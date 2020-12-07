@@ -1,0 +1,5 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	tests/sort-levels.tsv	o	
+sort-levels	primary		sort-asc		[	sort ascending by current column; replace any existing sort criteria
+sort-levels	secondary		sort-asc-add		z[	sort ascending by current column; add to existing sort criteria
+sort-levels	tertiary		sort-desc-add		z]	sort descending by current column; add to existing sort criteria

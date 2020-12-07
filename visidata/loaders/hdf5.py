@@ -32,7 +32,7 @@ class Hdf5ObjSheet(Sheet):
             elif len(source.shape) == 2:  # matrix
                 ncols = source.shape[1]
                 for i in range(ncols):
-                    self.addColumns(ColumnItem('', i, width=8), index=i)
+                    self.addColumn(ColumnItem('', i, width=8), index=i)
                 self.recalc()
                 yield from source  # copy
             else:
@@ -42,10 +42,16 @@ class Hdf5ObjSheet(Sheet):
 
 
     def openRow(self, row):
+        import h5py
         if isinstance(row, BaseSheet):
             return row
-        if isinstance(row, h5py.Object):
-            return H5ObjSheet(row)
+        if isinstance(row, h5py.HLObject):
+            return Hdf5ObjSheet(row)
+
+        import numpy
+        from .npy import NpySheet
+        if isinstance(row, numpy.ndarray):
+            return NpySheet(None, npy=row)
 
 
 Hdf5ObjSheet.addCommand('A', 'dive-metadata', 'vd.push(SheetDict(cursorRow.name + "_attrs", source=cursorRow.attrs))', 'open metadata sheet for object referenced in current row')

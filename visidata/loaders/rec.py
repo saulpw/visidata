@@ -1,7 +1,7 @@
 from visidata import *
 
 @VisiData.api
-def open_rec(p):
+def open_rec(vd, p):
     return RecIndexSheet(p.name, source=p)
 
 def decode_multiline(line, fp):

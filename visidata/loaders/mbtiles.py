@@ -111,7 +111,7 @@ class PbfCanvas(InvertedCanvas):
                 for poly in mpoly:
                     yield poly+[poly[0]], self.plotColor(key), r
         else:
-            assert False, t
+            vd.warning('unknown geometry type %s' % t)
 
     @asyncthread
     def reload(self):

@@ -1,0 +1,16 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	http://visidata.org/usage.tsv	o	
+usage	daily_users		type-int		#	
+usage	daily_users		aggregate-col	sum	+	
+usage	motd_fetches		type-int		#	
+usage	motd_fetches		aggregate-col	sum	+	
+usage	date		freq-col		F	
+usage_date_freq	date		type-date		@	
+usage_date_freq			exec-python	import calendar	g^X	
+usage_date_freq	date		addcol-expr	date.isocalendar()[2]	=	
+usage_date_freq	date.isocalendar()[2]		rename-col	dotw	^	
+usage_date_freq	dotw		addcol-expr	'Sat/Sun' if dotw >=6 else 'Mon-Fri'	=	
+usage_date_freq	'Sat/Sun' if dotw >=6 else 'Mon-Fri'		key-col		!	
+usage_date_freq	date		sort-desc		!	
+usage_date_freq	daily_users_sum		plot-column		.	
+usage_date_freq_graph	2018-11-18 2019-03-26	51 140	delete-cursor		d	delete rows on source sheet contained within canvas cursor

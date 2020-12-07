@@ -1,0 +1,3 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/benchmark.csv	o	
+benchmark	Date		capture-col	(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<year>\d{4}) (?P<hour>\d{1,2}):(?P<min>\d{2})(?P<meridiem>[ap])	;	add new column from capture groups of regex; requires example row

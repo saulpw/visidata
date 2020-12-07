@@ -1,6 +1,6 @@
 python-dateutil     # date type
 
-# optional requirements
+# optional dependencies
 pandas==1.0.3       # dta (Stata)
 requests            # http
 lxml                # html/xml
@@ -21,6 +21,7 @@ dnslib              # pcap
 namestand           # graphviz
 datapackage         # frictionless .json
 pdfminer.six        # pdf
+tabula              # pdf tables
 vobject             # vcf
 tabulate            # tabulate saver
 wcwidth             # tabulate saver with unicode

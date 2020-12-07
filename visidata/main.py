@@ -2,7 +2,7 @@
 # Usage: $0 [<options>] [<input> ...]
 #        $0 [<options>] --play <cmdlog> [--batch] [-w <waitsecs>] [-o <output>] [field=value ...]
 
-__version__ = '2.0.1'
+__version__ = '2.1'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
 from copy import copy
@@ -33,7 +33,7 @@ def eval_vd(logpath, *args, **kwargs):
     src = Path(logpath.given, fp=io.StringIO(log), filesize=len(log))
     vs = vd.openSource(src, filetype=src.ext)
     vs.name += '_vd'
-    vd.push(vs)
+    vs.reload()
     vs.vd = vd
     return vs
 
@@ -59,15 +59,15 @@ def duptty():
     return stdin, stdout
 
 option_aliases = {}
-def optalias(abbr, name):
-    option_aliases[abbr] = name
+def optalias(abbr, name, val=None):
+    option_aliases[abbr] = (name, val)
 
 
 optalias('f', 'filetype')
 optalias('p', 'play')
 optalias('b', 'batch')
 optalias('P', 'preplay')
-optalias('y', 'confirm_overwrite')
+optalias('y', 'confirm_overwrite', False)
 optalias('o', 'output')
 optalias('w', 'replay_wait')
 optalias('d', 'delimiter')
@@ -130,7 +130,7 @@ def main_vd():
                 pass
 
             optname = optname.replace('-', '_')
-            optname = option_aliases.get(optname, optname)
+            optname, optval = option_aliases.get(optname, (optname, optval))
 
             if optval is None:
                 opt = options._get(optname)
@@ -167,7 +167,7 @@ def main_vd():
 
         elif current_args.get('play', None) and '=' in arg:
             # parse 'key=value' pairs for formatting cmdlog template in replay mode
-            k, v = arg.split('=')
+            k, v = arg.split('=', maxsplit=1)
             fmtkwargs[k] = v
         else:
             inputs.append((arg, copy(current_args)))
@@ -188,7 +188,7 @@ def main_vd():
             options.set(k, v, obj='override')
 
     # fetch motd and plugins *after* options parsing/setting
-    visidata.PluginsSheet().reload()
+    vd.pluginsSheet.ensureLoaded()
     domotd()
 
     if args.batch:
@@ -275,6 +275,7 @@ def main_vd():
             if vd.replay_sync(vs):  # error
                 return 1
         else:
+            vd.currentReplay = vs
             vd.replay(vs)
             run()
 

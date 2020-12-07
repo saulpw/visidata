@@ -4,7 +4,7 @@ from copy import copy
 import textwrap
 
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException
-from visidata import (options, theme, isNumeric, Column, option, namedlist, SettableColumn,
+from visidata import (options, theme, Column, option, namedlist, SettableColumn,
 TypedExceptionWrapper, BaseSheet, UNLOADED,
 vd, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
 import visidata
@@ -17,7 +17,6 @@ option('default_width', 20, 'default column width', replay=True)   # TODO: make 
 option('default_height', 10, 'default column height')
 option('textwrap_cells', True, 'wordwrap text for multiline rows')
 
-option('cmd_after_edit', 'go-down', 'command longname to execute after successful edit')
 option('quitguard', False, 'confirm before quitting last sheet')
 option('debug', False, 'exit on error and display stacktrace')
 option('skip', 0, 'skip N rows before header', replay=True)
@@ -56,7 +55,8 @@ theme('disp_endtop_sep', '║', '') # ╽╿┃╖╢
 theme('disp_endmid_sep', '║', '') # ╽╿┃
 theme('disp_endbot_sep', '║', '') # ╽╿┃╜‖
 theme('disp_selected_note', '•', '') #
-
+theme('disp_sort_asc', '↑↟⇞⇡⇧⇑', 'characters for ascending sort') # ↑▲↟↥↾↿⇞⇡⇧⇈⤉⤒⥔⥘⥜⥠⍏˄ˆ
+theme('disp_sort_desc', '↓↡⇟⇣⇩⇓', 'characters for descending sort') # ↓▼↡↧⇂⇃⇟⇣⇩⇊⤈⤓⥕⥙⥝⥡⍖˅ˇ
 theme('color_default', 'normal', 'the default color')
 theme('color_default_hdr', 'bold', 'color of the column headers')
 theme('color_bottom_hdr', 'underline', 'color of the bottom header row')
@@ -95,11 +95,12 @@ class RecursiveExprException(Exception):
 
 class LazyComputeRow:
     'Calculate column values as needed.'
-    def __init__(self, sheet, row):
+    def __init__(self, sheet, row, col=None):
         self.row = row
+        self.col = col
         self.sheet = sheet
         if not hasattr(self.sheet, '_lcm'):
-            self.sheet._lcm = LazyChainMap(sheet, vd)
+            self.sheet._lcm = LazyChainMap(sheet, vd, col)
         else:
             self.sheet._lcm.clear()  # reset locals on lcm
 
@@ -107,7 +108,7 @@ class LazyComputeRow:
         self._keys = [c.name for c in self.sheet.columns]
 
     def keys(self):
-        return self._keys + self.sheet._lcm.keys() + ['row', 'sheet']
+        return self._keys + self.sheet._lcm.keys() + ['row', 'sheet', 'col']
 
     def __str__(self):
         return str(self.as_dict())
@@ -122,26 +123,34 @@ class LazyComputeRow:
         try:
             i = self._keys.index(colid)
             c = self.sheet.columns[i]
+            if c is self.col:
+                j = self._keys[i+1:].index(colid)
+                c = self.sheet.columns[i+j+1]
 
-            if c in self._usedcols:
-                raise RecursiveExprException()
-            self._usedcols.add(c)
-            ret = c.getTypedValue(self.row)
-            self._usedcols.remove(c)
-            return ret
         except ValueError:
             try:
-                return self.sheet._lcm[colid]
+                c = self.sheet._lcm[colid]
             except (KeyError, AttributeError):
-                if colid == 'row':
-                    return self
-                elif colid == 'sheet':
-                    return self.sheet
-                raise KeyError(colid)
+                if colid == 'sheet': return self.sheet
+                elif colid == 'row': c = self.row
+                elif colid == 'col': c = self.col
+                else:
+                    raise KeyError(colid)
+
+        if not isinstance(c, Column):  # columns calc in the context of the row of the cell being calc'ed
+            return c
+
+        if c in self._usedcols:
+            raise RecursiveExprException()
+
+        self._usedcols.add(c)
+        ret = c.getTypedValue(self.row)
+        self._usedcols.remove(c)
+        return ret
 
 class BasicRow(collections.defaultdict):
-    def __init__(self):
-        super().__init__(lambda: None)
+    def __init__(self, *args):
+        collections.defaultdict.__init__(self, lambda: None, *args)
     def __bool__(self):
         return True
 
@@ -310,7 +319,19 @@ class TableSheet(BaseSheet):
 
     @property
     def bottomRowIndex(self):
-        return max(self._rowLayout.keys())
+        return max(self._rowLayout.keys()) if self._rowLayout else self.topRowIndex+self.nScreenRows
+
+    @bottomRowIndex.setter
+    def bottomRowIndex(self, newidx):
+        'Set topRowIndex, by getting height of *newidx* row and going backwards until more than nScreenRows is allocated.'
+        nrows = 0
+        i = 0
+        while nrows < self.nScreenRows and newidx-i >= 0:
+            h = self.calc_height(self.rows[newidx-i])
+            nrows += h
+            i += 1
+
+        self._topRowIndex = newidx-i+2
 
     def __deepcopy__(self, memo):
         'same as __copy__'
@@ -321,9 +342,10 @@ class TableSheet(BaseSheet):
     def __repr__(self):
         return self.name
 
-    def evalExpr(self, expr, row=None):
+    def evalExpr(self, expr, row=None, col=None):
         if row:
-            contexts = vd._evalcontexts.setdefault((self, self.rowid(row)), LazyComputeRow(self, row))
+            # contexts are cached by sheet/rowid for duration of drawcycle
+            contexts = vd._evalcontexts.setdefault((self, self.rowid(row), col), LazyComputeRow(self, row, col=col))
         else:
             contexts = None
 
@@ -525,14 +547,10 @@ class TableSheet(BaseSheet):
         # check bounds, scroll if necessary
         if self.topRowIndex > self.cursorRowIndex:
             self.topRowIndex = self.cursorRowIndex
-        else:
-            if self.topRowIndex < self.cursorRowIndex-self.nScreenRows+1:
-                self.topRowIndex = self.cursorRowIndex-self.nScreenRows+1
-            elif self._rowLayout: # only check this if topRowIndex has not been set (which clears _rowLayout)
-                bottomRowIndex = self.bottomRowIndex
-                y, h = self._rowLayout[bottomRowIndex]
-                if self.cursorRowIndex > bottomRowIndex and y+h > self.nScreenRows:
-                    self._topRowIndex += bottomRowIndex-self.cursorRowIndex+2
+        elif self.bottomRowIndex < self.cursorRowIndex:
+            self.bottomRowIndex = self.cursorRowIndex
+        elif self.bottomRowIndex == self.cursorRowIndex and self._rowLayout and self._rowLayout[self.bottomRowIndex][1] > 1:
+            self.bottomRowIndex = self.cursorRowIndex
 
         if self.cursorCol and self.cursorCol.keycol:
             return
@@ -611,7 +629,14 @@ class TableSheet(BaseSheet):
 
         hdrs = col.name.split('\n')
         for i in range(h):
-            name = ' '  # save room at front for LeftMore
+            name = ' '  # save room at front for LeftMore or sorted arrow
+            for j, (sortcol, sortdir) in enumerate(self._ordering):
+                if col is sortcol:
+                    try:
+                        name = self.options.disp_sort_desc[j] if sortdir else self.options.disp_sort_asc[j]
+                    except IndexError:
+                        pass
+
             if h-i-1 < len(hdrs):
                 name += hdrs[::-1][h-i-1]
 
@@ -667,6 +692,7 @@ class TableSheet(BaseSheet):
             'colsep': options.disp_column_sep,
             'keysep': options.disp_keycol_sep,
             'selectednote': options.disp_selected_note,
+            'disp_truncator': options.disp_truncator,
         }
 
         self._rowLayout = {}  # [rowidx] -> (y, height)
@@ -690,41 +716,16 @@ class TableSheet(BaseSheet):
 
             rowcattr = self._colorize(None, row)
 
-            y += self.drawRow(scr, row, self.topRowIndex+rowidx, y, rowcattr, maxheight=self.windowHeight-y, **drawparams)
+            y += self.drawRow(scr, row, self.topRowIndex+rowidx, y, rowcattr, maxheight=self.windowHeight-y-1, **drawparams)
 
         if vcolidx+1 < self.nVisibleCols:
             scr.addstr(headerRow, self.windowWidth-2, options.disp_more_right, colors.color_column_sep)
 
         scr.refresh()
 
-    def drawRow(self, scr, row, rowidx, ybase, rowcattr: ColorAttr, maxheight,
-            isNull='',
-            topsep='',
-            midsep='',
-            botsep='',
-            endsep='',
-            keytopsep='',
-            keymidsep='',
-            keybotsep='',
-            endtopsep='',
-            endmidsep='',
-            endbotsep='',
-            colsep='',
-            keysep='',
-            selectednote=''
-       ):
-
-            # sepattr is the attr between cell/columns
-            sepcattr = update_attr(rowcattr, colors.color_column_sep, 1)
-
-            # apply current row here instead of in a colorizer, because it needs to know dispRowIndex
-            if rowidx == self.cursorRowIndex:
-                color_current_row = colors.get_color('color_current_row', 5)
-                basecellcattr = sepcattr = update_attr(rowcattr, color_current_row)
-            else:
-                basecellcattr = rowcattr
-
-            displines = {}  # [vcolidx] -> list of lines in that cell
+    def calc_height(self, row, displines=None, isNull=None):
+            if displines is None:
+                displines = {}  # [vcolidx] -> list of lines in that cell
 
             for vcolidx, (x, colwidth) in sorted(self._visibleColLayout.items()):
                 if x < self.windowWidth:  # only draw inside window
@@ -733,11 +734,11 @@ class TableSheet(BaseSheet):
                         continue
                     col = vcols[vcolidx]
                     cellval = col.getCell(row)
-                    if colwidth > 1 and isNumeric(col):
+                    if colwidth > 1 and vd.isNumeric(col):
                         cellval.display = cellval.display.rjust(colwidth-2)
 
                     try:
-                        if isNull(cellval.value):
+                        if isNull and isNull(cellval.value):
                             cellval.note = options.disp_note_none
                             cellval.notecolor = 'color_note_type'
                     except (TypeError, ValueError):
@@ -754,8 +755,37 @@ class TableSheet(BaseSheet):
                 h = len(lines)   # of this cell
                 heights.append(min(col.height, h))
 
-            height = min(max(heights), maxheight) or 1  # display even empty rows
+            return max(heights)
 
+    def drawRow(self, scr, row, rowidx, ybase, rowcattr: ColorAttr, maxheight,
+            isNull='',
+            topsep='',
+            midsep='',
+            botsep='',
+            endsep='',
+            keytopsep='',
+            keymidsep='',
+            keybotsep='',
+            endtopsep='',
+            endmidsep='',
+            endbotsep='',
+            colsep='',
+            keysep='',
+            selectednote='',
+            disp_truncator=''
+       ):
+            # sepattr is the attr between cell/columns
+            sepcattr = update_attr(rowcattr, colors.color_column_sep, 1)
+
+            # apply current row here instead of in a colorizer, because it needs to know dispRowIndex
+            if rowidx == self.cursorRowIndex:
+                color_current_row = colors.get_color('color_current_row', 5)
+                basecellcattr = sepcattr = update_attr(rowcattr, color_current_row)
+            else:
+                basecellcattr = rowcattr
+
+            displines = {}  # [vcolidx] -> list of lines in that cell
+            height = min(self.calc_height(row, displines), maxheight) or 1  # display even empty rows
             self._rowLayout[rowidx] = (ybase, height)
 
             for vcolidx, (col, cellval, lines) in displines.items():
@@ -821,11 +851,12 @@ class TableSheet(BaseSheet):
                                 else:
                                     sepchars = midsep
 
-                        clipdraw(scr, y, x, (disp_column_fill if colwidth > 2 else '')+line[hoffset:], cattr.attr, w=colwidth-(1 if note else 0))
+                        pre = disp_truncator if hoffset != 0 else disp_column_fill
+                        clipdraw(scr, y, x, (pre if colwidth > 2 else '')+line[hoffset:], cattr.attr, w=colwidth-(1 if note else 0))
                         vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='edit-cell')
 
                         if x+colwidth+len(sepchars) <= self.windowWidth:
-                            scr.addstr(y, x+colwidth, sepchars, basecellcattr.attr)
+                            scr.addstr(y, x+colwidth, sepchars, sepcattr.attr)
 
             for notefunc in vd.rowNoters:
                 ch = notefunc(self, row)
@@ -937,6 +968,8 @@ class SheetsSheet(IndexSheet):
     def reload(self):
         self.rows = self.source
 
+    def sort(self):
+        self.rows[1:] = sorted(self.rows[1:], key=self.sortkey)
 
 @VisiData.property
 @drawcache
@@ -1035,7 +1068,7 @@ Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)', 'show cursor positio
 Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', 'toggle current column as a key column')
 Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])', 'unset current column as a key column')
 
-Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)); options.cmd_after_edit and sheet.execCommand(options.cmd_after_edit)', 'edit contents of current cell')
+Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)) if not (cursorRow is None) else fail("no rows to edit")', 'edit contents of current cell')
 Sheet.addCommand('ge', 'setcol-input', 'cursorCol.setValuesTyped(selectedRows, input("set selected to: ", value=cursorDisplay))', 'set contents of current column for selected rows to same input')
 
 Sheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.reload=lambda vs=vs,rows=selectedRows: setattr(vs, "rows", list(rows)); vd.push(vs)', 'open duplicate sheet with only selected rows'),

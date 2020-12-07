@@ -7,7 +7,6 @@ import re
 import time
 
 from visidata import option, options, anytype, stacktrace, vd
-from visidata import isNumeric
 from visidata import asyncthread, dispwidth
 from visidata import wrapply, TypedWrapper, TypedExceptionWrapper
 from visidata import Extensible, AttrDict, undoAttrFunc
@@ -52,7 +51,7 @@ class DisplayWrapper:
         self.error = error      # list of strings for stacktrace
 
     def __bool__(self):
-        return self.value
+        return bool(self.value)
 
     def __eq__(self, other):
         return self.value == other
@@ -164,7 +163,7 @@ class Column(Extensible):
     @type.setter
     def type(self, t):
         if self._type != t:
-            vd.addUndo(setattr, self, 'type', self._type)
+            vd.addUndo(setattr, self, '_type', self.type)
         self._type = t
 
     @property
@@ -496,7 +495,7 @@ class ExprColumn(Column):
 
     def calcValue(self, row):
         t0 = time.perf_counter()
-        r = self.sheet.evalExpr(self.compiledExpr, row)
+        r = self.sheet.evalExpr(self.compiledExpr, row, col=self)
         t1 = time.perf_counter()
         self.ncalcs += 1
         self.maxtime = max(self.maxtime, t1-t0)

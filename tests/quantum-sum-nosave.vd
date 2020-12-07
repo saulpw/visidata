@@ -1,5 +1,5 @@
 sheet	col	row	longname	input	keystrokes	comment
-quantum-sum-nosave_vd			add-sheet	1	A	open new blank sheet with number columns
+			add-sheet	1	A	open new blank sheet with number columns
 unnamed			add-rows	100000	ga	add N blank rows
 unnamed	0		addcol-expr	random.random()	=	create new column from Python expression, with column names as variables
 unnamed	random.random()		type-float		%	set type of current column to float

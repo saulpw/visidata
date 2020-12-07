@@ -1,0 +1,898 @@
+vd(1)                        Quick Reference Guide                       vd(1)
+
+NAME
+     VisiData — a terminal utility for exploring and arranging tabular data
+
+SYNOPSIS
+     vd [options] [input ...]
+     vd [options] --play cmdlog [-w waitsecs] [--batch] [-o output]
+        [field=value]
+     vd [options] [input ...] +toplevel:subsheet:col:row
+
+DESCRIPTION
+     VisiData is an easy-to-use multipurpose tool to explore, clean, edit, and
+     restructure data. Rows can be selected, filtered, and grouped; columns
+     can be rearranged, transformed, and derived via regex or Python expres‐
+     sions; and workflows can be saved, documented, and replayed.
+
+   REPLAY MODE
+     -p, --play=cmdlog       replay a saved cmdlog within the interface
+     -w, --replay-wait=seconds
+                             wait seconds between commands
+     -b, --batch             replay in batch mode (with no interface)
+     -o, --output=file       save final visible sheet to file as .tsv
+     --replay-movement       toggle --play to move cursor cell-by-cell
+     field=value             replace "{field}" in cmdlog contents with value
+
+   Commands During Replay
+        ^U                   pause/resume replay
+        ^N                   execute next row in replaying sheet
+        ^K                   cancel current replay
+
+   GLOBAL COMMANDS
+     All keystrokes are case sensitive. The ^ prefix is shorthand for Ctrl.
+
+   Keystrokes to start off with
+      ^Q              abort program immediately
+      ^C              cancel user input or abort all async threads on current
+                      sheet
+     g^C              abort all secondary threads
+       q              quit current sheet
+      gq              quit all sheets (clean exit)
+
+      ^H              view this man page
+     z^H              view sheet of command longnames and keybindings
+     Space longname   execute command by its longname
+
+       U              undo the most recent modification (requires enabled
+                      options.undo)
+       R              redo the most recent undo (requires enabled
+                      options.undo)
+
+   Cursor Movement
+     Arrow PgUp Home  go as expected
+      h   j   k   l   go left/down/up/right
+     gh  gj  gk  gl   go all the way to the left/bottom/top/right of sheet
+          G  gg       go all the way to the bottom/top of sheet
+     ^B  ^F           scroll one page back/forward
+     zz               scroll current row to center of screen
+
+     ^^ (Ctrl+^)      jump to previous sheet (swaps with current sheet)
+
+      /   ? regex     search for regex forward/backward in current column
+     g/  g? regex     search for regex forward/backward over all visible
+                      columns
+     z/  z? expr      search by Python expr forward/backward in current column
+                      (with column names as variables)
+      n   N           go to next/previous match from last regex search
+
+      <   >           go up/down current column to next value
+     z<  z>           go up/down current column to next null value
+      {   }           go up/down current column to next selected row
+
+      c regex         go to next column with name matching regex
+      r regex         go to next row with key matching regex
+     zc  zr number    go to column/row number (0-based)
+
+      H   J   K   L   slide current row/column left/down/up/right
+     gH  gJ  gK  gL   slide current row/column all the way to the left/bot‐
+                      tom/top/right of sheet
+     zH  zJ  zK  zK number
+                      slide current row/column number positions to the
+                      left/down/up/right
+
+     zh  zj  zk  zl   scroll one left/down/up/right
+
+   Column Manipulation
+       _ (underscore)
+                      toggle width of current column between full and default
+                      width
+      g_              toggle widths of all visible columns between full and
+                      default width
+      z_ number       adjust width of current column to number
+     gz_ number       adjust widths of all visible columns to Ar number
+
+      - (hyphen)      hide current column
+     z-               reduce width of current column by half
+     gv               unhide all columns
+
+     ! z!             toggle/unset current column as a key column
+     ~  #  %  $  @  z#
+                      set type of current column to str/int/float/cur‐
+                      rency/date/len
+       ^              edit name of current column
+      g^              set names of all unnamed visible columns to contents of
+                      selected rows (or current row)
+      z^              set name of current column to combined contents of cur‐
+                      rent cell in selected rows (or current row)
+     gz^              set name of all visible columns to combined contents of
+                      current column for selected rows (or current row)
+
+       = expr         create new column from Python expr, with column names,
+                      and attributes, as variables
+      g= expr         set current column for selected rows to result of Python
+                      expr
+     gz= expr         set current column for selected rows to the items in
+                      result of Python sequence expr
+      z= expr         evaluate Python expression on current row and set
+                      current cell with result of Python expr
+
+       i (iota)       add column with incremental values
+      gi              set current column for selected rows to incremental
+                      values
+      zi step         add column with values at increment step
+     gzi step         set current column for selected rows at increment step
+
+      ' (tick)        add a frozen copy of current column with all cells eval‐
+                      uated
+     g'               open a frozen copy of current sheet with all visible
+                      columns evaluated
+     z'  gz'          add/reset cache for current/all visible column(s)
+
+      : regex         add new columns from regex split; number of columns
+                      determined by example row at cursor
+      ; regex         add new columns from capture groups of regex (also
+                      requires example row)
+     z; expr          create new column from bash expr, with $columnNames as
+                      variables
+      * regex/subst   add column derived from current column, replacing regex
+                      with subst (may include \1 backrefs)
+     g*  gz* regex/subst
+                      modify selected rows in current/all visible column(s),
+                      replacing regex with subst (may include \1 backrefs)
+
+      (   g(          expand current/all visible column(s) of lists (e.g. [3])
+                      or dicts (e.g. {3}) fully
+     z(  gz( depth    expand current/all visible column(s) of lists (e.g. [3])
+                      or dicts (e.g. {3}) to given depth (0= fully)
+      )               unexpand current column; restore original column and re‐
+                      move other columns at this level
+     zM               row-wise expand current column of lists (e.g. [3]) or
+                      dicts (e.g. {3}) within that column
+
+   Row Selection
+       s   t   u      select/toggle/unselect current row
+      gs  gt  gu      select/toggle/unselect all rows
+      zs  zt  zu      select/toggle/unselect all rows from top to cursor
+     gzs gzt gzu      select/toggle/unselect all rows from cursor to bottom
+      |   \ regex     select/unselect rows matching regex in current column
+     g|  g\ regex     select/unselect rows matching regex in any visible
+                      column
+     z|  z\ expr      select/unselect rows matching Python expr in any visible
+                      column
+      , (comma)       select rows matching typed value of current cell in cur‐
+                      rent column
+     g,               select rows matching typed value of current row in all
+                      visible columns
+     z, gz,           select rows matching display value of current cell/row
+                      in current column/all visible columns
+
+   Row Sorting/Filtering
+       [    ]         sort ascending/descending by current column; replace any
+                      existing sort criteria
+      g[   g]         sort ascending/descending by all key columns; replace
+                      any existing sort criteria
+      z[   z]         sort ascending/descending by current column; add to ex‐
+                      isting sort criteria
+     gz[  gz]         sort ascending/descending by all key columns; add to ex‐
+                      isting sort criteria
+      "               open duplicate sheet with only selected rows
+     g"               open duplicate sheet with all rows
+     gz"              open duplicate sheet with deepcopy of selected rows
+
+   Editing Rows and Cells
+       a   za         append a blank row/column; appended columns cannot be
+                      copied to clipboard
+      ga  gza number  append number blank rows/columns
+       d   gd         delete (cut) current/selected row(s) and move to clip‐
+                      board
+       y   gy         yank (copy) current/all selected row(s) to clipboard
+      zy  gzy         yank (copy) contents of current column for current/se‐
+                      lected row(s) to clipboard
+      zd  gzd         delete (cut) contents of current column for current/se‐
+                      lected row(s) and move to clipboard
+       p    P         paste clipboard rows after/before current row
+      zp  gzp         set cells of current column for current/selected row(s)
+                      to last clipboard value
+       Y   gY         yank (copy) current/all selected row(s) to system
+                      clipboard (using options.clipboard_copy_cmd)
+      zY  gzY         yank (copy) contents of current column for
+                      current/selected row(s) to system clipboard (using
+                      options.clipboard_copy_cmd)
+       f              fill null cells in current column with contents of non-
+                      null cells up the current column
+       e text         edit contents of current cell
+      ge text         set contents of current column for selected rows to text
+
+     Commands While Editing Input
+        Enter  ^C        accept/abort input
+        ^O               open external $EDITOR to edit contents
+        ^R               reload initial value
+        ^A  ^E           go to beginning/end of line
+        ^B  ^F           go back/forward one character
+        ^←  ^→ (arrow)   go back/forward one word
+        ^H  ^D           delete previous/current character
+        ^T               transpose previous and current characters
+        ^U  ^K           clear from cursor to beginning/end of line
+        ^Y               paste from cell clipboard
+        Backspace  Del   delete previous/current character
+        Insert           toggle insert mode
+        Up  Down         set contents to previous/next in history
+        Tab  Shift+Tab   autocomplete input (when available)
+        Shift+Arrow      move cursor in direction of Arrow and re-enter edit
+                         mode
+
+   Data Toolkit
+      o input         open input in VisiData
+     ^S g^S filename  save current/all sheet(s) to filename in format
+                      determined by extension (default .tsv)
+                      Note: if the format does not support multisave, or the
+                      filename ends in a /, a directory will be created.
+     z^S filename     save current column only to filename in format
+                      determined by extension (default .tsv)
+     ^D filename.vd   save CommandLog to filename.vd file
+     A                open new blank sheet with one column
+     T                open new sheet that has rows and columns of current
+                      sheet transposed
+
+      + aggregator    add aggregator to current column (see Frequency Table)
+     z+ aggregator    display result of aggregator over values in selected
+                      rows for current column
+      &               concatenate top two sheets in Sheets Stack
+     g&               concatenate all sheets in Sheets Stack
+
+   Data Visualization
+      . (dot)       plot current numeric column vs key columns. The numeric
+                    key column is used for the x-axis; categorical key column
+                    values determine color.
+     g.             plot a graph of all visible numeric columns vs key
+                    columns.
+
+     If rows on the current sheet represent plottable coordinates (as in .shp
+     or vector .mbtiles sources),  . plots the current row, and g. plots all
+     selected rows (or all rows if none selected).
+
+     Canvas-specific Commands
+         +   -              increase/decrease zoom level, centered on cursor
+         _ (underscore)     zoom to fit full extent
+        z_ (underscore)     set aspect ratio
+         x xmin xmax        set xmin/xmax on graph
+         y ymin ymax        set ymin/ymax on graph
+         s   t   u          select/toggle/unselect rows on source sheet con‐
+                            tained within canvas cursor
+        gs  gt  gu          select/toggle/unselect rows on source sheet visi‐
+                            ble on screen
+         d                  delete rows on source sheet contained within can‐
+                            vas cursor
+        gd                  delete rows on source sheet visible on screen
+         Enter              open sheet of source rows contained within canvas
+                            cursor
+        gEnter              open sheet of source rows visible on screen
+         1 - 9              toggle display of layers
+        ^L                  redraw all pixels on canvas
+         v                  toggle show_graph_labels option
+        mouse scrollwheel   zoom in/out of canvas
+        left click-drag     set canvas cursor
+        right click-drag    scroll canvas
+
+   Split Screen
+      Z             split screen in half, so that second sheet on the stack is
+                    visible in a second pane
+     zZ             split screen, and queries for height of second pane
+
+     Split Window specific Commands
+        gZ                  close an already split screen, current pane full
+                            screens
+        Tab                 jump to other pane
+        ^^ (Ctrl+^)         swap which sheet is in current pane
+
+   Other Commands
+     Q                quit current sheet and remove it from the CommandLog
+     v                toggle sheet-specific visibility (multi-line rows on
+                      Sheet, legends/axes on Graph)
+
+      ^E  g^E         view traceback for most recent error(s)
+     z^E              view traceback for error in current cell
+
+      ^L              refresh screen
+      ^R              reload current sheet
+     z^R              clear cache for current column
+      ^Z              suspend VisiData process
+      ^G              show cursor position and bounds of current sheet on sta‐
+                      tus line
+      ^V              show version and copyright information on status line
+      ^P              open Status History
+     m keystroke      first, begin recording macro; second, prompt for
+                      keystroke No, and complete recording. Macro can then be
+                      executed everytime provided keystroke is used. Will
+                      override existing keybinding. Macros will run on current
+                      row, column, sheet.
+     gm               open an index of all existing macros. Can be directly
+                      viewed with Enter, and then modified with ^S.
+
+      ^Y  z^Y  g^Y    open current row/cell/sheet as Python object
+      ^X expr         evaluate Python expr and opens result as Python object
+     z^X expr         evaluate Python expr, in context of current row, and
+                      open result as Python object
+     g^X stmt         execute Python stmt in the global scope
+
+   Internal Sheets List
+      .  VisiDataMenu (Shift+V)      browse list of core sheets
+      .  Directory Sheet             browse properties of files in a directory
+      .  Plugins Sheet               browse, install, and (de)activate plugins
+
+     Metasheets
+      .  Columns Sheet (Shift+C)     edit column properties
+      .  Sheets Sheet (Shift+S)      jump between sheets or join them together
+      .  Options Sheet (Shift+O)     edit configuration options
+      .  Commandlog (Shift+D)        modify and save commands for replay
+      .  Error Sheet (Ctrl+E)            view last error
+      .  Status History (Ctrl+P)         view history of status messages
+      .  Threads Sheet (Ctrl+T)          view, cancel, and profile
+         asynchronous threads
+
+     Derived Sheets
+      .  Frequency Table (Shift+F)   group rows by column value, with
+         aggregations of other columns
+      .  Describe Sheet (Shift+I)    view summary statistics for each column
+      .  Pivot Table (Shift+W)       group rows by key and summarize current
+         column
+      .  Melted Sheet (Shift+M)      unpivot non-key columns into
+         variable/value columns
+      .  Transposed Sheet (Shift+T)   open new sheet with rows and columns
+         transposed
+
+   INTERNAL SHEETS
+   VisiDataMenu (Shift+V)
+     (sheet-specific commands)
+        Enter            load sheet in current row
+
+   Directory Sheet
+     (global commands)
+        Space open-dir-current
+                         open the Directory Sheet for the current directory
+     (sheet-specific commands)
+        Enter  gEnter    open current/selected file(s) as new sheet(s)
+         ^O  g^O         open current/selected file(s) in external $EDITOR
+         ^R  z^R  gz^R   reload information for all/current/selected file(s)
+
+   Plugins Sheet
+     Browse through a list of available plugins. VisiData needs to be
+     restarted before plugin activation takes effect. Installation may require
+     internet access.
+     (global commands)
+        Space open-plugins
+                         open the Plugins Sheet
+     (sheet-specific commands)
+        a                install and activate current plugin
+        d                deactivate current plugin
+
+   METASHEETS
+   Columns Sheet (Shift+C)
+     Properties of columns on the source sheet can be changed with standard
+     editing commands (e ge g= Del) on the Columns Sheet. Multiple aggregators
+     can be set by listing them (separated by spaces) in the aggregators
+     column. The 'g' commands affect the selected rows, which are the literal
+     columns on the source sheet.
+     (global commands)
+        gC               open Columns Sheet with all visible columns from all
+                         sheets
+     (sheet-specific commands)
+         &               add column from concatenating selected source columns
+        g! gz!           toggle/unset selected columns as key columns on
+                         source sheet
+        g+ aggregator    add Ar aggregator No to selected source columns
+        g- (hyphen)      hide selected columns on source sheet
+        g~ g# g% g$ g@ gz# z%
+                         set type of selected columns on source sheet to
+                         str/int/float/currency/date/len/floatsi
+         Enter           open a Frequency Table sheet grouped by column
+                         referenced in current row
+
+   Sheets Sheet (Shift+S)
+     open Sheets Stack, which contains only the active sheets on the current
+     stack
+     (global commands)
+        gS               open Sheets Sheet, which contains all sheets from
+                         current session, active and inactive
+        Alt number       jump to sheet number
+     (sheet-specific commands)
+         Enter           jump to sheet referenced in current row
+        gEnter           push selected sheets to top of sheet stack
+         a               add row to reference a new blank sheet
+        gC  gI           open Columns Sheet/Describe Sheet with all visible
+                         columns from selected sheets
+        g^R              reload all selected sheets
+        z^C  gz^C        abort async threads for current/selected sheets(s)
+        g^S              save selected or all sheets
+         & jointype      merge selected sheets with visible columns from all,
+                         keeping rows according to jointype:
+                         .  inner  keep only rows which match keys on all
+                            sheets
+                         .  outer  keep all rows from first selected sheet
+                         .  full   keep all rows from all sheets (union)
+                         .  diff   keep only rows NOT in all sheets
+                         .  append keep all rows from all sheets
+                            (concatenation)
+                         .  extend copy first selected sheet, keeping all rows
+                            and sheet type, and extend with columns from other
+                            sheets
+                         .  merge  mostly keep all rows from first selected
+                            sheet, except prioritise cells with non-null/non-
+                            error values
+
+   Options Sheet (Shift+O)
+     (global commands)
+        Shift+O          edit global options (apply to all sheets)
+        zO               edit sheet options (apply to current sheet only)
+        gO               open options.config as TextSheet
+     (sheet-specific commands)
+        Enter  e         edit option at current row
+        d                remove option override for this context
+
+   CommandLog (Shift+D)
+     (global commands)
+        D                open current sheet's CommandLog with all other loose
+                         ends removed; includes commands from parent sheets
+        gD               open global CommandLog for all commands executed in
+                         the current session
+        zD               open current sheet's CommandLog with the parent
+                         sheets commands' removed
+     (sheet-specific commands)
+          x              replay command in current row
+         gx              replay contents of entire CommandLog
+         ^C              abort replay
+
+   DERIVED SHEETS
+   Frequency Table (Shift+F)
+     A Frequency Table groups rows by one or more columns, and includes
+     summary columns for those with aggregators.
+     (global commands)
+        gF               open Frequency Table, grouped by all key columns on
+                         source sheet
+        zF               open one-line summary for all rows and selected rows
+     (sheet-specific commands)
+         s   t   u       select/toggle/unselect these entries in source sheet
+         Enter  gEnter   open copy of source sheet with rows that are grouped
+                         in current cell / selected rows
+
+   Describe Sheet (Shift+I)
+     A Describe Sheet contains descriptive statistics for all visible columns.
+     (global commands)
+        gI               open Describe Sheet for all visible columns on all
+                         sheets
+     (sheet-specific commands)
+        zs  zu           select/unselect rows on source sheet that are being
+                         described in current cell
+         !               toggle/unset current column as a key column on source
+                         sheet
+         Enter           open a Frequency Table sheet grouped on column
+                         referenced in current row
+        zEnter           open copy of source sheet with rows described in cur‐
+                         rent cell
+
+   Pivot Table (Shift+W)
+     Set key column(s) and aggregators on column(s) before pressing Shift+W on
+     the column to pivot.
+     (sheet-specific commands)
+         Enter           open sheet of source rows aggregated in current pivot
+                         row
+        zEnter           open sheet of source rows aggregated in current pivot
+                         cell
+
+   Melted Sheet (Shift+M)
+     Open Melted Sheet (unpivot), with key columns retained and all non-key
+     columns reduced to Variable-Value rows.
+     (global commands)
+        gM regex         open Melted Sheet (unpivot), with key columns
+                         retained and regex capture groups determining how the
+                         non-key columns will be reduced to Variable-Value
+                         rows.
+
+   Python Object Sheet (^X ^Y g^Y z^Y)
+     (sheet-specific commands)
+         Enter           dive further into Python object
+         v               toggle show/hide for methods and hidden properties
+        gv  zv           show/hide methods and hidden properties
+
+COMMANDLINE OPTIONS
+     -P=longname                  preplay longname before replay or regular
+                                  launch; limited to Base Sheet bound commands
+     +toplevel:subsheet:col:row   launch vd with subsheet of toplevel at
+                                  top-of-stack, and cursor at col and row; all
+                                  arguments are optional
+
+     -f, --filetype=filetype      tsv                set loader to use for
+                                  filetype instead of file extension
+     -y, --confirm-overwrite=F    True               overwrite existing files
+                                  without confirmation
+     --mouse-interval=int         1                  max time between
+                                                     press/release for click
+                                                     (ms)
+     --null-value=NoneType        None               a value to be counted as
+                                                     null
+     --undo=bool                  True               enable undo/redo
+     --col-cache-size=int         0                  max number of cache en‐
+                                                     tries in each cached col‐
+                                                     umn
+     --clean-names                False              clean column/sheet names
+                                                     to be valid Python iden‐
+                                                     tifiers
+     --default-width=int          20                 default column width
+     --default-height=int         10                 default column height
+     --textwrap-cells=bool        True               wordwrap text for multi‐
+                                                     line rows
+     --quitguard                  False              confirm before quitting
+                                                     last sheet
+     --debug                      False              exit on error and display
+                                                     stacktrace
+     --skip=int                   0                  skip N rows before header
+     --header=int                 1                  parse first N rows as
+                                                     column names
+     --force-256-colors           False              use 256 colors even if
+                                                     curses reports fewer
+     --use-default-colors         False              curses use default termi‐
+                                                     nal colors
+     --note-pending=str           ⌛                 note to display for pend‐
+                                                     ing cells
+     --note-format-exc=str        ?                  cell note for an excep‐
+                                                     tion during formatting
+     --note-getter-exc=str        !                  cell note for an excep‐
+                                                     tion during computation
+     --note-type-exc=str          !                  cell note for an excep‐
+                                                     tion during type conver‐
+                                                     sion
+     --scroll-incr=int            3                  amount to scroll with
+                                                     scrollwheel
+     --name-joiner=str            _                  string to join sheet or
+                                                     column names
+     --value-joiner=str                              string to join display
+                                                     values
+     --wrap                       False              wrap text to fit window
+                                                     width on TextSheet
+     --save-filetype=str          tsv                specify default file type
+                                                     to save as
+     --profile=str                                   filename to save binary
+                                                     profiling data
+     --min-memory-mb=int          0                  minimum memory to con‐
+                                                     tinue loading and async
+                                                     processing
+     --encoding=str               utf-8              encoding passed to
+                                                     codecs.open
+     --encoding-errors=str        surrogateescape    encoding_errors passed to
+                                                     codecs.open
+     --bulk-select-clear          False              clear selected rows be‐
+                                                     fore new bulk selections
+     --some-selected-rows         False              if no rows selected, if
+                                                     True, someSelectedRows
+                                                     returns all rows; if
+                                                     False, fails
+     --delimiter=str                                 field delimiter to use
+                                                     for tsv/usv filetype
+     --row-delimiter=str                             " row delimiter to use
+                                                     for tsv/usv filetype
+     --tsv-safe-newline=str                          replacement for newline
+                                                     character when saving to
+                                                     tsv
+     --tsv-safe-tab=str                              replacement for tab char‐
+                                                     acter when saving to tsv
+     --visibility=int             0                  visibility level (0=low,
+                                                     1=high)
+     --expand-col-scanrows=int    1000               number of rows to check
+                                                     when expanding columns (0
+                                                     = all)
+     --json-indent=NoneType       None               indent to use when saving
+                                                     json
+     --json-sort-keys             False              sort object keys when
+                                                     saving to json
+     --default-colname=str                           column name to use for
+                                                     non-dict rows
+     --filetype=str                                  specify file type
+     --confirm-overwrite=bool     True               whether to prompt for
+                                                     overwrite confirmation on
+                                                     save
+     --safe-error=str             #ERR               error string to use while
+                                                     saving
+     --clipboard-copy-cmd=str                        command to copy stdin to
+                                                     system clipboard
+     --clipboard-paste-cmd=str                       command to get contents
+                                                     of system clipboard
+     --fancy-chooser=bool         True               a nicer selection inter‐
+                                                     face for aggregators and
+                                                     jointype
+     --describe-aggrs=str         mean stdev         numeric aggregators to
+                                                     calculate on Describe
+                                                     sheet
+     --histogram-bins=int         0                  number of bins for his‐
+                                                     togram of numeric columns
+     --numeric-binning            False              bin numeric columns into
+                                                     ranges
+     --replay-wait=float          0.0                time to wait between re‐
+                                                     played commands, in sec‐
+                                                     onds
+     --replay-movement            False              insert movements during
+                                                     replay
+     --visidata-dir=str           ~/.visidata/       directory to load and
+                                                     store additional files
+     --rowkey-prefix=str          キ                 string prefix for rowkey
+                                                     in the cmdlog
+     --cmdlog-histfile=str                           file to autorecord each
+                                                     cmdlog action to
+     --regex-flags=str            I                  flags to pass to re.com‐
+                                                     pile() [AILMSUX]
+     --regex-maxsplit=int         0                  maxsplit to pass to
+                                                     regex.split
+     --default-sample-size=int    100                number of rows to sample
+                                                     for regex.split
+     --show-graph-labels=bool     True               show axes and legend on
+                                                     graph
+     --plot-colors=str                               list of distinct colors
+                                                     to use for plotting dis‐
+                                                     tinct objects
+     --zoom-incr=float            2.0                amount to multiply cur‐
+                                                     rent zoomlevel when zoom‐
+                                                     ing
+     --motd-url=str                                  source of randomized
+                                                     startup messages
+     --dir-recurse                False              walk source path recur‐
+                                                     sively on DirSheet
+     --dir-hidden                 False              load hidden files on
+                                                     DirSheet
+     --config=str                 ~/.visidatarc      config file to exec in
+                                                     Python
+     --play=str
+     --batch                      False              replay in batch mode
+                                                     (with no interface and
+                                                     all status sent to std‐
+                                                     out)
+     --output=NoneType            None               save the final visible
+                                                     sheet to output at the
+                                                     end of replay
+     --preplay=str                                   longnames to preplay be‐
+                                                     fore replay
+     --imports=str                plugins            imports to preload before
+                                                     .visidatarc (command-line
+                                                     only)
+     --incr-base=float            1.0                start value for column
+                                                     increments
+     --csv-dialect=str            excel              dialect passed to
+                                                     csv.reader
+     --csv-delimiter=str          ,                  delimiter passed to
+                                                     csv.reader
+     --csv-quotechar=str          "                  quotechar passed to
+                                                     csv.reader
+     --csv-skipinitialspace=bool  True               skipinitialspace passed
+                                                     to csv.reader
+     --csv-escapechar=NoneType    None               escapechar passed to
+                                                     csv.reader
+     --csv-lineterminator=str                        " lineterminator passed
+                                                     to csv.writer
+     --safety-first               False              sanitize input/output to
+                                                     handle edge cases, with a
+                                                     performance cost
+     --fixed-rows=int             1000               number of rows to check
+                                                     for fixed width columns
+     --fixed-maxcols=int          0                  max number of fixed-width
+                                                     columns to create (0 is
+                                                     no max)
+     --postgres-schema=str        public             The desired schema for
+                                                     the Postgres database
+     --html-title=str             <h2>{sheet.name}</h2>
+                                                     table header when saving
+                                                     to html
+     --pcap-internet=str          n                  (y/s/n) if save_dot in‐
+                                                     cludes all internet hosts
+                                                     separately (y), combined
+                                                     (s), or does not include
+                                                     the internet (n)
+     --graphviz-edge-labels=bool  True               whether to include edge
+                                                     labels on graphviz dia‐
+                                                     grams
+     --pdf-tables                 False              parse PDF for tables in‐
+                                                     stead of pages of text
+     --plugins-url=str            https://visidata.org/plugins/plugins.jsonl
+                                                     source of plugins sheet
+
+   DISPLAY OPTIONS
+     Display options can only be set via the Options Sheet or a .visidatarc
+     (see FILES).
+
+     disp_splitwin_pct   0                   height of second sheet on screen
+     disp_currency_fmt   %.02f               default fmtstr to format for cur‐
+                                             rency values
+     disp_float_fmt      {:.02f}             default fmtstr to format for
+                                             float values
+     disp_int_fmt        {:.0f}              default fmtstr to format for int
+                                             values
+     disp_date_fmt       %Y-%m-%d            default fmtstr to strftime for
+                                             date values
+     disp_note_none      ⌀                   visible contents of a cell whose
+                                             value is None
+     disp_truncator      …                   indicator that the contents are
+                                             only partially visible
+     disp_oddspace       ·                   displayable character for odd
+                                             whitespace
+     disp_more_left      <                   header note indicating more col‐
+                                             umns to the left
+     disp_more_right     >                   header note indicating more col‐
+                                             umns to the right
+     disp_error_val                          displayed contents for computa‐
+                                             tion exception
+     disp_ambig_width    1                   width to use for unicode chars
+                                             marked ambiguous
+     disp_pending                            string to display in pending
+                                             cells
+     color_note_pending  bold magenta        color of note in pending cells
+     color_note_type     226 yellow          color of cell note for non-str
+                                             types in anytype columns
+     color_note_row      220 yellow          color of row note on left edge
+     disp_column_sep     |                   separator between columns
+     disp_keycol_sep     ║                   separator between key columns and
+                                             rest of columns
+     disp_rowtop_sep     |
+     disp_rowmid_sep     ⁝
+     disp_rowbot_sep     ⁝
+     disp_rowend_sep     ║
+     disp_keytop_sep     ║
+     disp_keymid_sep     ║
+     disp_keybot_sep     ║
+     disp_endtop_sep     ║
+     disp_endmid_sep     ║
+     disp_endbot_sep     ║
+     disp_selected_note  •
+     disp_sort_asc       ↑↟⇞⇡⇧⇑              characters for ascending sort
+     disp_sort_desc      ↓↡⇟⇣⇩⇓              characters for descending sort
+     color_default       normal              the default color
+     color_default_hdr   bold                color of the column headers
+     color_bottom_hdr    underline           color of the bottom header row
+     color_current_row   reverse             color of the cursor row
+     color_current_col   bold                color of the cursor column
+     color_current_hdr   bold reverse        color of the header for the cur‐
+                                             sor column
+     color_column_sep    246 blue            color of column separators
+     color_key_col       81 cyan             color of key columns
+     color_hidden_col    8                   color of hidden columns on
+                                             metasheets
+     color_selected_row  215 yellow          color of selected rows
+     disp_rstatus_fmt     {sheet.longname} {sheet.nRows:9d} {sheet.rowtype}
+                                             right-side status format string
+     disp_status_fmt     {sheet.shortcut}› {sheet.name}|
+                                             status line prefix
+     disp_lstatus_max    0                   maximum length of left status
+                                             line
+     disp_status_sep      |                  separator between statuses
+     color_keystrokes    white               color of input keystrokes on sta‐
+                                             tus line
+     color_status        bold                status line color
+     color_error         red                 error message color
+     color_warning       yellow              warning message color
+     color_top_status    underline           top window status bar color
+     color_active_status bold                 active window status bar color
+     color_inactive_status 8                 inactive window status bar color
+     color_working       green               color of system running smoothly
+     color_edit_cell     normal              cell color to use when editing
+                                             cell
+     disp_edit_fill      _                   edit field fill character
+     disp_unprintable    ·                   substitute character for unprint‐
+                                             ables
+     disp_histogram      *                   histogram element character
+     disp_histolen       50                  width of histogram column
+     disp_replay_play    ▶                   status indicator for active re‐
+                                             play
+     disp_replay_pause   ‖                   status indicator for paused re‐
+                                             play
+     color_status_replay green               color of replay status indicator
+     disp_pixel_random   False               randomly choose attr from set of
+                                             pixels instead of most common
+     color_graph_hidden  238 blue            color of legend for hidden attri‐
+                                             bute
+     color_graph_selected bold               color of selected graph points
+     color_graph_axis    bold                color for graph axis labels
+     color_add_pending   green               color for rows pending add
+     color_change_pending reverse yellow     color for cells pending modifica‐
+                                             tion
+     color_delete_pending red                color for rows pending delete
+     color_xword_active  green               color of active clue
+
+EXAMPLES
+           vd foo.tsv
+     open the file foo.tsv in the current directory
+
+           vd -f sqlite bar.db
+     open the file bar.db as a sqlite database
+
+           vd -b countries.fixed -o countries.tsv
+     convert countries.fixed (in fixed width format) to countries.tsv (in tsv
+     format)
+
+           vd postgres://username:password@hostname:port/database
+     open a connection to the given postgres database
+
+           vd --play tests/pivot.vd --replay-wait 1 --output tests/pivot.tsv
+     replay tests/pivot.vd, waiting 1 second between commands, and output the
+     final sheet to test/pivot.tsv
+
+           ls -l | vd -f fixed --skip 1 --header 0
+     parse the output of ls -l into usable data
+
+           ls | vd | lpr
+     interactively select a list of filenames to send to the printer
+
+           vd newfile.tsv
+     open a blank sheet named newfile if file does not exist
+
+           vd sample.xlsx +:sheet1:2:3
+     launch with sheet1 at top-of-stack, and cursor at column 2 and row 3
+
+           vd -P open-plugins
+     preplay longname open-plugins before starting the session
+
+FILES
+     At the start of every session, VisiData looks for $HOME/.visidatarc, and
+     calls Python exec() on its contents if it exists. For example:
+
+        options.min_memory_mb=100  # stop processing without 100MB free
+
+        bindkey('0', 'go-leftmost')   # alias '0' to go to first column, like vim
+
+        def median(values):
+            L = sorted(values)
+            return L[len(L)//2]
+
+        aggregator('median', median)
+
+     Functions defined in .visidatarc are available in python expressions
+     (e.g. in derived columns).
+
+SUPPORTED SOURCES
+     Core VisiData includes these sources:
+
+        tsv (tab-separated value)
+           Plain and simple. VisiData writes tsv format by default. See the
+           --tsv-delimiter option.
+
+        csv (comma-separated value)
+           .csv files are a scourge upon the earth, and still regrettably
+           common.
+           See the --csv-dialect, --csv-delimiter, --csv-quotechar, and
+           --csv-skipinitialspace options.
+           Accepted dialects are excel-tab, unix, and excel.
+
+        fixed (fixed width text)
+           Columns are autodetected from the first 1000 rows (adjustable with
+           --fixed-rows).
+
+        json (single object) and jsonl/ndjson/ldjson (one object per line).
+           Cells containing lists (e.g. [3]) or dicts ({3}) can be expanded
+           into new columns with ( and unexpanded with ).
+
+        sqlite
+           May include multiple tables. The initial sheet is the table
+           directory; Enter loaders the entrie table into memory. z^S saves
+           modifications to source.
+
+     URL schemes are also supported:
+        http (requires requests); can be used as transport for with another
+        filetype
+
+     For a list of all remaining formats supported by VisiData, see
+     https://visidata.org/formats.
+
+     In addition, .zip, .gz, .bz2, and .xz files are decompressed on the fly.
+
+SUPPORTED OUTPUT FORMATS
+     These are the supported savers:
+
+        tsv (tab-separated value)
+        csv (comma-separated value)
+        json (one object with all rows)
+        jsonl/ndjson/ldjson (one object per line/row)
+           All expanded subcolumns must be closed (with )) to retain the same
+           structure.
+        sqlite (save to source with z^S)
+        md (markdown table)
+
+AUTHOR
+     VisiData was made by Saul Pwanson <vd@saul.pw>.
+
+Linux/MacOS                       Dec 5, 2020                      Linux/MacOS

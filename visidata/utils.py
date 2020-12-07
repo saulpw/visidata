@@ -1,8 +1,9 @@
 import operator
+import string
 
 'Various helper classes and functions.'
 
-__all__ = ['AlwaysDict', 'AttrDict', 'moveListItem', 'namedlist', 'classproperty']
+__all__ = ['AlwaysDict', 'AttrDict', 'moveListItem', 'namedlist', 'classproperty', 'MissingAttrFormatter']
 
 
 class AlwaysDict(dict):
@@ -20,6 +21,8 @@ class AttrDict(dict):
         try:
             return self[k]
         except KeyError:
+            if k.startswith("__"):
+                raise AttributeError
             return None
 
     def __setattr__(self, k, v):
@@ -96,3 +99,17 @@ def namedlist(objname, fieldnames):
                 super().__setattr__(k, v)
 
     return NamedListTemplate
+
+class MissingAttrFormatter(string.Formatter):
+    "formats {} fields with `''`, that would normally result in a raised KeyError or AttributeError; intended for user customisable format strings."
+    def get_field(self, field_name, *args, **kwargs):
+        try:
+            return super().get_field(field_name, *args, **kwargs)
+        except (KeyError, AttributeError):
+            return (None, field_name)
+
+    def format_field(self, value, format_spec):
+        # value is missing
+        if not value:
+            return ''
+        return super().format_field(value, format_spec)

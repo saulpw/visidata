@@ -6,7 +6,7 @@ import visidata
 
 from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiData
 from visidata import vd, options, theme, colors
-from visidata import launchExternalEditor, suspend, ColumnItem, ENTER
+from visidata import launchExternalEditor, suspend, ColumnItem
 
 __all__ = ['confirm', 'CompleteKey']
 
@@ -15,6 +15,22 @@ theme('disp_edit_fill', '_', 'edit field fill character')
 theme('disp_unprintable', '·', 'substitute character for unprintables')
 
 VisiData.init('lastInputs', lambda: collections.defaultdict(list))  # [input_type] -> list of prevInputs
+
+class AcceptInput(Exception):
+    '*args[0]* is the input to be accepted'
+
+visidata.vd._nextCommands = []
+
+@VisiData.api
+def queueCommand(vd, longname): #, input=None, sheet=None, col=None, row=None):
+    vd._nextCommands.append(longname)
+
+def acceptThenFunc(*longnames):
+    def _acceptthen(v, i):
+        for longname in longnames:
+            vd.queueCommand(longname)
+        raise AcceptInput(v)
+    return _acceptthen
 
 # editline helpers
 
@@ -124,7 +140,6 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
   'A better curses line editing widget.'
   with EnableCursor():
     ESC='^['
-    ENTER='^J'
     TAB='^I'
 
     history_state = HistoryState(history)
@@ -196,7 +211,7 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
         elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1; v = delchar(v, i)
         elif ch == TAB:                            v, i = complete_state.complete(v, i, +1)
         elif ch == 'KEY_BTAB':                     v, i = complete_state.complete(v, i, -1)
-        elif ch == ENTER:                          break
+        elif ch in ['^J', '^M']:                   break  # ENTER to accept value
         elif ch == '^K':                           v = v[:i]  # ^Kill to end-of-line
         elif ch == '^O':                           v = launchExternalEditor(v)
         elif ch == '^R':                           v = str(value)  # ^Reload initial value
@@ -241,7 +256,10 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
         v = vd.getLastArgs()
 
     if v is None:
-        v = vd.editline(vd.sheets[0]._scr, y, x, w, display=display, **kwargs)
+        try:
+            v = vd.editline(vd.sheets[0]._scr, y, x, w, display=display, **kwargs)
+        except AcceptInput as e:
+            v = e.args[0]
 
         # clear keyboard buffer to neutralize multi-line pastes (issue#585)
         curses.flushinp()
@@ -299,7 +317,7 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
         else:
             history = type
 
-    sheet = self.sheets[0]
+    sheet = self.activeSheet
     rstatuslen = self.drawRightStatus(sheet._scr, sheet)
     attr = 0
     promptlen = clipdraw(sheet._scr, sheet.windowHeight-1, 0, prompt, attr, w=sheet.windowWidth-rstatuslen-1)
@@ -312,6 +330,8 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
 
     if ret:
         if isinstance(type, str):
+            if self.lastInputs[type] and self.lastInputs[type][-1] == ret:
+                return ret
             self.lastInputs[type].append(ret)
     elif defaultLast:
         history or vd.fail("no previous input")
@@ -323,6 +343,9 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
 @VisiData.global_api
 def confirm(vd, prompt, exc=EscapeException):
     'Display *prompt* on status line and demand input that starts with "Y" or "y" to proceed.  Raise *exc* otherwise.  Return True.'
+    if options.batch:
+        return vd.fail('cannot confirm in batch mode: ' + prompt)
+
     yn = vd.input(prompt, value='no', record=False)[:1]
     if not yn or yn not in 'Yy':
         msg = 'disconfirmed: ' + prompt
@@ -366,11 +389,25 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
         y, h = self._rowLayout.get(rowidx, (0, 0))
         value = value or col.getDisplayValue(self.rows[self.cursorRowIndex])
 
+    bindings={
+        'kUP':        acceptThenFunc('go-up', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'KEY_SR':     acceptThenFunc('go-up', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'kDN':        acceptThenFunc('go-down', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'KEY_SF':     acceptThenFunc('go-down', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'KEY_SRIGHT': acceptThenFunc('go-right', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'KEY_SLEFT':  acceptThenFunc('go-left', 'rename-col' if rowidx < 0 else 'edit-cell'),
+    }
+
+    bindings.update(kwargs.get('bindings', {}))
+    kwargs['bindings'] = bindings
+
     editargs = dict(value=value,
                     fillchar=options.disp_edit_fill,
                     truncchar=options.disp_truncator)
+
     editargs.update(kwargs)  # update with user-specified args
     r = vd.editText(y, x, w, **editargs)
+
     if rowidx >= 0:  # if not header
         r = col.type(r)  # convert input to column type, let exceptions be raised
 

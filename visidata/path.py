@@ -238,7 +238,8 @@ class RepeatFile:
         return r
 
     def seek(self, n):
-        assert n == 0, 'RepeatFile can only seek to beginning'
+        if n != 0:
+            vd.error('RepeatFile can only seek to beginning')
         self.iter = RepeatFileIter(self)
 
     def __iter__(self):

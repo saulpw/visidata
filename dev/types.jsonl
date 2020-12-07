@@ -1,0 +1,7 @@
+{"type": "anytype", "description": "pass-through", "numeric": "", "command": "type-anytype", "keystrokes": "z~"}
+{"type": "str", "description": "string", "numeric": "", "command": "type-str", "keystrokes": "~"}
+{"type": "date", "description": "date/time", "numeric": "Y", "command": "type-date", "keystrokes": "@"}
+{"type": "int", "description": "integer", "numeric": "Y", "command": "type-int", "keystrokes": "#"}
+{"type": "float", "description": "decimal", "numeric": "Y", "command": "type-float", "keystrokes": "%"}
+{"type": "currency", "description": "decimal with units", "numeric": "Y", "command": "type-currency", "keystrokes": "$"}
+{"type": "vlen", "description": "container size", "numeric": "Y", "command": "type-vlen", "keystrokes": "z#"}

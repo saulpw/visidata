@@ -1,5 +1,6 @@
 sheet	col	row	longname	input	keystrokes	comment
 			open-file	sample_data/benchmark.csv	o	
+		numeric_binning	set-option	True		
 benchmark	Quantity		type-int		#	
 benchmark	Quantity		addcol-expr	Quantity > 1	=	
 benchmark	Quantity > 1		select-col-regex	True	|	

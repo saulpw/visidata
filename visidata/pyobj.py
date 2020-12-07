@@ -2,7 +2,7 @@ from functools import singledispatch
 
 from visidata import *
 
-__all__ = ['PythonSheet', 'expand_cols_deep', 'deduceType', 'closeColumn', 'ListOfDictSheet', 'SheetDict', 'PyobjSheet']
+__all__ = ['PythonSheet', 'expand_cols_deep', 'deduceType', 'closeColumn', 'ListOfDictSheet', 'SheetDict', 'PyobjSheet', 'view']
 
 option('visibility', 0, 'visibility level')
 option('expand_col_scanrows', 1000, 'number of rows to check when expanding columns (0 = all)')

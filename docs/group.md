@@ -19,6 +19,7 @@ Aggregator      Description
 `min`           smallest value in the group
 `max`           largest value in the group
 `avg`/`mean`    average value of the group
+`mode`          most frequently appearing value in group
 `median`        median value in the group
 `q3/q4/q5/q10`  add quantile aggregators to group (e.g. q4 adds p25, p50, p75)
 `sum`           total summation of all numbers in the group
@@ -26,6 +27,7 @@ Aggregator      Description
 `count`         number of values in the group
 `keymax`        key of the row with the largest value in the group
 `list`          gathers values in column into a list
+`stdev`         standard deviation of values
 
 The follow howtos will have examples of workflows involving grouping of data and statistical aggregation.
 

@@ -13,7 +13,7 @@ def markdown_escape(s, style='orgmode'):
     return ret
 
 def markdown_colhdr(col):
-    if isNumeric(col):
+    if vd.isNumeric(col):
         return ('-' * (col.width-1)) + ':'
     else:
         return '-' * (col.width or options.default_width)

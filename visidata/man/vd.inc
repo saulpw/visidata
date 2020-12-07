@@ -1,4 +1,4 @@
-.Dd July 23, 2020
+.Dd Dec 5, 2020
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -188,7 +188,7 @@ set name of current column to combined contents of current cell in selected rows
 set name of all visible columns to combined contents of current column for selected rows (or current row)
 .Pp
 .It Ic "  =" Ar expr
-.No create new column from Python Ar expr Ns , with column names as variables
+.No create new column from Python Ar expr Ns , with column names, and attributes, as variables
 .It Ic " g=" Ar expr
 .No set current column for selected rows to result of Python Ar expr
 .It Ic "gz=" Ar expr
@@ -253,9 +253,11 @@ select/toggle/unselect all rows from cursor to bottom
 .It Ic "z|  z\e\ " Ns Ar expr
 .No select/unselect rows matching Python Ar expr No in any visible column
 .It Ic " \&," Ns " (comma)"
-select rows matching current cell in current column
+select rows matching typed value of current cell in current column
 .It Ic "g\&,"
-select rows matching current row in all visible columns
+select rows matching typed value of current row in all visible columns
+.It Ic "z\&, gz\&,"
+select rows matching display value of current cell/row in current column/all visible columns
 .
 .El
 .
@@ -343,6 +345,8 @@ toggle insert mode
 set contents to previous/next in history
 .It Ic "Tab  Shift+Tab"
 autocomplete input (when available)
+.It Ic "Shift+Arrow"
+.No move cursor in direction of Sy Arrow No and re-enter edit mode
 .
 .El
 .
@@ -369,9 +373,9 @@ open
 .It Ic "z+" Ar aggregator
 .No display result of Ar aggregator No over values in selected rows for current column
 .It Ic " &"
-.No concatenate top two sheets in Sy Sheets Stack No
+.No concatenate top two sheets in Sy Sheets Stack
 .It Ic "g&"
-.No concatenate all sheets in Sy Sheets Stack No
+.No concatenate all sheets in Sy Sheets Stack
 .Pp
 .El
 .Ss Data Visualization
@@ -466,6 +470,10 @@ show cursor position and bounds of current sheet on status line
 show version and copyright information on status line
 .It Ic " ^P"
 .No open Sy Status History
+.It "m" Ar keystroke
+.No first, begin recording macro; second, prompt for Ar keystroke No, and complete recording. Macro can then be executed everytime provided keystroke is used. Will override existing keybinding. Macros will run on current row, column, sheet.
+.It "gm"
+.No open an index of all existing macros. Can be directly viewed with Sy Enter Ns , and then modified with Sy ^S Ns .
 .
 .El
 .Pp
@@ -591,8 +599,8 @@ toggle/unset selected columns as key columns on source sheet
 add Ar aggregator No to selected source columns
 .It Ic "g-" No (hyphen)
 hide selected columns on source sheet
-.It Ic "g~ g# g% g$ g@  gz#"
-set type of selected columns on source sheet to str/int/float/currency/date/len
+.It Ic "g~ g# g% g$ g@ gz# z%"
+set type of selected columns on source sheet to str/int/float/currency/date/len/floatsi
 .It Ic " Enter"
 .No open a Sy Frequency Table No sheet grouped by column referenced in current row
 .El
@@ -624,6 +632,8 @@ add row to reference a new blank sheet
 .No reload all selected sheets
 .It Ic "z^C  gz^C"
 abort async threads for current/selected sheets(s)
+.It Ic "g^S"
+save selected or all sheets
 .It Ic " &" Ar jointype
 .No merge selected sheets with visible columns from all, keeping rows according to Ar jointype Ns :
 .El
@@ -654,7 +664,7 @@ abort async threads for current/selected sheets(s)
 .It Ic zO
 .No edit sheet options (apply to Sy current sheet No only)
 .It Ic gO
-.No open Sy options.config No as Sy TextSheet No
+.No open Sy options.config No as Sy TextSheet
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -662,6 +672,8 @@ abort async threads for current/selected sheets(s)
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter  e"
 edit option at current row
+.It Ic "d"
+remove option override for this context
 .El
 .
 .Ss CommandLog (Shift+D)
@@ -819,7 +831,7 @@ overwrite existing files without confirmation
 .No open a blank sheet named Ar newfile No if file does not exist
 .Pp
 .Dl Ic vd sample.xlsx +:sheet1:2:3
-.No launch with Sy sheet1 No at top-of-stack, and cursor at column Sy 2 No and row Sy 3 No
+.No launch with Sy sheet1 No at top-of-stack, and cursor at column Sy 2 No and row Sy 3
 .Pp
 .Dl Ic vd -P open-plugins
 .No preplay longname Sy open-plugins No before starting the session
@@ -842,7 +854,7 @@ For example:
 Functions defined in .visidatarc are available in python expressions (e.g. in derived columns).
 .
 .Sh SUPPORTED SOURCES
-These are the supported sources:
+Core VisiData includes these sources:
 .Pp
 .Bl -inset -compact -offset xxx
 .It Sy tsv No (tab-separated value)
@@ -875,67 +887,24 @@ These are the supported sources:
 .El
 .Pp
 .Bl -inset -compact -offset xxx
-.It Sy yaml Ns / Ns Sy yml No (requires Sy PyYAML Ns )
+.It Sy sqlite
 .Bl -inset -compact -offset xxx
-.It Uses the safe YAML loader, which supports the most common uses of YAML.
-.El
-.Pp
-.Bl -inset -compact -offset xxx
-.It Sy pcap No ( requires Sy dpkt Ns , Sy dnslib Ns )
-.Bl -inset -compact -offset xxx
-.It View and investigate captured network traffic in a tabular format.
+.It May include multiple tables. The initial sheet is the table directory;
+.Sy Enter No loaders the entrie table into memory. Sy z^S No saves modifications to source.
 .El
 .El
 .Pp
-.Bl -inset -compact -offset xxx
-.It Sy png No (requires Sy pypng Ns )
-.Bl -inset -compact -offset xxx
-.It Pixels can be edited and saved in data form. Images can be plotted with Ic "\&." No (dot).
-.El
-.El
-.
-.Pp
-The following URL schemes are supported:
+URL schemes are also supported:
 .Bl -inset -compact -offset xxx
 .It Sy http No (requires Sy requests Ns ); can be used as transport for with another filetype
-.It Sy postgres No (requires Sy psycopg2 Ns )
 .El
 .
 .Pp
-.Bl -inset -compact
-.It The following sources may include multiple tables.  The initial sheet is the table directory;
-.Sy Enter No loads the entire table into memory.
-.El
-.
-.Pp
-.Bl -inset -compact -offset xxx
-.It Sy sqlite
-.It Sy xlsx No (requires Sy openpyxl Ns )
-.It Sy xls No (requires Sy xlrd Ns )
-.It Sy hdf5 No (requires Sy h5py Ns )
-.It Sy ttf Ns / Ns Sy otf No (requires Sy fonttools Ns )
-.It Sy mbtiles No (requires Sy mapbox-vector-tile Ns )
-.It Sy htm Ns / Ns Sy html No (requires Sy lxml Ns )
-.It Sy xml No (requires Sy lxml Ns )
-.Bl -tag -width XXXX -compact -offset XXX
-.It Sy " v"
-show only columns in current row attributes
-.It Sy za
-add column for xml attribute
-.El
-.It Sy xpt No (SAS; requires Sy xport Ns )
-.It Sy sas7bdat No (SAS; requires Sy sas7bdat Ns )
-.It Sy sav No (SPSS; requires Sy savReaderWriter Ns )
-.It Sy dta No (Stata; requires Sy pandas Ns )
-.It Sy shp No (requires Sy pyshp Ns )
-.El
+For a list of all remaining formats supported by VisiData, see https://visidata.org/formats.
 .Pp
 In addition,
 .Sy .zip Ns , Sy .gz Ns , Sy .bz2 Ns , and Sy .xz No files are decompressed on the fly.
 .Pp
-.No VisiData has an adapter for Sy pandas Ns . To load a file format which is supported by Sy pandas Ns , pass Sy -f pandas data.foo Ns . This will call Sy pandas.read_foo() Ns .
-.Pp
-.No For example, Sy vd -f pandas data.parquet No loads a parquet file. Note that when using the Sy pandas No loader, the Sy .fileformat No file extension is mandatory
 .
 .Sh SUPPORTED OUTPUT FORMATS
 These are the supported savers:
@@ -945,17 +914,12 @@ These are the supported savers:
 .It Sy csv No (comma-separated value)
 .It Sy json No (one object with all rows)
 .It Sy jsonl Ns / Ns Sy ndjson Ns / Ns Sy ldjson No (one object per line/row)
-.It Sy sqlite No (multisave capable)
 .Bl -inset -compact -offset xxx
 .It All expanded subcolumns must be closed (with Sy "\&)" Ns ) to retain the same structure.
-.It Sy .shp No files can be saved as Sy geoJSON Ns .
 .El
-.It Sy md No (org-mode compatible markdown table)
-.It Sy htm Ns / Ns Sy html No (requires Sy lxml Ns )
-.It Sy png No (requires Sy pypng Ns )
+.It Sy sqlite No (save to source with Sy z^S Ns )
+.It Sy md No (markdown table)
 .El
-.Pp
-.No Multisave is supported by Sy html Ns , Sy md Ns , and Sy txt Ns ; Sy g^S No will save all sheets into a single output file.
 .Pp
 .
 .Sh AUTHOR

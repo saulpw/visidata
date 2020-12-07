@@ -20,10 +20,10 @@ for i in $TESTS ; do
     outbase=${i##tests/}
     if [ "${i%-nosave.vd}-nosave" == "${i%.vd}" ];
     then
-        PYTHONPATH=. bin/vd --play "$i" --batch
+        PYTHONPATH=. bin/vd --play "$i" --batch --config tests/.visidatarc --visidata-dir tests/.visidata
     else
         for goldfn in tests/golden/${outbase%.vd}.*; do
-            PYTHONPATH=. bin/vd --confirm-overwrite=False --play "$i" --batch --output "$goldfn"
+            PYTHONPATH=. bin/vd --confirm-overwrite=False --play "$i" --batch --output "$goldfn" --config tests/.visidatarc --visidata-dir tests/.visidata
             echo "save: $goldfn"
         done
     fi

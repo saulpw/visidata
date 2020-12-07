@@ -87,12 +87,20 @@ def nextColRegex(sheet, colregex):
 
     vd.fail('no column name matches /%s/' % colregex)
 
+
+@Column.property
+def visibleWidth(self):
+    'Width of column as is displayed in terminal'
+    vcolidx = self.sheet.visibleCols.index(self)
+    return self.sheet._visibleColLayout[vcolidx][1]
+
+
 Sheet.addCommand(None, 'go-left',  'cursorRight(-1)', 'go left'),
 Sheet.addCommand(None, 'go-down',  'cursorDown(+1)', 'go down'),
 Sheet.addCommand(None, 'go-up',    'cursorDown(-1)', 'go up'),
 Sheet.addCommand(None, 'go-right', 'cursorRight(+1)', 'go right'),
-Sheet.addCommand(None, 'go-pagedown', 'cursorDown(nScreenRows); sheet.topRowIndex += nScreenRows', 'scroll one page forward'),
-Sheet.addCommand(None, 'go-pageup', 'cursorDown(-nScreenRows); sheet.topRowIndex -= nScreenRows', 'scroll one page backward'),
+Sheet.addCommand(None, 'go-pagedown', 'cursorDown(bottomRowIndex-topRowIndex); sheet.topRowIndex = bottomRowIndex', 'scroll one page forward'),
+Sheet.addCommand(None, 'go-pageup', 'cursorDown(topRowIndex-bottomRowIndex); sheet.bottomRowIndex = topRowIndex', 'scroll one page backward'),
 
 Sheet.addCommand(None, 'go-leftmost', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0', 'go all the way to the left of sheet'),
 Sheet.addCommand(None, 'go-top', 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'go all the way to the top of sheet'),
@@ -160,13 +168,13 @@ Sheet.addCommand(None, 'scroll-right', 'sheet.cursorVisibleColIndex += options.s
 Sheet.addCommand(None, 'scroll-leftmost', 'sheet.leftVisibleColIndex = cursorVisibleColIndex', 'scroll sheet to leftmost column')
 Sheet.addCommand(None, 'scroll-rightmost', 'tmp = cursorVisibleColIndex; pageLeft(); sheet.cursorVisibleColIndex = tmp', 'scroll sheet to rightmost column')
 
-Sheet.addCommand('zl', 'scroll-cells-right', 'cursorCol.hoffset += cursorCol.width-2', 'scroll display of current column to the right')
-Sheet.addCommand('zh', 'scroll-cells-left', 'cursorCol.hoffset -= cursorCol.width-2', 'scroll display of current column to the left')
-Sheet.addCommand('gzl', 'scroll-cells-rightmost', 'cursorCol.hoffset = -cursorCol.width+1', 'scroll display of current column to the end')
+Sheet.addCommand('zl', 'scroll-cells-right', 'cursorCol.hoffset += cursorCol.visibleWidth-2', 'scroll display of current column to the right')
+Sheet.addCommand('zh', 'scroll-cells-left', 'cursorCol.hoffset -= cursorCol.visibleWidth-2', 'scroll display of current column to the left')
+Sheet.addCommand('gzl', 'scroll-cells-rightmost', 'cursorCol.hoffset = -cursorCol.visibleWidth+2', 'scroll display of current column to the end')
 Sheet.addCommand('gzh', 'scroll-cells-leftmost', 'cursorCol.hoffset = 0', 'scroll display of current column to the beginning')
 
-Sheet.addCommand('zj', 'scroll-cells-down', 'cursorCol.voffset += 1', 'scroll display of current column down one line')
-Sheet.addCommand('zk', 'scroll-cells-up', 'cursorCol.voffset -= 1', 'scroll display of current column up one line')
+Sheet.addCommand('zj', 'scroll-cells-down', 'cursorCol.voffset += 1 if cursorCol.height > 1 else fail("multiline column needed for scrolling")', 'scroll display of current column down one line')
+Sheet.addCommand('zk', 'scroll-cells-up', 'cursorCol.voffset -= 1 if cursorCol.height > 1 else fail("multiline column needed for scrolling")', 'scroll display of current column up one line')
 Sheet.addCommand('gzj', 'scroll-cells-bottom', 'cursorCol.voffset = -1', 'scroll display of current column to the bottom')
 Sheet.addCommand('gzk', 'scroll-cells-top', 'cursorCol.voffset = 0', 'scroll display of current column to the top')
 

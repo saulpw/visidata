@@ -72,4 +72,4 @@ def addcol_rownum(sheet):
     return newcol
 
 Sheet.addCommand(None, 'addcol-rownum', 'addcol_rownum()', helpstr='add column with original row ordering')
-Sheet.addCommand(None, 'addcol-delta', 'addcol_delta()', helpstr='add column with delta of current column')
+Sheet.addCommand(None, 'addcol-delta', 'addcol_delta(cursorVisibleColIndex)', helpstr='add column with delta of current column')

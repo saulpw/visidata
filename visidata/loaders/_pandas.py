@@ -17,7 +17,9 @@ class DataFrameAdapter:
 
     def __init__(self, df):
         import pandas as pd
-        assert isinstance(df, pd.DataFrame)
+        if not isinstance(df, pd.DataFrame):
+            vd.fail('%s is not a dataframe' % type(df).__name__)
+
         self.df = df
 
     def __len__(self):
@@ -115,10 +117,19 @@ class PandasSheet(Sheet):
             else:
                 readfunc = getattr(pd, 'read_'+filetype) or vd.error('no pandas.read_'+filetype)
             df = readfunc(str(self.source), **options.getall('pandas_'+filetype+'_'))
+        else:
+            try:
+                df = pd.DataFrame(self.source)
+            except ValueError as err:
+                vd.fail('error building pandas DataFrame from source data: %s' % err)
 
         # reset the index here
         if type(df.index) is not pd.RangeIndex:
             df = df.reset_index()
+
+        # VisiData assumes string column names but pandas does not. Forcing string
+        # columns at load-time avoids various errors later.
+        df.columns = df.columns.astype(str)
 
         self.columns = []
         for col in (c for c in df.columns if not c.startswith("__vd_")):
@@ -180,7 +191,7 @@ class PandasSheet(Sheet):
         return is_selected
 
     @property
-    def nSelected(self):
+    def nSelectedRows(self):
         self._checkSelectedIndex()
         return self._selectedMask.sum()
 

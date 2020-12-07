@@ -36,14 +36,21 @@ class ZipSheet(Sheet):
             vd.error(err)
 
     def openRow(self, fi):
-            zfp = zipfile.ZipFile(str(self.source), 'r')
-            decodedfp = codecs.iterdecode(self.openZipFile(zfp, fi),
+            decodedfp = codecs.iterdecode(self.openZipFile(self.zfp, fi),
                                           encoding=options.encoding,
                                           errors=options.encoding_errors)
             return vd.openSource(Path(fi.filename, fp=decodedfp, filesize=fi.file_size), filetype=options.filetype)
 
+    @asyncthread
+    def extract(self, *rows, path=None):
+        self.zfp.extractall(members=[r.filename for r in rows], path=path)
+
+    @property
+    def zfp(self):
+        return zipfile.ZipFile(str(self.source), 'r')
+
     def iterload(self):
-        with zipfile.ZipFile(str(self.source), 'r') as zf:
+        with self.zfp as zf:
             for zi in Progress(zf.infolist()):
                 yield zi
 
@@ -72,3 +79,9 @@ class TarSheet(Sheet):
         with tarfile.open(name=str(self.source)) as tf:
             for ti in Progress(tf.getmembers()):
                 yield ti
+
+
+ZipSheet.addCommand('x', 'extract-file', 'extract(cursorRow)')
+ZipSheet.addCommand('gx', 'extract-selected', 'extract(*onlySelectedRows)')
+ZipSheet.addCommand('zx', 'extract-file-to', 'extract(cursorRow, path=inputPath("extract to: "))')
+ZipSheet.addCommand('gzx', 'extract-selected-to', 'extract(*onlySelectedRows, path=inputPath("extract %d files to: " % nSelected))')

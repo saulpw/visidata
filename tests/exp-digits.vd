@@ -1,6 +1,6 @@
 sheet	col	row	longname	input	keystrokes	comment
 		incr_base	set-option	0		
-exp-digits_vd			open-new	1	A	open new blank sheet with number columns
+			open-new	1	A	open new blank sheet with number columns
 unnamed	0		rename-col	x	^	edit name of current column
 unnamed			add-rows	100	ga	add N blank rows
 unnamed			select-rows		gs	

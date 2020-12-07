@@ -1,5 +1,128 @@
 # VisiData version history
 
+# v2.1 (2020-12-06)
+
+    - [add] add bulk rows and cols leave cursor on first added (like add singles)
+    - [add] add colname input to `addcol-new`
+    - [aggregators] add mode and stdev to aggregator options (thanks @jsvine for PR #754)
+    - [api] add options.unset()
+    - [columns] add hidden 'keycol' to **ColumnsSheet**  (thanks @geekscrapy for feature request #768)
+    - [cli] support running as `python -m visidata` (thanks @abitrolly for PR #785)
+    - [cli] add `#!vd -p` as first line of `.vdj` for executable vd script
+    - [cli] allow `=` in `.vd` replay parameters
+    - [clipboard] clipboard commands now require some selected rows #681
+    - [commands] add unset-option command bound to `d` on OptionsSheet #733
+    - [config] `--config=''` now ignores visidatarc (thanks @rswgnu for feature request #777)
+    - [defer] commit changes, even if no deferred changes
+    - [deprecated] add traceback warnings for deprecated calls (thanks @ajkerrigan for PR #724)
+    - [display] add sort indication #582
+    - [display] show ellipsis on left side with non-zero hoffset (thanks @frosencrantz for feature request #751)
+    - [expr] allow column attributes as variables (thanks @frosencrantz for feature request #659)
+    - [freq] change `numeric_binning` back to False by default
+    - [input] Shift+Arrow within `edit-cell` to move cursor and re-enter edit mode
+    - [loaders http] have automatic API pagination (thanks @geekscrapy for feature request #480)
+    - [loaders json] improve loading speedup 50% (thanks @lxcode for investigating and pointing this out #765)
+        - this makes JSON saving non-deterministic in Python 3.6, as the order of fields output is dependent on the order within the dict
+            - (this is the default behaviour for dicts in Python 3.7+)
+    - [loaders json] try loading as jsonl before json (inverted)
+        - jsonl is a streamable format, so this way it doesn't have to wait for the entire contents to be loaded before failing to parse as json and then trying to parse as jsonl
+        - fixes api loading with http so that contents of each response are added as they happen
+        - unfurl toplevel lists
+        - functionally now jsonl and json are identical
+    - [loaders json] try parsing `options.json_indent` as int (thanks @frosencrantz for the bug report #753)
+         this means json output can't be indented with a number. this seems like an uncommon use case
+    - [loaders json] skip lines starting with `#`
+    - [loaders pdf] `options.pdf_tables` to parse tables from pdf with tabular
+    - [loaders sqlite] use rowid to update and delete rows
+        - note that this will not work with WITHOUT ROWID sqlite tables
+    - [loaders xlsx] add active column (thanks @kbd for feature request #726)
+    - [loaders zip] add extract-file, extract-selected, extract-file-to, extract-selected-to commands
+    - [macros] add improved macro system (thanks @bob-u for feature request #755)
+        - `m` (`macro-record`) begins recording macro; `m` prompts for keystroke, and completes recording
+        - macro can then be executed everytime provided keystroke is used, will override existing keybinding
+        - `gm` opens an index of all existing macros, can be directly viewed with `Enter` and then modified with `Ctrl+S`
+        - macros will run command on current row, column sheet
+        - remove deprecated `z Ctrl+D` older iteration of macro system
+    - [regex] use capture names for column names, if available, in `capture-col` (thanks @tsibley for PR #808)
+        - allows for pre-determining friendlier column names, saving a renaming step later
+    - [save] `g Ctrl+S` is `save-sheets-selected` on **IndexSheet**
+        - new command allows some or all sheets on an **IndexSheet** to be saved (and not the sheets on the sheet stack)
+    - [saver] add fixed-width saver (uses col.width)
+    - [saver sqlite] ensureLoaded when saving sheets to sqlite db
+    - [search] `search-next` and `searchr-next` are now bound to n and N (was `next-search` and `search-prev`)
+    - [select] differentiate select-equal- and select-exact- (thanks @geekscrapy for feature request #734)
+       - previous select-equal- matched type value
+       - now select-equal- matches display value
+       - add `z,` and `gz,` bindings for select-exact-cell/-row
+    - [sheets] sorting on **SheetsSheet** now does not sort **SheetsSheet** itself. (thanks @klartext and @geekscrapy for bug reports #761 #518)
+    - [status] use `color_working` for progress indicator (thanks @geekscrapy for feature request #804)
+    - [types] add floatsi parser (sponsored feature by @anjakefala #661)
+        - floatsi type now parses SI strings (like 2.3M)
+        - use `z%` to set column type to floatsi
+
+## Bugfixes
+
+    - [api] expose visidata.view (thanks @alekibango for bug report #732)
+    - [color] use `color_column_sep` for sep chars (thanks @geekscrapy for bug report)
+    - [defer] frozen columns should not be deferred (thanks @frosencrantz for bug report #786)
+    - [dir] fix commit-sheet and delete-row on DirSheet
+    - [draw] fix display for off-screen cursor with multiline rows
+    - [expr] remove duplicate tabbing suggestions (thanks @geekscrapy for bug report #747)
+    - [expr] never include computing column (thanks @geekscrapy for bug report #756)
+        - only checks for self-reference; 2+ cycles still raises RecursionException
+        - caches are now for each cell, instead of for each row
+    - [freeze] freeze-sheet with errors should replace with null
+    - [loaders frictionless] assume JSON if no format (thanks scls19fr for bug report #803)
+        - from https://specs.frictionlessdata.io/data-resource/#data-location):
+            - a consumer of resource object MAY assume if no format or mediatype property is provided that the data is JSON and attempt to process it as such.
+
+    - [loaders hdf5] misc bugfixes to hdf5 dataset loading (thanks @amotl for PR #728)
+    - [loaders jsonl] fix copy-rows
+    - [loaders pandas] support loading Python objects directly (thanks @ajkerrigan for PR #816 and scls19fr for bug report #798)
+    - [loaders pandas] ensure all column names are strings (thanks @ajkerrigan for PR #816 and scls19fr for bug report #800)
+    - [loaders pandas] build frequency table using a copy of the source (thanks @ajkerrigan for PR #816 and scls19fr for bug report #802)
+    - [loaders sqlite] fix commit-sheet
+    - [loaders sqlite] fix commit deletes
+    - [loaders xlsx] only reload Workbook sheets to avoid error (thanks @aborruso for bug report #797)
+    - [loaders vdj] fix add-row
+    - [man] fix warnings with manpage (thanks @jsvine for the bug report #718)
+    - [movement] fix scroll-cells (thanks @jsvine for bug report #762)
+    - [numeric binning] perform degenerate binning when number of bins greater than number of values
+        - (instead of when greater than width of bins)
+    -  [numeric binning] if width of bins is 1, fallback to degenerate binning
+    - [numeric binning] degenerate binning should resemble non-numeric binning (thanks @setop for bug report #791)
+    - [options] fix `confirm_overwrite` in batch mode
+        - fix `-y` to set `confirm_overwrite` to False (means, no confirmation necessary for overwrite)
+        - make `confirm()` always fail in batch mode
+        - make `confirm_overwrite` a sheet-specific option
+    - [plugins] only reload **Plugins Sheet** if not already loaded
+    - [replay] move to replay context after getting sheet (thanks @rswgnu for bug report #796)
+    - [replay] do not push replaying .vd on sheet stack (thanks @rswgnu for bug report #795)
+    - [scroll] zj/zk do nothing in single-line mode (thanks @jsvine for suggestion)
+    - [shell] empty stdin to avoid hanging process (thanks @frosencrantz for bug report #752)
+    - [status] handle missing attributes in `disp_rstatus_fmt` (thanks @geekscrapy for bug report #764)
+    - [tabulate] fix savers to save in their own format (thanks @frosencrantz for bug report #723)
+    - [typing] fix indefinite hang for typing (thanks @lxcode for issue #794)
+    - [windows] add Ctrl+M as alias for Ctrl+J #741 (thanks @bob-u for bug report #741)
+    - [windows man] package man/vd.txt as a fallback for when man is not available on os (thanks @bob-u for bug report #745)
+
+## Plugins
+- add conll loader to **PluginsSheet** (thanks @polm)
+- remove livesearch
+- add clickhouse loader
+
+## Commands
+- if `options.some_selected_rows` is True, `setcol-expr`, `setcol-iter`, `setcol-subst`, `setcol-subst`, `setcol-subst-all` will return all rows, if none selected
+
+## API
+- [columns] add Column.visibleWidth
+- [open] additionally search for `open_filetype` within the vd scope
+- [select] rename `someSelectedRows` to `onlySelectedRows`
+- [select] add new `someSelectedRows` and `options.some_selected_rows` (thanks maufdez for feature request #767)
+    - if options is True, and no rows are selected, `someSelectedRows` will return all rows
+- [status] allow non-hashable status msgs by deduping based on stringified contents
+- [isNumeric] isNumeric is part of vdobj
+
 # v2.0.1 (2020-10-13)
 
 ## Bugfixes

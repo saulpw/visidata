@@ -7,7 +7,7 @@ from visidata import *
 theme('disp_histogram', '*', 'histogram element character')
 option('disp_histolen', 50, 'width of histogram column')
 option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
-option('numeric_binning', True, 'bin numeric columns into ranges', replay=True)
+option('numeric_binning', False, 'bin numeric columns into ranges', replay=True)
 
 
 def valueNames(discrete_vals, numeric_vals):
@@ -59,7 +59,7 @@ class FreqTableSheet(PivotSheet):
             self.column('percent').hide()
             self.column('histogram').hide()
 
-        if not [c for c in self.groupByCols if isNumeric(c)]:
+        if not [c for c in self.groupByCols if vd.isNumeric(c)]:
             self.orderBy(self.column('count'), reverse=True)
 
     def openRow(self, row):

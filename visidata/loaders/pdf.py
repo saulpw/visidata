@@ -2,10 +2,16 @@ import io
 
 from visidata import *
 
-def open_pdf(p):
-    return PdfSheet(p.name, source=p)
+vd.option('pdf_tables', False, 'parse PDF for tables instead of pages of text', replay=True)
 
-class PdfSheet(TableSheet):
+
+def open_pdf(p):
+    if vd.options.pdf_tables:
+        return TabulaSheet(p.name, source=p)
+    return PdfMinerSheet(p.name, source=p)
+
+
+class PdfMinerSheet(TableSheet):
     rowtype='pages' # rowdef: [pdfminer.LTPage, pageid, text]
     columns=[
         ColumnItem('pdfpage', 0, width=0),
@@ -27,3 +33,10 @@ class PdfSheet(TableSheet):
                     interpreter = PDFPageInterpreter(newrsrcmgr, txtconv)
                     interpreter.process_page(page)
                     yield [page, page.pageid, output_string.getvalue()]
+
+
+class TabulaSheet(IndexSheet):
+    def iterload(self):
+        import tabula
+        for i, t in enumerate(tabula.read_pdf(self.source, pages='all', multiple_tables=True)):
+            yield PandasSheet(self.source.name, i, source=t)

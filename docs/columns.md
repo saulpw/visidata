@@ -1,5 +1,5 @@
-- Update: 2020-06-17
-- Version: VisiData 2.0
+- Update: 2020-10-01
+- Version: VisiData 2.0.1
 
 # Columns
 
@@ -9,7 +9,7 @@ Commands(s)     Operation
 ------------    -----------
 `!`             pins the current column on the left as a key column
  `H`  `L`       slides the current column **one position** to the left/right
-`gH` `gL`       slides the current column **all the way** to the left/right of the sheet
+`gH` `gL`       slides the current column **all the way** to the left/right of its section
 
 ---
 
@@ -28,6 +28,10 @@ Commands(s)     Operation
 5. Press `q` to return to the source sheet.
 
 ###### How to unhide columns
+
+1. Press `gv` to unhide all columns on current sheet.
+
+**or**
 
 1. Press `Shift+C` on the source sheet to open its **Columns sheet**.
 2. Move the cursor right to the **width** column.
@@ -132,8 +136,23 @@ uses the commands for column splitting and transformation with [xd/puzzles.tsv](
 ###
 
 - `:` adds new columns derived from splitting the current column at positions defined by a *regex pattern*. The current row will be used to infer the number of columns that will be created.
-- `;` adds new columns derived from pulling the contents of the current column which match the *regex within capture groups*. This command also requires an example row.
+- `;` adds new columns derived from pulling the contents of the current column which match the *regex within capture groups*. The new columns are named using the capture group index, or if named capture groups are used, the capture group names. This command also requires an example row.
 - `*` followed by *regex*`/`*substring* replaces the text which matches the capture groups in *regex* with the contents of *substring*. *substring* may include backreferences (*\1* etc).
+
+## [How do I substitute text in my column]
+
+The `*` command can be used to do content transformations of cells. The `g*` variant transforms in-place, instead of creating a new column.
+
+The following example uses [benchmarks.csv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/benchmarks.csv).
+
+**Question** Transform the **SKU** values of *food* to *nutri*.
+
+1. Move cursor to **SKU** column.
+2. Press `gs` to select all rows.
+3. Type `g*` folowed by *food/nutri*.
+
+- tests/transform-cols.vd
+
 
 ---
 
@@ -170,7 +189,35 @@ Note that by default the expansion logic will look for nested columns in **up to
 
 ## [How to create derivative columns](#derived) {#derived}
 
-The `=` command takes a Python expression as input, evaluates the expression, and creates a new column from the result. Column names can be supplied as variables, in order to have the expression performed on the column cell-by-cell. VisiData supports `Tab` autocompletion of column names.
+The `=` command takes a Python expression as input and creates a new column, where each cell evaluates the expression in the context of its row.
+
+These variables and functions are available in the scope of an expression:
+
+- **Column names** evaluate to the typed value of the cell in the named column for the same row.
+- **`vd`** attributes and methods; use `Ctrl+X vd` to view the vd object, or [see the API]().
+- **`Sheet`** attributes and methods; use `g Ctrl+Y` to view the sheet object (or see the API).
+- **Global** functions and variables (add your own in your .visidatarc).
+- **modules** that have been `import`ed in Python
+  - if you need a module that hasn't already been imported at runtime, use `g Ctrl+X import <modname>`.
+
+- **`sheet`**: the current sheet (a TableSheet object)
+- **`col`**: the current column (as a Column object; use for Column metadata)
+- **`row`**: the current row (a Python object of the internal rowtype)
+
+Additional attributes can be added to sheets and columns.
+
+`col` deliberately returns a Column object, but any other Column object is interpreted as the value within that column for the same row.
+
+For example, this customizes addcol-expr to set the `curcol` attribute on the new ExprColumn to a snapshot of the current cursor column (at the time the expression column is added):
+
+```
+Sheet.addCommand('=', 'addcol-expr', 'addColumnAtCursor(ExprColumn(inputExpr("new column expr="), curcol=cursorCol))', 'create
+ new column from Python expression, with column names as variables')
+```
+
+Then, an expression can use `curcol` as though it referred to the value in the saved column.
+
+`Tab` autocompletion when inputting an expression will cycle through valid column names only.
 
 The following examples use the file [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
 

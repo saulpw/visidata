@@ -17,9 +17,9 @@ def StaticColumn(sheet, col):
         # no need to undo, addColumn undo is enough
         for r in Progress(rows, 'calculating'):
             try:
-                frozencol.setValue(r, col.getTypedValue(r))
+                frozencol.putValue(r, col.getTypedValue(r))
             except Exception as e:
-                frozencol.setValue(r, e)
+                frozencol.putValue(r, e)
 
     calcRows_async(frozencol, sheet.rows, col)
     return frozencol
@@ -44,10 +44,11 @@ class StaticSheet(Sheet):
             row = []
             self.addRow(row)
             for col in self.source.visibleCols:
-                try:
-                    row.append(col.getTypedValue(r))
-                except Exception as e:
+                val = col.getTypedValue(r)
+                if isinstance(val, TypedExceptionWrapper):
                     row.append(None)
+                else:
+                    row.append(val)
 
 
 Sheet.addCommand("'", 'freeze-col', 'sheet.addColumnAtCursor(StaticColumn(cursorCol))', 'add a frozen copy of current column with all cells evaluated')

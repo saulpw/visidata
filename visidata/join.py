@@ -31,7 +31,7 @@ jointypes = [{'key': k, 'desc': v} for k, v in {
     'outer': 'all rows from first selected sheet',
     'full': 'all rows from all sheets (union)',
     'diff': 'only rows NOT in all sheets',
-    'append': 'only columns from first sheet; extend with rows from all sheets',
+    'append': 'columns all sheets; extend with rows from all sheets',
     'extend': 'only rows from first sheet; extend with columns from all sheets',
     'merge': 'merge differences from other sheets into first sheet',
 }.items()]

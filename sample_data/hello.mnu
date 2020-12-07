@@ -1,0 +1,2 @@
+x	y	text	color	command	input	cond	status
+3	4	hello world	217 underline	show-status	Hello World!		

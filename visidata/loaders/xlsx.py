@@ -1,10 +1,11 @@
 from visidata import *
 
 
+def open_xls(p):
+    return XlsIndexSheet(p.name, source=p)
+
 def open_xlsx(p):
     return XlsxIndexSheet(p.name, source=p)
-
-open_xls = open_xlsx
 
 class XlsxIndexSheet(IndexSheet):
     'Load XLSX file (in Excel Open XML format).'
@@ -14,6 +15,7 @@ class XlsxIndexSheet(IndexSheet):
         ColumnAttr('name', width=0),  # visidata Sheet name
         ColumnAttr('nRows', type=int),
         ColumnAttr('nCols', type=int),
+        Column('active', getter=lambda col,row: row.source is col.sheet.workbook.active),
     ]
     nKeys = 1
 
@@ -21,8 +23,10 @@ class XlsxIndexSheet(IndexSheet):
         import openpyxl
         self.workbook = openpyxl.load_workbook(str(self.source), data_only=True, read_only=True)
         for sheetname in self.workbook.sheetnames:
-            vs = XlsxSheet(self.name, sheetname, source=self.workbook[sheetname])
-            vs.reload()
+            src = self.workbook[sheetname]
+            vs = XlsxSheet(self.name, sheetname, source=src)
+            if isinstance(src, openpyxl.Workbook):
+                vs.reload()
             yield vs
 
 
@@ -85,7 +89,7 @@ def save_xlsx(vd, p, *sheets):
             for col, v in dispvals.items():
                 if col.type == date:
                     v = datetime.datetime.fromtimestamp(int(v.timestamp()))
-                elif not isNumeric(col):
+                elif not vd.isNumeric(col):
                     v = str(v)
                 row.append(v)
 

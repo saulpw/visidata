@@ -87,7 +87,7 @@ class DescribeSheet(ColumnsSheet):
                     d['errors'].append(sr)
 
             d['mode'] = self.calcStatistic(d, mode, vals)
-            if isNumeric(srccol):
+            if vd.isNumeric(srccol):
                 for func in [min, max, sum, median]:  # use type
                     d[func.__name__] = self.calcStatistic(d, func, vals)
                 for aggrname in options.describe_aggrs.split():

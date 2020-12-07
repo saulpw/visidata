@@ -45,7 +45,7 @@ class PivotSheet(Sheet):
         self.groupByCols = groupByCols  # whose values become rows
 
     def isNumericRange(self, col):
-        return isNumeric(col) and self.source.options.numeric_binning
+        return vd.isNumeric(col) and self.source.options.numeric_binning
 
     def initCols(self):
         self.columns = []
@@ -167,7 +167,7 @@ class PivotSheet(Sheet):
         numericCols = [c for c in self.groupByCols if self.isNumericRange(c)]
 
         if len(numericCols) > 1:
-            vd.error('only one numeric column can be binned')
+            vd.fail('only one numeric column can be binned')
 
         numericBins = []
         degenerateBinning = False
@@ -181,10 +181,11 @@ class PivotSheet(Sheet):
             if width == 0:
                 # only one value (and maybe errors)
                 numericBins = [(minval, maxval)]
-            elif numericCols[0].type in (int, vlen) and nbins > width:
-                # more bins than int vals, just use the vals
+            elif (numericCols[0].type in (int, vlen) and nbins > (maxval - minval)) or (width == 1):
+                # (more bins than int vals) or (if bins are of width 1), just use the vals as bins
                 degenerateBinning = True
-                numericBins = [(minval+i, minval+i) for i in range(maxval-minval+1)]
+                numericBins = [(val, val) for val in sorted(set(vals))]
+                nbins = len(numericBins)
             else:
                 numericBins = [(minval+width*i, minval+width*(i+1)) for i in range(nbins)]
 
@@ -214,7 +215,8 @@ class PivotSheet(Sheet):
                     if not width:
                         binidx = 0
                     elif degenerateBinning:
-                        binidx = val-minval
+                        # in degenerate binning, each val has its own bin
+                        binidx = numericBins.index((val, val))
                     else:
                         binidx = int((val-minval)//width)
                     groupRow = numericGroupRows[formatRange(numericCols[0], numericBins[min(binidx, nbins-1)])]

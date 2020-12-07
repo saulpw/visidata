@@ -13,7 +13,7 @@ option('visidata_dir', '~/.visidata/', 'directory to load and store additional f
 # prefixes which should not be logged
 nonLogged = '''forget exec-longname undo redo quit
 show error errors statuses options threads jump
-replay cancel save-cmdlog
+replay cancel save-cmdlog macro
 go- search scroll prev next page start end zoom resize visibility
 mouse suspend redraw no-op help syscopy sysopen profile toggle'''.split()
 
@@ -159,12 +159,10 @@ class _CommandLog:
                 colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
 
             if contains(cmd.execstr, 'plotterCursorBox'):
-                assert not colname and not rowname
                 bb = sheet.cursorBox
                 colname = '%s %s' % (sheet.formatX(bb.xmin), sheet.formatX(bb.xmax))
                 rowname = '%s %s' % (sheet.formatY(bb.ymin), sheet.formatY(bb.ymax))
             elif contains(cmd.execstr, 'plotterVisibleBox'):
-                assert not colname and not rowname
                 bb = sheet.visibleBox
                 colname = '%s %s' % (sheet.formatX(bb.xmin), sheet.formatX(bb.xmax))
                 rowname = '%s %s' % (sheet.formatY(bb.ymin), sheet.formatY(bb.ymax))
@@ -212,6 +210,10 @@ class CommandLog(_CommandLog, VisiDataMetaSheet):
     pass
 
 class CommandLogJsonl(_CommandLog, JsonLinesSheet):
+
+    def newRow(self):
+        return JsonLinesSheet.newRow(self)
+
     def iterload(self):
         for r in JsonLinesSheet.iterload(self):
             if isinstance(r, TypedWrapper):
@@ -269,6 +271,11 @@ def delay(vd, factor=1):
         acquired = vd.semaphore.acquire(timeout=options.replay_wait*factor if not vd.paused else None)
         return acquired or not vd.paused
 
+@VisiData.property
+def activeSheet(vd):
+    'Return top sheet on sheets stack, or cmdlog sheets stack empty.'
+    return vd.sheets[0] if vd.sheets else vd.cmdlog
+
 
 @VisiData.api
 def replayOne(vd, r):
@@ -280,23 +287,25 @@ def replayOne(vd, r):
             vs = None
 
         longname = getattr(r, 'longname', None)
-        if longname == 'set-option':
+        if longname in ['set-option', 'unset-option']:
             try:
-                if r.col:
-                    options.set(r.row, r.input, r.col)
+                context = vs if r.sheet and vs else vd
+                if longname == 'set-option':
+                    context.options.set(r.row, r.input, r.sheet or r.col or 'override')
                 else:
-                    options[r.row] = r.input
+                    context.options.unset(r.row, r.sheet or r.col or 'override')
 
                 escaped = False
             except Exception as e:
                 vd.exceptionCaught(e)
                 escaped = True
         else:
-            vd.moveToReplayContext(r, vs)
             if vs:
                 vd.push(vs)
             else:
-                vs = vd.sheets[0]  # use top sheet by default
+                vs = vd.activeSheet
+
+            vd.moveToReplayContext(r, vs)
 
             if r.comment:
                 vd.status(r.comment)
@@ -337,7 +346,7 @@ def replay_sync(vd, cmdlog, live=False):
                 cmdlog.cursorRowIndex += 1
                 prog.addProgress(1)
 
-                vd.sheets[0].ensureLoaded()
+                vd.activeSheet.ensureLoaded()
                 vd.sync()
                 while not vd.delay():
                     pass
@@ -374,15 +383,6 @@ def setLastArgs(vd, args):
 def replayStatus(vd):
         x = options.disp_replay_pause if vd.paused else options.disp_replay_play
         return ' │ %s %s/%s' % (x, vd.currentReplay.cursorRowIndex, len(vd.currentReplay.rows))
-
-
-@VisiData.api
-def setOption(vd, optname, optval, obj=None):
-    if vd.cmdlog:
-        objname = options._opts.objname(obj)
-        vd.cmdlog.addRow(vd.cmdlog.newRow(col=objname, row=optname,
-                    keystrokes='', input=str(optval),
-                    longname='set-option'))
 
 
 @BaseSheet.property

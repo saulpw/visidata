@@ -8,4 +8,4 @@ class FrictionlessIndexSheet(IndexSheet):
         import datapackage
         self.dp = datapackage.Package(self.source.open_text())
         for r in Progress(self.dp.resources):
-            yield vd.openSource(self.source.with_name(r.descriptor['path']), filetype=r.descriptor['format'])
+            yield vd.openSource(self.source.with_name(r.descriptor['path']), filetype=r.descriptor.get('format', 'json'))

@@ -33,6 +33,7 @@ class ColumnsSheet(Sheet):
     columns = [
             ColumnAttr('sheet', type=str),
             ColumnAttr('name', width=options.default_width),
+            ColumnAttr('keycol', type=int, width=0),
             ColumnAttr('width', type=int),
             ColumnAttr('height', type=int),
             ColumnAttr('hoffset', type=int, width=0),
@@ -163,7 +164,7 @@ def allColumnsSheet(vd):
 
 @ColumnsSheet.command('&', 'join-cols', 'add column from concatenating selected source columns')
 def join_cols(sheet):
-    cols = sheet.someSelectedRows
+    cols = sheet.onlySelectedRows
     destSheet = cols[0].sheet
 
     if len(set(c.sheet for c in cols)) > 1:
@@ -186,20 +187,21 @@ BaseSheet.addCommand('zO', 'options-sheet', 'vd.push(sheet.optionsSheet)', 'open
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))', 'open Columns Sheet: edit column properties for current sheet')
 
 # used ColumnsSheet, affecting the 'row' (source column)
-ColumnsSheet.addCommand('g!', 'key-selected', 'for c in someSelectedRows: c.sheet.setKeys([c])', 'toggle selected rows as key columns on source sheet')
-ColumnsSheet.addCommand('gz!', 'key-off-selected', 'for c in someSelectedRows: c.sheet.unsetKeys([c])', 'unset selected rows as key columns on source sheet')
+ColumnsSheet.addCommand('g!', 'key-selected', 'for c in onlySelectedRows: c.sheet.setKeys([c])', 'toggle selected rows as key columns on source sheet')
+ColumnsSheet.addCommand('gz!', 'key-off-selected', 'for c in onlySelectedRows: c.sheet.unsetKeys([c])', 'unset selected rows as key columns on source sheet')
 
-ColumnsSheet.addCommand('g-', 'hide-selected', 'someSelectedRows.hide()', 'hide selected columns on source sheet')
+ColumnsSheet.addCommand('g-', 'hide-selected', 'onlySelectedRows.hide()', 'hide selected columns on source sheet')
 ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.setWidth(c.getMaxWidth(c.sheet.visibleRows))', 'adjust widths of selected source columns')
 
-ColumnsSheet.addCommand('g%', 'type-float-selected', 'someSelectedRows.type=float', 'set type of selected columns to float')
-ColumnsSheet.addCommand('g#', 'type-int-selected', 'someSelectedRows.type=int', 'set type of selected columns to int')
-ColumnsSheet.addCommand('gz#', 'type-len-selected', 'someSelectedRows.type=vlen', 'set type of selected columns to len')
-ColumnsSheet.addCommand('g@', 'type-date-selected', 'someSelectedRows.type=date', 'set type of selected columns to date')
-ColumnsSheet.addCommand('g$', 'type-currency-selected', 'someSelectedRows.type=currency', 'set type of selected columns to currency')
-ColumnsSheet.addCommand('g~', 'type-string-selected', 'someSelectedRows.type=str', 'set type of selected columns to str')
-ColumnsSheet.addCommand('gz~', 'type-any-selected', 'someSelectedRows.type=anytype', 'set type of selected columns to anytype')
+ColumnsSheet.addCommand('g%', 'type-float-selected', 'onlySelectedRows.type=float', 'set type of selected columns to float')
+ColumnsSheet.addCommand('g#', 'type-int-selected', 'onlySelectedRows.type=int', 'set type of selected columns to int')
+ColumnsSheet.addCommand('gz#', 'type-len-selected', 'onlySelectedRows.type=vlen', 'set type of selected columns to len')
+ColumnsSheet.addCommand('g@', 'type-date-selected', 'onlySelectedRows.type=date', 'set type of selected columns to date')
+ColumnsSheet.addCommand('g$', 'type-currency-selected', 'onlySelectedRows.type=currency', 'set type of selected columns to currency')
+ColumnsSheet.addCommand('g~', 'type-string-selected', 'onlySelectedRows.type=str', 'set type of selected columns to str')
+ColumnsSheet.addCommand('gz~', 'type-any-selected', 'onlySelectedRows.type=anytype', 'set type of selected columns to anytype')
 
+OptionsSheet.addCommand('d', 'unset-option', 'options.unset(cursorRow.name, str(source))', 'remove option override for this context')
 OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)', 'edit option at current row')
 OptionsSheet.bindkey('e', 'edit-option')
 OptionsSheet.bindkey(ENTER, 'edit-option')

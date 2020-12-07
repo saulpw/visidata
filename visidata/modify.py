@@ -120,6 +120,7 @@ def deleteBy(sheet, func, commit=False):
             if r is row:
                 sheet.cursorRowIndex = len(sheet.rows)-1
         else:
+            sheet.deleteSourceRow(r)
             ndeleted += 1
 
     if not commit:
@@ -181,25 +182,7 @@ def commitMods(self):
 @Sheet.api
 def commitDeletes(self):
     'Return the number of rows that have been marked for deletion. Delete the rows. Clear the marking.'
-    ndeleted = 0
-
-    dest_row = None     # row to re-place cursor after
-    oldidx = self.cursorRowIndex
-    while oldidx < len(self.rows):
-        if not self.isDeleted(self.rows[oldidx]):
-            dest_row = self.rows[oldidx]
-            break
-        oldidx += 1
-
-    newidx = 0
-    for r in Progress(list(self.rows), gerund='deleting'):
-        if self.isDeleted(self.rows[newidx]):
-            self.deleteSourceRow(newidx)
-            ndeleted += 1
-        else:
-            if r is dest_row:
-                self.cursorRowIndex = newidx
-            newidx += 1
+    ndeleted = self.deleteBy(self.isDeleted, commit=True)
 
     if ndeleted:
         vd.status('deleted %s %s' % (ndeleted, self.rowtype))
@@ -269,17 +252,14 @@ def commit(sheet, *rows):
     cstr = sheet.changestr(adds, mods, deletes)
     path = sheet.source
 
-    if not cstr:
-        vd.fail('no diffs')
-
-    if options.confirm_overwrite:
-        confirm('really %s? ' % cstr)
+    if sheet.options.confirm_overwrite:
+        vd.confirm('really %s? ' % cstr)
 
     sheet.putChanges()
 
 Sheet.addCommand('a', 'add-row', 'addNewRows(1, cursorRowIndex); cursorDown(1)', 'append a blank row')
-Sheet.addCommand('ga', 'add-rows', 'addNewRows(int(input("add rows: ", value=1)), cursorRowIndex)', 'append N blank rows')
-Sheet.addCommand('za', 'addcol-new', 'addColumnAtCursor(SettableColumn()); cursorRight(1)', 'append an empty column')
-Sheet.addCommand('gza', 'addcol-bulk', 'addColumnAtCursor(*(SettableColumn() for c in range(int(input("add columns: ")))))', 'append N empty columns')
+Sheet.addCommand('ga', 'add-rows', 'addNewRows(int(input("add rows: ", value=1)), cursorRowIndex); cursorDown(1)', 'append N blank rows')
+Sheet.addCommand('za', 'addcol-new', 'addColumnAtCursor(SettableColumn(input("column name: "))); cursorRight(1)', 'append an empty column')
+Sheet.addCommand('gza', 'addcol-bulk', 'addColumnAtCursor(*(SettableColumn() for c in range(int(input("add columns: "))))); cursorRight(1)', 'append N empty columns')
 
 Sheet.addCommand('z^S', 'commit-sheet', 'commit()')

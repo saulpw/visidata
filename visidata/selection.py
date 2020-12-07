@@ -1,5 +1,6 @@
 from visidata import vd, Sheet, Progress, option, asyncthread, options, rotateRange, Fanout, undoAttrCopyFunc, copy
 option('bulk_select_clear', False, 'clear selected rows before new bulk selections', replay=True)
+option('some_selected_rows', False, 'if no rows selected, if True, someSelectedRows returns all rows; if False, fails')
 
 Sheet.init('_selectedRows', dict)  # rowid(row) -> row
 
@@ -94,11 +95,23 @@ def selectedRows(self):
     return Fanout((r for r in self.rows if self.rowid(r) in self._selectedRows))
 
 @Sheet.property
-def someSelectedRows(self):
+def onlySelectedRows(self):
     'List of selected rows in sheet order.  Fail if no rows are selected.'
     if self.nSelectedRows == 0:
         vd.fail('no rows selected')
     return self.selectedRows
+
+@Sheet.property
+def someSelectedRows(self):
+    '''Return a list of rows:
+        (a) in batch mode, always return selectedRows
+        (b) in interactive mode, if options.some_selected_rows is True, return selectedRows or all rows if none selected
+        (c) in interactive mode, if options.some_selected_rows is False, return selectedRows or fail if none selected'''
+    if options.batch:
+        return self.selectedRows
+    if options.some_selected_rows:
+        return self.selectedRows or self.rows
+    return self.onlySelectedRows
 
 @Sheet.property
 def nSelectedRows(self):
@@ -141,8 +154,10 @@ Sheet.addCommand('\\', 'unselect-col-regex', 'unselectByIdx(vd.searchRegex(sheet
 Sheet.addCommand('g|', 'select-cols-regex', 'selectByIdx(vd.searchRegex(sheet, regex=input("select regex: ", type="regex", defaultLast=True), columns="visibleCols"))', 'select rows matching regex in any visible column')
 Sheet.addCommand('g\\', 'unselect-cols-regex', 'unselectByIdx(vd.searchRegex(sheet, regex=input("unselect regex: ", type="regex", defaultLast=True), columns="visibleCols"))', 'unselect rows matching regex in any visible column')
 
-Sheet.addCommand(',', 'select-equal-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', 'select rows matching current cell in current column')
-Sheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getTypedValue(r) == c.getTypedValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
+Sheet.addCommand(',', 'select-equal-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorDisplay: c.getDisplayValue(r) == v), progress=False)', 'select rows matching current cell in current column')
+Sheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getDisplayValue(r) == c.getDisplayValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
+Sheet.addCommand('z,', 'select-exact-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', 'select rows matching current cell in current column')
+Sheet.addCommand('gz,', 'select-exact-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getTypedValue(r) == c.getTypedValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
 
 Sheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: "); select(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalExpr(expr, r)), progress=False)', 'select rows matching Python expression in any visible column')
 Sheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalExpr(expr, r)), progress=False)', 'unselect rows matching Python expression in any visible column')

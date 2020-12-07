@@ -34,6 +34,16 @@ The *p* argument is a :ref:`visidata.Path<vd-path>`.
 
 The actual loading happens in the Sheet.  An existing :ref:`sheet type<sheets>` can be used, or a new sheet type can be created.
 
+If the loader is within a plugin, the ``open_<filetype>`` should be decorated with a ``@VisiData,api`` in order to make them available through the ``vd`` object's scope.
+
+::
+
+    @VisiData.api
+    def open_readme(vd, p):
+        return ReadmeSheet(p.name, source=p)
+
+Note, the change in the ``open_<filetype>`` function signature, when decorated.
+
 Step 2. Create a Sheet subclass
 -------------------------------
 

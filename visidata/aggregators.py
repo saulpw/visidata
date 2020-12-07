@@ -1,6 +1,7 @@
 import math
 import functools
 import collections
+from statistics import mode, stdev
 
 from visidata import Progress, Column
 from visidata import *
@@ -96,14 +97,16 @@ def quantiles(q, helpstr):
     return [percentile(round(100*i/q), helpstr) for i in range(1, q)]
 
 vd.aggregator('min', min, 'minimum value')
-vd.aggregator('max', max, 'minimum value')
+vd.aggregator('max', max, 'maximum value')
 vd.aggregator('avg', mean, 'arithmetic mean of values', type=float)
 vd.aggregator('mean', mean, 'arithmetic mean of values', type=float)
 vd.aggregator('median', median, 'median of values')
+vd.aggregator('mode', mode, 'mode of values')
 vd.aggregator('sum', sum, 'sum of values')
 vd.aggregator('distinct', set, 'distinct values', type=vlen)
 vd.aggregator('count', lambda values: sum(1 for v in values), 'number of values', type=int)
 vd.aggregator('list', list, 'list of values')
+vd.aggregator('stdev', stdev, 'standard deviation of values', type=float)
 
 vd.aggregators['q3'] = quantiles(3, 'tertiles (33/66th pctile)')
 vd.aggregators['q4'] = quantiles(4, 'quartiles (25/50/75th pctile)')

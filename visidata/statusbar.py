@@ -1,7 +1,7 @@
 import collections
 import curses
 
-from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, theme
+from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, theme, MissingAttrFormatter
 
 
 __all__ = ['StatusSheet', 'status', 'error', 'fail', 'warning', 'debug']
@@ -39,7 +39,7 @@ def status(self, *args, priority=0):
     if not args:
         return True
 
-    k = (priority, args)
+    k = (priority, tuple(map(str, args)))
     self.statuses[k] = self.statuses.get(k, 0) + 1
 
     if self.statusHistory:
@@ -97,7 +97,7 @@ def leftStatus(sheet):
 def drawLeftStatus(vd, scr, vs):
     'Draw left side of status bar.'
     cattr = colors.get_color('color_status')
-    active = vs is vd.sheets[0]  # active sheet
+    active = (vs is vd.sheets[0]) if vd.sheets else False # active sheet
     if active:
         cattr = update_attr(cattr, colors.color_active_status, 0)
     else:
@@ -153,7 +153,7 @@ def drawLeftStatus(vd, scr, vs):
 @VisiData.api
 def rightStatus(vd, sheet):
     'Return right side of status bar.  Overrideable.'
-    return options.disp_rstatus_fmt.format(sheet=sheet, vd=vd)
+    return MissingAttrFormatter().format(sheet.options.disp_rstatus_fmt, sheet=sheet, vd=vd)
 
 
 @VisiData.api
@@ -166,7 +166,7 @@ def drawRightStatus(vd, scr, vs):
         (vd.rightStatus(vs), 'color_status'),
     ]
 
-    active = vs is vd.sheets[0]  # active sheet
+    active = vs is vd.activeSheet
 
     if active:
         statcolors.append((vd.keystrokes or '', 'color_keystrokes'))
@@ -177,7 +177,7 @@ def drawRightStatus(vd, scr, vs):
             gerund = vs.progresses[0].gerund
         else:
             gerund = 'processing'
-        statcolors.insert(1, ('  %s %s…' % (vs.progressPct, gerund), 'color_status'))
+        statcolors.insert(1, ('  %s %s…' % (vs.progressPct, gerund), 'color_working'))
 
     if active and vd.currentReplay:
         statcolors.insert(0, (vd.replayStatus, 'color_status_replay'))
