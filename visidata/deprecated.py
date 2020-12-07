@@ -86,6 +86,7 @@ def push_pyobj(name, pyobj):
 
 @deprecated('2.1', 'vd.isNumeric instead')
 def isNumeric(col):
+    '.. deprecated:: 2.1'
     return vd.isNumeric(col)
 
 visidata.addGlobals({'load_pyobj': load_pyobj, 'isNumeric': isNumeric})
