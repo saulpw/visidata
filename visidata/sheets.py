@@ -331,7 +331,7 @@ class TableSheet(BaseSheet):
             nrows += h
             i += 1
 
-        self._topRowIndex = newidx-i+2
+        self._topRowIndex = newidx-i+2 if nrows == self.nScreenRows-1 else newidx-self.nScreenRows+1
 
     def __deepcopy__(self, memo):
         'same as __copy__'
