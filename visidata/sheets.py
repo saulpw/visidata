@@ -319,7 +319,7 @@ class TableSheet(BaseSheet):
 
     @property
     def bottomRowIndex(self):
-        return max(self._rowLayout.keys()) if self._rowLayout else self.topRowIndex+self.nScreenRows
+        return max(self._rowLayout.keys()) if self._rowLayout else self.topRowIndex+self.nScreenRows-1
 
     @bottomRowIndex.setter
     def bottomRowIndex(self, newidx):
