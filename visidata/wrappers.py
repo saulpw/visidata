@@ -28,6 +28,9 @@ class TypedWrapper:
     def __bool__(self):
         return False
 
+    def __len__(self):
+        return 0
+
     def __str__(self):
         return '%s(%s)' % (self.type.__name__, ','.join(str(x) for x in self.args))
 
