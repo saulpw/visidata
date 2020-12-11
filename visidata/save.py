@@ -68,6 +68,8 @@ def itervals(sheet, *cols, format=False):
 @Sheet.api
 def getDefaultSaveName(sheet):
     src = getattr(sheet, 'source', None)
+    if src.scheme:
+        return src.name + src.suffix
     if isinstance(src, Path):
         return str(src)
     else:
