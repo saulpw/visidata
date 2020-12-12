@@ -954,7 +954,7 @@ class SheetsSheet(IndexSheet):
     columns = [
         ColumnAttr('name'),
         ColumnAttr('type', '__class__.__name__'),
-        ColumnAttr('shortcut'),
+        Column('shortcut', getter=lambda c,r: getattr(r, 'shortcut'), setter=lambda c,r,v: setattr(r, '_shortcut', v)),
         ColumnAttr('nRows', type=int),
         ColumnAttr('nCols', type=int),
         ColumnAttr('nVisibleCols', type=int),
