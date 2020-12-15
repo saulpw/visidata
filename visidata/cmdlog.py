@@ -333,6 +333,8 @@ def replay_sync(vd, cmdlog, live=False):
                     return
 
                 vd.statuses.clear()
+                vd.activeSheet.ensureLoaded()
+                vd.sync()
                 try:
                     if vd.replayOne(cmdlog.cursorRow):
                         vd.replay_cancel()
@@ -346,8 +348,6 @@ def replay_sync(vd, cmdlog, live=False):
                 cmdlog.cursorRowIndex += 1
                 prog.addProgress(1)
 
-                vd.activeSheet.ensureLoaded()
-                vd.sync()
                 while not vd.delay():
                     pass
 
