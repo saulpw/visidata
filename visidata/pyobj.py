@@ -152,10 +152,10 @@ def SheetList(*names, **kwargs):
         vd.status('no content in %s' % names)
         return
 
-    if isinstance(src, dict):
+    if isinstance(src[0], dict):
         return ListOfDictSheet(*names, **kwargs)
-    elif isinstance(src, tuple):
-        if getattr(src, '_fields', None):  # looks like a namedtuple
+    elif isinstance(src[0], tuple):
+        if getattr(src[0], '_fields', None):  # looks like a namedtuple
             return ListOfNamedTupleSheet(*names, **kwargs)
 
     # simple list
