@@ -147,7 +147,7 @@ class _CommandLog:
             self.afterExecSheet(sheet, False, '')
 
         colname, rowname, sheetname = '', '', None
-        if sheet and not (cmd.longname.startswith('open-') and cmd.longname != 'open-row'):
+        if sheet and not (cmd.longname.startswith('open-') and not cmd.longname in ('open-row', 'open-cell')):
             sheetname = sheet
 
             contains = lambda s, *substrs: any((a in s) for a in substrs)
