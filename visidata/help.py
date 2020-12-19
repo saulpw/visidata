@@ -36,7 +36,7 @@ class HelpSheet(MetaSheet):
         self.revbinds = {}  # [longname] -> keystrokes
         itbindings = vd.bindkeys.iterall()
         for (keystrokes, _), longname in itbindings:
-            if (keystrokes not in self.revbinds) and ('-' not in keystrokes or keystrokes[-1] == '-'):
+            if (keystrokes not in self.revbinds) and not vd.isLongname(keystrokes):
                 self.revbinds[longname] = keystrokes
 
 
