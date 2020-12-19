@@ -226,6 +226,11 @@ def sheet(self):
     'the top sheet on the stack'
     return self.sheets[0] if self.sheets else None
 
+@VisiData.api
+def isLongname(self, ks):
+    'Return True if *ks* is a longname.'
+    return ('-' in ks) and (ks[-1] != '-')
+
 
 @VisiData.api
 def getSheet(vd, sheetname):
