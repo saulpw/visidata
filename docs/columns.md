@@ -203,10 +203,13 @@ These variables and functions are available in the scope of an expression:
 - **`sheet`**: the current sheet (a TableSheet object)
 - **`col`**: the current column (as a Column object; use for Column metadata)
 - **`row`**: the current row (a Python object of the internal rowtype)
+- **curcol**: evaluate to the typed value of this row in the column that the cursor was on at the time that the expression column was added.
+- **cursorCol**: evaluate to the typed value of this row for the column the cursor is on. Changes as the cursor moves for `=`. Uses the column from the time the calculation was made for `g=`, `gz=`, and `z=`.
 
 Additional attributes can be added to sheets and columns.
 
-`col` deliberately returns a Column object, but any other Column object is interpreted as the value within that column for the same row.
+`col` deliberately returns a Column object, but any other Column object is interpreted as the value within that column for the same row. For example, both `curcol` and `cursorcol` return values, not the object itself.
+
 
 For example, this customizes addcol-expr to set the `curcol` attribute on the new ExprColumn to a snapshot of the current cursor column (at the time the expression column is added):
 
@@ -234,6 +237,19 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 1. Type `=` followed by `Year + '-' + Month + '-' + Day`.
 2. Set the type of the new derived column by pressing `@` (date).
 3. Type `^` followed by `Date` to rename the column to **Date**.
+
+**Question** I have a dataset with **Date** column that is missing a prefix of '2020-'. How do I add it to the **Date** column?
+
+When using `=`, and wanting to reference the current column, we recommend using `curcol`. When using `g=`, `gz=`, and `z=`, we recommend cursorCol. `=`, unlike the others, is dynamic and changes with adjustment of underlying values, which means it will change along with the movement of the cursor (tracked by `cursorCol`). `curcol` is a special attribute of a new **ExprColumn**, which remembers the cursorCol at the time of creation.
+
+1. Move the cursor to **Date**.
+2. Type `g=` followed by *f"2020-{cursorCol}"*.
+
+**Question** I have a dataset with **file names**. How do I create a new column with the **file names** lower cased?
+
+1. Move the cursor to **file names** column.
+2. Type `=` followed by **curcol.casefold()**.
+3. Move to the newly created column, and rename it with `^`, followed by the desired name.
 
 ---
 

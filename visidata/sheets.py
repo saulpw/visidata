@@ -99,16 +99,20 @@ class LazyComputeRow:
         self.row = row
         self.col = col
         self.sheet = sheet
-        if not hasattr(self.sheet, '_lcm'):
-            self.sheet._lcm = LazyChainMap(sheet, vd, col)
-        else:
-            self.sheet._lcm.clear()  # reset locals on lcm
-
         self._usedcols = set()
         self._keys = [c.name for c in self.sheet.columns]
 
+        self._lcm.clear()  # reset locals on lcm
+
+    @property
+    def _lcm(self):
+        lcmobj = self.col or self.sheet
+        if not hasattr(lcmobj, '_lcm'):
+            lcmobj._lcm = LazyChainMap(self.sheet, vd, self.col)
+        return lcmobj._lcm
+
     def keys(self):
-        return self._keys + self.sheet._lcm.keys() + ['row', 'sheet', 'col']
+        return self._keys + self._lcm.keys() + ['row', 'sheet', 'col']
 
     def __str__(self):
         return str(self.as_dict())
@@ -129,7 +133,7 @@ class LazyComputeRow:
 
         except ValueError:
             try:
-                c = self.sheet._lcm[colid]
+                c = self._lcm[colid]
             except (KeyError, AttributeError):
                 if colid == 'sheet': return self.sheet
                 elif colid == 'row': c = self.row
