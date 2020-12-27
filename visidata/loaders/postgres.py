@@ -112,7 +112,11 @@ class PgTablesSheet(Sheet):
 class PgTable(Sheet):
     @asyncthread
     def reload(self):
-        with self.sql.cur("SELECT * FROM " + self.source) as cur:
+        if self.options.postgres_schema:
+            source = f"{self.options.postgres_schema}.{self.source}"
+        else:
+            source = self.source
+        with self.sql.cur(f"SELECT * FROM {source}") as cur:
             self.rows = []
             r = cur.fetchone()
             if r:
