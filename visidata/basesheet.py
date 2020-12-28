@@ -229,7 +229,7 @@ def sheet(self):
 @VisiData.api
 def isLongname(self, ks):
     'Return True if *ks* is a longname.'
-    return ('-' in ks) and (ks[-1] != '-')
+    return ('-' in ks) and (ks[-1] != '-') or (len(ks) > 3 and ks.islower())
 
 
 @VisiData.api
