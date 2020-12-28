@@ -65,6 +65,23 @@ The following example uses the file [sample.tsv](https://raw.githubusercontent.c
 
 ---
 
+## How to select rows where the current column is not null?
+
+'Null' cells, by default, are cells which contain `None`. This can be changed with `options.null_value`. Null cells can be set with `zd` (set current cell to `None`) or `gzd` (set selected rows in current column to `None`). Null cells are distinguished with a yellow ∅' symbol on the right hand corner. They are distinct from empty cells (which are `''` in columns of string type.)
+
+1. Type `|` followed by *.* to select all rows with empty and null cells in the current column.
+
+---
+
+## How to select rows where the current column is null?
+
+There are several different options:
+
+- Move to an empty or null cell in the column of interest and press `,` to select all empty cells in that column.
+- Open a **DescribeSheet** for the current sheet with `Shift+I`. Move to the **nulls** column, and then move to the row which references the source column of interest. Type `zd` to select all null rows for that column.
+- For non-numerical columns `z|` followed by **not ColumnName**, will select all empty cells for that column. For numerical columns it will also select cells with `0`.
+---
+
 ## How to move, copy and remove rows
 
 Command(s)         Operation
