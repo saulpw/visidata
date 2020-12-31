@@ -47,8 +47,9 @@ def sortkey(self, r, prog=None):
         val = col.getTypedValue(r)
         ret.append(Reversor(val) if reverse else val)
 
-        if prog:
-            prog.addProgress(1)
+    if prog:
+        prog.addProgress(1)
+
     return ret
 
 @Sheet.api
