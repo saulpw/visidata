@@ -1,5 +1,24 @@
 # VisiData version history
 
+# v2.1.1
+
+    - [macros] allow macro interfaces to be longnames (thanks @frosencrantz #787)
+    - [save] better default save filename for url sheets (thanks @geekscrapy #824)
+
+## Bugfixes
+    - [cmdlog] record column, sheet, and row info for open-cell
+    - [expr-col] `curcol` now works for multiple invocations (thanks @geekscrapy #659)
+    - [loaders postgres] account for postgres_schema when rendering Postgres tables (thanks @jdormit for PR #852)
+    - [loaders url] fail unknown URL scheme (thanks @geekscrapy for PR #84)
+    - [pyobj] fix Pyobj Sheets for lists (thanks @brookskindle #843)
+    - [pipe] handle broken pipes gracefully (thanks @robdmc #851)
+    - [scroll] fix issue with jagged scrolling down (thanks @uoee #832)
+    - [sort] fix bug where total progress in sorting is (100 * # of columns to sort) (thanks @cwarden)
+
+## api
+    - format_field formats int(0) and float(0.0) as "0" (thanks @geekscrapy for PR #821)
+    - add TypedWrapper.__len__ (thanks @geekscrapy)
+
 # v2.1 (2020-12-06)
 
     - [add] add bulk rows and cols leave cursor on first added (like add singles)
