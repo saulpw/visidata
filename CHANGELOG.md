@@ -1,6 +1,6 @@
 # VisiData version history
 
-# v2.1.1
+# v2.1.1 (2021-01-03)
 
     - [macros] allow macro interfaces to be longnames (thanks @frosencrantz #787)
     - [save] better default save filename for url sheets (thanks @geekscrapy #824)
