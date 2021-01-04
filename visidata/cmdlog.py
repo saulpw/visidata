@@ -281,12 +281,13 @@ def activeSheet(vd):
 def replayOne(vd, r):
         'Replay the command in one given row.'
         vd.currentReplayRow = r
-        if r.sheet:
+        longname = getattr(r, 'longname', None)
+
+        if r.sheet and not (r.sheet == 'override' and longname in ['set-option', 'unset-option']):
             vs = vd.getSheet(r.sheet) or vd.error('no sheet named %s' % r.sheet)
         else:
             vs = None
 
-        longname = getattr(r, 'longname', None)
         if longname in ['set-option', 'unset-option']:
             try:
                 context = vs if r.sheet and vs else vd
