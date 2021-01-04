@@ -7,6 +7,7 @@
 
 ## Bugfixes
     - [cmdlog] record column, sheet, and row info for open-cell
+    - [cmdlog] catch case of 'override' sheet for set-option
     - [expr-col] `curcol` now works for multiple invocations (thanks @geekscrapy #659)
     - [loaders postgres] account for postgres_schema when rendering Postgres tables (thanks @jdormit for PR #852)
     - [loaders url] fail unknown URL scheme (thanks @geekscrapy for PR #84)
