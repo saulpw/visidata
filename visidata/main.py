@@ -2,7 +2,7 @@
 # Usage: $0 [<options>] [<input> ...]
 #        $0 [<options>] --play <cmdlog> [--batch] [-w <waitsecs>] [-o <output>] [field=value ...]
 
-__version__ = '2.1'
+__version__ = '2.1.1'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
 from copy import copy
@@ -297,6 +297,8 @@ def vd_cli():
     rc = -1
     try:
         rc = main_vd()
+    except BrokenPipeError:
+        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno()) # handle broken pipe gracefully
     except visidata.ExpectedException as e:
         print('Error: ' + str(e))
     except FileNotFoundError as e:

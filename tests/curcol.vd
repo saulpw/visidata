@@ -1,0 +1,6 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.tsv	o	
+sample	Region		addcol-expr	curcol.casefold()	=	create new column from Python expression, with column names as variables
+sample	Item		addcol-expr	curcol.casefold()	=	create new column from Python expression, with column names as variables
+sample	curcol.casefold()		rename-col	Region_col	^	edit name of current column
+sample	curcol.casefold()		rename-col	Item_col	^	edit name of current column

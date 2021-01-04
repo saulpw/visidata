@@ -868,7 +868,7 @@ SUPPORTED SOURCES
 
         sqlite
            May include multiple tables. The initial sheet is the table
-           directory; Enter loaders the entrie table into memory. z^S saves
+           directory; Enter loads the entire table into memory. z^S saves
            modifications to source.
 
      URL schemes are also supported:

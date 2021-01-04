@@ -37,6 +37,8 @@
     * How to perform operations on a subset of rows
     * How to filter rows
     * How to filter a random subset of rows
+    * How to select rows where the current column is not null
+    * How to select rows where the current column is null
     * How to move, copy and remove rows
     * How to sort rows
 * [Columns](/docs/columns)

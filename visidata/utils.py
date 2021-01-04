@@ -110,6 +110,8 @@ class MissingAttrFormatter(string.Formatter):
 
     def format_field(self, value, format_spec):
         # value is missing
-        if not value:
+        if value is None:
             return ''
+        elif not value:
+            return str(value)
         return super().format_field(value, format_spec)
