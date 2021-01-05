@@ -111,21 +111,23 @@ git tag v#.#.#
 git push --tags
 ```
 
-15. Write up the release notes and add it to `www/releases.md`
+15. Write up the release notes and add it to `www/releases.md`. Add it to index.md.
 
 16. Upload new motd
 
-17. Run dev/mkwww.sh to rebuild the website and deploy with dev/deploy_www.sh
+17. Update the website by pushing to master.
 
 18. Comb through issues and close the ones that have been solved, referencing the version number
 
-19. Post github release notes on tinyletter.
+19. Post github release notes on patreon.
 
 20. Update the other distributions.
 
 # conda
 
-1. Fork https://github.com/conda-forge/visidata-feedstock
+Registry: https://github.com/conda-forge/visidata-feedstock/
+
+1. Fork https://github.com/conda-forge/visidata-feedstock. Open the recipe/meta.yaml.
 
 2. Update the VisiData version and sha256.
 
@@ -135,44 +137,52 @@ git push --tags
 
 5. Comment `@conda-forge-admin, please rerender` in the PR.
 
+6. Merge the PR, when everything is green.
+
 
 # Homebrew
 
-1. Update the link in url to the new visidata tar.gz file.
-2. Download the tarfile and obtain its new sha256
-```
-shasum -a 256
-```
-3. Check each dependency and see if it has been updated. If so, update the url and sha256 for the newest version.
-4. Install visidata using `pip3 install visidata --upgrade` and note down all of the new dependencies. 
-5. Obtain their urls and sha256 and add them to the formula
-6. Change their urls from `pypi.python.org` to `files.pythonhosted.org`.
-7. Test the formula with `brew install --build-from-source visidata`. Fix as needed.
-8. Audit the formula with `brew audit --new-formula visidata`
-9. Add and commit the formula.
+Registry: https://github.com/saulpw/homebrew-vd
+
+1. Open the Formula/visidata.rb file. Update the link in url to the new visidata tar.gz file.
+2. Update the sha256 and version in visidata.rb. Update the version in README.md.
+3. For major version ships, check each dependency and see if it has been updated. If so, update the url and sha256 for the newest version.
+4. On a mac, test the formula with `brew install --build-from-source visidata`. Fix as needed.
+5. Audit the formula with `brew audit --new-formula visidata`
+6. Add and commit the formula.
 
 ## Debian
-1. Obtain the visidata tar.gz file from pypi
+1. Download the visidata tar.gz file from pypi
 2. tar -xzmf visidata.tar.gz
 3. cp visidata.ver.tar.gz visidata_ver.orig.tar.gz
-4. cd visidata/
-5. Place there the contents of the debian directory from github.com/saulpw/visidata
+4. cd visidata-ver/
+5. Place there the contents of the debian directory from github.com/saulpw/visidata/dev/debian/
 6. Update changelog
 ```
-dch -v version-revision
+dch -v new_version
 ```
-7. Run debuild. Fix errors as they come up
+
+where new_version = "$version"-1
+
+Edit as necessary. I usually set stability to unstable, and urgency to low, and add a small changelog.
+7. Run debuild. Fix errors as they come up.
 8. If a package fails to import a module, it must be added to the build dependencies as python3-modules
 9. cd ..
-10. Sign the changes files
+10. If unsigned by debuild, sign the changes files
 ```
 debsign -k keycode visidata_ver.changes
 ```
-11. Upload to debian mentors
+
+anjakefala has the key and password.
+11. Upload to debian mentors and contact the mentor, [Martin](https://qa.debian.org/developer.php?email=debacle%40debian.org).
 ```
 dput mentors visidata_ver.changes
 ```
 
+12. Copy the fresh contents of the debian folder back into visidata/dev/debian.
+
 ## deb-vd
-9. Enter saulpw/deb-vd.
-10. Run the command reprepro includedeb sid new-vd.deb
+Private registry: https://github.com/saulpw/deb-vd
+1. Enter saulpw/deb-vd.
+2. Run the command reprepro includedeb sid new-vd.deb
+3. Update the README.md with the new version, commit *all* the changes and push to master.
