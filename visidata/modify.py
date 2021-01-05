@@ -126,7 +126,8 @@ def deleteBy(sheet, func, commit=False):
     if not commit:
         vd.addUndo(setattr, sheet, 'rows', oldrows)
 
-    vd.status('deleted %s %s' % (ndeleted, sheet.rowtype))
+    if ndeleted:
+        vd.status('deleted %s %s' % (ndeleted, sheet.rowtype))
 
     return ndeleted
 
