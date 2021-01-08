@@ -1,5 +1,7 @@
+import collections
+
 from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENTER, asyncthread, option, Sheet, IndexSheet
-from visidata import CellColorizer, RowColorizer
+from visidata import CellColorizer, RowColorizer, JsonLinesSheet, AttrDict
 from visidata import ColumnAttr, ColumnEnum, ColumnItem
 from visidata import TsvSheet, Path, Option
 from visidata import undoAttrFunc, VisiData, vlen
@@ -117,6 +119,57 @@ class OptionsSheet(Sheet):
         self.columns[1].name = 'global_value' if self.source == 'override' else 'sheet_value'
 
 
+vd._lastInputs = collections.defaultdict(dict)  # [input_type] -> {'input': anything}
+
+class LastInputsSheet(JsonLinesSheet):
+    columns = [
+        ColumnItem('type'),
+        ColumnItem('input'),
+    ]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.colnames = {col.name:col for col in self.columns}
+
+    def addRow(self, row):
+        'Update lastInputs before adding row.'
+        row = AttrDict(row)
+        vd._lastInputs[row.type][row.input] = 1
+        return super().addRow(row)
+
+    def appendRow(self, row):
+        'Append *row* (AttrDict with *type* and *input*) directly to source.'
+        hist = self.history(row.type)
+        if hist and hist[-1] == row.input:
+            return
+
+        self.addRow(row)
+
+        if self.source:
+            with self.source.open_text(mode='a') as fp:
+                import json
+                fp.write(json.dumps(row) + '\n')
+
+    def history(self, t):
+        'Return list of inputs in category *t*, with last element being the most recently added.'
+        return list(vd._lastInputs[t].keys())
+
+
+@VisiData.cached_property
+def lastInputsSheet(vd):
+    name = options.input_history
+    if not name:
+        return LastInputsSheet('last_inputs', source=None, rows=[])
+
+    p = Path(options.visidata_dir)/f'{options.input_history}.jsonl'
+    vs = LastInputsSheet(name, source=p)
+    try:
+        vs.reload.__wrapped__(vs)
+    except FileNotFoundError:
+        pass
+
+    return vs
+
+
 class VisiDataSheet(IndexSheet):
     rowtype = 'metasheets'
     precious = False
@@ -183,6 +236,7 @@ globalCommand('O', 'options-global', 'vd.push(vd.globalOptionsSheet)', 'open Opt
 
 BaseSheet.addCommand('V', 'open-vd', 'vd.push(vd.vdmenu)', 'open VisiData menu: browse list of core sheets')
 BaseSheet.addCommand('zO', 'options-sheet', 'vd.push(sheet.optionsSheet)', 'open Options Sheet: edit sheet options (apply to current sheet only)')
+BaseSheet.addCommand(None, 'open-inputs', 'vd.push(lastInputsSheet)', '')
 
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))', 'open Columns Sheet: edit column properties for current sheet')
 
