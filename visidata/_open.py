@@ -38,8 +38,9 @@ def _completeFilename(val, state):
 
 
 @VisiData.api
-def openPath(vd, p, filetype=None):
-    'Call ``open_<filetype>(p)`` or ``openurl_<p.scheme>(p, filetype)``.  Return constructed but unloaded sheet of appropriate type.'
+def openPath(vd, p, filetype=None, create=False):
+    '''Call ``open_<filetype>(p)`` or ``openurl_<p.scheme>(p, filetype)``.  Return constructed but unloaded sheet of appropriate type.
+    If True, *create* will return a new, blank **Sheet** if file does not exist.'''
     if p.scheme and not p.fp: # isinstance(p, UrlPath):
         openfunc = 'openurl_' + p.scheme
         try:
@@ -54,6 +55,8 @@ def openPath(vd, p, filetype=None):
             filetype = p.ext or options.filetype or 'txt'
 
     if not p.exists():
+        if not create:
+            return None
         vd.warning('%s does not exist, creating new sheet' % p)
         return vd.newSheet(p.name, 1, source=p)
 
@@ -70,8 +73,9 @@ def openPath(vd, p, filetype=None):
 
 
 @VisiData.global_api
-def openSource(vd, p, filetype=None, **kwargs):
-    'Return unloaded sheet object for *p* opened as the given *filetype* and with *kwargs* as option overrides. *p* can be a Path or a string (filename, url, or "-" for stdin).'
+def openSource(vd, p, filetype=None, create=False, **kwargs):
+    '''Return unloaded sheet object for *p* opened as the given *filetype* and with *kwargs* as option overrides. *p* can be a Path or a string (filename, url, or "-" for stdin).
+    when true, *create* will return a blank sheet, if file does not exist.'''
     if not filetype:
         filetype = options.filetype
 
@@ -82,9 +86,9 @@ def openSource(vd, p, filetype=None, **kwargs):
         elif p == '-':
             vs = vd.openPath(Path('-', fp=vd._stdin), filetype=filetype)
         else:
-            vs = vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
+            vs = vd.openPath(Path(p), filetype=filetype, create=create)  # convert to Path and recurse
     else:
-        vs = vs or vd.openPath(p, filetype=filetype)
+        vs = vs or vd.openPath(p, filetype=filetype, create=create)
 
     for optname, optval in kwargs.items():
         vs.options[optname] = optval
@@ -113,4 +117,4 @@ def loadInternalSheet(vd, cls, p, **kwargs):
     return vs
 
 
-BaseSheet.addCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: ")))', 'open input in VisiData')
+BaseSheet.addCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: "), create=True))', 'open input in VisiData')
