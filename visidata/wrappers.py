@@ -51,6 +51,10 @@ class TypedWrapper:
         if isinstance(x, TypedWrapper):
             return self.type == x.type and self.val == x.val
 
+    def __iter__(self):
+        return self
+    def __next__(self):
+        raise StopIteration
 
 class TypedExceptionWrapper(TypedWrapper):
     def __init__(self, func, *args, exception=None):
