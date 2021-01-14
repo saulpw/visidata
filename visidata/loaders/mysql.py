@@ -83,7 +83,8 @@ class MyTablesSheet(Sheet):
                         table_name
                 ) as column_count
             where
-                t.table_name = column_count.table_name;
+                t.table_name = column_count.table_name
+                AND t.table_schema = '{self.schema}';
         '''
 
         with self.sql.cur(qstr) as cur:
