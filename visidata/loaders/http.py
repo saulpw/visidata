@@ -1,8 +1,10 @@
 from visidata import Path, RepeatFile, options, vd
 
 content_filetypes = {
-    'tab-separated-values': 'tsv'  # thanks @lindner
+    'tab-separated-values': 'tsv'
 }
+
+vd.option('http_max_next', 0, 'max next.url pages to follow in http response') #848
 
 
 def openurl_http(path, filetype=None):
@@ -11,15 +13,15 @@ def openurl_http(path, filetype=None):
     response = requests.get(path.given, stream=True)
     response.raise_for_status()
 
-    # if filetype not given, auto-detect with hacky mime-type parse
     if not filetype:
+        # try auto-detect from extension
         ext = path.suffix[1:].lower()
         openfunc = vd.getGlobals().get(f'open_{ext}')
 
         if openfunc:
             filetype = ext
-
         else:
+            # if extension unknown, fallback to mime-type
             contenttype = response.headers['content-type']
             subtype = contenttype.split(';')[0].split('/')[-1]
             filetype = content_filetypes.get(subtype, subtype)
@@ -32,17 +34,28 @@ def openurl_http(path, filetype=None):
         response.encoding = options.encoding
 
     # Automatically paginate if a 'next' URL is given
-    def _iter_lines(path=path, response=response):
+    def _iter_lines(path=path, response=response, max_next=options.http_max_next):
+        path.responses = []
+        n = 0
         while response:
+            path.responses.append(response)
             yield from response.iter_lines(decode_unicode=True)
 
             src = response.links.get('next', {}).get('url', None)
-            response = requests.get(src, stream=True) if src else None
+            if not src:
+                break
 
-    # create resettable iterator over contents
-    fp = RepeatFile(iter_lines=_iter_lines())
+            n += 1
+            if n > max_next:
+                vd.warning(f'stopping at max {max_next} pages')
+                break
 
-    # call open_<filetype> with a usable Path
-    return vd.openSource(Path(path.given, fp=fp), filetype=filetype)
+            vd.status(f'fetching next page from {src}')
+            response = requests.get(src, stream=True)
+
+    # add resettable iterator over contents as an already-open fp
+    path.fp = RepeatFile(iter_lines=_iter_lines())
+
+    return vd.openSource(path, filetype=filetype)
 
 openurl_https = openurl_http
