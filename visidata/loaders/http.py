@@ -9,6 +9,7 @@ def openurl_http(path, filetype=None):
     import requests
 
     response = requests.get(path.given, stream=True)
+    response.raise_for_status()
 
     # if filetype not given, auto-detect with hacky mime-type parse
     if not filetype:
