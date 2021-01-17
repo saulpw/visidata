@@ -98,7 +98,7 @@ def main_vd():
     i=1
     current_args = {}
     global_args = {}
-    flGlobal = False
+    flGlobal = True
     optsdone = False
 
     while i < len(sys.argv):
@@ -119,7 +119,9 @@ def main_vd():
             curses.wrapper(lambda scr: vd.openManPage())
             return 0
         elif arg in ['-g', '--global']:
-            flGlobal = not flGlobal  # can toggle within the same command
+            flGlobal = True
+        elif arg in ['-n', '--nonglobal']:
+            flGlobal = False
         elif arg[0] == '-':
             optname = arg.lstrip('-')
             optval = None
