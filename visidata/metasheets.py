@@ -254,6 +254,8 @@ ColumnsSheet.addCommand('g@', 'type-date-selected', 'onlySelectedRows.type=date'
 ColumnsSheet.addCommand('g$', 'type-currency-selected', 'onlySelectedRows.type=currency', 'set type of selected columns to currency')
 ColumnsSheet.addCommand('g~', 'type-string-selected', 'onlySelectedRows.type=str', 'set type of selected columns to str')
 ColumnsSheet.addCommand('gz~', 'type-any-selected', 'onlySelectedRows.type=anytype', 'set type of selected columns to anytype')
+ColumnsSheet.addCommand('gz%', 'type-floatsi-selected', 'onlySelectedRows.type=floatsi', 'set type of selected columns to floatsi')
+ColumnsSheet.addCommand('', 'type-floatlocale-selected', 'onlySelectedRows.type=floatlocale', 'set type of selected columns to float using system locale')
 
 OptionsSheet.addCommand('d', 'unset-option', 'options.unset(cursorRow.name, str(source))', 'remove option override for this context')
 OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)', 'edit option at current row')
