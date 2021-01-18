@@ -119,7 +119,7 @@ vdtype(list, '')
 
 @VisiData.api
 def isNumeric(vd, col):
-    return col.type in (int,vlen,float,currency,date,floatsi)
+    return col.type in (int,vlen,float,currency,date,floatsi,floatlocale)
 
 ##
 
@@ -129,6 +129,13 @@ def currency(*args):
     if args and isinstance(args[0], str):
         args = [''.join(ch for ch in args[0] if ch in floatchars)]
     return float(*args)
+
+def floatlocale(*args):
+    'Calculate float() using system locale set in LC_NUMERIC.'
+    if not args:
+        return 0.0
+
+    return locale.atof(*args)
 
 
 class vlen(int):
@@ -195,6 +202,7 @@ class datedelta(datetime.timedelta):
         return self.total_seconds()
 
 vdtype(vlen, '♯', '%.0f')
+vdtype(floatlocale, '%')
 vdtype(date, '@', '', formatter=lambda fmtstr,val: val.strftime(fmtstr or options.disp_date_fmt))
 vdtype(currency, '$')
 vdtype(floatsi, '‱', formatter=SIFormatter)
