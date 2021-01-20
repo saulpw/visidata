@@ -283,7 +283,7 @@ def replayOne(vd, r):
         vd.currentReplayRow = r
         longname = getattr(r, 'longname', None)
 
-        if r.sheet and not (r.sheet == 'override' and longname in ['set-option', 'unset-option']):
+        if r.sheet and longname not in ['set-option', 'unset-option']:
             vs = vd.getSheet(r.sheet) or vd.error('no sheet named %s' % r.sheet)
         else:
             vs = None
