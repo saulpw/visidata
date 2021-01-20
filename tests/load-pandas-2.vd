@@ -1,5 +1,5 @@
 sheet	col	row	longname	input	keystrokes	comment
-	override	filetype	set-option	pandas		
+	global	filetype	set-option	pandas		
 			open-file	sample_data/StatusPR.csv	o	
 StatusPR	Month		select-col-regex	sep	|	select rows matching regex in current column
 StatusPR	Location		unselect-col-regex	puerto	\	unselect rows matching regex in current column
