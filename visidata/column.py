@@ -131,6 +131,15 @@ class Column(Extensible):
     def __deepcopy__(self, memo):
         return self.__copy__()  # no separate deepcopy
 
+    def __getstate__(self):
+        d = {k:getattr(self, k) for k in 'name width height expr keycol fmtstr voffset hoffset aggstr'.split()}
+        d['type'] = self.type.__name__
+        return d
+
+    def __setstate__(self, d):
+        for attr, v in d.items():
+            setattr(self, attr, v)
+
     def recalc(self, sheet=None):
         'Reset column cache, attach column to *sheet*, and reify column name.'
         if self._cachedValues:
@@ -156,6 +165,15 @@ class Column(Extensible):
         self._name = maybe_clean(name, self.sheet)
 
     @property
+    def typestr(self):
+        'Type of this column as string.'
+        return self._type.__name__
+
+    @typestr.setter
+    def typestr(self, v):
+        self.type = vd.getGlobals()[v or 'anytype']
+
+    @property
     def type(self):
         'Type of this column.'
         return self._type
@@ -164,7 +182,12 @@ class Column(Extensible):
     def type(self, t):
         if self._type != t:
             vd.addUndo(setattr, self, '_type', self.type)
-        self._type = t
+        if not t:
+            self._type = anytype
+        elif isinstance(t, str):
+            self.typestr = t
+        else:
+            self._type = t
 
     @property
     def width(self):
@@ -501,6 +524,12 @@ class ExprColumn(Column):
         self.maxtime = max(self.maxtime, t1-t0)
         self.totaltime += (t1-t0)
         return r
+
+    def putValue(self, row, val):
+        a = self.getDisplayValue(row)
+        b = self.format(self.type(val))
+        if a != b:
+            vd.warning('%s calced %s not %s' % (self.name, a, b))
 
     @property
     def expr(self):

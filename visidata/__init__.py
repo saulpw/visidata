@@ -133,6 +133,7 @@ from .loaders.vcf import *
 from .loaders.texttables import *
 from .loaders.rec import *
 from .loaders.eml import *
+from .loaders.vds import *
 
 from .plugins import *
 
