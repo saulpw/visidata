@@ -2,7 +2,7 @@ import collections
 
 from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENTER, asyncthread, option, Sheet, IndexSheet
 from visidata import CellColorizer, RowColorizer, JsonLinesSheet, AttrDict
-from visidata import ColumnAttr, ColumnEnum, ColumnItem
+from visidata import ColumnAttr, ColumnItem
 from visidata import TsvSheet, Path, Option
 from visidata import undoAttrFunc, VisiData, vlen
 

@@ -36,7 +36,6 @@ __all__ = [
     'SubColumnFunc',
     'SubColumnItem',
     'SubColumnAttr',
-    'ColumnEnum', 'EnumColumn',
     'ColumnExpr', 'ExprColumn',
     'DisplayWrapper',
 ]
@@ -490,23 +489,6 @@ def SubColumnItem(idx, c, **kwargs):
         kwargs['name'] = c.name
     return SubColumnFunc(origcol=c, subfunc=getitemdef, expr=idx, **kwargs)
 
-class EnumColumn(Column):
-    'types and aggregators. row.<name> should be kept to the values in the mapping m, and can be set by the a string key into the mapping.'
-    def __init__(self, name, m, default=None, **kwargs):
-        super().__init__(name, **kwargs)
-        self.mapping = m
-        self.default = default
-
-    def calcValue(self, row):
-        v = getattr(row, self.name, None)
-        return v.__name__ if v else None
-
-    def putValue(self, row, value):
-        if isinstance(value, str):  # first try to get the actual value from the mapping
-            value = self.mapping.get(value, value)
-        setattr(row, self.name, value or self.default)
-
-
 class ExprColumn(Column):
     'Column using *expr* to derive the value from each row.'
     def __init__(self, name, expr=None, **kwargs):
@@ -558,4 +540,3 @@ class SettableColumn(Column):
 ColumnItem = ItemColumn
 ColumnAttr = AttrColumn
 ColumnExpr = ExprColumn
-ColumnEnum = EnumColumn
