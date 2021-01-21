@@ -9,7 +9,7 @@ import visidata
 from visidata import VisiData, BaseSheet, vd
 
 
-# [settingname] -> { objname(Sheet-instance/Sheet-type/'override'/'global'): Option/Command/longname }
+# [settingname] -> { objname(Sheet-instance/Sheet-type/'global'/'default'): Option/Command/longname }
 class SettingsMgr(collections.OrderedDict):
     def __init__(self):
         super().__init__()
@@ -19,7 +19,7 @@ class SettingsMgr(collections.OrderedDict):
         if isinstance(obj, str):
             v = obj
         elif obj is None:
-            v = 'override'
+            v = 'global'
         elif isinstance(obj, BaseSheet):
             v = obj.name
         elif inspect.isclass(obj) and issubclass(obj, BaseSheet):
@@ -34,27 +34,27 @@ class SettingsMgr(collections.OrderedDict):
         'Inverse of objname(obj); returns obj if available'
         return self.allobjs.get(objname)
 
-    def unset(self, k, obj='global'):
+    def unset(self, k, obj='default'):
         'Remove setting for given key in the given context.'
         objstr = self.objname(obj)
         if objstr in self[k]:
             del self[k][objstr]
 
     def set(self, k, v, obj):
-        'obj is a Sheet instance, or a Sheet [sub]class.  obj="override" means override all; obj="global" means last resort.'
+        'obj is a Sheet instance, or a Sheet [sub]class.  obj="global" means override default unless there is a sheet-specific override; obj="default" means last resort.'
         if k not in self:
             self[k] = dict()
         self[k][self.objname(obj)] = v
         return v
 
     def setdefault(self, k, v):
-        return self.set(k, v, 'global')
+        return self.set(k, v, 'default')
 
     def _mappings(self, obj):
         '''Return list of contexts in order to resolve settings. ordering is, from lowest to highest precedence:
 
-        1. "global": default specified in option() definition
-        2. "override": in order of program execution:
+        1. "default": default specified in option() definition
+        2. "global": in order of program execution:
             a. .visidatarc
             b. command-line options, applied on top of the overrides in .visidatarc
             c. at runtime via 'O'ptions meta-sheet
@@ -67,7 +67,7 @@ class SettingsMgr(collections.OrderedDict):
             mappings += [self.objname(obj)]
             mappings += [self.objname(cls) for cls in inspect.getmro(type(obj))]
 
-        mappings += ['override', 'global']
+        mappings += ['global', 'default']
         return mappings
 
     def _get(self, key, obj=None):
@@ -160,7 +160,7 @@ class OptionsObject:
         return self._get(optname, obj).value
 
     def getdefault(self, optname):
-        return self._get(optname, 'global').value
+        return self._get(optname, 'default').value
 
     def getonly(self, optname, obj, default):
         'Return value of option optname as set on obj, or default if not set specifically on obj'
@@ -171,7 +171,7 @@ class OptionsObject:
                 return opt.value
         return default
 
-    def set(self, optname, value, obj='override'):
+    def set(self, optname, value, obj='global'):
         "Override *value* for *optname* in the options context, or in the *obj* context if given."
         opt = self._get(optname)
         if opt:
@@ -188,8 +188,8 @@ class OptionsObject:
             else:
                 value = t(value)
 
-            if curval != value and self._get(optname, 'global').replayable:
-                if obj != 'global' and type(obj) is not type:  # global and class options set on init aren't recorded
+            if curval != value and self._get(optname, 'default').replayable:
+                if obj != 'default' and type(obj) is not type:  # default and class options set on init aren't recorded
                     if vd.cmdlog:
                         objname = self._opts.objname(obj)
                         vd.cmdlog.addRow(vd.cmdlog.newRow(sheet=objname, row=optname,
@@ -214,7 +214,7 @@ class OptionsObject:
         return v
 
     def setdefault(self, optname, value, helpstr):
-        return self._set(optname, value, 'global', helpstr=helpstr)
+        return self._set(optname, value, 'default', helpstr=helpstr)
 
     def getall(self, prefix=''):
         'Return dictionary of all options beginning with `prefix` (with `prefix` removed from the name).'
@@ -343,7 +343,7 @@ def loadConfigFile(fnrc, _globals=None):
 
 
 def addOptions(parser):
-    for optname in options.keys('global'):
+    for optname in options.keys('default'):
         if optname.startswith('color_') or optname.startswith('disp_'):
             continue
         action = 'store_true' if options[optname] is False else 'store'

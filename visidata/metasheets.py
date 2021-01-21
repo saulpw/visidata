@@ -17,7 +17,7 @@ def optionsSheet(sheet):
 
 @VisiData.lazy_property
 def globalOptionsSheet(vd):
-    return OptionsSheet('global_options', source='override')
+    return OptionsSheet('global_options', source='global')
 
 
 class ColumnsSheet(Sheet):
@@ -92,7 +92,7 @@ class OptionsSheet(Sheet):
             setter=lambda col,row,val: options.set(row.name, val, col.sheet.source),
             ),
         Column('default', getter=lambda col,row: options.getdefault(row.name)),
-        Column('description', width=40, getter=lambda col,row: options._get(row.name, 'global').helpstr),
+        Column('description', width=40, getter=lambda col,row: options._get(row.name, 'default').helpstr),
         ColumnAttr('replayable'),
     )
     colorizers = [
@@ -116,7 +116,7 @@ class OptionsSheet(Sheet):
         for k in options.keys():
             opt = options._get(k)
             self.addRow(opt)
-        self.columns[1].name = 'global_value' if self.source == 'override' else 'sheet_value'
+        self.columns[1].name = 'global_value' if self.source == 'global' else 'sheet_value'
 
 
 vd._lastInputs = collections.defaultdict(dict)  # [input_type] -> {'input': anything}
