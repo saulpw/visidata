@@ -1,4 +1,4 @@
-.Dd Dec 5, 2020
+.Dd Jan 21, 2021
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -848,6 +848,8 @@ specify default file type to save as
 filename to save binary profiling data
 .It Sy --min-memory-mb Ns = Ns Ar "int         " No "0"
 minimum memory to continue loading and async processing
+.It Sy --input-history Ns = Ns Ar "str         " No ""
+basename of file to store persistent input history
 .It Sy --encoding Ns = Ns Ar "str              " No "utf-8"
 encoding passed to codecs.open
 .It Sy --encoding-errors Ns = Ns Ar "str       " No "surrogateescape"
@@ -956,6 +958,8 @@ number of rows to check for fixed width columns
 max number of fixed-width columns to create (0 is no max)
 .It Sy --postgres-schema Ns = Ns Ar "str       " No "public"
 The desired schema for the Postgres database
+.It Sy --http-max-next Ns = Ns Ar "int         " No "0"
+max next.url pages to follow in http response
 .It Sy --html-title Ns = Ns Ar "str            " No "<h2>{sheet.name}</h2>"
 table header when saving to html
 .It Sy --pcap-internet Ns = Ns Ar "str         " No "n"

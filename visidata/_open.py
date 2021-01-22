@@ -77,7 +77,7 @@ def openSource(vd, p, filetype=None, create=False, **kwargs):
     '''Return unloaded sheet object for *p* opened as the given *filetype* and with *kwargs* as option overrides. *p* can be a Path or a string (filename, url, or "-" for stdin).
     when true, *create* will return a blank sheet, if file does not exist.'''
     if not filetype:
-        filetype = options.filetype
+        filetype = options.getonly('filetype', 'global', '')
 
     vs = None
     if isinstance(p, str):

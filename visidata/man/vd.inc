@@ -1,4 +1,4 @@
-.Dd Dec 5, 2020
+.Dd Jan 21, 2021
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .

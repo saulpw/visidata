@@ -182,12 +182,7 @@ def main_vd():
     vd.loadConfigAndPlugins(args)
 
     for k, v in global_args.items():
-        options.set(k, v, obj='override')
-
-    for k, v in current_args.items():
-        opt = options._get(k)
-        if opt and opt.sheettype is None:
-            options.set(k, v, obj='override')
+        options.set(k, v, obj='global')
 
     # fetch motd and plugins *after* options parsing/setting
     vd.pluginsSheet.ensureLoaded()
