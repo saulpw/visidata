@@ -557,6 +557,8 @@ COMMANDLINE OPTIONS
      --min-memory-mb=int          0                  minimum memory to con‐
                                                      tinue loading and async
                                                      processing
+     --input-history=str                             basename of file to store
+                                                     persistent input history
      --encoding=str               utf-8              encoding passed to
                                                      codecs.open
      --encoding-errors=str        surrogateescape    encoding_errors passed to
@@ -677,6 +679,8 @@ COMMANDLINE OPTIONS
                                                      no max)
      --postgres-schema=str        public             The desired schema for
                                                      the Postgres database
+     --http-max-next=int          0                  max next.url pages to
+                                                     follow in http response
      --html-title=str             <h2>{sheet.name}</h2>
                                                      table header when saving
                                                      to html
@@ -895,4 +899,4 @@ SUPPORTED OUTPUT FORMATS
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                       Dec 5, 2020                      Linux/MacOS
+Linux/MacOS                      Jan 21, 2021                      Linux/MacOS
