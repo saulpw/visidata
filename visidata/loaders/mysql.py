@@ -1,4 +1,5 @@
 from visidata import *
+from contextlib import contextmanager
 
 __all__ = ['openurl_mysql', 'MyTable', 'MyTablesSheet']
 
@@ -20,36 +21,43 @@ def codeToType(type_code, colname):
 
 
 def openurl_mysql(url, filetype=None):
-    import MySQLdb as mysql
-
     url = urlparse(url.given)
     dbname = url.path[1:]
-    conn = mysql.connect(
-                user=url.username,
-                database=dbname,
-                host=url.hostname,
-                port=url.port or 3306,
-                password=url.password,
-                use_unicode=True,
-                charset='utf8')
-
-    return MyTablesSheet(dbname+"_tables", sql=SQL(conn), schema=dbname)
+    return MyTablesSheet(dbname+"_tables", sql=SQL(url), schema=dbname)
 
 
 class SQL:
-    def __init__(self, conn):
-        self.conn = conn
+    def __init__(self, url):
+        self.url = url
 
+    @contextmanager
     def cur(self, qstr):
-        cur = self.conn.cursor()
-        cur.execute(qstr)
-        return cur
+        import MySQLdb as mysql
+        import MySQLdb.cursors as cursors
+
+        dbname = self.url.path[1:]
+        connection = mysql.connect(
+                    user=self.url.username,
+                    database=self.url.path[1:],
+                    host=self.url.hostname,
+                    port=self.url.port or 3306,
+                    password=self.url.password,
+                    use_unicode=True,
+                    charset='utf8',
+                    cursorclass=cursors.SSCursor) ## if SSCursor is not used mysql will first fetch ALL data, and only then visualize it
+        try:
+            cursor = connection.cursor() # one connection per request as SSCursor only allows to fetch data asynchronously from one query at a time
+            cursor.execute(qstr)
+            with cursor as c:
+                yield c
+        finally:
+            cursor.close()
+            connection.close()
 
     @asyncthread
     def query_async(self, qstr, callback=None):
         with self.cur(qstr) as cur:
             callback(cur)
-            cur.close()
 
 
 def cursorToColumns(cur, sheet):
