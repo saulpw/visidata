@@ -108,6 +108,7 @@ from .loaders.fixed_width import *
 from .loaders.postgres import *
 from .loaders.mysql import *
 from .loaders.shp import *
+from .loaders.geojson import *
 from .loaders.mbtiles import *
 from .loaders.http import *
 from .loaders.html import *
