@@ -96,5 +96,5 @@ def save_geojson(vd, p, vs):
         for chunk in json.JSONEncoder().iterencode(featcoll):
             fp.write(chunk)
 
-ShapeSheet.addCommand('.', 'plot-row', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=[cursorRow], textCol=cursorCol))', 'plot geospatial vector in current row')
-ShapeSheet.addCommand('g.', 'plot-rows', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=rows, textCol=cursorCol))', 'plot all geospatial vectors in current sheet')
+ShapeSheet.addCommand('.', 'plot-row', 'vd.push(ShapeMap(name+"_map", source=sheet, sourceRows=[cursorRow], textCol=cursorCol))', 'plot geospatial vector in current row')
+ShapeSheet.addCommand('g.', 'plot-rows', 'vd.push(ShapeMap(name+"_map", source=sheet, sourceRows=rows, textCol=cursorCol))', 'plot all geospatial vectors in current sheet')
