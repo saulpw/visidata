@@ -41,9 +41,8 @@ class VdsIndexSheet(IndexSheet):
                 if line.startswith('#{'):
                     d = json.loads(line[1:])
                     if 'col' not in d:
-                        vs = VdsSheet(d.pop('name'), columns=[], rows=[], source=self.source, source_fpos=fp.tell())
+                        vs = VdsSheet(d.pop('name'), columns=[], source=self.source, source_fpos=fp.tell())
                         yield vs
-                        vs.reload()
                 line = fp.readline()
 
 

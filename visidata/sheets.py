@@ -21,6 +21,8 @@ option('quitguard', False, 'confirm before quitting last sheet')
 option('debug', False, 'exit on error and display stacktrace')
 option('skip', 0, 'skip N rows before header', replay=True)
 option('header', 1, 'parse first N rows as column names', replay=True)
+option('load_lazy', False, 'load subsheets always (False) or lazily (True)')
+
 theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
 theme('use_default_colors', False, 'curses use default terminal colors')
 
@@ -952,6 +954,11 @@ class IndexSheet(Sheet):
         for vs in self.rows:
             if vs.name == k:
                 return vs
+
+    def addRow(self, sheet):
+        super().addRow(sheet)
+        if not self.options.load_lazy:
+            sheet.ensureLoaded()
 
 
 class SheetsSheet(IndexSheet):
