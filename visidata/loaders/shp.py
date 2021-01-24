@@ -54,11 +54,11 @@ class ShapeMap(InvertedCanvas):
             # color according to key
             k = tuple(col.getValue(row) for col in self.source.keyCols)
 
-            if row.shape.shapeType == 5:
+            if row.shape.shapeType in (5, 15, 25):
                 self.polygon(row.shape.points, self.plotColor(k), row)
-            elif row.shape.shapeType == 3:
+            elif row.shape.shapeType in (3, 13, 23):
                 self.polyline(row.shape.points, self.plotColor(k), row)
-            elif row.shape.shapeType == 1:
+            elif row.shape.shapeType in (1, 11, 21):
                 x, y = row.shape.points[0]
                 self.point(x, y, self.plotColor(k), row)
             else:
