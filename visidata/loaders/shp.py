@@ -52,7 +52,7 @@ class ShapeMap(InvertedCanvas):
 
         for row in Progress(self.sourceRows):
             # color according to key
-            k = tuple(col.getValue(row) for col in self.source.keyCols)
+            k = tuple(col.getValue(row) for col in self.keyCols)
 
             if row.shape.shapeType == 5:
                 self.polygon(row.shape.points, self.plotColor(k), row)
@@ -96,5 +96,5 @@ def save_geojson(vd, p, vs):
         for chunk in json.JSONEncoder().iterencode(featcoll):
             fp.write(chunk)
 
-ShapeSheet.addCommand('.', 'plot-row', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=[cursorRow], textCol=cursorCol))', 'plot geospatial vector in current row')
-ShapeSheet.addCommand('g.', 'plot-rows', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=rows, textCol=cursorCol))', 'plot all geospatial vectors in current sheet')
+ShapeSheet.addCommand('.', 'plot-row', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=[cursorRow], textCol=cursorCol, keyCols=keyCols))', 'plot geospatial vector in current row')
+ShapeSheet.addCommand('g.', 'plot-rows', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=rows, textCol=cursorCol, keyCols=keyCols))', 'plot all geospatial vectors in current sheet')
