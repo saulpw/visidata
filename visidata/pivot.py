@@ -95,7 +95,7 @@ class PivotSheet(Sheet):
         aggcols = {  # [Column] -> list(aggregators)
             sourcecol: sourcecol.aggregators
                 for sourcecol in self.source.visibleCols
-                    if hasattr(sourcecol, 'aggregators')
+                    if sourcecol.aggregators
         } or {  # if pivot given but no aggregators specified
             sourcecol: [vd.aggregators["count"]]
                 for sourcecol in self.pivotCols
