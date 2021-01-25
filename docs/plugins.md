@@ -11,7 +11,7 @@ Plugins are optional Python modules that extend or modify base VisiData's functi
 * [jsvine's repo](https://github.com/jsvine/visidata-plugins)
 * [anjakefala's repo](https://github.com/anjakefala/vd-plugins)
 * [ajkerrigan's repo](https://github.com/ajkerrigan/visidata-plugins)
-* ...and [let us know](https://github.com/saulpw/visidata/issues/new) about yours! Advice for [making plugins](https://github.com/saulpw/visidata/blob/develop/dev/checklists/add-plugin.md).
+* ...and [let us know](https://github.com/saulpw/visidata/issues/new) about yours! Advice for [making plugins](https://visidata.org/docs/api).
 
 # How to use/activate a plugin
 
@@ -34,7 +34,7 @@ To install it
 
 ## From within VisiData
 
-We maintain a list of plugins which can be downloaded and installed from within the application itself. To incorporate a plugin into this list, add it to [plugins.jsonl](https://github.com/saulpw/visidata/blob/develop/plugins/plugins.jsonl), and create a PR off of the `develop` branch.  Advice for [making plugins and adding them to our curated sets](https://github.com/saulpw/visidata/blob/develop/dev/checklists/add-plugin.md).
+We maintain a list of plugins which can be downloaded and installed from within the application itself. To incorporate a plugin into this list, add it to [plugins.jsonl](https://github.com/saulpw/visidata/blob/develop/plugins/plugins.jsonl), and create a PR off of the `develop` branch.
 
 To install a plugin, and its dependencies, from within VisiData:
 
