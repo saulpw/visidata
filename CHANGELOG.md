@@ -26,12 +26,11 @@
 
 ## Loaders
 
-    - [loaders vd] add loader/saver for custom .vds format (VisiData Sheet) to save column properties and data for multiple sheets in one file
+    - [loaders vds] add loader/saver for custom .vds format (VisiData Sheet) to save column properties and data for multiple sheets in one file
     - [ux] autoload all sheets by default; set `options.load_lazy` to disable
         - removes a minor friction with unloaded subsheets
 
     - [loaders http] add `options.http_max_next` to limit api pagination (default 0 - no pagination) (thanks @aborruso #830)
-    - [loaders]  set `options.load_lazy` to disable autoloading all sheets by default
 
 ## Bugfixes and Adjustments
 
@@ -41,8 +40,8 @@
     - [loaders mysql] fix mysql loader duplicating tables for each database (thanks @SuRaMoN #868)
     - [loaders mysql] perform asynchronous data fetch for mysql loader (thanks @SuRaMoN #869)
     - [loaders shp] fix display (thanks @dracos #874)
-    - [replay] do not grab sheetname for `set-option`
-    - [slide] fix column rank assignment when sliding key columns to the right
+    - [replay] fix replaying of .vd with `set-option`
+    - [slide] fix bug when sliding key columns to the left, after sliding them to the right
     - [types] add command `type-floatsi-selected` on **Columns Sheet**
 
     - [expand] errors and nulls can now be expanded with `expand-cols` (thanks @geekscrapy #865)
