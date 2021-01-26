@@ -1,5 +1,57 @@
 # VisiData version history
 
+# v2.2 
+
+    - [expand] errors and nulls can now be expanded with `expand-cols` (thanks @geekscrapy #865)
+    - [loaders http] raise requests.exceptions if http status is not 20x (thanks @geekscrapy #848)
+    - [loaders shp] support more Shapefile types (thanks @dracos #875)
+        - 1x includes Z co-ordinates (ignored), 2x include a user-defined measurement (ignored)
+    - [loaders vd] add custom .vds (VisiData Sheet) format to save sheet/col state for an entire session
+    - [open] if absent, open will get filetype from 'global' `options.filetype` (default by mimetype or from extension), not sheet-specific
+        - to set the filetype for a file locally, set through cli: `vd -f tsv sample.foo`
+        - to set globally, set the sheet to 'global' for `set-option` in the **CommandLog**, or set `options.filetype` in `~/.visidatarc` or do `vd -g -f tsv sample.foo`
+    - [cli options] now global by default; use `-n` to set option as sheet-specific instead
+        - add `-n`/`--nonglobal` to make subsequent CLI options "sheet-specific" (applying only to paths specified directly on the CLI)
+        - keep `-g`/`--global` to make subsequent CLI options "global" (applying to all sheets by default unless overriden)
+        - invert the default: now CLI options are global by default (thus `-g` is a no-op unless preceded by `-n` on the CLI)
+        - `-g` no longer acts as a toggle
+    - [types] add type floatlocale (thanks @Guiriguanche #863)
+        - add commands `type-floatlocale` and `type-floatlocale-selected`
+        - floatlocale column calculated based on LC_NUMERIC system locale setting
+        - calculation is 20x slower than with standard float column
+        - can handle floats with commas as decimals (e.g. '1,1'), if LC_NUMERIC is set to a locale like 'en_DK.UTF-8'
+        - LC_NUMERIC, environment variable, must be set before launching VisiData
+    - [types] add command `type-floatsi-selected` on **Columns Sheet**
+
+
+## options
+    - [fancy chooser] turned off by default
+    - [input] add `options.input_history` (thanks @tsibley and @ajkerrigan #468)
+        - basename of file to store persistent input history (default of `''` means disabled)
+        - caveat: persistent file only read if option given before first input
+    - [load] add `options.load_lazy` to disable autoloading of all sheets (default False, loads all subsheets)
+    - [loaders http] `options.http_max_next` to limit api pagination (default 0 - no pagination) (thanks @aborruso #830)
+
+## Bugfixes
+    - [cli] fail properly if path cannot be opened
+    - [defer] only mention number of deleted rows, if some were deleted
+    - [go-pageup go-pagedown] ensure cursor stays in the same relative positions
+    - [loaders mysql] fix mysql loader duplicating tables for each database (thanks @SuRaMoN #868)
+    - [loaders mysql] perform asynchronous data fetch for mysql loader (thanks @SuRaMoN #869)
+    - [loaders shp] fix display (thanks @dracos #874)
+    - [replay] do not grab sheets for `set-option`; might not be loaded, yet
+    - [slide] fix column rank assignment when sliding key columns to the right
+
+## api
+    - add create arg to `openSource()`, to toggle whether file is created if it does not exist
+    - remove unused `EnumColumns`/`ColumnEnum`
+    - all columns now have an aggregators attr, check for content instead
+    - [settings] 'global' is now 'default', and 'override' is 'global'
+        - 'default' is the default setting within VisiData
+        - 'global' is a user override on that default that applies globally
+        - sheet-specific overrides global and default, for the sheet it is specific to
+        - options set through visidatarc and cli are 'global' unless otherwise specified
+
 # v2.1.1 (2021-01-03)
 
     - [macros] allow macro interfaces to be longnames (thanks @frosencrantz #787)
