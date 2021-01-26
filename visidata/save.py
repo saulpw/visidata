@@ -96,7 +96,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
 
     filetype = givenpath.ext or options.save_filetype
 
-    savefunc = getattr(vd, 'save_' + filetype, None) or vd.fail('no function to save as type %s' % filetype)
+    savefunc = getattr(vsheets[0], 'save_' + filetype, None) or getattr(vd, 'save_' + filetype, None) or vd.fail('no function to save as type %s' % filetype)
 
     if givenpath.exists() and confirm_overwrite:
         confirm("%s already exists. overwrite? " % givenpath.given)
