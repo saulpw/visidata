@@ -168,7 +168,7 @@ def expand_source_rows(source, vd, cursorRow):
     """Support for expanding a row of frequency table to underlying rows"""
     if cursorRow.sourcerows is None:
         vd.error("no source rows")
-    vs = PandasSheet(source.name + "_" + valueNames(cursorRow.discrete_keys, cursorRow.numeric_key), source=cursorRow.sourcerows)
+    vs = PandasSheet(source.name, valueNames(cursorRow.discrete_keys, cursorRow.numeric_key), source=cursorRow.sourcerows)
     vd.push(vs)
 
 PandasSheet.addCommand('F', 'freq-col', 'vd.push(PandasFreqTableSheet(sheet, cursorCol))', 'open Frequency Table grouped on current column, with aggregations of other columns')
