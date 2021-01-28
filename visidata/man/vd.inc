@@ -253,11 +253,11 @@ select/toggle/unselect all rows from cursor to bottom
 .It Ic "z|  z\e\ " Ns Ar expr
 .No select/unselect rows matching Python Ar expr No in any visible column
 .It Ic " \&," Ns " (comma)"
-select rows matching typed value of current cell in current column
+select rows matching display value of current cell in current column
 .It Ic "g\&,"
-select rows matching typed value of current row in all visible columns
+select rows matching display value of current row in all visible columns
 .It Ic "z\&, gz\&,"
-select rows matching display value of current cell/row in current column/all visible columns
+select rows matching typed value of current cell/row in current column/all visible columns
 .
 .El
 .
