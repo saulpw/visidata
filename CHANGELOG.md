@@ -26,8 +26,9 @@
 
 ## Loaders
 
+    - [loaders geojson] add loading and saving support for geojson files (thanks @draco #876)
     - [loaders vds] add loader/saver for custom .vds format (VisiData Sheet) to save column properties and data for multiple sheets in one file
-    - [ux] autoload all sheets by default; set `options.load_lazy` to disable
+    - [ux] autoload all subsheets by default; set `options.load_lazy` to disable
         - removes a minor friction with unloaded subsheets
 
     - [loaders http] add `options.http_max_next` to limit api pagination (default 0 - no pagination) (thanks @aborruso #830)
@@ -39,7 +40,9 @@
     - [go-pageup go-pagedown] ensure cursor stays in the same relative positions
     - [loaders mysql] fix mysql loader duplicating tables for each database (thanks @SuRaMoN #868)
     - [loaders mysql] perform asynchronous data fetch for mysql loader (thanks @SuRaMoN #869)
+    - [loaders pandas] fix empty subsets for dup-selected and frequency table `open-row` (thanks @ajkerrigan #881 #878)
     - [loaders shp] fix display (thanks @dracos #874)
+    - [loaders shp] fix saving to geojson (thanks @dracos #876)
     - [replay] fix replaying of .vd with `set-option`
     - [slide] fix bug when sliding key columns to the left, after sliding them to the right
     - [types] add command `type-floatsi-selected` on **Columns Sheet**
@@ -60,6 +63,8 @@
         - 'global' is a user override on that default that applies globally
         - sheet-specific overrides global and default, for the sheet it is specific to
         - options set through visidatarc and cli are 'global' unless otherwise specified
+    - [save] grab `save_foo` from **SheetType** first
+        - allows overrides of sheet-specific saving
 
 # v2.1.1 (2021-01-03)
 
