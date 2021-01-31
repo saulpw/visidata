@@ -63,7 +63,7 @@
     b. push to testpypi
 
     ```
-    python3 setup.py sdist
+    python3 setup.py sdist bdist_wheel --universal
     twine upload dist/* -r testpypi
     ```
 
