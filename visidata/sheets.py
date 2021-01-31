@@ -21,6 +21,8 @@ option('quitguard', False, 'confirm before quitting last sheet')
 option('debug', False, 'exit on error and display stacktrace')
 option('skip', 0, 'skip N rows before header', replay=True)
 option('header', 1, 'parse first N rows as column names', replay=True)
+option('load_lazy', False, 'load subsheets always (False) or lazily (True)')
+
 theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
 theme('use_default_colors', False, 'curses use default terminal colors')
 
@@ -953,6 +955,11 @@ class IndexSheet(Sheet):
             if vs.name == k:
                 return vs
 
+    def addRow(self, sheet):
+        super().addRow(sheet)
+        if not self.options.load_lazy:
+            sheet.ensureLoaded()
+
 
 class SheetsSheet(IndexSheet):
     columns = [
@@ -1031,7 +1038,7 @@ def sheetsSheet(vd):
 @VisiData.api
 def quit(vd, *sheets):
     'Remove *sheets* from sheets stack, asking for confirmation if options.quitguard set (either global or sheet-specific).'
-    if len(vd.sheets) == len(sheets) and options.getonly('quitguard', 'override', False):
+    if len(vd.sheets) == len(sheets) and options.getonly('quitguard', 'global', False):
         vd.confirm("quit last sheet? ")
     for vs in sheets:
         if options.getonly('quitguard', vs, False):
@@ -1088,6 +1095,7 @@ Sheet.addCommand('z#', 'type-len', 'cursorCol.type = vlen', 'set type of current
 Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency', 'set type of current column to currency')
 Sheet.addCommand('%', 'type-float', 'cursorCol.type = float', 'set type of current column to float')
 Sheet.addCommand('z%', 'type-floatsi', 'cursorCol.type = floatsi', 'set type of current column to SI float')
+Sheet.addCommand('', 'type-floatlocale', 'cursorCol.type = floatlocale', 'set type of current column to float using system locale set in LC_NUMERIC')
 
 # when diving into a sheet, remove the index unless it is precious
 IndexSheet.addCommand('g^R', 'reload-selected', 'for vs in selectedRows or rows: vs.reload()', 'reload all selected sheets')
@@ -1095,7 +1103,6 @@ SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_colu
 SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visble columns from selected sheets')
 SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)', 'abort async thread for current sheet')
 SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)', 'abort async threads for selected sheets')
-IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelectedRows), *selectedRows, confirm_overwrite=options.confirm_overwrite)', 'save all selected sheets to given file or directory')
 SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(openRow(dest))', 'open sheet referenced in current row')
 
 BaseSheet.addCommand('q', 'quit-sheet',  'vd.quit(sheet)', 'quit current sheet')

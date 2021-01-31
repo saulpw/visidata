@@ -1,0 +1,108 @@
+#{"name": "sample"}
+#{"name": "OrderDate", "width": 18, "height": 1, "expr": "OrderDate", "keycol": 0, "fmtstr": "%Y-%m-%d", "voffset": 0, "hoffset": 0, "aggstr": "", "type": "date", "col": "Column"}
+#{"name": "Region", "width": 9, "height": 1, "expr": "Region", "keycol": 0, "fmtstr": "", "voffset": 0, "hoffset": 0, "aggstr": "", "type": "", "col": "Column"}
+#{"name": "Rep", "width": 10, "height": 1, "expr": "Rep", "keycol": 0, "fmtstr": "", "voffset": 0, "hoffset": 0, "aggstr": "", "type": "", "col": "Column"}
+#{"name": "Item", "width": 9, "height": 1, "expr": "Item", "keycol": 0, "fmtstr": "", "voffset": 0, "hoffset": 0, "aggstr": "", "type": "", "col": "Column"}
+#{"name": "Units", "width": 7, "height": 1, "expr": "Units", "keycol": 0, "fmtstr": "", "voffset": 0, "hoffset": 0, "aggstr": "", "type": "int", "col": "Column"}
+#{"name": "Unit_Cost", "width": 11, "height": 1, "expr": "Unit_Cost", "keycol": 0, "fmtstr": "", "voffset": 0, "hoffset": 0, "aggstr": "", "type": "float", "col": "Column"}
+#{"name": "Total", "width": 9, "height": 1, "expr": "Total", "keycol": 0, "fmtstr": "", "voffset": 0, "hoffset": 0, "aggstr": "", "type": "float", "col": "Column"}
+{"OrderDate": "2016-01-06", "Region": "East", "Rep": "Jones", "Item": "Pencil", "Units": "95", "Unit_Cost": "1.99", "Total": "189.05"}
+{"OrderDate": "2016-01-23", "Region": "Central", "Rep": "Kivell", "Item": "Binder", "Units": "50", "Unit_Cost": "19.99", "Total": "999.50"}
+{"OrderDate": "2016-02-09", "Region": "Central", "Rep": "Jardine", "Item": "Pencil", "Units": "36", "Unit_Cost": "4.99", "Total": "179.64"}
+{"OrderDate": "2016-02-26", "Region": "Central", "Rep": "Gill", "Item": "Pen", "Units": "27", "Unit_Cost": "19.99", "Total": "539.73"}
+{"OrderDate": "2016-03-15", "Region": "West", "Rep": "Sorvino", "Item": "Pencil", "Units": "56", "Unit_Cost": "2.99", "Total": "167.44"}
+{"OrderDate": "2016-04-01", "Region": "East", "Rep": "Jones", "Item": "Binder", "Units": "60", "Unit_Cost": "4.99", "Total": "299.40"}
+{"OrderDate": "2016-04-18", "Region": "Central", "Rep": "Andrews", "Item": "Pencil", "Units": "75", "Unit_Cost": "1.99", "Total": "149.25"}
+{"OrderDate": "2016-05-05", "Region": "Central", "Rep": "Jardine", "Item": "Pencil", "Units": "90", "Unit_Cost": "4.99", "Total": "449.10"}
+{"OrderDate": "2016-05-22", "Region": "West", "Rep": "Thompson", "Item": "Pencil", "Units": "32", "Unit_Cost": "1.99", "Total": "63.68"}
+{"OrderDate": "2016-06-08", "Region": "East", "Rep": "Jones", "Item": "Binder", "Units": "60", "Unit_Cost": "8.99", "Total": "539.40"}
+{"OrderDate": "2016-06-25", "Region": "Central", "Rep": "Morgan", "Item": "Pencil", "Units": "90", "Unit_Cost": "4.99", "Total": "449.10"}
+{"OrderDate": "2016-07-12", "Region": "East", "Rep": "Howard", "Item": "Binder", "Units": "29", "Unit_Cost": "1.99", "Total": "57.71"}
+{"OrderDate": "2016-07-29", "Region": "East", "Rep": "Parent", "Item": "Binder", "Units": "81", "Unit_Cost": "19.99", "Total": "1619.19"}
+{"OrderDate": "2016-08-15", "Region": "East", "Rep": "Jones", "Item": "Pencil", "Units": "35", "Unit_Cost": "4.99", "Total": "174.65"}
+{"OrderDate": "2016-09-01", "Region": "Central", "Rep": "Smith", "Item": "Desk", "Units": "2", "Unit_Cost": "125.00", "Total": "250.00"}
+{"OrderDate": "2016-09-18", "Region": "East", "Rep": "Jones", "Item": "Pen Set", "Units": "16", "Unit_Cost": "15.99", "Total": "255.84"}
+{"OrderDate": "2016-10-05", "Region": "Central", "Rep": "Morgan", "Item": "Binder", "Units": "28", "Unit_Cost": "8.99", "Total": "251.72"}
+{"OrderDate": "2016-10-22", "Region": "East", "Rep": "Jones", "Item": "Pen", "Units": "64", "Unit_Cost": "8.99", "Total": "575.36"}
+{"OrderDate": "2016-11-08", "Region": "East", "Rep": "Parent", "Item": "Pen", "Units": "15", "Unit_Cost": "19.99", "Total": "299.85"}
+{"OrderDate": "2016-11-25", "Region": "Central", "Rep": "Kivell", "Item": "Pen Set", "Units": "96", "Unit_Cost": "4.99", "Total": "479.04"}
+{"OrderDate": "2016-12-12", "Region": "Central", "Rep": "Smith", "Item": "Pencil", "Units": "67", "Unit_Cost": "1.29", "Total": "86.43"}
+{"OrderDate": "2016-12-29", "Region": "East", "Rep": "Parent", "Item": "Pen Set", "Units": "74", "Unit_Cost": "15.99", "Total": "1183.26"}
+{"OrderDate": "2017-01-15", "Region": "Central", "Rep": "Gill", "Item": "Binder", "Units": "46", "Unit_Cost": "8.99", "Total": "413.54"}
+{"OrderDate": "2017-02-01", "Region": "Central", "Rep": "Smith", "Item": "Binder", "Units": "87", "Unit_Cost": "15.00", "Total": "1305.00"}
+{"OrderDate": "2017-02-18", "Region": "East", "Rep": "Jones", "Item": "Binder", "Units": "4", "Unit_Cost": "4.99", "Total": "19.96"}
+{"OrderDate": "2017-03-07", "Region": "West", "Rep": "Sorvino", "Item": "Binder", "Units": "7", "Unit_Cost": "19.99", "Total": "139.93"}
+{"OrderDate": "2017-03-24", "Region": "Central", "Rep": "Jardine", "Item": "Pen Set", "Units": "50", "Unit_Cost": "4.99", "Total": "249.50"}
+{"OrderDate": "2017-04-10", "Region": "Central", "Rep": "Andrews", "Item": "Pencil", "Units": "66", "Unit_Cost": "1.99", "Total": "131.34"}
+{"OrderDate": "2017-04-27", "Region": "East", "Rep": "Howard", "Item": "Pen", "Units": "96", "Unit_Cost": "4.99", "Total": "479.04"}
+{"OrderDate": "2017-05-14", "Region": "Central", "Rep": "Gill", "Item": "Pencil", "Units": "53", "Unit_Cost": "1.29", "Total": "68.37"}
+{"OrderDate": "2017-05-31", "Region": "Central", "Rep": "Gill", "Item": "Binder", "Units": "80", "Unit_Cost": "8.99", "Total": "719.20"}
+{"OrderDate": "2017-06-17", "Region": "Central", "Rep": "Kivell", "Item": "Desk", "Units": "5", "Unit_Cost": "125.00", "Total": "625.00"}
+{"OrderDate": "2017-07-04", "Region": "East", "Rep": "Jones", "Item": "Pen Set", "Units": "62", "Unit_Cost": "4.99", "Total": "309.38"}
+{"OrderDate": "2017-07-21", "Region": "Central", "Rep": "Morgan", "Item": "Pen Set", "Units": "55", "Unit_Cost": "12.49", "Total": "686.95"}
+{"OrderDate": "2017-08-07", "Region": "Central", "Rep": "Kivell", "Item": "Pen Set", "Units": "42", "Unit_Cost": "23.95", "Total": "1005.90"}
+{"OrderDate": "2017-08-24", "Region": "West", "Rep": "Sorvino", "Item": "Desk", "Units": "3", "Unit_Cost": "275.00", "Total": "825.00"}
+{"OrderDate": "2017-09-10", "Region": "Central", "Rep": "Gill", "Item": "Pencil", "Units": "7", "Unit_Cost": "1.29", "Total": "9.03"}
+{"OrderDate": "2017-09-27", "Region": "West", "Rep": "Sorvino", "Item": "Pen", "Units": "76", "Unit_Cost": "1.99", "Total": "151.24"}
+{"OrderDate": "2017-10-14", "Region": "West", "Rep": "Thompson", "Item": "Binder", "Units": "57", "Unit_Cost": "19.99", "Total": "1139.43"}
+{"OrderDate": "2017-10-31", "Region": "Central", "Rep": "Andrews", "Item": "Pencil", "Units": "14", "Unit_Cost": "1.29", "Total": "18.06"}
+{"OrderDate": "2017-11-17", "Region": "Central", "Rep": "Jardine", "Item": "Binder", "Units": "11", "Unit_Cost": "4.99", "Total": "54.89"}
+{"OrderDate": "2017-12-04", "Region": "Central", "Rep": "Jardine", "Item": "Binder", "Units": "94", "Unit_Cost": "19.99", "Total": "1879.06"}
+{"OrderDate": "2017-12-21", "Region": "Central", "Rep": "Andrews", "Item": "Binder", "Units": "28", "Unit_Cost": "4.99", "Total": "139.72"}
+#{"name": "benchmark"}
+#{"name": "Date", "width": 18, "height": 1, "expr": "Date", "keycol": 0, "fmtstr": "", "voffset": 0, "hoffset": 0, "aggstr": "", "type": "date", "col": "Column"}
+#{"name": "Customer", "width": 20, "height": 1, "expr": "Customer", "keycol": 0, "fmtstr": "", "voffset": 0, "hoffset": 0, "aggstr": "", "type": "", "col": "Column"}
+#{"name": "SKU", "width": 9, "height": 1, "expr": "SKU", "keycol": 0, "fmtstr": "", "voffset": 0, "hoffset": 0, "aggstr": "", "type": "", "col": "Column"}
+#{"name": "Item", "width": 20, "height": 1, "expr": "Item", "keycol": 0, "fmtstr": "", "voffset": 0, "hoffset": 0, "aggstr": "", "type": "", "col": "Column"}
+#{"name": "Quantity", "width": 10, "height": 1, "expr": "Quantity", "keycol": 0, "fmtstr": "", "voffset": 0, "hoffset": 0, "aggstr": "", "type": "int", "col": "Column"}
+#{"name": "Unit", "width": 11, "height": 1, "expr": "Unit", "keycol": 0, "fmtstr": "", "voffset": 0, "hoffset": 0, "aggstr": "", "type": "currency", "col": "Column"}
+#{"name": "Paid", "width": 11, "height": 1, "expr": "Paid", "keycol": 0, "fmtstr": "", "voffset": 0, "hoffset": 0, "aggstr": "", "type": "currency", "col": "Column"}
+{"Date": "2018-07-03 13:47", "Customer": "Robert Armstrong", "SKU": "FOOD213", "Item": "BFF Oh My Gravy! Beef & Salmon 2.8oz", "Quantity": "4", "Unit": "12.95", "Paid": "51.80"}
+{"Date": "2018-07-03 15:32", "Customer": "Kyle Kennedy", "SKU": "FOOD121", "Item": "Food, Adult Cat - 3.5 oz", "Quantity": "1", "Unit": "4.22", "Paid": "4.22"}
+{"Date": "2018-07-05 16:15", "Customer": "Douglas \"Dougie\" Powers", "SKU": "FOOD121", "Item": "Food, Adult Cat 3.5 oz", "Quantity": "1", "Unit": "4.22", "Paid": "4.22"}
+{"Date": "2018-07-06 12:15", "Customer": "\u685c \u9ad8\u6a4b (Sakura Takahashi)", "SKU": "FOOD122", "Item": "Food, Senior Wet Cat - 3 oz", "Quantity": "12", "Unit": "1.29", "Paid": "157.00"}
+{"Date": "2018-07-10 10:28", "Customer": "David Attenborough", "SKU": "NSCT201", "Item": "Food, Salamander", "Quantity": "30", "Unit": "0.05", "Paid": "1.50"}
+{"Date": "2018-07-10 17:23", "Customer": "Susan Ashworth", "SKU": "CAT060", "Item": "Cat, Korat (Felis catus)", "Quantity": "1", "Unit": "720.42", "Paid": "720.42"}
+{"Date": "2018-07-10 17:23", "Customer": "Susan Ashworth", "SKU": "FOOD130", "Item": "Food, Kitten 3kg", "Quantity": "1", "Unit": "14.94", "Paid": "14.94"}
+{"Date": "2018-07-13 10:26", "Customer": "Wil Wheaton", "SKU": "NSCT523", "Item": "Monster, Rust (Monstrus gygaxus)", "Quantity": "1", "Unit": "39.95", "Paid": "39.95"}
+{"Date": "2018-07-13 15:49", "Customer": "Robert Armstrong", "SKU": "FOOD216", "Item": "BFF Oh My Gravy! Chicken & Shrimp 2.8oz", "Quantity": "4", "Unit": "12.95", "Paid": "51.80"}
+{"Date": "2018-07-17 09:01", "Customer": "Robert Armstrong", "SKU": "FOOD217", "Item": "BFF Oh My Gravy! Duck & Tuna 2.8oz", "Quantity": "4", "Unit": "12.95", "Paid": "51.80"}
+{"Date": "2018-07-17 11:30", "Customer": "Helen Halestorm", "SKU": "LAGO342", "Item": "Rabbit (Oryctolagus cuniculus)", "Quantity": "2", "Unit": "32.94", "Paid": "65.88"}
+{"Date": "2018-07-18 12:16", "Customer": "\u685c \u9ad8\u6a4b (Sakura Takahashi)", "SKU": "FOOD122", "Item": "Food, Senior Wet Cat - 3 oz", "Quantity": "6", "Unit": "1.29", "Paid": "157.00"}
+{"Date": "2018-07-19 10:28", "Customer": "Rubeus Hagrid", "SKU": "FOOD170", "Item": "Food, Dog - 5kg", "Quantity": "5", "Unit": "44.95", "Paid": "224.75"}
+{"Date": "2018-07-20 14:13", "Customer": "Jon Arbuckle", "SKU": "FOOD167", "Item": "Food, Premium Wet Cat - 3.5 oz", "Quantity": "50", "Unit": "3.95", "Paid": "197.50"}
+{"Date": "2018-07-23 13:41", "Customer": "Robert Armstrong", "SKU": "FOOD215", "Item": "BFF Oh My Gravy! Lamb & Tuna 2.8oz", "Quantity": "4", "Unit": "12.95", "Paid": "51.80"}
+{"Date": "2018-07-23 16:23", "Customer": "Douglas \"Dougie\" Powers", "SKU": "TOY235", "Item": "Laser Pointer", "Quantity": "1", "Unit": "16.12", "Paid": "16.12"}
+{"Date": "2018-07-24 12:16", "Customer": "\u685c \u9ad8\u6a4b (Sakura Takahashi)", "SKU": "FOOD122", "Item": "Food, Senior Wet Cat - 3 oz", "Quantity": "3", "Unit": "1.29", "Paid": "157.00"}
+{"Date": "2018-07-26 16:39", "Customer": "Douglas \"Dougie\" Powers", "SKU": "FOOD420", "Item": "Food, Shark - 10 kg", "Quantity": "1", "Unit": "15.70", "Paid": "15.70"}
+{"Date": "2018-07-27 12:16", "Customer": "\u685c \u9ad8\u6a4b (Sakura Takahashi)", "SKU": "FOOD122", "Item": "Food, Senior Wet Cat - 3 oz", "Quantity": "3", "Unit": "1.29", "Paid": "157.00"}
+{"Date": "2018-07-30 12:17", "Customer": "\u685c \u9ad8\u6a4b (Sakura Takahashi)", "SKU": "RETURN", "Item": "Food, Senior Wet Cat - 3 oz", "Quantity": "1", "Unit": "1.29", "Paid": "157.00"}
+{"Date": "2018-07-31 17:42", "Customer": "Rubeus Hagrid", "SKU": "CAT060", "Item": "Food, Dragon - 50kg", "Quantity": "5", "Unit": "720.42", "Paid": "3602.10"}
+{"Date": "2018-08-01 14:44", "Customer": "David Attenborough", "SKU": "FOOD360", "Item": "Food, Rhinocerous - 50kg", "Quantity": "4", "Unit": "5.72", "Paid": "22.88"}
+{"Date": "2018-08-02 17:12", "Customer": "Susan Ashworth", "SKU": "CAT110", "Item": "Cat, Maine Coon (Felix catus)", "Quantity": "1", "Unit": "1309.68", "Paid": "1309.68"}
+{"Date": "2018-08-02 17:12", "Customer": "Susan Ashworth", "SKU": "FOOD130", "Item": "Food, Kitten 3kg", "Quantity": "3", "Unit": "14.94", "Paid": "44.82"}
+{"Date": "2018-08-06 10:21", "Customer": "Robert Armstrong", "SKU": "FOOD212", "Item": "BFF Oh My Gravy! Beef & Chicken 2.8oz", "Quantity": "4", "Unit": "12.95", "Paid": "51.80"}
+{"Date": "2018-08-07 16:12", "Customer": "Juan Johnson", "SKU": "REPT082", "Item": "Kingsnake, California (Lampropeltis getula)", "Quantity": "1", "Unit": "89.95", "Paid": "89.95"}
+{"Date": "2018-08-07 16:12", "Customer": "Juan Johnson", "SKU": "RDNT443", "Item": "Mouse, Pinky (Mus musculus)", "Quantity": "1", "Unit": "1.49", "Paid": "1.49"}
+{"Date": "2018-08-10 16:31", "Customer": "Robert Armstrong", "SKU": "FOOD211", "Item": "BFF Oh My Gravy! Chicken & Turkey 2.8oz", "Quantity": "4", "Unit": "12.95", "Paid": "51.80"}
+{"Date": "2018-08-13 14:07", "Customer": "Monica Johnson", "SKU": "RDNT443", "Item": "Mouse, Pinky (Mus musculus)", "Quantity": "1", "Unit": "1.49", "Paid": "1.49"}
+{"Date": "2018-08-13 14:08", "Customer": "Mar\u00eda Fern\u00e1ndez", "SKU": "FOOD146", "Item": "Forti Diet Prohealth Mouse/Rat 3lbs", "Quantity": "2", "Unit": "2.00", "Paid": "4.00"}
+{"Date": "2018-08-15 11:57", "Customer": "Mr. Praline", "SKU": "RETURN", "Item": "Parrot, Norwegian Blue (Mopsitta tanta)", "Quantity": "1", "Unit": "2300.00", "Paid": "-2300.00"}
+{"Date": "2018-08-15 15:48", "Customer": "Kyle Kennedy", "SKU": "FOOD121", "Item": "Food, Adult Cat - 3.5 oz", "Quantity": "2", "Unit": "4.22", "Paid": "8.44"}
+{"Date": "2018-08-16 11:50", "Customer": "Helen Halestorm", "SKU": "RETURN", "Item": "Rabbit (Oryctolagus cuniculus)", "Quantity": "6", "Unit": "0.00", "Paid": "0.00"}
+{"Date": "2018-08-16 16:00", "Customer": "Kyle Kennedy", "SKU": "DOG010", "Item": "Dog, Golden Retriever (Canis lupus familiaris)", "Quantity": "1", "Unit": "2495.99", "Paid": "2495.99"}
+{"Date": "2018-08-16 17:15", "Customer": "Michael Smith", "SKU": "BIRD160", "Item": "Parakeet, Blue (Melopsittacus undulatus)", "Quantity": "1", "Unit": "29.95", "Paid": "31.85"}
+{"Date": "2018-08-17 09:26", "Customer": "Rubeus Hagrid", "SKU": "NSCT201", "Item": "Food, Spider", "Quantity": "5", "Unit": "0.05", "Paid": "0.25"}
+{"Date": "2018-08-20 09:36", "Customer": "Kyle Kennedy", "SKU": "RETURN", "Item": "Dog, Golden Retriever (Canis lupus familiaris)", "Quantity": "1", "Unit": "1247.99", "Paid": "-1247.99"}
+{"Date": "2018-08-20 15:31", "Customer": "Monica Johnson", "SKU": "NSCT201", "Item": "Crickets, Adult Live (Gryllus assimilis)", "Quantity": "30", "Unit": "0.05", "Paid": "1.50"}
+{"Date": "2018-08-20 17:12", "Customer": "David Attenborough", "SKU": "NSCT084", "Item": "Food, Pangolin", "Quantity": "30", "Unit": "0.17", "Paid": "5.10"}
+{"Date": "2018-08-21 12:13", "Customer": "Robert Armstrong", "SKU": "FOOD214", "Item": "BFF Oh My Gravy! Duck & Salmon 2.8oz", "Quantity": "4", "Unit": "12.95", "Paid": "51.80"}
+{"Date": "2018-08-22 09:38", "Customer": "David Attenborough", "SKU": "BIRD160", "Item": "Food, Quoll", "Quantity": "1", "Unit": "29.95", "Paid": "29.95"}
+{"Date": "2018-08-22 14:13", "Customer": "Jon Arbuckle", "SKU": "FOOD170", "Item": "Food, Adult Dog - 5kg", "Quantity": "1", "Unit": "44.95", "Paid": "44.95"}
+{"Date": "2018-08-24 11:42", "Customer": "Robert Armstrong", "SKU": "FOOD218", "Item": "BFF Oh My Gravy! Chicken & Salmon 2.8oz", "Quantity": "4", "Unit": "12.95", "Paid": "51.80"}
+{"Date": "2018-08-27 15:05", "Customer": "Monica Johnson", "SKU": "NSCT443", "Item": "Mealworms, Large (Tenebrio molitor) 100ct", "Quantity": "1", "Unit": "1.99", "Paid": "1.99"}
+{"Date": "2018-08-28 17:32", "Customer": "Susan Ashworth", "SKU": "CAT020", "Item": "Cat, Scottish Fold (Felis catus)", "Quantity": "1", "Unit": "1964.53", "Paid": "1964.53"}
+{"Date": "2018-08-28 17:32", "Customer": "Susan Ashworth", "SKU": "FOOD130", "Item": "Food, Kitten 3kg", "Quantity": "2", "Unit": "14.94", "Paid": "29.88"}
+{"Date": "2018-08-29 10:07", "Customer": "Robert Armstrong", "SKU": "FOOD219", "Item": "BFF Oh My Gravy! Chicken & Pumpkin 2.8oz", "Quantity": "4", "Unit": "12.95", "Paid": "51.80"}
+{"Date": "2018-08-31 00:00", "Customer": "Robert Armstrong", "SKU": "FOOD219", "Item": "BFF Oh My Gravy! Chicken & Pumpkin 2.8oz", "Quantity": "144", "Unit": "12.95", "Paid": "1864.80"}
+{"Date": "2018-08-31 17:57", "Customer": "Juan Johnson", "SKU": "REPT217", "Item": "Lizard, Spinytail (Uromastyx ornatus)", "Quantity": "1", "Unit": "99.95", "Paid": "99.95"}

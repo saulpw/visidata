@@ -36,7 +36,6 @@ __all__ = [
     'SubColumnFunc',
     'SubColumnItem',
     'SubColumnAttr',
-    'ColumnEnum', 'EnumColumn',
     'ColumnExpr', 'ExprColumn',
     'DisplayWrapper',
 ]
@@ -131,6 +130,15 @@ class Column(Extensible):
     def __deepcopy__(self, memo):
         return self.__copy__()  # no separate deepcopy
 
+    def __getstate__(self):
+        d = {k:getattr(self, k) for k in 'name width height expr keycol fmtstr voffset hoffset aggstr'.split()}
+        d['type'] = self.type.__name__
+        return d
+
+    def __setstate__(self, d):
+        for attr, v in d.items():
+            setattr(self, attr, v)
+
     def recalc(self, sheet=None):
         'Reset column cache, attach column to *sheet*, and reify column name.'
         if self._cachedValues:
@@ -156,6 +164,15 @@ class Column(Extensible):
         self._name = maybe_clean(name, self.sheet)
 
     @property
+    def typestr(self):
+        'Type of this column as string.'
+        return self._type.__name__
+
+    @typestr.setter
+    def typestr(self, v):
+        self.type = vd.getGlobals()[v or 'anytype']
+
+    @property
     def type(self):
         'Type of this column.'
         return self._type
@@ -164,7 +181,12 @@ class Column(Extensible):
     def type(self, t):
         if self._type != t:
             vd.addUndo(setattr, self, '_type', self.type)
-        self._type = t
+        if not t:
+            self._type = anytype
+        elif isinstance(t, str):
+            self.typestr = t
+        else:
+            self._type = t
 
     @property
     def width(self):
@@ -467,23 +489,6 @@ def SubColumnItem(idx, c, **kwargs):
         kwargs['name'] = c.name
     return SubColumnFunc(origcol=c, subfunc=getitemdef, expr=idx, **kwargs)
 
-class EnumColumn(Column):
-    'types and aggregators. row.<name> should be kept to the values in the mapping m, and can be set by the a string key into the mapping.'
-    def __init__(self, name, m, default=None, **kwargs):
-        super().__init__(name, **kwargs)
-        self.mapping = m
-        self.default = default
-
-    def calcValue(self, row):
-        v = getattr(row, self.name, None)
-        return v.__name__ if v else None
-
-    def putValue(self, row, value):
-        if isinstance(value, str):  # first try to get the actual value from the mapping
-            value = self.mapping.get(value, value)
-        setattr(row, self.name, value or self.default)
-
-
 class ExprColumn(Column):
     'Column using *expr* to derive the value from each row.'
     def __init__(self, name, expr=None, **kwargs):
@@ -501,6 +506,12 @@ class ExprColumn(Column):
         self.maxtime = max(self.maxtime, t1-t0)
         self.totaltime += (t1-t0)
         return r
+
+    def putValue(self, row, val):
+        a = self.getDisplayValue(row)
+        b = self.format(self.type(val))
+        if a != b:
+            vd.warning('%s calced %s not %s' % (self.name, a, b))
 
     @property
     def expr(self):
@@ -529,4 +540,3 @@ class SettableColumn(Column):
 ColumnItem = ItemColumn
 ColumnAttr = AttrColumn
 ColumnExpr = ExprColumn
-ColumnEnum = EnumColumn

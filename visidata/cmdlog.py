@@ -283,7 +283,7 @@ def replayOne(vd, r):
         vd.currentReplayRow = r
         longname = getattr(r, 'longname', None)
 
-        if r.sheet and not (r.sheet == 'override' and longname in ['set-option', 'unset-option']):
+        if r.sheet and longname not in ['set-option', 'unset-option']:
             vs = vd.getSheet(r.sheet) or vd.error('no sheet named %s' % r.sheet)
         else:
             vs = None
@@ -291,10 +291,12 @@ def replayOne(vd, r):
         if longname in ['set-option', 'unset-option']:
             try:
                 context = vs if r.sheet and vs else vd
+                option_scope = r.sheet or r.col or 'global'
+                if option_scope == 'override': option_scope = 'global' # override is deprecated, is now global
                 if longname == 'set-option':
-                    context.options.set(r.row, r.input, r.sheet or r.col or 'override')
+                    context.options.set(r.row, r.input, option_scope)
                 else:
-                    context.options.unset(r.row, r.sheet or r.col or 'override')
+                    context.options.unset(r.row, option_scope)
 
                 escaped = False
             except Exception as e:

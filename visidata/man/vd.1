@@ -1,4 +1,4 @@
-.Dd Dec 5, 2020
+.Dd Jan 30, 2021
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -253,11 +253,11 @@ select/toggle/unselect all rows from cursor to bottom
 .It Ic "z|  z\e\ " Ns Ar expr
 .No select/unselect rows matching Python Ar expr No in any visible column
 .It Ic " \&," Ns " (comma)"
-select rows matching typed value of current cell in current column
+select rows matching display value of current cell in current column
 .It Ic "g\&,"
-select rows matching typed value of current row in all visible columns
+select rows matching display value of current row in all visible columns
 .It Ic "z\&, gz\&,"
-select rows matching display value of current cell/row in current column/all visible columns
+select rows matching typed value of current cell/row in current column/all visible columns
 .
 .El
 .
@@ -779,6 +779,10 @@ show/hide methods and hidden properties
 .El
 .
 .Sh COMMANDLINE OPTIONS
+.No Add Sy -n Ns / Ns Sy --nonglobal No to make subsequent CLI options "sheet-specific" (applying only to paths specified directly on the CLI). By default, CLI options apply to all sheets.
+.Pp
+.No Options can also be set via the Ar Options Sheet No or a Ar .visidatarc No (see Sx FILES Ns ).
+.Pp
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Cm -P Ns = Ns Ar longname
 .No preplay Ar longname No before replay or regular launch; limited to Sy Base Sheet No bound commands
@@ -822,6 +826,8 @@ exit on error and display stacktrace
 skip N rows before header
 .It Sy --header Ns = Ns Ar "int                " No "1"
 parse first N rows as column names
+.It Sy --load-lazy No "                 False"
+load subsheets always (False) or lazily (True)
 .It Sy --force-256-colors No "          False"
 use 256 colors even if curses reports fewer
 .It Sy --use-default-colors No "        False"
@@ -848,6 +854,8 @@ specify default file type to save as
 filename to save binary profiling data
 .It Sy --min-memory-mb Ns = Ns Ar "int         " No "0"
 minimum memory to continue loading and async processing
+.It Sy --input-history Ns = Ns Ar "str         " No ""
+basename of file to store persistent input history
 .It Sy --encoding Ns = Ns Ar "str              " No "utf-8"
 encoding passed to codecs.open
 .It Sy --encoding-errors Ns = Ns Ar "str       " No "surrogateescape"
@@ -885,7 +893,7 @@ error string to use while saving
 command to copy stdin to system clipboard
 .It Sy --clipboard-paste-cmd Ns = Ns Ar "str   " No ""
 command to get contents of system clipboard
-.It Sy --fancy-chooser Ns = Ns Ar "bool        " No "True"
+.It Sy --fancy-chooser No "             False"
 a nicer selection interface for aggregators and jointype
 .It Sy --describe-aggrs Ns = Ns Ar "str        " No "mean stdev"
 numeric aggregators to calculate on Describe sheet
@@ -956,6 +964,8 @@ number of rows to check for fixed width columns
 max number of fixed-width columns to create (0 is no max)
 .It Sy --postgres-schema Ns = Ns Ar "str       " No "public"
 The desired schema for the Postgres database
+.It Sy --http-max-next Ns = Ns Ar "int         " No "0"
+max next.url pages to follow in http response
 .It Sy --html-title Ns = Ns Ar "str            " No "<h2>{sheet.name}</h2>"
 table header when saving to html
 .It Sy --pcap-internet Ns = Ns Ar "str         " No "n"
@@ -1119,6 +1129,12 @@ color of active clue
 .Pp
 .Dl Nm vd Cm -f sqlite bar.db
 .No open the file bar.db as a sqlite database
+.Pp
+.Dl Nm vd Cm foo.tsv -n -f sqlite bar.db
+.No open foo.tsv as tsv and bar.db as a sqlite database
+.Pp
+.Dl Nm vd Cm -f sqlite foo.tsv bar.db
+.No open both foo.tsv and bar.db as a sqlite database
 .Pp
 .Dl Nm vd Cm -b countries.fixed -o countries.tsv
 .No convert countries.fixed (in fixed width format) to countries.tsv (in tsv format)

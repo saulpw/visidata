@@ -65,11 +65,11 @@ The following example uses the file [sample.tsv](https://raw.githubusercontent.c
 
 ---
 
-## How to select rows where the current column is not null?
+## How to select rows where the current column is not null or empty?
 
 'Null' cells, by default, are cells which contain `None`. This can be changed with `options.null_value`. Null cells can be set with `zd` (set current cell to `None`) or `gzd` (set selected rows in current column to `None`). Null cells are distinguished with a yellow ∅' symbol on the right hand corner. They are distinct from empty cells (which are `''` in columns of string type.)
 
-1. Type `|` followed by *.* to select all rows with empty and null cells in the current column.
+1. Type `|` followed by *.* to select all rows without empty or null cells in the current column.
 
 ---
 
@@ -77,9 +77,11 @@ The following example uses the file [sample.tsv](https://raw.githubusercontent.c
 
 There are several different options:
 
-- Move to an empty or null cell in the column of interest and press `,` to select all empty cells in that column.
-- Open a **DescribeSheet** for the current sheet with `Shift+I`. Move to the **nulls** column, and then move to the row which references the source column of interest. Type `zd` to select all null rows for that column.
-- For non-numerical columns `z|` followed by **not ColumnName**, will select all empty cells for that column. For numerical columns it will also select cells with `0`.
+- `z,` matches by **typed value** while `,` matches by **display value**. Move to an empty or `None` cell in the column of interest and press `,` to select all empty and `None` cells in that column. Type `z,` on a `None` cell to select all rows that contain `None` in that column. Type `z.` on an empty cell to select all rows that have an empty cell in that column.
+- Open a **DescribeSheet** for the current sheet with `Shift+I`. Move to the **nulls** column, and then move to the row which references the source column of interest. Type `zs` to select all null rows for that column.
+- `z|` is a command which allows selection by provided Python expression criteria (using column names as variables). For non-numerical columns `z|` followed by **not ColumnName**, will select all empty cells and `None` cells for that column. For numerical columns it will also select cells with `0`.
+- [A typed value of Python None is always a `TypedWrapper`](https://www.visidata.org/docs/api/columns.html#user-defined-types), which allows sorting, etc., on columns with None values. For this reason `z|` *ColumnName is None* will not work, thought `z|` *ColumnName.val is None* will work. This is not a recommended approach, though at the moment, it is available.
+
 ---
 
 ## How to move, copy and remove rows

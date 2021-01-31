@@ -24,10 +24,7 @@ class XlsxIndexSheet(IndexSheet):
         self.workbook = openpyxl.load_workbook(str(self.source), data_only=True, read_only=True)
         for sheetname in self.workbook.sheetnames:
             src = self.workbook[sheetname]
-            vs = XlsxSheet(self.name, sheetname, source=src)
-            if isinstance(src, openpyxl.Workbook):
-                vs.reload()
-            yield vs
+            yield XlsxSheet(self.name, sheetname, source=src)
 
 
 class XlsxSheet(SequenceSheet):
@@ -51,9 +48,7 @@ class XlsIndexSheet(IndexSheet):
         import xlrd
         self.workbook = xlrd.open_workbook(str(self.source))
         for sheetname in self.workbook.sheet_names():
-            vs = XlsSheet(self.name, sheetname, source=self.workbook.sheet_by_name(sheetname))
-            vs.reload()
-            yield vs
+            yield XlsSheet(self.name, sheetname, source=self.workbook.sheet_by_name(sheetname))
 
 
 class XlsSheet(SequenceSheet):

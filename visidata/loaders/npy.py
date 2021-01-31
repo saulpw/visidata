@@ -63,7 +63,7 @@ def save_npy(vd, p, sheet):
     for col in Progress(sheet.visibleCols):
         if col.type in (int, vlen):
             dt = 'i8'
-        elif col.type in (float, currency):
+        elif col.type in (float, currency, floatlocale):
             dt = 'f8'
         elif col.type is date:
             dt = 'datetime64[s]'

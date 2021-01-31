@@ -2,7 +2,7 @@
 # Usage: $0 [<options>] [<input> ...]
 #        $0 [<options>] --play <cmdlog> [--batch] [-w <waitsecs>] [-o <output>] [field=value ...]
 
-__version__ = '2.1.1'
+__version__ = '2.2'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
 from copy import copy
@@ -98,7 +98,7 @@ def main_vd():
     i=1
     current_args = {}
     global_args = {}
-    flGlobal = False
+    flGlobal = True
     optsdone = False
 
     while i < len(sys.argv):
@@ -119,7 +119,9 @@ def main_vd():
             curses.wrapper(lambda scr: vd.openManPage())
             return 0
         elif arg in ['-g', '--global']:
-            flGlobal = not flGlobal  # can toggle within the same command
+            flGlobal = True
+        elif arg in ['-n', '--nonglobal']:
+            flGlobal = False
         elif arg[0] == '-':
             optname = arg.lstrip('-')
             optval = None
@@ -180,12 +182,7 @@ def main_vd():
     vd.loadConfigAndPlugins(args)
 
     for k, v in global_args.items():
-        options.set(k, v, obj='override')
-
-    for k, v in current_args.items():
-        opt = options._get(k)
-        if opt and opt.sheettype is None:
-            options.set(k, v, obj='override')
+        options.set(k, v, obj='global')
 
     # fetch motd and plugins *after* options parsing/setting
     vd.pluginsSheet.ensureLoaded()
@@ -210,7 +207,7 @@ def main_vd():
         if ('filetype' in current_args) and ('filetype' not in opts):
             opts['filetype'] = current_args['filetype']
 
-        vs = vd.openSource(p, **opts)
+        vs = vd.openSource(p, create=True, **opts) or vd.fail(f'could not open {p}')
         for k, v in current_args.items():  # apply final set of args to sheets specifically on cli, if not set otherwise #573
             if not vs.options.is_set(k, vs):
                 vs.options[k] = v

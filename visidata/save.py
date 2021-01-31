@@ -96,7 +96,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
 
     filetype = givenpath.ext or options.save_filetype
 
-    savefunc = getattr(vd, 'save_' + filetype, None) or vd.fail('no function to save as type %s' % filetype)
+    savefunc = getattr(vsheets[0], 'save_' + filetype, None) or getattr(vd, 'save_' + filetype, None) or vd.fail('no function to save as type %s' % filetype)
 
     if givenpath.exists() and confirm_overwrite:
         confirm("%s already exists. overwrite? " % givenpath.given)
@@ -138,6 +138,6 @@ def save_txt(vd, p, *vsheets):
 
 Sheet.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName()), sheet, confirm_overwrite=options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)')
 BaseSheet.addCommand('g^S', 'save-all', 'vd.saveSheets(inputPath("save all sheets to: "), *vd.sheets, confirm_overwrite=options.confirm_overwrite)', 'save all sheets to given file or directory)')
-IndexSheet.addCommand('g^S', 'save-sheets-selected', 'vd.saveSheets(inputPath("save all sheets to: "), *selectedRows, confirm_overwrite=options.confirm_overwrite)', 'save all sheets to given file or directory)')
+IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelectedRows, value=str(source)), *selectedRows, confirm_overwrite=options.confirm_overwrite)', 'save all selected sheets to given file or directory')
 Sheet.addCommand('', 'save-col', 'save_cols([cursorCol])', 'save current column only to filename in format determined by extension (default .tsv)')
 Sheet.addCommand('', 'save-col-keys', 'save_cols(keyCols + [cursorCol])', 'save key columns and current column to filename in format determined by extension (default .tsv)')

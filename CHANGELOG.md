@@ -1,5 +1,71 @@
 # VisiData version history
 
+# v2.2 (2021-01-30)
+
+## Options
+
+    - [cli options] now global by default; use `-n` to set option as sheet-specific instead
+        - add `-n`/`--nonglobal` to make subsequent CLI options "sheet-specific" (applying only to paths specified directly on the CLI)
+        - keep `-g`/`--global` to make subsequent CLI options "global" (applying to all sheets by default unless overriden)
+        - invert the default: now CLI options are global by default (thus `-g` is a no-op unless preceded by `-n` on the CLI)
+        - `-g` no longer acts as a toggle
+
+    - [input] add `options.input_history` (thanks @tsibley and @ajkerrigan #468)
+        - basename of file to store persistent input history (default of `''` means disabled)
+        - caveat: persistent file only read if option given before first input
+
+    - [options.fancy_chooser] now disabled by default--use `Ctrl+X` to open from a choose() prompt
+
+## Types
+
+    - [types] add `floatlocale` type (thanks @Guiriguanche #863)
+        - add commands `type-floatlocale` and `type-floatlocale-selected` (unbound by default)
+        - `floatlocale` parses based on `LC_NUMERIC` envvar (must be set before launching)
+        - parsing is 20x slower than with standard float column
+        - will parse commas as decimals (e.g. '1,1') if LC_NUMERIC is set to a locale like 'en_DK.UTF-8'
+
+## Loaders
+
+    - [loaders geojson] add loading and saving support for geojson files (thanks @draco #876)
+    - [loaders vds] add loader/saver for custom .vds format (VisiData Sheet) to save column properties and data for multiple sheets in one file
+    - [ux] autoload all subsheets by default; set `options.load_lazy` to disable
+        - removes a minor friction with unloaded subsheets
+
+    - [loaders http] add `options.http_max_next` to limit api pagination (default 0 - no pagination) (thanks @aborruso #830)
+
+## Bugfixes and Adjustments
+
+    - [cli] fail properly if path cannot be opened
+    - [defer] only mention number of deleted rows, if some were deleted
+    - [go-pageup go-pagedown] ensure cursor stays in the same relative positions
+    - [loaders mysql] fix mysql loader duplicating tables for each database (thanks @SuRaMoN #868)
+    - [loaders mysql] perform asynchronous data fetch for mysql loader (thanks @SuRaMoN #869)
+    - [loaders pandas] fix empty subsets for dup-selected and frequency table `open-row` (thanks @ajkerrigan #881 #878)
+    - [loaders shp] fix display (thanks @dracos #874)
+    - [loaders shp] fix saving to geojson (thanks @dracos #876)
+    - [replay] fix replaying of .vd with `set-option`
+    - [slide] fix bug when sliding key columns to the left, after sliding them to the right
+    - [types] add command `type-floatsi-selected` on **Columns Sheet**
+
+    - [expand] errors and nulls can now be expanded with `expand-cols` (thanks @geekscrapy #865)
+
+    - [open] openSource now uses **'global'** `options.filetype` instead of sheet-specific as previous
+        - to set the filetype for a file locally, set through cli: `vd -f tsv sample.foo`
+        - to set in the **CommandLog**, use sheet="global" with longname="set-option"
+
+    - [loaders http] raise exception if http status is not 20x (thanks @geekscrapy #848)
+    - [loaders shp] support more Shapefile types (thanks @dracos #875)
+
+## API
+    - add `create` kwarg to `openSource()`, to create the file if it does not exist already
+    - [settings] 'global' is now 'default', and 'override' is 'global'
+        - 'default' is the default setting within VisiData
+        - 'global' is a user override on that default that applies globally
+        - sheet-specific overrides global and default, for the sheet it is specific to
+        - options set through visidatarc and cli are 'global' unless otherwise specified
+    - [save] grab `save_foo` from **SheetType** first
+        - allows overrides of sheet-specific saving
+
 # v2.1.1 (2021-01-03)
 
     - [macros] allow macro interfaces to be longnames (thanks @frosencrantz #787)

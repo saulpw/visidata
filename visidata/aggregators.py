@@ -29,6 +29,18 @@ def getValues(self, rows):
 
 vd.aggregators = collections.OrderedDict()  # [aggname] -> annotated func, or list of same
 
+Column.init('aggregators', list)
+
+def aggstr_get(col):
+    'A space-separated names of aggregators on this column.'
+    return ' '.join(aggr.name for aggr in col.aggregators)
+
+def aggstr_set(col, v):
+    col.aggregators = list(vd.aggregators[k] for k in (v or '').split())
+
+Column.aggstr = property(aggstr_get, aggstr_set)
+
+
 class Aggregator:
     def __init__(self, name, type, func, helpstr='foo'):
         'Define aggregator `name` that calls func(col, rows)'
@@ -117,11 +129,7 @@ vd.aggregators['q10'] = quantiles(10, 'deciles (10/20/30/40/50/60/70/80/80th pct
 vd.aggregators['keymax'] = _defaggr('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]), 'key of the maximum value')
 
 
-ColumnsSheet.columns += [
-        Column('aggregators',
-               getter=lambda col,row: ' '.join(x.name for x in getattr(row, 'aggregators', [])),
-               setter=lambda col,row,val: setattr(row, 'aggregators', list(vd.aggregators[k] for k in (val or '').split())))
-]
+ColumnsSheet.columns += [ColumnAttr('aggregators','aggstr')]
 
 @Sheet.api
 def addAggregators(sheet, cols, aggrnames):

@@ -27,10 +27,7 @@ class HtmlTablesSheet(IndexSheet):
 
         for i, e in enumerate(html.iter('table')):
             if e.tag == 'table':
-                vs = HtmlTableSheet(e.attrib.get("id", "table_" + str(i)), source=e)
-                vs.reload()
-                vs.html = e
-                yield vs
+                yield HtmlTableSheet(e.attrib.get("id", "table_" + str(i)), source=e, html=e)
 
 
 def is_header(elem):

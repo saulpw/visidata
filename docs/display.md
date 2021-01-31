@@ -14,7 +14,7 @@ Computed properties:
 
 - `cursorRow`: rows[cursorRowIndex]
 - `cursorCol`: columns[cursorColIndex] (equivalent to visibleCols[cursorVisibleColIndex])
-- `nVisibleRows`: simply based on terminal height, the exact number of rows that can be displayed.
+- `nScreenRows`: simply based on terminal height, the exact number of rows that can be displayed.
 - `visibleRows`: slice of onscreen rows; 'visible' has different meaning than visibleCols
 - `visibleCols`: (O(ncols), cached between frames): list of all non-hidden columns
 - `leftVisibleColIndex` is the first non-key column on the left.

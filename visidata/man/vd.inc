@@ -1,4 +1,4 @@
-.Dd Dec 5, 2020
+.Dd Jan 30, 2021
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -253,11 +253,11 @@ select/toggle/unselect all rows from cursor to bottom
 .It Ic "z|  z\e\ " Ns Ar expr
 .No select/unselect rows matching Python Ar expr No in any visible column
 .It Ic " \&," Ns " (comma)"
-select rows matching typed value of current cell in current column
+select rows matching display value of current cell in current column
 .It Ic "g\&,"
-select rows matching typed value of current row in all visible columns
+select rows matching display value of current row in all visible columns
 .It Ic "z\&, gz\&,"
-select rows matching display value of current cell/row in current column/all visible columns
+select rows matching typed value of current cell/row in current column/all visible columns
 .
 .El
 .
@@ -779,6 +779,10 @@ show/hide methods and hidden properties
 .El
 .
 .Sh COMMANDLINE OPTIONS
+.No Add Sy -n Ns / Ns Sy --nonglobal No to make subsequent CLI options "sheet-specific" (applying only to paths specified directly on the CLI). By default, CLI options apply to all sheets.
+.Pp
+.No Options can also be set via the Ar Options Sheet No or a Ar .visidatarc No (see Sx FILES Ns ).
+.Pp
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Cm -P Ns = Ns Ar longname
 .No preplay Ar longname No before replay or regular launch; limited to Sy Base Sheet No bound commands
@@ -811,6 +815,12 @@ overwrite existing files without confirmation
 .Pp
 .Dl Nm vd Cm -f sqlite bar.db
 .No open the file bar.db as a sqlite database
+.Pp
+.Dl Nm vd Cm foo.tsv -n -f sqlite bar.db
+.No open foo.tsv as tsv and bar.db as a sqlite database
+.Pp
+.Dl Nm vd Cm -f sqlite foo.tsv bar.db
+.No open both foo.tsv and bar.db as a sqlite database
 .Pp
 .Dl Nm vd Cm -b countries.fixed -o countries.tsv
 .No convert countries.fixed (in fixed width format) to countries.tsv (in tsv format)

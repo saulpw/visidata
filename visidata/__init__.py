@@ -1,6 +1,6 @@
 'VisiData: a curses interface for exploring and arranging tabular data'
 
-__version__ = '2.1.1'
+__version__ = '2.2'
 __version_info__ = 'VisiData v' + __version__
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __status__ = 'Production/Stable'
@@ -108,6 +108,7 @@ from .loaders.fixed_width import *
 from .loaders.postgres import *
 from .loaders.mysql import *
 from .loaders.shp import *
+from .loaders.geojson import *
 from .loaders.mbtiles import *
 from .loaders.http import *
 from .loaders.html import *
@@ -133,6 +134,7 @@ from .loaders.vcf import *
 from .loaders.texttables import *
 from .loaders.rec import *
 from .loaders.eml import *
+from .loaders.vds import *
 
 from .plugins import *
 

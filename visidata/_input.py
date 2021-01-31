@@ -5,8 +5,8 @@ import curses
 import visidata
 
 from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiData
-from visidata import vd, options, theme, colors
-from visidata import launchExternalEditor, suspend, ColumnItem
+from visidata import vd, option, options, theme, colors
+from visidata import launchExternalEditor, suspend, ColumnItem, AttrDict
 
 __all__ = ['confirm', 'CompleteKey']
 
@@ -14,7 +14,7 @@ theme('color_edit_cell', 'normal', 'cell color to use when editing cell')
 theme('disp_edit_fill', '_', 'edit field fill character')
 theme('disp_unprintable', '·', 'substitute character for unprintables')
 
-VisiData.init('lastInputs', lambda: collections.defaultdict(list))  # [input_type] -> list of prevInputs
+option('input_history', '', 'basename of file to store persistent input history')
 
 class AcceptInput(Exception):
     '*args[0]* is the input to be accepted'
@@ -302,7 +302,7 @@ def inputsingle(vd, prompt, record=True):
 def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
     '''Display *prompt* and return line of user input.
 
-        - *type*: list of previous items, or a string indicating the type of input.
+        - *type*: string indicating the type of input to use for history.
         - *history*: list of strings to use for input history.
         - *defaultLast*:  on empty input, if True, return last history item.
         - *display*: pass False to not display input (for sensitive input, e.g. a password).
@@ -311,11 +311,8 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
         - *updater*: ``updater(val)`` is called every keypress or timeout.
         - *bindings*: dict of keystroke to func(v, i) that returns updated (v, i)
     '''
-    if type:
-        if isinstance(type, str):
-            history = self.lastInputs[type]
-        else:
-            history = type
+
+    history = self.lastInputsSheet.history(type)
 
     sheet = self.activeSheet
     rstatuslen = self.drawRightStatus(sheet._scr, sheet)
@@ -329,10 +326,8 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
                         **kwargs)
 
     if ret:
-        if isinstance(type, str):
-            if self.lastInputs[type] and self.lastInputs[type][-1] == ret:
-                return ret
-            self.lastInputs[type].append(ret)
+        self.lastInputsSheet.appendRow(AttrDict(type=type, input=ret))
+
     elif defaultLast:
         history or vd.fail("no previous input")
         ret = history[-1]
