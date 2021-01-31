@@ -160,12 +160,12 @@ DESCRIPTION
                       column
      z|  z\ expr      select/unselect rows matching Python expr in any visible
                       column
-      , (comma)       select rows matching typed value of current cell in cur‐
-                      rent column
-     g,               select rows matching typed value of current row in all
+      , (comma)       select rows matching display value of current cell in
+                      current column
+     g,               select rows matching display value of current row in all
                       visible columns
-     z, gz,           select rows matching display value of current cell/row
-                      in current column/all visible columns
+     z, gz,           select rows matching typed value of current cell/row in
+                      current column/all visible columns
 
    Row Sorting/Filtering
        [    ]         sort ascending/descending by current column; replace any
@@ -496,6 +496,13 @@ DESCRIPTION
         gv  zv           show/hide methods and hidden properties
 
 COMMANDLINE OPTIONS
+     Add -n/--nonglobal to make subsequent CLI options sheet-specific
+     (applying only to paths specified directly on the CLI). By default, CLI
+     options apply to all sheets.
+
+     Options can also be set via the Options Sheet or a .visidatarc (see
+     FILES).
+
      -P=longname                  preplay longname before replay or regular
                                   launch; limited to Base Sheet bound commands
      +toplevel:subsheet:col:row   launch vd with subsheet of toplevel at
@@ -529,6 +536,8 @@ COMMANDLINE OPTIONS
      --skip=int                   0                  skip N rows before header
      --header=int                 1                  parse first N rows as
                                                      column names
+     --load-lazy                  False              load subsheets always
+                                                     (False) or lazily (True)
      --force-256-colors           False              use 256 colors even if
                                                      curses reports fewer
      --use-default-colors         False              curses use default termi‐
@@ -599,7 +608,7 @@ COMMANDLINE OPTIONS
                                                      system clipboard
      --clipboard-paste-cmd=str                       command to get contents
                                                      of system clipboard
-     --fancy-chooser=bool         True               a nicer selection inter‐
+     --fancy-chooser              False              a nicer selection inter‐
                                                      face for aggregators and
                                                      jointype
      --describe-aggrs=str         mean stdev         numeric aggregators to
@@ -805,6 +814,12 @@ EXAMPLES
            vd -f sqlite bar.db
      open the file bar.db as a sqlite database
 
+           vd foo.tsv -n -f sqlite bar.db
+     open foo.tsv as tsv and bar.db as a sqlite database
+
+           vd -f sqlite foo.tsv bar.db
+     open both foo.tsv and bar.db as a sqlite database
+
            vd -b countries.fixed -o countries.tsv
      convert countries.fixed (in fixed width format) to countries.tsv (in tsv
      format)
@@ -899,4 +914,4 @@ SUPPORTED OUTPUT FORMATS
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                      Jan 21, 2021                      Linux/MacOS
+Linux/MacOS                      Jan 30, 2021                      Linux/MacOS
