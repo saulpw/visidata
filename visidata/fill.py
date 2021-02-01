@@ -16,8 +16,8 @@ def fillNullValues(vd, col, rows):
         except Exception as e:
             val = e
 
-        if isNull(val) and (id(r) in rowsToFill):
-            if lastval:
+        if isNull(val):
+            if lastval and (id(r) in rowsToFill):
                 oldvals.append((col,r,val))
                 col.setValue(r, lastval)
                 n += 1
