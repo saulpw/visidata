@@ -9,14 +9,14 @@ def fillNullValues(vd, col, rows):
     oldvals = [] # for undo
     isNull = col.sheet.isNullFunc()
     n = 0
-    rowsToFill = list(rows)
+    rowsToFill = [id(r) for r in rows]
     for r in Progress(col.sheet.rows, 'filling'):  # loop over all rows
         try:
             val = col.getValue(r)
         except Exception as e:
             val = e
 
-        if isNull(val) and r in rowsToFill:
+        if isNull(val) and (id(r) in rowsToFill):
             if lastval:
                 oldvals.append((col,r,val))
                 col.setValue(r, lastval)
