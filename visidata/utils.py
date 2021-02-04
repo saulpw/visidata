@@ -19,7 +19,10 @@ class AttrDict(dict):
     'Augment a dict with more convenient .attr syntax.  not-present keys return None.'
     def __getattr__(self, k):
         try:
-            return self[k]
+            v = self[k]
+            if isinstance(v, dict):
+                v = AttrDict(v)
+            return v
         except KeyError:
             if k.startswith("__"):
                 raise AttributeError
