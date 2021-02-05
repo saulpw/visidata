@@ -31,4 +31,4 @@ You **may** modify this source code for your own usage, and you **may** distribu
 
     pip3 install -r ~/.visidata/vdplus/requirements.txt
 
-4. Update to the [latest develop version of VisiData]().
+4. Update to the [latest develop version of VisiData](https://github.com/saulpw/visidata/tree/develop).
