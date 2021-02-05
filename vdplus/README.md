@@ -21,7 +21,7 @@ You **may** modify this source code for your own usage, and you **may** distribu
 
 1. Clone this repo into `.visidata/vdplus`.
 
-    git clone https://github.com/saulpw/vdplus ~/.visidata/vdplus
+    git clone git@github.com:saulpw/vdplus ~/.visidata/vdplus
 
 2. Add this line to your `.visidatarc` (which is usually in the $HOME directory):
 
@@ -31,4 +31,4 @@ You **may** modify this source code for your own usage, and you **may** distribu
 
     pip3 install -r ~/.visidata/vdplus/requirements.txt
 
-4. Update to the [latest develop version of VisiData]().
+4. Update to the [latest develop version of VisiData](https://github.com/saulpw/visidata/tree/develop).
