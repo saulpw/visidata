@@ -21,7 +21,7 @@ You **may** modify this source code for your own usage, and you **may** distribu
 
 1. Clone this repo into `.visidata/vdplus`.
 
-    git clone https://github.com/saulpw/vdplus ~/.visidata/vdplus
+    git clone git@github.com:saulpw/vdplus ~/.visidata/vdplus
 
 2. Add this line to your `.visidatarc` (which is usually in the $HOME directory):
 
