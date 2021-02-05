@@ -6,7 +6,7 @@ from .gdrive import *
 
 def _google_creds_fn():
     from pkg_resources import resource_filename
-    return resource_filename('vdpro', 'google-creds.json')
+    return resource_filename('vdplus', 'google-creds.json')
 
 
 @VisiData.api

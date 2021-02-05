@@ -1,1 +1,1 @@
-{"name": "vdpro", "description": "VisiData Pro", "maintainer": "Saul Pwanson @saulpw", "latest_release": "", "url": "", "latest_ver": "", "visidata_ver": "2.2", "pydeps": "google_auth_oauthlib google-api-python-client", "vdplugindeps": "", "sha256": ""}
+{"name": "vdplus", "description": "VisiData Plus", "maintainer": "Saul Pwanson @saulpw", "latest_release": "", "url": "", "latest_ver": "", "visidata_ver": "2.3dev", "pydeps": "google_auth_oauthlib google-api-python-client", "vdplugindeps": "", "sha256": ""}

@@ -5,28 +5,30 @@
 ### Loaders
 
 - [Google Sheets](gsheets/): load and save (but not yet update an existing sheet)
+- [Google Drive](gsheets/): get list of files
 
 ## License
 
-VisiData Pro is source-available, **not** open-source software.
+This repository is private, and only [Saul Pwanson](https://github.com/saulpw) has the authority to grant access to it or to distribute its contents.
 
-This repository is private, and only Saul Pwanson (or [Pwanson & Pwanson LLC](pwanson.com)) has the authority to grant access to it.
+The code in this repository, hereafter "VisiData Plus", is **not** open-source software.
 
-Access grants you the ability to use the software according to the [LICENSE](LICENSE.md).
+Access to this repo grants you the ability to use the software according to the [LICENSE](LICENSE.md).
 
-You **may** modify the source code for your own usage, and you **may** distribute those modifications as patches to other users of VisiData Pro, but you **must not** redistribute any part of the VisiData Pro source.
-
+You **may** modify this source code for your own usage, and you **may** distribute those modifications as patches to other users of VisiData Plus, but you **must not** redistribute any of the source code contained in this repository.
 
 ## Installation
 
-1. Clone this repo into `.visidata/vdpro`.
+1. Clone this repo into `.visidata/vdplus`.
 
-You can put it into a different directory, but make sure the parit's in your `$PYTHONPATH`.
+    git clone https://github.com/saulpw/vdplus ~/.visidata/vdplus
 
 2. Add this line to your `.visidatarc` (which is usually in the $HOME directory):
 
-    import vdpro
+    import vdplus
 
+3. Install Python requirements:
 
-3. Update to the [latest released version of VisiData]().
+    pip3 install -r ~/.visidata/vdplus/requirements.txt
 
+4. Update to the [latest develop version of VisiData]().
