@@ -10,6 +10,7 @@ def open_gsheets(vd, p):
     if m:
         return GSheetsIndex(p.name, source=m.groups()[0])
 
+vd.open_g = vd.open_gsheets
 
 @VisiData.cached_property
 def _gsheets(vd):
@@ -49,7 +50,7 @@ class GSheet(SequenceSheet):
 
 
 @VisiData.api
-def save_gsheet(vd, p, *sheets):
+def save_gsheets(vd, p, *sheets):
     gsheet = vd._gsheets_rw.create(body={
         'properties': { 'title': p.name },
         'sheets': list({'properties': { 'title': vs.name }} for vs in sheets),
@@ -69,3 +70,5 @@ def save_gsheet(vd, p, *sheets):
             range=vs.name,
             body=dict(values=rows)
         ).execute()
+
+vd.save_g = vd.save_gsheets

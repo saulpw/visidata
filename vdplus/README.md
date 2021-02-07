@@ -2,10 +2,14 @@
 
 ## Features
 
-### Loaders
-
-- [Google Sheets](gsheets/): load and save (but not yet update an existing sheet)
-- [Google Drive](gsheets/): get list of files
+- [Google Drive](google/#gdrive)
+  - list files
+  - delete file
+  - open image in browser
+  - open Google Sheet in VisiData
+- [Google Sheets](google/#gsheets)
+  - load from url with `-f gsheets` (or `-f g`)
+  - save with `.g` extension
 
 ## License
 

@@ -16,3 +16,13 @@ VisiData assumes the first row is the header row with column names.
 
 Save to `<sheetname>.gsheet` using either `Ctrl+S` (current sheet only) or `g Ctrl+S` (all sheets on the sheet stack).
 "sheetname" will be the visible name of the Spreadsheet in Google Drive; each sheet tab within the Spreadsheet will be named according to the sheet name within VisiData.
+
+# Google Drive
+
+Use the `gdrive` filetype (the path doesn't matter):
+
+    vd . -f gdrive
+
+- Files can be marked for deletion with `d` and execute those deletions with `z Ctrl+S` (same as on the DirSheet for the local filesystem).
+- Images can be viewed with `Enter` (in browser).
+
