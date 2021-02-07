@@ -411,7 +411,7 @@ def setitem(r, i, v):  # function needed for use in lambda
     r[i] = v
     return True
 
-def getattrdeep(obj, attr, getter=getattr, *default):
+def getattrdeep(obj, attr, *default, getter=getattr):
     'Return dotted attr (like "a.b.c") from obj, or default if any of the components are missing.'
     if not isinstance(attr, str):
         return getter(obj, attr, *default)
@@ -440,7 +440,7 @@ def setattrdeep(obj, attr, val, getter=getattr, setter=setattr):
     setter(obj, attrs[-1], val)
 
 def getitemdeep(obj, k, *default):
-    return getattrdeep(obj, k, getter=getitemdef, *default)
+    return getattrdeep(obj, k, *default, getter=getitemdef)
 
 def setitemdeep(obj, k, val):
     return setattrdeep(obj, k, val, getter=getitemdef, setter=setitem)
