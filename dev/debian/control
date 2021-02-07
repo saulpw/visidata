@@ -2,7 +2,7 @@ Source: visidata
 Section: devel
 Priority: optional
 Maintainer: Anja Boskovic <anja.kefala@gmail.com>
-Build-Depends: debhelper-compat (=13), dh-python, python3-all, python3-setuptools, python3-xlrd, python3-openpyxl, python3-dateutil, python3-requests
+Build-Depends: debhelper-compat (=13), dh-python, python3-all, python3-setuptools, python3-xlrd, python3-openpyxl, python3-dateutil, python3-requests, python3-pytest
 Standards-Version: 4.5.1
 Vcs-Git: https://salsa.debian.org/anjakefala/visidata.git
 Vcs-Browser: https://salsa.debian.org/anjakefala/visidata
