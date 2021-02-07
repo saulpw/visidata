@@ -651,7 +651,7 @@ COMMANDLINE OPTIONS
                                                      DirSheet
      --config=str                 ~/.visidatarc      config file to exec in
                                                      Python
-     --play=str
+     --play=str                                      file.vd to replay
      --batch                      False              replay in batch mode
                                                      (with no interface and
                                                      all status sent to std‐
