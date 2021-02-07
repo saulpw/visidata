@@ -177,7 +177,7 @@ def saveToClipboard(sheet, rows, filetype=None):
 
 
 Sheet.addCommand('y', 'copy-row', 'copyRows([cursorRow])', 'yank (copy) current row to clipboard')
-Sheet.addCommand('d', 'delete-row', 'delete_row(cursorRowIndex)', 'delete (cut) current row and move it to clipboard')
+Sheet.addCommand('d', 'delete-row', 'delete_row(cursorRowIndex); defer and cursorDown(1)', 'delete (cut) current row and move it to clipboard')
 Sheet.addCommand('p', 'paste-after', 'paste_after(cursorRowIndex)', 'paste clipboard rows after current row')
 Sheet.addCommand('P', 'paste-before', 'paste_before(cursorRowIndex)', 'paste clipboard rows before current row')
 
