@@ -5,7 +5,7 @@
 ## Bugfixes
     - [setcol-fill] use row identity to identify selected rows (thanks @frosencrantz, #884)
         - for jsonl, empty rows are identical ({}), and if ones is selected, previously it would result in all of them being filled.
-    - [setcol-fill] fill with most recent non-null value (thanks @frosencrantz, #884)
+        - also, fill with most recent *non-null* value
 
 ## man
     - add a manpage visidata.1
