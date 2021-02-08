@@ -21,4 +21,5 @@ $MAN/parse_options.py $BUILD/vd-cli.inc $BUILD/vd-opts.inc
 
 soelim -rt -I $BUILD $BUILD/vd.inc > $BUILD/vd-pre.1
 preconv -r -e utf8 $BUILD/vd-pre.1 > $MAN/vd.1
+preconv -r -e utf8 $BUILD/vd-pre.1 > $MAN/visidata.1
 MANWIDTH=80 man $MAN/vd.1 > $MAN/vd.txt

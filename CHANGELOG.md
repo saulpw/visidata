@@ -1,5 +1,16 @@
 # VisiData version history
 
+# v2.2.1 (2021-02-07)
+
+## Bugfixes
+    - [setcol-fill] use row identity to identify selected rows (thanks @frosencrantz, #884)
+        - for jsonl, empty rows are identical ({}), and if ones is selected, previously it would result in all of them being filled.
+        - also, fill with most recent *non-null* value
+
+## man
+    - add a manpage visidata.1
+    - fix typo
+
 # v2.2 (2021-01-30)
 
 ## Options

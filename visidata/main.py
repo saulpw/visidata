@@ -2,7 +2,7 @@
 # Usage: $0 [<options>] [<input> ...]
 #        $0 [<options>] --play <cmdlog> [--batch] [-w <waitsecs>] [-o <output>] [field=value ...]
 
-__version__ = '2.2'
+__version__ = '2.2.1'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
 from copy import copy
@@ -17,7 +17,7 @@ from visidata import Path, saveSheets, domotd
 import visidata
 
 option('config', '~/.visidatarc', 'config file to exec in Python', sheettype=None)
-option('play', '', '.vd file to replay')
+option('play', '', 'file.vd to replay')
 option('batch', False, 'replay in batch mode (with no interface and all status sent to stdout)')
 option('output', None, 'save the final visible sheet to output at the end of replay')
 option('preplay', '', 'longnames to preplay before replay')

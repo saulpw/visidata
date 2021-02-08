@@ -651,7 +651,7 @@ COMMANDLINE OPTIONS
                                                      DirSheet
      --config=str                 ~/.visidatarc      config file to exec in
                                                      Python
-     --play=str
+     --play=str                                      file.vd to replay
      --batch                      False              replay in batch mode
                                                      (with no interface and
                                                      all status sent to std‐
@@ -914,4 +914,4 @@ SUPPORTED OUTPUT FORMATS
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                      Jan 30, 2021                      Linux/MacOS
+Linux/MacOS                      Feb 07, 2021                      Linux/MacOS
