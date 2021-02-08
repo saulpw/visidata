@@ -914,4 +914,4 @@ SUPPORTED OUTPUT FORMATS
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                      Jan 30, 2021                      Linux/MacOS
+Linux/MacOS                      Feb 07, 2021                      Linux/MacOS

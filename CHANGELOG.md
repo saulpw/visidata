@@ -1,6 +1,6 @@
 # VisiData version history
 
-# v2.2.1
+# v2.2.1 (2021-02-07)
 
 ## Bugfixes
     - [setcol-fill] use row identity to identify selected rows (thanks @frosencrantz, #884)
