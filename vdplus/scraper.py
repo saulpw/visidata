@@ -1,6 +1,16 @@
 #!/usr/bin/env python3
 
+__all__=[ 'SelectorColumn' ]
+
 from visidata import *
+
+import os.path
+from urllib.parse import urljoin
+
+import requests
+import requests_cache
+
+requests_cache.install_cache(str(Path(os.path.join(options.visidata_dir, 'httpcache'))), backend='sqlite', expire_after=24*60*60)
 
 
 @VisiData.api
@@ -11,10 +21,9 @@ def soup(vd, s):
 
 @VisiData.api
 def open_scrape(vd, p):
-    return HtmlLinksSheet(p.name, source=p)
+    return HtmlDocsSheet(p.name, source=p, urls=[p.given])
 
-
-def genSelector(c, node):
+def node_name(node):
     me = ' ' + node.name
     class_ = node.attrs.get("class")
     if class_:
@@ -22,45 +31,79 @@ def genSelector(c, node):
     id_ = node.attrs.get("id")
     if id_:
         me += '#' + id_[0]
+    return me
+
+def calc_selector(node):
     if node.parent:
-        return genSelector(c, node.parent) + me
+        return calc_selector(node.parent) + node_name(node)
     else:
-        return me
+        return ''
 
-class HrefColumn(Column):
+
+class HtmlAttrColumn(Column):
     def calcValue(self, row):
-        return r.attrs['href']
+        return row.attrs[self.expr]
 
-class HtmlLinksSheet(Sheet):
-    rowtype='dom nodes'
+def _getRootSheet(sheet):
+    if not isinstance(sheet.source, Sheet):
+        return sheet
+    return _getRootSheet(sheet.source)
+
+
+# one row per element
+class HtmlElementsSheet(Sheet):
+    # source=[element, ...]
+    rowtype='dom nodes'  # rowdef soup.element
     columns = [
-            Column('selector', getter=genSelector),
-            ColumnAttr('text'),
-            Column('href', getter=lambda c,r: r.attrs['href']),
+        Column('name', getter=lambda c,r: node_name(r)),
+        Column('selector', getter=lambda c,r: calc_selector(r)),
+        AttrColumn('text'),
+        HtmlAttrColumn('href', expr='href'),
     ]
-    @asyncthread
-    def reload(self):
-        self.soup = vd.soup(self.source.open_text())
-        self.rows = []
-        for link in self.soup.find_all():
-            self.addRow(link)
+    def iterload(self):
+        for el in self.elements:
+            yield from el.find_all()
+
+    @property
+    def rootSource(self):
+        return _getRootSheet(self).source
+
+    def openRows(self, rows):
+        realurls = [urljoin(self.rootSource.given, r.attrs.get('href')) for r in rows]
+        yield HtmlDocsSheet(self.name, 'scrape', source=self, urls=realurls)
 
     def openRow(self, row):
-        return open_scrape(Path(row.attrs["href"]))
+        'opening a single row'
+        return HtmlElementsSheet('', source=self, elements=[row])
 
 
-class HtmlDiffSheet(Sheet):
-    rowtype='dom nodes'
+class SelectorColumn(Column):
+    def calcValue(self, row):
+        return row.soup.select(self.expr)
+
+
+class HtmlDocsSheet(Sheet):
+    rowtype='requests'  # rowdef: requests.Response
     columns = [
-            Column('selector', getter=genSelector),
-            ColumnAttr('text'),
-            Column('href', getter=lambda c,r: r.attrs['href']),
+        AttrColumn('url'),
+        AttrColumn('status_code'),
+        AttrColumn('reason'),
+        AttrColumn('soup.title'),
     ]
-    @asyncthread
-    def reload(self):
-        self.soup = vd.soup(self.source.open_text())
-        self.rows = []
-        for link in self.soup.find_all():
-            self.addRow(link)
+    def iterload(self):
+        self.colnames = {}
+        for url in self.urls:
+            yield requests.get(url)
 
+    def addRow(self, row, index=None):
+        super().addRow(row, index=index)
+        try:
+            row.soup = vd.soup(row.text)
+        except Exception:
+            row.soup = None
 
+    def openRow(self, row):
+        return HtmlElementsSheet(row.url, source=self, elements=[row.soup])
+
+HtmlElementsSheet.addCommand('go', 'open-rows', 'for vs in openRows(selectedRows): vd.push(vs)')
+HtmlDocsSheet.addCommand(';', 'addcol-selector', 'sel=input("css selector: ", type="selector"); addColumn(SelectorColumn(sel, expr=sel))')
