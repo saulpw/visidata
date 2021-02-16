@@ -22,7 +22,6 @@ class SqliteSheet(Sheet):
 
     def execute(self, conn, sql, parms=None):
         parms = parms or []
-        vd.status(sql)
         return conn.execute(sql, parms)
 
     def iterload(self):
@@ -120,11 +119,9 @@ class SqliteQuerySheet(SqliteSheet):
     def iterload(self):
         with self.conn() as conn:
             self.columns = []
-            self.addColumn(ColumnItem('rowid', 0, type=int))
-
             self.result = self.execute(conn, self.query, parms=getattr(self, 'parms', []))
             for i, desc in enumerate(self.result.description):
-                self.addColumn(ColumnItem(desc[0], i+1))
+                self.addColumn(ColumnItem(desc[0], i))
 
             for row in self.result:
                 yield row
