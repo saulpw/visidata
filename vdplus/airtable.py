@@ -1,5 +1,5 @@
 import re
-from visidata import vd, date, asyncthread, VisiData, Sheet, Column, ItemColumn, deduceType, TypedWrapper
+from visidata import vd, date, asyncthread, VisiData, Progress, Sheet, Column, ItemColumn, deduceType, TypedWrapper
 from airtable import Airtable
 
 vd.option('airtable_key', '', 'Airtable API key from https://airtable.com/account')
@@ -31,7 +31,7 @@ class AirtableSheet(Sheet):
 
         fields = set()
         airtable = Airtable(vd.options.airtable_base, self.source, vd.options.airtable_key)
-        for page in airtable.get_iter(view=self.view):
+        for page in Progress(airtable.get_iter(view=self.view), gerund='loading', total=1):
             for record in page:
                 for field, value in record['fields'].items():
                     if field not in fields:
@@ -60,9 +60,15 @@ class AirtableSheet(Sheet):
 
         adds, mods, dels = self.getDeferredChanges()
         airtable = Airtable(vd.options.airtable_base, self.source, vd.options.airtable_key)
-        airtable.batch_insert([fields(r, self.visibleCols) for r in adds.values()])
-        airtable.batch_update([update(r, m.keys()) for r, m in mods.values()])
-        airtable.batch_delete([r['id'] for r in dels.values()])
+        with Progress(gerund='inserting', total=3) as prog:
+            airtable.batch_insert([fields(r, self.visibleCols) for r in adds.values()])
+            prog.addProgress(1)
+            prog.gerund = 'updating'
+            airtable.batch_update([update(r, m.keys()) for r, m in mods.values()])
+            prog.addProgress(1)
+            prog.gerund = 'deleting'
+            airtable.batch_delete([r['id'] for r in dels.values()])
+            prog.addProgress(1)
 
         self.preloadHook()
         self.reload()
