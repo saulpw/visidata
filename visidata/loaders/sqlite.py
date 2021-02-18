@@ -119,6 +119,8 @@ class SqliteQuerySheet(SqliteSheet):
     def iterload(self):
         with self.conn() as conn:
             self.columns = []
+            for c in type(self).columns:
+                self.addColumn(copy(c))
             self.result = self.execute(conn, self.query, parms=getattr(self, 'parms', []))
             for i, desc in enumerate(self.result.description):
                 self.addColumn(ColumnItem(desc[0], i))
