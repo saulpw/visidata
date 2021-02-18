@@ -1,5 +1,5 @@
 import re
-from visidata import vd, date, VisiData, Sheet, Column, ItemColumn, deduceType
+from visidata import vd, date, asyncthread, VisiData, Sheet, Column, ItemColumn, deduceType, TypedWrapper
 from airtable import Airtable
 
 vd.option('airtable_key', '', 'Airtable API key from https://airtable.com/account')
@@ -14,16 +14,55 @@ def open_airtable(vd, p):
 
 class AirtableSheet(Sheet):
     rowtype = 'records' # rowdef: dict
+    savesToSource = True
+    defer = True
+
     def iterload(self):
-        airtable = Airtable(vd.options.airtable_base, self.source, vd.options.airtable_key)
+        def fieldColumn(field, value):
+            from visidata import setitem
+            return Column(field,
+                expr=field, type=deduceType(value),
+                getter=lambda c,r: r['fields'].get(c.expr),
+                setter=lambda c,r,v: setitem(r['fields'], c.expr, v))
+
         self.columns = []
         self.addColumn(ItemColumn('id', 'id', type=str, width=0))
         self.addColumn(ItemColumn('createdTime', 'createdTime', type=date, width=0))
+
         fields = set()
+        airtable = Airtable(vd.options.airtable_base, self.source, vd.options.airtable_key)
         for page in airtable.get_iter(view=self.view):
             for record in page:
                 for field, value in record['fields'].items():
                     if field not in fields:
-                        self.addColumn(Column(field, expr=field, type=deduceType(value), getter=lambda c,r: r['fields'].get(c.expr)))
+                        self.addColumn(fieldColumn(field, value))
                         fields.add(field)
                 yield record
+
+    def newRow(self):
+        return {'fields': {}}
+
+    @asyncthread
+    def putChanges(self):
+        def fields(row, cols, includeNones=False):
+            fields = {}
+            for col in cols:
+                val = col.getTypedValue(row)
+                if isinstance(val, TypedWrapper):
+                    if includeNones:
+                        fields[col.expr] = None
+                else:
+                    fields[col.expr] = val
+            return fields
+
+        def update(row, cols):
+            return {'id': row['id'], 'fields': fields(row, cols, includeNones=True)}
+
+        adds, mods, dels = self.getDeferredChanges()
+        airtable = Airtable(vd.options.airtable_base, self.source, vd.options.airtable_key)
+        airtable.batch_insert([fields(r, self.visibleCols) for r in adds.values()])
+        airtable.batch_update([update(r, m.keys()) for r, m in mods.values()])
+        airtable.batch_delete([r['id'] for r in dels.values()])
+
+        self.preloadHook()
+        self.reload()
