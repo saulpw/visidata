@@ -61,10 +61,10 @@ class AirtableSheet(Sheet):
         adds, mods, dels = self.getDeferredChanges()
         airtable = Airtable(vd.options.airtable_base, self.source, vd.options.airtable_key)
         with Progress(gerund='inserting', total=3) as prog:
-            airtable.batch_insert([fields(r, self.visibleCols) for r in adds.values()])
+            airtable.batch_insert([fields(r, self.visibleCols) for r in adds.values()], typecast=True)
             prog.addProgress(1)
             prog.gerund = 'updating'
-            airtable.batch_update([update(r, m.keys()) for r, m in mods.values()])
+            airtable.batch_update([update(r, m.keys()) for r, m in mods.values()], typecast=True)
             prog.addProgress(1)
             prog.gerund = 'deleting'
             airtable.batch_delete([r['id'] for r in dels.values()])
