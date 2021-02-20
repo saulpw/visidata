@@ -60,12 +60,18 @@ def setWindows(vd, scr):
             vd.win1 = vd.winBottom
             # drawing to 0-line window causes problems
             vd.win2 = mock.MagicMock(__bool__=mock.Mock(return_value=False))
+            for vs in vd.sheets[0:0]:
+                vs.refresh()
         elif pct > 0: # second window line n to bottom
             vd.win1 = vd.winTop
             vd.win2 = vd.winBottom
+            for vs in vd.sheets[0:2]:
+                vs.refresh()
         elif pct < 0: # second window line 0 to n
             vd.win1 = vd.winBottom
             vd.win2 = vd.winTop
+            for vs in vd.sheets[0:2]:
+                vs.refresh()
 
         vd.windowConfig = desiredConfig
         vd.scrFull = scr
