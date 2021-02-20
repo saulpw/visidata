@@ -1014,6 +1014,8 @@ def push(vd, vs):
     if not isinstance(vs, BaseSheet):
         return  # return instead of raise, some commands need this
 
+    vd.options.disp_splitwin_pct=-vd.options.disp_splitwin_pct
+
     vs.vd = vd
     if vs in vd.sheets:
         vd.sheets.remove(vs)
@@ -1040,6 +1042,7 @@ def quit(vd, *sheets):
     'Remove *sheets* from sheets stack, asking for confirmation if options.quitguard set (either global or sheet-specific).'
     if len(vd.sheets) == len(sheets) and options.getonly('quitguard', 'global', False):
         vd.confirm("quit last sheet? ")
+    vd.options.disp_splitwin_pct=-vd.options.disp_splitwin_pct
     for vs in sheets:
         if options.getonly('quitguard', vs, False):
             vd.draw_all()
@@ -1108,9 +1111,9 @@ SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(shee
 BaseSheet.addCommand('q', 'quit-sheet',  'vd.quit(sheet)', 'quit current sheet')
 globalCommand('gq', 'quit-all', 'vd.quit(*vd.sheets)', 'quit all sheets (clean exit)')
 
-BaseSheet.addCommand('Z', 'splitwin-half', 'options.disp_splitwin_pct = 50', 'split screen in half, so that second sheet on stack is visible in a second pane')
+BaseSheet.addCommand('Z', 'splitwin-half', 'options.disp_splitwin_pct = -50', 'split screen in half, so that second sheet on stack is visible in a second pane')
 BaseSheet.addCommand('gZ', 'splitwin-close', 'options.disp_splitwin_pct = 0', 'close an already split screen, current pane full screens')
-BaseSheet.addCommand('^I', 'splitwin-swap', 'vd.push(vd.sheets[1]) if len(sheets) >=2 else fail("at least 2 sheets required for splitwin-swap"); options.disp_splitwin_pct = -options.disp_splitwin_pct', 'jump to other pane')
+BaseSheet.addCommand('^I', 'splitwin-swap', 'push(sheets[1]) if sheets[1:] else fail("no second sheet")', 'jump to other pane')
 BaseSheet.addCommand('zZ', 'splitwin-input', 'options.disp_splitwin_pct = input("% height for split window: ", value=options.disp_splitwin_pct)', 'split screen and queries for height of second pane, second sheet on stack is visible in second pane')
 
 BaseSheet.addCommand('^L', 'redraw', 'vd.redraw(); sheet.refresh()', 'refresh screen')
