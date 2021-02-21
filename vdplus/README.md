@@ -10,6 +10,9 @@
 - [Google Sheets](google/#gsheets)
   - load from url with `-f gsheets` (or `-f g`)
   - save with `.g` extension
+- [Airtable](airtable.md)
+  - load from url with `-f airtable`
+  - save changes to existing tables with `z Ctrl+S`
 
 ## License
 
