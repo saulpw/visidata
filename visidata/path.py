@@ -7,7 +7,7 @@ from functools import wraps
 
 from visidata import *
 
-option('encoding', 'utf-8', 'encoding passed to codecs.open', replay=True)
+option('encoding', 'utf-8-sig', 'encoding passed to codecs.open', replay=True)
 option('encoding_errors', 'surrogateescape', 'encoding_errors passed to codecs.open', replay=True)
 
 @functools.lru_cache()
