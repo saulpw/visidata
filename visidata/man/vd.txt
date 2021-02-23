@@ -181,16 +181,15 @@ DESCRIPTION
      gz"              open duplicate sheet with deepcopy of selected rows
 
    Editing Rows and Cells
-       a   za         append a blank row/column; appended columns cannot be
+       a   za         append blank row/column; appended columns cannot be
                       copied to clipboard
       ga  gza number  append number blank rows/columns
-       d   gd         delete (cut) current/selected row(s) and move to clip‐
-                      board
+       d   gd         delete current/selected row(s)
        y   gy         yank (copy) current/all selected row(s) to clipboard
       zy  gzy         yank (copy) contents of current column for current/se‐
                       lected row(s) to clipboard
-      zd  gzd         delete (cut) contents of current column for current/se‐
-                      lected row(s) and move to clipboard
+      zd  gzd         delete contents of current column for current/selected
+                      row(s)
        p    P         paste clipboard rows after/before current row
       zp  gzp         set cells of current column for current/selected row(s)
                       to last clipboard value

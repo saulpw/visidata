@@ -285,17 +285,17 @@ open duplicate sheet with deepcopy of selected rows
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "  a   za"
-append a blank row/column; appended columns cannot be copied to clipboard
+append blank row/column; appended columns cannot be copied to clipboard
 .It Ic " ga  gza" Ar number
 .No append Ar number No blank rows/columns
 .It Ic "  d   gd"
-delete (cut) current/selected row(s) and move to clipboard
+delete current/selected row(s)
 .It Ic "  y   gy"
 yank (copy) current/all selected row(s) to clipboard
 .It Ic " zy  gzy"
 yank (copy) contents of current column for current/selected row(s) to clipboard
 .It Ic " zd  gzd"
-delete (cut) contents of current column for current/selected row(s) and move to clipboard
+delete contents of current column for current/selected row(s)
 .It Ic "  p    P"
 paste clipboard rows after/before current row
 .It Ic " zp  gzp"

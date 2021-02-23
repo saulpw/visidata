@@ -29,7 +29,7 @@ An example usage follows.
 
 2. Press
 
-    a. `gd` to delete the selected rows.  The rows can be pasted elsewhere on any sheet of the same type with `gp`.
+    a. `gd` to delete the selected rows.
 
     **or**
 
@@ -92,16 +92,16 @@ Command(s)         Operation
 `gJ` `gK`          move cursor row all the way to the bottom/top of sheet
 
 
-###### How to cut/copy and paste a single row
+###### How to copy and paste a single row
 
-1. Press `d`/`y` to delete/yank the row and move it to the clipboard.
+1. Press `y` to copy the row to the clipboard.
 2. Move the cursor to the desired location.
 3. Press `p`/`Shift+P` to paste the row after/before current row.
 
-###### How to cut/copy and paste multiple rows
+###### How to copy and paste multiple rows
 
 1. Press `s`/`t` on those rows to select them.
-2. Press `gd`/`gy` to cut/yank all selected rows to the clipboard.
+2. Press `gy` to copy all selected rows to the clipboard.
 3. Move the cursor to the desired location.
 3. Press `p`/`Shift+P` to paste those rows after/before current row.
 
