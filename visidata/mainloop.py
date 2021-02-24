@@ -1,6 +1,7 @@
 import contextlib
 import os
 import curses
+import signal
 import threading
 import time
 from unittest import mock
@@ -222,6 +223,10 @@ def setupcolors(stdscr, f, *args):
     return f(stdscr, *args)
 
 def wrapper(f, *args):
+    # workaround for bug in curses.wrapper #899
+    # https://stackoverflow.com/questions/31440392/curses-wrapper-messing-up-terminal-after-background-foreground-sequence
+    vd.tstp_signal = signal.getsignal(signal.SIGTSTP)
+
     return curses.wrapper(setupcolors, f, *args)
 
 def run(*sheetlist):
