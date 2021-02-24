@@ -178,17 +178,13 @@ def saveToClipboard(sheet, rows, filetype=None):
 
 Sheet.addCommand('y', 'copy-row', 'copyRows([cursorRow])', 'yank (copy) current row to clipboard')
 
-Sheet.addCommand('', 'cut-row', 'vd.cliprows = [(sheet, cursorRowIndex, sheet.delete_row(cursorRowIndex))]; defer and cursorDown(1)', 'delete (cut) current row and move it to clipboard')
 Sheet.addCommand('p', 'paste-after', 'paste_after(cursorRowIndex)', 'paste clipboard rows after current row')
 Sheet.addCommand('P', 'paste-before', 'paste_before(cursorRowIndex)', 'paste clipboard rows before current row')
 
-Sheet.addCommand('', 'cut-selected', 'copyRows(onlySelectedRows); deleteSelected()', 'delete (cut) selected rows and move them to clipboard')
 Sheet.addCommand('gy', 'copy-selected', 'copyRows(onlySelectedRows)', 'yank (copy) selected rows to clipboard')
 
 Sheet.addCommand('zy', 'copy-cell', 'copyCells(cursorCol, [cursorRow])', 'yank (copy) current cell to clipboard')
 Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.clipcells[0]) if vd.clipcells else warning("no cells to paste")', 'set contents of current cell to last clipboard value')
-Sheet.addCommand('', 'cut-cell', 'vd.clipcells = [cursorDisplay]; cursorCol.setValues([cursorRow], None)', 'delete (cut) current cell and move it to clipboard')
-Sheet.addCommand('', 'cut-cells', 'vd.clipcells = list(vd.sheet.cursorCol.getDisplayValue(r) for r in onlySelectedRows); cursorCol.setValues(onlySelectedRows, None)', 'delete (cut) contents of current column for selected rows and move them to clipboard')
 
 Sheet.addCommand('d', 'delete-row', 'delete_row(cursorRowIndex); defer and cursorDown(1)', 'delete current row')
 Sheet.addCommand('gd', 'delete-selected', 'deleteSelected()', 'delete selected rows')
