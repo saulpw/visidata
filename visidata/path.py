@@ -234,7 +234,6 @@ class RepeatFile:
             try:
                 s = next(self.iter)
                 r += s + '\n'
-                n += len(r)
             except StopIteration:
                 break  # end of file
         return r
