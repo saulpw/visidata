@@ -121,4 +121,4 @@ alias('add-sheet', 'open-new')
 alias('save-sheets-selected', 'save-selected')
 
 # v2.3
-alias('show-aggregate', 'record-aggregate')
+alias('show-aggregate', 'memo-aggregate')

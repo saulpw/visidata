@@ -152,7 +152,7 @@ def aggname(col, agg):
 
 @Column.api
 @asyncthread
-def record_aggregate(col, agg, rows):
+def memo_aggregate(col, agg, rows):
     'Show aggregated value in status, and add to memory.'
     aggval = agg(col, rows)
     typedval = wrapply(agg.type or col.type, aggval)
@@ -172,5 +172,5 @@ vd.addGlobals(globals())
 
 
 Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregator_choices))', 'add aggregator to current column')
-Sheet.addCommand('z+', 'record-aggregate', 'for agg in chooseMany(aggregator_choices): cursorCol.record_aggregate(aggregators[agg], selectedRows or rows)', 'record result of aggregator over values in selected rows for current column')
+Sheet.addCommand('z+', 'memo-aggregate', 'for agg in chooseMany(aggregator_choices): cursorCol.memo_aggregate(aggregators[agg], selectedRows or rows)', 'memo result of aggregator over values in selected rows for current column')
 ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseMany(aggregator_choices))', 'add aggregators to selected source columns')
