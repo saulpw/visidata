@@ -1,0 +1,8 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.tsv	o	
+sample	Units		type-int		#	set type of current column to int
+sample	Units		record-aggregate	sum	z+	record result of aggregator over values in selected rows for current column
+sample	Units		addcol-expr	Units*100/Units_sum	=	create new column from Python expression, with column names as variables
+sample	Units*100/Units_sum		type-float		%	set type of current column to float
+sample	Units*100/Units_sum		rename-col	Units_pct	^	edit name of current column
+sample	Units_pct		record-aggregate	sum	z+	record result of aggregator over values in selected rows for current column
