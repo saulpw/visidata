@@ -13,13 +13,19 @@ def memoriesSheet(vd):
 
 
 class MemorySheet(Sheet):
-    rowtype = 'memories'
+    rowtype = 'memories' # rowdef: keys into vd.memory
     columns = [
-        Column('name', getter=lambda c,r: r[0], setter=lambda c,r,v: setitem(vd.memory, v, r[1])),
-        Column('value', getter=lambda c,r: r[1], setter=lambda c,r,v: setitem(vd.memory, r[0], v)),
+        Column('name', getter=lambda c,r: r, setter=lambda c,r,v: setitem(vd.memory, v, vd.memory[r])),
+        Column('value', getter=lambda c,r: vd.memory[r], setter=lambda c,r,v: setitem(vd.memory, r, v)),
     ]
-    def reload(self):
-        self.rows = list(vd.memory.items())
+
+    @property
+    def rows(self):
+        return list(vd.memory.keys())
+
+    @rows.setter
+    def rows(self, v):
+        pass
 
 
 Sheet.addCommand('^[M', 'open-memory', 'vd.push(vd.memoriesSheet)')
