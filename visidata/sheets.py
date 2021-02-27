@@ -110,7 +110,7 @@ class LazyComputeRow:
     def _lcm(self):
         lcmobj = self.col or self.sheet
         if not hasattr(lcmobj, '_lcm'):
-            lcmobj._lcm = LazyChainMap(self.sheet, vd, self.col)
+            lcmobj._lcm = LazyChainMap(self.sheet, self.col, *vd.contexts)
         return lcmobj._lcm
 
     def keys(self):
