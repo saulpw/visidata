@@ -119,3 +119,6 @@ alias('dive-cell', 'open-cell')
 alias('dive-row', 'open-row')
 alias('add-sheet', 'open-new')
 alias('save-sheets-selected', 'save-selected')
+
+# v2.3
+alias('show-aggregate', 'record-aggregate')
