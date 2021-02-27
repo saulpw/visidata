@@ -67,7 +67,12 @@ def _(sampleValue, col, vals):
 def _(sampleValue, col, vals):
     '''Use the longest sequence to determine the number of columns we need to
     create, and their presumed types'''
-    longestSeq = max(vals, key=len)
+    def lenNoExceptions(v):
+        try:
+            return len(v)
+        except Exception as e:
+            return 0
+    longestSeq = max(vals, key=lenNoExceptions)
     colTypes = [deduceType(v) for v in longestSeq]
     return [
         ExpandedColumn('%s[%s]' % (col.name, k), type=colType, origCol=col, key=k)
