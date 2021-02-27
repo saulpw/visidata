@@ -157,7 +157,9 @@ def show_aggregate(col, agg, rows):
     aggval = agg(col, rows)
     typedval = wrapply(agg.type or col.type, aggval)
     dispval = col.format(typedval)
-    vd.status(dispval)
+    k = col.name+'_'+agg.name
+    vd.status(f'{k}={dispval}')
+    vd.memory[k] = typedval
 
 
 @VisiData.property
