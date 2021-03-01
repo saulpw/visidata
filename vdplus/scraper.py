@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-__all__=[ 'SelectorColumn' ]
+__all__=[ 'SelectorColumn', 'soupstr' ]
 
 from visidata import *
 
@@ -21,7 +21,10 @@ def soup(vd, s):
 
 @VisiData.api
 def open_scrape(vd, p):
-    return HtmlDocsSheet(p.name, source=p, urls=[p.given])
+    if p.is_url():
+        return HtmlDocsSheet(p.name, source=p, urls=[p.given])
+    else:
+        return HtmlElementsSheet(p.name, source=p, elements=[vd.soup(p.read_text())])
 
 def node_name(node):
     me = ' ' + node.name
@@ -105,5 +108,11 @@ class HtmlDocsSheet(Sheet):
     def openRow(self, row):
         return HtmlElementsSheet(row.url, source=self, elements=[row.soup])
 
+def soupstr(coll):
+    return ' '.join(v.string for v in coll)
+
+vdtype(soupstr, 's')
+
+HtmlElementsSheet.addCommand('~', 'type-soupstr', 'cursorCol.type=soupstr')
 HtmlElementsSheet.addCommand('go', 'open-rows', 'for vs in openRows(selectedRows): vd.push(vs)')
 HtmlDocsSheet.addCommand(';', 'addcol-selector', 'sel=input("css selector: ", type="selector"); addColumn(SelectorColumn(sel, expr=sel))')

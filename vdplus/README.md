@@ -27,7 +27,7 @@
 
   - on RequestsSheet, add column of elements matching given css selector with `;` (addcol-selector)
     - cross-tabulate data from multiple pages
-
+    - join elements together with the `soupstr` type (bound to `~` on the HTMLElementsSheet)
 
 ## License
 
