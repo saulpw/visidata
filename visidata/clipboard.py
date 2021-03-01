@@ -180,8 +180,8 @@ Sheet.addCommand('P', 'paste-before', 'paste_before(cursorRowIndex)', 'paste cli
 
 Sheet.addCommand('gy', 'copy-selected', 'copyRows(onlySelectedRows)', 'yank (copy) selected rows to clipboard')
 
-Sheet.addCommand('zy', 'copy-cell', 'vd.memory.clipval=cursorCol.getTypedValue(cursorRow)', 'yank (copy) current cell to clipboard')
-Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.memory.clipval) if vd.memory.clipval else warning("no cells to paste")', 'set contents of current cell to last clipboard value')
+Sheet.addCommand('zy', 'copy-cell', 'vd.memo("clipval", cursorCol, cursorRow)', 'yank (copy) current cell to clipboard')
+Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.memory.clipval)', 'set contents of current cell to last clipboard value')
 
 Sheet.addCommand('d', 'delete-row', 'delete_row(cursorRowIndex); defer and cursorDown(1)', 'delete current row')
 Sheet.addCommand('gd', 'delete-selected', 'deleteSelected()', 'delete selected rows')

@@ -3,6 +3,13 @@ from visidata import Sheet, VisiData, ItemColumn, vd, AttrDict, Column, setitem
 vd.memory = AttrDict()
 vd.contexts += [vd.memory]
 
+
+@VisiData.api
+def memo(vd, name, col, row):
+    vd.memory[name] = col.getTypedValue(row)
+    vd.status('memo %s=%s' % (name, col.getDisplayValue(row)))
+
+
 class MemorySheet(Sheet):
     rowtype = 'memos' # rowdef: keys into vd.memory
     columns = [
