@@ -60,14 +60,8 @@ def delete_row(sheet, rowidx):
 
 @Sheet.api
 def paste_after(sheet, rowidx):
-    vd.addUndo(sheet.rows.pop, rowidx+1)
-    sheet.rows[rowidx+1:rowidx+1] = list(deepcopy(r) for s,i,r in vd.memory.cliprows)
-
-@Sheet.api
-def paste_before(sheet, rowidx):
-    sheet.rows[sheet.cursorRowIndex:sheet.cursorRowIndex] = list(deepcopy(r) for s,i,r in vd.memory.cliprows)
-    vd.addUndo(sheet.rows.pop, rowidx)
-
+    to_paste = list(deepcopy(r) for s,i,r in reversed(vd.memory.cliprows))
+    sheet.addNewRows(len(to_paste), rowidx, to_paste)
 
 # mapping of OS to list of possible (command name, command args) for copy and
 # paste commands
@@ -176,7 +170,7 @@ def saveToClipboard(sheet, rows, filetype=None):
 Sheet.addCommand('y', 'copy-row', 'copyRows([cursorRow])', 'yank (copy) current row to clipboard')
 
 Sheet.addCommand('p', 'paste-after', 'paste_after(cursorRowIndex)', 'paste clipboard rows after current row')
-Sheet.addCommand('P', 'paste-before', 'paste_before(cursorRowIndex)', 'paste clipboard rows before current row')
+Sheet.addCommand('P', 'paste-before', 'paste_after(cursorRowIndex-1)', 'paste clipboard rows before current row')
 
 Sheet.addCommand('gy', 'copy-selected', 'copyRows(onlySelectedRows)', 'yank (copy) selected rows to clipboard')
 

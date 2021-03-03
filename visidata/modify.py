@@ -73,11 +73,11 @@ def rowDeleted(self, row):
 
 @Sheet.api
 @asyncthread
-def addNewRows(sheet, n, idx):
+def addNewRows(sheet, n, idx, rows=None):
     'Add *n* new rows after row at *idx*.'
     addedRows = {}
     for i in Progress(range(n), 'adding'):
-        row = sheet.newRow()
+        row = sheet.newRow() if not rows else rows[i]
         addedRows[sheet.rowid(row)] = row
         sheet.addRow(row, idx+1)
 
