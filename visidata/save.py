@@ -65,7 +65,7 @@ def itervals(sheet, *cols, format=False):
     for row in sheet.iterdispvals(*cols, format=format):
         yield [row[c] for c in cols]
 
-@Sheet.api
+@BaseSheet.api
 def getDefaultSaveName(sheet):
     src = getattr(sheet, 'source', None)
     if hasattr(src, 'scheme') and src.scheme:
