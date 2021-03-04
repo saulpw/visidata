@@ -24,6 +24,8 @@ class ReturnValue(BaseException):
 def draw_sheet(self, scr, sheet):
     'Erase *scr* and draw *sheet* on it, including status bars.'
 
+    sheet.ensureLoaded()
+
     scr.erase()  # clear screen before every re-draw
 
     sheet._scr = scr
@@ -120,7 +122,6 @@ def mainloop(self, scr):
         threading.current_thread().sheet = sheet
         vd.drawThread = threading.current_thread()
 
-        sheet.ensureLoaded()
         vd.setWindows(scr)
 
         self.draw_all()
