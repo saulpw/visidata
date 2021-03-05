@@ -10,7 +10,7 @@ from visidata import launchExternalEditor, suspend, ColumnItem, AttrDict
 
 __all__ = ['confirm', 'CompleteKey']
 
-theme('color_edit_cell', 'normal', 'cell color to use when editing cell')
+theme('color_edit_cell', 'white', 'cell color to use when editing cell')
 theme('disp_edit_fill', '_', 'edit field fill character')
 theme('disp_unprintable', '·', 'substitute character for unprintables')
 

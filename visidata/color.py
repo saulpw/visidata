@@ -3,6 +3,7 @@ import functools
 from copy import copy
 
 from visidata import options, Extensible, drawcache, drawcache_property
+import visidata
 from collections import namedtuple
 
 __all__ = ['ColorAttr', 'colors', 'update_attr', 'ColorMaker']
@@ -38,8 +39,8 @@ def update_attr(oldattr, updattr, updprec=None):
 
 class ColorMaker:
     def __init__(self):
-        self.attrs = {}
-        self.color_attrs = {}
+        self.color_pairs = {}  # (fg,bg) -> (color_attr, colornamestr) (can be or'ed with other attrs)
+        self.default_fgbg = (-1, -1)  # default fg and bg
 
     @drawcache_property
     def colorcache(self):
@@ -48,28 +49,14 @@ class ColorMaker:
     def setup(self):
         if options.use_default_colors:
             curses.use_default_colors()
-            default_bg = -1
+            self.default_fgbg = (-1, -1)
         else:
-            default_bg = curses.COLOR_BLACK
+            self.default_fgbg = (-1, curses.COLOR_BLACK)
 
-        self.color_attrs['black'] = curses.color_pair(0)
-
-        for c in range(0, options.force_256_colors and 256 or curses.COLORS):
-            try:
-                curses.init_pair(c+1, c, default_bg)
-                self.color_attrs[str(c)] = curses.color_pair(c+1)
-            except curses.error as e:
-                pass # curses.init_pair gives a curses error on Windows
-
-        for c in 'red green yellow blue magenta cyan white'.split():
-            colornum = getattr(curses, 'COLOR_' + c.upper())
-            self.color_attrs[c] = curses.color_pair(colornum+1)
-
-        for a in 'normal blink bold dim reverse standout underline'.split():
-            self.attrs[a] = getattr(curses, 'A_' + a.upper())
-
-    def keys(self):
-        return list(self.attrs.keys()) + list(self.color_attrs.keys())
+    @functools.cached_property
+    def colors(self):
+        'not computed until curses color has been initialized'
+        return {x[6:]:getattr(curses, x) for x in dir(curses) if x.startswith('COLOR_') and x != 'COLOR_PAIRS'}
 
     def __getitem__(self, colornamestr):
         return self._colornames_to_cattr(colornamestr).attr
@@ -88,14 +75,34 @@ class ColorMaker:
         return cattr
 
     def _colornames_to_cattr(self, colornamestr, precedence=0):
-        color, attr = 0, 0
-        for colorname in colornamestr.split(' '):
-            if colorname in self.color_attrs:
-                if not color:
-                    color = self.color_attrs[colorname.lower()]
-            elif colorname in self.attrs:
-                attr = self.attrs[colorname.lower()]
-        return ColorAttr(color, attr, precedence, color | attr)
+        attrs = 0
+        fgbg = list(self.default_fgbg)
+        i = 0
+        for x in colornamestr.split():
+            if x == 'fg': i = 0
+            elif x in ['on', 'bg']: i = 1
+            elif attr := getattr(curses, 'A_' + x.upper(), None):
+                attrs |= attr
+            else:
+                if fgbg[i] == self.default_fgbg[i]:  # keep first known color
+                    fgbg[i] = int(x) if x.isdigit() else self.colors.get(x.upper(), 0)
+
+        if tuple(fgbg) == tuple(self.default_fgbg):
+            color = 0
+        else:
+            pairnum, _ = self.color_pairs.get(tuple(fgbg), (None, ''))
+            if pairnum is None:
+                pairnum = len(self.color_pairs)+1
+                try:
+                    curses.init_pair(pairnum, *fgbg)
+                except curses.error as e:
+                    visidata.vd.exceptionCaught(e)
+                    return curses.color_pair(0) | attrs
+                self.color_pairs[tuple(fgbg)] = (pairnum, colornamestr)
+
+            color = curses.color_pair(pairnum)
+
+        return ColorAttr(color, attrs, precedence, color | attrs)
 
     def get_color(self, optname, precedence=0):
         'colors.color_foo returns colors[options.color_foo]'
