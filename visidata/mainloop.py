@@ -147,6 +147,9 @@ def mainloop(self, scr):
                 clicktype = ''
                 try:
                     devid, x, y, z, bstate = curses.getmouse()
+                    if vd.windowConfig and y > vd.windowConfig['n'] and vd.windowConfig['pct'] > 0:
+                        y -= vd.windowConfig['n']
+                        sheet = vd.sheets[1]
                     sheet.mouseX, sheet.mouseY = x, y
                     if bstate & curses.BUTTON_CTRL:
                         clicktype += "CTRL-"
