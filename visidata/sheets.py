@@ -280,9 +280,12 @@ class TableSheet(BaseSheet):
     def reload(self):
         'Load rows and/or columns from ``self.source``.  Async.  Override in subclass.'
         self.rows = []
-        with vd.Progress(gerund='loading', total=0):
-            for r in self.iterload():
-                self.addRow(r)
+        try:
+            with vd.Progress(gerund='loading', total=0):
+                for r in self.iterload():
+                    self.addRow(r)
+        except FileNotFoundError:
+            return  # let it be a blank sheet without error
 
         # if an ordering has been specified, sort the sheet
         if self._ordering:

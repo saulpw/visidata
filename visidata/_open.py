@@ -48,17 +48,14 @@ def openPath(vd, p, filetype=None, create=False):
         except KeyError:
             vd.fail(f'no loader for url scheme: {p.scheme}')
 
+    if not p.exists() and not create:
+        return None
+
     if not filetype:
         if p.is_dir():
             filetype = 'dir'
         else:
             filetype = p.ext or options.filetype or 'txt'
-
-    if not p.exists():
-        if not create:
-            return None
-        vd.warning('%s does not exist, creating new sheet' % p)
-        return vd.newSheet(p.name, 1, source=p)
 
     filetype = filetype.lower()
 
@@ -68,7 +65,11 @@ def openPath(vd, p, filetype=None, create=False):
         filetype = 'txt'
         openfunc = vd.getGlobals().get('open_txt')
 
-    vd.status('opening %s as %s' % (p.given, filetype))
+    if p.exists():
+        vd.status('opening %s as %s' % (p.given, filetype))
+    else:
+        vd.status('creating blank %s' % (p.given))
+
     return openfunc(p)
 
 
