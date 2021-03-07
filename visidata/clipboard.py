@@ -179,8 +179,8 @@ Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.m
 
 Sheet.addCommand('d', 'delete-row', 'delete_row(cursorRowIndex); defer and cursorDown(1)', 'delete current row')
 Sheet.addCommand('gd', 'delete-selected', 'deleteSelected()', 'delete selected rows')
-Sheet.addCommand('zd', 'delete-cell', 'cursorCol.setValues([cursorRow], None)', 'delete current cell (set to None)')
-Sheet.addCommand('gzd', 'delete-cells', 'cursorCol.setValues(onlySelectedRows, None)', 'delete contents of current column for selected rows (set to None)')
+Sheet.addCommand('zd', 'delete-cell', 'cursorCol.setValues([cursorRow], options.null_value)', 'delete current cell (set to None)')
+Sheet.addCommand('gzd', 'delete-cells', 'cursorCol.setValues(onlySelectedRows, options.null_value)', 'delete contents of current column for selected rows (set to None)')
 
 Sheet.bindkey('BUTTON2_PRESSED', 'go-mouse')
 Sheet.addCommand('BUTTON2_RELEASED', 'syspaste-cells', 'pasteFromClipboard(visibleCols[cursorVisibleColIndex:], rows[cursorRowIndex:])', 'paste into VisiData from system clipboard')

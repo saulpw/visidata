@@ -98,7 +98,7 @@ def deleteBy(sheet, func, commit=False):
     oldidx = sheet.cursorRowIndex
     ndeleted = 0
 
-    row = None   # row to re-place cursor after
+    newCursorRow = None   # row to re-place cursor after
     # if commit is True, commit to delete, even if defer is True
     if sheet.defer and not commit:
         ndeleted = 0
