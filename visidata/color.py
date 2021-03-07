@@ -2,7 +2,7 @@ import curses
 import functools
 from copy import copy
 
-from visidata import options, Extensible, drawcache, drawcache_property
+from visidata import options, Extensible, drawcache, drawcache_property, VisiData
 import visidata
 from collections import namedtuple
 
@@ -53,7 +53,7 @@ class ColorMaker:
         else:
             self.default_fgbg = (-1, curses.COLOR_BLACK)
 
-    @functools.cached_property
+    @VisiData.cached_property
     def colors(self):
         'not computed until curses color has been initialized'
         return {x[6:]:getattr(curses, x) for x in dir(curses) if x.startswith('COLOR_') and x != 'COLOR_PAIRS'}
@@ -79,9 +79,15 @@ class ColorMaker:
         fgbg = list(self.default_fgbg)
         i = 0
         for x in colornamestr.split():
-            if x == 'fg': i = 0
-            elif x in ['on', 'bg']: i = 1
-            elif attr := getattr(curses, 'A_' + x.upper(), None):
+            if x == 'fg':
+                i = 0
+                continue
+            elif x in ['on', 'bg']:
+                i = 1
+                continue
+
+            attr = getattr(curses, 'A_' + x.upper(), None)
+            if attr:
                 attrs |= attr
             else:
                 if fgbg[i] == self.default_fgbg[i]:  # keep first known color
