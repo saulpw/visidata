@@ -21,9 +21,9 @@ open_ndjson = open_ldjson = open_json = open_jsonl
 class JsonSheet(PythonSheet):
     def iterload(self):
         self.colnames = {}  # [colname] -> Column
-        self.columns = []
 
         with self.source.open_text() as fp:
+            self.columns = deepcopy(type(self).columns)
             for L in fp:
                 try:
                     if L.startswith('#'): # skip commented lines
