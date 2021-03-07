@@ -96,12 +96,10 @@ class ColorMaker:
                 try:
                     curses.init_pair(pairnum, *fgbg)
                 except curses.error as e:
-                    visidata.vd.exceptionCaught(e)
-                    return curses.color_pair(0) | attrs
+                    return ColorAttr(0, attrs, precedence, attrs)
                 self.color_pairs[tuple(fgbg)] = (pairnum, colornamestr)
 
             color = curses.color_pair(pairnum)
-
         return ColorAttr(color, attrs, precedence, color | attrs)
 
     def get_color(self, optname, precedence=0):
