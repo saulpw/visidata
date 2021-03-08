@@ -35,7 +35,8 @@ def rowAdded(self, row):
     'Mark row as a deferred add-row'
     self._deferredAdds[self.rowid(row)] = row
     def _undoRowAdded(sheet, row):
-        del sheet._deferredAdds[sheet.rowid(row)]
+        if sheet.rowid(row) in sheet._deferredAdds:
+            del sheet._deferredAdds[sheet.rowid(row)]
     vd.addUndo(_undoRowAdded, self, row)
 
 @Column.api
