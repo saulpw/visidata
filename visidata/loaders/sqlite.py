@@ -101,9 +101,12 @@ class SqliteSheet(Sheet):
                     vd.warning('not all rows deleted') # f'{res.rowcount}/{res.arraysize} rows deleted'
 
             conn.commit()
+        self.commitAdds()
+        self.commitMods()
+        self.commitDeletes()
 
         self.preloadHook()
-        self.reload()
+
 
 
 class SqliteIndexSheet(SqliteSheet, IndexSheet):
