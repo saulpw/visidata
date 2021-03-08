@@ -68,7 +68,8 @@ def rowDeleted(self, row):
     'Mark row as a deferred delete-row'
     self._deferredDels[self.rowid(row)] = row
     def _undoRowDeleted(sheet, row):
-        del sheet._deferredDels[sheet.rowid(row)]
+        if sheet.rowid(row) in sheet._deferredDels:
+            del sheet._deferredDels[sheet.rowid(row)]
     vd.addUndo(_undoRowDeleted, self, row)
 
 
@@ -87,13 +88,13 @@ def addNewRows(sheet, n, idx, rows=None):
 
     @asyncthread
     def _removeRows():
-        sheet.deleteBy(lambda r,sheet=sheet,addedRows=addedRows: sheet.rowid(r) in addedRows, commit=True)
+        sheet.deleteBy(lambda r,sheet=sheet,addedRows=addedRows: sheet.rowid(r) in addedRows, commit=True, undo=False)
 
     vd.addUndo(_removeRows)
 
 
 @Sheet.api
-def deleteBy(sheet, func, commit=False):
+def deleteBy(sheet, func, commit=False, undo=True):
     'Delete rows on sheet for which ``func(row)`` returns true.  Return number of rows deleted.  If sheet.defer is set and *commit* is True, remove rows immediately without deferring.'
     oldrows = copy(sheet.rows)
     oldidx = sheet.cursorRowIndex
@@ -124,7 +125,7 @@ def deleteBy(sheet, func, commit=False):
             sheet.deleteSourceRow(r)
             ndeleted += 1
 
-    if not commit:
+    if undo:
         vd.addUndo(setattr, sheet, 'rows', oldrows)
 
     if ndeleted:
@@ -184,7 +185,7 @@ def commitMods(self):
 @Sheet.api
 def commitDeletes(self):
     'Return the number of rows that have been marked for deletion. Delete the rows. Clear the marking.'
-    ndeleted = self.deleteBy(self.isDeleted, commit=True)
+    ndeleted = self.deleteBy(self.isDeleted, commit=True, undo=True)
 
     if ndeleted:
         vd.status('deleted %s %s' % (ndeleted, self.rowtype))
