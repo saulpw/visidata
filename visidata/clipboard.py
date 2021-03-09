@@ -61,7 +61,7 @@ def delete_row(sheet, rowidx):
 @Sheet.api
 def paste_after(sheet, rowidx):
     to_paste = list(deepcopy(r) for s,i,r in reversed(vd.memory.cliprows))
-    sheet.addNewRows(len(to_paste), rowidx, to_paste)
+    sheet.addRowsUndoable(to_paste, index=rowidx)
 
 # mapping of OS to list of possible (command name, command args) for copy and
 # paste commands
