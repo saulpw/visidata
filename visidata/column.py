@@ -459,10 +459,10 @@ def getitemdef(o, k, default=None):
     except Exception:
         return default
 
-def ItemColumn(name=None, key=None, **kwargs):
+def ItemColumn(name=None, expr=None, **kwargs):
     'Column using getitem/setitem with *key*.'
     return Column(name,
-            expr=key if key is not None else name,
+            expr=expr if expr is not None else name,
             getter=lambda col,row: getitemdeep(row, col.expr),
             setter=lambda col,row,val: setitemdeep(row, col.expr, val),
             **kwargs)
