@@ -123,7 +123,7 @@ vd.aggregator('stdev', stdev, 'standard deviation of values', type=float)
 vd.aggregators['q3'] = quantiles(3, 'tertiles (33/66th pctile)')
 vd.aggregators['q4'] = quantiles(4, 'quartiles (25/50/75th pctile)')
 vd.aggregators['q5'] = quantiles(5, 'quintiles (20/40/60/80th pctiles)')
-vd.aggregators['q10'] = quantiles(10, 'deciles (10/20/30/40/50/60/70/80/80th pctiles)')
+vd.aggregators['q10'] = quantiles(10, 'deciles (10/20/30/40/50/60/70/80/90th pctiles)')
 
 # returns keys of the row with the max value
 vd.aggregators['keymax'] = _defaggr('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]), 'key of the maximum value')
