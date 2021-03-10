@@ -107,9 +107,10 @@ def deleteBy(sheet, func, commit=False):
             ndeleted += 1
         return ndeleted
 
+    # find next non-deleted row to go to once delete has finished
     while oldidx < len(oldrows):
         if not func(oldrows[oldidx]):
-            row = sheet.rows[oldidx]
+            newCursorRow = sheet.rows[oldidx]
             break
         oldidx += 1
 
@@ -117,7 +118,7 @@ def deleteBy(sheet, func, commit=False):
     for r in Progress(oldrows, 'deleting'):
         if not func(r):
             sheet.rows.append(r)
-            if r is row:
+            if r is newCursorRow:
                 sheet.cursorRowIndex = len(sheet.rows)-1
         else:
             sheet.deleteSourceRow(r)

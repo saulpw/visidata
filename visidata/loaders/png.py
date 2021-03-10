@@ -64,7 +64,7 @@ class PNGDrawing(Canvas):
 @VisiData.api
 def save_png(vd, p, vs):
     if isinstance(vs, Canvas):
-        return save_png(p, vs.source)
+        return vd.save_png(p, vs.source)
 
     palette = collections.OrderedDict()
     palette[(0,0,0,0)] = 0   # invisible black is 0
