@@ -179,7 +179,7 @@ anjakefala has the key and password.
 dput mentors visidata_ver.changes
 ```
 
-12. Copy the fresh contents of the debian folder back into visidata/dev/debian.
+12. Copy the fresh contents of the debian folder back into visidata/dev/debian and in debian-visidata (https://salsa.debian.org/anjakefala/visidata).
 
 ## deb-vd
 Private registry: https://github.com/saulpw/deb-vd
