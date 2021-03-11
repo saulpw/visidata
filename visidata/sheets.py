@@ -156,7 +156,7 @@ class LazyComputeRow:
 
 class BasicRow(collections.defaultdict):
     def __init__(self, *args):
-        collections.defaultdict.__init__(self, lambda: None, *args)
+        collections.defaultdict.__init__(self, lambda: None)
     def __bool__(self):
         return True
 
