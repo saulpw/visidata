@@ -360,7 +360,9 @@ class Drawing(BaseSheet):
     def paste_chars(dwg, charslist):
         p = charslist[0]
         newrows = deepcopy(charslist)
-        for r in adj_xy(dwg.cursorX-p['x'], dwg.cursorY-p['y'], newrows):
+        x = dwg.cursorX-p.get('x', dwg.cursorX)
+        y = dwg.cursorY-p.get('y', dwg.cursorY)
+        for r in adj_xy(x, y, newrows):
             dwg.source.addRow(r)
 
         if dwg.source.nSelectedRows == 0: # auto-select newly pasted item
@@ -419,8 +421,8 @@ Drawing.addCommand('y', 'yank-char', 'p=AttrDict(cursorRow); vd.memo_chars=adj_x
 Drawing.addCommand('gy', 'yank-selected', 'sel=[AttrDict(r) for r in source.selectedRows]; vd.memo_chars=adj_xy(-sel[0].x, -sel[0].y, sel)')
 Drawing.addCommand('x', 'cut-char', 'vd.memo_chars=remove_at(cursorX, cursorY, cursorW, cursorH)')
 Drawing.addCommand('zx', 'cut-char-top', 'r=list(itercursor())[-1]; vd.memo_chars=[r]; source.deleteBy(lambda r,row=r: r is row)')
-Drawing.addCommand('p', 'paste-chars', 'paste_chars(vd.memo_chars)')
-Drawing.addCommand('gp', 'paste-chars-selected', 'paste_chars(vd.memo_chars)')
+Drawing.addCommand('p', 'paste-chars', 'paste_chars(vd.memory.cliprows)')
+Drawing.addCommand('gp', 'paste-chars-selected', 'paste_chars(vd.memory.cliprows, selectedRows)', 'paste characters from clipboard over selection')
 
 Drawing.addCommand('zh', 'go-left-obj', 'go_obj(-1, 0)')
 Drawing.addCommand('zj', 'go-down-obj', 'go_obj(0, +1)')
@@ -487,4 +489,5 @@ Drawing.init('mark', lambda: (0,0))
 Drawing.class_options.disp_rstatus_fmt='{sheet.pendir}  <U+{sheet.cursorCharOrd:04X}> {sheet.options.disp_selected_note}{sheet.source.nSelectedRows}'
 Drawing.class_options.quitguard='modified'
 Drawing.class_options.null_value=''
+Drawing.quitguard=True
 DrawingSheet.class_options.null_value=''
