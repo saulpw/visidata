@@ -144,6 +144,9 @@ class Drawing(BaseSheet):
             for ny in range(y, y+h):
                 yield from self.drawing[(nx,ny)]
 
+    def __getattr__(self, k):
+        return getattr(self.source, k)
+
     def itercursor(self):
         return self.iterbox(self.cursorX, self.cursorY, self.cursorW+1, self.cursorH+1)
 
