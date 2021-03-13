@@ -74,11 +74,11 @@ class ColorMaker:
             cattr = update_attr(cattr, c)
         return cattr
 
-    def _colornames_to_cattr(self, colornamestr, precedence=0):
-        attrs = 0
-        fgbg = list(self.default_fgbg)
-        i = 0
-        for x in colornamestr.split():
+    def split_colorstr(self, colorstr):
+        'Return (fgstr, bgstr, attrlist) parsed from colorstr.'
+        fgbgattrs = ['', '', []]  # fgstr, bgstr, attrlist
+        i = 0  # fg by default
+        for x in colorstr.split():
             if x == 'fg':
                 i = 0
                 continue
@@ -86,24 +86,38 @@ class ColorMaker:
                 i = 1
                 continue
 
-            attr = getattr(curses, 'A_' + x.upper(), None)
-            if attr:
-                attrs |= attr
+            if hasattr(curses, 'A_' + x.upper()):
+                fgbgattrs[2].append(x)
             else:
-                if fgbg[i] == self.default_fgbg[i]:  # keep first known color
-                    fgbg[i] = int(x) if x.isdigit() else self.colors.get(x.upper(), 0)
+                if not fgbgattrs[i]:  # keep first known color
+                    fgbgattrs[i] = x
 
-        if tuple(fgbg) == tuple(self.default_fgbg):
+        return fgbgattrs
+
+    def _get_colornum(self, colorname, default=0):
+        'Return terminal color number for colorname.'
+        return int(colorname) if colorname.isdigit() else self.colors.get(colorname.upper(), default)
+
+    def _colornames_to_cattr(self, colornamestr, precedence=0):
+        fg, bg, attrlist = self.split_colorstr(colornamestr)
+        attrs = 0
+        for attr in attrlist:
+            attrs |= getattr(curses, 'A_'+attr.upper())
+
+        if not fg and not bg:
             color = 0
         else:
-            pairnum, _ = self.color_pairs.get(tuple(fgbg), (None, ''))
+            fgbg = (self._get_colornum(fg, 7), self._get_colornum(bg, 0))
+            pairnum, _ = self.color_pairs.get(fgbg, (None, ''))
             if pairnum is None:
+                if len(self.color_pairs) > 254:
+                    self.color_pairs.clear()  # start over
                 pairnum = len(self.color_pairs)+1
                 try:
                     curses.init_pair(pairnum, *fgbg)
                 except curses.error as e:
                     return ColorAttr(0, attrs, precedence, attrs)
-                self.color_pairs[tuple(fgbg)] = (pairnum, colornamestr)
+                self.color_pairs[fgbg] = (pairnum, colornamestr)
 
             color = curses.color_pair(pairnum)
         return ColorAttr(color, attrs, precedence, color | attrs)
