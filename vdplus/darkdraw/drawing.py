@@ -130,7 +130,7 @@ class DrawingSheet(JsonSheet):
     def gatherGroup(self, gname):
         return list(r for r in self.rows if gname in r.get('group', ''))
 
-    def slide_to(self, rows, index=0):
+    def slide_top(self, rows, index=0):
         'Move selected rows to top of sheet (bottom of drawing)'
         for r in rows:
             self.rows.pop(self.rows.index(r))
@@ -405,8 +405,8 @@ Drawing.addCommand('BUTTON1_RELEASED', 'end-cursor', 'end_cursor(mouseX, mouseY)
 
 Drawing.addCommand('', 'align-x-selected', 'align_selected("x")')
 
-Drawing.addCommand('gKEY_HOME', 'slide-top-selected', 'source.slide_to(source.someSelectedRows, -1)', 'move selected items to top layer of drawing')
-Drawing.addCommand('gKEY_END', 'slide-bottom-selected', 'source.slide_to(source.someSelectedRows, 0)', 'move selected items to bottom layer of drawing')
+Drawing.addCommand('gKEY_HOME', 'slide-top-selected', 'source.slide_top(source.someSelectedRows, -1)', 'move selected items to top layer of drawing')
+Drawing.addCommand('gKEY_END', 'slide-bottom-selected', 'source.slide_top(source.someSelectedRows, 0)', 'move selected items to bottom layer of drawing')
 Drawing.addCommand('d', 'delete-cursor', 'remove_at(cursorX, cursorY, cursorW, cursorH); go_forward(1, 1)', 'delete first item under cursor')
 Drawing.addCommand('gd', 'delete-selected', 'source.deleteSelected()')
 Drawing.addCommand('a', 'add-input', 'place_text(input("text: ", value=get_text()), dx=1)')
