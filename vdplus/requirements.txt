@@ -1,6 +1,9 @@
 git+https://github.com/gtalarico/airtable-python-wrapper@60f4e8ae809cbcbc694307a2b467757512b93b8f#egg=airtable-python-wrapper
+
 google_auth_oauthlib
 google-api-python-client
 
-requests_cache
-beautifulsoup4
+requests_cache  # scraper
+beautifulsoup4  # scraper
+
+wcwidth  # darkdraw
