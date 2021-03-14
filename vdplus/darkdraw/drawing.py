@@ -40,17 +40,6 @@ def bounding_box(rows):
             ymax = max(ymax, r.y + (r.h or 0))
     return xmin, ymin, xmax, ymax
 
-def iterdeep(rows, x=0, y=0, toprow=None):
-    for r in rows:
-        yield r, x+r.x, y+r.y, toprow or r
-        yield from iterdeep(r.rows or [], x+r.x, x+r.y, toprow or r)
-
-def adj_xy(dx, dy, L):
-    for r in L:
-        r["x"] += dx
-        r["y"] += dy
-    return L
-
 def any_match(G1, G2):
     for g in G1:
         if g in G2: return True
@@ -123,7 +112,8 @@ def save_ansihtml(vd, p, *sheets):
 class DrawingSheet(JsonSheet):
     rowtype='strings'  # rowdef: { .x, .y, .text, .color, .group, .layer }
     columns=[
-        ItemColumn('t', type=float),
+        ItemColumn('type'),
+        ItemColumn('duration_ms', type=int),
         ItemColumn('x', type=int),
         ItemColumn('y', type=int),
         ItemColumn('text'),
@@ -133,31 +123,51 @@ class DrawingSheet(JsonSheet):
         ItemColumn('rows'),
     ]
     def newRow(self):
-        return AttrDict(x=None, y=None, text='', color='', tags=[])
+        return AttrDict(x=None, y=None, text='', color='', tags=[], group='')
 
     def addRow(self, row, **kwargs):
         row = super().addRow(row, **kwargs)
         vd.addUndo(self.rows.remove, row)
         return row
 
+    def iterdeep(self, rows, x=0, y=0, toprow=None):
+        for r in rows:
+            if r.ref:
+                g = self.groups[r.ref]
+                yield from self.iterdeep(g.rows, x+r.x, y+r.y, toprow or r)
+            else:
+                yield r, x+r.x, y+r.y, toprow or r
+                yield from self.iterdeep(r.rows or [], x+r.x, x+r.y, toprow or r)
+
+    def tag_selected(self, rows, tagstr):
+        tags = tagstr.split()
+        for r in self.someSelectedRows:
+            for tag in tags:
+                if tag not in (r.tags or ''):
+                    r.tags.append(tag)
+
     @drawcache_property
     def groups(self):
-        return {r.group+'.':r for r in self.rows if not r.group.endswith('.')}
+        return {r.group:r for r in self.rows if not r.group.endswith('.')}
+
+    def create_group(self, gname, rows=None):
+        nr = self.newRow()
+        nr.group = gname
+        nr.type = 'group'
+        if rows:
+            nr.rows = rows
+            x1, y1, x2, y2 = bounding_box(nr.rows)
+            nr.x, nr.y, nr.w, nr.h = x1, y1, x2-x1, y2-y1
+            for r in nr.rows:
+                r.group = gname + '.' + r.get('group', '')
+                r.x -= x1
+                r.y -= y1
+        return self.addRow(nr)
 
     def group_selected(self, gname):
-        nr = self.newRow()
-        nr.rows = self.selectedRows
-        x1, y1, x2, y2 = bounding_box(nr.rows)
-        nr.x, nr.y, nr.w, nr.h = x1, y1, x2-x1, y2-y1
-        nr.group = gname
-
-        for r in nr.rows:
-            r.group = gname + '.' + r.get('group', '')
-            r.x -= x1
-            r.y -= y1
+        nr = self.create_group(gname, self.selectedRows)
 
         self.deleteSelected()
-        nr = self.addRow(nr)
         self.select([nr])
         vd.status('group "%s" (%d objects)' % (gname, self.nSelectedRows))
 
@@ -166,10 +176,15 @@ class DrawingSheet(JsonSheet):
         groups = set()  # that items were grouped into
         for r in self.someSelectedRows:
             if r.group and r.group.endswith('.'):
+                gname = r.group[:-1]
                 regrouped.append(r)
-                g = self.groups[r.group]
+                if gname not in self.groups:
+                    g = self.create_group(gname)
+                    self.addRow(g)
+                else:
+                    g = self.groups[gname]
                 g.rows.append(r)
-                groups.add(r.group)
+                groups.add(gname)
 
         self.deleteBy(lambda r,rows=regrouped: r in rows)
         self.select(list(g for name, g in self.groups.items() if name in groups))
@@ -179,7 +194,7 @@ class DrawingSheet(JsonSheet):
     def degroup_selected(self):
         degrouped = []
         groups = set()
-        for r, x, y, top in iterdeep(self.someSelectedRows):
+        for r, x, y, top in self.iterdeep(self.someSelectedRows):
             r.x = x
             r.y = y
             if r.rows:
@@ -189,7 +204,7 @@ class DrawingSheet(JsonSheet):
                 degrouped.append(r)
 
         for g in groups:
-            self.groups[g+'.'].rows.clear()
+            self.groups[g].rows.clear()
 
         self.clearSelected()
         self.select(degrouped)
@@ -268,7 +283,7 @@ class Drawing(BaseSheet):
 
         self.minX, self.minY, self.maxX, self.maxY = xmin, ymin, xmax, ymax = bounding_box(self.source.rows)
 
-        for row, x, y, toprow in iterdeep(self.source.rows):
+        for row, x, y, toprow in self.iterdeep(self.source.rows):
             r = AttrDict(row)
             rtags = r.tags
             for g in rtags:
@@ -359,7 +374,7 @@ class Drawing(BaseSheet):
         if cr and cr.text:
             return 'U+%04X' % ord(cr.text[0])
         if cr.group:
-            n = len(list(iterdeep(cr.rows)))
+            n = len(list(self.iterdeep(cr.rows)))
             return '%s (%s objects)' % (cr.group, n)
         return '???'
 
@@ -370,28 +385,28 @@ class Drawing(BaseSheet):
     def go_left(self):
         if self.options.pen_down:
             self.pendir = 'l'
-            self.place_text(ch, self.cursorX, self.cursorY, **vd.memo_chars[0])
+            self.place_text(ch, self.cursorX, self.cursorY, **vd.memory.cliprows[0])
         else:
             self.cursorX -= 1
 
     def go_right(self):
         if self.options.pen_down:
             self.pendir = 'r'
-            self.place_text(ch, self.cursorX, self.cursorY, **vd.memo_chars[0])
+            self.place_text(ch, self.cursorX, self.cursorY, **vd.memory.cliprows[0])
         else:
             self.cursorX += 1
 
     def go_down(self):
         if self.options.pen_down:
             self.pendir = 'd'
-            self.place_text(ch, self.cursorX, self.cursorY, **vd.memo_chars[0])
+            self.place_text(ch, self.cursorX, self.cursorY, **vd.memory.cliprows[0])
         else:
             self.cursorY += 1
 
     def go_up(self):
         if self.options.pen_down:
             self.pendir = 'u'
-            self.place_text(ch, self.cursorX, self.cursorY, **vd.memo_chars[0])
+            self.place_text(ch, self.cursorX, self.cursorY, **vd.memory.cliprows[0])
         else:
             self.cursorY -= 1
 
@@ -456,16 +471,30 @@ class Drawing(BaseSheet):
         rows[0].text = ''.join(r.text for r in rows)
         dwg.source.deleteBy(lambda r,rows=rows[1:]: r in rows)
 
-    def paste_chars(dwg, charslist):
-        p = charslist[0]
-        newrows = deepcopy(charslist)
-        x = dwg.cursorX-p.get('x', dwg.cursorX)
-        y = dwg.cursorY-p.get('y', dwg.cursorY)
-        for r in adj_xy(x, y, newrows):
-            dwg.source.addRow(r)
+    def paste_chars(self, rows, deep=True):
+        rows or vd.fail('no rows to paste')
 
-        if dwg.source.nSelectedRows == 0: # auto-select newly pasted item
-            dwg.source.select(newrows)
+        newrows = deepcopy(rows) if deep else copy(rows)
+
+        x1, y1, x2, y2 = bounding_box(rows)
+        for r in newrows:
+            r.x += self.cursorX-x1
+            r.y += self.cursorY-y1
+            self.source.addRow(r)
+
+        if self.source.nSelectedRows == 0: # auto-select newly pasted item
+            self.source.select(newrows)
+
+    def paste_groupref(self, rows):
+        for r in rows:
+            if r.type == 'group':
+                newr = self.newRow()
+                newr.type = 'ref'
+                newr.x, newr.y = self.cursorX, self.cursorY
+                newr.ref = r.group
+                self.addRow(newr)
+            else:
+                vd.warning('not a group')
 
     def select_tag(self, tag):
         self.select(list(r for r in self.source.rows if tag in (r.tags or '')))
@@ -516,12 +545,13 @@ Drawing.addCommand('gd', 'delete-selected', 'source.deleteSelected()')
 Drawing.addCommand('a', 'add-input', 'place_text(input("text: ", value=get_text()), dx=1)')
 Drawing.addCommand('e', 'edit-char', 'cursorRow.text=input("text: ", value=get_text())')
 Drawing.addCommand('ge', 'edit-selected', 'v=input("text: ", value=get_text())\nfor r in source.selectedRows: r.text=v')
-Drawing.addCommand('y', 'yank-char', 'p=AttrDict(cursorRow); vd.memo_chars=adj_xy(-p.x, -p.y, [p])')
-Drawing.addCommand('gy', 'yank-selected', 'sel=[AttrDict(r) for r in source.selectedRows]; vd.memo_chars=adj_xy(-sel[0].x, -sel[0].y, sel)')
-Drawing.addCommand('x', 'cut-char', 'vd.memo_chars=remove_at(cursorX, cursorY, cursorW, cursorH)')
-Drawing.addCommand('zx', 'cut-char-top', 'r=list(itercursor())[-1]; vd.memo_chars=[r]; source.deleteBy(lambda r,row=r: r is row)')
-Drawing.addCommand('p', 'paste-chars', 'paste_chars(vd.memory.cliprows[2])')
-Drawing.addCommand('gp', 'paste-chars-selected', 'paste_chars(vd.memory.cliprows[2], selectedRows)', 'paste characters from clipboard over selection')
+Drawing.addCommand('y', 'yank-char', 'sheet.copyRows([cursorRow])')
+Drawing.addCommand('gy', 'yank-selected', 'sheet.copyRows(sheet.selectedRows)')
+Drawing.addCommand('x', 'cut-char', 'sheet.copyRows(remove_at(cursorX, cursorY, cursorW, cursorH))')
+Drawing.addCommand('zx', 'cut-char-top', 'r=list(itercursor())[-1]; sheet.copyRows([r]); source.deleteBy(lambda r,row=r: r is row)')
+Drawing.addCommand('p', 'paste-chars', 'sheet.paste_chars(vd.memory.cliprows)')
+Drawing.addCommand('gp', 'paste-chars-selected', 'sheet.paste_chars(vd.memory.cliprows, selectedRows)', 'paste characters from clipboard over selection')
+Drawing.addCommand('zp', 'paste-group', 'sheet.paste_groupref(vd.memory.cliprows)')
 
 Drawing.addCommand('zh', 'go-left-obj', 'go_obj(-1, 0)')
 Drawing.addCommand('zj', 'go-down-obj', 'go_obj(0, +1)')
@@ -562,19 +592,12 @@ BaseSheet.addCommand('A', 'new-drawing', 'vd.push(Drawing("untitled", source=Dra
 BaseSheet.addCommand('M', 'open-unicode', 'vd.push(vd.unibrowser)')
 BaseSheet.addCommand('`', 'push-source', 'vd.push(sheet.source)')
 
-DrawingSheet.addCommand('^G', 'show-char', 'status(f"{sheet.cursorCharName}")')
+Drawing.addCommand('^G', 'show-char', 'status(f"{sheet.cursorCharName}")')
 DrawingSheet.addCommand(ENTER, 'dive-group', 'cursorRow.rows or fail("not a group"); vd.push(DrawingSheet(source=sheet, rows=cursorRow.rows))')
 DrawingSheet.addCommand('g'+ENTER, 'dive-selected', 'ret=sum(((r.rows or []) for r in selectedRows), []) or fail("no groups"); vd.push(DrawingSheet(source=sheet, rows=ret))')
 Drawing.addCommand('&', 'join-selected', 'join_rows(source.selectedRows)')
 
-@Drawing.command('gm', 'tag-selected', '')
-def tag_selected(sheet):
-    tagstr = vd.input('tag selected as: ', type='tag')
-    tags = tagstr.split()
-    for r in sheet.someSelectedRows:
-        for tag in tags:
-            if tag not in (r.tags or ''):
-                r.tags.append(tag)
+Drawing.addCommand('gm', 'tag-selected', 'sheet.tag_rows(sheet.someSelectedRows, vd.input("tag selected as: ", type="tag"))')
 
 Drawing.addCommand(ENTER, 'dive-cursor', 'vd.push(DrawingSheet(source=sheet, rows=cursorRows))')
 Drawing.addCommand('g'+ENTER, 'dive-selected', 'vd.push(DrawingSheet(source=sheet, rows=source.selectedRows))')
