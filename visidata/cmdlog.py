@@ -117,6 +117,21 @@ def moveToCol(vs, colstr):
 
     return True
 
+
+@TableSheet.api
+def commandCursor(sheet, execstr):
+    'Return (col, row) of cursor suitable for cmdlog replay of execstr.'
+    colname, rowname = '', ''
+    contains = lambda s, *substrs: any((a in s) for a in substrs)
+    if contains(execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorRow') and sheet.nRows > 0:
+        k = sheet.rowkey(sheet.cursorRow)
+        rowname = keystr(k) if k else sheet.cursorRowIndex
+
+    if contains(execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol'):
+        colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
+    return colname, rowname
+
+
 # rowdef: namedlist (like TsvSheet)
 class _CommandLog:
     'Log of commands for current session.'
@@ -150,23 +165,9 @@ class _CommandLog:
         if sheet and not (cmd.longname.startswith('open-') and not cmd.longname in ('open-row', 'open-cell')):
             sheetname = sheet
 
+            colname, rowname = sheet.commandCursor(cmd.execstr)
+
             contains = lambda s, *substrs: any((a in s) for a in substrs)
-            if contains(cmd.execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorRow') and sheet.nRows > 0:
-                k = sheet.rowkey(sheet.cursorRow)
-                rowname = keystr(k) if k else sheet.cursorRowIndex
-
-            if contains(cmd.execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol'):
-                colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
-
-            if contains(cmd.execstr, 'plotterCursorBox'):
-                bb = sheet.cursorBox
-                colname = '%s %s' % (sheet.formatX(bb.xmin), sheet.formatX(bb.xmax))
-                rowname = '%s %s' % (sheet.formatY(bb.ymin), sheet.formatY(bb.ymax))
-            elif contains(cmd.execstr, 'plotterVisibleBox'):
-                bb = sheet.visibleBox
-                colname = '%s %s' % (sheet.formatX(bb.xmin), sheet.formatX(bb.xmax))
-                rowname = '%s %s' % (sheet.formatY(bb.ymin), sheet.formatY(bb.ymax))
-
             if contains(cmd.execstr, 'pasteFromClipboard'):
                 args = clipboard().paste().strip()
 
