@@ -130,6 +130,7 @@ class DrawingSheet(JsonSheet):
         ItemColumn('color'),
         ItemColumn('group'),
         ItemColumn('tags'),
+        ItemColumn('rows'),
     ]
     def newRow(self):
         return AttrDict(x=None, y=None, text='', color='', tags=[])
