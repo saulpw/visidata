@@ -38,7 +38,7 @@ class JsonSheet(PythonSheet):
                 try:
                     if L.startswith('#'): # skip commented lines
                         continue
-                    ret = json.loads(L)
+                    ret = json.loads(L, object_hook=AttrDict)
                     if isinstance(ret, list):
                         yield from Progress(ret)
                     else:
