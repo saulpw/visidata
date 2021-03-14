@@ -23,13 +23,16 @@ def open_scr(vd, p):
     for y, (line, mask) in enumerate(zip_longest(lines, pcolors)):
         if mask is None: mask = []
         x = 0
+        sheet = DrawingSheet(p.name, 'table', source=p)
         for ch, mch in zip_longest(line, mask):
             if ch == ' ':
                 x += 1
             else:
-                rows.append(AttrDict(x=x, y=y, text=ch, color=palette[mch] if mch else ''))
+                newr = sheet.newRow()
+                newr.x, newr.y, newr.text, newr.color = x, y, ch, palette[mch] if mch else ''
+                rows.append(newr)
                 x += dispwidth(ch)
 
-    sheet = DrawingSheet(p.name, 'table', source=p, rows=rows)
+    sheet.rows=rows
     return Drawing(p.name, source=sheet)
 
