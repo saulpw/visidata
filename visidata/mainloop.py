@@ -8,8 +8,8 @@ from unittest import mock
 
 from visidata import vd, VisiData, colors, ESC, options, option
 
-curses_timeout = 100 # curses timeout in ms
-timeouts_before_idle = 10
+vd.curses_timeout = 100 # curses timeout in ms
+vd.timeouts_before_idle = 10
 
 option('disp_splitwin_pct', 0, 'height of second sheet on screen')
 option('mouse_interval', 1, 'max time between press/release for click (ms)', sheettype=None)
@@ -105,7 +105,7 @@ def runresult(vd):
 @VisiData.api
 def mainloop(self, scr):
     'Manage execution of keystrokes and subsequent redrawing of screen.'
-    scr.timeout(curses_timeout)
+    scr.timeout(vd.curses_timeout)
     with contextlib.suppress(curses.error):
         curses.curs_set(0)
 
@@ -205,13 +205,13 @@ def mainloop(self, scr):
         # no idle redraw unless background threads are running
         time.sleep(0)  # yield to other threads which may not have started yet
         if vd.unfinishedThreads:
-            scr.timeout(curses_timeout)
+            scr.timeout(vd.curses_timeout)
         else:
             numTimeouts += 1
-            if numTimeouts > timeouts_before_idle:
+            if vd.timeouts_before_idle >= 0 and numTimeouts > vd.timeouts_before_idle:
                 scr.timeout(-1)
             else:
-                scr.timeout(curses_timeout)
+                scr.timeout(vd.curses_timeout)
 
 def setupcolors(stdscr, f, *args):
     curses.raw()    # get control keys instead of signals
