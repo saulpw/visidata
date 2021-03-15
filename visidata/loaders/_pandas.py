@@ -308,7 +308,7 @@ class PandasSheet(Sheet):
         # There may be a better way to handle that case.
         vd.addUndo(self._addRows, oldrow.to_dict(), rowidx)
         self._deleteRows(rowidx)
-        vd.cliprows = [(self, rowidx, oldrow)]
+        vd.memory.cliprows = [oldrow]
 
     def deleteBy(self, by):
         '''Delete rows for which func(row) is true.  Returns number of deleted rows.'''

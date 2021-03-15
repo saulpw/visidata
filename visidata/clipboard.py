@@ -18,7 +18,7 @@ def setslice(L, a, b, M):
 
 @Sheet.api
 def copyRows(sheet, rows):
-    vd.memory.cliprows = list((sheet, i, r) for i, r in enumerate(rows))
+    vd.memory.cliprows = rows
     if not rows:
         vd.warning('no %s selected; clipboard emptied' % sheet.rowtype)
     else:
@@ -60,7 +60,7 @@ def delete_row(sheet, rowidx):
 
 @Sheet.api
 def paste_after(sheet, rowidx):
-    to_paste = list(deepcopy(r) for s,i,r in reversed(vd.memory.cliprows))
+    to_paste = list(deepcopy(r) for r in reversed(vd.memory.cliprows))
     sheet.addRowsUndoable(to_paste, index=rowidx)
 
 # mapping of OS to list of possible (command name, command args) for copy and
