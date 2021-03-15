@@ -122,13 +122,22 @@ class DrawingSheet(JsonSheet):
         ItemColumn('type'),
         ItemColumn('x', type=int),
         ItemColumn('y', type=int),
-        ItemColumn('text'),
-        ItemColumn('color'),
-        ItemColumn('group'),
-        ItemColumn('tags'),
-        ItemColumn('rows'),
-        ItemColumn('frame'),
-        ItemColumn('duration_ms', type=int),
+
+        ItemColumn('text'),  # for text objects (type == '')
+        ItemColumn('color'), # for text
+
+        # for all objects
+        ItemColumn('tags'),  # for all objs
+        ItemColumn('group'), # "
+        ItemColumn('frame'), # "
+
+        ItemColumn('rows'), # for groups
+        ItemColumn('duration_ms', type=int), # for frames
+
+        ItemColumn('ref'),
+    ]
+    colorizers = [
+        CellColorizer(3, None, lambda s,c,r,v: r and c and c.name == 'text' and r.color)
     ]
     def newRow(self):
         return AttrDict(x=None, y=None, text='', color='', tags=[], group='')
@@ -361,7 +370,7 @@ class Drawing(BaseSheet):
             for j in range(self.cursorW+1):
                 clipdraw(scr, self.cursorY+i, self.cursorX+j, ' ', colors.color_current_row)
 
-        self.minX, self.minY, self.maxX, self.maxY = xmin, ymin, xmax, ymax = bounding_box(self.source.rows)
+        self.minX, self.minY, self.maxX, self.maxY = bounding_box(self.source.rows)
 
         for r, x, y, parents in self.iterdeep(self.source.rows):
             toprow = parents[0]
@@ -370,9 +379,9 @@ class Drawing(BaseSheet):
 
             if not r.text: continue
             if any_match(r.tags, self.disabled_tags): continue
-            if toprow.frame:
+            if toprow.frame or r.frame:
                 if not self.frames: continue
-                if toprow.frame != thisframe.id: continue
+                if thisframe.id not in [toprow.frame, r.frame]: continue
 
             if not (0 <= y < self.windowHeight-1 and 0 <= x < self.windowWidth):  # inside screen
                 continue
@@ -740,5 +749,4 @@ Drawing.init('autoplay_frames', list)
 Drawing.class_options.disp_rstatus_fmt='{sheet.frameDesc}  <{sheet.cursorDesc}> {sheet.source.nRows} {sheet.rowtype}  {sheet.options.disp_selected_note}{sheet.source.nSelectedRows}'
 Drawing.class_options.quitguard='modified'
 Drawing.class_options.null_value=''
-Drawing.class_options.quitguard=True
 DrawingSheet.class_options.null_value=''
