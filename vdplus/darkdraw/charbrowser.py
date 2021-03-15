@@ -81,18 +81,18 @@ class UnicodeDataColumn(Column):
         super().__init__(name, expr=name, *args, **kwargs)
 
     def calcValue(self, row):
-        r = getattr(unicodedata, self.expr)(row[0])
+        r = getattr(unicodedata, self.expr)(row.text)
         if self.expr in enumvalues:
             return enumvalues[self.expr][r]
         return r
 
 
 class UnicodeBrowser(Sheet):
-    rowtype='chars' # rowdef: [char]
+    rowtype='chars' # rowdef: AttrDict(.text=ch)
     precious=False
     columns = [
-        Column('num', fmtstr='%04X', type=int, getter=lambda c,r: ord(r[0])),
-        Column('text', getter=lambda c,r: unicodedata.normalize('NFC', r[0])),
+        Column('num', fmtstr='%04X', type=int, getter=lambda c,r: ord(r.text)),
+        Column('text', getter=lambda c,r: unicodedata.normalize('NFC', r.text)),
         UnicodeDataColumn('name', width=20),
         UnicodeDataColumn('category'),
 #        UnicodeDataColumn('decimal'),
@@ -110,4 +110,4 @@ class UnicodeBrowser(Sheet):
 
 @VisiData.lazy_property
 def unibrowser(vd):
-    return UnicodeBrowser('unicode_chars', rows=[[chr(i)] for i in range(32, 0x100000) if unicodedata.category(chr(i))[0] not in 'CM'])
+    return UnicodeBrowser('unicode_chars', rows=[AttrDict(text=chr(i)) for i in range(32, 0x100000) if unicodedata.category(chr(i))[0] not in 'CM'])

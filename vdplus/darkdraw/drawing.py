@@ -10,9 +10,6 @@ vd.option('pen_down', False, 'is pen down')
 
 vd.charPalWidth = charPalWidth = 16
 vd.charPalHeight = charPalHeight = 16
-vd.first_t = 0
-vd.last_t = 0
-vd.fixed_t = None
 
 @VisiData.api
 def open_ddw(vd, p):
@@ -108,12 +105,21 @@ def save_ansihtml(vd, p, *sheets):
     with p.open_text(mode='w') as fp:
         fp.write(out)
 
+class FramesSheet(Sheet):
+    rowtype='frames'  # rowdef: { .type, .id, .duration_ms, .x, .y }
+    columns = [
+        ItemColumn('type', width=0),
+        ItemColumn('id'),
+        ItemColumn('duration_ms', type=int),
+        ItemColumn('x', type=int),
+        ItemColumn('y', type=int),
+    ]
 
 class DrawingSheet(JsonSheet):
-    rowtype='strings'  # rowdef: { .x, .y, .text, .color, .group, .layer }
+    rowtype='elements'  # rowdef: { .type, .x, .y, .text, .color, .group, .tags=[], .frame, .id, .rows=[] }
     columns=[
+        ItemColumn('id'),
         ItemColumn('type'),
-        ItemColumn('duration_ms', type=int),
         ItemColumn('x', type=int),
         ItemColumn('y', type=int),
         ItemColumn('text'),
@@ -121,6 +127,8 @@ class DrawingSheet(JsonSheet):
         ItemColumn('group'),
         ItemColumn('tags'),
         ItemColumn('rows'),
+        ItemColumn('frame'),
+        ItemColumn('duration_ms', type=int),
     ]
     def newRow(self):
         return AttrDict(x=None, y=None, text='', color='', tags=[], group='')
@@ -130,42 +138,82 @@ class DrawingSheet(JsonSheet):
         vd.addUndo(self.rows.remove, row)
         return row
 
-    def iterdeep(self, rows, x=0, y=0, toprow=None):
+    def iterdeep(self, rows, x=0, y=0, parents=None):
         for r in rows:
+            newparents = (parents or []) + [r]
+            if r.type == 'frame': continue
             if r.ref:
+                assert r.type == 'ref'
                 g = self.groups[r.ref]
-                yield from self.iterdeep(g.rows, x+r.x, y+r.y, toprow or r)
+                yield from self.iterdeep(g.rows, x+r.x, y+r.y, newparents)
             else:
-                yield r, x+r.x, y+r.y, toprow or r
-                yield from self.iterdeep(r.rows or [], x+r.x, x+r.y, toprow or r)
+                yield r, x+r.x, y+r.y, newparents
+                yield from self.iterdeep(r.rows or [], x+r.x, x+r.y, newparents)
 
-    def tag_selected(self, rows, tagstr):
+    def tag_rows(self, rows, tagstr):
         tags = tagstr.split()
-        for r in self.someSelectedRows:
+        for r in rows:
             for tag in tags:
                 if tag not in (r.tags or ''):
                     r.tags.append(tag)
 
-    @drawcache_property
+    @property
     def groups(self):
-        return {r.group:r for r in self.rows if not r.group.endswith('.')}
+        return {r.id:r for r in self.rows if r.type == 'group'}
 
-    def create_group(self, gname, rows=None):
+    def create_group(self, gname):
         nr = self.newRow()
-        nr.group = gname
+        nr.id = gname
         nr.type = 'group'
-        if rows:
-            nr.rows = rows
-            x1, y1, x2, y2 = bounding_box(nr.rows)
-            nr.x, nr.y, nr.w, nr.h = x1, y1, x2-x1, y2-y1
-            for r in nr.rows:
-                r.group = gname + '.' + r.get('group', '')
-                r.x -= x1
-                r.y -= y1
+        vd.status('created group "%s"' % gname)
         return self.addRow(nr)
 
+    @property
+    def frames(self):
+        return [r for r in self.rows if r.type == 'frame']
+
+    @property
+    def nFrames(self):
+        return len(self.frames)
+
+    def new_between_frame(self, fidx1, fidx2):
+        f1 = f2 = None
+        if not self.frames:
+            name = '0'
+        else:
+            if 0 <= fidx1 < len(self.frames):
+                f1 = self.frames[fidx1]
+            if 0 <= fidx2 < len(self.frames):
+                f2 = self.frames[fidx2]
+            if f1 and f2:
+                name = str(f1.id)+'-'+str(f2.id)
+            elif f1:
+                name = str(int(f1.id)+1)
+            elif f2:
+                name = str(int(f1.id)-1)
+
+        newf = self.newRow()
+        newf.type = 'frame'
+        newf.id = name
+        newf.duration_ms = 100
+        if f1:
+            for i, r in enumerate(self.rows):
+                if r is f1:
+                    return self.addRow(newf, index=i+1)
+        else:
+            return self.addRow(newf, index=0)
+        vd.error('no existing frame ' + str(f1))
+
     def group_selected(self, gname):
-        nr = self.create_group(gname, self.selectedRows)
+        nr = self.create_group(gname)
+
+        rows = self.selectedRows
+        nr.rows = rows
+        x1, y1, x2, y2 = bounding_box(nr.rows)
+        nr.x, nr.y, nr.w, nr.h = x1, y1, x2-x1, y2-y1
+        for r in nr.rows:
+            r.x -= x1
+            r.y -= y1
 
         self.deleteSelected()
         self.select([nr])
@@ -175,16 +223,20 @@ class DrawingSheet(JsonSheet):
         regrouped = []
         groups = set()  # that items were grouped into
         for r in self.someSelectedRows:
-            if r.group and r.group.endswith('.'):
-                gname = r.group[:-1]
+            if r.group:
                 regrouped.append(r)
-                if gname not in self.groups:
-                    g = self.create_group(gname)
+                if r.group not in self.groups:
+                    g = self.create_group(r.group)
+                    g.x = r.x
+                    g.y = r.y
                     self.addRow(g)
                 else:
-                    g = self.groups[gname]
+                    g = self.groups[r.group]
+
+                r.x -= g.x
+                r.y -= g.y
                 g.rows.append(r)
-                groups.add(gname)
+                groups.add(r.group)
 
         self.deleteBy(lambda r,rows=regrouped: r in rows)
         self.select(list(g for name, g in self.groups.items() if name in groups))
@@ -194,12 +246,15 @@ class DrawingSheet(JsonSheet):
     def degroup_selected(self):
         degrouped = []
         groups = set()
-        for r, x, y, top in self.iterdeep(self.someSelectedRows):
+        for r, x, y, parents in self.iterdeep(self.someSelectedRows):
             r.x = x
             r.y = y
-            if r.rows:
-                groups.add(r.group)
-            else:
+            r.group = '.'.join(p.id for p in parents[:-1])
+
+            if r.type == 'group':
+                groups.add(r.id)
+
+            if r is not parents[0]:
                 self.addRow(r)
                 degrouped.append(r)
 
@@ -233,10 +288,16 @@ class Drawing(BaseSheet):
 
     @rows.setter
     def rows(self, v):
-        pass #        self.source.rows = v
+        pass
 
     def __getattr__(self, k):
         return getattr(self.source, k)
+
+    @property
+    def currentFrame(self):
+        if self.frames and 0 <= self.cursorFrameIndex < self.nFrames:
+            return self.frames[self.cursorFrameIndex]
+        return AttrDict()
 
     def commandCursor(self, execstr):
         if 'cursor' in execstr:
@@ -270,10 +331,29 @@ class Drawing(BaseSheet):
         self.draw(self._scr)
 
     def draw(self, scr):
-        self.drawing = defaultdict(list)  # (x, y) -> list of rows; actual screen layout (topmost last in list)
-        self._tags = defaultdict(list)  # "groupname" -> list of rows in that group
+        thisframe = self.currentFrame
+        if self.autoplay_frames:
+            vd.timeouts_before_idle = -1
+            t = time.time()
+            ft, f = self.autoplay_frames[0]
+            thisframe = f
+            if not ft:
+                self.autoplay_frames[0][0] = t
+            elif t-ft > f.duration_ms/1000:  # frame expired
+#                vd.status('next frame after %0.3fs' % (t-ft))
+                self.autoplay_frames.pop(0)
+                if self.autoplay_frames:
+                    self.autoplay_frames[0][0] = t
+                    thisframe = self.autoplay_frames[0][1]
+                    vd.curses_timeout = thisframe.duration_ms
+                else:
+                    vd.status('ending autoplay')
+                    vd.timeouts_before_idle = 10
+                    vd.curses_timeout = 100
 
-        t = vd.fixed_t if vd.fixed_t is not None else (time.time() - vd.first_t)
+        self.drawing = defaultdict(list)  # (x, y) -> list of rows; actual screen layout (topmost last in list)
+        self._tags = defaultdict(list)  # "tag" -> list of rows with that tag
+
         selectedGroups = set()  # any group with a selected element
 
         # draw blank cursor as backdrop
@@ -283,29 +363,32 @@ class Drawing(BaseSheet):
 
         self.minX, self.minY, self.maxX, self.maxY = xmin, ymin, xmax, ymax = bounding_box(self.source.rows)
 
-        for row, x, y, toprow in self.iterdeep(self.source.rows):
-            r = AttrDict(row)
-            rtags = r.tags
-            for g in rtags:
-                self._tags[g].append(row)
+        for r, x, y, parents in self.iterdeep(self.source.rows):
+            toprow = parents[0]
+            for g in r.tags:
+                self._tags[g].append(r)
 
-            if r.text and not any_match(rtags, self.disabled_tags):
-                if 0 <= y < self.windowHeight-1 and 0 <= x < self.windowWidth:  # inside screen
-                    c = r.color
-                    if r.t is not None:
-                        if r.t > t:
-                            continue
-                    if self.within_cursor(x, y, r.w or dispwidth(r.text), r.h or 1):
-                        c = self.options.color_current_row + ' ' + c
-                    if self.source.isSelected(toprow):
-                        c = self.options.color_selected_row + ' ' + c
-                        selectedGroups |= set(rtags)
-                    a = colors[c]
-                    w = clipdraw(scr, y, x, r.text, a)
-                    for i in range(0, w):
-                        cellrows = self.drawing[(x+i, y)]
-                        if toprow not in cellrows:
-                            cellrows.append(toprow)
+            if not r.text: continue
+            if any_match(r.tags, self.disabled_tags): continue
+            if toprow.frame:
+                if not self.frames: continue
+                if toprow.frame != thisframe.id: continue
+
+            if not (0 <= y < self.windowHeight-1 and 0 <= x < self.windowWidth):  # inside screen
+                continue
+
+            c = r.color
+            if self.within_cursor(x, y, r.w or dispwidth(r.text), r.h or 1):
+                c = self.options.color_current_row + ' ' + c
+            if self.source.isSelected(toprow):
+                c = self.options.color_selected_row + ' ' + c
+                selectedGroups |= set(r.tags)
+            a = colors[c]
+            w = clipdraw(scr, y, x, r.text, a)
+            for i in range(0, w):
+                cellrows = self.drawing[(x+i, y)]
+                if toprow not in cellrows:
+                    cellrows.append(toprow)
 
         if self.options.visibility > 0:
             defattr = self.options.color_default
@@ -320,7 +403,6 @@ class Drawing(BaseSheet):
                     c = self.options.color_selected_row + ' ' + c
                 clipdraw(scr, i+1, self.windowWidth-20, '%02d: %s' % (i+1, tag), colors[c])
 
-        self.last_t = t
 
     def reload(self):
         self.source.ensureLoaded()
@@ -329,7 +411,8 @@ class Drawing(BaseSheet):
         'Return (width, height) of drawn text.'
         if x is None: x = self.cursorX
         if y is None: y = self.cursorY
-        r = AttrDict(x=x, y=y, text=text, color='')
+        r = self.newRow()
+        r.x, r.y, r.text = x, y, text
         self.source.addRow(r)
         self.modified = True
         self.go_forward(dispwidth(text)+dx, 1+dy)
@@ -373,10 +456,14 @@ class Drawing(BaseSheet):
         cr = self.cursorRow
         if cr and cr.text:
             return 'U+%04X' % ord(cr.text[0])
-        if cr.group:
+        if cr.type == 'group':
             n = len(list(self.iterdeep(cr.rows)))
-            return '%s (%s objects)' % (cr.group, n)
+            return '%s (%s objects)' % (cr.id, n)
         return '???'
+
+    @property
+    def frameDesc(sheet):
+        return f'Frame {sheet.currentFrame.id} {sheet.cursorFrameIndex}/{sheet.nFrames}'
 
     @property
     def cursorCharName(self):
@@ -457,6 +544,7 @@ class Drawing(BaseSheet):
     def checkCursor(self):
         self.cursorX = min(self.windowWidth-2, max(0, self.cursorX))
         self.cursorY = min(self.windowHeight-2, max(0, self.cursorY))
+        self.cursorFrameIndex = min(max(self.cursorFrameIndex, 0), len(self.frames)-1)
 
     def end_cursor(dwg, x, y):
         dwg.cursorW=abs(x-dwg.cursorX)
@@ -471,15 +559,25 @@ class Drawing(BaseSheet):
         rows[0].text = ''.join(r.text for r in rows)
         dwg.source.deleteBy(lambda r,rows=rows[1:]: r in rows)
 
-    def paste_chars(self, rows, deep=True):
+    def paste_chars(self, rows):
         rows or vd.fail('no rows to paste')
 
-        newrows = deepcopy(rows) if deep else copy(rows)
+        newrows = []
 
         x1, y1, x2, y2 = bounding_box(rows)
-        for r in newrows:
-            r.x += self.cursorX-x1
-            r.y += self.cursorY-y1
+        for oldr in rows:
+            r = self.newRow()
+            r.frame = self.currentFrame.id
+            r.text = oldr.text
+            if r.x is None:
+                r.x = self.cursorX
+                r.y = self.cursorY
+                self.go_forward(dispwidth(r.text)+1, 1)
+            else:
+                r.x = (r.x or 0)+self.cursorX-x1
+                r.y = (r.y or 0)+self.cursorY-y1
+
+            newrows.append(r)
             self.source.addRow(r)
 
         if self.source.nSelectedRows == 0: # auto-select newly pasted item
@@ -491,7 +589,7 @@ class Drawing(BaseSheet):
                 newr = self.newRow()
                 newr.type = 'ref'
                 newr.x, newr.y = self.cursorX, self.cursorY
-                newr.ref = r.group
+                newr.ref = r.id
                 self.addRow(newr)
             else:
                 vd.warning('not a group')
@@ -538,6 +636,14 @@ Drawing.addCommand('BUTTON1_RELEASED', 'end-cursor', 'end_cursor(mouseX, mouseY)
 
 Drawing.addCommand('', 'align-x-selected', 'align_selected("x")')
 
+Drawing.addCommand('F', 'open-frames', 'vd.push(FramesSheet(sheet, "frames", source=sheet, rows=sheet.frames, cursorRowIndex=sheet.cursorFrameIndex))')
+Drawing.addCommand('[', 'prev-frame', 'sheet.cursorFrameIndex -= 1 if sheet.cursorFrameIndex > 0 else fail("first frame")')
+Drawing.addCommand(']', 'next-frame', 'sheet.cursorFrameIndex += 1 if sheet.cursorFrameIndex < sheet.nFrames-1 else fail("last frame")')
+Drawing.addCommand('g[', 'first-frame', 'sheet.cursorFrameIndex = 0')
+Drawing.addCommand('g]', 'last-frame', 'sheet.cursorFrameIndex = sheet.nFrames-1')
+Drawing.addCommand('z[', 'new-frame-before', 'sheet.new_between_frame(sheet.cursorFrameIndex-1, sheet.cursorFrameIndex)')
+Drawing.addCommand('z]', 'new-frame-after', 'sheet.new_between_frame(sheet.cursorFrameIndex, sheet.cursorFrameIndex+1); sheet.cursorFrameIndex += 1')
+
 Drawing.addCommand('gKEY_HOME', 'slide-top-selected', 'source.slide_top(source.someSelectedRows, -1)', 'move selected items to top layer of drawing')
 Drawing.addCommand('gKEY_END', 'slide-bottom-selected', 'source.slide_top(source.someSelectedRows, 0)', 'move selected items to bottom layer of drawing')
 Drawing.addCommand('d', 'delete-cursor', 'remove_at(cursorX, cursorY, cursorW, cursorH); go_forward(1, 1)', 'delete first item under cursor')
@@ -550,7 +656,7 @@ Drawing.addCommand('gy', 'yank-selected', 'sheet.copyRows(sheet.selectedRows)')
 Drawing.addCommand('x', 'cut-char', 'sheet.copyRows(remove_at(cursorX, cursorY, cursorW, cursorH))')
 Drawing.addCommand('zx', 'cut-char-top', 'r=list(itercursor())[-1]; sheet.copyRows([r]); source.deleteBy(lambda r,row=r: r is row)')
 Drawing.addCommand('p', 'paste-chars', 'sheet.paste_chars(vd.memory.cliprows)')
-Drawing.addCommand('gp', 'paste-chars-selected', 'sheet.paste_chars(vd.memory.cliprows, selectedRows)', 'paste characters from clipboard over selection')
+#Drawing.addCommand('gp', 'paste-chars-selected', 'sheet.paste_chars(vd.memory.cliprows)', 'paste characters from clipboard over selection')
 Drawing.addCommand('zp', 'paste-group', 'sheet.paste_groupref(vd.memory.cliprows)')
 
 Drawing.addCommand('zh', 'go-left-obj', 'go_obj(-1, 0)')
@@ -588,9 +694,9 @@ for i in range(1, 99):
     Drawing.addCommand('z%02d'%i, 'unselect-group-%s'%i, 'g=list(_tags.keys())[%s]; source.unselect(source.gatherTag(g))' %(i-1))
 
 
-BaseSheet.addCommand('A', 'new-drawing', 'vd.push(Drawing("untitled", source=DrawingSheet("", source=Path("untitled.ddw"))))')
-BaseSheet.addCommand('M', 'open-unicode', 'vd.push(vd.unibrowser)')
-BaseSheet.addCommand('`', 'push-source', 'vd.push(sheet.source)')
+Drawing.addCommand('A', 'new-drawing', 'vd.push(Drawing("untitled", source=DrawingSheet("", source=Path("untitled.ddw"))))')
+Drawing.addCommand('M', 'open-unicode', 'vd.push(vd.unibrowser)')
+Drawing.addCommand('`', 'push-source', 'vd.push(sheet.source)')
 
 Drawing.addCommand('^G', 'show-char', 'status(f"{sheet.cursorCharName}")')
 DrawingSheet.addCommand(ENTER, 'dive-group', 'cursorRow.rows or fail("not a group"); vd.push(DrawingSheet(source=sheet, rows=cursorRow.rows))')
@@ -614,9 +720,7 @@ Drawing.addCommand('zi', 'insert-col', 'for r in source.someSelectedRows: r.x +=
 Drawing.addCommand('zm', 'place-mark', 'sheet.mark=(cursorX, cursorY)')
 Drawing.addCommand('m', 'swap-mark', '(cursorX, cursorY), sheet.mark=sheet.mark, (cursorX, cursorY)')
 Drawing.addCommand('v', 'visibility', 'options.visibility ^= 1')
-Drawing.addCommand('r', 'reset-time', 'vd.first_t=time.time()')
-Drawing.addCommand('>', 'time-next', 'vd.fixed_t += 1')
-Drawing.addCommand('<', 'time-prev', 'vd.fixed_t -= 1')
+Drawing.addCommand('r', 'reset-time', 'sheet.autoplay_frames = [[0, f] for f in sheet.frames]')
 
 Drawing.addCommand('kRIT5', 'resize-cursor-wider', 'sheet.cursorW += 1')
 Drawing.addCommand('kLFT5', 'resize-cursor-thinner', 'sheet.cursorW -= 1')
@@ -631,7 +735,9 @@ Drawing.bindkey('zKEY_DOWN', 'resize-cursor-taller')
 Drawing.bindkey('C', 'open-colors')
 
 Drawing.init('mark', lambda: (0,0))
-Drawing.class_options.disp_rstatus_fmt='{sheet.pendir}  <{sheet.cursorDesc}> {sheet.options.disp_selected_note}{sheet.source.nSelectedRows}'
+Drawing.init('cursorFrameIndex', lambda: 0)
+Drawing.init('autoplay_frames', list)
+Drawing.class_options.disp_rstatus_fmt='{sheet.frameDesc}  <{sheet.cursorDesc}> {sheet.source.nRows} {sheet.rowtype}  {sheet.options.disp_selected_note}{sheet.source.nSelectedRows}'
 Drawing.class_options.quitguard='modified'
 Drawing.class_options.null_value=''
 Drawing.class_options.quitguard=True
