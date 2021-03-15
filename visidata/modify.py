@@ -73,7 +73,7 @@ def rowDeleted(self, row):
 
 @Sheet.api
 @asyncthread
-def addRowsUndoable(sheet, rows, index=None):
+def addRows(sheet, rows, index=None, undo=False):
     'Add *rows* after row at *index*.'
     addedRows = {}
     if index is None: index=len(sheet.rows)
@@ -88,7 +88,8 @@ def addRowsUndoable(sheet, rows, index=None):
     def _removeRows():
         sheet.deleteBy(lambda r,sheet=sheet,addedRows=addedRows: sheet.rowid(r) in addedRows, commit=True)
 
-    vd.addUndo(_removeRows)
+    if undo:
+        vd.addUndo(_removeRows)
 
 
 @Sheet.api
@@ -264,8 +265,8 @@ def commit(sheet, *rows):
 def new_rows(sheet, n):
     return [sheet.newRow() for i in range(n)]
 
-Sheet.addCommand('a', 'add-row', 'addRowsUndoable([newRow()], index=cursorRowIndex); cursorDown(1)', 'append a blank row')
-Sheet.addCommand('ga', 'add-rows', 'n=int(input("add rows: ", value=1)); addRowsUndoable(new_rows(n), index=cursorRowIndex); cursorDown(1)', 'append N blank rows')
+Sheet.addCommand('a', 'add-row', 'addRows([newRow()], index=cursorRowIndex, undo=True); cursorDown(1)', 'append a blank row')
+Sheet.addCommand('ga', 'add-rows', 'n=int(input("add rows: ", value=1)); addRows(new_rows(n), index=cursorRowIndex, undo=True); cursorDown(1)', 'append N blank rows')
 Sheet.addCommand('za', 'addcol-new', 'addColumnAtCursor(SettableColumn(input("column name: "))); cursorRight(1)', 'append an empty column')
 Sheet.addCommand('gza', 'addcol-bulk', 'addColumnAtCursor(*(SettableColumn() for c in range(int(input("add columns: "))))); cursorRight(1)', 'append N empty columns')
 
