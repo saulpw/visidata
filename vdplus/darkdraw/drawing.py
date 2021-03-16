@@ -38,72 +38,9 @@ def bounding_box(rows):
     return xmin, ymin, xmax, ymax
 
 def any_match(G1, G2):
-    for g in G1:
-        if g in G2: return True
-
-def termcolor_to_css_color(n):
-    if not n.isdigit():
-        return n
-    n = int(n)
-    if 0 <= n < 16:
-        raise
-    if 16 <= n < 232:
-        n -= 16
-        r,g,b = n//36,(n%36)//6,n%6
-        ints = [0x00, 0x66, 0x88,0xbb,0xdd,0xff]
-        r,g,b=ints[r],ints[g],ints[b]
-    else:
-        n=list(range(8,255,10))[n-232]
-        r,g,b=n,n,n
-    return '#%02x%02x%02x' % (r,g,b)
-
-
-@VisiData.api
-def save_ansihtml(vd, p, *sheets):
-    for vs in sheets:
-        if isinstance(vs, DrawingSheet):
-            dwg = Drawing('', source=vs)
-        elif isinstance(vs, Drawing):
-            dwg = vs
-        else:
-            vd.fail(f'{vs.name} not a drawing')
-        dwg._scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))
-        dwg.draw(dwg._scr)
-        body = '''<pre>'''
-        for y in range(dwg.minY, dwg.maxY+1):
-            for x in range(dwg.minX, dwg.maxX+1):
-                r = dwg.drawing.get((x,y), None)
-                if not r:
-                    body += ' '
-                else:
-                    ch = r[-1].text[x-r[-1].x]
-                    fg, bg, attrs = colors.split_colorstr(r[-1].color)
-
-                    style = ''
-                    if 'underline' in attrs:
-                        style += f'text-decoration: underline; '
-                    if 'bold' in attrs:
-                        style += f'font-weight: bold; '
-                    if 'reverse' in attrs:
-                        bg, fg = fg, bg
-                    if bg:
-                        bg = termcolor_to_css_color(bg)
-                        style += f'background-color: {bg}; '
-                    if fg:
-                        fg = termcolor_to_css_color(fg)
-                        style += f'color: {fg}; '
-
-                    body += f'<span style="{style}">{ch}</span>'
-            body += '\n'
-        body += '</pre>\n'
-    try:
-        tmpl = open('ansi.html').read()
-        out = tmpl.replace('<body>', '<body>'+body)
-    except FileNotFoundError:
-        out = body
-
-    with p.open_text(mode='w') as fp:
-        fp.write(out)
+    if G1 and G2:
+        for g in G1:
+            if g in G2: return True
 
 class FramesSheet(Sheet):
     rowtype='frames'  # rowdef: { .type, .id, .duration_ms, .x, .y }
@@ -374,7 +311,7 @@ class Drawing(BaseSheet):
 
         for r, x, y, parents in self.iterdeep(self.source.rows):
             toprow = parents[0]
-            for g in r.tags:
+            for g in (r.tags or []):
                 self._tags[g].append(r)
 
             if not r.text: continue
