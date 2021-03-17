@@ -23,37 +23,54 @@ class Box:
         self.y1 = y1
         self.w = scrw if w is None else w
         self.h = scrh if h is None else h
-        if self.w < 0:
-            self.x1 = x1+self.w
-            self.w = -self.w
 
-        if self.h < 0:
-            self.y1 = y1+self.h
-            self.h = -self.h
+        self.normalize()
 
     def __str__(self):
         return f'({self.x1}+{self.w},{self.y1}+{self.h})'
 
+    def normalize(self):
+        'Make sure w and h are non-negative, swapping coordinates as needed.'
+        if self.w < 0:
+            self.x1 += self.w
+            self.w = -self.w
+
+        if self.h < 0:
+            self.y1 += self.h
+            self.h = -self.h
+
     @property
     def x2(self):
-        return self.x1+self.w
+        return self.x1+self.w+1
 
     @x2.setter
     def x2(self, v):
-        self.w = v-self.x1
+        self.w = v-self.x1-1
+        self.normalize()
 
     @property
     def y2(self):
-        return self.y1+self.h
+        return self.y1+self.h+1
 
     @y2.setter
     def y2(self, v):
-        self.h = v-self.y1
+        self.h = v-self.y1-1
+        self.normalize()
 
+    def contains(self, b):
+        'Return True if this box contains any part of the given x,y,w,h.'
+        xA = max(self.x1, b.x1)  # left
+        xB = min(self.x2, b.x2)  # right
+        yA = max(self.y1, b.y1)  # top
+        yB = min(self.y2, b.y2)  # bottom
+        return xA < xB-1 and yA < yB-1   # xA+.5 < xB-.5 and yA+.5 < yB-.5
+
+
+class DrawableBox(Box):
     def reverse(self):
         if not self.scr: return
-        for y in range(self.y1, self.y2+1):
-            for x in range(self.x1, self.x2+1):
+        for y in range(self.y1, self.y2):
+            for x in range(self.x1, self.x2):
                 try:
                     self.scr.chgat(y, x, 1, screen_contents.get((x,y), (0,0))[1] | curses.A_REVERSE)
                 except curses.error:
@@ -61,7 +78,7 @@ class Box:
 
     def erase(self):
 #        screen_contents.clear()
-        for y in range(self.y1, self.y2+1):
+        for y in range(self.y1, self.y2):
             self.scr.addstr(y, 0, ' '*self.w, 0)
 
     def draw(self, yr, xr, s, attr=0):
@@ -79,14 +96,10 @@ class Box:
                 screen_contents[(self.x1+x, self.y1+y)] = (s, attr)
                 self.scr.addstr(self.y1+y, self.x1+x, s, attr)
 
-    def contains(self, x, y):
-        '*xr* and *yr* in screen coordinates.'
-        return self.x1 <= x < self.x2 and self.y1 <= y < self.y2
-
     def box(self, x1=0, y1=0, dx=0, color=''):
         if self.w <= 0 or self.h <= 0: return
         attr = colors.get(color)
-        x2, y2=x1+self.w, y1+self.h
+        x2, y2=x1+self.w+1, y1+self.h+1
         self.draw(0, range(x1, x2), '━', attr)
         self.draw(y2, range(x1, x2), '━', attr)
         self.draw(range(y1, y2), x1, '┃', attr)
