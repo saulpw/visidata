@@ -489,8 +489,8 @@ class Drawing(BaseSheet):
         self.cursorFrameIndex = min(max(self.cursorFrameIndex, 0), len(self.frames)-1)
 
     def end_cursor(self, x, y):
-        self.cursorBox.x2 = x
-        self.cursorBox.y2 = y
+        self.cursorBox.x2 = x+2
+        self.cursorBox.y2 = y+2
         self.cursorBox.normalize()
 
     def join_rows(dwg, rows):
