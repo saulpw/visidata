@@ -14,8 +14,8 @@ class SuspendCurses:
         signal.signal(signal.SIGTSTP, visidata.vd.tstp_signal)
 
     def __exit__(self, exc_type, exc_val, tb):
-        newscr = curses.initscr()
-        newscr.refresh()
+        curses.reset_prog_mode()
+        visidata.vd.scrFull.refresh()
         curses.doupdate()
 
 

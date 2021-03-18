@@ -213,46 +213,64 @@ def mainloop(self, scr):
             else:
                 scr.timeout(vd.curses_timeout)
 
-def setupcolors(stdscr, f, *args):
+
+def initCurses():
+    # reduce ESC timeout to 25ms. http://en.chys.info/2009/09/esdelay-ncurses/
+    os.putenv('ESCDELAY', '25')
+    curses.use_env(True)
+
+    # workaround for bug in curses.wrapper #899
+    # https://stackoverflow.com/questions/31440392/curses-wrapper-messing-up-terminal-after-background-foreground-sequence
+    vd.tstp_signal = signal.getsignal(signal.SIGTSTP)
+
+    scr = curses.initscr()
+
+    curses.start_color()
+
+    colors.setup()
+
+    curses.noecho()
+    curses.cbreak()
+
     curses.raw()    # get control keys instead of signals
     curses.meta(1)  # allow "8-bit chars"
     curses.mousemask(-1 if options.mouse_interval else 0)
     curses.mouseinterval(options.mouse_interval)
     curses.mouseEvents = {}
 
+    scr.keypad(1)
+
+    curses.def_prog_mode()
+
     for k in dir(curses):
         if k.startswith('BUTTON') or k in ('REPORT_MOUSE_POSITION', '2097152'):
             curses.mouseEvents[getattr(curses, k)] = k
 
-    return f(stdscr, *args)
+    return scr
 
-def wrapper(f, *args):
-    # workaround for bug in curses.wrapper #899
-    # https://stackoverflow.com/questions/31440392/curses-wrapper-messing-up-terminal-after-background-foreground-sequence
-    vd.tstp_signal = signal.getsignal(signal.SIGTSTP)
 
-    return curses.wrapper(setupcolors, f, *args)
+def wrapper(f, *args, **kwargs):
+    try:
+        scr = initCurses()
+        return f(scr, *args, **kwargs)
+    finally:
+        curses.endwin()
+
 
 def run(*sheetlist):
     'Main entry point; launches vdtui with the given sheets already pushed (last one is visible)'
 
-    # reduce ESC timeout to 25ms. http://en.chys.info/2009/09/esdelay-ncurses/
-    os.putenv('ESCDELAY', '25')
+    try:
+        # Populate VisiData object with sheets from a given list.
+        for vs in sheetlist:
+            vd.push(vs)
 
-    curses.use_env(True)
+        vd.status('Ctrl+H opens help')
 
-    ret = wrapper(cursesMain, sheetlist)
+        scr = initCurses()
+        ret = vd.mainloop(scr)
+    finally:
+        curses.endwin()
 
     if ret:
         print(ret)
-
-def cursesMain(_scr, sheetlist):
-    'Populate VisiData object with sheets from a given list.'
-
-    colors.setup()
-
-    for vs in sheetlist:
-        vd.push(vs)
-
-    vd.status('Ctrl+H opens help')
-    return vd.mainloop(_scr)
