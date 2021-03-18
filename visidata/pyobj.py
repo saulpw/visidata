@@ -314,7 +314,17 @@ def openCell(sheet, col, row):
     return PyobjSheet(name, source=col.getTypedValue(row))
 
 
-globalCommand('^X', 'pyobj-expr', 'expr = input("eval: ", "expr", completer=CompleteExpr()); vd.push(PyobjSheet(expr, source=evalExpr(expr)))', 'evaluate Python expression and open result as Python object')
+@BaseSheet.api
+def pyobj_expr(sheet):
+    def launch_repl(v, i):
+        import code
+        with SuspendCurses():
+            code.InteractiveConsole(locals=locals()).interact()
+        return v, i
+    expr = vd.input("eval: ", "expr", completer=visidata.CompleteExpr(), bindings={'^X': launch_repl})
+    vd.push(PyobjSheet(expr, source=sheet.evalExpr(expr)))
+
+BaseSheet.addCommand('^X', 'pyobj-expr', 'pyobj_expr()', 'evaluate Python expression and open result as Python object')
 globalCommand('g^X', 'exec-python', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals(), LazyChainMap(sheet, *vd.contexts))', 'execute Python statement in the global scope')
 globalCommand('z^X', 'pyobj-expr-row', 'expr = input("eval over current row: ", "expr", completer=CompleteExpr()); vd.push(PyobjSheet(expr, source=evalExpr(expr, row=cursorRow)))', 'evaluate Python expression, in context of current row, and open result as Python object')
 
