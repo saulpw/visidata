@@ -44,8 +44,31 @@ class VisiData(visidata.Extensible):
         self.lastErrors = []
         self.keystrokes = ''
         self.scrFull = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
-        self.cmdlog = None
+        self._cmdlog = None
         self.contexts = [self]  # objects whose attributes are in the fallback context for eval/exec.
+
+    def sheetstack(self, pane=0):
+        'Return list of sheets in given *pane*. pane=0 is the active pane.  pane=-1 is the inactive pane.'
+        if pane == -1:
+            return list(vs for vs in self.sheets if vs.pane and (vs.pane != self.activePane))
+        else:
+            return list(vs for vs in self.sheets if vs.pane == (pane or self.activePane))
+
+    @property
+    def stackedSheets(self):
+        return list(vs for vs in self.sheets if vs.pane)
+
+    @property
+    def activeSheet(self):
+        'Return top sheet on sheets stack, or cmdlog if no sheets.'
+        stack = self.activeStack
+        if stack:
+            return stack[0]
+        return self._cmdlog
+
+    @property
+    def activeStack(self):
+        return self.sheetstack() or self.sheetstack(-1)
 
     @drawcache_property
     def mousereg(self):
@@ -79,7 +102,7 @@ class VisiData(visidata.Extensible):
         try:
             scr.refresh()
             k = scr.get_wch()
-            vs = vs or self.sheets[0]
+            vs = vs or self.activeSheet
             self.drawRightStatus(vs._scr, vs) # continue to display progress %
         except curses.error:
             return ''  # curses timeout

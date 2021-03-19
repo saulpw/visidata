@@ -59,22 +59,19 @@ def setWindows(vd, scr):
         vd.winTop.keypad(1)
         vd.winBottom = curses.newwin(h-n, w, n, 0)
         vd.winBottom.keypad(1)
-        if pct == 0 or pct >= 100:  # no second window
+        if pct == 0 or pct >= 100:  # no second pane
             vd.win1 = vd.winBottom
             # drawing to 0-line window causes problems
             vd.win2 = mock.MagicMock(__bool__=mock.Mock(return_value=False))
-            for vs in vd.sheets[0:0]:
-                vs.refresh()
-        elif pct > 0: # second window line n to bottom
+        elif pct > 0: # pane 2 from line n to bottom
             vd.win1 = vd.winTop
             vd.win2 = vd.winBottom
-            for vs in vd.sheets[0:2]:
-                vs.refresh()
-        elif pct < 0: # second window line 0 to n
+        elif pct < 0: # pane 2 from line 0 to n
             vd.win1 = vd.winBottom
             vd.win2 = vd.winTop
-            for vs in vd.sheets[0:2]:
-                vs.refresh()
+
+        for vs in vd.sheetstack(1)[0:0]+vd.sheetstack(2)[0:0]:
+            vs.refresh()
 
         vd.windowConfig = desiredConfig
         vd.scrFull = scr
@@ -83,11 +80,14 @@ def setWindows(vd, scr):
 @VisiData.api
 def draw_all(vd):
     'Draw all sheets in all windows.'
-    if not vd.sheets:
-        return
-    vd.draw_sheet(vd.win1, vd.sheets[0])
-    if vd.win2 and len(vd.sheets) > 1:
-        vd.draw_sheet(vd.win2, vd.sheets[1])
+    if vd.sheetstack(1):
+        vd.draw_sheet(vd.win1, vd.sheetstack(1)[0])
+    else:
+        vd.win1.erase()
+        vd.win1.refresh()
+
+    if vd.win2 and vd.sheetstack(2):
+        vd.draw_sheet(vd.win2, vd.sheetstack(2)[0])
     else:
         vd.win2.erase()
         vd.win2.refresh()
@@ -115,7 +115,7 @@ def mainloop(self, scr):
 
     self.keystrokes = ''
     while True:
-        if not self.sheets and self.currentReplay is None:
+        if not self.stackedSheets and self.currentReplay is None:
             return
 
         sheet = self.activeSheet
@@ -149,7 +149,7 @@ def mainloop(self, scr):
                     devid, x, y, z, bstate = curses.getmouse()
                     if vd.windowConfig and y > vd.windowConfig['n'] and vd.windowConfig['pct'] > 0:
                         y -= vd.windowConfig['n']
-                        sheet = vd.sheets[1]
+                        sheet = vd.sheetstack(-1)[0]
                     sheet.mouseX, sheet.mouseY = x, y
                     if bstate & curses.BUTTON_CTRL:
                         clicktype += "CTRL-"

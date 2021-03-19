@@ -10,6 +10,9 @@ vd, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
 import visidata
 
 
+vd.activePane = 1   # pane numbering starts at 1; pane 0 means active pane
+
+
 __all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'TableSheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow', 'SequenceSheet']
 
 
@@ -972,6 +975,7 @@ class SheetsSheet(IndexSheet):
     columns = [
         ColumnAttr('name'),
         ColumnAttr('type', '__class__.__name__'),
+        ColumnAttr('pane', type=int),
         ColumnAttr('shortcut'),
         ColumnAttr('nRows', type=int),
         ColumnAttr('nCols', type=int),
@@ -1016,14 +1020,13 @@ def remove(vd, vs):
 
 
 @VisiData.global_api
-def push(vd, vs):
-    'Push Sheet *vs* onto ``vd.sheets`` stack.  Remove from other position if already on sheets stack.'
+def push(vd, vs, pane=0):
+    'Push Sheet *vs* onto ``vd.sheets`` stack for *pane* (0 for active pane, -1 for inactive pane).  Remove from other position if already on sheets stack.'
     if not isinstance(vs, BaseSheet):
         return  # return instead of raise, some commands need this
 
-    vd.options.disp_splitwin_pct=-vd.options.disp_splitwin_pct
-
     vs.vd = vd
+    vs.pane = pane or vd.activePane
     if vs in vd.sheets:
         vd.sheets.remove(vs)
 
@@ -1043,18 +1046,17 @@ def allSheetsSheet(vd):
 def sheetsSheet(vd):
     return SheetsSheet("sheets", source=vd.sheets)
 
-
 @VisiData.api
 def quit(vd, *sheets):
     'Remove *sheets* from sheets stack, asking for confirmation if options.quitguard set (either global or sheet-specific).'
     if len(vd.sheets) == len(sheets) and options.getonly('quitguard', 'global', False):
         vd.confirm("quit last sheet? ")
-    vd.options.disp_splitwin_pct=-vd.options.disp_splitwin_pct
+
     for vs in sheets:
         if options.getonly('quitguard', vs, False):
             vd.draw_all()
             vd.confirm(f'quit guarded sheet "{vs.name}?" ')
-        vd.remove(vs)
+        vs.pane = 0
 
 
 @BaseSheet.api
@@ -1079,6 +1081,7 @@ def updateColNames(sheet, rows, cols, overwrite=False):
 IndexSheet.class_options.header = 0
 IndexSheet.class_options.skip = 0
 
+BaseSheet.init('pane', lambda: 1)
 
 globalCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)', 'open Sheets Stack: join or jump between the active sheets on the current stack')
 globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)', 'open Sheets Sheet: join or jump between all sheets from current session')
@@ -1118,9 +1121,9 @@ SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(shee
 BaseSheet.addCommand('q', 'quit-sheet',  'vd.quit(sheet)', 'quit current sheet')
 globalCommand('gq', 'quit-all', 'vd.quit(*vd.sheets)', 'quit all sheets (clean exit)')
 
-BaseSheet.addCommand('Z', 'splitwin-half', 'options.disp_splitwin_pct = -options.disp_splitwin_pct or -50', 'split screen in half, so that second sheet on stack is visible in a second pane')
+BaseSheet.addCommand('Z', 'splitwin-half', 'options.disp_splitwin_pct = -options.disp_splitwin_pct or -50; sheet.pane=1 if pane == 2 else 2', 'split screen in half, so that second sheet on stack is visible in a second pane')
 BaseSheet.addCommand('gZ', 'splitwin-close', 'options.disp_splitwin_pct = 0', 'close an already split screen, current pane full screens')
-BaseSheet.addCommand('^I', 'splitwin-swap', 'push(sheets[1]) if sheets[1:] else fail("no second sheet")', 'jump to other pane')
+BaseSheet.addCommand('^I', 'splitwin-swap', 'vd.activePane = 1 if pane == 2 else 2', 'jump to other pane')
 BaseSheet.addCommand('zZ', 'splitwin-input', 'options.disp_splitwin_pct = input("% height for split window: ", value=options.disp_splitwin_pct)', 'split screen and queries for height of second pane, second sheet on stack is visible in second pane')
 
 BaseSheet.addCommand('^L', 'redraw', 'vd.redraw(); sheet.refresh()', 'refresh screen')

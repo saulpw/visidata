@@ -145,7 +145,7 @@ class BaseSheet(Extensible):
         try:
             if vd.cmdlog:
                 # sheet may have changed
-                vd.cmdlog.afterExecSheet(vd.sheets[0] if vd.sheets else None, escaped, err)
+                vd.cmdlog.afterExecSheet(vd.activeSheet, escaped, err)
         except Exception as e:
             vd.exceptionCaught(e)
 
@@ -223,8 +223,7 @@ def redraw(vd):
 
 @VisiData.property
 def sheet(self):
-    'the top sheet on the stack'
-    return self.sheets[0] if self.sheets else None
+    return self.activeSheet
 
 @VisiData.api
 def isLongname(self, ks):

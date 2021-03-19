@@ -272,11 +272,6 @@ def delay(vd, factor=1):
         acquired = vd.semaphore.acquire(timeout=options.replay_wait*factor if not vd.paused else None)
         return acquired or not vd.paused
 
-@VisiData.property
-def activeSheet(vd):
-    'Return top sheet on sheets stack, or cmdlog sheets stack empty.'
-    return vd.sheets[0] if vd.sheets else vd.cmdlog
-
 
 @VisiData.api
 def replayOne(vd, r):
@@ -417,11 +412,12 @@ def shortcut(self):
     return ''
 
 
-@VisiData.lazy_property
+@VisiData.property
 def cmdlog(vd):
-    vs = CommandLog('cmdlog', rows=[])
-    vd.beforeExecHooks.append(vs.beforeExecHook)
-    return vs
+    if not vd._cmdlog:
+        vd._cmdlog = CommandLog('cmdlog', rows=[])
+        vd.beforeExecHooks.append(vd._cmdlog.beforeExecHook)
+    return vd._cmdlog
 
 @VisiData.property
 def modifyCommand(vd):

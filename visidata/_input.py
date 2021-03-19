@@ -257,7 +257,7 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
 
     if v is None:
         try:
-            v = vd.editline(vd.sheets[0]._scr, y, x, w, display=display, **kwargs)
+            v = vd.editline(vd.activeSheet._scr, y, x, w, display=display, **kwargs)
         except AcceptInput as e:
             v = e.args[0]
 
@@ -275,7 +275,7 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
 @VisiData.api
 def inputsingle(vd, prompt, record=True):
     'Display prompt and return single character of user input.'
-    sheet = vd.sheets[0]
+    sheet = vd.activeSheet
     rstatuslen = vd.drawRightStatus(sheet._scr, sheet)
 
     v = None

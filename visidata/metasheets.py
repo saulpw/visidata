@@ -211,7 +211,7 @@ def vdmenu(vd):
 
 @VisiData.property
 def allColumnsSheet(vd):
-    return ColumnsSheet("all_columns", source=list(vd.sheets))
+    return ColumnsSheet("all_columns", source=vd.stackedSheets)
 
 
 @ColumnsSheet.command('&', 'join-cols', 'add column from concatenating selected source columns')

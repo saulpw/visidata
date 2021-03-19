@@ -97,7 +97,7 @@ def leftStatus(sheet):
 def drawLeftStatus(vd, scr, vs):
     'Draw left side of status bar.'
     cattr = colors.get_color('color_status')
-    active = (vs is vd.sheets[0]) if vd.sheets else False # active sheet
+    active = (vs is vd.activeSheet)
     if active:
         cattr = update_attr(cattr, colors.color_active_status, 0)
     else:

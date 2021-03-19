@@ -196,8 +196,8 @@ def execAsync(self, func, *args, sheet=None, **kwargs):
     thread = threading.Thread(target=_toplevelTryFunc, daemon=True, args=(func,)+args, kwargs=kwargs)
     self.threads.append(_annotate_thread(thread))
 
-    if sheet is None and self.sheets:
-        sheet = self.sheets[0]
+    if sheet is None:
+        sheet = self.activeSheet
 
     if sheet is not None:
         sheet.currentThreads.append(thread)

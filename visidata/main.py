@@ -276,9 +276,9 @@ def main_vd():
             vd.replay(vs)
             run()
 
-    if vd.sheets and (flPipedOutput or args.output):
+    if vd.stackedSheets and (flPipedOutput or args.output):
         outpath = Path(args.output or '-')
-        saveSheets(outpath, vd.sheets[0], confirm_overwrite=False)
+        saveSheets(outpath, vd.activeSheet, confirm_overwrite=False)
 
     saver_threads = [t for t in vd.unfinishedThreads if t.name.startswith('save_')]
     if saver_threads:

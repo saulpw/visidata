@@ -73,7 +73,7 @@ class SettingsMgr(collections.OrderedDict):
     def _get(self, key, obj=None):
         d = self.get(key, None)
         if d:
-            for m in self._mappings(obj or vd.sheet):
+            for m in self._mappings(obj or vd.activeSheet):
                 v = d.get(m)
                 if v:
                     return v
@@ -81,7 +81,7 @@ class SettingsMgr(collections.OrderedDict):
     def iter(self, obj=None):
         'Iterate through all keys considering context of obj. If obj is None, uses the context of the top sheet.'
         if obj is None and vd:
-            obj = vd.sheet
+            obj = vd.activeSheet
 
         for o in self._mappings(obj):
             for k in self.keys():
@@ -133,10 +133,10 @@ class OptionsObject:
 
     def _get(self, k, obj=None):
         'Return Option object for k in context of obj. Cache result until any set().'
-        opt = self._cache.get((k, obj or vd.sheet), None)
+        opt = self._cache.get((k, obj or vd.activeSheet), None)
         if opt is None:
             opt = self._opts._get(k, obj)
-            self._cache[(k, obj or vd.sheet)] = opt
+            self._cache[(k, obj or vd.activeSheet)] = opt
         return opt
 
     def _set(self, k, v, obj=None, helpstr=''):
