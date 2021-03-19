@@ -27,7 +27,7 @@ option('header', 1, 'parse first N rows as column names', replay=True)
 option('load_lazy', False, 'load subsheets always (False) or lazily (True)')
 
 theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
-theme('use_default_colors', False, 'curses use default terminal colors')
+theme('use_default_colors', True, 'curses use default terminal colors')
 
 theme('disp_note_none', '⌀',  'visible contents of a cell whose value is None')
 theme('disp_truncator', '…', 'indicator that the contents are only partially visible')
