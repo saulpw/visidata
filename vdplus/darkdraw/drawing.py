@@ -382,7 +382,7 @@ class Drawing(BaseSheet):
 
     @property
     def cursorRows(self):
-        return self._displayedRows[(self.cursorBox.x1, self.cursorBox.y1)]
+        return list(self.iterbox(self.cursorBox))
 
     @property
     def cursorRow(self):
