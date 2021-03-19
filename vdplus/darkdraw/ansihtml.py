@@ -45,7 +45,7 @@ def save_ansihtml(vd, p, *sheets):
         body = '''<pre>'''
         for y in range(dwg.minY, dwg.maxY+1):
             for x in range(dwg.minX, dwg.maxX+1):
-                rows = dwg.drawing.get((x,y), None)
+                rows = dwg._displayedRows.get((x,y), None)
                 if not rows:
                     body += ' '
                 else:

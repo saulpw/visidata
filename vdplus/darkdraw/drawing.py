@@ -14,13 +14,13 @@ vd.charPalHeight = charPalHeight = 16
 
 @VisiData.api
 def open_ddw(vd, p):
-    return Drawing(p.name, source=DrawingSheet(p.name, 'table', source=p))
+    return DrawingSheet(p.name, 'table', source=p).drawing
 
 vd.save_ddw = vd.save_jsonl
 
 @VisiData.lazy_property
 def words(vd):
-    return [x.strip() for x in open('/usr/share/dict/words').readlines() if 3 <= len(x) < 8 and x.islower()]
+    return [x.strip() for x in open('/usr/share/dict/words').readlines() if 3 <= len(x) < 8 and x.islower() and x.strip().isalpha()]
 
 @VisiData.api
 def random_word(vd):
@@ -79,6 +79,10 @@ class DrawingSheet(JsonSheet):
     ]
     def newRow(self):
         return AttrDict(x=None, y=None, text='', color='', tags=[], group='')
+
+    @functools.cached_property
+    def drawing(self):
+        return Drawing(self.name, source=self)
 
     def addRow(self, row, **kwargs):
         row = super().addRow(row, **kwargs)
@@ -159,8 +163,8 @@ class DrawingSheet(JsonSheet):
         x1, y1, x2, y2 = bounding_box(nr.rows)
         nr.x, nr.y, nr.w, nr.h = x1, y1, x2-x1, y2-y1
         for r in nr.rows:
-            r.x -= x1
-            r.y -= y1
+            r.x = (r.x or 0) - x1
+            r.y = (r.y or 0) - y1
 
         self.deleteSelected()
         self.select([nr])
@@ -225,9 +229,9 @@ class DrawingSheet(JsonSheet):
 class Drawing(BaseSheet):
     def iterbox(self, box):
         'Yield rows within the given box.'
-        for nx in range(box.x1, box.x2+1):
-            for ny in range(box.y1, box.y2+1):
-                yield from self.drawing[(nx,ny)]
+        for nx in range(box.x1, box.x2-1):
+            for ny in range(box.y1, box.y2-1):
+                yield from self._displayedRows[(nx,ny)]
 
     @property
     def rows(self):
@@ -291,7 +295,7 @@ class Drawing(BaseSheet):
                     vd.timeouts_before_idle = 10
                     vd.curses_timeout = 100
 
-        self.drawing = defaultdict(list)  # (x, y) -> list of rows; actual screen layout (topmost last in list)
+        self._displayedRows = defaultdict(list)  # (x, y) -> list of rows; actual screen layout (topmost last in list)
         self._tags = defaultdict(list)  # "tag" -> list of rows with that tag
 
         selectedGroups = set()  # any group with a selected element
@@ -317,16 +321,16 @@ class Drawing(BaseSheet):
             if not (0 <= y < self.windowHeight-1 and 0 <= x < self.windowWidth):  # inside screen
                 continue
 
-            c = r.color
+            c = r.color or ''
             if self.cursorBox.contains(Box(scr, x, y, r.w or dispwidth(r.text), r.h or 1)):
-                c = self.options.color_current_row + ' ' + c
+                c = self.options.color_current_row + ' ' + str(c)
             if self.source.isSelected(toprow):
-                c = self.options.color_selected_row + ' ' + c
+                c = self.options.color_selected_row + ' ' + str(c)
                 selectedGroups |= set(r.tags)
             a = colors[c]
             w = clipdraw(scr, y, x, r.text, a)
             for i in range(0, w):
-                cellrows = self.drawing[(x+i, y)]
+                cellrows = self._displayedRows[(x+i, y)]
                 if toprow not in cellrows:
                     cellrows.append(toprow)
 
@@ -367,7 +371,7 @@ class Drawing(BaseSheet):
         'Return text of topmost visible element at (x,y) (or cursor if not given).'
         if x is None: x = self.cursorBox.x1
         if y is None: y = self.cursorBox.y1
-        r = self.drawing.get((x,y), None)
+        r = self._displayedRows.get((x,y), None)
         if not r: return ''
         return r[-1]['text']
 
@@ -378,7 +382,7 @@ class Drawing(BaseSheet):
 
     @property
     def cursorRows(self):
-        return self.drawing[(self.cursorBox.x1, self.cursorBox.y1)]
+        return self._displayedRows[(self.cursorBox.x1, self.cursorBox.y1)]
 
     @property
     def cursorRow(self):
@@ -468,14 +472,14 @@ class Drawing(BaseSheet):
     def go_obj(self, xdir=0, ydir=0):
         x=self.cursorBox.x1
         y=self.cursorBox.y1
-        currows = self.drawing.get((x, y), [])
-        xmin = min(x for x, y in self.drawing.keys())
-        ymin = min(y for x, y in self.drawing.keys())
-        xmax = max(x for x, y in self.drawing.keys())
-        ymax = max(y for x, y in self.drawing.keys())
+        currows = self._displayedRows.get((x, y), [])
+        xmin = min(x for x, y in self._displayedRows.keys())
+        ymin = min(y for x, y in self._displayedRows.keys())
+        xmax = max(x for x, y in self._displayedRows.keys())
+        ymax = max(y for x, y in self._displayedRows.keys())
 
         while xmin <= x <= xmax and ymin <= y <= ymax:
-            for r in self.drawing.get((x, y), [])[::-1]:
+            for r in self._displayedRows.get((x, y), [])[::-1]:
                 if r and r not in currows:
                     self.cursorBox.x1 = x
                     self.cursorBox.y1 = y
@@ -506,15 +510,22 @@ class Drawing(BaseSheet):
         x1, y1, x2, y2 = bounding_box(rows)
         for oldr in rows:
             r = self.newRow()
+            r.update(deepcopy(oldr))
             r.frame = self.currentFrame.id
-            r.text = oldr.text
-            if r.x is None:
+            if self.paste_mode == 'fg all':
+                r.color = oldr.color or '' or ''
+            if self.paste_mode in 'bg all':
+                r.color = oldr.color or ''
+            if self.paste_mode in 'ch all':
+                r.text = oldr.text
+
+            if oldr.x is None:
                 r.x = self.cursorBox.x1
                 r.y = self.cursorBox.y1
                 self.go_forward(dispwidth(r.text)+1, 1)
             else:
-                r.x = (r.x or 0)+self.cursorBox.x1-x1
-                r.y = (r.y or 0)+self.cursorBox.y1-y1
+                r.x = (oldr.x or 0)+self.cursorBox.x1-x1
+                r.y = (oldr.y or 0)+self.cursorBox.y1-y1
 
             newrows.append(r)
             self.source.addRow(r)
@@ -546,7 +557,7 @@ class Drawing(BaseSheet):
 
 
 Drawing.init('cursorBox', lambda: Box(None, 0,0,1,1))
-Drawing.init('drawing', dict)  # (x,y) -> list of rows
+Drawing.init('_displayedRows', dict)  # (x,y) -> list of rows
 Drawing.init('pendir', lambda: 'r')
 Drawing.init('disabled_tags', set)  # set of groupnames which should not be drawn or interacted with
 
@@ -633,6 +644,7 @@ for i in range(1, 99):
 Drawing.addCommand('A', 'new-drawing', 'vd.push(Drawing("untitled", source=DrawingSheet("", source=Path("untitled.ddw"))))')
 Drawing.addCommand('M', 'open-unicode', 'vd.push(vd.unibrowser)')
 Drawing.addCommand('`', 'push-source', 'vd.push(sheet.source)')
+DrawingSheet.addCommand('`', 'open-drawing', 'vd.push(sheet.drawing)')
 
 Drawing.addCommand('^G', 'show-char', 'status(f"{sheet.cursorBox}  {sheet.cursorCharName}")')
 DrawingSheet.addCommand(ENTER, 'dive-group', 'cursorRow.rows or fail("not a group"); vd.push(DrawingSheet(source=sheet, rows=cursorRow.rows))')
