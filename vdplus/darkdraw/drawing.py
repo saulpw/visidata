@@ -119,7 +119,7 @@ class DrawingSheet(JsonSheet):
         vd.status('created group "%s"' % gname)
         return self.addRow(nr)
 
-    @property
+    @drawcache_property
     def frames(self):
         return [r for r in self.rows if r.type == 'frame']
 
