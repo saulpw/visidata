@@ -45,9 +45,10 @@ vd.windowConfig = None
 vd.winTop = mock.MagicMock(__bool__=mock.Mock(return_value=False))
 
 @VisiData.api
-def setWindows(vd, scr):
+def setWindows(vd, scr, pct=None):
     'Assign winTop, winBottom, win1 and win2 according to options.disp_splitwin_pct.'
-    pct = options.disp_splitwin_pct   # percent of window for secondary sheet (negative means bottom)
+    if pct is None:
+        pct = options.disp_splitwin_pct  # percent of window for secondary sheet (negative means bottom)
     h, w = scr.getmaxyx()
     n = abs(pct)*h//100
     # on 100 line screen, pct = 25 means second window on lines 75-100.  pct -25 -> lines 0-25
@@ -80,17 +81,28 @@ def setWindows(vd, scr):
 @VisiData.api
 def draw_all(vd):
     'Draw all sheets in all windows.'
-    if vd.sheetstack(1):
-        vd.draw_sheet(vd.win1, vd.sheetstack(1)[0])
-    else:
-        vd.win1.erase()
-        vd.win1.refresh()
-
-    if vd.win2 and vd.sheetstack(2):
-        vd.draw_sheet(vd.win2, vd.sheetstack(2)[0])
-    else:
-        vd.win2.erase()
-        vd.win2.refresh()
+    ss1 = vd.sheetstack(1)
+    ss2 = vd.sheetstack(2)
+    if ss1 and not ss2:
+        vd.activePane = 1
+        vd.setWindows(vd.scrFull, 0)
+        vd.draw_sheet(vd.win1, ss1[0])
+        if vd.win2:
+            vd.win2.erase()
+            vd.win2.refresh()
+    elif not ss1 and ss2:
+        vd.activePane = 2
+        vd.setWindows(vd.scrFull, 0)
+        vd.draw_sheet(vd.win1, ss2[0])
+        if vd.win2:
+            vd.win2.erase()
+            vd.win2.refresh()
+    elif ss1 and ss2 and vd.win2:
+        vd.draw_sheet(vd.win1, ss1[0])
+        vd.draw_sheet(vd.win2, ss2[0])
+    elif ss1 and ss2 and not vd.win2:
+        vd.draw_sheet(vd.win1, vd.sheetstack(vd.activePane)[0])
+        vd.setWindows(vd.scrFull)
 
 @VisiData.api
 def runresult(vd):
