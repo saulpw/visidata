@@ -302,7 +302,7 @@ def replayOne(vd, r):
             if vs:
                 vd.push(vs)
             else:
-                vs = vd.activeSheet
+                vs = vd.activeSheet or vd.cmdlog
 
             vd.moveToReplayContext(r, vs)
 
@@ -345,7 +345,8 @@ def replay_sync(vd, cmdlog, live=False):
                 cmdlog.cursorRowIndex += 1
                 prog.addProgress(1)
 
-                vd.activeSheet.ensureLoaded()
+                if vd.activeSheet:
+                    vd.activeSheet.ensureLoaded()
                 vd.sync()
                 while not vd.delay():
                     pass
