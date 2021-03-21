@@ -77,6 +77,10 @@ class ColorMaker:
     def split_colorstr(self, colorstr):
         'Return (fgstr, bgstr, attrlist) parsed from colorstr.'
         fgbgattrs = ['', '', []]  # fgstr, bgstr, attrlist
+        if not colorstr:
+            return fgbgattrs
+        colorstr = str(colorstr)
+
         i = 0  # fg by default
         for x in colorstr.split():
             if x == 'fg':
