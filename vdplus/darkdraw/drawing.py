@@ -210,7 +210,9 @@ class DrawingSheet(JsonSheet):
                 degrouped.append(r)
 
         for g in groups:
+            oldrows = copy(self.groups[g].rows)
             self.groups[g].rows.clear()
+            vd.addUndo(setattr, self.groups[g], 'rows', oldrows)
 
         self.clearSelected()
         self.select(degrouped)
@@ -407,7 +409,7 @@ class Drawing(BaseSheet):
 
     @property
     def frameDesc(sheet):
-        return f'Frame {sheet.currentFrame.id} {sheet.cursorFrameIndex}/{sheet.nFrames}'
+        return f'Frame {sheet.currentFrame.id} {sheet.cursorFrameIndex}/{sheet.nFrames-1}'
 
     @property
     def cursorCharName(self):
