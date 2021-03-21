@@ -514,7 +514,7 @@ class Drawing(BaseSheet):
             r = self.newRow()
             r.update(deepcopy(oldr))
             r.frame = self.currentFrame.id
-            if self.paste_mode == 'fg all':
+            if self.paste_mode in 'fg all':
                 r.color = oldr.color or '' or ''
             if self.paste_mode in 'bg all':
                 r.color = oldr.color or ''
@@ -686,6 +686,7 @@ Drawing.bindkey('zKEY_DOWN', 'resize-cursor-taller')
 Drawing.bindkey('C', 'open-colors')
 
 Drawing.init('mark', lambda: (0,0))
+Drawing.init('paste_mode', lambda: 'all')
 Drawing.init('cursorFrameIndex', lambda: 0)
 Drawing.init('autoplay_frames', list)
 Drawing.class_options.disp_rstatus_fmt='{sheet.frameDesc}  <{sheet.cursorDesc}> {sheet.source.nRows} {sheet.rowtype}  {sheet.options.disp_selected_note}{sheet.source.nSelectedRows}'
