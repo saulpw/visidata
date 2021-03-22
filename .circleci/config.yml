@@ -15,7 +15,8 @@ jobs:
       - run: sudo chown -R circleci:circleci /usr/local/share
       - run: sudo chown -R circleci:circleci /usr/local/lib
       - run: sudo chown -R circleci:circleci /usr/local/include/
-      - run: export PYTHONPATH=.
+      - run: echo 'export PYTHONPATH=~/visidata:~/visidata/visidata' >> $BASH_ENV
+      - run: source $BASH_ENV
       - run: locale
       - run:
           name: dependencies
@@ -24,5 +25,3 @@ jobs:
       - run:
           command: |
             dev/test.sh
-      - run:
-          command: bin/vd --help
