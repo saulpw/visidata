@@ -231,10 +231,6 @@ def initCurses():
     os.putenv('ESCDELAY', '25')
     curses.use_env(True)
 
-    # workaround for bug in curses.wrapper #899
-    # https://stackoverflow.com/questions/31440392/curses-wrapper-messing-up-terminal-after-background-foreground-sequence
-    vd.tstp_signal = signal.getsignal(signal.SIGTSTP)
-
     scr = curses.initscr()
 
     curses.start_color()

@@ -23,3 +23,5 @@ jobs:
       - run:
           command: |
             dev/test.sh
+      - run:
+          command: bin/vd --help

@@ -10,6 +10,7 @@ import os
 import io
 import sys
 import locale
+import signal
 import warnings
 
 from visidata import vd, option, options, run, BaseSheet, AttrDict
@@ -85,6 +86,10 @@ def main_vd():
     flPipedOutput = not sys.stdout.isatty()
 
     vd._stdin, vd._stdout = duptty()  # always dup stdin/stdout
+
+    # workaround for bug in curses.wrapper #899
+    # https://stackoverflow.com/questions/31440392/curses-wrapper-messing-up-terminal-after-background-foreground-sequence
+    vd.tstp_signal = signal.getsignal(signal.SIGTSTP)
 
     stdinSource = Path('-', fp=vd._stdin)
 
