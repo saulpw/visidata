@@ -104,8 +104,9 @@ class DrawingSheet(JsonSheet):
     def tag_rows(self, rows, tagstr):
         tags = tagstr.split()
         for r in rows:
+            if not r.tags: r.tags = []
             for tag in tags:
-                if tag not in (r.tags or ''):
+                if tag not in r.tags:
                     r.tags.append(tag)
 
     @property
@@ -328,7 +329,7 @@ class Drawing(BaseSheet):
                 c = self.options.color_current_row + ' ' + str(c)
             if self.source.isSelected(toprow):
                 c = self.options.color_selected_row + ' ' + str(c)
-                selectedGroups |= set(r.tags)
+                if r.tags: selectedGroups |= set(r.tags)
             a = colors[c]
             w = clipdraw(scr, y, x, r.text, a)
             for i in range(0, w):
