@@ -7,10 +7,13 @@ from visidata import *
 import os.path
 from urllib.parse import urljoin
 
-import requests
-import requests_cache
+try:
+    import requests
+    import requests_cache
 
-requests_cache.install_cache(str(Path(os.path.join(options.visidata_dir, 'httpcache'))), backend='sqlite', expire_after=24*60*60)
+    requests_cache.install_cache(str(Path(os.path.join(options.visidata_dir, 'httpcache'))), backend='sqlite', expire_after=24*60*60)
+except ModuleNotFoundError:
+    pass
 
 
 @VisiData.api
@@ -94,6 +97,7 @@ class HtmlDocsSheet(Sheet):
         AttrColumn('soup.title'),
     ]
     def iterload(self):
+        import requests
         self.colnames = {}
         for url in self.urls:
             yield requests.get(url)
