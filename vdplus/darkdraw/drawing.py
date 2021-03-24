@@ -369,6 +369,15 @@ class Drawing(BaseSheet):
             self.cursorBox.x1 += 1
             self.cursorBox.y1 = 1
 
+    def edit_text(self, text, row):
+        if row is None:
+            self.place_text(text, dx=1)
+            return
+        oldtext = row.text
+        row.text = text
+        vd.addUndo(setattr, row, 'text', oldtext)
+
+
     def get_text(self, x=None, y=None):
         'Return text of topmost visible element at (x,y) (or cursor if not given).'
         if x is None: x = self.cursorBox.x1
@@ -598,7 +607,7 @@ Drawing.addCommand('gKEY_END', 'slide-bottom-selected', 'source.slide_top(source
 Drawing.addCommand('d', 'delete-cursor', 'remove_at(cursorBox); go_forward(1, 1)', 'delete first item under cursor')
 Drawing.addCommand('gd', 'delete-selected', 'source.deleteSelected()')
 Drawing.addCommand('a', 'add-input', 'place_text(input("text: ", value=get_text()), dx=1)')
-Drawing.addCommand('e', 'edit-char', 'cursorRow.text=input("text: ", value=get_text())')
+Drawing.addCommand('e', 'edit-char', 'edit_text(input("text: ", value=get_text()), cursorRow)')
 Drawing.addCommand('ge', 'edit-selected', 'v=input("text: ", value=get_text())\nfor r in source.selectedRows: r.text=v')
 Drawing.addCommand('y', 'yank-char', 'sheet.copyRows([cursorRow])')
 Drawing.addCommand('gy', 'yank-selected', 'sheet.copyRows(sheet.selectedRows)')
