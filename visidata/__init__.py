@@ -143,6 +143,11 @@ from .colorsheet import *
 
 from .deprecated import *
 
+try:
+    from vdplus import *
+except ModuleNotFoundError:
+    pass
+
 from math import *
 
 vd.finalInit()
