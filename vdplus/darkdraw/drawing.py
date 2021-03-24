@@ -348,7 +348,7 @@ class Drawing(BaseSheet):
                     c = self.options.color_current_row + ' ' + c
                 if tag in selectedGroups:
                     c = self.options.color_selected_row + ' ' + c
-                clipdraw(scr, i+1, self.windowWidth-20, '%02d: %s' % (i+1, tag), colors[c])
+                clipdraw(scr, i+1, self.windowWidth-20, 'z%02d: %s' % (i+1, tag), colors[c])
 
         elif self.options.visibility == 2: # draw clipboard item shortcuts
             if not vd.memory.cliprows:
@@ -356,7 +356,7 @@ class Drawing(BaseSheet):
             defcolor = self.options.color_default
             for i, r in enumerate(vd.memory.cliprows[:10]):
                 x = self.windowWidth-20
-                x += clipdraw(scr, i+1, x, 'F%d: ' % (i+1), colors[defcolor])
+                x += clipdraw(scr, i+1, x, '%d: ' % (i+1), colors[defcolor])
                 x += clipdraw(scr, i+1, x, r.text, colors[r.color])
 
     def reload(self):
@@ -430,6 +430,10 @@ class Drawing(BaseSheet):
     @property
     def frameDesc(sheet):
         return f'Frame {sheet.currentFrame.id} {sheet.cursorFrameIndex}/{sheet.nFrames-1}'
+
+    @property
+    def pasteDesc(sheet):
+        return f'paste {sheet.paste_mode}'
 
     @property
     def cursorCharName(self):
@@ -524,6 +528,10 @@ class Drawing(BaseSheet):
         rows[0].text = ''.join(r.text for r in rows)
         dwg.source.deleteBy(lambda r,rows=rows[1:]: r in rows)
 
+    def cycle_paste_mode(self):
+        modes = ['all', 'char', 'color']
+        self.paste_mode = modes[(modes.index(self.paste_mode)+1)%len(modes)]
+
     def paste_chars(self, rows):
         rows or vd.fail('no rows to paste')
 
@@ -531,15 +539,18 @@ class Drawing(BaseSheet):
 
         x1, y1, x2, y2 = bounding_box(rows)
         for oldr in rows:
-            r = self.newRow()
-            r.update(deepcopy(oldr))
-            r.frame = self.currentFrame.id
-            if self.paste_mode in 'fg all':
-                r.color = oldr.color or '' or ''
-            if self.paste_mode in 'bg all':
-                r.color = oldr.color or ''
-            if self.paste_mode in 'ch all':
+            if self.paste_mode == 'color':
+                for existing in self.cursorRows:
+                    existing.color = vd.default_color
+                continue
+
+            if self.paste_mode in 'all char':
+                r = self.newRow()
+                r.update(deepcopy(oldr))
+                r.frame = self.currentFrame.id
                 r.text = oldr.text
+                if self.paste_mode == 'char':
+                    r.color = vd.default_color
 
             if oldr.x is None:
                 r.x = self.cursorBox.x1
@@ -655,11 +666,11 @@ Drawing.addCommand('u', 'unselect-cursor', 'source.unselect(list(itercursor()))'
 Drawing.addCommand('zs', 'select-top-cursor', 'source.selectRow(list(itercursor())[-1])')
 Drawing.addCommand('gu', 'unselect-all', 'source.clearSelected()')
 
-Drawing.addCommand('00', 'enable-all-groups', 'disabled_tags.clear()')
+Drawing.addCommand('z00', 'enable-all-groups', 'disabled_tags.clear()')
 for i in range(1, 99):
-    Drawing.addCommand('%02d'%i, 'toggle-group-%s'%i, 'g=list(_tags.keys())[%s]; disabled_tags.remove(g) if g in disabled_tags else disabled_tags.add(g)' %(i-1))
+    Drawing.addCommand('z%02d'%i, 'toggle-enabled-group-%s'%i, 'g=list(_tags.keys())[%s]; disabled_tags.remove(g) if g in disabled_tags else disabled_tags.add(g)' %(i-1))
     Drawing.addCommand('g%02d'%i, 'select-group-%s'%i, 'g=list(_tags.keys())[%s]; source.select(source.gatherTag(g))' %(i-1))
-    Drawing.addCommand('z%02d'%i, 'unselect-group-%s'%i, 'g=list(_tags.keys())[%s]; source.unselect(source.gatherTag(g))' %(i-1))
+    Drawing.addCommand('gz%02d'%i, 'unselect-group-%s'%i, 'g=list(_tags.keys())[%s]; source.unselect(source.gatherTag(g))' %(i-1))
 
 
 Drawing.addCommand('A', 'new-drawing', 'vd.push(Drawing("untitled", source=DrawingSheet("", source=Path("untitled.ddw"))))')
@@ -690,15 +701,17 @@ Drawing.addCommand('zm', 'place-mark', 'sheet.mark=(cursorBox.x1, cursorBox.y1)'
 Drawing.addCommand('m', 'swap-mark', '(cursorBox.x1, cursorBox.y1), sheet.mark=sheet.mark, (cursorBox.x1, cursorBox.y1)')
 Drawing.addCommand('v', 'visibility', 'options.visibility = (options.visibility+1)%3')
 Drawing.addCommand('r', 'reset-time', 'sheet.autoplay_frames = [[0, f] for f in sheet.frames]')
+Drawing.addCommand('c', 'set-default-color', 'vd.default_color=list(itercursor())[-1].color')
 
 Drawing.addCommand('kRIT5', 'resize-cursor-wider', 'sheet.cursorBox.w += 1')
 Drawing.addCommand('kLFT5', 'resize-cursor-thinner', 'sheet.cursorBox.w -= 1')
 Drawing.addCommand('kUP5', 'resize-cursor-shorter', 'sheet.cursorBox.h -= 1')
 Drawing.addCommand('kDN5', 'resize-cursor-taller', 'sheet.cursorBox.h += 1')
 
+Drawing.addCommand(';', 'cycle-paste-mode', 'sheet.cycle_paste_mode()')
+
 for i in range(1,10):
-    Drawing.addCommand('KEY_F(%d)'%i, 'paste-char-%d'%i, 'sheet.paste_chars([vd.memory.cliprows[%d]])'%(i-1))
-    Drawing.addCommand('zKEY_F(%d)'%i, 'paste-char-%d'%i, 'sheet.paste_chars([vd.memory.cliprows[%d]])'%(i-1))
+    Drawing.addCommand('%s'%str(i)[-1], 'paste-char-%d'%i, 'sheet.paste_chars([vd.memory.cliprows[%d]])'%(i-1))
 
 Drawing.bindkey('zKEY_RIGHT', 'resize-cursor-wider')
 Drawing.bindkey('zKEY_LEFT', 'resize-cursor-thinner')
@@ -712,7 +725,8 @@ Drawing.init('mark', lambda: (0,0))
 Drawing.init('paste_mode', lambda: 'all')
 Drawing.init('cursorFrameIndex', lambda: 0)
 Drawing.init('autoplay_frames', list)
-Drawing.class_options.disp_rstatus_fmt='{sheet.frameDesc}  {sheet.source.nRows} {sheet.rowtype}  {sheet.options.disp_selected_note}{sheet.source.nSelectedRows}'
+VisiData.init('default_color', str)
+Drawing.class_options.disp_rstatus_fmt='[{sheet.pasteDesc}] {vd.default_color} {sheet.frameDesc}  {sheet.source.nRows} {sheet.rowtype}  {sheet.options.disp_selected_note}{sheet.source.nSelectedRows}'
 Drawing.class_options.quitguard='modified'
 Drawing.class_options.null_value=''
 DrawingSheet.class_options.null_value=''
