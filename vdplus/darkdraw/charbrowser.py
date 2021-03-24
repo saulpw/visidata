@@ -110,4 +110,4 @@ class UnicodeBrowser(Sheet):
 
 @VisiData.lazy_property
 def unibrowser(vd):
-    return UnicodeBrowser('unicode_chars', rows=[AttrDict(text=chr(i)) for i in range(32, 0x100000) if unicodedata.category(chr(i))[0] not in 'CM'])
+    return UnicodeBrowser('unicode_chars', rows=[AttrDict(text=chr(i)) for i in range(32, 0x10000) if unicodedata.category(chr(i))[0] not in 'CM'])

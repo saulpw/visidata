@@ -413,7 +413,7 @@ class Drawing(BaseSheet):
         cr = self.cursorRow
         if cr and cr.text:
             return 'U+%04X' % ord(cr.text[0])
-        if cr.type == 'group':
+        if cr and cr.type == 'group':
             n = len(list(self.iterdeep(cr.rows)))
             return '%s (%s objects)' % (cr.id, n)
         return '???'
@@ -426,7 +426,7 @@ class Drawing(BaseSheet):
     def cursorCharName(self):
         ch = self.cursorChar
         if not ch: return ''
-        return unicodedata.name(cr[0])
+        return unicodedata.name(ch[0])
 
     def go_left(self):
         if self.options.pen_down:
@@ -479,8 +479,8 @@ class Drawing(BaseSheet):
 
     def slide_selected(self, dx, dy):
         for r in self.source.someSelectedRows:
-            r['x'] += dx
-            r['y'] += dy
+            if 'x' in r: r['x'] += dx
+            if 'y' in r: r['y'] += dy
 
     def go_obj(self, xdir=0, ydir=0):
         x=self.cursorBox.x1
@@ -535,16 +535,14 @@ class Drawing(BaseSheet):
             if oldr.x is None:
                 r.x = self.cursorBox.x1
                 r.y = self.cursorBox.y1
-                self.go_forward(dispwidth(r.text)+1, 1)
+                if len(rows) > 1:
+                    self.go_forward(dispwidth(r.text)+1, 1)
             else:
                 r.x = (oldr.x or 0)+self.cursorBox.x1-x1
                 r.y = (oldr.y or 0)+self.cursorBox.y1-y1
 
             newrows.append(r)
             self.source.addRow(r)
-
-        if self.source.nSelectedRows == 0: # auto-select newly pasted item
-            self.source.select(newrows)
 
     def paste_groupref(self, rows):
         for r in rows:
@@ -660,8 +658,8 @@ Drawing.addCommand('M', 'open-unicode', 'vd.push(vd.unibrowser)')
 Drawing.addCommand('`', 'push-source', 'vd.push(sheet.source)')
 DrawingSheet.addCommand('`', 'open-drawing', 'vd.push(sheet.drawing)')
 
-Drawing.addCommand('^G', 'show-char', 'status(f"{sheet.cursorBox}  {sheet.cursorCharName}")')
-DrawingSheet.addCommand(ENTER, 'dive-group', 'cursorRow.rows or fail("not a group"); vd.push(DrawingSheet(source=sheet, rows=cursorRow.rows))')
+Drawing.addCommand('^G', 'show-char', 'status(f"{sheet.cursorBox} <{cursorDesc}> {sheet.cursorCharName}")')
+DrawingSheet.addCommand(ENTER, 'dive-group', 'cursorRow.rows or fail("no elements in group"); vd.push(DrawingSheet(source=sheet, rows=cursorRow.rows))')
 DrawingSheet.addCommand('g'+ENTER, 'dive-selected', 'ret=sum(((r.rows or []) for r in selectedRows), []) or fail("no groups"); vd.push(DrawingSheet(source=sheet, rows=ret))')
 Drawing.addCommand('&', 'join-selected', 'join_rows(source.selectedRows)')
 
@@ -701,7 +699,7 @@ Drawing.init('mark', lambda: (0,0))
 Drawing.init('paste_mode', lambda: 'all')
 Drawing.init('cursorFrameIndex', lambda: 0)
 Drawing.init('autoplay_frames', list)
-Drawing.class_options.disp_rstatus_fmt='{sheet.frameDesc}  <{sheet.cursorDesc}> {sheet.source.nRows} {sheet.rowtype}  {sheet.options.disp_selected_note}{sheet.source.nSelectedRows}'
+Drawing.class_options.disp_rstatus_fmt='{sheet.frameDesc}  {sheet.source.nRows} {sheet.rowtype}  {sheet.options.disp_selected_note}{sheet.source.nSelectedRows}'
 Drawing.class_options.quitguard='modified'
 Drawing.class_options.null_value=''
 DrawingSheet.class_options.null_value=''
