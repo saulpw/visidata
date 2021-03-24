@@ -3,7 +3,7 @@ import random
 import time
 import unicodedata
 from visidata import *
-from .box import Box
+from .box import CharBox
 
 
 vd.allPrefixes += list('01')
@@ -324,7 +324,7 @@ class Drawing(BaseSheet):
                 continue
 
             c = r.color or ''
-            if self.cursorBox.contains(Box(scr, x, y, r.w or dispwidth(r.text), r.h or 1)):
+            if self.cursorBox.contains(CharBox(scr, x, y, r.w or dispwidth(r.text), r.h or 1)):
                 c = self.options.color_current_row + ' ' + str(c)
             if self.source.isSelected(toprow):
                 c = self.options.color_selected_row + ' ' + str(c)
@@ -569,7 +569,7 @@ class Drawing(BaseSheet):
             r.x = rows[0].x
 
 
-Drawing.init('cursorBox', lambda: Box(None, 0,0,1,1))
+Drawing.init('cursorBox', lambda: CharBox(None, 0,0,1,1))
 Drawing.init('_displayedRows', dict)  # (x,y) -> list of rows
 Drawing.init('pendir', lambda: 'r')
 Drawing.init('disabled_tags', set)  # set of groupnames which should not be drawn or interacted with
@@ -591,7 +591,7 @@ Drawing.addCommand('', 'pen-down', 'sheet.pendir="d"', '')
 Drawing.addCommand('', 'pen-up', 'sheet.pendir="u"', '')
 Drawing.addCommand('', 'pen-right', 'sheet.pendir="r"', '')
 
-Drawing.addCommand('BUTTON1_PRESSED', 'move-cursor', 'sheet.cursorBox = Box(None, mouseX, mouseY, 1, 1)', 'start cursor box with left mouse button press')
+Drawing.addCommand('BUTTON1_PRESSED', 'move-cursor', 'sheet.cursorBox = CharBox(None, mouseX, mouseY, 1, 1)', 'start cursor box with left mouse button press')
 Drawing.addCommand('BUTTON1_RELEASED', 'end-cursor', 'end_cursor(mouseX, mouseY)', 'end cursor box with left mouse button release')
 
 Drawing.addCommand('', 'align-x-selected', 'align_selected("x")')

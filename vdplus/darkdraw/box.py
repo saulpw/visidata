@@ -15,7 +15,7 @@ def wc_ljust(text, length, padding=' '):
     return text + padding * max(0, (length - wcswidth(text)))
 
 
-class Box:
+class CharBox:
     def __init__(self, scr=None, x1=0, y1=0, w=None, h=None):
         scrh, scrw = scr.getmaxyx() if scr else (25, 80)
         self.scr = scr
@@ -66,7 +66,7 @@ class Box:
         return xA < xB-1 and yA < yB-1   # xA+.5 < xB-.5 and yA+.5 < yB-.5
 
 
-class DrawableBox(Box):
+class DrawableBox(CharBox):
     def reverse(self):
         if not self.scr: return
         for y in range(self.y1, self.y2):
