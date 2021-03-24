@@ -337,11 +337,11 @@ class Drawing(BaseSheet):
                 if toprow not in cellrows:
                     cellrows.append(toprow)
 
-        if self.options.visibility > 0:
-            defattr = self.options.color_default
-            clipdraw(scr, i+1, self.windowWidth-20, '00: (reset)', defattr)
+        if self.options.visibility == 1: # draw tags
+            defcolor = self.options.color_default
+            clipdraw(scr, 0, self.windowWidth-20, '00: (reset)', colors[defcolor])
             for i, tag in enumerate(self._tags.keys()):
-                c = defattr
+                c = defcolor
                 if tag in self.disabled_tags:
                     c = self.options.color_graph_hidden
                 if self.cursorRow and tag in self.cursorRow.get('group', ''):
@@ -350,6 +350,14 @@ class Drawing(BaseSheet):
                     c = self.options.color_selected_row + ' ' + c
                 clipdraw(scr, i+1, self.windowWidth-20, '%02d: %s' % (i+1, tag), colors[c])
 
+        elif self.options.visibility == 2: # draw clipboard item shortcuts
+            if not vd.memory.cliprows:
+                return
+            defcolor = self.options.color_default
+            for i, r in enumerate(vd.memory.cliprows[:10]):
+                x = self.windowWidth-20
+                x += clipdraw(scr, i+1, x, 'F%d: ' % (i+1), colors[defcolor])
+                x += clipdraw(scr, i+1, x, r.text, colors[r.color])
 
     def reload(self):
         self.source.ensureLoaded()
@@ -680,13 +688,17 @@ Drawing.addCommand('zi', 'insert-col', 'for r in source.someSelectedRows: r.x +=
 
 Drawing.addCommand('zm', 'place-mark', 'sheet.mark=(cursorBox.x1, cursorBox.y1)')
 Drawing.addCommand('m', 'swap-mark', '(cursorBox.x1, cursorBox.y1), sheet.mark=sheet.mark, (cursorBox.x1, cursorBox.y1)')
-Drawing.addCommand('v', 'visibility', 'options.visibility ^= 1')
+Drawing.addCommand('v', 'visibility', 'options.visibility = (options.visibility+1)%3')
 Drawing.addCommand('r', 'reset-time', 'sheet.autoplay_frames = [[0, f] for f in sheet.frames]')
 
 Drawing.addCommand('kRIT5', 'resize-cursor-wider', 'sheet.cursorBox.w += 1')
 Drawing.addCommand('kLFT5', 'resize-cursor-thinner', 'sheet.cursorBox.w -= 1')
 Drawing.addCommand('kUP5', 'resize-cursor-shorter', 'sheet.cursorBox.h -= 1')
 Drawing.addCommand('kDN5', 'resize-cursor-taller', 'sheet.cursorBox.h += 1')
+
+for i in range(1,10):
+    Drawing.addCommand('KEY_F(%d)'%i, 'paste-char-%d'%i, 'sheet.paste_chars([vd.memory.cliprows[%d]])'%(i-1))
+    Drawing.addCommand('zKEY_F(%d)'%i, 'paste-char-%d'%i, 'sheet.paste_chars([vd.memory.cliprows[%d]])'%(i-1))
 
 Drawing.bindkey('zKEY_RIGHT', 'resize-cursor-wider')
 Drawing.bindkey('zKEY_LEFT', 'resize-cursor-thinner')
