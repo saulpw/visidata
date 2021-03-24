@@ -352,6 +352,8 @@ class Drawing(BaseSheet):
 
     def reload(self):
         self.source.ensureLoaded()
+        vd.sync()
+        self.draw(self._scr)
 
     def place_text(self, text, x=None, y=None, dx=0, dy=0):
         'Return (width, height) of drawn text.'
@@ -693,6 +695,7 @@ Drawing.bindkey('zKEY_UP', 'resize-cursor-shorter')
 Drawing.bindkey('zKEY_DOWN', 'resize-cursor-taller')
 
 Drawing.bindkey('C', 'open-colors')
+Drawing.unbindkey('^R')
 
 Drawing.init('mark', lambda: (0,0))
 Drawing.init('paste_mode', lambda: 'all')
