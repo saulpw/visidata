@@ -1,6 +1,5 @@
 import re
 from visidata import vd, date, asyncthread, VisiData, Progress, Sheet, Column, ItemColumn, deduceType, TypedWrapper
-from airtable import Airtable
 
 vd.option('airtable_key', '', 'Airtable API key from https://airtable.com/account')
 vd.option('airtable_base', '', 'Airtable base ID from https://airtable.com/api')
@@ -18,6 +17,7 @@ class AirtableSheet(Sheet):
     defer = True
 
     def iterload(self):
+        from airtable import Airtable
         def fieldColumn(field, value):
             from visidata import setitem
             return Column(field,
@@ -58,6 +58,7 @@ class AirtableSheet(Sheet):
         def update(row, cols):
             return {'id': row['id'], 'fields': fields(row, cols, includeNones=True)}
 
+        from airtable import Airtable
         adds, mods, dels = self.getDeferredChanges()
         airtable = Airtable(vd.options.airtable_base, self.source, vd.options.airtable_key)
         with Progress(gerund='inserting', total=3) as prog:
