@@ -137,6 +137,8 @@ from .loaders.rec import *
 from .loaders.eml import *
 from .loaders.vds import *
 
+from .ddwplay import *
+
 from .plugins import *
 
 from .colorsheet import *

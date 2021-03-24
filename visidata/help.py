@@ -1,3 +1,5 @@
+from pkg_resources import resource_filename
+
 from visidata import *
 
 
@@ -18,7 +20,6 @@ class HelpSheet(MetaSheet):
     nKeys = 2
 
     def iterload(self):
-        from pkg_resources import resource_filename
         cmdlist = VisiDataMetaSheet('cmdlist', source=None)
 
         self.cmddict = {}
@@ -58,9 +59,61 @@ def help_search(vd, sheet, regex):
         vs.addRow(allrows[rowidx])
 
 
+class HelpPane:
+    def __init__(self, name):
+        self.name = name
+        self.scr = None
+        self.parentscr = None
+        self._shown = False
+        self.amgr = visidata.AnimationMgr()
+
+    @property
+    def shown(self):
+        return self._shown
+
+    @shown.setter
+    def shown(self, v):
+        self._shown = v
+        if v:
+            self.amgr.trigger(self.name, loop=True, y=1, x=2)
+
+    def draw(self, scr, x=None, y=None):
+        if not self.shown:
+            if self.scr:
+                self.scr.erase()
+                self.scr.refresh()
+            return
+        if y is None: y=0  # show at top of screen by default
+        if not self.scr or scr is not self.parentscr:  # (re)allocate help pane scr
+            if y+self.amgr.maxHeight+3 < scr.getmaxyx()[0]:
+                yhelp = y+1
+            else:
+                yhelp = y-self.amgr.maxHeight-3
+
+            self.scr = scr.derwin(self.amgr.maxHeight+3, self.amgr.maxWidth+4, yhelp, 0)
+            self.parentscr = scr
+
+        if self.amgr.active:
+            self.scr.erase()
+            self.scr.box()
+            self.amgr.draw(self.scr)
+            self.scr.refresh()
+
+
+@VisiData.api
+def getHelpPane(vd, name, module='vdplus'):
+    ret = HelpPane(name)
+    try:
+        ret.amgr.load(name, Path(resource_filename(module, 'help/'+name+'.ddw')).open_text())
+    except FileNotFoundError:
+        pass
+    except ModuleNotFoundError:
+        pass
+    return ret
+
+
 @VisiData.global_api
 def openManPage(vd):
-    from pkg_resources import resource_filename
     import os
     with SuspendCurses():
         if os.system(' '.join(['man', resource_filename(__name__, 'man/vd.1')])) != 0:
