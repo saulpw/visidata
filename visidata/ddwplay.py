@@ -5,11 +5,24 @@ from visidata import colors, vd
 
 __all__ = ['Animation', 'AnimationMgr']
 
+# duplicate of visidata.AttrDict, except default return value is '' instead of None
 class AttrDict(dict):
     def __getattr__(self, k):
-        return self.get(k, '')
+        try:
+            v = self[k]
+            if isinstance(v, dict):
+                v = AttrDict(v)
+            return v
+        except AttributeError:
+            raise "eofo"
+        except KeyError:
+            if k.startswith("__"):
+                raise AttributeError
+            return ''
     def __setattr__(self, k, v):
         self[k] = v
+    def __dir__(self):
+        return self.keys()
 
 
 class Animation:
@@ -28,10 +41,10 @@ class Animation:
             if r.ref:
                 assert r.type == 'ref'
                 g = self.groups[r.ref]
-                yield from self.iterdeep(g.rows, x+r.x, y+r.y, newparents)
+                yield from self.iterdeep(map(AttrDict, g.rows or []), x+r.x, y+r.y, newparents)
             else:
                 yield r, x+r.x, y+r.y, newparents
-                yield from self.iterdeep(r.rows or [], x+r.x, x+r.y, newparents)
+                yield from self.iterdeep(map(AttrDict, r.rows or []), x+r.x, x+r.y, newparents)
 
     def load_from(self, fp):
         for line in fp.readlines():
@@ -78,11 +91,11 @@ class Animation:
 class AnimationMgr:
     def __init__(self):
         self.library = {}  # animation name -> Animation
-        self.active = []  # list of (start_time, Animation, args, kwargs)
+        self.active = []  # list of (start_time, Animation, kwargs)
 
-    def trigger(self, name, *args, **kwargs):
+    def trigger(self, name, **kwargs):
         if name in self.library:
-            self.active.append((time.time(), self.library[name], args, kwargs))
+            self.active.append((time.time(), self.library[name], kwargs))
         else:
             vd.debug('unknown drawing "%s"' % name)
 
@@ -91,23 +104,24 @@ class AnimationMgr:
 
     @property
     def maxHeight(self):
-        return max(anim.height for _, anim, _, _ in self.active) if self.active else 0
+        return max(anim.height for _, anim, _ in self.active) if self.active else 0
 
     @property
     def maxWidth(self):
-        return max(anim.width for _, anim, _, _ in self.active) if self.active else 0
+        return max(anim.width for _, anim, _ in self.active) if self.active else 0
 
-    def draw(self, scr, t=None):
+    def draw(self, scr, t=None, **kwargs):
         'Draw all active animations on *scr* at time *t*.  Return next t to be called at.'
         if t is None:
             t = time.time()
         times = []
         done = []
         for row in self.active:
-            startt, anim, args, kwargs = row
-            nextt = anim.draw(scr, *args, t=t-startt, **kwargs)
+            startt, anim, akwargs = row
+            kwargs.update(akwargs)
+            nextt = anim.draw(scr, t=t-startt, **kwargs)
             if nextt is None:
-                if not kwargs.get('loop'):
+                if not akwargs.get('loop'):
                     done.append(row)
             else:
                 times.append(t+nextt)

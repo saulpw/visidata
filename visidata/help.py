@@ -2,6 +2,8 @@ from pkg_resources import resource_filename
 
 from visidata import *
 
+vd.show_help = False
+
 
 class HelpSheet(MetaSheet):
     'Show all commands available to the source sheet.'
@@ -64,51 +66,55 @@ class HelpPane:
         self.name = name
         self.scr = None
         self.parentscr = None
-        self._shown = False
         self.amgr = visidata.AnimationMgr()
 
-    @property
-    def shown(self):
-        return self._shown
-
-    @shown.setter
-    def shown(self, v):
-        self._shown = v
-        if v:
-            self.amgr.trigger(self.name, loop=True, y=1, x=2)
-
     def draw(self, scr, x=None, y=None):
-        if not self.shown:
+        if not scr: return
+        if not vd.show_help:
             if self.scr:
                 self.scr.erase()
                 self.scr.refresh()
+                self.scr = None
             return
         if y is None: y=0  # show at top of screen by default
+        if x is None: x=0
         if not self.scr or scr is not self.parentscr:  # (re)allocate help pane scr
-            if y+self.amgr.maxHeight+3 < scr.getmaxyx()[0]:
-                yhelp = y+1
-            else:
-                yhelp = y-self.amgr.maxHeight-3
+            if y >= 0:
+                if y+self.amgr.maxHeight+3 < scr.getmaxyx()[0]:
+                    yhelp = y+1
+                else:
+                    yhelp = y-self.amgr.maxHeight-3
+            else:  # y<0
+                yhelp = scr.getmaxyx()[0]-self.amgr.maxHeight-4
 
-            self.scr = scr.derwin(self.amgr.maxHeight+3, self.amgr.maxWidth+4, yhelp, 0)
+            if x >= 0:
+                if x+self.amgr.maxWidth+4 < scr.getmaxyx()[1]:
+                    xhelp = x+1
+                else:
+                    xhelp = x-self.amgr.maxWidth-4
+            else:  # x<0
+                xhelp = scr.getmaxyx()[1]-self.amgr.maxWidth-5
+
+            self.scr = scr.derwin(self.amgr.maxHeight+3, self.amgr.maxWidth+4, yhelp, xhelp)
             self.parentscr = scr
 
-        if self.amgr.active:
-            self.scr.erase()
-            self.scr.box()
-            self.amgr.draw(self.scr)
-            self.scr.refresh()
+        self.scr.erase()
+        self.scr.box()
+        self.amgr.draw(self.scr, y=1, x=2)
+        self.scr.refresh()
 
 
 @VisiData.api
+@functools.lru_cache(maxsize=None)
 def getHelpPane(vd, name, module='vdplus'):
     ret = HelpPane(name)
     try:
         ret.amgr.load(name, Path(resource_filename(module, 'help/'+name+'.ddw')).open_text())
-    except FileNotFoundError:
-        pass
-    except ModuleNotFoundError:
-        pass
+        ret.amgr.trigger(name, loop=True)
+    except FileNotFoundError as e:
+        vd.debug(str(e))
+    except ModuleNotFoundError as e:
+        vd.debug(str(e))
     return ret
 
 
