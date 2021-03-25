@@ -14,6 +14,7 @@ vd.charPalHeight = charPalHeight = 16
 
 @VisiData.api
 def open_ddw(vd, p):
+    vd.timeouts_before_idle = -1
     return DrawingSheet(p.name, 'table', source=p).drawing
 
 vd.save_ddw = vd.save_jsonl
@@ -278,6 +279,8 @@ class Drawing(BaseSheet):
         self.draw(self._scr)
 
     def draw(self, scr):
+        vd.getHelpPane('darkdraw').draw(scr, y=-1, x=-1)
+
         thisframe = self.currentFrame
         if self.autoplay_frames:
             vd.timeouts_before_idle = -1
@@ -709,6 +712,7 @@ Drawing.addCommand('kUP5', 'resize-cursor-shorter', 'sheet.cursorBox.h -= 1')
 Drawing.addCommand('kDN5', 'resize-cursor-taller', 'sheet.cursorBox.h += 1')
 
 Drawing.addCommand(';', 'cycle-paste-mode', 'sheet.cycle_paste_mode()')
+Drawing.addCommand('^G', 'toggle-help', 'vd.show_help = not vd.show_help')
 
 for i in range(1,10):
     Drawing.addCommand('%s'%str(i)[-1], 'paste-char-%d'%i, 'sheet.paste_chars([vd.memory.cliprows[%d]])'%(i-1))
