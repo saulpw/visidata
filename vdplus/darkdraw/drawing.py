@@ -711,6 +711,9 @@ Drawing.addCommand('kLFT5', 'resize-cursor-thinner', 'sheet.cursorBox.w -= 1')
 Drawing.addCommand('kUP5', 'resize-cursor-shorter', 'sheet.cursorBox.h -= 1')
 Drawing.addCommand('kDN5', 'resize-cursor-taller', 'sheet.cursorBox.h += 1')
 
+Drawing.addCommand('gzKEY_LEFT', 'resize-cursor-min-width', 'sheet.cursorBox.w = 1')
+Drawing.addCommand('gzKEY_UP', 'resize-cursor-min-height', 'sheet.cursorBox.h = 1')
+
 Drawing.addCommand(';', 'cycle-paste-mode', 'sheet.cycle_paste_mode()')
 Drawing.addCommand('^G', 'toggle-help', 'vd.show_help = not vd.show_help')
 
