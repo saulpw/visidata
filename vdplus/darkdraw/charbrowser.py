@@ -66,7 +66,7 @@ enumvalues = {
   },
   'east_asian_width': {
     'A': 'Ambiguous',
-    'F': 'Fillwidth',
+    'F': 'Fullwidth',
     'H': 'Halfwidth',
     'N': 'Neutral',
     'Na': 'Narrow',

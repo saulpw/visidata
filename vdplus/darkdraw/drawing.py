@@ -14,7 +14,7 @@ vd.charPalHeight = charPalHeight = 16
 
 @VisiData.api
 def open_ddw(vd, p):
-    vd.timeouts_before_idle = -1
+    vd.timeouts_before_idle = 60
     return DrawingSheet(p.name, 'table', source=p).drawing
 
 vd.save_ddw = vd.save_jsonl
@@ -202,7 +202,7 @@ class DrawingSheet(JsonSheet):
         for r, x, y, parents in self.iterdeep(self.someSelectedRows):
             r.x = x
             r.y = y
-            r.group = '.'.join(p.id for p in parents[:-1])
+            r.group = '.'.join((p.id or '') for p in parents[:-1])
 
             if r.type == 'group':
                 groups.add(r.id)
@@ -625,9 +625,13 @@ Drawing.addCommand('g]', 'last-frame', 'sheet.cursorFrameIndex = sheet.nFrames-1
 Drawing.addCommand('z[', 'new-frame-before', 'sheet.new_between_frame(sheet.cursorFrameIndex-1, sheet.cursorFrameIndex)')
 Drawing.addCommand('z]', 'new-frame-after', 'sheet.new_between_frame(sheet.cursorFrameIndex, sheet.cursorFrameIndex+1); sheet.cursorFrameIndex += 1')
 
+DrawingSheet.unbindkey('[')  # dangerous
+DrawingSheet.unbindkey(']')
+
+Drawing.addCommand('g^^', 'jump-first', 'vd.activeStack.append(vd.activeStack.pop(0))', 'jump to first sheet')
 Drawing.addCommand('gKEY_HOME', 'slide-top-selected', 'source.slide_top(source.someSelectedRows, -1)', 'move selected items to top layer of drawing')
 Drawing.addCommand('gKEY_END', 'slide-bottom-selected', 'source.slide_top(source.someSelectedRows, 0)', 'move selected items to bottom layer of drawing')
-Drawing.addCommand('d', 'delete-cursor', 'remove_at(cursorBox); go_forward(1, 1)', 'delete first item under cursor')
+Drawing.addCommand('d', 'delete-cursor', 'remove_at(cursorBox)', 'delete first item under cursor')
 Drawing.addCommand('gd', 'delete-selected', 'source.deleteSelected()')
 Drawing.addCommand('a', 'add-input', 'place_text(input("text: ", value=get_text()), dx=1)')
 Drawing.addCommand('e', 'edit-char', 'edit_text(input("text: ", value=get_text()), cursorRow)')
@@ -685,6 +689,13 @@ Drawing.addCommand('^G', 'show-char', 'status(f"{sheet.cursorBox} <{cursorDesc}>
 DrawingSheet.addCommand(ENTER, 'dive-group', 'cursorRow.rows or fail("no elements in group"); vd.push(DrawingSheet(source=sheet, rows=cursorRow.rows))')
 DrawingSheet.addCommand('g'+ENTER, 'dive-selected', 'ret=sum(((r.rows or []) for r in selectedRows), []) or fail("no groups"); vd.push(DrawingSheet(source=sheet, rows=ret))')
 Drawing.addCommand('&', 'join-selected', 'join_rows(source.selectedRows)')
+
+@VisiData.api
+def cycleColor(vd, c, n=1):
+    return ''.join(str(int(x)+n) if x.isdigit() else x for x in c.split())
+
+Drawing.addCommand('gc', 'set-color-input', 'x=input("color: ", value=sheet.cursorRows[0].color)\nfor r in sheet.cursorRows: r.color=x')
+Drawing.addCommand('zc', 'cycle-color', 'for r in sheet.cursorRows: r.color = cycleColor(r.color)')
 
 Drawing.addCommand('gm', 'tag-selected', 'sheet.tag_rows(sheet.someSelectedRows, vd.input("tag selected as: ", type="tag"))')
 
