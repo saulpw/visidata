@@ -363,8 +363,9 @@ class Drawing(BaseSheet):
                 x += clipdraw(scr, i+1, x, r.text, colors[r.color])
 
 
-        x = 3
+        # draw lstatus2 (paste status with default color)
         y = self.windowHeight-2
+        x = 3
         x += clipdraw(scr, y, x, 'paste ' + self.paste_mode + ' ', defattr)
 
         x += clipdraw(scr, y, x, ' %s %s ' % (len(vd.memory.cliprows or []), self.rowtype), defattr)
@@ -372,6 +373,16 @@ class Drawing(BaseSheet):
         x += clipdraw(scr, y, x, '  default color: ', defattr)
         x += clipdraw(scr, y, x, '##', colors[vd.default_color])
         x += clipdraw(scr, y, x, ' %s' % vd.default_color, defattr)
+
+        # draw rstatus2 (cursor status)
+        if self.cursorRows:
+            c = self.cursorRows[0].color
+            x = self.windowWidth-18-len(c)
+            x += clipdraw(scr, y, x, '%s  ' % c, defattr)
+            x += clipdraw(scr, y, x, '##', colors[c])
+
+        x = self.windowWidth-14
+        x += clipdraw(scr, y, x, '  %s' % self.cursorBox, defattr)
 
     def reload(self):
         self.source.ensureLoaded()
@@ -749,7 +760,7 @@ Drawing.init('paste_mode', lambda: 'all')
 Drawing.init('cursorFrameIndex', lambda: 0)
 Drawing.init('autoplay_frames', list)
 vd.default_color = ''
-Drawing.class_options.disp_rstatus_fmt='{sheet.cursorBox} | {sheet.frameDesc} | {sheet.source.nRows} {sheet.rowtype}  {sheet.options.disp_selected_note}{sheet.source.nSelectedRows}'
+Drawing.class_options.disp_rstatus_fmt='{sheet.frameDesc} | {sheet.source.nRows} {sheet.rowtype}  {sheet.options.disp_selected_note}{sheet.source.nSelectedRows}'
 Drawing.class_options.quitguard='modified'
 Drawing.class_options.null_value=''
 DrawingSheet.class_options.null_value=''
