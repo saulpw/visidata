@@ -340,9 +340,10 @@ class Drawing(BaseSheet):
                 if toprow not in cellrows:
                     cellrows.append(toprow)
 
+        defcolor = self.options.color_default
+        defattr = colors[defcolor]
         if self.options.visibility == 1: # draw tags
-            defcolor = self.options.color_default
-            clipdraw(scr, 0, self.windowWidth-20, '00: (reset)', colors[defcolor])
+            clipdraw(scr, 0, self.windowWidth-20, '00: (reset)', defattr)
             for i, tag in enumerate(self._tags.keys()):
                 c = defcolor
                 if tag in self.disabled_tags:
@@ -356,11 +357,21 @@ class Drawing(BaseSheet):
         elif self.options.visibility == 2: # draw clipboard item shortcuts
             if not vd.memory.cliprows:
                 return
-            defcolor = self.options.color_default
             for i, r in enumerate(vd.memory.cliprows[:10]):
                 x = self.windowWidth-20
-                x += clipdraw(scr, i+1, x, '%d: ' % (i+1), colors[defcolor])
+                x += clipdraw(scr, i+1, x, '%d: ' % (i+1), defattr)
                 x += clipdraw(scr, i+1, x, r.text, colors[r.color])
+
+
+        x = 3
+        y = self.windowHeight-2
+        x += clipdraw(scr, y, x, 'paste ' + self.paste_mode + ' ', defattr)
+
+        x += clipdraw(scr, y, x, ' %s %s ' % (len(vd.memory.cliprows or []), self.rowtype), defattr)
+
+        x += clipdraw(scr, y, x, '  default color: ', defattr)
+        x += clipdraw(scr, y, x, '##', colors[vd.default_color])
+        x += clipdraw(scr, y, x, ' %s' % vd.default_color, defattr)
 
     def reload(self):
         self.source.ensureLoaded()
@@ -433,10 +444,6 @@ class Drawing(BaseSheet):
     @property
     def frameDesc(sheet):
         return f'Frame {sheet.currentFrame.id} {sheet.cursorFrameIndex}/{sheet.nFrames-1}'
-
-    @property
-    def pasteDesc(sheet):
-        return f'paste {sheet.paste_mode}'
 
     @property
     def cursorCharName(self):
@@ -744,7 +751,7 @@ Drawing.init('paste_mode', lambda: 'all')
 Drawing.init('cursorFrameIndex', lambda: 0)
 Drawing.init('autoplay_frames', list)
 VisiData.init('default_color', str)
-Drawing.class_options.disp_rstatus_fmt='[{sheet.pasteDesc}] {vd.default_color} {sheet.frameDesc}  {sheet.source.nRows} {sheet.rowtype}  {sheet.options.disp_selected_note}{sheet.source.nSelectedRows}'
+Drawing.class_options.disp_rstatus_fmt='{sheet.frameDesc} | {sheet.source.nRows} {sheet.rowtype}  {sheet.options.disp_selected_note}{sheet.source.nSelectedRows}'
 Drawing.class_options.quitguard='modified'
 Drawing.class_options.null_value=''
 DrawingSheet.class_options.null_value=''
