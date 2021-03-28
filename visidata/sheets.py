@@ -1080,8 +1080,9 @@ def updateColNames(sheet, rows, cols, overwrite=False):
 @BaseSheet.api
 def splitPane(sheet, pct):
     vd.stackedSheets[1:] or vd.fail("need 2 sheets for splitpane")
+    if not options.disp_splitwin_pct:
+        sheet.pane=1 if sheet.pane == 2 else 2
     options.disp_splitwin_pct = pct
-    sheet.pane=1 if sheet.pane == 2 else 2
 
 
 IndexSheet.class_options.header = 0
