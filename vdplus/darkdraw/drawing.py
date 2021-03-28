@@ -542,37 +542,36 @@ class Drawing(BaseSheet):
         modes = ['all', 'char', 'color']
         self.paste_mode = modes[(modes.index(self.paste_mode)+1)%len(modes)]
 
-    def paste_chars(self, rows):
-        rows or vd.fail('no rows to paste')
+    def paste_chars(self, srcrows):
+        srcrows or vd.fail('no rows to paste')
 
         newrows = []
 
-        x1, y1, x2, y2 = bounding_box(rows)
-        for oldr in rows:
-            if self.paste_mode == 'color':
-                for existing in self.cursorRows:
-                    existing.color = vd.default_color
-                continue
+        x1, y1, x2, y2 = bounding_box(srcrows)
+        for oldr in srcrows:
+            if oldr.x is None:
+                newx = self.cursorBox.x1
+                newy = self.cursorBox.y1
+                if len(srcrows) > 1:
+                    self.go_forward(dispwidth(r.text)+1, 1)
+            else:
+                newx = (oldr.x or 0)+self.cursorBox.x1-x1
+                newy = (oldr.y or 0)+self.cursorBox.y1-y1
 
             if self.paste_mode in 'all char':
                 r = self.newRow()
                 r.update(deepcopy(oldr))
                 r.frame = self.currentFrame.id
                 r.text = oldr.text
+                r.x, r.y = newx, newy
                 if self.paste_mode == 'char':
                     r.color = vd.default_color
-
-            if oldr.x is None:
-                r.x = self.cursorBox.x1
-                r.y = self.cursorBox.y1
-                if len(rows) > 1:
-                    self.go_forward(dispwidth(r.text)+1, 1)
-            else:
-                r.x = (oldr.x or 0)+self.cursorBox.x1-x1
-                r.y = (oldr.y or 0)+self.cursorBox.y1-y1
-
-            newrows.append(r)
-            self.source.addRow(r)
+                newrows.append(r)
+                self.source.addRow(r)
+            elif self.paste_mode == 'color':
+                if oldr.color:
+                    for existing in self._displayedRows[(newx, newy)]:
+                        existing.color = oldr.color
 
     def paste_groupref(self, rows):
         for r in rows:
@@ -648,7 +647,6 @@ Drawing.addCommand('gy', 'yank-selected', 'sheet.copyRows(sheet.selectedRows)')
 Drawing.addCommand('x', 'cut-char', 'sheet.copyRows(remove_at(cursorBox))')
 Drawing.addCommand('zx', 'cut-char-top', 'r=list(itercursor())[-1]; sheet.copyRows([r]); source.deleteBy(lambda r,row=r: r is row)')
 Drawing.addCommand('p', 'paste-chars', 'sheet.paste_chars(vd.memory.cliprows)')
-#Drawing.addCommand('gp', 'paste-chars-selected', 'sheet.paste_chars(vd.memory.cliprows)', 'paste characters from clipboard over selection')
 Drawing.addCommand('zp', 'paste-group', 'sheet.paste_groupref(vd.memory.cliprows)')
 
 Drawing.addCommand('zh', 'go-left-obj', 'go_obj(-1, 0)')
