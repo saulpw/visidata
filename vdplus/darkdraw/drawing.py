@@ -749,7 +749,7 @@ Drawing.init('paste_mode', lambda: 'all')
 Drawing.init('cursorFrameIndex', lambda: 0)
 Drawing.init('autoplay_frames', list)
 VisiData.init('default_color', str)
-Drawing.class_options.disp_rstatus_fmt='{sheet.frameDesc} | {sheet.source.nRows} {sheet.rowtype}  {sheet.options.disp_selected_note}{sheet.source.nSelectedRows}'
+Drawing.class_options.disp_rstatus_fmt='{sheet.cursorBox} | {sheet.frameDesc} | {sheet.source.nRows} {sheet.rowtype}  {sheet.options.disp_selected_note}{sheet.source.nSelectedRows}'
 Drawing.class_options.quitguard='modified'
 Drawing.class_options.null_value=''
 DrawingSheet.class_options.null_value=''
