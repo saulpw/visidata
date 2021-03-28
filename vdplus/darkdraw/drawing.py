@@ -706,10 +706,23 @@ DrawingSheet.addCommand(ENTER, 'dive-group', 'cursorRow.rows or fail("no element
 DrawingSheet.addCommand('g'+ENTER, 'dive-selected', 'ret=sum(((r.rows or []) for r in selectedRows), []) or fail("no groups"); vd.push(DrawingSheet(source=sheet, rows=ret))')
 Drawing.addCommand('&', 'join-selected', 'join_rows(source.selectedRows)')
 
+@Drawing.api
+def flip_horiz(sheet, box):
+    for r in sheet.iterbox(box):
+        r.x = box.x2+box.x1-r.x-2
+
+
+@Drawing.api
+def flip_vert(sheet, box):
+    for r in sheet.iterbox(box):
+        r.y = box.y2+box.y1-r.y-2
+
 @VisiData.api
 def cycleColor(vd, c, n=1):
     return ''.join(str(int(x)+n) if x.isdigit() else x for x in c.split())
 
+Drawing.addCommand('', 'flip-cursor-horiz', 'flip_horiz(sheet.cursorBox)')
+Drawing.addCommand('', 'flip-cursor-vert', 'flip_vert(sheet.cursorBox)')
 Drawing.addCommand('gc', 'set-color-input', 'x=input("color: ", value=sheet.cursorRows[0].color)\nfor r in sheet.cursorRows: r.color=x')
 Drawing.addCommand('zc', 'cycle-color', 'for r in sheet.cursorRows: r.color = cycleColor(r.color)')
 
