@@ -8,6 +8,7 @@ from .box import CharBox
 
 vd.allPrefixes += list('01')
 vd.option('pen_down', False, 'is pen down')
+vd.option('disp_guide_xy', '80 25', 'x y of onscreen guides')
 
 vd.charPalWidth = charPalWidth = 16
 vd.charPalHeight = charPalHeight = 16
@@ -33,7 +34,7 @@ def bounding_box(rows):
     for r in rows:
         if r.x is not None:
             xmin = min(xmin, r.x)
-            xmax = max(xmax, r.x + (r.w or 0))
+            xmax = max(xmax, r.x + (r.w or dispwidth(r.text)))
         if r.y is not None:
             ymin = min(ymin, r.y)
             ymax = max(ymax, r.y + (r.h or 0))
@@ -306,12 +307,25 @@ class Drawing(BaseSheet):
 
         selectedGroups = set()  # any group with a selected element
 
-        # draw blank cursor as backdrop
+        self.minX, self.minY, self.maxX, self.maxY = bounding_box(self.source.rows)
+
+        def draw_guides(xmax, ymax):
+            for x in range(xmax):
+                scr.addstr(ymax, x, '-')
+
+            for y in range(ymax):
+                scr.addstr(y, x, '|')
+
+        #draw_guides(self.maxX+1, self.maxY+1)
+        guidexy = self.options.disp_guide_xy
+        if guidexy:
+            guidex,guidey = map(int, guidexy.split())
+            draw_guides(guidex, guidey)
+
+        # draw blank cursor as backdrop but on top of guides
         for i in range(self.cursorBox.h):
             for j in range(self.cursorBox.w):
                 clipdraw(scr, self.cursorBox.y1+i, self.cursorBox.x1+j, ' ', colors.color_current_row)
-
-        self.minX, self.minY, self.maxX, self.maxY = bounding_box(self.source.rows)
 
         for r, x, y, parents in self.iterdeep(self.source.rows):
             toprow = parents[0]
