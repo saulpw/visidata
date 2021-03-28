@@ -161,10 +161,13 @@ def mainloop(self, scr):
                     devid, x, y, z, bstate = curses.getmouse()
                     pct = vd.windowConfig['pct']
                     topPaneActive = ((vd.activePane == 1 and pct < 0)  or (vd.activePane == 2 and pct > 0))
+                    bottomPaneActive = ((vd.activePane == 2 and pct < 0)  or (vd.activePane == 1 and pct > 0))
                     if vd.windowConfig and y > vd.windowConfig['n'] and topPaneActive:
                         y -= vd.windowConfig['n']
                         sheet.mouseX, sheet.mouseY = x, y
-                    elif vd.windowConfig and y < vd.windowConfig['n'] and not topPaneActive:
+                    elif vd.windowConfig and y < vd.windowConfig['n'] and bottomPaneActive:
+                        sheet.mouseX, sheet.mouseY = x, y
+                    elif pct == 0:
                         sheet.mouseX, sheet.mouseY = x, y
                     if bstate & curses.BUTTON_CTRL:
                         clicktype += "CTRL-"
