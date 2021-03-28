@@ -92,6 +92,8 @@ class BaseSheet(DrawablePane):
         self.source = None
         self.rows = UNLOADED      # list of opaque objects
         self._scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
+        self.mouseX = 0
+        self.mouseY = 0
 
         super().__init__(**kwargs)
 
