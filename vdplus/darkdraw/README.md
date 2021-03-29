@@ -1,12 +1,12 @@
 # DarkDraw II
 
-A terminal-based drawing tool with support for Unicode and 256-color terminals.
+Art and animation for the terminal, in the terminal.
 
-Features:
-  - user-definable character palettes
-  - mixed half- and full- width unicode characters supported
-  - extensive unicode discovery sheet
-  - manipulate the data behind the drawing
+- unicode and 256-color support
+- discover useful glyphs with the unicode browser
+- frame-by-frame animation
+- manipulate the data behind the drawing with [VisiData](visidata.org)
+- define your own character and colour palettes (they're just regular drawings)
 
 ## Commands
 
@@ -104,7 +104,7 @@ available to be pasted onto the drawing with the number keys.  In visibility mod
 
 - `Shift+M` to open a unicode browser
    - use standard VisiData commands (`/` to search in a column, `|` to select, `"` to pull selected into their own sheet, etc)
-   - and `y` or `gy` to copy characters to the clipboard
+   - `y`  (or `gy`) to copy one (or more) characters to the clipboard
    - which can then be `p`asted directly into a Drawing
 
 ### Color
@@ -116,20 +116,19 @@ available to be pasted onto the drawing with the number keys.  In visibility mod
 
 #### Color values
 
-Color values are strings like `'<attr> <fgcolorname> on <bgcolorname>'`.  Any of these may be omitted; order does not matter.  "fg" and "bg" are accepted also.
+Color values are strings like `'<attr> <fgcolorname> on <bgcolorname>'`.  Any of these may be omitted; order does not matter.  `fg` and `bg`/`on` indicate whether the color is the foreground or background.
 
 - color names can be standard terminal colors (`red` `green` `blue` `yellow` `cyan` `magenta` `white` `black`) or a number from 0-255 for [xterm 256 colors]().
-- The terminal attributes "underline" and/or "bold" can be anywhere in the string.
+- The terminal attributes `underline` and/or `bold` can be anywhere in the string.
 - Omitting the fg or bg color will fall back to the default color (white for fg, black for bg) for display.
 
 - Examples:
   - `magenta`
   - `green on black`
-  - `fg cyan bg white`
-  - `bold 36 on 243'
-  - `underline on yellow fg 57'
+  - `bg cyan fg white`
+  - `bold 36 on 243`
+  - `on yellow underline fg 57`
 
-#### Commands
 ### Groups
 
 Groups are handled as a single entity, both on the drawing and on the backing sheet.
@@ -148,14 +147,17 @@ If an object or group has its 'frame' attribute set, it will only be drawn in fr
 - `g[` (first-frame) and `g]` (last-frame): go to first or last frame
 - `z[` (new-frame-before) and `z]` (new-frame-after): create a new frame right before or right after the current frame
 
-- `r` (reset-time): replay the animation
+- `r` (reset-time): play all frames in animation
 
 ### VisiData commands (not specific to DarkDraw)
 
 - `o`: open a new file (open a Drawing if extension is .ddw)
+
+#### panes and windows
+
 - `Shift+Z`: split window into 50% top and 50% bottom pane
-- `z Shift+Z`: split window to specified percent (negative swaps panes)
-- `g Shift+Z`: unsplit pane (fullscreen current sheet)
+- `Tab`: swap active pane
+- `g Ctrl+^`: cycle through sheets in this pane
 
 ### Notes for VisiData users
 
