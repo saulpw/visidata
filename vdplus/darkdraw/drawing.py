@@ -741,9 +741,17 @@ def flip_vert(sheet, box):
 def cycleColor(vd, c, n=1):
     return ''.join(str(int(x)+n) if x.isdigit() else x for x in c.split())
 
+@Drawing.api
+def set_color(self, color):
+    for r in self.cursorRows:
+        oldcolor = copy(r.color)
+        r.color = color
+        vd.addUndo(setattr, r, 'color', oldcolor)
+
+
 Drawing.addCommand('', 'flip-cursor-horiz', 'flip_horiz(sheet.cursorBox)')
 Drawing.addCommand('', 'flip-cursor-vert', 'flip_vert(sheet.cursorBox)')
-Drawing.addCommand('gc', 'set-color-input', 'x=input("color: ", value=sheet.cursorRows[0].color)\nfor r in sheet.cursorRows: r.color=x')
+Drawing.addCommand('gc', 'set-color-input', 'set_color(input("color: ", value=sheet.cursorRows[0].color))')
 Drawing.addCommand('zc', 'cycle-color', 'for r in sheet.cursorRows: r.color = cycleColor(r.color)')
 
 Drawing.addCommand('gm', 'tag-selected', 'sheet.tag_rows(sheet.someSelectedRows, vd.input("tag selected as: ", type="tag"))')
