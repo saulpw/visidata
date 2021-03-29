@@ -725,13 +725,17 @@ Drawing.addCommand('&', 'join-selected', 'join_rows(source.selectedRows)')
 @Drawing.api
 def flip_horiz(sheet, box):
     for r in sheet.iterbox(box):
+        oldx = copy(r.x)
         r.x = box.x2+box.x1-r.x-2
+        vd.addUndo(setattr, r, 'x', oldx)
 
 
 @Drawing.api
 def flip_vert(sheet, box):
     for r in sheet.iterbox(box):
+        oldy = r.y
         r.y = box.y2+box.y1-r.y-2
+        vd.addUndo(setattr, r, 'y', oldy)
 
 @VisiData.api
 def cycleColor(vd, c, n=1):
