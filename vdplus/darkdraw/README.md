@@ -18,7 +18,7 @@ Features:
 The drawing is rendered from a straightforward list of items with x/y/text/color and other attributes.
 This list can be used directly and called the 'backing sheet'.
 
-- `\`` (open-source): push backing sheet (if on drawing) or drawing (if on backing sheet)
+- `` ` `` (open-source): push backing sheet (if on drawing) or drawing (if on backing sheet)
 
 - `Enter` (dive-cursor): push backing subsheet with only rows under the cursor
   - Note: edits to rows on any backing subsheets will be applied directly, but deleting rows or adding new rows will have no effect.  Any adding, deleting, or reordering must be done from the top sheet.
