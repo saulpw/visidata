@@ -529,8 +529,14 @@ class Drawing(BaseSheet):
 
     def slide_selected(self, dx, dy):
         for r in self.source.someSelectedRows:
-            if 'x' in r: r['x'] += dx
-            if 'y' in r: r['y'] += dy
+            if 'x' in r:
+                oldx = copy(r['x'])
+                r['x'] += dx
+                vd.addUndo(setattr, r, 'x', oldx)
+            if 'y' in r:
+                oldy = copy(r['y'])
+                r['y'] += dy
+                vd.addUndo(setattr, r, 'y', oldy)
 
     def go_obj(self, xdir=0, ydir=0):
         x=self.cursorBox.x1
