@@ -34,7 +34,7 @@ def bounding_box(rows):
     for r in rows:
         if r.x is not None:
             xmin = min(xmin, r.x)
-            xmax = max(xmax, r.x + (r.w or dispwidth(r.text)))
+            xmax = max(xmax, r.x + (r.w or dispwidth(r.text or '')))
         if r.y is not None:
             ymin = min(ymin, r.y)
             ymax = max(ymax, r.y + (r.h or 0))
@@ -368,7 +368,7 @@ class Drawing(BaseSheet):
                     c = self.options.color_current_row + ' ' + c
                 if tag in selectedGroups:
                     c = self.options.color_selected_row + ' ' + c
-                clipdraw(scr, i+1, self.windowWidth-20, 'z%02d: %s' % (i+1, tag), colors[c])
+                clipdraw(scr, i+1, self.windowWidth-20, '%02d: %s' % (i+1, tag), colors[c])
 
         elif self.options.visibility == 2: # draw clipboard item shortcuts
             if not vd.memory.cliprows:
@@ -713,9 +713,9 @@ Drawing.addCommand('gu', 'unselect-all', 'source.clearSelected()')
 
 Drawing.addCommand('z00', 'enable-all-groups', 'disabled_tags.clear()')
 for i in range(1, 99):
-    Drawing.addCommand('z%02d'%i, 'toggle-enabled-group-%s'%i, 'g=list(_tags.keys())[%s]; disabled_tags.remove(g) if g in disabled_tags else disabled_tags.add(g)' %(i-1))
+    Drawing.addCommand('%02d'%i, 'toggle-enabled-group-%s'%i, 'g=list(_tags.keys())[%s]; disabled_tags.remove(g) if g in disabled_tags else disabled_tags.add(g)' %(i-1))
     Drawing.addCommand('g%02d'%i, 'select-group-%s'%i, 'g=list(_tags.keys())[%s]; source.select(source.gatherTag(g))' %(i-1))
-    Drawing.addCommand('gz%02d'%i, 'unselect-group-%s'%i, 'g=list(_tags.keys())[%s]; source.unselect(source.gatherTag(g))' %(i-1))
+    Drawing.addCommand('z%02d'%i, 'unselect-group-%s'%i, 'g=list(_tags.keys())[%s]; source.unselect(source.gatherTag(g))' %(i-1))
 
 
 Drawing.addCommand('A', 'new-drawing', 'vd.push(Drawing("untitled", source=DrawingSheet("", source=Path("untitled.ddw"))))')
