@@ -5,5 +5,3 @@ google-api-python-client
 
 requests_cache  # scraper
 beautifulsoup4  # scraper
-
-wcwidth  # darkdraw
