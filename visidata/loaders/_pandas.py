@@ -125,7 +125,7 @@ class PandasSheet(Sheet):
 
         # reset the index here
         if type(df.index) is not pd.RangeIndex:
-            df = df.reset_index()
+            df = df.reset_index(drop=True)
 
         # VisiData assumes string column names but pandas does not. Forcing string
         # columns at load-time avoids various errors later.
