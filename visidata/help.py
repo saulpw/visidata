@@ -115,6 +115,8 @@ def getHelpPane(vd, name, module='vdplus'):
         vd.debug(str(e))
     except ModuleNotFoundError as e:
         vd.debug(str(e))
+    except KeyError as e:
+        vd.debug(str(e))
     return ret
 
 
