@@ -71,6 +71,9 @@ def getDefaultSaveName(sheet):
     if hasattr(src, 'scheme') and src.scheme:
         return src.name + src.suffix
     if isinstance(src, Path):
+        if sheet.options.is_set('save_filetype', sheet):
+            # if save_filetype is over-ridden from default, use it as the extension
+            return str(src.with_suffix('')) + '.' + sheet.options.save_filetype
         return str(src)
     else:
         return sheet.name+'.'+getattr(sheet, 'filetype', options.save_filetype)
@@ -96,7 +99,11 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
 
     filetype = givenpath.ext or options.save_filetype
 
-    savefunc = getattr(vsheets[0], 'save_' + filetype, None) or getattr(vd, 'save_' + filetype, None) or vd.fail('no function to save as type %s' % filetype)
+    savefunc = getattr(vsheets[0], 'save_' + filetype, None) or getattr(vd, 'save_' + filetype, None)
+
+    if savefunc is None:
+        savefunc = getattr(vd, 'save_' + options.save_filetype, None) or vd.fail('no function to save as type %s' % filetype)
+        vd.warning(f'save for {filetype} unavailable, using {options.save_filetype}')
 
     if givenpath.exists() and confirm_overwrite:
         confirm("%s already exists. overwrite? " % givenpath.given)
