@@ -23,6 +23,8 @@ def _plugin_import(plugin):
     return "import " + _plugin_import_name(plugin)
 
 def _plugin_import_name(plugin):
+    if 'git+' in plugin.url:
+        return plugin.name
     return "plugins."+plugin.name
 
 def _plugin_in_import_list(plugin):
@@ -166,7 +168,8 @@ class PluginsSheet(JsonLinesSheet):
                 r = re.compile(r'^{}\W'.format(_plugin_import(plugin)))
                 new.writelines(line for line in old.readlines() if not r.match(line))
 
-            os.unlink(_plugin_path(plugin))
+            if os.path.exists(_plugin_path(plugin)):
+                os.unlink(_plugin_path(plugin))
             sys.modules.pop(_plugin_import_name(plugin))
             importlib.invalidate_caches()
             vd.warning('{0} plugin uninstalled'.format(plugin['name']))
