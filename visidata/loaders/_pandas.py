@@ -273,7 +273,7 @@ class PandasSheet(Sheet):
             col: [None] * n for col in self.df.columns
         }).astype(self.df.dtypes.to_dict(), errors='ignore')
 
-    def addRows(self, rows, index=None, undo=False):
+    def addRows(self, rows, index=None, undo=True):
         import pandas as pd
         if index is None:
             self.df = self.df.append(pd.DataFrame(rows))
@@ -291,7 +291,7 @@ class PandasSheet(Sheet):
         self._checkSelectedIndex()
 
     def addRow(self, row, index=None):
-        self.addRows([row], index, undo=True)
+        self.addRows([row], index)
         vd.addUndo(self._deleteRows, index or self.nRows - 1)
 
     def delete_row(self, rowidx):
@@ -303,7 +303,7 @@ class PandasSheet(Sheet):
         # If we use `oldrow` directly, we get errors comparing DataFrame objects
         # when there are multiple deletion commands for the same row index.
         # There may be a better way to handle that case.
-        vd.addUndo(self.addRows, oldrow.to_dict(), rowidx)
+        vd.addUndo(self.addRows, oldrow.to_dict(), rowidx, False)
         self._deleteRows(rowidx)
         vd.memory.cliprows = [oldrow]
 

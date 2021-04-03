@@ -73,7 +73,7 @@ def rowDeleted(self, row):
 
 @Sheet.api
 @asyncthread
-def addRows(sheet, rows, index=None, undo=False):
+def addRows(sheet, rows, index=None, undo=True):
     'Add *rows* after row at *index*.'
     addedRows = {}
     if index is None: index=len(sheet.rows)
@@ -86,15 +86,17 @@ def addRows(sheet, rows, index=None, undo=False):
 
     @asyncthread
     def _removeRows():
-        sheet.deleteBy(lambda r,sheet=sheet,addedRows=addedRows: sheet.rowid(r) in addedRows, commit=True)
+        sheet.deleteBy(lambda r,sheet=sheet,addedRows=addedRows: sheet.rowid(r) in addedRows, commit=True, undo=False)
 
     if undo:
         vd.addUndo(_removeRows)
 
 
 @Sheet.api
-def deleteBy(sheet, func, commit=False):
-    'Delete rows on sheet for which ``func(row)`` returns true.  Return number of rows deleted.  If sheet.defer is set and *commit* is True, remove rows immediately without deferring.'
+def deleteBy(sheet, func, commit=False, undo=True):
+    '''Delete rows on sheet for which ``func(row)`` returns true.  Return number of rows deleted.
+    If sheet.defer is set and *commit* is True, remove rows immediately without deferring.
+    If undo is set to True, add an undo for deletion.'''
     oldrows = copy(sheet.rows)
     oldidx = sheet.cursorRowIndex
     ndeleted = 0
@@ -125,7 +127,7 @@ def deleteBy(sheet, func, commit=False):
             sheet.deleteSourceRow(r)
             ndeleted += 1
 
-    if not commit:
+    if undo:
         vd.addUndo(setattr, sheet, 'rows', oldrows)
 
     if ndeleted:
@@ -185,7 +187,7 @@ def commitMods(self):
 @Sheet.api
 def commitDeletes(self):
     'Return the number of rows that have been marked for deletion. Delete the rows. Clear the marking.'
-    ndeleted = self.deleteBy(self.isDeleted, commit=True)
+    ndeleted = self.deleteBy(self.isDeleted, commit=True, undo=False)
 
     if ndeleted:
         vd.status('deleted %s %s' % (ndeleted, self.rowtype))
@@ -265,8 +267,8 @@ def commit(sheet, *rows):
 def new_rows(sheet, n):
     return [sheet.newRow() for i in range(n)]
 
-Sheet.addCommand('a', 'add-row', 'addRows([newRow()], index=cursorRowIndex, undo=True); cursorDown(1)', 'append a blank row')
-Sheet.addCommand('ga', 'add-rows', 'n=int(input("add rows: ", value=1)); addRows(new_rows(n), index=cursorRowIndex, undo=True); cursorDown(1)', 'append N blank rows')
+Sheet.addCommand('a', 'add-row', 'addRows([newRow()], index=cursorRowIndex); cursorDown(1)', 'append a blank row')
+Sheet.addCommand('ga', 'add-rows', 'n=int(input("add rows: ", value=1)); addRows(new_rows(n), index=cursorRowIndex); cursorDown(1)', 'append N blank rows')
 Sheet.addCommand('za', 'addcol-new', 'addColumnAtCursor(SettableColumn(input("column name: "))); cursorRight(1)', 'append an empty column')
 Sheet.addCommand('gza', 'addcol-bulk', 'addColumnAtCursor(*(SettableColumn() for c in range(int(input("add columns: "))))); cursorRight(1)', 'append N empty columns')
 
