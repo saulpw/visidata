@@ -7,6 +7,14 @@ BaseSheet.init('undone', list)  # list of CommandLogRow for redo after undo
 
 option('undo', True, 'enable undo/redo')
 
+nonUndo = '''commit open-file'''.split()
+
+def isUndoableCommand(longname):
+    for n in nonUndo:
+        if longname.startswith(n):
+            return False
+    return True
+
 @VisiData.api
 def addUndo(vd, undofunc, *args, **kwargs):
     'On undo of latest command, call ``undofunc(*args, **kwargs)``.'
@@ -16,7 +24,7 @@ def addUndo(vd, undofunc, *args, **kwargs):
             return
         r = vd.modifyCommand
         # some special commands, like open-file, do not have an undofuncs set
-        if not r or not isinstance(r.undofuncs, list):
+        if not r or not isUndoableCommand(r.longname):
             return
         r.undofuncs.append((undofunc, args, kwargs))
 

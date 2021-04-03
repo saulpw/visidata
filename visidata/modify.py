@@ -35,6 +35,9 @@ def rowAdded(self, row):
     'Mark row as a deferred add-row'
     self._deferredAdds[self.rowid(row)] = row
     def _undoRowAdded(sheet, row):
+        if sheet.rowid(row) not in sheet._deferredAdds:
+            warning('cannot undo to before commit')
+            return
         del sheet._deferredAdds[sheet.rowid(row)]
     vd.addUndo(_undoRowAdded, self, row)
 
@@ -54,10 +57,13 @@ def cellChanged(col, row, val):
         def _undoCellChanged(col, row, oldval):
             if oldval == col.getSourceValue(row):
                 # if we have reached the original value, remove from defermods entirely
+                if col.sheet.rowid(row) not in col.sheet._deferredMods:
+                    warning('cannot undo to before commit')
+                    return
                 del col.sheet._deferredMods[col.sheet.rowid(row)]
             else:
                 # otherwise, update deferredMods with previous value
-                _, rowmods = col.sheet._deferredMods[rowid]
+                _, rowmods = col.sheet._deferredMods[col.sheet.rowid(row)]
                 rowmods[col] = oldval
 
         vd.addUndo(_undoCellChanged, col, row, oldval)
@@ -67,6 +73,9 @@ def rowDeleted(self, row):
     'Mark row as a deferred delete-row'
     self._deferredDels[self.rowid(row)] = row
     def _undoRowDeleted(sheet, row):
+        if sheet.rowid(row) not in sheet._deferredDels:
+            warning('cannot undo to before commit')
+            return
         del sheet._deferredDels[sheet.rowid(row)]
     vd.addUndo(_undoRowDeleted, self, row)
 
