@@ -133,6 +133,10 @@ def mainloop(self, scr):
             return
 
         sheet = self.activeSheet
+
+        if not sheet:
+            continue
+
         threading.current_thread().sheet = sheet
         vd.drawThread = threading.current_thread()
 
