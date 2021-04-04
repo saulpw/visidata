@@ -1,5 +1,65 @@
 # VisiData version history
 
+# v2.3 (2021-04-03)
+
+## Features
+    - [colors] allow background colors (thanks @frosencrantz #435)
+        - use "*fg* on *bg*" e.g. "212 yellow on 14 red"
+            -r "bg *bg* fg *fg*" (or reversed)
+            - attributes always apply to foreground regardless of position in colorstr
+            - as before, only the first valid color in a category (fg/bg) is used; subsequent color names (even unknown ones) are ignored
+        - allocate colors on demand, instead of "all" 256 colors as fg
+        - **Colors Sheet** now only includes colors actually allocated
+    - [colors] set `use_default_colors` default to `True` (was `False`)
+    - [delete] do not move deleted values to clipboard (thanks @geekscrapy #895)
+        - `delete-*` commands are changed to not alter the clipboard
+        - the previous `delete-*` commands are renamed to `cut-*` (unbound)
+        - this affects: `delete-row`, `delete-selected`, `delete-cell`, `delete-cells`
+    - [jump-first] bound `g^^` to cycle through sheets
+    - [null] `zd` / `gzd` `delete-cells` set to `options.null_value` instead of `None`
+    - [memories] add MemorySheet on `Alt+M`, `Alt+m` adds current cell to sheet  (thanks @UrDub and @geekscrapy #912)
+        - useful for storing values to reference later
+        - both names and values can be edited on MemorySheet
+        - [aggregator] `memo-aggregator`(z+; formerly called `show-aggregate`) adds value to memory sheet
+        - [clipboard] clipboard stored on memory sheet; zy/zp use vd.memory.clipval;
+    - [plugins] allow install from github url to local pip repo
+    - [plugins] add darkdraw to plugins.jsonl
+    - [png] save image as RGBA
+    - [pyobj-expr] `Ctrl+X` within `Ctrl+X` input suspends directly into python REPL
+    - [save_filetype] if `save_ext` does not exist, or if `options.save_filetype` is different from default, use `options.save_filetype`
+    - [vdplus] auto-import, ignore if not available
+
+## Bugfixes
+    - [aggregator] fix typo in deciles description (thanks @cwarden #922)
+    - [copy] copying BasicRow (new sheets), now does not error (still blank)
+    - [cmdlog] for `open-file` source logging in cmdlog, we want paths to physical files, so if src is a **Sheet** grabs its source
+    - [defer] fix pasting in deferred sheets
+    - [eval] fix **ExprColumns** on empty rows
+    - [help] move signal config earlier in runcycle, to accomodate --help (thanks @frosencrantz #926)
+    - [open] create blank sheet of appropriate type when path does not exist
+    - [pandas] fix conflict between dropped index and existing column (thanks thomanq #937)
+    - [plugins] only check for plugins.jsonl once daily (previously: every start-up)
+    - [pivot] fix `openRow`
+    - [pivot] fix bug with sheet name
+    - [png] fix saving directly from canvas
+    - [sort] fix sorting of visidata.Path objects (thanks @frosencrantz #897)
+    - [splitwin] now involves two different sheetstacks that build and quit independently (thanks @lamchau #894)
+        - [splitwin] allows stickier panes for push/quit
+    - [splitwin] splitwin-half (`Z`) swaps panes if already active
+    - [splitwin] fix cursor behaviour on both panes when active
+        - cursor movement on inactive panes is blocked
+    - [splitwin] only re-split (with `zZ`) if sheets are not already split, otherwise adjust split percent
+    - [SuspendCurses] workaround for bug in curses.wrapper (thanks @frosencrantz #899)
+    - [undo] do not set undo for a `commit-sheet`
+
+## Api
+    - [addRows] addRows(rows, index, undo) adds rows at index, sets undo if True
+        - set undo to False, if using addRows within an addUndo function
+    - [deleteBy] add an undo flag to deleteBy
+    - [clipboard] change `cliprows` to be a simple list of rows
+    - new **DrawablePane** super-base class
+    - [json] rowdef now **AttrDict** for massive convenience
+
 # v2.2.1 (2021-02-07)
 
 ## Bugfixes

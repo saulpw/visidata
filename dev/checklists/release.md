@@ -8,11 +8,11 @@
 
 2. Verify that documentation/docstrings are up-to-date on features and functionality
 
-    a. manpage;
+    a. CHANGELOG;
 
-    b. visidata.org; (formats?)
+    b. manpage;
 
-    c. CHANGELOG;
+    c. visidata.org; (formats?)
 
     d. patrons.tsv;
 
