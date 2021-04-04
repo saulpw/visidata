@@ -5,7 +5,7 @@
 ## Features
     - [colors] allow background colors (thanks @frosencrantz #435)
         - use "*fg* on *bg*" e.g. "212 yellow on 14 red"
-            -r "bg *bg* fg *fg*" (or reversed)
+            - "bg *bg* fg *fg*" (or reversed)
             - attributes always apply to foreground regardless of position in colorstr
             - as before, only the first valid color in a category (fg/bg) is used; subsequent color names (even unknown ones) are ignored
         - allocate colors on demand, instead of "all" 256 colors as fg

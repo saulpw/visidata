@@ -29,5 +29,5 @@ class MemorySheet(Sheet):
 vd.memosSheet = MemorySheet('memos')
 
 
-Sheet.addCommand('^[M', 'open-memos', 'vd.push(vd.memosSheet)')
-Sheet.addCommand('^[m', 'memo-cell', 'vd.memory[input("assign "+cursorCol.getDisplayValue(cursorRow)+" to: ")] = cursorCol.getTypedValue(cursorRow)')
+Sheet.addCommand('^[M', 'open-memos', 'vd.push(vd.memosSheet)', 'open the Memory Sheet')
+Sheet.addCommand('^[m', 'memo-cell', 'vd.memory[input("assign "+cursorCol.getDisplayValue(cursorRow)+" to: ")] = cursorCol.getTypedValue(cursorRow)', 'store value in current cell in Memory Sheet')
