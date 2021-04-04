@@ -23,6 +23,8 @@ def _plugin_import(plugin):
     return "import " + _plugin_import_name(plugin)
 
 def _plugin_import_name(plugin):
+    if 'git+' in plugin.url:
+        return plugin.name
     return "plugins."+plugin.name
 
 def _plugin_in_import_list(plugin):
@@ -65,7 +67,7 @@ class PluginsSheet(JsonLinesSheet):
 
     @asyncsingle
     def reload(self):
-        self.source = urlcache(options.plugins_url or vd.fail(), days=0)  # for VisiDataMetaSheet.reload()
+        self.source = urlcache(options.plugins_url or vd.fail(), days=1)  # for VisiDataMetaSheet.reload()
         super().reload.__wrapped__(self)
         self.addColumn(Column('available', width=0, getter=_installedStatus), index=1)
         self.addColumn(Column('installed', width=8, getter=lambda c,r: _loadedVersion(r)), index=2)
@@ -104,12 +106,22 @@ class PluginsSheet(JsonLinesSheet):
     def _install(self, plugin):
         outpath = _plugin_path(plugin)
 
-        with urlcache(plugin.url, 0).open_text() as pyfp:
-            contents = pyfp.read()
-            if not _checkHash(contents, plugin.sha256):
-                vd.error('%s plugin SHA256 does not match!' % plugin.name)
-            with outpath.open_text(mode='w') as outfp:
-                outfp.write(contents)
+        if "git+" in plugin.url:
+            p = subprocess.Popen([sys.executable, '-m', 'pip', 'install',
+                                '--upgrade', plugin.url],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
+            out, err = p.communicate()
+            vd.status(out)
+            if err:
+                vd.warning(err)
+        else:
+            with urlcache(plugin.url, days=0).open_text() as pyfp:
+                contents = pyfp.read()
+                if not _checkHash(contents, plugin.sha256):
+                    vd.error('%s plugin SHA256 does not match!' % plugin.name)
+                with outpath.open_text(mode='w') as outfp:
+                    outfp.write(contents)
 
         if plugin.pydeps:
             p = subprocess.Popen([sys.executable, '-m', 'pip', 'install',
@@ -156,7 +168,8 @@ class PluginsSheet(JsonLinesSheet):
                 r = re.compile(r'^{}\W'.format(_plugin_import(plugin)))
                 new.writelines(line for line in old.readlines() if not r.match(line))
 
-            os.unlink(_plugin_path(plugin))
+            if os.path.exists(_plugin_path(plugin)):
+                os.unlink(_plugin_path(plugin))
             sys.modules.pop(_plugin_import_name(plugin))
             importlib.invalidate_caches()
             vd.warning('{0} plugin uninstalled'.format(plugin['name']))

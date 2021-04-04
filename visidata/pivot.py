@@ -71,7 +71,7 @@ class PivotSheet(Sheet):
     def openRow(self, row):
         'open sheet of source rows aggregated in current pivot row'
         vs = copy(self.source)
-        vs.name += "_%s"%"+".join(row.discrete_keys)
+        vs.name += "_%s"%"+".join(map(str, row.discrete_keys))
         vs.rows = sum(row.pivotrows.values(), [])
         return vs
 

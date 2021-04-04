@@ -8,11 +8,11 @@
 
 2. Verify that documentation/docstrings are up-to-date on features and functionality
 
-    a. manpage;
+    a. CHANGELOG;
 
-    b. visidata.org; (formats?)
+    b. manpage;
 
-    c. CHANGELOG;
+    c. visidata.org; (formats?)
 
     d. patrons.tsv;
 
@@ -63,7 +63,7 @@
     b. push to testpypi
 
     ```
-    python3 setup.py sdist
+    python3 setup.py sdist bdist_wheel --universal
     twine upload dist/* -r testpypi
     ```
 

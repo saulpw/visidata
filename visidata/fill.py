@@ -33,4 +33,4 @@ def fillNullValues(vd, col, rows):
     vd.status("filled %d values" % n)
 
 
-Sheet.addCommand('f', 'setcol-fill', 'fillNullValues(cursorCol, selectedRows)', 'fills null cells in selected rows of current column with contents of non-null cells up the current column')
+Sheet.addCommand('f', 'setcol-fill', 'fillNullValues(cursorCol, someSelectedRows)', 'fills null cells in selected rows of current column with contents of non-null cells up the current column')

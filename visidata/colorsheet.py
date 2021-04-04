@@ -1,21 +1,46 @@
 import curses
-from visidata import globalCommand, colors, Sheet, Column, RowColorizer, wrapply
+from visidata import VisiData, colors, Sheet, Column, RowColorizer, wrapply, BaseSheet
 
 
 class ColorSheet(Sheet):
-    rowtype = 'colors'  # rowdef: color number as assigned in the colors object
+    rowtype = 'colors'  # rowdef: [(fg,bg), (color_attr, colornamestr)]
     columns = [
-        Column('color', type=int),
-        Column('R', getter=lambda col,row: curses.color_content(curses.pair_number(colors[row])-1)[0]),
-        Column('G', getter=lambda col,row: curses.color_content(curses.pair_number(colors[row])-1)[1]),
-        Column('B', getter=lambda col,row: curses.color_content(curses.pair_number(colors[row])-1)[2]),
+        Column('color', getter=lambda c,r: r[1][1]),
+        Column('fg', type=int, getter=lambda c,r: r[0][0]),
+        Column('bg', type=int, getter=lambda c,r: r[0][1]),
+        Column('attr', width=0, type=int, getter=lambda c,r: r[1][0]),
         ]
     colorizers = [
-        RowColorizer(7, None, lambda s,c,r,v: r)
+        RowColorizer(7, None, lambda s,c,r,v: r and r[1][1])
     ]
 
-    def reload(self):
-        self.rows = sorted(colors.keys(), key=lambda n: wrapply(int, n))
+    def iterload(self):
+        self.rows = []
+        for k, v in colors.color_pairs.items():
+            yield [k, v]
+
+        for i in range(0, 256):
+            yield [(i, 0), (None, f'{i}')]
+
+    def draw(self, scr):
+        super().draw(scr)
+        rightcol = max(self._visibleColLayout.values())
+        xstart = rightcol[0] + rightcol[1] + 4
+        for i, r in enumerate(self.rows[(self.topRowIndex//6)*6:]):
+            y=i//6+1
+            x=(i%6)*3+xstart
+            c = r[1][1]
+            s = '██'
+            if y > self.windowHeight-1:
+                break
+            if r is self.cursorRow:
+                x -= 1
+                s = '[██]'
+            scr.addstr(y, x, s, colors[c])
 
 
-globalCommand(None, 'colors', 'vd.push(ColorSheet("vdcolors"))', 'open Color Sheet with an overview of curses colors and codes')
+BaseSheet.addCommand(None, 'open-colors', 'vd.push(vd.colorsSheet)', 'open Color Sheet with avaiable terminal colors')
+
+@VisiData.lazy_property
+def colorsSheet(vd):
+    return ColorSheet()

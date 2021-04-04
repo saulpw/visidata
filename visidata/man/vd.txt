@@ -181,16 +181,16 @@ DESCRIPTION
      gz"              open duplicate sheet with deepcopy of selected rows
 
    Editing Rows and Cells
-       a   za         append a blank row/column; appended columns cannot be
+       a   za         append blank row/column; appended columns cannot be
                       copied to clipboard
       ga  gza number  append number blank rows/columns
-       d   gd         delete (cut) current/selected row(s) and move to clip‐
-                      board
-       y   gy         yank (copy) current/all selected row(s) to clipboard
-      zy  gzy         yank (copy) contents of current column for current/se‐
-                      lected row(s) to clipboard
-      zd  gzd         delete (cut) contents of current column for current/se‐
-                      lected row(s) and move to clipboard
+       d   gd         delete current/selected row(s)
+       y   gy         yank (copy) current/all selected row(s) to clipboard in
+                      Memory Sheet
+      zy  gzy         yank (copy) contents of current column for
+                      current/selected row(s) to clipboard in Memory Sheet
+      zd  gzd         set contents of current column for current/selected
+                      row(s) to options.null_value
        p    P         paste clipboard rows after/before current row
       zp  gzp         set cells of current column for current/selected row(s)
                       to last clipboard value
@@ -237,7 +237,7 @@ DESCRIPTION
 
       + aggregator    add aggregator to current column (see Frequency Table)
      z+ aggregator    display result of aggregator over values in selected
-                      rows for current column
+                      rows for current column; store result in Memory Sheet
       &               concatenate top two sheets in Sheets Stack
      g&               concatenate all sheets in Sheets Stack
 
@@ -285,6 +285,7 @@ DESCRIPTION
                             screens
         Tab                 jump to other pane
         ^^ (Ctrl+^)         swap which sheet is in current pane
+        g^^ (g Ctrl+^)      cycle through sheets
 
    Other Commands
      Q                quit current sheet and remove it from the CommandLog
@@ -320,6 +321,7 @@ DESCRIPTION
       .  VisiDataMenu (Shift+V)      browse list of core sheets
       .  Directory Sheet             browse properties of files in a directory
       .  Plugins Sheet               browse, install, and (de)activate plugins
+      .  Memory Sheet (Alt+M)        browse saved values, including clipboard
 
      Metasheets
       .  Columns Sheet (Shift+C)     edit column properties
@@ -366,6 +368,16 @@ DESCRIPTION
      (sheet-specific commands)
         a                install and activate current plugin
         d                deactivate current plugin
+
+   Memory Sheet
+     Browse through a list of stored values, referanceable in expressions
+     through their name.
+     (global commands)
+        Alt+M            open the Memory Sheet
+        Alt+m name       store value in current cell in Memory Sheet under
+                         name
+     (sheet-specific commands)
+        e                edit either value or name, to edit reference
 
    METASHEETS
    Columns Sheet (Shift+C)
@@ -540,7 +552,7 @@ COMMANDLINE OPTIONS
                                                      (False) or lazily (True)
      --force-256-colors           False              use 256 colors even if
                                                      curses reports fewer
-     --use-default-colors         False              curses use default termi‐
+     --use-default-colors=bool    True               curses use default termi‐
                                                      nal colors
      --note-pending=str           ⌛                 note to display for pend‐
                                                      ing cells
@@ -755,7 +767,7 @@ COMMANDLINE OPTIONS
      disp_selected_note  •
      disp_sort_asc       ↑↟⇞⇡⇧⇑              characters for ascending sort
      disp_sort_desc      ↓↡⇟⇣⇩⇓              characters for descending sort
-     color_default       normal              the default color
+     color_default       white               the default color
      color_default_hdr   bold                color of the column headers
      color_bottom_hdr    underline           color of the bottom header row
      color_current_row   reverse             color of the cursor row
@@ -783,7 +795,7 @@ COMMANDLINE OPTIONS
      color_active_status bold                 active window status bar color
      color_inactive_status 8                 inactive window status bar color
      color_working       green               color of system running smoothly
-     color_edit_cell     normal              cell color to use when editing
+     color_edit_cell     white               cell color to use when editing
                                              cell
      disp_edit_fill      _                   edit field fill character
      disp_unprintable    ·                   substitute character for unprint‐
@@ -914,4 +926,4 @@ SUPPORTED OUTPUT FORMATS
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                      Feb 07, 2021                      Linux/MacOS
+Linux/MacOS                      Apr 03, 2021                      Linux/MacOS

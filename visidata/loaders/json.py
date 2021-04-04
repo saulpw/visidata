@@ -19,16 +19,26 @@ open_ndjson = open_ldjson = open_json = open_jsonl
 
 
 class JsonSheet(PythonSheet):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._colnames = {}  # [colname] -> Column
+
+    def addColumn(self, col, **kwargs):
+        super().addColumn(col, **kwargs)
+        self._colnames[col.name] = col
+
     def iterload(self):
-        self.colnames = {}  # [colname] -> Column
         self.columns = []
+        self._colnames.clear()
+        for c in type(self).columns:
+            self.addColumn(deepcopy(c))
 
         with self.source.open_text() as fp:
             for L in fp:
                 try:
                     if L.startswith('#'): # skip commented lines
                         continue
-                    ret = json.loads(L)
+                    ret = json.loads(L, object_hook=AttrDict)
                     if isinstance(ret, list):
                         yield from Progress(ret)
                     else:
@@ -59,10 +69,8 @@ class JsonSheet(PythonSheet):
         super().addRow(row, index=index)
 
         for k in row:
-            if k not in self.colnames:
-                c = ColumnItem(k, type=deduceType(row[k]))
-                self.colnames[k] = c
-                self.addColumn(c)
+            if k not in self._colnames:
+                self.addColumn(ColumnItem(k, type=deduceType(row[k])))
         return row
 
     def newRow(self):

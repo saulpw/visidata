@@ -13,7 +13,7 @@ def rgb_to_attr(r,g,b,a):
     return 0
 
 class PNGSheet(Sheet):
-    rowtype = 'pixels'  # rowdef: tuple(x, y, r, g, b, a)
+    rowtype = 'pixels'  # rowdef: list(x, y, r, g, b, a)
     columns = [ColumnItem(name, i, type=int) for i, name in enumerate('x y R G B A'.split())] + [
         Column('attr', type=int, getter=lambda col,row: rgb_to_attr(*row[2:]))
     ]
@@ -64,27 +64,21 @@ class PNGDrawing(Canvas):
 @VisiData.api
 def save_png(vd, p, vs):
     if isinstance(vs, Canvas):
-        return save_png(p, vs.source)
+        return vd.save_png(p, vs.source)
 
-    palette = collections.OrderedDict()
-    palette[(0,0,0,0)] = 0   # invisible black is 0
-
-    pixels = list([0]*vs.width for y in range(vs.height))
+    pixels = list([] for y in range(vs.height))
 
     for x,y,r,g,b,a in Progress(sorted(vs.rows), 'saving'):
-        color = tuple((r,g,b,a))
-        colornum = palette.get(color, None)
-        if colornum is None:
-            colornum = palette[color] = len(palette)
-        pixels[y][x] = colornum
+        pixels[y].extend((r,g,b,a))
 
-    vd.status('saving %sx%sx%s' % (vs.width, vs.height, len(palette)))
+    vd.status('saving %sx%s' % (vs.width, vs.height))
 
     import png
+    img = png.from_array(pixels, mode='RGBA')
     with open(p, 'wb') as fp:
-        w = png.Writer(vs.width, vs.height, palette=list(palette.keys()))
-        w.write(fp, pixels)
+        img.write(fp)
 
     vd.status('saved')
+
 
 PNGSheet.addCommand('.', 'plot-sheet', 'vd.push(PNGDrawing(name+"_plot", source=sheet, sourceRows=rows))', 'plot this png')

@@ -376,6 +376,20 @@ class Canvas(Plotter):
         self.cursorBox.w = max(self.cursorBox.w, self.canvasCharWidth)
         self.cursorBox.h = max(self.cursorBox.h, self.canvasCharHeight)
 
+    def commandCursor(sheet, execstr):
+        'Return (col, row) of cursor suitable for cmdlog replay of execstr.'
+        contains = lambda s, *substrs: any((a in s) for a in substrs)
+        colname, rowname = '', ''
+        if contains(execstr, 'plotterCursorBox'):
+            bb = sheet.cursorBox
+            colname = '%s %s' % (sheet.formatX(bb.xmin), sheet.formatX(bb.xmax))
+            rowname = '%s %s' % (sheet.formatY(bb.ymin), sheet.formatY(bb.ymax))
+        elif contains(execstr, 'plotterVisibleBox'):
+            bb = sheet.visibleBox
+            colname = '%s %s' % (sheet.formatX(bb.xmin), sheet.formatX(bb.xmax))
+            rowname = '%s %s' % (sheet.formatY(bb.ymin), sheet.formatY(bb.ymax))
+        return colname, rowname
+
     @property
     def canvasCharWidth(self):
         'Width in canvas units of a single char in the terminal'

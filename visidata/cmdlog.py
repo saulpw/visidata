@@ -117,6 +117,21 @@ def moveToCol(vs, colstr):
 
     return True
 
+
+@TableSheet.api
+def commandCursor(sheet, execstr):
+    'Return (col, row) of cursor suitable for cmdlog replay of execstr.'
+    colname, rowname = '', ''
+    contains = lambda s, *substrs: any((a in s) for a in substrs)
+    if contains(execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorRow') and sheet.nRows > 0:
+        k = sheet.rowkey(sheet.cursorRow)
+        rowname = keystr(k) if k else sheet.cursorRowIndex
+
+    if contains(execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol'):
+        colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
+    return colname, rowname
+
+
 # rowdef: namedlist (like TsvSheet)
 class _CommandLog:
     'Log of commands for current session.'
@@ -150,23 +165,9 @@ class _CommandLog:
         if sheet and not (cmd.longname.startswith('open-') and not cmd.longname in ('open-row', 'open-cell')):
             sheetname = sheet
 
+            colname, rowname = sheet.commandCursor(cmd.execstr)
+
             contains = lambda s, *substrs: any((a in s) for a in substrs)
-            if contains(cmd.execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorRow') and sheet.nRows > 0:
-                k = sheet.rowkey(sheet.cursorRow)
-                rowname = keystr(k) if k else sheet.cursorRowIndex
-
-            if contains(cmd.execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol'):
-                colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
-
-            if contains(cmd.execstr, 'plotterCursorBox'):
-                bb = sheet.cursorBox
-                colname = '%s %s' % (sheet.formatX(bb.xmin), sheet.formatX(bb.xmax))
-                rowname = '%s %s' % (sheet.formatY(bb.ymin), sheet.formatY(bb.ymax))
-            elif contains(cmd.execstr, 'plotterVisibleBox'):
-                bb = sheet.visibleBox
-                colname = '%s %s' % (sheet.formatX(bb.xmin), sheet.formatX(bb.xmax))
-                rowname = '%s %s' % (sheet.formatY(bb.ymin), sheet.formatY(bb.ymax))
-
             if contains(cmd.execstr, 'pasteFromClipboard'):
                 args = clipboard().paste().strip()
 
@@ -202,6 +203,8 @@ class _CommandLog:
         vd.activeCommand = None
 
     def openHook(self, vs, src):
+        while isinstance(src, BaseSheet):
+            src = src.source
         r = self.newRow(keystrokes='o', input=src, longname='open-file')
         vs.cmdlog_sheet.addRow(r)
         self.addRow(r)
@@ -271,11 +274,6 @@ def delay(vd, factor=1):
         acquired = vd.semaphore.acquire(timeout=options.replay_wait*factor if not vd.paused else None)
         return acquired or not vd.paused
 
-@VisiData.property
-def activeSheet(vd):
-    'Return top sheet on sheets stack, or cmdlog sheets stack empty.'
-    return vd.sheets[0] if vd.sheets else vd.cmdlog
-
 
 @VisiData.api
 def replayOne(vd, r):
@@ -306,7 +304,7 @@ def replayOne(vd, r):
             if vs:
                 vd.push(vs)
             else:
-                vs = vd.activeSheet
+                vs = vd.activeSheet or vd.cmdlog
 
             vd.moveToReplayContext(r, vs)
 
@@ -349,7 +347,8 @@ def replay_sync(vd, cmdlog, live=False):
                 cmdlog.cursorRowIndex += 1
                 prog.addProgress(1)
 
-                vd.activeSheet.ensureLoaded()
+                if vd.activeSheet:
+                    vd.activeSheet.ensureLoaded()
                 vd.sync()
                 while not vd.delay():
                     pass
@@ -416,11 +415,12 @@ def shortcut(self):
     return ''
 
 
-@VisiData.lazy_property
+@VisiData.property
 def cmdlog(vd):
-    vs = CommandLog('cmdlog', rows=[])
-    vd.beforeExecHooks.append(vs.beforeExecHook)
-    return vs
+    if not vd._cmdlog:
+        vd._cmdlog = CommandLog('cmdlog', rows=[])
+        vd.beforeExecHooks.append(vd._cmdlog.beforeExecHook)
+    return vd._cmdlog
 
 @VisiData.property
 def modifyCommand(vd):

@@ -10,6 +10,9 @@ vd, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
 import visidata
 
 
+vd.activePane = 1   # pane numbering starts at 1; pane 0 means active pane
+
+
 __all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'TableSheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow', 'SequenceSheet']
 
 
@@ -24,7 +27,7 @@ option('header', 1, 'parse first N rows as column names', replay=True)
 option('load_lazy', False, 'load subsheets always (False) or lazily (True)')
 
 theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
-theme('use_default_colors', False, 'curses use default terminal colors')
+theme('use_default_colors', True, 'curses use default terminal colors')
 
 theme('disp_note_none', '⌀',  'visible contents of a cell whose value is None')
 theme('disp_truncator', '…', 'indicator that the contents are only partially visible')
@@ -59,7 +62,7 @@ theme('disp_endbot_sep', '║', '') # ╽╿┃╜‖
 theme('disp_selected_note', '•', '') #
 theme('disp_sort_asc', '↑↟⇞⇡⇧⇑', 'characters for ascending sort') # ↑▲↟↥↾↿⇞⇡⇧⇈⤉⤒⥔⥘⥜⥠⍏˄ˆ
 theme('disp_sort_desc', '↓↡⇟⇣⇩⇓', 'characters for descending sort') # ↓▼↡↧⇂⇃⇟⇣⇩⇊⤈⤓⥕⥙⥝⥡⍖˅ˇ
-theme('color_default', 'normal', 'the default color')
+theme('color_default', 'white', 'the default color')
 theme('color_default_hdr', 'bold', 'color of the column headers')
 theme('color_bottom_hdr', 'underline', 'color of the bottom header row')
 theme('color_current_row', 'reverse', 'color of the cursor row')
@@ -110,7 +113,7 @@ class LazyComputeRow:
     def _lcm(self):
         lcmobj = self.col or self.sheet
         if not hasattr(lcmobj, '_lcm'):
-            lcmobj._lcm = LazyChainMap(self.sheet, vd, self.col)
+            lcmobj._lcm = LazyChainMap(self.sheet, self.col, *vd.contexts)
         return lcmobj._lcm
 
     def keys(self):
@@ -156,7 +159,7 @@ class LazyComputeRow:
 
 class BasicRow(collections.defaultdict):
     def __init__(self, *args):
-        collections.defaultdict.__init__(self, lambda: None, *args)
+        collections.defaultdict.__init__(self, lambda: None)
     def __bool__(self):
         return True
 
@@ -280,9 +283,12 @@ class TableSheet(BaseSheet):
     def reload(self):
         'Load rows and/or columns from ``self.source``.  Async.  Override in subclass.'
         self.rows = []
-        with vd.Progress(gerund='loading', total=0):
-            for r in self.iterload():
-                self.addRow(r)
+        try:
+            with vd.Progress(gerund='loading', total=0):
+                for r in self.iterload():
+                    self.addRow(r)
+        except FileNotFoundError:
+            return  # let it be a blank sheet without error
 
         # if an ordering has been specified, sort the sheet
         if self._ordering:
@@ -349,7 +355,7 @@ class TableSheet(BaseSheet):
         return self.name
 
     def evalExpr(self, expr, row=None, col=None):
-        if row:
+        if row is not None:
             # contexts are cached by sheet/rowid for duration of drawcycle
             contexts = vd._evalcontexts.setdefault((self, self.rowid(row), col), LazyComputeRow(self, row, col=col))
         else:
@@ -492,7 +498,11 @@ class TableSheet(BaseSheet):
 
     def addColumnAtCursor(self, *cols):
         'Insert all *cols* into columns after cursor.  Return first column.'
-        return self.addColumn(*cols, index=0 if self.cursorCol.keycol else self.columns.index(self.cursorCol)+1)
+        index = 0
+        ccol = self.cursorCol
+        if ccol and not ccol.keycol:
+            index = self.columns.index(ccol)+1
+        return self.addColumn(*cols, index=index)
 
     def setColNames(self, rows):
         for c in self.visibleCols:
@@ -965,6 +975,7 @@ class SheetsSheet(IndexSheet):
     columns = [
         ColumnAttr('name'),
         ColumnAttr('type', '__class__.__name__'),
+        ColumnAttr('pane', type=int),
         ColumnAttr('shortcut'),
         ColumnAttr('nRows', type=int),
         ColumnAttr('nCols', type=int),
@@ -1009,12 +1020,13 @@ def remove(vd, vs):
 
 
 @VisiData.global_api
-def push(vd, vs):
-    'Push Sheet *vs* onto ``vd.sheets`` stack.  Remove from other position if already on sheets stack.'
+def push(vd, vs, pane=0):
+    'Push Sheet *vs* onto ``vd.sheets`` stack for *pane* (0 for active pane, -1 for inactive pane).  Remove from other position if already on sheets stack.'
     if not isinstance(vs, BaseSheet):
         return  # return instead of raise, some commands need this
 
     vs.vd = vd
+    vs.pane = pane or vd.activePane
     if vs in vd.sheets:
         vd.sheets.remove(vs)
 
@@ -1034,17 +1046,17 @@ def allSheetsSheet(vd):
 def sheetsSheet(vd):
     return SheetsSheet("sheets", source=vd.sheets)
 
-
 @VisiData.api
 def quit(vd, *sheets):
     'Remove *sheets* from sheets stack, asking for confirmation if options.quitguard set (either global or sheet-specific).'
     if len(vd.sheets) == len(sheets) and options.getonly('quitguard', 'global', False):
         vd.confirm("quit last sheet? ")
+
     for vs in sheets:
         if options.getonly('quitguard', vs, False):
             vd.draw_all()
             vd.confirm(f'quit guarded sheet "{vs.name}?" ')
-        vd.remove(vs)
+        vs.pane = 0
 
 
 @BaseSheet.api
@@ -1065,10 +1077,18 @@ def updateColNames(sheet, rows, cols, overwrite=False):
         if not c._name or overwrite:
             c.name = "\n".join(c.getDisplayValue(r) for r in rows)
 
+@BaseSheet.api
+def splitPane(sheet, pct):
+    vd.stackedSheets[1:] or vd.fail("need 2 sheets for splitpane")
+    if not options.disp_splitwin_pct:
+        sheet.pane=1 if sheet.pane == 2 else 2
+    options.disp_splitwin_pct = pct
+
 
 IndexSheet.class_options.header = 0
 IndexSheet.class_options.skip = 0
 
+BaseSheet.init('pane', lambda: 1)
 
 globalCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)', 'open Sheets Stack: join or jump between the active sheets on the current stack')
 globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)', 'open Sheets Sheet: join or jump between all sheets from current session')
@@ -1108,10 +1128,10 @@ SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(shee
 BaseSheet.addCommand('q', 'quit-sheet',  'vd.quit(sheet)', 'quit current sheet')
 globalCommand('gq', 'quit-all', 'vd.quit(*vd.sheets)', 'quit all sheets (clean exit)')
 
-BaseSheet.addCommand('Z', 'splitwin-half', 'options.disp_splitwin_pct = 50', 'split screen in half, so that second sheet on stack is visible in a second pane')
+BaseSheet.addCommand('Z', 'splitwin-half', 'splitPane(-options.disp_splitwin_pct or -50)', 'split screen in half, so that second sheet on stack is visible in a second pane')
 BaseSheet.addCommand('gZ', 'splitwin-close', 'options.disp_splitwin_pct = 0', 'close an already split screen, current pane full screens')
-BaseSheet.addCommand('^I', 'splitwin-swap', 'vd.push(vd.sheets[1]) if len(sheets) >=2 else fail("at least 2 sheets required for splitwin-swap"); options.disp_splitwin_pct = -options.disp_splitwin_pct', 'jump to other pane')
-BaseSheet.addCommand('zZ', 'splitwin-input', 'options.disp_splitwin_pct = input("% height for split window: ", value=options.disp_splitwin_pct)', 'split screen and queries for height of second pane, second sheet on stack is visible in second pane')
+BaseSheet.addCommand('^I', 'splitwin-swap', 'vd.activePane = 1 if sheet.pane == 2 else 2', 'jump to other pane')
+BaseSheet.addCommand('zZ', 'splitwin-input', 'splitPane(input("% height for split window: ", value=options.disp_splitwin_pct))', 'split screen and queries for height of second pane, second sheet on stack is visible in second pane')
 
 BaseSheet.addCommand('^L', 'redraw', 'vd.redraw(); sheet.refresh()', 'refresh screen')
 BaseSheet.addCommand(None, 'guard-sheet', 'options.set("quitguard", True, sheet); status("guarded")', 'guard current sheet from accidental quitting')

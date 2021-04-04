@@ -10,7 +10,7 @@ from visidata import launchExternalEditor, suspend, ColumnItem, AttrDict
 
 __all__ = ['confirm', 'CompleteKey']
 
-theme('color_edit_cell', 'normal', 'cell color to use when editing cell')
+theme('color_edit_cell', 'white', 'cell color to use when editing cell')
 theme('disp_edit_fill', '_', 'edit field fill character')
 theme('disp_unprintable', '·', 'substitute character for unprintables')
 
@@ -172,8 +172,10 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
                 a += incr
             return min(max(a, 0), len(s))
 
+
     while True:
         updater(v)
+        vd.getHelpPane('input').draw(scr, y=y)
 
         if display:
             dispval = clean_printable(v)
@@ -208,6 +210,7 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
         elif ch == '^D' or ch == 'KEY_DC':         v = delchar(v, i)
         elif ch == '^E' or ch == 'KEY_END':        i = len(v)
         elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1
+        elif ch == '^G':                           vd.show_help = not vd.show_help; continue # not a first keypress
         elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1; v = delchar(v, i)
         elif ch == TAB:                            v, i = complete_state.complete(v, i, +1)
         elif ch == 'KEY_BTAB':                     v, i = complete_state.complete(v, i, -1)
@@ -219,7 +222,7 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
         elif ch == '^U':                           v = v[i:]; i = 0  # clear to beginning
         elif ch == '^V':                           v = splice(v, i, until_get_wch(scr)); i += 1  # literal character
         elif ch == '^W':                           j = find_nonword(v, 0, i-1, -1); v = v[:j+1] + v[i:]; i = j+1  # erase word
-        elif ch == '^Y':                           v = splice(v, i, vd.clipcells[0])
+        elif ch == '^Y':                           v = splice(v, i, vd.memory.clipval)
         elif ch == '^Z':                           suspend()
         # CTRL+arrow
         elif ch == 'kLFT5':                        i = find_nonword(v, 0, i-1, -1)+1; # word left
@@ -257,7 +260,7 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
 
     if v is None:
         try:
-            v = vd.editline(vd.sheets[0]._scr, y, x, w, display=display, **kwargs)
+            v = vd.editline(vd.activeSheet._scr, y, x, w, display=display, **kwargs)
         except AcceptInput as e:
             v = e.args[0]
 
@@ -275,7 +278,7 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
 @VisiData.api
 def inputsingle(vd, prompt, record=True):
     'Display prompt and return single character of user input.'
-    sheet = vd.sheets[0]
+    sheet = vd.activeSheet
     rstatuslen = vd.drawRightStatus(sheet._scr, sheet)
 
     v = None

@@ -38,7 +38,39 @@ class LazyChainMap:
         self.locals[k] = v
 
 
-class BaseSheet(Extensible):
+class DrawablePane(Extensible):
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+    'Base class for all interaction owners that can be drawn in a window.'
+    def draw(self, scr):
+        'Draw on the terminal window *scr*.  Should be overridden.'
+        vd.error('no draw')
+
+    @property
+    def windowHeight(self):
+        'Height of the current sheet window, in terminal lines.'
+        return self._scr.getmaxyx()[0] if self._scr else 25
+
+    @property
+    def windowWidth(self):
+        'Width of the current sheet window, in single-width characters.'
+        return self._scr.getmaxyx()[1] if self._scr else 80
+
+    def execCommand2(self, cmd, vdglobals=None):
+        "Execute `cmd` with `vdglobals` as globals and this sheet's attributes as locals.  Return True if user cancelled."
+
+        try:
+            self.sheet = self
+            code = compile(cmd.execstr, cmd.longname, 'exec')
+            exec(code, vdglobals, LazyChainMap(vd, self))
+            return False
+        except EscapeException as e:  # user aborted
+            vd.warning(str(e))
+            return True
+
+
+class BaseSheet(DrawablePane):
     'Base class for all sheet types.'
     _rowtype = object    # callable (no parms) that returns new empty item
     _coltype = None      # callable (no parms) that returns new settable view into that item
@@ -60,8 +92,10 @@ class BaseSheet(Extensible):
         self.source = None
         self.rows = UNLOADED      # list of opaque objects
         self._scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
+        self.mouseX = 0
+        self.mouseY = 0
 
-        self.__dict__.update(kwargs)
+        super().__init__(**kwargs)
 
     def __lt__(self, other):
         if self.name != other.name:
@@ -100,21 +134,8 @@ class BaseSheet(Extensible):
             return vs in self.source
         return False
 
-    @property
-    def windowHeight(self):
-        'Height of the current sheet window, in terminal lines.'
-        return self._scr.getmaxyx()[0] if self._scr else 25
-
-    @property
-    def windowWidth(self):
-        'Width of the current sheet window, in single-width characters.'
-        return self._scr.getmaxyx()[1] if self._scr else 80
-
-    def execCommand(self, cmd, args='', vdglobals=None, keystrokes=None):
-        """Execute `cmd` tuple with `vdglobals` as globals and this sheet's attributes as locals.  Return True if user cancelled.
-        `cmd` can be a longname, a keystroke, or a Command object."""
+    def execCommand(self, cmd, vdglobals=None, keystrokes=None):
         cmd = self.getCommand(cmd or keystrokes)
-
         if not cmd:
             if keystrokes:
                 vd.debug('no command "%s"' % keystrokes)
@@ -126,17 +147,11 @@ class BaseSheet(Extensible):
         if vdglobals is None:
             vdglobals = vd.getGlobals()
 
-        self.sheet = self
-
         try:
             for hookfunc in vd.beforeExecHooks:
                 hookfunc(self, cmd, '', keystrokes)
-            code = compile(cmd.execstr, cmd.longname, 'exec')
             vd.debug(cmd.longname)
-            exec(code, vdglobals, LazyChainMap(vd, self))
-        except EscapeException as e:  # user aborted
-            vd.warning(str(e))
-            escaped = True
+            escaped = super().execCommand2(cmd, vdglobals=vdglobals)
         except Exception as e:
             vd.debug(cmd.execstr)
             err = vd.exceptionCaught(e)
@@ -145,7 +160,7 @@ class BaseSheet(Extensible):
         try:
             if vd.cmdlog:
                 # sheet may have changed
-                vd.cmdlog.afterExecSheet(vd.sheets[0] if vd.sheets else None, escaped, err)
+                vd.cmdlog.afterExecSheet(vd.activeSheet, escaped, err)
         except Exception as e:
             vd.exceptionCaught(e)
 
@@ -172,10 +187,6 @@ class BaseSheet(Extensible):
     def recalc(self):
         'Clear any calculated value caches.'
         pass
-
-    def draw(self, scr):
-        'Draw the sheet on the terminal window *scr*.  Overrideable.'
-        vd.error('no draw')
 
     def refresh(self):
         'Clear the terminal screen and let the next draw cycle redraw everything.'
@@ -223,8 +234,7 @@ def redraw(vd):
 
 @VisiData.property
 def sheet(self):
-    'the top sheet on the stack'
-    return self.sheets[0] if self.sheets else None
+    return self.activeSheet
 
 @VisiData.api
 def isLongname(self, ks):

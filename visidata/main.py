@@ -2,7 +2,7 @@
 # Usage: $0 [<options>] [<input> ...]
 #        $0 [<options>] --play <cmdlog> [--batch] [-w <waitsecs>] [-o <output>] [field=value ...]
 
-__version__ = '2.2.1'
+__version__ = '2.3'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
 from copy import copy
@@ -10,6 +10,7 @@ import os
 import io
 import sys
 import locale
+import signal
 import warnings
 
 from visidata import vd, option, options, run, BaseSheet, AttrDict
@@ -85,6 +86,10 @@ def main_vd():
     flPipedOutput = not sys.stdout.isatty()
 
     vd._stdin, vd._stdout = duptty()  # always dup stdin/stdout
+
+    # workaround for bug in curses.wrapper #899
+    # https://stackoverflow.com/questions/31440392/curses-wrapper-messing-up-terminal-after-background-foreground-sequence
+    vd.tstp_signal = signal.getsignal(signal.SIGTSTP)
 
     stdinSource = Path('-', fp=vd._stdin)
 
@@ -276,9 +281,9 @@ def main_vd():
             vd.replay(vs)
             run()
 
-    if vd.sheets and (flPipedOutput or args.output):
+    if vd.stackedSheets and (flPipedOutput or args.output):
         outpath = Path(args.output or '-')
-        saveSheets(outpath, vd.sheets[0], confirm_overwrite=False)
+        saveSheets(outpath, vd.activeSheet, confirm_overwrite=False)
 
     saver_threads = [t for t in vd.unfinishedThreads if t.name.startswith('save_')]
     if saver_threads:

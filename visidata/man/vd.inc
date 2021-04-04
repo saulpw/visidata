@@ -1,4 +1,4 @@
-.Dd Feb 07, 2021
+.Dd Apr 03, 2021
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -285,17 +285,17 @@ open duplicate sheet with deepcopy of selected rows
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "  a   za"
-append a blank row/column; appended columns cannot be copied to clipboard
+append blank row/column; appended columns cannot be copied to clipboard
 .It Ic " ga  gza" Ar number
 .No append Ar number No blank rows/columns
 .It Ic "  d   gd"
-delete (cut) current/selected row(s) and move to clipboard
+delete current/selected row(s)
 .It Ic "  y   gy"
-yank (copy) current/all selected row(s) to clipboard
+.No yank (copy) current/all selected row(s) to clipboard in Sy Memory Sheet
 .It Ic " zy  gzy"
-yank (copy) contents of current column for current/selected row(s) to clipboard
+.No yank (copy) contents of current column for current/selected row(s) to clipboard in Sy Memory Sheet
 .It Ic " zd  gzd"
-delete (cut) contents of current column for current/selected row(s) and move to clipboard
+.No set contents of current column for current/selected row(s) to Sy options.null_value
 .It Ic "  p    P"
 paste clipboard rows after/before current row
 .It Ic " zp  gzp"
@@ -371,7 +371,7 @@ open
 .It Ic " +" Ar aggregator
 .No add Ar aggregator No to current column (see Sy "Frequency Table" Ns )
 .It Ic "z+" Ar aggregator
-.No display result of Ar aggregator No over values in selected rows for current column
+.No display result of Ar aggregator No over values in selected rows for current column; store result in Sy Memory Sheet
 .It Ic " &"
 .No concatenate top two sheets in Sy Sheets Stack
 .It Ic "g&"
@@ -440,6 +440,8 @@ scroll canvas
 .No jump to other pane
 .It Ic "^^" No (Ctrl+^)
 .No swap which sheet is in current pane
+.It Ic "g^^" No (g Ctrl+^)
+.No cycle through sheets
 .Pp
 .El
 .Ss Other Commands
@@ -496,6 +498,8 @@ open current row/cell/sheet as Python object
 .Sy Directory Sheet No "            browse properties of files in a directory"
 .It Sy " \&."
 .Sy Plugins Sheet No "              browse, install, and (de)activate plugins"
+.It Sy " \&."
+.Sy Memory Sheet No (Alt+M) "       browse saved values, including clipboard"
 .It " "
 .It Sy Metasheets
 .It Sy " \&."
@@ -574,6 +578,27 @@ reload information for all/current/selected file(s)
 install and activate current plugin
 .It Ic "d"
 deactivate current plugin
+.El
+.
+.Ss Memory Sheet
+.Bl -inset -compact
+.It Browse through a list of stored values, referanceable in expressions through their Sy name Ns .
+.El
+.Bl -inset -compact
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic Alt+M
+.No open the Sy Memory Sheet
+.It Ic Alt+m Ar name
+.No store value in current cell in Sy Memory Sheet No under Ar name
+.El
+.Bl -inset -compact
+.It (sheet-specific commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic "e"
+edit either value or name, to edit reference
 .El
 .Ss METASHEETS
 .Ss Columns Sheet (Shift+C)

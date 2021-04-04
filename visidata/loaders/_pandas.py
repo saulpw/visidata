@@ -125,7 +125,7 @@ class PandasSheet(Sheet):
 
         # reset the index here
         if type(df.index) is not pd.RangeIndex:
-            df = df.reset_index()
+            df = df.reset_index(drop=True)
 
         # VisiData assumes string column names but pandas does not. Forcing string
         # columns at load-time avoids various errors later.
@@ -273,14 +273,16 @@ class PandasSheet(Sheet):
             col: [None] * n for col in self.df.columns
         }).astype(self.df.dtypes.to_dict(), errors='ignore')
 
-    def _addRows(self, rows, idx):
+    def addRows(self, rows, index=None, undo=True):
         import pandas as pd
-        if idx is None:
+        if index is None:
             self.df = self.df.append(pd.DataFrame(rows))
         else:
-            self.df = pd.concat((self.df.iloc[0:idx], pd.DataFrame(rows), self.df.iloc[idx:]))
+            self.df = pd.concat((self.df.iloc[0:index], pd.DataFrame(rows), self.df.iloc[index:]))
         self.df.index = pd.RangeIndex(self.nRows)
         self._checkSelectedIndex()
+        if undo:
+            vd.addUndo(self._deleteRows, range(index, index + len(rows)))
 
     def _deleteRows(self, which):
         import pandas as pd
@@ -288,14 +290,9 @@ class PandasSheet(Sheet):
         self.df.index = pd.RangeIndex(self.nRows)
         self._checkSelectedIndex()
 
-    def addNewRows(self, n, idx=None):
-        self._addRows(self.newRows(n), idx)
-        idx = idx or self.nRows - 1
-        vd.addUndo(self._deleteRows, range(idx, idx + n))
-
-    def addRow(self, row, idx=None):
-        self._addRows([row], idx)
-        vd.addUndo(self._deleteRows, idx or self.nRows - 1)
+    def addRow(self, row, index=None):
+        self.addRows([row], index)
+        vd.addUndo(self._deleteRows, index or self.nRows - 1)
 
     def delete_row(self, rowidx):
         import pandas as pd
@@ -306,9 +303,9 @@ class PandasSheet(Sheet):
         # If we use `oldrow` directly, we get errors comparing DataFrame objects
         # when there are multiple deletion commands for the same row index.
         # There may be a better way to handle that case.
-        vd.addUndo(self._addRows, oldrow.to_dict(), rowidx)
+        vd.addUndo(self.addRows, oldrow.to_dict(), rowidx, False)
         self._deleteRows(rowidx)
-        vd.cliprows = [(self, rowidx, oldrow)]
+        vd.memory.cliprows = [oldrow]
 
     def deleteBy(self, by):
         '''Delete rows for which func(row) is true.  Returns number of deleted rows.'''

@@ -90,6 +90,11 @@ def isNumeric(col):
 
 visidata.addGlobals({'load_pyobj': load_pyobj, 'isNumeric': isNumeric})
 
+visidata.Sheet.addCommand('', 'cut-row', 'vd.memory.cliprows = [sheet.delete_row(cursorRowIndex)]; defer and cursorDown(1)', 'delete (cut) current row and move it to clipboard')
+visidata.Sheet.addCommand('', 'cut-selected', 'copyRows(onlySelectedRows); deleteSelected()', 'delete (cut) selected rows and move them to clipboard')
+visidata.Sheet.addCommand('', 'cut-cell', 'vd.memory.clipcells = [cursorDisplay]; cursorCol.setValues([cursorRow], None)', 'delete (cut) current cell and move it to clipboard')
+visidata.Sheet.addCommand('', 'cut-cells', 'vd.memory.clipcells = list(vd.sheet.cursorCol.getDisplayValue(r) for r in onlySelectedRows); cursorCol.setValues(onlySelectedRows, None)', 'delete (cut) contents of current column for selected rows and move them to clipboard')
+
 # The longnames on the left are deprecated for 2.0
 
 alias('edit-cells', 'setcol-input')
@@ -114,3 +119,6 @@ alias('dive-cell', 'open-cell')
 alias('dive-row', 'open-row')
 alias('add-sheet', 'open-new')
 alias('save-sheets-selected', 'save-selected')
+
+# v2.3
+alias('show-aggregate', 'memo-aggregate')

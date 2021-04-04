@@ -411,27 +411,39 @@ def setitem(r, i, v):  # function needed for use in lambda
     r[i] = v
     return True
 
-def getattrdeep(obj, attr, *default):
+def getattrdeep(obj, attr, *default, getter=getattr):
     'Return dotted attr (like "a.b.c") from obj, or default if any of the components are missing.'
-    attrs = attr.split('.')
-    if default:
-        getattr_default = lambda o,a,d=default[0]: getattr(o, a, d)
-    else:
-        getattr_default = lambda o,a: getattr(o, a)
+    if not isinstance(attr, str):
+        return getter(obj, attr, *default)
 
+    if default:
+        getattr_default = lambda o,a,d=default[0]: getter(o, a, d)
+    else:
+        getattr_default = lambda o,a: getter(o, a)
+
+    attrs = attr.split('.')
     for a in attrs[:-1]:
         obj = getattr_default(obj, a)
 
     return getattr_default(obj, attrs[-1])
 
-def setattrdeep(obj, attr, val):
+
+def setattrdeep(obj, attr, val, getter=getattr, setter=setattr):
     'Set dotted attr (like "a.b.c") on obj to val.'
+    if not isinstance(attr, str):
+        return setter(obj, attr, val)
+
     attrs = attr.split('.')
 
     for a in attrs[:-1]:
-        obj = getattr(obj, a)
-    setattr(obj, attrs[-1], val)
+        obj = getter(obj, a)
+    setter(obj, attrs[-1], val)
 
+def getitemdeep(obj, k, *default):
+    return getattrdeep(obj, k, *default, getter=getitemdef)
+
+def setitemdeep(obj, k, val):
+    return setattrdeep(obj, k, val, getter=getitemdef, setter=setitem)
 
 def AttrColumn(name='', attr=None, **kwargs):
     'Column using getattr/setattr with *attr*.'
@@ -447,12 +459,12 @@ def getitemdef(o, k, default=None):
     except Exception:
         return default
 
-def ItemColumn(name=None, key=None, **kwargs):
+def ItemColumn(name=None, expr=None, **kwargs):
     'Column using getitem/setitem with *key*.'
     return Column(name,
-            expr=key if key is not None else name,
-            getter=lambda col,row: getitemdef(row, col.expr),
-            setter=lambda col,row,val: setitem(row, col.expr, val),
+            expr=expr if expr is not None else name,
+            getter=lambda col,row: getitemdeep(row, col.expr),
+            setter=lambda col,row,val: setitemdeep(row, col.expr, val),
             **kwargs)
 
 class SubColumnFunc(Column):

@@ -52,16 +52,19 @@ def clipstr(s, dispw):
 
 def clipdraw(scr, y, x, s, attr, w=None, rtl=False):
     'Draw string `s` at (y,x)-(y,x+w) with curses attr, clipping with ellipsis char.  if rtl, draw inside (x-w, x).  Returns width drawn (max of w).'
-    if not scr:
-        return 0
-    _, windowWidth = scr.getmaxyx()
+    if scr:
+        _, windowWidth = scr.getmaxyx()
+    else:
+        windowWidth = 80
     dispw = 0
     try:
         if w is None:
-            w = len(s)
+            w = dispwidth(s)
         w = min(w, (x-1) if rtl else (windowWidth-x-1))
         if w <= 0:  # no room anyway
             return 0
+        if not scr:
+            return w
 
         # convert to string just before drawing
         clipped, dispw = clipstr(str(s), w)

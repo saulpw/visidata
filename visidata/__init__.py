@@ -1,6 +1,6 @@
 'VisiData: a curses interface for exploring and arranging tabular data'
 
-__version__ = '2.2.1'
+__version__ = '2.3'
 __version_info__ = 'VisiData v' + __version__
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __status__ = 'Production/Stable'
@@ -95,6 +95,7 @@ import visidata.fill
 import visidata.incr
 import visidata.customdate
 import visidata.misc
+import visidata.memory
 from .macros import *
 from .menu import *
 
@@ -136,11 +137,18 @@ from .loaders.rec import *
 from .loaders.eml import *
 from .loaders.vds import *
 
+from .ddwplay import *
+
 from .plugins import *
 
 from .colorsheet import *
 
 from .deprecated import *
+
+try:
+    from vdplus import *
+except ModuleNotFoundError:
+    pass
 
 from math import *
 

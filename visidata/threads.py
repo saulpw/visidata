@@ -118,7 +118,7 @@ class ThreadsSheet(Sheet):
     def openRow(self, row):
         'push profile sheet for this action'
         if row.profile:
-            return ProfileSheet(row.name+"_profile", source=row.profile)
+            return ProfileSheet(row.name, "profile", source=row.profile)
         vd.warning("no profile")
 
 
@@ -196,8 +196,8 @@ def execAsync(self, func, *args, sheet=None, **kwargs):
     thread = threading.Thread(target=_toplevelTryFunc, daemon=True, args=(func,)+args, kwargs=kwargs)
     self.threads.append(_annotate_thread(thread))
 
-    if sheet is None and self.sheets:
-        sheet = self.sheets[0]
+    if sheet is None:
+        sheet = self.activeSheet
 
     if sheet is not None:
         sheet.currentThreads.append(thread)
@@ -333,6 +333,7 @@ class ThreadProfiler:
                 vd.threads.remove(self.thread)
 
 class ProfileSheet(Sheet):
+    rowtype = 'callsites' # rowdef: profiler_entry
     columns = [
         Column('funcname', getter=lambda col,row: codestr(row.code)),
         Column('filename', getter=lambda col,row: os.path.split(row.code.co_filename)[-1] if not isinstance(row.code, str) else ''),
@@ -351,7 +352,10 @@ class ProfileSheet(Sheet):
     nKeys=3
 
     def reload(self):
-        self.rows = self.source.getstats()
+        if isinstance(self.source, cProfile.Profile):
+            self.rows = self.source.getstats()
+        else:
+            self.rows = self.source
         self.orderBy(None, self.column('inlinetime_us'), reverse=True)
         self.callers = collections.defaultdict(list)  # [row.code] -> list(code)
 
