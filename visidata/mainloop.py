@@ -71,7 +71,7 @@ def setWindows(vd, scr, pct=None):
             vd.win1 = vd.winBottom
             vd.win2 = vd.winTop
 
-        for vs in vd.sheetstack(1)[0:0]+vd.sheetstack(2)[0:0]:
+        for vs in vd.sheetstack(1)[0:1]+vd.sheetstack(2)[0:1]:
             vs.refresh()
 
         vd.windowConfig = desiredConfig

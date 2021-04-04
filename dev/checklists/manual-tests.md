@@ -56,3 +56,9 @@
         - bin/vd -f txt sample_data/y77d-th95.json.gz
 14. Testing the starting position syntax
 15. Test loading url
+16. Split window
+    - gZ
+    - zZ
+    - Z
+    - various active panes
+    - using cursor in active pane
