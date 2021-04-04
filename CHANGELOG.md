@@ -26,6 +26,10 @@
     - [plugins] add darkdraw to plugins.jsonl
     - [png] save image as RGBA
     - [pyobj-expr] `Ctrl+X` within `Ctrl+X` input suspends directly into python REPL
+    - [splitwin] now involves two different sheetstacks that build and quit independently (thanks @lamchau #894)
+        - [splitwin] allows stickier panes for push/quit
+    - [splitwin] splitwin-half (`Z`) swaps panes if already active
+    - [splitwin] only re-split (with `zZ`) if sheets are not already split, otherwise adjust split percent
     - [save_filetype] if `save_ext` does not exist, or if `options.save_filetype` is different from default, use `options.save_filetype`
     - [vdplus] auto-import, ignore if not available
 
@@ -43,12 +47,8 @@
     - [pivot] fix bug with sheet name
     - [png] fix saving directly from canvas
     - [sort] fix sorting of visidata.Path objects (thanks @frosencrantz #897)
-    - [splitwin] now involves two different sheetstacks that build and quit independently (thanks @lamchau #894)
-        - [splitwin] allows stickier panes for push/quit
-    - [splitwin] splitwin-half (`Z`) swaps panes if already active
     - [splitwin] fix cursor behaviour on both panes when active
         - cursor movement on inactive panes is blocked
-    - [splitwin] only re-split (with `zZ`) if sheets are not already split, otherwise adjust split percent
     - [SuspendCurses] workaround for bug in curses.wrapper (thanks @frosencrantz #899)
     - [undo] do not set undo for a `commit-sheet`
 
