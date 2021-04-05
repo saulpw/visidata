@@ -499,7 +499,7 @@ open current row/cell/sheet as Python object
 .It Sy " \&."
 .Sy Plugins Sheet No "              browse, install, and (de)activate plugins"
 .It Sy " \&."
-.Sy Memory Sheet No (Alt+M) "       browse saved values, including clipboard"
+.Sy Memory Sheet No (Alt+Shift+M) "       browse saved values, including clipboard"
 .It " "
 .It Sy Metasheets
 .It Sy " \&."
@@ -588,9 +588,9 @@ deactivate current plugin
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic Alt+M
+.It Ic Alt+Shift+M
 .No open the Sy Memory Sheet
-.It Ic Alt+m Ar name
+.It Ic Alt+M Ar name
 .No store value in current cell in Sy Memory Sheet No under Ar name
 .El
 .Bl -inset -compact

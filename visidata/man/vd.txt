@@ -321,7 +321,8 @@ DESCRIPTION
       .  VisiDataMenu (Shift+V)      browse list of core sheets
       .  Directory Sheet             browse properties of files in a directory
       .  Plugins Sheet               browse, install, and (de)activate plugins
-      .  Memory Sheet (Alt+M)        browse saved values, including clipboard
+      .  Memory Sheet (Alt+Shift+M)        browse saved values, including
+         clipboard
 
      Metasheets
       .  Columns Sheet (Shift+C)     edit column properties
@@ -373,8 +374,8 @@ DESCRIPTION
      Browse through a list of stored values, referanceable in expressions
      through their name.
      (global commands)
-        Alt+M            open the Memory Sheet
-        Alt+m name       store value in current cell in Memory Sheet under
+        Alt+Shift+M      open the Memory Sheet
+        Alt+M name       store value in current cell in Memory Sheet under
                          name
      (sheet-specific commands)
         e                edit either value or name, to edit reference
