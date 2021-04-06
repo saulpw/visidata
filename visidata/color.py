@@ -40,18 +40,13 @@ def update_attr(oldattr, updattr, updprec=None):
 class ColorMaker:
     def __init__(self):
         self.color_pairs = {}  # (fg,bg) -> (color_attr, colornamestr) (can be or'ed with other attrs)
-        self.default_fgbg = (-1, -1)  # default fg and bg
 
     @drawcache_property
     def colorcache(self):
         return {}
 
     def setup(self):
-        if options.use_default_colors:
-            curses.use_default_colors()
-            self.default_fgbg = (-1, -1)
-        else:
-            self.default_fgbg = (-1, curses.COLOR_BLACK)
+        curses.use_default_colors()
 
     @VisiData.cached_property
     def colors(self):
@@ -98,9 +93,13 @@ class ColorMaker:
 
         return fgbgattrs
 
-    def _get_colornum(self, colorname, default=0):
+    def _get_colornum(self, colorname, default=-1):
         'Return terminal color number for colorname.'
-        return int(colorname) if colorname.isdigit() else self.colors.get(colorname.upper(), default)
+        if not colorname: return default
+        try:
+            return int(colorname)
+        except Exception:
+            return self.colors.get(colorname.upper())
 
     def _colornames_to_cattr(self, colornamestr, precedence=0):
         fg, bg, attrlist = self.split_colorstr(colornamestr)
@@ -111,7 +110,9 @@ class ColorMaker:
         if not fg and not bg:
             color = 0
         else:
-            fgbg = (self._get_colornum(fg, 7), self._get_colornum(bg, 0))
+            deffg, defbg, _ = self.split_colorstr(options.color_default)
+            fgbg = (self._get_colornum(fg, self._get_colornum(deffg)),
+                    self._get_colornum(bg, self._get_colornum(defbg)))
             pairnum, _ = self.color_pairs.get(fgbg, (None, ''))
             if pairnum is None:
                 if len(self.color_pairs) > 254:

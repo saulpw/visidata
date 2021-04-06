@@ -27,7 +27,6 @@ option('header', 1, 'parse first N rows as column names', replay=True)
 option('load_lazy', False, 'load subsheets always (False) or lazily (True)')
 
 theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
-theme('use_default_colors', True, 'curses use default terminal colors')
 
 theme('disp_note_none', '⌀',  'visible contents of a cell whose value is None')
 theme('disp_truncator', '…', 'indicator that the contents are only partially visible')
@@ -62,7 +61,7 @@ theme('disp_endbot_sep', '║', '') # ╽╿┃╜‖
 theme('disp_selected_note', '•', '') #
 theme('disp_sort_asc', '↑↟⇞⇡⇧⇑', 'characters for ascending sort') # ↑▲↟↥↾↿⇞⇡⇧⇈⤉⤒⥔⥘⥜⥠⍏˄ˆ
 theme('disp_sort_desc', '↓↡⇟⇣⇩⇓', 'characters for descending sort') # ↓▼↡↧⇂⇃⇟⇣⇩⇊⤈⤓⥕⥙⥝⥡⍖˅ˇ
-theme('color_default', 'white', 'the default color')
+theme('color_default', 'white on black', 'the default fg and bg colors')
 theme('color_default_hdr', 'bold', 'color of the column headers')
 theme('color_bottom_hdr', 'underline', 'color of the bottom header row')
 theme('color_current_row', 'reverse', 'color of the cursor row')

@@ -122,3 +122,4 @@ alias('save-sheets-selected', 'save-selected')
 
 # v2.3
 alias('show-aggregate', 'memo-aggregate')
+#theme('use_default_colors', True, 'curses use default terminal colors')
