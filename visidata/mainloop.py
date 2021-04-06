@@ -86,7 +86,6 @@ def draw_all(vd):
     ss2 = vd.sheetstack(2)
     if ss1 and not ss2:
         vd.activePane = 1
-        ss1[0].options.disp_splitwin_pct = 0
         vd.setWindows(vd.scrFull)
         vd.draw_sheet(vd.win1, ss1[0])
         if vd.win2:
@@ -94,7 +93,6 @@ def draw_all(vd):
             vd.win2.refresh()
     elif not ss1 and ss2:
         vd.activePane = 2
-        ss2[0].options.disp_splitwin_pct = 0
         vd.setWindows(vd.scrFull)
         vd.draw_sheet(vd.win1, ss2[0])
         if vd.win2:
