@@ -27,7 +27,7 @@ def save_vds(vd, p, *sheets):
                 fp.write('#'+json.dumps(d)+NL)
 
             with Progress(gerund='saving'):
-                for row in vs.iterdispvals(*vs.visibleCols, format=True):
+                for row in vs.iterdispvals(*vs.visibleCols, format=False):
                     d = {col.name:val for col, val in row.items()}
                     fp.write(json.dumps(d)+NL)
 
