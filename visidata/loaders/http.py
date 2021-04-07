@@ -16,7 +16,7 @@ def openurl_http(path, filetype=None):
     if not filetype:
         # try auto-detect from extension
         ext = path.suffix[1:].lower()
-        openfunc = vd.getGlobals().get(f'open_{ext}')
+        openfunc = getattr(vd, f'open_{ext}', vd.getGlobals().get(f'open_{ext}'))
 
         if openfunc:
             filetype = ext
