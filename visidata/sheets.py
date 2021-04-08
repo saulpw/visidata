@@ -964,8 +964,8 @@ class IndexSheet(Sheet):
             if vs.name == k:
                 return vs
 
-    def addRow(self, sheet):
-        super().addRow(sheet)
+    def addRow(self, sheet, **kwargs):
+        super().addRow(sheet, **kwargs)
         if not self.options.load_lazy:
             sheet.ensureLoaded()
 
