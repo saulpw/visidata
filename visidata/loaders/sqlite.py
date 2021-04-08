@@ -134,6 +134,7 @@ class SqliteQuerySheet(SqliteSheet):
 def save_sqlite(vd, p, *vsheets):
     import sqlite3
     conn = sqlite3.connect(str(p))
+    conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
     sqltypes = {
