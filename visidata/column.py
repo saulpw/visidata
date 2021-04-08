@@ -397,11 +397,11 @@ class Column(Extensible):
         return vd.status('set %d cells to %d values' % (len(rows), len(values)))
 
     def getMaxWidth(self, rows):
-        'Return the maximum length of any cell in column or its header.'
+        'Return the maximum length of any cell in column or its header (up to window width).'
         w = 0
         nlen = dispwidth(self.name)
         if len(rows) > 0:
-            w = max(max(dispwidth(self.getDisplayValue(r)) for r in rows), nlen)+2
+            w = max(max(dispwidth(self.getDisplayValue(r), maxwidth=self.sheet.windowWidth) for r in rows), nlen)+2
         return max(w, nlen)
 
 
