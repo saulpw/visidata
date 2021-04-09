@@ -946,7 +946,7 @@ class IndexSheet(Sheet):
 
     columns = [
         ColumnAttr('name'),
-        ColumnAttr('rows', 'nRows', type=int),
+        ColumnAttr('rows', 'nRows', type=int, width=9),
         ColumnAttr('cols', 'nCols', type=int),
         ColumnAttr('keys', 'keyColNames'),
         ColumnAttr('source'),
