@@ -158,7 +158,7 @@ BaseSheet.init('progresses', list)  # list of Progress objects
 
 @BaseSheet.property
 def progressMade(self):
-    return sum(prog.made for prog in self.progresses)
+    return sum(prog.made for prog in self.progresses if prog.total)
 
 @BaseSheet.property
 def progressTotal(self):
