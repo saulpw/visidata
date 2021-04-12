@@ -1,4 +1,4 @@
-.Dd Apr 03, 2021
+.Dd Apr 11, 2021
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -436,10 +436,12 @@ scroll canvas
 .Bl -tag -width XXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "gZ"
 .No close an already split screen, current pane full screens
-.It Ic "Tab"
+.It Ic " Z"
+.No push second sheet on current pane's stack to the top of the other pane's stack
+.It Ic " Tab"
 .No jump to other pane
-.It Ic "^^" No (Ctrl+^)
-.No swap which sheet is in current pane
+.It Ic "gTab"
+.No swap panes
 .It Ic "g^^" No (g Ctrl+^)
 .No cycle through sheets
 .Pp
@@ -499,7 +501,7 @@ open current row/cell/sheet as Python object
 .It Sy " \&."
 .Sy Plugins Sheet No "              browse, install, and (de)activate plugins"
 .It Sy " \&."
-.Sy Memory Sheet No (Alt+M) "       browse saved values, including clipboard"
+.Sy Memory Sheet No (Alt+Shift+M) "       browse saved values, including clipboard"
 .It " "
 .It Sy Metasheets
 .It Sy " \&."
@@ -588,9 +590,9 @@ deactivate current plugin
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic Alt+M
+.It Ic Alt+Shift+M
 .No open the Sy Memory Sheet
-.It Ic Alt+m Ar name
+.It Ic Alt+M Ar name
 .No store value in current cell in Sy Memory Sheet No under Ar name
 .El
 .Bl -inset -compact
@@ -855,8 +857,6 @@ parse first N rows as column names
 load subsheets always (False) or lazily (True)
 .It Sy --force-256-colors No "          False"
 use 256 colors even if curses reports fewer
-.It Sy --use-default-colors Ns = Ns Ar "bool   " No "True"
-curses use default terminal colors
 .It Sy --note-pending Ns = Ns Ar "str          " No "\[u231B]"
 note to display for pending cells
 .It Sy --note-format-exc Ns = Ns Ar "str       " No "?"
@@ -1070,8 +1070,8 @@ separator between key columns and rest of columns
 characters for ascending sort
 .It Sy "disp_sort_desc     " No "\[u2193]\[u21A1]\[u21DF]\[u21E3]\[u21E9]\[u21D3]"
 characters for descending sort
-.It Sy "color_default      " No "white"
-the default color
+.It Sy "color_default      " No "white on black"
+the default fg and bg colors
 .It Sy "color_default_hdr  " No "bold"
 color of the column headers
 .It Sy "color_bottom_hdr   " No "underline"
@@ -1090,7 +1090,7 @@ color of key columns
 color of hidden columns on metasheets
 .It Sy "color_selected_row " No "215 yellow"
 color of selected rows
-.It Sy "disp_rstatus_fmt   " No " {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} "
+.It Sy "disp_rstatus_fmt   " No " {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} {sheet.options.disp_selected_note}{sheet.nSelectedRows}"
 right-side status format string
 .It Sy "disp_status_fmt    " No "{sheet.shortcut}\[u203A] {sheet.name}| "
 status line prefix

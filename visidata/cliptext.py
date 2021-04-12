@@ -10,7 +10,7 @@ disp_column_fill = ' '
 
 ### Curses helpers
 
-def dispwidth(ss):
+def dispwidth(ss, maxwidth=None):
     'Return display width of string, according to unicodedata width and options.disp_ambig_width.'
     disp_ambig_width = options.disp_ambig_width
     w = 0
@@ -23,6 +23,8 @@ def dispwidth(ss):
             w += 2
         elif not unicodedata.combining(cc):
             w += 1
+        if maxwidth and w > maxwidth:
+            break
     return w
 
 
@@ -33,6 +35,7 @@ def clipstr(s, dispw):
     w = 0
     ret = ''
     trunch = options.disp_truncator
+    trunchlen = dispwidth(trunch)
     for c in s:
         if c != ' ' and unicodedata.category(c) in ('Cc', 'Zs', 'Zl'):  # control char, space, line sep
             c = options.disp_oddspace
@@ -42,9 +45,9 @@ def clipstr(s, dispw):
             ret += c
             w += dispwidth(c)
 
-        if w > dispw-len(trunch)+1:
+        if w > dispw-trunchlen+1:
             ret = ret[:-2] + trunch # replace final char with ellipsis
-            w += len(trunch)
+            w += trunchlen
             break
 
     return ret, w
@@ -59,7 +62,7 @@ def clipdraw(scr, y, x, s, attr, w=None, rtl=False):
     dispw = 0
     try:
         if w is None:
-            w = dispwidth(s)
+            w = dispwidth(s, maxwidth=windowWidth)
         w = min(w, (x-1) if rtl else (windowWidth-x-1))
         if w <= 0:  # no room anyway
             return 0

@@ -30,6 +30,26 @@ def modtime(path):
     return st and st.st_mtime
 
 
+class FileProgress:
+    'Open file in binary mode and track read() progress.'
+    def __init__(self, path, **kwargs):
+        self.path = path
+        self.fp = open(path, mode='wb' if 'w' in kwargs.get('mode', '') else 'rb')
+        self.size = filesize(path)
+        self.prog = Progress(gerund='loading', total=self.size)
+        self.prog.__enter__()
+
+    def read(self, size=-1):
+        r = self.fp.read(size)
+        if self.prog:
+            if r:
+                self.prog.addProgress(len(r))
+            else:
+                self.prog.__exit__(None, None, None)
+                self.prog = None
+        return r
+
+
 class Path(os.PathLike):
     'File and path-handling class, modeled on `pathlib.Path`.'
     def __init__(self, given, fp=None, lines=None, filesize=None):
@@ -141,13 +161,13 @@ class Path(os.PathLike):
         fn = self
         if self.compression == 'gz':
             import gzip
-            return gzip.open(fn, *args, **kwargs)
+            return gzip.open(FileProgress(fn, **kwargs), *args, **kwargs)
         elif self.compression == 'bz2':
             import bz2
-            return bz2.open(fn, *args, **kwargs)
+            return bz2.open(FileProgress(fn, **kwargs), *args, **kwargs)
         elif self.compression == 'xz':
             import lzma
-            return lzma.open(fn, *args, **kwargs)
+            return lzma.open(FileProgress(fn, **kwargs), *args, **kwargs)
         else:
             return self._path.open(*args, **kwargs)
 

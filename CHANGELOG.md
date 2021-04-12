@@ -1,5 +1,33 @@
 # VisiData version history
 
+# v2.4 (2021-04-11)
+
+- [splitwindow] stabilize sheet stack associations
+    - `Shift+Z` pushes 'under sheet' (if any) onto other stack
+    - `Shift+Z` does not swap panes anymore
+    - `g Tab` swaps panes
+    - `options.disp_splitwin_pct` is always not sheet-specific
+
+- [status] show nSelectedRows on rstatus
+
+- [color] remove `options.use_default_colors` (thanks @lxcode #939)
+    - `options.color_default` can now have both fg and bg
+    - other color options which do not specify fg or bg will use the missing component from `color_default`
+    - to use terminal default colors, set `options.color_default=""`
+
+## Bugfixes
+
+- [loaders gzip] fix progress bar when opening gzip (thanks @geekscrapy #925)
+- [loaders http] fix loading files from url without specifying filetype
+- [loaders sqlite] use `TABLE_XINFO` for hidden/virtual columns (thanks @dotcs #945)
+- [loaders sqlite] perf improvement: do not pre-count rows (required full table scan)
+- [loaders vds] save typed values instead of formatted display values (thanks @frosencrantz #885)
+- [loaders xlsx] stringify "header" row values for column names (thanks @davidwales #921)
+- [pyobj-show-hidden] grab visibility lvl from sheet specific option (thanks @frosencrantz #947)
+- [splitwin] prevent flickering-on-full-window
+- [splitwin] if top sheet quit, keep bottom sheet in bottom pane
+- [splitwin] full-screen/splitwin close all sheets should be part of the same stack
+
 # v2.3 (2021-04-03)
 
 ## Features

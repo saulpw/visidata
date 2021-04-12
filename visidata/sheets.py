@@ -27,7 +27,6 @@ option('header', 1, 'parse first N rows as column names', replay=True)
 option('load_lazy', False, 'load subsheets always (False) or lazily (True)')
 
 theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
-theme('use_default_colors', True, 'curses use default terminal colors')
 
 theme('disp_note_none', '⌀',  'visible contents of a cell whose value is None')
 theme('disp_truncator', '…', 'indicator that the contents are only partially visible')
@@ -62,7 +61,7 @@ theme('disp_endbot_sep', '║', '') # ╽╿┃╜‖
 theme('disp_selected_note', '•', '') #
 theme('disp_sort_asc', '↑↟⇞⇡⇧⇑', 'characters for ascending sort') # ↑▲↟↥↾↿⇞⇡⇧⇈⤉⤒⥔⥘⥜⥠⍏˄ˆ
 theme('disp_sort_desc', '↓↡⇟⇣⇩⇓', 'characters for descending sort') # ↓▼↡↧⇂⇃⇟⇣⇩⇊⤈⤓⥕⥙⥝⥡⍖˅ˇ
-theme('color_default', 'white', 'the default color')
+theme('color_default', 'white on black', 'the default fg and bg colors')
 theme('color_default_hdr', 'bold', 'color of the column headers')
 theme('color_bottom_hdr', 'underline', 'color of the bottom header row')
 theme('color_current_row', 'reverse', 'color of the cursor row')
@@ -895,7 +894,7 @@ class SequenceSheet(Sheet):
         self.columns = []
         for i, colnamelines in enumerate(itertools.zip_longest(*headerrows, fillvalue='')):
             colnamelines = ['' if c is None else c for c in colnamelines]
-            self.addColumn(ColumnItem(''.join(colnamelines), i))
+            self.addColumn(ColumnItem(''.join(map(str, colnamelines)), i))
 
         self._rowtype = namedlist('tsvobj', [(c.name or '_') for c in self.columns])
 
@@ -947,7 +946,7 @@ class IndexSheet(Sheet):
 
     columns = [
         ColumnAttr('name'),
-        ColumnAttr('rows', 'nRows', type=int),
+        ColumnAttr('rows', 'nRows', type=int, width=9),
         ColumnAttr('cols', 'nCols', type=int),
         ColumnAttr('keys', 'keyColNames'),
         ColumnAttr('source'),
@@ -965,8 +964,8 @@ class IndexSheet(Sheet):
             if vs.name == k:
                 return vs
 
-    def addRow(self, sheet):
-        super().addRow(sheet)
+    def addRow(self, sheet, **kwargs):
+        super().addRow(sheet, **kwargs)
         if not self.options.load_lazy:
             sheet.ensureLoaded()
 
@@ -1078,12 +1077,13 @@ def updateColNames(sheet, rows, cols, overwrite=False):
             c.name = "\n".join(c.getDisplayValue(r) for r in rows)
 
 @BaseSheet.api
-def splitPane(sheet, pct):
-    vd.stackedSheets[1:] or vd.fail("need 2 sheets for splitpane")
-    if not options.disp_splitwin_pct:
-        sheet.pane=1 if sheet.pane == 2 else 2
-    options.disp_splitwin_pct = pct
+def splitPane(sheet, pct=None):
+    if vd.activeStack[1:]:
+        undersheet = vd.activeStack[1]
+        pane = 1 if undersheet.pane == 2 else 2
+        vd.push(undersheet, pane=pane)
 
+    vd.options.disp_splitwin_pct = pct
 
 IndexSheet.class_options.header = 0
 IndexSheet.class_options.skip = 0
@@ -1128,10 +1128,11 @@ SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(shee
 BaseSheet.addCommand('q', 'quit-sheet',  'vd.quit(sheet)', 'quit current sheet')
 globalCommand('gq', 'quit-all', 'vd.quit(*vd.sheets)', 'quit all sheets (clean exit)')
 
-BaseSheet.addCommand('Z', 'splitwin-half', 'splitPane(-options.disp_splitwin_pct or -50)', 'split screen in half, so that second sheet on stack is visible in a second pane')
-BaseSheet.addCommand('gZ', 'splitwin-close', 'options.disp_splitwin_pct = 0', 'close an already split screen, current pane full screens')
-BaseSheet.addCommand('^I', 'splitwin-swap', 'vd.activePane = 1 if sheet.pane == 2 else 2', 'jump to other pane')
-BaseSheet.addCommand('zZ', 'splitwin-input', 'splitPane(input("% height for split window: ", value=options.disp_splitwin_pct))', 'split screen and queries for height of second pane, second sheet on stack is visible in second pane')
+BaseSheet.addCommand('Z', 'splitwin-half', 'splitPane(vd.options.disp_splitwin_pct or 50)', 'ensure split pane is set and push under sheet onto other pane')
+BaseSheet.addCommand('gZ', 'splitwin-close', 'vd.options.disp_splitwin_pct = 0\nfor vs in vd.activeStack: vs.pane = 1', 'close split screen')
+BaseSheet.addCommand('^I', 'splitwin-swap', 'vd.activePane = 1 if sheet.pane == 2 else 2', 'jump to inactive pane')
+BaseSheet.addCommand('g^I', 'splitwin-swap-pane', 'vd.options.disp_splitwin_pct=-vd.options.disp_splitwin_pct', 'swap panes onscreen')
+BaseSheet.addCommand('zZ', 'splitwin-input', 'vd.options.disp_splitwin_pct = input("% height for split window: ", value=vd.options.disp_splitwin_pct)', 'set split pane to specific size')
 
 BaseSheet.addCommand('^L', 'redraw', 'vd.redraw(); sheet.refresh()', 'refresh screen')
 BaseSheet.addCommand(None, 'guard-sheet', 'options.set("quitguard", True, sheet); status("guarded")', 'guard current sheet from accidental quitting')

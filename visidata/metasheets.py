@@ -129,11 +129,11 @@ class LastInputsSheet(JsonLinesSheet):
         super().__init__(*args, **kwargs)
         self.colnames = {col.name:col for col in self.columns}
 
-    def addRow(self, row):
+    def addRow(self, row, **kwargs):
         'Update lastInputs before adding row.'
         row = AttrDict(row)
         vd._lastInputs[row.type][row.input] = 1
-        return super().addRow(row)
+        return super().addRow(row, **kwargs)
 
     def appendRow(self, row):
         'Append *row* (AttrDict with *type* and *input*) directly to source.'

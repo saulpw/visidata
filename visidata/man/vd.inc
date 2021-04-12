@@ -1,4 +1,4 @@
-.Dd Apr 03, 2021
+.Dd Apr 11, 2021
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -436,10 +436,12 @@ scroll canvas
 .Bl -tag -width XXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "gZ"
 .No close an already split screen, current pane full screens
-.It Ic "Tab"
+.It Ic " Z"
+.No push second sheet on current pane's stack to the top of the other pane's stack
+.It Ic " Tab"
 .No jump to other pane
-.It Ic "^^" No (Ctrl+^)
-.No swap which sheet is in current pane
+.It Ic "gTab"
+.No swap panes
 .It Ic "g^^" No (g Ctrl+^)
 .No cycle through sheets
 .Pp
@@ -499,7 +501,7 @@ open current row/cell/sheet as Python object
 .It Sy " \&."
 .Sy Plugins Sheet No "              browse, install, and (de)activate plugins"
 .It Sy " \&."
-.Sy Memory Sheet No (Alt+M) "       browse saved values, including clipboard"
+.Sy Memory Sheet No (Alt+Shift+M) "       browse saved values, including clipboard"
 .It " "
 .It Sy Metasheets
 .It Sy " \&."
@@ -588,9 +590,9 @@ deactivate current plugin
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic Alt+M
+.It Ic Alt+Shift+M
 .No open the Sy Memory Sheet
-.It Ic Alt+m Ar name
+.It Ic Alt+M Ar name
 .No store value in current cell in Sy Memory Sheet No under Ar name
 .El
 .Bl -inset -compact
