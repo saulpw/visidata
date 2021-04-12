@@ -27,6 +27,7 @@
 - [splitwindow] misc fixes.
     - prevent flickering-on-full-window
     - if top sheet quit, keep bottom sheet in bottom pane
+    - after full-screen/splitwin close all sheets should be part of the same stack
 
 # v2.3 (2021-04-03)
 
