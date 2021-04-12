@@ -57,8 +57,44 @@
 14. Testing the starting position syntax
 15. Test loading url
 16. Split window
+    - make sure that if you exit split window, all the sheets from both panes can be accessible on the resulting stack
+    - test 1
+        - open 2 files
+        - Z
+        - first window should be active
+        - Tab between
+        - close top one, then redo and test closing bottom one
+            - bug?
+                - does not fullsize
+            - when top pane is quit, bottom pane is moved to the top
+    - test 2
+        - open 2 files
+        - Z
+        - open columns sheet in one
+        - Z
+        - inspect sheet stack
+            - columns sheet should remain where it is, and the source sheet below gets moved to the top of the other window
+        - redo with opening the columns sheet on the other
+            - bug
+                - when Shift+Z is done on bottom pane, its second sheet becomes the second sheet of the top stack, isntead of the first sheet of the top stack
+        - test 3
+            - Shift+Z with only one file
+            - Shift+Z with two panes, each pane's stack only has one file
     - gZ
+        - test both panes
+        - move around, should be no flickering
+        - press Z again
+        - test both panes
     - zZ
-    - Z
-    - various active panes
+        - should change window size, without changing anything else
+        - test for both panes
+        - test negative and positive
+            - bug?
+                - negative switches the windows they belong to
+    - gTab
+        - should window swap
+        - test both panes
+            - bug?
+                - if the second window is a smaller size, should it orient around the cursor position
     - using cursor in active pane
+        - test both panes
