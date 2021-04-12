@@ -121,6 +121,8 @@ class HtmlDocsSheet(Sheet):
         AttrColumn('url'),
         AttrColumn('status_code', type=int),
         AttrColumn('from_cache'),
+        AttrColumn('fetched_at', 'created_at', type=date, width=0),
+        AttrColumn('expires', type=date),
         AttrColumn('reason'),
         AttrColumn('soup.title.string'),
     ]

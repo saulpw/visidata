@@ -2,6 +2,10 @@
 
 from visidata import *
 
+vd.option('reddit_client_id', '', 'client_id for reddit api')
+vd.option('reddit_client_secret', '', 'client_secret for reddit api')
+vd.option('reddit_user_agent', visidata.__version__, 'user_agent for reddit api')
+
 subreddit_hidden_attrs='''
 name accounts_active accounts_active_is_fuzzed advertiser_category
 all_original_content allow_chat_post_creation allow_discovery
@@ -73,9 +77,20 @@ user_reports
 
 @VisiData.api
 def open_reddit(vd, p):
-    'scrape from list of subreddits'
     vd.enable_requests_cache()
     return SubredditSheet(p.name, source=p)
+
+@VisiData.api
+def open_redditu(vd, p):
+    'Get information about Reddit username from API.'
+    vd.enable_requests_cache()
+    return SubredditSheet(p.name, source=p)
+
+@VisiData.cached_property
+def reddit(vd):
+    import praw
+
+    return praw.Reddit(**vd.options.getall('reddit_'))
 
 
 class SubredditSheet(Sheet):
@@ -90,33 +105,29 @@ class SubredditSheet(Sheet):
         AttrColumn('title'),
         AttrColumn('description', width=50),
         AttrColumn('url', width=10),
-    ] + [AttrColumn(x) for x in subreddit_hidden_attrs.split()]
+    ] + [AttrColumn(x, width=0) for x in subreddit_hidden_attrs.split()]
 
     def iterload(self):
-        import praw
-
-        client_secret = 'LgDZWsSLVuzUYN-IioDJj9mmEYZZ4g'
-        client_id = 'qhwpLTENOBt1pQ'
-        user_agent = visidata.__version__
-
-        self.reddit = praw.Reddit(client_id=client_id, client_secret=client_secret, user_agent=user_agent)
-
         if self.source.given.startswith('/'):
-            yield from self.reddit.subreddits.popular(self.source.name[1:])
+            yield from vd.reddit.subreddits.popular(self.source.name[1:])
         else:
-            yield self.reddit.subreddit(self.source.name)
+            yield vd.reddit.subreddit(self.source.name)
 
     def openRow(self, row):
         return RedditSubmissions(row.display_name_prefixed, source=row)
+
+    def openRows(self, rows):
+        comboname = '+'.join(row.display_name for row in rows)
+        return RedditSubmissions(comboname, source=vd.reddit.subreddit(comboname))
 
 
 class RedditSubmissions(Sheet):
     rowtype='reddit posts' # rowdef: praw.Submission
     nKeys=2
     columns = [
-        AttrColumn('subreddit', width=0),
+        AttrColumn('subreddit'),
         AttrColumn('id', width=0),
-        AttrColumn('created', width=11, type=date),
+        AttrColumn('created', width=12, type=date),
         AttrColumn('author'),
         AttrColumn('ups', width=8, type=int),
         AttrColumn('downs', width=8, type=int),
@@ -125,7 +136,7 @@ class RedditSubmissions(Sheet):
         AttrColumn('selftext', width=60),
         AttrColumn('comments', width=0),
         AttrColumn('url', width=0),
-    ] + [AttrColumn(x) for x in post_hidden_attrs.split()]
+    ] + [AttrColumn(x, width=0) for x in post_hidden_attrs.split()]
 
     def iterload(self):
         yield from self.source.top(limit=10000)
@@ -149,7 +160,7 @@ class RedditComments(Sheet):
         AttrColumn('depth', type=int),
         AttrColumn('body', width=60),
         AttrColumn('edited', width=0),
-    ] + [AttrColumn(x) for x in comment_hidden_attrs   .split()]
+    ] + [AttrColumn(x, width=0) for x in comment_hidden_attrs.split()]
 
     def iterload(self):
         yield from self.source
@@ -161,8 +172,24 @@ class RedditComments(Sheet):
 @SubredditSheet.api
 @asyncthread
 def search(sheet, q):
-    for r in sheet.reddit.subreddits.search(q):
+    for r in vd.reddit.subreddits.search(q):
         sheet.addRow(r, index=sheet.cursorRowIndex+1)
 
+
+@RedditSubmissions.api
+@asyncthread
+def search(sheet, q):
+    for r in sheet.source.search(q, limit=None):
+        sheet.addRow(r, index=sheet.cursorRowIndex+1)
+
+
+@VisiData.api
+def sysopen_subreddits(vd, *subreddits):
+    vd.launchBrowser("-new-tab", "https://www.reddit.com/r/"+"+".join(subreddits))
+
+
+SubredditSheet.addCommand('^O', 'sysopen-subreddit', 'sysopen_subreddits(cursorRow.display_name)')
+SubredditSheet.addCommand('g^O', 'sysopen-subreddits', 'sysopen_subreddits(*(row.display_name for row in selectedRows))')
+SubredditSheet.addCommand('g'+ENTER, 'open-subreddits', 'vd.push(openRows(selectedRows))')
 SubredditSheet.addCommand('ga', 'add-subreddits-match', 'search(input("add subreddits matching: "))')
-RedditSubmissions.addCommand('ga', 'search-submissions', 'addRows(source.search(input("add posts matching: ")), index=cursorRowIndex+1)')
+RedditSubmissions.addCommand('ga', 'add-submissions-match', 'search(input("add posts matching: "))')
