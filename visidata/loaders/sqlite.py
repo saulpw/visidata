@@ -1,3 +1,5 @@
+import re
+
 from visidata import *
 
 def open_sqlite(p):
@@ -25,23 +27,28 @@ class SqliteSheet(Sheet):
         return conn.execute(sql, parms)
 
     def iterload(self):
-        sqltypes = {
-            'INTEGER': int,
-            'TEXT': anytype,
-            'BLOB': str,
-            'REAL': float
-        }
+        def parse_sqlite_type(t):
+            m = re.match(r'(\w+)(\((\d+)(,(\d+))?\))?', t.upper())
+            if not m: return anytype
+            typename, _, i, _, f = m.groups()
+            if typename == 'DATE': return date
+            if typename == 'INTEGER': return int
+            if typename == 'REAL': return float
+            if typename == 'NUMBER':
+                return int if f == '0' else float
+            return anytype
 
         with self.conn() as conn:
             tblname = self.tableName
             if not isinstance(self, SqliteIndexSheet):
                 self.columns = []
                 self.addColumn(ColumnItem('rowid', 0, type=int, width=0))
-                for i, r in enumerate(self.execute(conn, 'PRAGMA TABLE_INFO("%s")' % tblname)):
-                    c = ColumnItem(r[1], i+1, type=sqltypes.get(r[2].upper(), anytype))
+                for r in self.execute(conn, 'PRAGMA TABLE_XINFO("%s")' % tblname):
+                    colnum, colname, coltype, nullable, defvalue, colkey, *_ = r
+                    c = ColumnItem(colname, colnum+1, type=parse_sqlite_type(coltype))
                     self.addColumn(c)
 
-                    if r[-1]:
+                    if colkey:
                         self.setKeys([c])
 
             r = self.execute(conn, 'SELECT rowid, * FROM "%s"' % tblname)
