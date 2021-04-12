@@ -1,4 +1,4 @@
-.Dd Apr 03, 2021
+.Dd Apr 11, 2021
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -436,10 +436,12 @@ scroll canvas
 .Bl -tag -width XXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "gZ"
 .No close an already split screen, current pane full screens
-.It Ic "Tab"
+.It Ic " Z"
+.No push second sheet on current pane's stack to the top of the other pane's stack
+.It Ic " Tab"
 .No jump to other pane
-.It Ic "^^" No (Ctrl+^)
-.No swap which sheet is in current pane
+.It Ic "gTab"
+.No swap panes
 .It Ic "g^^" No (g Ctrl+^)
 .No cycle through sheets
 .Pp
