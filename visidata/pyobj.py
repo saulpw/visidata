@@ -284,7 +284,7 @@ class PyobjSheet(PythonSheet):
 
     def reload(self):
         self.rows = []
-        vislevel = options.visibility
+        vislevel = self.options.visibility
         for r in dir(self.source):
             try:
                 if vislevel <= 2 and r.startswith('__'): continue
