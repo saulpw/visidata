@@ -14,7 +14,8 @@
 - [Airtable](airtable.md)
   - load from url with `-f airtable`
   - save changes to existing tables with `z Ctrl+S`
-
+- [Reddit](reddit.md)
+  - read-only interface to API for subreddits, redditors, submissions, and comments
 - [Web Scraper](#scraper)
   - `vd <url> -f scrape` opens url in RequestsSheet
     - scraping results cached in sqlite db in .visidata

@@ -3,6 +3,6 @@ from .google import *
 from .airtable import *
 from .seaborn import *
 from .scraper import *
-from .scraper_reddit import *
+from .reddit import *
 
 addGlobals(globals())

@@ -234,8 +234,8 @@ def sysopen_subreddits(vd, *subreddits):
     vd.launchBrowser("-new-tab", "https://www.reddit.com/r/"+"+".join(subreddits))
 
 
-SubredditSheet.addCommand('^O', 'sysopen-subreddit', 'sysopen_subreddits(cursorRow.display_name)')
-SubredditSheet.addCommand('g^O', 'sysopen-subreddits', 'sysopen_subreddits(*(row.display_name for row in selectedRows))')
-SubredditSheet.addCommand('g'+ENTER, 'open-subreddits', 'vd.push(openRows(selectedRows))')
-SubredditSheet.addCommand('ga', 'add-subreddits-match', 'addRowsFromQuery(input("add subreddits matching: "))')
-RedditSubmissions.addCommand('ga', 'add-submissions-match', 'addRowsFromQuery(input("add posts matching: "))')
+SubredditSheet.addCommand('^O', 'sysopen-subreddit', 'sysopen_subreddits(cursorRow.display_name)', 'open browser window with subreddit')
+SubredditSheet.addCommand('g^O', 'sysopen-subreddits', 'sysopen_subreddits(*(row.display_name for row in selectedRows))', 'open sheet with top ~1000 submissions for that subreddit')
+SubredditSheet.addCommand('g'+ENTER, 'open-subreddits', 'vd.push(openRows(selectedRows))', 'open sheet with top ~1000 submissions for each selected subreddit')
+SubredditSheet.addCommand('ga', 'add-subreddits-match', 'addRowsFromQuery(input("add subreddits matching: "))', 'add subreddits matching input by name or description')
+RedditSubmissions.addCommand('ga', 'add-submissions-match', 'addRowsFromQuery(input("add posts matching: "))', 'add posts in this subreddit matching input')
