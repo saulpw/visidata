@@ -1080,7 +1080,8 @@ def updateColNames(sheet, rows, cols, overwrite=False):
 def splitPane(sheet, pct=None):
     if vd.activeStack[1:]:
         undersheet = vd.activeStack[1]
-        undersheet.pane = 1 if undersheet.pane == 2 else 2
+        pane = 1 if undersheet.pane == 2 else 2
+        vd.push(undersheet, pane=pane)
 
     vd.options.disp_splitwin_pct = pct
 
