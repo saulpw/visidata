@@ -1,6 +1,6 @@
 # VisiData version history
 
-# v2.4 (XXXX-XX-XX)
+# v2.4 (2021-04-11)
 
 - [loaders sqlite] do not pre-count rows (requires 2nd full table scan)
 - [splitwindow] stabilize sheet stack associations
