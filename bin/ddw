@@ -1,3 +1,9 @@
-#!/usr/bin/env sh
+#!/usr/bin/env python3
 
-exec "$(dirname $(realpath $0))/vd" -f ddw $@
+import visidata
+import darkdraw
+
+visidata.vd.options.filetype = 'ddw'
+
+if __name__ == '__main__':
+    visidata.main.vd_cli()
