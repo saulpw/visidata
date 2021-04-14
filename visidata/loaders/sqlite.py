@@ -113,13 +113,38 @@ class SqliteSheet(Sheet):
 
 
 class SqliteIndexSheet(SqliteSheet, IndexSheet):
+    rowtype = 'tables'
     tableName = 'sqlite_master'
+    savesToSource = True
+    defer = True
     def iterload(self):
         for row in SqliteSheet.iterload(self):
             if row[1] != 'index':
                 tblname = row[2]
                 yield SqliteSheet(tblname, source=self, tableName=tblname, row=row)
 
+    def putChanges(self):
+        adds, mods, dels = self.getDeferredChanges()
+        with self.conn() as conn:
+            for r in adds.values():
+                vd.warning('create a new table by saving a new sheet to this database file')
+
+            for row, rowmods in mods.values():
+                cname = self.column('name')
+                if len(rowmods) == 1 and cname in rowmods:
+                    sql='ALTER TABLE "%s" RENAME TO "%s"' % (cname.calcValue(row), rowmods[cname])
+                    self.execute(conn, sql)
+                else:
+                    vd.warning('can only modify table name')
+
+            for row in dels.values():
+                sql = 'DROP TABLE "%s"' % row.tableName
+                self.execute(conn, sql)
+
+            conn.commit()
+
+        self.preloadHook()
+        self.reload()
 
 class SqliteQuerySheet(SqliteSheet):
     def iterload(self):
@@ -181,5 +206,7 @@ def save_sqlite(vd, p, *vsheets):
     vd.status("%s save finished" % p)
 
 
+SqliteIndexSheet.addCommand('a', 'add-table', 'fail("create a new table by saving a sheet to this database file")', 'stub; add table by saving a sheet to the db file instead')
+SqliteIndexSheet.bindkey('ga', 'add-table')
 SqliteSheet.class_options.header = 0
 VisiData.save_db = VisiData.save_sqlite
