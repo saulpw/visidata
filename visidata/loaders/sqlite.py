@@ -24,6 +24,7 @@ class SqliteSheet(Sheet):
 
     def execute(self, conn, sql, parms=None):
         parms = parms or []
+        vd.debug(sql)
         return conn.execute(sql, parms)
 
     def iterload(self):
