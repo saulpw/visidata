@@ -62,11 +62,11 @@ class ColorMaker:
 
     @drawcache
     def resolve_colors(self, colorstack):
-        'Returns the ColorAttr for the colorstack, a list of color option names sorted highest-precedence color first.'
+        'Returns the ColorAttr for the colorstack, a list of (prec, color_option_name) sorted highest-precedence color first.'
         cattr = ColorAttr(0,0,0,0)
-        for coloropt in colorstack:
+        for prec, coloropt in colorstack:
             c = self.get_color(coloropt)
-            cattr = update_attr(cattr, c)
+            cattr = update_attr(cattr, c, prec)
         return cattr
 
     def split_colorstr(self, colorstr):

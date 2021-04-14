@@ -245,7 +245,7 @@ class TableSheet(BaseSheet):
             try:
                 r = colorizer.func(self, col, row, value)
                 if r:
-                    colorstack.append(colorizer.coloropt if colorizer.coloropt else r)
+                    colorstack.append((colorizer.precedence, colorizer.coloropt if colorizer.coloropt else r))
             except Exception as e:
                 vd.exceptionCaught(e)
 
