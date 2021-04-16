@@ -59,16 +59,24 @@ def openPath(vd, p, filetype=None, create=False):
 
     filetype = filetype.lower()
 
+    if not p.exists():
+        if not create:
+            return None
+        newfunc = getattr(vd, 'new_' + filetype, vd.getGlobals().get('new_' + filetype))
+        if not newfunc:
+            vd.warning('%s does not exist, creating new sheet' % p)
+            return vd.newSheet(p.name, 1, source=p)
+
+        vd.status('creating blank %s' % (p.given))
+        return newfunc(p)
+
     openfunc = getattr(vd, 'open_' + filetype, vd.getGlobals().get('open_' + filetype))
     if not openfunc:
         vd.warning('unknown "%s" filetype' % filetype)
         filetype = 'txt'
         openfunc = vd.getGlobals().get('open_txt')
 
-    if p.exists():
-        vd.status('opening %s as %s' % (p.given, filetype))
-    else:
-        vd.status('creating blank %s' % (p.given))
+    vd.status('opening %s as %s' % (p.given, filetype))
 
     return openfunc(p)
 
