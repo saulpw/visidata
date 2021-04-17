@@ -1048,7 +1048,7 @@ def sheetsSheet(vd):
 @VisiData.api
 def quit(vd, *sheets):
     'Remove *sheets* from sheets stack, asking for confirmation if options.quitguard set (either global or sheet-specific).'
-    if len(vd.sheets) == len(sheets) and options.getonly('quitguard', 'global', False):
+    if (len(vd.sheets) == len(sheets)) and options.getonly('quitguard', 'global', False):
         vd.confirm("quit last sheet? ")
 
     for vs in sheets:
@@ -1056,6 +1056,7 @@ def quit(vd, *sheets):
             vd.draw_all()
             vd.confirm(f'quit guarded sheet "{vs.name}?" ')
         vs.pane = 0
+        vd.remove(vs)
 
 
 @BaseSheet.api
