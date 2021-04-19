@@ -61,7 +61,7 @@ This Python script can be used to generate a sample `~/.visidatarc`, with all of
 ~~~
 from visidata import options
 
-for optname, val in sorted(options().items()):
+for optname, val in sorted(dict(options).items()):
     val = repr(val)
     helpstr = options._get(optname, 'global').helpstr
     print(f'options.{optname:25s} = {val:10s}  # {helpstr}')
