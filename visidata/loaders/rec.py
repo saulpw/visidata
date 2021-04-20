@@ -29,9 +29,10 @@ def get_kv(line):
     return re.split(r':[ \t]?', line, maxsplit=1)
 
 class RecSheet(TableSheet):
-    def addColumn(self, c, index=None):
-        super().addColumn(c, index=index)
-        self.colnames[c.name] = c
+    def addColumn(self, cols, index=None):
+        super().addColumn(cols, index=index)
+        self.colnames.update({col.name: col for col in cols})
+        return cols[0]
 
 RecSheet.init('colnames', dict)
 

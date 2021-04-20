@@ -23,9 +23,10 @@ class JsonSheet(PythonSheet):
         super().__init__(*args, **kwargs)
         self._colnames = {}  # [colname] -> Column
 
-    def addColumn(self, col, **kwargs):
-        super().addColumn(col, **kwargs)
-        self._colnames[col.name] = col
+    def addColumn(self, *cols, index=None):
+        super().addColumn(*cols, index=index)
+        self._colnames.update({col.name: col for col in cols })
+        return cols[0]
 
     def iterload(self):
         self.columns = []
