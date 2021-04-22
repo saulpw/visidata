@@ -112,9 +112,9 @@ class PluginsSheet(JsonLinesSheet):
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE)
             out, err = p.communicate()
-            vd.status(out)
+            vd.status(out.decode('UTF-8'))
             if err:
-                vd.warning(err)
+                vd.warning(err.decode('UTF-8'))
         else:
             with urlcache(plugin.url, days=0).open_text() as pyfp:
                 contents = pyfp.read()
@@ -130,9 +130,9 @@ class PluginsSheet(JsonLinesSheet):
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE)
             out, err = p.communicate()
-            vd.status(out)
+            vd.status(out.decode('UTF-8'))
             if err:
-                vd.warning(err)
+                vd.warning(err.decode('UTF-8'))
         vd.status('%s plugin installed' % plugin.name)
 
         if _plugin_in_import_list(plugin):
