@@ -39,6 +39,7 @@ def iterdispvals(sheet, *cols, format=False):
         for col, transforms in transformers.items():
             try:
                 dispval = col.getValue(r)
+
             except Exception as e:
                 vd.exceptionCaught(e)
                 dispval = options_safe_error or str(e)
@@ -46,12 +47,15 @@ def iterdispvals(sheet, *cols, format=False):
             try:
                 for t in transforms:
                     if dispval is None:
-                        dispval = ''
                         break
                     elif isinstance(dispval, TypedExceptionWrapper):
                         dispval = options_safe_error or str(dispval)
                         break
-                    dispval = t(dispval)
+                    else:
+                        dispval = t(dispval)
+
+                if dispval is None and format:
+                    dispval = ''
             except Exception as e:
                 dispval = str(dispval)
 
