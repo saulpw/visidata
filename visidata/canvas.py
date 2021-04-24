@@ -225,7 +225,7 @@ class Plotter(BaseSheet):
 
         if self.pixels:
             cursorBBox = self.plotterCursorBox
-            getPixelAttr = self.getPixelAttrRandom if options.disp_pixel_random else self.getPixelAttrMost
+            getPixelAttr = self.getPixelAttrRandom if self.options.disp_pixel_random else self.getPixelAttrMost
 
             for char_y in range(0, self.plotheight//4):
                 for char_x in range(0, self.plotwidth//2):
@@ -278,7 +278,7 @@ class Plotter(BaseSheet):
                     o[1] = False
                     label_fldraw[1] = False
 
-        if options.show_graph_labels:
+        if self.options.show_graph_labels:
             labels_by_line = defaultdict(list) # y -> text labels
 
             for pix_x, pix_y, txt, attr, row in self.labels:
@@ -336,7 +336,7 @@ class Canvas(Plotter):
         self.legends.clear()
         self.legendwidth = 0
         self.plotAttrs.clear()
-        self.unusedAttrs = list(colors[colorname.translate(str.maketrans('_', ' '))] for colorname in options.plot_colors.split())
+        self.unusedAttrs = list(colors[colorname.translate(str.maketrans('_', ' '))] for colorname in self.options.plot_colors.split())
 
     def plotColor(self, k):
         attr = self.plotAttrs.get(k, None)
