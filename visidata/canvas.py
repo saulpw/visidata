@@ -6,6 +6,7 @@ from visidata import *
 
 option('show_graph_labels', True, 'show axes and legend on graph')
 theme('plot_colors', 'green red yellow cyan magenta white 38 136 168', 'list of distinct colors to use for plotting distinct objects')
+theme('disp_canvas_charset', ''.join(chr(0x2800+i) for i in range(256)), 'charset to render 2x4 blocks on canvas')
 theme('disp_pixel_random', False, 'randomly choose attr from set of pixels instead of most common')
 option('zoom_incr', 2.0, 'amount to multiply current zoomlevel when zooming')
 theme('color_graph_hidden', '238 blue', 'color of legend for hidden attribute')
@@ -216,6 +217,8 @@ class Plotter(BaseSheet):
 
     def draw(self, scr):
         windowHeight, windowWidth = scr.getmaxyx()
+        disp_canvas_charset = self.options.disp_canvas_charset or ' o'
+        disp_canvas_charset += (256 - len(disp_canvas_charset)) * disp_canvas_charset[-1]
 
         if self.needsRefresh:
             self.render(windowHeight, windowWidth)
@@ -254,7 +257,7 @@ class Plotter(BaseSheet):
                         attr = update_attr(ColorAttr(attr, 0, 0, attr), colors.color_current_row).attr
 
                     if attr:
-                        scr.addstr(char_y, char_x, chr(0x2800+braille_num), attr)
+                        scr.addstr(char_y, char_x, disp_canvas_charset[braille_num], attr)
 
         def _mark_overlap_text(labels, textobj):
             def _overlaps(a, b):
