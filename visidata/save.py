@@ -89,7 +89,7 @@ def save_cols(vd, cols):
         savedcoltxt = cols[0].name + ' column'
     else:
         savedcoltxt = '%s columns' % len(cols)
-    path = inputPath('save %s to: ' % savedcoltxt, value=vs.getDefaultSaveName())
+    path = vd.inputPath('save %s to: ' % savedcoltxt, value=vs.getDefaultSaveName())
     vd.saveSheets(path, vs, confirm_overwrite=options.confirm_overwrite)
 
 
