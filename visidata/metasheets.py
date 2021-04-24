@@ -213,6 +213,15 @@ def vdmenu(vd):
 def allColumnsSheet(vd):
     return ColumnsSheet("all_columns", source=vd.stackedSheets)
 
+@VisiData.api
+def save_visidatarc(vd, p, vs):
+    with p.open_text(mode='w') as fp:
+        for optname, val in sorted(vd.options.getall().items()):
+            rval = repr(val)
+            defopt = vd.options._get(optname, 'default')
+            leading = '# ' if val == defopt.value else ''
+            fp.write(f'{leading}options.{optname:25s} = {rval:10s}  # {defopt.helpstr}\n')
+
 
 @ColumnsSheet.command('&', 'join-cols', 'add column from concatenating selected source columns')
 def join_cols(sheet):
