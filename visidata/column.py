@@ -214,10 +214,12 @@ class Column(Extensible):
         if typedval is None:
             return None
 
-        if isinstance(typedval, (list, tuple)):
-            return '[%s]' % len(typedval)
-        if isinstance(typedval, dict):
-            return '{%s}' % len(typedval)
+        if self.type is anytype:
+            if isinstance(typedval, (list, tuple)):
+                return '[%s]' % len(typedval)
+            if isinstance(typedval, dict):
+                return '{%s}' % len(typedval)
+
         if isinstance(typedval, bytes):
             typedval = typedval.decode(options.encoding, options.encoding_errors)
 
