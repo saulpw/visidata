@@ -1024,10 +1024,18 @@ def push(vd, vs, pane=0):
     if not isinstance(vs, BaseSheet):
         return  # return instead of raise, some commands need this
 
-    vs.vd = vd
-    vs.pane = pane or vd.activePane
     if vs in vd.sheets:
         vd.sheets.remove(vs)
+
+    vs.vd = vd
+    if pane == -1:
+        vs.pane = 2 if vd.activePane == 1 else 1
+    elif pane == 0:
+        if not vd.sheetstack(1): vs.pane=1
+        elif not vd.sheetstack(2) and vd.options.disp_splitwin_pct != 0: vs.pane=2
+        else: vs.pane = vd.activePane
+    else:
+        vs.pane = pane
 
     vd.sheets.insert(0, vs)
 
@@ -1083,6 +1091,7 @@ def splitPane(sheet, pct=None):
         undersheet = vd.activeStack[1]
         pane = 1 if undersheet.pane == 2 else 2
         vd.push(undersheet, pane=pane)
+        vd.activePane = pane
 
     vd.options.disp_splitwin_pct = pct
 
