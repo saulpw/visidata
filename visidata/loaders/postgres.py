@@ -52,8 +52,7 @@ def openurl_postgres(url, filetype=None):
     return PgTablesSheet(dbname+"_tables", sql=SQL(conn))
 
 
-def openurl_postgresql(url, filetype):
-    return openurl_postgres(url, filetype)
+openurl_postgresql=openurl_postgres
 
 
 class SQL:
