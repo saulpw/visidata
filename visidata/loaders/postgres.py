@@ -1,6 +1,6 @@
 from visidata import *
 
-__all__ = ['openurl_postgres', 'openurl_rds', 'PgTable', 'PgTablesSheet']
+__all__ = ['openurl_postgres', 'openurl_postgresql', 'openurl_rds', 'PgTable', 'PgTablesSheet']
 
 option('postgres_schema', 'public', 'The desired schema for the Postgres database')
 
@@ -50,6 +50,10 @@ def openurl_postgres(url, filetype=None):
                 password=url.password)
 
     return PgTablesSheet(dbname+"_tables", sql=SQL(conn))
+
+
+def openurl_postgresql(url, filetype):
+    return openurl_postgres(url, filetype)
 
 
 class SQL:
