@@ -87,9 +87,12 @@ def main_vd():
 
     vd._stdin, vd._stdout = duptty()  # always dup stdin/stdout
 
-    # workaround for bug in curses.wrapper #899
-    # https://stackoverflow.com/questions/31440392/curses-wrapper-messing-up-terminal-after-background-foreground-sequence
-    vd.tstp_signal = signal.getsignal(signal.SIGTSTP)
+    try:
+        # workaround for bug in curses.wrapper #899
+        # https://stackoverflow.com/questions/31440392/curses-wrapper-messing-up-terminal-after-background-foreground-sequence
+        vd.tstp_signal = signal.getsignal(signal.SIGTSTP)
+    except Exception:
+        vd.tstp_signal = None
 
     stdinSource = Path('-', fp=vd._stdin)
 

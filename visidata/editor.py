@@ -11,7 +11,8 @@ class SuspendCurses:
     'Context manager to leave windowed mode on enter and restore it on exit.'
     def __enter__(self):
         curses.endwin()
-        signal.signal(signal.SIGTSTP, visidata.vd.tstp_signal)
+        if visidata.vd.tstp_signal:
+            signal.signal(signal.SIGTSTP, visidata.vd.tstp_signal)
 
     def __exit__(self, exc_type, exc_val, tb):
         curses.reset_prog_mode()
