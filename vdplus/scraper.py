@@ -152,3 +152,6 @@ vdtype(soupstr, 's')
 HtmlElementsSheet.addCommand('~', 'type-soupstr', 'cursorCol.type=soupstr')
 HtmlElementsSheet.addCommand('go', 'open-rows', 'for vs in openRows(selectedRows): vd.push(vs)')
 HtmlDocsSheet.addCommand(';', 'addcol-selector', 'sel=input("css selector: ", type="selector"); addColumn(SelectorColumn(sel, expr=sel, cache="async"))')
+
+vd.addGlobals({'SelectorColumn':SelectorColumn,
+                        'soupstr':soupstr})
