@@ -911,7 +911,7 @@ SUPPORTED SOURCES
      For a list of all remaining formats supported by VisiData, see
      https://visidata.org/formats.
 
-     In addition, .zip, .gz, .bz2, and .xz files are decompressed on the fly.
+     In addition, .zip, .gz, .bz2, .xz, and .zst files are decompressed on the fly.
 
 SUPPORTED OUTPUT FORMATS
      These are the supported savers:
