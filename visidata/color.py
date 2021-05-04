@@ -89,17 +89,25 @@ class ColorMaker:
                 fgbgattrs[2].append(x)
             else:
                 if not fgbgattrs[i]:  # keep first known color
-                    fgbgattrs[i] = x
+                    if self._get_colornum(x) is not None:   # only set known colors
+                        fgbgattrs[i] = x
 
         return fgbgattrs
 
+    @functools.lru_cache(None)
     def _get_colornum(self, colorname, default=-1):
         'Return terminal color number for colorname.'
         if not colorname: return default
         try:
-            return int(colorname)
+            r = int(colorname)
         except Exception:
-            return self.colors.get(colorname.upper())
+            r = self.colors.get(colorname.upper())
+
+        try: # test to see if color is available
+            curses.init_pair(curses.COLORS, r, 0)
+            return r
+        except curses.error as e:
+            return None  # not available
 
     def _colornames_to_cattr(self, colornamestr, precedence=0):
         fg, bg, attrlist = self.split_colorstr(colornamestr)
@@ -115,8 +123,9 @@ class ColorMaker:
                     self._get_colornum(bg, self._get_colornum(defbg)))
             pairnum, _ = self.color_pairs.get(fgbg, (None, ''))
             if pairnum is None:
-                if len(self.color_pairs) > 254:
+                if len(self.color_pairs) > curses.COLORS:
                     self.color_pairs.clear()  # start over
+                    self._get_colornum.cache_clear()
                 pairnum = len(self.color_pairs)+1
                 try:
                     curses.init_pair(pairnum, *fgbg)
