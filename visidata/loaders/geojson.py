@@ -92,12 +92,14 @@ class GeoJSONMap(InvertedCanvas):
                 bbox = reduce_coords(line, bbox)
         elif typ in ('Polygon', 'MultiPolygon'):
             for polygon in coords:
+                if not isinstance(polygon[0][0], list):
+                    continue
                 self.polygon(polygon[0], colour, row)
                 bbox = reduce_coords(polygon[0], bbox)
                 for hole in polygon[1:]:
                     self.polygon(hole, 0, row)
         else:
-            vd.status('notimpl shapeType %s' % typ)
+            vd.warning('notimpl shapeType %s' % typ)
 
         return bbox
 
