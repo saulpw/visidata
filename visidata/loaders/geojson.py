@@ -46,17 +46,26 @@ class GeoJSONMap(InvertedCanvas):
     def reload(self):
         self.reset()
 
+        nplotted = nerrors = 0
+
         for row in Progress(self.sourceRows):
             k = self.source.rowkey(row)
             colour = self.plotColor(k)
 
-            bbox = self.parse_geometry(row, colour)
+            try:
+                bbox = self.parse_geometry(row, colour)
+                nplotted += 1
+            except Exception as e:
+                vd.exceptionCaught(e)
+                nerrors += 1
+                continue
 
             x1, y1, x2, y2 = bbox
             textx, texty = (x1+x2)/2, (y1+y2)/2
             disptext = self.textCol.getDisplayValue(row)
             self.label(textx, texty, disptext, colour, row)
 
+        vd.status('loaded %d %s (%d errors)' % (nplotted, self.rowtype, nerrors))
         self.refresh()
 
     def parse_geometry(self, row, colour, bbox=None):
