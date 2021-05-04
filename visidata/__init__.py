@@ -4,7 +4,7 @@ __version__ = '2.5dev'
 __version_info__ = 'VisiData v' + __version__
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __status__ = 'Production/Stable'
-__copyright__ = 'Copyright (c) 2016-2019 ' + __author__
+__copyright__ = 'Copyright (c) 2016-2021 ' + __author__
 
 
 class EscapeException(BaseException):
