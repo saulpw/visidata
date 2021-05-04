@@ -148,8 +148,8 @@ from .deprecated import *
 from .windows import *
 
 try:
-    from vdplus import *
-except ModuleNotFoundError:
+    import vdplus
+except ModuleNotFoundError as e:
     pass
 
 from math import *
