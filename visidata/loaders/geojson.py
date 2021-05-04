@@ -17,6 +17,7 @@ class GeoJSONSheet(PythonSheet):
 
     def iterload(self):
         self.colnames = {}
+        self.columns = [Column('json_row', width=0)]
 
         with self.source.open_text() as fp:
             ret = json.load(fp)
