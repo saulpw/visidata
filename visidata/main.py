@@ -53,7 +53,6 @@ def duptty():
         fin.close()
         fout.close()
     except Exception as e:
-        print(e)
         stdin = sys.stdin
         stdout = sys.stdout
 
