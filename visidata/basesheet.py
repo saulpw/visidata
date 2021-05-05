@@ -190,8 +190,9 @@ class BaseSheet(DrawablePane):
 
     def refresh(self):
         'Clear the terminal screen and let the next draw cycle redraw everything.'
-        self._scr.clear()
-        self._scr.refresh()
+        if self._scr:
+            self._scr.clear()
+            self._scr.refresh()
 
     def ensureLoaded(self):
         'Call ``reload()`` if not already loaded.'
@@ -226,6 +227,8 @@ class BaseSheet(DrawablePane):
 @VisiData.api
 def redraw(vd):
     'Clear the terminal screen and let the next draw cycle recreate the windows and redraw everything.'
+    for vs in vd.sheets:
+        vs._scr = None
     vd.scrFull.clear()
     vd.win1.clear()
     vd.win2.clear()
