@@ -145,6 +145,8 @@ from .colorsheet import *
 
 from .deprecated import *
 
+from .windows import *
+
 try:
     from vdplus import *
 except ModuleNotFoundError:
