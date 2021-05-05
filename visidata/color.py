@@ -104,7 +104,7 @@ class ColorMaker:
             r = self.colors.get(colorname.upper())
 
         try: # test to see if color is available
-            curses.init_pair(curses.COLORS, r, 0)
+            curses.init_pair(255, r, 0)
             return r
         except curses.error as e:
             return None  # not available
@@ -123,7 +123,7 @@ class ColorMaker:
                     self._get_colornum(bg, self._get_colornum(defbg)))
             pairnum, _ = self.color_pairs.get(fgbg, (None, ''))
             if pairnum is None:
-                if len(self.color_pairs) > curses.COLORS:
+                if len(self.color_pairs) > 254:
                     self.color_pairs.clear()  # start over
                     self._get_colornum.cache_clear()
                 pairnum = len(self.color_pairs)+1
