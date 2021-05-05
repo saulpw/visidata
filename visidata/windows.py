@@ -24,3 +24,8 @@ if vd.is_windows:
     # Alt+F1 instead of Alt+1
     for i in range(12):
         vd.bindkey('KEY_F(%s)'%(i+37), ALT+'%s'%(i+1))
+
+    vd.options.color_key_col = 'cyan'
+    vd.options.color_note_type = 'yellow'
+    vd.options.color_note_row = 'yellow'
+    vd.options.color_selected_row = 'yellow'
