@@ -2,10 +2,10 @@ import sys
 from visidata import VisiData, vd, ALT
 
 @VisiData.property
-def is_windows():
-    return sys.platform == 'win32':
+def is_windows(vd):
+    return sys.platform == 'win32'
 
-if vd.is_windows():
+if vd.is_windows:
     vd.bindkey('^Z', 'undo-last')
 
     # keypad
