@@ -17,6 +17,8 @@ from visidata import vd, option, options, run, BaseSheet, AttrDict
 from visidata import Path, saveSheets, domotd
 import visidata
 
+vd.version_info = __version_info__
+
 option('config', '~/.visidatarc', 'config file to exec in Python', sheettype=None)
 option('play', '', 'file.vd to replay')
 option('batch', False, 'replay in batch mode (with no interface and all status sent to stdout)')
@@ -117,7 +119,7 @@ def main_vd():
         elif arg in ['--']:
             optsdone = True
         elif arg in ['-v', '--version']:
-            print(__version_info__)
+            print(vd.version_info)
             return 0
         elif arg == '-':
             inputs.append((stdinSource, copy(current_args)))
