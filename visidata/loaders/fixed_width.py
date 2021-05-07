@@ -40,7 +40,7 @@ def columnize(rows):
             colstart = i
         prev = i
 
-    yield colstart, None   # final column gets rest of line
+    yield colstart, prev+1   # final column gets rest of line
 
 
 class FixedWidthColumnsSheet(SequenceSheet):
