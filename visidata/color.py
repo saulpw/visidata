@@ -103,6 +103,9 @@ class ColorMaker:
         except Exception:
             r = self.colors.get(colorname.upper())
 
+        if r is None:
+            return None
+
         try: # test to see if color is available
             curses.init_pair(255, r, 0)
             return r
