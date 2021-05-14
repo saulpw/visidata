@@ -92,7 +92,7 @@ class HtmlElementsSheet(Sheet):
         HtmlAttrColumn('href', expr='href'),
     ]
     def iterload(self):
-        for el in self.elements or [vd.soup(p.read_text())]:
+        for el in self.elements or [vd.soup(self.source.read_text())]:
             for x in el.find_all():
                 if x.string:
                     yield x

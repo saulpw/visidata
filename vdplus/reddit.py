@@ -16,6 +16,9 @@ def open_reddit(vd, p):
     if p.given.startswith('u/') or p.given.startswith('/u/'):
         return RedditorsSheet(p.name, source=p.name.split('+'), search=(p.given[0]=='/'))
 
+    return SubredditSheet(p.name, source=p)
+
+vd.new_reddit = vd.open_reddit
 
 @VisiData.cached_property
 def reddit(vd):
@@ -114,6 +117,7 @@ class SubredditSheet(Sheet):
     # source is a text list of subreddits
     rowtype = 'subreddits'  # rowdef: praw.Subreddit
     nKeys=1
+    search=False
     columns = [
         AttrColumn('display_name_prefixed', width=15),
         AttrColumn('active_user_count', type=int),
@@ -126,10 +130,16 @@ class SubredditSheet(Sheet):
 
     def iterload(self):
         for name in self.source:
+            name = name.strip()
             if self.search:
-                yield from vd.reddit.subreddits.popular(name)
+                yield from vd.reddit.subreddits.search(name)
             else:
-                yield vd.reddit.subreddit(name)
+                try:
+                    r = vd.reddit.subreddit(name)
+                    r.display_name_prefixed
+                    yield r
+                except Exception as e:
+                    vd.exceptionCaught(e)
 
     def openRow(self, row):
         return RedditSubmissions(row.display_name_prefixed, source=row)
@@ -185,7 +195,8 @@ class RedditSubmissions(Sheet):
     ] + list(hiddenCols(post_hidden_attrs))
 
     def iterload(self):
-        yield from self.source.top(limit=10000)
+        kind = 'new' # 'top'
+        yield from getattr(self.source, kind)(limit=10000)
 
     def openRow(self, row):
         return RedditComments(row.id, source=row.comments.list())
