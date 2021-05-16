@@ -5,10 +5,9 @@
 vsh is a compilation of [VisiData packages](https://visidata.org) that contain interactive terminal user interfaces for classic unix tools.
 
 Includes:
-- vls
-    - Navigate the filesystem
-    - Delete and bulk rename files using classic VisiData commands
-    - Press `Enter` on data sources to load them in vd
+- vsh
+    - run shell commands
+    - output will be loaded as a sheet.
 - vping
     - use like regular `ping`
     - resulting output will be dynamically loaded into a vd TUI
