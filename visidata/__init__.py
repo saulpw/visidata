@@ -81,6 +81,7 @@ from .cmdlog import *
 from .freeze import *
 from .regex import *
 from .canvas import *
+from .canvas_text import *
 from .graph import *
 from .motd import *
 from .transpose import *
@@ -88,7 +89,7 @@ from .shell import *
 from .layout import *
 from .main import *
 from .help import *
-from .modify import *
+import visidata.modify
 import visidata.sort
 import visidata.unfurl
 import visidata.fill
