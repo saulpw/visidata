@@ -139,7 +139,7 @@ class BaseSheet(DrawablePane):
         if not cmd:
             if keystrokes:
                 vd.debug('no command "%s"' % keystrokes)
-            return True
+            return False
 
         escaped = False
         err = ''
