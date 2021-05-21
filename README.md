@@ -43,7 +43,7 @@ Hundreds of other commands and options are also available; see the documentation
 
 ### Help and Support
 
-If you have a question, issue, or suggestion regarding VisiData, please [create an issue on Github](https://github.com/saulpw/visidata/issues) or chat with us at #visidata on [freenode.net](https://webchat.freenode.net/).
+If you have a question, issue, or suggestion regarding VisiData, please [create an issue on Github](https://github.com/saulpw/visidata/issues) or chat with us at #visidata on [irc.libera.chat](https://libera.chat/).
 
 If you use VisiData regularly, please [support me on Patreon](https://www.patreon.com/saulpw)!
 
