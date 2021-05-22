@@ -150,10 +150,13 @@ class DirSheet(Sheet):
         self.removeFile(r)
 
     def iterload(self):
+        hidden_files = self.options.dir_hidden
+
         def _walkfiles(p):
             basepath = str(p)
             for folder, subdirs, files in os.walk(basepath):
                 subfolder = folder[len(basepath)+1:]
+                if not hidden_files and subfolder.startswith('.'): continue
                 if subfolder in ['.', '..']: continue
 
                 fpath = Path(folder)
@@ -173,9 +176,8 @@ class DirSheet(Sheet):
         folders = set()
         f = _walkfiles if self.options.dir_recurse else _listfiles
 
-        hidden_files = options.dir_hidden
         for p in f(self.source):
-            if hidden_files and p.name.startswith('.'):
+            if not hidden_files and p.name.startswith('.'):
                 continue
 
             yield p
