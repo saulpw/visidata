@@ -1,0 +1,59 @@
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: Logging
+metadata:
+  name: default-logging
+spec:
+  fluentd: {}
+  fluentbit: {}
+  controlNamespace: logging
+
+---
+
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: Output
+metadata:
+  name: loki-output
+spec:
+  loki:
+    url: http://loki.logging:3100
+    configure_kubernetes_labels: true
+    buffer:
+      timekey: 1m
+      timekey_wait: 30s
+      timekey_use_utc: true
+
+---
+
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: Flow
+metadata:
+  name: loki-flow
+spec:
+  filters:
+    - parser:
+        remove_key_name_field: true
+        reserve_data: true
+        parsers:
+          - type: none
+  selectors:
+    app: visidata
+  outputRefs:
+    - loki-output
+
+---
+
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: Flow
+metadata:
+  name: loki-flow-hub
+spec:
+  filters:
+    - parser:
+        remove_key_name_field: true
+        reserve_data: true
+        parsers:
+          - type: none
+  selectors:
+    app: hub
+  outputRefs:
+    - loki-output

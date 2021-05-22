@@ -1,0 +1,124 @@
+@import "@material/linear-progress/_mixins";
+@import "@material/button/_mixins";
+@import "@material/tab/_mixins";
+
+@include mdc-linear-progress-bar-color(#fff);
+@include mdc-linear-progress-buffer-color($mdc-theme-accent);
+
+$progress_thickness: 3px;
+
+html,
+body {
+  background-color: white;
+  margin: 0;
+  padding: 0;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.mdc-linear-progress {
+  top: 0;
+  position: fixed;
+  z-index: 6;
+}
+
+header.mdc-top-app-bar {
+  top: 0;
+
+  #site-logo {
+    float: left;
+    margin-right: 5px;
+  }
+
+  #site-title {
+    float: left;
+  }
+
+  #user-overview {
+    display: flex;
+    align-items: center;
+    margin-left: 1em;
+
+    svg {
+      width: 20px;
+      float: left;
+
+      path {
+        fill: $mdc-theme-primary;
+      }
+    }
+
+    span {
+      margin-left: 5px;
+    }
+  }
+
+  #account-button.account-page-is-active,
+  .about-page-is-active {
+    border-bottom: 3px solid $mdc-theme-secondary;
+  }
+}
+
+.layout {
+  margin: auto;
+  margin-top: 50px;
+  padding: 10px 20px;
+}
+
+#terminal {
+  display: none;
+  background: black;
+  padding: 0;
+  margin: 0;
+}
+
+.layout {
+  #terminal {
+    min-height: 90vh;
+  }
+}
+
+.embeded {
+  #terminal {
+    min-height: 100vh;
+  }
+}
+
+.terminal {
+  font-family: "DejaVu Sans Mono", "Everson Mono", FreeMono, Menlo, Terminal, monospace, "Apple Symbols";
+}
+
+.xterm-overlay {
+  border-radius: 15px;
+  font-size: xx-large;
+  color: black;
+  background: white;
+  opacity: 0.75;
+  padding: 0.2em 0.5em 0.2em 0.5em;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  user-select: none;
+  transition: opacity 180ms ease-in;
+}
+
+.mdc-snackbar__surface {
+  background-color: $mdc-theme-primary;
+
+  .mdc-snackbar__label {
+    color: $mdc-theme-secondary;
+    text-align: center;
+  }
+}
+
+footer {
+  margin-top: auto;
+  padding-bottom: 1em;
+  width: 100%;
+  text-align: center;
+  font-size: 0.9em;
+  opacity: 0.65;
+}
