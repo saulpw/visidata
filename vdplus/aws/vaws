@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+
+from vdtui import *
+from pyobj import *
+
+import s3
+import cloudwatch
+
+options.disp_none = '∅'
+
+globalCommand('0', 'vd.push(g_aws_index)', '(dial 0 for operator)')
+
+class AWSIndex(Sheet):
+    columns = [
+        Column('sheet', getter=lambda r: r.name)
+    ]
+    commands = [
+        Command(ENTER, 'vd.push(cursorRow)', 'push this sheet')
+    ]
+
+    def reload(self):
+        self.rows = []
+        for v in getGlobals().values():
+            if isinstance(v, Sheet):
+                if v is not self:
+                    self.addRow(v)
+
+g_aws_index = AWSIndex('aws')
+
+addGlobals(globals())
+
+run([g_aws_index])
