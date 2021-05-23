@@ -1,97 +1,48 @@
-# VisiData Pro
+# VisiData Plus
 
-## Features
+This repo contains many interesting plugins for use with [VisiData](https://visidata.org).
 
-- [Google Drive](#google)
-  - list files
-  - delete file
-  - open image in browser
-  - open Google Sheet in VisiData
+## Plugins
 
-- [Google Sheets](#google)
-  - load from url with `-f gsheets` (or `-f g`)
-  - save with `.g` extension
-- [Airtable](airtable.md)
-  - load from url with `-f airtable`
-  - save changes to existing tables with `z Ctrl+S`
-- [Reddit](reddit.md)
-  - read-only interface to API for subreddits, redditors, submissions, and comments
-- [Web Scraper](#scraper)
-  - `vd <url> -f scrape` opens url in RequestsSheet
-    - scraping results cached in sqlite db in .visidata
-    - `ENTER` (open-row) to open row as HTMLElements
+- [Google Drive](tree/develop/google): list/open/delete files via [Google Drive API](https://developers.google.com/drive/).
+- [Google Sheets](tree/develop/google): load/save new sheet (with `.g` extension) via [Google Sheets API](https://developers.google.com/sheets/).
+- [Airtable](tree/develop/airtable): load/save existing table via [Airtable API](https://airtable.com/api).
+- [Reddit](tree/develop/reddit): read-only interface to [Reddit](https://www.reddit.com/dev/api) API for subreddits, redditors, submissions, and comments.
+- [Zulip](tree/develop/zulip): read-only interface to [Zulip](https://github.com/zulip/zulip) chat API.
+- [Web Scraper](tree/develop/scraper): scrape urls from web pages and web pages from urls iteratively and interactively.
 
-  - HTMLElements is list of elements as parsed by beautifulsoup4
-    - easily determine selector containing relevant information
-    - dive into children of cursor element with `ENTER` (or children of all selected rows with `g ENTER`)
-    - batch open links to scrape more data with `go` to open RequestsSheet with hrefs in selected rows
-
-  - on RequestsSheet, add column of elements matching given css selector with `;` (addcol-selector)
-    - cross-tabulate data from multiple pages
-    - join elements together with the `soupstr` type (bound to `~` on the HTMLElementsSheet)
-
-## License
-
-This repository is private, and only [Saul Pwanson](https://github.com/saulpw) has the authority to grant access to it or to distribute its contents.
+## No License Granted By Default
 
 The code in this repository, hereafter "VisiData Plus", is **not** open-source software.
 
-Access to this repo grants you the ability to use the software according to the [LICENSE](LICENSE.md).
+All code and documentation in this repository is copyright [Saul Pwanson](https://github.com/saulpw), who has the sole authority to release, license, or redistribute its contents.
 
-You **may** modify this source code for your own usage, and you **may** distribute those modifications as patches to other users of VisiData Plus, but you **must not** redistribute any of the source code contained in this repository.
+You **must not** redistribute any of the source code contained in this repository, unless it has been explicitly released under an Open Source License.
 
-## Installation
+You **may** use components which have been released under an Open Source License; see the component-level READMEs for information.
+
+You **may** use other components on a trial basis to discover their capabilities.
+
+You **may** view or read any of the source code, to learn about Python, or how to make VisiData plugins, or how to use a specific API or library.
+
+You **may** request permission to use one or more components in this repository on an ongoing basis by contacting [Saul Pwanson](mailto:vdplus@saul.pw), who probably will agree to liberal terms if you ask nicely, and particularly if you express interest in expanding, maintaining, and/or packaging a component for release.
+
+You **must** have digitally signed the [Contributor Assignment Agreement](https://github.com/saulpw/vdplus/tree/develop/CONTRIBUTING.md) in order to submit changes to this repository.
+
+## Installing a component
 
 1. Clone this repo into `.visidata/vdplus`:
 
-```
     git clone git@github.com:saulpw/vdplus ~/.visidata/vdplus
-```
 
-2. Add this line to your `.visidatarc` (which is usually in your home directory):
+2. Add this line to your `.visidatarc` (which is usually in your home directory) for every component you want to use:
 
-```
-    import vdplus
-```
+    import vdplus.<component>
 
-3. Install Python requirements:
+3. Install Python requirements for that component:
 
-```
-    pip3 install -r ~/.visidata/vdplus/requirements.txt
-```
+    pip3 install -r ~/.visidata/vdplus/<component>/requirements.txt
 
-4. Update to the [latest develop version of VisiData](https://github.com/saulpw/visidata/tree/develop).
+4. You may have to upgrade to the [unreleased "develop" branch of VisiData](https://github.com/saulpw/visidata/tree/develop):
 
-
-# Using Google Sheets and Google Drive
-
-## Authenticating
-
-When VisiData attempts to use the Google API, it uses the "web authentication flow", which causes a web page to open asking for permissions to read and/or write your Google Sheets.
-After granting permissions, VisiData caches the auth token in the .visidata directory.  Remove `.visidata/google-*.pickle` to unauthenticate.
-
-## Loading a Google Sheet into VisiData
-
-Use VisiData to open the URL or spreadsheet id, with filetype `g` (or `gsheets`):
-
-```
-    vd https://docs.google.com/spreadsheets/d/1WV0JI_SsGfmoocXWJILK2nhfcxU1H7roqL1HE7zBdsY/ -f g
-```
-
-VisiData assumes the first row is the header row with column names.
-
-## Saving one or more sheets in VisiData as a Google Sheet
-
-Save to `<sheetname>.g` using either `Ctrl+S` (current sheet only) or `g Ctrl+S` (all sheets on the sheet stack).
-<sheetname> will be the visible name of the Spreadsheet in Google Drive; each sheet tab within the Spreadsheet will be named according to the sheet name within VisiData.
-
-## Google Drive
-
-Use the `gdrive` filetype (the path doesn't matter):
-
-```
-    vd . -f gdrive
-```
-
-- Files can be marked for deletion with `d` and execute those deletions with `z Ctrl+S` (same as on the DirSheet for the local filesystem).
-- Images can be viewed with `Enter` (in browser).
+    pip3 install git+https://github.com/saulpw/visidata.git@develop
