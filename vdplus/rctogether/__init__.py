@@ -8,15 +8,14 @@ import requests
 
 from visidata import *
 
-vd.option('vrc_app_id', '', 'app id for virtual RC')
-vd.option('vrc_app_secret', '', 'secret key for virtual RC')
-vd.option('vrc_bot_name', 'vdbot', 'default bot name')
-vd.option('vrc_bot_emoji', '\U0001f9df', 'default emoji for bot')
+vd.option('rc_app_id', '', 'app id for RC Together')
+vd.option('rc_app_secret', '', 'secret key for RC Together')
+vd.option('rc_bot_name', 'vdbot', 'default bot name')
+vd.option('rc_bot_emoji', '\U0001f9df', 'default emoji for bot')
 
 first_names = '''John Robert William George Charles James David Michael Paul Alexander Richard Joseph Louis Henry Thomas Peter Edward Jean Karl Carl Daniel Philip Alfred Christian Hans Martin Frederick José Johann Carlos Ferdinand Mary Juan Pierre Ivan Albert Giovanni Jan Otto Wilhelm Arthur Max Chris Frank Mikhail Mark Roger Anna Alan Antonio Friedrich Jacques Steve Kim Ernst Fernando Kevin Tom Walter Vladimir Eric Francis Franz Heinrich Nikolai François Andrew Giuseppe Jack Samuel Muhammad Manuel André Brian Boris Claude Stephen Ian Mario Christopher Francisco Georges Maurice Maria Simon Joe Adam Anne Anthony Constantine Elizabeth Georg Henri Jim Kurt Ptolemy Victor Ahmed Patrick Gustav Johannes Marcus Nicolas René Tim Michel Hugo Aaron Anton Bill Mike Diego Gabriel Prince Hermann Jennifer Ben Roberto Rudolf Sergei Sam Jason Viktor Andrei Alfonso Aleksandr Alberto Bernard Billy Catherine Leo Isaac Javier Ludwig Miguel Igor Erich Alessandro Tony Jane Edgar Harold Lee Mohamed Oliver Raymond Steven Sarah Adolf Matthew Pedro Ali Andy Jeff Gary Emil Francesco Guy Howard Herbert Jules Ken Leopold Marco Oscar Ronald Nick Larry Joan Luis Benjamin Bobby Carlo Donald Dennis Edmund Fritz Jorge Justin Julia Konstantin Matt Margaret Marcel Sean Stefan Theodor Maximilian Nicholas Danny Harry Simone Antiochus Omar Andreas Michelle Rafael Johan Ryan Andrea Andrey Ibn Abu Jonathan Felix Julius Jerry'''.split()
 
 ORIGIN_FQHOST = 'recurse.rctogether.com'
-API_URL=f'https://{ORIGIN_FQHOST}/api'
 BOT_NAME="vdbotlab"
 BOT_EMOJI="",  # robot
 
@@ -36,11 +35,14 @@ color_trans = {
 }
 
 @VisiData.api
-def open_vrc(vd, p):
+def open_rc(vd, p):
     vd.timeouts_before_idle = -1
     vs = VirtualRCStream(p.name, source=p)
+    global ORIGIN_FQHOST
+    ORIGIN_FQHOST = p.name + '.rctogether.com'
+    vd.rc_api_url = f'https://{ORIGIN_FQHOST}/api'
     vd.vrc.con = Connection(origin=f'https://{ORIGIN_FQHOST}',
-                     url=f'wss://{ORIGIN_FQHOST}/cable?app_id={vd.options.vrc_app_id}&app_secret={vd.options.vrc_app_secret}',
+                     url=f'wss://{ORIGIN_FQHOST}/cable?app_id={vd.options.rc_app_id}&app_secret={vd.options.rc_app_secret}',
                      identifier={"channel": "ApiChannel"},
                      callback=vs.sub_on_receive)
     vd.vrc.con.connect()
@@ -49,7 +51,7 @@ def open_vrc(vd, p):
     w.options.confirm_overwrite = False
     return w
 
-VisiData.new_vrc = open_vrc
+VisiData.new_rc = open_rc
 
 class Connection:
     "The connection to a websocket server"
@@ -165,10 +167,10 @@ class VirtualRC:
         self.world = VirtualRCWorldSheet(ORIGIN_FQHOST, rows=[])
 
     def req(self, method, endpoint, parms={}, **kwargs):
-        parms['app_id'] = vd.options.vrc_app_id
-        parms['app_secret'] = vd.options.vrc_app_secret
+        parms['app_id'] = vd.options.rc_app_id
+        parms['app_secret'] = vd.options.rc_app_secret
         parmstr = urllib.parse.urlencode(list(parms.items()))
-        r = getattr(requests, method.lower())(url=f"{API_URL}/{endpoint}?{parmstr}", json=kwargs) # data=json.dumps(kwargs, ensure_ascii=False).encode('utf-8'))
+        r = getattr(requests, method.lower())(url=f"{vd.rc_api_url}/{endpoint}?{parmstr}", json=kwargs)
 
         self.botResponses.addRow(r)
 
@@ -200,8 +202,8 @@ class VirtualRC:
     def add_bot(self, x=0, y=0, name=None, emoji=None):
       with Progress(total=1) as prog:
         r = self.post('bots', bot={
-                "name": name or vd.options.vrc_bot_name,
-                "emoji": emoji or vd.options.vrc_bot_emoji,
+                "name": name or vd.options.rc_bot_name,
+                "emoji": emoji or vd.options.rc_bot_emoji,
                 "x": x,
                 "y": y,
                 "direction": "right",
@@ -384,16 +386,15 @@ class VirtualRCStream(TableSheet, VirtualRCSheet):
         else:
             vd.warning('unknown msg type "%s"' % msg['type'])
 
-VirtualRCSheet.addCommand('1', 'open-botmsgs', 'vd.push(vd.vrc.botResponses)')
-VirtualRCSheet.addCommand('2', 'open-botstream', 'vd.push(vd.vrc.streamSheet)')
+VirtualRCSheet.addCommand('', 'open-rc-msgs', 'vd.push(vd.vrc.botResponses)')
+VirtualRCSheet.addCommand('', 'open-rc-stream', 'vd.push(vd.vrc.streamSheet)')
 
 VirtualRCSheet.addCommand('`', 'open-backing', 'vd.push(vd.vrc.world)')
 VirtualRCWorldSheet.addCommand('`', 'open-world', 'vd.push(source)')
 
 
 VirtualRCSheet.addCommand('a', 'add-msg', 'send_msg(input("message: "))')
-VirtualRCSheet.addCommand('m', 'move-bot', 'move(*map(int, input("x y: ", value="%s %s"%(bot_info["pos"]["x"], bot_info["pos"]["y"])).split()))')
-VirtualRCWorld.addCommand('w', 'add-wall', 'vrc.post("walls", {"bot_id":vd.vrc.botid}, pos=dict(x=cursorBox.x1, y=cursorBox.y1), color="yellow", wall_text="F")', 'add wall at cursor')
-VirtualRCWorld.addCommand('n', 'add-note', 'vrc.post("notes", {"bot_id":vd.vrc.botid}, pos=dict(x=cursorBox.x1, y=cursorBox.y1), color="yellow", wall_text="F")', 'add note at cursor')
+#VirtualRCWorld.addCommand('w', 'add-wall', 'vrc.post("walls", {"bot_id":vd.vrc.botid}, pos=dict(x=cursorBox.x1, y=cursorBox.y1), color="yellow", wall_text="F")', 'add wall at cursor')
+#VirtualRCWorld.addCommand('n', 'add-note', 'vrc.post("notes", {"bot_id":vd.vrc.botid}, pos=dict(x=cursorBox.x1, y=cursorBox.y1), color="yellow", wall_text="F")', 'add note at cursor')
 VirtualRCWorld.addCommand('b', 'add-bot', 'vrc.add_bots(1, cursorBox.x1, cursorBox.y1)', 'add bot at cursor')
 VirtualRCWorld.addCommand('gb', 'add-bots', 'vrc.add_bots(int(input("# bots to create: ")), cursorBox.x1, cursorBox.y1)', 'add bots at cursor')
