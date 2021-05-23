@@ -7,9 +7,10 @@ This repo contains many interesting plugins for use with [VisiData](https://visi
 - [Google Drive](tree/develop/google): list/open/delete files via [Google Drive API](https://developers.google.com/drive/).
 - [Google Sheets](tree/develop/google): load/save new sheet (with `.g` extension) via [Google Sheets API](https://developers.google.com/sheets/).
 - [Airtable](tree/develop/airtable): load/save existing table via [Airtable API](https://airtable.com/api).
-- [Reddit](tree/develop/reddit): read-only interface to [Reddit](https://www.reddit.com/dev/api) API for subreddits, redditors, submissions, and comments.
-- [Zulip](tree/develop/zulip): read-only interface to [Zulip](https://github.com/zulip/zulip) chat API.
 - [Web Scraper](tree/develop/scraper): scrape urls from web pages and web pages from urls iteratively and interactively.
+- [Reddit](tree/develop/reddit): read-only interface to [Reddit API](https://www.reddit.com/dev/api) for subreddits, redditors, submissions, and comments.
+- [Zulip](tree/develop/zulip): read-only interface to [Zulip chat API](https://github.com/zulip/zulip).
+- [RC Together](tree/develop/rctogether): control an army of bots via [RC Together API](https://docs.rctogether.com/).
 
 ## No License Granted By Default
 
