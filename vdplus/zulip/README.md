@@ -8,7 +8,13 @@ Get an [API key for Zulip](https://zulip.com/api/api-keys) and add import and op
     options.zulip_api_key='...'
     options.zulip_email='you@example.com'
 
-Use `vd` with the appropriate site url and the `zulip` filetype:
+Install the Python module for zulip:
+
+    pip3 install zulip
+
+## Usage
+
+Launch `vd` with the appropriate site url and the `zulip` filetype:
 
     vd -f zulip https://recurse.zulipchat.com
 
