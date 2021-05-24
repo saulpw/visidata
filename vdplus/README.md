@@ -11,6 +11,7 @@ This repo contains many interesting plugins for use with [VisiData](https://visi
 - [Reddit](tree/develop/reddit): read-only interface to [Reddit API](https://www.reddit.com/dev/api) for subreddits, redditors, submissions, and comments.
 - [Zulip](tree/develop/zulip): read-only interface to [Zulip chat API](https://github.com/zulip/zulip).
 - [RC Together](tree/develop/rctogether): control an army of bots via [RC Together API](https://docs.rctogether.com/).
+- [Galactic Conquest](tree/develop/galcon): a remake of the classic [Galcon](http://www.galcon.com/classic/history.html).
 
 ## No License Granted By Default
 

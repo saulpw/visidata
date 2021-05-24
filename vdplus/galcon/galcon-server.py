@@ -463,52 +463,55 @@ class WSIHandler(http.server.BaseHTTPRequestHandler):
         fields = dict((k, v[0]) for k, v in fields.items())  # every param is a list; assume only one value for any param
 
         toplevel = path.split('/')[1]
-        if toplevel:
-            try:
-                sessions = fields.pop('session', None)
-                if sessions:
-                    pl = self.server.sessions.get(sessions)
-                else:
-                    pl = None
+        if not toplevel:
+            self.wfile.write('OK\n'.encode('utf-8'))
+            return
 
-                if not pl:
-                    username = fields.get('username')
-                    if username:
-                        if username in self.server.users:
-                            pl = self.server.users[username]
-                            if fields['password'] != pl.md5_password:
-                                raise HTTPException(403, 'Sorry, wrong password')
-                        else:
-                            sessionid = uuid.uuid1().hex
-                            pl = Player(username, fields['password'], sessionid)
-                            self.server.sessions[sessionid] = pl
-                            self.server.users[username] = pl
+        try:
+            sessions = fields.pop('session', None)
+            if sessions:
+                pl = self.server.sessions.get(sessions)
+            else:
+                pl = None
 
-                ret = getattr(self.server.game, '%s_%s' % (reqtype, toplevel))(pl, **fields)
+            if not pl:
+                username = fields.get('username')
+                if username:
+                    if username in self.server.users:
+                        pl = self.server.users[username]
+                        if fields['password'] != pl.md5_password:
+                            raise HTTPException(403, 'Sorry, wrong password')
+                    else:
+                        sessionid = uuid.uuid1().hex
+                        pl = Player(username, fields['password'], sessionid)
+                        self.server.sessions[sessionid] = pl
+                        self.server.users[username] = pl
 
-                if isinstance(ret, list) or isinstance(ret, dict):
-                    ret = json.dumps(ret)
-                # else leave as string
+            ret = getattr(self.server.game, '%s_%s' % (reqtype, toplevel))(pl, **fields)
 
-                self.send_response(200)
-                self.send_header('Content-type', 'text/json')
-                self.end_headers()
+            if isinstance(ret, list) or isinstance(ret, dict):
+                ret = json.dumps(ret)
+            # else leave as string
 
-                if ret:
-                    self.wfile.write(ret.encode('utf-8'))
-            except HTTPException as e:
-                if self.server.game.options.debug:
-                    print(traceback.format_exc())
-                self.send_response(e.errcode)
-                self.send_header('Content-type', 'text/plain')
-                self.end_headers()
-                self.wfile.write(str(e).encode('utf-8')) #
-            except Exception as e:
+            self.send_response(200)
+            self.send_header('Content-type', 'text/json')
+            self.end_headers()
+
+            if ret:
+                self.wfile.write(ret.encode('utf-8'))
+        except HTTPException as e:
+            if self.server.game.options.debug:
                 print(traceback.format_exc())
-                self.send_response(404)
-                self.send_header('Content-type', 'text/plain')
-                self.end_headers()
-                self.wfile.write(str(traceback.format_exc()).encode('utf-8'))
+            self.send_response(e.errcode)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(str(e).encode('utf-8')) #
+        except Exception as e:
+            print(traceback.format_exc())
+            self.send_response(404)
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(str(traceback.format_exc()).encode('utf-8'))
 
     def do_GET(self):
         parsed_url = urllib.parse.urlparse(self.path)
@@ -662,4 +665,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

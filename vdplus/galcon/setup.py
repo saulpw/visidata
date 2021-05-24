@@ -2,18 +2,17 @@
 
 from setuptools import setup
 
-__version__ = '1.12'
+__version__ = '1.13'
 
-setup(name='vdgalcon',
+setup(name='visidata-galcon',
       version=__version__,
-      install_requires='visidata>=0.61 requests'.split(),
-      description='Galactic Conquest in curses, on VisiData',
+      install_requires='visidata>=2.5 requests'.split(),
+      description='Galactic Conquest in VisiData',
       author='Saul Pwanson',
       author_email='vdgalcon@saul.pw',
-      url='http://github.com/saulpw/vdgalcon',
-      download_url='https://github.com/saulpw/vdgalcon/tarball/' + __version__,
-      scripts=['vdgalcon.py', 'vdgalcon-server.py'],
-      license='GPLv3',
+      url='http://visidata.org/plus/galcon',
+      download_url='https://visidata.org/plus/galcon.py',
+      scripts=['galcon.py', 'galcon-server.py'],
       classifiers=[
           'Development Status :: 3 - Alpha',
           'Environment :: Console',

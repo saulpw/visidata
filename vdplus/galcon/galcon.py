@@ -25,6 +25,17 @@ theme('disp_empty_space', '.', 'color of empty space')
 theme('twinkle_rate', '200', 'neg twinkle')
 theme('color_twinkle', 'cyan bold', 'color of twinkling star')
 
+
+@VisiData.api
+def openhttp_galcon(vd, p):
+    vd.g_client = WSIClient(p.given)
+
+    vd._status = ["'N' to generate new 'M'ap; Ctrl+S when ready to start"]
+
+    vd.g_client.login()
+    return vd.g_client.Players
+
+
 class GalconSheet(Sheet):
     pass
 
@@ -42,12 +53,6 @@ GalconSheet.addCommand(ALT+'q', 'quit-game', 'g_client.player_quit(); vd.quit(s 
 
 options.disp_column_sep = ''
 #options.color_current_row = 'reverse white'
-
-class AttrDict(dict):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.__dict__ = self
-
 
 class WSIClient:
     def __init__(self, url):
@@ -86,7 +91,7 @@ class WSIClient:
     def current_turn(self):
         if not self.gamestate:
             self.refresh = True
-            g_client.refresh_everything()
+            vd.g_client.refresh_everything()
 
         return self.gamestate.get('current_turn')
 
@@ -203,7 +208,7 @@ class PlayersSheet(GalconSheet):
     @asyncthread
     def reload(self):
         self.rows = []
-        for r in g_client.get('/players').json():
+        for r in vd.g_client.get('/players').json():
             self.addRow(AttrDict(r))
 
         self.rows.sort(key=lambda row: row.name)
@@ -233,7 +238,7 @@ class PlanetsSheet(GalconSheet):
     ]
 
     colorizers = [
-        RowColorizer(5, None, lambda sheet,col,row,value: row and g_client.Players.get_player_color(row.ownername)),
+        RowColorizer(5, None, lambda sheet,col,row,value: row and vd.g_client.Players.get_player_color(row.ownername)),
         RowColorizer(5, 'color_dest_planet', lambda sheet,c,row,v: row is sheet.marked_planet),
     ]
     marked_planet = None
@@ -241,7 +246,7 @@ class PlanetsSheet(GalconSheet):
     def reload(self):
         # name, x, y, prod, killpct, owner.name, nships
         self.rows = []
-        for planetobj in g_client.get('/planets').json():
+        for planetobj in vd.g_client.get('/planets').json():
                 self.addRow(AttrDict(planetobj))
         self.rows.sort(key=lambda row: row.name)
 
@@ -285,13 +290,13 @@ class HistoricalDeploymentsSheet(GalconSheet):
         ColumnItem('killpct', 'killpct', type=int, fmtstr='%s%%'),
     ]
     colorizers = [
-        RowColorizer(9, None, lambda s,c,r,v: r and g_client.Players.get_player_color(r['launch_player_name']))
+        RowColorizer(9, None, lambda s,c,r,v: r and vd.g_client.Players.get_player_color(r['launch_player_name']))
     ]
 
     @asyncthread
     def reload(self):
         self.rows = []
-        for r in g_client.get('/deployments').json():
+        for r in vd.g_client.get('/deployments').json():
             self.addRow(r)
 
 
@@ -304,12 +309,12 @@ class EventsSheet(GalconSheet):
     @asyncthread
     def reload(self):
         self.rows = []
-        for row in g_client.get('/events').json():
+        for row in vd.g_client.get('/events').json():
             self.addRow(row)
 
         # find first event for the current turn and put the toprow there
         for i, (turn, _) in enumerate(self.rows):
-            if turn == g_client.current_turn:
+            if turn == vd.g_client.current_turn:
                 self.topRowIndex = index
                 self.cursorRowIndex = index
                 break
@@ -322,8 +327,8 @@ class MapSheet(GalconSheet):
     fieldToShow = [ 'name', 'prod', 'killpct', 'nships' ]
 
     colorizers = [
-        CellColor(9, None, lambda s,c,r,v: g_client.Players.get_player_color(r[c.x].ownername) if r[c.x] else None),
-        CellColor(5, 'color_dest_planet', lambda s,c,r,v: r[c.x] and r[c.x] is g_client.Planets.marked_planet),
+        CellColor(9, None, lambda s,c,r,v: vd.g_client.Players.get_player_color(r[c.x].ownername) if r[c.x] else None),
+        CellColor(5, 'color_dest_planet', lambda s,c,r,v: r[c.x] and r[c.x] is vd.g_client.Planets.marked_planet),
         CellColor(2, None, lambda s,c,r,v: s.colorSpace(c,r,v)),
     ]
 
@@ -349,11 +354,11 @@ class MapSheet(GalconSheet):
         status('showing "%s"' % self.fieldToShow[0])
 
     def reload(self):
-        g_client.Planets.reload()
+        vd.g_client.Planets.reload()
 
         # set columns on every reload, to use current width/height
-        self.map_w = g_client.gamestate['map_width']
-        self.map_h = g_client.gamestate['map_height']
+        self.map_w = vd.g_client.gamestate['map_width']
+        self.map_h = vd.g_client.gamestate['map_height']
 
         self.columns = []
         for x in range(self.map_w):
@@ -368,7 +373,7 @@ class MapSheet(GalconSheet):
                 current_row.append(None)
             self.addRow(current_row)
 
-        for planet in g_client.Planets.rows:
+        for planet in vd.g_client.Planets.rows:
             self.rows[planet.y][planet.x] = planet
 
         # so the order can't be changed
@@ -389,26 +394,7 @@ class GameOptionsSheet(GalconSheet):
 
     def reload(self):
         self.rows = []
-        for r in g_client.get('/options').json().items():
+        for r in vd.g_client.get('/options').json().items():
             self.addRow(r)
 
 GameOptionsSheet.addCommand('e', 'edit-option', 'status(g_client.get("/set_option", option=cursorRow[0], value=editCell(1))); reload()', 'edit game option')
-
-
-def main_vgalcon():
-    global g_client
-
-    if not sys.argv[1:]:
-        print('Usage: %s <url>' % sys.argv[0])
-        return 1
-
-    g_client = WSIClient(sys.argv[1])
-
-    vd._status = ["'N' to generate new 'M'ap; Ctrl+S when ready to start"]
-    addGlobals({'g_client': g_client})
-
-    g_client.login()
-    run(g_client.Players)
-
-
-main_vgalcon()
