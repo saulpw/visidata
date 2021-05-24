@@ -3,6 +3,7 @@ import textwrap
 from visidata import vd, option, options, Sheet, ColumnItem, asyncthread
 from visidata import Column, ColumnItem, vlen
 from visidata import globalCommand, error, stacktrace, VisiData
+import visidata
 
 __all__ = ['TextSheet', 'ErrorSheet']
 
