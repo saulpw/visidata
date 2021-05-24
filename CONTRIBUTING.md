@@ -49,11 +49,13 @@ Design proposals with concrete use cases are very welcome.
 If you encounter any bugs or have any problems, please [create an issue on GitHub](https://github.com/saulpw/visidata/issues).
 
 A great bug report will include:
+
     - a stacktrace, if there is an unexpected error; the most recent full stack traces can be viewed with `Ctrl+E` (then saved with `Ctrl+S`)
     - a [.vd](http://visidata.org/docs/save-restore/) and sample dataset that reproduces the issue
     - a .png/.gif (esp. for user interface changes)
 
 Some examples of great bug reports:
+
     - [#350 by @chocolateboy](https://github.com/saulpw/visidata/issues/350)
     - [#340 by @Mikee-3000](https://github.com/saulpw/visidata/issues/340)
 
