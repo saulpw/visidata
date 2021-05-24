@@ -12,6 +12,7 @@ This repo contains many interesting plugins for use with [VisiData](https://visi
 - [Zulip](tree/develop/zulip): read-only interface to [Zulip chat API](https://github.com/zulip/zulip).
 - [RC Together](tree/develop/rctogether): control an army of bots via [RC Together API](https://docs.rctogether.com/).
 - [Galactic Conquest](tree/develop/galcon): a remake of the classic [Galcon](http://www.galcon.com/classic/history.html).
+- [ping](tree/develop/ping): interactive ping+traceroute
 
 ## No License Granted By Default
 

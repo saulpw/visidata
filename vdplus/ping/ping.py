@@ -1,23 +1,23 @@
-#!/usr/bin/env python3
+# requires shell tools: ping traceroute
+#   these tools aren't inlined as they require root privs
 
-'ping/traceroute on VisiData'
-
-__version__ = '0.2-dev'
-
-import sys
+import time
 from statistics import mean
 
-from visidata import *
-import visidata.main
 import sh
 
-option('ping_count', 3, 'send this many pings to each host')
-option('ping_interval', 0.1, 'wait between ping rounds, in seconds')
+from visidata import VisiData, Sheet, Column
+from visidata import *
 
-globalCommand('^C', 'for s in topSheets: s.stop = True; status("user stopped")', 'stop pinging')
-globalCommand('^S', 'vd.save_tsv(sheet, input("save tsv to: ", value=name+".tsv"))', 'save this sheet as tsv')
+vd.option('ping_count', 3, 'send this many pings to each host')   # TODO: alias to -c
+vd.option('ping_interval', 0.1, 'wait between ping rounds, in seconds')   # TODO: alias to -i
 
-options.null_value = False
+
+@VisiData.api
+def new_ping(vd, p):
+    pingsheet = PingSheet(p.given, source=p.given)
+    return StatsSheet("traceroute_"+pingsheet.name, source=pingsheet)
+
 
 class StatsSheet(Sheet):
     rowtype='hosts' # rowdef: PingColumn
@@ -42,8 +42,8 @@ def PingColumn(name, ip):
 
 class PingSheet(Sheet):
     rowtype = 'pings'  # rowdef: {'time':time.time(), 'hostname': pingtime}
-    def __init__(self, name, source=None, **kwargs):
-        super().__init__(name, source=source, **kwargs)
+    def __init__(self, *names, source=None, **kwargs):
+        super().__init__(*names, source=source, **kwargs)
         self.sources = [source]
 
     def ping_response(self, row, ip, data):
@@ -64,14 +64,14 @@ class PingSheet(Sheet):
 
                 if inner_ip not in self.sources:
                     self.sources.insert(-1, inner_ip)
-                    self.columns.insert(-1, PingColumn(hostname, inner_ip))
+                    self.addColumn(PingColumn(hostname, inner_ip), index=-1)
                     self.send_trace(ip, int(ttl)+1)  # get next hop
                 break
 
     def ping_error(self, ip, data):
         if ip in self.sources:
             self.sources.remove(ip)
-            status("%s removed" % ip)
+            vd.warning("%s removed: %s" % (ip, data))
 
     def update_traces(self, row, ip):
         rtes = self.routes.get(ip)
@@ -106,7 +106,6 @@ class PingSheet(Sheet):
         self.stop = False
         self.start_time = time.time()
         self.columns = []
-#            Column('time', type=float, getter=lambda r,self=self: r['time']-self.start_time),
 
         for ip in self.sources:
             self.addColumn(PingColumn(ip, ip))
@@ -114,13 +113,11 @@ class PingSheet(Sheet):
         self.routes = {}
         self.rows = []
         pings_sent = {}
-        ping_count = options.ping_count
+        ping_count = self.options.ping_count
         with Progress(total=ping_count*len(self.sources), gerund='pinging') as prog:
           while not self.stop:
             r = {'time':time.time()}
             self.addRow(r)
-            if self.cursorRowIndex == self.nRows-2:
-                self.cursorRowIndex = self.nRows-1
 
             npings = 0  # this loop
             for ip in self.sources:
@@ -128,39 +125,17 @@ class PingSheet(Sheet):
                 pings_sent[ip] = pings_sent.get(ip, 0)+1
                 if ping_count and pings_sent[ip] <= ping_count:
                     sh.ping('-c', '1', ip, _bg=True, _bg_exc=False, _timeout=30,
-                            _out=lambda data,self=self,r=r,ip=ip: self.ping_response(r,ip,data))
-#                            _err=lambda data,self=self,ip=ip,a=1: self.ping_error(ip, data))
+                            _out=lambda data,self=self,r=r,ip=ip: self.ping_response(r,ip,data),
+                            _err=lambda data,self=self,ip=ip,a=1: self.ping_error(ip, data))
                     npings += 1
                 else:
                     r[ip] = None
 
             if npings == 0:
-                status('no more pings to send')
+                vd.status('no more pings to send')
                 break
 
-            time.sleep(options.ping_interval)
+            time.sleep(self.options.ping_interval)
 
 
-def main_vping():
-    import argparse
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('inputs', nargs='*', help='ping destination hosts')
-    parser.add_argument('-c', dest='ping_count', default='3', help='')
-    parser.add_argument('-i', dest='ping_interval', default='0.1', help='')
-
-    args = vd.parseArgs(parser)
-
-    domotd()
-
-    for ip in args.inputs:
-        pingsheet = PingSheet(ip, source=ip)
-        vd.push(StatsSheet("traceroute_"+pingsheet.name, source=pingsheet))
-
-    run()
-
-
-vd.addGlobals(globals())
-
-PingSheet.addCommand('T', 'traceroute-summary', 'vd.push(StatsSheet("traceroute_"+sheet.name, source=sheet))', 'push traceroute sheet with summary pingtimes')
-
-main_vping()
+PingSheet.class_options.null_value = False
