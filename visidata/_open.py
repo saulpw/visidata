@@ -42,7 +42,8 @@ def openPath(vd, p, filetype=None, create=False):
     '''Call ``open_<filetype>(p)`` or ``openurl_<p.scheme>(p, filetype)``.  Return constructed but unloaded sheet of appropriate type.
     If True, *create* will return a new, blank **Sheet** if file does not exist.'''
     if p.scheme and not p.fp: # isinstance(p, UrlPath):
-        openfunc = 'openurl_' + p.scheme
+        schemes = p.scheme.split('+')
+        openfunc = 'openurl_' + schemes[-1]
         try:
             return vd.getGlobals()[openfunc](p, filetype=filetype)
         except KeyError:

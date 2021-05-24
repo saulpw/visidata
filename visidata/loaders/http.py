@@ -8,6 +8,14 @@ vd.option('http_max_next', 0, 'max next.url pages to follow in http response') #
 
 
 def openurl_http(path, filetype=None):
+    schemes = path.scheme.split('+')
+    if len(schemes) > 1:
+        sch = schemes[0]
+        openfunc = getattr(vd, f'openhttp_{sch}', vd.getGlobals().get(f'openhttp_{sch}'))
+        if not openfunc:
+            vd.fail(f'no vd.openhttp_{sch}')
+        return openfunc(Path(schemes[-1]+'://'+path.given.split('://')[1]))
+
     import requests
 
     response = requests.get(path.given, stream=True)
