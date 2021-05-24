@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+
+__version__ = '0.2-dev'
+
+from visidata import *
+
+import subprocess
+import shlex
+
+import sh
+import psutil
+
+globalCommand('X', 'exec-sh', 'shellHistory.execute(input("$ ", type="command"))')
+
+
+class ShellHistorySheet(Sheet):
+    rowtype = 'commands' # rowdef: sh.Command
+    columns = [
+        Column('realcmd', width=0, getter=lambda c,r: ' '.join(x.decode('utf-8') for x in r.cmd)),
+        ColumnAttr('pid', width=10, type=int),
+        ColumnAttr('cmd', 'cmdstr', width=20),
+        Column('name', getter=lambda c,r: r.proc.name()),
+        Column('status', getter=lambda c,r: r.proc.status()),
+        Column('user', getter=lambda c,r: r.proc.username()),
+        Column('real_uid', type=int, getter=lambda c,r: r.proc.uids()[0]),
+        Column('effective_uid', type=int, getter=lambda c,r: r.proc.uids()[1]),
+        Column('mem_uss', type=int, getter=lambda c,r: r.proc.memory_full_info().uss),
+        Column('mem_rss', type=int, getter=lambda c,r: r.proc.memory_full_info().rss),
+        Column('mem_vms', type=int, getter=lambda c,r: r.proc.memory_full_info().vms),
+        Column('mem_shared', type=int, getter=lambda c,r: r.proc.memory_full_info().shared),
+        Column('user_time_s', type=float, getter=lambda c,r: r.proc.cpu_times()[0]),
+        Column('sys_time_s', type=float, getter=lambda c,r: r.proc.cpu_times()[1]),
+        ColumnAttr('stdin'),
+        ColumnAttr('stdout'),
+        ColumnAttr('stderr'),
+        ColumnAttr('exit_code', type=int),
+        ColumnAttr('sid', width=0, type=int),
+        ColumnAttr('pgid', width=0, type=int),
+        ColumnAttr('ctty', width=0),
+        ColumnAttr('ctty', width=0),
+    ]
+
+    @asyncthread
+    def execute(self, cmdstr):
+        cmdparts = shlex.split(cmdstr)
+        cmd = sh.Command(cmdparts[0])
+        ret = cmd(*cmdparts[1:], _bg=True)
+        self.rows.append(ret)
+        ret.cmdstr = cmdstr
+        ret.proc = psutil.Process(ret.pid)
+        vd.push(TextSheet(ret.cmdstr, source=ret))
+        ret.wait()
+
+    def leftStatus(self):
+        homedir = os.getenv('HOME')
+        cwd = os.getcwd()
+        if cwd.startswith(homedir):
+            cwd = '~' + cwd[len(homedir):]
+        return cwd + '| '
+
+
+ShellHistorySheet.addCommand('x', 'exec-row', 'execute(cursorRow.cmdstr)')
+ShellHistorySheet.addCommand('^C', 'cancel-row', 'cursorRow.terminate()')
+ShellHistorySheet.addCommand('g^C', 'cancel-rows', 'status(list(r.terminate() for r in selectedRows or rows if r.is_alive()))')
+ShellHistorySheet.addCommand('^K', 'signal-row', 'sig=input("send signal: "); cursorRow.signal(int(sig))')
+ShellHistorySheet.addCommand('g^K', 'signal-rows', 'sig=input("send signal to selected: "); status(list(r.signal(int(sig)) for r in selectedRows or rows if r.is_alive()))')
+#ShellHistorySheet.addCommand('v', '', '')
+
+
+shellHistory = ShellHistorySheet('history')
+
+
+def main():
+    vd.addGlobals(globals())
+    run(shellHistory)
+    os._exit(0)
+
+main()
