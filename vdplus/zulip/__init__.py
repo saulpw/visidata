@@ -71,7 +71,7 @@ class ZulipAPISheet(Sheet):
             zulip_func = getattr(vd.z_client, zulip_func)
         r = zulip_func(*self.zulip_args, **self.zulip_kwargs)
         if r['result'] != 'success':
-            vd.push(PyobjSheet(result_key+'_error', source=r))
+            vd.push(PyobjSheet(self.zulip_result_key+'_error', source=r))
             return
         yield from r[self.zulip_result_key]
 
