@@ -68,3 +68,23 @@ On the Queued Orders sheet:
 
 - `e` to modify an order
 - `d` to delete an order
+
+### Using the Dockerfiles
+
+Create an ssh deploy key that has permissions for vdplus. Here, it is called `bluebird_docker`
+
+```
+# build the image for the galcon server
+sudo docker build --build-arg SSH_PRIVATE_KEY="$(cat bluebird_docker)" -t galcon-server -f Dockerfile.galcon-server .
+# run the galcon server
+sudo docker run -d -p 7777:8080 --rm galcon-server
+
+# get ip address of where galcon server is running
+sudo docker inspect GALCON_SERVER_CONTAINER_NUMBER | jq '.[0].NetworkSettings.IPAddress'
+
+# build the image for the client
+sudo docker build --build-arg SSH_PRIVATE_KEY="$(cat bluebird_docker)" -t galcon-client -f Dockerfile.galcon-client .
+
+# for each person that is playing, run the docker client
+sudo docker run -e IPADDR="GALCON_SERVER_IP_ADDRESS" -it --rm galcon-client
+```
