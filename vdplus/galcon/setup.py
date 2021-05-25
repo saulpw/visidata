@@ -2,7 +2,7 @@
 
 from setuptools import setup
 
-__version__ = '1.13'
+__version__ = '1.14'
 
 setup(name='visidata-galcon',
       version=__version__,
