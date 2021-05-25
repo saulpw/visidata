@@ -6,7 +6,7 @@ __version__ = '1.13'
 
 setup(name='visidata-galcon',
       version=__version__,
-      install_requires='visidata>=2.5 requests'.split(),
+      install_requires=['visidata@git+https://github.com/saulpw/visidata.git@develop', 'requests'],
       description='Galactic Conquest in VisiData',
       author='Saul Pwanson',
       author_email='vdgalcon@saul.pw',
