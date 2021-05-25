@@ -51,8 +51,6 @@ GalconSheet.addCommand(ALT+'r', 'open-scores', 'vd.push(SheetList("scores", g_cl
 GalconSheet.addCommand('^S', 'end-turn', 'g_client.submit_turn()', 'submit deployments and end turn')
 GalconSheet.addCommand(ALT+'q', 'quit-game', 'g_client.player_quit(); vd.quit(s for s in vd.sheets if isinstance(s, GalconSheet))', 'quit the game (with confirm)')
 
-options.disp_column_sep = ''
-#options.color_current_row = 'reverse white'
 
 class WSIClient:
     def __init__(self, url):
@@ -396,5 +394,8 @@ class GameOptionsSheet(GalconSheet):
         self.rows = []
         for r in vd.g_client.get('/options').json().items():
             self.addRow(r)
+
+PlanetsSheet.class_options.disp_column_sep = ''
+#PlanetsSheet.class_options.color_current_row = 'reverse white'
 
 GameOptionsSheet.addCommand('e', 'edit-option', 'status(g_client.get("/set_option", option=cursorRow[0], value=editCell(1))); reload()', 'edit game option')
