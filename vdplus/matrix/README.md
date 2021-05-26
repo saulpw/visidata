@@ -17,3 +17,4 @@ It appends a line to the .visidatarc with the token it receives, so subsequent u
 ## Commands
 
 - `a` to add (send) a message to the channel of the message the cursor is on.
+- `Enter` to push a sheet with all the messages from that channel.

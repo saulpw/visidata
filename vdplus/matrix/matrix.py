@@ -1,5 +1,3 @@
-import builtins
-
 from visidata import vd, VisiData, Sheet, Column, ItemColumn, date
 from visidata import *
 
@@ -7,11 +5,15 @@ vd.option('matrix_token', '', 'matrix API token')
 vd.option('matrix_user_id', '', 'matrix user ID associated with token')
 vd.option('matrix_device_id', 'VisiData', 'device ID associated with matrix login')
 
+vd.matrix_client = None
+
 
 @VisiData.api
 def openhttp_matrix(vd, p):
     if not vd.options.matrix_token:
+        import builtins
         import getpass
+
         from matrix_client.client import MatrixClient
 
         username = builtins.input(f'{p.given} username: ')
@@ -47,12 +49,20 @@ class MatrixSheet(Sheet):
     @asyncthread
     def reload(self):
         from matrix_client.client import MatrixClient
-        vd.matrix_client = MatrixClient(self.source.given,
+        from matrix_client.room import Room
+        if not vd.matrix_client:
+            vd.matrix_client = MatrixClient(self.source.given,
                                         token=self.options.matrix_token,
                                         user_id=self.options.matrix_user_id)
 
+        if isinstance(self.source, Room):
+            self.add_room(self.source)
+            self.get_room_messages(self.source)
+            return
+
         for room in vd.matrix_client.get_rooms().values():
             self.add_room(room)
+            room.backfill_previous_messages(limit=1)
 
         vd.matrix_client.add_listener(self.global_event)
         vd.matrix_client.add_ephemeral_listener(self.global_event)
@@ -63,12 +73,25 @@ class MatrixSheet(Sheet):
 
         vd.matrix_client.listen_for_events() # vd.matrix_client.sync(full_state=True)
 
-    @asyncthread
     def add_room(self, room):
         room.add_listener(self.room_event)
         room.add_ephemeral_listener(self.room_event)
         room.add_state_listener(self.global_event)
-        room.backfill_previous_messages(limit=1)
+
+    @asyncthread
+    def get_room_messages(self, room):
+        try:
+            while room.prev_batch:
+                ret = vd.matrix_client.api.get_room_messages(room.room_id, room.prev_batch, direction='b', limit=100)
+                for r in ret['chunk']:
+                    r['room'] = room
+                    self.addRow(r)
+
+                if ret['end'] == room.prev_batch:
+                    break
+                room.prev_batch = ret['end']
+        except Exception as e:
+            vd.exceptionCaught(e)
 
     def addRow(self, r, **kwargs):
         r = AttrDict(r)
@@ -100,8 +123,10 @@ class MatrixSheet(Sheet):
     def add_message(self, text):
         vd.matrix_client.send_text(text)
 
+    def openRow(self, row):
+        return MatrixSheet(row.room.display_name, source=row.room, last_id=row.event_id)
+
 
 MatrixSheet.init('event_index', dict)
 
 MatrixSheet.addCommand('a', 'add-message', 'cursorRow.room.send_text(input(cursorRow.room.display_name+"> "))')
-MatrixSheet.addCommand('', 'dive-row', 'vd.push(MatrixRoom(cursorRow.room.display_name, source=cursorRow.room))')
