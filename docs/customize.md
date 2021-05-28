@@ -102,7 +102,7 @@ The **.visidatarc** in the user's home directory is plain Python code, and can c
 
 Longnames are names given to particular flavours of executable commands for ease of keystroke remapping. For example, the longname `select-row` is assigned to commands which select the current row in a sheet. On default, this longname is bound to the keystroke `s`.
 
-From within VisiData, type `z Ctrl+H` to open the **Commands Sheet**. This is a reference for all of the commands available on the current sheet. For a deeper exploration of commands, check out [the book of VisiData](https://github.com/saulpw/visidata-book/blob/master/commands.md).
+From within VisiData, type `z Ctrl+H` to open the **Commands Sheet**. This is a reference for all of the commands available on the current sheet. For a deeper exploration of commands, check out [the book of VisiData](https://www.visidata.org/docs/api/commands.html).
 
 ### Setting/changing keybindings for existing commands
 
