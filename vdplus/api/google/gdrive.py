@@ -1,7 +1,7 @@
 import visidata
 from visidata import vd, VisiData, Sheet, IndexSheet, SequenceSheet, ColumnItem, Path, AttrDict, ColumnAttr, asyncthread, Progress, ColumnExpr, date
 
-from vdplus.google import GSheetsIndex
+from vdplus.api.google import GSheetsIndex
 
 @VisiData.api
 def open_gdrive(vd, p):

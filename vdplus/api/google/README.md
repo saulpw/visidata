@@ -2,6 +2,10 @@
 
 ## Setup and Authentication
 
+Add to .visidatarc:
+
+    import vdplus.api.google
+
 When VisiData attempts to use the Google API, it uses the "web authentication flow", which causes a web page to open asking for permissions to read and/or write your Google Sheets.
 After granting permissions, VisiData caches the auth token in the .visidata directory.  Remove `.visidata/google-*.pickle` to unauthenticate.
 
