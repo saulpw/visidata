@@ -73,10 +73,10 @@ class SQL:
             cur.close()
 
 
-def cursorToColumns(cur, sheet):
-    sheet.columns = []
+@VisiData.api
+def postgresGetColumns(vd, cur):
     for i, coldesc in enumerate(cur.description):
-        sheet.addColumn(ColumnItem(coldesc.name, i, type=codeToType(coldesc.type_code, coldesc.name)))
+        yield ColumnItem(coldesc.name, i, type=codeToType(coldesc.type_code, coldesc.name))
 
 
 # rowdef: (table_name, ncols)
@@ -101,7 +101,9 @@ class PgTablesSheet(Sheet):
             r = cur.fetchone()
             if r:
                 self.addRow(r)
-            cursorToColumns(cur, self)
+            self.columns = []
+            for c in vd.postgresGetColumns(cur):
+                self.addColumn(c)
             self.setKeys(self.columns[0:1])  # table_name is the key
 
             for r in cur:
@@ -124,6 +126,8 @@ class PgTable(Sheet):
             r = cur.fetchone()
             if r:
                 self.addRow(r)
-            cursorToColumns(cur, self)
+            self.columns = []
+            for c in vd.postgresGetColumns(cur):
+                self.addColumn(c)
             for r in cur:
                 self.addRow(r)
