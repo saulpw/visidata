@@ -6,8 +6,7 @@ Useful for exploring the underlying data, and creating and modifying bots in bul
 
 Import the library and set the API key options in .visidatarc:
 
-    import vdplus.rctogether
-
+    import vdplus.api.rctogether
     options.rc_app_id = ''
     options.rc_app_secret = ''
 
