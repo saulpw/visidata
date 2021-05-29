@@ -4,8 +4,7 @@
 
 Obtain your [personal API key](https://airtable.com/account) and add it to `.visidatarc`:
 
-    import vdplus.airtable
-
+    import vdplus.api.airtable
     options.airtable_key = 'keyXXXXXXXXXXXXXX'
 
 ## Loading an Airtable table into VisiData
