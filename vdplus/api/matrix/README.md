@@ -4,7 +4,7 @@
 
 Add this to .visidatarc:
 
-    import vdplus.matrix
+    import vdplus.api.matrix
     options.matrix_user_id = '@handle:matrix.org'  # replace with your handle/homeserver
 
 Then run:
