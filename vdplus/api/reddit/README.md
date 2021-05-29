@@ -6,8 +6,9 @@
 
 2. Create a "script" app.  You can use `http://localhost:8000` for the redirect uri.
 
-3. Store credentials in visidatarc:
+3. Add import and credentials to visidatarc:
 
+    import vdplus.api.reddit
     options.reddit_client_id = '...'      # below the description in the upper left
     options.reddit_client_secret = '...'
 
