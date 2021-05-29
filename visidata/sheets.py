@@ -257,7 +257,7 @@ class TableSheet(BaseSheet):
             self.rows.append(row)
         else:
             self.rows.insert(index, row)
-            if self.cursorRowIndex >= index:
+            if self.cursorRowIndex and self.cursorRowIndex >= index:
                 self.cursorRowIndex += 1
         return row
 
