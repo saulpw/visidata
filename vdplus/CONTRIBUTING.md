@@ -6,7 +6,7 @@ Thank you for your interest in contributing to a project by [Saul Pwanson](https
 
 This contributor agreement ("Agreement") documents the rights granted by contributors to Us.
 
-By adding your name to the contributors.md file at https://github.com/saulpw/blob/master/contributors.md you are agreeing to be bound by the Agreement in full; your nmae will then appear on the [Contributors page]().
+By adding your name to the contributors.md file at https://github.com/saulpw/blob/master/contributors.md you are agreeing to be bound by the Agreement in full; your name will then appear on the [Contributors page](https://visidata.org/vdplus/contributors).
 
 This is a legally binding document, so please read it carefully before agreeing to it. The Agreement may cover more than one software project managed by Us.
 
