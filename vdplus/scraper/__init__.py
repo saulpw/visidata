@@ -86,8 +86,9 @@ class HtmlElementsSheet(Sheet):
     rowtype='dom nodes'  # rowdef soup.element
     columns = [
         Column('name', getter=lambda c,r: node_name(r)),
-        Column('selector', getter=lambda c,r: calc_selector(r), cache='async'),
+        Column('selector', getter=lambda c,r: calc_selector(r), cache='async', width=0),
         AttrColumn('string'),
+        Column('depth', cache=True, getter=lambda c,r: list(c.sheet.parents(r))),
         Column('prev_header', getter=lambda c,r: prev_header(r), cache=True),
         HtmlAttrColumn('href', expr='href'),
     ]
@@ -96,6 +97,11 @@ class HtmlElementsSheet(Sheet):
             for x in el.find_all():
                 if x.string:
                     yield x
+
+    def parents(self, row):
+        while row.parent and row.parent is not row:
+            yield row.parent
+            row = row.parent
 
     @property
     def rootSource(self):
