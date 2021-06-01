@@ -5,31 +5,34 @@ from visidata import *
 __all__ = ['PythonSheet', 'expand_cols_deep', 'deduceType', 'closeColumn', 'ListOfDictSheet', 'SheetDict', 'PyobjSheet', 'view']
 
 option('visibility', 0, 'visibility level')
-option('expand_col_scanrows', 1000, 'number of rows to check when expanding columns (0 = all)')
+option('default_sample_size', 100, 'number of rows to sample for regex.split (0=all)', replay=True)
 
 
 class PythonSheet(Sheet):
     def openRow(self, row):
         return PyobjSheet("%s[%s]" % (self.name, self.keystr(row)), source=row)
 
-def _getWraparoundSlice(seq, n, center):
-    '''Return a slice of length n from a sequence, centered around a given index'''
-    start = int(center - n / 2) % len(seq)
+
+@Sheet.api
+def getSampleRows(sheet):
+    'Return list of sample rows centered around the cursor.'
+    n = sheet.options.default_sample_size
+    if n == 0 or n >= sheet.nRows:
+        return sheet.rows
+    seq = sheet.rows
+    start = math.ceil(sheet.cursorRowIndex - n / 2) % len(seq)
     end = (start + n) % len(seq)
     if start < end:
         return seq[start:end]
     return seq[start:] + seq[:end]
+
 
 @asyncthread
 def expand_cols_deep(sheet, cols, rows=None, depth=0):  # depth == 0 means drill all the way
     'expand all visible columns of containers to the given depth (0=fully)'
     ret = []
     if not rows:
-        scanrows = options.expand_col_scanrows
-        if scanrows == 0 or scanrows >= sheet.nRows:
-            rows = sheet.rows
-        else:
-            rows = _getWraparoundSlice(sheet.rows, scanrows, sheet.cursorRowIndex)
+        rows = sheet.getSampleRows()
 
     for col in cols:
         newcols = _addExpandedColumns(col, rows, sheet.columns.index(col))

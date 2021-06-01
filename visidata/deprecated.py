@@ -118,3 +118,4 @@ alias('save-sheets-selected', 'save-selected')
 # v2.3
 alias('show-aggregate', 'memo-aggregate')
 #theme('use_default_colors', True, 'curses use default terminal colors')
+#option('expand_col_scanrows', 1000, 'number of rows to check when expanding columns (0 = all)')
