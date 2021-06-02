@@ -174,6 +174,31 @@ class date(datetime.datetime):
         tzinfo = getattr(r, 'tzinfo', None)
         return super().__new__(cls, *t[:6], microsecond=ms, tzinfo=tzinfo, **kwargs)
 
+    def __lt__(self, b):
+        if isinstance(b, datetime.datetime): return datetime.datetime.__lt__(self, b)
+        elif isinstance(b, datetime.date):   return not self.date().__eq__(b) and self.date().__lt__(b)
+        return NotImplemented
+
+    def __gt__(self, b):
+        if isinstance(b, datetime.datetime): return datetime.datetime.__gt__(self, b)
+        elif isinstance(b, datetime.date):   return not self.date().__eq__(b) and self.date().__gt__(b)
+        return NotImplemented
+
+    def __le__(self, b):
+        if isinstance(b, datetime.datetime): return datetime.datetime.__le__(self, b)
+        elif isinstance(b, datetime.date):   return self.date().__le__(b)
+        return NotImplemented
+
+    def __ge__(self, b):
+        if isinstance(b, datetime.datetime): return datetime.datetime.__le__(self, b)
+        elif isinstance(b, datetime.date):   return self.date().__ge__(b)
+        return NotImplemented
+
+    def __eq__(self, b):
+        if isinstance(b, datetime.datetime): return datetime.datetime.__eq__(self, b)
+        elif isinstance(b, datetime.date): return self.date().__eq__(b)
+        return NotImplemented
+
     def __str__(self):
         return self.strftime(options.disp_date_fmt)
 
