@@ -418,6 +418,11 @@ def getattrdeep(obj, attr, *default, getter=getattr):
     if not isinstance(attr, str):
         return getter(obj, attr, *default)
 
+    try:  # if attribute exists, return toplevel value, even if dotted
+        return getter(obj, attr)
+    except Exception as e:
+        pass
+
     if default:
         getattr_default = lambda o,a,d=default[0]: getter(o, a, d)
     else:
@@ -425,7 +430,7 @@ def getattrdeep(obj, attr, *default, getter=getattr):
 
     attrs = attr.split('.')
     for a in attrs[:-1]:
-        obj = getattr_default(obj, a)
+        obj = getter(obj, a)
 
     return getattr_default(obj, attrs[-1])
 
@@ -435,11 +440,21 @@ def setattrdeep(obj, attr, val, getter=getattr, setter=setattr):
     if not isinstance(attr, str):
         return setter(obj, attr, val)
 
-    attrs = attr.split('.')
+    try:  # if attribute exists, overwrite toplevel value, even if dotted
+        getter(obj, attr)
+        return setter(obj, attr, val)
+    except Exception as e:
+        pass
 
+    attrs = attr.split('.')
     for a in attrs[:-1]:
-        obj = getter(obj, a)
+        try:
+            obj = getter(obj, a)
+        except Exception as e:
+            obj = obj[a] = type(obj)()  # assume homogenous nesting
+
     setter(obj, attrs[-1], val)
+
 
 def getitemdeep(obj, k, *default):
     return getattrdeep(obj, k, *default, getter=getitemdef)
