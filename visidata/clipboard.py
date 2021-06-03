@@ -174,7 +174,7 @@ Sheet.addCommand('P', 'paste-before', 'paste_after(cursorRowIndex-1)', 'paste cl
 
 Sheet.addCommand('gy', 'copy-selected', 'copyRows(onlySelectedRows)', 'yank (copy) selected rows to clipboard')
 
-Sheet.addCommand('zy', 'copy-cell', 'vd.memo("clipval", cursorCol, cursorRow)', 'yank (copy) current cell to clipboard')
+Sheet.addCommand('zy', 'copy-cell', 'copyCells(cursorCol, [cursorRow]); vd.memo("clipval", cursorCol, cursorRow)', 'yank (copy) current cell to clipboard')
 Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.memory.clipval)', 'set contents of current cell to last clipboard value')
 
 Sheet.addCommand('d', 'delete-row', 'delete_row(cursorRowIndex); defer and cursorDown(1)', 'delete current row')
@@ -195,10 +195,10 @@ Sheet.addCommand('gY', 'syscopy-selected', 'syscopyRows(onlySelectedRows)', 'yan
 Sheet.addCommand('zY', 'syscopy-cell', 'syscopyCells(cursorCol, [cursorRow])', 'yank (copy) current cell to system clipboard (using options.clipboard_copy_cmd)')
 Sheet.addCommand('gzY', 'syscopy-cells', 'syscopyCells(cursorCol, onlySelectedRows)', 'yank (copy) contents of current column from selected rows to system clipboard (using options.clipboard_copy_cmd')
 
-Sheet.addCommand('x', 'cut-row', 'vd.memory.cliprows = [sheet.delete_row(cursorRowIndex)]; defer and cursorDown(1)', 'delete (cut) current row and move it to clipboard')
+Sheet.addCommand('x', 'cut-row', 'copyRows([sheet.delete_row(cursorRowIndex)]); defer and cursorDown(1)', 'delete (cut) current row and move it to clipboard')
 Sheet.addCommand('gx', 'cut-selected', 'copyRows(onlySelectedRows); deleteSelected()', 'delete (cut) selected rows and move them to clipboard')
-Sheet.addCommand('zx', 'cut-cell', 'vd.memory.clipcells = [cursorDisplay]; cursorCol.setValues([cursorRow], None)', 'delete (cut) current cell and move it to clipboard')
-Sheet.addCommand('gzx', 'cut-cells', 'vd.memory.clipcells = list(vd.sheet.cursorCol.getDisplayValue(r) for r in onlySelectedRows); cursorCol.setValues(onlySelectedRows, None)', 'delete (cut) contents of current column for selected rows and move them to clipboard')
+Sheet.addCommand('zx', 'cut-cell', 'copyCells(cursorCol, [cursorRow]); cursorCol.setValues([cursorRow], None)', 'delete (cut) current cell and move it to clipboard')
+Sheet.addCommand('gzx', 'cut-cells', 'copyCells(cursorCol, onlySelectedRows); cursorCol.setValues(onlySelectedRows, None)', 'delete (cut) contents of current column for selected rows and move them to clipboard')
 
 
 Sheet.bindkey('KEY_DC', 'delete-cell'),
