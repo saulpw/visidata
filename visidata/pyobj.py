@@ -1,4 +1,5 @@
 from functools import singledispatch
+import math
 
 from visidata import *
 
