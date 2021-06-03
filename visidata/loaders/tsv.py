@@ -20,7 +20,7 @@ def splitter(fp, delim='\n'):
 
     buf = ''
     while True:
-        nextbuf = fp.read(512)
+        nextbuf = fp.read(65536)
         if not nextbuf:
             break
         buf += nextbuf
