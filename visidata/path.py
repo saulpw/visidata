@@ -84,7 +84,7 @@ class Path(os.PathLike):
             self.name = self._path.name
 
         # check if file is compressed
-        if self.suffix in ['.gz', '.bz2', '.xz', '.zst']:
+        if self.suffix in ['.gz', '.bz2', '.xz', '.lzma', '.zst']:
             self.compression = self.ext
             uncompressedpath = Path(self.given[:-len(self.suffix)])
             self.name = uncompressedpath.name
@@ -165,7 +165,7 @@ class Path(os.PathLike):
         elif self.compression == 'bz2':
             import bz2
             return bz2.open(FileProgress(fn, **kwargs), *args, **kwargs)
-        elif self.compression == 'xz':
+        elif self.compression in ['xz', 'lzma']:
             import lzma
             return lzma.open(FileProgress(fn, **kwargs), *args, **kwargs)
         elif self.compression == 'zst':
