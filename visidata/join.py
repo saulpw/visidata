@@ -60,6 +60,7 @@ def groupRowsByKey(sheets, rowsBySheetKey, rowsByKey):
                     for crow in itertools.product(*[rowsBySheetKey[vs2].get(key, [None]) for vs2 in sheets]):
                         rowsByKey[key].append(list(crow))
 
+
 class JoinKeyColumn(Column):
     def __init__(self, name='', keycols=None, **kwargs):
         super().__init__(name, type=keycols[0].type, width=keycols[0].width, **kwargs)
@@ -116,14 +117,9 @@ class JoinSheet(Sheet):
         # first item in joined row is the key tuple from the first sheet.
         # first columns are the key columns from the first sheet, using its row (0)
         self.columns = []
-        keyDict = collections.defaultdict(list)
 
-        for s in sheets:
-            for keyCol in s.keyCols:
-                keyDict[keyCol.name].append(keyCol)
-
-        for i, cols in enumerate(keyDict.values()):
-            self.addColumn(JoinKeyColumn(name=cols[0].name, keycols=cols)) # ColumnItem(c.name, i, sheet=sheets[0], type=c.type, width=c.width)))
+        for i, cols in enumerate(itertools.zip_longest(*(s.keyCols for s in sheets))):
+            self.addColumn(JoinKeyColumn(cols[0].name, keycols=cols)) # ColumnItem(c.name, i, sheet=sheets[0], type=c.type, width=c.width)))
         self.setKeys(self.columns)
 
         allcols = collections.defaultdict(lambda n=len(sheets): [None]*n)
