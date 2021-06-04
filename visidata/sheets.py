@@ -1077,7 +1077,9 @@ def preloadHook(sheet):
 
 @VisiData.api
 def newSheet(vd, name, ncols, **kwargs):
-    return Sheet(name, columns=[SettableColumn() for i in range(ncols)], **kwargs)
+    vs = Sheet(name, columns=[SettableColumn() for i in range(ncols)], **kwargs)
+    vs.options.quitguard = True
+    return vs
 
 
 @Sheet.api
