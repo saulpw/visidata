@@ -41,7 +41,7 @@ class JsonSheet(PythonSheet):
                         continue
                     ret = json.loads(L, object_hook=AttrDict)
                     if isinstance(ret, list):
-                        yield from Progress(ret)
+                        yield from ret
                     else:
                         yield ret
 
@@ -53,7 +53,7 @@ class JsonSheet(PythonSheet):
                         with self.source.open_text() as fp:
                             ret = json.load(fp)
                             if isinstance(ret, list):
-                                yield from Progress(ret)
+                                yield from ret
                             else:
                                 yield ret
                         break
