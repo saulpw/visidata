@@ -136,6 +136,7 @@ Sheet.addCommand('gzd', 'delete-cells', 'cursorCol.setValues(onlySelectedRows, o
 Sheet.bindkey('BUTTON2_PRESSED', 'go-mouse')
 Sheet.addCommand('BUTTON2_RELEASED', 'syspaste-cells', 'pasteFromClipboard(visibleCols[cursorVisibleColIndex:], rows[cursorRowIndex:])', 'paste from system clipboard to region starting at cursor')
 Sheet.bindkey('BUTTON2_CLICKED', 'go-mouse')
+Sheet.bindkey('zP', 'syspaste-cells')
 
 Sheet.addCommand('gzy', 'copy-cells', 'copyCells(cursorCol, onlySelectedRows)', 'yank (copy) contents of current column for selected rows to clipboard')
 Sheet.addCommand('gzp', 'setcol-clipboard', 'for r, v in zip(onlySelectedRows, itertools.cycle(vd.memory.clipcells or [None])): cursorCol.setValuesTyped([r], v)', 'set cells of current column for selected rows to last clipboard value')
