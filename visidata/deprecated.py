@@ -29,7 +29,8 @@ def __call__(vd):
 
 @deprecated('1.6')
 def copyToClipboard(value):
-    return visidata.clipboard().copy(value)
+    vd.error("copyToClipboard longer implemented")
+    return visidata.clipboard_copy(value)
 
 
 @deprecated('1.6')

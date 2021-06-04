@@ -169,7 +169,7 @@ class _CommandLog:
 
             contains = lambda s, *substrs: any((a in s) for a in substrs)
             if contains(cmd.execstr, 'pasteFromClipboard'):
-                args = clipboard().paste().strip()
+                args = vd.sysclip_value().strip()
 
 
         comment = vd.currentReplayRow.comment if vd.currentReplayRow else cmd.helpstr
