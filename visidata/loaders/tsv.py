@@ -38,12 +38,10 @@ class TsvSheet(SequenceSheet):
         rowdelim = self.options.row_delimiter
 
         with self.source.open_text() as fp:
-            with Progress(total=filesize(self.source)) as prog:
                 for line in splitter(fp, rowdelim):
                     if not line:
                         continue
 
-                    prog.addProgress(len(line))
                     row = list(line.split(delim))
 
                     if len(row) < self.nVisibleCols:
