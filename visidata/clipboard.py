@@ -147,6 +147,7 @@ class _Clipboard:
 
 
 @VisiData.api
+@asyncthread
 def pasteFromClipboard(vd, cols, rows):
     text = vd.getLastArgs() or clipboard().paste().strip() or vd.error('system clipboard is empty')
 
