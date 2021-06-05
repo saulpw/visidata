@@ -149,7 +149,7 @@ def main_vd():
                     if type(opt.value) is bool:
                         optval = True
                     else:
-                        if i >= len(sys.argv):
+                        if i >= len(sys.argv)-1:
                             vd.error(f'"-{optname}" missing argument')
 
                         optval = sys.argv[i+1]
