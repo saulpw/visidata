@@ -202,6 +202,9 @@ class date(datetime.datetime):
     def __str__(self):
         return self.strftime(options.disp_date_fmt)
 
+    def __hash__(self):
+        return super().__hash__()
+
     def __float__(self):
         return self.timestamp()
 
