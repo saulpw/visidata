@@ -109,6 +109,7 @@ def delete_row(sheet, rowidx):
         oldrow = sheet.rows[rowidx]
         sheet.rowDeleted(oldrow)
 
+    sheet.setModified()
     return oldrow
 
 @Sheet.api

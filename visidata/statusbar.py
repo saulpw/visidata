@@ -3,10 +3,9 @@ import curses
 
 from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, theme, MissingAttrFormatter
 
-
 __all__ = ['StatusSheet', 'status', 'error', 'fail', 'warning', 'debug']
 
-theme('disp_rstatus_fmt', ' {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} {sheet.options.disp_selected_note}{sheet.nSelectedRows}', 'right-side status format string')
+theme('disp_rstatus_fmt', ' {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus} {sheet.options.disp_selected_note}{sheet.nSelectedRows}', 'right-side status format string')
 theme('disp_status_fmt', '{sheet.shortcut}› {sheet.name}| ', 'status line prefix')
 theme('disp_lstatus_max', 0, 'maximum length of left status line')
 theme('disp_status_sep', ' | ', 'separator between statuses')
@@ -22,6 +21,12 @@ theme('color_inactive_status', '8', 'inactive window status bar color')
 BaseSheet.init('longname', lambda: '')
 
 vd.beforeExecHooks.append(lambda sheet, cmd, args, ks: setattr(sheet, 'longname', cmd.longname))
+
+
+@BaseSheet.property
+def modifiedStatus(sheet):
+    return ' [M]' if sheet.hasBeenModified else ''
+
 
 @VisiData.lazy_property
 def statuses(vd):

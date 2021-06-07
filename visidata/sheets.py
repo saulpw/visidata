@@ -1055,31 +1055,39 @@ def allSheetsSheet(vd):
 def sheetsSheet(vd):
     return SheetsSheet("sheets", source=vd.sheets)
 
+
 @VisiData.api
 def quit(vd, *sheets):
-    'Remove *sheets* from sheets stack, asking for confirmation if options.quitguard set (either global or sheet-specific).'
-    if (len(vd.sheets) == len(sheets)) and options.getonly('quitguard', 'global', False):
-        vd.confirm("quit last sheet? ")
+    'Remove *sheets* from sheets stack, asking for confirmation if needed.'
 
     for vs in sheets:
-        if options.getonly('quitguard', vs, False):
-            vd.draw_all()
-            vd.confirm(f'quit guarded sheet "{vs.name}?" ')
+        vs.confirmQuit('quit')
         vs.pane = 0
         vd.remove(vs)
 
 
 @BaseSheet.api
+def confirmQuit(vs, verb='quit'):
+    if vs.options.quitguard:
+        if vs.hasBeenModified:
+            vd.draw_all()
+            vd.confirm(f'{verb} modified sheet "{vs.name}?" ')
+    elif vs.options.getonly('quitguard', vs, False):  # if this sheet is specifically guarded
+        vd.draw_all()
+        vd.confirm(f'{verb} guarded sheet "{vs.name}?" ')
+
+
+@BaseSheet.api
 def preloadHook(sheet):
     'Override to setup for reload().'
-    pass
+    sheet.confirmQuit('reload')
+
+    sheet.hasBeenModified = False
 
 
 @VisiData.api
 def newSheet(vd, name, ncols, **kwargs):
-    vs = Sheet(name, columns=[SettableColumn() for i in range(ncols)], **kwargs)
-    vs.options.quitguard = True
-    return vs
+    return Sheet(name, columns=[SettableColumn() for i in range(ncols)], **kwargs)
 
 
 @Sheet.api

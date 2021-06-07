@@ -94,8 +94,14 @@ class BaseSheet(DrawablePane):
         self._scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
         self.mouseX = 0
         self.mouseY = 0
+        self.hasBeenModified = False
 
         super().__init__(**kwargs)
+
+    def setModified(self):
+        if not self.hasBeenModified:
+            vd.addUndo(setattr, self, 'hasBeenModified', self.hasBeenModified)
+            self.hasBeenModified = True
 
     def __lt__(self, other):
         if self.name != other.name:

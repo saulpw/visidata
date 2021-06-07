@@ -371,6 +371,7 @@ class Column(Extensible):
             self.cellChanged(row, val)
         else:
             self.putValue(row, val)
+        self.sheet.setModified()
 
     def setValueSafe(self, row, value):
         'setValue and ignore exceptions.'

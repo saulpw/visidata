@@ -115,7 +115,10 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
     vd.status('saving %s sheets to %s as %s' % (len(vsheets), givenpath.given, filetype))
 
     if not givenpath.given.endswith('/'):  # forcibly specify save individual files into directory by ending path with /
-        return vd.execAsync(savefunc, givenpath, *vsheets)
+        vd.execAsync(savefunc, givenpath, *vsheets)
+        for vs in vsheets:
+            vs.hasBeenModified = False
+        return
 
     # more than one sheet; either no specific multisave for save filetype, or path ends with /
 
@@ -132,7 +135,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
     for vs in vsheets:
         p = Path((givenpath / vs.name).with_suffix('.'+filetype))
         vd.execAsync(savefunc, p, vs)
-    return
+        vs.hasBeenModified = False
 
 
 @VisiData.api

@@ -25,10 +25,10 @@ Sheet.colorizers += [
 
 @Sheet.api
 def preloadHook(sheet):
+    BaseSheet.preloadHook(sheet)
     sheet._deferredAdds.clear()
     sheet._deferredMods.clear()
     sheet._deferredDels.clear()
-    # how to call the previous preloadHook? Sheet.preloadHook(sheet)
 
 @Sheet.api
 def rowAdded(self, row):
@@ -92,6 +92,7 @@ def addRows(sheet, rows, index=None, undo=True):
 
         if sheet.defer:
             sheet.rowAdded(row)
+    sheet.setModified()
 
     @asyncthread
     def _removeRows():
@@ -138,6 +139,7 @@ def deleteBy(sheet, func, commit=False, undo=True):
 
     if undo:
         vd.addUndo(setattr, sheet, 'rows', oldrows)
+        sheet.setModified()
 
     if ndeleted:
         vd.status('deleted %s %s' % (ndeleted, sheet.rowtype))
@@ -270,6 +272,7 @@ def commit(sheet, *rows):
         vd.confirm('really %s? ' % cstr)
 
     sheet.putChanges()
+    sheet.hasBeenModified = False
 
 
 @Sheet.api

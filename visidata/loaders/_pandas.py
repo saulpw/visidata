@@ -103,6 +103,7 @@ class PandasSheet(Sheet):
             vd.warning(f'Type of {val} does not match column {col.name}. Changing type.')
             col.type = anytype
             col.sheet.df.loc[row.name, col.name] = val
+        self.setModified()
 
     def reload(self):
         import pandas as pd
@@ -282,6 +283,7 @@ class PandasSheet(Sheet):
         self.df.index = pd.RangeIndex(self.nRows)
         self._checkSelectedIndex()
         if undo:
+            self.setModified()
             vd.addUndo(self._deleteRows, range(index, index + len(rows)))
 
     def _deleteRows(self, which):
@@ -303,9 +305,10 @@ class PandasSheet(Sheet):
         # If we use `oldrow` directly, we get errors comparing DataFrame objects
         # when there are multiple deletion commands for the same row index.
         # There may be a better way to handle that case.
-        vd.addUndo(self.addRows, oldrow.to_dict(), rowidx, False)
+        vd.addUndo(self.addRows, oldrow.to_dict(), rowidx, undo=False)
         self._deleteRows(rowidx)
         vd.memory.cliprows = [oldrow]
+        self.setModified()
 
     def deleteBy(self, by):
         '''Delete rows for which func(row) is true.  Returns number of deleted rows.'''
@@ -317,6 +320,7 @@ class PandasSheet(Sheet):
         self.df.index = pd.RangeIndex(self.nRows)
         ndeleted = nRows - self.nRows
 
+        self.setModified()
         vd.status('deleted %s %s' % (ndeleted, self.rowtype))
         return ndeleted
 
