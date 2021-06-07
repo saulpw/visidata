@@ -73,7 +73,7 @@ class Path(os.PathLike):
     'File and path-handling class, modeled on `pathlib.Path`.'
     def __init__(self, given, fp=None, lines=None, filesize=None):
         # Resolve pathname shell variables and ~userdir
-        self.given = os.path.expandvars(os.path.expanduser(given))
+        self.given = os.path.expandvars(os.path.expanduser(str(given)))
         self.fp = fp
         self.lines = lines or []  # shared among all RepeatFile instances
         self.filesize = filesize
