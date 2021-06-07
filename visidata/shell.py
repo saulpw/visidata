@@ -1,5 +1,6 @@
 import os
 import io
+import shutil
 import sys
 import stat
 import locale
@@ -13,7 +14,7 @@ except ImportError:
 
 from visidata import Column, Sheet, LazyComputeRow, asynccache, options, option, globalCommand
 from visidata import Path, ENTER, date, asyncthread, confirm, fail, FileExistsError, VisiData
-from visidata import CellColorizer, RowColorizer, modtime, filesize, vstat
+from visidata import CellColorizer, RowColorizer, modtime, filesize, vstat, Progress
 
 
 option('dir_recurse', False, 'walk source path recursively on DirSheet')
@@ -221,3 +222,15 @@ DirSheet.addCommand(ENTER, 'open-row', 'vd.push(openSource(cursorRow or fail("no
 DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r))', 'open selected files as new sheets')
 DirSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow)', 'open current file in external $EDITOR')
 DirSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*selectedRows)', 'open selected files in external $EDITOR')
+
+DirSheet.addCommand('y', 'copy-row', 'copy_files([cursorRow], inputPath("copy to dest: "))', 'copy file to given directory')
+DirSheet.addCommand('gy', 'copy-selected', 'copy_files(selectedRows, inputPath("copy to dest: ", value=cursorRow.given))', 'copy selected files to given directory')
+
+@DirSheet.api
+@asyncthread
+def copy_files(sheet, paths, dest):
+    dest = Path(dest)
+    dest.is_dir() or vd.fail('target must be directory')
+    vd.status('copying %s %s to %s' % (len(paths), sheet.rowtype, dest))
+    for p in Progress(paths, gerund='copying'):
+        shutil.copyfile(p, dest/(p.parts[-1]))
