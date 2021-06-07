@@ -55,6 +55,11 @@ class FileProgress:
         self.fp.__enter__()
         return self
 
+    def __next__(self):
+        r = next(self.fp)
+        self.prog.addProgress(len(r))
+        return r
+
     def __iter__(self):
         if not self.prog:
             yield from self.fp
