@@ -286,8 +286,11 @@ def sync(self, *joiningThreads):
 
 min_thread_time_s = 0.10 # only keep threads that take longer than this number of seconds
 
-def open_pyprof(p):
-    return ProfileSheet(p.name, p.open_bytes())
+@VisiData.api
+def open_pyprof(vd, p):
+    import pstats
+    return ProfileStatsSheet(p.name, source=pstats.Stats(p.given).stats)
+
 
 @VisiData.api
 def toggleProfiling(vd, t):
@@ -332,6 +335,7 @@ class ThreadProfiler:
             if elapsed_s(self.thread) < min_thread_time_s:
                 vd.threads.remove(self.thread)
 
+
 class ProfileSheet(Sheet):
     rowtype = 'callsites' # rowdef: profiler_entry
     columns = [
@@ -356,6 +360,7 @@ class ProfileSheet(Sheet):
             self.rows = self.source.getstats()
         else:
             self.rows = self.source
+
         self.orderBy(None, self.column('inlinetime_us'), reverse=True)
         self.callers = collections.defaultdict(list)  # [row.code] -> list(code)
 
@@ -378,6 +383,25 @@ class ProfileSheet(Sheet):
             return ProfileSheet(codestr(row.code)+"_"+col.name, source=val)
         vd.warning("no callers")
 
+
+class ProfileStatsSheet(Sheet):
+    rowtype = 'functions' # rowdef: list from pstats.Stats.stats
+    columns = [
+        ItemColumn('pathname', 0),
+        ItemColumn('line', 1, type=int),
+        ItemColumn('func', 2),
+        ItemColumn('ncalls', 3, type=int),
+        ItemColumn('primitive_calls', 4, type=int, width=0),
+        ItemColumn('tottime', 5, type=float),
+        ItemColumn('cumtime', 6, type=float),
+        ItemColumn('callers', 7),
+    ]
+    def reload(self):
+        self.rows = list((k+v) for k,v in self.source.items())
+
+    def openRow(self, row):
+        return ProfileStatsSheet('', source=row[7])
+
 def codestr(code):
     if isinstance(code, str):
         return code
@@ -389,6 +413,8 @@ ThreadsSheet.addCommand(None, 'add-row', 'fail("cannot add new rows on Threads S
 
 ProfileSheet.addCommand('z^S', 'save-profile', 'source.dump_stats(input("save profile to: ", value=name+".prof"))', 'save profile')
 ProfileSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow.code.co_filename, "+%s" % cursorRow.code.co_firstlineno)', 'open current file at referenced row in external $EDITOR')
+ProfileStatsSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow[0], "+%s" % cursorRow[1])', 'open current file at referenced row in external $EDITOR')
+
 globalCommand('^_', 'toggle-profile', 'toggleProfiling(threading.current_thread())', 'turn profiling on for main process')
 
 BaseSheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads or fail("no active threads on this sheet"))', 'abort all threads on current sheet')
