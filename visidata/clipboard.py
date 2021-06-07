@@ -146,7 +146,7 @@ Sheet.addCommand('gzp', 'setcol-clipboard', 'for r, v in zip(onlySelectedRows, i
 Sheet.addCommand('Y', 'syscopy-row', 'syscopyCells(visibleCols, [cursorRow])', 'yank (copy) current row to system clipboard (using options.clipboard_copy_cmd)')
 
 Sheet.addCommand('gY', 'syscopy-selected', 'syscopyCells(visibleCols, onlySelectedRows)', 'yank (copy) selected rows to system clipboard (using options.clipboard_copy_cmd)')
-Sheet.addCommand('zY', 'syscopy-cell', 'syscopyCells([cursorCol], [cursorRow], filetype="tsv")', 'yank (copy) current cell to system clipboard (using options.clipboard_copy_cmd)')
+Sheet.addCommand('zY', 'syscopy-cell', 'syscopyCells([cursorCol], [cursorRow], filetype="txt")', 'yank (copy) current cell to system clipboard (using options.clipboard_copy_cmd)')
 Sheet.addCommand('gzY', 'syscopy-cells', 'syscopyCells([cursorCol], onlySelectedRows, filetype="tsv")', 'yank (copy) contents of current column from selected rows to system clipboard (using options.clipboard_copy_cmd')
 
 Sheet.addCommand('x', 'cut-row', 'copyRows([sheet.delete_row(cursorRowIndex)]); defer and cursorDown(1)', 'delete (cut) current row and move it to clipboard')
