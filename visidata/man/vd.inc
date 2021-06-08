@@ -1,4 +1,4 @@
-.Dd May 03, 2021
+.Dd June 07, 2021
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -110,6 +110,8 @@ go all the way to the left/bottom/top/right of sheet
 go all the way to the bottom/top of sheet
 .It Ic "^B  ^F"
 scroll one page back/forward
+.It Ic "^Left ^Right"
+scroll one page left/right
 .It Ic "zz"
 scroll current row to center of screen
 .Pp
@@ -292,14 +294,20 @@ append blank row/column; appended columns cannot be copied to clipboard
 delete current/selected row(s)
 .It Ic "  y   gy"
 .No yank (copy) current/all selected row(s) to clipboard in Sy Memory Sheet
+.It Ic "  x  gx"
+.No cut (copy and delete) current/all selected row(s) to clipboard in Sy Memory Sheet
 .It Ic " zy  gzy"
 .No yank (copy) contents of current column for current/selected row(s) to clipboard in Sy Memory Sheet
 .It Ic " zd  gzd"
 .No set contents of current column for current/selected row(s) to Sy options.null_value
+.It Ic " zx gzx"
+.No cut (copy and delete) contents of current column for current/selected row(s) to clipboard in Sy Memory Sheet
 .It Ic "  p    P"
 paste clipboard rows after/before current row
 .It Ic " zp  gzp"
 set cells of current column for current/selected row(s) to last clipboard value
+.It Ic " zP  gzP"
+paste to cells of current column for current/selected row(s) using the system clipboard
 .It Ic "  Y   gY"
 .No yank (copy) current/all selected row(s) to system clipboard (using Sy options.clipboard_copy_cmd Ns )
 .It Ic " zY  gzY"
@@ -701,6 +709,8 @@ save selected or all sheets
 edit option at current row
 .It Ic "d"
 remove option override for this context
+.It Ic "^S"
+.No save option configuration to Sy foo.visidatarc
 .El
 .
 .Ss CommandLog (Shift+D)
@@ -940,23 +950,7 @@ URL schemes are also supported:
 For a list of all remaining formats supported by VisiData, see https://visidata.org/formats.
 .Pp
 In addition,
-.Sy .zip Ns , Sy .gz Ns , Sy .bz2 Ns , Sy .xz Ns , and Sy .zst No files are decompressed on the fly.
-.Pp
-.
-.Sh SUPPORTED OUTPUT FORMATS
-These are the supported savers:
-.Pp
-.Bl -inset -compact -offset xxx
-.It Sy tsv No (tab-separated value)
-.It Sy csv No (comma-separated value)
-.It Sy json No (one object with all rows)
-.It Sy jsonl Ns / Ns Sy ndjson Ns / Ns Sy ldjson No (one object per line/row)
-.Bl -inset -compact -offset xxx
-.It All expanded subcolumns must be closed (with Sy "\&)" Ns ) to retain the same structure.
-.El
-.It Sy sqlite No (save to source with Sy z^S Ns )
-.It Sy md No (markdown table)
-.El
+.Sy .zip Ns , Sy .gz Ns , Sy .bz2 Ns , Sy .xz Ns , Sy ,zstd Ns , and Sy .zst No files are decompressed on the fly.
 .Pp
 .
 .Sh AUTHOR
