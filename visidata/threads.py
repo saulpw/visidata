@@ -13,8 +13,8 @@ from visidata import *
 __all__ = ['Progress', 'asynccache', 'async_deepcopy', 'elapsed_s', 'cancelThread', 'ThreadsSheet', 'ProfileSheet', 'codestr', 'asyncsingle']
 
 
-option('profile', '', 'filename to save binary profiling data')
-option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
+vd.option('profile', False, 'enable profiling on threads')
+vd.option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
 
 theme('color_working', 'green', 'color of system running smoothly')
 
@@ -297,36 +297,26 @@ def toggleProfiling(vd, t):
     if not t.profile:
         t.profile = cProfile.Profile()
         t.profile.enable()
-        if not options.profile:
-            options.set('profile', 'vdprofile')
+        if not vd.options.profile:
+            vd.options.set('profile', True)
     else:
         t.profile.disable()
-        t.profile = None
-        options.set('profile', '')
-    vd.status('profiling ' + ('ON' if t.profile else 'OFF'))
+        vd.options.set('profile', False)
+    vd.status('profiling ' + ('ON' if vd.options.profile else 'OFF'))
 
 
 class ThreadProfiler:
-    numProfiles = 0
-
     def __init__(self, thread):
         self.thread = thread
-        if options.profile:
-            self.thread.profile = cProfile.Profile()
-        else:
-            self.thread.profile = None
-        ThreadProfiler.numProfiles += 1
-        self.profileNumber = ThreadProfiler.numProfiles
+        self.thread.profile = cProfile.Profile()
 
     def __enter__(self):
-        if self.thread.profile:
+        if vd.options.profile:
             self.thread.profile.enable()
         return self
 
     def __exit__(self, exc_type, exc_val, tb):
-        if self.thread.profile:
-            self.thread.profile.disable()
-            self.thread.profile.dump_stats(options.profile + str(self.profileNumber))
+        self.thread.profile.disable()
 
         if exc_val:
             self.thread.exception = exc_val
