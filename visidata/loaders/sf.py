@@ -98,11 +98,11 @@ class StaticFrameSheet(Sheet):
 
         # reset the index here
         if frame.index._map: # if it is not an IndexAutoFactory
-            frame = frame.unset_index(drop=True)
+            frame = frame.unset_index()
 
         # VisiData assumes string column names
         if frame.columns.dtype != str:
-            frame = frame.relabel(columns=columns.astype(str))
+            frame = frame.relabel(columns=frame.columns.astype(str))
 
         dtypes = frame.dtypes
 
@@ -303,8 +303,9 @@ class StaticFrameSheet(Sheet):
         '''Delete all selected rows.'''
         self.deleteBy(self._selectedMask)
 
-def view_pandas(df):
-    run(StaticFrameSheet('', source=df))
+def view_sf(frame):
+    # NOTE: could identify and unpack a Bus, Quilt, or Batch
+    run(StaticFrameSheet('', source=frame))
 
 
 # Override with vectorized implementations
@@ -318,6 +319,9 @@ StaticFrameSheet.addCommand(None, 'unselect-before', 'unselectByIndex(end=cursor
 StaticFrameSheet.addCommand(None, 'stoggle-after', 'toggleByIndex(start=cursorRowIndex)', 'toggle selection of rows from cursor to bottom')
 StaticFrameSheet.addCommand(None, 'select-after', 'selectByIndex(start=cursorRowIndex)', 'select all rows from cursor to bottom')
 StaticFrameSheet.addCommand(None, 'unselect-after', 'unselectByIndex(start=cursorRowIndex)', 'unselect all rows from cursor to bottom')
+
+
+# TODO: update with SF args
 StaticFrameSheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=StaticFrameAdapter(sheet.df.sample(nrows or nRows)); vd.push(vs)', 'open duplicate sheet with a random population subset of N rows'),
 
 # Handle the regex selection family of commands through a single method,
@@ -328,4 +332,4 @@ StaticFrameSheet.addCommand('g|', 'select-cols-regex', 'selectByRegex(regex=inpu
 StaticFrameSheet.addCommand('g\\', 'unselect-cols-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=visibleCols, unselect=True)', 'unselect rows matching regex in any visible column')
 
 # Override with a pandas/dataframe-aware implementation
-StaticFrameSheet.addCommand('"', 'dup-selected', 'vs=StaticFrameSheet(sheet.name, "selectedref", source=selectedRows.df); vd.push(vs)', 'open duplicate sheet with only selected rows'),
+StaticFrameSheet.addCommand('"', 'dup-selected', 'vs=StaticFrameSheet(sheet.name, "selectedref", source=selectedRows.frame); vd.push(vs)', 'open duplicate sheet with only selected rows'),

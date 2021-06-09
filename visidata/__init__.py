@@ -122,6 +122,7 @@ from .loaders.spss import *
 from .loaders.xml import *
 from .loaders.yaml import *
 from .loaders._pandas import *
+from .loaders.sf import *
 from .loaders.graphviz import *
 from .loaders.npy import *
 from .loaders.usv import *
