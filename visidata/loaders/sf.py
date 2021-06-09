@@ -26,6 +26,22 @@ class StaticFrameAdapter:
             raise AttributeError(f"'{self.__class__.__name__}' has no attribute '{k}'")
         return getattr(self.frame, k)
 
+    def pop(self, k):
+        row = self.frame.iloc[k]
+        self.frame = self.frame.drop.iloc[k]
+        return row.values.tolist()
+
+    def insert(self, k, row):
+        import static_frame as sf
+        f = sf.Frame.from_records([row], columns=self.frame.columns)
+        self.frame = sf.Frame.from_concat((
+                self.frame.iloc[0: k],
+                f,
+                self.frame.iloc[k:],
+                ), index=sf.IndexAutoFactory)
+
+
+
 class StaticFrameSheet(Sheet):
     '''Sheet sourced from a static_frame.Frame
 
@@ -134,20 +150,18 @@ class StaticFrameSheet(Sheet):
         # NOTE: SF does not yet support ascending per column yet
         self.rows = self.rows.sort_values(by_cols)
 
-    # NOTE: maybe this method is not needed
     def _checkSelectedIndex(self):
         import static_frame as sf
         if self._selectedMask.index is not self.frame.index:
             # selection is no longer valid
             vd.status('sf.Frame.index updated, clearing {} selected rows'
                       .format(self._selectedMask.sum()))
-            self._selectedMask = sf.Series(False, index=self.frame.index)
+            self._selectedMask = sf.Series.from_element(False, index=self.frame.index)
 
     def rowid(self, row):
         return getattr(row, 'name', None) or ''
 
-    # Base selection API. Refer to GH #266: re-implement the selection API by
-    # keeping a boolean sf.Series.from_element indicating the selected rows.
+
     def isSelected(self, row):
         if row is None:
             return False
@@ -212,7 +226,6 @@ class StaticFrameSheet(Sheet):
 
 
 
-    # TODO: below
     @asyncthread
     def selectByRegex(self, regex, columns, unselect=False):
         '''
@@ -220,16 +233,17 @@ class StaticFrameSheet(Sheet):
         matching rows to the selection. If unselect is True, remove from the
         active selection instead.
         '''
-        import static_frame as sf
-        case_sensitive = 'I' not in vd.options.regex_flags
-        masks = pd.DataFrame([
-            self.frame[col.name].astype(str).str.contains(pat=regex, case=case_sensitive, regex=True)
-            for col in columns
-        ])
-        if unselect:
-            self._selectedMask = self._selectedMask & ~masks.any()
-        else:
-            self._selectedMask = self._selectedMask | masks.any()
+        raise NotImplementedError()
+        # import static_frame as sf
+        # case_sensitive = 'I' not in vd.options.regex_flags
+        # masks = pd.DataFrame([
+        #     self.frame[col.name].astype(str).str.contains(pat=regex, case=case_sensitive, regex=True)
+        #     for col in columns
+        # ])
+        # if unselect:
+        #     self._selectedMask = self._selectedMask & ~masks.any()
+        # else:
+        #     self._selectedMask = self._selectedMask | masks.any()
 
     def addUndoSelection(self):
         vd.addUndo(undoAttrCopyFunc([self], '_selectedMask'))
@@ -242,31 +256,37 @@ class StaticFrameSheet(Sheet):
 
     def newRows(self, n):
         '''
-        Return n rows of empty data. Let pandas decide on the most
-        appropriate missing value (NaN, NA, etc) based on the underlying
-        DataFrame's dtypes.
+        Return n rows of empty data.
         '''
-
         import static_frame as sf
-        return pd.DataFrame({
-            col: [None] * n for col in self.frame.columns
-        }).astype(self.frame.dtypes.to_dict(), errors='ignore')
+        def items():
+            for col, dtype in zip(self.frame.columns, self.frame.dtypes):
+                array = np.empty(n, dtype=dtype)
+                array.flags.writeable = False
+                yield col, array
+        return sf.Frame.from_items(items())
 
     def addRows(self, rows, index=None, undo=True):
         import static_frame as sf
         if index is None:
-            self.frame = self.frame.append(pd.DataFrame(rows))
+            index = len(self.frame) # needed for undo
+            f = sf.Frame.from_records(rows, columns=self.frame.columns)
+            self.frame = sf.Frame.from_concat(self.frame, f, index=sf.IndexAutoFactory)
         else:
-            self.frame = pd.concat((self.frame.iloc[0:index], pd.DataFrame(rows), self.frame.iloc[index:]))
-        self.frame.index = pd.RangeIndex(self.nRows)
+            f = sf.Frame.from_records(rows, columns=self.frame.columns)
+            self.frame = sf.Frame.from_concat((
+                    self.frame.iloc[0: index],
+                    f,
+                    self.frame.iloc[index:],
+                    ), index=sf.IndexAutoFactory)
+
         self._checkSelectedIndex()
         if undo:
             vd.addUndo(self._deleteRows, range(index, index + len(rows)))
 
     def _deleteRows(self, which):
         import static_frame as sf
-        self.frame.drop(which, inplace=True)
-        self.frame.index = pd.RangeIndex(self.nRows)
+        self.frame = self.frame.drop.iloc[which].reindex(sf.IndexAutoFactory)
         self._checkSelectedIndex()
 
     def addRow(self, row, index=None):
@@ -275,14 +295,9 @@ class StaticFrameSheet(Sheet):
 
     def delete_row(self, rowidx):
         import static_frame as sf
-        oldrow = self.frame.iloc[rowidx:rowidx+1]
+        oldrow = self.frame.iloc[rowidx].values.tolist() # a series
 
-        # Use to_dict() here to work around an edge case when applying undos.
-        # As an action is undone, its entry gets removed from the cmdlog sheet.
-        # If we use `oldrow` directly, we get errors comparing DataFrame objects
-        # when there are multiple deletion commands for the same row index.
-        # There may be a better way to handle that case.
-        vd.addUndo(self.addRows, oldrow.to_dict(), rowidx, False)
+        vd.addUndo(self.addRows, [oldrow], rowidx, False)
         self._deleteRows(rowidx)
         vd.memory.cliprows = [oldrow]
 
@@ -291,9 +306,9 @@ class StaticFrameSheet(Sheet):
         import static_frame as sf
         oldidx = self.cursorRowIndex
         nRows = self.nRows
-        vd.addUndo(setattr, self, 'df', self.frame.copy())
-        self.frame = self.frame[~by]
-        self.frame.index = pd.RangeIndex(self.nRows)
+        vd.addUndo(setattr, self, 'frame', self.frame)
+
+        self.frame = self.frame[~by].reindex(sf.IndexAutoFactory)
         ndeleted = nRows - self.nRows
 
         vd.status('deleted %s %s' % (ndeleted, self.rowtype))
@@ -321,8 +336,7 @@ StaticFrameSheet.addCommand(None, 'select-after', 'selectByIndex(start=cursorRow
 StaticFrameSheet.addCommand(None, 'unselect-after', 'unselectByIndex(start=cursorRowIndex)', 'unselect all rows from cursor to bottom')
 
 
-# TODO: update with SF args
-StaticFrameSheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=StaticFrameAdapter(sheet.df.sample(nrows or nRows)); vd.push(vs)', 'open duplicate sheet with a random population subset of N rows'),
+StaticFrameSheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=StaticFrameAdapter(sheet.frame.sample(nrows or nRows)); vd.push(vs)', 'open duplicate sheet with a random population subset of N rows'),
 
 # Handle the regex selection family of commands through a single method,
 # since the core logic is shared
