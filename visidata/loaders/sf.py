@@ -131,9 +131,6 @@ class StaticFrameSheet(Sheet):
                 setter=self.setValue
             ))
 
-        # if self.columns[0].name == 'index': # if the frame contains an index column
-        #     self.column('index').hide()
-
         self.rows = StaticFrameAdapter(frame)
         self._selectedMask = sf.Series.from_element(False, index=frame.index)
 
@@ -318,9 +315,30 @@ class StaticFrameSheet(Sheet):
         '''Delete all selected rows.'''
         self.deleteBy(self._selectedMask)
 
-def view_sf(frame):
-    # NOTE: could identify and unpack a Bus, Quilt, or Batch
-    run(StaticFrameSheet('', source=frame))
+
+
+class StaticFrameIndexSheet(IndexSheet):
+    rowtype = 'sheets'
+    columns = [
+        Column('sheet', getter=lambda col,row: row.source.name),
+        ColumnAttr('name', width=0),
+        ColumnAttr('nRows', type=int),
+        ColumnAttr('nCols', type=int),
+    ]
+
+    nKeys = 1
+    def iterload(self):
+        for sheetname in self.source.keys():
+            yield StaticFrameSheet(self.name, sheetname, source=self.source[sheetname])
+
+
+
+def view_sf(container):
+    import static_frame as sf
+    if isinstance(container, sf.Bus):
+        run(StaticFrameIndexSheet('', source=container))
+    else:
+        run(StaticFrameSheet('', source=container))
 
 
 # Override with vectorized implementations
