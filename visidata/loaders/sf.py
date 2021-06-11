@@ -334,6 +334,7 @@ class StaticFrameIndexSheet(IndexSheet):
 
 
 def view_sf(container):
+    import static_frame as sf
     # multi-Frame containers
     if isinstance(container, sf.Bus):
         run(StaticFrameIndexSheet('', source=container))
