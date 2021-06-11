@@ -52,8 +52,10 @@ class StaticFrameSheet(Sheet):
 
     def dtype_to_type(self, dtype):
         import numpy as np
-        # if np.issubdtype(dtype, np.str):
-        #     return str # NOTE: do we need this?
+        if dtype == bool:
+            return bool
+        if dtype.kind == 'U':
+            return str
         if np.issubdtype(dtype, np.integer):
             return int
         if np.issubdtype(dtype, np.floating):
