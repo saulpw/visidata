@@ -194,7 +194,7 @@ class OptionsObject:
                         objname = self._opts.objname(obj)
                         vd.cmdlog.addRow(vd.cmdlog.newRow(sheet=objname, row=optname,
                                     keystrokes='', input=str(value),
-                                    longname='set-option'))
+                                    longname='set-option', undofuncs=[]))
         else:
             curval = None
             vd.warning('setting unknown option %s' % optname)
