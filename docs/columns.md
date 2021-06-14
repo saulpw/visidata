@@ -55,6 +55,13 @@ Command    Type
 
 Columns usually begin as untyped. Odd results while working with numerical or datetime data is usually due to values being considered as strings, and the problem is solved by setting the correct type.
 
+The `currency` type filters out any non-float characters, and then parses the remainder of the cell value as a float.
+The reasons to prefer using `float` over `currency`, is performance (it is quite a bit slower than native parsing with `float`), or if any non-float characters should get reported as an error.
+
+The `date` type parses dates into ISO8601 format. Those columns can then be used in mathematical calculations, and the calculations are interpreted for dates. E.g. 2020-01-01 + 1, is 2020-01-02.
+
+The `vlen` type formats the cell value to the length of the content. For example, if the cell content is a list of length 3, then when `vlen` typed it will display a value of 3.
+
 The following example uses the file [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
 
 <div class="asciicast">
