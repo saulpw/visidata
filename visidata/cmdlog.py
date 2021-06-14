@@ -163,7 +163,7 @@ class _CommandLog:
 
         colname, rowname, sheetname = '', '', None
         if sheet and not (cmd.longname.startswith('open-') and not cmd.longname in ('open-row', 'open-cell')):
-            sheetname = sheet
+            sheetname = sheet.name
 
             colname, rowname = sheet.commandCursor(cmd.execstr)
 
