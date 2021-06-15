@@ -147,7 +147,7 @@ class Path(os.PathLike):
             return self.rfile
 
         if self.fp:
-            self.rfile = RepeatFile(fp=self.fp)
+            self.rfile = RepeatFile(self.fp)
             return self.rfile
 
         if 't' not in mode:
@@ -174,7 +174,7 @@ class Path(os.PathLike):
             kwargs['errors'] = kwargs.get('encoding_errors', options.encoding_errors)
 
         if self.lines:
-            return RepeatFile(iter_lines=self.lines).read()
+            return RepeatFile(self.lines).read()
         elif self.fp:
             return self.fp.read()
         else:
@@ -260,9 +260,7 @@ class Path(os.PathLike):
 
 
 class RepeatFile:
-    def __init__(self, *, fp=None, iter_lines=None):
-        'Provide either fp or iter_lines, and lines will be filled from it.'
-        self.fp = fp
+    def __init__(self, iter_lines):
         self.iter_lines = iter_lines
         self.lines = []
         self.iter = RepeatFileIter(self)
@@ -318,13 +316,6 @@ class RepeatFileIter:
                 self.rf.lines.append(r)
             except StopIteration:
                 self.rf.iter_lines = None
-                raise
-        elif self.rf.fp:
-            try:
-                r = next(self.rf.fp)
-                self.rf.lines.append(r)
-            except StopIteration:
-                self.rf.fp = None
                 raise
         else:
             raise StopIteration()
