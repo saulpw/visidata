@@ -14,6 +14,9 @@ def open_vds(vd, p):
 def save_vds(vd, p, *sheets):
     'Save in custom VisiData format, preserving columns and their attributes.'
 
+    def col_serialized_target(col_class):
+        return Column if issubclass(col_class, SettableColumn) else col_class
+
     with p.open_text(mode='w') as fp:
         for vs in sheets:
             # class and attrs for vs
@@ -23,7 +26,7 @@ def save_vds(vd, p, *sheets):
             # class and attrs for each column in vs
             for col in vs.visibleCols:
                 d = col.__getstate__()
-                d['col'] = type(col).__name__
+                d['col'] = col_serialized_target(type(col)).__name__
                 fp.write('#'+json.dumps(d)+NL)
 
             with Progress(gerund='saving'):
