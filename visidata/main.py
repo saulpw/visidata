@@ -232,8 +232,9 @@ def main_vd():
 
     if not args.play:
         if args.batch:
-            vd.push(sources[0])
-            sources[0].reload()
+            if sources:
+                vd.push(sources[0])
+                sources[0].reload()
 
         for startsheets, startrow, startcol in start_positions:
             sheets = []  # sheets to apply startrow:startcol to
