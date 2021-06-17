@@ -234,12 +234,13 @@ class StaticFrameSheet(Sheet):
         import static_frame as sf
         import re
 
+        columns = [c.name for c in columns]
         flags = re.I if 'I' in vd.options.regex_flags else None
         masks = self.frame[columns].via_re(regex, flags).search()
         if unselect:
-            self._selectedMask = self._selectedMask & ~masks.any()
+            self._selectedMask = self._selectedMask & ~masks.any(axis=1)
         else:
-            self._selectedMask = self._selectedMask | masks.any()
+            self._selectedMask = self._selectedMask | masks.any(axis=1)
 
     def addUndoSelection(self):
         vd.addUndo(undoAttrCopyFunc([self], '_selectedMask'))
