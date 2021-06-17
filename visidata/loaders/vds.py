@@ -29,7 +29,7 @@ def save_vds(vd, p, *sheets):
             with Progress(gerund='saving'):
                 for row in vs.iterdispvals(*vs.visibleCols, format=False):
                     d = {col.name:val for col, val in row.items()}
-                    fp.write(json.dumps(d)+NL)
+                    fp.write(json.dumps(d, default=str)+NL)
 
 
 class VdsIndexSheet(IndexSheet):
