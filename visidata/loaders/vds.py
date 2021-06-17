@@ -23,7 +23,10 @@ def save_vds(vd, p, *sheets):
             # class and attrs for each column in vs
             for col in vs.visibleCols:
                 d = col.__getstate__()
-                d['col'] = type(col).__name__
+                if isinstance(col, SettableColumn):
+                    d['col'] = 'Column'
+                else:
+                    d['col'] = type(col).__name__
                 fp.write('#'+json.dumps(d)+NL)
 
             with Progress(gerund='saving'):
