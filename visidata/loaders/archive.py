@@ -84,4 +84,4 @@ class TarSheet(Sheet):
 ZipSheet.addCommand('x', 'extract-file', 'extract(cursorRow)')
 ZipSheet.addCommand('gx', 'extract-selected', 'extract(*onlySelectedRows)')
 ZipSheet.addCommand('zx', 'extract-file-to', 'extract(cursorRow, path=inputPath("extract to: "))')
-ZipSheet.addCommand('gzx', 'extract-selected-to', 'extract(*onlySelectedRows, path=inputPath("extract %d files to: " % nSelected))')
+ZipSheet.addCommand('gzx', 'extract-selected-to', 'extract(*onlySelectedRows, path=inputPath("extract %d files to: " % nSelectedRows))')
