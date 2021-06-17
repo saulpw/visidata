@@ -371,4 +371,5 @@ StaticFrameSheet.addCommand('g|', 'select-cols-regex', 'selectByRegex(regex=inpu
 StaticFrameSheet.addCommand('g\\', 'unselect-cols-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=visibleCols, unselect=True)', 'unselect rows matching regex in any visible column')
 
 # Override with a pandas/dataframe-aware implementation
-StaticFrameSheet.addCommand('"', 'dup-selected', 'vs=StaticFrameSheet(sheet.name, "selectedref", source=selectedRows.frame); vd.push(vs)', 'open duplicate sheet with only selected rows'),
+StaticFrameSheet.addCommand('"', 'dup-selected', 'vs=StaticFrameSheet(sheet.name, "selectedref", source=selectedRows.frame); vd.push(vs)', 'open duplicate sheet with only selected rows')
+
