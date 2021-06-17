@@ -136,7 +136,6 @@ class StaticFrameSheet(Sheet):
         self.rows = StaticFrameAdapter(frame)
         self._selectedMask = sf.Series.from_element(False, index=frame.index)
 
-
     @asyncthread
     def sort(self):
         '''Sort rows according to the current self._ordering.'''
@@ -163,7 +162,6 @@ class StaticFrameSheet(Sheet):
     def rowid(self, row):
         return getattr(row, 'name', None) or ''
 
-
     def isSelected(self, row):
         if row is None:
             return False
@@ -178,7 +176,7 @@ class StaticFrameSheet(Sheet):
     def unselectRow(self, row):
         self._checkSelectedIndex()
         is_selected = self._selectedMask.loc[row.name]
-        self._selectedMask = self._selectedMask.assign.loc[row.name](True)
+        self._selectedMask = self._selectedMask.assign.loc[row.name](False)
         return is_selected
 
     @property
@@ -226,8 +224,6 @@ class StaticFrameSheet(Sheet):
         self._checkSelectedIndex()
         self._selectedMask = self._selectedMask.assign.iloc[mask](selected)
 
-
-
     @asyncthread
     def selectByRegex(self, regex, columns, unselect=False):
         '''
@@ -235,17 +231,15 @@ class StaticFrameSheet(Sheet):
         matching rows to the selection. If unselect is True, remove from the
         active selection instead.
         '''
-        raise NotImplementedError()
-        # import static_frame as sf
-        # case_sensitive = 'I' not in vd.options.regex_flags
-        # masks = pd.DataFrame([
-        #     self.frame[col.name].astype(str).str.contains(pat=regex, case=case_sensitive, regex=True)
-        #     for col in columns
-        # ])
-        # if unselect:
-        #     self._selectedMask = self._selectedMask & ~masks.any()
-        # else:
-        #     self._selectedMask = self._selectedMask | masks.any()
+        import static_frame as sf
+        import re
+
+        flags = re.I if 'I' in vd.options.regex_flags else None
+        masks = self.frame[columns].via_re(regex, flags).search()
+        if unselect:
+            self._selectedMask = self._selectedMask & ~masks.any()
+        else:
+            self._selectedMask = self._selectedMask | masks.any()
 
     def addUndoSelection(self):
         vd.addUndo(undoAttrCopyFunc([self], '_selectedMask'))
