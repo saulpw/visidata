@@ -2,13 +2,16 @@ from functools import partial
 
 from visidata import *
 
+# Commands known to not work
+# ^ Rename current column (and related commands; fails with view_pandas)
+# " Create new sheet of selected rows (works with view_pandas)
+
 class StaticFrameAdapter:
 
     def __init__(self, frame):
         import static_frame as sf
         if not isinstance(frame, sf.Frame):
             vd.fail('%s is not a StaticFrame Frame' % type(frame).__name__)
-
         self.frame = frame
 
     def __len__(self):
@@ -41,7 +44,6 @@ class StaticFrameAdapter:
                 ), index=sf.IndexAutoFactory)
 
 
-
 class StaticFrameSheet(Sheet):
     '''Sheet sourced from a static_frame.Frame
 
@@ -52,16 +54,17 @@ class StaticFrameSheet(Sheet):
 
     def dtype_to_type(self, dtype):
         import numpy as np
+
         if dtype == bool:
             return bool
         if dtype.kind == 'U':
             return str
+        if dtype.kind == 'M':
+            return date
         if np.issubdtype(dtype, np.integer):
             return int
         if np.issubdtype(dtype, np.floating):
             return float
-        if np.issubdtype(dtype, np.datetime64):
-            return date
         return anytype
 
     @property
@@ -320,7 +323,7 @@ class StaticFrameSheet(Sheet):
 class StaticFrameIndexSheet(IndexSheet):
     rowtype = 'sheets'
     columns = [
-        Column('sheet', getter=lambda col,row: row.source.name),
+        Column('sheet', getter=lambda col, row: row.source.name),
         ColumnAttr('name', width=0),
         ColumnAttr('nRows', type=int),
         ColumnAttr('nCols', type=int),
