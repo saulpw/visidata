@@ -268,12 +268,23 @@ class StaticFrameSheet(Sheet):
 
     def addRows(self, rows, index=None, undo=True):
         import static_frame as sf
+
+        # identify empty rows and expand them to column width with None
+        rows_exp = []
+        for row in rows:
+            if len(row) == 0:
+                rows_exp.append(
+                        list(None for _ in range(len(self.frame.columns)))
+                        )
+            else:
+                rows_exp.append(row)
+
         if index is None:
             index = len(self.frame) # needed for undo
-            f = sf.Frame.from_records(rows, columns=self.frame.columns)
+            f = sf.Frame.from_records(rows_exp, columns=self.frame.columns)
             self.frame = sf.Frame.from_concat(self.frame, f, index=sf.IndexAutoFactory)
         else:
-            f = sf.Frame.from_records(rows, columns=self.frame.columns)
+            f = sf.Frame.from_records(rows_exp, columns=self.frame.columns)
             self.frame = sf.Frame.from_concat((
                     self.frame.iloc[0: index],
                     f,
