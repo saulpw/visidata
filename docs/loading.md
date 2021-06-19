@@ -97,7 +97,7 @@ To load files from within a VisiData session, press `o` and enter a filepath.
 
 ---
 
-## [How to convert a dataset from one supported filetype into another](#convert) {#convert}
+## How to convert a dataset from one supported filetype into another
 
 ~~~
 vd -b countries.fixed -o countries.tsv
