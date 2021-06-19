@@ -4,7 +4,6 @@ from visidata import *
 
 # Commands known to not work
 # ^ Rename current column (and related commands; fails with view_pandas)
-# " Create new sheet of selected rows (works with view_pandas)
 
 class StaticFrameAdapter:
 
@@ -89,11 +88,13 @@ class StaticFrameSheet(Sheet):
         column's type as needed.
         '''
         dtype_old = col.sheet.frame.dtypes[col.name]
-        frame = col.sheet.frame.assign.loc[row.name, col.name](val)
-        dtype_new = frame.dtypes[col.name]
+        f = col.sheet.frame.assign.loc[row.name, col.name](val)
+        dtype_new = f.dtypes[col.name]
         if dtype_old != dtype_new:
             vd.warning(f'Type of {val} does not match column {col.name}. Changing type.')
             col.type = self.dtype_to_type(dtype_new)
+        # assign back to frame, convert to StaticFrameAdapter
+        self.rows = StaticFrameAdapter(f)
 
     def reload(self):
         import static_frame as sf
