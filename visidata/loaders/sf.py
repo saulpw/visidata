@@ -22,7 +22,7 @@ class StaticFrameAdapter:
     def __getitem__(self, k):
         if isinstance(k, slice):
             return StaticFrameAdapter(self.frame.iloc[k])
-        return self.frame.iloc[k]
+        return self.frame.iloc[k] # return a Series
 
     def __getattr__(self, k):
         if 'frame' not in self.__dict__:
@@ -97,6 +97,7 @@ class StaticFrameSheet(Sheet):
 
     def reload(self):
         import static_frame as sf
+
         if isinstance(self.source, sf.Frame):
             frame = self.source
         elif isinstance(self.source, Path):
@@ -117,7 +118,7 @@ class StaticFrameSheet(Sheet):
             except ValueError as err:
                 vd.fail('error building Frame from source data: %s' % err)
 
-        # reset the index here
+        # If the index is not an IndexAutoFactory, try to move it onto the Frame. If this fails it might mean we are trying to unset an auto index post selection
         if frame.index._map: # if it is not an IndexAutoFactory
             frame = frame.unset_index()
 
@@ -189,8 +190,12 @@ class StaticFrameSheet(Sheet):
 
     @property
     def selectedRows(self):
+        import static_frame as sf
+
         self._checkSelectedIndex()
-        return StaticFrameAdapter(self.frame.loc[self._selectedMask])
+        # NOTE: we expect to have already moved a real index onto the Frame by the time this is called; this selection will create a new index that is not needed, so replace it with an IndexAutoFactory
+        f = self.frame.loc[self._selectedMask].relabel(sf.IndexAutoFactory)
+        return StaticFrameAdapter(f)
 
     # Vectorized implementation of multi-row selections
     @asyncthread
