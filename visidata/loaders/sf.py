@@ -5,6 +5,9 @@ from visidata import *
 # Commands known to not work
 # ^ Rename current column (and related commands; fails with view_pandas)
 
+# Unsure
+# cannot have the name of the Frame set as the name of the sheet.
+
 class StaticFrameAdapter:
 
     def __init__(self, frame):
@@ -383,6 +386,7 @@ StaticFrameSheet.addCommand(None, 'unselect-after', 'unselectByIndex(start=curso
 
 
 StaticFrameSheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=StaticFrameAdapter(sheet.frame.sample(nrows or nRows)); vd.push(vs)', 'open duplicate sheet with a random population subset of N rows'),
+StaticFrameSheet.addCommand(None, 'random-columns', 'ncols=int(input("random number to select: ", value=nCols)); vs=copy(sheet); vs.name=name+"_sample"; vs.source=sheet.frame.sample(columns=(ncols or nCols)); vd.push(vs)', 'open duplicate sheet with a random population subset of N columns'),
 
 # Handle the regex selection family of commands through a single method,
 # since the core logic is shared
