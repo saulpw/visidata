@@ -5,8 +5,6 @@ from visidata import *
 # Commands known to not work
 # ^ Rename current column (and related commands; fails with view_pandas)
 
-# Unsure
-# cannot have the name of the Frame set as the name of the sheet.
 
 class StaticFrameAdapter:
 
@@ -77,9 +75,11 @@ class StaticFrameSheet(Sheet):
     @frame.setter
     def frame(self, val):
         if isinstance(getattr(self, 'rows', None), StaticFrameAdapter):
+            # If we already have a rows attribute and it is a SFA, then we assume val us a Frame and inject it intot the SFA
             self.rows.frame = val
         else:
             self.rows = StaticFrameAdapter(val)
+        self.name = '' if val.name is None else val.name
 
     def getValue(self, col, row):
         '''Look up column values in the underlying Frame.'''
@@ -123,7 +123,7 @@ class StaticFrameSheet(Sheet):
                 vd.fail('error building Frame from source data: %s' % err)
 
         # If the index is not an IndexAutoFactory, try to move it onto the Frame. If this fails it might mean we are trying to unset an auto index post selection
-        if frame.index._map: # if it is not an IndexAutoFactory
+        if frame.index.depth > 1 or frame.index._map: # if it is not an IndexAutoFactory
             frame = frame.unset_index()
 
         # VisiData assumes string column names
@@ -358,18 +358,27 @@ class StaticFrameIndexSheet(IndexSheet):
 
 def view_sf(container):
     import static_frame as sf
+
+    name = '' if container.name is None else container.name
+
     # multi-Frame containers
     if isinstance(container, sf.Bus):
-        run(StaticFrameIndexSheet('', source=container))
+        run(StaticFrameIndexSheet(name, source=container))
     elif isinstance(container, sf.Batch):
-        run(StaticFrameIndexSheet('', source=container.to_bus()))
+        run(StaticFrameIndexSheet(name, source=container.to_bus()))
     # Frame-like containers
     elif isinstance(container, sf.Quilt):
-        run(StaticFrameSheet('', source=container.to_frame()))
+        run(StaticFrameSheet(name, source=container.to_frame()))
+    # convertable to a Frame
     elif isinstance(container, sf.Series):
-        run(StaticFrameSheet('', source=container.to_frame()))
+        run(StaticFrameSheet(name, source=container.to_frame()))
+    elif isinstance(container, sf.Index):
+        run(StaticFrameSheet(name, source=container.to_series().to_frame()))
+    elif isinstance(container, sf.IndexHierarchy):
+        run(StaticFrameSheet(name, source=container.to_frame()))
+    # Frame
     else:
-        run(StaticFrameSheet('', source=container))
+        run(StaticFrameSheet(name, source=container))
 
 
 # Override with vectorized implementations
