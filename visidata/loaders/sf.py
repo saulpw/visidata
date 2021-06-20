@@ -352,6 +352,7 @@ class StaticFrameIndexSheet(IndexSheet):
     nKeys = 1
     def iterload(self):
         for sheetname in self.source.keys():
+            # this will combine self.name, sheetname into one name
             yield StaticFrameSheet(self.name, sheetname, source=self.source[sheetname])
 
 
