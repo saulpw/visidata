@@ -3,8 +3,8 @@ from functools import partial
 from visidata import *
 
 # Commands known to not work
-# ^ Rename current column (and related commands; fails with view_pandas)
-
+# `^` Rename current column (and related commands; fails with view_pandas)
+# `&`, inner, outer, diff, extend, merge
 
 class StaticFrameAdapter:
 
@@ -43,6 +43,9 @@ class StaticFrameAdapter:
                 self.frame.iloc[k:],
                 ), index=sf.IndexAutoFactory)
 
+    def __bool__(self):
+        # this was added to try to help with `& diff`; does not seem to help
+        return bool(self.frame.size)
 
 class StaticFrameSheet(Sheet):
     '''Sheet sourced from a static_frame.Frame
@@ -269,7 +272,7 @@ class StaticFrameSheet(Sheet):
         '''
         import static_frame as sf
         def items():
-            for col, dtype in zip(self.frame.columns, self.frame.dtypes):
+            for col, dtype in self.frame.dtypes.items():
                 array = np.empty(n, dtype=dtype)
                 array.flags.writeable = False
                 yield col, array
@@ -339,7 +342,6 @@ class StaticFrameSheet(Sheet):
         self.deleteBy(self._selectedMask)
 
 
-
 class StaticFrameIndexSheet(IndexSheet):
     rowtype = 'sheets'
     columns = [
@@ -354,7 +356,6 @@ class StaticFrameIndexSheet(IndexSheet):
         for sheetname in self.source.keys():
             # this will combine self.name, sheetname into one name
             yield StaticFrameSheet(self.name, sheetname, source=self.source[sheetname])
-
 
 
 def view_sf(container):
