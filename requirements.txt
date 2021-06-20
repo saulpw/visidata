@@ -25,6 +25,6 @@ tabula              # pdf tables
 vobject             # vcf
 tabulate            # tabulate saver
 wcwidth             # tabulate saver with unicode
-static-frame>=0.8.13
+static-frame>=0.8.14
 
 -e git+https://github.com/saulpw/pyxlsb.git@master#egg=pyxlsb # xlsb
