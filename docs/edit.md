@@ -1,7 +1,10 @@
+---
+title: Editing Contents
+---
+
 - Update: 2018-08-19
 - Version: VisiData 1.3.1
 
-# Editing Contents
 
 ## How to edit cells
 

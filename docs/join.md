@@ -1,7 +1,10 @@
+---
+title: Combining datasets
+---
+
 - Update: 2020-10-27
 - Version: VisiData 2.0.1
 
-# Combining datasets
 
 ## How to join two datasets
 

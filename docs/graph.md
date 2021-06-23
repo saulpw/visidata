@@ -1,7 +1,10 @@
+---
+title: Drawing graphs
+---
+
 - Update: 2018-03-17
 - Version: VisiData 1.1
 
-# Drawing graphs
 
 Graphs in VisiData can be used to visualise the relationship between numeric dependent variables vs a numeric independent variable. Optionally, a second independent variable, which is categorical,  adds an additional colored scatter plot for each category.
 

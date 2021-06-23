@@ -1,4 +1,6 @@
-# Deferred modifications -- Track changes
+---
+title: Deferred modifications -- Track changes
+---
 
 ## vls
 

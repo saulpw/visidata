@@ -1,4 +1,6 @@
-# How can I move around and search?
+---
+title: How can I move around and search?
+---
 
 - basic movement just like vim
   - 'G' 'gg' '^G' work as in vim, as do some of the 'z' scroll commands

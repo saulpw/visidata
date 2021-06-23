@@ -1,7 +1,10 @@
+---
+title: Customizing VisiData
+---
+
 - Updated: 2019-11-02
 - Version: VisiData v2.-1
 
-# Customizing VisiData
 
 In VisiData, there is a distinction between global configurations (options/commands) and sheet-specific. Global settings are on default applied to every single sheet in the session. Sheet-specific  ones override global settings for a given **SheetType**.
 

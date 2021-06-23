@@ -1,7 +1,11 @@
+---
+title: Pipes
+---
+
 - Update: 2019-09-11
 - Version: VisiData 2.0
 
-# STDOUT pipe/redirect
+## STDOUT pipe/redirect
 
 Visdata is pipe-friendly, it works well with other tools in a pipeline.  Visidata can interactively filter stdin, and save the
 results to stdout.

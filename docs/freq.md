@@ -1,4 +1,6 @@
-# Frequency Table Reference
+---
+title: Frequency Table Reference
+---
 
 the below also applies to the [PivotSheet]
 

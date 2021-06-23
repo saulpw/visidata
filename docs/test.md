@@ -1,3 +1,7 @@
+---
+title: Tests
+---
+
 - Update: 2018-01-28
 - Version: VisiData 1.0
 

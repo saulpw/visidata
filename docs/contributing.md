@@ -1,4 +1,6 @@
-# Checklists for Contributing to VIsiData
+---
+title: Checklists for Contributing to VisiData
+---
 
 ## [Submitting a Core Loader](#loader)
 A deeper explanation of all of these steps can be found [in the api documentation](https://www.visidata.org/docs/api/loaders.html).

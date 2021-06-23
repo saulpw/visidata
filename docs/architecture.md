@@ -1,5 +1,6 @@
-
-# Architecture Overview
+---
+title: Architecture Overview
+---
 
 ## The Core Principle: Columns are Functions of Rows
 

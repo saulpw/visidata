@@ -1,3 +1,7 @@
+---
+permalink: docs/old
+---
+
 # VisiData Documentation
 
 ## Getting started

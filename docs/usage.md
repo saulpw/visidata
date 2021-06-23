@@ -1,3 +1,7 @@
+---
+title: Usage
+---
+
 # How can I load files and exit the program?
 
 If you use the command line, 'vd' should pretty much work as you expect:

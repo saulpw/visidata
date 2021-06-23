@@ -1,5 +1,6 @@
-
-## Sheets
+---
+title: Sheets
+---
 
 Every displayed screen is an instance of `Sheet`, which manages its [rows](#reload), [columns](/column), [cursor](#cursor), and [display](#display).
 

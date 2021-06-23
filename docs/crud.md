@@ -1,7 +1,10 @@
+---
+title: Creating sheets, rows and columns
+---
+
 - Update: 2018-12-12
 - Version: VisiData 1.5.1
 
-# Creating sheets, rows and columns
 
 ## How to configure the cursor to move right after a successful edit
 

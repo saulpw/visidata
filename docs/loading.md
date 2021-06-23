@@ -1,7 +1,10 @@
+---
+title: Loading data
+---
+
 - Update: 2018-12-18
 - Version: VisiData 1.5.1
 
-# Loading data
 
 ## Specifying a source file
 

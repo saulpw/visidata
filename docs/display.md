@@ -1,4 +1,6 @@
-# The Design of VisiData: Display Engine
+---
+title: The Design of VisiData: Display Engine
+---
 
 ## Sheet
 

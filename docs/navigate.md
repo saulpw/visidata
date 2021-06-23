@@ -1,7 +1,9 @@
+---
+title: Navigation
+---
+
 - Updated: 2020-07-18
 - Version: VisiData 2.0
-
-# Navigation
 
 ## How to rapidly scroll through a sheet
 
