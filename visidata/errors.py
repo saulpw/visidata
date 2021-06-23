@@ -23,6 +23,8 @@ def exceptionCaught(vd, exc=None, **kwargs):
     vd.lastErrors.append(stacktrace())
     if kwargs.get('status', True):
         vd.status(vd.lastErrors[-1][-1], priority=2)  # last line of latest error
+    else:
+        vd.addToStatusHistory(vd.lastErrors[-1][-1])
     if options.debug:
         raise
 

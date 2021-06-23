@@ -37,23 +37,26 @@ def statuses(vd):
 def statusHistory(vd):
     return list()  # list of [priority, statusmsg, repeats] for all status messages ever
 
-
 @VisiData.global_api
-def status(self, *args, priority=0):
+def status(vd, *args, priority=0):
     'Display *args* on status until next action.'
     if not args:
         return True
 
     k = (priority, tuple(map(str, args)))
-    self.statuses[k] = self.statuses.get(k, 0) + 1
+    vd.statuses[k] = vd.statuses.get(k, 0) + 1
 
-    if self.statusHistory:
-        prevpri, prevargs, prevn = self.statusHistory[-1]
+    return vd.addToStatusHistory(*args, priority=priority)
+
+@VisiData.api
+def addToStatusHistory(vd, *args, priority=0):
+    if vd.statusHistory:
+        prevpri, prevargs, prevn = vd.statusHistory[-1]
         if prevpri == priority and prevargs == args:
-            self.statusHistory[-1][2] += 1
+            vd.statusHistory[-1][2] += 1
             return True
 
-    self.statusHistory.append([priority, args, 1])
+    vd.statusHistory.append([priority, args, 1])
     return True
 
 @VisiData.global_api
@@ -78,6 +81,8 @@ def debug(vd, *args, **kwargs):
     'Display *args* on status if options.debug is set.'
     if options.debug:
         return vd.status(*args, **kwargs)
+    else:
+        return vd.addToStatusHistory(*args, **kwargs)
 
 def middleTruncate(s, w):
     if len(s) <= w:

@@ -84,8 +84,8 @@ def gatherBy(self, func, gerund='gathering'):
             r = self.rows[i]
             if func(r):
                 yield r
-        except Exception:
-            pass
+        except Exception as e:
+            vd.exceptionCaught(e, status=False)
 
 @Sheet.property
 def selectedRows(self):
