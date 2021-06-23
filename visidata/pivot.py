@@ -113,6 +113,7 @@ class PivotSheet(Sheet):
 
                     c = Column(aggname,
                                 type=aggregator.type or aggcol.type,
+                                fmtstr=aggcol.fmtstr,
                                 getter=lambda col,row,aggcol=aggcol,agg=aggregator: agg(aggcol, row.sourcerows))
                     self.addColumn(c)
 
