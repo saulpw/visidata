@@ -139,7 +139,7 @@ class Path(os.PathLike):
     def __truediv__(self, a):
         return Path(self._path.__truediv__(a))
 
-    def open_text(self, mode='rt'):
+    def open_text(self, mode='rt', encoding=None):
         'Open path in text mode, using options.encoding and options.encoding_errors.  Return open file-pointer or file-pointer-like.'
         # rfile makes a single-access fp reusable
 
@@ -163,7 +163,7 @@ class Path(os.PathLike):
                 vd.error('invalid mode "%s" for Path.open_text()' % mode)
                 return sys.stderr
 
-        return self.open(mode=mode, encoding=options.encoding, errors=options.encoding_errors)
+        return self.open(mode=mode, encoding=encoding or vd.options.encoding, errors=vd.options.encoding_errors)
 
     @wraps(pathlib.Path.read_text)
     def read_text(self, *args, **kwargs):
@@ -201,7 +201,7 @@ class Path(os.PathLike):
 
     def __iter__(self):
         with Progress(total=filesize(self)) as prog:
-            with self.open_text() as fd:
+            with self.open_text(encoding=vd.options.encoding) as fd:
                 for i, line in enumerate(fd):
                     prog.addProgress(len(line))
                     yield line.rstrip('\n')

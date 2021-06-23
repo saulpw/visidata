@@ -109,7 +109,7 @@ def openSource(vd, p, filetype=None, create=False, **kwargs):
 #### enable external addons
 def open_txt(p):
     'Create sheet from `.txt` file at Path `p`, checking whether it is TSV.'
-    with p.open_text() as fp:
+    with p.open_text(encoding=vd.options.encoding) as fp:
         if options.delimiter in next(fp):    # peek at the first line
             return open_tsv(p)  # TSV often have .txt extension
         return TextSheet(p.name, source=p)

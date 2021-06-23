@@ -140,7 +140,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
 
 @VisiData.api
 def save_txt(vd, p, *vsheets):
-    with p.open_text(mode='w') as fp:
+    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
         for vs in vsheets:
             unitsep = vs.options.delimiter
             rowsep = vs.options.row_delimiter

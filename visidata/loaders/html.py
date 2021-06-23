@@ -19,7 +19,7 @@ class HtmlTablesSheet(IndexSheet):
         import lxml.html
         from lxml import etree
         utf8_parser = etree.HTMLParser(encoding='utf-8')
-        with self.source.open_text() as fp:
+        with self.source.open_text(encoding='utf-8') as fp:
             html = lxml.html.etree.parse(fp, parser=utf8_parser)
         self.setKeys([self.column('name')])
         self.column('keys').hide()

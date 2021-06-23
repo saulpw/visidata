@@ -34,7 +34,7 @@ class JsonSheet(PythonSheet):
         for c in type(self).columns:
             self.addColumn(deepcopy(c))
 
-        with self.source.open_text() as fp:
+        with self.source.open_text(encoding=self.options.encoding) as fp:
             for L in fp:
                 try:
                     if L.startswith('#'): # skip commented lines
@@ -50,7 +50,7 @@ class JsonSheet(PythonSheet):
                         e.stacktrace = stacktrace()
                         yield TypedExceptionWrapper(json.loads, L, exception=e)  # an error on one line
                     else:
-                        with self.source.open_text() as fp:
+                        with self.source.open_text(encoding=self.options.encoding) as fp:
                             ret = json.load(fp)
                             if isinstance(ret, list):
                                 yield from ret
@@ -118,7 +118,7 @@ def _rowdict(cols, row):
 
 @VisiData.api
 def save_json(vd, p, *vsheets):
-    with p.open_text(mode='w') as fp:
+    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
         if len(vsheets) == 1:
             vs = vsheets[0]
             it = [_rowdict(vs.visibleCols, row) for row in vs.iterrows()]
@@ -138,7 +138,7 @@ def save_json(vd, p, *vsheets):
 
 @VisiData.api
 def save_jsonl(vd, p, *vsheets):
-    with p.open_text(mode='w') as fp:
+    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
       for vs in vsheets:
         vcols = vs.visibleCols
         jsonenc = _vjsonEncoder()
@@ -148,5 +148,6 @@ def save_jsonl(vd, p, *vsheets):
                 fp.write(jsonenc.encode(rowdict) + '\n')
 
 
+JsonSheet.class_options.encoding = 'utf-8'
 VisiData.save_ndjson = VisiData.save_jsonl
 VisiData.save_ldjson = VisiData.save_jsonl

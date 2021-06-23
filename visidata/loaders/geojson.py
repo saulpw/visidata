@@ -19,7 +19,7 @@ class GeoJSONSheet(PythonSheet):
         self.colnames = {}
         self.columns = [Column('json_row', width=0)]
 
-        with self.source.open_text() as fp:
+        with self.source.open_text(encoding='utf-8') as fp:
             ret = json.load(fp)
 
             if ret['type'] == 'FeatureCollection':
@@ -127,7 +127,7 @@ def save_geojson(vd, p, vs):
     except Exception:
         indent = vs.options.json_indent
 
-    with p.open_text(mode='w') as fp:
+    with p.open_text(mode='w', encoding='utf-8') as fp:
         encoder = json.JSONEncoder(indent=indent, sort_keys=vs.options.json_sort_keys)
         for chunk in encoder.iterencode(featcoll):
             fp.write(chunk)

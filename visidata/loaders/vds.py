@@ -14,7 +14,7 @@ def open_vds(vd, p):
 def save_vds(vd, p, *sheets):
     'Save in custom VisiData format, preserving columns and their attributes.'
 
-    with p.open_text(mode='w') as fp:
+    with p.open_text(mode='w', encoding='utf-8') as fp:
         for vs in sheets:
             # class and attrs for vs
             d = { 'name': vs.name, }
@@ -38,7 +38,7 @@ def save_vds(vd, p, *sheets):
 class VdsIndexSheet(IndexSheet):
     def iterload(self):
         vs = None
-        with self.source.open_text() as fp:
+        with self.source.open_text(encoding='utf-8') as fp:
             line = fp.readline()
             while line:
                 if line.startswith('#{'):
@@ -57,7 +57,7 @@ class VdsSheet(Sheet):
         self.colnames = {}
         self.columns = []
 
-        with self.source.open_text() as fp:
+        with self.source.open_text(encoding='utf-8') as fp:
             fp.seek(self.source_fpos)
 
             # consume all metadata, create columns

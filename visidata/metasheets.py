@@ -144,7 +144,7 @@ class LastInputsSheet(JsonLinesSheet):
         self.addRow(row)
 
         if self.source:
-            with self.source.open_text(mode='a') as fp:
+            with self.source.open_text(mode='a', encoding=self.options.encoding) as fp:
                 import json
                 fp.write(json.dumps(row) + '\n')
 

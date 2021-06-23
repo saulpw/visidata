@@ -458,4 +458,5 @@ BaseSheet.addCommand('', 'repeat-last', 'execCommand(cmdlog_sheet.rows[-1].longn
 BaseSheet.addCommand('', 'repeat-input', 'r = copy(cmdlog_sheet.rows[-1]); r.sheet=r.row=r.col=""; vd.replayOne(r)', 'run previous command, along with any previous input to that command')
 
 CommandLog.class_options.json_sort_keys = False
+CommandLog.class_options.encoding = 'utf-8'
 CommandLogJsonl.class_options.json_sort_keys = False
