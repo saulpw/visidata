@@ -94,7 +94,7 @@ def openSource(vd, p, filetype=None, create=False, **kwargs):
         if '://' in p:
             vs = vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
         elif p == '-':
-            vs = vd.openPath(Path('-', fp=vd._stdin), filetype=filetype)
+            vs = vd.openPath(vd.stdinSource, filetype=filetype)
         else:
             vs = vd.openPath(Path(p), filetype=filetype, create=create)  # convert to Path and recurse
     else:

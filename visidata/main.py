@@ -46,7 +46,7 @@ def duptty():
     try:
         fin = open('/dev/tty')
         fout = open('/dev/tty', mode='w')
-        stdin = open(os.dup(0))
+        stdin = open(os.dup(0), encoding=vd.options.getonly('encoding', 'global', 'utf-8'))
         stdout = open(os.dup(1))  # for dumping to stdout from interface
         os.dup2(fin.fileno(), 0)
         os.dup2(fout.fileno(), 1)
@@ -86,7 +86,6 @@ def main_vd():
     flPipedInput = not sys.stdin.isatty()
     flPipedOutput = not sys.stdout.isatty()
 
-    vd._stdin, vd._stdout = duptty()  # always dup stdin/stdout
 
     try:
         # workaround for bug in curses.wrapper #899
@@ -95,7 +94,7 @@ def main_vd():
     except Exception:
         vd.tstp_signal = None
 
-    stdinSource = Path('-', fp=vd._stdin)
+    vd.stdinSource = Path('-', fp=None)  # fp filled in below after options parsed for encoding
 
     # parse args, including +sheetname:subsheet:4:3 starting at row:col on sheetname:subsheet[:...]
     start_positions = []  # (list_of_sheetstr, str, str)  # empty sheetstr means all sheets
@@ -122,7 +121,7 @@ def main_vd():
             print(vd.version_info)
             return 0
         elif arg == '-':
-            inputs.append((stdinSource, copy(current_args)))
+            inputs.append((vd.stdinSource, copy(current_args)))
         elif arg in ['-h', '--help']:
             import curses
             curses.wrapper(lambda scr: vd.openManPage())
@@ -193,6 +192,9 @@ def main_vd():
     for k, v in global_args.items():
         options.set(k, v, obj='global')
 
+    vd._stdin, vd._stdout = duptty()  # always dup stdin/stdout
+    vd.stdinSource.fp = vd._stdin
+
     # fetch motd and plugins *after* options parsing/setting
     vd.pluginsSheet.ensureLoaded()
     domotd()
@@ -209,7 +211,7 @@ def main_vd():
 
     if not args.play:
         if flPipedInput and not inputs:  # '|vd' without explicit '-'
-            inputs.append((stdinSource, copy(current_args)))
+            inputs.append((vd.stdinSource, copy(current_args)))
 
     sources = []
     for p, opts in inputs:
@@ -272,7 +274,7 @@ def main_vd():
             run(vd.sheets[0])
     else:
         if args.play == '-':
-            vdfile = stdinSource
+            vdfile = vd.stdinSource
             vdfile.name = 'stdin.vd'
         else:
             vdfile = Path(args.play)
