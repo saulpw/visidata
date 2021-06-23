@@ -75,8 +75,8 @@ option('name_joiner', '_', 'string to join sheet or column names')
 option('value_joiner', ' ', 'string to join display values')
 
 
-def splitcell(s, width=0):
-    if width <= 0 or not options.textwrap_cells:
+def splitcell(sheet, s, width=0):
+    if width <= 0 or not sheet.options.textwrap_cells:
         return [s]
 
     ret = []
@@ -596,8 +596,8 @@ class TableSheet(BaseSheet):
 
     def calcColLayout(self):
         'Set right-most visible column, based on calculation.'
-        minColWidth = len(options.disp_more_left)+len(options.disp_more_right)+2
-        sepColWidth = len(options.disp_column_sep)
+        minColWidth = len(self.options.disp_more_left)+len(self.options.disp_more_right)+2
+        sepColWidth = len(self.options.disp_column_sep)
         winWidth = self.windowWidth
         self._visibleColLayout = {}
         x = 0
@@ -609,8 +609,8 @@ class TableSheet(BaseSheet):
                 # handle delayed column width-finding
                 col.width = max(col.getMaxWidth(vrows), minColWidth)
                 if vcolidx != self.nVisibleCols-1:  # let last column fill up the max width
-                    col.width = min(col.width, options.default_width)
-            width = col.width if col.width is not None else options.default_width
+                    col.width = min(col.width, self.options.default_width)
+            width = col.width if col.width is not None else self.options.default_width
             if col in self.keyCols:
                 width = max(width, 1)  # keycols must all be visible
             if col in self.keyCols or vcolidx >= self.leftVisibleColIndex:  # visible columns
@@ -633,9 +633,9 @@ class TableSheet(BaseSheet):
         if vcolidx == self.cursorVisibleColIndex:
             hdrcattr = update_attr(hdrcattr, colors.color_current_hdr, 2)
 
-        C = options.disp_column_sep
+        C = self.options.disp_column_sep
         if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.rightVisibleColIndex:
-            C = options.disp_keycol_sep
+            C = self.options.disp_keycol_sep
 
         x, colwidth = self._visibleColLayout[vcolidx]
 
@@ -658,7 +658,7 @@ class TableSheet(BaseSheet):
                 name += hdrs[::-1][h-i-1]
 
             if len(name) > colwidth-1:
-                name = name[:colwidth-len(options.disp_truncator)] + options.disp_truncator
+                name = name[:colwidth-len(self.options.disp_truncator)] + self.options.disp_truncator
 
             if i == h-1:
                 hdrcattr = update_attr(hdrcattr, colors.color_bottom_hdr, 5)
@@ -673,7 +673,7 @@ class TableSheet(BaseSheet):
 
         try:
             if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
-                A = options.disp_more_left
+                A = self.options.disp_more_left
                 scr.addstr(y, x, A, sepcattr.attr)
         except ValueError:  # from .index
             pass
@@ -687,7 +687,7 @@ class TableSheet(BaseSheet):
         vd.clearCaches()
 
         if not self.columns:
-            if options.debug:
+            if self.options.debug:
                 self.addColumn(Column())
             else:
                 return
@@ -695,21 +695,21 @@ class TableSheet(BaseSheet):
         drawparams = {
             'isNull': self.isNullFunc(),
 
-            'topsep': options.disp_rowtop_sep,
-            'midsep': options.disp_rowmid_sep,
-            'botsep': options.disp_rowbot_sep,
-            'endsep': options.disp_rowend_sep,
-            'keytopsep': options.disp_keytop_sep,
-            'keymidsep': options.disp_keymid_sep,
-            'keybotsep': options.disp_keybot_sep,
-            'endtopsep': options.disp_endtop_sep,
-            'endmidsep': options.disp_endmid_sep,
-            'endbotsep': options.disp_endbot_sep,
+            'topsep': self.options.disp_rowtop_sep,
+            'midsep': self.options.disp_rowmid_sep,
+            'botsep': self.options.disp_rowbot_sep,
+            'endsep': self.options.disp_rowend_sep,
+            'keytopsep': self.options.disp_keytop_sep,
+            'keymidsep': self.options.disp_keymid_sep,
+            'keybotsep': self.options.disp_keybot_sep,
+            'endtopsep': self.options.disp_endtop_sep,
+            'endmidsep': self.options.disp_endmid_sep,
+            'endbotsep': self.options.disp_endbot_sep,
 
-            'colsep': options.disp_column_sep,
-            'keysep': options.disp_keycol_sep,
-            'selectednote': options.disp_selected_note,
-            'disp_truncator': options.disp_truncator,
+            'colsep': self.options.disp_column_sep,
+            'keysep': self.options.disp_keycol_sep,
+            'selectednote': self.options.disp_selected_note,
+            'disp_truncator': self.options.disp_truncator,
         }
 
         self._rowLayout = {}  # [rowidx] -> (y, height)
@@ -736,7 +736,7 @@ class TableSheet(BaseSheet):
             y += self.drawRow(scr, row, self.topRowIndex+rowidx, y, rowcattr, maxheight=self.windowHeight-y-1, **drawparams)
 
         if vcolidx+1 < self.nVisibleCols:
-            scr.addstr(headerRow, self.windowWidth-2, options.disp_more_right, colors.color_column_sep)
+            scr.addstr(headerRow, self.windowWidth-2, self.options.disp_more_right, colors.color_column_sep)
 
         scr.refresh()
 
@@ -756,13 +756,13 @@ class TableSheet(BaseSheet):
 
                     try:
                         if isNull and isNull(cellval.value):
-                            cellval.note = options.disp_note_none
+                            cellval.note = self.options.disp_note_none
                             cellval.notecolor = 'color_note_type'
                     except (TypeError, ValueError):
                         pass
 
                     if col.voffset or col.height > 1:
-                        lines = splitcell(cellval.display, width=colwidth-2)
+                        lines = splitcell(self, cellval.display, width=colwidth-2)
                     else:
                         lines = [cellval.display]
                     displines[vcolidx] = (col, cellval, lines)
@@ -884,7 +884,7 @@ class TableSheet(BaseSheet):
             return height
 
 vd.rowNoters = [
-        lambda sheet, row: sheet.isSelected(row) and options.disp_selected_note,
+        lambda sheet, row: sheet.isSelected(row) and sheet.options.disp_selected_note,
 ]
 
 Sheet = TableSheet  # deprecated in 2.0 but still widely used internally
@@ -913,7 +913,7 @@ class SequenceSheet(Sheet):
 
     def optlines(self, it, optname):
         'Generate next options.<optname> elements from iterator with exceptions wrapped.'
-        for i in range(options.getobj(optname, self)):
+        for i in range(self.options.getobj(optname, self)):
             try:
                 yield next(it)
             except StopIteration:
