@@ -83,7 +83,7 @@ order: 1
 * [Developing a loader](/docs/api/loaders)
 * [STDOUT pipe/redirect](/docs/pipes)
 
-# For developers
+## For developers
 
 VisiData can interact with data from any source or in any format.
 * [VisiData API Guide](/docs/api)
