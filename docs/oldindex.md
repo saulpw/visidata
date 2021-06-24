@@ -1,5 +1,5 @@
 ---
-permalink: docs/old
+title: Old docs index
 ---
 
 # VisiData Documentation
