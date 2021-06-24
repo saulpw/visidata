@@ -1,5 +1,6 @@
 ---
 title: Checklists for Contributing to VisiData
+order: 99
 ---
 
 ## [Submitting a Core Loader](#loader)

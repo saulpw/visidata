@@ -1,9 +1,10 @@
 ---
 title: Rows
+order: 4
+Update: 2018-12-12
+Version: VisiData 1.5.1
 ---
 
-- Update: 2018-12-12
-- Version: VisiData 1.5.1
 
 ## How to perform operations on a subset of rows
 

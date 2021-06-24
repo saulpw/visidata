@@ -1,9 +1,10 @@
 ---
 title: Pipes
+order: 14
+Update: 2019-09-11
+Version: VisiData 2.0
 ---
 
-- Update: 2019-09-11
-- Version: VisiData 2.0
 
 ## STDOUT pipe/redirect
 

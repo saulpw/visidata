@@ -1,9 +1,10 @@
 ---
 title: Options
+order: 99
+Date: 2017-12-27
+Version: 1.0
 ---
 
-- Date: 2017-12-27
-- Version: 1.0
 
 ## Options
 

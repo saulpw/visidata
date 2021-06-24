@@ -1,10 +1,9 @@
 ---
 title: Loading data
+order: 2
+update: 2018-12-18
+version: VisiData 1.5.1
 ---
-
-- Update: 2018-12-18
-- Version: VisiData 1.5.1
-
 
 ## Specifying a source file
 

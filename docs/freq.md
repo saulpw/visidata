@@ -1,5 +1,6 @@
 ---
 title: Frequency Table Reference
+order: 99
 ---
 
 the below also applies to the [PivotSheet]

@@ -1,5 +1,6 @@
 ---
 title: How can I move around and search?
+order: 99
 ---
 
 - basic movement just like vim

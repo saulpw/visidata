@@ -1,6 +1,7 @@
 ---
 title: Quick Reference Guide
 permalink: /man/
+order: 2
 ---
 <pre id="manpage" class="whitespace-pre-wrap text-xs">
 vd(1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        Quick Reference Guide                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        vd(1)

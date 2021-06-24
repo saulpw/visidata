@@ -1,8 +1,7 @@
 ---
-title: Old docs index
+title: Getting Started
+order: 1
 ---
-
-# VisiData Documentation
 
 ## Getting started
 
@@ -88,5 +87,5 @@ title: Old docs index
 
 VisiData can interact with data from any source or in any format.
 * [VisiData API Guide](/docs/api)
-* [guide to contributing](/contributing)
+* [guide to contributing](/docs/contributing)
 * [viewtsv annotated](/docs/viewtsv)

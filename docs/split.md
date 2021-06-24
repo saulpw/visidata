@@ -1,5 +1,6 @@
 ---
 title: Split view
+order: 99
 ---
 
 # Viewing two sheets simultaneously

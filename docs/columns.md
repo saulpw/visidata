@@ -2,6 +2,7 @@
 title: Columns
 update: 2020-10-01
 version: VisiData 2.0.1
+order: 5
 ---
 
 ## How to manipulate columns
