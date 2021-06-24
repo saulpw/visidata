@@ -1,10 +1,8 @@
 ---
 title: Columns
+update: 2020-10-01
+version: VisiData 2.0.1
 ---
-
-- Update: 2020-10-01
-- Version: VisiData 2.0.1
-
 
 ## How to manipulate columns
 
