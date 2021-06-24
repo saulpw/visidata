@@ -1,13 +1,16 @@
-'''This adds the `unfurl-col` command, to unfurl a column containing iterable values, such as lists, dicts, and strings.
+'''This adds the `unfurl-col` command, to unfurl a column containing iterable values, such as lists and dicts.
 Unfurling pushes a new sheet, with each key/value pair in the unfurled column values getting its own row, with the rest of the source sheet's columns copied for each of those rows.
 
-Note: When unfurling a column, non-iterable objects (such as integers) are treated as single-item lists, so that they too can be unfurled.
+Note: When unfurling a column, non-iterable objects (numbers, and also strings) are treated as single-item lists, so that they too can be unfurled.
 
 Credit to Jeremy Singer-Vine for the idea and original implementation.
 '''
 
 from collections.abc import Iterable, Mapping
 from visidata import vd, Progress, Sheet, Column, ColumnItem, SettableColumn, SubColumnFunc, asyncthread, clean_to_id
+
+
+vd.option('unfurl_empty', False, 'if unfurl includes rows for empty containers')
 
 
 class UnfurledSheet(Sheet):
@@ -25,6 +28,7 @@ class UnfurledSheet(Sheet):
                 self.addColumn(SubColumnFunc(col.name, col, 0, keycol=col.keycol))
 
         self.rows = []
+        unfurl_empty = self.options.unfurl_empty
         for row in Progress(self.source.rows):
             val = self.source_col.getValue(row)
 
@@ -36,10 +40,14 @@ class UnfurledSheet(Sheet):
             else:
                 gen = enumerate(val)
 
+            nadded = 0
             for key, sub_value in gen:
                 new_row = [ row, key, sub_value ]
                 self.addRow(new_row)
+                nadded += 1
 
+            if unfurl_empty and not nadded:
+                self.addRow([row, None, None])
 
 @Sheet.api
 def unfurl_col(sheet, col):
