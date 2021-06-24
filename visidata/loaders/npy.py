@@ -12,7 +12,7 @@ class NpySheet(Sheet):
     def iterload(self):
         import numpy
         if not hasattr(self, 'npy'):
-            self.npy = numpy.load(str(self.source), encoding='bytes')
+            self.npy = numpy.load(str(self.source), encoding='bytes', allow_pickle=True)
         self.reloadCols()
         yield from Progress(self.npy, total=len(self.npy))
 
