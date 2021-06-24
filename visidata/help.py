@@ -14,7 +14,8 @@ class HelpSheet(MetaSheet):
     columns = [
         ColumnAttr('sheet'),
         ColumnAttr('longname'),
-        Column('keystrokes', getter=lambda col,row: col.sheet.revbinds.get(row.longname)),
+        Column('keystrokes', getter=lambda col,row: col.sheet.revbinds.get(row.longname, [None])[0]),
+        Column('all_bindings', width=0, getter=lambda col,row: list(set(col.sheet.revbinds.get(row.longname, [])))),
         Column('description', getter=lambda col,row: col.sheet.cmddict[(row.sheet, row.longname)].helpstr),
         ColumnAttr('execstr', width=0),
         Column('logged', width=0, getter=lambda col,row: isLoggableCommand(row.longname)),
@@ -36,11 +37,10 @@ class HelpSheet(MetaSheet):
             if k in self.cmddict:
                 self.cmddict[k].helpstr = cmdrow.helpstr
 
-        self.revbinds = {}  # [longname] -> keystrokes
+        self.revbinds = collections.defaultdict(list)  # longname -> [keystrokes, ..]
         itbindings = vd.bindkeys.iterall()
         for (keystrokes, _), longname in itbindings:
-            if (keystrokes not in self.revbinds) and not vd.isLongname(keystrokes):
-                self.revbinds[longname] = keystrokes
+            self.revbinds[longname].append(keystrokes)
 
 
 @VisiData.api
