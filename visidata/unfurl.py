@@ -10,7 +10,7 @@ from collections.abc import Iterable, Mapping
 from visidata import vd, Progress, Sheet, Column, ColumnItem, SettableColumn, SubColumnFunc, asyncthread, clean_to_id
 
 
-vd.option('unfurl_empty', False, 'if unfurl includes rows for empty containers')
+vd.option('unfurl_empty', False, 'if unfurl includes rows for empty containers', replay=True)
 
 
 class UnfurledSheet(Sheet):
