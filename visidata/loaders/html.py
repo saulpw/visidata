@@ -47,6 +47,7 @@ class HtmlTableSheet(Sheet):
         headers = []
 
         maxlinks = {}  # [colnum] -> nlinks:int
+        ncols = 0
 
         for rownum, r in enumerate(self.source.iter('tr')):
             row = []
@@ -85,13 +86,14 @@ class HtmlTableSheet(Sheet):
 
             if any(row):
                 yield row
+                ncols = max(ncols, colnum)
 
         self.columns = []
         if headers:
             it = itertools.zip_longest(*headers, fillvalue='')
         else:
-            it = [list(x) for x in self.rows[0]]
-            self.rows = self.rows[1:]
+            it = list(list(x) for x in self.rows.pop(0))
+            it += [''] * (ncols-len(it))
 
         for colnum, names in enumerate(it):
             name = '_'.join(str(x) for x in names if x)
