@@ -23,10 +23,11 @@ Step 1. ``open_<filetype>`` boilerplate
 
 ::
 
-    def open_readme(p):
+    @VisiData.api
+    def open_readme(vd, p):
         return ReadmeSheet(p.name, source=p)
 
-This is used for filetype ``readme``, which is used for files with extension ``.readme``, or when specified manually with the ``filetype`` option like ``--filetype=readme`` on the command line.
+This is used for filetype ``readme``, which is used for files with extension ``.readme``, or when specified manually with the ``filetype`` option like ``--filetype=readme`` or ``-f readme`` on the command line.
 
 The ``open_<filetype>`` function usually looks exactly like this, with only the type of :ref:`Sheet <sheets>` changed.
 
@@ -34,15 +35,7 @@ The *p* argument is a :ref:`visidata.Path<vd-path>`.
 
 The actual loading happens in the Sheet.  An existing :ref:`sheet type<sheets>` can be used, or a new sheet type can be created.
 
-If the loader is within a plugin, the ``open_<filetype>`` should be decorated with a ``@VisiData,api`` in order to make them available through the ``vd`` object's scope.
-
 ::
-
-    @VisiData.api
-    def open_readme(vd, p):
-        return ReadmeSheet(p.name, source=p)
-
-Note, the change in the ``open_<filetype>`` function signature, when decorated.
 
 Step 2. Create a Sheet subclass
 -------------------------------
@@ -97,7 +90,11 @@ Each loader for a tabular sheet should overload ``iterload()``, which uses the S
    So it needs to be wrapped in a Python ``list``, which is guaranteed to be unique, and also mutable.
 
 
--  ``sheet.source`` is a :ref:`visidata.Path<vd-path>`; the same as the *source* kwarg given in ``open_readme``. In fact, any kwarg passed to a Sheet constructor will be stored on the sheet in an attribute of the same name.
+-  ``sheet.source`` is the :ref:`visidata.Path<vd-path>` given as the *source* kwarg to ``ReadmeSheet()`` in ``open_readme``. 
+
+  .. note::
+
+     Any *kwarg* passed to a Sheet constructor will be stored on the sheet in an attribute of the same name.
 
   .. note::
 
