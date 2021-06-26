@@ -1,5 +1,6 @@
 ---
-title: How can I move around and search?
+eleventyNavigation:
+  key: How can I move around and search?
 order: 99
 ---
 

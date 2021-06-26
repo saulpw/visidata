@@ -1,5 +1,6 @@
 ---
-title: Save and Restore
+eleventyNavigation:
+  key: Save and Restore
 order: 11
 Updated: 2018-01-17
 Version: VisiData 0.99

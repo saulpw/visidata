@@ -1,5 +1,6 @@
 ---
-title: Navigation
+eleventyNavigation:
+  key: Navigation
 order: 3
 updated: 2020-07-18
 version: VisiData 2.0

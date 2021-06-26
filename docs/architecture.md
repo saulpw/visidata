@@ -1,5 +1,6 @@
 ---
-title: Architecture Overview
+eleventyNavigation:
+  key: Architecture Overview
 order: 99
 ---
 

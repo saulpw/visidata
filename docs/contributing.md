@@ -1,5 +1,6 @@
 ---
-title: Checklists for Contributing to VisiData
+eleventyNavigation:
+  key: Checklists for Contributing to VisiData
 order: 99
 ---
 

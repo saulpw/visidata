@@ -1,5 +1,6 @@
 ---
-title: "The Design of VisiData: Display Engine"
+eleventyNavigation:
+  key: "The Design of VisiData: Display Engine"
 order: 99
 ---
 

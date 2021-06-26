@@ -1,5 +1,6 @@
 ---
-title: Split view
+eleventyNavigation:
+  key: Split view
 order: 99
 ---
 

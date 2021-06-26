@@ -1,5 +1,6 @@
 ---
-title: Terminal Graphics in VisiData
+eleventyNavigation:
+  key: Terminal Graphics in VisiData
 order: 99
 Updated: 2017-12-06
 Version: VisiData 1.0

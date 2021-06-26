@@ -1,5 +1,6 @@
 ---
-title: Quick Reference Guide
+eleventyNavigation:
+  key: Quick Reference Guide
 permalink: /man/
 order: 2
 ---

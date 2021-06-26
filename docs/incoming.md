@@ -1,5 +1,6 @@
 ---
-title: Deferred modifications -- Track changes
+eleventyNavigation:
+  key: Deferred modifications -- Track changes
 order: 99
 ---
 

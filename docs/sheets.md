@@ -1,5 +1,6 @@
 ---
-title: Sheets
+eleventyNavigation:
+  key: Sheets
 order: 99
 ---
 

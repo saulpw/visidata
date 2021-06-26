@@ -1,5 +1,6 @@
 ---
-title: Frequency Table Reference
+eleventyNavigation:
+  key: Frequency Table Reference
 order: 99
 ---
 

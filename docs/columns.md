@@ -1,5 +1,6 @@
 ---
-title: Columns
+eleventyNavigation:
+ key: Columns
 update: 2020-10-01
 version: VisiData 2.0.1
 order: 5
