@@ -62,11 +62,12 @@ class ColumnShell(Column):
             context = LazyComputeRow(self.source, row)
             for arg in shlex.split(self.expr):
                 if arg.startswith('$'):
-                    args.append(str(context[arg[1:]]))
+                    args.append(shlex.quote(str(context[arg[1:]])))
                 else:
                     args.append(arg)
 
-            p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = subprocess.Popen([os.getenv('SHELL', 'bash'), '-c', ' '.join(args)],
+                    stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             return p.communicate()
         except Exception as e:
             vd.exceptionCaught(e)
