@@ -1,7 +1,7 @@
 ---
 eleventyNavigation:
   key: How can I move around and search?
-order: 99
+  order: 99
 ---
 
 - basic movement just like vim

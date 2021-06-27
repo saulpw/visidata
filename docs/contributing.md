@@ -1,7 +1,7 @@
 ---
 eleventyNavigation:
   key: Checklists for Contributing to VisiData
-order: 99
+  order: 99
 ---
 
 ## [Submitting a Core Loader](#loader)

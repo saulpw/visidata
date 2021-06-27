@@ -1,7 +1,7 @@
 ---
 eleventyNavigation:
-  key: Contributing Tests
-order: 99
+    key: Contributing Tests
+    order: 99
 Update: 2018-01-28
 Version: VisiData 1.0
 ---

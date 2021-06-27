@@ -1,7 +1,7 @@
 ---
 eleventyNavigation:
-  key: Customizing VisiData
-order: 12
+    key: Customizing VisiData
+    order: 12
 Updated: 2019-11-02
 Version: VisiData v2.-1
 ---

@@ -1,7 +1,7 @@
 ---
 eleventyNavigation:
   key: Rows
-order: 4
+  order: 4
 Update: 2018-12-12
 Version: VisiData 1.5.1
 ---

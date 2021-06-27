@@ -1,7 +1,7 @@
 ---
 eleventyNavigation:
   key: Loading data
-order: 2
+  order: 2
 update: 2018-12-18
 version: VisiData 1.5.1
 ---

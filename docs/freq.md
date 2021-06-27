@@ -1,7 +1,7 @@
 ---
 eleventyNavigation:
   key: Frequency Table Reference
-order: 99
+  order: 99
 ---
 
 the below also applies to the [PivotSheet]

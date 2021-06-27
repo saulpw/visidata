@@ -1,7 +1,7 @@
 ---
 eleventyNavigation:
-  key: Creating sheets, rows and columns
-order: 8
+    key: Creating sheets, rows and columns
+    order: 8
 Update: 2018-12-12
 Version: VisiData 1.5.1
 ---

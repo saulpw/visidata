@@ -1,7 +1,7 @@
 ---
 eleventyNavigation:
   key: Split view
-order: 99
+  order: 99
 ---
 
 # Viewing two sheets simultaneously

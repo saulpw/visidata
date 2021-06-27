@@ -2,7 +2,6 @@
 eleventyNavigation:
     key: Supported Formats
     order: 99
-layout: docs
 ---
 
 |filetype            |format              |VisiData\_loader |VisiData saver  |version\_added |created  |creator             |PyPI dependencies   |

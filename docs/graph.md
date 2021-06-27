@@ -1,7 +1,7 @@
 ---
 eleventyNavigation:
   key: Drawing graphs
-order: 10
+  order: 10
 Update: 2018-03-17
 Version: VisiData 1.1
 ---

@@ -1,7 +1,7 @@
 ---
 eleventyNavigation:
-  key: Getting Started
-order: 1
+    key: Getting Started
+    order: 1
 ---
 
 ## Getting started

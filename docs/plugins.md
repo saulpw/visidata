@@ -1,7 +1,7 @@
 ---
 eleventyNavigation:
   key: Plugins
-order: 13
+  order: 13
 Updated: 2019-03-05
 Version: VisiData 1.6
 ---

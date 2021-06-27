@@ -1,7 +1,7 @@
 ---
 eleventyNavigation:
   key: Combining datasets
-order: 9
+  order: 9
 Update: 2020-10-27
 Version: VisiData 2.0.1
 ---
