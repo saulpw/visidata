@@ -1,3 +1,8 @@
 sheet	col	row	longname	input	keystrokes	comment
-benchmark			describe-sheet		I	
+			open-file	sample_data/benchmark.csv	o	
+benchmark	Date		type-date		@	set type of current column to date
+benchmark	Quantity		type-int		#	set type of current column to int
+benchmark	Unit		type-currency		$	set type of current column to currency
+benchmark	Paid		type-currency		$	set type of current column to currency
+benchmark			describe-sheet		I	open Describe Sheet with descriptive statistics for all visible columns
 benchmark_describe	mode		hide-col		-	hide current column
