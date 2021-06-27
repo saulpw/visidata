@@ -139,4 +139,4 @@ BaseSheet.bindkey('KEY_BACKSPACE', 'sysopen-help')
 BaseSheet.bindkey('zKEY_F(1)', 'help-commands')
 BaseSheet.bindkey('zKEY_BACKSPACE', 'help-commands')
 
-HelpSheet.addCommand(ENTER, 'exec-command', 'activeStack[1].execCommand(cursorRow.longname); quit(sheet)', 'execute command on undersheet')
+HelpSheet.addCommand(ENTER, 'exec-command', 'quit(sheet); draw_all(); activeStack[0].execCommand(cursorRow.longname)', 'execute command on undersheet')
