@@ -1,4 +1,4 @@
-.Dd June 07, 2021
+.Dd June 27, 2021
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -81,6 +81,8 @@ cancel user input or abort all async threads on current sheet
 abort all secondary threads
 .It Ic "  q"
 quit current sheet
+.It Ic "  Q"
+quit current sheet and free associated memory
 .It Ic " gq"
 quit all sheets (clean exit)
 .Pp
@@ -567,6 +569,14 @@ open current/selected file(s) as new sheet(s)
 open current/selected file(s) in external $EDITOR
 .It Ic " ^R  z^R  gz^R"
 reload information for all/current/selected file(s)
+.It Ic "  d   gd"
+delete current/selected file(s) from filesystem, upon commit
+.It Ic "  y   gy" Ar directory
+.No copy current/selected file(s) to given Ar directory Ns , upon commit
+.It Ic "  e   ge" Ar name
+.No rename current/selected file(s) to Ar name
+.It Ic "z^S"
+commit changes to file system
 .El
 .
 .Ss Plugins Sheet
