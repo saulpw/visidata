@@ -45,12 +45,16 @@ def detect_command(cmdlist):
 
 
 @Sheet.api
-@asyncthread
 def syscopyCells(sheet, cols, rows, filetype=None):
+    filetype = filetype or vd.input("copy %d %s as filetype: " % (len(rows), sheet.rowtype), value=sheet.options.save_filetype)
+    sheet.syscopyCells_async(cols, rows, filetype)
+
+@Sheet.api
+@asyncthread
+def syscopyCells_async(sheet, cols, rows, filetype):
     vs = copy(sheet)
     vs.rows = rows or vd.fail('no %s selected' % sheet.rowtype)
     vs.columns = cols
-    filetype = filetype or vd.input("copy %d %s as filetype: " % (len(rows), sheet.rowtype), value=sheet.options.save_filetype)
 
     if not sheet.options.clipboard_copy_cmd:
         __copy_commands = {
