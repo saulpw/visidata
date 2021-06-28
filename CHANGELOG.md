@@ -13,10 +13,13 @@
         - identical dates compare equal even if intra-day times are different
         - this does not work for incompletely specified visidata.date; e.g.
             `visidata.date(2016, 10, 29, 4, 0, 0) != visidata.date(2016, 10, 29)`
+- [DirSheet] add y/gy to copy file(s) to given directory
+- [loaders vds] save non-jsonable cells as string (thanks @pacien #1011)
 - [loaders zstd] support loading zstd-compressed files (thanks @lxcode #971)
 - [movement] bind `Ctrl+Left/Right` to `go-left`/`right-page` (thanks @davidwales #1002)
 - [options] save to foo.visidatarc from OptionsSheet (thanks @njthomas #958)
 - [sqlite] RENAME and DROP tables from SqliteIndexSheet
+- [unfurl] add `options_unfurl_empty` to include row for empty list/dict (thanks @frosencrantz #898)
 - [quitguard] guard new sheets by default (thanks @frosencrantz #844)
 - [quitguard] confirm quit/reload only if sheet modified (references #955, #844, #483; thanks @jvns, @frosencrantz)
 
@@ -27,11 +30,23 @@
 - [clipboard] gzp pastes None if nothing on clipboard
 - [clipboard] make syspaste async
 - [clipboard] bind `zP` to syspaste-cells and gzP to syspaste-cells-selected (thanks @jvns and frosencrantz #983, #990)
+- [cliptext] better support for combining and variant chars (thanks @lxcode #758)
+- [colors] reduce color swatch size to remove flashing (thanks @frosencrantz #946)
+- [encoding] specify encoding explicitly for all Path.open_text (thanks @pacien #1016)
+- [error] exceptionCaught(status=False) to add to status history, but not post to status (thanks @frosencrantz #982)
+- [freqtbl] copy fmtstr from source col to aggcol (thanks @geekscrapy #1003)
+- [help] ENTER/exec-command to execute command on undersheet (thanks @geekscrapy #1011)
+- [help] add `all_bindings` hidden column (thanks @frosencrantz #896)
 - [loaders tsv] increase bufsize to improve loader performance by 10%
 - [path] all Path.open track Progress via read/filesize (thanks @jspatz #987)
+- [path] add Progress for opening compressed files
+- [path] implement line-seek operations (thanks @pacien #1010)
 - [regex expand] deprecate `expand_col_scanrows`; standardize on `options.default_sample_size` (thanks @jsvine)
+- [shell] `addcol-shell` pa
 - [splitwin] push sheet in empty pane iff splitwin
+- [stdin] use cli --encoding option for piped data (thanks @pacien #1018)
 - [undo] remove undo for reload (replaced with quitguard+confirm)
+- [quit] add Shift+Q/quit-sheet-free to quit and free associated memory (thanks @cwarden)
 
 ## Display
 - [canvas] add `disp_canvas_charset` to change displayed chars (thanks @albert-ying #963)
@@ -41,20 +56,31 @@
 
 ## Bugfixes
 
+- [batch] ensure quitguard is off during batch mode
+- [canvas[ fix error on dive into cursor including y-axis
 - [cli] have an actual error if there is a missing argument for final option
+- [cli] do nothing (no error) if no sources given
 - [clipboard] fix zy/gzp regression (thanks @sfranky #961)
+- [clipboard] syscopy-cell do not include column name
+- [cmdlog] fix bug where customising replayable options in Options Sheet led to issues opening metasheets (thanks @jsvine #952)
+- [cmdlog] fix bug where cmdlog records new sheet name, instead of old sheet name for `rename-sheet` (thanks @aborruso #979)
 - [color] track precedence so colorizers apply over `color_current_row`
 - [color] determine color availability with `init_pair`
 - [color] do not break on nonsense color
 - [column] getitemdeep/setitemdeep get/set dotted item key if exists (thanks @frosencrantz #991)
+- [column] fix bug where hard crash occurs when cursor on cell of SheetsSheet is on cursorDisplay (thanks @frosencrantz #1029)
 - [execCommand] warn gracefully if bound command longname does not exist
 - [expr] setValuesFromExpr do not stop processing on exception
 - [join] fix when keys have different names (thanks @aborruso #964)
 - [loaders fixed] fix editing in final column for fixed-width load (thanks @mwayne #974)
 - [loaders geojson] do not abort plot if rows have errors
+- [loaders html] add columns even if not in first row
 - [loaders rec json] fix adding new columns for json and rec loaders (thanks @ajkerrigan #959)
+- [npy] set `allow_pickle=True` for load
 - [loaders postgresql] add postgresql scheme (fixes #966) (thanks @zormit #967)
 - [loaders sqlite] fix saving deleted cells (thanks @mattenklicker #969)
+- [loaders vds] save SettableColumn as Column (thanks @pacien #1012)
+- [loaders zip] fix extract-selected-to
 - [open] fix regression where opening blank sheets of type tsv, csv, txt, etc was not working
 - [plugins] fix stdout/error from plugins installation message (was in bytes, changed to str)
 - [quit] remove sheets from **Sheets Sheet** upon quit
