@@ -6,6 +6,7 @@ from visidata import *
 
 option('show_graph_labels', True, 'show axes and legend on graph')
 theme('plot_colors', 'green red yellow cyan magenta white 38 136 168', 'list of distinct colors to use for plotting distinct objects')
+theme('disp_canvas_charset', ''.join(chr(0x2800+i) for i in range(256)), 'charset to render 2x4 blocks on canvas')
 theme('disp_pixel_random', False, 'randomly choose attr from set of pixels instead of most common')
 option('zoom_incr', 2.0, 'amount to multiply current zoomlevel when zooming')
 theme('color_graph_hidden', '238 blue', 'color of legend for hidden attribute')
@@ -206,7 +207,7 @@ class Plotter(BaseSheet):
     def rowsWithin(self, bbox):
         'return list of deduped rows within bbox'
         ret = {}
-        for y in range(bbox.ymin, bbox.ymax+1):
+        for y in range(bbox.ymin, min(len(self.pixels), bbox.ymax+1)):
             for x in range(bbox.xmin, min(len(self.pixels[y]), bbox.xmax+1)):
                 for attr, rows in self.pixels[y][x].items():
                     if attr not in self.hiddenAttrs:
@@ -216,13 +217,15 @@ class Plotter(BaseSheet):
 
     def draw(self, scr):
         windowHeight, windowWidth = scr.getmaxyx()
+        disp_canvas_charset = self.options.disp_canvas_charset or ' o'
+        disp_canvas_charset += (256 - len(disp_canvas_charset)) * disp_canvas_charset[-1]
 
         if self.needsRefresh:
             self.render(windowHeight, windowWidth)
 
         if self.pixels:
             cursorBBox = self.plotterCursorBox
-            getPixelAttr = self.getPixelAttrRandom if options.disp_pixel_random else self.getPixelAttrMost
+            getPixelAttr = self.getPixelAttrRandom if self.options.disp_pixel_random else self.getPixelAttrMost
 
             for char_y in range(0, self.plotheight//4):
                 for char_x in range(0, self.plotwidth//2):
@@ -254,7 +257,7 @@ class Plotter(BaseSheet):
                         attr = update_attr(ColorAttr(attr, 0, 0, attr), colors.color_current_row).attr
 
                     if attr:
-                        scr.addstr(char_y, char_x, chr(0x2800+braille_num), attr)
+                        scr.addstr(char_y, char_x, disp_canvas_charset[braille_num], attr)
 
         def _mark_overlap_text(labels, textobj):
             def _overlaps(a, b):
@@ -275,7 +278,7 @@ class Plotter(BaseSheet):
                     o[1] = False
                     label_fldraw[1] = False
 
-        if options.show_graph_labels:
+        if self.options.show_graph_labels:
             labels_by_line = defaultdict(list) # y -> text labels
 
             for pix_x, pix_y, txt, attr, row in self.labels:
@@ -333,7 +336,7 @@ class Canvas(Plotter):
         self.legends.clear()
         self.legendwidth = 0
         self.plotAttrs.clear()
-        self.unusedAttrs = list(colors[colorname.translate(str.maketrans('_', ' '))] for colorname in options.plot_colors.split())
+        self.unusedAttrs = list(colors[colorname.translate(str.maketrans('_', ' '))] for colorname in self.options.plot_colors.split())
 
     def plotColor(self, k):
         attr = self.plotAttrs.get(k, None)
@@ -375,6 +378,20 @@ class Canvas(Plotter):
         self.cursorBox = BoundingBox(self.cursorBox.xmin, self.cursorBox.ymin, p.x, p.y)
         self.cursorBox.w = max(self.cursorBox.w, self.canvasCharWidth)
         self.cursorBox.h = max(self.cursorBox.h, self.canvasCharHeight)
+
+    def commandCursor(sheet, execstr):
+        'Return (col, row) of cursor suitable for cmdlog replay of execstr.'
+        contains = lambda s, *substrs: any((a in s) for a in substrs)
+        colname, rowname = '', ''
+        if contains(execstr, 'plotterCursorBox'):
+            bb = sheet.cursorBox
+            colname = '%s %s' % (sheet.formatX(bb.xmin), sheet.formatX(bb.xmax))
+            rowname = '%s %s' % (sheet.formatY(bb.ymin), sheet.formatY(bb.ymax))
+        elif contains(execstr, 'plotterVisibleBox'):
+            bb = sheet.visibleBox
+            colname = '%s %s' % (sheet.formatX(bb.xmin), sheet.formatX(bb.xmax))
+            rowname = '%s %s' % (sheet.formatY(bb.ymin), sheet.formatY(bb.ymax))
+        return colname, rowname
 
     @property
     def canvasCharWidth(self):

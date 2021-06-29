@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+set -u
+
+cd "$(git rev-parse --show-toplevel)" # begin in project root
+docker build -f Dockerfile.alpine -t visidata .
+docker build -f Dockerfile.darkdraw.alpine -t darkdraw .

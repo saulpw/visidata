@@ -10,11 +10,11 @@ from visidata import VisiData, vd, option, options, globalCommand, Sheet, Escape
 from visidata import ColumnAttr, Column
 from visidata import *
 
-__all__ = ['Progress', 'asynccache', 'async_deepcopy', 'elapsed_s', 'cancelThread', 'ThreadsSheet', 'ProfileSheet', 'codestr', 'asyncsingle']
+__all__ = ['Progress', 'asynccache', 'async_deepcopy', 'elapsed_s', 'cancelThread', 'ThreadsSheet', 'ProfileSheet', 'codestr', 'asyncsingle', 'MemoryUsageSheet']
 
 
-option('profile', '', 'filename to save binary profiling data')
-option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
+vd.option('profile', False, 'enable profiling on threads')
+vd.option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
 
 theme('color_working', 'green', 'color of system running smoothly')
 
@@ -118,7 +118,7 @@ class ThreadsSheet(Sheet):
     def openRow(self, row):
         'push profile sheet for this action'
         if row.profile:
-            return ProfileSheet(row.name+"_profile", source=row.profile)
+            return ProfileSheet(row.name, "profile", source=row.profile)
         vd.warning("no profile")
 
 
@@ -158,7 +158,7 @@ BaseSheet.init('progresses', list)  # list of Progress objects
 
 @BaseSheet.property
 def progressMade(self):
-    return sum(prog.made for prog in self.progresses)
+    return sum(prog.made for prog in self.progresses if prog.total)
 
 @BaseSheet.property
 def progressTotal(self):
@@ -189,6 +189,10 @@ VisiData.init('threads', lambda: [_annotate_thread(threading.current_thread(), 0
 def threadsSheet(self):
     return ThreadsSheet('threads')
 
+@VisiData.lazy_property
+def memoryUsageSheet(self):
+    return MemoryUsageSheet("memory_usage")
+
 @VisiData.api
 def execAsync(self, func, *args, sheet=None, **kwargs):
     'Execute ``func(*args, **kwargs)`` in a separate thread.'
@@ -196,8 +200,8 @@ def execAsync(self, func, *args, sheet=None, **kwargs):
     thread = threading.Thread(target=_toplevelTryFunc, daemon=True, args=(func,)+args, kwargs=kwargs)
     self.threads.append(_annotate_thread(thread))
 
-    if sheet is None and self.sheets:
-        sheet = self.sheets[0]
+    if sheet is None:
+        sheet = self.activeSheet
 
     if sheet is not None:
         sheet.currentThreads.append(thread)
@@ -286,44 +290,37 @@ def sync(self, *joiningThreads):
 
 min_thread_time_s = 0.10 # only keep threads that take longer than this number of seconds
 
-def open_pyprof(p):
-    return ProfileSheet(p.name, p.open_bytes())
+@VisiData.api
+def open_pyprof(vd, p):
+    import pstats
+    return ProfileStatsSheet(p.name, source=pstats.Stats(p.given).stats)
+
 
 @VisiData.api
 def toggleProfiling(vd, t):
     if not t.profile:
         t.profile = cProfile.Profile()
         t.profile.enable()
-        if not options.profile:
-            options.set('profile', 'vdprofile')
+        if not vd.options.profile:
+            vd.options.set('profile', True)
     else:
         t.profile.disable()
-        t.profile = None
-        options.set('profile', '')
-    vd.status('profiling ' + ('ON' if t.profile else 'OFF'))
+        vd.options.set('profile', False)
+    vd.status('profiling ' + ('ON' if vd.options.profile else 'OFF'))
 
 
 class ThreadProfiler:
-    numProfiles = 0
-
     def __init__(self, thread):
         self.thread = thread
-        if options.profile:
-            self.thread.profile = cProfile.Profile()
-        else:
-            self.thread.profile = None
-        ThreadProfiler.numProfiles += 1
-        self.profileNumber = ThreadProfiler.numProfiles
+        self.thread.profile = cProfile.Profile()
 
     def __enter__(self):
-        if self.thread.profile:
+        if vd.options.profile:
             self.thread.profile.enable()
         return self
 
     def __exit__(self, exc_type, exc_val, tb):
-        if self.thread.profile:
-            self.thread.profile.disable()
-            self.thread.profile.dump_stats(options.profile + str(self.profileNumber))
+        self.thread.profile.disable()
 
         if exc_val:
             self.thread.exception = exc_val
@@ -332,7 +329,9 @@ class ThreadProfiler:
             if elapsed_s(self.thread) < min_thread_time_s:
                 vd.threads.remove(self.thread)
 
+
 class ProfileSheet(Sheet):
+    rowtype = 'callsites' # rowdef: profiler_entry
     columns = [
         Column('funcname', getter=lambda col,row: codestr(row.code)),
         Column('filename', getter=lambda col,row: os.path.split(row.code.co_filename)[-1] if not isinstance(row.code, str) else ''),
@@ -351,7 +350,11 @@ class ProfileSheet(Sheet):
     nKeys=3
 
     def reload(self):
-        self.rows = self.source.getstats()
+        if isinstance(self.source, cProfile.Profile):
+            self.rows = self.source.getstats()
+        else:
+            self.rows = self.source
+
         self.orderBy(None, self.column('inlinetime_us'), reverse=True)
         self.callers = collections.defaultdict(list)  # [row.code] -> list(code)
 
@@ -374,10 +377,49 @@ class ProfileSheet(Sheet):
             return ProfileSheet(codestr(row.code)+"_"+col.name, source=val)
         vd.warning("no callers")
 
+
+class ProfileStatsSheet(Sheet):
+    rowtype = 'functions' # rowdef: list from pstats.Stats.stats
+    columns = [
+        ItemColumn('pathname', 0),
+        ItemColumn('line', 1, type=int),
+        ItemColumn('func', 2),
+        ItemColumn('ncalls', 3, type=int),
+        ItemColumn('primitive_calls', 4, type=int, width=0),
+        ItemColumn('tottime', 5, type=float),
+        ItemColumn('cumtime', 6, type=float),
+        ItemColumn('callers', 7),
+    ]
+    def reload(self):
+        self.rows = list((k+v) for k,v in self.source.items())
+
+    def openRow(self, row):
+        return ProfileStatsSheet('', source=row[7])
+
 def codestr(code):
     if isinstance(code, str):
         return code
     return code.co_name
+
+
+class MemoryUsageSheet(Sheet):
+    rowtype = 'samples'  # rowdef: dict(t:time_t, data_MB:float)
+    columns = [
+        ItemColumn('t', type=date, fmtstr="%H:%M:%S"),
+        ItemColumn('data_MB', type=int),
+    ]
+    nKeys = 1
+    def iterload(self):
+        import psutil
+        proc = psutil.Process()
+        while True:
+            r = proc.memory_info()
+            yield {
+                't': time.time(),
+                'data_MB': r.data/1000000,
+            }
+            time.sleep(1)
+
 
 ThreadsSheet.addCommand('^C', 'cancel-thread', 'cancelThread(cursorRow)', 'abort thread at current row')
 ThreadsSheet.addCommand(None, 'add-row', 'fail("cannot add new rows on Threads Sheet")', 'invalid command')
@@ -385,8 +427,12 @@ ThreadsSheet.addCommand(None, 'add-row', 'fail("cannot add new rows on Threads S
 
 ProfileSheet.addCommand('z^S', 'save-profile', 'source.dump_stats(input("save profile to: ", value=name+".prof"))', 'save profile')
 ProfileSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow.code.co_filename, "+%s" % cursorRow.code.co_firstlineno)', 'open current file at referenced row in external $EDITOR')
+ProfileStatsSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow[0], "+%s" % cursorRow[1])', 'open current file at referenced row in external $EDITOR')
+
 globalCommand('^_', 'toggle-profile', 'toggleProfiling(threading.current_thread())', 'turn profiling on for main process')
 
 BaseSheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads or fail("no active threads on this sheet"))', 'abort all threads on current sheet')
-globalCommand('g^C', 'cancel-all', 'liveThreads=list(t for vs in vd.sheets for t in vs.currentThreads); cancelThread(*liveThreads); status("canceled %s threads" % len(liveThreads))', 'abort all secondary threads')
-globalCommand('^T', 'threads-all', 'vd.push(vd.threadsSheet)', 'open Threads Sheet')
+BaseSheet.addCommand('g^C', 'cancel-all', 'liveThreads=list(t for vs in vd.sheets for t in vs.currentThreads); cancelThread(*liveThreads); status("canceled %s threads" % len(liveThreads))', 'abort all secondary threads')
+
+BaseSheet.addCommand('^T', 'threads-all', 'vd.push(vd.threadsSheet)', 'open Threads Sheet')
+BaseSheet.addCommand('z^T', 'open-memusage', 'vd.push(vd.memoryUsageSheet)', 'open Memory Usage Sheet')

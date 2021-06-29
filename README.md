@@ -1,5 +1,5 @@
 
-# VisiData v2.1 [![twitter @VisiData][1.1]][1] [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/develop.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/develop) [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/saulpw/visidata)
+# VisiData v2.4 [![twitter @VisiData][1.1]][1] [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable) [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/saulpw/visidata)
 
 A terminal interface for exploring and arranging tabular data.
 
@@ -43,7 +43,7 @@ Hundreds of other commands and options are also available; see the documentation
 
 ### Help and Support
 
-If you have a question, issue, or suggestion regarding VisiData, please [create an issue on Github](https://github.com/saulpw/visidata/issues) or chat with us at #visidata on [freenode.net](https://webchat.freenode.net/).
+If you have a question, issue, or suggestion regarding VisiData, please [create an issue on Github](https://github.com/saulpw/visidata/issues) or chat with us at #visidata on [irc.libera.chat](https://libera.chat/).
 
 If you use VisiData regularly, please [support me on Patreon](https://www.patreon.com/saulpw)!
 

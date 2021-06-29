@@ -100,7 +100,7 @@ Colors
 
 The TableSheet allows rows, columns, or individual cells to be colorized according to a Python function.
 
-See `Color Docs <docs/colors>`__ for information on how to configure specific colors and attributes.
+See `Color Docs <../colors>`__ for information on how to configure specific colors and attributes.
 
 .. data:: visidata.TableSheet.colorizers
 

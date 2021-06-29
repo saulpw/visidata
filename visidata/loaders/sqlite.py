@@ -1,3 +1,5 @@
+import re
+
 from visidata import *
 
 def open_sqlite(p):
@@ -22,33 +24,36 @@ class SqliteSheet(Sheet):
 
     def execute(self, conn, sql, parms=None):
         parms = parms or []
-        vd.status(sql)
+        vd.debug(sql)
         return conn.execute(sql, parms)
 
     def iterload(self):
-        sqltypes = {
-            'INTEGER': int,
-            'TEXT': anytype,
-            'BLOB': str,
-            'REAL': float
-        }
+        def parse_sqlite_type(t):
+            m = re.match(r'(\w+)(\((\d+)(,(\d+))?\))?', t.upper())
+            if not m: return anytype
+            typename, _, i, _, f = m.groups()
+            if typename == 'DATE': return date
+            if typename == 'INTEGER': return int
+            if typename == 'REAL': return float
+            if typename == 'NUMBER':
+                return int if f == '0' else float
+            return anytype
 
         with self.conn() as conn:
             tblname = self.tableName
             if not isinstance(self, SqliteIndexSheet):
                 self.columns = []
                 self.addColumn(ColumnItem('rowid', 0, type=int, width=0))
-                for i, r in enumerate(self.execute(conn, 'PRAGMA TABLE_INFO("%s")' % tblname)):
-                    c = ColumnItem(r[1], i+1, type=sqltypes.get(r[2].upper(), anytype))
+                for r in self.execute(conn, 'PRAGMA TABLE_XINFO("%s")' % tblname):
+                    colnum, colname, coltype, nullable, defvalue, colkey, *_ = r
+                    c = ColumnItem(colname, colnum+1, type=parse_sqlite_type(coltype))
                     self.addColumn(c)
 
-                    if r[-1]:
+                    if colkey:
                         self.setKeys([c])
 
-            r = self.execute(conn, 'SELECT COUNT(*) FROM "%s"' % tblname).fetchall()
-            rowcount = r[0][0]
-            for row in Progress(self.execute(conn, 'SELECT rowid, * FROM "%s"' % tblname), total=rowcount-1):
-                yield list(row)
+            r = self.execute(conn, 'SELECT rowid, * FROM "%s"' % tblname)
+            yield from Progress(r, total=r.rowcount-1)
 
     @asyncthread
     def putChanges(self):
@@ -108,23 +113,48 @@ class SqliteSheet(Sheet):
 
 
 class SqliteIndexSheet(SqliteSheet, IndexSheet):
+    rowtype = 'tables'
     tableName = 'sqlite_master'
+    savesToSource = True
+    defer = True
     def iterload(self):
         for row in SqliteSheet.iterload(self):
             if row[1] != 'index':
                 tblname = row[2]
                 yield SqliteSheet(tblname, source=self, tableName=tblname, row=row)
 
+    def putChanges(self):
+        adds, mods, dels = self.getDeferredChanges()
+        with self.conn() as conn:
+            for r in adds.values():
+                vd.warning('create a new table by saving a new sheet to this database file')
+
+            for row, rowmods in mods.values():
+                cname = self.column('name')
+                if len(rowmods) == 1 and cname in rowmods:
+                    sql='ALTER TABLE "%s" RENAME TO "%s"' % (cname.calcValue(row), rowmods[cname])
+                    self.execute(conn, sql)
+                else:
+                    vd.warning('can only modify table name')
+
+            for row in dels.values():
+                sql = 'DROP TABLE "%s"' % row.tableName
+                self.execute(conn, sql)
+
+            conn.commit()
+
+        self.preloadHook()
+        self.reload()
 
 class SqliteQuerySheet(SqliteSheet):
     def iterload(self):
         with self.conn() as conn:
             self.columns = []
-            self.addColumn(ColumnItem('rowid', 0, type=int))
-
+            for c in type(self).columns:
+                self.addColumn(copy(c))
             self.result = self.execute(conn, self.query, parms=getattr(self, 'parms', []))
             for i, desc in enumerate(self.result.description):
-                self.addColumn(ColumnItem(desc[0], i+1))
+                self.addColumn(ColumnItem(desc[0], i))
 
             for row in self.result:
                 yield row
@@ -135,6 +165,7 @@ class SqliteQuerySheet(SqliteSheet):
 def save_sqlite(vd, p, *vsheets):
     import sqlite3
     conn = sqlite3.connect(str(p))
+    conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
     sqltypes = {
@@ -175,5 +206,7 @@ def save_sqlite(vd, p, *vsheets):
     vd.status("%s save finished" % p)
 
 
+SqliteIndexSheet.addCommand('a', 'add-table', 'fail("create a new table by saving a sheet to this database file")', 'stub; add table by saving a sheet to the db file instead')
+SqliteIndexSheet.bindkey('ga', 'add-table')
 SqliteSheet.class_options.header = 0
 VisiData.save_db = VisiData.save_sqlite

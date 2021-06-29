@@ -1,4 +1,4 @@
-.Dd Dec 5, 2020
+.Dd June 27, 2021
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -81,6 +81,8 @@ cancel user input or abort all async threads on current sheet
 abort all secondary threads
 .It Ic "  q"
 quit current sheet
+.It Ic "  Q"
+quit current sheet and free associated memory
 .It Ic " gq"
 quit all sheets (clean exit)
 .Pp
@@ -110,6 +112,8 @@ go all the way to the left/bottom/top/right of sheet
 go all the way to the bottom/top of sheet
 .It Ic "^B  ^F"
 scroll one page back/forward
+.It Ic "^Left ^Right"
+scroll one page left/right
 .It Ic "zz"
 scroll current row to center of screen
 .Pp
@@ -253,11 +257,11 @@ select/toggle/unselect all rows from cursor to bottom
 .It Ic "z|  z\e\ " Ns Ar expr
 .No select/unselect rows matching Python Ar expr No in any visible column
 .It Ic " \&," Ns " (comma)"
-select rows matching typed value of current cell in current column
+select rows matching display value of current cell in current column
 .It Ic "g\&,"
-select rows matching typed value of current row in all visible columns
+select rows matching display value of current row in all visible columns
 .It Ic "z\&, gz\&,"
-select rows matching display value of current cell/row in current column/all visible columns
+select rows matching typed value of current cell/row in current column/all visible columns
 .
 .El
 .
@@ -285,21 +289,27 @@ open duplicate sheet with deepcopy of selected rows
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .It Ic "  a   za"
-append a blank row/column; appended columns cannot be copied to clipboard
+append blank row/column; appended columns cannot be copied to clipboard
 .It Ic " ga  gza" Ar number
 .No append Ar number No blank rows/columns
 .It Ic "  d   gd"
-delete (cut) current/selected row(s) and move to clipboard
+delete current/selected row(s)
 .It Ic "  y   gy"
-yank (copy) current/all selected row(s) to clipboard
+.No yank (copy) current/all selected row(s) to clipboard in Sy Memory Sheet
+.It Ic "  x  gx"
+.No cut (copy and delete) current/all selected row(s) to clipboard in Sy Memory Sheet
 .It Ic " zy  gzy"
-yank (copy) contents of current column for current/selected row(s) to clipboard
+.No yank (copy) contents of current column for current/selected row(s) to clipboard in Sy Memory Sheet
 .It Ic " zd  gzd"
-delete (cut) contents of current column for current/selected row(s) and move to clipboard
+.No set contents of current column for current/selected row(s) to Sy options.null_value
+.It Ic " zx gzx"
+.No cut (copy and delete) contents of current column for current/selected row(s) to clipboard in Sy Memory Sheet
 .It Ic "  p    P"
 paste clipboard rows after/before current row
 .It Ic " zp  gzp"
 set cells of current column for current/selected row(s) to last clipboard value
+.It Ic " zP  gzP"
+paste to cells of current column for current/selected row(s) using the system clipboard
 .It Ic "  Y   gY"
 .No yank (copy) current/all selected row(s) to system clipboard (using Sy options.clipboard_copy_cmd Ns )
 .It Ic " zY  gzY"
@@ -371,7 +381,7 @@ open
 .It Ic " +" Ar aggregator
 .No add Ar aggregator No to current column (see Sy "Frequency Table" Ns )
 .It Ic "z+" Ar aggregator
-.No display result of Ar aggregator No over values in selected rows for current column
+.No display result of Ar aggregator No over values in selected rows for current column; store result in Sy Memory Sheet
 .It Ic " &"
 .No concatenate top two sheets in Sy Sheets Stack
 .It Ic "g&"
@@ -436,10 +446,14 @@ scroll canvas
 .Bl -tag -width XXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "gZ"
 .No close an already split screen, current pane full screens
-.It Ic "Tab"
+.It Ic " Z"
+.No push second sheet on current pane's stack to the top of the other pane's stack
+.It Ic " Tab"
 .No jump to other pane
-.It Ic "^^" No (Ctrl+^)
-.No swap which sheet is in current pane
+.It Ic "gTab"
+.No swap panes
+.It Ic "g^^" No (g Ctrl+^)
+.No cycle through sheets
 .Pp
 .El
 .Ss Other Commands
@@ -496,6 +510,8 @@ open current row/cell/sheet as Python object
 .Sy Directory Sheet No "            browse properties of files in a directory"
 .It Sy " \&."
 .Sy Plugins Sheet No "              browse, install, and (de)activate plugins"
+.It Sy " \&."
+.Sy Memory Sheet No (Alt+Shift+M) "       browse saved values, including clipboard"
 .It " "
 .It Sy Metasheets
 .It Sy " \&."
@@ -553,6 +569,14 @@ open current/selected file(s) as new sheet(s)
 open current/selected file(s) in external $EDITOR
 .It Ic " ^R  z^R  gz^R"
 reload information for all/current/selected file(s)
+.It Ic "  d   gd"
+delete current/selected file(s) from filesystem, upon commit
+.It Ic "  y   gy" Ar directory
+.No copy current/selected file(s) to given Ar directory Ns , upon commit
+.It Ic "  e   ge" Ar name
+.No rename current/selected file(s) to Ar name
+.It Ic "z^S"
+commit changes to file system
 .El
 .
 .Ss Plugins Sheet
@@ -574,6 +598,27 @@ reload information for all/current/selected file(s)
 install and activate current plugin
 .It Ic "d"
 deactivate current plugin
+.El
+.
+.Ss Memory Sheet
+.Bl -inset -compact
+.It Browse through a list of stored values, referanceable in expressions through their Sy name Ns .
+.El
+.Bl -inset -compact
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic Alt+Shift+M
+.No open the Sy Memory Sheet
+.It Ic Alt+M Ar name
+.No store value in current cell in Sy Memory Sheet No under Ar name
+.El
+.Bl -inset -compact
+.It (sheet-specific commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic "e"
+edit either value or name, to edit reference
 .El
 .Ss METASHEETS
 .Ss Columns Sheet (Shift+C)
@@ -674,6 +719,8 @@ save selected or all sheets
 edit option at current row
 .It Ic "d"
 remove option override for this context
+.It Ic "^S"
+.No save option configuration to Sy foo.visidatarc
 .El
 .
 .Ss CommandLog (Shift+D)
@@ -779,6 +826,10 @@ show/hide methods and hidden properties
 .El
 .
 .Sh COMMANDLINE OPTIONS
+.No Add Sy -n Ns / Ns Sy --nonglobal No to make subsequent CLI options "sheet-specific" (applying only to paths specified directly on the CLI). By default, CLI options apply to all sheets.
+.Pp
+.No Options can also be set via the Ar Options Sheet No or a Ar .visidatarc No (see Sx FILES Ns ).
+.Pp
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Cm -P Ns = Ns Ar longname
 .No preplay Ar longname No before replay or regular launch; limited to Sy Base Sheet No bound commands
@@ -811,6 +862,12 @@ overwrite existing files without confirmation
 .Pp
 .Dl Nm vd Cm -f sqlite bar.db
 .No open the file bar.db as a sqlite database
+.Pp
+.Dl Nm vd Cm foo.tsv -n -f sqlite bar.db
+.No open foo.tsv as tsv and bar.db as a sqlite database
+.Pp
+.Dl Nm vd Cm -f sqlite foo.tsv bar.db
+.No open both foo.tsv and bar.db as a sqlite database
 .Pp
 .Dl Nm vd Cm -b countries.fixed -o countries.tsv
 .No convert countries.fixed (in fixed width format) to countries.tsv (in tsv format)
@@ -890,7 +947,7 @@ Core VisiData includes these sources:
 .It Sy sqlite
 .Bl -inset -compact -offset xxx
 .It May include multiple tables. The initial sheet is the table directory;
-.Sy Enter No loaders the entrie table into memory. Sy z^S No saves modifications to source.
+.Sy Enter No loads the entire table into memory. Sy z^S No saves modifications to source.
 .El
 .El
 .Pp
@@ -903,23 +960,7 @@ URL schemes are also supported:
 For a list of all remaining formats supported by VisiData, see https://visidata.org/formats.
 .Pp
 In addition,
-.Sy .zip Ns , Sy .gz Ns , Sy .bz2 Ns , and Sy .xz No files are decompressed on the fly.
-.Pp
-.
-.Sh SUPPORTED OUTPUT FORMATS
-These are the supported savers:
-.Pp
-.Bl -inset -compact -offset xxx
-.It Sy tsv No (tab-separated value)
-.It Sy csv No (comma-separated value)
-.It Sy json No (one object with all rows)
-.It Sy jsonl Ns / Ns Sy ndjson Ns / Ns Sy ldjson No (one object per line/row)
-.Bl -inset -compact -offset xxx
-.It All expanded subcolumns must be closed (with Sy "\&)" Ns ) to retain the same structure.
-.El
-.It Sy sqlite No (save to source with Sy z^S Ns )
-.It Sy md No (markdown table)
-.El
+.Sy .zip Ns , Sy .gz Ns , Sy .bz2 Ns , Sy .xz Ns , Sy ,zstd Ns , and Sy .zst No files are decompressed on the fly.
 .Pp
 .
 .Sh AUTHOR

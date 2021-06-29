@@ -9,15 +9,15 @@ def fillNullValues(vd, col, rows):
     oldvals = [] # for undo
     isNull = col.sheet.isNullFunc()
     n = 0
-    rowsToFill = list(rows)
+    rowsToFill = [id(r) for r in rows]
     for r in Progress(col.sheet.rows, 'filling'):  # loop over all rows
         try:
             val = col.getValue(r)
         except Exception as e:
             val = e
 
-        if isNull(val) and r in rowsToFill:
-            if lastval:
+        if isNull(val):
+            if lastval and (id(r) in rowsToFill):
                 oldvals.append((col,r,val))
                 col.setValue(r, lastval)
                 n += 1
@@ -33,4 +33,4 @@ def fillNullValues(vd, col, rows):
     vd.status("filled %d values" % n)
 
 
-Sheet.addCommand('f', 'setcol-fill', 'fillNullValues(cursorCol, selectedRows)', 'fills null cells in selected rows of current column with contents of non-null cells up the current column')
+Sheet.addCommand('f', 'setcol-fill', 'fillNullValues(cursorCol, someSelectedRows)', 'fills null cells in selected rows of current column with contents of non-null cells up the current column')

@@ -24,7 +24,10 @@ def runMacro(vd, macro):
 
 def setMacro(ks, vs):
     vd.macrobindings[ks] = vs
-    BaseSheet.addCommand(ks, vs.name, 'runMacro(vd.macrobindings[keystrokes])')
+    if vd.isLongname(ks):
+        BaseSheet.addCommand('', ks, 'runMacro(vd.macrobindings[longname])')
+    else:
+        BaseSheet.addCommand(ks, vs.name, 'runMacro(vd.macrobindings[keystrokes])')
 
 
 @CommandLog.api
@@ -58,8 +61,6 @@ def startMacro(cmdlog):
         vd.status("recording macro")
         vd.macroMode = CommandLog('current_macro', rows=[])
 
-
-vd.status(vd.macrosheet)
 
 Sheet.addCommand('m', 'macro-record', 'vd.cmdlog.startMacro()')
 Sheet.addCommand('gm', 'macro-sheet', 'vd.push(vd.macrosheet)')

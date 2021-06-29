@@ -1,5 +1,288 @@
 # VisiData version history
 
+# v2.5 (XXXX-XX-XX)
+
+- #visidata has moved off of freenode to libera.chat
+- the required pandas version for the pandas loader has been bumped to at least 1.0.5
+
+## Features
+
+- [clipboard] bind `x` family to `cut-*` (thanks @geekscrapy #895)
+- [date] add specialized comparators for `datetime.date` (thanks @aborruso #975)
+    - visidata.date now compares to datetime.date (previously raised exception)
+        - identical dates compare equal even if intra-day times are different
+        - this does not work for incompletely specified visidata.date; e.g.
+            `visidata.date(2016, 10, 29, 4, 0, 0) != visidata.date(2016, 10, 29)`
+- [DirSheet] add y/gy to copy file(s) to given directory
+- [loaders vds] save non-jsonable cells as string (thanks @pacien #1011)
+- [loaders zstd] support loading zstd-compressed files (thanks @lxcode #971)
+- [movement] bind `Ctrl+Left/Right` to `go-left`/`right-page` (thanks @davidwales #1002)
+- [options] save to foo.visidatarc from OptionsSheet (thanks @njthomas #958)
+- [sqlite] RENAME and DROP tables from SqliteIndexSheet
+- [unfurl] add `options.unfurl_empty` to include row for empty list/dict (thanks @frosencrantz #898)
+- [quitguard] guard new sheets by default (thanks @frosencrantz #844)
+- [quitguard] confirm quit/reload only if sheet modified (references #955, #844, #483; thanks @jvns, @frosencrantz)
+
+## Improvements
+
+- [addRow] advance cursor if row inserted before cursor
+- [archive] add .lzma as alias for .xz
+- [clipboard] gzp pastes None if nothing on clipboard
+- [clipboard] make syspaste async
+- [clipboard] bind `zP` to syspaste-cells and gzP to syspaste-cells-selected (thanks @jvns and frosencrantz #983, #990)
+- [cliptext] better support for combining and variant chars (thanks @lxcode #758)
+- [colors] reduce color swatch size to remove flashing (thanks @frosencrantz #946)
+- [encoding] specify encoding explicitly for all Path.open_text (thanks @pacien #1016)
+- [error] exceptionCaught(status=False) to add to status history, but not post to status (thanks @frosencrantz #982)
+- [freqtbl] copy fmtstr from source col to aggcol (thanks @geekscrapy #1003)
+- [help] ENTER/exec-command to execute command on undersheet (thanks @geekscrapy #1011)
+- [help] add `all_bindings` hidden column (thanks @frosencrantz #896)
+- [loaders tsv] increase bufsize to improve loader performance by 10%
+- [path] all Path.open track Progress via read/filesize (thanks @jspatz #987)
+- [path] add Progress for opening compressed files
+- [path] implement line-seek operations (thanks @pacien #1010)
+- [regex expand] deprecate `options.expand_col_scanrows`; standardize on `options.default_sample_size` (thanks @jsvine)
+- [shell] `addcol-shell` pa
+- [splitwin] push sheet in empty pane iff splitwin
+- [stdin] use cli --encoding option for piped data (thanks @pacien #1018)
+- [undo] remove undo for reload (replaced with quitguard+confirm)
+- [quit] add Shift+Q/quit-sheet-free to quit and free associated memory (thanks @cwarden)
+
+## Display
+- [canvas] add `options.disp_canvas_charset` to change displayed chars (thanks @albert-ying #963)
+- [canvas] use sheet specific options for draw
+- [disp] format list/dict as [n]/{n} only for anytype
+- [save] iterdispvals(format=True) convert None to empty string
+
+## Bugfixes
+
+- [batch] ensure quitguard is off during batch mode
+- [canvas[ fix error on dive into cursor including y-axis
+- [cli] have an actual error if there is a missing argument for final option
+- [cli] do nothing (no error) if no sources given
+- [clipboard] fix zy/gzp regression (thanks @sfranky #961)
+- [clipboard] syscopy-cell do not include column name
+- [cmdlog] fix bug where customising replayable options in Options Sheet led to issues opening metasheets (thanks @jsvine #952)
+- [cmdlog] fix bug where cmdlog records new sheet name, instead of old sheet name for `rename-sheet` (thanks @aborruso #979)
+- [color] track precedence so colorizers apply over `color_current_row`
+- [color] determine color availability with `init_pair`
+- [color] do not break on nonsense color
+- [column] getitemdeep/setitemdeep get/set dotted item key if exists (thanks @frosencrantz #991)
+- [column] fix bug where hard crash occurs when cursor on cell of SheetsSheet is on cursorDisplay (thanks @frosencrantz #1029)
+- [execCommand] warn gracefully if bound command longname does not exist
+- [expr] setValuesFromExpr do not stop processing on exception
+- [join] fix when keys have different names (thanks @aborruso #964)
+- [loaders fixed] fix editing in final column for fixed-width load (thanks @mwayne #974)
+- [loaders geojson] do not abort plot if rows have errors
+- [loaders html] add columns even if not in first row
+- [loaders rec json] fix adding new columns for json and rec loaders (thanks @ajkerrigan #959)
+- [npy] set `allow_pickle=True` for load
+- [loaders postgresql] add postgresql scheme (fixes #966) (thanks @zormit #967)
+- [loaders sqlite] fix saving deleted cells (thanks @mattenklicker #969)
+- [loaders vds] save SettableColumn as Column (thanks @pacien #1012)
+- [loaders zip] fix extract-selected-to
+- [open] fix regression where opening blank sheets of type tsv, csv, txt, etc was not working
+- [plugins] fix stdout/error from plugins installation message (was in bytes, changed to str)
+- [quit] remove sheets from **Sheets Sheet** upon quit
+- [save-col] fix inputPath error (thanks @savulchik #962)
+- [shell] fix `options.dir_hidden`; also apply to dirs when `dir_recurse`
+- [textsheet] fix reload after `^O` sysopen
+
+## API
+
+- expose vd.loadConfigFile and `vd.version_info`
+- scheme1+scheme2://... calls `open_scheme2()`; `open_http` calls `openhttp_scheme1`
+
+## vdplus
+
+- moved clickhouse, vsh, vgit, windows to vdplus
+
+
+# v2.4 (2021-04-11)
+
+- [splitwindow] stabilize sheet stack associations
+    - `Shift+Z` pushes 'under sheet' (if any) onto other stack
+    - `Shift+Z` does not swap panes anymore
+    - `g Tab` swaps panes
+    - `options.disp_splitwin_pct` is always not sheet-specific
+
+- [status] show nSelectedRows on rstatus
+
+- [color] remove `options.use_default_colors` (thanks @lxcode #939)
+    - `options.color_default` can now have both fg and bg
+    - other color options which do not specify fg or bg will use the missing component from `color_default`
+    - to use terminal default colors, set `options.color_default=""`
+
+## Bugfixes
+
+- [loaders gzip] fix progress bar when opening gzip (thanks @geekscrapy #925)
+- [loaders http] fix loading files from url without specifying filetype
+- [loaders sqlite] use `TABLE_XINFO` for hidden/virtual columns (thanks @dotcs #945)
+- [loaders sqlite] perf improvement: do not pre-count rows (required full table scan)
+- [loaders vds] save typed values instead of formatted display values (thanks @frosencrantz #885)
+- [loaders xlsx] stringify "header" row values for column names (thanks @davidwales #921)
+- [pyobj-show-hidden] grab visibility lvl from sheet specific option (thanks @frosencrantz #947)
+- [splitwin] prevent flickering-on-full-window
+- [splitwin] if top sheet quit, keep bottom sheet in bottom pane
+- [splitwin] full-screen/splitwin close all sheets should be part of the same stack
+
+# v2.3 (2021-04-03)
+
+## Features
+    - [colors] allow background colors (thanks @frosencrantz #435)
+        - use "*fg* on *bg*" e.g. "212 yellow on 14 red"
+            - "bg *bg* fg *fg*" (or reversed)
+            - attributes always apply to foreground regardless of position in colorstr
+            - as before, only the first valid color in a category (fg/bg) is used; subsequent color names (even unknown ones) are ignored
+        - allocate colors on demand, instead of "all" 256 colors as fg
+        - **Colors Sheet** now only includes colors actually allocated
+    - [colors] set `use_default_colors` default to `True` (was `False`)
+    - [delete] do not move deleted values to clipboard (thanks @geekscrapy #895)
+        - `delete-*` commands are changed to not alter the clipboard
+        - the previous `delete-*` commands are renamed to `cut-*` (unbound)
+        - this affects: `delete-row`, `delete-selected`, `delete-cell`, `delete-cells`
+    - [jump-first] bound `g^^` to cycle through sheets
+    - [null] `zd` / `gzd` `delete-cells` set to `options.null_value` instead of `None`
+    - [memories] add MemorySheet on `Alt+M`, `Alt+m` adds current cell to sheet  (thanks @UrDub and @geekscrapy #912)
+        - useful for storing values to reference later
+        - both names and values can be edited on MemorySheet
+        - [aggregator] `memo-aggregator`(z+; formerly called `show-aggregate`) adds value to memory sheet
+        - [clipboard] clipboard stored on memory sheet; zy/zp use vd.memory.clipval;
+    - [plugins] allow install from github url to local pip repo
+    - [plugins] add darkdraw to plugins.jsonl
+    - [png] save image as RGBA
+    - [pyobj-expr] `Ctrl+X` within `Ctrl+X` input suspends directly into python REPL
+    - [splitwin] now involves two different sheetstacks that build and quit independently (thanks @lamchau #894)
+        - [splitwin] allows stickier panes for push/quit
+    - [splitwin] splitwin-half (`Z`) swaps panes if already active
+    - [splitwin] only re-split (with `zZ`) if sheets are not already split, otherwise adjust split percent
+    - [save_filetype] if `save_ext` does not exist, or if `options.save_filetype` is different from default, use `options.save_filetype`
+    - [vdplus] auto-import, ignore if not available
+
+## Bugfixes
+    - [aggregator] fix typo in deciles description (thanks @cwarden #922)
+    - [copy] copying BasicRow (new sheets), now does not error (still blank)
+    - [cmdlog] for `open-file` source logging in cmdlog, we want paths to physical files, so if src is a **Sheet** grabs its source
+    - [defer] fix pasting in deferred sheets
+    - [eval] fix **ExprColumns** on empty rows
+    - [help] move signal config earlier in runcycle, to accomodate --help (thanks @frosencrantz #926)
+    - [open] create blank sheet of appropriate type when path does not exist
+    - [pandas] fix conflict between dropped index and existing column (thanks thomanq #937)
+    - [plugins] only check for plugins.jsonl once daily (previously: every start-up)
+    - [pivot] fix `openRow`
+    - [pivot] fix bug with sheet name
+    - [png] fix saving directly from canvas
+    - [sort] fix sorting of visidata.Path objects (thanks @frosencrantz #897)
+    - [splitwin] fix cursor behaviour on both panes when active
+        - cursor movement on inactive panes is blocked
+    - [SuspendCurses] workaround for bug in curses.wrapper (thanks @frosencrantz #899)
+    - [undo] do not set undo for a `commit-sheet`
+
+## Api
+    - [addRows] addRows(rows, index, undo) adds rows at index, sets undo if True
+        - set undo to False, if using addRows within an addUndo function
+    - [deleteBy] add an undo flag to deleteBy
+    - [clipboard] change `cliprows` to be a simple list of rows
+    - new **DrawablePane** super-base class
+    - [json] rowdef now **AttrDict** for massive convenience
+
+# v2.2.1 (2021-02-07)
+
+## Bugfixes
+    - [setcol-fill] use row identity to identify selected rows (thanks @frosencrantz, #884)
+        - for jsonl, empty rows are identical ({}), and if ones is selected, previously it would result in all of them being filled.
+        - also, fill with most recent *non-null* value
+
+## man
+    - add a manpage visidata.1
+    - fix typo
+
+# v2.2 (2021-01-30)
+
+## Options
+
+    - [cli options] now global by default; use `-n` to set option as sheet-specific instead
+        - add `-n`/`--nonglobal` to make subsequent CLI options "sheet-specific" (applying only to paths specified directly on the CLI)
+        - keep `-g`/`--global` to make subsequent CLI options "global" (applying to all sheets by default unless overriden)
+        - invert the default: now CLI options are global by default (thus `-g` is a no-op unless preceded by `-n` on the CLI)
+        - `-g` no longer acts as a toggle
+
+    - [input] add `options.input_history` (thanks @tsibley and @ajkerrigan #468)
+        - basename of file to store persistent input history (default of `''` means disabled)
+        - caveat: persistent file only read if option given before first input
+
+    - [options.fancy_chooser] now disabled by default--use `Ctrl+X` to open from a choose() prompt
+
+## Types
+
+    - [types] add `floatlocale` type (thanks @Guiriguanche #863)
+        - add commands `type-floatlocale` and `type-floatlocale-selected` (unbound by default)
+        - `floatlocale` parses based on `LC_NUMERIC` envvar (must be set before launching)
+        - parsing is 20x slower than with standard float column
+        - will parse commas as decimals (e.g. '1,1') if LC_NUMERIC is set to a locale like 'en_DK.UTF-8'
+
+## Loaders
+
+    - [loaders geojson] add loading and saving support for geojson files (thanks @draco #876)
+    - [loaders vds] add loader/saver for custom .vds format (VisiData Sheet) to save column properties and data for multiple sheets in one file
+    - [ux] autoload all subsheets by default; set `options.load_lazy` to disable
+        - removes a minor friction with unloaded subsheets
+
+    - [loaders http] add `options.http_max_next` to limit api pagination (default 0 - no pagination) (thanks @aborruso #830)
+
+## Bugfixes and Adjustments
+
+    - [cli] fail properly if path cannot be opened
+    - [defer] only mention number of deleted rows, if some were deleted
+    - [go-pageup go-pagedown] ensure cursor stays in the same relative positions
+    - [loaders mysql] fix mysql loader duplicating tables for each database (thanks @SuRaMoN #868)
+    - [loaders mysql] perform asynchronous data fetch for mysql loader (thanks @SuRaMoN #869)
+    - [loaders pandas] fix empty subsets for dup-selected and frequency table `open-row` (thanks @ajkerrigan #881 #878)
+    - [loaders shp] fix display (thanks @dracos #874)
+    - [loaders shp] fix saving to geojson (thanks @dracos #876)
+    - [replay] fix replaying of .vd with `set-option`
+    - [slide] fix bug when sliding key columns to the left, after sliding them to the right
+    - [types] add command `type-floatsi-selected` on **Columns Sheet**
+
+    - [expand] errors and nulls can now be expanded with `expand-cols` (thanks @geekscrapy #865)
+
+    - [open] openSource now uses **'global'** `options.filetype` instead of sheet-specific as previous
+        - to set the filetype for a file locally, set through cli: `vd -f tsv sample.foo`
+        - to set in the **CommandLog**, use sheet="global" with longname="set-option"
+
+    - [loaders http] raise exception if http status is not 20x (thanks @geekscrapy #848)
+    - [loaders shp] support more Shapefile types (thanks @dracos #875)
+
+## API
+    - add `create` kwarg to `openSource()`, to create the file if it does not exist already
+    - [settings] 'global' is now 'default', and 'override' is 'global'
+        - 'default' is the default setting within VisiData
+        - 'global' is a user override on that default that applies globally
+        - sheet-specific overrides global and default, for the sheet it is specific to
+        - options set through visidatarc and cli are 'global' unless otherwise specified
+    - [save] grab `save_foo` from **SheetType** first
+        - allows overrides of sheet-specific saving
+
+# v2.1.1 (2021-01-03)
+
+    - [macros] allow macro interfaces to be longnames (thanks @frosencrantz #787)
+    - [save] better default save filename for url sheets (thanks @geekscrapy #824)
+
+## Bugfixes
+    - [cmdlog] record column, sheet, and row info for open-cell
+    - [cmdlog] catch case of 'override' sheet for set-option
+    - [expr-col] `curcol` now works for multiple invocations (thanks @geekscrapy #659)
+    - [loaders postgres] account for postgres_schema when rendering Postgres tables (thanks @jdormit for PR #852)
+    - [loaders url] fail unknown URL scheme (thanks @geekscrapy for PR #84)
+    - [pyobj] fix Pyobj Sheets for lists (thanks @brookskindle #843)
+    - [pipe] handle broken pipes gracefully (thanks @robdmc #851)
+    - [scroll] fix issue with jagged scrolling down (thanks @uoee #832)
+    - [sort] fix bug where total progress in sorting is (100 * # of columns to sort) (thanks @cwarden)
+
+## api
+    - format_field formats int(0) and float(0.0) as "0" (thanks @geekscrapy for PR #821)
+    - add TypedWrapper.__len__ (thanks @geekscrapy)
+
 # v2.1 (2020-12-06)
 
     - [add] add bulk rows and cols leave cursor on first added (like add singles)

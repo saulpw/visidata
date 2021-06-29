@@ -36,7 +36,7 @@ The options context should be referenced directly when setting:
 
     - ``sheet.options`` to *set* an option on a specific sheet instance (**sheet override**).
     - ``<SheetType>.class_options`` to *set* a option default for a particular type of Sheet (**class override**).
-    - ``vd.options`` (or plain ``options``) to *set* a global option default (**global override**).
+    - ``vd.options`` (or plain ``options``) to *set* an option globally for all sheets, except for sheets that have a sheet override (**global override**).
 
 Use ``sheet.options`` to *get* an option within the context of a specific sheet.
 This is strongly preferred, so the user can override the option setting on a sheet-specific basis.

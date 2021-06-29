@@ -24,7 +24,7 @@ Finally, you can launch the [DirSheet](), navigate to the file you wish to load,
 vd .
 ~~~
 
-In VisiData, a [loader](/docs/loaders) is a module which directs how VisiData structures and engages with a particular data source. [These sources](/formats) are currently supported.
+In VisiData, a [loader](/docs/api/loaders) is a module which directs how VisiData structures and engages with a particular data source. [These sources](/formats) are currently supported.
 
 On default, the file extension determines which loader is used. Unknown filetypes are loaded as **Text sheets**. To force a particular loader, pass `-f` with the filetype or format name.
 

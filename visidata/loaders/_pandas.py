@@ -103,6 +103,7 @@ class PandasSheet(Sheet):
             vd.warning(f'Type of {val} does not match column {col.name}. Changing type.')
             col.type = anytype
             col.sheet.df.loc[row.name, col.name] = val
+        self.setModified()
 
     def reload(self):
         import pandas as pd
@@ -125,7 +126,7 @@ class PandasSheet(Sheet):
 
         # reset the index here
         if type(df.index) is not pd.RangeIndex:
-            df = df.reset_index()
+            df = df.reset_index(drop=True)
 
         # VisiData assumes string column names but pandas does not. Forcing string
         # columns at load-time avoids various errors later.
@@ -273,14 +274,17 @@ class PandasSheet(Sheet):
             col: [None] * n for col in self.df.columns
         }).astype(self.df.dtypes.to_dict(), errors='ignore')
 
-    def _addRows(self, rows, idx):
+    def addRows(self, rows, index=None, undo=True):
         import pandas as pd
-        if idx is None:
+        if index is None:
             self.df = self.df.append(pd.DataFrame(rows))
         else:
-            self.df = pd.concat((self.df.iloc[0:idx], pd.DataFrame(rows), self.df.iloc[idx:]))
+            self.df = pd.concat((self.df.iloc[0:index], pd.DataFrame(rows), self.df.iloc[index:]))
         self.df.index = pd.RangeIndex(self.nRows)
         self._checkSelectedIndex()
+        if undo:
+            self.setModified()
+            vd.addUndo(self._deleteRows, range(index, index + len(rows)))
 
     def _deleteRows(self, which):
         import pandas as pd
@@ -288,14 +292,9 @@ class PandasSheet(Sheet):
         self.df.index = pd.RangeIndex(self.nRows)
         self._checkSelectedIndex()
 
-    def addNewRows(self, n, idx=None):
-        self._addRows(self.newRows(n), idx)
-        idx = idx or self.nRows - 1
-        vd.addUndo(self._deleteRows, range(idx, idx + n))
-
-    def addRow(self, row, idx=None):
-        self._addRows([row], idx)
-        vd.addUndo(self._deleteRows, idx or self.nRows - 1)
+    def addRow(self, row, index=None):
+        self.addRows([row], index)
+        vd.addUndo(self._deleteRows, index or self.nRows - 1)
 
     def delete_row(self, rowidx):
         import pandas as pd
@@ -306,9 +305,10 @@ class PandasSheet(Sheet):
         # If we use `oldrow` directly, we get errors comparing DataFrame objects
         # when there are multiple deletion commands for the same row index.
         # There may be a better way to handle that case.
-        vd.addUndo(self._addRows, oldrow.to_dict(), rowidx)
+        vd.addUndo(self.addRows, oldrow.to_dict(), rowidx, undo=False)
         self._deleteRows(rowidx)
-        vd.cliprows = [(self, rowidx, oldrow)]
+        vd.memory.cliprows = [oldrow]
+        self.setModified()
 
     def deleteBy(self, by):
         '''Delete rows for which func(row) is true.  Returns number of deleted rows.'''
@@ -320,6 +320,7 @@ class PandasSheet(Sheet):
         self.df.index = pd.RangeIndex(self.nRows)
         ndeleted = nRows - self.nRows
 
+        self.setModified()
         vd.status('deleted %s %s' % (ndeleted, self.rowtype))
         return ndeleted
 
@@ -350,3 +351,6 @@ PandasSheet.addCommand('|', 'select-col-regex', 'selectByRegex(regex=input("sele
 PandasSheet.addCommand('\\', 'unselect-col-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=[cursorCol], unselect=True)', 'unselect rows matching regex in current column')
 PandasSheet.addCommand('g|', 'select-cols-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=visibleCols)', 'select rows matching regex in any visible column')
 PandasSheet.addCommand('g\\', 'unselect-cols-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=visibleCols, unselect=True)', 'unselect rows matching regex in any visible column')
+
+# Override with a pandas/dataframe-aware implementation
+PandasSheet.addCommand('"', 'dup-selected', 'vs=PandasSheet(sheet.name, "selectedref", source=selectedRows.df); vd.push(vs)', 'open duplicate sheet with only selected rows'),

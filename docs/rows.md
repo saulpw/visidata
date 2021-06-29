@@ -29,7 +29,7 @@ An example usage follows.
 
 2. Press
 
-    a. `gd` to delete the selected rows.  The rows can be pasted elsewhere on any sheet of the same type with `gp`.
+    a. `gd` to delete the selected rows.
 
     **or**
 
@@ -65,6 +65,25 @@ The following example uses the file [sample.tsv](https://raw.githubusercontent.c
 
 ---
 
+## How to select rows where the current column is not null or empty?
+
+'Null' cells, by default, are cells which contain `None`. This can be changed with `options.null_value`. Null cells can be set with `zd` (set current cell to `None`) or `gzd` (set selected rows in current column to `None`). Null cells are distinguished with a yellow ∅' symbol on the right hand corner. They are distinct from empty cells (which are `''` in columns of string type.)
+
+1. Type `|` followed by *.* to select all rows without empty or null cells in the current column.
+
+---
+
+## How to select rows where the current column is null?
+
+There are several different options:
+
+- `z,` matches by **typed value** while `,` matches by **display value**. Move to an empty or `None` cell in the column of interest and press `,` to select all empty and `None` cells in that column. Type `z,` on a `None` cell to select all rows that contain `None` in that column. Type `z.` on an empty cell to select all rows that have an empty cell in that column.
+- Open a **DescribeSheet** for the current sheet with `Shift+I`. Move to the **nulls** column, and then move to the row which references the source column of interest. Type `zs` to select all null rows for that column.
+- `z|` is a command which allows selection by provided Python expression criteria (using column names as variables). For non-numerical columns `z|` followed by **not ColumnName**, will select all empty cells and `None` cells for that column. For numerical columns it will also select cells with `0`.
+- [A typed value of Python None is always a `TypedWrapper`](https://www.visidata.org/docs/api/columns.html#user-defined-types), which allows sorting, etc., on columns with None values. For this reason `z|` *ColumnName is None* will not work, thought `z|` *ColumnName.val is None* will work. This is not a recommended approach, though at the moment, it is available.
+
+---
+
 ## How to move, copy and remove rows
 
 Command(s)         Operation
@@ -73,16 +92,16 @@ Command(s)         Operation
 `gJ` `gK`          move cursor row all the way to the bottom/top of sheet
 
 
-###### How to cut/copy and paste a single row
+###### How to copy and paste a single row
 
-1. Press `d`/`y` to delete/yank the row and move it to the clipboard.
+1. Press `y` to copy the row to the clipboard.
 2. Move the cursor to the desired location.
 3. Press `p`/`Shift+P` to paste the row after/before current row.
 
-###### How to cut/copy and paste multiple rows
+###### How to copy and paste multiple rows
 
 1. Press `s`/`t` on those rows to select them.
-2. Press `gd`/`gy` to cut/yank all selected rows to the clipboard.
+2. Press `gy` to copy all selected rows to the clipboard.
 3. Move the cursor to the desired location.
 3. Press `p`/`Shift+P` to paste those rows after/before current row.
 

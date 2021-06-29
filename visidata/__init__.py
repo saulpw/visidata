@@ -1,10 +1,10 @@
 'VisiData: a curses interface for exploring and arranging tabular data'
 
-__version__ = '2.1'
+__version__ = '2.5dev'
 __version_info__ = 'VisiData v' + __version__
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __status__ = 'Production/Stable'
-__copyright__ = 'Copyright (c) 2016-2019 ' + __author__
+__copyright__ = 'Copyright (c) 2016-2021 ' + __author__
 
 
 class EscapeException(BaseException):
@@ -81,6 +81,7 @@ from .cmdlog import *
 from .freeze import *
 from .regex import *
 from .canvas import *
+from .canvas_text import *
 from .graph import *
 from .motd import *
 from .transpose import *
@@ -88,13 +89,14 @@ from .shell import *
 from .layout import *
 from .main import *
 from .help import *
-from .modify import *
+import visidata.modify
 import visidata.sort
 import visidata.unfurl
 import visidata.fill
 import visidata.incr
 import visidata.customdate
 import visidata.misc
+import visidata.memory
 from .macros import *
 from .menu import *
 
@@ -108,6 +110,7 @@ from .loaders.fixed_width import *
 from .loaders.postgres import *
 from .loaders.mysql import *
 from .loaders.shp import *
+from .loaders.geojson import *
 from .loaders.mbtiles import *
 from .loaders.http import *
 from .loaders.html import *
@@ -133,12 +136,20 @@ from .loaders.vcf import *
 from .loaders.texttables import *
 from .loaders.rec import *
 from .loaders.eml import *
+from .loaders.vds import *
+
+from .ddwplay import *
 
 from .plugins import *
 
 from .colorsheet import *
 
 from .deprecated import *
+
+try:
+    import vdplus
+except ModuleNotFoundError as e:
+    pass
 
 from math import *
 

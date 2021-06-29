@@ -36,7 +36,6 @@ __all__ = [
     'SubColumnFunc',
     'SubColumnItem',
     'SubColumnAttr',
-    'ColumnEnum', 'EnumColumn',
     'ColumnExpr', 'ExprColumn',
     'DisplayWrapper',
 ]
@@ -131,6 +130,15 @@ class Column(Extensible):
     def __deepcopy__(self, memo):
         return self.__copy__()  # no separate deepcopy
 
+    def __getstate__(self):
+        d = {k:getattr(self, k) for k in 'name width height expr keycol fmtstr voffset hoffset aggstr'.split()}
+        d['type'] = self.type.__name__
+        return d
+
+    def __setstate__(self, d):
+        for attr, v in d.items():
+            setattr(self, attr, v)
+
     def recalc(self, sheet=None):
         'Reset column cache, attach column to *sheet*, and reify column name.'
         if self._cachedValues:
@@ -156,6 +164,15 @@ class Column(Extensible):
         self._name = maybe_clean(name, self.sheet)
 
     @property
+    def typestr(self):
+        'Type of this column as string.'
+        return self._type.__name__
+
+    @typestr.setter
+    def typestr(self, v):
+        self.type = vd.getGlobals()[v or 'anytype']
+
+    @property
     def type(self):
         'Type of this column.'
         return self._type
@@ -164,7 +181,12 @@ class Column(Extensible):
     def type(self, t):
         if self._type != t:
             vd.addUndo(setattr, self, '_type', self.type)
-        self._type = t
+        if not t:
+            self._type = anytype
+        elif isinstance(t, str):
+            self.typestr = t
+        else:
+            self._type = t
 
     @property
     def width(self):
@@ -192,10 +214,12 @@ class Column(Extensible):
         if typedval is None:
             return None
 
-        if isinstance(typedval, (list, tuple)):
-            return '[%s]' % len(typedval)
-        if isinstance(typedval, dict):
-            return '{%s}' % len(typedval)
+        if self.type is anytype:
+            if isinstance(typedval, (list, tuple)):
+                return '[%s]' % len(typedval)
+            if isinstance(typedval, dict):
+                return '{%s}' % len(typedval)
+
         if isinstance(typedval, bytes):
             typedval = typedval.decode(options.encoding, options.encoding_errors)
 
@@ -347,6 +371,7 @@ class Column(Extensible):
             self.cellChanged(row, val)
         else:
             self.putValue(row, val)
+        self.sheet.setModified()
 
     def setValueSafe(self, row, value):
         'setValue and ignore exceptions.'
@@ -375,11 +400,11 @@ class Column(Extensible):
         return vd.status('set %d cells to %d values' % (len(rows), len(values)))
 
     def getMaxWidth(self, rows):
-        'Return the maximum length of any cell in column or its header.'
+        'Return the maximum length of any cell in column or its header (up to window width).'
         w = 0
         nlen = dispwidth(self.name)
         if len(rows) > 0:
-            w = max(max(dispwidth(self.getDisplayValue(r)) for r in rows), nlen)+2
+            w = max(max(dispwidth(self.getDisplayValue(r), maxwidth=self.sheet.windowWidth) for r in rows), nlen)+2
         return max(w, nlen)
 
 
@@ -389,27 +414,55 @@ def setitem(r, i, v):  # function needed for use in lambda
     r[i] = v
     return True
 
-def getattrdeep(obj, attr, *default):
-    'Return dotted attr (like "a.b.c") from obj, or default if any of the components are missing.'
-    attrs = attr.split('.')
-    if default:
-        getattr_default = lambda o,a,d=default[0]: getattr(o, a, d)
-    else:
-        getattr_default = lambda o,a: getattr(o, a)
 
-    for a in attrs[:-1]:
-        obj = getattr_default(obj, a)
+def getattrdeep(obj, attr, *default, getter=getattr):
+    try:
+        'Return dotted attr (like "a.b.c") from obj, or default if any of the components are missing.'
+        if not isinstance(attr, str):
+            return getter(obj, attr, *default)
 
-    return getattr_default(obj, attrs[-1])
+        try:  # if attribute exists, return toplevel value, even if dotted
+            if attr in obj:
+                return getter(obj, attr)
+        except Exception as e:
+            pass
 
-def setattrdeep(obj, attr, val):
+        attrs = attr.split('.')
+        for a in attrs[:-1]:
+            obj = getter(obj, a)
+
+        return getter(obj, attrs[-1])
+    except Exception as e:
+        if not default: raise
+        return default[0]
+
+
+def setattrdeep(obj, attr, val, getter=getattr, setter=setattr):
     'Set dotted attr (like "a.b.c") on obj to val.'
+    if not isinstance(attr, str):
+        return setter(obj, attr, val)
+
+    try:  # if attribute exists, overwrite toplevel value, even if dotted
+        getter(obj, attr)
+        return setter(obj, attr, val)
+    except Exception as e:
+        pass
+
     attrs = attr.split('.')
-
     for a in attrs[:-1]:
-        obj = getattr(obj, a)
-    setattr(obj, attrs[-1], val)
+        try:
+            obj = getter(obj, a)
+        except Exception as e:
+            obj = obj[a] = type(obj)()  # assume homogenous nesting
 
+    setter(obj, attrs[-1], val)
+
+
+def getitemdeep(obj, k, *default):
+    return getattrdeep(obj, k, *default, getter=getitem)
+
+def setitemdeep(obj, k, val):
+    return setattrdeep(obj, k, val, getter=getitemdef, setter=setitem)
 
 def AttrColumn(name='', attr=None, **kwargs):
     'Column using getattr/setattr with *attr*.'
@@ -419,18 +472,21 @@ def AttrColumn(name='', attr=None, **kwargs):
                   setter=lambda col,row,val: setattrdeep(row, col.expr, val),
                   **kwargs)
 
+def getitem(o, k, default=None):
+    return default if o is None else o[k]
+
 def getitemdef(o, k, default=None):
     try:
         return default if o is None else o[k]
     except Exception:
         return default
 
-def ItemColumn(name=None, key=None, **kwargs):
+def ItemColumn(name=None, expr=None, **kwargs):
     'Column using getitem/setitem with *key*.'
     return Column(name,
-            expr=key if key is not None else name,
-            getter=lambda col,row: getitemdef(row, col.expr),
-            setter=lambda col,row,val: setitem(row, col.expr, val),
+            expr=expr if expr is not None else name,
+            getter=lambda col,row: getitemdeep(row, col.expr, None),
+            setter=lambda col,row,val: setitemdeep(row, col.expr, val),
             **kwargs)
 
 class SubColumnFunc(Column):
@@ -467,23 +523,6 @@ def SubColumnItem(idx, c, **kwargs):
         kwargs['name'] = c.name
     return SubColumnFunc(origcol=c, subfunc=getitemdef, expr=idx, **kwargs)
 
-class EnumColumn(Column):
-    'types and aggregators. row.<name> should be kept to the values in the mapping m, and can be set by the a string key into the mapping.'
-    def __init__(self, name, m, default=None, **kwargs):
-        super().__init__(name, **kwargs)
-        self.mapping = m
-        self.default = default
-
-    def calcValue(self, row):
-        v = getattr(row, self.name, None)
-        return v.__name__ if v else None
-
-    def putValue(self, row, value):
-        if isinstance(value, str):  # first try to get the actual value from the mapping
-            value = self.mapping.get(value, value)
-        setattr(row, self.name, value or self.default)
-
-
 class ExprColumn(Column):
     'Column using *expr* to derive the value from each row.'
     def __init__(self, name, expr=None, **kwargs):
@@ -501,6 +540,12 @@ class ExprColumn(Column):
         self.maxtime = max(self.maxtime, t1-t0)
         self.totaltime += (t1-t0)
         return r
+
+    def putValue(self, row, val):
+        a = self.getDisplayValue(row)
+        b = self.format(self.type(val))
+        if a != b:
+            vd.warning('%s calced %s not %s' % (self.name, a, b))
 
     @property
     def expr(self):
@@ -529,4 +574,3 @@ class SettableColumn(Column):
 ColumnItem = ItemColumn
 ColumnAttr = AttrColumn
 ColumnExpr = ExprColumn
-ColumnEnum = EnumColumn

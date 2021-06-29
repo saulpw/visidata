@@ -19,7 +19,7 @@ class HtmlTablesSheet(IndexSheet):
         import lxml.html
         from lxml import etree
         utf8_parser = etree.HTMLParser(encoding='utf-8')
-        with self.source.open_text() as fp:
+        with self.source.open_text(encoding='utf-8') as fp:
             html = lxml.html.etree.parse(fp, parser=utf8_parser)
         self.setKeys([self.column('name')])
         self.column('keys').hide()
@@ -27,10 +27,7 @@ class HtmlTablesSheet(IndexSheet):
 
         for i, e in enumerate(html.iter('table')):
             if e.tag == 'table':
-                vs = HtmlTableSheet(e.attrib.get("id", "table_" + str(i)), source=e)
-                vs.reload()
-                vs.html = e
-                yield vs
+                yield HtmlTableSheet(e.attrib.get("id", "table_" + str(i)), source=e, html=e)
 
 
 def is_header(elem):
@@ -50,6 +47,7 @@ class HtmlTableSheet(Sheet):
         headers = []
 
         maxlinks = {}  # [colnum] -> nlinks:int
+        ncols = 0
 
         for rownum, r in enumerate(self.source.iter('tr')):
             row = []
@@ -88,13 +86,14 @@ class HtmlTableSheet(Sheet):
 
             if any(row):
                 yield row
+                ncols = max(ncols, colnum)
 
         self.columns = []
         if headers:
             it = itertools.zip_longest(*headers, fillvalue='')
         else:
-            it = [list(x) for x in self.rows[0]]
-            self.rows = self.rows[1:]
+            it = list(list(x) for x in self.rows.pop(0))
+            it += [''] * (ncols-len(it))
 
         for colnum, names in enumerate(it):
             name = '_'.join(str(x) for x in names if x)

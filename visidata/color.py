@@ -2,7 +2,8 @@ import curses
 import functools
 from copy import copy
 
-from visidata import options, Extensible, drawcache, drawcache_property
+from visidata import options, Extensible, drawcache, drawcache_property, VisiData
+import visidata
 from collections import namedtuple
 
 __all__ = ['ColorAttr', 'colors', 'update_attr', 'ColorMaker']
@@ -38,38 +39,19 @@ def update_attr(oldattr, updattr, updprec=None):
 
 class ColorMaker:
     def __init__(self):
-        self.attrs = {}
-        self.color_attrs = {}
+        self.color_pairs = {}  # (fg,bg) -> (color_attr, colornamestr) (can be or'ed with other attrs)
 
     @drawcache_property
     def colorcache(self):
         return {}
 
     def setup(self):
-        if options.use_default_colors:
-            curses.use_default_colors()
-            default_bg = -1
-        else:
-            default_bg = curses.COLOR_BLACK
+        curses.use_default_colors()
 
-        self.color_attrs['black'] = curses.color_pair(0)
-
-        for c in range(0, options.force_256_colors and 256 or curses.COLORS):
-            try:
-                curses.init_pair(c+1, c, default_bg)
-                self.color_attrs[str(c)] = curses.color_pair(c+1)
-            except curses.error as e:
-                pass # curses.init_pair gives a curses error on Windows
-
-        for c in 'red green yellow blue magenta cyan white'.split():
-            colornum = getattr(curses, 'COLOR_' + c.upper())
-            self.color_attrs[c] = curses.color_pair(colornum+1)
-
-        for a in 'normal blink bold dim reverse standout underline'.split():
-            self.attrs[a] = getattr(curses, 'A_' + a.upper())
-
-    def keys(self):
-        return list(self.attrs.keys()) + list(self.color_attrs.keys())
+    @VisiData.cached_property
+    def colors(self):
+        'not computed until curses color has been initialized'
+        return {x[6:]:getattr(curses, x) for x in dir(curses) if x.startswith('COLOR_') and x != 'COLOR_PAIRS'}
 
     def __getitem__(self, colornamestr):
         return self._colornames_to_cattr(colornamestr).attr
@@ -80,22 +62,82 @@ class ColorMaker:
 
     @drawcache
     def resolve_colors(self, colorstack):
-        'Returns the ColorAttr for the colorstack, a list of color option names sorted highest-precedence color first.'
+        'Returns the ColorAttr for the colorstack, a list of (prec, color_option_name) sorted highest-precedence color first.'
         cattr = ColorAttr(0,0,0,0)
-        for coloropt in colorstack:
+        for prec, coloropt in colorstack:
             c = self.get_color(coloropt)
-            cattr = update_attr(cattr, c)
+            cattr = update_attr(cattr, c, prec)
         return cattr
 
+    def split_colorstr(self, colorstr):
+        'Return (fgstr, bgstr, attrlist) parsed from colorstr.'
+        fgbgattrs = ['', '', []]  # fgstr, bgstr, attrlist
+        if not colorstr:
+            return fgbgattrs
+        colorstr = str(colorstr)
+
+        i = 0  # fg by default
+        for x in colorstr.split():
+            if x == 'fg':
+                i = 0
+                continue
+            elif x in ['on', 'bg']:
+                i = 1
+                continue
+
+            if hasattr(curses, 'A_' + x.upper()):
+                fgbgattrs[2].append(x)
+            else:
+                if not fgbgattrs[i]:  # keep first known color
+                    if self._get_colornum(x) is not None:   # only set known colors
+                        fgbgattrs[i] = x
+
+        return fgbgattrs
+
+    @functools.lru_cache(None)
+    def _get_colornum(self, colorname, default=-1):
+        'Return terminal color number for colorname.'
+        if not colorname: return default
+        try:
+            r = int(colorname)
+        except Exception:
+            r = self.colors.get(colorname.upper())
+
+        if r is None:
+            return None
+
+        try: # test to see if color is available
+            curses.init_pair(255, r, 0)
+            return r
+        except curses.error as e:
+            return None  # not available
+
     def _colornames_to_cattr(self, colornamestr, precedence=0):
-        color, attr = 0, 0
-        for colorname in colornamestr.split(' '):
-            if colorname in self.color_attrs:
-                if not color:
-                    color = self.color_attrs[colorname.lower()]
-            elif colorname in self.attrs:
-                attr = self.attrs[colorname.lower()]
-        return ColorAttr(color, attr, precedence, color | attr)
+        fg, bg, attrlist = self.split_colorstr(colornamestr)
+        attrs = 0
+        for attr in attrlist:
+            attrs |= getattr(curses, 'A_'+attr.upper())
+
+        if not fg and not bg:
+            color = 0
+        else:
+            deffg, defbg, _ = self.split_colorstr(options.color_default)
+            fgbg = (self._get_colornum(fg, self._get_colornum(deffg)),
+                    self._get_colornum(bg, self._get_colornum(defbg)))
+            pairnum, _ = self.color_pairs.get(fgbg, (None, ''))
+            if pairnum is None:
+                if len(self.color_pairs) > 254:
+                    self.color_pairs.clear()  # start over
+                    self._get_colornum.cache_clear()
+                pairnum = len(self.color_pairs)+1
+                try:
+                    curses.init_pair(pairnum, *fgbg)
+                except curses.error as e:
+                    return ColorAttr(0, attrs, precedence, attrs)
+                self.color_pairs[fgbg] = (pairnum, colornamestr)
+
+            color = curses.color_pair(pairnum)
+        return ColorAttr(color, attrs, precedence, color | attrs)
 
     def get_color(self, optname, precedence=0):
         'colors.color_foo returns colors[options.color_foo]'

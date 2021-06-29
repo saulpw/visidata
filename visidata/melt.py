@@ -6,6 +6,7 @@ from visidata import *
 
 melt_var_colname = 'Variable' # column name to use for the melted variable name
 melt_value_colname = 'Value'  # column name to use for the melted value
+melt_null = False   # whether to melt null values
 
 
 # rowdef: {0:sourceRow, 1:Category1, ..., N:CategoryN, ColumnName:Column, ...}
@@ -69,7 +70,7 @@ class MeltedSheet(Sheet):
                 meltedrow = {}
                 for varval, c in cols:
                     try:
-                        if not isNull(c.getValue(r)):
+                        if melt_null or not isNull(c.getValue(r)):
                             meltedrow[varval] = c
                     except Exception as e:
                         pass

@@ -56,41 +56,10 @@ The maximum option name length should be 20.
 
 `theme()` should be used instead of `option()` if the option has no effect on the operation of the program, and can be overrided without affecting existing scripts.  The interfaces are identical.  (The implementation is also identical currently, but that may change in the future.)
 
-This Python script can be used to generate a sample `~/.visidatarc`, with all of the option defaults:
+To generate a `.visidatarc` with all of the global options as they are currently set:
+   - `Shift+O` to go to any Options Sheet
+   - `Ctrl+S` and save to a file with a `.visidatarc` extension
 
-~~~
-from visidata import options
-
-for optname, val in sorted(options().items()):
-    val = repr(val)
-    helpstr = options._get(optname, 'global').helpstr
-    print(f'options.{optname:25s} = {val:10s}  # {helpstr}')
-~~~
-
-::::: {.announce}
-
----
-#### Extra Python aid
-
-To run the above code, place it in a file named vdrc.py. Then run it by typing
-
-```
-python3 vdrc.py
-```
-
-in the terminal.
-
-#### Extra terminal aid
-
-You can stdout redirection to place the output in a file:
-
-```
-python3 vdrc.py > ~/.visidatarc-template
-```
-
-Careful, `>` will overwrite files they are directing to. `>>` will append to the file.
-
----
 
 :::::
 
@@ -102,7 +71,7 @@ The **.visidatarc** in the user's home directory is plain Python code, and can c
 
 Longnames are names given to particular flavours of executable commands for ease of keystroke remapping. For example, the longname `select-row` is assigned to commands which select the current row in a sheet. On default, this longname is bound to the keystroke `s`.
 
-From within VisiData, type `z Ctrl+H` to open the **Commands Sheet**. This is a reference for all of the commands available on the current sheet. For a deeper exploration of commands, check out [the book of VisiData](https://github.com/saulpw/visidata-book/blob/master/commands.md).
+From within VisiData, type `z Ctrl+H` to open the **Commands Sheet**. This is a reference for all of the commands available on the current sheet. For a deeper exploration of commands, check out [the book of VisiData](https://www.visidata.org/docs/api/commands.html).
 
 ### Setting/changing keybindings for existing commands
 

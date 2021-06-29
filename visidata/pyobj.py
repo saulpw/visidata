@@ -1,35 +1,39 @@
 from functools import singledispatch
+import math
 
 from visidata import *
 
 __all__ = ['PythonSheet', 'expand_cols_deep', 'deduceType', 'closeColumn', 'ListOfDictSheet', 'SheetDict', 'PyobjSheet', 'view']
 
 option('visibility', 0, 'visibility level')
-option('expand_col_scanrows', 1000, 'number of rows to check when expanding columns (0 = all)')
+option('default_sample_size', 100, 'number of rows to sample for regex.split (0=all)', replay=True)
 
 
 class PythonSheet(Sheet):
     def openRow(self, row):
         return PyobjSheet("%s[%s]" % (self.name, self.keystr(row)), source=row)
 
-def _getWraparoundSlice(seq, n, center):
-    '''Return a slice of length n from a sequence, centered around a given index'''
-    start = int(center - n / 2) % len(seq)
+
+@Sheet.api
+def getSampleRows(sheet):
+    'Return list of sample rows centered around the cursor.'
+    n = sheet.options.default_sample_size
+    if n == 0 or n >= sheet.nRows:
+        return sheet.rows
+    seq = sheet.rows
+    start = math.ceil(sheet.cursorRowIndex - n / 2) % len(seq)
     end = (start + n) % len(seq)
     if start < end:
         return seq[start:end]
     return seq[start:] + seq[:end]
+
 
 @asyncthread
 def expand_cols_deep(sheet, cols, rows=None, depth=0):  # depth == 0 means drill all the way
     'expand all visible columns of containers to the given depth (0=fully)'
     ret = []
     if not rows:
-        scanrows = options.expand_col_scanrows
-        if scanrows == 0 or scanrows >= sheet.nRows:
-            rows = sheet.rows
-        else:
-            rows = _getWraparoundSlice(sheet.rows, scanrows, sheet.cursorRowIndex)
+        rows = sheet.getSampleRows()
 
     for col in cols:
         newcols = _addExpandedColumns(col, rows, sheet.columns.index(col))
@@ -67,7 +71,12 @@ def _(sampleValue, col, vals):
 def _(sampleValue, col, vals):
     '''Use the longest sequence to determine the number of columns we need to
     create, and their presumed types'''
-    longestSeq = max(vals, key=len)
+    def lenNoExceptions(v):
+        try:
+            return len(v)
+        except Exception as e:
+            return 0
+    longestSeq = max(vals, key=lenNoExceptions)
     colTypes = [deduceType(v) for v in longestSeq]
     return [
         ExpandedColumn('%s[%s]' % (col.name, k), type=colType, origCol=col, key=k)
@@ -152,10 +161,10 @@ def SheetList(*names, **kwargs):
         vd.status('no content in %s' % names)
         return
 
-    if isinstance(src, dict):
+    if isinstance(src[0], dict):
         return ListOfDictSheet(*names, **kwargs)
-    elif isinstance(src, tuple):
-        if getattr(src, '_fields', None):  # looks like a namedtuple
+    elif isinstance(src[0], tuple):
+        if getattr(src[0], '_fields', None):  # looks like a namedtuple
             return ListOfNamedTupleSheet(*names, **kwargs)
 
     # simple list
@@ -279,7 +288,7 @@ class PyobjSheet(PythonSheet):
 
     def reload(self):
         self.rows = []
-        vislevel = options.visibility
+        vislevel = self.options.visibility
         for r in dir(self.source):
             try:
                 if vislevel <= 2 and r.startswith('__'): continue
@@ -309,9 +318,19 @@ def openCell(sheet, col, row):
     return PyobjSheet(name, source=col.getTypedValue(row))
 
 
-globalCommand('^X', 'pyobj-expr', 'expr = input("eval: ", "expr", completer=CompleteExpr()); vd.push(PyobjSheet(expr, source=evalExpr(expr, None)))', 'evaluate Python expression and open result as Python object')
-globalCommand('g^X', 'exec-python', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals())', 'execute Python statement in the global scope')
-globalCommand('z^X', 'pyobj-expr-row', 'expr = input("eval over current row: ", "expr", completer=CompleteExpr()); vd.push(PyobjSheet(expr, source=evalExpr(expr, cursorRow)))', 'evaluate Python expression, in context of current row, and open result as Python object')
+@BaseSheet.api
+def pyobj_expr(sheet):
+    def launch_repl(v, i):
+        import code
+        with SuspendCurses():
+            code.InteractiveConsole(locals=locals()).interact()
+        return v, i
+    expr = vd.input("eval: ", "expr", completer=visidata.CompleteExpr(), bindings={'^X': launch_repl})
+    vd.push(PyobjSheet(expr, source=sheet.evalExpr(expr)))
+
+BaseSheet.addCommand('^X', 'pyobj-expr', 'pyobj_expr()', 'evaluate Python expression and open result as Python object')
+globalCommand('g^X', 'exec-python', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals(), LazyChainMap(sheet, *vd.contexts))', 'execute Python statement in the global scope')
+globalCommand('z^X', 'pyobj-expr-row', 'expr = input("eval over current row: ", "expr", completer=CompleteExpr()); vd.push(PyobjSheet(expr, source=evalExpr(expr, row=cursorRow)))', 'evaluate Python expression, in context of current row, and open result as Python object')
 
 Sheet.addCommand('^Y', 'pyobj-row', 'status(type(cursorRow)); vd.push(PyobjSheet("%s[%s]" % (sheet.name, cursorRowIndex), source=cursorRow))', 'open current row as Python object')
 Sheet.addCommand('z^Y', 'pyobj-cell', 'status(type(cursorValue)); vd.push(PyobjSheet("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), source=cursorValue))', 'open current cell as Python object')

@@ -4,6 +4,9 @@ workflows:
   test:
     jobs:
       - test-3.6
+      - test-3.7
+      - test-3.8
+      - test-3.9
 jobs:
   test-3.6: &test-template
     working_directory: ~/visidata
@@ -14,6 +17,9 @@ jobs:
       - run: sudo chown -R circleci:circleci /usr/local/bin
       - run: sudo chown -R circleci:circleci /usr/local/share
       - run: sudo chown -R circleci:circleci /usr/local/lib
+      - run: sudo chown -R circleci:circleci /usr/local/include/
+      - run: echo 'export PYTHONPATH=~/visidata:~/visidata/visidata' >> $BASH_ENV
+      - run: source $BASH_ENV
       - run: locale
       - run:
           name: dependencies
@@ -22,3 +28,18 @@ jobs:
       - run:
           command: |
             dev/test.sh
+
+  test-3.7:
+    <<: *test-template
+    docker:
+      - image: circleci/python:3.7
+
+  test-3.8:
+    <<: *test-template
+    docker:
+      - image: circleci/python:3.8
+
+  test-3.9:
+    <<: *test-template
+    docker:
+      - image: circleci/python:3.9

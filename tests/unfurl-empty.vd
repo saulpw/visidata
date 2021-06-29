@@ -1,0 +1,9 @@
+sheet	col	row	longname	input	keystrokes	comment
+global		disp_float_fmt	set-option	%.07f		
+			open-file	tests/unfurl-empty.jsonl	o	
+global		unfurl_empty	set-option	True		
+unfurl-empty	a		unfurl-col			row-wise expand current column of lists (e.g. [2]) or dicts (e.g. {3}) within that column
+unfurl-empty_a_unfurled		0	select-row		s	select current row
+unfurl-empty_a_unfurled		1	select-row		s	select current row
+unfurl-empty_a_unfurled	a_key	1	setcol-input	key	ge	set contents of current column for selected rows to same input
+unfurl-empty_a_unfurled	a_value	1	setcol-input	value	ge	set contents of current column for selected rows to same input

@@ -12,7 +12,7 @@ class NpySheet(Sheet):
     def iterload(self):
         import numpy
         if not hasattr(self, 'npy'):
-            self.npy = numpy.load(str(self.source), encoding='bytes')
+            self.npy = numpy.load(str(self.source), encoding='bytes', allow_pickle=True)
         self.reloadCols()
         yield from Progress(self.npy, total=len(self.npy))
 
@@ -63,7 +63,7 @@ def save_npy(vd, p, sheet):
     for col in Progress(sheet.visibleCols):
         if col.type in (int, vlen):
             dt = 'i8'
-        elif col.type in (float, currency):
+        elif col.type in (float, currency, floatlocale):
             dt = 'f8'
         elif col.type is date:
             dt = 'datetime64[s]'

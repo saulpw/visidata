@@ -12,6 +12,4 @@ class XlsbIndex(IndexSheet):
 
         wb = open_workbook(str(self.source))
         for name in wb.sheets:
-            vs = wb.get_sheet(name, True)
-            vs.reload()
-            yield vs
+            yield wb.get_sheet(name, True)

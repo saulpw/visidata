@@ -2,7 +2,7 @@
 # Usage: $0 [<options>] [<input> ...]
 #        $0 [<options>] --play <cmdlog> [--batch] [-w <waitsecs>] [-o <output>] [field=value ...]
 
-__version__ = '2.1'
+__version__ = '2.5dev'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
 from copy import copy
@@ -10,14 +10,18 @@ import os
 import io
 import sys
 import locale
+import datetime
+import signal
 import warnings
 
 from visidata import vd, option, options, run, BaseSheet, AttrDict
 from visidata import Path, saveSheets, domotd
 import visidata
 
+vd.version_info = __version_info__
+
 option('config', '~/.visidatarc', 'config file to exec in Python', sheettype=None)
-option('play', '', '.vd file to replay')
+option('play', '', 'file.vd to replay')
 option('batch', False, 'replay in batch mode (with no interface and all status sent to stdout)')
 option('output', None, 'save the final visible sheet to output at the end of replay')
 option('preplay', '', 'longnames to preplay before replay')
@@ -43,7 +47,7 @@ def duptty():
     try:
         fin = open('/dev/tty')
         fout = open('/dev/tty', mode='w')
-        stdin = open(os.dup(0))
+        stdin = open(os.dup(0), encoding=vd.options.getonly('encoding', 'global', 'utf-8'))
         stdout = open(os.dup(1))  # for dumping to stdout from interface
         os.dup2(fin.fileno(), 0)
         os.dup2(fout.fileno(), 1)
@@ -52,7 +56,6 @@ def duptty():
         fin.close()
         fout.close()
     except Exception as e:
-        print(e)
         stdin = sys.stdin
         stdout = sys.stdout
 
@@ -84,9 +87,15 @@ def main_vd():
     flPipedInput = not sys.stdin.isatty()
     flPipedOutput = not sys.stdout.isatty()
 
-    vd._stdin, vd._stdout = duptty()  # always dup stdin/stdout
 
-    stdinSource = Path('-', fp=vd._stdin)
+    try:
+        # workaround for bug in curses.wrapper #899
+        # https://stackoverflow.com/questions/31440392/curses-wrapper-messing-up-terminal-after-background-foreground-sequence
+        vd.tstp_signal = signal.getsignal(signal.SIGTSTP)
+    except Exception:
+        vd.tstp_signal = None
+
+    vd.stdinSource = Path('-', fp=None)  # fp filled in below after options parsed for encoding
 
     # parse args, including +sheetname:subsheet:4:3 starting at row:col on sheetname:subsheet[:...]
     start_positions = []  # (list_of_sheetstr, str, str)  # empty sheetstr means all sheets
@@ -98,7 +107,7 @@ def main_vd():
     i=1
     current_args = {}
     global_args = {}
-    flGlobal = False
+    flGlobal = True
     optsdone = False
 
     while i < len(sys.argv):
@@ -110,16 +119,18 @@ def main_vd():
         elif arg in ['--']:
             optsdone = True
         elif arg in ['-v', '--version']:
-            print(__version_info__)
+            print(vd.version_info)
             return 0
         elif arg == '-':
-            inputs.append((stdinSource, copy(current_args)))
+            inputs.append((vd.stdinSource, copy(current_args)))
         elif arg in ['-h', '--help']:
             import curses
             curses.wrapper(lambda scr: vd.openManPage())
             return 0
         elif arg in ['-g', '--global']:
-            flGlobal = not flGlobal  # can toggle within the same command
+            flGlobal = True
+        elif arg in ['-n', '--nonglobal']:
+            flGlobal = False
         elif arg[0] == '-':
             optname = arg.lstrip('-')
             optval = None
@@ -138,7 +149,7 @@ def main_vd():
                     if type(opt.value) is bool:
                         optval = True
                     else:
-                        if i >= len(sys.argv):
+                        if i >= len(sys.argv)-1:
                             vd.error(f'"-{optname}" missing argument')
 
                         optval = sys.argv[i+1]
@@ -180,12 +191,10 @@ def main_vd():
     vd.loadConfigAndPlugins(args)
 
     for k, v in global_args.items():
-        options.set(k, v, obj='override')
+        options.set(k, v, obj='global')
 
-    for k, v in current_args.items():
-        opt = options._get(k)
-        if opt and opt.sheettype is None:
-            options.set(k, v, obj='override')
+    vd._stdin, vd._stdout = duptty()  # always dup stdin/stdout
+    vd.stdinSource.fp = vd._stdin
 
     # fetch motd and plugins *after* options parsing/setting
     vd.pluginsSheet.ensureLoaded()
@@ -193,6 +202,7 @@ def main_vd():
 
     if args.batch:
         options.undo = False
+        options.quitguard = False
         vd.status = lambda *args, **kwargs: print(*args, file=sys.stderr)  # ignore kwargs (like priority)
         vd.editline = lambda *args, **kwargs: ''
         vd.execAsync = lambda func, *args, **kwargs: func(*args, **kwargs) # disable async
@@ -202,7 +212,7 @@ def main_vd():
 
     if not args.play:
         if flPipedInput and not inputs:  # '|vd' without explicit '-'
-            inputs.append((stdinSource, copy(current_args)))
+            inputs.append((vd.stdinSource, copy(current_args)))
 
     sources = []
     for p, opts in inputs:
@@ -210,7 +220,7 @@ def main_vd():
         if ('filetype' in current_args) and ('filetype' not in opts):
             opts['filetype'] = current_args['filetype']
 
-        vs = vd.openSource(p, **opts)
+        vs = vd.openSource(p, create=True, **opts) or vd.fail(f'could not open {p}')
         for k, v in current_args.items():  # apply final set of args to sheets specifically on cli, if not set otherwise #573
             if not vs.options.is_set(k, vs):
                 vs.options[k] = v
@@ -221,12 +231,23 @@ def main_vd():
     vd.sheets.extend(sources)  # purposefully do not load everything
 
     if not vd.sheets and not args.play and not args.batch:
-        vd.push(vd.vdmenu)
+        if 'filetype' in current_args:
+            newfunc = getattr(vd, 'new_' + current_args['filetype'], vd.getGlobals().get('new_' + current_args['filetype']))
+            datestr = datetime.date.today().strftime('%Y-%m-%d')
+            if newfunc:
+                vd.status('creating blank %s' % current_args['filetype'])
+                vd.push(newfunc(Path(datestr + '.' + current_args['filetype'])))
+            else:
+                vd.status('new_%s does not exist, creating new blank sheet' % current_args['filetype'])
+                vd.push(vd.newSheet(datestr, 1))
+        else:
+            vd.push(vd.currentDirSheet)
 
     if not args.play:
         if args.batch:
-            vd.push(sources[0])
-            sources[0].reload()
+            if sources:
+                vd.push(sources[0])
+                sources[0].reload()
 
         for startsheets, startrow, startcol in start_positions:
             sheets = []  # sheets to apply startrow:startcol to
@@ -264,7 +285,7 @@ def main_vd():
             run(vd.sheets[0])
     else:
         if args.play == '-':
-            vdfile = stdinSource
+            vdfile = vd.stdinSource
             vdfile.name = 'stdin.vd'
         else:
             vdfile = Path(args.play)
@@ -279,9 +300,9 @@ def main_vd():
             vd.replay(vs)
             run()
 
-    if vd.sheets and (flPipedOutput or args.output):
+    if vd.stackedSheets and (flPipedOutput or args.output):
         outpath = Path(args.output or '-')
-        saveSheets(outpath, vd.sheets[0], confirm_overwrite=False)
+        saveSheets(outpath, vd.activeSheet, confirm_overwrite=False)
 
     saver_threads = [t for t in vd.unfinishedThreads if t.name.startswith('save_')]
     if saver_threads:
@@ -297,6 +318,8 @@ def vd_cli():
     rc = -1
     try:
         rc = main_vd()
+    except BrokenPipeError:
+        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno()) # handle broken pipe gracefully
     except visidata.ExpectedException as e:
         print('Error: ' + str(e))
     except FileNotFoundError as e:

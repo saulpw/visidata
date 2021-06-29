@@ -3,10 +3,9 @@ import curses
 
 from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, theme, MissingAttrFormatter
 
-
 __all__ = ['StatusSheet', 'status', 'error', 'fail', 'warning', 'debug']
 
-theme('disp_rstatus_fmt', ' {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} ', 'right-side status format string')
+theme('disp_rstatus_fmt', ' {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus} {sheet.options.disp_selected_note}{sheet.nSelectedRows}', 'right-side status format string')
 theme('disp_status_fmt', '{sheet.shortcut}› {sheet.name}| ', 'status line prefix')
 theme('disp_lstatus_max', 0, 'maximum length of left status line')
 theme('disp_status_sep', ' | ', 'separator between statuses')
@@ -23,6 +22,12 @@ BaseSheet.init('longname', lambda: '')
 
 vd.beforeExecHooks.append(lambda sheet, cmd, args, ks: setattr(sheet, 'longname', cmd.longname))
 
+
+@BaseSheet.property
+def modifiedStatus(sheet):
+    return ' [M]' if sheet.hasBeenModified else ''
+
+
 @VisiData.lazy_property
 def statuses(vd):
     return collections.OrderedDict()  # (priority, statusmsg) -> num_repeats; shown until next action
@@ -32,23 +37,26 @@ def statuses(vd):
 def statusHistory(vd):
     return list()  # list of [priority, statusmsg, repeats] for all status messages ever
 
-
 @VisiData.global_api
-def status(self, *args, priority=0):
+def status(vd, *args, priority=0):
     'Display *args* on status until next action.'
     if not args:
         return True
 
     k = (priority, tuple(map(str, args)))
-    self.statuses[k] = self.statuses.get(k, 0) + 1
+    vd.statuses[k] = vd.statuses.get(k, 0) + 1
 
-    if self.statusHistory:
-        prevpri, prevargs, prevn = self.statusHistory[-1]
+    return vd.addToStatusHistory(*args, priority=priority)
+
+@VisiData.api
+def addToStatusHistory(vd, *args, priority=0):
+    if vd.statusHistory:
+        prevpri, prevargs, prevn = vd.statusHistory[-1]
         if prevpri == priority and prevargs == args:
-            self.statusHistory[-1][2] += 1
+            vd.statusHistory[-1][2] += 1
             return True
 
-    self.statusHistory.append([priority, args, 1])
+    vd.statusHistory.append([priority, args, 1])
     return True
 
 @VisiData.global_api
@@ -73,6 +81,8 @@ def debug(vd, *args, **kwargs):
     'Display *args* on status if options.debug is set.'
     if options.debug:
         return vd.status(*args, **kwargs)
+    else:
+        return vd.addToStatusHistory(*args, **kwargs)
 
 def middleTruncate(s, w):
     if len(s) <= w:
@@ -97,7 +107,7 @@ def leftStatus(sheet):
 def drawLeftStatus(vd, scr, vs):
     'Draw left side of status bar.'
     cattr = colors.get_color('color_status')
-    active = (vs is vd.sheets[0]) if vd.sheets else False # active sheet
+    active = (vs is vd.activeSheet)
     if active:
         cattr = update_attr(cattr, colors.color_active_status, 0)
     else:

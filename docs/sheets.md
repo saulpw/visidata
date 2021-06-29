@@ -58,7 +58,7 @@ Here is a diagram of the screen layout:
 #### row layout
 
 - `topRowIndex` index of row just below header row
-- `nVisibleRows`: simply based on terminal height, the number of rows that can be displayed.
+- `nScreenRows`: simply based on terminal height, the number of rows that can be displayed.
 - `visibleRows`: the contiguous slice of `rows` which is visible onscreen
 
 Column layout is more involved:

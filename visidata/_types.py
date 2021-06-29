@@ -119,7 +119,7 @@ vdtype(list, '')
 
 @VisiData.api
 def isNumeric(vd, col):
-    return col.type in (int,vlen,float,currency,date,floatsi)
+    return col.type in (int,vlen,float,currency,date,floatsi,floatlocale)
 
 ##
 
@@ -129,6 +129,13 @@ def currency(*args):
     if args and isinstance(args[0], str):
         args = [''.join(ch for ch in args[0] if ch in floatchars)]
     return float(*args)
+
+def floatlocale(*args):
+    'Calculate float() using system locale set in LC_NUMERIC.'
+    if not args:
+        return 0.0
+
+    return locale.atof(*args)
 
 
 class vlen(int):
@@ -167,8 +174,36 @@ class date(datetime.datetime):
         tzinfo = getattr(r, 'tzinfo', None)
         return super().__new__(cls, *t[:6], microsecond=ms, tzinfo=tzinfo, **kwargs)
 
+    def __lt__(self, b):
+        if isinstance(b, datetime.datetime): return datetime.datetime.__lt__(self, b)
+        elif isinstance(b, datetime.date):   return not self.date().__eq__(b) and self.date().__lt__(b)
+        return NotImplemented
+
+    def __gt__(self, b):
+        if isinstance(b, datetime.datetime): return datetime.datetime.__gt__(self, b)
+        elif isinstance(b, datetime.date):   return not self.date().__eq__(b) and self.date().__gt__(b)
+        return NotImplemented
+
+    def __le__(self, b):
+        if isinstance(b, datetime.datetime): return datetime.datetime.__le__(self, b)
+        elif isinstance(b, datetime.date):   return self.date().__le__(b)
+        return NotImplemented
+
+    def __ge__(self, b):
+        if isinstance(b, datetime.datetime): return datetime.datetime.__le__(self, b)
+        elif isinstance(b, datetime.date):   return self.date().__ge__(b)
+        return NotImplemented
+
+    def __eq__(self, b):
+        if isinstance(b, datetime.datetime): return datetime.datetime.__eq__(self, b)
+        elif isinstance(b, datetime.date): return self.date().__eq__(b)
+        return NotImplemented
+
     def __str__(self):
         return self.strftime(options.disp_date_fmt)
+
+    def __hash__(self):
+        return super().__hash__()
 
     def __float__(self):
         return self.timestamp()
@@ -195,6 +230,7 @@ class datedelta(datetime.timedelta):
         return self.total_seconds()
 
 vdtype(vlen, '♯', '%.0f')
+vdtype(floatlocale, '%')
 vdtype(date, '@', '', formatter=lambda fmtstr,val: val.strftime(fmtstr or options.disp_date_fmt))
 vdtype(currency, '$')
 vdtype(floatsi, '‱', formatter=SIFormatter)

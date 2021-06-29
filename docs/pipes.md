@@ -12,15 +12,14 @@ the name of the items being selected.  Visidata understands numeric, date, curre
 sort by file size, sort processes by memory usage, or last modification times.  By first sorting or filtering by
 this metadata, you can more easily find what file(s) or process(es) you want to choose.
 
-
    - Use it to manually update (sort, filter, edit) tabular data in a pipeline  `mysql < query.sql | vd | awk 'awkity {awk}'
    - Use it to interactively pick processes to kill `ps -ef | vd | tail -n +2 | xargs --no-run-if-empty kill`
-   - `ls|vd|lpr` to interactively select a list of filenames to send to the printer
-      - Visdata without arguments will find all the files in the current directory including metadata (e.g. size, modtime, owner) so this can be said more simply as `vd | lpr`
 
-Some useful commands to use when in a pipeline:
-   - [ ] **how do we save the contents of one column without a header?**
-   - [ ] **how do we convert output to a different format?**
-   - `q`/`gq` to output nothing
-   - `Ctrl+Q` to output current sheet (like at end of -b)
-   - `vd -o-` to send directly to the terminal (not necessary if already redirected)
+When redirecting VisiData output:
+
+   - `Ctrl+Q` will output current sheet (as it quits with the top sheet still on the stack)
+   - `q` (or `gq`) will output nothing (as it quits by dropping all sheets from the stack)
+
+Use `vd -o-` to send directly to the terminal when not redirecting stdout (it's not necessary if already redirected).
+
+To output a single column without the column header, make sure only that column is visible and save as .txt.  For example, `vd . --save-filetype txt | lpr`.

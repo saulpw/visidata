@@ -38,6 +38,7 @@ DESCRIPTION
                       sheet
      g^C              abort all secondary threads
        q              quit current sheet
+       Q              quit current sheet and free associated memory
       gq              quit all sheets (clean exit)
 
       ^H              view this man page
@@ -55,6 +56,7 @@ DESCRIPTION
      gh  gj  gk  gl   go all the way to the left/bottom/top/right of sheet
           G  gg       go all the way to the bottom/top of sheet
      ^B  ^F           scroll one page back/forward
+     ^Left ^Right     scroll one page left/right
      zz               scroll current row to center of screen
 
      ^^ (Ctrl+^)      jump to previous sheet (swaps with current sheet)
@@ -160,12 +162,12 @@ DESCRIPTION
                       column
      z|  z\ expr      select/unselect rows matching Python expr in any visible
                       column
-      , (comma)       select rows matching typed value of current cell in cur‐
-                      rent column
-     g,               select rows matching typed value of current row in all
+      , (comma)       select rows matching display value of current cell in
+                      current column
+     g,               select rows matching display value of current row in all
                       visible columns
-     z, gz,           select rows matching display value of current cell/row
-                      in current column/all visible columns
+     z, gz,           select rows matching typed value of current cell/row in
+                      current column/all visible columns
 
    Row Sorting/Filtering
        [    ]         sort ascending/descending by current column; replace any
@@ -181,19 +183,25 @@ DESCRIPTION
      gz"              open duplicate sheet with deepcopy of selected rows
 
    Editing Rows and Cells
-       a   za         append a blank row/column; appended columns cannot be
+       a   za         append blank row/column; appended columns cannot be
                       copied to clipboard
       ga  gza number  append number blank rows/columns
-       d   gd         delete (cut) current/selected row(s) and move to clip‐
-                      board
-       y   gy         yank (copy) current/all selected row(s) to clipboard
-      zy  gzy         yank (copy) contents of current column for current/se‐
-                      lected row(s) to clipboard
-      zd  gzd         delete (cut) contents of current column for current/se‐
-                      lected row(s) and move to clipboard
+       d   gd         delete current/selected row(s)
+       y   gy         yank (copy) current/all selected row(s) to clipboard in
+                      Memory Sheet
+       x  gx          cut (copy and delete) current/all selected row(s) to
+                      clipboard in Memory Sheet
+      zy  gzy         yank (copy) contents of current column for
+                      current/selected row(s) to clipboard in Memory Sheet
+      zd  gzd         set contents of current column for current/selected
+                      row(s) to options.null_value
+      zx gzx          cut (copy and delete) contents of current column for
+                      current/selected row(s) to clipboard in Memory Sheet
        p    P         paste clipboard rows after/before current row
       zp  gzp         set cells of current column for current/selected row(s)
                       to last clipboard value
+      zP  gzP         paste to cells of current column for current/selected
+                      row(s) using the system clipboard
        Y   gY         yank (copy) current/all selected row(s) to system
                       clipboard (using options.clipboard_copy_cmd)
       zY  gzY         yank (copy) contents of current column for
@@ -237,7 +245,7 @@ DESCRIPTION
 
       + aggregator    add aggregator to current column (see Frequency Table)
      z+ aggregator    display result of aggregator over values in selected
-                      rows for current column
+                      rows for current column; store result in Memory Sheet
       &               concatenate top two sheets in Sheets Stack
      g&               concatenate all sheets in Sheets Stack
 
@@ -283,8 +291,11 @@ DESCRIPTION
      Split Window specific Commands
         gZ                  close an already split screen, current pane full
                             screens
-        Tab                 jump to other pane
-        ^^ (Ctrl+^)         swap which sheet is in current pane
+         Z                  push second sheet on current pane's stack to the
+                            top of the other pane's stack
+         Tab                jump to other pane
+        gTab                swap panes
+        g^^ (g Ctrl+^)      cycle through sheets
 
    Other Commands
      Q                quit current sheet and remove it from the CommandLog
@@ -320,6 +331,8 @@ DESCRIPTION
       .  VisiDataMenu (Shift+V)      browse list of core sheets
       .  Directory Sheet             browse properties of files in a directory
       .  Plugins Sheet               browse, install, and (de)activate plugins
+      .  Memory Sheet (Alt+Shift+M)        browse saved values, including
+         clipboard
 
      Metasheets
       .  Columns Sheet (Shift+C)     edit column properties
@@ -355,6 +368,13 @@ DESCRIPTION
         Enter  gEnter    open current/selected file(s) as new sheet(s)
          ^O  g^O         open current/selected file(s) in external $EDITOR
          ^R  z^R  gz^R   reload information for all/current/selected file(s)
+          d   gd         delete current/selected file(s) from filesystem, upon
+                         commit
+          y   gy directory
+                         copy current/selected file(s) to given directory,
+                         upon commit
+          e   ge name    rename current/selected file(s) to name
+        z^S              commit changes to file system
 
    Plugins Sheet
      Browse through a list of available plugins. VisiData needs to be
@@ -366,6 +386,16 @@ DESCRIPTION
      (sheet-specific commands)
         a                install and activate current plugin
         d                deactivate current plugin
+
+   Memory Sheet
+     Browse through a list of stored values, referanceable in expressions
+     through their name.
+     (global commands)
+        Alt+Shift+M      open the Memory Sheet
+        Alt+M name       store value in current cell in Memory Sheet under
+                         name
+     (sheet-specific commands)
+        e                edit either value or name, to edit reference
 
    METASHEETS
    Columns Sheet (Shift+C)
@@ -429,6 +459,7 @@ DESCRIPTION
      (sheet-specific commands)
         Enter  e         edit option at current row
         d                remove option override for this context
+        ^S               save option configuration to foo.visidatarc
 
    CommandLog (Shift+D)
      (global commands)
@@ -496,6 +527,13 @@ DESCRIPTION
         gv  zv           show/hide methods and hidden properties
 
 COMMANDLINE OPTIONS
+     Add -n/--nonglobal to make subsequent CLI options sheet-specific
+     (applying only to paths specified directly on the CLI). By default, CLI
+     options apply to all sheets.
+
+     Options can also be set via the Options Sheet or a .visidatarc (see
+     FILES).
+
      -P=longname                  preplay longname before replay or regular
                                   launch; limited to Base Sheet bound commands
      +toplevel:subsheet:col:row   launch vd with subsheet of toplevel at
@@ -522,17 +560,17 @@ COMMANDLINE OPTIONS
      --default-height=int         10                 default column height
      --textwrap-cells=bool        True               wordwrap text for multi‐
                                                      line rows
-     --quitguard                  False              confirm before quitting
+     --quitguard=bool             True               confirm before quitting
                                                      last sheet
      --debug                      False              exit on error and display
                                                      stacktrace
      --skip=int                   0                  skip N rows before header
      --header=int                 1                  parse first N rows as
                                                      column names
+     --load-lazy                  False              load subsheets always
+                                                     (False) or lazily (True)
      --force-256-colors           False              use 256 colors even if
                                                      curses reports fewer
-     --use-default-colors         False              curses use default termi‐
-                                                     nal colors
      --note-pending=str           ⌛                 note to display for pend‐
                                                      ing cells
      --note-format-exc=str        ?                  cell note for an excep‐
@@ -552,11 +590,13 @@ COMMANDLINE OPTIONS
                                                      width on TextSheet
      --save-filetype=str          tsv                specify default file type
                                                      to save as
-     --profile=str                                   filename to save binary
-                                                     profiling data
+     --profile                    False              enable profiling on
+                                                     threads
      --min-memory-mb=int          0                  minimum memory to con‐
                                                      tinue loading and async
                                                      processing
+     --input-history=str                             basename of file to store
+                                                     persistent input history
      --encoding=str               utf-8              encoding passed to
                                                      codecs.open
      --encoding-errors=str        surrogateescape    encoding_errors passed to
@@ -578,9 +618,8 @@ COMMANDLINE OPTIONS
                                                      acter when saving to tsv
      --visibility=int             0                  visibility level (0=low,
                                                      1=high)
-     --expand-col-scanrows=int    1000               number of rows to check
-                                                     when expanding columns (0
-                                                     = all)
+     --default-sample-size=int    100                number of rows to sample
+                                                     for regex.split (0=all)
      --json-indent=NoneType       None               indent to use when saving
                                                      json
      --json-sort-keys             False              sort object keys when
@@ -597,7 +636,7 @@ COMMANDLINE OPTIONS
                                                      system clipboard
      --clipboard-paste-cmd=str                       command to get contents
                                                      of system clipboard
-     --fancy-chooser=bool         True               a nicer selection inter‐
+     --fancy-chooser              False              a nicer selection inter‐
                                                      face for aggregators and
                                                      jointype
      --describe-aggrs=str         mean stdev         numeric aggregators to
@@ -622,8 +661,6 @@ COMMANDLINE OPTIONS
                                                      pile() [AILMSUX]
      --regex-maxsplit=int         0                  maxsplit to pass to
                                                      regex.split
-     --default-sample-size=int    100                number of rows to sample
-                                                     for regex.split
      --show-graph-labels=bool     True               show axes and legend on
                                                      graph
      --plot-colors=str                               list of distinct colors
@@ -640,7 +677,7 @@ COMMANDLINE OPTIONS
                                                      DirSheet
      --config=str                 ~/.visidatarc      config file to exec in
                                                      Python
-     --play=str
+     --play=str                                      file.vd to replay
      --batch                      False              replay in batch mode
                                                      (with no interface and
                                                      all status sent to std‐
@@ -653,6 +690,8 @@ COMMANDLINE OPTIONS
      --imports=str                plugins            imports to preload before
                                                      .visidatarc (command-line
                                                      only)
+     --unfurl-empty               False              if unfurl includes rows
+                                                     for empty containers
      --incr-base=float            1.0                start value for column
                                                      increments
      --csv-dialect=str            excel              dialect passed to
@@ -677,6 +716,8 @@ COMMANDLINE OPTIONS
                                                      no max)
      --postgres-schema=str        public             The desired schema for
                                                      the Postgres database
+     --http-max-next=int          0                  max next.url pages to
+                                                     follow in http response
      --html-title=str             <h2>{sheet.name}</h2>
                                                      table header when saving
                                                      to html
@@ -742,7 +783,7 @@ COMMANDLINE OPTIONS
      disp_selected_note  •
      disp_sort_asc       ↑↟⇞⇡⇧⇑              characters for ascending sort
      disp_sort_desc      ↓↡⇟⇣⇩⇓              characters for descending sort
-     color_default       normal              the default color
+     color_default       white on black      the default fg and bg colors
      color_default_hdr   bold                color of the column headers
      color_bottom_hdr    underline           color of the bottom header row
      color_current_row   reverse             color of the cursor row
@@ -755,6 +796,8 @@ COMMANDLINE OPTIONS
                                              metasheets
      color_selected_row  215 yellow          color of selected rows
      disp_rstatus_fmt     {sheet.longname} {sheet.nRows:9d} {sheet.rowtype}
+                                             {sheet.modifiedStatus}
+                                             {sheet.options.disp_selected_note}{sheet.nSelectedRows}
                                              right-side status format string
      disp_status_fmt     {sheet.shortcut}› {sheet.name}|
                                              status line prefix
@@ -770,7 +813,7 @@ COMMANDLINE OPTIONS
      color_active_status bold                 active window status bar color
      color_inactive_status 8                 inactive window status bar color
      color_working       green               color of system running smoothly
-     color_edit_cell     normal              cell color to use when editing
+     color_edit_cell     white               cell color to use when editing
                                              cell
      disp_edit_fill      _                   edit field fill character
      disp_unprintable    ·                   substitute character for unprint‐
@@ -782,6 +825,10 @@ COMMANDLINE OPTIONS
      disp_replay_pause   ‖                   status indicator for paused re‐
                                              play
      color_status_replay green               color of replay status indicator
+     disp_canvas_charset
+                                             ⠀⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿⡀⡁⡂⡃⡄⡅⡆⡇⡈⡉⡊⡋⡌⡍⡎⡏⡐⡑⡒⡓⡔⡕⡖⡗⡘⡙⡚⡛⡜⡝⡞⡟⡠⡡⡢⡣⡤⡥⡦⡧⡨⡩⡪⡫⡬⡭⡮⡯⡰⡱⡲⡳⡴⡵⡶⡷⡸⡹⡺⡻⡼⡽⡾⡿⢀⢁⢂⢃⢄⢅⢆⢇⢈⢉⢊⢋⢌⢍⢎⢏⢐⢑⢒⢓⢔⢕⢖⢗⢘⢙⢚⢛⢜⢝⢞⢟⢠⢡⢢⢣⢤⢥⢦⢧⢨⢩⢪⢫⢬⢭⢮⢯⢰⢱⢲⢳⢴⢵⢶⢷⢸⢹⢺⢻⢼⢽⢾⢿⣀⣁⣂⣃⣄⣅⣆⣇⣈⣉⣊⣋⣌⣍⣎⣏⣐⣑⣒⣓⣔⣕⣖⣗⣘⣙⣚⣛⣜⣝⣞⣟⣠⣡⣢⣣⣤⣥⣦⣧⣨⣩⣪⣫⣬⣭⣮⣯⣰⣱⣲⣳⣴⣵⣶⣷⣸⣹⣺⣻⣼⣽⣾⣿
+                                             charset to render 2x4 blocks on
+                                             canvas
      disp_pixel_random   False               randomly choose attr from set of
                                              pixels instead of most common
      color_graph_hidden  238 blue            color of legend for hidden attri‐
@@ -800,6 +847,12 @@ EXAMPLES
 
            vd -f sqlite bar.db
      open the file bar.db as a sqlite database
+
+           vd foo.tsv -n -f sqlite bar.db
+     open foo.tsv as tsv and bar.db as a sqlite database
+
+           vd -f sqlite foo.tsv bar.db
+     open both foo.tsv and bar.db as a sqlite database
 
            vd -b countries.fixed -o countries.tsv
      convert countries.fixed (in fixed width format) to countries.tsv (in tsv
@@ -868,7 +921,7 @@ SUPPORTED SOURCES
 
         sqlite
            May include multiple tables. The initial sheet is the table
-           directory; Enter loaders the entrie table into memory. z^S saves
+           directory; Enter loads the entire table into memory. z^S saves
            modifications to source.
 
      URL schemes are also supported:
@@ -878,21 +931,10 @@ SUPPORTED SOURCES
      For a list of all remaining formats supported by VisiData, see
      https://visidata.org/formats.
 
-     In addition, .zip, .gz, .bz2, and .xz files are decompressed on the fly.
-
-SUPPORTED OUTPUT FORMATS
-     These are the supported savers:
-
-        tsv (tab-separated value)
-        csv (comma-separated value)
-        json (one object with all rows)
-        jsonl/ndjson/ldjson (one object per line/row)
-           All expanded subcolumns must be closed (with )) to retain the same
-           structure.
-        sqlite (save to source with z^S)
-        md (markdown table)
+     In addition, .zip, .gz, .bz2, .xz, ,zstd, and .zst files are decompressed
+     on the fly.
 
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                       Dec 5, 2020                      Linux/MacOS
+Linux/MacOS                      June 27, 2021                     Linux/MacOS

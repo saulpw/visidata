@@ -10,58 +10,127 @@ disp_column_fill = ' '
 
 ### Curses helpers
 
-def dispwidth(ss):
+# ZERO_WIDTH_CF is from wcwidth:
+# NOTE: created by hand, there isn't anything identifiable other than
+# general Cf category code to identify these, and some characters in Cf
+# category code are of non-zero width.
+# Also includes some Cc, Mn, Zl, and Zp characters
+ZERO_WIDTH_CF = set(map(chr, [
+    0,       # Null (Cc)
+    0x034F,  # Combining grapheme joiner (Mn)
+    0x200B,  # Zero width space
+    0x200C,  # Zero width non-joiner
+    0x200D,  # Zero width joiner
+    0x200E,  # Left-to-right mark
+    0x200F,  # Right-to-left mark
+    0x2028,  # Line separator (Zl)
+    0x2029,  # Paragraph separator (Zp)
+    0x202A,  # Left-to-right embedding
+    0x202B,  # Right-to-left embedding
+    0x202C,  # Pop directional formatting
+    0x202D,  # Left-to-right override
+    0x202E,  # Right-to-left override
+    0x2060,  # Word joiner
+    0x2061,  # Function application
+    0x2062,  # Invisible times
+    0x2063,  # Invisible separator
+]))
+
+def wcwidth(cc, ambig=1):
+        if cc in ZERO_WIDTH_CF:
+            return 1
+        eaw = unicodedata.east_asian_width(cc)
+        if eaw in 'AN':  # ambiguous or neutral
+            if unicodedata.category(cc) == 'Mn':
+                return 1
+            else:
+                return ambig
+        elif eaw in 'WF': # wide/full
+            return 2
+        elif not unicodedata.combining(cc):
+            return 1
+        return 0
+
+
+def dispwidth(ss, maxwidth=None):
     'Return display width of string, according to unicodedata width and options.disp_ambig_width.'
     disp_ambig_width = options.disp_ambig_width
     w = 0
 
     for cc in ss:
-        eaw = unicodedata.east_asian_width(cc)
-        if eaw == 'A':  # ambiguous
-            w += disp_ambig_width
-        elif eaw in 'WF': # wide/full
-            w += 2
-        elif not unicodedata.combining(cc):
-            w += 1
+        w += wcwidth(cc, disp_ambig_width)
+        if maxwidth and w > maxwidth:
+            break
     return w
 
 
 @functools.lru_cache(maxsize=100000)
-def clipstr(s, dispw):
+def _dispch(c, oddspacech=None, combch=None, modch=None):
+    ccat = unicodedata.category(c)
+    if ccat in ['Mn', 'Sk', 'Lm']:
+        if unicodedata.name(c).startswith('MODIFIER'):
+            return modch, 1
+    elif c != ' ' and ccat in ('Cc', 'Zs', 'Zl'):  # control char, space, line sep
+        return oddspacech, 1
+    elif c in ZERO_WIDTH_CF:
+        return combch, 1
+
+    return c, dispwidth(c)
+
+@functools.lru_cache(maxsize=100000)
+def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
     '''Return clipped string and width in terminal display characters.
     Note: width may differ from len(s) if East Asian chars are 'fullwidth'.'''
     w = 0
     ret = ''
-    trunch = options.disp_truncator
-    for c in s:
-        if c != ' ' and unicodedata.category(c) in ('Cc', 'Zs', 'Zl'):  # control char, space, line sep
-            c = options.disp_oddspace
 
-        if c:
-            c = c[0]  # multi-char disp_oddspace just uses the first char
+    trunchlen = dispwidth(trunch)
+    for c in s:
+        newc, chlen = _dispch(c, oddspacech=oddspacech, combch=combch, modch=modch)
+        if newc:
+            ret += newc
+            w += chlen
+        else:
             ret += c
             w += dispwidth(c)
 
-        if w > dispw-len(trunch)+1:
+        if w > dispw-trunchlen+1:
             ret = ret[:-2] + trunch # replace final char with ellipsis
-            w += len(trunch)
+            w += trunchlen
             break
 
     return ret, w
 
 
+def clipstr(s, dispw):
+    if options.visibility:
+        return _clipstr(s, dispw,
+                        trunch=options.disp_truncator,
+                        oddspacech=options.disp_oddspace,
+                        modch='\u25e6',
+                        combch='\u25cc')
+    else:
+        return _clipstr(s, dispw,
+                trunch=options.disp_truncator,
+                oddspacech=options.disp_oddspace,
+                modch='',
+                combch='')
+
 def clipdraw(scr, y, x, s, attr, w=None, rtl=False):
     'Draw string `s` at (y,x)-(y,x+w) with curses attr, clipping with ellipsis char.  if rtl, draw inside (x-w, x).  Returns width drawn (max of w).'
-    if not scr:
-        return 0
-    _, windowWidth = scr.getmaxyx()
+    if scr:
+        _, windowWidth = scr.getmaxyx()
+    else:
+        windowWidth = 80
     dispw = 0
     try:
         if w is None:
-            w = len(s)
+            w = dispwidth(s, maxwidth=windowWidth)
         w = min(w, (x-1) if rtl else (windowWidth-x-1))
         if w <= 0:  # no room anyway
             return 0
+        if not scr:
+            return w
 
         # convert to string just before drawing
         clipped, dispw = clipstr(str(s), w)

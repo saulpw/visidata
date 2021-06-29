@@ -29,7 +29,8 @@ def __call__(vd):
 
 @deprecated('1.6')
 def copyToClipboard(value):
-    return visidata.clipboard().copy(value)
+    vd.error("copyToClipboard longer implemented")
+    return visidata.clipboard_copy(value)
 
 
 @deprecated('1.6')
@@ -113,3 +114,9 @@ alias('page-left', 'go-left-page')
 alias('dive-cell', 'open-cell')
 alias('dive-row', 'open-row')
 alias('add-sheet', 'open-new')
+alias('save-sheets-selected', 'save-selected')
+
+# v2.3
+alias('show-aggregate', 'memo-aggregate')
+#theme('use_default_colors', True, 'curses use default terminal colors')
+#option('expand_col_scanrows', 1000, 'number of rows to check when expanding columns (0 = all)')

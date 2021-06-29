@@ -71,7 +71,7 @@ class PivotSheet(Sheet):
     def openRow(self, row):
         'open sheet of source rows aggregated in current pivot row'
         vs = copy(self.source)
-        vs.name += "_%s"%"+".join(row.discrete_keys)
+        vs.name += "_%s"%"+".join(map(str, row.discrete_keys))
         vs.rows = sum(row.pivotrows.values(), [])
         return vs
 
@@ -95,7 +95,7 @@ class PivotSheet(Sheet):
         aggcols = {  # [Column] -> list(aggregators)
             sourcecol: sourcecol.aggregators
                 for sourcecol in self.source.visibleCols
-                    if hasattr(sourcecol, 'aggregators')
+                    if sourcecol.aggregators
         } or {  # if pivot given but no aggregators specified
             sourcecol: [vd.aggregators["count"]]
                 for sourcecol in self.pivotCols
@@ -113,6 +113,7 @@ class PivotSheet(Sheet):
 
                     c = Column(aggname,
                                 type=aggregator.type or aggcol.type,
+                                fmtstr=aggcol.fmtstr,
                                 getter=lambda col,row,aggcol=aggcol,agg=aggregator: agg(aggcol, row.sourcerows))
                     self.addColumn(c)
 

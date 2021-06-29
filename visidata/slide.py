@@ -52,7 +52,7 @@ def moveKeyCol(sheet, fromKeyColIdx, toKeyColIdx):
             if toKeyColIdx <= col.keycol < fromKeyColIdx:
                 col.keycol += 1
         else:  # moving to the right
-            if 1 < col.keycol <= toKeyColIdx:
+            if fromKeyColIdx < col.keycol <= toKeyColIdx:
                 col.keycol -= 1
 
     # key columns are 1-indexed; columns in general are 0-indexed

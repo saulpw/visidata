@@ -46,19 +46,21 @@ class ShapeSheet(Sheet):
 
 class ShapeMap(InvertedCanvas):
     aspectRatio = 1.0
+    filetype = 'geojson'
+
     @asyncthread
     def reload(self):
         self.reset()
 
         for row in Progress(self.sourceRows):
             # color according to key
-            k = tuple(col.getValue(row) for col in self.source.keyCols)
+            k = self.source.rowkey(row)
 
-            if row.shape.shapeType == 5:
+            if row.shape.shapeType in (5, 15, 25):
                 self.polygon(row.shape.points, self.plotColor(k), row)
-            elif row.shape.shapeType == 3:
+            elif row.shape.shapeType in (3, 13, 23):
                 self.polyline(row.shape.points, self.plotColor(k), row)
-            elif row.shape.shapeType == 1:
+            elif row.shape.shapeType in (1, 11, 21):
                 x, y = row.shape.points[0]
                 self.point(x, y, self.plotColor(k), row)
             else:
@@ -71,9 +73,8 @@ class ShapeMap(InvertedCanvas):
 
         self.refresh()
 
-@VisiData.api
+@ShapeMap.api
 def save_geojson(vd, p, vs):
-    isinstance(vs, Canvas) or vd.fail("must save geojson from canvas sheet")
     features = []
     for coords, attr, row in Progress(vs.polylines, 'saving'):
         feat = {
@@ -92,9 +93,10 @@ def save_geojson(vd, p, vs):
         'type': 'FeatureCollection',
         'features': features,
     }
-    with p.open_text(mode='w') as fp:
+    with p.open_text(mode='w', encoding=vs.options.encoding) as fp:
         for chunk in json.JSONEncoder().iterencode(featcoll):
             fp.write(chunk)
 
-ShapeSheet.addCommand('.', 'plot-row', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=[cursorRow], textCol=cursorCol))', 'plot geospatial vector in current row')
-ShapeSheet.addCommand('g.', 'plot-rows', 'vd.push(ShapeMap(name+"_map", sheet, sourceRows=rows, textCol=cursorCol))', 'plot all geospatial vectors in current sheet')
+ShapeSheet.addCommand('.', 'plot-row', 'vd.push(ShapeMap(name+"_map", source=sheet, sourceRows=[cursorRow], textCol=cursorCol))', 'plot geospatial vector in current row')
+ShapeSheet.addCommand('g.', 'plot-rows', 'vd.push(ShapeMap(name+"_map", source=sheet, sourceRows=rows, textCol=cursorCol))', 'plot all geospatial vectors in current sheet')
+ShapeMap.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .geojson)')

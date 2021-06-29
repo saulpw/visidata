@@ -10,6 +10,9 @@ vd, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
 import visidata
 
 
+vd.activePane = 1   # pane numbering starts at 1; pane 0 means active pane
+
+
 __all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'TableSheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow', 'SequenceSheet']
 
 
@@ -17,12 +20,13 @@ option('default_width', 20, 'default column width', replay=True)   # TODO: make 
 option('default_height', 10, 'default column height')
 option('textwrap_cells', True, 'wordwrap text for multiline rows')
 
-option('quitguard', False, 'confirm before quitting last sheet')
+option('quitguard', True, 'confirm before quitting last sheet')
 option('debug', False, 'exit on error and display stacktrace')
 option('skip', 0, 'skip N rows before header', replay=True)
 option('header', 1, 'parse first N rows as column names', replay=True)
+option('load_lazy', False, 'load subsheets always (False) or lazily (True)')
+
 theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
-theme('use_default_colors', False, 'curses use default terminal colors')
 
 theme('disp_note_none', '⌀',  'visible contents of a cell whose value is None')
 theme('disp_truncator', '…', 'indicator that the contents are only partially visible')
@@ -57,7 +61,7 @@ theme('disp_endbot_sep', '║', '') # ╽╿┃╜‖
 theme('disp_selected_note', '•', '') #
 theme('disp_sort_asc', '↑↟⇞⇡⇧⇑', 'characters for ascending sort') # ↑▲↟↥↾↿⇞⇡⇧⇈⤉⤒⥔⥘⥜⥠⍏˄ˆ
 theme('disp_sort_desc', '↓↡⇟⇣⇩⇓', 'characters for descending sort') # ↓▼↡↧⇂⇃⇟⇣⇩⇊⤈⤓⥕⥙⥝⥡⍖˅ˇ
-theme('color_default', 'normal', 'the default color')
+theme('color_default', 'white on black', 'the default fg and bg colors')
 theme('color_default_hdr', 'bold', 'color of the column headers')
 theme('color_bottom_hdr', 'underline', 'color of the bottom header row')
 theme('color_current_row', 'reverse', 'color of the cursor row')
@@ -71,8 +75,8 @@ option('name_joiner', '_', 'string to join sheet or column names')
 option('value_joiner', ' ', 'string to join display values')
 
 
-def splitcell(s, width=0):
-    if width <= 0 or not options.textwrap_cells:
+def splitcell(sheet, s, width=0):
+    if width <= 0 or not sheet.options.textwrap_cells:
         return [s]
 
     ret = []
@@ -99,16 +103,20 @@ class LazyComputeRow:
         self.row = row
         self.col = col
         self.sheet = sheet
-        if not hasattr(self.sheet, '_lcm'):
-            self.sheet._lcm = LazyChainMap(sheet, vd, col)
-        else:
-            self.sheet._lcm.clear()  # reset locals on lcm
-
         self._usedcols = set()
         self._keys = [c.name for c in self.sheet.columns]
 
+        self._lcm.clear()  # reset locals on lcm
+
+    @property
+    def _lcm(self):
+        lcmobj = self.col or self.sheet
+        if not hasattr(lcmobj, '_lcm'):
+            lcmobj._lcm = LazyChainMap(self.sheet, self.col, *vd.contexts)
+        return lcmobj._lcm
+
     def keys(self):
-        return self._keys + self.sheet._lcm.keys() + ['row', 'sheet', 'col']
+        return self._keys + self._lcm.keys() + ['row', 'sheet', 'col']
 
     def __str__(self):
         return str(self.as_dict())
@@ -129,7 +137,7 @@ class LazyComputeRow:
 
         except ValueError:
             try:
-                c = self.sheet._lcm[colid]
+                c = self._lcm[colid]
             except (KeyError, AttributeError):
                 if colid == 'sheet': return self.sheet
                 elif colid == 'row': c = self.row
@@ -150,7 +158,7 @@ class LazyComputeRow:
 
 class BasicRow(collections.defaultdict):
     def __init__(self, *args):
-        collections.defaultdict.__init__(self, lambda: None, *args)
+        collections.defaultdict.__init__(self, lambda: None)
     def __bool__(self):
         return True
 
@@ -237,7 +245,7 @@ class TableSheet(BaseSheet):
             try:
                 r = colorizer.func(self, col, row, value)
                 if r:
-                    colorstack.append(colorizer.coloropt if colorizer.coloropt else r)
+                    colorstack.append((colorizer.precedence, colorizer.coloropt if colorizer.coloropt else r))
             except Exception as e:
                 vd.exceptionCaught(e)
 
@@ -249,6 +257,8 @@ class TableSheet(BaseSheet):
             self.rows.append(row)
         else:
             self.rows.insert(index, row)
+            if self.cursorRowIndex and self.cursorRowIndex >= index:
+                self.cursorRowIndex += 1
         return row
 
     def newRow(self):
@@ -274,9 +284,12 @@ class TableSheet(BaseSheet):
     def reload(self):
         'Load rows and/or columns from ``self.source``.  Async.  Override in subclass.'
         self.rows = []
-        with vd.Progress(gerund='loading', total=0):
-            for r in self.iterload():
-                self.addRow(r)
+        try:
+            with vd.Progress(gerund='loading', total=0):
+                for r in self.iterload():
+                    self.addRow(r)
+        except FileNotFoundError:
+            return  # let it be a blank sheet without error
 
         # if an ordering has been specified, sort the sheet
         if self._ordering:
@@ -343,7 +356,7 @@ class TableSheet(BaseSheet):
         return self.name
 
     def evalExpr(self, expr, row=None, col=None):
-        if row:
+        if row is not None:
             # contexts are cached by sheet/rowid for duration of drawcycle
             contexts = vd._evalcontexts.setdefault((self, self.rowid(row), col), LazyComputeRow(self, row, col=col))
         else:
@@ -474,6 +487,10 @@ class TableSheet(BaseSheet):
 
     def addColumn(self, *cols, index=None):
         'Insert all *cols* into columns at *index*, or append to end of columns if *index* is None.  Return first column.'
+        if not cols:
+            vd.warning('no columns to add')
+            return
+
         for i, col in enumerate(cols):
             vd.addUndo(self.columns.remove, col)
             if index is None:
@@ -486,7 +503,11 @@ class TableSheet(BaseSheet):
 
     def addColumnAtCursor(self, *cols):
         'Insert all *cols* into columns after cursor.  Return first column.'
-        return self.addColumn(*cols, index=0 if self.cursorCol.keycol else self.columns.index(self.cursorCol)+1)
+        index = 0
+        ccol = self.cursorCol
+        if ccol and not ccol.keycol:
+            index = self.columns.index(ccol)+1
+        return self.addColumn(*cols, index=index)
 
     def setColNames(self, rows):
         for c in self.visibleCols:
@@ -579,8 +600,8 @@ class TableSheet(BaseSheet):
 
     def calcColLayout(self):
         'Set right-most visible column, based on calculation.'
-        minColWidth = len(options.disp_more_left)+len(options.disp_more_right)+2
-        sepColWidth = len(options.disp_column_sep)
+        minColWidth = len(self.options.disp_more_left)+len(self.options.disp_more_right)+2
+        sepColWidth = len(self.options.disp_column_sep)
         winWidth = self.windowWidth
         self._visibleColLayout = {}
         x = 0
@@ -592,8 +613,8 @@ class TableSheet(BaseSheet):
                 # handle delayed column width-finding
                 col.width = max(col.getMaxWidth(vrows), minColWidth)
                 if vcolidx != self.nVisibleCols-1:  # let last column fill up the max width
-                    col.width = min(col.width, options.default_width)
-            width = col.width if col.width is not None else options.default_width
+                    col.width = min(col.width, self.options.default_width)
+            width = col.width if col.width is not None else self.options.default_width
             if col in self.keyCols:
                 width = max(width, 1)  # keycols must all be visible
             if col in self.keyCols or vcolidx >= self.leftVisibleColIndex:  # visible columns
@@ -616,9 +637,9 @@ class TableSheet(BaseSheet):
         if vcolidx == self.cursorVisibleColIndex:
             hdrcattr = update_attr(hdrcattr, colors.color_current_hdr, 2)
 
-        C = options.disp_column_sep
+        C = self.options.disp_column_sep
         if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.rightVisibleColIndex:
-            C = options.disp_keycol_sep
+            C = self.options.disp_keycol_sep
 
         x, colwidth = self._visibleColLayout[vcolidx]
 
@@ -641,7 +662,7 @@ class TableSheet(BaseSheet):
                 name += hdrs[::-1][h-i-1]
 
             if len(name) > colwidth-1:
-                name = name[:colwidth-len(options.disp_truncator)] + options.disp_truncator
+                name = name[:colwidth-len(self.options.disp_truncator)] + self.options.disp_truncator
 
             if i == h-1:
                 hdrcattr = update_attr(hdrcattr, colors.color_bottom_hdr, 5)
@@ -656,7 +677,7 @@ class TableSheet(BaseSheet):
 
         try:
             if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
-                A = options.disp_more_left
+                A = self.options.disp_more_left
                 scr.addstr(y, x, A, sepcattr.attr)
         except ValueError:  # from .index
             pass
@@ -670,7 +691,7 @@ class TableSheet(BaseSheet):
         vd.clearCaches()
 
         if not self.columns:
-            if options.debug:
+            if self.options.debug:
                 self.addColumn(Column())
             else:
                 return
@@ -678,21 +699,21 @@ class TableSheet(BaseSheet):
         drawparams = {
             'isNull': self.isNullFunc(),
 
-            'topsep': options.disp_rowtop_sep,
-            'midsep': options.disp_rowmid_sep,
-            'botsep': options.disp_rowbot_sep,
-            'endsep': options.disp_rowend_sep,
-            'keytopsep': options.disp_keytop_sep,
-            'keymidsep': options.disp_keymid_sep,
-            'keybotsep': options.disp_keybot_sep,
-            'endtopsep': options.disp_endtop_sep,
-            'endmidsep': options.disp_endmid_sep,
-            'endbotsep': options.disp_endbot_sep,
+            'topsep': self.options.disp_rowtop_sep,
+            'midsep': self.options.disp_rowmid_sep,
+            'botsep': self.options.disp_rowbot_sep,
+            'endsep': self.options.disp_rowend_sep,
+            'keytopsep': self.options.disp_keytop_sep,
+            'keymidsep': self.options.disp_keymid_sep,
+            'keybotsep': self.options.disp_keybot_sep,
+            'endtopsep': self.options.disp_endtop_sep,
+            'endmidsep': self.options.disp_endmid_sep,
+            'endbotsep': self.options.disp_endbot_sep,
 
-            'colsep': options.disp_column_sep,
-            'keysep': options.disp_keycol_sep,
-            'selectednote': options.disp_selected_note,
-            'disp_truncator': options.disp_truncator,
+            'colsep': self.options.disp_column_sep,
+            'keysep': self.options.disp_keycol_sep,
+            'selectednote': self.options.disp_selected_note,
+            'disp_truncator': self.options.disp_truncator,
         }
 
         self._rowLayout = {}  # [rowidx] -> (y, height)
@@ -719,7 +740,7 @@ class TableSheet(BaseSheet):
             y += self.drawRow(scr, row, self.topRowIndex+rowidx, y, rowcattr, maxheight=self.windowHeight-y-1, **drawparams)
 
         if vcolidx+1 < self.nVisibleCols:
-            scr.addstr(headerRow, self.windowWidth-2, options.disp_more_right, colors.color_column_sep)
+            scr.addstr(headerRow, self.windowWidth-2, self.options.disp_more_right, colors.color_column_sep)
 
         scr.refresh()
 
@@ -739,13 +760,13 @@ class TableSheet(BaseSheet):
 
                     try:
                         if isNull and isNull(cellval.value):
-                            cellval.note = options.disp_note_none
+                            cellval.note = self.options.disp_note_none
                             cellval.notecolor = 'color_note_type'
                     except (TypeError, ValueError):
                         pass
 
                     if col.voffset or col.height > 1:
-                        lines = splitcell(cellval.display, width=colwidth-2)
+                        lines = splitcell(self, cellval.display, width=colwidth-2)
                     else:
                         lines = [cellval.display]
                     displines[vcolidx] = (col, cellval, lines)
@@ -867,7 +888,7 @@ class TableSheet(BaseSheet):
             return height
 
 vd.rowNoters = [
-        lambda sheet, row: sheet.isSelected(row) and options.disp_selected_note,
+        lambda sheet, row: sheet.isSelected(row) and sheet.options.disp_selected_note,
 ]
 
 Sheet = TableSheet  # deprecated in 2.0 but still widely used internally
@@ -879,7 +900,7 @@ class SequenceSheet(Sheet):
         self.columns = []
         for i, colnamelines in enumerate(itertools.zip_longest(*headerrows, fillvalue='')):
             colnamelines = ['' if c is None else c for c in colnamelines]
-            self.addColumn(ColumnItem(''.join(colnamelines), i))
+            self.addColumn(ColumnItem(''.join(map(str, colnamelines)), i))
 
         self._rowtype = namedlist('tsvobj', [(c.name or '_') for c in self.columns])
 
@@ -896,7 +917,7 @@ class SequenceSheet(Sheet):
 
     def optlines(self, it, optname):
         'Generate next options.<optname> elements from iterator with exceptions wrapped.'
-        for i in range(options.getobj(optname, self)):
+        for i in range(self.options.getobj(optname, self)):
             try:
                 yield next(it)
             except StopIteration:
@@ -931,7 +952,7 @@ class IndexSheet(Sheet):
 
     columns = [
         ColumnAttr('name'),
-        ColumnAttr('rows', 'nRows', type=int),
+        ColumnAttr('rows', 'nRows', type=int, width=9),
         ColumnAttr('cols', 'nCols', type=int),
         ColumnAttr('keys', 'keyColNames'),
         ColumnAttr('source'),
@@ -949,11 +970,17 @@ class IndexSheet(Sheet):
             if vs.name == k:
                 return vs
 
+    def addRow(self, sheet, **kwargs):
+        super().addRow(sheet, **kwargs)
+        if not self.options.load_lazy:
+            sheet.ensureLoaded()
+
 
 class SheetsSheet(IndexSheet):
     columns = [
         ColumnAttr('name'),
         ColumnAttr('type', '__class__.__name__'),
+        ColumnAttr('pane', type=int),
         Column('shortcut', getter=lambda c,r: getattr(r, 'shortcut'), setter=lambda c,r,v: setattr(r, '_shortcut', v)),
         ColumnAttr('nRows', type=int),
         ColumnAttr('nCols', type=int),
@@ -998,14 +1025,23 @@ def remove(vd, vs):
 
 
 @VisiData.global_api
-def push(vd, vs):
-    'Push Sheet *vs* onto ``vd.sheets`` stack.  Remove from other position if already on sheets stack.'
+def push(vd, vs, pane=0):
+    'Push Sheet *vs* onto ``vd.sheets`` stack for *pane* (0 for active pane, -1 for inactive pane).  Remove from other position if already on sheets stack.'
     if not isinstance(vs, BaseSheet):
         return  # return instead of raise, some commands need this
 
-    vs.vd = vd
     if vs in vd.sheets:
         vd.sheets.remove(vs)
+
+    vs.vd = vd
+    if pane == -1:
+        vs.pane = 2 if vd.activePane == 1 else 1
+    elif pane == 0:
+        if not vd.sheetstack(1): vs.pane=1
+        elif not vd.sheetstack(2) and vd.options.disp_splitwin_pct != 0: vs.pane=2
+        else: vs.pane = vd.activePane
+    else:
+        vs.pane = pane
 
     vd.sheets.insert(0, vs)
 
@@ -1026,20 +1062,31 @@ def sheetsSheet(vd):
 
 @VisiData.api
 def quit(vd, *sheets):
-    'Remove *sheets* from sheets stack, asking for confirmation if options.quitguard set (either global or sheet-specific).'
-    if len(vd.sheets) == len(sheets) and options.getonly('quitguard', 'override', False):
-        vd.confirm("quit last sheet? ")
+    'Remove *sheets* from sheets stack, asking for confirmation if needed.'
+
     for vs in sheets:
-        if options.getonly('quitguard', vs, False):
-            vd.draw_all()
-            vd.confirm(f'quit guarded sheet "{vs.name}?" ')
+        vs.confirmQuit('quit')
+        vs.pane = 0
         vd.remove(vs)
+
+
+@BaseSheet.api
+def confirmQuit(vs, verb='quit'):
+    if vs.options.quitguard:
+        if vs.precious and vs.hasBeenModified:
+            vd.draw_all()
+            vd.confirm(f'{verb} modified sheet "{vs.name}?" ')
+    elif vs.options.getonly('quitguard', vs, False):  # if this sheet is specifically guarded
+        vd.draw_all()
+        vd.confirm(f'{verb} guarded sheet "{vs.name}?" ')
 
 
 @BaseSheet.api
 def preloadHook(sheet):
     'Override to setup for reload().'
-    pass
+    sheet.confirmQuit('reload')
+
+    sheet.hasBeenModified = False
 
 
 @VisiData.api
@@ -1054,15 +1101,25 @@ def updateColNames(sheet, rows, cols, overwrite=False):
         if not c._name or overwrite:
             c.name = "\n".join(c.getDisplayValue(r) for r in rows)
 
+@BaseSheet.api
+def splitPane(sheet, pct=None):
+    if vd.activeStack[1:]:
+        undersheet = vd.activeStack[1]
+        pane = 1 if undersheet.pane == 2 else 2
+        vd.push(undersheet, pane=pane)
+        vd.activePane = pane
+
+    vd.options.disp_splitwin_pct = pct
 
 IndexSheet.class_options.header = 0
 IndexSheet.class_options.skip = 0
 
+BaseSheet.init('pane', lambda: 1)
 
 globalCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)', 'open Sheets Stack: join or jump between the active sheets on the current stack')
 globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)', 'open Sheets Sheet: join or jump between all sheets from current session')
 
-BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); vd.addUndoReload(rows, columns); reload(); recalc(); status("reloaded")', 'reload current sheet'),
+BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); reload(); recalc(); status("reloaded")', 'reload current sheet'),
 Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line'),
 
 Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', 'toggle current column as a key column')
@@ -1084,6 +1141,7 @@ Sheet.addCommand('z#', 'type-len', 'cursorCol.type = vlen', 'set type of current
 Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency', 'set type of current column to currency')
 Sheet.addCommand('%', 'type-float', 'cursorCol.type = float', 'set type of current column to float')
 Sheet.addCommand('z%', 'type-floatsi', 'cursorCol.type = floatsi', 'set type of current column to SI float')
+Sheet.addCommand('', 'type-floatlocale', 'cursorCol.type = floatlocale', 'set type of current column to float using system locale set in LC_NUMERIC')
 
 # when diving into a sheet, remove the index unless it is precious
 IndexSheet.addCommand('g^R', 'reload-selected', 'for vs in selectedRows or rows: vs.reload()', 'reload all selected sheets')
@@ -1091,16 +1149,17 @@ SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_colu
 SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visble columns from selected sheets')
 SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)', 'abort async thread for current sheet')
 SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)', 'abort async threads for selected sheets')
-IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelectedRows), *selectedRows, confirm_overwrite=options.confirm_overwrite)', 'save all selected sheets to given file or directory')
 SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(openRow(dest))', 'open sheet referenced in current row')
 
 BaseSheet.addCommand('q', 'quit-sheet',  'vd.quit(sheet)', 'quit current sheet')
+BaseSheet.addCommand('Q', 'quit-sheet-free',  'rows.clear(); sheet.source.lines.clear(); vd.allSheets.remove(sheet); vd.quit(sheet)', 'discard current sheet and free memory')
 globalCommand('gq', 'quit-all', 'vd.quit(*vd.sheets)', 'quit all sheets (clean exit)')
 
-BaseSheet.addCommand('Z', 'splitwin-half', 'options.disp_splitwin_pct = 50', 'split screen in half, so that second sheet on stack is visible in a second pane')
-BaseSheet.addCommand('gZ', 'splitwin-close', 'options.disp_splitwin_pct = 0', 'close an already split screen, current pane full screens')
-BaseSheet.addCommand('^I', 'splitwin-swap', 'vd.push(vd.sheets[1]) if len(sheets) >=2 else fail("at least 2 sheets required for splitwin-swap"); options.disp_splitwin_pct = -options.disp_splitwin_pct', 'jump to other pane')
-BaseSheet.addCommand('zZ', 'splitwin-input', 'options.disp_splitwin_pct = input("% height for split window: ", value=options.disp_splitwin_pct)', 'split screen and queries for height of second pane, second sheet on stack is visible in second pane')
+BaseSheet.addCommand('Z', 'splitwin-half', 'splitPane(vd.options.disp_splitwin_pct or 50)', 'ensure split pane is set and push under sheet onto other pane')
+BaseSheet.addCommand('gZ', 'splitwin-close', 'vd.options.disp_splitwin_pct = 0\nfor vs in vd.activeStack: vs.pane = 1', 'close split screen')
+BaseSheet.addCommand('^I', 'splitwin-swap', 'vd.activePane = 1 if sheet.pane == 2 else 2', 'jump to inactive pane')
+BaseSheet.addCommand('g^I', 'splitwin-swap-pane', 'vd.options.disp_splitwin_pct=-vd.options.disp_splitwin_pct', 'swap panes onscreen')
+BaseSheet.addCommand('zZ', 'splitwin-input', 'vd.options.disp_splitwin_pct = input("% height for split window: ", value=vd.options.disp_splitwin_pct)', 'set split pane to specific size')
 
 BaseSheet.addCommand('^L', 'redraw', 'vd.redraw(); sheet.refresh()', 'refresh screen')
 BaseSheet.addCommand(None, 'guard-sheet', 'options.set("quitguard", True, sheet); status("guarded")', 'guard current sheet from accidental quitting')

@@ -25,16 +25,19 @@ Sheet.colorizers += [
 
 @Sheet.api
 def preloadHook(sheet):
+    BaseSheet.preloadHook(sheet)
     sheet._deferredAdds.clear()
     sheet._deferredMods.clear()
     sheet._deferredDels.clear()
-    # how to call the previous preloadHook? Sheet.preloadHook(sheet)
 
 @Sheet.api
 def rowAdded(self, row):
     'Mark row as a deferred add-row'
     self._deferredAdds[self.rowid(row)] = row
     def _undoRowAdded(sheet, row):
+        if sheet.rowid(row) not in sheet._deferredAdds:
+            warning('cannot undo to before commit')
+            return
         del sheet._deferredAdds[sheet.rowid(row)]
     vd.addUndo(_undoRowAdded, self, row)
 
@@ -54,10 +57,13 @@ def cellChanged(col, row, val):
         def _undoCellChanged(col, row, oldval):
             if oldval == col.getSourceValue(row):
                 # if we have reached the original value, remove from defermods entirely
+                if col.sheet.rowid(row) not in col.sheet._deferredMods:
+                    warning('cannot undo to before commit')
+                    return
                 del col.sheet._deferredMods[col.sheet.rowid(row)]
             else:
                 # otherwise, update deferredMods with previous value
-                _, rowmods = col.sheet._deferredMods[rowid]
+                _, rowmods = col.sheet._deferredMods[col.sheet.rowid(row)]
                 rowmods[col] = oldval
 
         vd.addUndo(_undoCellChanged, col, row, oldval)
@@ -67,38 +73,45 @@ def rowDeleted(self, row):
     'Mark row as a deferred delete-row'
     self._deferredDels[self.rowid(row)] = row
     def _undoRowDeleted(sheet, row):
+        if sheet.rowid(row) not in sheet._deferredDels:
+            warning('cannot undo to before commit')
+            return
         del sheet._deferredDels[sheet.rowid(row)]
     vd.addUndo(_undoRowDeleted, self, row)
 
 
 @Sheet.api
 @asyncthread
-def addNewRows(sheet, n, idx):
-    'Add *n* new rows after row at *idx*.'
+def addRows(sheet, rows, index=None, undo=True):
+    'Add *rows* after row at *index*.'
     addedRows = {}
-    for i in Progress(range(n), 'adding'):
-        row = sheet.newRow()
+    if index is None: index=len(sheet.rows)
+    for row in Progress(rows, gerund='adding'):
         addedRows[sheet.rowid(row)] = row
-        sheet.addRow(row, idx+1)
+        sheet.addRow(row, index=index+1)
 
         if sheet.defer:
             sheet.rowAdded(row)
+    sheet.setModified()
 
     @asyncthread
     def _removeRows():
-        sheet.deleteBy(lambda r,sheet=sheet,addedRows=addedRows: sheet.rowid(r) in addedRows, commit=True)
+        sheet.deleteBy(lambda r,sheet=sheet,addedRows=addedRows: sheet.rowid(r) in addedRows, commit=True, undo=False)
 
-    vd.addUndo(_removeRows)
+    if undo:
+        vd.addUndo(_removeRows)
 
 
 @Sheet.api
-def deleteBy(sheet, func, commit=False):
-    'Delete rows on sheet for which ``func(row)`` returns true.  Return number of rows deleted.  If sheet.defer is set and *commit* is True, remove rows immediately without deferring.'
+def deleteBy(sheet, func, commit=False, undo=True):
+    '''Delete rows on sheet for which ``func(row)`` returns true.  Return number of rows deleted.
+    If sheet.defer is set and *commit* is True, remove rows immediately without deferring.
+    If undo is set to True, add an undo for deletion.'''
     oldrows = copy(sheet.rows)
     oldidx = sheet.cursorRowIndex
     ndeleted = 0
 
-    row = None   # row to re-place cursor after
+    newCursorRow = None   # row to re-place cursor after
     # if commit is True, commit to delete, even if defer is True
     if sheet.defer and not commit:
         ndeleted = 0
@@ -107,9 +120,10 @@ def deleteBy(sheet, func, commit=False):
             ndeleted += 1
         return ndeleted
 
+    # find next non-deleted row to go to once delete has finished
     while oldidx < len(oldrows):
         if not func(oldrows[oldidx]):
-            row = sheet.rows[oldidx]
+            newCursorRow = sheet.rows[oldidx]
             break
         oldidx += 1
 
@@ -117,16 +131,18 @@ def deleteBy(sheet, func, commit=False):
     for r in Progress(oldrows, 'deleting'):
         if not func(r):
             sheet.rows.append(r)
-            if r is row:
+            if r is newCursorRow:
                 sheet.cursorRowIndex = len(sheet.rows)-1
         else:
             sheet.deleteSourceRow(r)
             ndeleted += 1
 
-    if not commit:
+    if undo:
         vd.addUndo(setattr, sheet, 'rows', oldrows)
+        sheet.setModified()
 
-    vd.status('deleted %s %s' % (ndeleted, sheet.rowtype))
+    if ndeleted:
+        vd.status('deleted %s %s' % (ndeleted, sheet.rowtype))
 
     return ndeleted
 
@@ -143,7 +159,7 @@ def isChanged(self, col, row):
         row, rowmods = self._deferredMods[self.rowid(row)]
         newval = rowmods[col]
         curval = col.getSourceValue(row)
-        return col.type(newval) != col.type(curval)
+        return (newval is None and curval is not None) or col.type(newval) != col.type(curval)
     except KeyError:
         return False
     except Exception:
@@ -182,7 +198,7 @@ def commitMods(self):
 @Sheet.api
 def commitDeletes(self):
     'Return the number of rows that have been marked for deletion. Delete the rows. Clear the marking.'
-    ndeleted = self.deleteBy(self.isDeleted, commit=True)
+    ndeleted = self.deleteBy(self.isDeleted, commit=True, undo=False)
 
     if ndeleted:
         vd.status('deleted %s %s' % (ndeleted, self.rowtype))
@@ -256,9 +272,15 @@ def commit(sheet, *rows):
         vd.confirm('really %s? ' % cstr)
 
     sheet.putChanges()
+    sheet.hasBeenModified = False
 
-Sheet.addCommand('a', 'add-row', 'addNewRows(1, cursorRowIndex); cursorDown(1)', 'append a blank row')
-Sheet.addCommand('ga', 'add-rows', 'addNewRows(int(input("add rows: ", value=1)), cursorRowIndex); cursorDown(1)', 'append N blank rows')
+
+@Sheet.api
+def new_rows(sheet, n):
+    return [sheet.newRow() for i in range(n)]
+
+Sheet.addCommand('a', 'add-row', 'addRows([newRow()], index=cursorRowIndex); cursorDown(1)', 'append a blank row')
+Sheet.addCommand('ga', 'add-rows', 'n=int(input("add rows: ", value=1)); addRows(new_rows(n), index=cursorRowIndex); cursorDown(1)', 'append N blank rows')
 Sheet.addCommand('za', 'addcol-new', 'addColumnAtCursor(SettableColumn(input("column name: "))); cursorRight(1)', 'append an empty column')
 Sheet.addCommand('gza', 'addcol-bulk', 'addColumnAtCursor(*(SettableColumn() for c in range(int(input("add columns: "))))); cursorRight(1)', 'append N empty columns')
 

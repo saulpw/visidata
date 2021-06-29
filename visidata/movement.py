@@ -99,8 +99,8 @@ Sheet.addCommand(None, 'go-left',  'cursorRight(-1)', 'go left'),
 Sheet.addCommand(None, 'go-down',  'cursorDown(+1)', 'go down'),
 Sheet.addCommand(None, 'go-up',    'cursorDown(-1)', 'go up'),
 Sheet.addCommand(None, 'go-right', 'cursorRight(+1)', 'go right'),
-Sheet.addCommand(None, 'go-pagedown', 'cursorDown(bottomRowIndex-topRowIndex); sheet.topRowIndex = bottomRowIndex', 'scroll one page forward'),
-Sheet.addCommand(None, 'go-pageup', 'cursorDown(topRowIndex-bottomRowIndex); sheet.bottomRowIndex = topRowIndex', 'scroll one page backward'),
+Sheet.addCommand(None, 'go-pagedown', 'cursorDown(nScreenRows-1); sheet.topRowIndex = bottomRowIndex', 'scroll one page forward'),
+Sheet.addCommand(None, 'go-pageup', 'cursorDown(-nScreenRows+1); sheet.bottomRowIndex = topRowIndex', 'scroll one page backward'),
 
 Sheet.addCommand(None, 'go-leftmost', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0', 'go all the way to the left of sheet'),
 Sheet.addCommand(None, 'go-top', 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'go all the way to the top of sheet'),
@@ -161,8 +161,8 @@ Sheet.bindkey('BUTTON3_PRESSED', 'go-mouse')
 # vim-style scrolling with the 'z' prefix
 Sheet.addCommand('zz', 'scroll-middle', 'sheet.topRowIndex = cursorRowIndex-int(nScreenRows/2)', 'scroll current row to center of screen')
 
-Sheet.addCommand(None, 'go-right-page', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex', 'scroll cursor one page right')
-Sheet.addCommand(None, 'go-left-page', 'pageLeft()', 'scroll cursor one page left')
+Sheet.addCommand('kRIT5', 'go-right-page', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex', 'scroll cursor one page right')
+Sheet.addCommand('kLFT5', 'go-left-page', 'pageLeft()', 'scroll cursor one page left')
 Sheet.addCommand(None, 'scroll-left', 'sheet.cursorVisibleColIndex -= options.scroll_incr', 'scroll one column left')
 Sheet.addCommand(None, 'scroll-right', 'sheet.cursorVisibleColIndex += options.scroll_incr', 'scroll one column right')
 Sheet.addCommand(None, 'scroll-leftmost', 'sheet.leftVisibleColIndex = cursorVisibleColIndex', 'scroll sheet to leftmost column')
@@ -205,7 +205,8 @@ BaseSheet.bindkey('gk', 'go-top'),
 BaseSheet.bindkey('gh', 'go-leftmost'),
 BaseSheet.bindkey('gl', 'go-rightmost')
 
-BaseSheet.addCommand('^^', 'jump-prev', 'vd.sheets[1:] or fail("no previous sheet"); vd.push(vd.sheets[1])', 'jump to previous sheet (swap with current sheet)')
+BaseSheet.addCommand('^^', 'jump-prev', 'vd.activeStack[1:] or fail("no previous sheet"); vd.push(vd.activeStack[1])', 'jump to previous sheet in this pane')
+BaseSheet.addCommand('g^^', 'jump-first', 'vd.push(vd.activeStack[-1])', 'jump to first sheet')
 
 BaseSheet.addCommand(None, 'mouse-enable', 'mm, _ = curses.mousemask(-1); status("mouse "+("ON" if mm else "OFF"))', 'enable mouse events')
 BaseSheet.addCommand(None, 'mouse-disable', 'mm, _ = curses.mousemask(0); status("mouse "+("ON" if mm else "OFF"))', 'disable mouse events')

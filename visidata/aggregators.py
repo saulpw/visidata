@@ -29,6 +29,18 @@ def getValues(self, rows):
 
 vd.aggregators = collections.OrderedDict()  # [aggname] -> annotated func, or list of same
 
+Column.init('aggregators', list)
+
+def aggstr_get(col):
+    'A space-separated names of aggregators on this column.'
+    return ' '.join(aggr.name for aggr in col.aggregators)
+
+def aggstr_set(col, v):
+    col.aggregators = list(vd.aggregators[k] for k in (v or '').split())
+
+Column.aggstr = property(aggstr_get, aggstr_set)
+
+
 class Aggregator:
     def __init__(self, name, type, func, helpstr='foo'):
         'Define aggregator `name` that calls func(col, rows)'
@@ -111,17 +123,13 @@ vd.aggregator('stdev', stdev, 'standard deviation of values', type=float)
 vd.aggregators['q3'] = quantiles(3, 'tertiles (33/66th pctile)')
 vd.aggregators['q4'] = quantiles(4, 'quartiles (25/50/75th pctile)')
 vd.aggregators['q5'] = quantiles(5, 'quintiles (20/40/60/80th pctiles)')
-vd.aggregators['q10'] = quantiles(10, 'deciles (10/20/30/40/50/60/70/80/80th pctiles)')
+vd.aggregators['q10'] = quantiles(10, 'deciles (10/20/30/40/50/60/70/80/90th pctiles)')
 
 # returns keys of the row with the max value
 vd.aggregators['keymax'] = _defaggr('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]), 'key of the maximum value')
 
 
-ColumnsSheet.columns += [
-        Column('aggregators',
-               getter=lambda col,row: ' '.join(x.name for x in getattr(row, 'aggregators', [])),
-               setter=lambda col,row,val: setattr(row, 'aggregators', list(vd.aggregators[k] for k in (val or '').split())))
-]
+ColumnsSheet.columns += [ColumnAttr('aggregators','aggstr')]
 
 @Sheet.api
 def addAggregators(sheet, cols, aggrnames):
@@ -144,12 +152,14 @@ def aggname(col, agg):
 
 @Column.api
 @asyncthread
-def show_aggregate(col, agg, rows):
+def memo_aggregate(col, agg, rows):
     'Show aggregated value in status, and add to memory.'
     aggval = agg(col, rows)
     typedval = wrapply(agg.type or col.type, aggval)
     dispval = col.format(typedval)
-    vd.status(dispval)
+    k = col.name+'_'+agg.name
+    vd.status(f'{k}={dispval}')
+    vd.memory[k] = typedval
 
 
 @VisiData.property
@@ -162,5 +172,5 @@ vd.addGlobals(globals())
 
 
 Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregator_choices))', 'add aggregator to current column')
-Sheet.addCommand('z+', 'show-aggregate', 'for agg in chooseMany(aggregator_choices): cursorCol.show_aggregate(aggregators[agg], selectedRows or rows)', 'display result of aggregator over values in selected rows for current column')
+Sheet.addCommand('z+', 'memo-aggregate', 'for agg in chooseMany(aggregator_choices): cursorCol.memo_aggregate(aggregators[agg], selectedRows or rows)', 'memo result of aggregator over values in selected rows for current column')
 ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseMany(aggregator_choices))', 'add aggregators to selected source columns')
