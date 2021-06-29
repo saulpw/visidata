@@ -402,6 +402,8 @@ def cmdlog_sheet(sheet):
 
 @BaseSheet.property
 def shortcut(self):
+    if self._shortcut:
+        return self._shortcut
     try:
         return str(vd.allSheets.index(self)+1)
     except ValueError:
@@ -430,6 +432,8 @@ def modifyCommand(vd):
         return None
     return vd.cmdlog.rows[-1]
 
+
+BaseSheet.init('_shortcut')
 
 
 globalCommand('gD', 'cmdlog-all', 'vd.push(vd.cmdlog)', 'open global CommandLog for all commands executed in current session')
