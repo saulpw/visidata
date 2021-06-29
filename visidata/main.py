@@ -10,6 +10,7 @@ import os
 import io
 import sys
 import locale
+import datetime
 import signal
 import warnings
 
@@ -230,7 +231,17 @@ def main_vd():
     vd.sheets.extend(sources)  # purposefully do not load everything
 
     if not vd.sheets and not args.play and not args.batch:
-        vd.push(vd.vdmenu)
+        if 'filetype' in current_args:
+            newfunc = getattr(vd, 'new_' + current_args['filetype'], vd.getGlobals().get('new_' + current_args['filetype']))
+            datestr = datetime.date.today().strftime('%Y-%m-%d')
+            if newfunc:
+                vd.status('creating blank %s' % current_args['filetype'])
+                vd.push(newfunc(Path(datestr + '.' + current_args['filetype'])))
+            else:
+                vd.status('new_%s does not exist, creating new blank sheet' % current_args['filetype'])
+                vd.push(vd.newSheet(datestr, 1))
+        else:
+            vd.push(vd.currentDirSheet)
 
     if not args.play:
         if args.batch:
