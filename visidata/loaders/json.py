@@ -119,21 +119,29 @@ def _rowdict(cols, row):
 @VisiData.api
 def save_json(vd, p, *vsheets):
     with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
-        if len(vsheets) == 1:
-            vs = vsheets[0]
-            it = [_rowdict(vs.visibleCols, row) for row in vs.iterrows()]
-        else:
-            it = {vs.name: [_rowdict(vs.visibleCols, row) for row in vs.iterrows()] for vs in vsheets}
-
         try:
             indent = int(options.json_indent)
         except Exception:
             indent = options.json_indent
 
         jsonenc = _vjsonEncoder(indent=indent)
-        with Progress(gerund='saving'):
-            for chunk in jsonenc.iterencode(it):
-                fp.write(chunk)
+
+        if len(vsheets) == 1:
+            fp.write('[\n')
+            vs = vsheets[0]
+            with Progress(gerund='saving'):
+                for i, row in enumerate(vs.iterrows()):
+                    if i > 0:
+                        fp.write(',\n')
+                    rd = _rowdict(vs.visibleCols, row)
+                    fp.write(jsonenc.encode(rd))
+            fp.write('\n]\n')
+        else:
+            it = {vs.name: [_rowdict(vs.visibleCols, row) for row in vs.iterrows()] for vs in vsheets}
+
+            with Progress(gerund='saving'):
+                for chunk in jsonenc.iterencode(it):
+                    fp.write(chunk)
 
 
 @VisiData.api
