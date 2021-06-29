@@ -19,7 +19,7 @@
 - [movement] bind `Ctrl+Left/Right` to `go-left`/`right-page` (thanks @davidwales #1002)
 - [options] save to foo.visidatarc from OptionsSheet (thanks @njthomas #958)
 - [sqlite] RENAME and DROP tables from SqliteIndexSheet
-- [unfurl] add `options_unfurl_empty` to include row for empty list/dict (thanks @frosencrantz #898)
+- [unfurl] add `options.unfurl_empty` to include row for empty list/dict (thanks @frosencrantz #898)
 - [quitguard] guard new sheets by default (thanks @frosencrantz #844)
 - [quitguard] confirm quit/reload only if sheet modified (references #955, #844, #483; thanks @jvns, @frosencrantz)
 
@@ -41,7 +41,7 @@
 - [path] all Path.open track Progress via read/filesize (thanks @jspatz #987)
 - [path] add Progress for opening compressed files
 - [path] implement line-seek operations (thanks @pacien #1010)
-- [regex expand] deprecate `expand_col_scanrows`; standardize on `options.default_sample_size` (thanks @jsvine)
+- [regex expand] deprecate `options.expand_col_scanrows`; standardize on `options.default_sample_size` (thanks @jsvine)
 - [shell] `addcol-shell` pa
 - [splitwin] push sheet in empty pane iff splitwin
 - [stdin] use cli --encoding option for piped data (thanks @pacien #1018)
@@ -49,7 +49,7 @@
 - [quit] add Shift+Q/quit-sheet-free to quit and free associated memory (thanks @cwarden)
 
 ## Display
-- [canvas] add `disp_canvas_charset` to change displayed chars (thanks @albert-ying #963)
+- [canvas] add `options.disp_canvas_charset` to change displayed chars (thanks @albert-ying #963)
 - [canvas] use sheet specific options for draw
 - [disp] format list/dict as [n]/{n} only for anytype
 - [save] iterdispvals(format=True) convert None to empty string
