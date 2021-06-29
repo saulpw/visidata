@@ -68,7 +68,8 @@ def dispwidth(ss, maxwidth=None):
 def _dispch(c, oddspacech=None, combch=None, modch=None):
     ccat = unicodedata.category(c)
     if ccat in ['Mn', 'Sk', 'Lm']:
-        return modch, 1
+        if unicodedata.name(c).startswith('MODIFIER'):
+            return modch, 1
     elif c != ' ' and ccat in ('Cc', 'Zs', 'Zl'):  # control char, space, line sep
         return oddspacech, 1
     elif c in ZERO_WIDTH_CF:
