@@ -487,6 +487,10 @@ class TableSheet(BaseSheet):
 
     def addColumn(self, *cols, index=None):
         'Insert all *cols* into columns at *index*, or append to end of columns if *index* is None.  Return first column.'
+        if not cols:
+            vd.warning('no columns to add')
+            return
+
         for i, col in enumerate(cols):
             vd.addUndo(self.columns.remove, col)
             if index is None:
