@@ -132,6 +132,8 @@ class LastInputsSheet(JsonLinesSheet):
     def addRow(self, row, **kwargs):
         'Update lastInputs before adding row.'
         row = AttrDict(row)
+        if row.input in vd._lastInputs[row.type]:
+            del vd._lastInputs[row.type][row.input]  # so will be added as last entry
         vd._lastInputs[row.type][row.input] = 1
         return super().addRow(row, **kwargs)
 
