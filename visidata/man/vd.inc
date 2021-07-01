@@ -1,4 +1,4 @@
-.Dd June 27, 2021
+.Dd June 30, 2021
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -857,8 +857,17 @@ overwrite existing files without confirmation
 .so vd-opts.inc
 .
 .Sh EXAMPLES
+.Dl Nm vd
+.No launch Sy DirSheet No for current directory
+.Pp
 .Dl Nm vd Cm foo.tsv
 .No open the file foo.tsv in the current directory
+.Pp
+.Dl Nm vd Cm -f ddw
+.No open blank sheet of type ddw
+.Pp
+.Dl Nm vd Cm new.tsv
+.No open new blank tsv sheet named Ar new
 .Pp
 .Dl Nm vd Cm -f sqlite bar.db
 .No open the file bar.db as a sqlite database
