@@ -1,9 +1,10 @@
 # VisiData version history
 
-# v2.5 (XXXX-XX-XX)
+# v2.5 (2021-07-01)
 
-- #visidata has moved off of freenode to libera.chat
-- the required pandas version for the pandas loader has been bumped to at least 1.0.5
+- [social] #visidata has moved off of freenode to libera.chat
+- [deps] required pandas version for the pandas loader has been bumped to at least 1.0.5
+- [caa] new PR submitters required to sign CAA
 
 ## Features
 
@@ -21,7 +22,6 @@
 - [options] save to foo.visidatarc from OptionsSheet (thanks @njthomas #958)
 - [sqlite] RENAME and DROP tables from SqliteIndexSheet
 - [unfurl] add `options.unfurl_empty` to include row for empty list/dict (thanks @frosencrantz #898)
-- [quitguard] guard new sheets by default (thanks @frosencrantz #844)
 - [quitguard] confirm quit/reload only if sheet modified (references #955, #844, #483; thanks @jvns, @frosencrantz)
 
 ## Improvements
