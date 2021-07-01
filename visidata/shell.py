@@ -12,7 +12,7 @@ try:
 except ImportError:
     pass # pwd,grp modules not available on Windows
 
-from visidata import Column, Sheet, LazyComputeRow, asynccache, options, option, globalCommand
+from visidata import Column, Sheet, LazyComputeRow, asynccache, options, option, globalCommand, vd
 from visidata import Path, ENTER, date, asyncthread, confirm, fail, FileExistsError, VisiData
 from visidata import CellColorizer, RowColorizer, modtime, filesize, vstat, Progress
 
