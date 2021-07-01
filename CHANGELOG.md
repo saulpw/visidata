@@ -7,7 +7,7 @@
 
 ## Features
 
-- [cli] when no arguments on commandline, open currentDirSheet (previously vdmenu); -f empty sheet of that filetype
+- [cli] when no arguments on commandline, open currentDirSheet (previously vdmenu); -f opens empty sheet of that filetype
 - [clipboard] bind `x` family to `cut-*` (thanks @geekscrapy #895)
 - [date] add specialized comparators for `datetime.date` (thanks @aborruso #975)
     - visidata.date now compares to datetime.date (previously raised exception)
