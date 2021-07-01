@@ -336,3 +336,9 @@ class RepeatFileIter:
 
         self.nextIndex += 1
         return r
+
+@VisiData.api
+def releaseMemory(vd, source):
+    'If source is a filepath, release contents from memory.'
+    if isinstance(source, Path):
+        source.lines.clear()
