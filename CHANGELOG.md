@@ -7,6 +7,7 @@
 
 ## Features
 
+- [cli] when no arguments on commandline, open currentDirSheet (previously vdmenu); -f empty sheet of that filetype
 - [clipboard] bind `x` family to `cut-*` (thanks @geekscrapy #895)
 - [date] add specialized comparators for `datetime.date` (thanks @aborruso #975)
     - visidata.date now compares to datetime.date (previously raised exception)
@@ -30,19 +31,23 @@
 - [clipboard] gzp pastes None if nothing on clipboard
 - [clipboard] make syspaste async
 - [clipboard] bind `zP` to syspaste-cells and gzP to syspaste-cells-selected (thanks @jvns and frosencrantz #983, #990)
-- [cliptext] better support for combining and variant chars (thanks @lxcode #758)
+- [cliptext] better support for combining and variant chars (thanks @lxcode #758 #1034)
 - [colors] reduce color swatch size to remove flashing (thanks @frosencrantz #946)
 - [encoding] specify encoding explicitly for all Path.open_text (thanks @pacien #1016)
 - [error] exceptionCaught(status=False) to add to status history, but not post to status (thanks @frosencrantz #982)
 - [freqtbl] copy fmtstr from source col to aggcol (thanks @geekscrapy #1003)
 - [help] ENTER/exec-command to execute command on undersheet (thanks @geekscrapy #1011)
 - [help] add `all_bindings` hidden column (thanks @frosencrantz #896)
+- [inputs] put reused input at end of lastInputs (thanks @geekscrapy #1033)
+- [loaders json] streamify save to .json
 - [loaders tsv] increase bufsize to improve loader performance by 10%
 - [path] all Path.open track Progress via read/filesize (thanks @jspatz #987)
 - [path] add Progress for opening compressed files
 - [path] implement line-seek operations (thanks @pacien #1010)
 - [regex expand] deprecate `options.expand_col_scanrows`; standardize on `options.default_sample_size` (thanks @jsvine)
+- [regex] "match regex" to "capture regex" (thanks @geekscrapy #1032)
 - [shell] `addcol-shell` pa
+- [shortcut] allow shortcut for jump-sheet to be settable
 - [splitwin] push sheet in empty pane iff splitwin
 - [stdin] use cli --encoding option for piped data (thanks @pacien #1018)
 - [undo] remove undo for reload (replaced with quitguard+confirm)
