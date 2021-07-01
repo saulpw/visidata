@@ -93,11 +93,6 @@
 - [shell] fix `options.dir_hidden`; also apply to dirs when `dir_recurse`
 - [textsheet] fix reload after `^O` sysopen
 
-## API
-
-- expose vd.loadConfigFile and `vd.version_info`
-- scheme1+scheme2://... calls `open_scheme2()`; `open_http` calls `openhttp_scheme1`
-
 ## vdplus
 
 - moved clickhouse, vsh, vgit, windows to vdplus
