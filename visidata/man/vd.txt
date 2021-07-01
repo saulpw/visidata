@@ -842,8 +842,17 @@ COMMANDLINE OPTIONS
      color_xword_active  green               color of active clue
 
 EXAMPLES
+           vd
+     launch DirSheet for current directory
+
            vd foo.tsv
      open the file foo.tsv in the current directory
+
+           vd -f ddw
+     open blank sheet of type ddw
+
+           vd new.tsv
+     open new blank tsv sheet named new
 
            vd -f sqlite bar.db
      open the file bar.db as a sqlite database
@@ -937,4 +946,4 @@ SUPPORTED SOURCES
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                      June 27, 2021                     Linux/MacOS
+Linux/MacOS                      June 30, 2021                     Linux/MacOS
