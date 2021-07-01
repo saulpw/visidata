@@ -20,7 +20,7 @@ option('default_width', 20, 'default column width', replay=True)   # TODO: make 
 option('default_height', 10, 'default column height')
 option('textwrap_cells', True, 'wordwrap text for multiline rows')
 
-option('quitguard', True, 'confirm before quitting last sheet')
+option('quitguard', False, 'confirm before quitting last sheet')
 option('debug', False, 'exit on error and display stacktrace')
 option('skip', 0, 'skip N rows before header', replay=True)
 option('header', 1, 'parse first N rows as column names', replay=True)
