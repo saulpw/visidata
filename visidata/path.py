@@ -338,7 +338,15 @@ class RepeatFileIter:
         return r
 
 @VisiData.api
-def releaseMemory(vd, source):
-    'If source is a filepath, release contents from memory.'
-    if isinstance(source, Path):
-        source.lines.clear()
+def releaseMemory(vd, vs):
+    'release contents from memory.'
+    if isinstance(vs.source, Path):
+        # clears the read-in lines for Path objects
+        # from memory
+        vs.source.lines.clear()
+    if vs.precious:
+        # do not clear the rows of metasheets
+        # bc they may be intwined with their source sheet
+        vs.rows.clear()
+        # only precious sheets are in allSheets
+        vd.allSheets.remove(vs)
