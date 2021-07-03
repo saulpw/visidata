@@ -155,7 +155,7 @@ class JoinSheet(Sheet):
 
                 elif self.jointype == 'inner':  # only rows with matching key on all sheets
                     for combinedRow in combinedRows:
-                        if all(combinedRow):
+                        if all(r is not None for r in combinedRow):
                             self.addRow(combinedRow)
 
                 elif self.jointype == 'outer':  # all rows from first sheet
@@ -165,7 +165,7 @@ class JoinSheet(Sheet):
 
                 elif self.jointype == 'diff':  # only rows without matching key on all sheets
                     for combinedRow in combinedRows:
-                        if not all(combinedRow):
+                        if not all(r is not None for r in combinedRow):
                             self.addRow(combinedRow)
 
 
