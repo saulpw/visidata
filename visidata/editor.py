@@ -6,6 +6,7 @@ import curses
 
 import visidata
 
+visidata.vd.tstp_signal = None
 
 class SuspendCurses:
     'Context manager to leave windowed mode on enter and restore it on exit.'
