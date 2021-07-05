@@ -2,9 +2,6 @@ import json
 import threading
 import time
 import random
-import websocket
-
-import requests
 
 from visidata import *
 
@@ -100,6 +97,8 @@ class Connection:
                self.websocket.sock.connected
 
     def _run_forever(self):
+        import websocket
+
         def _on_message(socket, message):
             vd.debug(f'Data received: {message}')
             data = json.loads(message)
@@ -167,6 +166,8 @@ class VirtualRC:
         self.world = VirtualRCWorldSheet(ORIGIN_FQHOST, rows=[])
 
     def req(self, method, endpoint, parms={}, **kwargs):
+        import requests
+
         parms['app_id'] = vd.options.rc_app_id
         parms['app_secret'] = vd.options.rc_app_secret
         parmstr = urllib.parse.urlencode(list(parms.items()))
