@@ -1,0 +1,11 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	tests/data1.tsv	o	
+			open-file	tests/data2.tsv	o	
+			open-file	tests/data3.tsv	o	
+data1	Key		key-col		!	toggle current column as a key column
+data2	Key		key-col		!	toggle current column as a key column
+data3	Key		key-col		!	toggle current column as a key column
+data1			join-sheets-top2	extend	&	concatenate top two sheets in Sheets Stack
+data1			quit-sheet			
+data3			quit-sheet			
+data1+data3			join-sheets-top2	extend	&	concatenate top two sheets in Sheets Stack
