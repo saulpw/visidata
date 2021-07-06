@@ -56,9 +56,13 @@ def groupRowsByKey(sheets, rowsBySheetKey, rowsByKey):
                 key = joinkey(vs, r)
                 if key not in rowsByKey: # gather for this key has not been done yet
                     # multiplicative for non-unique keys
-                    rowsByKey[key] = []
-                    for crow in itertools.product(*[rowsBySheetKey[vs2].get(key, [None]) for vs2 in sheets]):
-                        rowsByKey[key].append(list(crow))
+                    rowsByKey[key] = [
+                        dict(crow)
+                          for crow in itertools.product(*[
+                              [(vs2, j) for j in rowsBySheetKey[vs2].get(key, [None])]
+                                  for vs2 in sheets
+                          ])
+                    ]
 
 
 class JoinKeyColumn(Column):
@@ -69,8 +73,8 @@ class JoinKeyColumn(Column):
     def calcValue(self, row):
         vals = set()
         for i, c in enumerate(self.keycols):
-            if row[i] is not None:
-                vals.add(c.getValue(row[i]))
+            if row[c.sheet] is not None:
+                vals.add(c.getValue(row[c.sheet]))
         if len(vals) == 1:
             return vals.pop()
         else:
@@ -78,8 +82,8 @@ class JoinKeyColumn(Column):
 
     def putValue(self, row, value):
         for i, c in enumerate(self.keycols):
-            if row[i] is not None:
-                c.setValues([row[i]], value)
+            if row[c.sheet] is not None:
+                c.setValues([row[c.sheet]], value)
 
     def recalc(self, sheet=None):
         Column.recalc(self, sheet)
@@ -89,17 +93,19 @@ class JoinKeyColumn(Column):
 
 class MergeColumn(Column):
     def calcValue(self, row):
-        for i, c in enumerate(self.cols):
+        for vs, c in self.cols.items():
             if c:
-                v = c.getTypedValue(row[i])
+                v = c.getTypedValue(row[vs])
                 if v and not isinstance(v, TypedWrapper):
                     return v
 
     def putValue(self, row, value):
-        for r, c in zip(row, self.cols[::-1]):
-            if c:
-                c.setValue(r, value)
+        for vs, c in reversed(self.cols.items()):
+            c.setValue(row[vs], value)
 
+    def isDiff(self, row, value):
+        col = list(self.cols.values())[0]
+        return col and value != col.getValue(row[col.sheet])
 
 #### slicing and dicing
 # rowdef: [sheet1_row, sheet2_row, ...]
@@ -107,7 +113,7 @@ class MergeColumn(Column):
 class JoinSheet(Sheet):
     'Column-wise join/merge. `jointype` constructor arg should be one of jointypes.'
     colorizers = [
-        CellColorizer(0, 'color_diff', lambda s,c,r,v: c and r and isinstance(c, MergeColumn) and c.cols[0] and v.value != c.cols[0].getValue(r[0]))
+        CellColorizer(0, 'color_diff', lambda s,c,r,v: c and r and isinstance(c, MergeColumn) and c.isDiff(r, v.value))
     ]
 
     @asyncthread
@@ -122,10 +128,10 @@ class JoinSheet(Sheet):
             self.addColumn(JoinKeyColumn(cols[0].name, keycols=cols)) # ColumnItem(c.name, i, sheet=sheets[0], type=c.type, width=c.width)))
         self.setKeys(self.columns)
 
-        allcols = collections.defaultdict(lambda n=len(sheets): [None]*n)
+        allcols = collections.defaultdict(dict) # colname: { sheet: origcol, ... }
         for sheetnum, vs in enumerate(sheets):
             for c in vs.nonKeyVisibleCols:
-                allcols[c.name][sheetnum] = c
+                allcols[c.name][vs] = c
 
         if self.jointype == 'merge':
             for colname, cols in allcols.items():
@@ -136,10 +142,10 @@ class JoinSheet(Sheet):
             # subsequent elements are the rows from each source, in order of the source sheets
             for c in vs.nonKeyVisibleCols:
                 newname = c.name if ctr[c.name] == 1 else '%s_%s' % (vs.name, c.name)
-                self.addColumn(SubColumnItem(sheetnum, c, name=newname))
+                self.addColumn(SubColumnItem(vs, c, name=newname))
 
-        rowsBySheetKey = {}
-        rowsByKey = {}
+        rowsBySheetKey = {}   # [sheet] -> { key:list(rows), ... }
+        rowsByKey = {}  # [key] -> [{sheet1:row1, sheet2:row1, ... }, ...]
 
         groupRowsByKey(sheets, rowsBySheetKey, rowsByKey)
 
@@ -155,34 +161,31 @@ class JoinSheet(Sheet):
 
                 elif self.jointype == 'inner':  # only rows with matching key on all sheets
                     for combinedRow in combinedRows:
-                        if all(r is not None for r in combinedRow):
+                        if all(r is not None for r in combinedRow.values()):
                             self.addRow(combinedRow)
 
                 elif self.jointype == 'outer':  # all rows from first sheet
                     for combinedRow in combinedRows:
-                        if combinedRow[0]:
+                        if combinedRow[sheets[0]]:
                             self.addRow(combinedRow)
 
                 elif self.jointype == 'diff':  # only rows without matching key on all sheets
                     for combinedRow in combinedRows:
-                        if not all(r is not None for r in combinedRow):
+                        if not all(r is not None for r in combinedRow.values()):
                             self.addRow(combinedRow)
 
 
 ## for ExtendedSheet_reload below
 class ExtendedColumn(Column):
     def calcValue(self, row):
-        key = joinkey(self.sheet.joinSources[0], row)
-        srcsheet = self.sheet.joinSources[self.sheetnum]
-        srcrow = self.sheet.rowsBySheetKey[srcsheet][key]
-        if srcrow[0]:
+        key = joinkey(self.firstJoinSource, row)
+        srcrow = self.rowsBySheetKey[self.srcsheet][key]
+        if srcrow:
             return self.sourceCol.calcValue(srcrow[0])
 
 
 @asyncthread
 def ExtendedSheet_reload(self, sheets):
-    self.joinSources = sheets
-
     # first item in joined row is the key tuple from the first sheet.
     # first columns are the key columns from the first sheet, using its row (0)
     self.columns = []
@@ -193,16 +196,16 @@ def ExtendedSheet_reload(self, sheets):
     for i, c in enumerate(sheets[0].nonKeyVisibleCols):
         self.addColumn(copy(c))
 
+    self.rowsBySheetKey = {}  # [srcSheet][key] -> list(rowobjs from sheets[0])
+    rowsByKey = {}  # [key] -> [{sheet1:row1, sheet2:row1, ... }, ...]
+
     for sheetnum, vs in enumerate(sheets[1:]):
         # subsequent elements are the rows from each source, in order of the source sheets
 #        ctr = collections.Counter(c.name for c in vs.nonKeyVisibleCols)
         for c in vs.nonKeyVisibleCols:
             newname = '%s_%s' % (vs.name, c.name)
-            newcol = ExtendedColumn(newname, sheetnum=sheetnum+1, sourceCol=c)
+            newcol = ExtendedColumn(newname, srcsheet=vs, rowsBySheetKey=self.rowsBySheetKey, firstJoinSource=sheets[0], sourceCol=c)
             self.addColumn(newcol)
-
-    self.rowsBySheetKey = {}  # [srcSheet][key] -> list(rowobjs from sheets[0])
-    rowsByKey = {}  # [key] -> [rows0, rows1, ...]
 
     groupRowsByKey(sheets, self.rowsBySheetKey, rowsByKey)
 
@@ -212,8 +215,8 @@ def ExtendedSheet_reload(self, sheets):
         for k, combinedRows in rowsByKey.items():
             prog.addProgress(1)
             for combinedRow in combinedRows:
-                if combinedRow[0]:
-                    self.addRow(combinedRow[0])
+                if combinedRow[sheets[0]]:
+                    self.addRow(combinedRow[sheets[0]])
 
 
 ## for ConcatSheet
