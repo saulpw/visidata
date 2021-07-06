@@ -74,12 +74,16 @@
 - [color] do not break on nonsense color
 - [column] getitemdeep/setitemdeep get/set dotted item key if exists (thanks @frosencrantz #991)
 - [column] fix bug where hard crash occurs when cursor on cell of SheetsSheet is on cursorDisplay (thanks @frosencrantz #1029)
+- [curses] add default `vd.tstp_signal` for non-cli users
 - [execCommand] warn gracefully if bound command longname does not exist
 - [expr] setValuesFromExpr do not stop processing on exception
 - [join] fix when keys have different names (thanks @aborruso #964)
+- [join] fix for rowdefs without bool (like pandas)
+- [join] fix multiple extend (thanks @cwarden for reporting)
 - [loaders fixed] fix editing in final column for fixed-width load (thanks @mwayne #974)
 - [loaders geojson] do not abort plot if rows have errors
 - [loaders html] add columns even if not in first row
+- [loaders pandas] fix column rename
 - [loaders rec json] fix adding new columns for json and rec loaders (thanks @ajkerrigan #959)
 - [npy] set `allow_pickle=True` for load
 - [loaders postgresql] add postgresql scheme (fixes #966) (thanks @zormit #967)
