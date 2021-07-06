@@ -114,7 +114,8 @@ class BaseSheet(DrawablePane):
         cls = self.__class__
         ret = cls.__new__(cls)
         ret.__dict__.update(self.__dict__)
-        ret.precious = True  # copies can be precious even if originals aren't
+        ret.precious = True  # copy can be precious even if original is not
+        ret.hasBeenModified = False  # copy is not modified even if original is
         return ret
 
     def __bool__(self):
