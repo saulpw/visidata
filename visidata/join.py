@@ -183,6 +183,14 @@ class ExtendedColumn(Column):
         if srcrow:
             return self.sourceCol.calcValue(srcrow[0])
 
+    def putValue(self, row, value):
+        key = joinkey(self.firstJoinSource, row)
+        srcrow = self.rowsBySheetKey[self.srcsheet][key]
+        if len(srcrow) == 1:
+            self.sourceCol.putValue(srcrow[0], value)
+        else:
+            vd.warning('failed to modify, not able to identify unique source row')
+
 
 @asyncthread
 def ExtendedSheet_reload(self, sheets):
