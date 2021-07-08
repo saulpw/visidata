@@ -7,7 +7,7 @@ Version: VisiData 1.5.1
 ---
 
 
-## How to perform operations on a subset of rows
+## [How to perform operations on a subset of rows](#subset) {#subset}
 
 Many commands can be finetuned to operate on rows which are 'selected'.
 

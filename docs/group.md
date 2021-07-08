@@ -54,7 +54,7 @@ This example uses the file [sample.tsv](https://raw.githubusercontent.com/saulpw
 
 ---
 
-## How to create a frequency chart
+## [How to create a frequency chart](#frequency) {#frequency}
 
 The following examples use the file [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
 

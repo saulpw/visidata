@@ -159,7 +159,7 @@ The following example uses [benchmarks.csv](https://raw.githubusercontent.com/sa
 
 ---
 
-## How to expand columns that contain nested data
+## [How to expand columns that contain nested data](#expand) {#expand}
 
 If a column includes container data such as JSON objects or arrays, the `(` family of commands can expand the child values into top-level columns:
 
@@ -190,7 +190,7 @@ Note that by default the expansion logic will look for nested columns in **up to
 
 ---
 
-## How to create derivative columns
+## [How to create derivative columns](#derived) {#derived}
 
 The `=` command takes a Python expression as input and creates a new column, where each cell evaluates the expression in the context of its row.
 

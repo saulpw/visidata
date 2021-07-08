@@ -4,7 +4,7 @@ eleventyNavigation:
   order: 99
 ---
 
-## [Submitting a Core Loader](#loader)
+## [Submitting a Core Loader](#loader) {#loader}
 A deeper explanation of all of these steps can be found [in the api documentation](https://www.visidata.org/docs/api/loaders.html).
 
 - Create an `open_foo` function that returns the new `FooSheet`.
@@ -16,7 +16,7 @@ A deeper explanation of all of these steps can be found [in the api documentatio
 - After replaying `vd load-foo.vd`, save the final sheet as `load-foo.tsv`. Save `load-foo.tsv` in `tests/golden/`.
 - add a section on the loader to the [formats.jsonl](https://github.com/saulpw/visidata/blob/develop/dev/formats.jsonl).
 
-## [Submitting an External Plugin](#plugins)
+## [Submitting an External Plugin](#plugins) {#plugins}
 
 - Host a single Python file containing all of the plugin's code.
 - Ensure the plugin has a `__version__`.

@@ -99,7 +99,7 @@ Careful, `>` will overwrite files they are directing to. `>>` will append to the
 
 ---
 
-## How to configure commands
+## How to configure commands {#commands}
 
 The **.visidatarc** in the user's home directory is plain Python code, and can contain additional commands or key bindings.
 
