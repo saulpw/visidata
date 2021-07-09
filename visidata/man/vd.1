@@ -865,7 +865,7 @@ default column width
 default column height
 .It Sy --textwrap-cells Ns = Ns Ar "bool       " No "True"
 wordwrap text for multiline rows
-.It Sy --quitguard Ns = Ns Ar "bool            " No "True"
+.It Sy --quitguard No "                 False"
 confirm before quitting last sheet
 .It Sy --debug No "                     False"
 exit on error and display stacktrace
@@ -1017,6 +1017,8 @@ table header when saving to html
 (y/s/n) if save_dot includes all internet hosts separately (y), combined (s), or does not include the internet (n)
 .It Sy --graphviz-edge-labels Ns = Ns Ar "bool " No "True"
 whether to include edge labels on graphviz diagrams
+.It Sy --npy-allow-pickle No "          False"
+numpy allow unpickling objects (unsafe)
 .It Sy --pdf-tables No "                False"
 parse PDF for tables instead of pages of text
 .It Sy --plugins-url Ns = Ns Ar "str           " No "https://visidata.org/plugins/plugins.jsonl"

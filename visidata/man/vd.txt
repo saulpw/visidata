@@ -560,7 +560,7 @@ COMMANDLINE OPTIONS
      --default-height=int         10                 default column height
      --textwrap-cells=bool        True               wordwrap text for multi‐
                                                      line rows
-     --quitguard=bool             True               confirm before quitting
+     --quitguard                  False              confirm before quitting
                                                      last sheet
      --debug                      False              exit on error and display
                                                      stacktrace
@@ -729,6 +729,8 @@ COMMANDLINE OPTIONS
      --graphviz-edge-labels=bool  True               whether to include edge
                                                      labels on graphviz dia‐
                                                      grams
+     --npy-allow-pickle           False              numpy allow unpickling
+                                                     objects (unsafe)
      --pdf-tables                 False              parse PDF for tables in‐
                                                      stead of pages of text
      --plugins-url=str            https://visidata.org/plugins/plugins.jsonl
