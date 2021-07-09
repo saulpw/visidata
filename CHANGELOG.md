@@ -47,7 +47,7 @@
 - [path] implement line-seek operations (thanks @pacien #1010)
 - [regex expand] deprecate `options.expand_col_scanrows`; standardize on `options.default_sample_size` (thanks @jsvine)
 - [regex] "match regex" to "capture regex" (thanks @geekscrapy #1032)
-- [shell] `addcol-shell` pa
+- [shell] `addcol-shell` pass command to $SHELL (thanks @juston2004 #1023)
 - [shortcut] allow shortcut for jump-sheet to be settable
 - [splitwin] push sheet in empty pane iff splitwin
 - [stdin] use cli --encoding option for piped data (thanks @pacien #1018)
