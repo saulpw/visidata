@@ -19,7 +19,7 @@ def save_dot(vd, p, vs):
 
     srccol = vs.keyCols[0]
     dstcol = vs.keyCols[1]
-    with p.open_text(mode='w') as fp:
+    with p.open_text(mode='w', encoding='utf-8') as fp:
         print('graph { concentrate=true;', file=fp)
         for row in Progress(vs.rows, 'saving'):
             src = srccol.getTypedValue(row)

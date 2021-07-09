@@ -26,7 +26,7 @@ class ColorSheet(Sheet):
         super().draw(scr)
         rightcol = max(self._visibleColLayout.values())
         xstart = rightcol[0] + rightcol[1] + 4
-        for i, r in enumerate(self.rows[(self.topRowIndex//6)*6:]):
+        for i, r in enumerate(self.rows[(self.topRowIndex//6)*6:(self.bottomRowIndex//6+1)*6]):
             y=i//6+1
             x=(i%6)*3+xstart
             c = r[1][1]

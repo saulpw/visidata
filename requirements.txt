@@ -1,7 +1,7 @@
 python-dateutil     # date type
 
 # optional dependencies
-pandas==1.0.3       # dta (Stata)
+pandas>=1.0.5       # dta (Stata)
 requests            # http
 lxml                # html/xml
 openpyxl            # xlsx
@@ -25,5 +25,6 @@ tabula              # pdf tables
 vobject             # vcf
 tabulate            # tabulate saver
 wcwidth             # tabulate saver with unicode
+zstandard           # read .zst files
 
 -e git+https://github.com/saulpw/pyxlsb.git@master#egg=pyxlsb # xlsb

@@ -8,11 +8,13 @@ def open_npy(p):
 def open_npz(p):
     return NpzSheet(p.name, source=p)
 
+vd.option('npy_allow_pickle', False, 'numpy allow unpickling objects (unsafe)')
+
 class NpySheet(Sheet):
     def iterload(self):
         import numpy
         if not hasattr(self, 'npy'):
-            self.npy = numpy.load(str(self.source), encoding='bytes')
+            self.npy = numpy.load(str(self.source), encoding='bytes', **self.options.getall('npy_'))
         self.reloadCols()
         yield from Progress(self.npy, total=len(self.npy))
 
@@ -89,4 +91,4 @@ def save_npy(vd, p, sheet):
 
     arr = np.array(data, dtype=dtype)
     with p.open_bytes(mode='w') as outf:
-        np.save(outf, arr, allow_pickle=False)
+        np.save(outf, arr, **sheet.options.getall('npy_'))

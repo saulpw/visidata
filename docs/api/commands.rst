@@ -136,6 +136,7 @@ Examples
 
 ::
 
+    @Sheet.api
     def show_hello(sheet):
         vd.status(sheet.options.disp_hello)
 

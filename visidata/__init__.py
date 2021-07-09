@@ -1,10 +1,10 @@
 'VisiData: a curses interface for exploring and arranging tabular data'
 
-__version__ = '2.4'
+__version__ = '2.5'
 __version_info__ = 'VisiData v' + __version__
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __status__ = 'Production/Stable'
-__copyright__ = 'Copyright (c) 2016-2019 ' + __author__
+__copyright__ = 'Copyright (c) 2016-2021 ' + __author__
 
 
 class EscapeException(BaseException):
@@ -81,6 +81,7 @@ from .cmdlog import *
 from .freeze import *
 from .regex import *
 from .canvas import *
+from .canvas_text import *
 from .graph import *
 from .motd import *
 from .transpose import *
@@ -88,7 +89,7 @@ from .shell import *
 from .layout import *
 from .main import *
 from .help import *
-from .modify import *
+import visidata.modify
 import visidata.sort
 import visidata.unfurl
 import visidata.fill
@@ -146,8 +147,8 @@ from .colorsheet import *
 from .deprecated import *
 
 try:
-    from vdplus import *
-except ModuleNotFoundError:
+    import vdplus
+except ModuleNotFoundError as e:
     pass
 
 from math import *

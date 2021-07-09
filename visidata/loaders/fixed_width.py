@@ -40,7 +40,7 @@ def columnize(rows):
             colstart = i
         prev = i
 
-    yield colstart, None   # final column gets rest of line
+    yield colstart, prev+1   # final column gets rest of line
 
 
 class FixedWidthColumnsSheet(SequenceSheet):
@@ -74,7 +74,7 @@ class FixedWidthColumnsSheet(SequenceSheet):
 
 @VisiData.api
 def save_fixed(vd, p, *vsheets):
-    with p.open_text(mode='w') as fp:
+    with p.open_text(mode='w', encoding=vsheets.options.encoding) as fp:
         for sheet in vsheets:
             if len(vsheets) > 1:
                 fp.write('%s\n\n' % vs.name)

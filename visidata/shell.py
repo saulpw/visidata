@@ -1,5 +1,6 @@
 import os
 import io
+import shutil
 import sys
 import stat
 import locale
@@ -11,9 +12,9 @@ try:
 except ImportError:
     pass # pwd,grp modules not available on Windows
 
-from visidata import Column, Sheet, LazyComputeRow, asynccache, options, option, globalCommand
+from visidata import Column, Sheet, LazyComputeRow, asynccache, options, option, globalCommand, vd
 from visidata import Path, ENTER, date, asyncthread, confirm, fail, FileExistsError, VisiData
-from visidata import CellColorizer, RowColorizer, modtime, filesize, vstat
+from visidata import CellColorizer, RowColorizer, modtime, filesize, vstat, Progress
 
 
 option('dir_recurse', False, 'walk source path recursively on DirSheet')
@@ -61,11 +62,12 @@ class ColumnShell(Column):
             context = LazyComputeRow(self.source, row)
             for arg in shlex.split(self.expr):
                 if arg.startswith('$'):
-                    args.append(str(context[arg[1:]]))
+                    args.append(shlex.quote(str(context[arg[1:]])))
                 else:
                     args.append(arg)
 
-            p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = subprocess.Popen([os.getenv('SHELL', 'bash'), '-c', ' '.join(args)],
+                    stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             return p.communicate()
         except Exception as e:
             vd.exceptionCaught(e)
@@ -150,10 +152,13 @@ class DirSheet(Sheet):
         self.removeFile(r)
 
     def iterload(self):
+        hidden_files = self.options.dir_hidden
+
         def _walkfiles(p):
             basepath = str(p)
             for folder, subdirs, files in os.walk(basepath):
                 subfolder = folder[len(basepath)+1:]
+                if not hidden_files and subfolder.startswith('.'): continue
                 if subfolder in ['.', '..']: continue
 
                 fpath = Path(folder)
@@ -173,9 +178,8 @@ class DirSheet(Sheet):
         folders = set()
         f = _walkfiles if self.options.dir_recurse else _listfiles
 
-        hidden_files = options.dir_hidden
         for p in f(self.source):
-            if hidden_files and p.name.startswith('.'):
+            if not hidden_files and p.name.startswith('.'):
                 continue
 
             yield p
@@ -219,3 +223,15 @@ DirSheet.addCommand(ENTER, 'open-row', 'vd.push(openSource(cursorRow or fail("no
 DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r))', 'open selected files as new sheets')
 DirSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow)', 'open current file in external $EDITOR')
 DirSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*selectedRows)', 'open selected files in external $EDITOR')
+
+DirSheet.addCommand('y', 'copy-row', 'copy_files([cursorRow], inputPath("copy to dest: "))', 'copy file to given directory')
+DirSheet.addCommand('gy', 'copy-selected', 'copy_files(selectedRows, inputPath("copy to dest: ", value=cursorRow.given))', 'copy selected files to given directory')
+
+@DirSheet.api
+@asyncthread
+def copy_files(sheet, paths, dest):
+    dest = Path(dest)
+    dest.is_dir() or vd.fail('target must be directory')
+    vd.status('copying %s %s to %s' % (len(paths), sheet.rowtype, dest))
+    for p in Progress(paths, gerund='copying'):
+        shutil.copyfile(p, dest/(p.parts[-1]))

@@ -1,6 +1,6 @@
 from visidata import *
 
-__all__ = ['openurl_postgres', 'openurl_rds', 'PgTable', 'PgTablesSheet']
+__all__ = ['openurl_postgres', 'openurl_postgresql', 'openurl_rds', 'PgTable', 'PgTablesSheet']
 
 option('postgres_schema', 'public', 'The desired schema for the Postgres database')
 
@@ -52,6 +52,9 @@ def openurl_postgres(url, filetype=None):
     return PgTablesSheet(dbname+"_tables", sql=SQL(conn))
 
 
+openurl_postgresql=openurl_postgres
+
+
 class SQL:
     def __init__(self, conn):
         self.conn = conn
@@ -70,10 +73,10 @@ class SQL:
             cur.close()
 
 
-def cursorToColumns(cur, sheet):
-    sheet.columns = []
+@VisiData.api
+def postgresGetColumns(vd, cur):
     for i, coldesc in enumerate(cur.description):
-        sheet.addColumn(ColumnItem(coldesc.name, i, type=codeToType(coldesc.type_code, coldesc.name)))
+        yield ColumnItem(coldesc.name, i, type=codeToType(coldesc.type_code, coldesc.name))
 
 
 # rowdef: (table_name, ncols)
@@ -98,7 +101,9 @@ class PgTablesSheet(Sheet):
             r = cur.fetchone()
             if r:
                 self.addRow(r)
-            cursorToColumns(cur, self)
+            self.columns = []
+            for c in vd.postgresGetColumns(cur):
+                self.addColumn(c)
             self.setKeys(self.columns[0:1])  # table_name is the key
 
             for r in cur:
@@ -121,6 +126,8 @@ class PgTable(Sheet):
             r = cur.fetchone()
             if r:
                 self.addRow(r)
-            cursorToColumns(cur, self)
+            self.columns = []
+            for c in vd.postgresGetColumns(cur):
+                self.addColumn(c)
             for r in cur:
                 self.addRow(r)

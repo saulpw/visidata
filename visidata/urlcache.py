@@ -26,7 +26,7 @@ def urlcache(url, days=1, text=True, headers={}):
         ret = fp.read()
         if text:
             ret = ret.decode('utf-8').strip()
-            with p.open_text(mode='w') as fpout:
+            with p.open_text(mode='w', encoding='utf-8') as fpout:
                 fpout.write(ret)
         else:
             with p.open_bytes(mode='w') as fpout:

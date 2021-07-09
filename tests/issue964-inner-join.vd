@@ -1,0 +1,6 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	tests/issue964b.csv	o	
+			open-file	tests/issue964a.csv	o	
+issue964b	cod_istat		key-col		!	toggle current column as a key column
+issue964a	domicilioCom		key-col		!	toggle current column as a key column
+issue964a			join-sheets-top2	inner	&	concatenate top two sheets in Sheets Stack

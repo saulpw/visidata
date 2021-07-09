@@ -23,7 +23,7 @@ class VcfSheet(PythonSheet):
 
         addedCols = set()
         lines = []
-        for line in self.source.open_text():
+        for line in self.source.open_text(encoding=self.options.encoding):
             lines.append(line)
             if line.startswith('END:'):
                 row = vobject.readOne('\n'.join(lines))
