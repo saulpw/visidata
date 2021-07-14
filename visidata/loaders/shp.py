@@ -93,7 +93,7 @@ def save_geojson(vd, p, vs):
         'type': 'FeatureCollection',
         'features': features,
     }
-    with p.open_text(mode='w') as fp:
+    with p.open_text(mode='w', encoding=vs.options.encoding) as fp:
         for chunk in json.JSONEncoder().iterencode(featcoll):
             fp.write(chunk)
 

@@ -17,8 +17,9 @@ class GeoJSONSheet(PythonSheet):
 
     def iterload(self):
         self.colnames = {}
+        self.columns = [Column('json_row', width=0)]
 
-        with self.source.open_text() as fp:
+        with self.source.open_text(encoding='utf-8') as fp:
             ret = json.load(fp)
 
             if ret['type'] == 'FeatureCollection':
@@ -46,17 +47,26 @@ class GeoJSONMap(InvertedCanvas):
     def reload(self):
         self.reset()
 
+        nplotted = nerrors = 0
+
         for row in Progress(self.sourceRows):
             k = self.source.rowkey(row)
             colour = self.plotColor(k)
 
-            bbox = self.parse_geometry(row, colour)
+            try:
+                bbox = self.parse_geometry(row, colour)
+                nplotted += 1
+            except Exception as e:
+                vd.exceptionCaught(e)
+                nerrors += 1
+                continue
 
             x1, y1, x2, y2 = bbox
             textx, texty = (x1+x2)/2, (y1+y2)/2
             disptext = self.textCol.getDisplayValue(row)
             self.label(textx, texty, disptext, colour, row)
 
+        vd.status('loaded %d %s (%d errors)' % (nplotted, self.rowtype, nerrors))
         self.refresh()
 
     def parse_geometry(self, row, colour, bbox=None):
@@ -82,12 +92,14 @@ class GeoJSONMap(InvertedCanvas):
                 bbox = reduce_coords(line, bbox)
         elif typ in ('Polygon', 'MultiPolygon'):
             for polygon in coords:
+                if not isinstance(polygon[0][0], list):
+                    continue
                 self.polygon(polygon[0], colour, row)
                 bbox = reduce_coords(polygon[0], bbox)
                 for hole in polygon[1:]:
                     self.polygon(hole, 0, row)
         else:
-            vd.status('notimpl shapeType %s' % typ)
+            vd.warning('notimpl shapeType %s' % typ)
 
         return bbox
 
@@ -115,7 +127,7 @@ def save_geojson(vd, p, vs):
     except Exception:
         indent = vs.options.json_indent
 
-    with p.open_text(mode='w') as fp:
+    with p.open_text(mode='w', encoding='utf-8') as fp:
         encoder = json.JSONEncoder(indent=indent, sort_keys=vs.options.json_sort_keys)
         for chunk in encoder.iterencode(featcoll):
             fp.write(chunk)

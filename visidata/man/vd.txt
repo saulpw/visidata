@@ -38,6 +38,7 @@ DESCRIPTION
                       sheet
      g^C              abort all secondary threads
        q              quit current sheet
+       Q              quit current sheet and free associated memory
       gq              quit all sheets (clean exit)
 
       ^H              view this man page
@@ -55,6 +56,7 @@ DESCRIPTION
      gh  gj  gk  gl   go all the way to the left/bottom/top/right of sheet
           G  gg       go all the way to the bottom/top of sheet
      ^B  ^F           scroll one page back/forward
+     ^Left ^Right     scroll one page left/right
      zz               scroll current row to center of screen
 
      ^^ (Ctrl+^)      jump to previous sheet (swaps with current sheet)
@@ -187,13 +189,19 @@ DESCRIPTION
        d   gd         delete current/selected row(s)
        y   gy         yank (copy) current/all selected row(s) to clipboard in
                       Memory Sheet
+       x  gx          cut (copy and delete) current/all selected row(s) to
+                      clipboard in Memory Sheet
       zy  gzy         yank (copy) contents of current column for
                       current/selected row(s) to clipboard in Memory Sheet
       zd  gzd         set contents of current column for current/selected
                       row(s) to options.null_value
+      zx gzx          cut (copy and delete) contents of current column for
+                      current/selected row(s) to clipboard in Memory Sheet
        p    P         paste clipboard rows after/before current row
       zp  gzp         set cells of current column for current/selected row(s)
                       to last clipboard value
+      zP  gzP         paste to cells of current column for current/selected
+                      row(s) using the system clipboard
        Y   gY         yank (copy) current/all selected row(s) to system
                       clipboard (using options.clipboard_copy_cmd)
       zY  gzY         yank (copy) contents of current column for
@@ -360,6 +368,13 @@ DESCRIPTION
         Enter  gEnter    open current/selected file(s) as new sheet(s)
          ^O  g^O         open current/selected file(s) in external $EDITOR
          ^R  z^R  gz^R   reload information for all/current/selected file(s)
+          d   gd         delete current/selected file(s) from filesystem, upon
+                         commit
+          y   gy directory
+                         copy current/selected file(s) to given directory,
+                         upon commit
+          e   ge name    rename current/selected file(s) to name
+        z^S              commit changes to file system
 
    Plugins Sheet
      Browse through a list of available plugins. VisiData needs to be
@@ -444,6 +459,7 @@ DESCRIPTION
      (sheet-specific commands)
         Enter  e         edit option at current row
         d                remove option override for this context
+        ^S               save option configuration to foo.visidatarc
 
    CommandLog (Shift+D)
      (global commands)
@@ -544,7 +560,7 @@ COMMANDLINE OPTIONS
      --default-height=int         10                 default column height
      --textwrap-cells=bool        True               wordwrap text for multi‐
                                                      line rows
-     --quitguard                  False              confirm before quitting
+     --quitguard=bool             True               confirm before quitting
                                                      last sheet
      --debug                      False              exit on error and display
                                                      stacktrace
@@ -574,8 +590,8 @@ COMMANDLINE OPTIONS
                                                      width on TextSheet
      --save-filetype=str          tsv                specify default file type
                                                      to save as
-     --profile=str                                   filename to save binary
-                                                     profiling data
+     --profile                    False              enable profiling on
+                                                     threads
      --min-memory-mb=int          0                  minimum memory to con‐
                                                      tinue loading and async
                                                      processing
@@ -602,9 +618,8 @@ COMMANDLINE OPTIONS
                                                      acter when saving to tsv
      --visibility=int             0                  visibility level (0=low,
                                                      1=high)
-     --expand-col-scanrows=int    1000               number of rows to check
-                                                     when expanding columns (0
-                                                     = all)
+     --default-sample-size=int    100                number of rows to sample
+                                                     for regex.split (0=all)
      --json-indent=NoneType       None               indent to use when saving
                                                      json
      --json-sort-keys             False              sort object keys when
@@ -646,8 +661,6 @@ COMMANDLINE OPTIONS
                                                      pile() [AILMSUX]
      --regex-maxsplit=int         0                  maxsplit to pass to
                                                      regex.split
-     --default-sample-size=int    100                number of rows to sample
-                                                     for regex.split
      --show-graph-labels=bool     True               show axes and legend on
                                                      graph
      --plot-colors=str                               list of distinct colors
@@ -677,6 +690,8 @@ COMMANDLINE OPTIONS
      --imports=str                plugins            imports to preload before
                                                      .visidatarc (command-line
                                                      only)
+     --unfurl-empty               False              if unfurl includes rows
+                                                     for empty containers
      --incr-base=float            1.0                start value for column
                                                      increments
      --csv-dialect=str            excel              dialect passed to
@@ -781,6 +796,7 @@ COMMANDLINE OPTIONS
                                              metasheets
      color_selected_row  215 yellow          color of selected rows
      disp_rstatus_fmt     {sheet.longname} {sheet.nRows:9d} {sheet.rowtype}
+                                             {sheet.modifiedStatus}
                                              {sheet.options.disp_selected_note}{sheet.nSelectedRows}
                                              right-side status format string
      disp_status_fmt     {sheet.shortcut}› {sheet.name}|
@@ -809,6 +825,10 @@ COMMANDLINE OPTIONS
      disp_replay_pause   ‖                   status indicator for paused re‐
                                              play
      color_status_replay green               color of replay status indicator
+     disp_canvas_charset
+                                             ⠀⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿⡀⡁⡂⡃⡄⡅⡆⡇⡈⡉⡊⡋⡌⡍⡎⡏⡐⡑⡒⡓⡔⡕⡖⡗⡘⡙⡚⡛⡜⡝⡞⡟⡠⡡⡢⡣⡤⡥⡦⡧⡨⡩⡪⡫⡬⡭⡮⡯⡰⡱⡲⡳⡴⡵⡶⡷⡸⡹⡺⡻⡼⡽⡾⡿⢀⢁⢂⢃⢄⢅⢆⢇⢈⢉⢊⢋⢌⢍⢎⢏⢐⢑⢒⢓⢔⢕⢖⢗⢘⢙⢚⢛⢜⢝⢞⢟⢠⢡⢢⢣⢤⢥⢦⢧⢨⢩⢪⢫⢬⢭⢮⢯⢰⢱⢲⢳⢴⢵⢶⢷⢸⢹⢺⢻⢼⢽⢾⢿⣀⣁⣂⣃⣄⣅⣆⣇⣈⣉⣊⣋⣌⣍⣎⣏⣐⣑⣒⣓⣔⣕⣖⣗⣘⣙⣚⣛⣜⣝⣞⣟⣠⣡⣢⣣⣤⣥⣦⣧⣨⣩⣪⣫⣬⣭⣮⣯⣰⣱⣲⣳⣴⣵⣶⣷⣸⣹⣺⣻⣼⣽⣾⣿
+                                             charset to render 2x4 blocks on
+                                             canvas
      disp_pixel_random   False               randomly choose attr from set of
                                              pixels instead of most common
      color_graph_hidden  238 blue            color of legend for hidden attri‐
@@ -822,8 +842,17 @@ COMMANDLINE OPTIONS
      color_xword_active  green               color of active clue
 
 EXAMPLES
+           vd
+     launch DirSheet for current directory
+
            vd foo.tsv
      open the file foo.tsv in the current directory
+
+           vd -f ddw
+     open blank sheet of type ddw
+
+           vd new.tsv
+     open new blank tsv sheet named new
 
            vd -f sqlite bar.db
      open the file bar.db as a sqlite database
@@ -911,21 +940,10 @@ SUPPORTED SOURCES
      For a list of all remaining formats supported by VisiData, see
      https://visidata.org/formats.
 
-     In addition, .zip, .gz, .bz2, and .xz files are decompressed on the fly.
-
-SUPPORTED OUTPUT FORMATS
-     These are the supported savers:
-
-        tsv (tab-separated value)
-        csv (comma-separated value)
-        json (one object with all rows)
-        jsonl/ndjson/ldjson (one object per line/row)
-           All expanded subcolumns must be closed (with )) to retain the same
-           structure.
-        sqlite (save to source with z^S)
-        md (markdown table)
+     In addition, .zip, .gz, .bz2, .xz, ,zstd, and .zst files are decompressed
+     on the fly.
 
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                      Apr 11, 2021                      Linux/MacOS
+Linux/MacOS                      June 30, 2021                     Linux/MacOS

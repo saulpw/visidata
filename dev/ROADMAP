@@ -9,7 +9,7 @@
   - [scroll cell] zh/zl Left hand side of a cell with content hidden doesn't show ellipsis #751
 
 2. Persistence
-  - input history  #736 #468
+  + input history  #736 #468
   - key indexes for better joining and lookups
 
 3. Interface discoverability for commands  #247 #742
@@ -19,9 +19,9 @@
   - possibly add popup modals
 
 4. more expressive expressions
-  - Memory sheet; can give things names and use in expressions.  #392
+  + Memory sheet; can give things names and use in expressions.  #392
   - access column values from execstr #655
-  - shortcut name for current column #659
+  + shortcut name for current column #659
 
 5. better asynchronicity
   - async thread pool
@@ -57,4 +57,4 @@ c) intra-cell coloring (for search results, markup)
 
   - #480: HTTP API pagination loader
   - #465: Ability to load from the contents of a cell.
-  - #505: [html] Provide way to access non-table elements
+  + #505: [html] Provide way to access non-table elements

@@ -194,7 +194,7 @@ class OptionsObject:
                         objname = self._opts.objname(obj)
                         vd.cmdlog.addRow(vd.cmdlog.newRow(sheet=objname, row=optname,
                                     keystrokes='', input=str(value),
-                                    longname='set-option'))
+                                    longname='set-option', undofuncs=[]))
         else:
             curval = None
             vd.warning('setting unknown option %s' % optname)
@@ -322,10 +322,10 @@ def getCommand(sheet, cmd):
     if not longname:
         vd.fail('no binding for %s' % cmd)
 
-    return vd.commands._get(longname, obj=sheet) or vd.fail('no command "%s"' % longname)
+    return vd.commands._get(longname, obj=sheet) or vd.warning('no command "%s"' % longname)
 
-
-def loadConfigFile(fnrc, _globals=None):
+@VisiData.api
+def loadConfigFile(vd, fnrc, _globals=None):
     if not fnrc:
         return
     p = visidata.Path(fnrc)
@@ -370,7 +370,7 @@ def loadConfigAndPlugins(vd, args):
             continue
 
     # user customisations in config file in standard location
-    loadConfigFile(options.config, vd.getGlobals())
+    vd.loadConfigFile(options.config, vd.getGlobals())
 
 
 BaseSheet.bindkey('^M', '^J')  # for windows ENTER

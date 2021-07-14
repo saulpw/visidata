@@ -26,7 +26,7 @@ class CsvSheet(SequenceSheet):
 
     def iterload(self):
         'Convert from CSV, first handling header row specially.'
-        with self.source.open_text() as fp:
+        with self.source.open_text(encoding=self.options.encoding) as fp:
             if options.safety_first:
                 rdr = csv.reader(removeNulls(fp), **options.getall('csv_'))
             else:
@@ -45,7 +45,7 @@ class CsvSheet(SequenceSheet):
 @VisiData.api
 def save_csv(vd, p, sheet):
     'Save as single CSV file, handling column names as first line.'
-    with p.open_text(mode='w') as fp:
+    with p.open_text(mode='w', encoding=sheet.options.encoding) as fp:
         cw = csv.writer(fp, **options.getall('csv_'))
         colnames = [col.name for col in sheet.visibleCols]
         if ''.join(colnames):

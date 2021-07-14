@@ -42,7 +42,8 @@ def openPath(vd, p, filetype=None, create=False):
     '''Call ``open_<filetype>(p)`` or ``openurl_<p.scheme>(p, filetype)``.  Return constructed but unloaded sheet of appropriate type.
     If True, *create* will return a new, blank **Sheet** if file does not exist.'''
     if p.scheme and not p.fp: # isinstance(p, UrlPath):
-        openfunc = 'openurl_' + p.scheme
+        schemes = p.scheme.split('+')
+        openfunc = 'openurl_' + schemes[-1]
         try:
             return vd.getGlobals()[openfunc](p, filetype=filetype)
         except KeyError:
@@ -59,16 +60,24 @@ def openPath(vd, p, filetype=None, create=False):
 
     filetype = filetype.lower()
 
+    if not p.exists():
+        if not create:
+            return None
+        newfunc = getattr(vd, 'new_' + filetype, vd.getGlobals().get('new_' + filetype))
+        if not newfunc:
+            vd.warning('%s does not exist, creating new sheet' % p)
+            return vd.newSheet(p.name, 1, source=p)
+
+        vd.status('creating blank %s' % (p.given))
+        return newfunc(p)
+
     openfunc = getattr(vd, 'open_' + filetype, vd.getGlobals().get('open_' + filetype))
     if not openfunc:
         vd.warning('unknown "%s" filetype' % filetype)
         filetype = 'txt'
         openfunc = vd.getGlobals().get('open_txt')
 
-    if p.exists():
-        vd.status('opening %s as %s' % (p.given, filetype))
-    else:
-        vd.status('creating blank %s' % (p.given))
+    vd.status('opening %s as %s' % (p.given, filetype))
 
     return openfunc(p)
 
@@ -85,7 +94,7 @@ def openSource(vd, p, filetype=None, create=False, **kwargs):
         if '://' in p:
             vs = vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
         elif p == '-':
-            vs = vd.openPath(Path('-', fp=vd._stdin), filetype=filetype)
+            vs = vd.openPath(vd.stdinSource, filetype=filetype)
         else:
             vs = vd.openPath(Path(p), filetype=filetype, create=create)  # convert to Path and recurse
     else:
@@ -100,7 +109,7 @@ def openSource(vd, p, filetype=None, create=False, **kwargs):
 #### enable external addons
 def open_txt(p):
     'Create sheet from `.txt` file at Path `p`, checking whether it is TSV.'
-    with p.open_text() as fp:
+    with p.open_text(encoding=vd.options.encoding) as fp:
         if options.delimiter in next(fp):    # peek at the first line
             return open_tsv(p)  # TSV often have .txt extension
         return TextSheet(p.name, source=p)

@@ -87,7 +87,7 @@ class PandasSheet(Sheet):
 
     def getValue(self, col, row):
         '''Look up column values in the underlying DataFrame.'''
-        return col.sheet.df.loc[row.name, col.name]
+        return col.sheet.df.loc[row.name, col.expr]
 
     def setValue(self, col, row, val):
         '''
@@ -98,11 +98,12 @@ class PandasSheet(Sheet):
         https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#why-does-assignment-fail-when-using-chained-indexing
         '''
         try:
-            col.sheet.df.loc[row.name, col.name] = val
+            col.sheet.df.loc[row.name, col.expr] = val
         except ValueError as err:
             vd.warning(f'Type of {val} does not match column {col.name}. Changing type.')
             col.type = anytype
-            col.sheet.df.loc[row.name, col.name] = val
+            col.sheet.df.loc[row.name, col.expr] = val
+        self.setModified()
 
     def reload(self):
         import pandas as pd
@@ -137,7 +138,8 @@ class PandasSheet(Sheet):
                 col,
                 type=self.dtype_to_type(df[col]),
                 getter=self.getValue,
-                setter=self.setValue
+                setter=self.setValue,
+                expr=col
             ))
 
         if self.columns[0].name == 'index': # if the df contains an index column
@@ -154,7 +156,7 @@ class PandasSheet(Sheet):
         by_cols = []
         ascending = []
         for col, reverse in self._ordering[::-1]:
-            by_cols.append(col.name)
+            by_cols.append(col.expr)
             ascending.append(not reverse)
         self.rows.sort_values(by=by_cols, ascending=ascending, inplace=True)
 
@@ -244,7 +246,7 @@ class PandasSheet(Sheet):
         import pandas as pd
         case_sensitive = 'I' not in vd.options.regex_flags
         masks = pd.DataFrame([
-            self.df[col.name].astype(str).str.contains(pat=regex, case=case_sensitive, regex=True)
+            self.df[col.expr].astype(str).str.contains(pat=regex, case=case_sensitive, regex=True)
             for col in columns
         ])
         if unselect:
@@ -282,6 +284,7 @@ class PandasSheet(Sheet):
         self.df.index = pd.RangeIndex(self.nRows)
         self._checkSelectedIndex()
         if undo:
+            self.setModified()
             vd.addUndo(self._deleteRows, range(index, index + len(rows)))
 
     def _deleteRows(self, which):
@@ -303,20 +306,21 @@ class PandasSheet(Sheet):
         # If we use `oldrow` directly, we get errors comparing DataFrame objects
         # when there are multiple deletion commands for the same row index.
         # There may be a better way to handle that case.
-        vd.addUndo(self.addRows, oldrow.to_dict(), rowidx, False)
+        vd.addUndo(self.addRows, oldrow.to_dict(), rowidx, undo=False)
         self._deleteRows(rowidx)
         vd.memory.cliprows = [oldrow]
+        self.setModified()
 
     def deleteBy(self, by):
         '''Delete rows for which func(row) is true.  Returns number of deleted rows.'''
         import pandas as pd
-        oldidx = self.cursorRowIndex
         nRows = self.nRows
         vd.addUndo(setattr, self, 'df', self.df.copy())
         self.df = self.df[~by]
         self.df.index = pd.RangeIndex(self.nRows)
         ndeleted = nRows - self.nRows
 
+        self.setModified()
         vd.status('deleted %s %s' % (ndeleted, self.rowtype))
         return ndeleted
 

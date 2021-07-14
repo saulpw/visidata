@@ -62,7 +62,5 @@ def startMacro(cmdlog):
         vd.macroMode = CommandLog('current_macro', rows=[])
 
 
-vd.status(vd.macrosheet)
-
 Sheet.addCommand('m', 'macro-record', 'vd.cmdlog.startMacro()')
 Sheet.addCommand('gm', 'macro-sheet', 'vd.push(vd.macrosheet)')

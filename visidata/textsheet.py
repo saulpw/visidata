@@ -3,6 +3,7 @@ import textwrap
 from visidata import vd, option, options, Sheet, ColumnItem, asyncthread
 from visidata import Column, ColumnItem, vlen
 from visidata import globalCommand, error, stacktrace, VisiData
+import visidata
 
 __all__ = ['TextSheet', 'ErrorSheet']
 
@@ -15,7 +16,7 @@ option('save_filetype', 'tsv', 'specify default file type to save as', replay=Tr
 # rowdef: (linenum, str)
 class TextSheet(Sheet):
     'Displays any iterable source, with linewrap if ``options.wrap`` is set.'
-    rowtype = 'lines'
+    rowtype = 'lines'  # rowdef: [linenum, text]
     filetype = 'txt'
     columns = [
         ColumnItem('linenum', 0, type=int, width=0),
@@ -23,9 +24,12 @@ class TextSheet(Sheet):
     ]
 
     def iterload(self):
+        yield from self.readlines(self.source)
+
+    def readlines(self, source):
         winWidth = min(self.columns[1].width or 78, self.windowWidth-2)
-        wrap = options.wrap
-        for startingLine, text in enumerate(self.source):
+        wrap = self.options.wrap
+        for startingLine, text in enumerate(source):
             if wrap and text:
                 for i, L in enumerate(textwrap.wrap(str(text), width=winWidth)):
                     yield [startingLine+i+1, L]
@@ -40,22 +44,13 @@ class TextSheet(Sheet):
                     fp.write(row[1])
                     fp.write('\n')
 
-        @asyncthread
-        def readlines(sheet, fn):
-            sheet.rows = []
-            with open(fn, 'r') as fp:
-                try:
-                    for i, line in enumerate(fp):
-                        sheet.addRow((i, line))
-                except Exception as e:
-                    vd.exceptionCaught(e)
-                    return ''
-
         import tempfile
         with tempfile.NamedTemporaryFile() as temp:
             writelines(sheet, temp.name)
             vd.launchEditor(temp.name, '+%s' % linenum)
-            readlines(sheet, temp.name)
+            sheet.rows = []
+            for r in sheet.readlines(visidata.Path(temp.name)):
+                sheet.addRow(r)
 
 
 # .source is list of source text lines to 'load'

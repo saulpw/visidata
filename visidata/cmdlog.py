@@ -163,13 +163,13 @@ class _CommandLog:
 
         colname, rowname, sheetname = '', '', None
         if sheet and not (cmd.longname.startswith('open-') and not cmd.longname in ('open-row', 'open-cell')):
-            sheetname = sheet
+            sheetname = sheet.name
 
             colname, rowname = sheet.commandCursor(cmd.execstr)
 
             contains = lambda s, *substrs: any((a in s) for a in substrs)
             if contains(cmd.execstr, 'pasteFromClipboard'):
-                args = clipboard().paste().strip()
+                args = vd.sysclip_value().strip()
 
 
         comment = vd.currentReplayRow.comment if vd.currentReplayRow else cmd.helpstr
@@ -402,6 +402,8 @@ def cmdlog_sheet(sheet):
 
 @BaseSheet.property
 def shortcut(self):
+    if self._shortcut:
+        return self._shortcut
     try:
         return str(vd.allSheets.index(self)+1)
     except ValueError:
@@ -431,6 +433,8 @@ def modifyCommand(vd):
     return vd.cmdlog.rows[-1]
 
 
+BaseSheet.init('_shortcut')
+
 
 globalCommand('gD', 'cmdlog-all', 'vd.push(vd.cmdlog)', 'open global CommandLog for all commands executed in current session')
 globalCommand('D', 'cmdlog-sheet', 'vd.push(sheet.cmdlog)', "open current sheet's CommandLog with all other loose ends removed; includes commands from parent sheets")
@@ -458,4 +462,5 @@ BaseSheet.addCommand('', 'repeat-last', 'execCommand(cmdlog_sheet.rows[-1].longn
 BaseSheet.addCommand('', 'repeat-input', 'r = copy(cmdlog_sheet.rows[-1]); r.sheet=r.row=r.col=""; vd.replayOne(r)', 'run previous command, along with any previous input to that command')
 
 CommandLog.class_options.json_sort_keys = False
+CommandLog.class_options.encoding = 'utf-8'
 CommandLogJsonl.class_options.json_sort_keys = False

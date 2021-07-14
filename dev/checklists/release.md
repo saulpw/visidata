@@ -115,7 +115,7 @@ git push --tags
 
 16. Upload new motd
 
-17. Update the website by pushing to master.
+17. Update the website by pushing to master. Update with new manpage. Update redirect to point to new manpage.
 
 18. Comb through issues and close the ones that have been solved, referencing the version number
 

@@ -41,7 +41,7 @@ VisiData is designed to be extensible, and most feature requests can be implemen
 If this would require changes to the VisiData core, and a reasonable design is approved, then the issue can stay open until the core changes have been made.
 Otherwise, in the spirit of Marie Kondo, the issue will be closed without prejudice.
 
-Feature requests with some amount of working Python code are more likely to get attention.
+Feature requeste with some amount of working Python code are more likely to get attention.
 Design proposals with concrete use cases are very welcome.
 
 ## Writing a well constructed bug report
@@ -49,11 +49,13 @@ Design proposals with concrete use cases are very welcome.
 If you encounter any bugs or have any problems, please [create an issue on GitHub](https://github.com/saulpw/visidata/issues).
 
 A great bug report will include:
+
     - a stacktrace, if there is an unexpected error; the most recent full stack traces can be viewed with `Ctrl+E` (then saved with `Ctrl+S`)
     - a [.vd](http://visidata.org/docs/save-restore/) and sample dataset that reproduces the issue
     - a .png/.gif (esp. for user interface changes)
 
 Some examples of great bug reports:
+
     - [#350 by @chocolateboy](https://github.com/saulpw/visidata/issues/350)
     - [#340 by @Mikee-3000](https://github.com/saulpw/visidata/issues/340)
 
@@ -69,7 +71,7 @@ VisiData has two main branches:
   - [stable](https://github.com/saulpw/visidata/tree/stable) has the last known good version of VisiData (what is in pypi/brew/apt).
   - [develop](https://github.com/saulpw/visidata/tree/develop) has the most up-to-date version of VisiData (which will eventually be merged to stable).
 
-All pull requests should be submitted against `develop`.
+All pull requests should be submitted against `develop`. Submitters will need to e-sign a Copyright Assignment Agreement (CAA) before a pull request will be accepted.
 
 # Open Source License and Copyright
 

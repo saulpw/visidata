@@ -62,11 +62,11 @@ class ColorMaker:
 
     @drawcache
     def resolve_colors(self, colorstack):
-        'Returns the ColorAttr for the colorstack, a list of color option names sorted highest-precedence color first.'
+        'Returns the ColorAttr for the colorstack, a list of (prec, color_option_name) sorted highest-precedence color first.'
         cattr = ColorAttr(0,0,0,0)
-        for coloropt in colorstack:
+        for prec, coloropt in colorstack:
             c = self.get_color(coloropt)
-            cattr = update_attr(cattr, c)
+            cattr = update_attr(cattr, c, prec)
         return cattr
 
     def split_colorstr(self, colorstr):
@@ -89,17 +89,28 @@ class ColorMaker:
                 fgbgattrs[2].append(x)
             else:
                 if not fgbgattrs[i]:  # keep first known color
-                    fgbgattrs[i] = x
+                    if self._get_colornum(x) is not None:   # only set known colors
+                        fgbgattrs[i] = x
 
         return fgbgattrs
 
+    @functools.lru_cache(None)
     def _get_colornum(self, colorname, default=-1):
         'Return terminal color number for colorname.'
         if not colorname: return default
         try:
-            return int(colorname)
+            r = int(colorname)
         except Exception:
-            return self.colors.get(colorname.upper())
+            r = self.colors.get(colorname.upper())
+
+        if r is None:
+            return None
+
+        try: # test to see if color is available
+            curses.init_pair(255, r, 0)
+            return r
+        except curses.error as e:
+            return None  # not available
 
     def _colornames_to_cattr(self, colornamestr, precedence=0):
         fg, bg, attrlist = self.split_colorstr(colornamestr)
@@ -117,6 +128,7 @@ class ColorMaker:
             if pairnum is None:
                 if len(self.color_pairs) > 254:
                     self.color_pairs.clear()  # start over
+                    self._get_colornum.cache_clear()
                 pairnum = len(self.color_pairs)+1
                 try:
                     curses.init_pair(pairnum, *fgbg)

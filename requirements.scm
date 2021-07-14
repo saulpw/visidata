@@ -1,0 +1,20 @@
+(specifications->manifest
+ '(
+   "bash"
+   "coreutils"
+   "direnv"
+   "git"
+   "inetutils"
+   "nss-certs"
+   "python"
+   "python-dateutil"
+   "python-lxml"
+   "python-openpyxl"
+   "python-pyopenssl"
+   "python-pytest"
+   "python-requests"
+   "python-wrapper"
+   "python-xlrd"
+   "sed"
+   "which"
+   ))
