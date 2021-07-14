@@ -11,3 +11,5 @@ visidata.egg-info/
 *_build
 tags
 /tests/log/
+# Mac files
+.DS_Store

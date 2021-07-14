@@ -1,4 +1,8 @@
-# VisiData Documentation
+---
+eleventyNavigation:
+    key: Getting Started
+    order: 1
+---
 
 ## Getting started
 
@@ -80,9 +84,9 @@
 * [Developing a loader](/docs/api/loaders)
 * [STDOUT pipe/redirect](/docs/pipes)
 
-# For developers
+## For developers
 
 VisiData can interact with data from any source or in any format.
 * [VisiData API Guide](/docs/api)
-* [guide to contributing](/contributing)
+* [guide to contributing](/docs/contributing)
 * [viewtsv annotated](/docs/viewtsv)

@@ -1,7 +1,13 @@
-- Updated: 2018-01-17
-- Version: VisiData 0.99
+---
+eleventyNavigation:
+    key: Save and Restore
+    order: 11
+Updated: 2018-01-17
+Version: VisiData 0.99
+---
 
-# How to save and replay a VisiData session
+
+## How to save and replay a VisiData session
 
 This example creates and then uses the file [pivot.vd](https://raw.githubusercontent.com/saulpw/visidata/stable/tests/pivot.vd).
 

@@ -1,7 +1,12 @@
-- Update: 2018-08-19
-- Version: VisiData 1.3.1
+---
+eleventyNavigation:
+  key: Grouping data and descriptive statistics
+  order: 7
+Update: 2018-08-19
+Version: VisiData 1.3.1
+---
 
-# Grouping data and descriptive statistics
+
 
 ## How to set statistical aggregators for a single column
 

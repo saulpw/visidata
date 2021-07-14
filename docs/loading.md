@@ -1,7 +1,11 @@
-- Update: 2018-12-18
-- Version: VisiData 1.5.1
-
-# Loading data
+---
+eleventyNavigation:
+  key: Loading data
+  order: 2
+  parent: Getting Started
+update: 2018-12-18
+version: VisiData 1.5.1
+---
 
 ## Specifying a source file
 

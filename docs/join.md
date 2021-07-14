@@ -1,7 +1,12 @@
-- Update: 2020-10-27
-- Version: VisiData 2.0.1
+---
+eleventyNavigation:
+  key: Combining datasets
+  order: 9
+Update: 2020-10-27
+Version: VisiData 2.0.1
+---
 
-# Combining datasets
+
 
 ## How to join two datasets
 

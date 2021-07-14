@@ -1,4 +1,8 @@
-# How can I move around and search?
+---
+eleventyNavigation:
+  key: How can I move around and search?
+  order: 99
+---
 
 - basic movement just like vim
   - 'G' 'gg' '^G' work as in vim, as do some of the 'z' scroll commands

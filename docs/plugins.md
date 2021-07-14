@@ -1,11 +1,15 @@
-- Updated: 2019-03-05
-- Version: VisiData 1.6
+---
+eleventyNavigation:
+  key: Plugins
+  order: 13
+Updated: 2019-03-05
+Version: VisiData 1.6
+---
 
-# Plugins
 
 Plugins are optional Python modules that extend or modify base VisiData's functionality. Once configured, plugins will be available upon every `vd` launching.
 
-# Known plugin homes
+## Known plugin homes
 
 * [saulpw's repo](https://github.com/saulpw/visidata/tree/develop/plugins)
 * [jsvine's repo](https://github.com/jsvine/visidata-plugins)
