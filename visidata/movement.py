@@ -161,8 +161,8 @@ Sheet.bindkey('BUTTON3_PRESSED', 'go-mouse')
 # vim-style scrolling with the 'z' prefix
 Sheet.addCommand('zz', 'scroll-middle', 'sheet.topRowIndex = cursorRowIndex-int(nScreenRows/2)', 'scroll current row to center of screen')
 
-Sheet.addCommand(None, 'go-right-page', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex', 'scroll cursor one page right')
-Sheet.addCommand(None, 'go-left-page', 'pageLeft()', 'scroll cursor one page left')
+Sheet.addCommand('kRIT5', 'go-right-page', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex', 'scroll cursor one page right')
+Sheet.addCommand('kLFT5', 'go-left-page', 'pageLeft()', 'scroll cursor one page left')
 Sheet.addCommand(None, 'scroll-left', 'sheet.cursorVisibleColIndex -= options.scroll_incr', 'scroll one column left')
 Sheet.addCommand(None, 'scroll-right', 'sheet.cursorVisibleColIndex += options.scroll_incr', 'scroll one column right')
 Sheet.addCommand(None, 'scroll-leftmost', 'sheet.leftVisibleColIndex = cursorVisibleColIndex', 'scroll sheet to leftmost column')

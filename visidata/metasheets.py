@@ -132,6 +132,8 @@ class LastInputsSheet(JsonLinesSheet):
     def addRow(self, row, **kwargs):
         'Update lastInputs before adding row.'
         row = AttrDict(row)
+        if row.input in vd._lastInputs[row.type]:
+            del vd._lastInputs[row.type][row.input]  # so will be added as last entry
         vd._lastInputs[row.type][row.input] = 1
         return super().addRow(row, **kwargs)
 
@@ -144,7 +146,7 @@ class LastInputsSheet(JsonLinesSheet):
         self.addRow(row)
 
         if self.source:
-            with self.source.open_text(mode='a') as fp:
+            with self.source.open_text(mode='a', encoding=self.options.encoding) as fp:
                 import json
                 fp.write(json.dumps(row) + '\n')
 
@@ -212,6 +214,15 @@ def vdmenu(vd):
 @VisiData.property
 def allColumnsSheet(vd):
     return ColumnsSheet("all_columns", source=vd.stackedSheets)
+
+@VisiData.api
+def save_visidatarc(vd, p, vs):
+    with p.open_text(mode='w') as fp:
+        for optname, val in sorted(vd.options.getall().items()):
+            rval = repr(val)
+            defopt = vd.options._get(optname, 'default')
+            leading = '# ' if val == defopt.value else ''
+            fp.write(f'{leading}options.{optname:25s} = {rval:10s}  # {defopt.helpstr}\n')
 
 
 @ColumnsSheet.command('&', 'join-cols', 'add column from concatenating selected source columns')

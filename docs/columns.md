@@ -2,8 +2,8 @@
 eleventyNavigation:
     key: Columns
     order: 5
-update: 2020-10-01
-version: VisiData 2.0.1
+update: 2021-06-16
+version: VisiData 2.4
 ---
 
 ## How to manipulate columns
@@ -58,6 +58,19 @@ Command    Type
 
 Columns usually begin as untyped. Odd results while working with numerical or datetime data is usually due to values being considered as strings, and the problem is solved by setting the correct type.
 
+The `float` type uses Python's builtin `float()` constructor to parse the string, and it parses by using the decimal separator.
+
+The `currency` type is a bit of a misnomer. It filters out any non-numeric characters, and then parses the remainder of the cell value as a float.
+The reasons to prefer using `float` over `currency`, is performance (it is quite a bit slower than native parsing with `float`), or if any non-float characters should get reported as an error.
+
+The `date` type parses dates into ISO8601 format. Those columns can then be used in mathematical calculations, and the calculations are interpreted for dates. E.g. 2020-01-01 + 1, is 2020-01-02.
+
+The `vlen` type formats the cell value to the length of the content. For example, if the cell content is a list of length 3, then when `vlen` typed it will display a value of 3.
+
+There is also the `floatlocale` type, which uses Python's `locale.atof` to parse the Column values. With `floatlocale`, you can set the `LC_NUMERIC` environment variable appropriately (before launching VisiData), such that `atof()` will parse the number based on your locale setting. There is a `type-floatlocale` command, which is unbound by default, because parsing this way is significantly slower than using the builtin float type.
+
+If you need locale-specific float parsing regularly, you may want to [rebind](/docs/customize) `%` or `z%` (or maybe some other keystroke) to `type-floatlocale` instead.
+
 The following example uses the file [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
 
 <div class="asciicast">
@@ -87,12 +100,14 @@ currency  disp_currency_fmt %0.2f
 date      disp_date_fmt     %Y-%m-%d
 
 Ways to adjust the display formatting:
+
 * The `fmtstr` column on the **Columns Sheet** allows you to specify the formatting for specific columns within that session, without affecting the default for the others.
 * The `disp_TYPE_fmt` option can be changed on the **Options Sheet** to set the formatting for all columns of type `TYPE` in that session.
 * The `--disp-TYPE-fmt` argument can be passed through the commandline to set the formatting for all columns of type `TYPE` in that session.
 * The `options.disp_TYPE_fmt` can be set in the `~/.visidatarc` to change the default formatting for all columns of type `TYPE` for all sessions.
 
 There are several formatting styles offered:
+
 * Formatting that starts with `'%'` (e.g. *%0.2f*) will use [locale.format_string()](https://docs.python.org/3.6/library/locale.html#locale.format_string).
 * Otherwise (e.g. *{:.02f}*), formatting will be passed to Python's [string.format()](https://docs.python.org/3/library/string.html#custom-string-formatting).
 * Date fmtstr are passed to [strftime](https://strftime.org/).
@@ -126,6 +141,26 @@ or set in the **Options Sheet**.
 2. Move the cursor down to the relevant *disp_date_fmt* option.
 3. Type `e` followed by *%m/%d/%Y*.
 ---
+
+###### How to specify a comma decimal separator when typing floating point numbers?
+
+1. Before launching VisiData, set the shell environment variable `LC_NUMERIC` to a locale which interprets commas as decimals. Any European locale should do; an example that works is `en_DK.UTF-8`.
+2. Within VisiData, set a column to type `floatlocale` by pressing `Space` followed by *type-floatlocale*.
+
+Note that `type-floatlocale` is significantly slower than `type-float`. However, if you wish to replace the current binding for `type-float` with `type-floatlocale`, add to your `~/.visidatarc`:
+
+~~~
+Sheet.unbindkey('%')
+Sheet.bindkey('%', 'type-floatlocale')
+~~~
+
+or if you never use `type-floatsi`, you can do
+
+
+~~~
+Sheet.unbindkey('z%')
+Sheet.bindkey('z%', 'type-floatlocale')
+~~~
 
 ## How to split a column
 

@@ -214,10 +214,12 @@ class Column(Extensible):
         if typedval is None:
             return None
 
-        if isinstance(typedval, (list, tuple)):
-            return '[%s]' % len(typedval)
-        if isinstance(typedval, dict):
-            return '{%s}' % len(typedval)
+        if self.type is anytype:
+            if isinstance(typedval, (list, tuple)):
+                return '[%s]' % len(typedval)
+            if isinstance(typedval, dict):
+                return '{%s}' % len(typedval)
+
         if isinstance(typedval, bytes):
             typedval = typedval.decode(options.encoding, options.encoding_errors)
 
@@ -369,6 +371,7 @@ class Column(Extensible):
             self.cellChanged(row, val)
         else:
             self.putValue(row, val)
+        self.sheet.setModified()
 
     def setValueSafe(self, row, value):
         'setValue and ignore exceptions.'
@@ -411,21 +414,27 @@ def setitem(r, i, v):  # function needed for use in lambda
     r[i] = v
     return True
 
+
 def getattrdeep(obj, attr, *default, getter=getattr):
-    'Return dotted attr (like "a.b.c") from obj, or default if any of the components are missing.'
-    if not isinstance(attr, str):
-        return getter(obj, attr, *default)
+    try:
+        'Return dotted attr (like "a.b.c") from obj, or default if any of the components are missing.'
+        if not isinstance(attr, str):
+            return getter(obj, attr, *default)
 
-    if default:
-        getattr_default = lambda o,a,d=default[0]: getter(o, a, d)
-    else:
-        getattr_default = lambda o,a: getter(o, a)
+        try:  # if attribute exists, return toplevel value, even if dotted
+            if attr in obj:
+                return getter(obj, attr)
+        except Exception as e:
+            pass
 
-    attrs = attr.split('.')
-    for a in attrs[:-1]:
-        obj = getattr_default(obj, a)
+        attrs = attr.split('.')
+        for a in attrs[:-1]:
+            obj = getter(obj, a)
 
-    return getattr_default(obj, attrs[-1])
+        return getter(obj, attrs[-1])
+    except Exception as e:
+        if not default: raise
+        return default[0]
 
 
 def setattrdeep(obj, attr, val, getter=getattr, setter=setattr):
@@ -433,14 +442,24 @@ def setattrdeep(obj, attr, val, getter=getattr, setter=setattr):
     if not isinstance(attr, str):
         return setter(obj, attr, val)
 
-    attrs = attr.split('.')
+    try:  # if attribute exists, overwrite toplevel value, even if dotted
+        getter(obj, attr)
+        return setter(obj, attr, val)
+    except Exception as e:
+        pass
 
+    attrs = attr.split('.')
     for a in attrs[:-1]:
-        obj = getter(obj, a)
+        try:
+            obj = getter(obj, a)
+        except Exception as e:
+            obj = obj[a] = type(obj)()  # assume homogenous nesting
+
     setter(obj, attrs[-1], val)
 
+
 def getitemdeep(obj, k, *default):
-    return getattrdeep(obj, k, *default, getter=getitemdef)
+    return getattrdeep(obj, k, *default, getter=getitem)
 
 def setitemdeep(obj, k, val):
     return setattrdeep(obj, k, val, getter=getitemdef, setter=setitem)
@@ -453,6 +472,9 @@ def AttrColumn(name='', attr=None, **kwargs):
                   setter=lambda col,row,val: setattrdeep(row, col.expr, val),
                   **kwargs)
 
+def getitem(o, k, default=None):
+    return default if o is None else o[k]
+
 def getitemdef(o, k, default=None):
     try:
         return default if o is None else o[k]
@@ -463,7 +485,7 @@ def ItemColumn(name=None, expr=None, **kwargs):
     'Column using getitem/setitem with *key*.'
     return Column(name,
             expr=expr if expr is not None else name,
-            getter=lambda col,row: getitemdeep(row, col.expr),
+            getter=lambda col,row: getitemdeep(row, col.expr, None),
             setter=lambda col,row,val: setitemdeep(row, col.expr, val),
             **kwargs)
 

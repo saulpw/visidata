@@ -6,6 +6,6 @@ def open_frictionless(p):
 class FrictionlessIndexSheet(IndexSheet):
     def iterload(self):
         import datapackage
-        self.dp = datapackage.Package(self.source.open_text())
+        self.dp = datapackage.Package(self.source.open_text(encoding='utf-8'))
         for r in Progress(self.dp.resources):
             yield vd.openSource(self.source.with_name(r.descriptor['path']), filetype=r.descriptor.get('format', 'json'))

@@ -23,9 +23,10 @@ class JsonSheet(PythonSheet):
         super().__init__(*args, **kwargs)
         self._colnames = {}  # [colname] -> Column
 
-    def addColumn(self, col, **kwargs):
-        super().addColumn(col, **kwargs)
-        self._colnames[col.name] = col
+    def addColumn(self, *cols, index=None):
+        super().addColumn(*cols, index=index)
+        self._colnames.update({col.name: col for col in cols })
+        return cols[0]
 
     def iterload(self):
         self.columns = []
@@ -33,14 +34,14 @@ class JsonSheet(PythonSheet):
         for c in type(self).columns:
             self.addColumn(deepcopy(c))
 
-        with self.source.open_text() as fp:
+        with self.source.open_text(encoding=self.options.encoding) as fp:
             for L in fp:
                 try:
                     if L.startswith('#'): # skip commented lines
                         continue
                     ret = json.loads(L, object_hook=AttrDict)
                     if isinstance(ret, list):
-                        yield from Progress(ret)
+                        yield from ret
                     else:
                         yield ret
 
@@ -49,10 +50,10 @@ class JsonSheet(PythonSheet):
                         e.stacktrace = stacktrace()
                         yield TypedExceptionWrapper(json.loads, L, exception=e)  # an error on one line
                     else:
-                        with self.source.open_text() as fp:
+                        with self.source.open_text(encoding=self.options.encoding) as fp:
                             ret = json.load(fp)
                             if isinstance(ret, list):
-                                yield from Progress(ret)
+                                yield from ret
                             else:
                                 yield ret
                         break
@@ -117,27 +118,35 @@ def _rowdict(cols, row):
 
 @VisiData.api
 def save_json(vd, p, *vsheets):
-    with p.open_text(mode='w') as fp:
-        if len(vsheets) == 1:
-            vs = vsheets[0]
-            it = [_rowdict(vs.visibleCols, row) for row in vs.iterrows()]
-        else:
-            it = {vs.name: [_rowdict(vs.visibleCols, row) for row in vs.iterrows()] for vs in vsheets}
-
+    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
         try:
             indent = int(options.json_indent)
         except Exception:
             indent = options.json_indent
 
         jsonenc = _vjsonEncoder(indent=indent)
-        with Progress(gerund='saving'):
-            for chunk in jsonenc.iterencode(it):
-                fp.write(chunk)
+
+        if len(vsheets) == 1:
+            fp.write('[\n')
+            vs = vsheets[0]
+            with Progress(gerund='saving'):
+                for i, row in enumerate(vs.iterrows()):
+                    if i > 0:
+                        fp.write(',\n')
+                    rd = _rowdict(vs.visibleCols, row)
+                    fp.write(jsonenc.encode(rd))
+            fp.write('\n]\n')
+        else:
+            it = {vs.name: [_rowdict(vs.visibleCols, row) for row in vs.iterrows()] for vs in vsheets}
+
+            with Progress(gerund='saving'):
+                for chunk in jsonenc.iterencode(it):
+                    fp.write(chunk)
 
 
 @VisiData.api
 def save_jsonl(vd, p, *vsheets):
-    with p.open_text(mode='w') as fp:
+    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
       for vs in vsheets:
         vcols = vs.visibleCols
         jsonenc = _vjsonEncoder()
@@ -147,5 +156,6 @@ def save_jsonl(vd, p, *vsheets):
                 fp.write(jsonenc.encode(rowdict) + '\n')
 
 
+JsonSheet.class_options.encoding = 'utf-8'
 VisiData.save_ndjson = VisiData.save_jsonl
 VisiData.save_ldjson = VisiData.save_jsonl

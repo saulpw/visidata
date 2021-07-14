@@ -32,11 +32,10 @@ def modtime(path):
 
 class FileProgress:
     'Open file in binary mode and track read() progress.'
-    def __init__(self, path, **kwargs):
+    def __init__(self, path, fp):
         self.path = path
-        self.fp = open(path, mode='wb' if 'w' in kwargs.get('mode', '') else 'rb')
-        self.size = filesize(path)
-        self.prog = Progress(gerund='loading', total=self.size)
+        self.fp = fp
+        self.prog = Progress(gerund='loading', total=filesize(path))
         self.prog.__enter__()
 
     def read(self, size=-1):
@@ -49,12 +48,37 @@ class FileProgress:
                 self.prog = None
         return r
 
+    def __getattr__(self, k):
+        return getattr(self.fp, k)
+
+    def __enter__(self):
+        self.fp.__enter__()
+        return self
+
+    def __next__(self):
+        r = next(self.fp)
+        self.prog.addProgress(len(r))
+        return r
+
+    def __iter__(self):
+        if not self.prog:
+            yield from self.fp
+        else:
+            for line in self.fp:
+                self.prog.addProgress(len(line))
+                yield line
+            self.prog.__exit__(None, None, None)
+            self.prog = None
+
+    def __exit__(self, type, value, tb):
+        return self.fp.__exit__(type, value, tb)
+
 
 class Path(os.PathLike):
     'File and path-handling class, modeled on `pathlib.Path`.'
     def __init__(self, given, fp=None, lines=None, filesize=None):
         # Resolve pathname shell variables and ~userdir
-        self.given = os.path.expandvars(os.path.expanduser(given))
+        self.given = os.path.expandvars(os.path.expanduser(str(given)))
         self.fp = fp
         self.lines = lines or []  # shared among all RepeatFile instances
         self.filesize = filesize
@@ -84,7 +108,7 @@ class Path(os.PathLike):
             self.name = self._path.name
 
         # check if file is compressed
-        if self.suffix in ['.gz', '.bz2', '.xz']:
+        if self.suffix in ['.gz', '.bz2', '.xz', '.lzma', '.zst']:
             self.compression = self.ext
             uncompressedpath = Path(self.given[:-len(self.suffix)])
             self.name = uncompressedpath.name
@@ -115,7 +139,7 @@ class Path(os.PathLike):
     def __truediv__(self, a):
         return Path(self._path.__truediv__(a))
 
-    def open_text(self, mode='rt'):
+    def open_text(self, mode='rt', encoding=None):
         'Open path in text mode, using options.encoding and options.encoding_errors.  Return open file-pointer or file-pointer-like.'
         # rfile makes a single-access fp reusable
 
@@ -123,7 +147,7 @@ class Path(os.PathLike):
             return self.rfile
 
         if self.fp:
-            self.rfile = RepeatFile(fp=self.fp)
+            self.rfile = RepeatFile(self.fp)
             return self.rfile
 
         if 't' not in mode:
@@ -139,7 +163,7 @@ class Path(os.PathLike):
                 vd.error('invalid mode "%s" for Path.open_text()' % mode)
                 return sys.stderr
 
-        return self.open(mode=mode, encoding=options.encoding, errors=options.encoding_errors)
+        return self.open(mode=mode, encoding=encoding or vd.options.encoding, errors=vd.options.encoding_errors)
 
     @wraps(pathlib.Path.read_text)
     def read_text(self, *args, **kwargs):
@@ -150,7 +174,7 @@ class Path(os.PathLike):
             kwargs['errors'] = kwargs.get('encoding_errors', options.encoding_errors)
 
         if self.lines:
-            return RepeatFile(iter_lines=self.lines).read()
+            return RepeatFile(self.lines).read()
         elif self.fp:
             return self.fp.read()
         else:
@@ -158,22 +182,26 @@ class Path(os.PathLike):
 
     @wraps(pathlib.Path.open)
     def open(self, *args, **kwargs):
-        fn = self
+        path = self
+        binmode = 'wb' if 'w' in kwargs.get('mode', '') else 'rb'
         if self.compression == 'gz':
             import gzip
-            return gzip.open(FileProgress(fn, **kwargs), *args, **kwargs)
+            return gzip.open(FileProgress(path, fp=open(path, mode=binmode)), *args, **kwargs)
         elif self.compression == 'bz2':
             import bz2
-            return bz2.open(FileProgress(fn, **kwargs), *args, **kwargs)
-        elif self.compression == 'xz':
+            return bz2.open(FileProgress(path, fp=open(path, mode=binmode)), *args, **kwargs)
+        elif self.compression in ['xz', 'lzma']:
             import lzma
-            return lzma.open(FileProgress(fn, **kwargs), *args, **kwargs)
+            return lzma.open(FileProgress(path, fp=open(path, mode=binmode)), *args, **kwargs)
+        elif self.compression == 'zst':
+            import zstandard
+            return zstandard.open(FileProgress(path, fp=open(path, mode=binmode)), *args, **kwargs)
         else:
-            return self._path.open(*args, **kwargs)
+            return FileProgress(path, fp=self._path.open(*args, **kwargs))
 
     def __iter__(self):
         with Progress(total=filesize(self)) as prog:
-            with self.open_text() as fd:
+            with self.open_text(encoding=vd.options.encoding) as fd:
                 for i, line in enumerate(fd):
                     prog.addProgress(len(line))
                     yield line.rstrip('\n')
@@ -232,16 +260,16 @@ class Path(os.PathLike):
 
 
 class RepeatFile:
-    def __init__(self, *, fp=None, iter_lines=None):
-        'Provide either fp or iter_lines, and lines will be filled from it.'
-        self.fp = fp
+    '''Lazy file-like object that can be read and line-seeked more than once from memory.'''
+
+    def __init__(self, iter_lines, lines=None):
         self.iter_lines = iter_lines
-        self.lines = []
+        self.lines = lines if lines is not None else []
         self.iter = RepeatFileIter(self)
 
     def __enter__(self):
-        self.iter = RepeatFileIter(self)
-        return self
+        '''Returns a new independent file-like object, sharing the same line cache.'''
+        return RepeatFile(self.iter_lines, lines=self.lines)
 
     def __exit__(self, a,b,c):
         pass
@@ -258,10 +286,21 @@ class RepeatFile:
                 break  # end of file
         return r
 
+    def tell(self):
+        '''Tells the current position as an opaque line marker.'''
+        return self.iter.nextIndex
+
     def seek(self, n):
-        if n != 0:
-            vd.error('RepeatFile can only seek to beginning')
-        self.iter = RepeatFileIter(self)
+        '''Seek to an already seen opaque line position marker only.'''
+        self.iter.nextIndex = n
+
+    def readline(self, size=-1):
+        if size != -1:
+            vd.error('RepeatFile does not support limited line length')
+        try:
+            return next(self.iter)
+        except StopIteration:
+            return ''
 
     def __iter__(self):
         return RepeatFileIter(self)
@@ -290,13 +329,6 @@ class RepeatFileIter:
                 self.rf.lines.append(r)
             except StopIteration:
                 self.rf.iter_lines = None
-                raise
-        elif self.rf.fp:
-            try:
-                r = next(self.rf.fp)
-                self.rf.lines.append(r)
-            except StopIteration:
-                self.rf.fp = None
                 raise
         else:
             raise StopIteration()

@@ -71,7 +71,6 @@ def chooseMany(vd, choices):
             chosen = e.args[0]
 
     if vd.cmdlog:
-        vd.status(str(chosen))
         vd.setLastArgs(' '.join(chosen))
 
     return chosen

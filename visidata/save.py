@@ -39,6 +39,7 @@ def iterdispvals(sheet, *cols, format=False):
         for col, transforms in transformers.items():
             try:
                 dispval = col.getValue(r)
+
             except Exception as e:
                 vd.exceptionCaught(e)
                 dispval = options_safe_error or str(e)
@@ -46,12 +47,15 @@ def iterdispvals(sheet, *cols, format=False):
             try:
                 for t in transforms:
                     if dispval is None:
-                        dispval = ''
                         break
                     elif isinstance(dispval, TypedExceptionWrapper):
                         dispval = options_safe_error or str(dispval)
                         break
-                    dispval = t(dispval)
+                    else:
+                        dispval = t(dispval)
+
+                if dispval is None and format:
+                    dispval = ''
             except Exception as e:
                 dispval = str(dispval)
 
@@ -89,7 +93,7 @@ def save_cols(vd, cols):
         savedcoltxt = cols[0].name + ' column'
     else:
         savedcoltxt = '%s columns' % len(cols)
-    path = inputPath('save %s to: ' % savedcoltxt, value=vs.getDefaultSaveName())
+    path = vd.inputPath('save %s to: ' % savedcoltxt, value=vs.getDefaultSaveName())
     vd.saveSheets(path, vs, confirm_overwrite=options.confirm_overwrite)
 
 
@@ -111,6 +115,8 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
     vd.status('saving %s sheets to %s as %s' % (len(vsheets), givenpath.given, filetype))
 
     if not givenpath.given.endswith('/'):  # forcibly specify save individual files into directory by ending path with /
+        for vs in vsheets:
+            vs.hasBeenModified = False
         return vd.execAsync(savefunc, givenpath, *vsheets)
 
     # more than one sheet; either no specific multisave for save filetype, or path ends with /
@@ -124,16 +130,17 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
     if not givenpath.is_dir():
         vd.fail(f'cannot save multiple {filetype} sheets to non-dir')
 
-    # get save function to call
-    for vs in vsheets:
-        p = Path((givenpath / vs.name).with_suffix('.'+filetype))
-        vd.execAsync(savefunc, p, vs)
-    return
+    def _savefiles(vsheets, givenpath, savefunc, filetype):
+        for vs in vsheets:
+            p = Path((givenpath / vs.name).with_suffix('.'+filetype))
+            savefunc(p, vs)
+            vs.hasBeenModified = False
+    return vd.execAsync(_savefile, vsheets, givenpath, savefunc, filetype)
 
 
 @VisiData.api
 def save_txt(vd, p, *vsheets):
-    with p.open_text(mode='w') as fp:
+    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
         for vs in vsheets:
             unitsep = vs.options.delimiter
             rowsep = vs.options.row_delimiter

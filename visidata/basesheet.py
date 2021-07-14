@@ -94,8 +94,14 @@ class BaseSheet(DrawablePane):
         self._scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
         self.mouseX = 0
         self.mouseY = 0
+        self.hasBeenModified = False
 
         super().__init__(**kwargs)
+
+    def setModified(self):
+        if not self.hasBeenModified:
+            vd.addUndo(setattr, self, 'hasBeenModified', self.hasBeenModified)
+            self.hasBeenModified = True
 
     def __lt__(self, other):
         if self.name != other.name:
@@ -108,7 +114,8 @@ class BaseSheet(DrawablePane):
         cls = self.__class__
         ret = cls.__new__(cls)
         ret.__dict__.update(self.__dict__)
-        ret.precious = True  # copies can be precious even if originals aren't
+        ret.precious = True  # copy can be precious even if original is not
+        ret.hasBeenModified = False  # copy is not modified even if original is
         return ret
 
     def __bool__(self):
@@ -139,7 +146,7 @@ class BaseSheet(DrawablePane):
         if not cmd:
             if keystrokes:
                 vd.debug('no command "%s"' % keystrokes)
-            return True
+            return False
 
         escaped = False
         err = ''
@@ -190,8 +197,9 @@ class BaseSheet(DrawablePane):
 
     def refresh(self):
         'Clear the terminal screen and let the next draw cycle redraw everything.'
-        self._scr.clear()
-        self._scr.refresh()
+        if self._scr:
+            self._scr.clear()
+            self._scr.refresh()
 
     def ensureLoaded(self):
         'Call ``reload()`` if not already loaded.'
@@ -226,6 +234,8 @@ class BaseSheet(DrawablePane):
 @VisiData.api
 def redraw(vd):
     'Clear the terminal screen and let the next draw cycle recreate the windows and redraw everything.'
+    for vs in vd.sheets:
+        vs._scr = None
     vd.scrFull.clear()
     vd.win1.clear()
     vd.win2.clear()
