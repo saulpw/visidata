@@ -13,12 +13,10 @@
 
 ## References
 
-* [quick reference guide for 2.0](/man)
+* [quick reference guide for 2.0](/docs/man)
     * all available commands and options
     * also available as a manpage via `man vd` and from inside VisiData with `Ctrl+H`
-* [quick reference guide for 1.5.2](/docs/v1.5.2/man)
 * [VisiData Cheat Sheet](https://jsvine.github.io/visidata-cheat-sheet/en/)
-* [keyboard layout of commands](/docs/kblayout)
 
 ## 'How to' recipes
 
@@ -77,12 +75,5 @@
     * How to have configurations persist
     * How to configure commands
 * [Plugins - extending VisiData functionality](/docs/plugins)
-* [Developing a loader](/docs/api/loaders)
 * [STDOUT pipe/redirect](/docs/pipes)
-
-# For developers
-
-VisiData can interact with data from any source or in any format.
-* [VisiData API Guide](/docs/api)
 * [guide to contributing](/contributing)
-* [viewtsv annotated](/docs/viewtsv)
