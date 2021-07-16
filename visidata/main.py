@@ -256,13 +256,17 @@ def main_vd():
             else:
                 startsheet = startsheets[0] or sources[-1]
                 vs = vd.getSheet(startsheet)
+                if not vs:
+                    vd.warning(f'no sheet "{startsheet}"')
+                    continue
+
                 vd.sync(vs.ensureLoaded())
                 vd.clearCaches()
                 for startsheet in startsheets[1:]:
                     rowidx = vs.getRowIndexFromStr(options.rowkey_prefix + startsheet)
                     if rowidx is None:
+                        vd.warning(f'{vs.name} has no subsheet "{startsheet}"')
                         vs = None
-                        vd.warning(f'no sheet "{startsheet}"')
                         break
                     vs = vs.rows[rowidx]
                     vd.sync(vs.ensureLoaded())
