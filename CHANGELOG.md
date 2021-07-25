@@ -1,6 +1,6 @@
 # VisiData version history
 
-# v2.5 (2021-07-01)
+# v2.5 (2021-07-08)
 
 - [social] #visidata has moved off of freenode to libera.chat
 - [deps] required pandas version for the pandas loader has been bumped to at least 1.0.5
