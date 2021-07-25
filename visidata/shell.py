@@ -230,8 +230,16 @@ DirSheet.addCommand('gy', 'copy-selected', 'copy_files(selectedRows, inputPath("
 @DirSheet.api
 @asyncthread
 def copy_files(sheet, paths, dest):
-    dest = Path(dest)
-    dest.is_dir() or vd.fail('target must be directory')
-    vd.status('copying %s %s to %s' % (len(paths), sheet.rowtype, dest))
-    for p in Progress(paths, gerund='copying'):
-        shutil.copyfile(p, dest/(p.parts[-1]))
+    destdir = Path(dest)
+    destdir.is_dir() or vd.fail('target must be directory')
+    vd.status('copying %s %s to %s' % (len(paths), sheet.rowtype, destdir))
+    for srcpath in Progress(paths, gerund='copying'):
+        try:
+            if not srcpath.is_dir():
+                destpath = destdir/str(srcpath)
+                os.makedirs(destpath.parent, exist_ok=True)
+                shutil.copyfile(srcpath, destpath)
+            else:
+                os.makedirs(p, exist_ok=True)
+        except Exception as e:
+            vd.exceptionCaught(e)
