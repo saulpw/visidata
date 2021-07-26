@@ -1,8 +1,6 @@
 # VisiData Plus
 
-This repo contains many interesting plugins for use with [VisiData](https://visidata.org).
-
-## Plugins
+VisiData Plus contains many useful loaders and features for [VisiData](https://visidata.org).
 
 ### APIs
 
@@ -21,25 +19,21 @@ This repo contains many interesting plugins for use with [VisiData](https://visi
 - [top](https://github.com/saulpw/vdplus/tree/develop/api/top): interactive process viewer
 - [Galactic Conquest](https://github.com/saulpw/vdplus/tree/develop/api/galcon): a remake of the classic [Galcon](http://www.galcon.com/classic/history.html).
 
-## No License Granted By Default
+## License
 
-The code in this repository, hereafter "VisiData Plus", is **not** open-source software.
+The code and documentation in this repository, hereafter "VisiData Plus", is **not** open-source software.
 
-All code and documentation in this repository is copyright [Saul Pwanson](https://github.com/saulpw), who has the sole authority to release, license, or redistribute its contents.
+VisiData Plus is copyright [Saul Pwanson](https://github.com/saulpw), who has the sole authority to release, license, or redistribute its contents.
 
-You **must not** redistribute any of the source code contained in this repository, unless it has been explicitly released under an Open Source License.
+As an individual, you may use VisiData Plus under the [PolyForm Non-Commercial Use license](LICENSE.polyform-non-commercial.txt).
 
-You **may** use components which have been released under an Open Source License; see the component-level READMEs for information.
+Other license terms are available for VisiData Plus; contact [Saul Pwanson](mailto:vdplus@saul.pw) for more information.
 
-You **may** use other components on a trial basis to discover their capabilities.
+Individual components of VisiData Plus may be available to convert to open-source license, particularly if you are willing to expand, maintain, and package that component for release.
 
-You **may** view or read any of the source code, to learn about Python, or how to make VisiData plugins, or how to use a specific API or library.
+If you submit a Pull Request to this repository, you **must** digitally sign the [Contributor Assignment Agreement](https://github.com/saulpw/vdplus/tree/develop/CONTRIBUTING.md) before they can be merged.
 
-You **may** request permission to use one or more components in this repository on an ongoing basis by contacting [Saul Pwanson](mailto:vdplus@saul.pw), who probably will agree to liberal terms if you ask nicely, and particularly if you express interest in expanding, maintaining, and/or packaging a component for release.
-
-You **must** digitally sign the [Contributor Assignment Agreement](https://github.com/saulpw/vdplus/tree/develop/CONTRIBUTING.md) in order to submit changes to this repository.
-
-## Installing a component
+## Installing VisiData Plus
 
 1. Clone this repo into `.visidata/vdplus`:
 
@@ -47,9 +41,9 @@ You **must** digitally sign the [Contributor Assignment Agreement](https://githu
 
 2. Add this line to your `.visidatarc` (which is usually in your home directory) for every component you want to use:
 
-    import vdplus.<component>
+    import vdplus
 
-Additional options may be necessary; see the README for each component.
+Additional options may be necessary for certain components; see the README for each component.
 
 3. Install Python requirements for that component:
 
