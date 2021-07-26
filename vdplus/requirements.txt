@@ -7,3 +7,6 @@ requests_cache  # scraper
 beautifulsoup4  # scraper
 
 praw # reddit
+
+seaborn
+matplotlib # svg

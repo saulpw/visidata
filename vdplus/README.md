@@ -12,12 +12,13 @@ VisiData Plus contains many useful loaders and features for [VisiData](https://v
 - [RC Together](https://github.com/saulpw/vdplus/tree/develop/api/rctogether): control an army of bots via [RC Together API](https://docs.rctogether.com/).
 - [bit.io](https://github.com/saulpw/vdplus/tree/develop/api/bitio): interface to [bit.io](https://bit.io) API.
 
-### Other tools
+### Other features/tools
 
-- [Web Scraper](https://github.com/saulpw/vdplus/tree/develop/api/scraper): scrape urls from web pages and web pages from urls iteratively and interactively.
-- [ping](https://github.com/saulpw/vdplus/tree/develop/api/ping): interactive ping+traceroute
-- [top](https://github.com/saulpw/vdplus/tree/develop/api/top): interactive process viewer
-- [Galactic Conquest](https://github.com/saulpw/vdplus/tree/develop/api/galcon): a remake of the classic [Galcon](http://www.galcon.com/classic/history.html).
+- [graphing](https://github.com/saulpw/vdplus/tree/develop/graphing): save scatterplot as .svg
+- [Web Scraper](https://github.com/saulpw/vdplus/tree/develop/scraper): scrape urls from web pages and web pages from urls iteratively and interactively.
+- [ping](https://github.com/saulpw/vdplus/tree/develop/ping): interactive ping+traceroute
+- [top](https://github.com/saulpw/vdplus/tree/develop/top): interactive process viewer
+- [Galactic Conquest](https://github.com/saulpw/vdplus/tree/develop/galcon): a remake of the classic [Galcon](http://www.galcon.com/classic/history.html).
 
 ## License
 

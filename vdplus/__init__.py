@@ -1,3 +1,3 @@
 from .utils import *
-from .seaborn import *
+from .graphing import *
 from .scraper import *
