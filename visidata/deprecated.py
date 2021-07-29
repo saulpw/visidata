@@ -1,3 +1,5 @@
+import functools
+
 from visidata import VisiData, vd
 import visidata
 
@@ -5,6 +7,7 @@ alias = visidata.BaseSheet.bindkey
 
 def deprecated(ver, instead=''):
     def decorator(func):
+        @functools.wraps(func)
         def wrapper(*args, **kwargs):
             import traceback
 
