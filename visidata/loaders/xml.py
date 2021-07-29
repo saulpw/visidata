@@ -77,10 +77,8 @@ class XmlSheet(Sheet):
 
 @VisiData.api
 def save_xml(vd, p, vs):
-    isinstance(XmlSheet) or vd.fail('must save xml from XmlSheet')
+    isinstance(vs, XmlSheet) or vd.fail('must save xml from XmlSheet')
     vs.root.write(str(p), encoding=options.encoding, standalone=False, pretty_print=True)
-
-VisiData.save_svg = VisiData.save_xml
 
 
 XmlSheet.addCommand('za', 'addcol-xmlattr', 'attr=input("add attribute: "); addColumnAtCursor(AttribColumn(attr, attr))', 'add column for xml attribute')
