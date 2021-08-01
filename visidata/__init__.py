@@ -137,6 +137,7 @@ from .loaders.texttables import *
 from .loaders.rec import *
 from .loaders.eml import *
 from .loaders.vds import *
+from .loaders.vnl import *
 
 from .ddwplay import *
 
