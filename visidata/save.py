@@ -135,7 +135,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
             p = Path((givenpath / vs.name).with_suffix('.'+filetype))
             savefunc(p, vs)
             vs.hasBeenModified = False
-    return vd.execAsync(_savefile, vsheets, givenpath, savefunc, filetype)
+    return vd.execAsync(_savefiles, vsheets, givenpath, savefunc, filetype)
 
 
 @VisiData.api
