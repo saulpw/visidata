@@ -13,7 +13,7 @@ Plugins can be installed and uninstalled in the :ref:`Plugins Sheet </docs/plugi
 Plugins often start as a small snippet in ``.visidatarc``, and then the code is migrated to a separate file when it gets too large to share with other people via a short code snippet.
 The actual code in either case should be identical.
 
-To publish a plugin, create a public repo with a .py file, and a ``manifest.jsonl`` file with the following json fields.
+To publish a plugin, create a public repo with a .py file. Ensure the plugin has a ``__version__``. In the ``visidata/plugins/plugins.jsonl`` file in the VisiData repo, add a row for each plugin with all of the necessary information:
 
 - *name*: short name of the plugin (like ``vfake``).  Less than 20 characters.
 - *description*: a "one line" searchable description of the core features.  Less than 1000 characters.
@@ -25,8 +25,6 @@ To publish a plugin, create a public repo with a .py file, and a ``manifest.json
 - *pydeps*: space-separated list of PyPI dependencies (like in ``requirements.txt``).
 - *vdplugindeps*: space-separated list of vd plugin dependencies.
 - *sha256*: SHA256 hash of plugin .py of most recent release.
-
-Multiple plugins can be defined in the same manifest; one line per plugin in the repository.
 
 .. note::
 
@@ -56,7 +54,7 @@ hello.py
 
     BaseSheet.addCommand('0', 'hello-world', 'status(options.disp_hello)')
 
-manifest.jsonl
+plugins.jsonl
 ^^^^^^^^^^^^^^^^
 
 ::
@@ -83,4 +81,4 @@ Notes:
 - Include at least the author and version metadata elements.
 - Options at the top, commands at the bottom.
 - Avoid toplevel imports of non-stdlib Python extensions.
-- To share with other people, add it to the `plugins.jsonl <>`__ and submit a PR to the `saulpw/visidata <>`__ Github repo.
+- To share with other people, add it to the `plugins.jsonl <https://github.com/saulpw/visidata/blob/develop/plugins/plugins.jsonl>`__ and submit a PR to the `saulpw/visidata <https://github.com/saulpw/visidata/pulls>`__ Github repo.
