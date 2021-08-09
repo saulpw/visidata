@@ -975,6 +975,11 @@ class IndexSheet(Sheet):
         if not self.options.load_lazy:
             sheet.ensureLoaded()
 
+    @asyncthread
+    def reloadSheets(self, sheets):
+        for vs in vd.Progress(sheets):
+            vs.reload()
+
 
 class SheetsSheet(IndexSheet):
     columns = [
@@ -1155,7 +1160,7 @@ Sheet.addCommand('z%', 'type-floatsi', 'cursorCol.type = floatsi', 'set type of 
 Sheet.addCommand('', 'type-floatlocale', 'cursorCol.type = floatlocale', 'set type of current column to float using system locale set in LC_NUMERIC')
 
 # when diving into a sheet, remove the index unless it is precious
-IndexSheet.addCommand('g^R', 'reload-selected', 'for vs in selectedRows or rows: vs.reload()', 'reload all selected sheets')
+IndexSheet.addCommand('g^R', 'reload-selected', 'reloadSheets(selectedRows or rows)', 'reload all selected sheets')
 SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_columns", source=selectedRows))', 'open Columns Sheet with all visible columns from selected sheets')
 SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visble columns from selected sheets')
 SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)', 'abort async thread for current sheet')
