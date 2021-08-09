@@ -88,14 +88,18 @@ class Cell:
 
     @property
     def value(cell):
-        o = wrapply(cell.col.getTypedValue, cell.row)
-        if isinstance(o, TypedExceptionWrapper):
-            return options.safe_error or str(o.exception)
-        elif isinstance(o, TypedWrapper):
-            return o.val
-        elif isinstance(o, date):
-            return cell.col.getDisplayValue(cell.row)
-        return o
+        try:
+            if cell.row is None:
+                return None
+            o = cell.col.getValue(cell.row)
+            if o is None:
+                return None
+            o = cell.col.type(o)
+            if isinstance(o, date):
+                o = cell.col.format(o)
+            return o
+        except Exception as e:
+            return options.safe_error or str(e)
 
 
 class _vjsonEncoder(json.JSONEncoder):
