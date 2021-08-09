@@ -276,6 +276,7 @@ class ConcatSheet(Sheet):
 
 
 
-IndexSheet.addCommand('&', 'join-sheets', 'vd.push(createJoinedSheet(selectedRows or fail("no sheets selected to join"), jointype=chooseOne(jointypes)))', 'merge selected sheets with visible columns from all, keeping rows according to jointype')
+IndexSheet.addCommand('&', 'join-selected', 'vd.push(createJoinedSheet(someSelectedRows, jointype=chooseOne(jointypes)))', 'merge selected sheets with visible columns from all, keeping rows according to jointype')
+IndexSheet.bindkey('g&', 'join-selected')
 Sheet.addCommand('&', 'join-sheets-top2', 'vd.push(createJoinedSheet(vd.sheets[:2], jointype=chooseOne(jointypes)))', 'concatenate top two sheets in Sheets Stack')
 Sheet.addCommand('g&', 'join-sheets-all', 'vd.push(createJoinedSheet(vd.sheets, jointype=chooseOne(jointypes)))', 'concatenate all sheets in Sheets Stack')
