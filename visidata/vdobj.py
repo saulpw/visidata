@@ -61,9 +61,14 @@ class VisiData(visidata.Extensible):
     @property
     def activeSheet(self):
         'Return top sheet on sheets stack, or cmdlog if no sheets.'
-        stack = self.activeStack
-        if stack:
-            return stack[0]
+        for vs in self.sheets:
+            if vs.pane and vs.pane == self.activePane:
+                return vs
+
+        for vs in self.sheets:
+            if vs.pane and vs.pane != self.activePane:
+                return vs
+
         return self._cmdlog
 
     @property
