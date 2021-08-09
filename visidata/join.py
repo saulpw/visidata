@@ -231,12 +231,10 @@ def ExtendedSheet_reload(self, sheets):
 class ConcatColumn(Column):
     def __init__(self, name, cols, **kwargs):
         super().__init__(name, **kwargs)
-        self.cols = cols
+        self.cols = {c.sheet:c for c in cols}
 
     def getColBySheet(self, s):
-        for c in self.cols:
-            if c.sheet is s:
-                return c
+        return self.cols.get(s, None)
 
     def calcValue(self, row):
         srcSheet, srcRow = row
