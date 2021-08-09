@@ -268,9 +268,12 @@ class ConcatSheet(Sheet):
         for cols in self.sourceCols:
             self.addColumn(ConcatColumn(cols[0].name, cols, type=cols[0].type))
 
-        for sheet in sourceSheets:
-            for r in Progress(sheet.rows):
-                self.addRow((sheet, r))
+        with Progress(gerund='joining', sheet=self, total=sum(vs.nRows for vs in sourceSheets)) as prog:
+            for sheet in sourceSheets:
+                for r in sheet.rows:
+                    self.addRow((sheet, r))
+                    prog.addProgress(1)
+
 
 
 IndexSheet.addCommand('&', 'join-sheets', 'vd.push(createJoinedSheet(selectedRows or fail("no sheets selected to join"), jointype=chooseOne(jointypes)))', 'merge selected sheets with visible columns from all, keeping rows according to jointype')
