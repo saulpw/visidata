@@ -81,54 +81,36 @@ JsonLinesSheet=JsonSheet
 
 ## saving json and jsonl
 
-class Cell:
-    def __init__(self, col, row):
-        self.col = col
-        self.row = row
-
-    @property
-    def value(cell):
-        try:
-            if cell.row is None:
-                return None
-            o = cell.col.getValue(cell.row)
-            if o is None:
-                return None
-            o = cell.col.type(o)
-            if isinstance(o, date):
-                o = cell.col.format(o)
-            return o
-        except Exception as e:
-            return options.safe_error or str(e)
-
-
 class _vjsonEncoder(json.JSONEncoder):
-    def __init__(self, **kwargs):
-        super().__init__(sort_keys=options.json_sort_keys, **kwargs)
-        self.safe_error = options.safe_error
-
     def default(self, obj):
-        return obj.value if isinstance(obj, Cell) else str(obj)
+        return str(obj)
 
 
 def _rowdict(cols, row):
     ret = {}
-    for c in cols:
-        cell = Cell(c, row)
-        if cell.value is not None:
-            ret[c.name] = cell
+    for col in cols:
+        o = wrapply(col.getTypedValue, row)
+        if isinstance(o, TypedExceptionWrapper):
+            o = col.sheet.options.safe_error or str(o.exception)
+        elif isinstance(o, TypedWrapper):
+            o = o.val
+        elif isinstance(o, date):
+            o = col.getDisplayValue(row)
+        if o is not None:
+            ret[col.name] = o
     return ret
 
 
 @VisiData.api
 def save_json(vd, p, *vsheets):
-    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
+    vs = vsheets[0]
+    with p.open_text(mode='w', encoding=vs.options.encoding) as fp:
         try:
-            indent = int(options.json_indent)
+            indent = int(vs.options.json_indent)
         except Exception:
-            indent = options.json_indent
+            indent = vs.options.json_indent
 
-        jsonenc = _vjsonEncoder(indent=indent)
+        jsonenc = _vjsonEncoder(indent=indent, sort_keys=vs.options.json_sort_keys)
 
         if len(vsheets) == 1:
             fp.write('[\n')
