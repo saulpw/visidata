@@ -42,24 +42,31 @@ def draw_sheet(self, scr, sheet):
     scr.refresh()
 
 
-vd.windowConfig = None
+vd.windowConfig = dict(pct=0, n=0, h=0, w=0)  # n=top line of bottom window; h=height of bottom window; w=width of screen
 vd.winTop = mock.MagicMock(__bool__=mock.Mock(return_value=False))
+vd.scrMenu = mock.MagicMock(__bool__=mock.Mock(return_value=False))
 
 @VisiData.api
 def setWindows(vd, scr, pct=None):
     'Assign winTop, winBottom, win1 and win2 according to options.disp_splitwin_pct.'
     if pct is None:
         pct = options.disp_splitwin_pct  # percent of window for secondary sheet (negative means bottom)
+    menulines = options.show_menu
     h, w = scr.getmaxyx()
+
     n = abs(pct)*h//100
     # on 100 line screen, pct = 25 means second window on lines 75-100.  pct -25 -> lines 0-25
 
-    desiredConfig = dict(pct=pct, n=n, h=h, w=w)
+    desiredConfig = dict(pct=pct, n=n, h=h-menulines, w=w)
 
     if vd.scrFull is not scr or vd.windowConfig != desiredConfig:
-        vd.winTop = curses.newwin(n, w, 0, 0)
+        if menulines and not vd.scrMenu:
+            vd.scrMenu = scr.derwin(h-1, w, 0, 0)
+            vd.scrMenu.keypad(1)
+
+        vd.winTop = scr.derwin(n, w, menulines, 0)
         vd.winTop.keypad(1)
-        vd.winBottom = curses.newwin(h-n, w, n, 0)
+        vd.winBottom = scr.derwin(h-n-menulines, w, n+menulines, 0)
         vd.winBottom.keypad(1)
         if pct == 0 or pct >= 100:  # no second pane
             vd.win1 = vd.winBottom
@@ -78,6 +85,7 @@ def setWindows(vd, scr, pct=None):
         vd.windowConfig = desiredConfig
         vd.scrFull = scr
         return True
+
 
 @VisiData.api
 def draw_all(vd):
@@ -104,6 +112,11 @@ def draw_all(vd):
     elif ss1 and ss2 and not vd.win2:
         vd.draw_sheet(vd.win1, vd.sheetstack(vd.activePane)[0])
         vd.setWindows(vd.scrFull)
+
+    if vd.scrMenu:
+        vd.drawMenu(vd.scrMenu, vd.activeSheet)
+        vd.scrMenu.refresh()
+
 
 @VisiData.api
 def runresult(vd):
@@ -139,7 +152,7 @@ def mainloop(self, scr):
         threading.current_thread().sheet = sheet
         vd.drawThread = threading.current_thread()
 
-        vd.setWindows(scr)
+        vd.setWindows(vd.scrFull)
 
         self.draw_all()
 
@@ -163,17 +176,24 @@ def mainloop(self, scr):
                 self.keystrokes = ''
                 clicktype = ''
                 try:
+                    py, px = scr.getparyx()
                     devid, x, y, z, bstate = curses.getmouse()
                     pct = vd.windowConfig['pct']
                     topPaneActive = ((vd.activePane == 1 and pct < 0)  or (vd.activePane == 2 and pct > 0))
                     bottomPaneActive = ((vd.activePane == 2 and pct < 0)  or (vd.activePane == 1 and pct > 0))
-                    if vd.windowConfig and y > vd.windowConfig['n'] and topPaneActive:
-                        y -= vd.windowConfig['n']
+                    if y > vd.windowConfig['n'] and topPaneActive:
+                        py, px = vd.winBottom.getparyx()
+                        y -= py
                         sheet.mouseX, sheet.mouseY = x, y
-                    elif vd.windowConfig and y < vd.windowConfig['n'] and bottomPaneActive:
+                    elif options.show_menu < y < vd.windowConfig['n'] and bottomPaneActive:
+                        py, px = vd.winTop.getparyx()
+                        y -= py
                         sheet.mouseX, sheet.mouseY = x, y
                     elif pct == 0:
+                        py, px = vd.winTop.getparyx()
+                        y -= py
                         sheet.mouseX, sheet.mouseY = x, y
+
                     if bstate & curses.BUTTON_CTRL:
                         clicktype += "CTRL-"
                         bstate &= ~curses.BUTTON_CTRL
@@ -195,14 +215,14 @@ def mainloop(self, scr):
                             f(y, x, keystroke)
 
                         self.keystrokes = keystroke
-                        keystroke = ''
+                        keystroke = ''   # already handled
                 except curses.error:
                     pass
                 except Exception as e:
                     self.exceptionCaught(e)
 
-            if keystroke in self.keystrokes[:-1]:
-                vd.warning('duplicate prefix')
+            if keystroke and keystroke in self.keystrokes[:-1]:
+                vd.warning('duplicate prefix: ' + keystroke)
                 self.keystrokes = ''
             else:
                 self.keystrokes += keystroke

@@ -123,7 +123,8 @@ class VisiData(visidata.Extensible):
 
     def getMouse(self, _scr, _x, _y, button):
         for scr, y, x, h, w, kwargs in self.mousereg[::-1]:
-            if scr == _scr and x <= _x < x+w and y <= _y < y+h and button in kwargs:
+            py, px = scr.getparyx()
+            if x <= _x-px < x+w and y <= _y-py < y+h and button in kwargs:
                 return kwargs[button]
 
     @property

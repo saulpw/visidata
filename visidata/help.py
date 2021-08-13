@@ -37,10 +37,14 @@ class HelpSheet(MetaSheet):
             if k in self.cmddict:
                 self.cmddict[k].helpstr = cmdrow.helpstr
 
-        self.revbinds = collections.defaultdict(list)  # longname -> [keystrokes, ..]
+    @MetaSheet.lazy_property
+    def revbinds(self):
+        revbinds = collections.defaultdict(list)  # longname -> [keystrokes, ..]
         itbindings = vd.bindkeys.iterall()
         for (keystrokes, _), longname in itbindings:
-            self.revbinds[longname].append(keystrokes)
+            revbinds[longname].append(keystrokes)
+
+        return revbinds
 
 
 @VisiData.api

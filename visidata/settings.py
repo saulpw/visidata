@@ -319,10 +319,7 @@ def getCommand(sheet, cmd):
     while vd.bindkeys._get(longname, obj=sheet):
         longname = vd.bindkeys._get(longname, obj=sheet)
 
-    if not longname:
-        vd.fail('no binding for %s' % cmd)
-
-    return vd.commands._get(longname, obj=sheet) or vd.warning('no command "%s"' % longname)
+    return vd.commands._get(longname, obj=sheet)
 
 @VisiData.api
 def loadConfigFile(vd, fnrc, _globals=None):
