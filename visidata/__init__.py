@@ -115,6 +115,7 @@ import visidata.loaders.sqlite
 import visidata.loaders.fixed_width
 import visidata.loaders.postgres
 import visidata.loaders.mysql
+import visidata.loaders.mysqlclient
 import visidata.loaders.shp
 import visidata.loaders.geojson
 import visidata.loaders.mbtiles

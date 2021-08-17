@@ -1,0 +1,7 @@
+sheet	col	row	longname	input	keystrokes	comment
+global		filetype	set-option	mysqlclient		
+			open-file	sample_data/mysqlclient.tsv	o	
+mysqlclient	LF		addcol-expr	ord(LF)	=	create new column from Python expression, with column names as variables
+mysqlclient	BS		addcol-expr	ord(BS)	=	create new column from Python expression, with column names as variables
+mysqlclient	TAB		addcol-expr	ord(TAB)	=	create new column from Python expression, with column names as variables
+mysqlclient	CR		addcol-expr	ord(CR)	=	create new column from Python expression, with column names as variables
