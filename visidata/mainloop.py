@@ -60,7 +60,9 @@ def setWindows(vd, scr, pct=None):
     desiredConfig = dict(pct=pct, n=n, h=h-menulines, w=w)
 
     if vd.scrFull is not scr or vd.windowConfig != desiredConfig:
-        if menulines and not vd.scrMenu:
+        if not menulines:
+            vd.scrMenu = None
+        elif not vd.scrMenu:
             vd.scrMenu = scr.derwin(h-1, w, 0, 0)
             vd.scrMenu.keypad(1)
 
