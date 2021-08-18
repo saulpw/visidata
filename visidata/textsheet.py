@@ -9,7 +9,7 @@ __all__ = ['TextSheet', 'ErrorSheet']
 
 
 option('wrap', False, 'wrap text to fit window width on TextSheet')
-option('save_filetype', 'tsv', 'specify default file type to save as', replay=True)
+option('save_filetype', '', 'specify default file type to save as', replay=True)
 
 
 ## text viewer
