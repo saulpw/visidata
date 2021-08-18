@@ -23,12 +23,14 @@ vd.menus = [
         MenuItem('Open file/url', 'open-file'),
         MenuItem('Save as', 'save-sheet'),
         MenuItem('Commit', 'commit-sheet'),
-        MenuItem('Close sheet', 'quit-sheet'),
         MenuItem('Options', menus=[
             MenuItem('All sheets', 'options-global'),
             MenuItem('This sheet', 'options-sheet'),
         ]),
-        MenuItem('Exit VisiData', 'quit-all'),
+        MenuItem('Quit', menus=[
+            MenuItem('Top sheet', 'quit-sheet'),
+            MenuItem('All sheets', 'quit-all'),
+        ]),
     ]),
 
     MenuItem('Edit', menus=[
