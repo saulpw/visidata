@@ -1,7 +1,7 @@
 import itertools
 import re
 
-from visidata import vd, VisiData, BaseSheet, Sheet, Column, Progress, globalCommand, ALT
+from visidata import vd, VisiData, BaseSheet, Sheet, Column, Progress, globalCommand, ALT, asyncthread
 
 __all__ = ['rotateRange']
 
@@ -61,19 +61,24 @@ def pageLeft(self):
 
 
 @Sheet.api
-def moveToNextRow(vs, func, reverse=False):
+@asyncthread
+def moveToNextRow(vs, func, reverse=False, msg='no different value up this column'):
     'Move cursor to next (prev if reverse) row for which func returns True.  Returns False if no row meets the criteria.'
     rng = range(vs.cursorRowIndex-1, -1, -1) if reverse else range(vs.cursorRowIndex+1, vs.nRows)
+    found = False
+    with Progress(total=len(vs.rows)) as prog:
+        for i in rng:
+            prog.addProgress(1)
+            try:
+                if func(vs.rows[i]):
+                    vs.cursorRowIndex = i
+                    found = True
+                    break
+            except Exception:
+                pass
 
-    for i in rng:
-        try:
-            if func(vs.rows[i]):
-                vs.cursorRowIndex = i
-                return True
-        except Exception:
-            pass
-
-    return False
+    if not found:
+        vd.status(msg)
 
 
 @Sheet.api
@@ -127,13 +132,13 @@ Sheet.addCommand('zc', 'go-col-number', 'sheet.cursorVisibleColIndex = int(input
 Sheet.addCommand('zr', 'go-row-number', 'sheet.cursorRowIndex = int(input("move to row number: "))', 'go to the given row number (0-based)')
 
 
-Sheet.addCommand('<', 'go-prev-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorTypedValue: col.getTypedValue(row) != val, reverse=True) or status("no different value up this column")', 'go up current column to next value'),
-Sheet.addCommand('>', 'go-next-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorTypedValue: col.getTypedValue(row) != val) or status("no different value down this column")', 'go down current column to next value'),
-Sheet.addCommand('{', 'go-prev-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True) or status("no previous selected row")', 'go up current column to previous selected row'),
-Sheet.addCommand('}', 'go-next-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row)) or status("no next selected row")', 'go down current column to next selected row'),
+Sheet.addCommand('<', 'go-prev-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorTypedValue: col.getTypedValue(row) != val, reverse=True, msg="no different value up this column")', 'go up current column to next value'),
+Sheet.addCommand('>', 'go-next-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorTypedValue: col.getTypedValue(row) != val, msg="no different value down this column")', 'go down current column to next value'),
+Sheet.addCommand('{', 'go-prev-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True, msg="no previous selected row")', 'go up current column to previous selected row'),
+Sheet.addCommand('}', 'go-next-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), msg="no next selected row") ', 'go down current column to next selected row'),
 
-Sheet.addCommand('z<', 'go-prev-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), reverse=True) or status("no null down this column")', 'go up current column to next null value'),
-Sheet.addCommand('z>', 'go-next-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row))) or status("no null down this column")', 'go down current column to next null value'),
+Sheet.addCommand('z<', 'go-prev-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), reverse=True, msg="no null up this column")', 'go up current column to next null value'),
+Sheet.addCommand('z>', 'go-next-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), msg="no null down this column")', 'go down current column to next null value'),
 
 for i in range(1, 11):
     globalCommand(ALT+str(i)[-1], 'jump-sheet-'+str(i), f'vd.push(*(list(s for s in allSheets if s.shortcut==str({i})) or fail("no sheet")))', f'jump to sheet {i}')
