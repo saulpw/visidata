@@ -15,6 +15,7 @@ vd.option('unfurl_empty', False, 'if unfurl includes rows for empty containers',
 
 
 class UnfurledSheet(Sheet):
+    # rowdef: [row, key, sub_value]
     @asyncthread
     def reload(self):
         # Copy over base sheet, using SubColumnFunc
