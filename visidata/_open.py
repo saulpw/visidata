@@ -110,8 +110,11 @@ def openSource(vd, p, filetype=None, create=False, **kwargs):
 def open_txt(p):
     'Create sheet from `.txt` file at Path `p`, checking whether it is TSV.'
     with p.open_text(encoding=vd.options.encoding) as fp:
-        if options.delimiter in next(fp):    # peek at the first line
-            return open_tsv(p)  # TSV often have .txt extension
+        try:
+            if options.delimiter in next(fp):    # peek at the first line
+                return open_tsv(p)  # TSV often have .txt extension
+        except StopIteration:
+            return Sheet(p.name, columns=[SettableColumn()], source=p)
         return TextSheet(p.name, source=p)
 
 
