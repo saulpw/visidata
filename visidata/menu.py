@@ -4,7 +4,7 @@ import textwrap
 from visidata import *
 
 
-vd.option('show_menu', False, '')
+vd.option('disp_menu_lines', 20, 'number of lines at top of screen for hierachical menu')
 vd.option('color_menu', 'white on 234 black', '')
 vd.option('color_menu_inactive', '245 white on 241 black', '')
 vd.option('color_menu_active', '223 yellow on black', '')
@@ -278,9 +278,9 @@ def prettybindkey(vd, k):
 
 @VisiData.api
 def runMenu(vd, i):
-    old_show_menu = vd.options.show_menu
+    old_disp_menu_lines = vd.options.disp_menu_lines
 
-    vd.options.show_menu=True
+    vd.options.disp_menu_lines=20
     vd.activeMenuItems = [i, 0]
 
     while True:
@@ -321,7 +321,7 @@ def runMenu(vd, i):
         vd.activeMenuItems[0] %= len(vd.menus)
 
     vd.activeMenuItems = []
-    vd.options.show_menu=old_show_menu
+    vd.options.disp_menu_lines=old_disp_menu_lines
 
 
 @VisiData.api

@@ -51,24 +51,25 @@ def setWindows(vd, scr, pct=None):
     'Assign winTop, winBottom, win1 and win2 according to options.disp_splitwin_pct.'
     if pct is None:
         pct = options.disp_splitwin_pct  # percent of window for secondary sheet (negative means bottom)
-    menulines = options.show_menu
+    menulines = options.disp_menu_lines
+    topmenulines = 1 if menulines else 0
     h, w = scr.getmaxyx()
 
     n = abs(pct)*h//100
     # on 100 line screen, pct = 25 means second window on lines 75-100.  pct -25 -> lines 0-25
 
-    desiredConfig = dict(pct=pct, n=n, h=h-menulines, w=w)
+    desiredConfig = dict(pct=pct, n=n, h=h-topmenulines, w=w)
 
     if vd.scrFull is not scr or vd.windowConfig != desiredConfig:
         if not menulines:
             vd.scrMenu = None
         elif not vd.scrMenu:
-            vd.scrMenu = scr.derwin(h-1, w, 0, 0)
+            vd.scrMenu = scr.derwin(menulines, w, 0, 0)
             vd.scrMenu.keypad(1)
 
-        vd.winTop = scr.derwin(n, w, menulines, 0)
+        vd.winTop = scr.derwin(n, w, topmenulines, 0)
         vd.winTop.keypad(1)
-        vd.winBottom = scr.derwin(h-n-menulines, w, n+menulines, 0)
+        vd.winBottom = scr.derwin(h-n-topmenulines, w, n+topmenulines, 0)
         vd.winBottom.keypad(1)
         if pct == 0 or pct >= 100:  # no second pane
             vd.win1 = vd.winBottom
@@ -187,7 +188,8 @@ def mainloop(self, scr):
                         py, px = vd.winBottom.getparyx()
                         y -= py
                         sheet.mouseX, sheet.mouseY = x, y
-                    elif options.show_menu < y < vd.windowConfig['n'] and bottomPaneActive:
+                    elif (1 if options.disp_menu_lines else 0) < y < vd.windowConfig['n'] and bottomPaneActive:
+                        # clicking within top pane when bottom pane is active
                         py, px = vd.winTop.getparyx()
                         y -= py
                         sheet.mouseX, sheet.mouseY = x, y
