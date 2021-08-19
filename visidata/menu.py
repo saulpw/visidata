@@ -93,12 +93,6 @@ vd.menus = [
         ]),
     ]),
 
-    MenuItem('Sheet', menus=[
-        MenuItem('Transpose', 'transpose'),
-        MenuItem('Melt', 'melt'),
-        MenuItem('Columns', 'columns-sheet'),
-    ]),
-
     MenuItem('Column', menus=[
         MenuItem('Hide', 'hide-col'),
         MenuItem('Type as', menus=[
@@ -159,6 +153,9 @@ vd.menus = [
     ]),
 
     MenuItem('Tools', menus=[
+        MenuItem('Transpose', 'transpose'),
+        MenuItem('Melt', 'melt'),
+        MenuItem('Columns', 'columns-sheet'),
         MenuItem('Plugins', 'open-plugins'),
         MenuItem('Command log', 'cmdlog-all'),
     ]),
@@ -356,4 +353,10 @@ class MenuCanvas(BaseSheet):
 
 
 MenuSheet.addCommand('z.', 'disp-menu', 'vd.push(MenuCanvas(name, "disp", source=sheet))', '')
-BaseSheet.addCommand('^[', 'open-menu', 'runMenu(0)', '')
+BaseSheet.addCommand('^[f', 'menu-file', 'runMenu(0)', '')
+BaseSheet.addCommand('^[e', 'menu-edit', 'runMenu(1)', '')
+BaseSheet.addCommand('^[v', 'menu-view', 'runMenu(2)', '')
+BaseSheet.addCommand('^[c', 'menu-column', 'runMenu(3)', '')
+BaseSheet.addCommand('^[s', 'menu-select', 'runMenu(4)', '')
+BaseSheet.addCommand('^[t', 'menu-tools', 'runMenu(5)', '')
+BaseSheet.addCommand('^[h', 'menu-sheet', 'runMenu(6)', '')
