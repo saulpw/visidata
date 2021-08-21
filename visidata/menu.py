@@ -21,6 +21,7 @@ vd.menus = [
     MenuItem('File', menus=[
         MenuItem('New', 'open-new'),
         MenuItem('Open file/url', 'open-file'),
+        MenuItem('Rename sheet', 'rename-sheet'),
         MenuItem('Save as', 'save-sheet'),
         MenuItem('Commit', 'commit-sheet'),
         MenuItem('Options', menus=[
@@ -66,7 +67,10 @@ vd.menus = [
 
     MenuItem('View', menus=[
         MenuItem('Statuses', 'open-statuses'),
-        MenuItem('All columns', 'columns-all'),
+        MenuItem('Columns', menus=[
+            MenuItem('this sheet', 'columns-sheet'),
+            MenuItem('all sheets', 'columns-all'),
+        ]),
         MenuItem('Errors', menus=[
             MenuItem('recent', 'error-recent'),
             MenuItem('all', 'errors-all'),
@@ -155,7 +159,6 @@ vd.menus = [
     MenuItem('Tools', menus=[
         MenuItem('Transpose', 'transpose'),
         MenuItem('Melt', 'melt'),
-        MenuItem('Columns', 'columns-sheet'),
         MenuItem('Plugins', 'open-plugins'),
         MenuItem('Command log', 'cmdlog-all'),
     ]),
