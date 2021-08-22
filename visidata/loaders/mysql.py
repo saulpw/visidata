@@ -124,7 +124,6 @@ class MyTable(Sheet):
             while True:
                 try:
                     r = cur.fetchone()
-                    consecutiveErrors = 0
                 except UnicodeDecodeError as exception:
                     vd.warning(str(exception))
                     continue
