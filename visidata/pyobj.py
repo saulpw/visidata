@@ -306,9 +306,25 @@ class PyobjSheet(PythonSheet):
 @TableSheet.api
 def openRow(sheet, row):
     'Return Sheet diving into *row*.'
+    if hasattr(sheet, 'connectionsSource'):
+        return openConnectedSheet(sheet, row)
     k = sheet.keystr(row) or [sheet.cursorRowIndex]
     name = f'{sheet.name}[{k}]'
     return PyobjSheet(name, source=tuple(c.getTypedValue(row) for c in sheet.visibleCols))
+
+def openConnectedSheet(sourceSheet, row):
+    for targetSheet, targetColumns in sourceSheet.connectionsTarget:
+        vd.ensureLoaded([targetSheet])
+        vd.sync()
+        vs = copy(targetSheet)
+        sourceCells = [c.getDisplayValue(row) for c in sourceSheet.connectionsSource]
+        vs.name += "_" + "_".join(sourceCells)
+        vs.source = str(sourceSheet)
+        vs.rows = []
+        for targetRow in targetSheet.rows:
+            if sourceCells == [c.getDisplayValue(targetRow) for c in targetColumns]:
+                vs.rows.append(copy(targetRow))
+        return vs
 
 @TableSheet.api
 def openCell(sheet, col, row):

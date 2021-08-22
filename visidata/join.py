@@ -10,20 +10,27 @@ def ensureLoaded(vd, sheets):
     threads = [vs.ensureLoaded() for vs in sheets]
     vd.status('loading %d sheets' % len([t for t in threads if t]))
 
-def createJoinedSheet(sheets, jointype=''):
+def joinSheets(sheets, jointype=''):
     sheets[1:] or vd.fail("join requires more than 1 sheet")
 
-    if jointype == 'append':
+    if jointype == 'connect':
+        for sourceSheet in sheets:
+            sourceSheet.connectionsSource = sourceSheet.keyCols
+            sourceSheet.connectionsTarget = []
+            for targetSheet in sheets:
+                if sourceSheet != targetSheet:
+                    sourceSheet.connectionsTarget.append((targetSheet, targetSheet.keyCols))
 
-        return ConcatSheet('&'.join(vs.name for vs in sheets), source=sheets)
+    elif jointype == 'append':
+        vd.push(ConcatSheet('&'.join(vs.name for vs in sheets), source=sheets))
 
     elif jointype == 'extend':
         vs = copy(sheets[0])
         vs.name = '+'.join(vs.name for vs in sheets)
         vs.reload = functools.partial(ExtendedSheet_reload, vs, sheets)
-        return vs
+        vd.push(vs)
     else:
-        return JoinSheet('+'.join(vs.name for vs in sheets), sources=sheets, jointype=jointype)
+        vd.push(JoinSheet('+'.join(vs.name for vs in sheets), sources=sheets, jointype=jointype))
 
 jointypes = [{'key': k, 'desc': v} for k, v in {
     'inner': 'only rows which match keys on all sheets',
@@ -33,6 +40,7 @@ jointypes = [{'key': k, 'desc': v} for k, v in {
     'append': 'columns all sheets; extend with rows from all sheets',
     'extend': 'only rows from first sheet; extend with columns from all sheets',
     'merge': 'merge differences from other sheets into first sheet',
+    'connect': 'connect the sheets, dive into a row by pressing ENTER',
 }.items()]
 
 def joinkey(sheet, row):
@@ -287,7 +295,7 @@ class ConcatSheet(Sheet):
 
 
 
-IndexSheet.addCommand('&', 'join-selected', 'vd.push(createJoinedSheet(someSelectedRows, jointype=chooseOne(jointypes)))', 'merge selected sheets with visible columns from all, keeping rows according to jointype')
+IndexSheet.addCommand('&', 'join-selected', 'joinSheets(someSelectedRows, jointype=chooseOne(jointypes))', 'merge selected sheets with visible columns from all, keeping rows according to jointype')
 IndexSheet.bindkey('g&', 'join-selected')
-Sheet.addCommand('&', 'join-sheets-top2', 'vd.push(createJoinedSheet(vd.sheets[:2], jointype=chooseOne(jointypes)))', 'concatenate top two sheets in Sheets Stack')
-Sheet.addCommand('g&', 'join-sheets-all', 'vd.push(createJoinedSheet(vd.sheets, jointype=chooseOne(jointypes)))', 'concatenate all sheets in Sheets Stack')
+Sheet.addCommand('&', 'join-sheets-top2', 'joinSheets(vd.sheets[:2], jointype=chooseOne(jointypes))', 'concatenate top two sheets in Sheets Stack')
+Sheet.addCommand('g&', 'join-sheets-all', 'joinSheets(vd.sheets, jointype=chooseOne(jointypes))', 'concatenate all sheets in Sheets Stack')
