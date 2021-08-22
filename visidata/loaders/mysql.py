@@ -121,5 +121,13 @@ class MyTable(Sheet):
             if r:
                 self.addRow(r)
             cursorToColumns(cur, self)
-            for r in cur:
+            while True:
+                try:
+                    r = cur.fetchone()
+                    consecutiveErrors = 0
+                except UnicodeDecodeError as exception:
+                    vd.warning(str(exception))
+                    continue
+                if r is None:
+                    break
                 self.addRow(r)
