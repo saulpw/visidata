@@ -118,6 +118,8 @@ class PandasSheet(Sheet):
             else:
                 readfunc = getattr(pd, 'read_'+filetype) or vd.error('no pandas.read_'+filetype)
             df = readfunc(str(self.source), **options.getall('pandas_'+filetype+'_'))
+            if (filetype == 'pickle') and not isinstance(df, pd.DataFrame):
+                vd.fail('pandas loader can only unpickle dataframes')
         else:
             try:
                 df = pd.DataFrame(self.source)
