@@ -70,6 +70,7 @@ class JsonSheet(PythonSheet):
         super().addRow(row, index=index)
 
         for k in row:
+            k = maybe_clean(k, self)
             if k not in self._colnames:
                 self.addColumn(ColumnItem(k, type=deduceType(row[k])))
         return row
