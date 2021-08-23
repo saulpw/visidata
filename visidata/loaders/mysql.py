@@ -118,15 +118,17 @@ class MyTable(Sheet):
         with self.sql.cur("SELECT * FROM " + self.source) as cur:
             self.rows = []
             r = cur.fetchone()
-            if r:
-                self.addRow(r)
+            if r is None:
+                return
+                
+            self.addRow(r)
             cursorToColumns(cur, self)
             while True:
                 try:
                     r = cur.fetchone()
-                except UnicodeDecodeError as exception:
-                    vd.warning(str(exception))
-                    continue
-                if r is None:
-                    break
-                self.addRow(r)
+                    if r is None:
+                        break
+                        
+                    self.addRow(r)
+                except UnicodeDecodeError as e:
+                    vd.exceptionCaught(e)
