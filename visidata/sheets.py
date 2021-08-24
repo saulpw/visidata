@@ -651,12 +651,6 @@ class TableSheet(BaseSheet):
         hdrs = col.name.split('\n')
         for i in range(h):
             name = ' '  # save room at front for LeftMore or sorted arrow
-            for j, (sortcol, sortdir) in enumerate(self._ordering):
-                if col is sortcol:
-                    try:
-                        name = self.options.disp_sort_desc[j] if sortdir else self.options.disp_sort_asc[j]
-                    except IndexError:
-                        pass
 
             if h-i-1 < len(hdrs):
                 name += hdrs[::-1][h-i-1]
@@ -680,6 +674,16 @@ class TableSheet(BaseSheet):
                 A = self.options.disp_more_left
                 scr.addstr(y, x, A, sepcattr.attr)
         except ValueError:  # from .index
+            pass
+
+        try:
+            A = ''
+            for j, (sortcol, sortdir) in enumerate(self._ordering):
+                if col is sortcol:
+                    A = self.options.disp_sort_desc[j] if sortdir else self.options.disp_sort_asc[j]
+                    scr.addstr(y+h-1, x, A, hdrcattr.attr)
+                    break
+        except IndexError:
             pass
 
     def isVisibleIdxKey(self, vcolidx):
