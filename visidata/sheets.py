@@ -492,6 +492,8 @@ class TableSheet(BaseSheet):
             return
 
         for i, col in enumerate(cols):
+            col.name = self.maybeClean(col.name)
+
             vd.addUndo(self.columns.remove, col)
             if index is None:
                 index = len(self.columns)

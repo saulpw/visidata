@@ -124,3 +124,12 @@ alias('join-sheets', 'join-selected')
 alias('show-aggregate', 'memo-aggregate')
 #theme('use_default_colors', True, 'curses use default terminal colors')
 #option('expand_col_scanrows', 1000, 'number of rows to check when expanding columns (0 = all)')
+
+# 2.6
+
+clean_name = visidata.cleanName
+
+def maybe_clean(s, vs):
+    if (vs or visidata.vd).options.clean_names:
+        s = visidata.cleanName(s)
+    return s

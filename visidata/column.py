@@ -23,8 +23,6 @@ option('clean_names', False, 'clean column/sheet names to be valid Python identi
 
 __all__ = [
     'clean_to_id',
-    'clean_name',
-    'maybe_clean',
     'Column',
     'setitem',
     'getattrdeep',
@@ -55,16 +53,6 @@ class DisplayWrapper:
     def __eq__(self, other):
         return self.value == other
 
-
-def maybe_clean(s, vs):
-    if (vs or vd).options.clean_names:
-        s = clean_name(s)
-    return s
-
-def clean_name(s):
-    s = re.sub(r'[^\w\d_]', '_', s)  # replace non-alphanum chars with _
-    s = re.sub(r'_+', '_', s)  # replace runs of _ with a single _
-    return s
 
 def clean_to_id(s):  # [Nas Banov] https://stackoverflow.com/a/3305731
     return re.sub(r'\W|^(?=\d)', '_', str(s)).strip('_')
@@ -162,7 +150,7 @@ class Column(Extensible):
             name = str(name)
 
         if self.sheet:
-            name = maybe_clean(name, self.sheet)
+            name = self.sheet.maybeClean(name)
 
         self._name = name
 

@@ -33,6 +33,7 @@ class GeoJSONSheet(PythonSheet):
 
             for feature in Progress(features):
                 for prop in feature.get('properties', {}).keys():
+                    prop = self.maybeClean(prop)
                     if prop not in self.colnames:
                         c = Column(name=prop, getter=getter_factory(prop))
                         self.colnames[prop] = c

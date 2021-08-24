@@ -178,26 +178,24 @@ def mainloop(self, scr):
             if keystroke == 'KEY_MOUSE':
                 self.keystrokes = ''
                 clicktype = ''
-                try:
-                    py, px = scr.getparyx()
-                    devid, x, y, z, bstate = curses.getmouse()
-                    pct = vd.windowConfig['pct']
-                    topPaneActive = ((vd.activePane == 1 and pct < 0)  or (vd.activePane == 2 and pct > 0))
-                    bottomPaneActive = ((vd.activePane == 2 and pct < 0)  or (vd.activePane == 1 and pct > 0))
-                    if y > vd.windowConfig['n'] and topPaneActive:
-                        py, px = vd.winBottom.getparyx()
-                        y -= py
-                        sheet.mouseX, sheet.mouseY = x, y
-                    elif (1 if options.disp_menu_lines else 0) < y < vd.windowConfig['n'] and bottomPaneActive:
-                        # clicking within top pane when bottom pane is active
-                        py, px = vd.winTop.getparyx()
-                        y -= py
-                        sheet.mouseX, sheet.mouseY = x, y
-                    elif pct == 0:
-                        py, px = vd.winTop.getparyx()
-                        y -= py
-                        sheet.mouseX, sheet.mouseY = x, y
 
+                devid, x, y, z, bstate = curses.getmouse()
+                for winname, winscr in dict(top=vd.winTop, bot=vd.winBottom, menu=vd.scrMenu).items():
+                    py, px = winscr.getparyx()
+                    mh, mw = winscr.getmaxyx()
+                    if py <= y < py+mh and px <= x < px+mw:
+                        # vd.status('clicked at (%s, %s) in %s' % (y-py, x-px, winname))
+                        break
+
+                pct = vd.windowConfig['pct']
+                topPaneActive = ((vd.activePane == 2 and pct < 0)  or (vd.activePane == 1 and pct > 0))
+                bottomPaneActive = ((vd.activePane == 1 and pct < 0)  or (vd.activePane == 2 and pct > 0))
+
+                if (bottomPaneActive and winname == 'top') or (topPaneActive and winname == 'bot'):
+                    self.activePane = 1 if self.activePane == 2 else 2
+                    sheet = self.activeSheet
+
+                try:
                     if bstate & curses.BUTTON_CTRL:
                         clicktype += "CTRL-"
                         bstate &= ~curses.BUTTON_CTRL
@@ -210,7 +208,8 @@ def mainloop(self, scr):
 
                     keystroke = clicktype + curses.mouseEvents.get(bstate, str(bstate))
 
-                    f = self.getMouse(scr, x, y, keystroke)
+                    f = self.getMouse(winscr, x, y, keystroke)
+                    sheet.mouseX, sheet.mouseY = x-px, y-py
                     if f:
                         if isinstance(f, str):
                             for cmd in f.split():

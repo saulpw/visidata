@@ -57,9 +57,10 @@ class XlsSheet(SequenceSheet):
         for rownum in Progress(range(worksheet.nrows)):
             yield list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols))
 
+
 def xls_name(name):
     # sheet name can not be longer than 31 characters
-    xname = clean_name(name)[:31]
+    xname = cleanName(name)[:31]
     if xname != name:
         vd.warning(f'{name} saved as {xname}')
     return xname
