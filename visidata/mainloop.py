@@ -308,8 +308,6 @@ def run(*sheetlist):
         for vs in sheetlist:
             vd.push(vs)
 
-        vd.status('Ctrl+H opens help')
-
         scr = initCurses()
         ret = vd.mainloop(scr)
     finally:

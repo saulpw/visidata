@@ -211,14 +211,15 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_chars=''):
 
         title += ' '*(w-len(item.title)) # padding
 
-        scr.addstr(y+i, x+1, title+titlenote, attr)
-        scr.addstr(y+i, x+3+w, ls, colors.color_menu)
+        clipdraw(scr, y+i, x+1, title+titlenote, attr)
+        clipdraw(scr, y+i, x+3+w, ls, colors.color_menu)
 
 
 @VisiData.api
 def drawMenu(vd, scr, sheet):
     h, w = scr.getmaxyx()
     scr.addstr(0, 0, ' '*(w-1), colors.color_menu)
+    clipdraw(scr, 0, w-22, 'Ctrl+H to open menu', colors.color_menu)
     disp_menu_chars = sheet.options.disp_menu_chars
     x = 1
     for i, item in enumerate(vd.menus):
@@ -362,4 +363,6 @@ BaseSheet.addCommand('^[v', 'menu-view', 'runMenu(2)', '')
 BaseSheet.addCommand('^[c', 'menu-column', 'runMenu(3)', '')
 BaseSheet.addCommand('^[s', 'menu-select', 'runMenu(4)', '')
 BaseSheet.addCommand('^[t', 'menu-tools', 'runMenu(5)', '')
-BaseSheet.addCommand('^[h', 'menu-sheet', 'runMenu(6)', '')
+BaseSheet.addCommand('^[h', 'menu-help', 'runMenu(6)', '')
+BaseSheet.bindkey('^H', 'menu-help')
+BaseSheet.bindkey('KEY_BACKSPACE', 'menu-help')
