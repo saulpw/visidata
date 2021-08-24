@@ -161,7 +161,10 @@ class Column(Extensible):
         else:
             name = str(name)
 
-        self._name = maybe_clean(name, self.sheet)
+        if self.sheet:
+            name = maybe_clean(name, self.sheet)
+
+        self._name = name
 
     @property
     def typestr(self):
