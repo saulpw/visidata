@@ -149,9 +149,6 @@ def AttrColumns(attrnames):
     'Return column names for all elements of list `attrnames`.'
     return [ColumnAttr(name) for name in attrnames]
 
-def DictKeyColumns(d):
-    'Return a list of Column objects from dictionary keys.'
-    return [ColumnItem(k, k, type=deduceType(d[k])) for k in d.keys()]
 
 def SheetList(*names, **kwargs):
     'Creates a Sheet from a list of homogenous dicts or namedtuples.'
@@ -190,14 +187,12 @@ class ListOfDictSheet(PythonSheet):
     rowtype = 'dicts'
     def reload(self):
         self.columns = []
-        addedCols = set()
+        self._knownKeys = set()
         for row in self.source:
-            newCols = {k: v for k, v in row.items() if k not in addedCols}
-            if not newCols:
-                continue
-            for c in DictKeyColumns(newCols):
-                self.addColumn(c)
-                addedCols.add(c.name)
+            for k in row:
+                if k not in self._knownKeys:
+                    self.addColumn(ColumnItem(k, k, type=deduceType(row[k])))
+                    self._knownKeys.add(k)
         self.rows = self.source
 
 # rowdef: namedtuple

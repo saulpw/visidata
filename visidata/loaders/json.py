@@ -21,16 +21,11 @@ open_ndjson = open_ldjson = open_json = open_jsonl
 class JsonSheet(PythonSheet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._colnames = {}  # [colname] -> Column
-
-    def addColumn(self, *cols, index=None):
-        super().addColumn(*cols, index=index)
-        self._colnames.update({col.name: col for col in cols })
-        return cols[0]
+        self._knownKeys = set()  # set of row keys already seen
 
     def iterload(self):
         self.columns = []
-        self._colnames.clear()
+        self._knownKeys.clear()
         for c in type(self).columns:
             self.addColumn(deepcopy(c))
 
@@ -70,8 +65,9 @@ class JsonSheet(PythonSheet):
         super().addRow(row, index=index)
 
         for k in row:
-            if k not in self._colnames:
+            if k not in self._knownKeys:
                 self.addColumn(ColumnItem(k, type=deduceType(row[k])))
+                self._knownKeys.add(k)
         return row
 
     def newRow(self):
