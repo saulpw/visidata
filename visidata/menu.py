@@ -184,12 +184,12 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_chars=''):
 
     # draw borders before/under submenus
     if level > 1:
-        scr.addstr(y-1, x, tl+ts*(w+2)+tr, colors.color_menu)  # top
+        clipdraw(scr, y-1, x, tl+ts*(w+2)+tr, colors.color_menu)  # top
 
-    scr.addstr(y+len(menus), x, bl+bs*(w+2)+br, colors.color_menu) #  bottom
+    clipdraw(scr, y+len(menus), x, bl+bs*(w+2)+br, colors.color_menu) #  bottom
 
     for i, item in enumerate(menus):
-        scr.addstr(y+i, x, ls, colors.color_menu)
+        clipdraw(scr, y+i, x, ls, colors.color_menu)
         if i == vd.activeMenuItems[level]:
             attr = colors.color_menu_active
             if level+1 < len(vd.activeMenuItems):
@@ -229,8 +229,8 @@ def drawMenu(vd, scr, sheet):
         else:
             attr = colors.color_menu
 
-        scr.addstr(0, x, ' '+item.title+' ', attr)
-        scr.addstr(0, x+1, item.title[0], attr | curses.A_UNDERLINE)
+        clipdraw(scr, 0, x, ' '+item.title+' ', attr)
+        clipdraw(scr, 0, x+1, item.title[0], attr | curses.A_UNDERLINE)
         vd.onMouse(scr, 0, x, 1, len(item),
                 BUTTON1_PRESSED=lambda y,x,key,i=i: vd.pressMenu(i),
                 BUTTON1_RELEASED=lambda y,x,key,i=i: vd.runMenu(i))
@@ -250,18 +250,18 @@ def drawMenu(vd, scr, sheet):
 
     # help box
     ls,rs,ts,bs,tl,tr,bl,br = disp_menu_chars
-    helpw = min(76, w)
+    helpw = min(76, w-4)
     helplines = textwrap.wrap(cmd.helpstr, width=helpw-4)
     y = h-len(helplines)-2
-    scr.addstr(y, 2, tl+ts*(helpw-2)+tr, colors.color_menu)
-    scr.addstr(h-1, 2, bl+bs*(helpw-2)+br, colors.color_menu)
+    clipdraw(scr, y, 2, tl+ts*(helpw-2)+tr, colors.color_menu)
+    clipdraw(scr, h-1, 2, bl+bs*(helpw-2)+br, colors.color_menu)
     for i, line in enumerate(helplines):
-        scr.addstr(h-len(helplines)-1+i, 2, ls+' '+line+' '*(helpw-len(line)-3)+rs, colors.color_menu)
+        clipdraw(scr, h-len(helplines)-1+i, 2, ls+' '+line+' '*(helpw-len(line)-3)+rs, colors.color_menu)
 
     mainbinding = HelpSheet().revbinds.get(cmd.longname, [None])[0]
     if mainbinding:
-        scr.addstr(y, 4, ' '+vd.prettybindkey(mainbinding or '(unbound)')+' ', colors.color_menu_active)
-    scr.addstr(y, 16, ' '+cmd.longname+' ', colors.color_menu)
+        clipdraw(scr, y, 4, ' '+vd.prettybindkey(mainbinding or '(unbound)')+' ', colors.color_menu_active)
+    clipdraw(scr, y, 16, ' '+cmd.longname+' ', colors.color_menu)
 
 
 @VisiData.api
