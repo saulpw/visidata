@@ -25,7 +25,7 @@ class SuspendCurses:
 def launchEditor(vd, *args):
     'Launch $EDITOR with *args* as arguments.'
     editor = os.environ.get('EDITOR') or vd.fail('$EDITOR not set')
-    args = [editor] + list(args)
+    args = editor.split() + list(args)
     with SuspendCurses():
         return subprocess.call(args)
 
