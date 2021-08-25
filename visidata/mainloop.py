@@ -93,6 +93,8 @@ def setWindows(vd, scr, pct=None):
 @VisiData.api
 def draw_all(vd):
     'Draw all sheets in all windows.'
+    vd.clearCaches()
+
     ss1 = vd.sheetstack(1)
     ss2 = vd.sheetstack(2)
     if ss1 and not ss2:
