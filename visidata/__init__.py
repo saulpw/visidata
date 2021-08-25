@@ -99,6 +99,7 @@ import visidata.misc
 import visidata.memory
 from .macros import *
 from .menu import *
+import visidata.macos
 
 from .loaders.csv import *
 from .loaders.archive import *
