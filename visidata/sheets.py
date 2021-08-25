@@ -525,8 +525,6 @@ class TableSheet(BaseSheet):
             if not col.keycol:
                 col.keycol = lastkeycol+1
                 lastkeycol += 1
-        # clears the keyCols cache
-        visidata.Extensible.clear_all_caches()
 
     def unsetKeys(self, cols):
         'Make all *cols* non-key columns.'
