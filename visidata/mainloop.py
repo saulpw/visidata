@@ -134,6 +134,39 @@ def runresult(vd):
 
 
 @VisiData.api
+def parseMouse(vd, **kwargs):
+    devid, x, y, z, bstate = curses.getmouse()
+
+    found = False
+    for winname, winscr in kwargs.items():
+        py, px = winscr.getparyx()
+        mh, mw = winscr.getmaxyx()
+        if py <= y < py+mh and px <= x < px+mw:
+            y, x, = y-py, x-px
+            found = True
+            # vd.status('clicked at (%s, %s) in %s' % (y, x, winname))
+            break
+
+    clicktype = ''
+    if bstate & curses.BUTTON_CTRL:
+        clicktype += "CTRL-"
+        bstate &= ~curses.BUTTON_CTRL
+    if bstate & curses.BUTTON_ALT:
+        clicktype += "ALT-"
+        bstate &= ~curses.BUTTON_ALT
+    if bstate & curses.BUTTON_SHIFT:
+        clicktype += "SHIFT-"
+        bstate &= ~curses.BUTTON_SHIFT
+
+    keystroke = clicktype + curses.mouseEvents.get(bstate, str(bstate))
+
+    if found:
+        return keystroke, y, x, winname, winscr
+
+    return keystroke, y, x, "whatwin", None
+
+
+@VisiData.api
 def mainloop(self, scr):
     'Manage execution of keystrokes and subsequent redrawing of screen.'
     scr.timeout(vd.curses_timeout)
@@ -179,15 +212,7 @@ def mainloop(self, scr):
 
             if keystroke == 'KEY_MOUSE':
                 self.keystrokes = ''
-                clicktype = ''
-
-                devid, x, y, z, bstate = curses.getmouse()
-                for winname, winscr in dict(top=vd.winTop, bot=vd.winBottom, menu=vd.scrMenu).items():
-                    py, px = winscr.getparyx()
-                    mh, mw = winscr.getmaxyx()
-                    if py <= y < py+mh and px <= x < px+mw:
-                        # vd.status('clicked at (%s, %s) in %s' % (y-py, x-px, winname))
-                        break
+                keystroke, y, x, winname, winscr = vd.parseMouse(top=vd.winTop, bot=vd.winBottom, menu=vd.scrMenu)
 
                 pct = vd.windowConfig['pct']
                 topPaneActive = ((vd.activePane == 2 and pct < 0)  or (vd.activePane == 1 and pct > 0))
@@ -198,20 +223,8 @@ def mainloop(self, scr):
                     sheet = self.activeSheet
 
                 try:
-                    if bstate & curses.BUTTON_CTRL:
-                        clicktype += "CTRL-"
-                        bstate &= ~curses.BUTTON_CTRL
-                    if bstate & curses.BUTTON_ALT:
-                        clicktype += "ALT-"
-                        bstate &= ~curses.BUTTON_ALT
-                    if bstate & curses.BUTTON_SHIFT:
-                        clicktype += "SHIFT-"
-                        bstate &= ~curses.BUTTON_SHIFT
-
-                    keystroke = clicktype + curses.mouseEvents.get(bstate, str(bstate))
-
                     f = self.getMouse(winscr, x, y, keystroke)
-                    sheet.mouseX, sheet.mouseY = x-px, y-py
+                    sheet.mouseX, sheet.mouseY = x, y
                     if f:
                         if isinstance(f, str):
                             for cmd in f.split():

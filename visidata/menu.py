@@ -11,7 +11,7 @@ vd.option('color_menu_active', '223 yellow on black', '')
 vd.option('disp_menu_chars', '││──┌┐└┘', 'box characters to use for menus')
 
 vd.activeMenuItems = []
-
+vd.menuRunning = False
 
 def MenuItem(title, longname='', menus=[]):
     return AttrDict(title=title, menus=menus, longname=longname)
@@ -173,12 +173,27 @@ vd.menus = [
 
 
 @VisiData.api
+def getMenuItem(vd):
+    try:
+        currentItem = vd
+        for i in vd.activeMenuItems:
+            currentItem = currentItem.menus[i]
+    except IndexError:
+        vd.activeMenuItems = vd.activeMenuItems[:i-1]
+
+    return currentItem
+
+
+@VisiData.api
 def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_chars=''):
     if not menus:
         return
     ls,rs,ts,bs,tl,tr,bl,br = disp_menu_chars
 
-    vd.activeMenuItems[level] %= len(menus)
+    try:
+        vd.activeMenuItems[level] %= len(menus)
+    except IndexError:
+        vd.activeMenuItems = vd.activeMenuItems[:-1]
 
     w = max(len(item.title) for item in menus)
 
@@ -214,6 +229,19 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_chars=''):
         clipdraw(scr, y+i, x+1, title+titlenote, attr)
         clipdraw(scr, y+i, x+3+w, ls, colors.color_menu)
 
+        vd.onMouse(scr, y+i, x, 1, w+3,
+                BUTTON1_PRESSED=lambda y,x,key,i=vd.activeMenuItems[:level]+[i]: vd.pressMenu(*i, 0),
+                BUTTON2_PRESSED=vd.nop,
+                BUTTON3_PRESSED=vd.nop,
+                BUTTON1_RELEASED=vd.nop,
+                BUTTON2_RELEASED=vd.nop,
+                BUTTON3_RELEASED=vd.nop)
+
+
+@VisiData.api
+def nop(vd, *args, **kwargs):
+    return True
+
 
 @VisiData.api
 def drawMenu(vd, scr, sheet):
@@ -231,18 +259,19 @@ def drawMenu(vd, scr, sheet):
 
         clipdraw(scr, 0, x, ' '+item.title+' ', attr)
         clipdraw(scr, 0, x+1, item.title[0], attr | curses.A_UNDERLINE)
-        vd.onMouse(scr, 0, x, 1, len(item),
-                BUTTON1_PRESSED=lambda y,x,key,i=i: vd.pressMenu(i),
-                BUTTON1_RELEASED=lambda y,x,key,i=i: vd.runMenu(i))
+        vd.onMouse(scr, 0, x, 1, len(item.title)+2,
+                BUTTON1_PRESSED=lambda y,x,key,i=i: vd.pressMenu(i, 0),
+                BUTTON2_PRESSED=vd.nop,
+                BUTTON3_PRESSED=vd.nop,
+                BUTTON1_RELEASED=vd.nop,
+                BUTTON2_RELEASED=vd.nop,
+                BUTTON3_RELEASED=vd.nop)
         x += len(item.title)+2
 
     if not vd.activeMenuItems:
         return
 
-    currentItem = vd
-    for i in vd.activeMenuItems:
-        currentItem = currentItem.menus[i]
-
+    currentItem = vd.getMenuItem()
     cmd = sheet.getCommand(currentItem.longname)
 
     if not cmd or not cmd.helpstr:
@@ -266,6 +295,7 @@ def drawMenu(vd, scr, sheet):
 
 @VisiData.api
 def prettybindkey(vd, k):
+    k = k.replace('^[', 'Alt+')
     k = k[:-1].replace('^', 'Ctrl+')+k[-1]
     if k[-1] in string.ascii_uppercase and '+' not in k and '_' not in k:
         k = k[:-1] + 'Shift+' + k[-1]
@@ -278,22 +308,49 @@ def prettybindkey(vd, k):
 
 
 @VisiData.api
-def runMenu(vd, i):
+def pressMenu(vd, *args):
+    vd.activeMenuItems = list(args)
+
+    if not vd.menuRunning:
+        return vd.runMenu()
+
+
+@VisiData.api
+def releaseMenu(vd, *args):
+    pass
+
+
+@VisiData.api
+def runMenu(vd):
     old_disp_menu_lines = vd.options.disp_menu_lines
 
     vd.options.disp_menu_lines=20
-    vd.activeMenuItems = [i, 0]
+    vd.menuRunning = True
 
-    while True:
+    try:
+      while True:
+        if len(vd.activeMenuItems) < 2:
+            vd.activeMenuItems.append(0)
+
         vd.draw_all()
 
         k = vd.getkeystroke(vd.scrMenu, vd.activeSheet)
 
-        currentItem = vd
-        for i in vd.activeMenuItems:
-            currentItem = currentItem.menus[i]
+        currentItem = vd.getMenuItem()
 
-        if k in ['^C', '^Q', '^[', 'q']: break
+        if k in ['^C', '^Q', '^[', 'q']:
+            break
+
+        elif k in ['KEY_MOUSE']:
+            keystroke, y, x, winname, winscr = vd.parseMouse(menu=vd.scrMenu, top=vd.winTop, bot=vd.winBottom)
+            if winname != 'menu':  # clicking off the menu is an escape
+                break
+            f = vd.getMouse(winscr, x, y, keystroke)
+            if f:
+                f(y, x, keystroke)
+            else:
+                break
+
         elif k in ['KEY_RIGHT', 'l']:
             if currentItem.menus:
                 vd.activeMenuItems.append(0)
@@ -321,13 +378,10 @@ def runMenu(vd, i):
 
         vd.activeMenuItems[0] %= len(vd.menus)
 
-    vd.activeMenuItems = []
-    vd.options.disp_menu_lines=old_disp_menu_lines
-
-
-@VisiData.api
-def pressMenu(vd, i):
-    vd.status(i)
+    finally:
+        vd.menuRunning = False
+        vd.activeMenuItems = []
+        vd.options.disp_menu_lines=old_disp_menu_lines
 
 
 def open_mnu(p):
@@ -357,12 +411,12 @@ class MenuCanvas(BaseSheet):
 
 
 MenuSheet.addCommand('z.', 'disp-menu', 'vd.push(MenuCanvas(name, "disp", source=sheet))', '')
-BaseSheet.addCommand('^[f', 'menu-file', 'runMenu(0)', '')
-BaseSheet.addCommand('^[e', 'menu-edit', 'runMenu(1)', '')
-BaseSheet.addCommand('^[v', 'menu-view', 'runMenu(2)', '')
-BaseSheet.addCommand('^[c', 'menu-column', 'runMenu(3)', '')
-BaseSheet.addCommand('^[s', 'menu-select', 'runMenu(4)', '')
-BaseSheet.addCommand('^[t', 'menu-tools', 'runMenu(5)', '')
-BaseSheet.addCommand('^[h', 'menu-help', 'runMenu(6)', '')
+BaseSheet.addCommand('^[f', 'menu-file', 'pressMenu(0)', '')
+BaseSheet.addCommand('^[e', 'menu-edit', 'pressMenu(1)', '')
+BaseSheet.addCommand('^[v', 'menu-view', 'pressMenu(2)', '')
+BaseSheet.addCommand('^[c', 'menu-column', 'pressMenu(3)', '')
+BaseSheet.addCommand('^[s', 'menu-select', 'pressMenu(4)', '')
+BaseSheet.addCommand('^[t', 'menu-tools', 'pressMenu(5)', '')
+BaseSheet.addCommand('^[h', 'menu-help', 'pressMenu(6)', '')
 BaseSheet.bindkey('^H', 'menu-help')
 BaseSheet.bindkey('KEY_BACKSPACE', 'menu-help')
