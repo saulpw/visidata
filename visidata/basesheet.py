@@ -145,7 +145,7 @@ class BaseSheet(DrawablePane):
         cmd = self.getCommand(cmd or keystrokes)
         if not cmd:
             if keystrokes:
-                vd.fail('no command for %s' % keystrokes)
+                vd.status('no command for %s' % keystrokes)
             return False
 
         escaped = False
