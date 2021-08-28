@@ -51,8 +51,7 @@ def setWindows(vd, scr, pct=None):
     'Assign winTop, winBottom, win1 and win2 according to options.disp_splitwin_pct.'
     if pct is None:
         pct = options.disp_splitwin_pct  # percent of window for secondary sheet (negative means bottom)
-    menulines = options.disp_menu_lines
-    topmenulines = 1 if menulines else 0
+    topmenulines = 1 if options.disp_menu else 0
     h, w = scr.getmaxyx()
 
     n = abs(pct)*h//100
@@ -61,10 +60,10 @@ def setWindows(vd, scr, pct=None):
     desiredConfig = dict(pct=pct, n=n, h=h-topmenulines, w=w)
 
     if vd.scrFull is not scr or vd.windowConfig != desiredConfig:
-        if not menulines:
+        if not topmenulines:
             vd.scrMenu = None
         elif not vd.scrMenu:
-            vd.scrMenu = scr.derwin(menulines, w, 0, 0)
+            vd.scrMenu = scr.derwin(h, w, 0, 0)
             vd.scrMenu.keypad(1)
 
         vd.winTop = scr.derwin(n, w, topmenulines, 0)

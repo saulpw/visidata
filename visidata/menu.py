@@ -4,11 +4,13 @@ import textwrap
 from visidata import *
 
 
-vd.option('disp_menu_lines', 20, 'number of lines at top of screen for hierachical menu')
-vd.option('color_menu', 'white on 234 black', '')
-vd.option('color_menu_inactive', '245 white on 241 black', '')
-vd.option('color_menu_active', '223 yellow on black', '')
-vd.option('disp_menu_chars', '││──┌┐└┘', 'box characters to use for menus')
+vd.option('disp_menu', True, 'show menu on top line when not active')
+vd.option('color_menu', 'white on 234 black', 'color of menu items in general')
+vd.option('color_menu_active', '223 yellow on black', 'color of active menu submenus/item')
+vd.option('disp_menu_boxchars', '││──┌┐└┘', 'box characters to use for menus')
+vd.option('disp_menu_more', '»', 'command submenu indicator')
+vd.option('disp_menu_push', '⎘', 'indicator if command pushes sheet onto sheet stack')
+vd.option('disp_menu_input', '…', 'indicator if input required for command')
 
 vd.activeMenuItems = []
 vd.menuRunning = False
@@ -195,17 +197,17 @@ def getMenuItem(vd):
 
 
 @VisiData.api
-def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_chars=''):
+def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
     if not menus:
-        return
-    ls,rs,ts,bs,tl,tr,bl,br = disp_menu_chars
+        return y, x
+    ls,rs,ts,bs,tl,tr,bl,br = disp_menu_boxchars
 
     try:
         vd.activeMenuItems[level] %= len(menus)
     except IndexError:
         vd.activeMenuItems = vd.activeMenuItems[:-1]
 
-    w = max(len(item.title) for item in menus)
+    w = max(len(item.title) for item in menus)+2
 
     # draw borders before/under submenus
     if level > 1:
@@ -218,25 +220,26 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_chars=''):
         if i == vd.activeMenuItems[level]:
             attr = colors.color_menu_active
             if level+1 < len(vd.activeMenuItems):
-                vd.drawSubmenu(scr, sheet, y+i, x+w+3, item.menus, level+1, disp_menu_chars=disp_menu_chars)
+                vd.drawSubmenu(scr, sheet, y+i, x+w+3, item.menus, level+1, disp_menu_boxchars=disp_menu_boxchars)
         else:
             attr = colors.color_menu
 
-        title = ' '+item.title
-        titlenote = ' '
+        title = item.title
+        pretitle= ' '
+        titlenote= ' '
         if item.menus:
-            titlenote = '»'
+            titlenote = vd.options.disp_menu_more
         else:
             cmd = sheet.getCommand(item.longname)
             if cmd and cmd.execstr:
                 if 'push(' in cmd.execstr:
-                    titlenote = '∴'
+                    titlenote = vd.options.disp_menu_push + ' '
                 if 'input' in cmd.execstr:
-                    title += '…'
+                    title += vd.options.disp_menu_input
 
-        title += ' '*(w-len(item.title)) # padding
+        title += ' '*(w-len(pretitle)-len(item.title)+1) # padding
 
-        clipdraw(scr, y+i, x+1, title+titlenote, attr)
+        clipdraw(scr, y+i, x+1, pretitle+title+titlenote, attr)
         clipdraw(scr, y+i, x+3+w, ls, colors.color_menu)
 
         vd.onMouse(scr, y+i, x, 1, w+3,
@@ -258,12 +261,13 @@ def drawMenu(vd, scr, sheet):
     h, w = scr.getmaxyx()
     scr.addstr(0, 0, ' '*(w-1), colors.color_menu)
     clipdraw(scr, 0, w-22, 'Ctrl+H to open menu', colors.color_menu)
-    disp_menu_chars = sheet.options.disp_menu_chars
+    disp_menu_boxchars = sheet.options.disp_menu_boxchars
     x = 1
+    ymax = 4
     for i, item in enumerate(vd.menus):
         if vd.activeMenuItems and i == vd.activeMenuItems[0]:
             attr = colors.color_menu_active
-            vd.drawSubmenu(scr, sheet, 1, x, item.menus, 1, disp_menu_chars)
+            vd.drawSubmenu(scr, sheet, 1, x, item.menus, 1, disp_menu_boxchars)
         else:
             attr = colors.color_menu
 
@@ -288,19 +292,22 @@ def drawMenu(vd, scr, sheet):
         return
 
     # help box
-    ls,rs,ts,bs,tl,tr,bl,br = disp_menu_chars
-    helpw = min(76, w-4)
+    helpw = min(w-4, 76)
+    helpx = 2
+    ls,rs,ts,bs,tl,tr,bl,br = disp_menu_boxchars
     helplines = textwrap.wrap(cmd.helpstr, width=helpw-4)
-    y = h-len(helplines)-2
-    clipdraw(scr, y, 2, tl+ts*(helpw-2)+tr, colors.color_menu)
-    clipdraw(scr, h-1, 2, bl+bs*(helpw-2)+br, colors.color_menu)
+
+    menuh = len(vd.menus[vd.activeMenuItems[0]].menus)+2
+    y = min(menuh, h-len(helplines)-1)
+    clipdraw(scr, y, helpx, tl+ts*(helpw-2)+tr, colors.color_menu)
     for i, line in enumerate(helplines):
-        clipdraw(scr, h-len(helplines)-1+i, 2, ls+' '+line+' '*(helpw-len(line)-3)+rs, colors.color_menu)
+        clipdraw(scr, y+i+1, helpx, ls+' '+line+' '*(helpw-len(line)-3)+rs, colors.color_menu)
+    clipdraw(scr, y+i+2, helpx, bl+bs*(helpw-2)+br, colors.color_menu)
 
     mainbinding = HelpSheet().revbinds.get(cmd.longname, [None])[0]
     if mainbinding:
-        clipdraw(scr, y, 4, ' '+vd.prettybindkey(mainbinding or '(unbound)')+' ', colors.color_menu_active)
-    clipdraw(scr, y, 16, ' '+cmd.longname+' ', colors.color_menu)
+        clipdraw(scr, y, helpx+2, ' '+vd.prettybindkey(mainbinding or '(unbound)')+' ', colors.color_menu_active)
+    clipdraw(scr, y, helpx+14, ' '+cmd.longname+' ', colors.color_menu)
 
 
 @VisiData.api
@@ -332,9 +339,9 @@ def releaseMenu(vd, *args):
 
 @VisiData.api
 def runMenu(vd):
-    old_disp_menu_lines = vd.options.disp_menu_lines
+    old_disp_menu = vd.options.disp_menu
 
-    vd.options.disp_menu_lines=20
+    vd.options.disp_menu=True
     vd.menuRunning = True
 
     try:
@@ -391,7 +398,7 @@ def runMenu(vd):
     finally:
         vd.menuRunning = False
         vd.activeMenuItems = []
-        vd.options.disp_menu_lines=old_disp_menu_lines
+        vd.options.disp_menu=old_disp_menu
 
 
 def open_mnu(p):
