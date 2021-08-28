@@ -128,6 +128,7 @@ vd.menus = [
     ),
 
     Menu('View',
+        Menu('Statuses', 'open-statuses'),
         Menu('Other sheet',
             Menu('previous sheet', 'jump-prev'),
             Menu('first sheet', 'jump-first'),
@@ -137,7 +138,6 @@ vd.menus = [
             Menu('cursor', 'dive-cursor'),
             Menu('selected cells', 'dive-selected-cells'),
         ),
-        Menu('Statuses', 'open-statuses'),
         Menu('Sheets',
             Menu('stack', 'sheets-stack'),
             Menu('all', 'sheets-all'),
@@ -181,12 +181,12 @@ vd.menus = [
         Menu('Refresh screen', 'redraw'),
     ),
     Menu('Column',
+        Menu('Hide', 'hide-col'),
+        Menu('Unhide all', 'unhide-cols'),
         Menu('Goto',
             Menu('by number', 'go-col-number'),
             Menu('by name', 'go-col-regex'),
         ),
-        Menu('Hide', 'hide-col'),
-        Menu('Unhide all', 'unhide-cols'),
         Menu('Resize',
             Menu('Half', 'resize-col-half'),
             Menu('Max', 'resize-col-max'),
@@ -194,13 +194,12 @@ vd.menus = [
             Menu('Input', 'resize-col-input'),
         ),
         Menu('Rename',
-            Menu('current',
-                Menu('from input', 'rename-col'),
-                Menu('from current row', ''),
-                Menu('from selected cells', 'rename-col-selected'),
+            Menu('current column', 'rename-col'),
+            Menu('from selected cells',
+                Menu('current column', 'rename-col-selected'),
+                Menu('unnamed columns', 'rename-cols-row'),
+                Menu('all columns', 'rename-cols-selected'),
             ),
-            Menu('unnamed from selected', 'rename-cols-row'),
-            Menu('all from selected', 'rename-cols-selected'),
         ),
         Menu('Type as',
             Menu('No type', 'type-any'),
@@ -214,7 +213,10 @@ vd.menus = [
             Menu('Custom date format', 'type-customdate'),
             Menu('Length', 'type-len'),
         ),
-        Menu('Toggle as key', 'key-col'),
+        Menu('Key',
+            Menu('Toggle current column', 'key-col'),
+            Menu('Unkey current column', 'key-col-off'),
+        ),
         Menu('Sort by',
             Menu('Current column only',
                 Menu('Ascending', 'sort-asc'),
@@ -468,27 +470,26 @@ def nop(vd, *args, **kwargs):
 def menus(sheet):
     'List of Hierarchical menu items for commands available on this sheet.'
     def _menus(sheet, item):
-        if item.menus:
-            menus = []
-            for i in item.menus:
-                m = _menus(sheet, i)
-                if m:
-                    menus.append(m)
+        if item.longname:
+            if sheet.getCommand(item.longname):
+                return item
+        elif item.menus:
+            menus = _menu_list(sheet, item.menus)
             if menus:
                 title = getattr(item, 'title', '')
                 return AttrDict(title=title, menus=menus, longname='')
-        elif item.longname:
-            if sheet.getCommand(item.longname):
-                return item
         else:
             raise Exception(item)
 
-    ret = []
-    for m in vd.menus:
-        r = _menus(sheet, m)
-        if r:
-            ret.append(r)
-    return ret
+    def _menu_list(sheet, menus):
+        ret = []
+        for i in menus:
+            m = _menus(sheet, i)
+            if m:
+                ret.append(m)
+        return ret
+
+    return _menu_list(sheet, vd.menus)
 
 
 @VisiData.api
