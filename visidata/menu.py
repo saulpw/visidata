@@ -7,12 +7,13 @@ from visidata import *
 vd.option('disp_menu', True, 'show menu on top line when not active')
 vd.option('color_menu', 'white on 234 black', 'color of menu items in general')
 vd.option('color_menu_active', '223 yellow on black', 'color of active menu submenus/item')
+vd.option('color_menu_help', 'black on 110', 'color of helpbox')
 vd.option('disp_menu_boxchars', '││──┌┐└┘', 'box characters to use for menus')
 vd.option('disp_menu_more', '»', 'command submenu indicator')
 vd.option('disp_menu_push', '⎘', 'indicator if command pushes sheet onto sheet stack')
 vd.option('disp_menu_input', '…', 'indicator if input required for command')
 
-vd.activeMenuItems = []
+BaseSheet.init('activeMenuItems', list)
 vd.menuRunning = False
 
 
@@ -378,30 +379,35 @@ vd.menus = [
 ]
 
 
-@VisiData.api
-def getMenuItem(vd):
+@BaseSheet.api
+def getMenuItem(sheet):
     try:
-        currentItem = vd
-        for i in vd.activeMenuItems:
+        currentItem = sheet
+        for i in sheet.activeMenuItems:
             currentItem = currentItem.menus[i]
     except IndexError:
-        vd.activeMenuItems = vd.activeMenuItems[:i-1]
+        sheet.activeMenuItems = sheet.activeMenuItems[:i-1]
 
     return currentItem
+
+
+@BaseSheet.api
+def menuitemAvailable(sheet, item):
+    return any(sheet.menuitemAvailable(i) for i in item.menus)
 
 
 @VisiData.api
 def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
     if not menus:
-        return y, x
+        return
     ls,rs,ts,bs,tl,tr,bl,br = disp_menu_boxchars
 
     try:
-        vd.activeMenuItems[level] %= len(menus)
+        sheet.activeMenuItems[level] %= len(menus)
     except IndexError:
-        vd.activeMenuItems = vd.activeMenuItems[:-1]
+        pass # sheet.activeMenuItems = sheet.activeMenuItems[:-1]
 
-    w = max(len(item.title) for item in menus)+2
+    w = max(len(item.title) for item in menus)+1
 
     # draw borders before/under submenus
     if level > 1:
@@ -409,21 +415,26 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
 
     clipdraw(scr, y+len(menus), x, bl+bs*(w+2)+br, colors.color_menu) #  bottom
 
-    for i, item in enumerate(menus):
-        clipdraw(scr, y+i, x, ls, colors.color_menu)
-        if i == vd.activeMenuItems[level]:
+
+    i = 0
+    for j, item in enumerate(menus):
+        attr = colors.color_menu
+
+        if level < len(sheet.activeMenuItems):
+          if j == sheet.activeMenuItems[level]:
             attr = colors.color_menu_active
-            if level+1 < len(vd.activeMenuItems):
+            if level < len(sheet.activeMenuItems):
                 vd.drawSubmenu(scr, sheet, y+i, x+w+3, item.menus, level+1, disp_menu_boxchars=disp_menu_boxchars)
-        else:
-            attr = colors.color_menu
+
+        clipdraw(scr, y+i, x, ls, colors.color_menu)
 
         title = item.title
         pretitle= ' '
         titlenote= ' '
         if item.menus:
             titlenote = vd.options.disp_menu_more
-        else:
+
+        if item.longname:
             cmd = sheet.getCommand(item.longname)
             if cmd and cmd.execstr:
                 if 'push(' in cmd.execstr:
@@ -437,12 +448,14 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
         clipdraw(scr, y+i, x+3+w, ls, colors.color_menu)
 
         vd.onMouse(scr, y+i, x, 1, w+3,
-                BUTTON1_PRESSED=lambda y,x,key,i=vd.activeMenuItems[:level]+[i]: vd.pressMenu(*i, 0),
+                BUTTON1_PRESSED=lambda y,x,key,i=sheet.activeMenuItems[:level]+[j]: sheet.pressMenu(*i, 0),
                 BUTTON2_PRESSED=vd.nop,
                 BUTTON3_PRESSED=vd.nop,
                 BUTTON1_RELEASED=vd.nop,
                 BUTTON2_RELEASED=vd.nop,
                 BUTTON3_RELEASED=vd.nop)
+
+        i += 1
 
 
 @VisiData.api
@@ -450,16 +463,44 @@ def nop(vd, *args, **kwargs):
     return True
 
 
+@BaseSheet.property
+@drawcache
+def menus(sheet):
+    'List of Hierarchical menu items for commands available on this sheet.'
+    def _menus(sheet, item):
+        if item.menus:
+            menus = []
+            for i in item.menus:
+                m = _menus(sheet, i)
+                if m:
+                    menus.append(m)
+            if menus:
+                title = getattr(item, 'title', '')
+                return AttrDict(title=title, menus=menus, longname='')
+        elif item.longname:
+            if sheet.getCommand(item.longname):
+                return item
+        else:
+            raise Exception(item)
+
+    ret = []
+    for m in vd.menus:
+        r = _menus(sheet, m)
+        if r:
+            ret.append(r)
+    return ret
+
+
 @VisiData.api
 def drawMenu(vd, scr, sheet):
     h, w = scr.getmaxyx()
     scr.addstr(0, 0, ' '*(w-1), colors.color_menu)
-    clipdraw(scr, 0, w-22, 'Ctrl+H to open menu', colors.color_menu)
     disp_menu_boxchars = sheet.options.disp_menu_boxchars
     x = 1
     ymax = 4
-    for i, item in enumerate(vd.menus):
-        if vd.activeMenuItems and i == vd.activeMenuItems[0]:
+    toplevel = sheet.menus
+    for i, item in enumerate(toplevel):
+        if sheet.activeMenuItems and i == sheet.activeMenuItems[0]:
             attr = colors.color_menu_active
             vd.drawSubmenu(scr, sheet, 1, x, item.menus, 1, disp_menu_boxchars)
         else:
@@ -468,7 +509,7 @@ def drawMenu(vd, scr, sheet):
         clipdraw(scr, 0, x, ' '+item.title+' ', attr)
         clipdraw(scr, 0, x+1, item.title[0], attr | curses.A_UNDERLINE)
         vd.onMouse(scr, 0, x, 1, len(item.title)+2,
-                BUTTON1_PRESSED=lambda y,x,key,i=i: vd.pressMenu(i, 0),
+                BUTTON1_PRESSED=lambda y,x,key,i=i,sheet=sheet: sheet.pressMenu(i, 0),
                 BUTTON2_PRESSED=vd.nop,
                 BUTTON3_PRESSED=vd.nop,
                 BUTTON1_RELEASED=vd.nop,
@@ -476,32 +517,39 @@ def drawMenu(vd, scr, sheet):
                 BUTTON3_RELEASED=vd.nop)
         x += len(item.title)+2
 
-    if not vd.activeMenuItems:
+
+    rightdisp = 'Ctrl+H for menu'
+    rightmenux = min(72, w-len(rightdisp))
+    if rightmenux > x:
+        clipdraw(scr, 0, rightmenux, rightdisp, colors.color_menu)
+
+    if not sheet.activeMenuItems:
         return
 
-    currentItem = vd.getMenuItem()
+    currentItem = sheet.getMenuItem()
     cmd = sheet.getCommand(currentItem.longname)
 
     if not cmd or not cmd.helpstr:
         return
 
     # help box
+    helpattr = colors.color_menu_help
     helpw = min(w-4, 76)
     helpx = 2
     ls,rs,ts,bs,tl,tr,bl,br = disp_menu_boxchars
     helplines = textwrap.wrap(cmd.helpstr, width=helpw-4)
 
-    menuh = len(vd.menus[vd.activeMenuItems[0]].menus)+2
+    menuh = len(toplevel[sheet.activeMenuItems[0]].menus)+2
     y = min(menuh, h-len(helplines)-1)
-    clipdraw(scr, y, helpx, tl+ts*(helpw-2)+tr, colors.color_menu)
+    clipdraw(scr, y, helpx, tl+ts*(helpw-2)+tr, helpattr)
     for i, line in enumerate(helplines):
-        clipdraw(scr, y+i+1, helpx, ls+' '+line+' '*(helpw-len(line)-3)+rs, colors.color_menu)
-    clipdraw(scr, y+i+2, helpx, bl+bs*(helpw-2)+br, colors.color_menu)
+        clipdraw(scr, y+i+1, helpx, ls+' '+line+' '*(helpw-len(line)-3)+rs, helpattr)
+    clipdraw(scr, y+i+2, helpx, bl+bs*(helpw-2)+br, helpattr)
 
     mainbinding = HelpSheet().revbinds.get(cmd.longname, [None])[0]
     if mainbinding:
         clipdraw(scr, y, helpx+2, ' '+vd.prettybindkey(mainbinding or '(unbound)')+' ', colors.color_menu_active)
-    clipdraw(scr, y, helpx+14, ' '+cmd.longname+' ', colors.color_menu)
+    clipdraw(scr, y, helpx+14, ' '+cmd.longname+' ', helpattr)
 
 
 @VisiData.api
@@ -518,17 +566,12 @@ def prettybindkey(vd, k):
     }.get(k, k).strip()
 
 
-@VisiData.api
-def pressMenu(vd, *args):
-    vd.activeMenuItems = list(args)
+@BaseSheet.api
+def pressMenu(sheet, *args):
+    sheet.activeMenuItems = list(args)
 
     if not vd.menuRunning:
         return vd.runMenu()
-
-
-@VisiData.api
-def releaseMenu(vd, *args):
-    pass
 
 
 @VisiData.api
@@ -537,17 +580,18 @@ def runMenu(vd):
 
     vd.options.disp_menu=True
     vd.menuRunning = True
+    sheet = vd.activeSheet
 
     try:
       while True:
-        if len(vd.activeMenuItems) < 2:
-            vd.activeMenuItems.append(0)
+        if len(sheet.activeMenuItems) < 2:
+            sheet.activeMenuItems.append(0)
 
         vd.draw_all()
 
-        k = vd.getkeystroke(vd.scrMenu, vd.activeSheet)
+        k = vd.getkeystroke(vd.scrMenu, sheet)
 
-        currentItem = vd.getMenuItem()
+        currentItem = sheet.getMenuItem()
 
         if k in ['^C', '^Q', '^[', 'q']:
             break
@@ -564,35 +608,45 @@ def runMenu(vd):
 
         elif k in ['KEY_RIGHT', 'l']:
             if currentItem.menus:
-                vd.activeMenuItems.append(0)
+                sheet.activeMenuItems.append(0)
             else:
-                vd.activeMenuItems = [vd.activeMenuItems[0]+1, 0]
+                sheet.activeMenuItems = [sheet.activeMenuItems[0]+1, 0]
 
         elif k in ['KEY_LEFT', 'h']:
-            if len(vd.activeMenuItems) > 2:
-                vd.activeMenuItems.pop(-1)
+            if len(sheet.activeMenuItems) > 2:
+                sheet.activeMenuItems.pop(-1)
             else:
-                vd.activeMenuItems = [vd.activeMenuItems[0]-1, 0]
+                sheet.activeMenuItems = [sheet.activeMenuItems[0]-1, 0]
 
         elif k in ['KEY_DOWN', 'j']:
-            vd.activeMenuItems[-1] += 1
+            sheet.activeMenuItems[-1] += 1
 
         elif k in ['KEY_UP', 'k']:
-            vd.activeMenuItems[-1] -= 1
+            sheet.activeMenuItems[-1] -= 1
 
         elif k in [ENTER, ' ']:
             if currentItem.menus:
-                vd.activeMenuItems.append(0)
+                sheet.activeMenuItems.append(0)
             else:
-                vd.activeSheet.execCommand(currentItem.longname)
+                # undo menu and redraw all so input is visible
+                vd.menuRunning = False
+                sheet.activeMenuItems = []
+                vd.options.disp_menu=old_disp_menu
+                vd.draw_all()
+                sheet.execCommand(currentItem.longname)
                 break
 
-        vd.activeMenuItems[0] %= len(vd.menus)
+        sheet.checkMenu()
 
     finally:
         vd.menuRunning = False
-        vd.activeMenuItems = []
+        sheet.activeMenuItems = []
         vd.options.disp_menu=old_disp_menu
+
+
+@BaseSheet.api
+def checkMenu(sheet):
+    sheet.activeMenuItems[0] %= len(sheet.menus)
 
 
 def open_mnu(p):
