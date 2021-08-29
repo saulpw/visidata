@@ -569,7 +569,12 @@ def prettybindkey(vd, k):
 
 @BaseSheet.api
 def pressMenu(sheet, *args):
-    sheet.activeMenuItems = list(args)
+    def _findMenu(i):
+        if isinstance(i, str):
+            i = [x.title for x in sheet.menus].index(i)
+        return i
+
+    sheet.activeMenuItems = list(_findMenu(arg) for arg in args)
 
     if not vd.menuRunning:
         return vd.runMenu()
@@ -677,14 +682,15 @@ class MenuCanvas(BaseSheet):
 
 
 MenuSheet.addCommand('z.', 'disp-menu', 'vd.push(MenuCanvas(name, "disp", source=sheet))', '')
-BaseSheet.addCommand('^[s', 'menu-sheet', 'pressMenu(0)', '')
-BaseSheet.addCommand('^[e', 'menu-edit', 'pressMenu(1)', '')
-BaseSheet.addCommand('^[v', 'menu-view', 'pressMenu(2)', '')
-BaseSheet.addCommand('^[c', 'menu-column', 'pressMenu(3)', '')
-BaseSheet.addCommand('^[r', 'menu-row', 'pressMenu(4)', '')
-BaseSheet.addCommand('^[d', 'menu-data', 'pressMenu(5)', '')
-BaseSheet.addCommand('^[p', 'menu-plot', 'pressMenu(6)', '')
-BaseSheet.addCommand('^[m', 'menu-meta', 'pressMenu(7)', '')
-BaseSheet.addCommand('^[h', 'menu-help', 'pressMenu(8)', '')
+
+BaseSheet.addCommand('^[s', 'menu-sheet', 'pressMenu("Sheet")', '')
+BaseSheet.addCommand('^[e', 'menu-edit', 'pressMenu("Edit")', '')
+BaseSheet.addCommand('^[v', 'menu-view', 'pressMenu("View")', '')
+BaseSheet.addCommand('^[c', 'menu-column', 'pressMenu("Column")', '')
+BaseSheet.addCommand('^[r', 'menu-row', 'pressMenu("Row")', '')
+BaseSheet.addCommand('^[d', 'menu-data', 'pressMenu("Data")', '')
+BaseSheet.addCommand('^[p', 'menu-plot', 'pressMenu("Plot")', '')
+BaseSheet.addCommand('^[m', 'menu-meta', 'pressMenu("Meta")', '')
+BaseSheet.addCommand('^[h', 'menu-help', 'pressMenu("Help")', '')
 BaseSheet.bindkey('^H', 'menu-help')
 BaseSheet.bindkey('KEY_BACKSPACE', 'menu-help')
