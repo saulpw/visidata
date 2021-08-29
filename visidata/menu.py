@@ -3,10 +3,13 @@ import textwrap
 
 from visidata import *
 
+__all__ = ['Menu']
+
 
 vd.option('disp_menu', True, 'show menu on top line when not active')
 vd.option('color_menu', 'white on 234 black', 'color of menu items in general')
 vd.option('color_menu_active', '223 yellow on black', 'color of active menu submenus/item')
+vd.option('color_menu_spec', '118 green on 234 black', 'color of active menu submenus/item')
 vd.option('color_menu_help', 'black on 110', 'color of helpbox')
 vd.option('disp_menu_boxchars', '││──┌┐└┘', 'box characters to use for menus')
 vd.option('disp_menu_more', '»', 'command submenu indicator')
@@ -18,10 +21,78 @@ vd.menuRunning = False
 
 
 def Menu(title, *args):
-    if len(args) > 1:
-        return AttrDict(title=title, menus=args, longname='')
-    else:
+    if len(args) == 1 and isinstance(args[0], str):
         return AttrDict(title=title, menus=[], longname=args[0])
+
+    return AttrDict(title=title, menus=list(args), longname='')
+
+
+def walkmenu(item, menupath=[]):
+    if item.menus:
+        for i in item.menus:
+            yield from walkmenu(i, menupath+[i.title])
+    else:
+        yield item, menupath
+
+
+def _finditem(menus, item):
+    if isinstance(item, str):
+        for m in menus:
+            if item == m.title:
+                return m
+        return None
+
+    return menus[item]
+
+
+def getMenuItem(obj, menupath=None):
+    if menupath is None:
+        menupath = obj.activeMenuItems
+
+    try:
+        currentItem = obj
+        for i in menupath:
+            currentItem = _finditem(currentItem.menus, i)
+    except IndexError as e:
+        vd.exceptionCaught(e)
+#        sheet.activeMenuItems = sheet.activeMenuItems[:i-1]
+
+    return currentItem
+
+
+@VisiData.api
+def addMenuItem(vd, *args):
+    getMenuItem(vd, args[:-2]).menus.append(Menu(*args[-2:]))
+
+
+@VisiData.api
+def addMenu(vd, *args):
+    m = Menu('top', *args)
+    for item, menupath in walkmenu(m):
+        obj = vd
+        for p in menupath:
+            c = _finditem(obj.menus, p)
+            if not c:
+                c = Menu(p)
+                obj.menus.append(c)
+            obj = c
+        obj.longname = item.longname
+
+
+def _intMenuPath(obj, menupath):
+    'Return list of numeric indexes of *menupath* (which may be numeric or string titles) through obj.menus.'
+    if not menupath:
+        return []
+
+    i = menupath[0]
+    if isinstance(i, str):
+        try:
+            i = [x.title for x in obj.menus].index(i)
+        except ValueError:
+            vd.warning('no menupath %s' % menupath)
+            return
+
+    return [i] + _intMenuPath(obj.menus[i], menupath[1:])
 
 
 vd.menus = [
@@ -256,10 +327,10 @@ vd.menus = [
     ),
 
     Menu('Row',
-        Menu('Dive into', 'dive-row'),
+        Menu('Dive into', 'open-row'),
         Menu('Goto',
-            Menu('top row', 'go-top'),
-            Menu('bottom row', 'go-bottom'),
+            Menu('top', 'go-top'),
+            Menu('bottom', 'go-bottom'),
             Menu('previous',
                 Menu('page', 'go-pageup'),
                 Menu('null', 'go-prev-null'),
@@ -371,26 +442,15 @@ vd.menus = [
             Menu('Python expression', 'pyobj-expr'),
         ),
     ),
-    Menu('Help',
+]
+
+vd.addMenu(Menu('Help',
         Menu('Quick reference', 'sysopen-help'),
         Menu('Open command list', 'help-commands'),
 #        Menu('Tutorial', 'open-tutorial'),
 #        Menu('About', 'open-about'),
         Menu('Version', 'show-version'),
-    ),
-]
-
-
-@BaseSheet.api
-def getMenuItem(sheet):
-    try:
-        currentItem = sheet
-        for i in sheet.activeMenuItems:
-            currentItem = currentItem.menus[i]
-    except IndexError:
-        sheet.activeMenuItems = sheet.activeMenuItems[:i-1]
-
-    return currentItem
+    ))
 
 
 @BaseSheet.api
@@ -417,14 +477,17 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
 
     clipdraw(scr, y+len(menus), x, bl+bs*(w+2)+br, colors.color_menu) #  bottom
 
-
     i = 0
     for j, item in enumerate(menus):
         attr = colors.color_menu
 
+        if any(x.obj not in ['BaseSheet', 'TableSheet'] for x, _ in walkmenu(item)):
+            attr = colors.color_menu_spec
+
         if level < len(sheet.activeMenuItems):
           if j == sheet.activeMenuItems[level]:
             attr = colors.color_menu_active
+
             if level < len(sheet.activeMenuItems):
                 vd.drawSubmenu(scr, sheet, y+i, x+w+3, item.menus, level+1, disp_menu_boxchars=disp_menu_boxchars)
 
@@ -436,14 +499,15 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
         if item.menus:
             titlenote = vd.options.disp_menu_more
 
-        if item.longname:
-            cmd = sheet.getCommand(item.longname)
-            if cmd and cmd.execstr:
-                if 'push(' in cmd.execstr:
+        # special notes
+        if item.cmd:
+            if item.cmd.execstr:
+                if 'push(' in item.cmd.execstr:
                     titlenote = vd.options.disp_menu_push + ' '
-                if 'input' in cmd.execstr:
+                if 'input' in item.cmd.execstr:
                     title += vd.options.disp_menu_input
 
+        # actually display the menu item
         title += ' '*(w-len(pretitle)-len(item.title)+1) # padding
 
         clipdraw(scr, y+i, x+1, pretitle+title+titlenote, attr)
@@ -471,15 +535,24 @@ def menus(sheet):
     'List of Hierarchical menu items for commands available on this sheet.'
     def _menus(sheet, item):
         if item.longname:
-            if sheet.getCommand(item.longname):
+            cmd = sheet.getCommand(item.longname)
+            if cmd:
+                item.cmd = cmd
+                if vd.commands[item.longname].get('TableSheet', None):
+                    item.obj = 'TableSheet'
+                elif vd.commands[item.longname].get('BaseSheet', None):
+                    item.obj = 'BaseSheet'
+                else:
+                    item.obj = ''
                 return item
+
         elif item.menus:
             menus = _menu_list(sheet, item.menus)
             if menus:
                 title = getattr(item, 'title', '')
                 return AttrDict(title=title, menus=menus, longname='')
         else:
-            raise Exception(item)
+            return item
 
     def _menu_list(sheet, menus):
         ret = []
@@ -527,10 +600,10 @@ def drawMenu(vd, scr, sheet):
     if not sheet.activeMenuItems:
         return
 
-    currentItem = sheet.getMenuItem()
-    cmd = sheet.getCommand(currentItem.longname)
+    currentItem = getMenuItem(sheet)
+    cmd = currentItem.cmd
 
-    if not cmd or not cmd.helpstr:
+    if not cmd:
         return
 
     # help box
@@ -538,7 +611,7 @@ def drawMenu(vd, scr, sheet):
     helpw = min(w-4, 76)
     helpx = 2
     ls,rs,ts,bs,tl,tr,bl,br = disp_menu_boxchars
-    helplines = textwrap.wrap(cmd.helpstr, width=helpw-4)
+    helplines = textwrap.wrap(cmd.helpstr or '(no help available)', width=helpw-4)
 
     menuh = len(toplevel[sheet.activeMenuItems[0]].menus)+2
     y = min(menuh, h-len(helplines)-1)
@@ -574,7 +647,7 @@ def pressMenu(sheet, *args):
             i = [x.title for x in sheet.menus].index(i)
         return i
 
-    sheet.activeMenuItems = list(_findMenu(arg) for arg in args)
+    sheet.activeMenuItems = _intMenuPath(sheet, args)
 
     if not vd.menuRunning:
         return vd.runMenu()
@@ -597,7 +670,7 @@ def runMenu(vd):
 
         k = vd.getkeystroke(vd.scrMenu, sheet)
 
-        currentItem = sheet.getMenuItem()
+        currentItem = getMenuItem(sheet)
 
         if k in ['^C', '^Q', '^[', 'q']:
             break
