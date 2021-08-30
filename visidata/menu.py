@@ -613,8 +613,10 @@ def drawMenu(vd, scr, sheet):
     ls,rs,ts,bs,tl,tr,bl,br = disp_menu_boxchars
     helplines = textwrap.wrap(cmd.helpstr or '(no help available)', width=helpw-4)
 
-    menuh = len(toplevel[sheet.activeMenuItems[0]].menus)+2
-    y = min(menuh, h-len(helplines)-1)
+    # place helpbox just below deepest menu
+    menuh = 2+sum(sheet.activeMenuItems[1:-1])
+    menuh += len(getMenuItem(sheet, sheet.activeMenuItems[:-1]).menus)
+    y = min(menuh, h-len(helplines)-3)
     clipdraw(scr, y, helpx, tl+ts*(helpw-2)+tr, helpattr)
     for i, line in enumerate(helplines):
         clipdraw(scr, y+i+1, helpx, ls+' '+line+' '*(helpw-len(line)-3)+rs, helpattr)
