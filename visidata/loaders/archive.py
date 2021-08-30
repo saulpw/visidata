@@ -81,7 +81,14 @@ class TarSheet(Sheet):
                 yield ti
 
 
-ZipSheet.addCommand('x', 'extract-file', 'extract(cursorRow)')
-ZipSheet.addCommand('gx', 'extract-selected', 'extract(*onlySelectedRows)')
-ZipSheet.addCommand('zx', 'extract-file-to', 'extract(cursorRow, path=inputPath("extract to: "))')
-ZipSheet.addCommand('gzx', 'extract-selected-to', 'extract(*onlySelectedRows, path=inputPath("extract %d files to: " % nSelectedRows))')
+ZipSheet.addCommand('x', 'extract-file', 'extract(cursorRow)', 'extract current file to current directory')
+ZipSheet.addCommand('gx', 'extract-selected', 'extract(*onlySelectedRows)', 'extract selected files to current directory')
+ZipSheet.addCommand('zx', 'extract-file-to', 'extract(cursorRow, path=inputPath("extract to: "))', 'extract current file to given pathname')
+ZipSheet.addCommand('gzx', 'extract-selected-to', 'extract(*onlySelectedRows, path=inputPath("extract %d files to: " % nSelectedRows))', 'extract selected files to given directory')
+
+vd.addMenu(Menu('Sheet', Menu('Extract',
+        Menu('current file', 'extract-file'),
+        Menu('current file to', 'extract-file-to'),
+        Menu('selected files', 'extract-selected'),
+        Menu('selected files to', 'extract-selected-to'),
+    )))
