@@ -39,8 +39,6 @@ def draw_sheet(self, scr, sheet):
     except Exception as e:
         self.exceptionCaught(e)
 
-    scr.refresh()
-
 
 vd.windowConfig = dict(pct=0, n=0, h=0, w=0)  # n=top line of bottom window; h=height of bottom window; w=width of screen
 vd.winTop = mock.MagicMock(__bool__=mock.Mock(return_value=False))
@@ -102,14 +100,12 @@ def draw_all(vd):
         vd.draw_sheet(vd.win1, ss1[0])
         if vd.win2:
             vd.win2.erase()
-            vd.win2.refresh()
     elif not ss1 and ss2:
         vd.activePane = 2
         vd.setWindows(vd.scrFull)
         vd.draw_sheet(vd.win2, ss2[0])
         if vd.win1:
             vd.win1.erase()
-            vd.win1.refresh()
     elif ss1 and ss2 and vd.win2:
         vd.draw_sheet(vd.win1, ss1[0])
         vd.draw_sheet(vd.win2, ss2[0])
@@ -119,6 +115,12 @@ def draw_all(vd):
 
     if vd.scrMenu:
         vd.drawMenu(vd.scrMenu, vd.activeSheet)
+
+    if vd.win1:
+        vd.win1.refresh()
+    if vd.win2:
+        vd.win2.refresh()
+    if vd.scrMenu:
         vd.scrMenu.refresh()
 
 

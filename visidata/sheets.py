@@ -744,8 +744,6 @@ class TableSheet(BaseSheet):
         if vcolidx+1 < self.nVisibleCols:
             scr.addstr(headerRow, self.windowWidth-2, self.options.disp_more_right, colors.color_column_sep)
 
-        scr.refresh()
-
     def calc_height(self, row, displines=None, isNull=None):
             if displines is None:
                 displines = {}  # [vcolidx] -> list of lines in that cell
