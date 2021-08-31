@@ -155,7 +155,7 @@ class LastInputsSheet(JsonLinesSheet):
         return list(vd._lastInputs[t].keys())
 
 
-@VisiData.cached_property
+@VisiData.lazy_property
 def lastInputsSheet(vd):
     name = options.input_history
     if not name:
