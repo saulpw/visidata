@@ -4,7 +4,7 @@ import curses
 
 import visidata
 
-__all__ = ['ENTER', 'ALT', 'ESC', 'asyncthread', 'VisiData', 'drawcache', 'drawcache_property']
+__all__ = ['ENTER', 'ALT', 'ESC', 'asyncthread', 'VisiData']
 
 
 ENTER='^J'
@@ -19,12 +19,6 @@ def asyncthread(func):
     def _execAsync(*args, **kwargs):
         return visidata.vd.execAsync(func, *args, **kwargs)
     return _execAsync
-
-# @drawcache is vd alias for @cache, since vd clears it every frame
-drawcache = visidata.cache
-
-def drawcache_property(func):
-    return property(drawcache(func))
 
 
 class VisiData(visidata.Extensible):
@@ -75,7 +69,7 @@ class VisiData(visidata.Extensible):
     def activeStack(self):
         return self.sheetstack() or self.sheetstack(-1)
 
-    @drawcache_property
+    @visidata.drawcache_property
     def mousereg(self):
         return []
 

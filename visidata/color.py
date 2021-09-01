@@ -49,7 +49,7 @@ class ColorMaker:
     def setup(self):
         curses.use_default_colors()
 
-    @VisiData.cached_property
+    @drawcache_property
     def colors(self):
         'not computed until curses color has been initialized'
         return {x[6:]:getattr(curses, x) for x in dir(curses) if x.startswith('COLOR_') and x != 'COLOR_PAIRS'}

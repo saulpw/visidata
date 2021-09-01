@@ -79,14 +79,14 @@ must come before ``@classmethod``.
 
 This acts just like the ``@property`` decorator, if it were defined inline to the class.
 
-.. autofunction:: visidata.Extensible.cached_property
+.. autofunction:: visidata.Extensible.lazy_property
 
 This works like ``@property``, except it only computes the value on first access, and then caches it for every subsequent usage.
 
 .. note::
 
     Because of how Python instantiates classes, extensions monkey-patched into a class are not also added to already-instantiated objects.
-    So global sheets defined by a plugin should be added to the VisiData object with ``cached_property``.
+    So global sheets defined by a plugin should be added to the VisiData object as a ``@VisiData.lazy_property``.
     This way, they are not created until their first use, which allows them to take advantage of Sheet extensions that were loaded after the plugin.
 
 
