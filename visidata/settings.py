@@ -276,7 +276,7 @@ def addCommand(cls, keystrokes, longname, execstr, helpstr='', **kwargs):
     '''
     vd.commands.set(longname, Command(longname, execstr, helpstr=helpstr, **kwargs), cls)
     if keystrokes:
-        vd.bindkeys.set(keystrokes, longname, cls)
+        vd.bindkeys.set(vd.prettykeys(keystrokes), longname, cls)
 
 def _command(cls, binding, longname, helpstr, **kwargs):
     def decorator(func):
@@ -291,7 +291,7 @@ globalCommand = BaseSheet.addCommand
 @VisiData.api
 def bindkey(vd, keystrokes, longname):
     'Bind *keystrokes* to *longname* on BaseSheet and unbind more-specific bindings of keystrokes.'
-    vd.bindkeys[keystrokes] = {'BaseSheet': longname}
+    vd.bindkeys[vd.prettykeys(keystrokes)] = {'BaseSheet': longname}
 
 @BaseSheet.class_api
 @classmethod
@@ -300,14 +300,14 @@ def bindkey(cls, keystrokes, longname):
     oldlongname = vd.bindkeys._get(keystrokes, cls)
     if oldlongname:
         vd.warning('%s was already bound to %s' % (keystrokes, oldlongname))
-    vd.bindkeys.set(keystrokes, longname, cls)
+    vd.bindkeys.set(vd.prettykeys(keystrokes), longname, cls)
 
 @BaseSheet.class_api
 @classmethod
 def unbindkey(cls, keystrokes):
     '''Unbind `keystrokes` on a `<SheetType>`.
     May be necessary to avoid a warning when overriding a binding on the same exact class.'''
-    vd.bindkeys.unset(keystrokes, cls)
+    vd.bindkeys.unset(vd.prettykeys(keystrokes), cls)
 
 @BaseSheet.api
 def getCommand(sheet, cmd):

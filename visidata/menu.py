@@ -624,22 +624,8 @@ def drawMenu(vd, scr, sheet):
 
     mainbinding = HelpSheet().revbinds.get(cmd.longname, [None])[0]
     if mainbinding:
-        clipdraw(scr, y, helpx+2, ' '+vd.prettybindkey(mainbinding or '(unbound)')+' ', colors.color_menu_active)
+        clipdraw(scr, y, helpx+2, ' '+vd.prettykeys(mainbinding or '(unbound)')+' ', colors.color_menu_active)
     clipdraw(scr, y, helpx+14, ' '+cmd.longname+' ', helpattr)
-
-
-@VisiData.api
-def prettybindkey(vd, k):
-    k = k.replace('^[', 'Alt+')
-    k = k[:-1].replace('^', 'Ctrl+')+k[-1]
-    if k[-1] in string.ascii_uppercase and '+' not in k and '_' not in k:
-        k = k[:-1] + 'Shift+' + k[-1]
-
-    return {
-        'Ctrl+I': 'Tab',
-        'Ctrl+J': 'Enter',
-        ' ': 'Space',
-    }.get(k, k).strip()
 
 
 @BaseSheet.api

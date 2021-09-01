@@ -29,10 +29,12 @@ from .utils import *
 
 from .extensible import *
 from .vdobj import *
-
 vd = VisiData()
+
 vd.addGlobals = addGlobals
 vd.getGlobals = getGlobals
+
+import visidata.keys
 
 from .basesheet import *
 from .settings import *

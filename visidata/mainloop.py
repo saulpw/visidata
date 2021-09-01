@@ -233,7 +233,7 @@ def mainloop(self, scr):
                         else:
                             f(y, x, keystroke)
 
-                        self.keystrokes = keystroke
+                        self.keystrokes = self.prettykeys(keystroke)
                         keystroke = ''   # already handled
                 except curses.error:
                     pass
@@ -244,13 +244,13 @@ def mainloop(self, scr):
                 vd.warning('duplicate prefix: ' + keystroke)
                 self.keystrokes = ''
             else:
-                self.keystrokes += keystroke
+                self.keystrokes += self.prettykeys(keystroke)
 
         self.drawRightStatus(sheet._scr, sheet)  # visible for commands that wait for input
 
         if not keystroke:  # timeout instead of keypress
             pass
-        elif keystroke == '^Q':
+        elif keystroke == 'Ctrl+Q':
             return self.lastErrors and '\n'.join(self.lastErrors[-1])
         elif vd.bindkeys._get(self.keystrokes):
             sheet.execCommand(self.keystrokes, keystrokes=self.keystrokes)
