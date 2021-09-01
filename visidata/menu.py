@@ -609,21 +609,35 @@ def drawMenu(vd, scr, sheet):
     if not cmd:
         return
 
-    # help box
+    # helpbox
+    sidelines = []
+    if 'push(' in cmd.execstr:
+        sidelines += [vd.options.disp_menu_push + ' pushes sheet']
+    if 'input' in cmd.execstr:
+        sidelines += [vd.options.disp_menu_input + ' needs input']
+
     helpattr = colors.color_menu_help
+    helpstrw = 0
+    if sidelines:
+        helpstrw = min(map(len, sidelines))+2
     helpw = min(w-4, 76)
     helpx = 2
     ls,rs,ts,bs,tl,tr,bl,br = disp_menu_boxchars
-    helplines = textwrap.wrap(cmd.helpstr or '(no help available)', width=helpw-4)
+    helplines = textwrap.wrap(cmd.helpstr or '(no help available)', width=helpw-4-helpstrw)
 
     # place helpbox just below deepest menu
     menuh = 2+sum(sheet.activeMenuItems[1:-1])
     menuh += len(getMenuItem(sheet, sheet.activeMenuItems[:-1]).menus)
     y = min(menuh, h-len(helplines)-3)
     clipdraw(scr, y, helpx, tl+ts*(helpw-2)+tr, helpattr)
+
+    # cmd.helpstr text
     for i, line in enumerate(helplines):
         clipdraw(scr, y+i+1, helpx, ls+' '+line+' '*(helpw-len(line)-3)+rs, helpattr)
     clipdraw(scr, y+i+2, helpx, bl+bs*(helpw-2)+br, helpattr)
+
+    for i, line in enumerate(sidelines):
+        clipdraw(scr, y+i+1, helpx+helpw-helpstrw, line, helpattr)
 
     mainbinding = HelpSheet().revbinds.get(cmd.longname, [None])[0]
     if mainbinding:
