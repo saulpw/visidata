@@ -427,7 +427,7 @@ vd.menus = [
             Menu('cursor', 'zoom-all'),
         ),
     ),
-    Menu('Meta',
+    Menu('sYstem',
         Menu('Macros sheet', 'macro-sheet'),
         Menu('Threads sheet', 'threads-all'),
         Menu('Import Python library', 'import-python'),
@@ -580,8 +580,11 @@ def drawMenu(vd, scr, sheet):
         else:
             attr = colors.color_menu
 
-        clipdraw(scr, 0, x, ' '+item.title+' ', attr)
-        clipdraw(scr, 0, x+1, item.title[0], attr | curses.A_UNDERLINE)
+        clipdraw(scr, 0, x, ' ', attr)
+        for j, ch in enumerate(item.title):
+            clipdraw(scr, 0, x+j+1, ch, attr | (curses.A_UNDERLINE if ch.isupper() else 0))
+        clipdraw(scr, 0, x+j+2, ' ', attr)
+
         vd.onMouse(scr, 0, x, 1, len(item.title)+2,
                 BUTTON1_PRESSED=lambda y,x,key,i=i,sheet=sheet: sheet.pressMenu(i),
                 BUTTON2_PRESSED=vd.nop,
@@ -592,8 +595,8 @@ def drawMenu(vd, scr, sheet):
         x += len(item.title)+2
 
 
-    rightdisp = 'Ctrl+H for menu'
-    rightmenux = min(72, w-len(rightdisp))
+    rightdisp = 'Ctrl+H for help'
+    rightmenux = min(72, w-len(rightdisp)-1)
     if rightmenux > x:
         clipdraw(scr, 0, rightmenux, rightdisp, colors.color_menu)
 
@@ -722,7 +725,7 @@ BaseSheet.addCommand('^[c', 'menu-column', 'pressMenu("Column")', '')
 BaseSheet.addCommand('^[r', 'menu-row', 'pressMenu("Row")', '')
 BaseSheet.addCommand('^[d', 'menu-data', 'pressMenu("Data")', '')
 BaseSheet.addCommand('^[p', 'menu-plot', 'pressMenu("Plot")', '')
-BaseSheet.addCommand('^[m', 'menu-meta', 'pressMenu("Meta")', '')
+BaseSheet.addCommand('^[y', 'menu-system', 'pressMenu("sYstem")', '')
 BaseSheet.addCommand('^[h', 'menu-help', 'pressMenu("Help")', '')
 BaseSheet.bindkey('^H', 'menu-help')
 BaseSheet.bindkey('KEY_BACKSPACE', 'menu-help')
