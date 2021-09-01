@@ -53,7 +53,7 @@ class _Progress:
 
     def __enter__(self):
         if self.sheet:
-            self.sheet.progresses.append(self)
+            self.sheet.progresses.insert(0, self)
         return self
 
     def addProgress(self, n):

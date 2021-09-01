@@ -32,20 +32,39 @@ def modtime(path):
 
 class FileProgress:
     'Open file in binary mode and track read() progress.'
-    def __init__(self, path, fp):
+    def __init__(self, path, fp, mode='r', **kwargs):
         self.path = path
         self.fp = fp
-        self.prog = Progress(gerund='loading', total=filesize(path))
-        self.prog.__enter__()
+        self.prog = None
+        if 'r' in mode:
+            gerund = 'reading'
+            self.prog = Progress(gerund=gerund, total=filesize(path))
+        elif 'w' in mode:
+            gerund = 'writing'
+            self.prog = Progress(gerund=gerund)
+        else:
+            gerund = 'nothing'
+
+        # track Progress on original fp
+        self.fp_orig_read = self.fp.read
+        self.fp_orig_close = self.fp.close
+        self.fp.read = self.read
+        self.fp.close = self.close
+
+        if self.prog:
+            self.prog.__enter__()
+
+    def close(self, *args, **kwargs):
+        if self.prog:
+            self.prog.__exit__(None, None, None)
+            self.prog = None
+        return self.fp_orig_close(*args, **kwargs)
 
     def read(self, size=-1):
-        r = self.fp.read(size)
+        r = self.fp_orig_read(size)
         if self.prog:
             if r:
                 self.prog.addProgress(len(r))
-            else:
-                self.prog.__exit__(None, None, None)
-                self.prog = None
         return r
 
     def __getattr__(self, k):
@@ -67,8 +86,6 @@ class FileProgress:
             for line in self.fp:
                 self.prog.addProgress(len(line))
                 yield line
-            self.prog.__exit__(None, None, None)
-            self.prog = None
 
     def __exit__(self, type, value, tb):
         return self.fp.__exit__(type, value, tb)
@@ -186,18 +203,18 @@ class Path(os.PathLike):
         binmode = 'wb' if 'w' in kwargs.get('mode', '') else 'rb'
         if self.compression == 'gz':
             import gzip
-            return gzip.open(FileProgress(path, fp=open(path, mode=binmode)), *args, **kwargs)
+            return gzip.open(FileProgress(path, fp=open(path, mode=binmode), **kwargs), *args, **kwargs)
         elif self.compression == 'bz2':
             import bz2
-            return bz2.open(FileProgress(path, fp=open(path, mode=binmode)), *args, **kwargs)
+            return bz2.open(FileProgress(path, fp=open(path, mode=binmode), **kwargs), *args, **kwargs)
         elif self.compression in ['xz', 'lzma']:
             import lzma
-            return lzma.open(FileProgress(path, fp=open(path, mode=binmode)), *args, **kwargs)
+            return lzma.open(FileProgress(path, fp=open(path, mode=binmode), **kwargs), *args, **kwargs)
         elif self.compression == 'zst':
             import zstandard
-            return zstandard.open(FileProgress(path, fp=open(path, mode=binmode)), *args, **kwargs)
+            return zstandard.open(FileProgress(path, fp=open(path, mode=binmode), **kwargs), *args, **kwargs)
         else:
-            return FileProgress(path, fp=self._path.open(*args, **kwargs))
+            return FileProgress(path, fp=self._path.open(*args, **kwargs), **kwargs)
 
     def __iter__(self):
         with Progress(total=filesize(self)) as prog:

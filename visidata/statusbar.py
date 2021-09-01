@@ -183,11 +183,8 @@ def drawRightStatus(vd, scr, vs):
 
     if vs.currentThreads:
         statcolors.insert(0, vd.checkMemoryUsage())
-        if vs.progresses:
-            gerund = vs.progresses[0].gerund
-        else:
-            gerund = 'processing'
-        statcolors.insert(1, ('  %s %s…' % (vs.progressPct, gerund), 'color_working'))
+        gerunds = [p.gerund for p in vs.progresses if p.gerund] or ['processing']
+        statcolors.insert(1, ('  %s %s…' % (vs.progressPct, gerunds[0]), 'color_working'))
 
     if active and vd.currentReplay:
         statcolors.insert(0, (vd.replayStatus, 'color_status_replay'))
