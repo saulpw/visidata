@@ -28,10 +28,22 @@ class XlsxIndexSheet(IndexSheet):
 
 
 class XlsxSheet(SequenceSheet):
+    # rowdef: AttrDict of column_letter to cell
+    def setCols(self, headerrows):
+        self.columns = []
+        headers = [[x.value for x in row.values()] for row in headerrows]
+        column_letters = [x.column_letter for x in headerrows[0].values()]
+
+        for i, colnamelines in enumerate(itertools.zip_longest(*headers, fillvalue='')):
+            colnamelines = ['' if c is None else c for c in colnamelines]
+            self.addColumn(AttrColumn(''.join(map(str, colnamelines)), column_letters[i] +'.value'))
+
+        self._rowtype = AttrDict
+
     def iterload(self):
         worksheet = self.source
         for row in Progress(worksheet.iter_rows(), total=worksheet.max_row or 0):
-            yield list(wrapply(getattr, cell, 'value') for cell in row)
+            yield AttrDict({cell.column_letter:cell for cell in row})
 
 
 class XlsIndexSheet(IndexSheet):
