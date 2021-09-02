@@ -21,6 +21,7 @@ vd.menuRunning = False
 
 
 def Menu(title, *args):
+    'Construct menu command or submenu.  *title* is displayed text for this item; *args* is either a single command longname, or recursive Menu elements.'
     if len(args) == 1 and isinstance(args[0], str):
         return AttrDict(title=title, menus=[], longname=args[0])
 
@@ -62,11 +63,19 @@ def getMenuItem(obj, menupath=None):
 
 @VisiData.api
 def addMenuItem(vd, *args):
+    'Add one command to hierarchical menu at given menupath.  Last argument must be valid command longname. Append menupath elements that do not exist. Example: vd.addMenuItem("Sheet", "Options", "more options", "options-more")'
     getMenuItem(vd, args[:-2]).menus.append(Menu(*args[-2:]))
 
 
 @VisiData.api
 def addMenu(vd, *args):
+    '''Incorporate submenus and commands into hierarchical menu.  Wrap all in Menu() objects.  Example:
+
+        vd.addMenu(Menu("Help",
+                    Menu("About",
+                      Menu("credits", "show-credits"),
+                      Menu("environment", "show-env"),
+                  )))'''
     m = Menu('top', *args)
     for item, menupath in walkmenu(m):
         obj = vd
@@ -532,7 +541,7 @@ def nop(vd, *args, **kwargs):
 @BaseSheet.property
 @drawcache
 def menus(sheet):
-    'List of Hierarchical menu items for commands available on this sheet.'
+    'List of hierarchical menu items for commands available on this sheet.'
     def _menus(sheet, item):
         if item.longname:
             cmd = sheet.getCommand(item.longname)
@@ -647,6 +656,7 @@ def drawMenu(vd, scr, sheet):
 
 @BaseSheet.api
 def pressMenu(sheet, *args):
+    'Navigate to given menupath and activate menu if not already activated.  Example: sheet.pressMenu("Help", "Version")'
     p = _intMenuPath(sheet, args)
     if p == sheet.activeMenuItems:  # clicking on current menu item
         if getMenuItem(sheet, p).longname:
@@ -667,6 +677,7 @@ def checkMenu(sheet):
 
 @VisiData.api
 def runMenu(vd):
+    'Activate menu, with sheet.activeMenuItems containing the navigated menu path.  Does not return until menu is deactivated.'
     old_disp_menu = vd.options.disp_menu
 
     vd.options.disp_menu=True
@@ -731,6 +742,7 @@ def runMenu(vd):
 
     vd.draw_all()
     sheet.execCommand(currentItem.longname)
+
 
 BaseSheet.addCommand('^[s', 'menu-sheet', 'pressMenu("Sheet")', '')
 BaseSheet.addCommand('^[e', 'menu-edit', 'pressMenu("Edit")', '')
