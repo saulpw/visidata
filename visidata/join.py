@@ -291,3 +291,5 @@ IndexSheet.addCommand('&', 'join-selected', 'vd.push(createJoinedSheet(someSelec
 IndexSheet.bindkey('g&', 'join-selected')
 Sheet.addCommand('&', 'join-sheets-top2', 'vd.push(createJoinedSheet(vd.sheets[:2], jointype=chooseOne(jointypes)))', 'concatenate top two sheets in Sheets Stack')
 Sheet.addCommand('g&', 'join-sheets-all', 'vd.push(createJoinedSheet(vd.sheets, jointype=chooseOne(jointypes)))', 'concatenate all sheets in Sheets Stack')
+
+vd.addMenuItem('Data', 'Join', 'selected sheets', 'join-selected')

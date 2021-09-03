@@ -71,6 +71,7 @@ from .slide import *
 from .search import *
 from .expr import *
 
+from .menu import *
 from .choose import *
 from .metasheets import *
 from .join import *
@@ -100,7 +101,6 @@ import visidata.customdate
 import visidata.misc
 import visidata.memory
 from .macros import *
-from .menu import *
 import visidata.macos
 
 from .loaders.csv import *
