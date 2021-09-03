@@ -3,20 +3,20 @@ import visidata
 
 
 visidata.vd.prettykeys_trdict = {
-        ' ': 'space',  # must be first
-        '^[': 'alt+',
-        '^j': 'enter',
-        '^i': 'tab',
-        'key_up':    'up',
-        'key_down':  'down',
-        'key_left':  'left',
-        'key_right': 'right',
-        'key_home':  'home',
-        'key_end':   'end',
-        'key_ppage': 'pgup',
-        'key_npage': 'pgdn',
-        'key_ic':    'ins',
-        'key_dc':    'del',
+        ' ': 'Space',  # must be first
+        '^[': 'Alt+',
+        '^J': 'Enter',
+        '^I': 'Tab',
+        'KEY_UP':    'Up',
+        'KEY_DOWN':  'Down',
+        'KEY_LEFT':  'Left',
+        'KEY_RIGHT': 'Right',
+        'KEY_HOME':  'Home',
+        'KEY_END':   'End',
+        'KEY_PPAGE': 'PgUp',
+        'KEY_NPAGE': 'PgDn',
+        'KEY_IC':    'Ins',
+        'KEY_DC':    'Del',
 
         'kUP5':      'Ctrl+Up',
         'kDN5':      'Ctrl+Down',
