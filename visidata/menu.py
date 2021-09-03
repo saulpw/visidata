@@ -679,6 +679,7 @@ def runMenu(vd):
     vd.options.disp_menu=True
     vd.menuRunning = True
     sheet = vd.activeSheet
+    vd.setWindows(vd.scrFull)
 
     try:
       while True:
