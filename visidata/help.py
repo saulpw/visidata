@@ -37,7 +37,7 @@ class HelpSheet(MetaSheet):
             if k in self.cmddict:
                 self.cmddict[k].helpstr = cmdrow.helpstr
 
-    @MetaSheet.lazy_property
+    @BaseSheet.lazy_property
     def revbinds(self):
         revbinds = collections.defaultdict(list)  # longname -> [keystrokes, ..]
         itbindings = vd.bindkeys.iterall()

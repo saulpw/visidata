@@ -648,7 +648,7 @@ def drawMenu(vd, scr, sheet):
     for i, line in enumerate(sidelines):
         clipdraw(scr, y+i+1, helpx+helpw-helpstrw, line, helpattr)
 
-    mainbinding = HelpSheet().revbinds.get(cmd.longname, [None])[0]
+    mainbinding = sheet.revbinds.get(cmd.longname, [None])[0]
     if mainbinding:
         clipdraw(scr, y, helpx+2, ' '+vd.prettykeys(mainbinding or '(unbound)')+' ', colors.color_menu_active)
     clipdraw(scr, y, helpx+14, ' '+cmd.longname+' ', helpattr)
