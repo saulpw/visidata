@@ -147,7 +147,6 @@ vd.menus = [
             ),
             Menu('selected cells',
                 Menu('from input', 'setcol-input'),
-                Menu('from cells above', 'setcol-fill'),
                 Menu('increment', 'setcol-incr'),
                 Menu('Python sequence', 'setcol-expr'),
                 Menu('regex substitution', 'setcol-subst'),
