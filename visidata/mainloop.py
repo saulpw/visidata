@@ -250,7 +250,7 @@ def mainloop(self, scr):
 
         if not keystroke:  # timeout instead of keypress
             pass
-        elif keystroke == 'Ctrl+Q':
+        elif keystroke == '^Q':
             return self.lastErrors and '\n'.join(self.lastErrors[-1])
         elif vd.bindkeys._get(self.keystrokes):
             sheet.execCommand(self.keystrokes, keystrokes=self.keystrokes)
