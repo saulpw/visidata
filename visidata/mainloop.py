@@ -201,7 +201,7 @@ def mainloop(self, scr):
 
         keystroke = self.getkeystroke(scr, sheet)
 
-        if not keystroke and prefixWaiting and ESC in self.keystrokes:  # timeout ESC
+        if not keystroke and prefixWaiting and "Alt+" in self.keystrokes:  # timeout ESC
             self.keystrokes = ''
 
         if keystroke:  # wait until next keystroke to clear statuses and previous keystrokes
