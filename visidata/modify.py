@@ -159,7 +159,7 @@ def isChanged(self, col, row):
         row, rowmods = self._deferredMods[self.rowid(row)]
         newval = rowmods[col]
         curval = col.getSourceValue(row)
-        return (newval is None and curval is not None) or col.type(newval) != col.type(curval)
+        return (newval is None and curval is not None) or (curval is None and newval is not None) or (col.type(newval) != col.type(curval))
     except KeyError:
         return False
     except Exception:
