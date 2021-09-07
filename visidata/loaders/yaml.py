@@ -14,7 +14,7 @@ class YamlSheet(JsonSheet):
             documents = yaml.safe_load_all(fp)
 
             self.columns = []
-            self._colnames.clear()
+            self._knownKeys.clear()
 
             # Peek at the document stream to determine how to best DWIM.
             #
