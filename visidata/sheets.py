@@ -800,7 +800,7 @@ class TableSheet(BaseSheet):
 
             # apply current row here instead of in a colorizer, because it needs to know dispRowIndex
             if rowidx == self.cursorRowIndex:
-                color_current_row = colors.get_color('color_current_row', 5)
+                color_current_row = colors.get_color('color_current_row', 2)
                 basecellcattr = sepcattr = update_attr(rowcattr, color_current_row)
             else:
                 basecellcattr = rowcattr
