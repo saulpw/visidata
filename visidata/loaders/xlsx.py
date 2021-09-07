@@ -31,6 +31,11 @@ class XlsxSheet(SequenceSheet):
     # rowdef: AttrDict of column_letter to cell
     def setCols(self, headerrows):
         self.columns = []
+        self._rowtype = AttrDict
+
+        if not headerrows:
+            return
+
         headers = [[x.value for x in row.values()] for row in headerrows]
         column_letters = [x.column_letter for x in headerrows[0].values()]
 
@@ -38,7 +43,10 @@ class XlsxSheet(SequenceSheet):
             colnamelines = ['' if c is None else c for c in colnamelines]
             self.addColumn(AttrColumn(''.join(map(str, colnamelines)), column_letters[i] +'.value'))
 
-        self._rowtype = AttrDict
+    def addRow(self, row, index=None):
+        Sheet.addRow(self, row, index=index)  # skip SequenceSheet
+        for column_letter, v in list(row.items())[len(self.columns):len(row)]:  # no-op if already done
+            self.addColumn(AttrColumn('', column_letter+'.value'))
 
     def iterload(self):
         worksheet = self.source
