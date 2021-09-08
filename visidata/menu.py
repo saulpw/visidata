@@ -6,7 +6,7 @@ from visidata import *
 __all__ = ['Menu']
 
 
-vd.option('disp_menu', True, 'show menu on top line when not active')
+vd.option('disp_menu', True, 'show menu on top line when not active', sheettype=None)
 vd.option('color_menu', 'white on 234 black', 'color of menu items in general')
 vd.option('color_menu_active', '223 yellow on black', 'color of active menu submenus/item')
 vd.option('color_menu_spec', '118 green on 234 black', 'color of active menu submenus/item')
