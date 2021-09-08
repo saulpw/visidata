@@ -646,7 +646,7 @@ def drawMenu(vd, scr, sheet):
 
     mainbinding = sheet.revbinds.get(cmd.longname, [None])[0]
     if mainbinding:
-        clipdraw(scr, y, helpx+2, ' '+vd.prettykeys(mainbinding or '(unbound)')+' ', colors.color_menu_active)
+        clipdraw(scr, y, helpx+2, ' '+vd.prettykeys(mainbinding or '(unbound)')+' ', colors.color_keystrokes)
     clipdraw(scr, y, helpx+14, ' '+cmd.longname+' ', helpattr)
 
 
