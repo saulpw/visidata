@@ -652,11 +652,14 @@ def drawMenu(vd, scr, sheet):
 
 @BaseSheet.api
 def pressMenu(sheet, *args):
-    'Navigate to given menupath and activate menu if not already activated.  Example: sheet.pressMenu("Help", "Version")'
+    '''Navigate to given menupath in *args* and activate menu if not already activated. Return True if pressing current item.
+    Example: sheet.pressMenu("Help", "Version")
+    '''
+    ret = False
     p = _intMenuPath(sheet, args)
     if p == sheet.activeMenuItems:  # clicking on current menu item
         if getMenuItem(sheet, p).longname:
-            return True
+            ret = True
         else:
             p += [0]
 
@@ -665,6 +668,7 @@ def pressMenu(sheet, *args):
     if not vd.menuRunning:
         vd.runMenu()
 
+    return ret
 
 @BaseSheet.api
 def checkMenu(sheet):
