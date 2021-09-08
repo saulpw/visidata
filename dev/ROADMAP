@@ -5,7 +5,7 @@
   - [options] option enums
   - [options] user-defined option aliases
   - [splitpane] File preview in directory view
-  - [defermods] 'modified since last save' indicator on status bar
+  + [defermods] 'modified since last save' indicator on status bar
   - [scroll cell] zh/zl Left hand side of a cell with content hidden doesn't show ellipsis #751
 
 2. Persistence
