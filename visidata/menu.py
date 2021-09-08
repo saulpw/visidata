@@ -622,32 +622,35 @@ def drawMenu(vd, scr, sheet):
         sidelines += [vd.options.disp_menu_input + ' needs input']
 
     helpattr = colors.color_menu_help
-    helpstrw = 0
-    if sidelines:
-        helpstrw = min(map(len, sidelines))+2
-    helpw = min(w-4, 76)
-    helpx = 2
+    helpx = 30
+    helpw = min(w-helpx-4, 76)
     ls,rs,ts,bs,tl,tr,bl,br = disp_menu_boxchars
-    helplines = textwrap.wrap(cmd.helpstr or '(no help available)', width=helpw-4-helpstrw)
+    helplines = textwrap.wrap(cmd.helpstr or '(no help available)', width=helpw-4)
 
     # place helpbox just below deepest menu
     menuh = 2+sum(sheet.activeMenuItems[1:-1])
     menuh += len(getMenuItem(sheet, sheet.activeMenuItems[:-1]).menus)
-    y = min(menuh, h-len(helplines)-3)
-    clipdraw(scr, y, helpx, tl+ts*(helpw-2)+tr, helpattr)
+    menuy = 16 # min(menuh, h-len(helplines)-3)
+    clipdraw(scr, menuy, helpx, tl+ts*(helpw-2)+tr, helpattr)
 
+    y = menuy
     # cmd.helpstr text
     for i, line in enumerate(helplines):
         clipdraw(scr, y+i+1, helpx, ls+' '+line+' '*(helpw-len(line)-3)+rs, helpattr)
-    clipdraw(scr, y+i+2, helpx, bl+bs*(helpw-2)+br, helpattr)
+    y += len(helplines)
 
+    if sidelines:
+        clipdraw(scr, y, helpx, ls+' '*(helpw-2)+rs, helpattr)
     for i, line in enumerate(sidelines):
-        clipdraw(scr, y+i+1, helpx+helpw-helpstrw, line, helpattr)
+        clipdraw(scr, y+i+1, helpx, ls+'   '+line+' '*(helpw-len(line)-5)+rs, helpattr)
+    y += len(sidelines)
+
+    clipdraw(scr, y+1, helpx, bl+bs*(helpw-2)+br, helpattr)
 
     mainbinding = sheet.revbinds.get(cmd.longname, [None])[0]
     if mainbinding:
-        clipdraw(scr, y, helpx+2, ' '+vd.prettykeys(mainbinding or '(unbound)')+' ', colors.color_keystrokes)
-    clipdraw(scr, y, helpx+14, ' '+cmd.longname+' ', helpattr)
+        clipdraw(scr, menuy, helpx+2, ' '+vd.prettykeys(mainbinding or '(unbound)')+' ', colors.color_keystrokes)
+    clipdraw(scr, menuy, helpx+14, ' '+cmd.longname+' ', helpattr)
 
 
 @BaseSheet.api
