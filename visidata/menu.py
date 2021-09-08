@@ -63,7 +63,7 @@ def getMenuItem(obj, menupath=None):
 
 @VisiData.api
 def addMenuItem(vd, *args):
-    'Add one command to hierarchical menu at given menupath.  Last argument must be valid command longname. Append menupath elements that do not exist. Example: vd.addMenuItem("Sheet", "Options", "more options", "options-more")'
+    'Add one command to hierarchical menu at given menupath.  Last argument must be valid command longname. Append menupath elements that do not exist. Example: vd.addMenuItem("File", "Options", "more options", "options-more")'
     getMenuItem(vd, args[:-2]).menus.append(Menu(*args[-2:]))
 
 
