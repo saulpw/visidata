@@ -105,7 +105,7 @@ def _intMenuPath(obj, menupath):
 
 
 vd.menus = [
-    Menu('Sheet',
+    Menu('File',
         Menu('New', 'open-new'),
         Menu('Open file/url', 'open-file'),
         Menu('Rename', 'rename-sheet'),
@@ -208,6 +208,7 @@ vd.menus = [
 
     Menu('View',
         Menu('Statuses', 'open-statuses'),
+        Menu('Plugins', 'open-plugins'),
         Menu('Other sheet',
             Menu('previous sheet', 'jump-prev'),
             Menu('first sheet', 'jump-first'),
@@ -222,7 +223,6 @@ vd.menus = [
             Menu('this sheet only', 'cmdlog-sheet-only'),
             Menu('all commands', 'cmdlog-all'),
         ),
-        Menu('Plugins', 'open-plugins'),
         Menu('Columns',
             Menu('this sheet', 'columns-sheet'),
             Menu('all sheets', 'columns-all'),
@@ -264,9 +264,9 @@ vd.menus = [
         ),
         Menu('Resize',
             Menu('Half', 'resize-col-half'),
-            Menu('Max', 'resize-col-max'),
-            Menu('All columns max', 'resize-cols-max'),
-            Menu('Input', 'resize-col-input'),
+            Menu('current column to max', 'resize-col-max'),
+            Menu('current column to input', 'resize-col-input'),
+            Menu('all columns max', 'resize-cols-max'),
         ),
         Menu('Rename',
             Menu('current column', 'rename-col'),
@@ -306,17 +306,6 @@ vd.menus = [
                 Menu('Descending', 'sort-keys-desc'),
             ),
         ),
-        Menu('Expand',
-            Menu('one level', 'expand-col'),
-            Menu('to depth', 'expand-col-depth'),
-            Menu('all columns one level', 'expand-cols'),
-            Menu('all columns to depth', 'expand-cols-depth'),
-        ),
-        Menu('Contract', 'contract-col'),
-        Menu('Split', 'split-col'),
-        Menu('Aggregate', 'aggregate-col'),
-        Menu('Fill', 'setcol-fill'),
-        Menu('Freeze', 'freeze-col'),
         Menu('Add column',
             Menu('empty',
                 Menu('one column', 'addcol-new'),
@@ -328,6 +317,17 @@ vd.menus = [
             Menu('increment', 'addcol-incr'),
             Menu('shell', 'addcol-shell'),
         ),
+        Menu('Expand',
+            Menu('one level', 'expand-col'),
+            Menu('to depth', 'expand-col-depth'),
+            Menu('all columns one level', 'expand-cols'),
+            Menu('all columns to depth', 'expand-cols-depth'),
+        ),
+        Menu('Contract', 'contract-col'),
+        Menu('Split', 'split-col'),
+        Menu('Add aggregator', 'aggregate-col'),
+        Menu('Fill', 'setcol-fill'),
+        Menu('Freeze', 'freeze-col'),
     ),
 
     Menu('Row',
@@ -432,26 +432,26 @@ vd.menus = [
         ),
         Menu('Dive into cursor', 'dive-cursor'),
     ),
-    Menu('sYstem',
+    Menu('System',
         Menu('Macros sheet', 'macro-sheet'),
         Menu('Threads sheet', 'threads-all'),
-        Menu('Import Python library', 'import-python'),
-        Menu('Exec Python statement', 'exec-python'),
-        Menu('Execute VisiData longname', 'exec-longname'),
+        Menu('Execute longname', 'exec-longname'),
+        Menu('Python',
+            Menu('import library', 'import-python'),
+            Menu('current sheet', 'pyobj-sheet'),
+            Menu('current row', 'pyobj-row'),
+            Menu('current cell', 'pyobj-cell'),
+            Menu('expression', 'pyobj-expr'),
+            Menu('exec()', 'exec-python'),
+        ),
         Menu('Toggle profiling', 'toggle-profile'),
         Menu('Suspend to shell', 'suspend'),
-        Menu('Open as Python Object',
-            Menu('Sheet', 'pyobj-sheet'),
-            Menu('Row', 'pyobj-row'),
-            Menu('Cell', 'pyobj-cell'),
-            Menu('Python expression', 'pyobj-expr'),
-        ),
     ),
 ]
 
 vd.addMenu(Menu('Help',
         Menu('Quick reference', 'sysopen-help'),
-        Menu('Open command list', 'help-commands'),
+        Menu('Command list', 'help-commands'),
 #        Menu('Tutorial', 'open-tutorial'),
 #        Menu('About', 'open-about'),
         Menu('Version', 'show-version'),
@@ -745,14 +745,14 @@ def runMenu(vd):
     sheet.execCommand(currentItem.longname)
 
 
-BaseSheet.addCommand('^[s', 'menu-sheet', 'pressMenu("Sheet")', '')
+BaseSheet.addCommand('^[f', 'menu-file', 'pressMenu("File")', '')
 BaseSheet.addCommand('^[e', 'menu-edit', 'pressMenu("Edit")', '')
 BaseSheet.addCommand('^[v', 'menu-view', 'pressMenu("View")', '')
 BaseSheet.addCommand('^[c', 'menu-column', 'pressMenu("Column")', '')
 BaseSheet.addCommand('^[r', 'menu-row', 'pressMenu("Row")', '')
 BaseSheet.addCommand('^[d', 'menu-data', 'pressMenu("Data")', '')
 BaseSheet.addCommand('^[p', 'menu-plot', 'pressMenu("Plot")', '')
-BaseSheet.addCommand('^[y', 'menu-system', 'pressMenu("sYstem")', '')
+BaseSheet.addCommand('^[s', 'menu-system', 'pressMenu("System")', '')
 BaseSheet.addCommand('^[h', 'menu-help', 'pressMenu("Help")', '')
 BaseSheet.bindkey('^H', 'menu-help')
 BaseSheet.bindkey('KEY_BACKSPACE', 'menu-help')

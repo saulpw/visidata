@@ -86,7 +86,7 @@ ZipSheet.addCommand('gx', 'extract-selected', 'extract(*onlySelectedRows)', 'ext
 ZipSheet.addCommand('zx', 'extract-file-to', 'extract(cursorRow, path=inputPath("extract to: "))', 'extract current file to given pathname')
 ZipSheet.addCommand('gzx', 'extract-selected-to', 'extract(*onlySelectedRows, path=inputPath("extract %d files to: " % nSelectedRows))', 'extract selected files to given directory')
 
-vd.addMenu(Menu('Sheet', Menu('Extract',
+vd.addMenu(Menu('File', Menu('Extract',
         Menu('current file', 'extract-file'),
         Menu('current file to', 'extract-file-to'),
         Menu('selected files', 'extract-selected'),
