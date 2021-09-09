@@ -717,10 +717,7 @@ def runMenu(vd):
                 return
 
         elif k in ['KEY_RIGHT', 'l']:
-            if currentItem.menus:
-                sheet.activeMenuItems.append(0)
-            else:
-                sheet.activeMenuItems = [sheet.activeMenuItems[0]+1, 0]
+            sheet.activeMenuItems = [sheet.activeMenuItems[0]+1, 0]
 
         elif k in ['KEY_LEFT', 'h']:
             if len(sheet.activeMenuItems) > 2:
