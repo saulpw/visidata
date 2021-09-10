@@ -38,18 +38,26 @@ If you submit a Pull Request to this repository, you **must** digitally sign the
 
 1. Clone this repo into `.visidata/vdplus`:
 
+```
     git clone git@github.com:saulpw/vdplus ~/.visidata/vdplus
+```
 
 2. Add this line to your `.visidatarc` (which is usually in your home directory) for every component you want to use:
 
+```
     import vdplus
+```
 
 Additional options may be necessary for certain components; see the README for each component.
 
 3. Install Python requirements for that component:
 
+```
     pip3 install -r ~/.visidata/vdplus/<component>/requirements.txt
+```
 
 4. You may have to upgrade to the [unreleased "develop" branch of VisiData](https://github.com/saulpw/visidata/tree/develop):
 
+```
     pip3 install git+https://github.com/saulpw/visidata.git@develop
+```
