@@ -15,7 +15,7 @@ import signal
 import warnings
 
 from visidata import vd, option, options, run, BaseSheet, AttrDict
-from visidata import Path, saveSheets, domotd
+from visidata import Path, saveSheets
 import visidata
 
 vd.version_info = __version_info__
@@ -198,7 +198,7 @@ def main_vd():
 
     # fetch motd and plugins *after* options parsing/setting
     vd.pluginsSheet.ensureLoaded()
-    domotd()
+    vd.domotd()
 
     if args.batch:
         options.undo = False
