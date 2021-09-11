@@ -15,6 +15,7 @@ vd.option('disp_menu_boxchars', '││──┌┐└┘', 'box characters to u
 vd.option('disp_menu_more', '»', 'command submenu indicator')
 vd.option('disp_menu_push', '⎘', 'indicator if command pushes sheet onto sheet stack')
 vd.option('disp_menu_input', '…', 'indicator if input required for command')
+vd.option('disp_menu_fmt', 'Ctrl+H for help', 'right-side menu format string')
 
 BaseSheet.init('activeMenuItems', list)
 vd.menuRunning = False
@@ -603,7 +604,7 @@ def drawMenu(vd, scr, sheet):
         x += len(item.title)+2
 
 
-    rightdisp = 'Ctrl+H for help'
+    rightdisp = sheet.options.disp_menu_fmt.format(sheet=sheet, vd=vd)
     rightmenux = min(72, w-len(rightdisp)-1)
     if rightmenux > x:
         clipdraw(scr, 0, rightmenux, rightdisp, colors.color_menu)
