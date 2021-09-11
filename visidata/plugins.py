@@ -55,6 +55,23 @@ def _pluginColorizer(s,c,r,v):
     if ver != r.latest_ver: return 'color_warning'
     return 'color_working'
 
+
+@VisiData.api
+def pipinstall(vd, deps):
+    'Install *deps*, a list of pypi modules to install via pip into the plugins-deps directory. Return True if successful (no error).'
+    p = subprocess.Popen([sys.executable, '-m', 'pip', 'install',
+                        '--target', str(Path(options.visidata_dir)/"plugins-deps"),
+                      ] + deps,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+    out, err = p.communicate()
+    vd.status(out.decode())
+    if err:
+        vd.warning(err.decode())
+        return False
+    return True
+
+
 class PluginsSheet(JsonLinesSheet):
     rowtype = "plugins"  # rowdef: AttrDict of json dict
     colorizers = [
@@ -124,15 +141,8 @@ class PluginsSheet(JsonLinesSheet):
                     outfp.write(contents)
 
         if plugin.pydeps:
-            p = subprocess.Popen([sys.executable, '-m', 'pip', 'install',
-                                '--target', str(Path(options.visidata_dir)/"plugins-deps"),
-                              ]+plugin.pydeps.split(),
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE)
-            out, err = p.communicate()
-            vd.status(out.decode())
-            if err:
-                vd.warning(err.decode())
+            vd.pipinstall(plugin.pydeps.split())
+
         vd.status('%s plugin installed' % plugin.name)
 
         if _plugin_in_import_list(plugin):
