@@ -10,3 +10,5 @@ praw # reddit
 
 seaborn
 matplotlib # svg
+
+psutil # top

@@ -19,10 +19,10 @@ class CPUStatsSheet(Sheet):
             self.addColumn(c)
 
         for i, k in enumerate(psutil.cpu_times()._fields):
-            self.addColumn(SubrowColumn(ColumnItem(k+'_s', i, type=float), 2))
+            self.addColumn(SubColumnItem(2, ColumnItem(k+'_s', i, type=float, sheet=self)))
 
         for i, k in enumerate(psutil.cpu_freq()._fields):
-            self.addColumn(SubrowColumn(ColumnItem(k+'_MHz', i, type=float), 3))
+            self.addColumn(SubColumnItem(3, ColumnItem(k+'_MHz', i, type=float, sheet=self)))
 
         self.rows = list()
         for r in zip(range(psutil.cpu_count()),
@@ -159,9 +159,10 @@ def processes(vd):
     return ProcessesSheet('processes')
 
 
-BaseSheet.addCommand('^[c', 'open-cpu', 'vd.push(vd.cpuStats)', 'CPU stats')
-BaseSheet.addCommand('^[m', 'open-memory', 'vd.push(vd.memStats)', 'Memory stats')
-BaseSheet.addCommand('^[p', 'open-processes', 'vd.push(vd.processes)', 'Process stats')
+
+BaseSheet.addCommand('', 'open-cpu', 'vd.push(vd.cpuStats)', 'open status for CPU usage stats' )
+BaseSheet.addCommand('', 'open-memory', 'vd.push(vd.memStats)', 'open stats for memory usage stats')
+BaseSheet.addCommand('', 'open-processes', 'vd.push(vd.processes)', 'open stats of system process stats')
 
 @VisiData.api
 def chooseSignal(vd):
@@ -174,6 +175,17 @@ ProcessesSheet.addCommand('gd', 'term-selected', 'for r in someSelectedRows: os.
 ProcessesSheet.addCommand('zd', 'kill-process', 'os.kill(cursorRow.pid, signal.SIGKILL)', 'send SIGKILL to process')
 ProcessesSheet.addCommand('gzd', 'kill-selected', 'for r in someSelectedRows: os.kill(r.pid, signal.SIGKILL)', 'send SIGKILL to selected processes')
 
-ProcessesSheet.addCommand('^K', 'signal-processkill-process', 'os.kill(cursorRow.pid, chooseSignal())', 'send chosen signal to process')
-UsefulProcessesSheet.addCommand('^K', 'signal-process', 'os.kill(cursorRow.pid, chooseSignal())', 'kill(2) send chosen signal to process')
+ProcessesSheet.addCommand('^K', 'signal-process', 'os.kill(cursorRow.pid, chooseSignal())', 'send chosen signal to process')
+UsefulProcessesSheet.addCommand('^K', 'signal-selected', 'os.kill(cursorRow.pid, chooseSignal())', 'kill(2) send chosen signal to process')
 UsefulProcessesSheet.addCommand('', 'open-rlimits', 'vd.push(RlimitsSheet(cursorRow.name() + "_rlimits", cursorRow))', 'push rlimits for this process')
+
+vd.addMenuItem('System', 'Signal', 'current process', 'TERMinate', 'term-process')
+vd.addMenuItem('System', 'Signal', 'current process', 'KILL', 'kill-process')
+vd.addMenuItem('System', 'Signal', 'current process', 'choose type', 'signal-process')
+vd.addMenuItem('System', 'Signal', 'selected processes', 'TERMinate', 'term-selected')
+vd.addMenuItem('System', 'Signal', 'selected processes', 'KILL', 'kill-selected')
+vd.addMenuItem('System', 'Signal', 'selected processes', 'choose type', 'signal-selected')
+vd.addMenuItem('View', 'Resource limits', 'open-rlimits')
+vd.addMenuItem('System', '+Statistics', 'CPU', 'open-cpu')
+vd.addMenuItem('System', '+Statistics', 'Memory', 'open-memory')
+vd.addMenuItem('System', '+Statistics', 'Processes', 'open-processes')
