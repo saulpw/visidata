@@ -198,7 +198,7 @@ def save_sqlite(vd, p, *vsheets):
                 elif not isinstance(v, (int, float, str)):
                     v = col.getDisplayValue(r)
                 sqlvals.append(v)
-            sql = 'INSERT INTO "%s" VALUES (%s)' % (tblname, ','.join('?' for v in sqlvals))
+            sql = 'INSERT INTO "%s" (%s) VALUES (%s)' % (tblname, ','.join(c.name for c in vs.visibleCols), ','.join('?' for v in sqlvals))
             c.execute(sql, sqlvals)
 
     conn.commit()
