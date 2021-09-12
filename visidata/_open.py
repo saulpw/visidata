@@ -43,11 +43,13 @@ def openPath(vd, p, filetype=None, create=False):
     If True, *create* will return a new, blank **Sheet** if file does not exist.'''
     if p.scheme and not p.fp: # isinstance(p, UrlPath):
         schemes = p.scheme.split('+')
-        openfunc = 'openurl_' + schemes[-1]
-        try:
-            return vd.getGlobals()[openfunc](p, filetype=filetype)
-        except KeyError:
+        openfuncname = 'openurl_' + schemes[-1]
+
+        openfunc = getattr(vd, openfuncname, None) or vd.getGlobals().get(openfuncname, None)
+        if not openfunc:
             vd.fail(f'no loader for url scheme: {p.scheme}')
+
+        return openfunc(p, filetype=filetype)
 
     if not p.exists() and not create:
         return None
