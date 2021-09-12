@@ -58,12 +58,12 @@ from .statusbar import *
 
 from .textsheet import *
 from .threads import *
-from ._input import *
+import visidata._input
 import visidata.movement
 from .path import *
-from .urlcache import *
-from .selection import *
-from .loaders.tsv import *
+import visidata._urlcache
+import visidata.selection
+import visidata.loaders.tsv
 from .pyobj import *
 import visidata.loaders.json
 import visidata._open

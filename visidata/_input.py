@@ -8,13 +8,12 @@ from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiDa
 from visidata import vd, option, options, theme, colors
 from visidata import launchExternalEditor, suspend, ColumnItem, AttrDict
 
-__all__ = ['confirm', 'CompleteKey']
 
-theme('color_edit_cell', 'white', 'cell color to use when editing cell')
-theme('disp_edit_fill', '_', 'edit field fill character')
-theme('disp_unprintable', '·', 'substitute character for unprintables')
+vd.option('color_edit_cell', 'white', 'cell color to use when editing cell')
+vd.option('disp_edit_fill', '_', 'edit field fill character')
+vd.option('disp_unprintable', '·', 'substitute character for unprintables')
 
-option('input_history', '', 'basename of file to store persistent input history')
+vd.option('input_history', '', 'basename of file to store persistent input history')
 
 class AcceptInput(Exception):
     '*args[0]* is the input to be accepted'
@@ -410,3 +409,6 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
         r = col.type(r)  # convert input to column type, let exceptions be raised
 
     return r
+
+
+vd.addGlobals({'CompleteKey': CompleteKey})

@@ -15,6 +15,8 @@ from visidata import options, asyncsingle, urlcache, vd, VisiData
 vd.option('motd_url', 'https://visidata.org/motd-'+vd.version, 'source of randomized startup messages', sheettype=None)
 
 
+vd.motd = ''
+
 @VisiData.api
 @asyncsingle
 def domotd(vd):
