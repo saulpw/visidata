@@ -57,3 +57,5 @@ Sheet.addCommand('z=', 'setcell-expr', 'cursorCol.setValues([cursorRow], evalExp
 Sheet.addCommand('gz=', 'setcol-iter', 'cursorCol.setValues(someSelectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(someSelectedRows))))', 'set current column for selected rows to the items in result of Python sequence expression')
 
 Sheet.addCommand(None, 'show-expr', 'status(evalExpr(inputExpr("show expr="), cursorRow))', 'evaluate Python expression on current row and show result on status line')
+
+vd.addGlobals({'CompleteExpr': CompleteExpr})

@@ -10,10 +10,9 @@ options.motd_url may be set to another URL, or empty to disable entirely.
 
 import random
 
-from visidata import option, options, asyncsingle, urlcache, vd, VisiData
-from visidata import __version__
+from visidata import options, asyncsingle, urlcache, vd, VisiData
 
-option('motd_url', 'https://visidata.org/motd-'+__version__, 'source of randomized startup messages', sheettype=None)
+vd.option('motd_url', 'https://visidata.org/motd-'+vd.version, 'source of randomized startup messages', sheettype=None)
 
 
 @VisiData.api

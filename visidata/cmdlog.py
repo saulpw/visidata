@@ -3,12 +3,12 @@ import threading
 from visidata import *
 import visidata
 
-option('replay_wait', 0.0, 'time to wait between replayed commands, in seconds', sheettype=None)
-theme('disp_replay_play', '▶', 'status indicator for active replay')
-theme('disp_replay_pause', '‖', 'status indicator for paused replay')
-theme('color_status_replay', 'green', 'color of replay status indicator')
-option('replay_movement', False, 'insert movements during replay', sheettype=None)
-option('visidata_dir', '~/.visidata/', 'directory to load and store additional files', sheettype=None)
+vd.option('replay_wait', 0.0, 'time to wait between replayed commands, in seconds', sheettype=None)
+vd.option('disp_replay_play', '▶', 'status indicator for active replay')
+vd.option('disp_replay_pause', '‖', 'status indicator for paused replay')
+vd.option('color_status_replay', 'green', 'color of replay status indicator')
+vd.option('replay_movement', False, 'insert movements during replay', sheettype=None)
+vd.option('visidata_dir', '~/.visidata/', 'directory to load and store additional files', sheettype=None)
 
 # prefixes which should not be logged
 nonLogged = '''forget exec-longname undo redo quit
@@ -17,26 +17,30 @@ replay cancel save-cmdlog macro
 go- search scroll prev next page start end zoom resize visibility
 mouse suspend redraw no-op help syscopy sysopen profile toggle'''.split()
 
-option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog', sheettype=None)
-option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to', sheettype=None)
+vd.option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog', sheettype=None)
+vd.option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to', sheettype=None)
 
 vd.activeCommand = UNLOADED
 
+@VisiData.api
 def open_vd(p):
     return CommandLog(p.name, source=p, precious=True)
 
-def open_vdj(p):
+@VisiData.api
+def open_vdj(vd, p):
     return CommandLogJsonl(p.name, source=p, precious=True)
 
 VisiData.save_vd = VisiData.save_tsv
 VisiData.save_vdj = VisiData.save_jsonl
 
 
-def checkVersion(desired_version):
+@VisiData.api
+def checkVersion(vd, desired_version):
     if desired_version != visidata.__version_info__:
         vd.fail("version %s required" % desired_version)
 
-def fnSuffix(prefix):
+@VisiData.api
+def fnSuffix(vd, prefix):
     i = 0
     fn = prefix + '.vd'
     while Path(fn).exists():
@@ -45,6 +49,7 @@ def fnSuffix(prefix):
 
     return fn
 
+@Sheet.api
 def inputLongname(sheet):
     longnames = set(k for (k, obj), v in vd.commands.iter(sheet))
     return vd.input("command name: ", completer=CompleteKey(sorted(longnames)), type='longname')

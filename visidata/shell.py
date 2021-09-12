@@ -12,13 +12,13 @@ try:
 except ImportError:
     pass # pwd,grp modules not available on Windows
 
-from visidata import Column, Sheet, LazyComputeRow, asynccache, options, option, globalCommand, vd
+from visidata import Column, Sheet, LazyComputeRow, asynccache, options, BaseSheet, vd
 from visidata import Path, ENTER, date, asyncthread, confirm, fail, FileExistsError, VisiData
 from visidata import CellColorizer, RowColorizer, modtime, filesize, vstat, Progress
 
 
-option('dir_recurse', False, 'walk source path recursively on DirSheet')
-option('dir_hidden', False, 'load hidden files on DirSheet')
+vd.option('dir_recurse', False, 'walk source path recursively on DirSheet')
+vd.option('dir_hidden', False, 'load hidden files on DirSheet')
 
 
 @VisiData.lazy_property
@@ -35,13 +35,16 @@ def exec_shell(*args):
         vd.push(TextSheet(' '.join(args), source=lines))
 
 
-def open_dir(p):
+@VisiData.api
+def open_dir(vd, p):
     return DirSheet(p.name, source=p)
 
-def open_fdir(p):
+@VisiData.api
+def open_fdir(vd, p):
     return FileListSheet(p.name, source=p)
 
-def addShellColumns(cmd, sheet):
+@VisiData.api
+def addShellColumns(vd, cmd, sheet):
     shellcol = ColumnShell(cmd, source=sheet, width=0)
     sheet.addColumnAtCursor(
             shellcol,
@@ -215,7 +218,7 @@ def inputShell(vd):
         vd.warning('no $column in command')
     return cmd
 
-globalCommand('', 'open-dir-current', 'vd.push(vd.currentDirSheet)', 'open Directory Sheet: browse properties of files in current directory')
+BaseSheet.addCommand('', 'open-dir-current', 'vd.push(vd.currentDirSheet)', 'open Directory Sheet: browse properties of files in current directory')
 
 Sheet.addCommand('z;', 'addcol-sh', 'cmd=inputShell(); addShellColumns(cmd, sheet)', 'create new column from bash expression, with $columnNames as variables')
 
@@ -243,3 +246,6 @@ def copy_files(sheet, paths, dest):
                 os.makedirs(p, exist_ok=True)
         except Exception as e:
             vd.exceptionCaught(e)
+
+
+vd.addGlobals({'DirSheet': DirSheet})

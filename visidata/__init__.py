@@ -69,9 +69,9 @@ from .loaders.json import *
 from ._open import *
 from .save import *
 from .clipboard import *
-from .slide import *
-from .search import *
-from .expr import *
+import visidata.slide
+import visidata.search
+import visidata.expr
 
 from .menu import Menu
 import visidata.choose
@@ -82,18 +82,18 @@ import visidata.describe
 import visidata.pivot
 import visidata.freqtbl
 import visidata.melt
-from .cmdlog import *
+import visidata.cmdlog
 import visidata.freeze
 import visidata.regex
 from .canvas import *
 from .canvas_text import *
 from .graph import *
-from .motd import *
-from .transpose import *
-from .shell import *
-from .layout import *
+import visidata.motd
+import visidata.transpose
+import visidata.shell
+import visidata.layout
 from .main import *
-from .help import *
+import visidata.help
 import visidata.modify
 import visidata.sort
 import visidata.unfurl
@@ -102,7 +102,7 @@ import visidata.incr
 import visidata.customdate
 import visidata.misc
 import visidata.memory
-from .macros import *
+import visidata.macros
 import visidata.macos
 
 import visidata.loaders.csv

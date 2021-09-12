@@ -1,6 +1,8 @@
 from visidata import *
 from functools import wraps
 
+from visidata.cmdlog import CommandLog
+
 vd.macroMode = None
 vd.macrobindings = {}
 

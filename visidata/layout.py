@@ -1,4 +1,4 @@
-from visidata import vd, Column, Sheet, options, Fanout
+from visidata import VisiData, vd, Column, Sheet, options, Fanout
 
 @Column.api
 def setWidth(self, w):
@@ -24,7 +24,8 @@ def toggleVisibility(self):
     else:
         self.height = 1
 
-def unhide_cols(cols, rows):
+@VisiData.api
+def unhide_cols(vd, cols, rows):
     'sets appropriate width if column was either hidden (0) or unseen (None)'
     for c in cols:
         c.setWidth(abs(c.width or 0) or c.getMaxWidth(rows))
