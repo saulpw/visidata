@@ -316,7 +316,7 @@ vd.menus = [
                 Menu('columns', 'addcol-bulk'),
             ),
             Menu('regex capture', 'addcol-capture'),
-            Menu('regex transform', 'addcol-subst'),
+            Menu('regex subst', 'addcol-subst'),
             Menu('Python expr', 'addcol-expr'),
             Menu('increment', 'addcol-incr'),
             Menu('shell', 'addcol-shell'),

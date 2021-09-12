@@ -81,10 +81,10 @@ from .aggregators import *
 import visidata.describe
 import visidata.pivot
 import visidata.freqtbl
-from .melt import *
+import visidata.melt
 from .cmdlog import *
-from .freeze import *
-from .regex import *
+import visidata.freeze
+import visidata.regex
 from .canvas import *
 from .canvas_text import *
 from .graph import *

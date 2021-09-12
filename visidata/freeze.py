@@ -25,6 +25,7 @@ def StaticColumn(sheet, col):
     return frozencol
 
 
+@VisiData.api
 class StaticSheet(Sheet):
     'A copy of the source sheet with all cells frozen.'
     def __init__(self, source):
