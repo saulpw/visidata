@@ -3,17 +3,21 @@ import string
 
 from visidata import *
 
-theme('color_xword_active', 'green', 'color of active clue')
+vd.option('color_xword_active', 'green', 'color of active clue')
 
-def open_puz(p):
+
+@VisiData.api
+def open_puz(vd, p):
     return PuzSheet(p.name, source=p)
 
-def open_xd(p):
+@VisiData.api
+def open_xd(vd, p):
     if p.is_dir():
         return CrosswordsSheet(p.name, source=p)
     return CrosswordSheet(p.name, source=p)
 
 
+@VisiData.api
 class CrosswordsSheet(Sheet):
     rowtype = 'puzzles'
     columns = [
@@ -32,6 +36,7 @@ class CrosswordsSheet(Sheet):
             self.addRow(Crossword(p.read(), str(p)))
 
 
+@VisiData.api
 class GridSheet(Sheet):
     rowtype = 'gridrow'  # rowdef: puzzle_row:str
     colorizers = [

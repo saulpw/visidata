@@ -2,11 +2,12 @@ import re
 
 from visidata import *
 
-def open_sqlite(p):
+@VisiData.api
+def open_sqlite(vd, p):
     return SqliteIndexSheet(p.name, source=p)
 
-open_sqlite3 = open_sqlite
-open_db = open_sqlite
+VisiData.open_sqlite3 = VisiData.open_sqlite
+VisiData.open_db = VisiData.open_sqlite
 
 # rowdef: list of values
 class SqliteSheet(Sheet):

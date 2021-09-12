@@ -2,10 +2,11 @@ from visidata import *
 from itertools import chain
 
 
-def open_yml(p):
+@VisiData.api
+def open_yml(vd, p):
     return YamlSheet(p.name, source=p)
 
-open_yaml = open_yml
+VisiData.open_yaml = VisiData.open_yml
 
 class YamlSheet(JsonSheet):
     def iterload(self):

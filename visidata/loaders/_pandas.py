@@ -2,13 +2,15 @@ from functools import partial
 
 from visidata import *
 
-def open_pandas(p):
+@VisiData.api
+def open_pandas(vd, p):
     return PandasSheet(p.name, source=p)
 
-def open_dta(p):
+@VisiData.api
+def open_dta(vd, p):
     return PandasSheet(p.name, source=p, filetype='stata')
 
-open_stata = open_pandas
+VisiData.open_stata = VisiData.open_pandas
 
 for ft in 'feather gbq orc parquet pickle sas stata'.split():
     globals().setdefault('open_'+ft, lambda p,ft=ft: PandasSheet(p.name, source=p, filetype=ft))

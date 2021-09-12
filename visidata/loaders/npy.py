@@ -2,10 +2,12 @@ from visidata import *
 
 'Loaders for .npy and .npz.  Save to .npy.  Depends on the zip loader.'
 
-def open_npy(p):
+@VisiData.api
+def open_npy(vd, p):
     return NpySheet(p.name, source=p)
 
-def open_npz(p):
+@VisiData.api
+def open_npz(vd, p):
     return NpzSheet(p.name, source=p)
 
 vd.option('npy_allow_pickle', False, 'numpy allow unpickling objects (unsafe)')
@@ -35,7 +37,7 @@ class NpySheet(Sheet):
             self.addColumn(ColumnItem(name, i, type=t))
 
 
-class NpzSheet(ZipSheet):
+class NpzSheet(vd.ZipSheet):
     # rowdef: tuple(tablename, table)
     columns = [
         ColumnItem('name', 0),

@@ -1,12 +1,13 @@
 import html
 from visidata import *
 
-option('html_title', '<h2>{sheet.name}</h2>', 'table header when saving to html')
+vd.option('html_title', '<h2>{sheet.name}</h2>', 'table header when saving to html')
 
-def open_html(p):
+@VisiData.api
+def open_html(vd, p):
     return HtmlTablesSheet(p.name, source=p)
 
-open_htm = open_html
+VisiData.open_htm = VisiData.open_html
 
 class HtmlTablesSheet(IndexSheet):
     rowtype = 'sheets'  # rowdef: HtmlTableSheet (sheet.html = lxml.html.HtmlElement)

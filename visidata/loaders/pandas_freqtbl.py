@@ -2,6 +2,7 @@ import math
 import collections
 
 from visidata import *
+from visidata.loaders._pandas import PandasSheet
 from visidata.pivot import PivotSheet
 
 class DataFrameRowSliceAdapter:

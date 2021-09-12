@@ -4,7 +4,7 @@ import ipaddress
 from visidata import *
 
 
-option('pcap_internet', 'n', '(y/s/n) if save_dot includes all internet hosts separately (y), combined (s), or does not include the internet (n)')
+vd.option('pcap_internet', 'n', '(y/s/n) if save_dot includes all internet hosts separately (y), combined (s), or does not include the internet (n)')
 
 protocols = collections.defaultdict(dict)  # ['ethernet'] = {[6] -> 'IP'}
 _flags = collections.defaultdict(dict)  # ['tcp'] = {[4] -> 'FIN'}
@@ -16,7 +16,8 @@ url_iana = 'https://visidata.org/plugins/pcap/iana-ports.tsv'
 oui = {}  # [macprefix (like '01:02:dd:0')] -> 'manufacturer'
 services = {}  # [('tcp', 25)] -> 'smtp'
 
-def open_pcap(p):
+@VisiData.api
+def open_pcap(vd, p):
     return PcapSheet(p.name, source=p)
 
 open_cap = open_pcap
@@ -247,6 +248,7 @@ class EtherSheet(Sheet):
     ]
 
 
+@VisiData.api
 class IPSheet(Sheet):
     rowtype = 'packets'
     columns = [
@@ -271,6 +273,7 @@ class IPSheet(Sheet):
                 yield pkt
 
 
+@VisiData.api
 class TCPSheet(IPSheet):
     columns = IPSheet.columns + [
         ColumnAttr('tcp_srcport', 'ip.tcp.sport', type=int, width=8, helpstr="TCP Source Port"),
@@ -347,6 +350,7 @@ class PcapSheet(Sheet):
 
 flowtype = collections.namedtuple('flow', 'packets transport src sport dst dport'.split())
 
+@VisiData.api
 class PcapFlowsSheet(Sheet):
     rowtype = 'netflows'  # rowdef: flowtype
     _rowtype = flowtype
@@ -404,3 +408,7 @@ def try_apply(func, *args, **kwargs):
 PcapSheet.addCommand('W', 'flows', 'vd.push(PcapFlowsSheet(sheet.name+"_flows", source=sheet))')
 PcapSheet.addCommand('2', 'l2-packet', 'vd.push(IPSheet("L2packets", source=sheet))')
 PcapSheet.addCommand('3', 'l3-packet', 'vd.push(TCPSheet("L3packets", source=sheet))')
+
+vd.addMenuItem('View', 'Packet capture', 'flows', 'flows')
+vd.addMenuItem('View', 'Packet capture', 'IP (L2)', 'l2-packet')
+vd.addMenuItem('View', 'Packet capture', 'TCP (L3)', 'l3-packet')

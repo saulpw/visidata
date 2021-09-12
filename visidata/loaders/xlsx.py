@@ -1,10 +1,12 @@
 from visidata import *
 
 
-def open_xls(p):
+@VisiData.api
+def open_xls(vd, p):
     return XlsIndexSheet(p.name, source=p)
 
-def open_xlsx(p):
+@VisiData.api
+def open_xlsx(vd, p):
     return XlsxIndexSheet(p.name, source=p)
 
 class XlsxIndexSheet(IndexSheet):

@@ -1,10 +1,10 @@
 from visidata import *
 
-
-def open_ttf(p):
+@VisiData.api
+def open_ttf(vd, p):
     return TTFTablesSheet(p.name, source=p)
 
-open_otf = open_ttf
+vd.open_otf = vd.open_ttf
 
 class TTFTablesSheet(Sheet):
     rowtype = 'font tables'

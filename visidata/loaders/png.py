@@ -1,6 +1,8 @@
 from visidata import *
 
-def open_png(p):
+
+@VisiData.api
+def open_png(vd, p):
     return PNGSheet(p.name, source=p)
 
 @functools.lru_cache(256)
@@ -31,6 +33,7 @@ class PNGSheet(Sheet):
                 yield [i//4, y, r, g, b, a]
 
 
+@VisiData.api
 class PNGDrawing(Canvas):
     aspectRatio = 1.0
     rowtype = 'pixels'

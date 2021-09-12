@@ -105,43 +105,43 @@ import visidata.memory
 from .macros import *
 import visidata.macos
 
-from .loaders.csv import *
-from .loaders.archive import *
-from .loaders.xlsx import *
-from .loaders.xlsb import *
-from .loaders.hdf5 import *
-from .loaders.sqlite import *
-from .loaders.fixed_width import *
-from .loaders.postgres import *
-from .loaders.mysql import *
-from .loaders.shp import *
-from .loaders.geojson import *
-from .loaders.mbtiles import *
-from .loaders.http import *
-from .loaders.html import *
-from .loaders.markdown import *
-from .loaders.pcap import *
-from .loaders.png import *
-from .loaders.ttf import *
-from .loaders.sas import *
-from .loaders.spss import *
-from .loaders.xml import *
-from .loaders.yaml import *
-from .loaders._pandas import *
-from .loaders.graphviz import *
-from .loaders.npy import *
-from .loaders.usv import *
-from .loaders.frictionless import *
-from .loaders.imap import *
+import visidata.loaders.csv
+import visidata.loaders.archive
+import visidata.loaders.xlsx
+import visidata.loaders.xlsb
+import visidata.loaders.hdf5
+import visidata.loaders.sqlite
+import visidata.loaders.fixed_width
+import visidata.loaders.postgres
+import visidata.loaders.mysql
+import visidata.loaders.shp
+import visidata.loaders.geojson
+import visidata.loaders.mbtiles
+import visidata.loaders.http
+import visidata.loaders.html
+import visidata.loaders.markdown
+import visidata.loaders.pcap
+import visidata.loaders.png
+import visidata.loaders.ttf
+import visidata.loaders.sas
+import visidata.loaders.spss
+import visidata.loaders.xml
+import visidata.loaders.yaml
+import visidata.loaders._pandas
+import visidata.loaders.graphviz
+import visidata.loaders.npy
+import visidata.loaders.usv
+import visidata.loaders.frictionless
+import visidata.loaders.imap
 
-from .loaders.pdf import *
-from .loaders.pandas_freqtbl import *
-from .loaders.xword import *
-from .loaders.vcf import *
-from .loaders.texttables import *
-from .loaders.rec import *
-from .loaders.eml import *
-from .loaders.vds import *
+import visidata.loaders.pdf
+import visidata.loaders.pandas_freqtbl
+import visidata.loaders.xword
+import visidata.loaders.vcf
+import visidata.loaders.texttables
+import visidata.loaders.rec
+import visidata.loaders.eml
+import visidata.loaders.vds
 
 from .ddwplay import *
 

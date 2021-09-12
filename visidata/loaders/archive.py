@@ -4,16 +4,19 @@ import zipfile
 
 from visidata import *
 
-def open_zip(p):
-    return ZipSheet(p.name, source=p)
+@VisiData.api
+def open_zip(vd, p):
+    return vd.ZipSheet(p.name, source=p)
 
-def open_tar(p):
+@VisiData.api
+def open_tar(vd, p):
     return TarSheet(p.name, source=p)
 
-open_tgz = open_tar
-open_txz = open_tar
-open_tbz2 = open_tar
+VisiData.open_tgz = VisiData.open_tar
+VisiData.open_txz = VisiData.open_tar
+VisiData.open_tbz2 = VisiData.open_tar
 
+@VisiData.api
 class ZipSheet(Sheet):
     'Wrapper for `zipfile` library.'
     rowtype = 'files' # rowdef ZipInfo
