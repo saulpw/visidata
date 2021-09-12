@@ -10,7 +10,9 @@ def ensureLoaded(vd, sheets):
     threads = [vs.ensureLoaded() for vs in sheets]
     vd.status('loading %d sheets' % len([t for t in threads if t]))
 
-def createJoinedSheet(sheets, jointype=''):
+
+@VisiData.api
+def createJoinedSheet(vd, sheets, jointype=''):
     sheets[1:] or vd.fail("join requires more than 1 sheet")
 
     if jointype == 'append':
@@ -25,7 +27,7 @@ def createJoinedSheet(sheets, jointype=''):
     else:
         return JoinSheet('+'.join(vs.name for vs in sheets), sources=sheets, jointype=jointype)
 
-jointypes = [{'key': k, 'desc': v} for k, v in {
+vd.jointypes = [{'key': k, 'desc': v} for k, v in {
     'inner': 'only rows which match keys on all sheets',
     'outer': 'all rows from first selected sheet',
     'full': 'all rows from all sheets (union)',

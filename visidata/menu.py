@@ -3,8 +3,6 @@ import textwrap
 
 from visidata import *
 
-__all__ = ['Menu']
-
 
 vd.option('disp_menu', True, 'show menu on top line when not active', sheettype=None)
 vd.option('color_menu', 'black on 110 cyan', 'color of menu items in general')
@@ -779,3 +777,5 @@ BaseSheet.addCommand('^[s', 'menu-system', 'pressMenu("System")', '')
 BaseSheet.addCommand('^[h', 'menu-help', 'pressMenu("Help")', '')
 BaseSheet.bindkey('^H', 'menu-help')
 BaseSheet.bindkey('KEY_BACKSPACE', 'menu-help')
+
+vd.addGlobals({'Menu': Menu})

@@ -79,6 +79,7 @@ class CrosswordSheet(Sheet):
             Column('answer', getter=lambda col, row: row[2])
             ]
 
+    @asyncthread
     def reload(self):
         import xdfile
         self.xd = xdfile.xdfile(xd_contents=self.source.read_text(), filename=self.source)

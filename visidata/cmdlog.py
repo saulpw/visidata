@@ -23,7 +23,7 @@ vd.option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to', she
 vd.activeCommand = UNLOADED
 
 @VisiData.api
-def open_vd(p):
+def open_vd(vd, p):
     return CommandLog(p.name, source=p, precious=True)
 
 @VisiData.api

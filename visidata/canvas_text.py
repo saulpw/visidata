@@ -1,4 +1,4 @@
-from visidata import BaseSheet, ENTER, colors, dispwidth
+from visidata import vd, BaseSheet, ENTER, colors, dispwidth
 import curses
 
 
@@ -169,3 +169,9 @@ TextCanvas.addCommand('gL', 'slide-rightmost-obj', 'slide(source.selectedRows, +
 
 
 TextCanvas.init('cursorBox', lambda: CharBox(None, 0,0,1,1))
+
+vd.addGlobals({
+    'CharBox': CharBox,
+    'boundingBox': boundingBox,
+    'TextCanvas': TextCanvas,
+    })

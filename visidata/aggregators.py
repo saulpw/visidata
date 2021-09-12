@@ -168,8 +168,6 @@ def aggregator_choices(vd):
        {'key': agg, 'desc': v[0].helpstr if isinstance(v, list) else v.helpstr} for agg, v in vd.aggregators.items()
     ]
 
-vd.addGlobals(globals())
-
 
 Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregator_choices))', 'add aggregator to current column')
 Sheet.addCommand('z+', 'memo-aggregate', 'for agg in chooseMany(aggregator_choices): cursorCol.memo_aggregate(aggregators[agg], selectedRows or rows)', 'memo result of aggregator over values in selected rows for current column')

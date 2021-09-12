@@ -6,7 +6,7 @@ from visidata import ColumnAttr, ColumnItem
 from visidata import TsvSheet, Path, Option
 from visidata import undoAttrFunc, VisiData, vlen
 
-option('visibility', 0, 'visibility level (0=low, 1=high)')
+vd.option('visibility', 0, 'visibility level (0=low, 1=high)')
 
 vd_system_sep = '\t'
 
@@ -272,3 +272,11 @@ OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)', 'edit opti
 OptionsSheet.bindkey('e', 'edit-option')
 OptionsSheet.bindkey(ENTER, 'edit-option')
 MetaSheet.class_options.header = 0
+
+
+vd.addGlobals({
+    'ColumnsSheet': ColumnsSheet,
+    'MetaSheet': MetaSheet,
+    'OptionsSheet': OptionsSheet,
+    'VisiDataMetaSheet': VisiDataMetaSheet,
+})

@@ -1,9 +1,8 @@
 import itertools
 import re
 
-from visidata import vd, VisiData, BaseSheet, Sheet, Column, Progress, globalCommand, ALT, asyncthread
+from visidata import vd, VisiData, BaseSheet, Sheet, Column, Progress, ALT, asyncthread
 
-__all__ = ['rotateRange']
 
 def rotateRange(n, idx, reverse=False):
     'Wraps an iter starting from idx. Yields indices from idx to n and then 0 to idx.'
@@ -141,7 +140,7 @@ Sheet.addCommand('z<', 'go-prev-null', 'moveToNextRow(lambda row,col=cursorCol,i
 Sheet.addCommand('z>', 'go-next-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), msg="no null down this column")', 'go down current column to next null value'),
 
 for i in range(1, 11):
-    globalCommand(ALT+str(i)[-1], 'jump-sheet-'+str(i), f'vd.push(*(list(s for s in allSheets if s.shortcut==str({i})) or fail("no sheet")))', f'jump to sheet {i}')
+    BaseSheet.addCommand(ALT+str(i)[-1], 'jump-sheet-'+str(i), f'vd.push(*(list(s for s in allSheets if s.shortcut==str({i})) or fail("no sheet")))', f'jump to sheet {i}')
 
 BaseSheet.bindkey('KEY_LEFT', 'go-left')
 BaseSheet.bindkey('KEY_DOWN', 'go-down')
@@ -217,3 +216,6 @@ BaseSheet.addCommand('BUTTON1_RELEASED', 'no-op', 'pass')
 
 BaseSheet.addCommand(None, 'mouse-enable', 'mm, _ = curses.mousemask(-1); status("mouse "+("ON" if mm else "OFF"))', 'enable mouse events')
 BaseSheet.addCommand(None, 'mouse-disable', 'mm, _ = curses.mousemask(0); status("mouse "+("ON" if mm else "OFF"))', 'disable mouse events')
+
+
+vd.addGlobals({'rotateRange': rotateRange})

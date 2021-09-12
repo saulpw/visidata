@@ -1,10 +1,10 @@
 from visidata import *
 
-option('color_graph_axis', 'bold', 'color for graph axis labels')
+vd.option('color_graph_axis', 'bold', 'color for graph axis labels')
 
 
-
-def numericCols(cols):
+@VisiData.api
+def numericCols(vd, cols):
     return [c for c in cols if vd.isNumeric(c)]
 
 
@@ -49,7 +49,7 @@ class GraphSheet(InvertedCanvas):
 
         vd.status('loading data points')
         catcols = [c for c in self.xcols if not vd.isNumeric(c)]
-        numcols = numericCols(self.xcols)
+        numcols = vd.numericCols(self.xcols)
         for ycol in self.ycols:
             for rownum, row in enumerate(Progress(self.sourceRows, 'plotting')):  # rows being plotted from source
                 try:
@@ -179,3 +179,9 @@ def set_x(sheet, s):
 
 Canvas.addCommand('y', 'resize-y-input', 'sheet.set_y(input("set ymin ymax="))', 'set ymin/ymax on graph axes')
 Canvas.addCommand('x', 'resize-x-input', 'sheet.set_x(input("set xmin xmax="))', 'set xmin/xmax on graph axes')
+
+
+vd.addGlobals({
+    'GraphSheet': GraphSheet,
+    'InvertedCanvas': InvertedCanvas,
+})

@@ -59,7 +59,7 @@ from .statusbar import *
 from .textsheet import *
 from .threads import *
 from ._input import *
-from .movement import *
+import visidata.movement
 from .path import *
 from .urlcache import *
 from .selection import *
@@ -73,11 +73,11 @@ import visidata.slide
 import visidata.search
 import visidata.expr
 
-from .menu import Menu
+import visidata.menu
 import visidata.choose
-from .metasheets import *
-from .join import *
-from .aggregators import *
+import visidata.metasheets
+import visidata.join
+import visidata.aggregators
 import visidata.describe
 import visidata.pivot
 import visidata.freqtbl
@@ -85,9 +85,9 @@ import visidata.melt
 import visidata.cmdlog
 import visidata.freeze
 import visidata.regex
-from .canvas import *
-from .canvas_text import *
-from .graph import *
+import visidata.canvas
+import visidata.canvas_text
+import visidata.graph
 import visidata.motd
 import visidata.transpose
 import visidata.shell
@@ -143,11 +143,10 @@ import visidata.loaders.rec
 import visidata.loaders.eml
 import visidata.loaders.vds
 
-from .ddwplay import *
+import visidata.ddwplay
+import visidata.plugins
 
-from .plugins import *
-
-from .colorsheet import *
+import visidata.colorsheet
 
 from .deprecated import *
 
@@ -156,6 +155,7 @@ try:
 except ModuleNotFoundError as e:
     pass
 
+import math
 from math import *
 
 vd.finalInit()

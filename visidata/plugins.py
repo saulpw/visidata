@@ -6,7 +6,7 @@ import importlib
 from visidata import *
 
 
-option('plugins_url', 'https://visidata.org/plugins/plugins.jsonl', 'source of plugins sheet')
+vd.option('plugins_url', 'https://visidata.org/plugins/plugins.jsonl', 'source of plugins sheet')
 
 
 @VisiData.lazy_property
@@ -186,7 +186,8 @@ class PluginsSheet(JsonLinesSheet):
         except FileNotFoundError:
             vd.warning("no plugins/__init__.py found")
 
-globalCommand(None, 'open-plugins', 'vd.push(vd.pluginsSheet)', 'open Plugins Sheet: manage your session environment for a curated set of plugins')
+
+BaseSheet.addCommand(None, 'open-plugins', 'vd.push(vd.pluginsSheet)', 'open Plugins Sheet: manage your session environment for a curated set of plugins')
 
 PluginsSheet.addCommand('a', 'add-plugin', 'installPlugin(cursorRow)', 'install and activate current plugin')
 PluginsSheet.addCommand('d', 'delete-plugin', 'removePluginIfExists(cursorRow)', 'deactivate current plugin')
