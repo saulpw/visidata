@@ -11,7 +11,8 @@ vd.option('color_menu', 'black on 110 cyan', 'color of menu items in general')
 vd.option('color_menu_active', '223 yellow on black', 'color of active menu submenus/item')
 vd.option('color_menu_spec', '118 green on 234 black', 'color of active menu submenus/item')
 vd.option('color_menu_help', 'black on 110 cyan', 'color of helpbox')
-vd.option('disp_menu_boxchars', '││──┌┐└┘', 'box characters to use for menus')
+
+vd.option('disp_menu_boxchars', '││──┌┐└┘├┤', 'box characters to use for menus')
 vd.option('disp_menu_more', '»', 'command submenu indicator')
 vd.option('disp_menu_push', '⎘', 'indicator if command pushes sheet onto sheet stack')
 vd.option('disp_menu_input', '…', 'indicator if input required for command')
@@ -471,14 +472,20 @@ def menuitemAvailable(sheet, item):
 def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
     if not menus:
         return
-    ls,rs,ts,bs,tl,tr,bl,br = disp_menu_boxchars
+    ls,rs,ts,bs,tl,tr,bl,br,lsr,rsl = disp_menu_boxchars
 
     try:
         sheet.activeMenuItems[level] %= len(menus)
     except IndexError:
         pass # sheet.activeMenuItems = sheet.activeMenuItems[:-1]
 
-    w = max(len(item.title) for item in menus)+1
+    for item in menus:
+        if item.cmd:
+            mainbinding = sheet.revbinds.get(item.cmd.longname, [None])[0]
+            item.binding = vd.prettykeys(mainbinding)
+
+    maxbinding = max(len(item.binding or '') for item in menus)+2
+    w = max(len(item.title) for item in menus)+maxbinding+2
 
     # draw borders before/under submenus
     if level > 1:
@@ -489,16 +496,17 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
     i = 0
     for j, item in enumerate(menus):
         attr = colors.color_menu
+        bindattr = colors.color_keystrokes
 
         if any(x.obj not in ['BaseSheet', 'TableSheet'] for x, _ in walkmenu(item)):
             attr = colors.color_menu_spec
 
         if level < len(sheet.activeMenuItems):
           if j == sheet.activeMenuItems[level]:
-            attr = colors.color_menu_active
+            bindattr = attr = colors.color_menu_active
 
             if level < len(sheet.activeMenuItems):
-                vd.drawSubmenu(scr, sheet, y+i, x+w+3, item.menus, level+1, disp_menu_boxchars=disp_menu_boxchars)
+                vd.drawSubmenu(scr, sheet, y+i, x+w+4, item.menus, level+1, disp_menu_boxchars=disp_menu_boxchars)
 
         clipdraw(scr, y+i, x, ls, colors.color_menu)
 
@@ -508,6 +516,7 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
         if item.menus:
             titlenote = vd.options.disp_menu_more
 
+        mainbinding = ' '*maxbinding
         # special notes
         if item.cmd:
             if item.cmd.execstr:
@@ -515,11 +524,17 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
                     titlenote = vd.options.disp_menu_push + ' '
                 if 'input' in item.cmd.execstr:
                     title += vd.options.disp_menu_input
+                revbinds = sheet.revbinds.get(item.cmd.longname, [])
+                if revbinds:
+                    mainbinding = vd.prettykeys(revbinds[0])
+                    mainbinding += ' '*(maxbinding-len(mainbinding))
 
         # actually display the menu item
-        title += ' '*(w-len(pretitle)-len(item.title)+1) # padding
+        title += ' '*(w-len(pretitle)-len(item.title)-maxbinding+1) # padding
 
-        clipdraw(scr, y+i, x+1, pretitle+title+titlenote, attr)
+        clipdraw(scr, y+i, x+1, ' ' + mainbinding, bindattr)
+
+        clipdraw(scr, y+i, x+maxbinding+1, pretitle+title+titlenote, attr)
         clipdraw(scr, y+i, x+3+w, ls, colors.color_menu)
 
         vd.onMouse(scr, y+i, x, 1, w+3,
@@ -628,7 +643,7 @@ def drawMenu(vd, scr, sheet):
     helpattr = colors.color_menu_help
     helpx = 30
     helpw = min(w-helpx-4, 76)
-    ls,rs,ts,bs,tl,tr,bl,br = disp_menu_boxchars
+    ls,rs,ts,bs,tl,tr,bl,br,lsr,rsl = disp_menu_boxchars
     helplines = textwrap.wrap(cmd.helpstr or '(no help available)', width=helpw-4)
 
     # place helpbox just below deepest menu
@@ -653,7 +668,7 @@ def drawMenu(vd, scr, sheet):
 
     mainbinding = sheet.revbinds.get(cmd.longname, [None])[0]
     if mainbinding:
-        clipdraw(scr, menuy, helpx+2, ' '+vd.prettykeys(mainbinding or '(unbound)')+' ', colors.color_keystrokes)
+        clipdraw(scr, menuy, helpx+2, rsl+vd.prettykeys(mainbinding or '(unbound)')+lsr, colors.color_keystrokes)
     clipdraw(scr, menuy, helpx+14, ' '+cmd.longname+' ', helpattr)
 
 
@@ -719,7 +734,10 @@ def runMenu(vd):
                 return
 
         elif k in ['KEY_RIGHT', 'l']:
-            sheet.activeMenuItems = [sheet.activeMenuItems[0]+1, 0]
+            if currentItem.menus and sheet.activeMenuItems[1] != 0:  # not first item
+                sheet.activeMenuItems.append(0)
+            else:
+                sheet.activeMenuItems = [sheet.activeMenuItems[0]+1, 0]
 
         elif k in ['KEY_LEFT', 'h']:
             if len(sheet.activeMenuItems) > 2:
