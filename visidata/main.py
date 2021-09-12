@@ -15,7 +15,7 @@ import signal
 import warnings
 
 from visidata import vd, option, options, run, BaseSheet, AttrDict
-from visidata import Path, saveSheets
+from visidata import Path
 import visidata
 
 vd.version_info = __version_info__
@@ -306,7 +306,7 @@ def main_vd():
 
     if vd.stackedSheets and (flPipedOutput or args.output):
         outpath = Path(args.output or '-')
-        saveSheets(outpath, vd.activeSheet, confirm_overwrite=False)
+        vd.saveSheets(outpath, vd.activeSheet, confirm_overwrite=False)
 
     saver_threads = [t for t in vd.unfinishedThreads if t.name.startswith('save_')]
     if saver_threads:

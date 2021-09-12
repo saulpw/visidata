@@ -203,7 +203,7 @@ class _CommandLog:
             if options.cmdlog_histfile:
                 if not getattr(vd, 'sessionlog', None):
                     vd.sessionlog = vd.loadInternalSheet(CommandLog, Path(date().strftime(options.cmdlog_histfile)))
-                append_tsv_row(vd.sessionlog, vd.activeCommand)
+                vd.sessionlog.append_tsv_row(vd.activeCommand)
 
         vd.activeCommand = None
 

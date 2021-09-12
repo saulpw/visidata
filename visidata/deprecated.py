@@ -133,3 +133,7 @@ def maybe_clean(s, vs):
     if (vs or visidata.vd).options.clean_names:
         s = visidata.cleanName(s)
     return s
+
+def load_tsv(fn):
+    vs = open_tsv(Path(fn))
+    yield from vs.iterload()

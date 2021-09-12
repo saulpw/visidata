@@ -39,7 +39,7 @@ def saveMacro(self, rows, ks):
         macropath = Path(fnSuffix(options.visidata_dir+"macro"))
         vd.save_vd(macropath, vs)
         setMacro(ks, vs)
-        append_tsv_row(vd.macrosheet.source, (ks, macropath))
+        vd.macrosheet.source.append_tsv_row((ks, macropath))
 
 @CommandLog.api
 @wraps(CommandLog.afterExecSheet)

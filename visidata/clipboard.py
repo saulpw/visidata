@@ -6,14 +6,10 @@ import tempfile
 import functools
 
 from visidata import VisiData, vd, asyncthread
-from visidata import Sheet, saveSheets, Path
+from visidata import Sheet, Path
 
 vd.option('clipboard_copy_cmd', '', 'command to copy stdin to system clipboard', sheettype=None)
 vd.option('clipboard_paste_cmd', '', 'command to get contents of system clipboard', sheettype=None)
-
-
-def setslice(L, a, b, M):
-    L[a:b] = M
 
 
 @Sheet.api
@@ -69,7 +65,7 @@ def syscopyCells_async(sheet, cols, rows, filetype):
 
     # use NTF to generate filename and delete file on context exit
     with tempfile.NamedTemporaryFile(suffix='.'+filetype) as temp:
-        vd.sync(saveSheets(Path(temp.name), vs))
+        vd.sync(vd.saveSheets(Path(temp.name), vs))
         p = subprocess.Popen(
             sheet.options.clipboard_copy_cmd.split(),
             stdin=open(temp.name, 'r', encoding=sheet.options.encoding),

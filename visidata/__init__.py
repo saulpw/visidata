@@ -65,10 +65,10 @@ from .urlcache import *
 from .selection import *
 from .loaders.tsv import *
 from .pyobj import *
-from .loaders.json import *
-from ._open import *
-from .save import *
-from .clipboard import *
+import visidata.loaders.json
+import visidata._open
+import visidata.save
+import visidata.clipboard
 import visidata.slide
 import visidata.search
 import visidata.expr

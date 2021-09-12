@@ -1,8 +1,8 @@
 from visidata import *
 
-option('color_add_pending', 'green', 'color for rows pending add')
-option('color_change_pending', 'reverse yellow', 'color for cells pending modification')
-option('color_delete_pending', 'red', 'color for rows pending delete')
+vd.option('color_add_pending', 'green', 'color for rows pending add')
+vd.option('color_change_pending', 'reverse yellow', 'color for cells pending modification')
+vd.option('color_delete_pending', 'red', 'color for rows pending delete')
 
 # deferred cached
 @Sheet.lazy_property
@@ -216,7 +216,7 @@ def putChanges(sheet):
     sheet.commitMods()
     sheet.commitDeletes()
 
-    saveSheets(Path(sheet.source), sheet, confirm_overwrite=False)
+    vd.saveSheets(Path(sheet.source), sheet, confirm_overwrite=False)
 
     # clear after save, to ensure cstr (in commit()) is aware of deletes
     sheet._deferredDels.clear()

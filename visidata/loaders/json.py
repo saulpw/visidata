@@ -4,18 +4,19 @@ from collections import OrderedDict
 from visidata import *
 
 
-option('json_indent', None, 'indent to use when saving json')
-option('json_sort_keys', False, 'sort object keys when saving to json')
-option('default_colname', '', 'column name to use for non-dict rows')
+vd.option('json_indent', None, 'indent to use when saving json')
+vd.option('json_sort_keys', False, 'sort object keys when saving to json')
+vd.option('default_colname', '', 'column name to use for non-dict rows')
 
-
-def open_jsonobj(p):
+@VisiData.api
+def open_jsonobj(vd, p):
     return JsonSheet(p.name, source=p)
 
-def open_jsonl(p):
+@VisiData.api
+def open_jsonl(vd, p):
     return JsonSheet(p.name, source=p)
 
-open_ndjson = open_ldjson = open_json = open_jsonl
+VisiData.open_ndjson = VisiData.open_ldjson = VisiData.open_json = VisiData.open_jsonl
 
 
 class JsonSheet(PythonSheet):
@@ -73,7 +74,6 @@ class JsonSheet(PythonSheet):
     def newRow(self):
         return {}
 
-JsonLinesSheet=JsonSheet
 
 ## saving json and jsonl
 
@@ -141,3 +141,8 @@ def save_jsonl(vd, p, *vsheets):
 JsonSheet.class_options.encoding = 'utf-8'
 VisiData.save_ndjson = VisiData.save_jsonl
 VisiData.save_ldjson = VisiData.save_jsonl
+
+vd.addGlobals({
+    'JsonSheet': JsonSheet,
+    'JsonLinesSheet': JsonSheet,
+})
