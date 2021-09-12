@@ -252,3 +252,5 @@ class PivotSheet(Sheet):
 
 
 Sheet.addCommand('W', 'pivot', 'vd.push(Pivot(sheet, keyCols, [cursorCol]))', 'open Pivot Table: group rows by key column and summarize current column')
+
+vd.addGlobals({'Pivot': Pivot})

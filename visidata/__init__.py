@@ -79,8 +79,8 @@ from .metasheets import *
 from .join import *
 from .aggregators import *
 import visidata.describe
-from .pivot import *
-from .freqtbl import *
+import visidata.pivot
+import visidata.freqtbl
 from .melt import *
 from .cmdlog import *
 from .freeze import *

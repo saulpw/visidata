@@ -677,6 +677,7 @@ def pressMenu(sheet, *args):
 
     return ret
 
+
 @BaseSheet.api
 def checkMenu(sheet):
     sheet.activeMenuItems[0] %= len(sheet.menus)
