@@ -10,13 +10,13 @@ theme('disp_status_fmt', '{sheet.shortcut}› {sheet.name}| ', 'status line pref
 theme('disp_lstatus_max', 0, 'maximum length of left status line')
 theme('disp_status_sep', ' | ', 'separator between statuses')
 
-theme('color_keystrokes', 'white', 'color of input keystrokes on status line')
-theme('color_status', 'bold', 'status line color')
+theme('color_keystrokes', 'bold 233 black on 110 cyan', 'color of input keystrokes on status line')
+theme('color_status', 'bold black on 110 cyan', 'status line color')
 theme('color_error', 'red', 'error message color')
 theme('color_warning', 'yellow', 'warning message color')
 theme('color_top_status', 'underline', 'top window status bar color')
-theme('color_active_status', 'bold', ' active window status bar color')
-theme('color_inactive_status', '8', 'inactive window status bar color')
+theme('color_active_status', 'black on 110 cyan', ' active window status bar color')
+theme('color_inactive_status', '8 on black', 'inactive window status bar color')
 
 BaseSheet.init('longname', lambda: '')
 
