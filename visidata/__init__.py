@@ -31,6 +31,8 @@ from .extensible import *
 from .vdobj import *
 vd = VisiData()
 
+vd.version = __version__
+
 vd.addGlobals = addGlobals
 vd.getGlobals = getGlobals
 
@@ -71,12 +73,12 @@ from .slide import *
 from .search import *
 from .expr import *
 
-from .menu import *
-from .choose import *
+from .menu import Menu
+import visidata.choose
 from .metasheets import *
 from .join import *
 from .aggregators import *
-from .describe import *
+import visidata.describe
 from .pivot import *
 from .freqtbl import *
 from .melt import *
