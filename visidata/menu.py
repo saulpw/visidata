@@ -5,6 +5,7 @@ from visidata import *
 
 
 vd.option('disp_menu', True, 'show menu on top line when not active', sheettype=None)
+vd.option('disp_menu_keys', False, 'show keystrokes inline in submenus', sheettype=None)
 vd.option('color_menu', 'black on 110 cyan', 'color of menu items in general')
 vd.option('color_menu_active', '223 yellow on black', 'color of active menu submenus/item')
 vd.option('color_menu_spec', '118 green on 234 black', 'color of active menu submenus/item')
@@ -480,7 +481,10 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
             mainbinding = sheet.revbinds.get(item.cmd.longname, [None])[0]
             item.binding = vd.prettykeys(mainbinding)
 
-    maxbinding = max(len(item.binding or '') for item in menus)+2
+    maxbinding = 0
+    if vd.options.disp_menu_keys:
+        maxbinding = max(len(item.binding or '') for item in menus)+2
+
     w = max(len(item.title) for item in menus)+maxbinding+2
 
     # draw borders before/under submenus
@@ -520,17 +524,20 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
                     titlenote = vd.options.disp_menu_push + ' '
                 if 'input' in item.cmd.execstr:
                     title += vd.options.disp_menu_input
-                revbinds = sheet.revbinds.get(item.cmd.longname, [])
-                if revbinds:
-                    mainbinding = vd.prettykeys(revbinds[0])
-                    mainbinding += ' '*(maxbinding-len(mainbinding))
+
+                if maxbinding:
+                    revbinds = sheet.revbinds.get(item.cmd.longname, [])
+                    if revbinds:
+                        mainbinding = vd.prettykeys(revbinds[0])
+                        mainbinding += ' '*(maxbinding-len(mainbinding))
 
         # actually display the menu item
         title += ' '*(w-len(pretitle)-len(item.title)-maxbinding+1) # padding
 
-        clipdraw(scr, y+i, x+1, ' ' + mainbinding, bindattr)
-
-        clipdraw(scr, y+i, x+maxbinding+1, pretitle+title+titlenote, attr)
+        clipdraw(scr, y+i, x+1, pretitle+title, attr)
+        if maxbinding:
+            clipdraw(scr, y+i, x+1+w-maxbinding, '  ' + mainbinding, bindattr)
+        clipdraw(scr, y+i, x+2+w, titlenote, attr)
         clipdraw(scr, y+i, x+3+w, ls, colors.color_menu)
 
         vd.onMouse(scr, y+i, x, 1, w+3,
