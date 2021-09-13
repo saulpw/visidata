@@ -653,21 +653,24 @@ def drawMenu(vd, scr, sheet):
     menuh = 2+sum(sheet.activeMenuItems[1:-1])
     menuh += len(getMenuItem(sheet, sheet.activeMenuItems[:-1]).menus)
     menuy = 16 # min(menuh, h-len(helplines)-3)
-    clipdraw(scr, menuy, helpx, tl+ts*(helpw-2)+tr, helpattr)
 
     y = menuy
+
+    clipdraw(scr, y, helpx, tl+ts*(helpw-2)+tr, helpattr) # top line
+    y += 1
+
     # cmd.helpstr text
     for i, line in enumerate(helplines):
-        clipdraw(scr, y+i+1, helpx, ls+' '+line+' '*(helpw-len(line)-3)+rs, helpattr)
+        clipdraw(scr, y+i, helpx, ls+' '+line+' '*(helpw-len(line)-3)+rs, helpattr)
     y += len(helplines)
 
     if sidelines:
         clipdraw(scr, y, helpx, ls+' '*(helpw-2)+rs, helpattr)
-    for i, line in enumerate(sidelines):
-        clipdraw(scr, y+i+1, helpx, ls+'   '+line+' '*(helpw-len(line)-5)+rs, helpattr)
-    y += len(sidelines)
+        for i, line in enumerate(sidelines):
+            clipdraw(scr, y+i+1, helpx, ls+'    '+line+' '*(helpw-len(line)-6)+rs, helpattr)
+        y += len(sidelines)+1
 
-    clipdraw(scr, y+1, helpx, bl+bs*(helpw-2)+br, helpattr)
+    clipdraw(scr, y, helpx, bl+bs*(helpw-2)+br, helpattr)
 
     mainbinding = sheet.revbinds.get(cmd.longname, [None])[0]
     if mainbinding:
