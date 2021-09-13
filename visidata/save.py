@@ -110,7 +110,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
         vd.warning(f'save for {filetype} unavailable, using {options.save_filetype}')
 
     if givenpath.exists() and confirm_overwrite:
-        confirm("%s already exists. overwrite? " % givenpath.given)
+        vd.confirm("%s already exists. overwrite? " % givenpath.given)
 
     vd.status('saving %s sheets to %s as %s' % (len(vsheets), givenpath.given, filetype))
 

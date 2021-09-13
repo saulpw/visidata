@@ -146,3 +146,4 @@ debug = deprecated('2.6', 'vd.debug')(vd.debug)
 fail = deprecated('2.6', 'vd.fail')(vd.fail)
 
 option = theme = vd.option # deprecated('2.6', 'vd.option')(vd.option)
+confirm = deprecated('2.6', 'vd.confirm')(vd.confirm)

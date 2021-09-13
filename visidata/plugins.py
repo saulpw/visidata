@@ -109,7 +109,7 @@ class PluginsSheet(JsonLinesSheet):
         overwrite = True
         if outpath.exists():
             try:
-                confirm("plugin path already exists, overwrite? ")
+                vd.confirm("plugin path already exists, overwrite? ")
             except ExpectedException:
                 overwrite = False
                 if _plugin_in_import_list(plugin):
