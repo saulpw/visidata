@@ -1,22 +1,21 @@
 import collections
 import curses
 
-from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, theme, MissingAttrFormatter
+from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, MissingAttrFormatter
 
-__all__ = ['StatusSheet', 'status', 'error', 'fail', 'warning', 'debug']
 
-theme('disp_rstatus_fmt', ' {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus} {sheet.options.disp_selected_note}{sheet.nSelectedRows}', 'right-side status format string')
-theme('disp_status_fmt', '{sheet.shortcut}› {sheet.name}| ', 'status line prefix')
-theme('disp_lstatus_max', 0, 'maximum length of left status line')
-theme('disp_status_sep', ' | ', 'separator between statuses')
+vd.option('disp_rstatus_fmt', ' {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus} {sheet.options.disp_selected_note}{sheet.nSelectedRows}', 'right-side status format string')
+vd.option('disp_status_fmt', '{sheet.shortcut}› {sheet.name}| ', 'status line prefix')
+vd.option('disp_lstatus_max', 0, 'maximum length of left status line')
+vd.option('disp_status_sep', ' | ', 'separator between statuses')
 
-theme('color_keystrokes', 'bold 233 black on 110 cyan', 'color of input keystrokes on status line')
-theme('color_status', 'bold black on 110 cyan', 'status line color')
-theme('color_error', 'red', 'error message color')
-theme('color_warning', 'yellow', 'warning message color')
-theme('color_top_status', 'underline', 'top window status bar color')
-theme('color_active_status', 'black on 110 cyan', ' active window status bar color')
-theme('color_inactive_status', '8 on black', 'inactive window status bar color')
+vd.option('color_keystrokes', 'bold 233 black on 110 cyan', 'color of input keystrokes on status line')
+vd.option('color_status', 'bold black on 110 cyan', 'status line color')
+vd.option('color_error', 'red', 'error message color')
+vd.option('color_warning', 'yellow', 'warning message color')
+vd.option('color_top_status', 'underline', 'top window status bar color')
+vd.option('color_active_status', 'black on 110 cyan', ' active window status bar color')
+vd.option('color_inactive_status', '8 on black', 'inactive window status bar color')
 
 BaseSheet.init('longname', lambda: '')
 
