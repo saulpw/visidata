@@ -131,4 +131,4 @@ def loadInternalSheet(vd, cls, p, **kwargs):
     return vs
 
 
-BaseSheet.addCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: "), create=True))', 'open input in VisiData')
+BaseSheet.addCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: "), create=True))', 'Open file or URL')
