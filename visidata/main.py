@@ -14,18 +14,18 @@ import datetime
 import signal
 import warnings
 
-from visidata import vd, option, options, run, BaseSheet, AttrDict
+from visidata import vd, options, run, BaseSheet, AttrDict
 from visidata import Path
 import visidata
 
 vd.version_info = __version_info__
 
-option('config', '~/.visidatarc', 'config file to exec in Python', sheettype=None)
-option('play', '', 'file.vd to replay')
-option('batch', False, 'replay in batch mode (with no interface and all status sent to stdout)')
-option('output', None, 'save the final visible sheet to output at the end of replay')
-option('preplay', '', 'longnames to preplay before replay')
-option('imports', 'plugins', 'imports to preload before .visidatarc (command-line only)')
+vd.option('config', '~/.visidatarc', 'config file to exec in Python', sheettype=None)
+vd.option('play', '', 'file.vd to replay')
+vd.option('batch', False, 'replay in batch mode (with no interface and all status sent to stdout)')
+vd.option('output', None, 'save the final visible sheet to output at the end of replay')
+vd.option('preplay', '', 'longnames to preplay before replay')
+vd.option('imports', 'plugins', 'imports to preload before .visidatarc (command-line only)')
 
 # for --play
 def eval_vd(logpath, *args, **kwargs):

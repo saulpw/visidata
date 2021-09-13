@@ -52,13 +52,15 @@ from ._types import *
 from .column import *
 
 from .sheets import *
+
 import visidata.statusbar
 
 import visidata.textsheet
 import visidata.threads
+from .path import *
 import visidata._input
 import visidata.movement
-from .path import *
+
 import visidata._urlcache
 import visidata.selection
 import visidata.loaders.tsv
@@ -90,7 +92,7 @@ import visidata.motd
 import visidata.transpose
 import visidata.shell
 import visidata.layout
-from .main import *
+import visidata.main
 import visidata.help
 import visidata.modify
 import visidata.sort
@@ -146,12 +148,13 @@ import visidata.plugins
 
 import visidata.colorsheet
 
-from .deprecated import *
-
 try:
     import vdplus
 except ModuleNotFoundError as e:
     pass
+
+from .deprecated import *
+
 
 import math
 from math import *

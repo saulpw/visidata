@@ -8,7 +8,6 @@ vd.option('disp_replay_play', '▶', 'status indicator for active replay')
 vd.option('disp_replay_pause', '‖', 'status indicator for paused replay')
 vd.option('color_status_replay', 'green', 'color of replay status indicator')
 vd.option('replay_movement', False, 'insert movements during replay', sheettype=None)
-vd.option('visidata_dir', '~/.visidata/', 'directory to load and store additional files', sheettype=None)
 
 # prefixes which should not be logged
 nonLogged = '''forget exec-longname undo redo quit

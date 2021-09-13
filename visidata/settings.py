@@ -370,5 +370,7 @@ def loadConfigAndPlugins(vd, args):
     vd.loadConfigFile(options.config, vd.getGlobals())
 
 
+vd.option('visidata_dir', '~/.visidata/', 'directory to load and store additional files', sheettype=None)
+
 BaseSheet.bindkey('^M', '^J')  # for windows ENTER
 BaseSheet.addCommand('gO', 'open-config', 'vd.push(open_txt(Path(options.config)))', 'open options.config as text sheet')
