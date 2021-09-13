@@ -30,6 +30,14 @@ def launchEditor(vd, *args):
         return subprocess.call(args)
 
 
+@visidata.VisiData.api
+def launchBrowser(vd, *args):
+    'Launch $BROWSER with *args* as arguments.'
+    browser = os.environ.get('BROWSER') or vd.fail('(no $BROWSER) for %s' % args[0])
+    args = [browser] + list(args)
+    subprocess.call(args)
+
+
 @visidata.VisiData.global_api
 def launchExternalEditor(vd, v, linenum=0):
     'Launch $EDITOR to edit string *v* starting on line *linenum*.'

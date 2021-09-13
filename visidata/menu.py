@@ -455,8 +455,6 @@ vd.menus = [
 vd.addMenu(Menu('Help',
         Menu('Quick reference', 'sysopen-help'),
         Menu('Command list', 'help-commands'),
-#        Menu('Tutorial', 'open-tutorial'),
-#        Menu('About', 'open-about'),
         Menu('Version', 'show-version'),
     ))
 
