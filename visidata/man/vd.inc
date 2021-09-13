@@ -914,7 +914,7 @@ For example:
        L = sorted(values)
        return L[len(L)//2]
 
-   aggregator('median', median)
+   vd.aggregator('median', median)
 .Ed
 .Pp
 Functions defined in .visidatarc are available in python expressions (e.g. in derived columns).

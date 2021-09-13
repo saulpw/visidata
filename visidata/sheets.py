@@ -1010,14 +1010,14 @@ def _evalcontexts(vd):
 
 ## VisiData sheet manipulation
 
-@VisiData.global_api
+@VisiData.api
 def replace(vd, vs):
     'Replace top sheet with the given sheet `vs`.'
     vd.sheets.pop(0)
     return vd.push(vs)
 
 
-@VisiData.global_api
+@VisiData.api
 def remove(vd, vs):
     'Remove *vs* from sheets stack, without asking for confirmation.'
     if vs in vd.sheets:
@@ -1029,7 +1029,7 @@ def remove(vd, vs):
         vd.fail('sheet not on stack')
 
 
-@VisiData.global_api
+@VisiData.api
 def push(vd, vs, pane=0):
     'Push Sheet *vs* onto ``vd.sheets`` stack for *pane* (0 for active pane, -1 for inactive pane).  Remove from other position if already on sheets stack.'
     if not isinstance(vs, BaseSheet):

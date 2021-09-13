@@ -21,7 +21,7 @@ class SuspendCurses:
         curses.doupdate()
 
 
-@visidata.VisiData.global_api
+@visidata.VisiData.api
 def launchEditor(vd, *args):
     'Launch $EDITOR with *args* as arguments.'
     editor = os.environ.get('EDITOR') or vd.fail('$EDITOR not set')
@@ -38,7 +38,7 @@ def launchBrowser(vd, *args):
     subprocess.call(args)
 
 
-@visidata.VisiData.global_api
+@visidata.VisiData.api
 def launchExternalEditor(vd, v, linenum=0):
     'Launch $EDITOR to edit string *v* starting on line *linenum*.'
     import tempfile

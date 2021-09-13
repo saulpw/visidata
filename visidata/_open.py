@@ -82,7 +82,7 @@ def openPath(vd, p, filetype=None, create=False):
     return openfunc(p)
 
 
-@VisiData.global_api
+@VisiData.api
 def openSource(vd, p, filetype=None, create=False, **kwargs):
     '''Return unloaded sheet object for *p* opened as the given *filetype* and with *kwargs* as option overrides. *p* can be a Path or a string (filename, url, or "-" for stdin).
     when true, *create* will return a blank sheet, if file does not exist.'''

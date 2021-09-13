@@ -125,7 +125,7 @@ def getHelpPane(vd, name, module='vdplus'):
     return ret
 
 
-@VisiData.global_api
+@VisiData.api
 def openManPage(vd):
     import os
     with SuspendCurses():

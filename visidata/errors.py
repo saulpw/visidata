@@ -15,7 +15,7 @@ def stacktrace(e=None):
     return traceback.format_exception_only(type(e), e)
 
 
-@VisiData.global_api
+@VisiData.api
 def exceptionCaught(vd, exc=None, status=True, **kwargs):
     'Add *exc* to list of last errors and add to status history.  Show on left status bar if *status* is True.  Reraise exception if options.debug is True.'
     if isinstance(exc, ExpectedException):  # already reported, don't log

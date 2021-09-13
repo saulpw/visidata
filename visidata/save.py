@@ -97,7 +97,7 @@ def save_cols(vd, cols):
     vd.saveSheets(path, vs, confirm_overwrite=options.confirm_overwrite)
 
 
-@VisiData.global_api
+@VisiData.api
 def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
     'Save all *vsheets* to *givenpath*.'
 

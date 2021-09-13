@@ -147,3 +147,7 @@ fail = deprecated('2.6', 'vd.fail')(vd.fail)
 
 option = theme = vd.option # deprecated('2.6', 'vd.option')(vd.option)
 confirm = deprecated('2.6', 'vd.confirm')(vd.confirm)
+launchExternalEditor = deprecated('2.6', 'vd.launchExternalEditor')(vd.launchExternalEditor)
+launchEditor = deprecated('2.6', 'vd.launchEditor')(vd.launchEditor)
+exceptionCaught = deprecated('2.6', 'vd.exceptionCaught')(vd.exceptionCaught)
+openSource = deprecated('2.6', 'vd.openSource')(vd.openSource)
