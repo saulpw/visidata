@@ -3,10 +3,8 @@ import math
 
 from visidata import *
 
-__all__ = ['PythonSheet', 'expand_cols_deep', 'deduceType', 'closeColumn', 'ListOfDictSheet', 'SheetDict', 'PyobjSheet', 'view']
-
-option('visibility', 0, 'visibility level')
-option('default_sample_size', 100, 'number of rows to sample for regex.split (0=all)', replay=True)
+vd.option('visibility', 0, 'visibility level')
+vd.option('default_sample_size', 100, 'number of rows to sample for regex.split (0=all)', replay=True)
 
 
 class PythonSheet(Sheet):
@@ -347,3 +345,14 @@ Sheet.addCommand('gz'+ENTER, 'dive-selected-cells', 'for r in selectedRows: vd.p
 PyobjSheet.addCommand('v', 'visibility', 'sheet.options.visibility = 0 if sheet.options.visibility else 2; reload()', 'toggle show/hide for methods and hidden properties')
 PyobjSheet.addCommand('gv', 'show-hidden', 'sheet.options.visibility = 2; reload()', 'show methods and hidden properties')
 PyobjSheet.addCommand('zv', 'hide-hidden', 'sheet.options.visibility -= 1; reload()', 'hide methods and hidden properties')
+
+vd.addGlobals({
+    'PythonSheet': PythonSheet,
+    'expand_cols_deep': expand_cols_deep,
+    'deduceType': deduceType,
+    'closeColumn': closeColumn,
+    'ListOfDictSheet': ListOfDictSheet,
+    'SheetDict': SheetDict,
+    'PyobjSheet': PyobjSheet,
+    'view': view,
+})

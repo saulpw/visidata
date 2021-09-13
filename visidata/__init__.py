@@ -64,7 +64,7 @@ from .path import *
 import visidata._urlcache
 import visidata.selection
 import visidata.loaders.tsv
-from .pyobj import *
+import visidata.pyobj
 import visidata.loaders.json
 import visidata._open
 import visidata.save
