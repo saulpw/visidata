@@ -138,4 +138,9 @@ def load_tsv(fn):
     vs = open_tsv(Path(fn))
     yield from vs.iterload()
 
-cancelThread = vd.cancelThread
+cancelThread = deprecated('2.6', 'vd.cancelThread')(vd.cancelThread)
+status = deprecated('2.6', 'vd.status')(vd.status)
+warning = deprecated('2.6', 'vd.warning')(vd.warning)
+error = deprecated('2.6', 'vd.error')(vd.error)
+debug = deprecated('2.6', 'vd.debug')(vd.debug)
+fail = deprecated('2.6', 'vd.fail')(vd.fail)

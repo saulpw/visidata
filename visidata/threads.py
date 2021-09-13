@@ -198,7 +198,7 @@ def execAsync(self, func, *args, sheet=None, **kwargs):
 
     return thread
 
-def _toplevelTryFunc(func, *args, status=status, **kwargs):
+def _toplevelTryFunc(func, *args, status=vd.status, **kwargs):
   with ThreadProfiler(threading.current_thread()) as prof:
     t = threading.current_thread()
     t.name = func.__name__

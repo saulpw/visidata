@@ -2,7 +2,7 @@ import textwrap
 
 from visidata import vd, BaseSheet, options, Sheet, ColumnItem, asyncthread
 from visidata import Column, ColumnItem, vlen
-from visidata import globalCommand, error, stacktrace, VisiData
+from visidata import globalCommand, VisiData
 import visidata
 
 

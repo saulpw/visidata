@@ -37,7 +37,7 @@ def statuses(vd):
 def statusHistory(vd):
     return list()  # list of [priority, statusmsg, repeats] for all status messages ever
 
-@VisiData.global_api
+@VisiData.api
 def status(vd, *args, priority=0):
     'Display *args* on status until next action.'
     if not args:
@@ -59,24 +59,24 @@ def addToStatusHistory(vd, *args, priority=0):
     vd.statusHistory.append([priority, args, 1])
     return True
 
-@VisiData.global_api
+@VisiData.api
 def error(vd, *args):
     'Abort with ExpectedException, and display *args* on status as an error.'
     vd.status(*args, priority=3)
     raise ExpectedException(args[0] if args else '')
 
-@VisiData.global_api
+@VisiData.api
 def fail(vd, *args):
     'Abort with ExpectedException, and display *args* on status as a warning.'
     vd.status(*args, priority=2)
     raise ExpectedException(args[0] if args else '')
 
-@VisiData.global_api
+@VisiData.api
 def warning(vd, *args):
     'Display *args* on status as a warning.'
     vd.status(*args, priority=1)
 
-@VisiData.global_api
+@VisiData.api
 def debug(vd, *args, **kwargs):
     'Display *args* on status if options.debug is set.'
     if options.debug:

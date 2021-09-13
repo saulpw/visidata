@@ -54,7 +54,7 @@ from .column import *
 theme = option  # convert theme(...) to option(...) and move this down, eventually into deprecated.py
 
 from .sheets import *
-from .statusbar import *
+import visidata.statusbar
 
 import visidata.textsheet
 import visidata.threads
