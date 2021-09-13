@@ -56,8 +56,8 @@ theme = option  # convert theme(...) to option(...) and move this down, eventual
 from .sheets import *
 from .statusbar import *
 
-from .textsheet import *
-from .threads import *
+import visidata.textsheet
+import visidata.threads
 import visidata._input
 import visidata.movement
 from .path import *

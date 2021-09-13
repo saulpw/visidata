@@ -2,7 +2,7 @@ __version__ = '0.9'
 
 from copy import copy
 
-from visidata import Sheet, vd, asyncsingle, cancelThread
+from visidata import Sheet, vd, asyncsingle
 
 @Sheet.api
 def dup_search(sheet, cols='cursorCol'):

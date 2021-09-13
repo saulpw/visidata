@@ -137,3 +137,5 @@ def maybe_clean(s, vs):
 def load_tsv(fn):
     vs = open_tsv(Path(fn))
     yield from vs.iterload()
+
+cancelThread = vd.cancelThread

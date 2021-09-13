@@ -453,7 +453,7 @@ globalCommand(None, 'show-status', 'status(input("status: "))', 'show given mess
 globalCommand('^V', 'show-version', 'status(__version_info__);', 'show version and copyright information on status line')
 globalCommand('z^V', 'check-version', 'checkVersion(input("require version: ", value=__version_info__))', 'check VisiData version against given version')
 
-globalCommand(' ', 'exec-longname', 'execCommand(inputLongname(sheet))', 'execute command by its longname')
+globalCommand(' ', 'exec-longname', 'execCommand(inputLongname())', 'execute command by its longname')
 
 CommandLog.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("replayed one row")', 'replay command in current row')
 CommandLog.addCommand('gx', 'replay-all', 'vd.replay(sheet)', 'replay contents of entire CommandLog')

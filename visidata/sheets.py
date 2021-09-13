@@ -1,6 +1,6 @@
 import collections
 import itertools
-from copy import copy
+from copy import copy, deepcopy
 import textwrap
 
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException
@@ -1125,6 +1125,19 @@ def splitPane(sheet, pct=None):
         vd.activePane = pane
 
     vd.options.disp_splitwin_pct = pct
+
+
+@Sheet.api
+def async_deepcopy(sheet, rowlist):
+    @asyncthread
+    def _async_deepcopy(newlist, oldlist):
+        for r in Progress(oldlist, 'copying'):
+            newlist.append(deepcopy(r))
+
+    ret = []
+    _async_deepcopy(ret, rowlist)
+    return ret
+
 
 IndexSheet.class_options.header = 0
 IndexSheet.class_options.skip = 0
