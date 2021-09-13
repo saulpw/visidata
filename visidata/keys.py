@@ -13,6 +13,7 @@ visidata.vd.prettykeys_trdict = {
         'KEY_RIGHT': 'Right',
         'KEY_HOME':  'Home',
         'KEY_END':   'End',
+        'KEY_EOL':   'End',
         'KEY_PPAGE': 'PgUp',
         'KEY_NPAGE': 'PgDn',
         'KEY_IC':    'Ins',
