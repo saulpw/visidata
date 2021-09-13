@@ -144,3 +144,5 @@ warning = deprecated('2.6', 'vd.warning')(vd.warning)
 error = deprecated('2.6', 'vd.error')(vd.error)
 debug = deprecated('2.6', 'vd.debug')(vd.debug)
 fail = deprecated('2.6', 'vd.fail')(vd.fail)
+
+option = theme = vd.option # deprecated('2.6', 'vd.option')(vd.option)

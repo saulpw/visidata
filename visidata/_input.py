@@ -5,7 +5,7 @@ import curses
 import visidata
 
 from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiData
-from visidata import vd, option, options, theme, colors
+from visidata import vd, options, colors
 from visidata import launchExternalEditor, suspend, ColumnItem, AttrDict
 
 
