@@ -15,7 +15,7 @@ vd.option('disp_menu_boxchars', '││──┌┐└┘├┤', 'box character
 vd.option('disp_menu_more', '»', 'command submenu indicator')
 vd.option('disp_menu_push', '⎘', 'indicator if command pushes sheet onto sheet stack')
 vd.option('disp_menu_input', '…', 'indicator if input required for command')
-vd.option('disp_menu_fmt', 'Ctrl+H for help', 'right-side menu format string')
+vd.option('disp_menu_fmt', 'Ctrl+H for help menu', 'right-side menu format string')
 
 BaseSheet.init('activeMenuItems', list)
 vd.menuRunning = False
