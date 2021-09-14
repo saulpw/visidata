@@ -171,6 +171,6 @@ def aggregator_choices(vd):
 vd.addGlobals(globals())
 
 
-Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregator_choices))', 'add aggregator to current column')
+Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregator_choices))', 'Add aggregator to current column')
 Sheet.addCommand('z+', 'memo-aggregate', 'for agg in chooseMany(aggregator_choices): cursorCol.memo_aggregate(aggregators[agg], selectedRows or rows)', 'memo result of aggregator over values in selected rows for current column')
 ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseMany(aggregator_choices))', 'add aggregators to selected source columns')

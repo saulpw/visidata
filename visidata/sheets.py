@@ -1134,7 +1134,7 @@ BaseSheet.init('pane', lambda: 1)
 globalCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)', 'open Sheets Stack: join or jump between the active sheets on the current stack')
 globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)', 'open Sheets Sheet: join or jump between all sheets from current session')
 
-BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); reload(); recalc(); status("reloaded")', 'reload current sheet'),
+BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); reload(); recalc(); status("reloaded")', 'Reload current sheet'),
 Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line'),
 
 Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', 'toggle current column as a key column')
@@ -1176,7 +1176,7 @@ BaseSheet.addCommand('^I', 'splitwin-swap', 'vd.activePane = 1 if sheet.pane == 
 BaseSheet.addCommand('g^I', 'splitwin-swap-pane', 'vd.options.disp_splitwin_pct=-vd.options.disp_splitwin_pct', 'swap panes onscreen')
 BaseSheet.addCommand('zZ', 'splitwin-input', 'vd.options.disp_splitwin_pct = input("% height for split window: ", value=vd.options.disp_splitwin_pct)', 'set split pane to specific size')
 
-BaseSheet.addCommand('^L', 'redraw', 'vd.redraw(); sheet.refresh()', 'refresh screen')
+BaseSheet.addCommand('^L', 'redraw', 'vd.redraw(); sheet.refresh()', 'Refresh screen')
 BaseSheet.addCommand(None, 'guard-sheet', 'options.set("quitguard", True, sheet); status("guarded")', 'guard current sheet from accidental quitting')
 BaseSheet.addCommand(None, 'open-source', 'vd.push(source)', 'jump to the source of this sheet')
 

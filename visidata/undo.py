@@ -109,5 +109,5 @@ def addUndoColNames(vd, cols):
     vd.addUndo(_undo)
 
 
-BaseSheet.addCommand('U', 'undo-last', 'vd.undo(sheet)', 'undo the most recent modification (requires enabled options.undo)')
-BaseSheet.addCommand('R', 'redo-last', 'vd.redo(sheet)', 'redo the most recent undo (requires enabled options.undo)')
+BaseSheet.addCommand('U', 'undo-last', 'vd.undo(sheet)', 'Undo the most recent change (options.undo must be enabled)')
+BaseSheet.addCommand('R', 'redo-last', 'vd.redo(sheet)', 'Redo the most recent undo (options.undo must be enabled)')

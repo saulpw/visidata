@@ -105,7 +105,7 @@ def regex_flags(sheet):
     return sum(getattr(re, f.upper()) for f in options.regex_flags)
 
 
-Sheet.addCommand(':', 'split-col', 'addRegexColumns(makeRegexSplitter, cursorCol, input("split regex: ", type="regex-split"))', 'add new columns from regex split; number of columns determined by example row at cursor')
+Sheet.addCommand(':', 'split-col', 'addRegexColumns(makeRegexSplitter, cursorCol, input("split regex: ", type="regex-split"))', 'Add new columns from regex split')
 Sheet.addCommand(';', 'capture-col', 'addRegexColumns(makeRegexMatcher, cursorCol, input("capture regex: ", type="regex-capture"))', 'add new column from capture groups of regex; requires example row')
 Sheet.addCommand('*', 'addcol-subst', 'addColumnAtCursor(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, input("transform column by regex: ", type="regex-subst"))))', 'add column derived from current column, replacing regex with subst (may include \1 backrefs)')
 Sheet.addCommand('g*', 'setcol-subst', 'setSubst([cursorCol], someSelectedRows)', 'regex/subst - modify selected rows in current column, replacing regex with subst, (may include backreferences \\1 etc)')

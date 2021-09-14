@@ -445,7 +445,7 @@ globalCommand('^N', 'replay-advance', 'vd.replay_advance()', 'execute next row i
 globalCommand('^K', 'replay-stop', 'vd.replay_cancel()', 'cancel current replay')
 
 globalCommand(None, 'show-status', 'status(input("status: "))', 'show given message on status line')
-globalCommand('^V', 'show-version', 'status(__version_info__);', 'show version and copyright information on status line')
+globalCommand('^V', 'show-version', 'status(__version_info__);', 'Show version and copyright information on status line')
 globalCommand('z^V', 'check-version', 'checkVersion(input("require version: ", value=__version_info__))', 'check VisiData version against given version')
 
 globalCommand(' ', 'exec-longname', 'execCommand(inputLongname(sheet))', 'execute command by its longname')

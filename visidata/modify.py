@@ -284,4 +284,4 @@ Sheet.addCommand('ga', 'add-rows', 'n=int(input("add rows: ", value=1)); addRows
 Sheet.addCommand('za', 'addcol-new', 'addColumnAtCursor(SettableColumn(input("column name: "))); cursorRight(1)', 'append an empty column')
 Sheet.addCommand('gza', 'addcol-bulk', 'addColumnAtCursor(*(SettableColumn() for c in range(int(input("add columns: "))))); cursorRight(1)', 'append N empty columns')
 
-Sheet.addCommand('z^S', 'commit-sheet', 'commit()', 'commit changes back to source.  not undoable!')
+Sheet.addCommand('z^S', 'commit-sheet', 'commit()', 'Commit changes back to data source. You cannot undo these changes.')
