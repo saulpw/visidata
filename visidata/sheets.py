@@ -20,7 +20,7 @@ vd.option('default_width', 20, 'default column width', replay=True)   # TODO: ma
 vd.option('default_height', 10, 'default column height')
 vd.option('textwrap_cells', True, 'wordwrap text for multiline rows')
 
-vd.option('quitguard', False, 'confirm before quitting last sheet')
+vd.option('quitguard', False, 'confirm before quitting modified sheet')
 vd.option('debug', False, 'exit on error and display stacktrace')
 vd.option('skip', 0, 'skip N rows before header', replay=True)
 vd.option('header', 1, 'parse first N rows as column names', replay=True)
@@ -1190,7 +1190,7 @@ BaseSheet.addCommand('g^I', 'splitwin-swap-pane', 'vd.options.disp_splitwin_pct=
 BaseSheet.addCommand('zZ', 'splitwin-input', 'vd.options.disp_splitwin_pct = input("% height for split window: ", value=vd.options.disp_splitwin_pct)', 'set split pane to specific size')
 
 BaseSheet.addCommand('^L', 'redraw', 'vd.redraw(); sheet.refresh()', 'refresh screen')
-BaseSheet.addCommand(None, 'guard-sheet', 'options.set("quitguard", True, sheet); status("guarded")', 'Mark current sheet to require explicit confirmation before quitting')
+BaseSheet.addCommand(None, 'guard-sheet', 'options.set("quitguard", True, sheet); status("guarded")', 'Set quitguard on current sheet to confirm before quit')
 BaseSheet.addCommand(None, 'open-source', 'vd.push(source)', 'jump to the source of this sheet')
 
 BaseSheet.bindkey('KEY_RESIZE', 'redraw')
