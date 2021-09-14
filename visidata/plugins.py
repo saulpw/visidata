@@ -187,7 +187,7 @@ class PluginsSheet(JsonLinesSheet):
             vd.warning("no plugins/__init__.py found")
 
 
-BaseSheet.addCommand(None, 'open-plugins', 'vd.push(vd.pluginsSheet)', 'open Plugins Sheet: manage your session environment for a curated set of plugins')
+BaseSheet.addCommand(None, 'open-plugins', 'vd.push(vd.pluginsSheet)', 'Open Plugins Sheet to manage supported plugins')
 
-PluginsSheet.addCommand('a', 'add-plugin', 'installPlugin(cursorRow)', 'install and activate current plugin')
-PluginsSheet.addCommand('d', 'delete-plugin', 'removePluginIfExists(cursorRow)', 'deactivate current plugin')
+PluginsSheet.addCommand('a', 'add-plugin', 'installPlugin(cursorRow)', 'Install and enable current plugin')
+PluginsSheet.addCommand('d', 'delete-plugin', 'removePluginIfExists(cursorRow)', 'Disable current plugin')

@@ -134,7 +134,7 @@ def openManPage(vd):
 
 
 # in VisiData, g^H refers to the man page
-BaseSheet.addCommand('g^H', 'sysopen-help', 'openManPage()', 'view VisiData man page')
+BaseSheet.addCommand('g^H', 'sysopen-help', 'openManPage()', 'Show the UNIX man page for VisiData')
 BaseSheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))', 'view sheet of command longnames and keybindings for current sheet')
 BaseSheet.addCommand('gz^H', 'help-commands-all', 'vd.push(HelpSheet("all_commands", source=None, revbinds={}))', 'view sheet of command longnames and keybindings for all sheet types')
 BaseSheet.addCommand(None, 'help-search', 'help_search(sheet, input("help: "))', 'search through command longnames with search terms')
