@@ -1,5 +1,5 @@
 from copy import copy
-from visidata import vd, option, options, VisiData, ListOfDictSheet, ENTER, CompleteKey, ReturnValue
+from visidata import vd, options, VisiData, ListOfDictSheet, ENTER, CompleteKey, ReturnValue
 
 
 vd.option('fancy_chooser', False, 'a nicer selection interface for aggregators and jointype')

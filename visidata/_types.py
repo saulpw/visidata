@@ -4,14 +4,14 @@ import collections
 import functools
 import datetime
 import locale
-from visidata import option, options, TypedWrapper, vd, VisiData
+from visidata import options, TypedWrapper, vd, VisiData
 
 #__all__ = ['anytype', 'vdtype', ]
 
-option('disp_currency_fmt', '%.02f', 'default fmtstr to format for currency values', replay=True)
-option('disp_float_fmt', '{:.02f}', 'default fmtstr to format for float values', replay=True)
-option('disp_int_fmt', '{:.0f}', 'default fmtstr to format for int values', replay=True)
-option('disp_date_fmt','%Y-%m-%d', 'default fmtstr to strftime for date values', replay=True)
+vd.option('disp_currency_fmt', '%.02f', 'default fmtstr to format for currency values', replay=True)
+vd.option('disp_float_fmt', '{:.02f}', 'default fmtstr to format for float values', replay=True)
+vd.option('disp_int_fmt', '{:.0f}', 'default fmtstr to format for int values', replay=True)
+vd.option('disp_date_fmt','%Y-%m-%d', 'default fmtstr to strftime for date values', replay=True)
 
 try:
     import dateutil.parser

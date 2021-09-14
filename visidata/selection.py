@@ -1,4 +1,4 @@
-from visidata import vd, Sheet, Progress, option, asyncthread, options, rotateRange, Fanout, undoAttrCopyFunc, copy
+from visidata import vd, Sheet, Progress, asyncthread, options, rotateRange, Fanout, undoAttrCopyFunc, copy
 
 vd.option('bulk_select_clear', False, 'clear selected rows before new bulk selections', replay=True)
 vd.option('some_selected_rows', False, 'if no rows selected, if True, someSelectedRows returns all rows; if False, fails')

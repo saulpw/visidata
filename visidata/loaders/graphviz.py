@@ -1,7 +1,7 @@
-from visidata import vd, options, option, TypedWrapper, asyncthread, Progress
+from visidata import vd, options, TypedWrapper, asyncthread, Progress
 from visidata import wrapply, clean_to_id, VisiData, SIFormatter
 
-option('graphviz_edge_labels', True, 'whether to include edge labels on graphviz diagrams')
+vd.option('graphviz_edge_labels', True, 'whether to include edge labels on graphviz diagrams')
 
 
 def is_valid(v):

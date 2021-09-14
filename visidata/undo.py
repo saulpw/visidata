@@ -1,11 +1,11 @@
 import itertools
 from copy import copy
 
-from visidata import vd, options, VisiData, BaseSheet, option, UNLOADED
+from visidata import vd, options, VisiData, BaseSheet, UNLOADED
 
 BaseSheet.init('undone', list)  # list of CommandLogRow for redo after undo
 
-option('undo', True, 'enable undo/redo')
+vd.option('undo', True, 'enable undo/redo')
 
 nonUndo = '''commit open-file'''.split()
 

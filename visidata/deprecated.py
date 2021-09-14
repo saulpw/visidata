@@ -151,3 +151,4 @@ launchExternalEditor = deprecated('2.6', 'vd.launchExternalEditor')(vd.launchExt
 launchEditor = deprecated('2.6', 'vd.launchEditor')(vd.launchEditor)
 exceptionCaught = deprecated('2.6', 'vd.exceptionCaught')(vd.exceptionCaught)
 openSource = deprecated('2.6', 'vd.openSource')(vd.openSource)
+globalCommand = visidata.BaseSheet.addCommand

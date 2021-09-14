@@ -10,15 +10,15 @@ __version__='0.1'
 import urllib.parse
 import json
 
-from visidata import vd, urlcache, AttrDict, Sheet, option, options, Column, ColumnExpr
+from visidata import vd, urlcache, AttrDict, Sheet, Column, ColumnExpr
 
-option('ntk_key', '', 'API Key for nettoolkit.com')
+vd.option('ntk_key', '', 'API Key for nettoolkit.com')
 
 
 def geocode(addr):
     'Return list of dict of location information given an address query.'
     url = 'https://api.nettoolkit.com/v1/geo/geocodes?address='+urllib.parse.quote(addr, safe='')
-    resp = urlcache(url, headers={'X-NTK-KEY': options.ntk_key})
+    resp = urlcache(url, headers={'X-NTK-KEY': vd.options.ntk_key})
     return json.loads(resp.read_text())['results']
 
 

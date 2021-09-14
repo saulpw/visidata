@@ -6,13 +6,13 @@ import threading
 import time
 from unittest import mock
 
-from visidata import vd, VisiData, colors, ESC, options, option
+from visidata import vd, VisiData, colors, ESC, options
 
 vd.curses_timeout = 100 # curses timeout in ms
 vd.timeouts_before_idle = 10
 
-option('disp_splitwin_pct', 0, 'height of second sheet on screen')
-option('mouse_interval', 1, 'max time between press/release for click (ms)', sheettype=None)
+vd.option('disp_splitwin_pct', 0, 'height of second sheet on screen')
+vd.option('mouse_interval', 1, 'max time between press/release for click (ms)', sheettype=None)
 
 class ReturnValue(BaseException):
     'raise ReturnValue(ret) to exit from an inner runresult() with its result.'

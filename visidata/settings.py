@@ -218,8 +218,8 @@ class OptionsObject:
 
     def getall(self, prefix=''):
         'Return dictionary of all options beginning with `prefix` (with `prefix` removed from the name).'
-        return { optname[len(prefix):] : options[optname]
-                    for optname in options.keys()
+        return { optname[len(prefix):] : vd.options[optname]
+                    for optname in vd.options.keys()
                         if optname.startswith(prefix) }
 
     def __getattr__(self, optname):      # options.foo
@@ -245,10 +245,9 @@ vd.bindkeys = SettingsMgr()
 vd._options = SettingsMgr()
 
 vd.options = vd.OptionsObject(vd._options)  # global option settings
-options = vd.options  # legacy
 
 
-@VisiData.global_api
+@VisiData.api
 def option(vd, name, default, helpstr, replay=False, sheettype=BaseSheet):
     '''Declare a new option.
 
@@ -258,7 +257,7 @@ def option(vd, name, default, helpstr, replay=False, sheettype=BaseSheet):
    - `replay`: ``True`` if changes to the option should be stored in the **Command Log**
    - `sheettype`: ``None`` if the option is not sheet-specific, to make it global on CLI
     '''
-    opt = options.setdefault(name, default, helpstr)
+    opt = vd.options.setdefault(name, default, helpstr)
     opt.replayable = replay
     opt.sheettype=sheettype
     return opt
@@ -340,7 +339,7 @@ def loadConfigFile(vd, fnrc, _globals=None):
 
 
 def addOptions(parser):
-    for optname in options.keys('default'):
+    for optname in vd.options.keys('default'):
         if optname.startswith('color_') or optname.startswith('disp_'):
             continue
         action = 'store_true' if options[optname] is False else 'store'
@@ -353,24 +352,30 @@ def addOptions(parser):
 @VisiData.api
 def loadConfigAndPlugins(vd, args):
     # set visidata_dir and config manually before loading config file, so visidata_dir can be set from cli or from $VD_DIR
-    options.visidata_dir = args.visidata_dir if args.visidata_dir is not None else os.getenv('VD_DIR', '') or options.visidata_dir
-    options.config = args.config if args.config is not None else os.getenv('VD_CONFIG', '') or options.config
+    vd.options.visidata_dir = args.visidata_dir if args.visidata_dir is not None else os.getenv('VD_DIR', '') or vd.options.visidata_dir
+    vd.options.config = args.config if args.config is not None else os.getenv('VD_CONFIG', '') or vd.options.config
 
-    sys.path.append(str(visidata.Path(options.visidata_dir)))
-    sys.path.append(str(visidata.Path(options.visidata_dir)/"plugins-deps"))
+    sys.path.append(str(visidata.Path(vd.options.visidata_dir)))
+    sys.path.append(str(visidata.Path(vd.options.visidata_dir)/"plugins-deps"))
 
     # import plugins from .visidata/plugins before .visidatarc, so plugin options can be overridden
-    for modname in (args.imports or options.imports or '').split():
+    for modname in (args.imports or vd.options.imports or '').split():
         try:
             vd.addGlobals(importlib.import_module(modname).__dict__)
         except ModuleNotFoundError:
             continue
 
     # user customisations in config file in standard location
-    vd.loadConfigFile(options.config, vd.getGlobals())
+    vd.loadConfigFile(vd.options.config, vd.getGlobals())
 
 
 vd.option('visidata_dir', '~/.visidata/', 'directory to load and store additional files', sheettype=None)
 
 BaseSheet.bindkey('^M', '^J')  # for windows ENTER
 BaseSheet.addCommand('gO', 'open-config', 'vd.push(open_txt(Path(options.config)))', 'open options.config as text sheet')
+
+vd.addGlobals({
+    'options': vd.options,  # legacy
+    'globalCommand': BaseSheet.addCommand,
+    'Option': Option,
+})

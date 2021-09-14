@@ -2,7 +2,7 @@ from visidata import *
 
 __all__ = ['openurl_postgres', 'openurl_postgresql', 'openurl_rds', 'PgTable', 'PgTablesSheet']
 
-option('postgres_schema', 'public', 'The desired schema for the Postgres database')
+vd.option('postgres_schema', 'public', 'The desired schema for the Postgres database')
 
 def codeToType(type_code, colname):
     import psycopg2

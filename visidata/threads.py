@@ -6,7 +6,7 @@ import cProfile
 import threading
 import collections
 
-from visidata import VisiData, vd, option, options, globalCommand, Sheet, EscapeException
+from visidata import VisiData, vd, options, globalCommand, Sheet, EscapeException
 from visidata import ColumnAttr, Column
 from visidata import *
 

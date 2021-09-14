@@ -39,7 +39,7 @@ vd.getGlobals = getGlobals
 import visidata.keys
 
 from .basesheet import *
-from .settings import *
+import visidata.settings
 from .errors import *
 from .editor import *
 from .cliptext import *
