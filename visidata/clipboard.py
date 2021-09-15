@@ -29,7 +29,7 @@ def copyCells(sheet, col, rows):
     vd.status('copied %d %s.%s to clipboard' % (len(rows), sheet.rowtype, col.name))
 
 
-def detect_command(cmdlist):
+def _detect_command(cmdlist):
     '''Detect available clipboard util and return cmdline to copy data to the system clipboard.
     cmddict is list of (platform, progname, argstr).'''
 
@@ -40,10 +40,54 @@ def detect_command(cmdlist):
     return ''
 
 
+def detect_syscopy_cmd(sheet):
+    cmd = sheet.options.clipboard_copy_cmd
+    if not cmd:
+        __copy_commands = {
+            'win32': [('clip', '')],
+            'darwin': [('pbcopy', 'w')],
+            None: [('xclip', '-selection clipboard -filter'),
+                ('xsel', '--clipboard --input')]
+        }
+        cmd = sheet.options.clipboard_copy_cmd = _detect_command(__copy_commands)
+    return cmd
+
+
+def detect_syspaste_cmd():
+    cmd = vd.options.clipboard_paste_cmd
+    if not cmd:
+        __paste_commands = {
+            'win32': [('clip', '')],
+            'darwin': [('pbpaste', '')],
+                None: [('xclip', '-selection clipboard -o'),
+                    ('xsel', '--clipboard')]
+        }
+        cmd = vd.options.clipboard_paste_cmd = _detect_command(__paste_commands)
+    return cmd
+
+
+@Sheet.api
+def syscopyValue(sheet, val):
+    # use NTF to generate filename and delete file on context exit
+    with tempfile.NamedTemporaryFile(suffix='.txt') as temp:
+        with open(temp.name, "w", encoding=sheet.options.encoding) as fp:
+            fp.write(val)
+
+        p = subprocess.Popen(
+            detect_syscopy_cmd(sheet).split(),
+            stdin=open(temp.name, 'r', encoding=sheet.options.encoding),
+            stdout=subprocess.DEVNULL,
+            close_fds=True)
+        p.communicate()
+
+    vd.status('copied value to system clipboard')
+
+
 @Sheet.api
 def syscopyCells(sheet, cols, rows, filetype=None):
     filetype = filetype or vd.input("copy %d %s as filetype: " % (len(rows), sheet.rowtype), value=sheet.options.save_filetype)
     sheet.syscopyCells_async(cols, rows, filetype)
+
 
 @Sheet.api
 @asyncthread
@@ -52,15 +96,7 @@ def syscopyCells_async(sheet, cols, rows, filetype):
     vs.rows = rows or vd.fail('no %s selected' % sheet.rowtype)
     vs.columns = cols
 
-    if not sheet.options.clipboard_copy_cmd:
-        __copy_commands = {
-            'win32': [('clip', '')],
-            'darwin': [('pbcopy', 'w')],
-            None: [('xclip', '-selection clipboard -filter'),
-                ('xsel', '--clipboard --input')]
-        }
-        sheet.options.clipboard_copy_cmd = detect_command(__copy_commands)
-
+    cmd = detect_syscopy_cmd(sheet)
     vd.status(f'copying {vs.nRows} {vs.rowtype} to system clipboard as {filetype}')
 
     # use NTF to generate filename and delete file on context exit
@@ -76,16 +112,8 @@ def syscopyCells_async(sheet, cols, rows, filetype):
 
 @VisiData.api
 def sysclip_value(vd):
-    if not vd.options.clipboard_paste_cmd:
-        __paste_commands = {
-            'win32': [('clip', '')],
-            'darwin': [('pbpaste', '')],
-                None: [('xclip', '-selection clipboard -o'),
-                    ('xsel', '--clipboard')]
-        }
-        vd.options.clipboard_paste_cmd = detect_command(__paste_commands)
+    cmd = detect_syspaste_cmd()
     return subprocess.check_output(vd.options.clipboard_paste_cmd.split()).decode('utf-8')
-
 
 
 @VisiData.api
@@ -146,7 +174,7 @@ Sheet.addCommand('gzp', 'setcol-clipboard', 'for r, v in zip(onlySelectedRows, i
 Sheet.addCommand('Y', 'syscopy-row', 'syscopyCells(visibleCols, [cursorRow])', 'yank (copy) current row to system clipboard (using options.clipboard_copy_cmd)')
 
 Sheet.addCommand('gY', 'syscopy-selected', 'syscopyCells(visibleCols, onlySelectedRows)', 'yank (copy) selected rows to system clipboard (using options.clipboard_copy_cmd)')
-Sheet.addCommand('zY', 'syscopy-cell', 'syscopyCells([cursorCol], [cursorRow], filetype="txt")', 'yank (copy) current cell to system clipboard (using options.clipboard_copy_cmd)')
+Sheet.addCommand('zY', 'syscopy-cell', 'syscopyValue(cursorDisplay)', 'yank (copy) current cell to system clipboard (using options.clipboard_copy_cmd)')
 Sheet.addCommand('gzY', 'syscopy-cells', 'syscopyCells([cursorCol], onlySelectedRows, filetype="txt")', 'yank (copy) contents of current column from selected rows to system clipboard (using options.clipboard_copy_cmd')
 
 Sheet.addCommand('x', 'cut-row', 'copyRows([sheet.delete_row(cursorRowIndex)]); defer and cursorDown(1)', 'delete (cut) current row and move it to clipboard')
