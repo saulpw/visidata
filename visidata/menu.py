@@ -5,7 +5,7 @@ from visidata import *
 
 
 vd.option('disp_menu', True, 'show menu on top line when not active', sheettype=None)
-vd.option('disp_menu_keys', False, 'show keystrokes inline in submenus', sheettype=None)
+vd.option('disp_menu_keys', True, 'show keystrokes inline in submenus', sheettype=None)
 vd.option('color_menu', 'black on 110 cyan', 'color of menu items in general')
 vd.option('color_menu_active', '223 yellow on black', 'color of active menu submenus/item')
 vd.option('color_menu_spec', '118 green on 234 black', 'color of active menu submenus/item')
