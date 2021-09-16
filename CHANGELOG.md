@@ -40,13 +40,14 @@
 - [help] add `all_bindings` hidden column (thanks @frosencrantz #896)
 - [inputs] put reused input at end of lastInputs (thanks @geekscrapy #1033)
 - [loaders json] streamify save to .json
+- [loaders npy] add `npy_allow_pickle` option, default False
 - [loaders tsv] increase bufsize to improve loader performance by 10%
 - [path] all Path.open track Progress via read/filesize (thanks @jspatz #987)
 - [path] add Progress for opening compressed files
 - [path] implement line-seek operations (thanks @pacien #1010)
 - [regex expand] deprecate `options.expand_col_scanrows`; standardize on `options.default_sample_size` (thanks @jsvine)
 - [regex] "match regex" to "capture regex" (thanks @geekscrapy #1032)
-- [shell] `addcol-shell` pa
+- [shell] `addcol-shell` pass command to $SHELL (thanks @juston2004 #1023)
 - [shortcut] allow shortcut for jump-sheet to be settable
 - [splitwin] push sheet in empty pane iff splitwin
 - [stdin] use cli --encoding option for piped data (thanks @pacien #1018)
@@ -74,14 +75,17 @@
 - [color] do not break on nonsense color
 - [column] getitemdeep/setitemdeep get/set dotted item key if exists (thanks @frosencrantz #991)
 - [column] fix bug where hard crash occurs when cursor on cell of SheetsSheet is on cursorDisplay (thanks @frosencrantz #1029)
+- [curses] add default `vd.tstp_signal` for non-cli users
 - [execCommand] warn gracefully if bound command longname does not exist
 - [expr] setValuesFromExpr do not stop processing on exception
 - [join] fix when keys have different names (thanks @aborruso #964)
+- [join] fix for rowdefs without bool (like pandas)
+- [join] fix multiple extend (thanks @cwarden for reporting)
 - [loaders fixed] fix editing in final column for fixed-width load (thanks @mwayne #974)
 - [loaders geojson] do not abort plot if rows have errors
 - [loaders html] add columns even if not in first row
+- [loaders pandas] fix column rename
 - [loaders rec json] fix adding new columns for json and rec loaders (thanks @ajkerrigan #959)
-- [npy] set `allow_pickle=True` for load
 - [loaders postgresql] add postgresql scheme (fixes #966) (thanks @zormit #967)
 - [loaders sqlite] fix saving deleted cells (thanks @mattenklicker #969)
 - [loaders vds] save SettableColumn as Column (thanks @pacien #1012)
