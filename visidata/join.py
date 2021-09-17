@@ -16,10 +16,12 @@ def createJoinedSheet(vd, sheets, jointype=''):
     sheets[1:] or vd.fail("join requires more than 1 sheet")
 
     if jointype == 'append':
-
         return ConcatSheet('&'.join(vs.name for vs in sheets), source=sheets)
 
-    elif jointype == 'extend':
+    for s in sheets:
+        s.keyCols or vd.fail(f'{s.name} has no key cols to join')
+
+    if jointype == 'extend':
         vs = copy(sheets[0])
         vs.name = '+'.join(vs.name for vs in sheets)
         vs.reload = functools.partial(ExtendedSheet_reload, vs, sheets)
