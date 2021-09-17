@@ -4,7 +4,8 @@ import json
 from visidata import *
 
 
-def open_geojson(p):
+@VisiData.api
+def open_geojson(vd, p):
     return GeoJSONSheet(p.name, source=p)
 
 def getter_factory(prop):

@@ -1,6 +1,7 @@
 from visidata import *
 
-def open_eml(p):
+@VisiData.api
+def open_eml(vd, p):
     return EmailSheet(p.name, source=p)
 
 class EmailSheet(TableSheet):

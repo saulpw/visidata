@@ -239,7 +239,8 @@ This is a completely functional loader for the ``sas7bdat`` (SAS dataset file) f
 
     from visidata import Sheet, ItemColumn, Progress
 
-    def open_sas7bdat(p):
+    @VisiData.api
+    def open_sas7bdat(vd, p):
         return SasSheet(p.name, source=p)
 
     class SasSheet(Sheet):

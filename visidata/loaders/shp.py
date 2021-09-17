@@ -3,10 +3,11 @@ from visidata import *
 # requires pyshp
 
 
-def open_shp(p):
+@VisiData.api
+def open_shp(vd, p):
     return ShapeSheet(p.name, source=p)
 
-open_dbf = open_shp
+VisiData.open_dbf = VisiData.open_shp
 
 shptypes = {
   'C': str,

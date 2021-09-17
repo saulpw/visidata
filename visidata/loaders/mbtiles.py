@@ -4,10 +4,12 @@ import json
 import gzip
 import sqlite3
 
-def open_pbf(p):
+@VisiData.api
+def open_pbf(vd, p):
     return PbfSheet(p.name, source=p)
 
-def open_mbtiles(p):
+@VisiData.api
+def open_mbtiles(vd, p):
     return MbtilesSheet(p.name, source=p)
 
 def getListDepth(L):

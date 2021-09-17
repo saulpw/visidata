@@ -3,7 +3,8 @@ from visidata import vd, IndexSheet
 'Requires visidata/deps/pyxlsb fork'
 
 
-def open_xlsb(p):
+@VisiData.api
+def open_xlsb(vd, p):
     return XlsbIndex(p.name, source=p)
 
 class XlsbIndex(IndexSheet):

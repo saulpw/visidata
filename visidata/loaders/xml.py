@@ -1,10 +1,11 @@
 from visidata import *
 
 
-def open_xml(p):
+@VisiData.api
+def open_xml(vd, p):
     return XmlSheet(p.name, source=p)
 
-open_svg = open_xml
+VisiData.open_svg = VisiData.open_xml
 
 def unns(k):
     'de-namespace key k'
