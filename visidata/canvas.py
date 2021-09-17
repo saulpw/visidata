@@ -1,3 +1,4 @@
+import math
 
 from collections import defaultdict, Counter
 from visidata import *

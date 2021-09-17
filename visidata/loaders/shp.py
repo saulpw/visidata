@@ -45,6 +45,7 @@ class ShapeSheet(Sheet):
         for i, (fname, ftype, fieldlen, declen) in enumerate(self.sf.fields[1:]):  # skip DeletionFlag
             self.addColumn(Column(fname, getter=lambda col,row,i=i: row.record[i], type=shptype(ftype, declen)))
 
+@VisiData.api
 class ShapeMap(InvertedCanvas):
     aspectRatio = 1.0
     filetype = 'geojson'

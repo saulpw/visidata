@@ -1,4 +1,4 @@
-from visidata import vd, IndexSheet
+from visidata import vd, IndexSheet, VisiData
 
 'Requires visidata/deps/pyxlsb fork'
 
