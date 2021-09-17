@@ -13,10 +13,12 @@ def open_dta(vd, p):
 VisiData.open_stata = VisiData.open_pandas
 
 for ft in 'feather gbq orc parquet pickle sas stata'.split():
-    globals().setdefault('open_'+ft, lambda p,ft=ft: PandasSheet(p.name, source=p, filetype=ft))
+    funcname ='open_'+ft
+    if not getattr(VisiData, funcname, None):
+        setattr(VisiData, funcname, lambda vd,p,ft=ft: PandasSheet(p.name, source=p, filetype=ft))
+
 
 class DataFrameAdapter:
-
     def __init__(self, df):
         import pandas as pd
         if not isinstance(df, pd.DataFrame):
