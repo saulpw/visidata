@@ -39,7 +39,7 @@ vd.getGlobals = getGlobals
 import visidata.keys
 
 from .basesheet import *
-import visidata.settings
+from .settings import *
 from .errors import *
 from .editor import *
 from .cliptext import *
@@ -53,47 +53,47 @@ from .column import *
 
 from .sheets import *
 
-import visidata.statusbar
+from .statusbar import *
 
-import visidata.textsheet
-import visidata.threads
+from .textsheet import *
+from .threads import *
 from .path import *
-import visidata._input
-import visidata.movement
+from ._input import *
+from .movement import *
 
-import visidata._urlcache
-import visidata.selection
-import visidata.loaders.tsv
-import visidata.pyobj
-import visidata.loaders.json
-import visidata._open
-import visidata.save
-import visidata.clipboard
-import visidata.slide
-import visidata.search
-import visidata.expr
+from ._urlcache import *
+from .selection import *
+from .loaders.tsv import *
+from .pyobj import *
+from .loaders.json import *
+from ._open import *
+from .save import *
+from .clipboard import *
+from .slide import *
+from .search import *
+from .expr import *
 
-import visidata.menu
-import visidata.choose
-import visidata.metasheets
-import visidata.join
-import visidata.aggregators
-import visidata.describe
-import visidata.pivot
-import visidata.freqtbl
-import visidata.melt
-import visidata.cmdlog
-import visidata.freeze
-import visidata.regex
-import visidata.canvas
-import visidata.canvas_text
-import visidata.graph
-import visidata.motd
-import visidata.transpose
-import visidata.shell
-import visidata.layout
-import visidata.main
-import visidata.help
+from .menu import *
+from .choose import *
+from .metasheets import *
+from .join import *
+from .aggregators import *
+from .describe import *
+from .pivot import *
+from .freqtbl import *
+from .melt import *
+from .cmdlog import *
+from .freeze import *
+from .regex import *
+from .canvas import *
+from .canvas_text import *
+from .graph import *
+from .motd import *
+from .transpose import *
+from .shell import *
+from .layout import *
+from .main import *
+from .help import *
 import visidata.modify
 import visidata.sort
 import visidata.unfurl
@@ -102,51 +102,51 @@ import visidata.incr
 import visidata.customdate
 import visidata.misc
 import visidata.memory
-import visidata.macros
+from .macros import *
 import visidata.macos
 
-import visidata.loaders.csv
-import visidata.loaders.archive
-import visidata.loaders.xlsx
-import visidata.loaders.xlsb
-import visidata.loaders.hdf5
-import visidata.loaders.sqlite
-import visidata.loaders.fixed_width
-import visidata.loaders.postgres
-import visidata.loaders.mysql
-import visidata.loaders.shp
-import visidata.loaders.geojson
-import visidata.loaders.mbtiles
-import visidata.loaders.http
-import visidata.loaders.html
-import visidata.loaders.markdown
-import visidata.loaders.pcap
-import visidata.loaders.png
-import visidata.loaders.ttf
-import visidata.loaders.sas
-import visidata.loaders.spss
-import visidata.loaders.xml
-import visidata.loaders.yaml
-import visidata.loaders._pandas
-import visidata.loaders.graphviz
-import visidata.loaders.npy
-import visidata.loaders.usv
-import visidata.loaders.frictionless
-import visidata.loaders.imap
+from .loaders.csv import *
+from .loaders.archive import *
+from .loaders.xlsx import *
+from .loaders.xlsb import *
+from .loaders.hdf5 import *
+from .loaders.sqlite import *
+from .loaders.fixed_width import *
+from .loaders.postgres import *
+from .loaders.mysql import *
+from .loaders.shp import *
+from .loaders.geojson import *
+from .loaders.mbtiles import *
+from .loaders.http import *
+from .loaders.html import *
+from .loaders.markdown import *
+from .loaders.pcap import *
+from .loaders.png import *
+from .loaders.ttf import *
+from .loaders.sas import *
+from .loaders.spss import *
+from .loaders.xml import *
+from .loaders.yaml import *
+from .loaders._pandas import *
+from .loaders.graphviz import *
+from .loaders.npy import *
+from .loaders.usv import *
+from .loaders.frictionless import *
+from .loaders.imap import *
 
-import visidata.loaders.pdf
-import visidata.loaders.pandas_freqtbl
-import visidata.loaders.xword
-import visidata.loaders.vcf
-import visidata.loaders.texttables
-import visidata.loaders.rec
-import visidata.loaders.eml
+from .loaders.pdf import *
+from .loaders.pandas_freqtbl import *
+from .loaders.xword import *
+from .loaders.vcf import *
+from .loaders.texttables import *
+from .loaders.rec import *
+from .loaders.eml import *
 import visidata.loaders.vds
 
-import visidata.ddwplay
-import visidata.plugins
+from .ddwplay import *
+from .plugins import *
 
-import visidata.colorsheet
+from .colorsheet import *
 
 try:
     import vdplus
