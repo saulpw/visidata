@@ -330,8 +330,8 @@ Sheet.addCommand('^Y', 'pyobj-row', 'status(type(cursorRow)); vd.push(PyobjSheet
 Sheet.addCommand('z^Y', 'pyobj-cell', 'status(type(cursorValue)); vd.push(PyobjSheet("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), source=cursorValue))', 'open current cell as Python object')
 globalCommand('g^Y', 'pyobj-sheet', 'status(type(sheet)); vd.push(PyobjSheet(sheet.name+"_sheet", source=sheet))', 'open current sheet as Python object')
 
-Sheet.addCommand('(', 'expand-col', 'expand_cols_deep(sheet, [cursorCol], depth=0)', 'expand current column of containers fully')
-Sheet.addCommand('g(', 'expand-cols', 'expand_cols_deep(sheet, visibleCols, depth=0)', 'expand all visible columns of containers fully')
+Sheet.addCommand('(', 'expand-col', 'expand_cols_deep(sheet, [cursorCol], depth=1)', 'expand current column of containers one level')
+Sheet.addCommand('g(', 'expand-cols', 'expand_cols_deep(sheet, visibleCols, depth=1)', 'expand all visible columns of containers one level')
 Sheet.addCommand('z(', 'expand-col-depth', 'expand_cols_deep(sheet, [cursorCol], depth=int(input("expand depth=", value=1)))', 'expand current column of containers to given depth (0=fully)')
 Sheet.addCommand('gz(', 'expand-cols-depth', 'expand_cols_deep(sheet, visibleCols, depth=int(input("expand depth=", value=1)))', 'expand all visible columns of containers to given depth (0=fully)')
 
