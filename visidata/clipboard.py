@@ -8,8 +8,18 @@ import functools
 from visidata import VisiData, vd, asyncthread
 from visidata import Sheet, Path
 
-vd.option('clipboard_copy_cmd', '', 'command to copy stdin to system clipboard', sheettype=None)
-vd.option('clipboard_paste_cmd', '', 'command to get contents of system clipboard', sheettype=None)
+if sys.platform == 'win32':
+    syscopy_cmd_default = 'clip'
+    syspaste_cmd_default = 'clip'
+elif sys.platform == 'darwin':
+    syscopy_cmd_default = 'pbcopy w'
+    syspaste_cmd_default = 'pbpaste'
+else:
+    syscopy_cmd_default = 'xclip -selection clipboard -filter'  # xsel --clipboard --input
+    syspaste_cmd_default = 'xclip -selection clipboard -o'  # xsel --clipboard
+
+vd.option('clipboard_copy_cmd', syscopy_cmd_default, 'command to copy stdin to system clipboard', sheettype=None)
+vd.option('clipboard_paste_cmd', syspaste_cmd_default, 'command to send contents of system clipboard to stdout', sheettype=None)
 
 
 @Sheet.api
@@ -29,43 +39,6 @@ def copyCells(sheet, col, rows):
     vd.status('copied %d %s.%s to clipboard' % (len(rows), sheet.rowtype, col.name))
 
 
-def _detect_command(cmdlist):
-    '''Detect available clipboard util and return cmdline to copy data to the system clipboard.
-    cmddict is list of (platform, progname, argstr).'''
-
-    for cmd, args in cmdlist.get(sys.platform, cmdlist[None]):
-        path = shutil.which(cmd)
-        if path: # see if command exists on system
-            return ' '.join([path, args])
-    return ''
-
-
-def detect_syscopy_cmd(sheet):
-    cmd = sheet.options.clipboard_copy_cmd
-    if not cmd:
-        __copy_commands = {
-            'win32': [('clip', '')],
-            'darwin': [('pbcopy', 'w')],
-            None: [('xclip', '-selection clipboard -filter'),
-                ('xsel', '--clipboard --input')]
-        }
-        cmd = sheet.options.clipboard_copy_cmd = _detect_command(__copy_commands)
-    return cmd
-
-
-def detect_syspaste_cmd():
-    cmd = vd.options.clipboard_paste_cmd
-    if not cmd:
-        __paste_commands = {
-            'win32': [('clip', '')],
-            'darwin': [('pbpaste', '')],
-                None: [('xclip', '-selection clipboard -o'),
-                    ('xsel', '--clipboard')]
-        }
-        cmd = vd.options.clipboard_paste_cmd = _detect_command(__paste_commands)
-    return cmd
-
-
 @Sheet.api
 def syscopyValue(sheet, val):
     # use NTF to generate filename and delete file on context exit
@@ -74,7 +47,7 @@ def syscopyValue(sheet, val):
             fp.write(val)
 
         p = subprocess.Popen(
-            detect_syscopy_cmd(sheet).split(),
+            sheet.options.clipboard_copy_cmd.split(),
             stdin=open(temp.name, 'r', encoding=sheet.options.encoding),
             stdout=subprocess.DEVNULL,
             close_fds=True)
@@ -96,7 +69,6 @@ def syscopyCells_async(sheet, cols, rows, filetype):
     vs.rows = rows or vd.fail('no %s selected' % sheet.rowtype)
     vs.columns = cols
 
-    cmd = detect_syscopy_cmd(sheet)
     vd.status(f'copying {vs.nRows} {vs.rowtype} to system clipboard as {filetype}')
 
     # use NTF to generate filename and delete file on context exit
@@ -112,7 +84,7 @@ def syscopyCells_async(sheet, cols, rows, filetype):
 
 @VisiData.api
 def sysclip_value(vd):
-    cmd = detect_syspaste_cmd()
+    cmd = vd.options.clipboard_paste_cmd
     return subprocess.check_output(vd.options.clipboard_paste_cmd.split()).decode('utf-8')
 
 

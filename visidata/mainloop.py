@@ -316,6 +316,7 @@ def wrapper(f, *args, **kwargs):
         curses.endwin()
 
 
+@VisiData.global_api
 def run(*sheetlist):
     'Main entry point; launches vdtui with the given sheets already pushed (last one is visible)'
 
