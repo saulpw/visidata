@@ -6,7 +6,7 @@ import importlib
 import os
 
 import visidata
-from visidata import VisiData, BaseSheet, vd
+from visidata import VisiData, BaseSheet, vd, AttrDict
 
 
 # [settingname] -> { objname(Sheet-instance/Sheet-type/'global'/'default'): Option/Command/longname }
@@ -326,7 +326,7 @@ def loadConfigFile(vd, fnrc, _globals=None):
         return
     p = visidata.Path(fnrc)
     if _globals is None:
-        _globals = globals()
+        _globals = vd.getGlobals()
     if p.exists():
         try:
             with open(p) as fd:
@@ -350,7 +350,7 @@ def addOptions(parser):
 
 
 @VisiData.api
-def loadConfigAndPlugins(vd, args):
+def loadConfigAndPlugins(vd, args=AttrDict()):
     # set visidata_dir and config manually before loading config file, so visidata_dir can be set from cli or from $VD_DIR
     vd.options.visidata_dir = args.visidata_dir if args.visidata_dir is not None else os.getenv('VD_DIR', '') or vd.options.visidata_dir
     vd.options.config = args.config if args.config is not None else os.getenv('VD_CONFIG', '') or vd.options.config
