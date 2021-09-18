@@ -103,7 +103,7 @@ def _intMenuPath(obj, menupath):
             i = [x.title for x in obj.menus].index(i)
         except ValueError:
             vd.warning('no menupath %s' % menupath)
-            return
+            return []
 
     return [i] + _intMenuPath(obj.menus[i], menupath[1:])
 
