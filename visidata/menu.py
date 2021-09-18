@@ -7,9 +7,9 @@ from visidata import *
 vd.option('disp_menu', True, 'show menu on top line when not active', sheettype=None)
 vd.option('disp_menu_keys', True, 'show keystrokes inline in submenus', sheettype=None)
 vd.option('color_menu', 'black on 110 cyan', 'color of menu items in general')
-vd.option('color_menu_active', '223 yellow on black', 'color of active menu submenus/item')
-vd.option('color_menu_spec', '118 green on 234 black', 'color of active menu submenus/item')
-vd.option('color_menu_help', 'black on 110 cyan', 'color of helpbox')
+vd.option('color_menu_active', '223 yellow on black', 'color of active menu items')
+vd.option('color_menu_spec', 'black on 34 green', 'color of sheet-specific menu items')
+vd.option('color_menu_help', 'black italic on 110 cyan', 'color of helpbox')
 
 vd.option('disp_menu_boxchars', '││──┌┐└┘├┤', 'box characters to use for menus')
 vd.option('disp_menu_more', '»', 'command submenu indicator')
@@ -505,7 +505,7 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
         bindattr = colors.color_keystrokes
 
         if any(x.obj not in ['BaseSheet', 'TableSheet'] for x, _ in walkmenu(item)):
-            attr = colors.color_menu_spec
+            bindattr = attr = colors.color_menu_spec
 
         if level < len(sheet.activeMenuItems):
           if j == sheet.activeMenuItems[level]:
@@ -680,8 +680,11 @@ def drawMenu(vd, scr, sheet):
 
     mainbinding = sheet.revbinds.get(cmd.longname, [None])[0]
     if mainbinding:
-        clipdraw(scr, menuy, helpx+2, rsl+vd.prettykeys(mainbinding or '(unbound)')+lsr, colors.color_keystrokes)
-    clipdraw(scr, menuy, helpx+14, ' '+cmd.longname+' ', helpattr)
+        clipdraw(scr, menuy, helpx+2, rsl, helpattr)
+        ks = vd.prettykeys(mainbinding or '(unbound)')
+        clipdraw(scr, menuy, helpx+3, ' '+ks+' ', colors.color_menu_active)
+        clipdraw(scr, menuy, helpx+2+len(ks)+3, lsr, helpattr)
+    clipdraw(scr, menuy, helpx+19, ' '+cmd.longname+' ', helpattr)
 
 
 @BaseSheet.api
