@@ -362,7 +362,8 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
     for modname in (args.imports or vd.options.imports or '').split():
         try:
             vd.addGlobals(importlib.import_module(modname).__dict__)
-        except ModuleNotFoundError:
+        except Exception as e:
+            vd.exceptionCaught(e)
             continue
 
     # user customisations in config file in standard location
