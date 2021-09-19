@@ -1,5 +1,72 @@
 # VisiData version history
 
+# 2.6 (XXXX-XX-XX)
+
+## Major features
+
+- [menu] new hierarchical menu system with `Ctrl+H`
+    - add `options.disp_menu` to allow the menu to be shown even when not active
+    - shows commands for active sheet, coloured if special to sheet type
+    - `Alt+F`, `Alt+E`, etc to open submenus (`Alt+` underlined capital letter in submenu)
+    - right arrow expands submenu item
+    - `q` or `Esc` to exit menu
+    - manpage is now `gCtrl+H`
+    - add `options.disp_menu_fmt` for upper right status
+
+## Additions and Improvements
+
+- [config] loadConfigAndPlugins without argparsing
+- [expand-col] only expand to one level
+- [help] overhaul of helpstr (thanks @stuartellis)
+- [join] rename join-sheets on IndexSheet to join-selected; make g& and & both join-selected
+- [join] fail if no key columns on any sheet (thanks @geekscrapy #1061)
+- [npy] add `npy_allow_pickle` option (default False)
+- [python] rebind g^X to new import-python
+- [loaders pandas] add error message for unpickling non-dataframes
+- [loaders xlsx] change rowdef to list of AttrDict (thanks @hoclun-rigsep #1088)
+- [macos] add bindings for Option+key to Alt+key
+- [modified] limit use of sheet protection (thanks @geekscrapy #1037)
+- [slide] remove slide row/col on mouse release 
+
+## Performance and Progress Improvements
+
+- [draw] early return for activeSheet; speedup draw with many sheets
+- [index] bulk reload sheets itself async
+- [go-next/go-prev] make commands async, with progress bars (thanks @geekscrapy #1063)
+- [join] use dict-lookup for getColBySheet instead of linear search
+- [join] ensure sheets are loaded before joining; show rows/cols incrementally
+- [join append] better progress meter
+- [progress] monkeypatch fp.read/close to better manage progresses
+
+## Bugfixes
+
+- [cli] issue warning if +sheet-position not found (thanks @geekscrapy #1046)
+- [clipboard] do not copy newline for syscopy-cell (thanks @geekscrapy #1064)
+- [column] detect existing column by row key instead of column name (thanks @geekscrapy #1058)
+- [column] only clean name after sheet set
+- [color] do not cache color for unfound colors
+- [color] set `color_current_row` to the same precedence as `color_current_column` (thanks @frosenrantz #1100)
+- [command] do not fail/abort on unknown command
+- [curses] add default `vd.tstp_signal` for non-cli uses
+- [draw] Sort indicator on top of More indicator (thanks @geekscrapy #1071)
+- [join] fix multiple extend (thanks @cwarden)
+- [join] allow extended columns to be modified (thanks @cwarden)
+- [join] fix for rowdefs without bool (like pandas)
+- [loaders dirsheet] continue after exception in copyfile
+- [loaders fixed] fix fixed-format saver
+- [loaders fixed] save uses `global options.encoding` (thanks @geekscrapy #1060)
+- [loaders mysql] do not stop loading on first error (thanks @SuRaMoN #1085)
+- [loaders pandas] fix column rename
+- [loaders sqlite] save based on column names, not position
+- [loaders sqlite] allow changing value of cells that were NULL (thanks @mattenklicker #1052)
+- [multisave] fix breaking typo
+- [open_txt] load new blank sheet for 0 byte files (thanks @geekscrapy #1047)
+- [save] do not set a default for `options.save_filetype` (thanks @frosencrantz #1072)
+- [split-pane mouse] activate pane on click (thanks @frosencrantz #954)
+- [unfurl] handle unfurling exceptions (Close #1053)
+- [quitguard] confirm quit when set on a specific sheet even if not precious or modified
+- [yaml] Fix yaml loader traces on no attribute `_colnames` (thanks @frosencrantz #1104)
+
 # v2.5 (2021-07-08)
 
 - [social] #visidata has moved off of freenode to libera.chat
