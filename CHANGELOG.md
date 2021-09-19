@@ -8,7 +8,7 @@
     - add `options.disp_menu` to allow the menu to be shown even when not active
     - shows commands for active sheet, coloured if special to sheet type
     - `Alt+F`, `Alt+E`, etc to open submenus (`Alt+` underlined capital letter in submenu)
-    - right arrow expands submenu item
+    - ENTER expands submenu item
     - `q` or `Esc` to exit menu
     - manpage is now `gCtrl+H`
     - add `options.disp_menu_fmt` for upper right status
@@ -59,6 +59,7 @@
 - [loaders pandas] fix column rename
 - [loaders sqlite] save based on column names, not position
 - [loaders sqlite] allow changing value of cells that were NULL (thanks @mattenklicker #1052)
+- [loaders sqlite] add message on not currently supporting WITHOUT ROWID (thanks @stephancb #1111)
 - [multisave] fix breaking typo
 - [open_txt] load new blank sheet for 0 byte files (thanks @geekscrapy #1047)
 - [save] do not set a default for `options.save_filetype` (thanks @frosencrantz #1072)
@@ -66,6 +67,7 @@
 - [unfurl] handle unfurling exceptions (Close #1053)
 - [quitguard] confirm quit when set on a specific sheet even if not precious or modified
 - [yaml] Fix yaml loader traces on no attribute `_colnames` (thanks @frosencrantz #1104)
+- [visidatarc] catch all visidatarc exceptions upon load
 
 # v2.5 (2021-07-08)
 
