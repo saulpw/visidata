@@ -138,6 +138,8 @@ def load_tsv(fn):
     vs = open_tsv(Path(fn))
     yield from vs.iterload()
 
+# NOTE: you cannot use deprecated() with nonfuncs
+
 cancelThread = deprecated('2.6', 'vd.cancelThread')(vd.cancelThread)
 status = deprecated('2.6', 'vd.status')(vd.status)
 warning = deprecated('2.6', 'vd.warning')(vd.warning)
@@ -146,6 +148,7 @@ debug = deprecated('2.6', 'vd.debug')(vd.debug)
 fail = deprecated('2.6', 'vd.fail')(vd.fail)
 
 option = theme = vd.option # deprecated('2.6', 'vd.option')(vd.option)
+jointypes = vd.jointypes # deprecated('2.6', 'vd.jointypes')(vd.jointypes)
 confirm = deprecated('2.6', 'vd.confirm')(vd.confirm)
 launchExternalEditor = deprecated('2.6', 'vd.launchExternalEditor')(vd.launchExternalEditor)
 launchEditor = deprecated('2.6', 'vd.launchEditor')(vd.launchEditor)
