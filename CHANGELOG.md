@@ -1,53 +1,45 @@
 # VisiData version history
 
-# 2.6 (XXXX-XX-XX)
+# 2.6 (2021-09-19)
 
-## Major features
+## Major feature
 
-- [menu] new hierarchical menu system with `Ctrl+H`
-    - add `options.disp_menu` to allow the menu to be shown even when not active
-    - shows commands for active sheet, coloured if special to sheet type
-    - `Alt+F`, `Alt+E`, etc to open submenus (`Alt+` underlined capital letter in submenu)
-    - ENTER expands submenu item
+- [menu] new hierarchical menu system
+    - `Alt+F`, `Alt+E`, etc to open submenus (`Alt+` underlined capital letter in toplevel menu)
+    - `Ctrl+H` to activate Help menu (manpage now at `gCtrl+H`)
     - `q` or `Esc` to exit menu
-    - manpage is now `gCtrl+H`
-    - add `options.disp_menu_fmt` for upper right status
+    - Enter to expand submenu item or execute command
+    - or left mouse click to activate and navigate menu
+    - only show commands available on current sheet
+    - sheet-specific commands highlighted with `options.color_menu_spec`
+    - new options:
+      - `disp_menu`: display menu if inactive (default True).  Can still activate menu with Ctrl+H/Alt+F
+      - `disp_menu_keys`: whether to display shortcuts inline (default True)
+      - `disp_menu_fmt`: upper right display on menu bar (like `disp_status_fmt`/`disp_rstatus_fmt`)
+      - theme colors: `color_menu` `color_menu_active` `color_menu_spec` `color_menu_help`
+      - theme chars: `disp_menu_boxchars` `disp_menu_more` `disp_menu_push` `disp_menu_input` `disp_menu_fmt`
 
-## Additions and Improvements
+## Interface changes
 
-- [config] loadConfigAndPlugins without argparsing
 - [expand-col] only expand to one level
-- [help] overhaul of helpstr (thanks @stuartellis)
-- [join] rename join-sheets on IndexSheet to join-selected; make g& and & both join-selected
-- [join] fail if no key columns on any sheet (thanks @geekscrapy #1061)
-- [npy] add `npy_allow_pickle` option (default False)
-- [python] rebind g^X to new import-python
-- [loaders pandas] add error message for unpickling non-dataframes
-- [loaders xlsx] change rowdef to list of AttrDict (thanks @hoclun-rigsep #1088)
+- [slide] remove slide row/col with mouse
 - [macos] add bindings for Option+key to Alt+key
 - [modified] limit use of sheet protection (thanks @geekscrapy #1037)
-- [slide] remove slide row/col on mouse release 
-
-## Performance and Progress Improvements
-
-- [draw] early return for activeSheet; speedup draw with many sheets
-- [index] bulk reload sheets itself async
-- [go-next/go-prev] make commands async, with progress bars (thanks @geekscrapy #1063)
-- [join] use dict-lookup for getColBySheet instead of linear search
-- [join] ensure sheets are loaded before joining; show rows/cols incrementally
-- [join append] better progress meter
-- [progress] monkeypatch fp.read/close to better manage progresses
+- [python] rebind g^X to new import-python command (what exec-python was mostly used for)
+- [npy] add `npy_allow_pickle` option (default False)
+- [join] rename join-sheets on IndexSheet to join-selected; bind both g& and & to join-selected
+- [loaders pandas] add error message for unpickling non-dataframes
+- [join] fail if no key columns on any sheet (thanks @geekscrapy #1061)
+- [loaders xlsx] enable access to cell metadata (thanks @hoclun-rigsep #1088)
+- many performance, progress bar, and UI responsiveness improvements
 
 ## Bugfixes
 
 - [cli] issue warning if +sheet-position not found (thanks @geekscrapy #1046)
 - [clipboard] do not copy newline for syscopy-cell (thanks @geekscrapy #1064)
 - [column] detect existing column by row key instead of column name (thanks @geekscrapy #1058)
-- [column] only clean name after sheet set
-- [color] do not cache color for unfound colors
 - [color] set `color_current_row` to the same precedence as `color_current_column` (thanks @frosenrantz #1100)
 - [command] do not fail/abort on unknown command
-- [curses] add default `vd.tstp_signal` for non-cli uses
 - [draw] Sort indicator on top of More indicator (thanks @geekscrapy #1071)
 - [join] fix multiple extend (thanks @cwarden)
 - [join] allow extended columns to be modified (thanks @cwarden)
@@ -64,7 +56,7 @@
 - [open_txt] load new blank sheet for 0 byte files (thanks @geekscrapy #1047)
 - [save] do not set a default for `options.save_filetype` (thanks @frosencrantz #1072)
 - [split-pane mouse] activate pane on click (thanks @frosencrantz #954)
-- [unfurl] handle unfurling exceptions (Close #1053)
+- [unfurl] handle unfurling exceptions (close #1053)
 - [quitguard] confirm quit when set on a specific sheet even if not precious or modified
 - [yaml] Fix yaml loader traces on no attribute `_colnames` (thanks @frosencrantz #1104)
 - [visidatarc] catch all visidatarc exceptions upon load
