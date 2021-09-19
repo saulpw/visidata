@@ -53,7 +53,10 @@ class SqliteSheet(Sheet):
                     if colkey:
                         self.setKeys([c])
 
-            r = self.execute(conn, 'SELECT rowid, * FROM "%s"' % tblname)
+            try:
+                r = self.execute(conn, 'SELECT rowid, * FROM "%s"' % tblname)
+            except sqlite3.OperationalError:
+                vd.error('tables WITHOUT ROWID not supported')
             yield from Progress(r, total=r.rowcount-1)
 
     @asyncthread
