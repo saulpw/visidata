@@ -1,12 +1,12 @@
 import collections
 
-from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENTER, asyncthread, option, Sheet, IndexSheet
+from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENTER, asyncthread, Sheet, IndexSheet
 from visidata import CellColorizer, RowColorizer, JsonLinesSheet, AttrDict
 from visidata import ColumnAttr, ColumnItem
 from visidata import TsvSheet, Path, Option
 from visidata import undoAttrFunc, VisiData, vlen
 
-option('visibility', 0, 'visibility level (0=low, 1=high)')
+vd.option('visibility', 0, 'visibility level (0=low, 1=high)')
 
 vd_system_sep = '\t'
 
@@ -155,7 +155,7 @@ class LastInputsSheet(JsonLinesSheet):
         return list(vd._lastInputs[t].keys())
 
 
-@VisiData.cached_property
+@VisiData.lazy_property
 def lastInputsSheet(vd):
     name = options.input_history
     if not name:
@@ -272,3 +272,11 @@ OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)', 'edit opti
 OptionsSheet.bindkey('e', 'edit-option')
 OptionsSheet.bindkey(ENTER, 'edit-option')
 MetaSheet.class_options.header = 0
+
+
+vd.addGlobals({
+    'ColumnsSheet': ColumnsSheet,
+    'MetaSheet': MetaSheet,
+    'OptionsSheet': OptionsSheet,
+    'VisiDataMetaSheet': VisiDataMetaSheet,
+})

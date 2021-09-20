@@ -79,14 +79,14 @@ must come before ``@classmethod``.
 
 This acts just like the ``@property`` decorator, if it were defined inline to the class.
 
-.. autofunction:: visidata.Extensible.cached_property
+.. autofunction:: visidata.Extensible.lazy_property
 
 This works like ``@property``, except it only computes the value on first access, and then caches it for every subsequent usage.
 
 .. note::
 
     Because of how Python instantiates classes, extensions monkey-patched into a class are not also added to already-instantiated objects.
-    So global sheets defined by a plugin should be added to the VisiData object with ``cached_property``.
+    So global sheets defined by a plugin should be added to the VisiData object as a ``@VisiData.lazy_property``.
     This way, they are not created until their first use, which allows them to take advantage of Sheet extensions that were loaded after the plugin.
 
 
@@ -123,13 +123,26 @@ If *copy* is ``True``, then a copy is made of the member for the new instance.
 
 .. autofunction:: visidata.vd.global_api
 
-When a function is defined in a .py module in visidata, it is available as a global function in that module.
+All features (and plugins) should expose functions and classes to plugins in one of these ways:
 
-VisiData does an effective ``from X import *`` for each plugin and modular feature, so that its package (or global) scope gets all of the exposed symbols.  See :ref:`getGlobals() and addGlobals() <other-commands>`.
+1. with `@VisiData.api` (or @Sheet.api): for most methods
 
-Everything in a .py module is exported automatically, unless there is an ``__all__`` with a list of the names of the functions that should be exported, and it will export only those.
+These can be used in an execstr as though they were global (attributes on `vd` and `sheet` are both implicitly in scope in an execstr).
 
-Each VisiData feature and plugin should include an ``__all__``, either empty or with an explicit list of function names to be available to :ref:`commands <commands>` and `Expressions <>`__.
+Outside of an execstr, use `vd.funcname(...)` (or `sheet.funcname(...)`).
+
+Note that classes can be annotated with `@VisiData.api` also.
+
+2. with `addGlobals({"funcname": funcname})`: for classes and methods internal to VisiData
+
+These can be used via direct import:
+
+`from visidata import SomeInternalClass`
+`from plugins.myplugin import HelperClass`
+
+This is acceptable for commonly-used classes.
+
+See :ref:`getGlobals() and addGlobals() <other-commands>`.
 
 What to extend: ``Sheet``, ``Column``, ``VisiData``, or globals?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

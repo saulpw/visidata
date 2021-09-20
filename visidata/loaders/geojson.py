@@ -4,7 +4,8 @@ import json
 from visidata import *
 
 
-def open_geojson(p):
+@VisiData.api
+def open_geojson(vd, p):
     return GeoJSONSheet(p.name, source=p)
 
 def getter_factory(prop):
@@ -33,6 +34,7 @@ class GeoJSONSheet(PythonSheet):
 
             for feature in Progress(features):
                 for prop in feature.get('properties', {}).keys():
+                    prop = self.maybeClean(prop)
                     if prop not in self.colnames:
                         c = Column(name=prop, getter=getter_factory(prop))
                         self.colnames[prop] = c

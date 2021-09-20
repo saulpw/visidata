@@ -1,3 +1,5 @@
+import functools
+
 from visidata import VisiData, vd
 import visidata
 
@@ -5,6 +7,7 @@ alias = visidata.BaseSheet.bindkey
 
 def deprecated(ver, instead=''):
     def decorator(func):
+        @functools.wraps(func)
         def wrapper(*args, **kwargs):
             import traceback
 
@@ -115,8 +118,40 @@ alias('dive-cell', 'open-cell')
 alias('dive-row', 'open-row')
 alias('add-sheet', 'open-new')
 alias('save-sheets-selected', 'save-selected')
+alias('join-sheets', 'join-selected')
 
 # v2.3
 alias('show-aggregate', 'memo-aggregate')
 #theme('use_default_colors', True, 'curses use default terminal colors')
 #option('expand_col_scanrows', 1000, 'number of rows to check when expanding columns (0 = all)')
+
+# 2.6
+
+clean_name = visidata.cleanName
+
+def maybe_clean(s, vs):
+    if (vs or visidata.vd).options.clean_names:
+        s = visidata.cleanName(s)
+    return s
+
+def load_tsv(fn):
+    vs = open_tsv(Path(fn))
+    yield from vs.iterload()
+
+# NOTE: you cannot use deprecated() with nonfuncs
+
+cancelThread = deprecated('2.6', 'vd.cancelThread')(vd.cancelThread)
+status = deprecated('2.6', 'vd.status')(vd.status)
+warning = deprecated('2.6', 'vd.warning')(vd.warning)
+error = deprecated('2.6', 'vd.error')(vd.error)
+debug = deprecated('2.6', 'vd.debug')(vd.debug)
+fail = deprecated('2.6', 'vd.fail')(vd.fail)
+
+option = theme = vd.option # deprecated('2.6', 'vd.option')(vd.option)
+jointypes = vd.jointypes # deprecated('2.6', 'vd.jointypes')(vd.jointypes)
+confirm = deprecated('2.6', 'vd.confirm')(vd.confirm)
+launchExternalEditor = deprecated('2.6', 'vd.launchExternalEditor')(vd.launchExternalEditor)
+launchEditor = deprecated('2.6', 'vd.launchEditor')(vd.launchEditor)
+exceptionCaught = deprecated('2.6', 'vd.exceptionCaught')(vd.exceptionCaught)
+openSource = deprecated('2.6', 'vd.openSource')(vd.openSource)
+globalCommand = visidata.BaseSheet.addCommand

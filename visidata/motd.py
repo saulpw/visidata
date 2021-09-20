@@ -10,18 +10,21 @@ options.motd_url may be set to another URL, or empty to disable entirely.
 
 import random
 
-from visidata import option, options, asyncsingle, urlcache, vd
-from visidata import __version__
+from visidata import options, asyncsingle, urlcache, vd, VisiData
 
-option('motd_url', 'https://visidata.org/motd-'+__version__, 'source of randomized startup messages', sheettype=None)
+vd.option('motd_url', 'https://visidata.org/motd-'+vd.version, 'source of randomized startup messages', sheettype=None)
 
 
+vd.motd = ''
+
+@VisiData.api
 @asyncsingle
-def domotd():
+def domotd(vd):
     try:
         if options.motd_url:
             p = urlcache(options.motd_url, days=1)
             line = random.choice(list(p))
-            vd.status(line.split('\t')[0], priority=-1)
+            vd.motd = line.split('\t')[0]
+            vd.status(vd.motd, priority=-1)
     except Exception:
         pass

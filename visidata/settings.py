@@ -6,7 +6,7 @@ import importlib
 import os
 
 import visidata
-from visidata import VisiData, BaseSheet, vd
+from visidata import VisiData, BaseSheet, vd, AttrDict
 
 
 # [settingname] -> { objname(Sheet-instance/Sheet-type/'global'/'default'): Option/Command/longname }
@@ -218,8 +218,8 @@ class OptionsObject:
 
     def getall(self, prefix=''):
         'Return dictionary of all options beginning with `prefix` (with `prefix` removed from the name).'
-        return { optname[len(prefix):] : options[optname]
-                    for optname in options.keys()
+        return { optname[len(prefix):] : vd.options[optname]
+                    for optname in vd.options.keys()
                         if optname.startswith(prefix) }
 
     def __getattr__(self, optname):      # options.foo
@@ -245,10 +245,9 @@ vd.bindkeys = SettingsMgr()
 vd._options = SettingsMgr()
 
 vd.options = vd.OptionsObject(vd._options)  # global option settings
-options = vd.options  # legacy
 
 
-@VisiData.global_api
+@VisiData.api
 def option(vd, name, default, helpstr, replay=False, sheettype=BaseSheet):
     '''Declare a new option.
 
@@ -258,7 +257,7 @@ def option(vd, name, default, helpstr, replay=False, sheettype=BaseSheet):
    - `replay`: ``True`` if changes to the option should be stored in the **Command Log**
    - `sheettype`: ``None`` if the option is not sheet-specific, to make it global on CLI
     '''
-    opt = options.setdefault(name, default, helpstr)
+    opt = vd.options.setdefault(name, default, helpstr)
     opt.replayable = replay
     opt.sheettype=sheettype
     return opt
@@ -276,7 +275,7 @@ def addCommand(cls, keystrokes, longname, execstr, helpstr='', **kwargs):
     '''
     vd.commands.set(longname, Command(longname, execstr, helpstr=helpstr, **kwargs), cls)
     if keystrokes:
-        vd.bindkeys.set(keystrokes, longname, cls)
+        vd.bindkeys.set(vd.prettykeys(keystrokes), longname, cls)
 
 def _command(cls, binding, longname, helpstr, **kwargs):
     def decorator(func):
@@ -291,7 +290,7 @@ globalCommand = BaseSheet.addCommand
 @VisiData.api
 def bindkey(vd, keystrokes, longname):
     'Bind *keystrokes* to *longname* on BaseSheet and unbind more-specific bindings of keystrokes.'
-    vd.bindkeys[keystrokes] = {'BaseSheet': longname}
+    vd.bindkeys[vd.prettykeys(keystrokes)] = {'BaseSheet': longname}
 
 @BaseSheet.class_api
 @classmethod
@@ -300,14 +299,14 @@ def bindkey(cls, keystrokes, longname):
     oldlongname = vd.bindkeys._get(keystrokes, cls)
     if oldlongname:
         vd.warning('%s was already bound to %s' % (keystrokes, oldlongname))
-    vd.bindkeys.set(keystrokes, longname, cls)
+    vd.bindkeys.set(vd.prettykeys(keystrokes), longname, cls)
 
 @BaseSheet.class_api
 @classmethod
 def unbindkey(cls, keystrokes):
     '''Unbind `keystrokes` on a `<SheetType>`.
     May be necessary to avoid a warning when overriding a binding on the same exact class.'''
-    vd.bindkeys.unset(keystrokes, cls)
+    vd.bindkeys.unset(vd.prettykeys(keystrokes), cls)
 
 @BaseSheet.api
 def getCommand(sheet, cmd):
@@ -319,10 +318,7 @@ def getCommand(sheet, cmd):
     while vd.bindkeys._get(longname, obj=sheet):
         longname = vd.bindkeys._get(longname, obj=sheet)
 
-    if not longname:
-        vd.fail('no binding for %s' % cmd)
-
-    return vd.commands._get(longname, obj=sheet) or vd.warning('no command "%s"' % longname)
+    return vd.commands._get(longname, obj=sheet)
 
 @VisiData.api
 def loadConfigFile(vd, fnrc, _globals=None):
@@ -330,7 +326,7 @@ def loadConfigFile(vd, fnrc, _globals=None):
         return
     p = visidata.Path(fnrc)
     if _globals is None:
-        _globals = globals()
+        _globals = vd.getGlobals()
     if p.exists():
         try:
             with open(p) as fd:
@@ -343,7 +339,7 @@ def loadConfigFile(vd, fnrc, _globals=None):
 
 
 def addOptions(parser):
-    for optname in options.keys('default'):
+    for optname in vd.options.keys('default'):
         if optname.startswith('color_') or optname.startswith('disp_'):
             continue
         action = 'store_true' if options[optname] is False else 'store'
@@ -354,24 +350,33 @@ def addOptions(parser):
 
 
 @VisiData.api
-def loadConfigAndPlugins(vd, args):
+def loadConfigAndPlugins(vd, args=AttrDict()):
     # set visidata_dir and config manually before loading config file, so visidata_dir can be set from cli or from $VD_DIR
-    options.visidata_dir = args.visidata_dir if args.visidata_dir is not None else os.getenv('VD_DIR', '') or options.visidata_dir
-    options.config = args.config if args.config is not None else os.getenv('VD_CONFIG', '') or options.config
+    vd.options.visidata_dir = args.visidata_dir if args.visidata_dir is not None else os.getenv('VD_DIR', '') or vd.options.visidata_dir
+    vd.options.config = args.config if args.config is not None else os.getenv('VD_CONFIG', '') or vd.options.config
 
-    sys.path.append(str(visidata.Path(options.visidata_dir)))
-    sys.path.append(str(visidata.Path(options.visidata_dir)/"plugins-deps"))
+    sys.path.append(str(visidata.Path(vd.options.visidata_dir)))
+    sys.path.append(str(visidata.Path(vd.options.visidata_dir)/"plugins-deps"))
 
     # import plugins from .visidata/plugins before .visidatarc, so plugin options can be overridden
-    for modname in (args.imports or options.imports or '').split():
+    for modname in (args.imports or vd.options.imports or '').split():
         try:
             vd.addGlobals(importlib.import_module(modname).__dict__)
-        except ModuleNotFoundError:
+        except Exception as e:
+            vd.exceptionCaught(e)
             continue
 
     # user customisations in config file in standard location
-    vd.loadConfigFile(options.config, vd.getGlobals())
+    vd.loadConfigFile(vd.options.config, vd.getGlobals())
 
+
+vd.option('visidata_dir', '~/.visidata/', 'directory to load and store additional files', sheettype=None)
 
 BaseSheet.bindkey('^M', '^J')  # for windows ENTER
 BaseSheet.addCommand('gO', 'open-config', 'vd.push(open_txt(Path(options.config)))', 'open options.config as text sheet')
+
+vd.addGlobals({
+    'options': vd.options,  # legacy
+    'globalCommand': BaseSheet.addCommand,
+    'Option': Option,
+})

@@ -6,7 +6,7 @@ import threading
 import re
 import time
 
-from visidata import option, options, anytype, stacktrace, vd
+from visidata import options, anytype, stacktrace, vd
 from visidata import asyncthread, dispwidth
 from visidata import wrapply, TypedWrapper, TypedExceptionWrapper
 from visidata import Extensible, AttrDict, undoAttrFunc
@@ -18,13 +18,11 @@ class InProgress(Exception):
 
 INPROGRESS = TypedExceptionWrapper(None, exception=InProgress())  # sentinel
 
-option('col_cache_size', 0, 'max number of cache entries in each cached column')
-option('clean_names', False, 'clean column/sheet names to be valid Python identifiers', replay=True)
+vd.option('col_cache_size', 0, 'max number of cache entries in each cached column')
+vd.option('clean_names', False, 'clean column/sheet names to be valid Python identifiers', replay=True)
 
 __all__ = [
     'clean_to_id',
-    'clean_name',
-    'maybe_clean',
     'Column',
     'setitem',
     'getattrdeep',
@@ -55,16 +53,6 @@ class DisplayWrapper:
     def __eq__(self, other):
         return self.value == other
 
-
-def maybe_clean(s, vs):
-    if (vs or vd).options.clean_names:
-        s = clean_name(s)
-    return s
-
-def clean_name(s):
-    s = re.sub(r'[^\w\d_]', '_', s)  # replace non-alphanum chars with _
-    s = re.sub(r'_+', '_', s)  # replace runs of _ with a single _
-    return s
 
 def clean_to_id(s):  # [Nas Banov] https://stackoverflow.com/a/3305731
     return re.sub(r'\W|^(?=\d)', '_', str(s)).strip('_')
@@ -161,7 +149,10 @@ class Column(Extensible):
         else:
             name = str(name)
 
-        self._name = maybe_clean(name, self.sheet)
+        if self.sheet:
+            name = self.sheet.maybeClean(name)
+
+        self._name = name
 
     @property
     def typestr(self):

@@ -2,7 +2,8 @@ from copy import copy
 
 from visidata import Sheet, TsvSheet, options, vd, VisiData
 
-def open_usv(p):
+@VisiData.api
+def open_usv(vd, p):
     vs = TsvSheet(p.name, source=p)
     vs.options.delimiter = '\u241e'
     vs.options.row_delimiter = '\u241f'

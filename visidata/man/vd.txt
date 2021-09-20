@@ -37,11 +37,13 @@ DESCRIPTION
       ^C              cancel user input or abort all async threads on current
                       sheet
      g^C              abort all secondary threads
-       q              quit current sheet
+       q              quit current sheet or menu
        Q              quit current sheet and free associated memory
       gq              quit all sheets (clean exit)
 
-      ^H              view this man page
+      ^H              activate help menu (Enter/left-mouse to expand submenu
+                      or execute command)
+     g^H              view this man page
      z^H              view sheet of command longnames and keybindings
      Space longname   execute command by its longname
 
@@ -144,7 +146,7 @@ DESCRIPTION
                       replacing regex with subst (may include \1 backrefs)
 
       (   g(          expand current/all visible column(s) of lists (e.g. [3])
-                      or dicts (e.g. {3}) fully
+                      or dicts (e.g. {3}) one level
      z(  gz( depth    expand current/all visible column(s) of lists (e.g. [3])
                       or dicts (e.g. {3}) to given depth (0= fully)
       )               unexpand current column; restore original column and re‐
@@ -314,7 +316,7 @@ DESCRIPTION
       ^V              show version and copyright information on status line
       ^P              open Status History
      m keystroke      first, begin recording macro; second, prompt for
-                      keystroke No, and complete recording. Macro can then be
+                      keystroke , and complete recording. Macro can then be
                       executed everytime provided keystroke is used. Will
                       override existing keybinding. Macros will run on current
                       row, column, sheet.
@@ -325,7 +327,7 @@ DESCRIPTION
       ^X expr         evaluate Python expr and opens result as Python object
      z^X expr         evaluate Python expr, in context of current row, and
                       open result as Python object
-     g^X stmt         execute Python stmt in the global scope
+     g^X module       import Python module in the global scope
 
    Internal Sheets List
       .  VisiDataMenu (Shift+V)      browse list of core sheets
@@ -544,6 +546,8 @@ COMMANDLINE OPTIONS
                                   filetype instead of file extension
      -y, --confirm-overwrite=F    True               overwrite existing files
                                   without confirmation
+     --visidata-dir=str           ~/.visidata/       directory to load and
+                                                     store additional files
      --mouse-interval=int         1                  max time between
                                                      press/release for click
                                                      (ms)
@@ -561,7 +565,7 @@ COMMANDLINE OPTIONS
      --textwrap-cells=bool        True               wordwrap text for multi‐
                                                      line rows
      --quitguard                  False              confirm before quitting
-                                                     last sheet
+                                                     modified sheet
      --debug                      False              exit on error and display
                                                      stacktrace
      --skip=int                   0                  skip N rows before header
@@ -588,19 +592,19 @@ COMMANDLINE OPTIONS
                                                      values
      --wrap                       False              wrap text to fit window
                                                      width on TextSheet
-     --save-filetype=str          tsv                specify default file type
+     --save-filetype=str                             specify default file type
                                                      to save as
      --profile                    False              enable profiling on
                                                      threads
      --min-memory-mb=int          0                  minimum memory to con‐
                                                      tinue loading and async
                                                      processing
-     --input-history=str                             basename of file to store
-                                                     persistent input history
      --encoding=str               utf-8              encoding passed to
                                                      codecs.open
      --encoding-errors=str        surrogateescape    encoding_errors passed to
                                                      codecs.open
+     --input-history=str                             basename of file to store
+                                                     persistent input history
      --bulk-select-clear          False              clear selected rows be‐
                                                      fore new bulk selections
      --some-selected-rows         False              if no rows selected, if
@@ -632,10 +636,13 @@ COMMANDLINE OPTIONS
                                                      save
      --safe-error=str             #ERR               error string to use while
                                                      saving
-     --clipboard-copy-cmd=str                        command to copy stdin to
+     --clipboard-copy-cmd=str     xclip -selection clipboard -filter
+                                                     command to copy stdin to
                                                      system clipboard
-     --clipboard-paste-cmd=str                       command to get contents
-                                                     of system clipboard
+     --clipboard-paste-cmd=str    xclip -selection clipboard -o
+                                                     command to send contents
+                                                     of system clipboard to
+                                                     stdout
      --fancy-chooser              False              a nicer selection inter‐
                                                      face for aggregators and
                                                      jointype
@@ -651,8 +658,6 @@ COMMANDLINE OPTIONS
                                                      onds
      --replay-movement            False              insert movements during
                                                      replay
-     --visidata-dir=str           ~/.visidata/       directory to load and
-                                                     store additional files
      --rowkey-prefix=str          キ                 string prefix for rowkey
                                                      in the cmdlog
      --cmdlog-histfile=str                           file to autorecord each
@@ -806,20 +811,41 @@ COMMANDLINE OPTIONS
      disp_lstatus_max    0                   maximum length of left status
                                              line
      disp_status_sep      |                  separator between statuses
-     color_keystrokes    white               color of input keystrokes on sta‐
+     color_keystrokes    bold 233 black on 110 cyan
+                                             color of input keystrokes on sta‐
                                              tus line
-     color_status        bold                status line color
+     color_status        bold black on 110 cyan
+                                             status line color
      color_error         red                 error message color
      color_warning       yellow              warning message color
      color_top_status    underline           top window status bar color
-     color_active_status bold                 active window status bar color
-     color_inactive_status 8                 inactive window status bar color
+     color_active_status black on 110 cyan    active window status bar color
+     color_inactive_status 8 on black        inactive window status bar color
      color_working       green               color of system running smoothly
      color_edit_cell     white               cell color to use when editing
                                              cell
      disp_edit_fill      _                   edit field fill character
      disp_unprintable    ·                   substitute character for unprint‐
                                              ables
+     disp_menu           True                show menu on top line when not
+                                             active
+     disp_menu_keys      True                show keystrokes inline in sub‐
+                                             menus
+     color_menu          black on 110 cyan   color of menu items in general
+     color_menu_active   223 yellow on black
+                                             color of active menu items
+     color_menu_spec     black on 34 green   color of sheet-specific menu
+                                             items
+     color_menu_help     black italic on 110 cyan
+                                             color of helpbox
+     disp_menu_boxchars  ││──┌┐└┘├┤          box characters to use for menus
+     disp_menu_more      »                   command submenu indicator
+     disp_menu_push      ⎘                   indicator if command pushes sheet
+                                             onto sheet stack
+     disp_menu_input     …                   indicator if input required for
+                                             command
+     disp_menu_fmt       Ctrl+H for help menu
+                                             right-side menu format string
      disp_histogram      *                   histogram element character
      disp_histolen       50                  width of histogram column
      disp_replay_play    ▶                   status indicator for active re‐
@@ -903,7 +929,7 @@ FILES
             L = sorted(values)
             return L[len(L)//2]
 
-        aggregator('median', median)
+        vd.aggregator('median', median)
 
      Functions defined in .visidatarc are available in python expressions
      (e.g. in derived columns).
@@ -948,4 +974,4 @@ SUPPORTED SOURCES
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                      June 30, 2021                     Linux/MacOS
+Linux/MacOS                   September 19, 2021                   Linux/MacOS

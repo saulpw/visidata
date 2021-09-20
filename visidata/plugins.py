@@ -6,7 +6,7 @@ import importlib
 from visidata import *
 
 
-option('plugins_url', 'https://visidata.org/plugins/plugins.jsonl', 'source of plugins sheet')
+vd.option('plugins_url', 'https://visidata.org/plugins/plugins.jsonl', 'source of plugins sheet')
 
 
 @VisiData.lazy_property
@@ -55,6 +55,23 @@ def _pluginColorizer(s,c,r,v):
     if ver != r.latest_ver: return 'color_warning'
     return 'color_working'
 
+
+@VisiData.api
+def pipinstall(vd, deps):
+    'Install *deps*, a list of pypi modules to install via pip into the plugins-deps directory. Return True if successful (no error).'
+    p = subprocess.Popen([sys.executable, '-m', 'pip', 'install',
+                        '--target', str(Path(options.visidata_dir)/"plugins-deps"),
+                      ] + deps,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+    out, err = p.communicate()
+    vd.status(out.decode())
+    if err:
+        vd.warning(err.decode())
+        return False
+    return True
+
+
 class PluginsSheet(JsonLinesSheet):
     rowtype = "plugins"  # rowdef: AttrDict of json dict
     colorizers = [
@@ -92,7 +109,7 @@ class PluginsSheet(JsonLinesSheet):
         overwrite = True
         if outpath.exists():
             try:
-                confirm("plugin path already exists, overwrite? ")
+                vd.confirm("plugin path already exists, overwrite? ")
             except ExpectedException:
                 overwrite = False
                 if _plugin_in_import_list(plugin):
@@ -124,15 +141,8 @@ class PluginsSheet(JsonLinesSheet):
                     outfp.write(contents)
 
         if plugin.pydeps:
-            p = subprocess.Popen([sys.executable, '-m', 'pip', 'install',
-                                '--target', str(Path(options.visidata_dir)/"plugins-deps"),
-                              ]+plugin.pydeps.split(),
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE)
-            out, err = p.communicate()
-            vd.status(out.decode())
-            if err:
-                vd.warning(err.decode())
+            vd.pipinstall(plugin.pydeps.split())
+
         vd.status('%s plugin installed' % plugin.name)
 
         if _plugin_in_import_list(plugin):
@@ -176,7 +186,8 @@ class PluginsSheet(JsonLinesSheet):
         except FileNotFoundError:
             vd.warning("no plugins/__init__.py found")
 
-globalCommand(None, 'open-plugins', 'vd.push(vd.pluginsSheet)', 'open Plugins Sheet: manage your session environment for a curated set of plugins')
 
-PluginsSheet.addCommand('a', 'add-plugin', 'installPlugin(cursorRow)', 'install and activate current plugin')
-PluginsSheet.addCommand('d', 'delete-plugin', 'removePluginIfExists(cursorRow)', 'deactivate current plugin')
+BaseSheet.addCommand(None, 'open-plugins', 'vd.push(vd.pluginsSheet)', 'Open Plugins Sheet to manage supported plugins')
+
+PluginsSheet.addCommand('a', 'add-plugin', 'installPlugin(cursorRow)', 'Install and enable current plugin')
+PluginsSheet.addCommand('d', 'delete-plugin', 'removePluginIfExists(cursorRow)', 'Disable current plugin')

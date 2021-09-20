@@ -1,4 +1,4 @@
-from visidata import Path, RepeatFile, options, vd
+from visidata import Path, RepeatFile, options, vd, VisiData
 
 content_filetypes = {
     'tab-separated-values': 'tsv'
@@ -7,7 +7,8 @@ content_filetypes = {
 vd.option('http_max_next', 0, 'max next.url pages to follow in http response') #848
 
 
-def openurl_http(path, filetype=None):
+@VisiData.api
+def openurl_http(vd, path, filetype=None):
     schemes = path.scheme.split('+')
     if len(schemes) > 1:
         sch = schemes[0]
@@ -66,4 +67,4 @@ def openurl_http(path, filetype=None):
 
     return vd.openSource(path, filetype=filetype)
 
-openurl_https = openurl_http
+VisiData.openurl_https = VisiData.openurl_http

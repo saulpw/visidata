@@ -1,6 +1,6 @@
 'VisiData: a curses interface for exploring and arranging tabular data'
 
-__version__ = '2.5'
+__version__ = '2.6'
 __version_info__ = 'VisiData v' + __version__
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __status__ = 'Production/Stable'
@@ -29,10 +29,14 @@ from .utils import *
 
 from .extensible import *
 from .vdobj import *
-
 vd = VisiData()
+
+vd.version = __version__
+
 vd.addGlobals = addGlobals
 vd.getGlobals = getGlobals
+
+import visidata.keys
 
 from .basesheet import *
 from .settings import *
@@ -47,17 +51,17 @@ from .undo import *
 from ._types import *
 from .column import *
 
-theme = option  # convert theme(...) to option(...) and move this down, eventually into deprecated.py
-
 from .sheets import *
+
 from .statusbar import *
 
 from .textsheet import *
 from .threads import *
+from .path import *
 from ._input import *
 from .movement import *
-from .path import *
-from .urlcache import *
+
+from ._urlcache import *
 from .selection import *
 from .loaders.tsv import *
 from .pyobj import *
@@ -69,6 +73,7 @@ from .slide import *
 from .search import *
 from .expr import *
 
+from .menu import *
 from .choose import *
 from .metasheets import *
 from .join import *
@@ -98,7 +103,7 @@ import visidata.customdate
 import visidata.misc
 import visidata.memory
 from .macros import *
-from .menu import *
+import visidata.macos
 
 from .loaders.csv import *
 from .loaders.archive import *
@@ -136,21 +141,22 @@ from .loaders.vcf import *
 from .loaders.texttables import *
 from .loaders.rec import *
 from .loaders.eml import *
-from .loaders.vds import *
+import visidata.loaders.vds
 
 from .ddwplay import *
-
 from .plugins import *
 
 from .colorsheet import *
-
-from .deprecated import *
 
 try:
     import vdplus
 except ModuleNotFoundError as e:
     pass
 
+from .deprecated import *
+
+
+import math
 from math import *
 
 vd.finalInit()

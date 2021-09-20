@@ -151,3 +151,34 @@ Examples
             # colors cells
             CellColorizer(3, None, lambda s,c,r,v: v.value if r and c in s.columns[1:3] and r.name.startswith('color_') else None)
         ]
+
+Menu System
+===========
+
+Features and plugins can add commands to the hierarchical menu system (new in v2.6).
+
+.. autofunction:: visidata.vd.runMenu
+.. autofunction:: visidata.vd.addMenu
+.. autofunction:: visidata.vd.addMenuItem
+
+.. autoclass:: visidata.Menu
+.. data:: visidata.vd.menus
+
+`vd.menus` contains the hierarchical list all Menu() objects, for exploration.
+
+Examples
+^^^^^^^^
+
+::
+
+    # add a single command to an existing menusubmenu with multiple commands
+    vd.addMenuItem('Column', 'Add column', 'enhance', 'enhance-col')
+
+    # add a submenu with multiple commands
+    vd.addMenu(Menu('Data', Menu('Enhance',
+        Menu('this column', 'enhance-col'),
+        Menu('all columns', 'enhance-cols'),
+    )))
+
+    # activate menu and navigate to Data»Enhance
+    vd.runMenu('Data', 'Enhance')

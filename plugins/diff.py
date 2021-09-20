@@ -1,11 +1,11 @@
 # command setdiff-sheet adds a diff colorizer for all sheets against current sheet
 
-from visidata import theme, globalCommand, Sheet, CellColorizer, vd
+from visidata import Sheet, CellColorizer, vd
 
 __version__ = "0.9"
 
-theme('color_diff', 'red', 'color of values different from --diff source')
-theme('color_diff_add', 'yellow', 'color of rows/columns added to --diff source')
+vd.option('color_diff', 'red', 'color of values different from --diff source')
+vd.option('color_diff_add', 'yellow', 'color of rows/columns added to --diff source')
 
 
 def makeDiffColorizer(othersheet):
@@ -23,9 +23,9 @@ def makeDiffColorizer(othersheet):
     return colorizeDiffs
 
 
+@Sheet.api
 def setDiffSheet(vs):
     Sheet.colorizers.append(CellColorizer(8, None, makeDiffColorizer(vs)))
 
-vd.addGlobals(globals())
 
-globalCommand(None, 'setdiff-sheet', 'setDiffSheet(sheet)', 'set this sheet as diff sheet for all new sheets')
+BaseSheet.addCommand(None, 'setdiff-sheet', 'setDiffSheet()', 'set this sheet as diff sheet for all new sheets')

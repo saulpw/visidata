@@ -1,10 +1,13 @@
+from copy import copy
 from statistics import mode, median, mean, stdev
 
-from visidata import *
+from visidata import vd, Column, ColumnAttr, vlen, RowColorizer, asyncthread, Progress, wrapply
+from visidata import BaseSheet, TableSheet, ColumnsSheet
 
-option('describe_aggrs', 'mean stdev', 'numeric aggregators to calculate on Describe sheet')
+__all__ = ['DescribeSheet']
 
-max_threads = 2
+
+vd.option('describe_aggrs', 'mean stdev', 'numeric aggregators to calculate on Describe sheet')
 
 
 @Column.api
@@ -58,7 +61,7 @@ class DescribeSheet(ColumnsSheet):
 
         self.setKeys(self.columns[:self.nKeys])
 
-        for aggrname in options.describe_aggrs.split():
+        for aggrname in vd.options.describe_aggrs.split():
             self.addColumn(DescribeColumn(aggrname, type=float))
 
         for srccol in Progress(self.rows, 'categorizing'):
@@ -90,7 +93,7 @@ class DescribeSheet(ColumnsSheet):
             if vd.isNumeric(srccol):
                 for func in [min, max, sum, median]:  # use type
                     d[func.__name__] = self.calcStatistic(d, func, vals)
-                for aggrname in options.describe_aggrs.split():
+                for aggrname in vd.options.describe_aggrs.split():
                     func = globals()[aggrname]
                     d[func.__name__] = self.calcStatistic(d, func, vals)
 
@@ -110,8 +113,10 @@ class DescribeSheet(ColumnsSheet):
         vd.warning(val)
 
 
-Sheet.addCommand('I', 'describe-sheet', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet]))', 'open Describe Sheet with descriptive statistics for all visible columns')
-globalCommand('gI', 'describe-all', 'vd.push(DescribeSheet("describe_all", source=vd.stackedSheets))', 'open Describe Sheet with description statistics for all visible columns from all sheets')
+TableSheet.addCommand('I', 'describe-sheet', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet]))', 'open Describe Sheet with descriptive statistics for all visible columns')
+BaseSheet.addCommand('gI', 'describe-all', 'vd.push(DescribeSheet("describe_all", source=vd.stackedSheets))', 'open Describe Sheet with description statistics for all visible columns from all sheets')
 
 DescribeSheet.addCommand('zs', 'select-cell', 'cursorRow.sheet.select(cursorValue)', 'select rows on source sheet which are being described in current cell')
 DescribeSheet.addCommand('zu', 'unselect-cell', 'cursorRow.sheet.unselect(cursorValue)', 'unselect rows on source sheet which are being described in current cell')
+
+vd.addGlobals({'DescribeSheet':DescribeSheet})

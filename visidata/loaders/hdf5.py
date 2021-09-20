@@ -1,9 +1,10 @@
 from visidata import *
 
-def open_h5(p):
+@VisiData.api
+def open_h5(vd, p):
     return Hdf5ObjSheet(p.name, source=p)
 
-open_hdf5 = open_h5
+VisiData.open_hdf5 = VisiData.open_h5
 
 class Hdf5ObjSheet(Sheet):
     'Support sheets in HDF5 format.'

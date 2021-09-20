@@ -3,17 +3,19 @@ import contextlib
 import itertools
 import collections
 
-from visidata import asyncthread, options, Progress, ColumnItem, SequenceSheet, Sheet, FileExistsError, getType, option, VisiData
+from visidata import vd, asyncthread, options, Progress, ColumnItem, SequenceSheet, Sheet, FileExistsError, getType, VisiData
 from visidata import namedlist, filesize
 
-option('delimiter', '\t', 'field delimiter to use for tsv/usv filetype', replay=True)
-option('row_delimiter', '\n', 'row delimiter to use for tsv/usv filetype', replay=True)
-option('tsv_safe_newline', '\u001e', 'replacement for newline character when saving to tsv', replay=True)
-option('tsv_safe_tab', '\u001f', 'replacement for tab character when saving to tsv', replay=True)
+vd.option('delimiter', '\t', 'field delimiter to use for tsv/usv filetype', replay=True)
+vd.option('row_delimiter', '\n', 'row delimiter to use for tsv/usv filetype', replay=True)
+vd.option('tsv_safe_newline', '\u001e', 'replacement for newline character when saving to tsv', replay=True)
+vd.option('tsv_safe_tab', '\u001f', 'replacement for tab character when saving to tsv', replay=True)
 
 
-def open_tsv(p):
+@VisiData.api
+def open_tsv(vd, p):
     return TsvSheet(p.name, source=p)
+
 
 def splitter(fp, delim='\n'):
     'Generates one line/row/record at a time from fp, separated by delim'
@@ -51,11 +53,6 @@ class TsvSheet(SequenceSheet):
                     yield row
 
 
-def load_tsv(fn):
-    vs = open_tsv(Path(fn))
-    yield from vs.iterload()
-
-
 @VisiData.api
 def save_tsv(vd, p, vs):
     'Write sheet to file `fn` as TSV.'
@@ -74,6 +71,7 @@ def save_tsv(vd, p, vs):
     vd.status('%s save finished' % p)
 
 
+@Sheet.api
 def append_tsv_row(vs, row):
     'Append `row` to vs.source, creating file with correct headers if necessary. For internal use only.'
     if not vs.source.exists():
@@ -93,3 +91,8 @@ def append_tsv_row(vs, row):
 
     with vs.source.open_text(mode='a', encoding=vs.options.encoding) as fp:
         fp.write('\t'.join(col.getDisplayValue(row) for col in vs.visibleCols) + '\n')
+
+
+vd.addGlobals({
+    'TsvSheet': TsvSheet,
+})

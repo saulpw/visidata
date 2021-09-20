@@ -71,9 +71,9 @@ class VdsSheet(Sheet):
                     classname = 'ItemColumn'
                     d['expr'] = d['name']
 
-                c = globals()[classname](d.pop('name'))
-                self.colnames[c.name] = c
+                c = globals()[classname](d.pop('name'), sheet=self)
                 self.addColumn(c)
+                self.colnames[c.name] = c
                 for k, v in d.items():
                     setattr(c, k, v)
 

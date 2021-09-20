@@ -1,5 +1,66 @@
 # VisiData version history
 
+# 2.6 (2021-09-19)
+
+## Major feature
+
+- [menu] new hierarchical menu system
+    - `Alt+F`, `Alt+E`, etc to open submenus (`Alt+` underlined capital letter in toplevel menu)
+    - `Ctrl+H` to activate Help menu (manpage now at `gCtrl+H`)
+    - `q` or `Esc` to exit menu
+    - Enter to expand submenu item or execute command
+    - or left mouse click to activate and navigate menu
+    - only show commands available on current sheet
+    - sheet-specific commands highlighted with `options.color_menu_spec`
+    - new options:
+      - `disp_menu`: display menu if inactive (default True).  Can still activate menu with Ctrl+H/Alt+F
+      - `disp_menu_keys`: whether to display shortcuts inline (default True)
+      - `disp_menu_fmt`: upper right display on menu bar (like `disp_status_fmt`/`disp_rstatus_fmt`)
+      - theme colors: `color_menu` `color_menu_active` `color_menu_spec` `color_menu_help`
+      - theme chars: `disp_menu_boxchars` `disp_menu_more` `disp_menu_push` `disp_menu_input` `disp_menu_fmt`
+
+## Interface changes
+
+- [expand-col] only expand to one level
+- [slide] remove slide row/col with mouse
+- [macos] add bindings for Option+key to Alt+key
+- [modified] limit use of sheet protection (thanks @geekscrapy #1037)
+- [python] rebind g^X to new import-python command (what exec-python was mostly used for)
+- [npy] add `npy_allow_pickle` option (default False)
+- [join] rename join-sheets on IndexSheet to join-selected; bind both g& and & to join-selected
+- [loaders pandas] add error message for unpickling non-dataframes
+- [join] fail if no key columns on any sheet (thanks @geekscrapy #1061)
+- [loaders xlsx] enable access to cell metadata (thanks @hoclun-rigsep #1088)
+- many performance, progress bar, and UI responsiveness improvements
+
+## Bugfixes
+
+- [cli] issue warning if +sheet-position not found (thanks @geekscrapy #1046)
+- [clipboard] do not copy newline for syscopy-cell (thanks @geekscrapy #1064)
+- [column] detect existing column by row key instead of column name (thanks @geekscrapy #1058)
+- [color] set `color_current_row` to the same precedence as `color_current_column` (thanks @frosenrantz #1100)
+- [command] do not fail/abort on unknown command
+- [draw] Sort indicator on top of More indicator (thanks @geekscrapy #1071)
+- [join] fix multiple extend (thanks @cwarden)
+- [join] allow extended columns to be modified (thanks @cwarden)
+- [join] fix for rowdefs without bool (like pandas)
+- [loaders dirsheet] continue after exception in copyfile
+- [loaders fixed] fix fixed-format saver
+- [loaders fixed] save uses `global options.encoding` (thanks @geekscrapy #1060)
+- [loaders mysql] do not stop loading on first error (thanks @SuRaMoN #1085)
+- [loaders pandas] fix column rename
+- [loaders sqlite] save based on column names, not position
+- [loaders sqlite] allow changing value of cells that were NULL (thanks @mattenklicker #1052)
+- [loaders sqlite] add message on not currently supporting WITHOUT ROWID (thanks @stephancb #1111)
+- [multisave] fix breaking typo
+- [open_txt] load new blank sheet for 0 byte files (thanks @geekscrapy #1047)
+- [save] do not set a default for `options.save_filetype` (thanks @frosencrantz #1072)
+- [split-pane mouse] activate pane on click (thanks @frosencrantz #954)
+- [unfurl] handle unfurling exceptions (close #1053)
+- [quitguard] confirm quit when set on a specific sheet even if not precious or modified
+- [yaml] Fix yaml loader traces on no attribute `_colnames` (thanks @frosencrantz #1104)
+- [visidatarc] catch all visidatarc exceptions upon load
+
 # v2.5 (2021-07-08)
 
 - [social] #visidata has moved off of freenode to libera.chat

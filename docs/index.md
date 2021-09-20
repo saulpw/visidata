@@ -1,4 +1,8 @@
-# VisiData Documentation
+---
+eleventyNavigation:
+    key: Getting Started
+    order: 1
+---
 
 ## Getting started
 
@@ -76,4 +80,3 @@
     * How to configure commands
 * [Plugins - extending VisiData functionality](/docs/plugins)
 * [STDOUT pipe/redirect](/docs/pipes)
-* [guide to contributing](/contributing)

@@ -6,10 +6,12 @@ SASTypes = {
     'number': float,
 }
 
-def open_xpt(p):
+@VisiData.api
+def open_xpt(vd, p):
     return XptSheet(p.name, source=p)
 
-def open_sas7bdat(p):
+@VisiData.api
+def open_sas7bdat(vd, p):
     return SasSheet(p.name, source=p)
 
 class XptSheet(Sheet):

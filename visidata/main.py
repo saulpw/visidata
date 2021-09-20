@@ -2,7 +2,7 @@
 # Usage: $0 [<options>] [<input> ...]
 #        $0 [<options>] --play <cmdlog> [--batch] [-w <waitsecs>] [-o <output>] [field=value ...]
 
-__version__ = '2.5'
+__version__ = '2.6'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
 from copy import copy
@@ -14,18 +14,18 @@ import datetime
 import signal
 import warnings
 
-from visidata import vd, option, options, run, BaseSheet, AttrDict
-from visidata import Path, saveSheets, domotd
+from visidata import vd, options, run, BaseSheet, AttrDict
+from visidata import Path
 import visidata
 
 vd.version_info = __version_info__
 
-option('config', '~/.visidatarc', 'config file to exec in Python', sheettype=None)
-option('play', '', 'file.vd to replay')
-option('batch', False, 'replay in batch mode (with no interface and all status sent to stdout)')
-option('output', None, 'save the final visible sheet to output at the end of replay')
-option('preplay', '', 'longnames to preplay before replay')
-option('imports', 'plugins', 'imports to preload before .visidatarc (command-line only)')
+vd.option('config', '~/.visidatarc', 'config file to exec in Python', sheettype=None)
+vd.option('play', '', 'file.vd to replay')
+vd.option('batch', False, 'replay in batch mode (with no interface and all status sent to stdout)')
+vd.option('output', None, 'save the final visible sheet to output at the end of replay')
+vd.option('preplay', '', 'longnames to preplay before replay')
+vd.option('imports', 'plugins', 'imports to preload before .visidatarc (command-line only)')
 
 # for --play
 def eval_vd(logpath, *args, **kwargs):
@@ -198,7 +198,7 @@ def main_vd():
 
     # fetch motd and plugins *after* options parsing/setting
     vd.pluginsSheet.ensureLoaded()
-    domotd()
+    vd.domotd()
 
     if args.batch:
         options.undo = False
@@ -256,13 +256,17 @@ def main_vd():
             else:
                 startsheet = startsheets[0] or sources[-1]
                 vs = vd.getSheet(startsheet)
+                if not vs:
+                    vd.warning(f'no sheet "{startsheet}"')
+                    continue
+
                 vd.sync(vs.ensureLoaded())
                 vd.clearCaches()
                 for startsheet in startsheets[1:]:
                     rowidx = vs.getRowIndexFromStr(options.rowkey_prefix + startsheet)
                     if rowidx is None:
+                        vd.warning(f'{vs.name} has no subsheet "{startsheet}"')
                         vs = None
-                        vd.warning(f'no sheet "{startsheet}"')
                         break
                     vs = vs.rows[rowidx]
                     vd.sync(vs.ensureLoaded())
@@ -302,7 +306,7 @@ def main_vd():
 
     if vd.stackedSheets and (flPipedOutput or args.output):
         outpath = Path(args.output or '-')
-        saveSheets(outpath, vd.activeSheet, confirm_overwrite=False)
+        vd.saveSheets(outpath, vd.activeSheet, confirm_overwrite=False)
 
     saver_threads = [t for t in vd.unfinishedThreads if t.name.startswith('save_')]
     if saver_threads:

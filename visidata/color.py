@@ -40,6 +40,7 @@ def update_attr(oldattr, updattr, updprec=None):
 class ColorMaker:
     def __init__(self):
         self.color_pairs = {}  # (fg,bg) -> (color_attr, colornamestr) (can be or'ed with other attrs)
+        self.color_cache = {}  # colorname -> colorpair
 
     @drawcache_property
     def colorcache(self):
@@ -48,7 +49,7 @@ class ColorMaker:
     def setup(self):
         curses.use_default_colors()
 
-    @VisiData.cached_property
+    @drawcache_property
     def colors(self):
         'not computed until curses color has been initialized'
         return {x[6:]:getattr(curses, x) for x in dir(curses) if x.startswith('COLOR_') and x != 'COLOR_PAIRS'}
@@ -94,10 +95,13 @@ class ColorMaker:
 
         return fgbgattrs
 
-    @functools.lru_cache(None)
     def _get_colornum(self, colorname, default=-1):
         'Return terminal color number for colorname.'
         if not colorname: return default
+        r = self.color_cache.get(colorname, None)
+        if r is not None:
+            return r
+
         try:
             r = int(colorname)
         except Exception:
@@ -108,6 +112,7 @@ class ColorMaker:
 
         try: # test to see if color is available
             curses.init_pair(255, r, 0)
+            self.color_cache[colorname] = r
             return r
         except curses.error as e:
             return None  # not available
@@ -128,7 +133,7 @@ class ColorMaker:
             if pairnum is None:
                 if len(self.color_pairs) > 254:
                     self.color_pairs.clear()  # start over
-                    self._get_colornum.cache_clear()
+                    self.color_cache.clear()
                 pairnum = len(self.color_pairs)+1
                 try:
                     curses.init_pair(pairnum, *fgbg)

@@ -1,7 +1,11 @@
-- Update: 2018-01-28
-- Version: VisiData 1.0
+---
+eleventyNavigation:
+    key: Contributing Tests
+    order: 99
+Update: 2018-01-28
+Version: VisiData 1.0
+---
 
-# Contributing tests
 
 The `tests` folder contains functional tests in the form of `.vd` scripts, each of which records a session of VisiData commands.  These ensure that data processing works consistently and reliably.
 

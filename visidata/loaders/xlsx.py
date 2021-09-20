@@ -1,10 +1,12 @@
 from visidata import *
 
 
-def open_xls(p):
+@VisiData.api
+def open_xls(vd, p):
     return XlsIndexSheet(p.name, source=p)
 
-def open_xlsx(p):
+@VisiData.api
+def open_xlsx(vd, p):
     return XlsxIndexSheet(p.name, source=p)
 
 class XlsxIndexSheet(IndexSheet):
@@ -28,10 +30,30 @@ class XlsxIndexSheet(IndexSheet):
 
 
 class XlsxSheet(SequenceSheet):
+    # rowdef: AttrDict of column_letter to cell
+    def setCols(self, headerrows):
+        self.columns = []
+        self._rowtype = AttrDict
+
+        if not headerrows:
+            return
+
+        headers = [[x.value for x in row.values()] for row in headerrows]
+        column_letters = [x.column_letter for x in headerrows[0].values()]
+
+        for i, colnamelines in enumerate(itertools.zip_longest(*headers, fillvalue='')):
+            colnamelines = ['' if c is None else c for c in colnamelines]
+            self.addColumn(AttrColumn(''.join(map(str, colnamelines)), column_letters[i] +'.value'))
+
+    def addRow(self, row, index=None):
+        Sheet.addRow(self, row, index=index)  # skip SequenceSheet
+        for column_letter, v in list(row.items())[len(self.columns):len(row)]:  # no-op if already done
+            self.addColumn(AttrColumn('', column_letter+'.value'))
+
     def iterload(self):
         worksheet = self.source
         for row in Progress(worksheet.iter_rows(), total=worksheet.max_row or 0):
-            yield list(wrapply(getattr, cell, 'value') for cell in row)
+            yield AttrDict({cell.column_letter:cell for cell in row})
 
 
 class XlsIndexSheet(IndexSheet):
@@ -57,9 +79,10 @@ class XlsSheet(SequenceSheet):
         for rownum in Progress(range(worksheet.nrows)):
             yield list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols))
 
+
 def xls_name(name):
     # sheet name can not be longer than 31 characters
-    xname = clean_name(name)[:31]
+    xname = cleanName(name)[:31]
     if xname != name:
         vd.warning(f'{name} saved as {xname}')
     return xname

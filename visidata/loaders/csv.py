@@ -2,19 +2,20 @@
 from visidata import *
 import csv
 
-option('csv_dialect', 'excel', 'dialect passed to csv.reader', replay=True)
-option('csv_delimiter', ',', 'delimiter passed to csv.reader', replay=True)
-option('csv_quotechar', '"', 'quotechar passed to csv.reader', replay=True)
-option('csv_skipinitialspace', True, 'skipinitialspace passed to csv.reader', replay=True)
-option('csv_escapechar', None, 'escapechar passed to csv.reader', replay=True)
-option('csv_lineterminator', '\r\n', 'lineterminator passed to csv.writer', replay=True)
-option('safety_first', False, 'sanitize input/output to handle edge cases, with a performance cost', replay=True)
+vd.option('csv_dialect', 'excel', 'dialect passed to csv.reader', replay=True)
+vd.option('csv_delimiter', ',', 'delimiter passed to csv.reader', replay=True)
+vd.option('csv_quotechar', '"', 'quotechar passed to csv.reader', replay=True)
+vd.option('csv_skipinitialspace', True, 'skipinitialspace passed to csv.reader', replay=True)
+vd.option('csv_escapechar', None, 'escapechar passed to csv.reader', replay=True)
+vd.option('csv_lineterminator', '\r\n', 'lineterminator passed to csv.writer', replay=True)
+vd.option('safety_first', False, 'sanitize input/output to handle edge cases, with a performance cost', replay=True)
 
 csv.field_size_limit(2**31-1) # Windows has max 32-bit
 
 options_num_first_rows = 10
 
-def open_csv(p):
+@VisiData.api
+def open_csv(vd, p):
     return CsvSheet(p.name, source=p)
 
 def removeNulls(fp):

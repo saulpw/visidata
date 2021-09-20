@@ -4,16 +4,19 @@ import zipfile
 
 from visidata import *
 
-def open_zip(p):
-    return ZipSheet(p.name, source=p)
+@VisiData.api
+def open_zip(vd, p):
+    return vd.ZipSheet(p.name, source=p)
 
-def open_tar(p):
+@VisiData.api
+def open_tar(vd, p):
     return TarSheet(p.name, source=p)
 
-open_tgz = open_tar
-open_txz = open_tar
-open_tbz2 = open_tar
+VisiData.open_tgz = VisiData.open_tar
+VisiData.open_txz = VisiData.open_tar
+VisiData.open_tbz2 = VisiData.open_tar
 
+@VisiData.api
 class ZipSheet(Sheet):
     'Wrapper for `zipfile` library.'
     rowtype = 'files' # rowdef ZipInfo
@@ -81,7 +84,14 @@ class TarSheet(Sheet):
                 yield ti
 
 
-ZipSheet.addCommand('x', 'extract-file', 'extract(cursorRow)')
-ZipSheet.addCommand('gx', 'extract-selected', 'extract(*onlySelectedRows)')
-ZipSheet.addCommand('zx', 'extract-file-to', 'extract(cursorRow, path=inputPath("extract to: "))')
-ZipSheet.addCommand('gzx', 'extract-selected-to', 'extract(*onlySelectedRows, path=inputPath("extract %d files to: " % nSelectedRows))')
+ZipSheet.addCommand('x', 'extract-file', 'extract(cursorRow)', 'extract current file to current directory')
+ZipSheet.addCommand('gx', 'extract-selected', 'extract(*onlySelectedRows)', 'extract selected files to current directory')
+ZipSheet.addCommand('zx', 'extract-file-to', 'extract(cursorRow, path=inputPath("extract to: "))', 'extract current file to given pathname')
+ZipSheet.addCommand('gzx', 'extract-selected-to', 'extract(*onlySelectedRows, path=inputPath("extract %d files to: " % nSelectedRows))', 'extract selected files to given directory')
+
+vd.addMenu(Menu('File', Menu('Extract',
+        Menu('current file', 'extract-file'),
+        Menu('current file to', 'extract-file-to'),
+        Menu('selected files', 'extract-selected'),
+        Menu('selected files to', 'extract-selected-to'),
+    )))

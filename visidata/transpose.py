@@ -1,6 +1,7 @@
-from visidata import *
+from visidata import VisiData, Sheet, asyncthread, Progress, Column
 
 # rowdef: Column
+@VisiData.api
 class TransposeSheet(Sheet):
     @asyncthread
     def reload(self):

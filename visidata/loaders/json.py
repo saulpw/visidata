@@ -4,33 +4,29 @@ from collections import OrderedDict
 from visidata import *
 
 
-option('json_indent', None, 'indent to use when saving json')
-option('json_sort_keys', False, 'sort object keys when saving to json')
-option('default_colname', '', 'column name to use for non-dict rows')
+vd.option('json_indent', None, 'indent to use when saving json')
+vd.option('json_sort_keys', False, 'sort object keys when saving to json')
+vd.option('default_colname', '', 'column name to use for non-dict rows')
 
-
-def open_jsonobj(p):
+@VisiData.api
+def open_jsonobj(vd, p):
     return JsonSheet(p.name, source=p)
 
-def open_jsonl(p):
+@VisiData.api
+def open_jsonl(vd, p):
     return JsonSheet(p.name, source=p)
 
-open_ndjson = open_ldjson = open_json = open_jsonl
+VisiData.open_ndjson = VisiData.open_ldjson = VisiData.open_json = VisiData.open_jsonl
 
 
 class JsonSheet(PythonSheet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._colnames = {}  # [colname] -> Column
-
-    def addColumn(self, *cols, index=None):
-        super().addColumn(*cols, index=index)
-        self._colnames.update({col.name: col for col in cols })
-        return cols[0]
+        self._knownKeys = set()  # set of row keys already seen
 
     def iterload(self):
         self.columns = []
-        self._colnames.clear()
+        self._knownKeys.clear()
         for c in type(self).columns:
             self.addColumn(deepcopy(c))
 
@@ -70,61 +66,47 @@ class JsonSheet(PythonSheet):
         super().addRow(row, index=index)
 
         for k in row:
-            if k not in self._colnames:
+            if k not in self._knownKeys:
                 self.addColumn(ColumnItem(k, type=deduceType(row[k])))
+                self._knownKeys.add(k)
         return row
 
     def newRow(self):
         return {}
 
-JsonLinesSheet=JsonSheet
 
 ## saving json and jsonl
 
-class Cell:
-    def __init__(self, col, row):
-        self.col = col
-        self.row = row
-
-    @property
-    def value(cell):
-        o = wrapply(cell.col.getTypedValue, cell.row)
-        if isinstance(o, TypedExceptionWrapper):
-            return options.safe_error or str(o.exception)
-        elif isinstance(o, TypedWrapper):
-            return o.val
-        elif isinstance(o, date):
-            return cell.col.getDisplayValue(cell.row)
-        return o
-
-
 class _vjsonEncoder(json.JSONEncoder):
-    def __init__(self, **kwargs):
-        super().__init__(sort_keys=options.json_sort_keys, **kwargs)
-        self.safe_error = options.safe_error
-
     def default(self, obj):
-        return obj.value if isinstance(obj, Cell) else str(obj)
+        return str(obj)
 
 
 def _rowdict(cols, row):
     ret = {}
-    for c in cols:
-        cell = Cell(c, row)
-        if cell.value is not None:
-            ret[c.name] = cell
+    for col in cols:
+        o = wrapply(col.getTypedValue, row)
+        if isinstance(o, TypedExceptionWrapper):
+            o = col.sheet.options.safe_error or str(o.exception)
+        elif isinstance(o, TypedWrapper):
+            o = o.val
+        elif isinstance(o, date):
+            o = col.getDisplayValue(row)
+        if o is not None:
+            ret[col.name] = o
     return ret
 
 
 @VisiData.api
 def save_json(vd, p, *vsheets):
-    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
+    vs = vsheets[0]
+    with p.open_text(mode='w', encoding=vs.options.encoding) as fp:
         try:
-            indent = int(options.json_indent)
+            indent = int(vs.options.json_indent)
         except Exception:
-            indent = options.json_indent
+            indent = vs.options.json_indent
 
-        jsonenc = _vjsonEncoder(indent=indent)
+        jsonenc = _vjsonEncoder(indent=indent, sort_keys=vs.options.json_sort_keys)
 
         if len(vsheets) == 1:
             fp.write('[\n')
@@ -159,3 +141,8 @@ def save_jsonl(vd, p, *vsheets):
 JsonSheet.class_options.encoding = 'utf-8'
 VisiData.save_ndjson = VisiData.save_jsonl
 VisiData.save_ldjson = VisiData.save_jsonl
+
+vd.addGlobals({
+    'JsonSheet': JsonSheet,
+    'JsonLinesSheet': JsonSheet,
+})

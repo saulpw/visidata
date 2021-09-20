@@ -2,12 +2,13 @@ import math
 import collections
 
 from visidata import *
+from visidata.pivot import PivotSheet
 
 
-theme('disp_histogram', '*', 'histogram element character')
-option('disp_histolen', 50, 'width of histogram column')
-option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
-option('numeric_binning', False, 'bin numeric columns into ranges', replay=True)
+vd.option('disp_histogram', '*', 'histogram element character')
+vd.option('disp_histolen', 50, 'width of histogram column')
+vd.option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
+vd.option('numeric_binning', False, 'bin numeric columns into ranges', replay=True)
 
 
 def valueNames(discrete_vals, numeric_vals):
@@ -87,6 +88,12 @@ Sheet.addCommand('gF', 'freq-keys', 'vd.push(FreqTableSheet(sheet, *keyCols))', 
 Sheet.addCommand('zF', 'freq-summary', 'vd.push(FreqTableSheetSummary(sheet, Column("Total", sheet=sheet, getter=lambda col, row: "Total")))', 'open one-line summary for all rows and selected rows')
 
 ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(FreqTableSheet(source[0], cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row')
+vd.addMenuItem('Data', 'Frequency table', 'current row', 'freq-row')
 
 FreqTableSheet.addCommand('gu', 'unselect-rows', 'unselect(selectedRows)', 'unselect all source rows grouped in current row')
 FreqTableSheet.addCommand('g'+ENTER, 'dive-rows', 'vs = copy(source); vs.name += "_several"; vs.rows=list(itertools.chain.from_iterable(row.sourcerows for row in selectedRows)); vd.push(vs)', 'open copy of source sheet with rows that are grouped in selected rows')
+
+vd.addGlobals({
+    'FreqTableSheet': FreqTableSheet,
+    'FreqTableSheetSummary': FreqTableSheetSummary,
+})

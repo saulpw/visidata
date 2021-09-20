@@ -1,10 +1,11 @@
 'Full terminal interface for TaskWarrior (task).'
 
 import tasklib
+from visidata import vd, launchExternalEditorValue, Sheet, ColumnItem, date, vlen, CellColorizer, Column, run
 from visidata import *
 
-options.disp_date_fmt = '%Y-%m-%d %H:%M'
-theme('color_task_changed', 'reverse yellow', 'color when vtask is changed')
+vd.options.disp_date_fmt = '%Y-%m-%d %H:%M'
+vd.option('color_task_changed', 'reverse yellow', 'color when vtask is changed')
 
 
 def editTask(task):

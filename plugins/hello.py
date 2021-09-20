@@ -4,11 +4,11 @@ Hello world minimal plugin.  Press F2 to show options.hello_world on the status 
 .visidatarc: `import plugins.hello`
 '''
 
-__author__ = 'Mike Smith <msmith@example.com>'
+__author__ = 'Paul Swanson <paulsw@example.com>'
 __version__ = '1.0'
 
-from visidata import option, globalCommand
+from visidata import vd, BaseSheet
 
-option('hello_world', '¡Hola mundo!', 'shown by the hello-world command')
+vd.option('hello_world', '¡Hola mundo!', 'shown by the hello-world command')
 
-globalCommand('KEY_F(2)', 'hello-world', 'status(options.hello_world)')
+BaseSheet.addCommand('KEY_F(2)', 'hello-world', 'status(options.hello_world)')

@@ -1,10 +1,10 @@
 import collections
 import itertools
-from copy import copy
+from copy import copy, deepcopy
 import textwrap
 
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException
-from visidata import (options, theme, Column, option, namedlist, SettableColumn,
+from visidata import (options, Column, namedlist, SettableColumn,
 TypedExceptionWrapper, BaseSheet, UNLOADED,
 vd, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
 import visidata
@@ -16,63 +16,63 @@ vd.activePane = 1   # pane numbering starts at 1; pane 0 means active pane
 __all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'TableSheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow', 'SequenceSheet']
 
 
-option('default_width', 20, 'default column width', replay=True)   # TODO: make not replay and remove from markdown saver
-option('default_height', 10, 'default column height')
-option('textwrap_cells', True, 'wordwrap text for multiline rows')
+vd.option('default_width', 20, 'default column width', replay=True)   # TODO: make not replay and remove from markdown saver
+vd.option('default_height', 10, 'default column height')
+vd.option('textwrap_cells', True, 'wordwrap text for multiline rows')
 
-option('quitguard', False, 'confirm before quitting last sheet')
-option('debug', False, 'exit on error and display stacktrace')
-option('skip', 0, 'skip N rows before header', replay=True)
-option('header', 1, 'parse first N rows as column names', replay=True)
-option('load_lazy', False, 'load subsheets always (False) or lazily (True)')
+vd.option('quitguard', False, 'confirm before quitting modified sheet')
+vd.option('debug', False, 'exit on error and display stacktrace')
+vd.option('skip', 0, 'skip N rows before header', replay=True)
+vd.option('header', 1, 'parse first N rows as column names', replay=True)
+vd.option('load_lazy', False, 'load subsheets always (False) or lazily (True)')
 
-theme('force_256_colors', False, 'use 256 colors even if curses reports fewer')
+vd.option('force_256_colors', False, 'use 256 colors even if curses reports fewer')
 
-theme('disp_note_none', '⌀',  'visible contents of a cell whose value is None')
-theme('disp_truncator', '…', 'indicator that the contents are only partially visible')
-theme('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
-theme('disp_more_left', '<', 'header note indicating more columns to the left')
-theme('disp_more_right', '>', 'header note indicating more columns to the right')
-theme('disp_error_val', '', 'displayed contents for computation exception')
-theme('disp_ambig_width', 1, 'width to use for unicode chars marked ambiguous')
+vd.option('disp_note_none', '⌀',  'visible contents of a cell whose value is None')
+vd.option('disp_truncator', '…', 'indicator that the contents are only partially visible')
+vd.option('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
+vd.option('disp_more_left', '<', 'header note indicating more columns to the left')
+vd.option('disp_more_right', '>', 'header note indicating more columns to the right')
+vd.option('disp_error_val', '', 'displayed contents for computation exception')
+vd.option('disp_ambig_width', 1, 'width to use for unicode chars marked ambiguous')
 
-theme('disp_pending', '', 'string to display in pending cells')
-theme('note_pending', '⌛', 'note to display for pending cells')
-theme('note_format_exc', '?', 'cell note for an exception during formatting')
-theme('note_getter_exc', '!', 'cell note for an exception during computation')
-theme('note_type_exc', '!', 'cell note for an exception during type conversion')
+vd.option('disp_pending', '', 'string to display in pending cells')
+vd.option('note_pending', '⌛', 'note to display for pending cells')
+vd.option('note_format_exc', '?', 'cell note for an exception during formatting')
+vd.option('note_getter_exc', '!', 'cell note for an exception during computation')
+vd.option('note_type_exc', '!', 'cell note for an exception during type conversion')
 
-theme('color_note_pending', 'bold magenta', 'color of note in pending cells')
-theme('color_note_type', '226 yellow', 'color of cell note for non-str types in anytype columns')
-theme('color_note_row', '220 yellow', 'color of row note on left edge')
-theme('scroll_incr', 3, 'amount to scroll with scrollwheel')
-theme('disp_column_sep', '|', 'separator between columns')
-theme('disp_keycol_sep', '║', 'separator between key columns and rest of columns')
-theme('disp_rowtop_sep', '|', '') # ╷│┬╽⌜⌐▇
-theme('disp_rowmid_sep', '⁝', '') # ┃┊│█
-theme('disp_rowbot_sep', '⁝', '') # ┊┴╿⌞█⍿╵⎢┴⌊  ⋮⁝
-theme('disp_rowend_sep', '║', '') # ┊┴╿⌞█⍿╵⎢┴⌊
-theme('disp_keytop_sep', '║', '') # ╽╿┃╖╟
-theme('disp_keymid_sep', '║', '') # ╽╿┃
-theme('disp_keybot_sep', '║', '') # ╽╿┃╜‖
-theme('disp_endtop_sep', '║', '') # ╽╿┃╖╢
-theme('disp_endmid_sep', '║', '') # ╽╿┃
-theme('disp_endbot_sep', '║', '') # ╽╿┃╜‖
-theme('disp_selected_note', '•', '') #
-theme('disp_sort_asc', '↑↟⇞⇡⇧⇑', 'characters for ascending sort') # ↑▲↟↥↾↿⇞⇡⇧⇈⤉⤒⥔⥘⥜⥠⍏˄ˆ
-theme('disp_sort_desc', '↓↡⇟⇣⇩⇓', 'characters for descending sort') # ↓▼↡↧⇂⇃⇟⇣⇩⇊⤈⤓⥕⥙⥝⥡⍖˅ˇ
-theme('color_default', 'white on black', 'the default fg and bg colors')
-theme('color_default_hdr', 'bold', 'color of the column headers')
-theme('color_bottom_hdr', 'underline', 'color of the bottom header row')
-theme('color_current_row', 'reverse', 'color of the cursor row')
-theme('color_current_col', 'bold', 'color of the cursor column')
-theme('color_current_hdr', 'bold reverse', 'color of the header for the cursor column')
-theme('color_column_sep', '246 blue', 'color of column separators')
-theme('color_key_col', '81 cyan', 'color of key columns')
-theme('color_hidden_col', '8', 'color of hidden columns on metasheets')
-theme('color_selected_row', '215 yellow', 'color of selected rows')
-option('name_joiner', '_', 'string to join sheet or column names')
-option('value_joiner', ' ', 'string to join display values')
+vd.option('color_note_pending', 'bold magenta', 'color of note in pending cells')
+vd.option('color_note_type', '226 yellow', 'color of cell note for non-str types in anytype columns')
+vd.option('color_note_row', '220 yellow', 'color of row note on left edge')
+vd.option('scroll_incr', 3, 'amount to scroll with scrollwheel')
+vd.option('disp_column_sep', '|', 'separator between columns')
+vd.option('disp_keycol_sep', '║', 'separator between key columns and rest of columns')
+vd.option('disp_rowtop_sep', '|', '') # ╷│┬╽⌜⌐▇
+vd.option('disp_rowmid_sep', '⁝', '') # ┃┊│█
+vd.option('disp_rowbot_sep', '⁝', '') # ┊┴╿⌞█⍿╵⎢┴⌊  ⋮⁝
+vd.option('disp_rowend_sep', '║', '') # ┊┴╿⌞█⍿╵⎢┴⌊
+vd.option('disp_keytop_sep', '║', '') # ╽╿┃╖╟
+vd.option('disp_keymid_sep', '║', '') # ╽╿┃
+vd.option('disp_keybot_sep', '║', '') # ╽╿┃╜‖
+vd.option('disp_endtop_sep', '║', '') # ╽╿┃╖╢
+vd.option('disp_endmid_sep', '║', '') # ╽╿┃
+vd.option('disp_endbot_sep', '║', '') # ╽╿┃╜‖
+vd.option('disp_selected_note', '•', '') #
+vd.option('disp_sort_asc', '↑↟⇞⇡⇧⇑', 'characters for ascending sort') # ↑▲↟↥↾↿⇞⇡⇧⇈⤉⤒⥔⥘⥜⥠⍏˄ˆ
+vd.option('disp_sort_desc', '↓↡⇟⇣⇩⇓', 'characters for descending sort') # ↓▼↡↧⇂⇃⇟⇣⇩⇊⤈⤓⥕⥙⥝⥡⍖˅ˇ
+vd.option('color_default', 'white on black', 'the default fg and bg colors')
+vd.option('color_default_hdr', 'bold', 'color of the column headers')
+vd.option('color_bottom_hdr', 'underline', 'color of the bottom header row')
+vd.option('color_current_row', 'reverse', 'color of the cursor row')
+vd.option('color_current_col', 'bold', 'color of the cursor column')
+vd.option('color_current_hdr', 'bold reverse', 'color of the header for the cursor column')
+vd.option('color_column_sep', '246 blue', 'color of column separators')
+vd.option('color_key_col', '81 cyan', 'color of key columns')
+vd.option('color_hidden_col', '8', 'color of hidden columns on metasheets')
+vd.option('color_selected_row', '215 yellow', 'color of selected rows')
+vd.option('name_joiner', '_', 'string to join sheet or column names')
+vd.option('value_joiner', ' ', 'string to join display values')
 
 
 def splitcell(sheet, s, width=0):
@@ -492,6 +492,8 @@ class TableSheet(BaseSheet):
             return
 
         for i, col in enumerate(cols):
+            col.name = self.maybeClean(col.name)
+
             vd.addUndo(self.columns.remove, col)
             if index is None:
                 index = len(self.columns)
@@ -523,8 +525,6 @@ class TableSheet(BaseSheet):
             if not col.keycol:
                 col.keycol = lastkeycol+1
                 lastkeycol += 1
-        # clears the keyCols cache
-        visidata.Extensible.clear_all_caches()
 
     def unsetKeys(self, cols):
         'Make all *cols* non-key columns.'
@@ -651,12 +651,6 @@ class TableSheet(BaseSheet):
         hdrs = col.name.split('\n')
         for i in range(h):
             name = ' '  # save room at front for LeftMore or sorted arrow
-            for j, (sortcol, sortdir) in enumerate(self._ordering):
-                if col is sortcol:
-                    try:
-                        name = self.options.disp_sort_desc[j] if sortdir else self.options.disp_sort_asc[j]
-                    except IndexError:
-                        pass
 
             if h-i-1 < len(hdrs):
                 name += hdrs[::-1][h-i-1]
@@ -682,14 +676,22 @@ class TableSheet(BaseSheet):
         except ValueError:  # from .index
             pass
 
+        try:
+            A = ''
+            for j, (sortcol, sortdir) in enumerate(self._ordering):
+                if col is sortcol:
+                    A = self.options.disp_sort_desc[j] if sortdir else self.options.disp_sort_asc[j]
+                    scr.addstr(y+h-1, x, A, hdrcattr.attr)
+                    break
+        except IndexError:
+            pass
+
     def isVisibleIdxKey(self, vcolidx):
         'Return boolean: is given column index a key column?'
         return self.visibleCols[vcolidx] in self.keyCols
 
     def draw(self, scr):
         'Draw entire screen onto the `scr` curses object.'
-        vd.clearCaches()
-
         if not self.columns:
             if self.options.debug:
                 self.addColumn(Column())
@@ -741,8 +743,6 @@ class TableSheet(BaseSheet):
 
         if vcolidx+1 < self.nVisibleCols:
             scr.addstr(headerRow, self.windowWidth-2, self.options.disp_more_right, colors.color_column_sep)
-
-        scr.refresh()
 
     def calc_height(self, row, displines=None, isNull=None):
             if displines is None:
@@ -800,7 +800,7 @@ class TableSheet(BaseSheet):
 
             # apply current row here instead of in a colorizer, because it needs to know dispRowIndex
             if rowidx == self.cursorRowIndex:
-                color_current_row = colors.get_color('color_current_row', 5)
+                color_current_row = colors.get_color('color_current_row', 2)
                 basecellcattr = sepcattr = update_attr(rowcattr, color_current_row)
             else:
                 basecellcattr = rowcattr
@@ -975,6 +975,11 @@ class IndexSheet(Sheet):
         if not self.options.load_lazy:
             sheet.ensureLoaded()
 
+    @asyncthread
+    def reloadSheets(self, sheets):
+        for vs in vd.Progress(sheets):
+            vs.reload()
+
 
 class SheetsSheet(IndexSheet):
     columns = [
@@ -1005,14 +1010,14 @@ def _evalcontexts(vd):
 
 ## VisiData sheet manipulation
 
-@VisiData.global_api
+@VisiData.api
 def replace(vd, vs):
     'Replace top sheet with the given sheet `vs`.'
     vd.sheets.pop(0)
     return vd.push(vs)
 
 
-@VisiData.global_api
+@VisiData.api
 def remove(vd, vs):
     'Remove *vs* from sheets stack, without asking for confirmation.'
     if vs in vd.sheets:
@@ -1024,7 +1029,7 @@ def remove(vd, vs):
         vd.fail('sheet not on stack')
 
 
-@VisiData.global_api
+@VisiData.api
 def push(vd, vs, pane=0):
     'Push Sheet *vs* onto ``vd.sheets`` stack for *pane* (0 for active pane, -1 for inactive pane).  Remove from other position if already on sheets stack.'
     if not isinstance(vs, BaseSheet):
@@ -1072,10 +1077,9 @@ def quit(vd, *sheets):
 
 @BaseSheet.api
 def confirmQuit(vs, verb='quit'):
-    if vs.options.quitguard:
-        if vs.precious and vs.hasBeenModified:
-            vd.draw_all()
-            vd.confirm(f'{verb} modified sheet "{vs.name}?" ')
+    if vs.options.quitguard and vs.precious and vs.hasBeenModified:
+        vd.draw_all()
+        vd.confirm(f'{verb} modified sheet "{vs.name}?" ')
     elif vs.options.getonly('quitguard', vs, False):  # if this sheet is specifically guarded
         vd.draw_all()
         vd.confirm(f'{verb} guarded sheet "{vs.name}?" ')
@@ -1122,6 +1126,19 @@ def splitPane(sheet, pct=None):
 
     vd.options.disp_splitwin_pct = pct
 
+
+@Sheet.api
+def async_deepcopy(sheet, rowlist):
+    @asyncthread
+    def _async_deepcopy(newlist, oldlist):
+        for r in Progress(oldlist, 'copying'):
+            newlist.append(deepcopy(r))
+
+    ret = []
+    _async_deepcopy(ret, rowlist)
+    return ret
+
+
 IndexSheet.class_options.header = 0
 IndexSheet.class_options.skip = 0
 
@@ -1130,7 +1147,7 @@ BaseSheet.init('pane', lambda: 1)
 globalCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)', 'open Sheets Stack: join or jump between the active sheets on the current stack')
 globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)', 'open Sheets Sheet: join or jump between all sheets from current session')
 
-BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); reload(); recalc(); status("reloaded")', 'reload current sheet'),
+BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); reload(); recalc(); status("reloaded")', 'Reload current sheet'),
 Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line'),
 
 Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', 'toggle current column as a key column')
@@ -1155,7 +1172,7 @@ Sheet.addCommand('z%', 'type-floatsi', 'cursorCol.type = floatsi', 'set type of 
 Sheet.addCommand('', 'type-floatlocale', 'cursorCol.type = floatlocale', 'set type of current column to float using system locale set in LC_NUMERIC')
 
 # when diving into a sheet, remove the index unless it is precious
-IndexSheet.addCommand('g^R', 'reload-selected', 'for vs in selectedRows or rows: vs.reload()', 'reload all selected sheets')
+IndexSheet.addCommand('g^R', 'reload-selected', 'reloadSheets(selectedRows or rows)', 'reload all selected sheets')
 SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_columns", source=selectedRows))', 'open Columns Sheet with all visible columns from selected sheets')
 SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visble columns from selected sheets')
 SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)', 'abort async thread for current sheet')
@@ -1172,16 +1189,16 @@ BaseSheet.addCommand('^I', 'splitwin-swap', 'vd.activePane = 1 if sheet.pane == 
 BaseSheet.addCommand('g^I', 'splitwin-swap-pane', 'vd.options.disp_splitwin_pct=-vd.options.disp_splitwin_pct', 'swap panes onscreen')
 BaseSheet.addCommand('zZ', 'splitwin-input', 'vd.options.disp_splitwin_pct = input("% height for split window: ", value=vd.options.disp_splitwin_pct)', 'set split pane to specific size')
 
-BaseSheet.addCommand('^L', 'redraw', 'vd.redraw(); sheet.refresh()', 'refresh screen')
-BaseSheet.addCommand(None, 'guard-sheet', 'options.set("quitguard", True, sheet); status("guarded")', 'guard current sheet from accidental quitting')
+BaseSheet.addCommand('^L', 'redraw', 'vd.redraw(); sheet.refresh()', 'Refresh screen')
+BaseSheet.addCommand(None, 'guard-sheet', 'options.set("quitguard", True, sheet); status("guarded")', 'Set quitguard on current sheet to confirm before quit')
 BaseSheet.addCommand(None, 'open-source', 'vd.push(source)', 'jump to the source of this sheet')
 
 BaseSheet.bindkey('KEY_RESIZE', 'redraw')
 
-BaseSheet.addCommand('A', 'open-new', 'vd.push(vd.newSheet("unnamed", 1))', 'open new blank sheet')
+BaseSheet.addCommand('A', 'open-new', 'vd.push(vd.newSheet("unnamed", 1))', 'Open new empty sheet')
 
 Sheet.addCommand('^', 'rename-col', 'vd.addUndoColNames([cursorCol]); cursorCol.name = editCell(cursorVisibleColIndex, -1)', 'edit name of current column')
 Sheet.addCommand('z^', 'rename-col-selected', 'updateColNames(selectedRows or [cursorRow], [sheet.cursorCol], overwrite=True)', 'set name of current column to combined contents of current cell in selected rows (or current row)')
 Sheet.addCommand('g^', 'rename-cols-row', 'updateColNames(selectedRows or [cursorRow], sheet.visibleCols)', 'set names of all unnamed visible columns to contents of selected rows (or current row)')
 Sheet.addCommand('gz^', 'rename-cols-selected', 'updateColNames(selectedRows or [cursorRow], sheet.visibleCols, overwrite=True)', 'set names of all visible columns to combined contents of selected rows (or current row)')
-BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to: ", value=sheet.name)', 'rename current sheet to input')
+BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to: ", value=sheet.name)', 'Rename current sheet')

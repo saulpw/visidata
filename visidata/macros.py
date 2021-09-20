@@ -1,6 +1,8 @@
 from visidata import *
 from functools import wraps
 
+from visidata.cmdlog import CommandLog
+
 vd.macroMode = None
 vd.macrobindings = {}
 
@@ -37,7 +39,7 @@ def saveMacro(self, rows, ks):
         macropath = Path(fnSuffix(options.visidata_dir+"macro"))
         vd.save_vd(macropath, vs)
         setMacro(ks, vs)
-        append_tsv_row(vd.macrosheet.source, (ks, macropath))
+        vd.macrosheet.source.append_tsv_row((ks, macropath))
 
 @CommandLog.api
 @wraps(CommandLog.afterExecSheet)
@@ -62,5 +64,5 @@ def startMacro(cmdlog):
         vd.macroMode = CommandLog('current_macro', rows=[])
 
 
-Sheet.addCommand('m', 'macro-record', 'vd.cmdlog.startMacro()')
-Sheet.addCommand('gm', 'macro-sheet', 'vd.push(vd.macrosheet)')
+Sheet.addCommand('m', 'macro-record', 'vd.cmdlog.startMacro()', 'record macro')
+Sheet.addCommand('gm', 'macro-sheet', 'vd.push(vd.macrosheet)', 'open macros sheet')

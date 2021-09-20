@@ -1,7 +1,7 @@
 import os
 
 import visidata
-from visidata import Extensible, VisiData, vd, EscapeException
+from visidata import Extensible, VisiData, vd, EscapeException, cleanName
 from unittest import mock
 
 
@@ -145,7 +145,7 @@ class BaseSheet(DrawablePane):
         cmd = self.getCommand(cmd or keystrokes)
         if not cmd:
             if keystrokes:
-                vd.debug('no command "%s"' % keystrokes)
+                vd.status('no command for %s' % keystrokes)
             return False
 
         escaped = False
@@ -189,7 +189,12 @@ class BaseSheet(DrawablePane):
         'Set name without spaces.'
         if self._name:
             vd.addUndo(setattr, self, '_name', self._name)
-        self._name = visidata.maybe_clean(str(name), self)
+        self._name = self.maybeClean(str(name))
+
+    def maybeClean(self, s):
+        if self.options.clean_names:
+            s = cleanName(s)
+        return s
 
     def recalc(self):
         'Clear any calculated value caches.'

@@ -2,11 +2,12 @@ import re
 
 from visidata import *
 
-def open_sqlite(p):
+@VisiData.api
+def open_sqlite(vd, p):
     return SqliteIndexSheet(p.name, source=p)
 
-open_sqlite3 = open_sqlite
-open_db = open_sqlite
+VisiData.open_sqlite3 = VisiData.open_sqlite
+VisiData.open_db = VisiData.open_sqlite
 
 # rowdef: list of values
 class SqliteSheet(Sheet):
@@ -52,7 +53,10 @@ class SqliteSheet(Sheet):
                     if colkey:
                         self.setKeys([c])
 
-            r = self.execute(conn, 'SELECT rowid, * FROM "%s"' % tblname)
+            try:
+                r = self.execute(conn, 'SELECT rowid, * FROM "%s"' % tblname)
+            except sqlite3.OperationalError:
+                vd.error('tables WITHOUT ROWID not supported')
             yield from Progress(r, total=r.rowcount-1)
 
     @asyncthread
@@ -198,7 +202,7 @@ def save_sqlite(vd, p, *vsheets):
                 elif not isinstance(v, (int, float, str)):
                     v = col.getDisplayValue(r)
                 sqlvals.append(v)
-            sql = 'INSERT INTO "%s" VALUES (%s)' % (tblname, ','.join('?' for v in sqlvals))
+            sql = 'INSERT INTO "%s" (%s) VALUES (%s)' % (tblname, ','.join(c.name for c in vs.visibleCols), ','.join('?' for v in sqlvals))
             c.execute(sql, sqlvals)
 
     conn.commit()

@@ -5,6 +5,7 @@ from visidata import *
 vd.show_help = False
 
 
+@VisiData.api
 class HelpSheet(MetaSheet):
     'Show all commands available to the source sheet.'
     rowtype = 'commands'
@@ -37,10 +38,14 @@ class HelpSheet(MetaSheet):
             if k in self.cmddict:
                 self.cmddict[k].helpstr = cmdrow.helpstr
 
-        self.revbinds = collections.defaultdict(list)  # longname -> [keystrokes, ..]
+    @BaseSheet.lazy_property
+    def revbinds(self):
+        revbinds = collections.defaultdict(list)  # longname -> [keystrokes, ..]
         itbindings = vd.bindkeys.iterall()
         for (keystrokes, _), longname in itbindings:
-            self.revbinds[longname].append(keystrokes)
+            revbinds[longname].append(keystrokes)
+
+        return revbinds
 
 
 @VisiData.api
@@ -120,7 +125,7 @@ def getHelpPane(vd, name, module='vdplus'):
     return ret
 
 
-@VisiData.global_api
+@VisiData.api
 def openManPage(vd):
     import os
     with SuspendCurses():
@@ -128,15 +133,17 @@ def openManPage(vd):
             vd.push(TextSheet('man_vd', source=Path(resource_filename(__name__, 'man/vd.txt'))))
 
 
-# in VisiData, ^H refers to the man page
-globalCommand('^H', 'sysopen-help', 'openManPage()', 'view vd man page')
+# in VisiData, g^H refers to the man page
+BaseSheet.addCommand('g^H', 'sysopen-help', 'openManPage()', 'Show the UNIX man page for VisiData')
 BaseSheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))', 'view sheet of command longnames and keybindings for current sheet')
 BaseSheet.addCommand('gz^H', 'help-commands-all', 'vd.push(HelpSheet("all_commands", source=None, revbinds={}))', 'view sheet of command longnames and keybindings for all sheet types')
-globalCommand(None, 'help-search', 'help_search(sheet, input("help: "))', 'search through command longnames with search terms')
+BaseSheet.addCommand(None, 'help-search', 'help_search(sheet, input("help: "))', 'search through command longnames with search terms')
 
 BaseSheet.bindkey('KEY_F(1)', 'sysopen-help')
-BaseSheet.bindkey('KEY_BACKSPACE', 'sysopen-help')
 BaseSheet.bindkey('zKEY_F(1)', 'help-commands')
 BaseSheet.bindkey('zKEY_BACKSPACE', 'help-commands')
 
 HelpSheet.addCommand(ENTER, 'exec-command', 'quit(sheet); draw_all(); activeStack[0].execCommand(cursorRow.longname)', 'execute command on undersheet')
+BaseSheet.addCommand(None, 'open-tutorial-visidata', 'launchBrowser("https://jsvine.github.io/intro-to-visidata/")', 'open https://jsvine.github.io/intro-to-visidata/')
+
+vd.addMenuItem("Help", "VisiData tutorial", 'open-tutorial-visidata')

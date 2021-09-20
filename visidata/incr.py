@@ -1,7 +1,7 @@
-from visidata import VisiData, Sheet, vd, options, option
+from visidata import VisiData, Sheet, vd, options
 
 
-option('incr_base', 1.0, 'start value for column increments', replay=True)
+vd.option('incr_base', 1.0, 'start value for column increments', replay=True)
 
 
 @VisiData.api

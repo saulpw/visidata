@@ -3,10 +3,8 @@ import math
 
 from visidata import *
 
-__all__ = ['PythonSheet', 'expand_cols_deep', 'deduceType', 'closeColumn', 'ListOfDictSheet', 'SheetDict', 'PyobjSheet', 'view']
-
-option('visibility', 0, 'visibility level')
-option('default_sample_size', 100, 'number of rows to sample for regex.split (0=all)', replay=True)
+vd.option('visibility', 0, 'visibility level')
+vd.option('default_sample_size', 100, 'number of rows to sample for regex.split (0=all)', replay=True)
 
 
 class PythonSheet(Sheet):
@@ -149,9 +147,6 @@ def AttrColumns(attrnames):
     'Return column names for all elements of list `attrnames`.'
     return [ColumnAttr(name) for name in attrnames]
 
-def DictKeyColumns(d):
-    'Return a list of Column objects from dictionary keys.'
-    return [ColumnItem(k, k, type=deduceType(d[k])) for k in d.keys()]
 
 def SheetList(*names, **kwargs):
     'Creates a Sheet from a list of homogenous dicts or namedtuples.'
@@ -190,14 +185,12 @@ class ListOfDictSheet(PythonSheet):
     rowtype = 'dicts'
     def reload(self):
         self.columns = []
-        addedCols = set()
+        self._knownKeys = set()
         for row in self.source:
-            newCols = {k: v for k, v in row.items() if k not in addedCols}
-            if not newCols:
-                continue
-            for c in DictKeyColumns(newCols):
-                self.addColumn(c)
-                addedCols.add(c.name)
+            for k in row:
+                if k not in self._knownKeys:
+                    self.addColumn(ColumnItem(k, k, type=deduceType(row[k])))
+                    self._knownKeys.add(k)
         self.rows = self.source
 
 # rowdef: namedtuple
@@ -329,15 +322,16 @@ def pyobj_expr(sheet):
     vd.push(PyobjSheet(expr, source=sheet.evalExpr(expr)))
 
 BaseSheet.addCommand('^X', 'pyobj-expr', 'pyobj_expr()', 'evaluate Python expression and open result as Python object')
-globalCommand('g^X', 'exec-python', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals(), LazyChainMap(sheet, *vd.contexts))', 'execute Python statement in the global scope')
+globalCommand('', 'exec-python', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals(), LazyChainMap(sheet, *vd.contexts))', 'execute Python statement with expression scope')
+globalCommand('g^X', 'import-python', 'modname=input("import: "); exec("import "+modname, getGlobals())', 'import Python module in the global scope')
 globalCommand('z^X', 'pyobj-expr-row', 'expr = input("eval over current row: ", "expr", completer=CompleteExpr()); vd.push(PyobjSheet(expr, source=evalExpr(expr, row=cursorRow)))', 'evaluate Python expression, in context of current row, and open result as Python object')
 
 Sheet.addCommand('^Y', 'pyobj-row', 'status(type(cursorRow)); vd.push(PyobjSheet("%s[%s]" % (sheet.name, cursorRowIndex), source=cursorRow))', 'open current row as Python object')
 Sheet.addCommand('z^Y', 'pyobj-cell', 'status(type(cursorValue)); vd.push(PyobjSheet("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), source=cursorValue))', 'open current cell as Python object')
 globalCommand('g^Y', 'pyobj-sheet', 'status(type(sheet)); vd.push(PyobjSheet(sheet.name+"_sheet", source=sheet))', 'open current sheet as Python object')
 
-Sheet.addCommand('(', 'expand-col', 'expand_cols_deep(sheet, [cursorCol], depth=0)', 'expand current column of containers fully')
-Sheet.addCommand('g(', 'expand-cols', 'expand_cols_deep(sheet, visibleCols, depth=0)', 'expand all visible columns of containers fully')
+Sheet.addCommand('(', 'expand-col', 'expand_cols_deep(sheet, [cursorCol], depth=1)', 'expand current column of containers one level')
+Sheet.addCommand('g(', 'expand-cols', 'expand_cols_deep(sheet, visibleCols, depth=1)', 'expand all visible columns of containers one level')
 Sheet.addCommand('z(', 'expand-col-depth', 'expand_cols_deep(sheet, [cursorCol], depth=int(input("expand depth=", value=1)))', 'expand current column of containers to given depth (0=fully)')
 Sheet.addCommand('gz(', 'expand-cols-depth', 'expand_cols_deep(sheet, visibleCols, depth=int(input("expand depth=", value=1)))', 'expand all visible columns of containers to given depth (0=fully)')
 
@@ -351,3 +345,14 @@ Sheet.addCommand('gz'+ENTER, 'dive-selected-cells', 'for r in selectedRows: vd.p
 PyobjSheet.addCommand('v', 'visibility', 'sheet.options.visibility = 0 if sheet.options.visibility else 2; reload()', 'toggle show/hide for methods and hidden properties')
 PyobjSheet.addCommand('gv', 'show-hidden', 'sheet.options.visibility = 2; reload()', 'show methods and hidden properties')
 PyobjSheet.addCommand('zv', 'hide-hidden', 'sheet.options.visibility -= 1; reload()', 'hide methods and hidden properties')
+
+vd.addGlobals({
+    'PythonSheet': PythonSheet,
+    'expand_cols_deep': expand_cols_deep,
+    'deduceType': deduceType,
+    'closeColumn': closeColumn,
+    'ListOfDictSheet': ListOfDictSheet,
+    'SheetDict': SheetDict,
+    'PyobjSheet': PyobjSheet,
+    'view': view,
+})

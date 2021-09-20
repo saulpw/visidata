@@ -5,8 +5,8 @@
 
 from visidata import Sheet, ColumnItem, asyncthread, options
 
-
-def open_tsv(p):
+@VisiData.api
+def open_tsv(vd, p):
     return MinimalTsvSheet(p.name, source=p)
 
 

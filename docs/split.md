@@ -1,3 +1,9 @@
+---
+eleventyNavigation:
+  key: Split view
+  order: 99
+---
+
 # Viewing two sheets simultaneously
 
 VisiData supports the viewing of two sheets simultaneously with a feature called split screen.

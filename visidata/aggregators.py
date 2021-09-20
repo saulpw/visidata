@@ -54,7 +54,7 @@ class Aggregator:
 
 _defaggr = Aggregator
 
-@VisiData.global_api
+@VisiData.api
 def aggregator(vd, name, func, helpstr='', *args, type=None):
     'Define simple aggregator *name* that calls ``func(values, *args)`` to aggregate *values*.  Use *type* to force the default type of the aggregated column.'
     def _func(col, rows):  # wrap builtins so they can have a .type
@@ -168,9 +168,7 @@ def aggregator_choices(vd):
        {'key': agg, 'desc': v[0].helpstr if isinstance(v, list) else v.helpstr} for agg, v in vd.aggregators.items()
     ]
 
-vd.addGlobals(globals())
 
-
-Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregator_choices))', 'add aggregator to current column')
+Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregator_choices))', 'Add aggregator to current column')
 Sheet.addCommand('z+', 'memo-aggregate', 'for agg in chooseMany(aggregator_choices): cursorCol.memo_aggregate(aggregators[agg], selectedRows or rows)', 'memo result of aggregator over values in selected rows for current column')
 ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseMany(aggregator_choices))', 'add aggregators to selected source columns')

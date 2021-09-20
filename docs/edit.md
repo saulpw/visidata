@@ -1,7 +1,12 @@
-- Update: 2018-08-19
-- Version: VisiData 1.3.1
+---
+eleventyNavigation:
+  key: Editing Contents
+  order: 6
+Update: 2018-08-19
+Version: VisiData 1.3.1
+---
 
-# Editing Contents
+
 
 ## How to edit cells
 

@@ -6,17 +6,15 @@ import cProfile
 import threading
 import collections
 
-from visidata import VisiData, vd, option, options, globalCommand, Sheet, EscapeException
+from visidata import VisiData, vd, options, globalCommand, Sheet, EscapeException
 from visidata import ColumnAttr, Column
 from visidata import *
-
-__all__ = ['Progress', 'asynccache', 'async_deepcopy', 'elapsed_s', 'cancelThread', 'ThreadsSheet', 'ProfileSheet', 'codestr', 'asyncsingle', 'MemoryUsageSheet']
 
 
 vd.option('profile', False, 'enable profiling on threads')
 vd.option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
 
-theme('color_working', 'green', 'color of system running smoothly')
+vd.option('color_working', 'green', 'color of system running smoothly')
 
 BaseSheet.init('currentThreads', list)
 
@@ -53,7 +51,7 @@ class _Progress:
 
     def __enter__(self):
         if self.sheet:
-            self.sheet.progresses.append(self)
+            self.sheet.progresses.insert(0, self)
         return self
 
     def addProgress(self, n):
@@ -82,19 +80,8 @@ def Progress(vd, iterable=None, gerund="", total=None, sheet=None):
         '''
     return _Progress(iterable=iterable, gerund=gerund, total=total, sheet=sheet)
 
-@asyncthread
-def _async_deepcopy(vs, newlist, oldlist):
-    for r in Progress(oldlist, 'copying'):
-        newlist.append(deepcopy(r))
 
-
-def async_deepcopy(vs, rowlist):
-    ret = []
-    _async_deepcopy(vs, ret, rowlist)
-    return ret
-
-
-@VisiData.global_api
+@VisiData.api
 def cancelThread(vd, *threads, exception=EscapeException):
     'Raise *exception* in one or more *threads*.'
     for t in threads:
@@ -148,7 +135,7 @@ def checkMemoryUsage(vd):
         if free_m < min_mem:
             attr = 'color_warning'
             vd.warning('%dMB free < %dMB minimum, stopping threads' % (free_m, min_mem))
-            cancelThread(*vd.unfinishedThreads)
+            vd.cancelThread(*vd.unfinishedThreads)
             curses.flash()
     return ret, attr
 
@@ -211,7 +198,7 @@ def execAsync(self, func, *args, sheet=None, **kwargs):
 
     return thread
 
-def _toplevelTryFunc(func, *args, status=status, **kwargs):
+def _toplevelTryFunc(func, *args, status=vd.status, **kwargs):
   with ThreadProfiler(threading.current_thread()) as prof:
     t = threading.current_thread()
     t.name = func.__name__
@@ -242,7 +229,7 @@ def asyncsingle(func):
 
         # cancel previous thread if running
         if _execAsync.searchThread:
-            cancelThread(_execAsync.searchThread)
+            vd.cancelThread(_execAsync.searchThread)
 
         _func.__name__ = func.__name__ # otherwise, the the thread's name is '_func'
 
@@ -429,10 +416,17 @@ ProfileSheet.addCommand('z^S', 'save-profile', 'source.dump_stats(input("save pr
 ProfileSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow.code.co_filename, "+%s" % cursorRow.code.co_firstlineno)', 'open current file at referenced row in external $EDITOR')
 ProfileStatsSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow[0], "+%s" % cursorRow[1])', 'open current file at referenced row in external $EDITOR')
 
-globalCommand('^_', 'toggle-profile', 'toggleProfiling(threading.current_thread())', 'turn profiling on for main process')
+globalCommand('^_', 'toggle-profile', 'toggleProfiling(threading.current_thread())', 'Enable or disable profiling on main VisiData process')
 
 BaseSheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads or fail("no active threads on this sheet"))', 'abort all threads on current sheet')
 BaseSheet.addCommand('g^C', 'cancel-all', 'liveThreads=list(t for vs in vd.sheets for t in vs.currentThreads); cancelThread(*liveThreads); status("canceled %s threads" % len(liveThreads))', 'abort all secondary threads')
 
 BaseSheet.addCommand('^T', 'threads-all', 'vd.push(vd.threadsSheet)', 'open Threads Sheet')
 BaseSheet.addCommand('z^T', 'open-memusage', 'vd.push(vd.memoryUsageSheet)', 'open Memory Usage Sheet')
+
+
+vd.addGlobals({
+    'Progress': Progress,
+    'asynccache': asynccache,
+    'asyncsingle': asyncsingle,
+})

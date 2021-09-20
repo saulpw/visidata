@@ -2,19 +2,23 @@ from functools import partial
 
 from visidata import *
 
-def open_pandas(p):
+@VisiData.api
+def open_pandas(vd, p):
     return PandasSheet(p.name, source=p)
 
-def open_dta(p):
+@VisiData.api
+def open_dta(vd, p):
     return PandasSheet(p.name, source=p, filetype='stata')
 
-open_stata = open_pandas
+VisiData.open_stata = VisiData.open_pandas
 
 for ft in 'feather gbq orc parquet pickle sas stata'.split():
-    globals().setdefault('open_'+ft, lambda p,ft=ft: PandasSheet(p.name, source=p, filetype=ft))
+    funcname ='open_'+ft
+    if not getattr(VisiData, funcname, None):
+        setattr(VisiData, funcname, lambda vd,p,ft=ft: PandasSheet(p.name, source=p, filetype=ft))
+
 
 class DataFrameAdapter:
-
     def __init__(self, df):
         import pandas as pd
         if not isinstance(df, pd.DataFrame):
@@ -118,6 +122,8 @@ class PandasSheet(Sheet):
             else:
                 readfunc = getattr(pd, 'read_'+filetype) or vd.error('no pandas.read_'+filetype)
             df = readfunc(str(self.source), **options.getall('pandas_'+filetype+'_'))
+            if (filetype == 'pickle') and not isinstance(df, pd.DataFrame):
+                vd.fail('pandas loader can only unpickle dataframes')
         else:
             try:
                 df = pd.DataFrame(self.source)

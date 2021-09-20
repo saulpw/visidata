@@ -1,6 +1,7 @@
 from visidata import *
 
-def open_eml(p):
+@VisiData.api
+def open_eml(vd, p):
     return EmailSheet(p.name, source=p)
 
 class EmailSheet(TableSheet):
@@ -25,7 +26,7 @@ def extract_part(sheet, givenpath, part):
 def extract_parts(sheet, givenpath, *parts):
     'Save all *parts* to Path *givenpath*.'
     if givenpath.exists() and sheet.options.confirm_overwrite:
-        confirm("%s already exists. overwrite? " % givenpath.given)
+        vd.confirm("%s already exists. overwrite? " % givenpath.given)
 
     vd.status('saving %s parts to %s' % (len(parts), givenpath.given))
 

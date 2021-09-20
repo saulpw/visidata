@@ -1,16 +1,17 @@
+import math
 
 from collections import defaultdict, Counter
 from visidata import *
 
 # see www/design/graphics.md
 
-option('show_graph_labels', True, 'show axes and legend on graph')
-theme('plot_colors', 'green red yellow cyan magenta white 38 136 168', 'list of distinct colors to use for plotting distinct objects')
-theme('disp_canvas_charset', ''.join(chr(0x2800+i) for i in range(256)), 'charset to render 2x4 blocks on canvas')
-theme('disp_pixel_random', False, 'randomly choose attr from set of pixels instead of most common')
-option('zoom_incr', 2.0, 'amount to multiply current zoomlevel when zooming')
-theme('color_graph_hidden', '238 blue', 'color of legend for hidden attribute')
-theme('color_graph_selected', 'bold', 'color of selected graph points')
+vd.option('show_graph_labels', True, 'show axes and legend on graph')
+vd.option('plot_colors', 'green red yellow cyan magenta white 38 136 168', 'list of distinct colors to use for plotting distinct objects')
+vd.option('disp_canvas_charset', ''.join(chr(0x2800+i) for i in range(256)), 'charset to render 2x4 blocks on canvas')
+vd.option('disp_pixel_random', False, 'randomly choose attr from set of pixels instead of most common')
+vd.option('zoom_incr', 2.0, 'amount to multiply current zoomlevel when zooming')
+vd.option('color_graph_hidden', '238 blue', 'color of legend for hidden attribute')
+vd.option('color_graph_selected', 'bold', 'color of selected graph points')
 
 
 class Point:
@@ -606,7 +607,7 @@ class Canvas(Plotter):
     def render(self, h, w):
         'resets plotter, cancels previous render threads, spawns a new render'
         self.needsRefresh = False
-        cancelThread(*(t for t in self.currentThreads if t.name == 'plotAll_async'))
+        vd.cancelThread(*(t for t in self.currentThreads if t.name == 'plotAll_async'))
         self.labels.clear()
         self.resetCanvasDimensions(h, w)
         self.render_async()
@@ -715,3 +716,12 @@ Canvas.addCommand('gt', 'stoggle-visible', 'source.toggle(list(rowsWithin(plotte
 Canvas.addCommand('gu', 'unselect-visible', 'source.unselect(list(rowsWithin(plotterVisibleBox)))', 'unselect rows on source sheet visible on screen')
 Canvas.addCommand('g'+ENTER, 'dive-visible', 'vs=copy(source); vs.rows=list(rowsWithin(plotterVisibleBox)); vd.push(vs)', 'open sheet of source rows visible on screen')
 Canvas.addCommand('gd', 'delete-visible', 'deleteSourceRows(rowsWithin(plotterVisibleBox))', 'delete rows on source sheet visible on screen')
+
+
+vd.addGlobals({
+    'Canvas': Canvas,
+    'Plotter': Plotter,
+    'BoundingBox': BoundingBox,
+    'Box': Box,
+    'Point': Point,
+})

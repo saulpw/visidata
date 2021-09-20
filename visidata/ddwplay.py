@@ -130,3 +130,5 @@ class AnimationMgr:
             self.active.remove(row)
 
         return min(times) if times else None
+
+vd.addGlobals({'Animation': Animation, 'AnimationMgr': AnimationMgr})

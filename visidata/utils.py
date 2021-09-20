@@ -1,9 +1,10 @@
 import operator
 import string
+import re
 
 'Various helper classes and functions.'
 
-__all__ = ['AlwaysDict', 'AttrDict', 'moveListItem', 'namedlist', 'classproperty', 'MissingAttrFormatter']
+__all__ = ['AlwaysDict', 'AttrDict', 'moveListItem', 'namedlist', 'classproperty', 'cleanName', 'MissingAttrFormatter']
 
 
 class AlwaysDict(dict):
@@ -47,6 +48,12 @@ def moveListItem(L, fromidx, toidx):
     r = L.pop(fromidx)
     L.insert(toidx, r)
     return toidx
+
+
+def cleanName(s):
+    s = re.sub(r'[^\w\d_]', '_', s)  # replace non-alphanum chars with _
+    s = re.sub(r'_+', '_', s)  # replace runs of _ with a single _
+    return s
 
 
 class OnExit:

@@ -1,7 +1,12 @@
+---
+eleventyNavigation:
+  key: Terminal Graphics in VisiData
+  order: 99
 Updated: 2017-12-06
 Version: VisiData 1.0
+---
 
-# Terminal Graphics in VisiData
+
 
 VisiData can display low-resolution terminal graphics with a reasonable amount of user interactivity.
 

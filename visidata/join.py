@@ -5,20 +5,23 @@ from copy import copy
 
 from visidata import *
 
+@VisiData.api
+def ensureLoaded(vd, sheets):
+    threads = [vs.ensureLoaded() for vs in sheets]
+    vd.status('loading %d sheets' % len([t for t in threads if t]))
 
-def createJoinedSheet(sheets, jointype=''):
+
+@VisiData.api
+def createJoinedSheet(vd, sheets, jointype=''):
     sheets[1:] or vd.fail("join requires more than 1 sheet")
 
     if jointype == 'append':
-        keyedcols = collections.defaultdict(list, {col.name:[col] for col in sheets[0].visibleCols})
-        for s in sheets[1:]:
-            for col in s.visibleCols:
-                key = col.name if col.name in keyedcols else col.sheet.visibleCols.index(col)
-                keyedcols[key].append(col)
+        return ConcatSheet('&'.join(vs.name for vs in sheets), source=sheets)
 
-        return ConcatSheet('&'.join(vs.name for vs in sheets), sourceCols=list(keyedcols.values()))
+    for s in sheets:
+        s.keyCols or vd.fail(f'{s.name} has no key cols to join')
 
-    elif jointype == 'extend':
+    if jointype == 'extend':
         vs = copy(sheets[0])
         vs.name = '+'.join(vs.name for vs in sheets)
         vs.reload = functools.partial(ExtendedSheet_reload, vs, sheets)
@@ -26,7 +29,7 @@ def createJoinedSheet(sheets, jointype=''):
     else:
         return JoinSheet('+'.join(vs.name for vs in sheets), sources=sheets, jointype=jointype)
 
-jointypes = [{'key': k, 'desc': v} for k, v in {
+vd.jointypes = [{'key': k, 'desc': v} for k, v in {
     'inner': 'only rows which match keys on all sheets',
     'outer': 'all rows from first selected sheet',
     'full': 'all rows from all sheets (union)',
@@ -120,6 +123,9 @@ class JoinSheet(Sheet):
     def reload(self):
         sheets = self.sources
 
+        vd.ensureLoaded(sheets)
+        vd.sync()
+
         # first item in joined row is the key tuple from the first sheet.
         # first columns are the key columns from the first sheet, using its row (0)
         self.columns = []
@@ -196,6 +202,10 @@ class ExtendedColumn(Column):
 def ExtendedSheet_reload(self, sheets):
     # first item in joined row is the key tuple from the first sheet.
     # first columns are the key columns from the first sheet, using its row (0)
+
+    vd.ensureLoaded(sheets)
+    vd.sync()
+
     self.columns = []
     for i, c in enumerate(sheets[0].keyCols):
         self.addColumn(copy(c))
@@ -229,14 +239,9 @@ def ExtendedSheet_reload(self, sheets):
 
 ## for ConcatSheet
 class ConcatColumn(Column):
-    def __init__(self, name, cols, **kwargs):
-        super().__init__(name, **kwargs)
-        self.cols = cols
-
+    '''ConcatColumn(name, cols={srcsheet:srccol}, ...)'''
     def getColBySheet(self, s):
-        for c in self.cols:
-            if c.sheet is s:
-                return c
+        return self.cols.get(s, None)
 
     def calcValue(self, row):
         srcSheet, srcRow = row
@@ -255,26 +260,40 @@ class ConcatColumn(Column):
 
 # rowdef: (srcSheet, srcRow)
 class ConcatSheet(Sheet):
-    'combination of multiple sheets by row concatenation. sourceCols=list(cols). '
+    'combination of multiple sheets by row concatenation. source=list of sheets. '
     @asyncthread
     def reload(self):
-        self.rows = []
-        sourceSheets = []
-        for cols in self.sourceCols:
-            for c in cols:
-                if c.sheet not in sourceSheets:
-                    sourceSheets.append(c.sheet)
-
         self.columns = []
         self.addColumn(ColumnItem('origin_sheet', 0, width=0))
-        for cols in self.sourceCols:
-            self.addColumn(ConcatColumn(cols[0].name, cols, type=cols[0].type))
 
-        for sheet in sourceSheets:
-            for r in Progress(sheet.rows):
-                self.addRow((sheet, r))
+        # only one column with each name allowed per sheet
+        keyedcols = collections.defaultdict(dict)  # name -> { sheet -> col }
+        self.rows = []
+
+        with Progress(gerund='joining', sheet=self, total=sum(vs.nRows for vs in self.source)) as prog:
+            for sheet in self.source:
+                if sheet.ensureLoaded():
+                    vd.sync()
+
+                for r in sheet.rows:
+                    self.addRow((sheet, r))
+                    prog.addProgress(1)
+
+                for idx, col in enumerate(sheet.visibleCols):
+                    if not keyedcols[col.name]:  # first column with this name/number
+                        self.addColumn(ConcatColumn(col.name, cols=keyedcols[col.name], type=col.type))
+
+                    if sheet in keyedcols[col.name]:  # two columns with same name on sheet
+                        keyedcols[idx][sheet] = col  # key by column num instead
+                        self.addColumn(ConcatColumn(col.name, cols=keyedcols[idx], type=col.type))
+                    else:
+                        keyedcols[col.name][sheet] = col
 
 
-IndexSheet.addCommand('&', 'join-sheets', 'vd.push(createJoinedSheet(selectedRows or fail("no sheets selected to join"), jointype=chooseOne(jointypes)))', 'merge selected sheets with visible columns from all, keeping rows according to jointype')
+
+IndexSheet.addCommand('&', 'join-selected', 'vd.push(createJoinedSheet(someSelectedRows, jointype=chooseOne(jointypes)))', 'merge selected sheets with visible columns from all, keeping rows according to jointype')
+IndexSheet.bindkey('g&', 'join-selected')
 Sheet.addCommand('&', 'join-sheets-top2', 'vd.push(createJoinedSheet(vd.sheets[:2], jointype=chooseOne(jointypes)))', 'concatenate top two sheets in Sheets Stack')
 Sheet.addCommand('g&', 'join-sheets-all', 'vd.push(createJoinedSheet(vd.sheets, jointype=chooseOne(jointypes)))', 'concatenate all sheets in Sheets Stack')
+
+vd.addMenuItem('Data', 'Join', 'selected sheets', 'join-selected')

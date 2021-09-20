@@ -1,8 +1,8 @@
 from visidata import *
 
-option('color_add_pending', 'green', 'color for rows pending add')
-option('color_change_pending', 'reverse yellow', 'color for cells pending modification')
-option('color_delete_pending', 'red', 'color for rows pending delete')
+vd.option('color_add_pending', 'green', 'color for rows pending add')
+vd.option('color_change_pending', 'reverse yellow', 'color for cells pending modification')
+vd.option('color_delete_pending', 'red', 'color for rows pending delete')
 
 # deferred cached
 @Sheet.lazy_property
@@ -36,7 +36,7 @@ def rowAdded(self, row):
     self._deferredAdds[self.rowid(row)] = row
     def _undoRowAdded(sheet, row):
         if sheet.rowid(row) not in sheet._deferredAdds:
-            warning('cannot undo to before commit')
+            vd.warning('cannot undo to before commit')
             return
         del sheet._deferredAdds[sheet.rowid(row)]
     vd.addUndo(_undoRowAdded, self, row)
@@ -58,7 +58,7 @@ def cellChanged(col, row, val):
             if oldval == col.getSourceValue(row):
                 # if we have reached the original value, remove from defermods entirely
                 if col.sheet.rowid(row) not in col.sheet._deferredMods:
-                    warning('cannot undo to before commit')
+                    vd.warning('cannot undo to before commit')
                     return
                 del col.sheet._deferredMods[col.sheet.rowid(row)]
             else:
@@ -74,7 +74,7 @@ def rowDeleted(self, row):
     self._deferredDels[self.rowid(row)] = row
     def _undoRowDeleted(sheet, row):
         if sheet.rowid(row) not in sheet._deferredDels:
-            warning('cannot undo to before commit')
+            vd.warning('cannot undo to before commit')
             return
         del sheet._deferredDels[sheet.rowid(row)]
     vd.addUndo(_undoRowDeleted, self, row)
@@ -159,7 +159,7 @@ def isChanged(self, col, row):
         row, rowmods = self._deferredMods[self.rowid(row)]
         newval = rowmods[col]
         curval = col.getSourceValue(row)
-        return (newval is None and curval is not None) or col.type(newval) != col.type(curval)
+        return (newval is None and curval is not None) or (curval is None and newval is not None) or (col.type(newval) != col.type(curval))
     except KeyError:
         return False
     except Exception:
@@ -216,7 +216,7 @@ def putChanges(sheet):
     sheet.commitMods()
     sheet.commitDeletes()
 
-    saveSheets(Path(sheet.source), sheet, confirm_overwrite=False)
+    vd.saveSheets(Path(sheet.source), sheet, confirm_overwrite=False)
 
     # clear after save, to ensure cstr (in commit()) is aware of deletes
     sheet._deferredDels.clear()
@@ -284,4 +284,4 @@ Sheet.addCommand('ga', 'add-rows', 'n=int(input("add rows: ", value=1)); addRows
 Sheet.addCommand('za', 'addcol-new', 'addColumnAtCursor(SettableColumn(input("column name: "))); cursorRight(1)', 'append an empty column')
 Sheet.addCommand('gza', 'addcol-bulk', 'addColumnAtCursor(*(SettableColumn() for c in range(int(input("add columns: "))))); cursorRight(1)', 'append N empty columns')
 
-Sheet.addCommand('z^S', 'commit-sheet', 'commit()')
+Sheet.addCommand('z^S', 'commit-sheet', 'commit()', 'commit changes back to source.  not undoable!')

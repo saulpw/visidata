@@ -4,7 +4,7 @@ import time
 from urllib.request import Request, urlopen
 import urllib.parse
 
-from visidata import Path, options, modtime
+from visidata import vd, Path, options, modtime
 
 
 def urlcache(url, days=1, text=True, headers={}):
@@ -33,3 +33,6 @@ def urlcache(url, days=1, text=True, headers={}):
                 fpout.write(ret)
 
     return p
+
+
+vd.addGlobals({'urlcache': urlcache})

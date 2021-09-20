@@ -3,10 +3,11 @@ from visidata import *
 # requires pyshp
 
 
-def open_shp(p):
+@VisiData.api
+def open_shp(vd, p):
     return ShapeSheet(p.name, source=p)
 
-open_dbf = open_shp
+VisiData.open_dbf = VisiData.open_shp
 
 shptypes = {
   'C': str,
@@ -44,6 +45,7 @@ class ShapeSheet(Sheet):
         for i, (fname, ftype, fieldlen, declen) in enumerate(self.sf.fields[1:]):  # skip DeletionFlag
             self.addColumn(Column(fname, getter=lambda col,row,i=i: row.record[i], type=shptype(ftype, declen)))
 
+@VisiData.api
 class ShapeMap(InvertedCanvas):
     aspectRatio = 1.0
     filetype = 'geojson'

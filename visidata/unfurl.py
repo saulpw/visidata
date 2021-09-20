@@ -8,12 +8,14 @@ Credit to Jeremy Singer-Vine for the idea and original implementation.
 
 from collections.abc import Iterable, Mapping
 from visidata import vd, Progress, Sheet, Column, ColumnItem, SettableColumn, SubColumnFunc, asyncthread, clean_to_id
+from visidata import stacktrace, TypedExceptionWrapper
 
 
 vd.option('unfurl_empty', False, 'if unfurl includes rows for empty containers', replay=True)
 
 
 class UnfurledSheet(Sheet):
+    # rowdef: [row, key, sub_value]
     @asyncthread
     def reload(self):
         # Copy over base sheet, using SubColumnFunc
@@ -30,7 +32,16 @@ class UnfurledSheet(Sheet):
         self.rows = []
         unfurl_empty = self.options.unfurl_empty
         for row in Progress(self.source.rows):
-            val = self.source_col.getValue(row)
+            try:
+                val = self.source_col.getValue(row)
+            except Exception as e:
+                e.stacktrace = stacktrace()
+                if unfurl_empty:
+                    # TypedExceptionWrapper allows the use of z^E to see the stacktrace
+                    # the exception on its own lacks clarity
+                    self.addRow([row, TypedExceptionWrapper(None, exception=e), TypedExceptionWrapper(None, exception=e)])
+                else:
+                    vd.exceptionCaught(e)
 
             if not isinstance(val, Iterable) or isinstance(val, str):
                 val = [ val ]

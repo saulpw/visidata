@@ -1,7 +1,10 @@
-- Update: 2021-06-16
-- Version: VisiData 2.4
-
-# Columns
+---
+eleventyNavigation:
+    key: Columns
+    order: 5
+update: 2021-06-16
+version: VisiData 2.4
+---
 
 ## How to manipulate columns
 

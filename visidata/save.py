@@ -1,8 +1,8 @@
 from visidata import *
 
 
-option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
-option('safe_error', '#ERR', 'error string to use while saving', replay=True)
+vd.option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
+vd.option('safe_error', '#ERR', 'error string to use while saving', replay=True)
 
 @Sheet.api
 def safe_trdict(vs):
@@ -97,7 +97,7 @@ def save_cols(vd, cols):
     vd.saveSheets(path, vs, confirm_overwrite=options.confirm_overwrite)
 
 
-@VisiData.global_api
+@VisiData.api
 def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
     'Save all *vsheets* to *givenpath*.'
 
@@ -106,11 +106,11 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
     savefunc = getattr(vsheets[0], 'save_' + filetype, None) or getattr(vd, 'save_' + filetype, None)
 
     if savefunc is None:
-        savefunc = getattr(vd, 'save_' + options.save_filetype, None) or vd.fail('no function to save as type %s' % filetype)
+        savefunc = getattr(vd, 'save_' + options.save_filetype, None) or vd.fail('no function to save as type %s, set options.save_filetype' % filetype)
         vd.warning(f'save for {filetype} unavailable, using {options.save_filetype}')
 
     if givenpath.exists() and confirm_overwrite:
-        confirm("%s already exists. overwrite? " % givenpath.given)
+        vd.confirm("%s already exists. overwrite? " % givenpath.given)
 
     vd.status('saving %s sheets to %s as %s' % (len(vsheets), givenpath.given, filetype))
 
@@ -135,7 +135,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
             p = Path((givenpath / vs.name).with_suffix('.'+filetype))
             savefunc(p, vs)
             vs.hasBeenModified = False
-    return vd.execAsync(_savefile, vsheets, givenpath, savefunc, filetype)
+    return vd.execAsync(_savefiles, vsheets, givenpath, savefunc, filetype)
 
 
 @VisiData.api
@@ -150,7 +150,7 @@ def save_txt(vd, p, *vsheets):
     vd.status('%s save finished' % p)
 
 
-Sheet.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName()), sheet, confirm_overwrite=options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)')
+BaseSheet.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName()), sheet, confirm_overwrite=options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)')
 BaseSheet.addCommand('g^S', 'save-all', 'vd.saveSheets(inputPath("save all sheets to: "), *vd.stackedSheets, confirm_overwrite=options.confirm_overwrite)', 'save all sheets to given file or directory)')
 IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelectedRows, value=str(source)), *selectedRows, confirm_overwrite=options.confirm_overwrite)', 'save all selected sheets to given file or directory')
 Sheet.addCommand('', 'save-col', 'save_cols([cursorCol])', 'save current column only to filename in format determined by extension (default .tsv)')

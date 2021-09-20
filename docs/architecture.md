@@ -1,5 +1,8 @@
-
-# Architecture Overview
+---
+eleventyNavigation:
+  key: Architecture Overview
+  order: 99
+---
 
 ## The Core Principle: Columns are Functions of Rows
 

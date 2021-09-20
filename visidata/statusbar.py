@@ -1,22 +1,21 @@
 import collections
 import curses
 
-from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, theme, MissingAttrFormatter
+from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, MissingAttrFormatter
 
-__all__ = ['StatusSheet', 'status', 'error', 'fail', 'warning', 'debug']
 
-theme('disp_rstatus_fmt', ' {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus} {sheet.options.disp_selected_note}{sheet.nSelectedRows}', 'right-side status format string')
-theme('disp_status_fmt', '{sheet.shortcut}› {sheet.name}| ', 'status line prefix')
-theme('disp_lstatus_max', 0, 'maximum length of left status line')
-theme('disp_status_sep', ' | ', 'separator between statuses')
+vd.option('disp_rstatus_fmt', ' {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus} {sheet.options.disp_selected_note}{sheet.nSelectedRows}', 'right-side status format string')
+vd.option('disp_status_fmt', '{sheet.shortcut}› {sheet.name}| ', 'status line prefix')
+vd.option('disp_lstatus_max', 0, 'maximum length of left status line')
+vd.option('disp_status_sep', ' | ', 'separator between statuses')
 
-theme('color_keystrokes', 'white', 'color of input keystrokes on status line')
-theme('color_status', 'bold', 'status line color')
-theme('color_error', 'red', 'error message color')
-theme('color_warning', 'yellow', 'warning message color')
-theme('color_top_status', 'underline', 'top window status bar color')
-theme('color_active_status', 'bold', ' active window status bar color')
-theme('color_inactive_status', '8', 'inactive window status bar color')
+vd.option('color_keystrokes', 'bold 233 black on 110 cyan', 'color of input keystrokes on status line')
+vd.option('color_status', 'bold black on 110 cyan', 'status line color')
+vd.option('color_error', 'red', 'error message color')
+vd.option('color_warning', 'yellow', 'warning message color')
+vd.option('color_top_status', 'underline', 'top window status bar color')
+vd.option('color_active_status', 'black on 110 cyan', ' active window status bar color')
+vd.option('color_inactive_status', '8 on black', 'inactive window status bar color')
 
 BaseSheet.init('longname', lambda: '')
 
@@ -37,7 +36,7 @@ def statuses(vd):
 def statusHistory(vd):
     return list()  # list of [priority, statusmsg, repeats] for all status messages ever
 
-@VisiData.global_api
+@VisiData.api
 def status(vd, *args, priority=0):
     'Display *args* on status until next action.'
     if not args:
@@ -59,24 +58,24 @@ def addToStatusHistory(vd, *args, priority=0):
     vd.statusHistory.append([priority, args, 1])
     return True
 
-@VisiData.global_api
+@VisiData.api
 def error(vd, *args):
     'Abort with ExpectedException, and display *args* on status as an error.'
     vd.status(*args, priority=3)
     raise ExpectedException(args[0] if args else '')
 
-@VisiData.global_api
+@VisiData.api
 def fail(vd, *args):
     'Abort with ExpectedException, and display *args* on status as a warning.'
     vd.status(*args, priority=2)
     raise ExpectedException(args[0] if args else '')
 
-@VisiData.global_api
+@VisiData.api
 def warning(vd, *args):
     'Display *args* on status as a warning.'
     vd.status(*args, priority=1)
 
-@VisiData.global_api
+@VisiData.api
 def debug(vd, *args, **kwargs):
     'Display *args* on status if options.debug is set.'
     if options.debug:
@@ -179,15 +178,12 @@ def drawRightStatus(vd, scr, vs):
     active = vs is vd.activeSheet
 
     if active:
-        statcolors.append((vd.keystrokes or '', 'color_keystrokes'))
+        statcolors.append((vd.prettykeys(vd.keystrokes) or '', 'color_keystrokes'))
 
     if vs.currentThreads:
         statcolors.insert(0, vd.checkMemoryUsage())
-        if vs.progresses:
-            gerund = vs.progresses[0].gerund
-        else:
-            gerund = 'processing'
-        statcolors.insert(1, ('  %s %s…' % (vs.progressPct, gerund), 'color_working'))
+        gerunds = [p.gerund for p in vs.progresses if p.gerund] or ['processing']
+        statcolors.insert(1, ('  %s %s…' % (vs.progressPct, gerunds[0]), 'color_working'))
 
     if active and vd.currentReplay:
         statcolors.insert(0, (vd.replayStatus, 'color_status_replay'))

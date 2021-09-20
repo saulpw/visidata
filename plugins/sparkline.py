@@ -1,20 +1,20 @@
 """
 Generate sparkline column for numeric columns
 """
-from visidata import Column, Sheet, option, options
+from visidata import vd, Column, Sheet
 
 __author__ = 'Lucas Messenger @layertwo'
 __version__ = '0.2'
 
 
-option('disp_sparkline', '▁▂▃▄▅▆▇', 'characters to display sparkline')
+vd.option('disp_sparkline', '▁▂▃▄▅▆▇', 'characters to display sparkline')
 
 
 def sparkline(*values):
     """
     From *values generate string sparkline
     """
-    lines = options.disp_sparkline
+    lines = vd.options.disp_sparkline
     values = [v for v in values if isinstance(v, (int, float))]
     mx = max(values)
     mn = min(values)

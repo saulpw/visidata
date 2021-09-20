@@ -1,6 +1,7 @@
 from visidata import *
 
-def open_frictionless(p):
+@VisiData.api
+def open_frictionless(vd, p):
     return FrictionlessIndexSheet(p.name, source=p)
 
 class FrictionlessIndexSheet(IndexSheet):

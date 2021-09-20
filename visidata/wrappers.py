@@ -3,11 +3,11 @@
 from copy import copy
 import functools
 
-from visidata import options, stacktrace, option, BaseSheet
+from visidata import options, stacktrace, BaseSheet, vd
 
 __all__ = ['forward', 'wrmap', 'wrapply', 'TypedWrapper', 'TypedExceptionWrapper']
 
-option('null_value', None, 'a value to be counted as null', replay=True)
+vd.option('null_value', None, 'a value to be counted as null', replay=True)
 
 @BaseSheet.api
 def isNullFunc(sheet):

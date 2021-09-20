@@ -4,7 +4,7 @@ import curses
 
 import visidata
 
-__all__ = ['ENTER', 'ALT', 'ESC', 'asyncthread', 'VisiData', 'drawcache', 'drawcache_property']
+__all__ = ['ENTER', 'ALT', 'ESC', 'asyncthread', 'VisiData']
 
 
 ENTER='^J'
@@ -19,12 +19,6 @@ def asyncthread(func):
     def _execAsync(*args, **kwargs):
         return visidata.vd.execAsync(func, *args, **kwargs)
     return _execAsync
-
-# @drawcache is vd alias for @cache, since vd clears it every frame
-drawcache = visidata.cache
-
-def drawcache_property(func):
-    return property(drawcache(func))
 
 
 class VisiData(visidata.Extensible):
@@ -61,16 +55,21 @@ class VisiData(visidata.Extensible):
     @property
     def activeSheet(self):
         'Return top sheet on sheets stack, or cmdlog if no sheets.'
-        stack = self.activeStack
-        if stack:
-            return stack[0]
+        for vs in self.sheets:
+            if vs.pane and vs.pane == self.activePane:
+                return vs
+
+        for vs in self.sheets:
+            if vs.pane and vs.pane != self.activePane:
+                return vs
+
         return self._cmdlog
 
     @property
     def activeStack(self):
         return self.sheetstack() or self.sheetstack(-1)
 
-    @drawcache_property
+    @visidata.drawcache_property
     def mousereg(self):
         return []
 
@@ -118,7 +117,7 @@ class VisiData(visidata.Extensible):
 
     def getMouse(self, _scr, _x, _y, button):
         for scr, y, x, h, w, kwargs in self.mousereg[::-1]:
-            if scr == _scr and x <= _x < x+w and y <= _y < y+h and button in kwargs:
+            if scr is _scr and x <= _x < x+w and y <= _y < y+h and button in kwargs:
                 return kwargs[button]
 
     @property

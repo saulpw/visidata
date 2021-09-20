@@ -1,7 +1,7 @@
 from functools import wraps, lru_cache
 
 
-__all__ = ['Extensible', 'cache']
+__all__ = ['Extensible', 'cache', 'drawcache', 'drawcache_property']
 
 class Extensible:
     _cache_clearers = []  # list of func() to call in clearCaches()
@@ -88,3 +88,10 @@ def cache(func):
         return func(self, *args, **kwargs)
     Extensible._cache_clearers.append(call_if_not.cache_clear)
     return call_if_not
+
+
+# @drawcache is vd alias for @cache, since vd clears it every frame
+drawcache = cache
+
+def drawcache_property(func):
+    return property(drawcache(func))

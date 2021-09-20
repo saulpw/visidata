@@ -1,8 +1,9 @@
 from visidata import *
 
-def open_spss(p):
+@VisiData.api
+def open_spss(vd, p):
     return SpssSheet(p.name, source=p)
-open_sav = open_spss
+VisiData.open_sav = VisiData.open_spss
 
 
 class SpssSheet(Sheet):

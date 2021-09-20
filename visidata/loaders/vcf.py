@@ -1,7 +1,9 @@
 from visidata import *
 
 # requires (deb): libbz2-dev libcurl4-openssl-dev liblzma-dev
-def open_vcf(p):
+
+@VisiData.api
+def open_vcf(vd, p):
     return VcfSheet(p.name, source=p)
 
 def unbox(col, row):
