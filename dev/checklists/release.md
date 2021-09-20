@@ -3,7 +3,7 @@
 1. Merge `stable` to `develop` (if necessary)
 
 2. Verify that VisiData is up-to-date:
-    * vdmenu
+    * help menu
     * plugins.jsonl
 
 2. Verify that documentation/docstrings are up-to-date on features and functionality
@@ -13,10 +13,6 @@
     b. manpage;
 
     c. visidata.org; (formats?)
-
-    d. patrons.tsv;
-
-    e. contributors.tsv
 
 3. Ensure `develop` automated tests run correctly with dev/test.sh
 
@@ -39,6 +35,7 @@
    d. bump version in `__version__` in source code (visidata/main.py, visidata/__init__.py) and setup.py;
 
 6. Run dev/mkman.sh to build the manpage and updated website
+    - Run ./mkmanhtml.sh, and move that to visidata.org:site/docs/man, and to visidata:docs/man.md
 
 7. Push `develop` to testpypi
 
@@ -116,6 +113,7 @@ git push --tags
 16. Upload new motd
 
 17. Update the website by pushing to master. Update with new manpage. Update redirect to point to new manpage.
+    - release notes
 
 18. Comb through issues and close the ones that have been solved, referencing the version number
 

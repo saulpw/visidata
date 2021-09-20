@@ -2,6 +2,7 @@
 1. cmdlog + replay
     - logging of options
     - logging of rows and columns
+    - if empty sheet, row or column on cmdlog, executes command on current sheet, row, column
     - pause, continue, abort
     - test batch mode
         - bin/vd -b -p tests/append.vd
@@ -11,12 +12,14 @@
 5. syscopy
 6. plots and image-loaders (like png)
     - relationship between plots and mice
-7. savers and gSavers
 8. .visidatarc
     - numerical, boolean and string option
     - sheet-specific and global
     - motd_url
 9. using the pandas loader
+    - select
+    - edit
+    - frequency table
 10. large dataset (311)
 11. multiline scrolling tests
     - test case 1
@@ -45,7 +48,7 @@
     - -w and others should be set "globally" (work without -g option)
     - bin/vd -f xlsx sample_data/sample-sales-reps.xlsx -f json sample_data/y77d-th95.json.gz
         - the xlsx sheet should have filetype 'xlsx'
-    - bin/vd sample_data/sample-sales-reps.xlsx -f xlsx
+    - bin/vd sample_data/sample-sales-reps.xlsx -n -f xlsx
         - `o` another file
         - check that it loads
         - check that it does not show 'xlsx' on its sheet-specific options
@@ -55,6 +58,7 @@
     - -f should apply to inner file for zipped filetypes
         - bin/vd -f txt sample_data/y77d-th95.json.gz
 14. Testing the starting position syntax
+    - `bin/vd +:sample-salesv4:: sample_data/sample-sales-reps.xlsx`
 15. Test loading url
 16. Split window
     - make sure that if you exit split window, all the sheets from both panes can be accessible on the resulting stack
@@ -98,3 +102,4 @@
                 - if the second window is a smaller size, should it orient around the cursor position
     - using cursor in active pane
         - test both panes
+17. Anything new in this release (should it have its own automated test?)
