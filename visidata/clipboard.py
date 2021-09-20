@@ -58,7 +58,7 @@ def syscopyValue(sheet, val):
 
 @Sheet.api
 def syscopyCells(sheet, cols, rows, filetype=None):
-    filetype = filetype or vd.input("copy %d %s as filetype: " % (len(rows), sheet.rowtype), value=sheet.options.save_filetype)
+    filetype = filetype or vd.input("copy %d %s as filetype: " % (len(rows), sheet.rowtype), value=sheet.options.save_filetype or 'tsv')
     sheet.syscopyCells_async(cols, rows, filetype)
 
 
