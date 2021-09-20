@@ -1,0 +1,4 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.tsv	o	
+sample			import-python	math	gCtrl+X	import Python module in the global scope
+sample	OrderDate		addcol-expr	math.pi	=	create new column from Python expression, with column names as variables
