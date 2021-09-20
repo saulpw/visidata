@@ -1,4 +1,4 @@
-.Dd June 30, 2021
+.Dd September 19, 2021
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -80,13 +80,15 @@ cancel user input or abort all async threads on current sheet
 .It Ic "g^C"
 abort all secondary threads
 .It Ic "  q"
-quit current sheet
+quit current sheet or menu
 .It Ic "  Q"
 quit current sheet and free associated memory
 .It Ic " gq"
 quit all sheets (clean exit)
 .Pp
 .It Ic " ^H"
+.No activate help menu ( Ns Sy Enter Ns / Ns Sy left-mouse No to expand submenu or execute command)
+.It Ic "g^H"
 view this man page
 .It Ic "z^H"
 view sheet of command longnames and keybindings
@@ -230,7 +232,7 @@ add/reset cache for current/all visible column(s)
 .No modify selected rows in current/all visible column(s), replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
 .Pp
 .It Ic " (   g("
-.No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) fully
+.No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) one level
 .It Ic "z(  gz(" Ar depth
 .No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) to given Ar depth ( Ar 0 Ns = fully)
 .It Ic " )"
@@ -485,7 +487,7 @@ show version and copyright information on status line
 .It Ic " ^P"
 .No open Sy Status History
 .It "m" Ar keystroke
-.No first, begin recording macro; second, prompt for Ar keystroke No, and complete recording. Macro can then be executed everytime provided keystroke is used. Will override existing keybinding. Macros will run on current row, column, sheet.
+.No first, begin recording macro; second, prompt for Ar keystroke No , and complete recording. Macro can then be executed everytime provided keystroke is used. Will override existing keybinding. Macros will run on current row, column, sheet.
 .It "gm"
 .No open an index of all existing macros. Can be directly viewed with Sy Enter Ns , and then modified with Sy ^S Ns .
 .
@@ -498,8 +500,8 @@ open current row/cell/sheet as Python object
 .No evaluate Python Ar expr No and opens result as Python object
 .It Ic "z^X" Ar expr
 .No evaluate Python Ar expr Ns , in context of current row, and open result as Python object
-.It Ic "g^X" Ar stmt
-.No execute Python Ar stmt No in the global scope
+.It Ic "g^X" Ar module
+.No import Python Ar module No in the global scope
 .El
 .
 .Ss Internal Sheets List
@@ -849,6 +851,8 @@ overwrite existing files without confirmation
 .
 .El
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
+.It Sy --visidata-dir Ns = Ns Ar "str          " No "~/.visidata/"
+directory to load and store additional files
 .It Sy --mouse-interval Ns = Ns Ar "int        " No "1"
 max time between press/release for click (ms)
 .It Sy --null-value Ns = Ns Ar "NoneType       " No "None"
@@ -866,7 +870,7 @@ default column height
 .It Sy --textwrap-cells Ns = Ns Ar "bool       " No "True"
 wordwrap text for multiline rows
 .It Sy --quitguard No "                 False"
-confirm before quitting last sheet
+confirm before quitting modified sheet
 .It Sy --debug No "                     False"
 exit on error and display stacktrace
 .It Sy --skip Ns = Ns Ar "int                  " No "0"
@@ -893,18 +897,18 @@ string to join sheet or column names
 string to join display values
 .It Sy --wrap No "                      False"
 wrap text to fit window width on TextSheet
-.It Sy --save-filetype Ns = Ns Ar "str         " No "tsv"
+.It Sy --save-filetype Ns = Ns Ar "str         " No ""
 specify default file type to save as
 .It Sy --profile No "                   False"
 enable profiling on threads
 .It Sy --min-memory-mb Ns = Ns Ar "int         " No "0"
 minimum memory to continue loading and async processing
-.It Sy --input-history Ns = Ns Ar "str         " No ""
-basename of file to store persistent input history
 .It Sy --encoding Ns = Ns Ar "str              " No "utf-8"
 encoding passed to codecs.open
 .It Sy --encoding-errors Ns = Ns Ar "str       " No "surrogateescape"
 encoding_errors passed to codecs.open
+.It Sy --input-history Ns = Ns Ar "str         " No ""
+basename of file to store persistent input history
 .It Sy --bulk-select-clear No "         False"
 clear selected rows before new bulk selections
 .It Sy --some-selected-rows No "        False"
@@ -934,10 +938,10 @@ specify file type
 whether to prompt for overwrite confirmation on save
 .It Sy --safe-error Ns = Ns Ar "str            " No "#ERR"
 error string to use while saving
-.It Sy --clipboard-copy-cmd Ns = Ns Ar "str    " No ""
+.It Sy --clipboard-copy-cmd Ns = Ns Ar "str    " No "xclip -selection clipboard -filter"
 command to copy stdin to system clipboard
-.It Sy --clipboard-paste-cmd Ns = Ns Ar "str   " No ""
-command to get contents of system clipboard
+.It Sy --clipboard-paste-cmd Ns = Ns Ar "str   " No "xclip -selection clipboard -o"
+command to send contents of system clipboard to stdout
 .It Sy --fancy-chooser No "             False"
 a nicer selection interface for aggregators and jointype
 .It Sy --describe-aggrs Ns = Ns Ar "str        " No "mean stdev"
@@ -950,8 +954,6 @@ bin numeric columns into ranges
 time to wait between replayed commands, in seconds
 .It Sy --replay-movement No "           False"
 insert movements during replay
-.It Sy --visidata-dir Ns = Ns Ar "str          " No "~/.visidata/"
-directory to load and store additional files
 .It Sy --rowkey-prefix Ns = Ns Ar "str         " No "\[u30AD]"
 string prefix for rowkey in the cmdlog
 .It Sy --cmdlog-histfile Ns = Ns Ar "str       " No ""
@@ -1120,9 +1122,9 @@ status line prefix
 maximum length of left status line
 .It Sy "disp_status_sep    " No " | "
 separator between statuses
-.It Sy "color_keystrokes   " No "white"
+.It Sy "color_keystrokes   " No "bold 233 black on 110 cyan"
 color of input keystrokes on status line
-.It Sy "color_status       " No "bold"
+.It Sy "color_status       " No "bold black on 110 cyan"
 status line color
 .It Sy "color_error        " No "red"
 error message color
@@ -1130,9 +1132,9 @@ error message color
 warning message color
 .It Sy "color_top_status   " No "underline"
 top window status bar color
-.It Sy "color_active_status" No "bold"
+.It Sy "color_active_status" No "black on 110 cyan"
  active window status bar color
-.It Sy "color_inactive_status" No "8"
+.It Sy "color_inactive_status" No "8 on black"
 inactive window status bar color
 .It Sy "color_working      " No "green"
 color of system running smoothly
@@ -1142,6 +1144,28 @@ cell color to use when editing cell
 edit field fill character
 .It Sy "disp_unprintable   " No "\[u00B7]"
 substitute character for unprintables
+.It Sy "disp_menu          " No "True"
+show menu on top line when not active
+.It Sy "disp_menu_keys     " No "True"
+show keystrokes inline in submenus
+.It Sy "color_menu         " No "black on 110 cyan"
+color of menu items in general
+.It Sy "color_menu_active  " No "223 yellow on black"
+color of active menu items
+.It Sy "color_menu_spec    " No "black on 34 green"
+color of sheet-specific menu items
+.It Sy "color_menu_help    " No "black italic on 110 cyan"
+color of helpbox
+.It Sy "disp_menu_boxchars " No "\[u2502]\[u2502]\[u2500]\[u2500]\[u250C]\[u2510]\[u2514]\[u2518]\[u251C]\[u2524]"
+box characters to use for menus
+.It Sy "disp_menu_more     " No "\[u00BB]"
+command submenu indicator
+.It Sy "disp_menu_push     " No "\[u2398]"
+indicator if command pushes sheet onto sheet stack
+.It Sy "disp_menu_input    " No "\[u2026]"
+indicator if input required for command
+.It Sy "disp_menu_fmt      " No "Ctrl+H for help menu"
+right-side menu format string
 .It Sy "disp_histogram     " No "*"
 histogram element character
 .It Sy "disp_histolen      " No "50"
@@ -1230,7 +1254,7 @@ For example:
        L = sorted(values)
        return L[len(L)//2]
 
-   aggregator('median', median)
+   vd.aggregator('median', median)
 .Ed
 .Pp
 Functions defined in .visidatarc are available in python expressions (e.g. in derived columns).

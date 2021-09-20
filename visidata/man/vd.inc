@@ -1,4 +1,4 @@
-.Dd June 30, 2021
+.Dd September 19, 2021
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -80,13 +80,15 @@ cancel user input or abort all async threads on current sheet
 .It Ic "g^C"
 abort all secondary threads
 .It Ic "  q"
-quit current sheet
+quit current sheet or menu
 .It Ic "  Q"
 quit current sheet and free associated memory
 .It Ic " gq"
 quit all sheets (clean exit)
 .Pp
 .It Ic " ^H"
+.No activate help menu ( Ns Sy Enter Ns / Ns Sy left-mouse No to expand submenu or execute command)
+.It Ic "g^H"
 view this man page
 .It Ic "z^H"
 view sheet of command longnames and keybindings
@@ -230,7 +232,7 @@ add/reset cache for current/all visible column(s)
 .No modify selected rows in current/all visible column(s), replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
 .Pp
 .It Ic " (   g("
-.No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) fully
+.No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) one level
 .It Ic "z(  gz(" Ar depth
 .No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) to given Ar depth ( Ar 0 Ns = fully)
 .It Ic " )"
@@ -498,8 +500,8 @@ open current row/cell/sheet as Python object
 .No evaluate Python Ar expr No and opens result as Python object
 .It Ic "z^X" Ar expr
 .No evaluate Python Ar expr Ns , in context of current row, and open result as Python object
-.It Ic "g^X" Ar stmt
-.No execute Python Ar stmt No in the global scope
+.It Ic "g^X" Ar module
+.No import Python Ar module No in the global scope
 .El
 .
 .Ss Internal Sheets List
