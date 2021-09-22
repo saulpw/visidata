@@ -84,7 +84,12 @@ class PluginsSheet(JsonLinesSheet):
 
     @asyncsingle
     def reload(self):
-        self.source = urlcache(options.plugins_url or vd.fail(), days=1)  # for VisiDataMetaSheet.reload()
+        try:
+            self.source = urlcache(vd.options.plugins_url or vd.fail(), days=1)  # for VisiDataMetaSheet.reload()
+        except urllib.error.URLError as e:
+            vd.debug(e)
+            return
+
         super().reload.__wrapped__(self)
         self.addColumn(Column('available', width=0, getter=_installedStatus), index=1)
         self.addColumn(Column('installed', width=8, getter=lambda c,r: _loadedVersion(r)), index=2)
