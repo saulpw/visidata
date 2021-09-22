@@ -148,13 +148,7 @@ from .plugins import *
 
 from .colorsheet import *
 
-try:
-    import vdplus
-except ModuleNotFoundError as e:
-    pass
-
 from .deprecated import *
-
 
 import math
 from math import *
