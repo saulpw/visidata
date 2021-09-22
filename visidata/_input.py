@@ -6,7 +6,7 @@ import visidata
 
 from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiData
 from visidata import vd, options, colors
-from visidata import launchExternalEditor, suspend, ColumnItem, AttrDict
+from visidata import suspend, ColumnItem, AttrDict
 
 
 vd.option('color_edit_cell', 'white', 'cell color to use when editing cell')
@@ -215,7 +215,7 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
         elif ch == 'KEY_BTAB':                     v, i = complete_state.complete(v, i, -1)
         elif ch in ['^J', '^M']:                   break  # ENTER to accept value
         elif ch == '^K':                           v = v[:i]  # ^Kill to end-of-line
-        elif ch == '^O':                           v = launchExternalEditor(v)
+        elif ch == '^O':                           v = vd.launchExternalEditor(v)
         elif ch == '^R':                           v = str(value)  # ^Reload initial value
         elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1]), i)  # swap chars
         elif ch == '^U':                           v = v[i:]; i = 0  # clear to beginning
