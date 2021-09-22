@@ -103,3 +103,4 @@
     - using cursor in active pane
         - test both panes
 17. Anything new in this release (should it have its own automated test?)
+18. `edit-cell` and then `Ctrl+O` to launch editor.
