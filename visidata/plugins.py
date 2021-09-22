@@ -1,9 +1,14 @@
+import os.path
 import os
+import sys
 import re
 import zipfile
+import shutil
 import importlib
+import subprocess
+import urllib
 
-from visidata import *
+from visidata import VisiData, vd, Path, CellColorizer, JsonLinesSheet, AttrDict, urlcache, Column, Progress, ExpectedException, BaseSheet, asyncsingle, asyncthread
 
 
 vd.option('plugins_url', 'https://visidata.org/plugins/plugins.jsonl', 'source of plugins sheet')
@@ -14,10 +19,10 @@ def pluginsSheet(p):
     return PluginsSheet('plugins_global')
 
 def _plugin_path(plugin):
-    return Path(os.path.join(options.visidata_dir, "plugins", plugin.name+".py"))
+    return Path(os.path.join(vd.options.visidata_dir, "plugins", plugin.name+".py"))
 
 def _plugin_init():
-    return Path(os.path.join(options.visidata_dir, "plugins", "__init__.py"))
+    return Path(os.path.join(vd.options.visidata_dir, "plugins", "__init__.py"))
 
 def _plugin_import(plugin):
     return "import " + _plugin_import_name(plugin)
@@ -60,7 +65,7 @@ def _pluginColorizer(s,c,r,v):
 def pipinstall(vd, deps):
     'Install *deps*, a list of pypi modules to install via pip into the plugins-deps directory. Return True if successful (no error).'
     p = subprocess.Popen([sys.executable, '-m', 'pip', 'install',
-                        '--target', str(Path(options.visidata_dir)/"plugins-deps"),
+                        '--target', str(Path(vd.options.visidata_dir)/"plugins-deps"),
                       ] + deps,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
