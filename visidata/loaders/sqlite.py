@@ -29,6 +29,8 @@ class SqliteSheet(Sheet):
         return conn.execute(sql, parms)
 
     def iterload(self):
+        import sqlite3
+
         def parse_sqlite_type(t):
             m = re.match(r'(\w+)(\((\d+)(,(\d+))?\))?', t.upper())
             if not m: return anytype
