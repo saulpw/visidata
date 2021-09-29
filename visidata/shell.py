@@ -236,14 +236,14 @@ def copy_files(sheet, paths, dest):
     destdir = Path(dest)
     destdir.is_dir() or vd.fail('target must be directory')
     vd.status('copying %s %s to %s' % (len(paths), sheet.rowtype, destdir))
+    os.makedirs(destdir, exist_ok=True)
     for srcpath in Progress(paths, gerund='copying'):
         try:
-            if not srcpath.is_dir():
-                destpath = destdir/str(srcpath)
-                os.makedirs(destpath.parent, exist_ok=True)
-                shutil.copyfile(srcpath, destpath)
+            destpath = destdir/str(srcpath._path.name)
+            if srcpath.is_dir():
+                shutil.copy_tree(srcpath, destpath)
             else:
-                os.makedirs(p, exist_ok=True)
+                shutil.copyfile(srcpath, destpath)
         except Exception as e:
             vd.exceptionCaught(e)
 
