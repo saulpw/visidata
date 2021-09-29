@@ -51,9 +51,9 @@ def launchExternalEditor(vd, v, linenum=0):
 def launchExternalEditorPath(path, linenum=0):
         'Launch $EDITOR to edit *path* starting on line *linenum*.'
         if linenum:
-            launchEditor(path, '+%s' % linenum)
+            visidata.vd.launchEditor(path, '+%s' % linenum)
         else:
-            launchEditor(path)
+            visidata.vd.launchEditor(path)
 
         with open(path, 'r') as fp:
             try:

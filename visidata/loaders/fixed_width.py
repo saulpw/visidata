@@ -80,16 +80,18 @@ def save_fixed(vd, p, *vsheets):
             if len(vsheets) > 1:
                 fp.write('%s\n\n' % vs.name)
 
+            widths = {}  # Column -> width:int
             # headers
-            for col in sheet.visibleCols:
-                fp.write('{0:{width}}'.format(col.name, width=col.width))
+            for col in Progress(sheet.visibleCols, gerund='sizing'):
+                widths[col] = col.width or sheet.options.default_width or col.getMaxWidth(sheet.rows)
+                fp.write(('{0:%s} ' % widths[col]).format(col.name))
             fp.write('\n')
 
             # rows
             with Progress(gerund='saving'):
                 for dispvals in sheet.iterdispvals(format=True):
                     for col, val in dispvals.items():
-                        fp.write('{0:{align}{width}}'.format(val, width=col.width, align='>' if vd.isNumeric(col) else '<'))
+                        fp.write(('{0:%s%s.%s} ' % ('>' if vd.isNumeric(col) else '<', widths[col], widths[col])).format(val))
                     fp.write('\n')
 
             vd.status('%s save finished' % p)
