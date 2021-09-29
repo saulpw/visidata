@@ -1,5 +1,19 @@
 # VisiData version history
 
+# 2.6.1 (2021-09-28)
+
+## Bugfixes
+
+- [editor] fix sysopen-row (thanks @frosencrantz #1116)
+- [loaders fixed] fix saver (#1123)
+- [loaders shell] fix copy-files
+- [loaders sqlite] fix import error on exception (thanks @jsvine #1125)
+
+## Plugins
+
+- bump dedupe plugin to version 0.2.0 (thanks @jsvine)
+- bump vds3 to version 0.8 (thanks @ajkerrigan)
+
 # 2.6 (2021-09-19)
 
 ## Major feature
