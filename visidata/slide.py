@@ -91,11 +91,11 @@ Sheet.addCommand('zJ', 'slide-down-n', 'slide_row(cursorRowIndex, cursorRowIndex
 Sheet.addCommand('zK', 'slide-up-n', 'slide_row(cursorRowIndex, cursorRowIndex-int(input("slide row up n=", value=1)))', 'slide current row N positions up')
 
 Sheet.bindkey('KEY_SLEFT', 'slide-left')
-Sheet.bindkey('KEY_SR', 'slide-left')
+Sheet.bindkey('KEY_SR', 'slide-up')
 Sheet.bindkey('kDN', 'slide-down')
 Sheet.bindkey('kUP', 'slide-up')
 Sheet.bindkey('KEY_SRIGHT', 'slide-right')
-Sheet.bindkey('KEY_SF', 'slide-right')
+Sheet.bindkey('KEY_SF', 'slide-down')
 
 Sheet.bindkey('gKEY_SLEFT', 'slide-leftmost')
 Sheet.bindkey('gkDN', 'slide-bottom')
