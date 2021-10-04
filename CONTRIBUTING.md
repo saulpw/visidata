@@ -73,6 +73,17 @@ VisiData has two main branches:
 
 All pull requests should be submitted against `develop`. Submitters will need to e-sign a Copyright Assignment Agreement (CAA) before a pull request will be accepted.
 
+# Documentation and Help Text
+
+Follow these guidelines when writing documentation for VisiData, such as the help text for menu items:
+
+1. Use International English
+2. Avoid using pronouns. Use "you" or "they" where appropriate.
+3. Ensure that explanations are clear and precise. VisiData enables users to quickly query and change data in powerful ways, and our documentation should support that goal.
+4. Avoid assuming that users are familiar with command-line shells
+5. Avoid assuming that users are familiar with the Python programming language
+6. The name of the product is "VisiData", capitalized as shown.
+
 # Open Source License and Copyright
 
 VisiData is an open-source utility that can be installed and used for free (under the terms of the [GPL3](https://www.gnu.org/licenses/gpl-3.0.en.html)).
