@@ -17,7 +17,7 @@ __all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'TableSh
 
 
 vd.option('default_width', 20, 'default column width', replay=True)   # TODO: make not replay and remove from markdown saver
-vd.option('default_height', 10, 'default column height')
+vd.option('default_height', 4, 'default column height')
 vd.option('textwrap_cells', True, 'wordwrap text for multiline rows')
 
 vd.option('quitguard', False, 'confirm before quitting modified sheet')
@@ -332,19 +332,16 @@ class TableSheet(BaseSheet):
 
     @property
     def bottomRowIndex(self):
-        return max(self._rowLayout.keys()) if self._rowLayout else self.topRowIndex+self.nScreenRows-1
+        return self.topRowIndex+self.nScreenRows-1
 
     @bottomRowIndex.setter
     def bottomRowIndex(self, newidx):
-        'Set topRowIndex, by getting height of *newidx* row and going backwards until more than nScreenRows is allocated.'
-        nrows = 0
-        i = 0
-        while nrows < self.nScreenRows and newidx-i >= 0:
-            h = self.calc_height(self.rows[newidx-i])
-            nrows += h
-            i += 1
+        self._topRowIndex = newidx-self.nScreenRows+1
 
-        self._topRowIndex = newidx-i+2 if nrows == self.nScreenRows-1 else newidx-self.nScreenRows+1
+    @drawcache_property
+    def rowHeight(self):
+        cols = self.visibleCols
+        return max(c.height for c in cols) if cols else 1
 
     def __deepcopy__(self, memo):
         'same as __copy__'
@@ -371,7 +368,7 @@ class TableSheet(BaseSheet):
     @property
     def nScreenRows(self):
         'Number of visible rows at the current window height.'
-        return self.windowHeight-self.nHeaderRows-self.nFooterRows
+        return (self.windowHeight-self.nHeaderRows-self.nFooterRows)//self.rowHeight
 
     @drawcache_property
     def nHeaderRows(self):
@@ -570,8 +567,6 @@ class TableSheet(BaseSheet):
             self.topRowIndex = self.cursorRowIndex
         elif self.bottomRowIndex < self.cursorRowIndex:
             self.bottomRowIndex = self.cursorRowIndex
-        elif self.bottomRowIndex == self.cursorRowIndex and self._rowLayout and self._rowLayout[self.bottomRowIndex][1] > 1:
-            self.bottomRowIndex = self.cursorRowIndex
 
         if self.cursorCol and self.cursorCol.keycol:
             return
@@ -730,7 +725,7 @@ class TableSheet(BaseSheet):
 
         y = headerRow + numHeaderRows
 
-        rows = self.rows[self.topRowIndex:min(self.topRowIndex+self.nScreenRows, self.nRows)]
+        rows = self.rows[self.topRowIndex:min(self.topRowIndex+self.nScreenRows+1, self.nRows)]
         self.checkCursorNoExceptions()
 
         for rowidx, row in enumerate(rows):
@@ -771,12 +766,7 @@ class TableSheet(BaseSheet):
                         lines = [cellval.display]
                     displines[vcolidx] = (col, cellval, lines)
 
-            heights = [0]
-            for col, cellval, lines in displines.values():
-                h = len(lines)   # of this cell
-                heights.append(min(col.height, h))
-
-            return max(heights)
+            return self.rowHeight
 
     def drawRow(self, scr, row, rowidx, ybase, rowcattr: ColorAttr, maxheight,
             isNull='',
