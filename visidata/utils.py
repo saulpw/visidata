@@ -21,7 +21,7 @@ class AttrDict(dict):
     def __getattr__(self, k):
         try:
             v = self[k]
-            if isinstance(v, dict):
+            if isinstance(v, dict) and not isinstance(v, AttrDict):
                 v = AttrDict(v)
             return v
         except KeyError:
