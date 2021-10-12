@@ -365,6 +365,9 @@ def replay_sync(vd, cmdlog, live=False):
 @asyncthread
 def replay(vd, cmdlog):
         'Inject commands into live execution with interface.'
+        for thread in vd.threads:
+            if thread.name == 'replay':
+                thread.noblock = True
         vd.replay_sync(cmdlog, live=True)
 
 
