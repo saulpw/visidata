@@ -1,4 +1,4 @@
-from visidata import VisiData, vd, Column, Sheet, options, Fanout
+from visidata import VisiData, vd, Column, Sheet, Fanout
 
 @Column.api
 def setWidth(self, w):
@@ -14,13 +14,13 @@ def toggleWidth(self, width):
     if self.width != width:
         self.width = width
     else:
-        self.width = int(options.default_width)
+        self.width = int(self.sheet.options.default_width)
 
 
 @Column.api
 def toggleVisibility(self):
     if self.height == 1:
-        self.height = options.default_height
+        self.height = self.sheet.options.default_height
     else:
         self.height = 1
 
