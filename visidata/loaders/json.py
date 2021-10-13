@@ -98,6 +98,12 @@ def _rowdict(cols, row):
 
 
 @VisiData.api
+def encode_json(vd, row, cols, enc=_vjsonEncoder(sort_keys=False)):
+    'Return JSON string for given *row* and given *cols*.'
+    return enc.encode(_rowdict(cols, row))
+
+
+@VisiData.api
 def save_json(vd, p, *vsheets):
     vs = vsheets[0]
     with p.open_text(mode='w', encoding=vs.options.encoding) as fp:
