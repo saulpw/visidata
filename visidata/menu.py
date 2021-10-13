@@ -629,9 +629,7 @@ def drawMenu(vd, scr, sheet):
 
 
     rightdisp = sheet.options.disp_menu_fmt.format(sheet=sheet, vd=vd)
-    rightmenux = min(72, w-len(rightdisp)-1)
-    if rightmenux > x:
-        clipdraw(scr, 0, rightmenux, rightdisp, colors.color_menu)
+    clipdraw(scr, 0, x+4, rightdisp, colors.color_menu)
 
     if not sheet.activeMenuItems:
         return
