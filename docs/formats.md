@@ -149,6 +149,20 @@ vd -f pandas data.parquet
 
 loads a parquet file. When using the **pandas** loader, the `.fileformat` file extension is mandatory.
 
+To load a hierarchy of parquet files located in folder `data/`, run
+
+~~~
+vd -f parquet data/
+~~~
+
+or rename the directory to `data.parquet` and run
+
+~~~
+vd data.parquet -f pandas
+~~~
+
+This should similarly work for any format that has a `pandas.read_format()` function.
+
 ## vd {#vd}
 - Command history log format for a VisiData session.
 - `Ctrl+D` to save the current session's CommandLog.
