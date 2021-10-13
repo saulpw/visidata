@@ -97,6 +97,17 @@ eleventyNavigation:
     - `postgres_schema` (default: 'public') the desired schema for the Postgres database
 - `vd postgres://`*username*`:`*password*`@`*hostname*`:`*port*`/`*database* opens a connection to the given postgres database.
 
+### using VisiData as a pager within psql
+
+In psql:
+
+~~~
+\pset format csv
+\pset pager always
+\setenv PSQL_PAGER 'vd -f csv'
+\pset pager_min_lines
+~~~
+
 ## sqlite {#sqlite}
 - supports saving for CREATE/INSERT (not wholesale updates)
 - `z Ctrl+S` to commit any `add-row`/`edit-cell`/`delete-row`
