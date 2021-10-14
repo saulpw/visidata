@@ -116,11 +116,16 @@ class HtmlElementsSheet(Sheet):
         return HtmlElementsSheet('', source=self, elements=[row])
 
 
+class DocsSelectorColumn(Column):
+    def calcValue(self, row):
+        return [x for x in row.soup.select(self.expr)]
+
 class SelectorColumn(Column):
     def calcValue(self, row):
-        return [x.string for x in row.soup.select(self.expr)]
+        return [x for x in row.select(self.expr)]
 
 
+# urls=list of urls to scrape
 class HtmlDocsSheet(Sheet):
     rowtype='requests'  # rowdef: requests.Response
     columns = [
@@ -156,9 +161,19 @@ def soupstr(coll):
 
 vdtype(soupstr, 's')
 
+@TableSheet.api
+def scrape_urls(sheet, col, rows):
+    return HtmlDocsSheet(sheet.name, "selected_urls", urls=[col.getTypedValue(r) for r in rows])
+
 HtmlElementsSheet.addCommand('~', 'type-soupstr', 'cursorCol.type=soupstr')
 HtmlElementsSheet.addCommand('go', 'open-rows', 'for vs in openRows(selectedRows): vd.push(vs)')
-HtmlDocsSheet.addCommand(';', 'addcol-selector', 'sel=input("css selector: ", type="selector"); addColumn(SelectorColumn(sel, expr=sel, cache="async"))')
+TableSheet.addCommand('gzo', 'scrape-cells', 'vd.push(scrape_urls(cursorCol, selectedRows))')
+HtmlDocsSheet.addCommand(';', 'addcol-selector', 'sel=input("css selector: ", type="selector"); addColumn(DocsSelectorColumn(sel, expr=sel, cache="async"))')
+HtmlElementsSheet.addCommand(';', 'addcol-selector', 'sel=input("css selector: ", type="selector"); addColumn(SelectorColumn(sel, expr=sel, cache="async"))')
 
-vd.addGlobals({'SelectorColumn':SelectorColumn,
-                        'soupstr':soupstr})
+vd.addGlobals({
+    'HtmlDocsSheet':SelectorColumn,
+    'SelectorColumn':SelectorColumn,
+    'DocsSelectorColumn':DocsSelectorColumn,
+    'soupstr':soupstr
+})
