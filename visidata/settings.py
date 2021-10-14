@@ -363,6 +363,11 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
     for modname in (args.imports or vd.options.imports or '').split():
         try:
             vd.addGlobals(importlib.import_module(modname).__dict__)
+        except ModuleNotFoundError as e:
+            # issue #1131
+            if 'plugins' in e.args[0]:
+                continue
+            vd.exceptionCaught(e)
         except Exception as e:
             vd.exceptionCaught(e)
             continue
