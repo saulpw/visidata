@@ -60,7 +60,7 @@ def git_all(*args, git=loggit, **kwargs):
         cmd = git('--no-pager', *args, _decode_errors='replace', **kwargs)
         out = cmd.stdout
     except sh.ErrorReturnCode as e:
-        status('git '+' '.join(args), 'error=%s' % e.exit_code)
+        vd.status('git '+' '.join(args), 'error=%s' % e.exit_code)
         out = e.stdout
 
     out = out.decode('utf-8')
@@ -75,12 +75,12 @@ def git_lines(*args, git=loggit, **kwargs):
         for line in git('--no-pager', _err=err, *args, _decode_errors='replace', _iter=True, _bg_exc=False, **kwargs):
             yield line[:-1]  # remove EOL
     except sh.ErrorReturnCode as e:
-        status('git '+' '.join(args), 'error=%s' % e.exit_code)
+        vd.status('git '+' '.join(args), 'error=%s' % e.exit_code)
 
     errlines = err.getvalue().splitlines()
     if len(errlines) < 3:
         for line in errlines:
-            status('stderr: '+line)
+            vd.status('stderr: '+line)
     else:
         vd.push(TextSheet('git ' + ' '.join(args), source=errlines))
 
@@ -107,11 +107,11 @@ def git_iter(*args, git=loggit, sep='\0', **kwargs):
         errlines = err.getvalue().splitlines()
         if len(errlines) < 3:
             for line in errlines:
-                status(line)
+                vd.status(line)
         else:
             vd.push(TextSheet('git ' + ' '.join(args), source=errlines))
 
-        error('git '+' '.join(args)+'error=%s' % e.exit_code)
+        vd.error('git '+' '.join(args)+'error=%s' % e.exit_code)
 
     r = ''.join(chunks)
     if r:
@@ -120,7 +120,7 @@ def git_iter(*args, git=loggit, sep='\0', **kwargs):
     errlines = err.getvalue().splitlines()
     if len(errlines) < 3:
         for line in errlines:
-            status(line)
+            vd.status(line)
     else:
         vd.push(TextSheet('git ' + ' '.join(args), source=errlines))
 
@@ -140,7 +140,7 @@ def getRootSheet(sheet):
     elif isinstance(sheet.source, Path):
         return sheet
     else:
-        error('no apparent root GitStatus')
+        vd.error('no apparent root GitStatus')
 
 
 def getRepoPath(p):
@@ -185,7 +185,7 @@ class GitContext:
         self.extra_args.clear()
 
         for line in self.git_lines(*args, **kwargs):
-            status(line)
+            vd.status(line)
 
         if isinstance(self.source, GitSheet):
             self.source.reload()
@@ -203,11 +203,11 @@ class GitContext:
         elif inp.startswith('rebas') or inp.startswith('apply'):
             self.git('rebase', '--abort')  # or --quit?
         else:
-            status('nothing to abort')
+            vd.status('nothing to abort')
 
     def git_apply(self, hunk, *args):
         self.git("apply", "-p0", "-", *args, _in="\n".join(hunk[7]) + "\n")
-        status('applied hunk (lines %s-%s)' % (hunk[3], hunk[3]+hunk[4]))
+        vd.status('applied hunk (lines %s-%s)' % (hunk[3], hunk[3]+hunk[4]))
 
 
 class GitSheet(GitContext, Sheet):

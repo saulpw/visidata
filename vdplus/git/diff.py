@@ -1,9 +1,9 @@
 from visidata import *
 from .git import GitSheet
 
-option('git_diff_algo', 'minimal', 'algorithm to use for git diff')
+vd.option('git_diff_algo', 'minimal', 'algorithm to use for git diff')
 
-__all__ = ['DifferSheet', 'HunksSheet', 'HunkViewer', 'getCommitSheet', 'getStagedHunksSheet', 'getHunksSheet']
+__all__ = ['DifferSheet', 'HunksSheet', 'HunkViewer']
 
 
 # one column per ref
@@ -164,7 +164,8 @@ class DifferSheet(GitSheet):
                         continue  # header
 
 
-def getHunksSheet(parent, *files):
+@VisiData.api
+def getHunksSheet(vd, parent, *files):
     return HunksSheet('hunks', 'diff',
                   '--diff-algorithm=' + options.git_diff_algo,
                   '--patch',
@@ -172,7 +173,8 @@ def getHunksSheet(parent, *files):
                   '--no-color',
                   '--no-prefix', *[gf.filename for gf in files], source=parent)
 
-def getStagedHunksSheet(parent, *files):
+@VisiData.api
+def getStagedHunksSheet(vd, parent, *files):
     return HunksSheet('staged_hunks', 'diff', '--cached',
                   '--diff-algorithm=' + options.git_diff_algo,
                   '--patch',
@@ -180,7 +182,8 @@ def getStagedHunksSheet(parent, *files):
                   '--no-color',
                   '--no-prefix', *[gf.filename for gf in files], source=parent)
 
-def getCommitSheet(name, parent, *refids):
+@VisiData.api
+def getCommitSheet(vd, name, parent, *refids):
     return HunksSheet(name, 'show',
                   '--diff-algorithm=' + options.git_diff_algo,
                   '--patch',

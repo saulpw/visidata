@@ -3,12 +3,12 @@ from visidata import *
 from .git import GitSheet
 from .diff import DifferSheet
 
-option('vgit_show_ignored', False, '')
-theme('color_vgit_staged_mod', 'green', 'files staged with modifications')
-theme('color_vgit_staged_del', 'red', 'files staged for deletion')
-theme('color_vgit_staged_add', 'green', 'files staged for addition')
-theme('color_vgit_unstaged_del', '88', 'files deleted but unstaged')
-theme('color_vgit_untracked', '237 blue', 'ignored/untracked files')
+vd.option('vgit_show_ignored', False, '')
+vd.option('color_vgit_staged_mod', 'green', 'files staged with modifications')
+vd.option('color_vgit_staged_del', 'red', 'files staged for deletion')
+vd.option('color_vgit_staged_add', 'green', 'files staged for addition')
+vd.option('color_vgit_unstaged_del', '88', 'files deleted but unstaged')
+vd.option('color_vgit_untracked', '237 blue', 'ignored/untracked files')
 
 
 # cached by GitStatus sheets
@@ -186,6 +186,24 @@ GitStatus.addCommand(None, 'ignore-wildcard', 'open(workdir+"/.gitignore", "a").
 
 GitStatus.addCommand('z^J', 'diff-file-staged', 'vd.push(getStagedHunksSheet(sheet, cursorRow))', 'push staged diffs for this file'),
 GitStatus.addCommand('gz^J', 'diff-selected-staged', 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files'),
+
+BaseSheet.addCommand('^[g', 'menu-git', 'pressMenu("Git")', 'open Git submenu')
+
+vd.addMenuItem('Git', 'View staged changes', 'current file', 'diff-file-staged')
+vd.addMenuItem('Git', 'View staged changes', 'selected files', 'staged changes', 'diff-selected-staged')
+vd.addMenuItem('Git', 'Stage', 'current file', 'git-add')
+vd.addMenuItem('Git', 'Stage', 'selected files', 'git-add-selected')
+vd.addMenuItem('Git', 'Unstage', 'current file', 'git-reset')
+vd.addMenuItem('Git', 'Unstage', 'selected files', 'git-reset-selected')
+vd.addMenuItem('Git', 'Rename file', 'git-mv')
+vd.addMenuItem('Git', 'Delete', 'file', 'git-rm')
+vd.addMenuItem('Git', 'Delete', 'selected files', 'git-rm-selected')
+vd.addMenuItem('Git', 'Ignore', 'file', 'ignore-file')
+vd.addMenuItem('Git', 'Ignore', 'wildcard', 'ignore-wildcard')
+vd.addMenuItem('Git', 'Commit staged changes', 'git-checkout')
+vd.addMenuItem('Git', 'Revert unstaged changes', 'current file', 'git-checkout')
+
+vd.addMenuItem('View', 'Revert unstaged changes', 'current file', 'git-checkout')
 
 
 @GitStatus.api

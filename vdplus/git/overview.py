@@ -1,5 +1,5 @@
 from visidata import Sheet, Column, ColumnAttr, date, vlen, asyncthread, Path, ENTER, namedlist
-import vgit
+import git
 
 
 GitRepo = namedlist('GitRepo', 'path stashes cached changes'.split())

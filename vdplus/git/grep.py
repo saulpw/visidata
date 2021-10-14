@@ -1,8 +1,8 @@
 from visidata import Sheet, ColumnItem, asyncthread, globalCommand, ENTER
-import vgit
+import git
 
 
-class GitGrep(vgit.GitSheet):
+class GitGrep(git.GitSheet):
     rowtype = 'results' # rowdef: list(file, line, line_contents)
     columns = [
         ColumnItem('filename', 0),
