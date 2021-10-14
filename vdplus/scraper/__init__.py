@@ -144,7 +144,8 @@ class HtmlDocsSheet(Sheet):
         super().addRow(row, index=index)
         try:
             row.soup = vd.soup(row.text)
-        except Exception:
+        except Exception as e:
+            vd.exceptionCaught(e)
             row.soup = None
 
     def openRow(self, row):

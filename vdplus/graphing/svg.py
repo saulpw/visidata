@@ -1,6 +1,6 @@
 import collections
 
-from visidata import VisiData, Canvas, vd, numericCols, Progress
+from visidata import VisiData, Canvas, vd, Progress
 
 vd.option('plt_marker', '.', 'matplotlib.markers')
 

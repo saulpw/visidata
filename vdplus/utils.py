@@ -4,6 +4,7 @@ import subprocess
 from visidata import VisiData, vd, asyncthread
 
 
+# added to vdcore in 2.6
 @VisiData.api
 def launchBrowser(vd, *args):
     'Launch $BROWSER with *args* as arguments.'
