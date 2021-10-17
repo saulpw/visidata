@@ -17,6 +17,8 @@ def getSampleRows(sheet):
     'Return list of sample rows centered around the cursor.'
     n = sheet.options.default_sample_size
     if n == 0 or n >= sheet.nRows:
+        if n:
+            vd.warning('default_sample_size larger than number of rows; using all rows')
         return sheet.rows
     seq = sheet.rows
     start = math.ceil(sheet.cursorRowIndex - n / 2) % len(seq)
