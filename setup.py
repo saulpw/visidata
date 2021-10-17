@@ -25,7 +25,7 @@ setup(name='visidata',
       packages=['visidata',  'visidata.loaders', 'visidata.tests'],
       include_package_data=True,
       data_files = [('share/man/man1', ['visidata/man/vd.1', 'visidata/man/visidata.1'])],
-      package_data={'visidata': ['man/vd.1', 'man/vd.txt']},
+      package_data={'visidata': ['man/vd.1', 'man/vd.txt', 'ddw/input.ddw']},
       license='GPLv3',
       classifiers=[
           'Development Status :: 5 - Production/Stable',
