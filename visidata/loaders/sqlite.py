@@ -2,8 +2,6 @@ import re
 
 from visidata import *
 
-vd.option('sqlite_encoding', 'utf-8', 'decoder used by sqlite3', replay=True)
-
 @VisiData.api
 def open_sqlite(vd, p):
     return SqliteIndexSheet(p.name, source=p)
