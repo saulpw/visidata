@@ -80,8 +80,6 @@ def debug(vd, *args, **kwargs):
     'Display *args* on status if options.debug is set.'
     if options.debug:
         return vd.status(*args, **kwargs)
-    else:
-        return vd.addToStatusHistory(*args, **kwargs)
 
 def middleTruncate(s, w):
     if len(s) <= w:
