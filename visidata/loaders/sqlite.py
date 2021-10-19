@@ -21,7 +21,9 @@ class SqliteSheet(Sheet):
 
     def conn(self):
         import sqlite3
-        return sqlite3.connect(str(self.resolve()))
+        con = sqlite3.connect(str(self.resolve()))
+        con.text_factory = lambda s, enc=self.options.encoding: s.decode(enc)
+        return con
 
     def execute(self, conn, sql, parms=None):
         parms = parms or []
@@ -55,10 +57,7 @@ class SqliteSheet(Sheet):
                     if colkey:
                         self.setKeys([c])
 
-            try:
-                r = self.execute(conn, 'SELECT rowid, * FROM "%s"' % tblname)
-            except sqlite3.OperationalError:
-                vd.error('tables WITHOUT ROWID not supported')
+            r = self.execute(conn, 'SELECT rowid, * FROM "%s"' % tblname)
             yield from Progress(r, total=r.rowcount-1)
 
     @asyncthread
@@ -171,6 +170,7 @@ class SqliteQuerySheet(SqliteSheet):
 def save_sqlite(vd, p, *vsheets):
     import sqlite3
     conn = sqlite3.connect(str(p))
+    conn.text_factory = lambda s, enc=vsheets[0].options.encoding: s.decode(enc)
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
