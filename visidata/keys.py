@@ -16,8 +16,6 @@ visidata.vd.prettykeys_trdict = {
         'KEY_EOL':   'End',
         'KEY_PPAGE': 'PgUp',
         'KEY_NPAGE': 'PgDn',
-        'KEY_IC':    'Ins',
-        'KEY_DC':    'Del',
 
         'kUP5':      'Ctrl+Up',
         'kDN5':      'Ctrl+Down',
@@ -30,10 +28,13 @@ visidata.vd.prettykeys_trdict = {
         'KEY_IC5':   'Ctrl+Ins',
         'KEY_DC5':   'Ctrl+Del',
 
+        'KEY_IC':    'Ins',
+        'KEY_DC':    'Del',
+
+        'KEY_SRIGHT':'Shift+Right',
         'KEY_SR':    'Shift+Up',
         'KEY_SF':    'Shift+Down',
         'KEY_SLEFT': 'Shift+Left',
-        'KEY_SRIGHT':'Shift+Right',
         'KEY_SHOME': 'Shift+Home',
         'KEY_SEND':  'Shift+End',
         'KEY_SPREVIOUS': 'Shift+PgUp',
