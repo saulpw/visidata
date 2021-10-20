@@ -175,7 +175,7 @@ class TableSheet(BaseSheet):
         ColumnColorizer(2, 'color_current_col', lambda s,c,r,v: c is s.cursorCol),
         ColumnColorizer(1, 'color_key_col', lambda s,c,r,v: c and c.keycol),
         CellColorizer(0, 'color_default', lambda s,c,r,v: True),
-        RowColorizer(2, 'color_selected_row', lambda s,c,r,v: s.isSelected(r)),
+        RowColorizer(2, 'color_selected_row', lambda s,c,r,v: r and s.isSelected(r)),
         RowColorizer(1, 'color_error', lambda s,c,r,v: isinstance(r, (Exception, TypedExceptionWrapper))),
     ]
     nKeys = 0  # columns[:nKeys] are key columns
