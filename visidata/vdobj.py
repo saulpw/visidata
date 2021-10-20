@@ -17,6 +17,9 @@ def asyncthread(func):
     'Function decorator, to make calls to `func()` spawn a separate thread if available.'
     @wraps(func)
     def _execAsync(*args, **kwargs):
+        if args and isinstance(args[0], visidata.BaseSheet):  #1136: allow cancel of async methods on Sheet
+            if 'sheet' not in kwargs:
+                kwargs['sheet'] = args[0]
         return visidata.vd.execAsync(func, *args, **kwargs)
     return _execAsync
 
