@@ -205,7 +205,7 @@ def main_vd():
         options.quitguard = False
         vd.status = lambda *args, **kwargs: print(*args, file=sys.stderr)  # ignore kwargs (like priority)
         vd.editline = lambda *args, **kwargs: ''
-        vd.execAsync = lambda func, *args, **kwargs: func(*args, **kwargs) # disable async
+        vd.execAsync = lambda func, *args, sheet=None, **kwargs: func(*args, **kwargs) # disable async
 
     for cmd in (args.preplay or '').split():
         BaseSheet('').execCommand(cmd)
