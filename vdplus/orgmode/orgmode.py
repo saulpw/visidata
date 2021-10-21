@@ -1,13 +1,19 @@
 import collections
 import datetime
+import re
 
 from visidata import *
 import orgparse
 
 
 @VisiData.api
+def open_org(vd, p):
+    return OrgSheet(p.name, source=p, filetype='org')
+
+
+@VisiData.api
 def open_forg(vd, p):
-    return OrgSheet(p.name, source=p)
+    return OrgSheet(p.name, source=p, filetype='forg')
 
 
 class OrgRows(list):
@@ -15,12 +21,15 @@ class OrgRows(list):
         super().__init__(*args)
         self._sheet = sheet
 
-    # inputLongname
     def _deepiter(self, objlist):
         for obj in objlist:
-            yield obj
-            if self._sheet and id(obj) in self._sheet.opened_rows:
+            if not obj.parent and obj.children:
+                # ignore toplevel file, dive into subrows
                 yield from self._deepiter(obj.children)
+            else:
+                yield obj
+                if self._sheet and id(obj) in self._sheet.opened_rows:
+                    yield from self._deepiter(obj.children)
 
     @property
     def _actual_list(self):
@@ -96,15 +105,18 @@ def orgmode_parse_into(toprow, fullfile, **kwargs):
     top_section = section = toprow # AttrDict(contents='', tags=[], level=0, children=[])
 #    toprow.children = [section]
     for linenum, line in enumerate(lines):
-        section.tags.extend(re.findall(r':\S+?:', line))
+        section.tags.extend(re.findall(r':([\S:]+?):', line))
+        links = re.findall(r'\[.*?\]\(.*?\)', line)
+        if links:
+            section.links.extend(links)
+            vd.status(links)
         g = orgmode_parse_title(line)
         if g:
             assert top_section or section in section.parent.children
             parent = section
             section = OrgSheet().newRow()
             section.update(g)
-            section.linenum = linenum
-
+            section.linenum = linenum+1
 
             while parent and section.level < parent.level:
                 parent = parent.parent
@@ -112,7 +124,6 @@ def orgmode_parse_into(toprow, fullfile, **kwargs):
             if not parent:
                 toprow.children.append(section)
                 continue
-
 
             if section.level > parent.level:
                 parent.children.append(section)
@@ -159,14 +170,14 @@ def orgmode_parse_title(line):
 class OrgSheet(Sheet):
     defer = True
     columns = [
-        Column('id', width=15, getter=lambda c,r: r.path.stem, setter=lambda c,r,v: setattr(r, 'path', r.path.rename(r.path.with_stem(v)))),
         ItemColumn('path', width=0),
-        ItemColumn('date', width=0, type=date),
+        Column('id', width=0, getter=lambda c,r: r.path.stem),
         ItemColumn('title', width=40),
-        ItemColumn('contents', width=0),
-        Column('tags', width=10, getter=lambda c,r: ' '.join(r.tags)),
-        ItemColumn('children'),
-#       Column('linenum', type=int, getter=lambda c,r: r.linenum),
+        ItemColumn('date', width=0, type=date),
+        ItemColumn('tags', width=10, type=lambda v: ' '.join(v)),
+        ItemColumn('links', type=vlen),
+        ItemColumn('children', type=vlen),
+        ItemColumn('linenum', width=0, type=int),
         Column('to_string', width=0, getter=lambda c,r: orgmode_to_string(r)),
         OrgContentsColumn('file_string', width=0, getter=lambda c,r: r.file_string),
     ]
@@ -180,6 +191,9 @@ class OrgSheet(Sheet):
     @property
     def rows(self):
         return self._rows
+
+    def isSelected(self, row):
+        return super().isSelected(row) or super().isSelected(_root(row))
 
     @rows.setter
     def rows(self, v):
@@ -199,23 +213,26 @@ class OrgSheet(Sheet):
             self.opened_rows.clear()
 
     def newRow(self):
-        return AttrDict(contents='', tags=[], children=[], level=0)
+        return AttrDict(contents='', tags=[], children=[], links=[], level=0, linenum=0)
 
     def iterload(self):
         self.rows = []
-        for fn in self.source.open_text():
-            p = Path(fn.rstrip())
+        if self.filetype == 'forg':
+            for fn in self.source.open_text():
+                yield self.parse_orgmd(Path(fn.rstrip()))
+        elif self.filetype == 'org':
+            yield self.parse_orgmd(self.source)
 
-            row = self.newRow()
-            row.path = p
-            row.tags = []
-            st = p.stat()
-            if st:
-                row.date = st.st_mtime
+    def parse_orgmd(self, path):
+        row = self.newRow()
+        row.path = path
+        st = path.stat()
+        if st:
+            row.date = st.st_mtime
 
-            row.file_string = p.read_text()
-            orgmode_parse_into(row, row.file_string, path=p)
-            yield row
+        row.file_string = path.read_text()
+        orgmode_parse_into(row, row.file_string, path=path)
+        return row
 
     def draw(self, scr):
         super().draw(scr)
@@ -274,7 +291,7 @@ def combine_rows(sheet, rows):
 
 
 def _root(row):
-    while row.parent:
+    while row and row.parent:
         row = row.parent
     return row
 
@@ -283,9 +300,19 @@ def _root(row):
 def sysopen_row(sheet, row):
     root = _root(row)
     if root.path.exists():
-        vd.launchEditor(root.path)
+        vd.launchEditor(root.path, '+%s'%row['linenum'])
     else:
         orgmode_parse_into(row, vd.launchExternalEditor(root.file_string))
+
+@VisiData.api
+def save_org(vd, p, *vsheets):
+    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
+        for vs in vsheets:
+            if isinstance(vs, OrgSheet):
+                for row in vs.rows:
+                    print(orgmode_to_string(row).strip(), file=fp)
+            else:
+                vd.warning('not implemented')
 
 
 OrgSheet.addCommand('^O', 'sysopen-row', 'sysopen_row(cursorRow)', 'open current file in external $EDITOR')
@@ -304,4 +331,4 @@ if __name__ == '__main__':
         sect = OrgSheet().newRow()
         sect.file_string = Path(fn).read_text()
         orgmode_parse_into(sect, sect.file_string, path=Path(fn))
-        print(orgmode_to_string(sect), end='')
+        print(orgmode_to_string(sect).strip())

@@ -7,10 +7,12 @@ Turns a directory of .org or .md files into database that can be worked like a Z
 - `--- [comment]` at start of line starts a new section
 - any number of `#` or `*` (followed by a space) leads a headline
 - `#+key: value` adds metadata to next element (headline, table, section, )
-- `:tag1:tag2:`
+- orgmode style tags: `:tag1:tag2:`
 - `[[tagname]]` links to that set of tags
 - `[[url]]` links to external url
-- `[[url][linktext]]` links to url with linktext
+- orgmode and markdown links
+   - `[[url][linktext]]`
+   - `[linktext](url)`
 - all other markup/orgmode/whatever is ignored and passed through
 
 ## Usage
@@ -34,5 +36,4 @@ Then within VisiData:
 
 - The zettel should be atomic, but too many individual files require specialized tools and workflows.
 - A small book should be one file; a large book maybe one file per chapter.
-
 
