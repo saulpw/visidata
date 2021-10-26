@@ -146,18 +146,15 @@ BaseSheet.bindkey('KEY_LEFT', 'go-left')
 BaseSheet.bindkey('KEY_DOWN', 'go-down')
 BaseSheet.bindkey('KEY_UP', 'go-up')
 BaseSheet.bindkey('KEY_RIGHT', 'go-right')
-BaseSheet.bindkey('KEY_HOME', 'go-leftmost')
-BaseSheet.bindkey('KEY_END', 'go-rightmost')
 BaseSheet.bindkey('KEY_NPAGE', 'go-pagedown')
 BaseSheet.bindkey('KEY_PPAGE', 'go-pageup')
-
-BaseSheet.bindkey('kHOM5', 'go-top')  # Ctrl+Home
-BaseSheet.bindkey('KEY_EOL', 'go-bottom')  # Ctrl+End
 
 BaseSheet.bindkey('gKEY_LEFT', 'go-leftmost'),
 BaseSheet.bindkey('gKEY_RIGHT', 'go-rightmost'),
 BaseSheet.bindkey('gKEY_UP', 'go-top'),
 BaseSheet.bindkey('gKEY_DOWN', 'go-bottom'),
+BaseSheet.bindkey('Home', 'go-top')
+BaseSheet.bindkey('End', 'go-bottom')
 
 Sheet.bindkey('BUTTON1_CLICKED', 'go-mouse')
 Sheet.bindkey('BUTTON3_PRESSED', 'go-mouse')
