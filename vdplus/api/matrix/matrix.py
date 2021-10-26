@@ -129,4 +129,5 @@ class MatrixSheet(Sheet):
 
 MatrixSheet.init('event_index', dict)
 
-MatrixSheet.addCommand('a', 'add-message', 'cursorRow.room.send_text(input(cursorRow.room.display_name+"> "))')
+MatrixSheet.addCommand('a', 'add-msg', 'cursorRow.room.send_text(input(cursorRow.room.display_name+"> "))', 'send chat message to current room')
+vd.addMenuItem('Edit', 'Add', '+matrix message', 'add-msg')

@@ -165,11 +165,11 @@ vdtype(soupstr, 's')
 def scrape_urls(sheet, col, rows):
     return HtmlDocsSheet(sheet.name, "selected_urls", urls=[col.getTypedValue(r) for r in rows])
 
-HtmlElementsSheet.addCommand('~', 'type-soupstr', 'cursorCol.type=soupstr')
-HtmlElementsSheet.addCommand('go', 'open-rows', 'for vs in openRows(selectedRows): vd.push(vs)')
-TableSheet.addCommand('gzo', 'scrape-cells', 'vd.push(scrape_urls(cursorCol, selectedRows))')
-HtmlDocsSheet.addCommand(';', 'addcol-selector', 'sel=input("css selector: ", type="selector"); addColumn(DocsSelectorColumn(sel, expr=sel, cache="async"))')
-HtmlElementsSheet.addCommand(';', 'addcol-selector', 'sel=input("css selector: ", type="selector"); addColumn(SelectorColumn(sel, expr=sel, cache="async"))')
+HtmlElementsSheet.addCommand('~', 'type-soupstr', 'cursorCol.type=soupstr', 'set type of current column to list of html elements')
+HtmlElementsSheet.addCommand('go', 'open-rows', 'for vs in openRows(selectedRows): vd.push(vs)', 'open sheet for each selected element')
+TableSheet.addCommand('gzo', 'scrape-cells', 'vd.push(scrape_urls(cursorCol, selectedRows))', 'open HTML Documents sheet from selected URLs')
+HtmlDocsSheet.addCommand(';', 'addcol-selector', 'sel=input("css selector: ", type="selector"); addColumn(DocsSelectorColumn(sel, expr=sel, cache="async"))', 'add column derived from css selector of current column')
+HtmlElementsSheet.addCommand(';', 'addcol-selector', 'sel=input("css selector: ", type="selector"); addColumn(SelectorColumn(sel, expr=sel, cache="async"))',  'add column derived from css selector of current column')
 
 vd.addGlobals({
     'HtmlDocsSheet':SelectorColumn,
@@ -177,3 +177,5 @@ vd.addGlobals({
     'DocsSelectorColumn':DocsSelectorColumn,
     'soupstr':soupstr
 })
+
+vd.addMenuItem('Data', '+Scrape', 'selected cells', 'scrape-cells')

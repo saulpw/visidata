@@ -387,15 +387,22 @@ class VirtualRCStream(TableSheet, VirtualRCSheet):
         else:
             vd.warning('unknown msg type "%s"' % msg['type'])
 
-VirtualRCSheet.addCommand('', 'open-rc-msgs', 'vd.push(vd.vrc.botResponses)')
-VirtualRCSheet.addCommand('', 'open-rc-stream', 'vd.push(vd.vrc.streamSheet)')
+VirtualRCSheet.addCommand('', 'open-rc-msgs', 'vd.push(vd.vrc.botResponses)', 'open RCTogether bot responses')
+VirtualRCSheet.addCommand('', 'open-rc-stream', 'vd.push(vd.vrc.streamSheet)', 'open RCTogether message stream')
 
-VirtualRCSheet.addCommand('`', 'open-backing', 'vd.push(vd.vrc.world)')
-VirtualRCWorldSheet.addCommand('`', 'open-world', 'vd.push(source)')
+VirtualRCSheet.addCommand('`', 'open-backing', 'vd.push(vd.vrc.world)', 'open RCTogether world map')
+VirtualRCWorldSheet.addCommand('`', 'open-world', 'vd.push(source)', 'open RCTogether world sheet')
 
 
-VirtualRCSheet.addCommand('a', 'add-msg', 'send_msg(input("message: "))')
+VirtualRCSheet.addCommand('a', 'add-msg', 'send_msg(input("message: "))', 'send RCTogether message from bot')
 #VirtualRCWorld.addCommand('w', 'add-wall', 'vrc.post("walls", {"bot_id":vd.vrc.botid}, pos=dict(x=cursorBox.x1, y=cursorBox.y1), color="yellow", wall_text="F")', 'add wall at cursor')
 #VirtualRCWorld.addCommand('n', 'add-note', 'vrc.post("notes", {"bot_id":vd.vrc.botid}, pos=dict(x=cursorBox.x1, y=cursorBox.y1), color="yellow", wall_text="F")', 'add note at cursor')
-VirtualRCWorld.addCommand('b', 'add-bot', 'vrc.add_bots(1, cursorBox.x1, cursorBox.y1)', 'add bot at cursor')
-VirtualRCWorld.addCommand('gb', 'add-bots', 'vrc.add_bots(int(input("# bots to create: ")), cursorBox.x1, cursorBox.y1)', 'add bots at cursor')
+VirtualRCWorld.addCommand('b', 'add-bot', 'vrc.add_bots(1, cursorBox.x1, cursorBox.y1)', 'add bot at cursor',)
+VirtualRCWorld.addCommand('gb', 'add-bots', 'vrc.add_bots(int(input("# bots to create: ")), cursorBox.x1, cursorBox.y1)', 'add multiple bots at cursor')
+
+vd.addMenuItem('Edit', 'Add', '+RCTogether bots', 'add-bots')
+vd.addMenuItem('Edit', 'Add', '+RCTogether chat message', 'add-msg')
+vd.addMenuItem('View', '+RCTogether', 'world map', 'open-backing')
+vd.addMenuItem('View', '+RCTogether', 'world sheet', 'open-world')
+vd.addMenuItem('View', '+RCTogether', 'bot responses', 'open-rc-msgs')
+vd.addMenuItem('View', '+RCTogether', 'message stream', 'open-rc-stream')

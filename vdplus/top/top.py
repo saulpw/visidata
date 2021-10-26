@@ -181,10 +181,10 @@ UsefulProcessesSheet.addCommand('', 'open-rlimits', 'vd.push(RlimitsSheet(cursor
 
 vd.addMenuItem('System', 'Signal', 'current process', 'TERMinate', 'term-process')
 vd.addMenuItem('System', 'Signal', 'current process', 'KILL', 'kill-process')
-vd.addMenuItem('System', 'Signal', 'current process', 'choose type', 'signal-process')
+vd.addMenuItem('System', 'Signal', 'current process', 'choose signal', 'signal-process')
 vd.addMenuItem('System', 'Signal', 'selected processes', 'TERMinate', 'term-selected')
 vd.addMenuItem('System', 'Signal', 'selected processes', 'KILL', 'kill-selected')
-vd.addMenuItem('System', 'Signal', 'selected processes', 'choose type', 'signal-selected')
+vd.addMenuItem('System', 'Signal', 'selected processes', 'choose signal', 'signal-selected')
 vd.addMenuItem('View', 'Resource limits', 'open-rlimits')
 vd.addMenuItem('System', '+Statistics', 'CPU', 'open-cpu')
 vd.addMenuItem('System', '+Statistics', 'Memory', 'open-memory')

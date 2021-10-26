@@ -2,18 +2,17 @@
 from visidata import vd, addGlobals, asyncthread, Sheet, ItemColumn
 from visidata import *
 
-__all__ = ['openurl_clickhouse']
 
 vd.option('clickhouse_host', '', '')
 vd.option('clickhouse_port', 9000, '')
 
-def openurl_clickhouse(p, filetype=None):
+@VisiData.api
+def openurl_clickhouse(vd, p, filetype=None):
     url = urlparse(p.given)
     options.clickhouse_host = url.hostname
     options.clickhouse_port = url.port
     return ClickhouseIndexSheet(p.name, source=p)
 
-BaseSheet.addCommand(ALT+'c', 'open-clickhouse', 'vd.push(vd.clickhouse_queries)')
 
 class ClickhouseQuerySheet(Sheet):
     columns = [
@@ -54,6 +53,7 @@ class ClickhouseSheet(Sheet):
         for r in result:
             self.addRow(r)
 
+
 class ClickhouseIndexSheet(IndexSheet):
     @asyncthread
     def reload(self):
@@ -69,4 +69,6 @@ class ClickhouseDbSheet(IndexSheet):
         for r in vd.clickhouse_client.execute('SHOW TABLES'):
             self.addRow(ClickhouseSheet(r[0], source=self, query='SELECT * FROM %s LIMIT 100' % r[0]))
 
-addGlobals({'openurl_clickhouse': openurl_clickhouse})
+
+BaseSheet.addCommand('', 'open-clickhouse', 'vd.push(vd.clickhouse_queries)', 'open sheet of clickhouse queries')
+vd.addMenuItem('File', '+Open API', 'clickhouse queries', 'open-clickhouse')

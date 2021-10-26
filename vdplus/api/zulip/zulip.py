@@ -209,3 +209,11 @@ BaseSheet.addCommand('', 'open-zulip-msgs', 'vd.push(vd.allMessages)', 'push lis
 
 ZulipMessagesSheet.addCommand('', 'reply-zulip-msg', 'reply_message(input(cursorRow["display_recipient"][1]["short_name"]+"> ", "message"), cursorRow)', 'reply to current topic')
 ZulipMessagesSheet.addCommand('', 'edit-zulip-msg', 'update_message(cursorRow["id"], editCell(3, cursorRowIndex))', 'edit message content')
+
+vd.addMenuItem('Zulip', '+Open', 'profile', 'open-zulip-profile')
+vd.addMenuItem('Zulip', '+Open', 'member list', 'open-zulip-members')
+vd.addMenuItem('Zulip', '+Open', 'streams', 'open-zulip-streams')
+vd.addMenuItem('Zulip', '+Open', 'subscriptions', 'open-zulip-subs')
+vd.addMenuItem('Zulip', '+Open', 'messages', 'open-zulip-subs')
+vd.addMenuItem('Zulip', '+Reply', 'reply-zulip-msg')
+vd.addMenuItem('Zulip', '+Edit message', 'edit-zulip-msg')

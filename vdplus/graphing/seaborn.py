@@ -63,4 +63,5 @@ def plotsea(sheet):
     plt.show()
 
 
-GraphSheet.addCommand('.', 'plot-seaborn', 'plotsea()' ,'')
+GraphSheet.addCommand('.', 'plot-seaborn', 'plotsea()', 'plot current graph using matplotlib/seaborn')
+vd.addMenuItem('Plot', 'Graph', '+using matplotlib', 'plot-seaborn')
