@@ -151,6 +151,7 @@ import visidata.colorsheet
 from .deprecated import *
 
 import math
+import random
 from math import *
 
 vd.finalInit()
