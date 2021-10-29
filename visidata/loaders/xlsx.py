@@ -51,9 +51,10 @@ class XlsxSheet(SequenceSheet):
             self.addColumn(AttrColumn('', column_letter+'.value'))
 
     def iterload(self):
+        from openpyxl.utils.cell import get_column_letter
         worksheet = self.source
         for row in Progress(worksheet.iter_rows(), total=worksheet.max_row or 0):
-            yield AttrDict({cell.column_letter:cell for cell in row})
+            yield AttrDict({get_column_letter(i+1):cell for i, cell in enumerate(row)})
 
 
 class XlsIndexSheet(IndexSheet):

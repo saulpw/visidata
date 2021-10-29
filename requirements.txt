@@ -4,7 +4,7 @@ python-dateutil     # date type
 pandas>=1.0.5       # dta (Stata)
 requests            # http
 lxml                # html/xml
-openpyxl            # xlsx
+openpyxl>= 2.4      # xlsx
 xlrd                # xls
 h5py                # hdf5
 psycopg2-binary     # postgres
