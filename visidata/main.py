@@ -81,7 +81,10 @@ optalias('force_valid_colnames', 'clean_names')  # deprecated
 
 def main_vd():
     'Open the given sources using the VisiData interface.'
-    locale.setlocale(locale.LC_ALL, '')
+    try:
+        locale.setlocale(locale.LC_ALL, '')
+    except locale.Error as e:
+        vd.warning(e)
     warnings.showwarning = vd.warning
 
     flPipedInput = not sys.stdin.isatty()
