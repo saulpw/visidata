@@ -22,7 +22,7 @@ class SqliteSheet(Sheet):
     def conn(self):
         import sqlite3
         con = sqlite3.connect(str(self.resolve()))
-        con.text_factory = lambda s, enc=self.options.encoding: s.decode(enc)
+        con.text_factory = lambda s, enc=self.options.encoding, encerrs=self.options.encoding_errors: s.decode(enc, encerrs)
         return con
 
     def execute(self, conn, sql, parms=None):
