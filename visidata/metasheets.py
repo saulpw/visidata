@@ -85,7 +85,7 @@ class OptionsSheet(Sheet):
     rowtype = 'options'
     precious = False
     columns = (
-        ColumnAttr('option', 'name'),
+        Column('option', getter=lambda col,row: row.name),
         Column('value',
             getter=lambda col,row: col.sheet.diffOption(row.name),
             setter=lambda col,row,val: options.set(row.name, val, col.sheet.source),
