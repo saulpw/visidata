@@ -81,12 +81,15 @@ class XlsSheet(SequenceSheet):
             yield list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols))
 
 
-def xls_name(name):
-    # sheet name can not be longer than 31 characters
-    xname = cleanName(name)[:31]
-    if xname != name:
-        vd.warning(f'{name} saved as {xname}')
-    return xname
+@Sheet.property
+def xls_name(vs):
+    name = vs.name
+    if vs.options.clean_names:
+        name = ''.join('_' if ch in ':[]*?/\\' else ch for ch in vs.name) #1122
+        name = cleaned_name[:31]  #594
+        name = name.strip('_')
+
+    return name
 
 
 @VisiData.api
@@ -97,7 +100,9 @@ def save_xlsx(vd, p, *sheets):
     wb.remove_sheet(wb['Sheet'])
 
     for vs in sheets:
-        ws = wb.create_sheet(title=xls_name(vs.name))
+        if vs.xls_name != vs.name:
+            vd.warning(f'saving {vs.name} as {vs.xls_name}')
+        ws = wb.create_sheet(title=vs.xls_name)
 
         headers = [col.name for col in vs.visibleCols]
         ws.append(headers)
@@ -127,7 +132,9 @@ def save_xls(vd, p, *sheets):
     wb = xlwt.Workbook()
 
     for vs in sheets:
-        ws1 = wb.add_sheet(xls_name(vs.name))
+        if vs.xls_name != vs.name:
+            vd.warning(f'saving {vs.name} as {vs.xls_name}')
+        ws1 = wb.add_sheet(vs.xls_name)
         for col_i, col in enumerate(vs.visibleCols):
             ws1.write(0, col_i, col.name)
 
