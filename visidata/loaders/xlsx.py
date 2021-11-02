@@ -83,7 +83,7 @@ class XlsSheet(SequenceSheet):
 
 @Sheet.property
 def xls_name(vs):
-    name = vs.name
+    name = vs.names[-1]
     if vs.options.clean_names:
         name = ''.join('_' if ch in ':[]*?/\\' else ch for ch in vs.name) #1122
         name = cleaned_name[:31]  #594
@@ -100,7 +100,7 @@ def save_xlsx(vd, p, *sheets):
     wb.remove_sheet(wb['Sheet'])
 
     for vs in sheets:
-        if vs.xls_name != vs.name:
+        if vs.xls_name != vs.names[-1]:
             vd.warning(f'saving {vs.name} as {vs.xls_name}')
         ws = wb.create_sheet(title=vs.xls_name)
 

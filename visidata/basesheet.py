@@ -87,8 +87,9 @@ class BaseSheet(DrawablePane):
         return vd.OptionsObject(vd._options, obj=self)
 
     def __init__(self, *names, **kwargs):
-        self._name = None
-        self.name = self.options.name_joiner.join(str(x) for x in names)
+        self._name = None   # initial cache value necessary for self.options
+        self.names = names
+        self.name = self.options.name_joiner.join(str(x) for x in self.names)
         self.source = None
         self.rows = UNLOADED      # list of opaque objects
         self._scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
@@ -177,18 +178,24 @@ class BaseSheet(DrawablePane):
         return escaped
 
     @property
+    def names(self):
+        return self._names
+
+    @names.setter
+    def names(self, names):
+        self._names = names
+        self.name = self.options.name_joiner.join(self.maybeClean(str(x)) for x in self._names)
+
+    @property
     def name(self):
         'Name of this sheet.'
-        try:
-            return self._name
-        except AttributeError:
-            return self.rowtype
+        return self._name
 
     @name.setter
     def name(self, name):
         'Set name without spaces.'
-        if self._name:
-            vd.addUndo(setattr, self, '_name', self._name)
+        if self._names:
+            vd.addUndo(setattr, self, '_names', self._names)
         self._name = self.maybeClean(str(name))
 
     def maybeClean(self, s):
