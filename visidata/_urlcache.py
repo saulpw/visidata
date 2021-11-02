@@ -6,7 +6,7 @@ import urllib.parse
 
 from visidata import vd, VisiData, Path, options, modtime
 
-@VisiData.api
+@VisiData.global_api
 def urlcache(vd, url, days=1, text=True, headers={}):
     'Return Path object to local cache of url contents.'
     p = Path(os.path.join(options.visidata_dir, 'cache', urllib.parse.quote(url, safe='')))
