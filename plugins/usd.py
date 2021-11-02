@@ -2,7 +2,7 @@
 Uses data from fixer.io
 '''
 
-from visidata import vd, urlcache
+from visidata import vd
 import functools
 import json
 
@@ -21,7 +21,7 @@ currency_symbols = {
 
 def currency_rates_json(date='latest'):
     url = 'http://data.fixer.io/api/%s?access_key=%s' % (date, vd.options.fixer_key)
-    return urlcache(url).read_text()
+    return vd.urlcache(url).read_text()
 
 @functools.lru_cache()
 def currency_rates():
