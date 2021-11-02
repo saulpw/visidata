@@ -10,7 +10,7 @@ options.motd_url may be set to another URL, or empty to disable entirely.
 
 import random
 
-from visidata import options, asyncsingle, urlcache, vd, VisiData
+from visidata import options, asyncsingle, vd, VisiData
 
 vd.option('motd_url', 'https://visidata.org/motd-'+vd.version, 'source of randomized startup messages', sheettype=None)
 
@@ -22,7 +22,7 @@ vd.motd = ''
 def domotd(vd):
     try:
         if options.motd_url:
-            p = urlcache(options.motd_url, days=1)
+            p = vd.urlcache(options.motd_url, days=1)
             line = random.choice(list(p))
             vd.motd = line.split('\t')[0]
             vd.status(vd.motd, priority=-1)

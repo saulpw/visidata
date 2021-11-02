@@ -4,10 +4,10 @@ import time
 from urllib.request import Request, urlopen
 import urllib.parse
 
-from visidata import vd, Path, options, modtime
+from visidata import vd, VisiData, Path, options, modtime
 
-
-def urlcache(url, days=1, text=True, headers={}):
+@VisiData.api
+def urlcache(vd, url, days=1, text=True, headers={}):
     'Return Path object to local cache of url contents.'
     p = Path(os.path.join(options.visidata_dir, 'cache', urllib.parse.quote(url, safe='')))
     if p.exists():

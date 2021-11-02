@@ -8,7 +8,7 @@ import importlib
 import subprocess
 import urllib
 
-from visidata import VisiData, vd, Path, CellColorizer, JsonLinesSheet, AttrDict, urlcache, Column, Progress, ExpectedException, BaseSheet, asyncsingle, asyncthread
+from visidata import VisiData, vd, Path, CellColorizer, JsonLinesSheet, AttrDict, Column, Progress, ExpectedException, BaseSheet, asyncsingle, asyncthread
 
 
 vd.option('plugins_url', 'https://visidata.org/plugins/plugins.jsonl', 'source of plugins sheet')
@@ -90,7 +90,7 @@ class PluginsSheet(JsonLinesSheet):
     @asyncsingle
     def reload(self):
         try:
-            self.source = urlcache(vd.options.plugins_url or vd.fail(), days=1)  # for VisiDataMetaSheet.reload()
+            self.source = vd.urlcache(vd.options.plugins_url or vd.fail(), days=1)  # for VisiDataMetaSheet.reload()
         except urllib.error.URLError as e:
             vd.debug(e)
             return
@@ -143,7 +143,7 @@ class PluginsSheet(JsonLinesSheet):
             if err:
                 vd.warning(err.decode())
         else:
-            with urlcache(plugin.url, days=0).open_text(encoding='utf-8') as pyfp:
+            with vd.urlcache(plugin.url, days=0).open_text(encoding='utf-8') as pyfp:
                 contents = pyfp.read()
                 if not _checkHash(contents, plugin.sha256):
                     vd.error('%s plugin SHA256 does not match!' % plugin.name)
