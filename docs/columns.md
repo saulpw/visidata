@@ -2,8 +2,8 @@
 eleventyNavigation:
     key: Columns
     order: 5
-update: 2021-06-16
-version: VisiData 2.4
+update: 2021-11-01
+version: VisiData 2.6
 ---
 
 ## How to manipulate columns
@@ -173,8 +173,8 @@ uses the commands for column splitting and transformation with [xd/puzzles.tsv](
 
 ###
 
-- `:` adds new columns derived from splitting the current column at positions defined by a *regex pattern*. The current row will be used to infer the number of columns that will be created.
-- `;` adds new columns derived from pulling the contents of the current column which match the *regex within capture groups*. The new columns are named using the capture group index, or if named capture groups are used, the capture group names. This command also requires an example row.
+- `:` adds new columns derived from splitting the current column at positions defined by a *regex pattern*. `options.default_sample_size` (default: 100) rows around the cursor will be used to determine the number of columns that will be created.
+- `;` adds new columns derived from pulling the contents of the current column which match the *regex within capture groups*. The new columns are named using the capture group index, or if named capture groups are used, the capture group names. This command uses the `options.default_sample_size` (default:100) rows around the cursor as sample rows.
 - `*` followed by *regex*`/`*substring* replaces the text which matches the capture groups in *regex* with the contents of *substring*. *substring* may include backreferences (*\1* etc).
 
 ## [How do I substitute text in my column]
@@ -221,7 +221,7 @@ The following demo shows `(` commands applied to this data:
     <asciinema-player id="player-expand-cols" poster="npt:0:20" rows=13 src="../casts/expand-cols.cast"></asciinema-player>
 </div>
 
-Note that by default the expansion logic will look for nested columns in **up to 1,000 rows surrounding the cursor**. This behavior can be controlled by adjusting `expand_col_scanrows` in the **Options Sheet**, or setting `options.expand_col_scanrows` in the `~/.visidatarc` file.
+Note that by default the expansion logic will look for nested columns in **up to** `options.default_sample_size` (Default: 100) **rows surrounding the cursor**. This behavior can be controlled by adjusting `default_sample_size` in the **Options Sheet**, or setting `options.default_sample_size` in the `~/.visidatarc` file.
 
 ---
 
