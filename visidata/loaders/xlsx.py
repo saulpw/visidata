@@ -28,34 +28,37 @@ class XlsxIndexSheet(IndexSheet):
             src = self.workbook[sheetname]
             yield XlsxSheet(self.name, sheetname, source=src)
 
-
 class XlsxSheet(SequenceSheet):
     # rowdef: AttrDict of column_letter to cell
     def setCols(self, headerrows):
+        from openpyxl.utils.cell import get_column_letter
         self.columns = []
         self._rowtype = AttrDict
 
         if not headerrows:
             return
 
-        headers = [[x.value for x in row.values()] for row in headerrows]
-        column_letters = [x.column_letter for x in headerrows[0].values()]
+        headers = [[cell.value for cell in row.values()] for row in headerrows]
+        column_letters = [
+                x.column_letter if 'column_letter' in dir(x)
+                else get_column_letter(i+1)
+                for i, x in enumerate(headerrows[0].values())]
 
         for i, colnamelines in enumerate(itertools.zip_longest(*headers, fillvalue='')):
             colnamelines = ['' if c is None else c for c in colnamelines]
-            self.addColumn(AttrColumn(''.join(map(str, colnamelines)), column_letters[i] +'.value'))
+            colname = ''.join(map(str, colnamelines))
+            self.addColumn(AttrColumn(colname, column_letters[i] + '.value'))
 
     def addRow(self, row, index=None):
         Sheet.addRow(self, row, index=index)  # skip SequenceSheet
         for column_letter, v in list(row.items())[len(self.columns):len(row)]:  # no-op if already done
-            self.addColumn(AttrColumn('', column_letter+'.value'))
+            self.addColumn(AttrColumn(column_letter, column_letter + '.value'))
 
     def iterload(self):
         from openpyxl.utils.cell import get_column_letter
         worksheet = self.source
         for row in Progress(worksheet.iter_rows(), total=worksheet.max_row or 0):
-            yield AttrDict({get_column_letter(i+1):cell for i, cell in enumerate(row)})
-
+            yield AttrDict({get_column_letter(i+1): cell for i, cell in enumerate(row)})
 
 class XlsIndexSheet(IndexSheet):
     'Load XLS file (in Excel format).'
