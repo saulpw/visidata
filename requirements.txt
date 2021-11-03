@@ -26,5 +26,6 @@ vobject             # vcf
 tabulate            # tabulate saver
 wcwidth             # tabulate saver with unicode
 zstandard           # read .zst files
+odfpy               # odt (OpenDocument)
 
 -e git+https://github.com/saulpw/pyxlsb.git@master#egg=pyxlsb # xlsb

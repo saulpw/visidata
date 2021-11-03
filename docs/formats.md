@@ -49,6 +49,7 @@ eleventyNavigation:
 |vcf           |Virtual Contact File \(vCard\)|2\.0             |                |  |1995     |Versit Consortium   |https://tools\.ietf\.org/html/rfc6350|                    |
 |rec           |recutils database file|2\.0             |displayed text  |  |2010     |Jose E\. Marchesi   |https://www\.gnu\.org/software/recutils/|                    |
 |eml           |Multipurpose Internet Mail Extensions \(MIME\)|2\.0             |                |  |1996     |Nathaniel Borenstein and Ned Freed|https://tools\.ietf\.org/html/rfc2045|                    |
+|ods           |OpenDocument Spreadsheet|2\.7             |                |  |2006     |[OASIS](https://en.wikipedia.org/wiki/OASIS_(organization))|https://docs.oasis-open.org/office/v1.1/|odfpy|
 
 
 # Extra notes about formats
