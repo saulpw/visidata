@@ -49,7 +49,7 @@ An example usage follows.
 
     **or**
 
-    d. `gz"` to open a copy of the sheet which has copies of all rows.  Any changes will be reflected on the source sheet
+    d. `gz"` to open a copy of the sheet which has copies of all rows.  Any changes will not be reflected on the source sheet
 
 
 The following example uses the file [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).

@@ -1118,10 +1118,11 @@ def splitPane(sheet, pct=None):
 
 
 @Sheet.api
-def async_deepcopy(sheet, rowlist):
+def async_deepcopy(name, sheet, rowlist):
+
     @asyncthread
     def _async_deepcopy(newlist, oldlist):
-        for r in Progress(oldlist, 'copying'):
+        for r in vd.Progress(oldlist, 'copying'):
             newlist.append(deepcopy(r))
 
     ret = []
