@@ -48,7 +48,7 @@ def fnSuffix(vd, prefix):
 
     return fn
 
-@Sheet.api
+@BaseSheet.api
 def inputLongname(sheet):
     longnames = set(k for (k, obj), v in vd.commands.iter(sheet))
     return vd.input("command name: ", completer=CompleteKey(sorted(longnames)), type='longname')
