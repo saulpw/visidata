@@ -41,7 +41,7 @@ An example usage follows.
 
     **or**
 
-    c. `g"` to open a duplicate sheet which has references to all rows, and keeping the selected rows selected.  The selection can be modified on the parent sheet and the new sheet independently, but any changes will be reflected on both sheets.
+    c. `g"` to open a duplicate sheet which has references to all rows, and keeping the selected rows selected.  The selection can be modified on the parent sheet and the new sheet independently, but any changes will not be reflected on both sheets.
 
     **or**
 
