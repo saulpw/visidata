@@ -48,8 +48,8 @@ class FileProgress:
         # track Progress on original fp
         self.fp_orig_read = self.fp.read
         self.fp_orig_close = self.fp.close
-        self.fp.read = self.read
-        self.fp.close = self.close
+        #self.fp.read = self.read            # 1159
+        #self.fp.close = self.close          # 1175
 
         if self.prog:
             self.prog.__enter__()
