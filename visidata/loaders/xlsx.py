@@ -1,5 +1,8 @@
 from visidata import *
 
+vd.option('xlsx_cellobject', False, 'include column of cell objects', replay=True)
+vd.option('xlsx_fontcolor', False, 'include cell font colors', replay=True)
+vd.option('xlsx_fillcolor', False, 'include cell fill colors', replay=True)
 
 @VisiData.api
 def open_xls(vd, p):
@@ -28,34 +31,52 @@ class XlsxIndexSheet(IndexSheet):
             src = self.workbook[sheetname]
             yield XlsxSheet(self.name, sheetname, source=src)
 
-
 class XlsxSheet(SequenceSheet):
     # rowdef: AttrDict of column_letter to cell
     def setCols(self, headerrows):
+        from openpyxl.utils.cell import get_column_letter
         self.columns = []
         self._rowtype = AttrDict
 
         if not headerrows:
             return
 
-        headers = [[x.value for x in row.values()] for row in headerrows]
-        column_letters = [x.column_letter for x in headerrows[0].values()]
+        headers = [[cell.value for cell in row.values()] for row in headerrows]
+        column_letters = [
+                x.column_letter if 'column_letter' in dir(x)
+                else get_column_letter(i+1)
+                for i, x in enumerate(headerrows[0].values())]
 
         for i, colnamelines in enumerate(itertools.zip_longest(*headers, fillvalue='')):
             colnamelines = ['' if c is None else c for c in colnamelines]
-            self.addColumn(AttrColumn(''.join(map(str, colnamelines)), column_letters[i] +'.value'))
+            column_name = ''.join(map(str, colnamelines))
+            self.addColumn(AttrColumn(column_name, column_letters[i] + '.value'))
+            self.addXlsxColumns(column_letters[i], column_name)
 
     def addRow(self, row, index=None):
         Sheet.addRow(self, row, index=index)  # skip SequenceSheet
         for column_letter, v in list(row.items())[len(self.columns):len(row)]:  # no-op if already done
-            self.addColumn(AttrColumn('', column_letter+'.value'))
+            self.addColumn(AttrColumn('', column_letter + '.value'))
+            self.addXlsxColumns(column_letter, column_letter)
 
     def iterload(self):
         from openpyxl.utils.cell import get_column_letter
         worksheet = self.source
         for row in Progress(worksheet.iter_rows(), total=worksheet.max_row or 0):
-            yield AttrDict({get_column_letter(i+1):cell for i, cell in enumerate(row)})
+            yield AttrDict({get_column_letter(i+1): cell for i, cell in enumerate(row)})
 
+    def addXlsxColumns(self, column_letter, column_name):
+        if self.options.xlsx_cellobject:
+            self.addColumn(
+                    AttrColumn(column_name + '_cellPyObj', column_letter))
+        if self.options.xlsx_fontcolor:
+            self.addColumn(
+                    AttrColumn(column_name + '_fontColor',
+                        column_letter + '.font.color.value'))
+        if self.options.xlsx_fillcolor:
+            self.addColumn(
+                    AttrColumn(column_name + '_fillColor', column_letter +
+                        '.fill.start_color.value'))
 
 class XlsIndexSheet(IndexSheet):
     'Load XLS file (in Excel format).'
