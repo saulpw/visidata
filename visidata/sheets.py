@@ -810,9 +810,10 @@ class TableSheet(BaseSheet):
                     cattr = update_attr(cattr, basecellcattr)
 
                     note = getattr(cellval, 'note', None)
+                    notewidth = 1 if note else 0
                     if note:
                         notecattr = update_attr(cattr, colors.get_color(cellval.notecolor), 10)
-                        clipdraw(scr, ybase, x+colwidth-len(note), note, notecattr.attr)
+                        clipdraw(scr, ybase, x+colwidth-notewidth, note, notecattr.attr)
 
                     if voffset >= 0:
                         if len(lines)-voffset > height:
@@ -863,7 +864,7 @@ class TableSheet(BaseSheet):
                                     sepchars = midsep
 
                         pre = disp_truncator if hoffset != 0 else disp_column_fill
-                        clipdraw(scr, y, x, (pre if colwidth > 2 else '')+line[hoffset:], cattr.attr, w=colwidth-(1 if note else 0))
+                        clipdraw(scr, y, x, (pre if colwidth > 2 else '')+line[hoffset:], cattr.attr, w=colwidth-notewidth)
                         vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='edit-cell')
 
                         if x+colwidth+len(sepchars) <= self.windowWidth:
