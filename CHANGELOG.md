@@ -1,5 +1,36 @@
 # VisiData version history
 
+# 2.7 (2021-11-XX)
+
+## Features
+
+- [loaders xlsx] offer optional columns with `options.xlsx_meta_columns` (default False) (thanks @hoclun-rigsep for PR #1098)
+    - adds columns `cellobject`, `fontcolor`, `fillcolor`
+
+## Improvements
+
+- several cosmetic improvements
+- [movement] bind Home/End to go-top/bottom (thanks @geekscrapy #1161)
+- [api] add vd.urlcache as alias for urlcache global (thanks @geekscrapy for PR #1164)
+
+## Bugfixes
+
+- [savers compression formats] fix corruption when saving to compression formats (#1159)
+- [draw] fix multiline rows by making height fixed for all rows (reported by @geekscrapy #916)
+- [async] make sure all threads started on sheet are cancelable (reported by @geekscrapy #1136)
+- [AttrDict] fix bug with setting value on nested AttrDict
+- [dup-X-deep] fix error with async_deepcopy (thanks @pstuifzand for fix)
+- [sqlite] handle sqlite column names with spaces (thanks @davidskeck for PR #1157)
+- [sqlite] use `options.encoding` and `options.encoding_errors` for decoding of sqlite db text (reported by @WesleyAC #1156)
+- [xlsx] add handling for EmptyCell instances (thanks @hoclun-rigsep for PR #1121)
+- [xlsx] gate sheet name cleaning on `options.clean_names` (reported by @davidwales #1122)
+- [macos] fix bindings for `Option`+key
+- [random-rows] fix import (reported by @geekscrapy #1162)
+- [slide] fix Shift slide-down and Shift slide-up with arrow keys (reported by @a-y-u-s-h #1137)
+- fix "ModuleNotFoundError: no module named 'plugins'" error on startup (#1131 #1152)
+- [replay] fix replay where `join-sheets` operation hangs (reported by @agjohnson #1141)
+- [unfurl-col] fix unfurl-col on cells containing exceptions (reported by @jsvine #1171)
+
 # 2.6.1 (2021-09-28)
 
 ## Bugfixes
