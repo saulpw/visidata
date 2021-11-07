@@ -16,10 +16,20 @@ def open_forg(vd, p):
     return OrgSheet(p.name, source=p, filetype='forg')
 
 
+@VisiData.api
+def open_orgdir(vd, p):
+    return OrgSheet(p.name, source=p, filetype='orgdir')
+
+
 class OrgRows(list):
     def __init__(self, *args, sheet=None):
         super().__init__(*args)
         self._sheet = sheet
+
+    def __iter__(self):
+        '''Iterate depth-first through all elements and their children.'''
+        for r in list.__iter__(self):
+            yield from self._deepiter([r])
 
     def _deepiter(self, objlist):
         for obj in objlist:
@@ -45,40 +55,6 @@ class OrgRows(list):
         return self._actual_list[k]
 
 
-class ArbitraryDictSheet(Sheet):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._knownKeys = set()  # set of row keys already seen
-
-    @asyncthread
-    def reload(self):
-        self.rows = []
-        self.columns = []
-        self._knownKeys.clear()
-        for c in type(self).columns:
-            self.addColumn(deepcopy(c))
-            self._knownKeys.add(c.expr)
-
-        try:
-            with vd.Progress(gerund='loading', total=0):
-                for r in self.iterload():
-                    self.addRow(r)
-        except FileNotFoundError:
-            return  # let it be a blank sheet without error
-
-        # if an ordering has been specified, sort the sheet
-        if self._ordering:
-            vd.sync(self.sort())
-
-    def addRow(self, row, index=None):
-        super().addRow(row, index=index)
-
-        for k in row:
-            if k not in self._knownKeys:
-                self.addColumn(ColumnItem(k, type=deduceType(row[k])))
-                self._knownKeys.add(k)
-        return row
-
 def encode_date(dt=None):
     if not dt:
         dt = datetime.datetime.now()
@@ -98,57 +74,66 @@ class OrgContentsColumn(Column):
         self.sheet.save(row)
 
 
-def orgmode_parse_into(toprow, fullfile, **kwargs):
-    toprow.update(kwargs)
-
-    lines = fullfile.splitlines()
-    top_section = section = toprow # AttrDict(contents='', tags=[], level=0, children=[])
-#    toprow.children = [section]
+def sectionize(lines):
+    'Generate (startinglinenum, contentlines) for each section.  First section may not have leading * or # but all others will.'
+    startinglinenum = 0
+    contents = []
     for linenum, line in enumerate(lines):
-        section.tags.extend(re.findall(r':([\S:]+?):', line))
-        links = re.findall(r'\[.*?\]\(.*?\)', line)
-        if links:
-            section.links.extend(links)
-            vd.status(links)
-        g = orgmode_parse_title(line)
-        if g:
-            assert top_section or section in section.parent.children
-            parent = section
-            section = OrgSheet().newRow()
-            section.update(g)
-            section.linenum = linenum+1
+        line = line.strip()
+        if not line and not contents:
+            continue  # ignore leading blank lines
 
-            while parent and section.level < parent.level:
-                parent = parent.parent
+        if line and line[0] in '#*':
+            if contents:
+                yield startinglinenum, contents
+                contents = []
+                startinglinenum = linenum
 
-            if not parent:
-                toprow.children.append(section)
-                continue
+        contents.append(line)
 
-            if section.level > parent.level:
-                parent.children.append(section)
-                section.parent = parent
-                continue
-            elif section.level == parent.level:
-                if parent.parent:
-                    parent.parent.children.append(section)
-                    section.parent = parent.parent
-                else:
-                    toprow.children.append(parent)
-        else:
-            # m = re.search(r'^#+BEGIN_(?P<name>\S+)\s*(?P<parms>.*)', line)
-            section.contents += line + '\n'
+    if contents:
+        yield startinglinenum, contents
 
-    if not toprow.title and len(toprow.children) == 1:
-        real = toprow.children[0]
-        toprow.title = real.title
 
-#    if top_section and top_section.contents:
-#        toprow.children.insert(0, top_section)
+def orgmode_parse(all_lines):
+    root = parent = OrgSheet().newRow()
+    for linenum, lines in sectionize(all_lines):
+        section = OrgSheet().newRow()
+        section.contents = '\n'.join(lines)
+        for line in lines:
+            section.tags.extend(re.findall(r':([\S:]+?):', line))
+            links = re.findall(r'\[.*?\]\(.*?\)', line)
+            if links:
+                section.links.extend(links)
+
+        title = orgmode_parse_title(lines[0])
+        if not title:
+            assert lines[0][0] not in '#*', (linenum, lines)
+            root = parent = section
+            continue
+
+        section.update(title)
+        section.linenum = linenum+1
+
+        while parent and section.level <= parent.level:
+            parent = parent.parent
+
+        parent.children.append(section)
+        section.parent = parent
+        parent = section
+
+    return root
+
+
+def orgmode_parse_into(toprow, fullfile, **kwargs):
+    row = orgmode_parse(fullfile.splitlines())
+    toprow.update(row)
+    toprow.update(kwargs)
 
 
 def orgmode_to_string(section, prestars=''):
     ret = ''
+
     if section.title:
         ret += prestars[len(section.stars):] + (section.title or ' ') + '\n'
     ret += section.contents or ''
@@ -157,25 +142,27 @@ def orgmode_to_string(section, prestars=''):
 
 
 def orgmode_parse_title(line):
-    m = re.search(r'^(?P<stars>[*#]+)\s+(?P<keyword>(TODO|FEEDBACK|VERIFY|DONE|DELEGATED))?\s*(?P<prio>\[#[A-z]\])?\s*(?P<title>.*)', line)
-    if m:
-        return dict(stars=m.group('stars'),
-                    level=len(m.group('stars')),
-                    keyword=m.group('keyword') or '',
-                    prio=m.group('prio') or '',
-                    title=line)
-    else:
+    m = re.match(r'^(?P<stars>[*#]+)\s*(?P<keyword>(TODO|FEEDBACK|VERIFY|DONE|DELEGATED))?\s*(?P<prio>\[#[A-z]\])?\s*(?P<title>.*)', line)
+    if not m:
+        assert not line or line[0] not in '#*', line
         return {}
+
+    return dict(stars=m.group('stars'),
+                level=len(m.group('stars')),
+                keyword=m.group('keyword') or '',
+                prio=m.group('prio') or '',
+                title=line)
 
 class OrgSheet(Sheet):
     defer = True
     columns = [
-        ItemColumn('path', width=0),
-        Column('id', width=0, getter=lambda c,r: r.path.stem),
+        Column('path', getter=lambda c,r: _root(r).path, width=0),
+        Column('id', width=0, getter=lambda c,r: _root(r).path.stem),
         ItemColumn('title', width=40),
         ItemColumn('date', width=0, type=date),
         ItemColumn('tags', width=10, type=lambda v: ' '.join(v)),
         ItemColumn('links', type=vlen),
+        ItemColumn('parent', width=0),
         ItemColumn('children', type=vlen),
         ItemColumn('linenum', width=0, type=int),
         Column('to_string', width=0, getter=lambda c,r: orgmode_to_string(r)),
@@ -217,21 +204,40 @@ class OrgSheet(Sheet):
 
     def iterload(self):
         self.rows = []
-        if self.filetype == 'forg':
+        def _walkfiles(p):
+            basepath = str(p)
+            for folder, subdirs, files in os.walk(basepath):
+                subfolder = folder[len(basepath)+1:]
+                if subfolder.startswith('.'): continue
+                if subfolder in ['.', '..']: continue
+
+                fpath = Path(folder)
+                yield fpath
+
+                for fn in files:
+                    yield fpath/fn
+
+        if self.filetype == 'orgdir':
+            basepath = str(self.source)
+            for p in _walkfiles(self.source):
+                if p.name.startswith('.'): continue
+                if p.ext in ['org', 'md']:
+                    yield self.parse_orgmd(p)
+        elif self.filetype == 'forg':
             for fn in self.source.open_text():
                 yield self.parse_orgmd(Path(fn.rstrip()))
         elif self.filetype == 'org':
             yield self.parse_orgmd(self.source)
 
     def parse_orgmd(self, path):
-        row = self.newRow()
+#        row.file_string = open(path).read()
+        vd.debug(path)
+        row = orgmode_parse(open(path).readlines())
         row.path = path
         st = path.stat()
         if st:
             row.date = st.st_mtime
 
-        row.file_string = path.read_text()
-        orgmode_parse_into(row, row.file_string, path=path)
         return row
 
     def draw(self, scr):
@@ -281,8 +287,7 @@ def combine_rows(sheet, rows):
     for r in rows:
         hdr = sheet.newRow()
         if hdr.title:
-            g = orgmode_parse_title(hdr.title)
-            hdr.update(g)
+            hdr.update(orgmode_parse_title(hdr.title))
         hdr.children = list(r.children)
         newrow.children.append(hdr)
 #    newrow.title = ' '
@@ -315,8 +320,31 @@ def save_org(vd, p, *vsheets):
                 vd.warning('not implemented')
 
 
+
+@OrgSheet.api
+def sysopen_rows(sheet, rows):
+    ret = ''
+    for r in rows:
+        s = orgmode_to_string(r).strip()
+        ret += '{::%s::}\n%s\n\n' % (id(r), s)
+
+    ret = vd.launchExternalEditor(ret + "{::}")
+
+    idrows = {id(r):r for r in rows}
+    for idtag, text in re.findall(r'\{::(\d+)::\}(.*?)\{::', ret, re.DOTALL):
+        idtag = int(idtag)
+        row = idrows.get(idtag, None)
+        if not row:
+            vd.warning('no id(%s), adding in current section' % idtag)
+            row = sheet.newRow()
+            sheet.addRow(row)
+
+        vd.status(idtag, text)
+        orgmode_parse_into(row, text.strip())
+
+
 OrgSheet.addCommand('^O', 'sysopen-row', 'sysopen_row(cursorRow)', 'open current file in external $EDITOR')
-OrgSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*(r.path for r in selectedRows))', 'open selected files in external $EDITOR')
+OrgSheet.addCommand('g^O', 'sysopen-rows', 'sysopen_rows(selectedRows)', 'open selected files in external $EDITOR')
 OrgSheet.addCommand('^J', 'expand-row', 'openRows([cursorRow]); sheet.cursorRowIndex += 1')
 OrgSheet.addCommand('z^J', 'close-row', 'closeRows([cursorRow]); sheet.cursorRowIndex += 1')
 OrgSheet.addCommand('g^J', 'expand-selected', 'openRows(selectedRows)')
@@ -328,7 +356,5 @@ OrgSheet.addCommand('p', 'paste-rows', 'paste_into(cursorRow, vd.memory.cliprows
 
 if __name__ == '__main__':
     for fn in sys.argv[1:]:
-        sect = OrgSheet().newRow()
-        sect.file_string = Path(fn).read_text()
-        orgmode_parse_into(sect, sect.file_string, path=Path(fn))
+        sect = orgmode_parse_into(Path(fn))
         print(orgmode_to_string(sect).strip())
