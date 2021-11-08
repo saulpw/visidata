@@ -21,40 +21,6 @@ def open_orgdir(vd, p):
     return OrgSheet(p.name, source=p, filetype='orgdir')
 
 
-class OrgRows(list):
-    def __init__(self, *args, sheet=None):
-        super().__init__(*args)
-        self._sheet = sheet
-
-    def __iter__(self):
-        '''Iterate depth-first through all elements and their children.'''
-        for r in list.__iter__(self):
-            yield from self._deepiter([r])
-
-    def _deepiter(self, objlist):
-        for obj in objlist:
-            if not obj.parent and obj.children:
-                # ignore toplevel file, dive into subrows
-                yield from self._deepiter(obj.children)
-            else:
-                yield obj
-                if self._sheet and id(obj) in self._sheet.opened_rows:
-                    yield from self._deepiter(obj.children)
-
-    @property
-    def _actual_list(self):
-        return list(self._deepiter(self))
-
-    def __len__(self):
-        return len(self._actual_list)
-
-    def __getitem__(self, k):
-        if isinstance(k, slice):
-            return OrgRows(self._actual_list[k], sheet=self._sheet)
-
-        return self._actual_list[k]
-
-
 def encode_date(dt=None):
     if not dt:
         dt = datetime.datetime.now()
@@ -134,8 +100,8 @@ def orgmode_parse_into(toprow, fullfile, **kwargs):
 def orgmode_to_string(section, prestars=''):
     ret = ''
 
-    if section.title:
-        ret += prestars[len(section.stars):] + (section.title or ' ') + '\n'
+#    if section.title:
+#        ret += prestars[len(section.stars):] + (section.title or ' ') + '\n'
     ret += section.contents or ''
     ret += ''.join(orgmode_to_string(c, prestars+(section.stars or '')) for c in section.children)
     return ret
@@ -175,22 +141,29 @@ class OrgSheet(Sheet):
 #        self.open_max=0  # all levels closed after this point
 #        self.close_max=0 # all levels open after this point
 
-    @property
-    def rows(self):
-        return self._rows
+    def isSelectedParents(self, row):
+        return super().isSelected(row) or row.parent and self.isSelectedParents(row.parent)
 
     def isSelected(self, row):
-        return super().isSelected(row) or super().isSelected(_root(row))
+        return self.isSelectedParents(row)
 
-    @rows.setter
-    def rows(self, v):
-        if v is not UNLOADED:
-            v = OrgRows(v, sheet=self)
-        self._rows = v
+    def refreshRows(self):
+        self.rows = list(self._deepiter(self.sourceRows))
+
+    def _deepiter(self, objlist, depth=1):
+        for obj in objlist:
+            if not obj.parent and obj.children:
+                # ignore toplevel file, dive into subrows
+                yield from self._deepiter(obj.children, depth)
+            else:
+                yield obj
+                if id(obj) in self.opened_rows:
+                    yield from self._deepiter(obj.children, depth-1)
 
     def openRows(self, rows):
         for row in rows:
             self.opened_rows.add(id(row))
+        self.refreshRows()
 
     def closeRows(self, rows=None):
         if rows is None:
@@ -198,6 +171,7 @@ class OrgSheet(Sheet):
                 self.opened_rows.remove(id(row))
         else:
             self.opened_rows.clear()
+        self.refreshRows()
 
     def newRow(self):
         return AttrDict(contents='', tags=[], children=[], links=[], level=0, linenum=0)
@@ -228,6 +202,9 @@ class OrgSheet(Sheet):
                 yield self.parse_orgmd(Path(fn.rstrip()))
         elif self.filetype == 'org':
             yield self.parse_orgmd(self.source)
+
+        self.sourceRows = self.rows
+        self.refreshRows()
 
     def parse_orgmd(self, path):
 #        row.file_string = open(path).read()
