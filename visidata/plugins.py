@@ -145,8 +145,11 @@ class PluginsSheet(JsonLinesSheet):
         else:
             with vd.urlcache(plugin.url, days=0).open_text(encoding='utf-8') as pyfp:
                 contents = pyfp.read()
-                if not _checkHash(contents, plugin.sha256):
-                    vd.error('%s plugin SHA256 does not match!' % plugin.name)
+                if plugin.sha256:
+                    if not _checkHash(contents, plugin.sha256):
+                        vd.error('%s plugin SHA256 does not match!' % plugin.name)
+                else:
+                    vd.warning('no SHA256 provided for %s plugin, not validating' % plugin.name)
                 with outpath.open_text(mode='w', encoding='utf-8') as outfp:
                     outfp.write(contents)
 
