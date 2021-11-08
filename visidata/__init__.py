@@ -143,6 +143,7 @@ import visidata.loaders.rec
 import visidata.loaders.eml
 import visidata.loaders.vds
 import visidata.loaders.odf
+import visidata.loaders.awk
 
 import visidata.ddwplay
 import visidata.plugins
