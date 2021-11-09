@@ -34,7 +34,7 @@ def encode_date(dt=None):
 class OrgContentsColumn(Column):
     def setValue(self, row, v):
         super().setValue(row, v)
-        orgmode_parse_into(_root(row), v)
+        orgmode_parse_into(row, v)
 
     def putValue(self, row, v):
         self.sheet.save(row)
@@ -43,17 +43,19 @@ class OrgContentsColumn(Column):
 def sectionize(lines):
     'Generate (startinglinenum, contentlines) for each section.  First section may not have leading * or # but all others will.'
     startinglinenum = 0
-    contents = []
+    prev_contents = contents = []
     for linenum, line in enumerate(lines):
-        line = line.strip()
-        if not line and not contents:
-            continue  # ignore leading blank lines
+        line = line.rstrip('\n')
 
         if line and line[0] in '#*':
             if contents:
                 yield startinglinenum, contents
+                prev_contents = contents
                 contents = []
                 startinglinenum = linenum
+        else:
+            if not line and not contents:
+                prev_contents.append(line)
 
         contents.append(line)
 
@@ -65,7 +67,15 @@ def orgmode_parse(all_lines):
     root = parent = OrgSheet().newRow()
     for linenum, lines in sectionize(all_lines):
         section = OrgSheet().newRow()
-        section.contents = '\n'.join(lines)
+
+        section.contents = ''
+        for i, line in enumerate(lines):
+            if not line and not lines[i-1]:
+                continue
+            section.contents += line + '\n'
+        section.orig_contents = section.contents
+
+        section.linenum = linenum+1
         for line in lines:
             section.tags.extend(re.findall(r':([\S:]+?):', line))
             links = re.findall(r'\[.*?\]\(.*?\)', line)
@@ -74,12 +84,10 @@ def orgmode_parse(all_lines):
 
         title = orgmode_parse_title(lines[0])
         if not title:
-            assert lines[0][0] not in '#*', (linenum, lines)
             root = parent = section
             continue
 
         section.update(title)
-        section.linenum = linenum+1
 
         while parent and section.level <= parent.level:
             parent = parent.parent
@@ -90,11 +98,20 @@ def orgmode_parse(all_lines):
 
     return root
 
+def _replace(node, newnode):
+    node.update(newnode)  # must replace insides of same row object
+    for c in node.children:
+        c.parent = node
+    return node
 
-def orgmode_parse_into(toprow, fullfile, **kwargs):
-    row = orgmode_parse(fullfile.splitlines())
-    toprow.update(row)
-    toprow.update(kwargs)
+def orgmode_parse_into(toprow, text):
+    row = orgmode_parse(text.splitlines())
+    if not row.title and len(row.children) == 1:
+        row = row.children[0]
+        row.parent = toprow.parent
+    toprow = _replace(toprow, row)
+
+    return toprow
 
 
 def orgmode_to_string(section, prestars=''):
@@ -102,8 +119,10 @@ def orgmode_to_string(section, prestars=''):
 
 #    if section.title:
 #        ret += prestars[len(section.stars):] + (section.title or ' ') + '\n'
-    ret += section.contents or ''
-    ret += ''.join(orgmode_to_string(c, prestars+(section.stars or '')) for c in section.children)
+    ret += section.contents.rstrip() or ''
+    ret += '\n\n'
+    ret += ''.join(orgmode_to_string(c, prestars+(section.stars or '')) for c in section.children).rstrip() + '\n'
+
     return ret
 
 
@@ -123,16 +142,16 @@ class OrgSheet(Sheet):
     defer = True
     columns = [
         Column('path', getter=lambda c,r: _root(r).path, width=0),
-        Column('id', width=0, getter=lambda c,r: _root(r).path.stem),
+        Column('id', getter=lambda c,r: _root(r).path.stem),
         ItemColumn('title', width=40),
-        ItemColumn('date', width=0, type=date),
+#        ItemColumn('date', width=0, type=date),
         ItemColumn('tags', width=10, type=lambda v: ' '.join(v)),
         ItemColumn('links', type=vlen),
         ItemColumn('parent', width=0),
         ItemColumn('children', type=vlen),
         ItemColumn('linenum', width=0, type=int),
         Column('to_string', width=0, getter=lambda c,r: orgmode_to_string(r)),
-        OrgContentsColumn('file_string', width=0, getter=lambda c,r: r.file_string),
+        OrgContentsColumn('orig_contents', width=0, getter=lambda c,r: r.orig_contents),
     ]
 
     def __init__(self, *args, **kwargs):
@@ -174,7 +193,7 @@ class OrgSheet(Sheet):
         self.refreshRows()
 
     def newRow(self):
-        return AttrDict(contents='', tags=[], children=[], links=[], level=0, linenum=0)
+        return AttrDict(title='', contents='', tags=[], children=[], links=[], level=0, linenum=0)
 
     def iterload(self):
         self.rows = []
@@ -208,13 +227,13 @@ class OrgSheet(Sheet):
 
     def parse_orgmd(self, path):
 #        row.file_string = open(path).read()
-        vd.debug(path)
         row = orgmode_parse(open(path).readlines())
-        row.path = path
         st = path.stat()
         if st:
-            row.date = st.st_mtime
+            mtime = st.st_mtime
 
+        row.path = path
+        row.date = mtime
         return row
 
     def draw(self, scr):
@@ -224,7 +243,13 @@ class OrgSheet(Sheet):
     def putChanges(self):
         adds, mods, dels = self.getDeferredChanges()
 
-        for row in adds.values():
+        saveset = {}  # path:_root(row)
+        for r in adds.values():
+            saveset[_root(r).path] = _root(r)
+        for r, _ in mods.values():
+            saveset[_root(r).path] = _root(r)
+
+        for row in addset.values():
             self.save(row)
 
         self.commitAdds()
@@ -236,6 +261,11 @@ class OrgSheet(Sheet):
 
         self.commitDeletes()
 
+    def save_all(self):
+        for row in self.sourceRows:
+            self.save(row)
+        vd.status('saved %s org files' % len(self.sourceRows))
+
     def save(self, row):
         try:
             row.path.rename('%s-%s' % (row.path, encode_date()))  # backup
@@ -243,16 +273,24 @@ class OrgSheet(Sheet):
             pass
 
         with row.path.open(mode='w') as f:
-            print(orgmode_to_string(row), file=f, end='')
+            print(orgmode_to_string(row).rstrip(), file=f)
 
 
 @OrgSheet.api
 def paste_into(sheet, row, sourcerows, cols):
+    row.children.extend(sourcerows)
+    for r in sourcerows:
+        r.parent.children.remove(r)
+        r.parent = row
+    sheet.refreshRows()
+
+
+@OrgSheet.api
+def paste_data_into(sheet, row, sourcerows, cols):
     body = row.body or ''
     for r in sourcerows:
         data = vd.encode_json(r, cols)
-        body += f':{cols[0].sheet.name}:{data}\n'
-    sheet.column('body').setValue(row, body)
+        row.contents += f':{cols[0].sheet.name}:{data}\n'
 
 
 @OrgSheet.api
@@ -297,7 +335,6 @@ def save_org(vd, p, *vsheets):
                 vd.warning('not implemented')
 
 
-
 @OrgSheet.api
 def sysopen_rows(sheet, rows):
     ret = ''
@@ -308,17 +345,36 @@ def sysopen_rows(sheet, rows):
     ret = vd.launchExternalEditor(ret + "{::}")
 
     idrows = {id(r):r for r in rows}
-    for idtag, text in re.findall(r'\{::(\d+)::\}(.*?)\{::', ret, re.DOTALL):
-        idtag = int(idtag)
-        row = idrows.get(idtag, None)
-        if not row:
-            vd.warning('no id(%s), adding in current section' % idtag)
-            row = sheet.newRow()
-            sheet.addRow(row)
 
-        vd.status(idtag, text)
-        orgmode_parse_into(row, text.strip())
+    idtexts = {}
+    for idtag, text in re.findall(r'\{::(\d+)::\}(.*?)(?={::)', ret, re.DOTALL):
+        idtexts[int(idtag)] = text
 
+    # reparse all existing
+    for rowid, row in idrows.items():
+        text = idtexts.get(rowid, '').strip()
+        if text:
+            orgmode_parse_into(row, text)
+        else:
+            # sometimes, top levels are missing parents
+            # this needs to be debugged
+            if row.parent:
+                row.parent.children.remove(row)
+
+    lastrow = None
+    # find new rows to add
+    for rowid, text in idtexts.items():
+        if rowid not in idrows:
+            section = orgmode_parse(text.splitlines())
+            while section.level <= lastrow.level:
+                lastrow = lastrow.parent
+
+            if lastrow:
+                sourceRows.append(section)
+            else:
+                sheet.addRow(section)
+
+    sheet.refreshRows()
 
 OrgSheet.addCommand('^O', 'sysopen-row', 'sysopen_row(cursorRow)', 'open current file in external $EDITOR')
 OrgSheet.addCommand('g^O', 'sysopen-rows', 'sysopen_rows(selectedRows)', 'open selected files in external $EDITOR')
@@ -328,10 +384,12 @@ OrgSheet.addCommand('g^J', 'expand-selected', 'openRows(selectedRows)')
 OrgSheet.addCommand('gz^J', 'close-selected', 'closeRows(selectedRows)')
 OrgSheet.addCommand('ga', 'combine-selected', 'addRows([combine_rows(selectedRows)], index=cursorRowIndex); cursorDown(1)', 'combine selected rows into new org entry')
 
-OrgSheet.addCommand('p', 'paste-rows', 'paste_into(cursorRow, vd.memory.cliprows, vd.memory.clipcols)', 'append clipboard rows to current zk')
+OrgSheet.addCommand('zp', 'paste-data', 'paste_data_into(cursorRow, vd.memory.cliprows, vd.memory.clipcols)', 'move clipboard rows to children of current row')
+OrgSheet.addCommand('p', 'paste-sections', 'paste_data_into(cursorRow, vd.memory.cliprows, vd.memory.clipcols)', 'move clipboard rows to children of current row')
+OrgSheet.addCommand('g^S', 'save-all', 'save_all()', 'save all org files')
 
 
 if __name__ == '__main__':
     for fn in sys.argv[1:]:
-        sect = orgmode_parse_into(Path(fn))
+        sect = orgmode_parse(Path(fn))
         print(orgmode_to_string(sect).strip())
