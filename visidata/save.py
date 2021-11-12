@@ -119,9 +119,13 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
     if not givenpath.given.endswith('/'):  # forcibly specify save individual files into directory by ending path with /
         for vs in vsheets:
             vs.hasBeenModified = False
+        # savefuncs(vd, p, *vsheets) will have 2 argcount (*vsheets does not get counted as an arg)
+        # savefuncs(vd, p, vs) will have 3 argcount (vs counts as an arg, along with vd, path)
+        if savefunc.__code__.co_argcount == 3 and len(vsheets) > 1:
+            vd.fail(f'cannot save multiple {filetype} sheets to non-dir')
         return vd.execAsync(savefunc, givenpath, *vsheets)
 
-    # more than one sheet; either no specific multisave for save filetype, or path ends with /
+    # path is a dir
 
     # save as individual files in the givenpath directory
     try:
