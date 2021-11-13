@@ -12,7 +12,7 @@ eleventyNavigation:
 ## Tutorials
 
 * Beginner: [An Introduction to VisiData](https://jsvine.github.io/intro-to-visidata/) by [Jeremy Singer-Vine](https://www.jsvine.com/)
-* Beginner: [Guida VisiData](https://github.com/ondata/guidaVisiData/tree/master/testo) by [Andrea Borruso](https://medium.com/@aborruso) (onData association)
+* Beginner: [Guida VisiData](https://ondata.github.io/guidaVisiData/) by [Andrea Borruso](https://twitter.com/@aborruso) ([onData association](https://twitter.com/ondatait))
 * Intermediate/Advanced (English): [VisiData case study videos](https://www.youtube.com/watch?v=yhunJc8Nu4g&list=PLxu7QdBkC7drrAGfYzatPGVHIpv4Et46W&index=4) by creator [Saul Pwanson](http://saul.pw)
 
 ## References
