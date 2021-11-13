@@ -131,7 +131,7 @@ class PluginsSheet(JsonLinesSheet):
             out, err = p.communicate()
             vd.status(out.decode())
             if err:
-                vd.warning(err.decode())
+                vd.fail('pip install failed:%s' % err.decode())
         else:
             with urlcache(plugin.url, days=0).open_text(encoding='utf-8') as pyfp:
                 contents = pyfp.read()
