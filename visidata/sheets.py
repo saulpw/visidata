@@ -963,7 +963,7 @@ class IndexSheet(Sheet):
 
     def addRow(self, sheet, **kwargs):
         super().addRow(sheet, **kwargs)
-        if not self.options.load_lazy:
+        if not self.options.load_lazy and not sheet.options.load_lazy:
             sheet.ensureLoaded()
 
     @asyncthread
