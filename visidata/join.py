@@ -77,11 +77,11 @@ class JoinKeyColumn(Column):
         vals = set()
         for i, c in enumerate(self.keycols):
             if row[c.sheet] is not None:
-                vals.add(c.getValue(row[c.sheet]))
+                vals.add(c.getDisplayValue(row[c.sheet]))
         if len(vals) == 1:
             return vals.pop()
         else:
-            raise Exception(f'inconsistent keys--reload join')
+            raise Exception(f'inconsistent keys: ' + str(vals))
 
     def putValue(self, row, value):
         for i, c in enumerate(self.keycols):
