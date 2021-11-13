@@ -7,7 +7,7 @@ import visidata
 __all__ = ['ENTER', 'ALT', 'ESC', 'asyncthread', 'VisiData']
 
 
-ENTER='^J'
+ENTER='Enter'
 ALT=ESC='^['
 
 

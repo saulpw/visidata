@@ -6,6 +6,7 @@ visidata.vd.prettykeys_trdict = {
         ' ': 'Space',  # must be first
         '^[': 'Alt+',
         '^J': 'Enter',
+        '^M': 'Enter',
         '^I': 'Tab',
         'KEY_UP':    'Up',
         'KEY_DOWN':  'Down',
