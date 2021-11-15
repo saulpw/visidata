@@ -2,25 +2,23 @@
 
 # 2.7 (2021-11-14)
 
-## Features
-
-- [loaders awk] add loader for simple awk-like records (requested by @fourjay #1179)
-    - filetype extension is `.lsv`
-- [loaders ods] add loader for odf spreadsheets
-- [loaders xlsx] offer optional columns with `options.xlsx_meta_columns` (default False) (thanks @hoclun-rigsep for PR #1098)
-    - adds columns `cellobject`, `fontcolor`, `fillcolor`
-- [loaders sqlite] allow the viewing/inserting of WITHOUT ROWID tables (requested by @stephancb #1111)
-    - modify/delete is not supported
-
 ## Improvements
 
-- several cosmetic improvements
-- [movement] bind Home/End to go-top/bottom (thanks @geekscrapy #1161)
+- [movement] bind Home/End to go-top/go-bottom (thanks @geekscrapy #1161)
 - [api] add vd.urlcache as alias for urlcache global (thanks @geekscrapy for PR #1164)
 - [plugins] do not continue installation if main package fails pip install (thanks @geekscrapy for PR #1194)
 - [plugins] allow for plugin records without SHA256; warn if absent (thanks @geekscrapy for PR #1183)
-- [load_lazy] do not load subsheets, if the sheet.option.load_lazy is set to True (thanks @geekscrapy for PR #1193)
-- [save] confirm when save_foo does not exist, and saver fallsback to `options.save_filetype` (default now 'tsv') (reported by @geekscrapy #1180)
+- [load_lazy] do not load subsheets, if `sheet.options.load_lazy` is True (thanks @geekscrapy for PR #1193)
+- [save] confirm when `save_foo` function does not exist and saver fallsback to `options.save_filetype` (reported by @geekscrapy #1180)
+- [save] `options.save_filetype` default now 'tsv'
+- several cosmetic improvements
+
+## Loaders
+
+- [lsv] add `lsv` filetype for simple awk-like records (requested by @fourjay #1179)
+- [ods] add `odf` filetype for Open Document Format spreadsheets
+- [xlsx] add extra columns (`cellobject`, `fontcolor`, `fillcolor`) if `options.xlsx_meta_columns` (default False) (thanks @hoclun-rigsep for PR #1098)
+- [sqlite] allow query/insert (no modify/delete yet) for `WITHOUT ROWID` tables (requested by @stephancb #1111)
 
 ## Bugfixes
 
@@ -40,7 +38,7 @@
 - [macos] fix bindings for `Option`+key
 - [random-rows] fix import (reported by @geekscrapy #1162)
 - [save-selected] better default save filename (reported by @geekscrapy #1180)
-- [save] fix bug where saving multiple sheets to a single non-embeddable format did not result in a fail (reported by @geekscrapy #1180)
+- [save] fix bug where saving multiple sheets to a single non-embeddable format did not result in fail (reported by @geekscrapy #1180)
 - [slide] fix Shift slide-down and Shift slide-up with arrow keys (reported by @a-y-u-s-h #1137)
 - [replay] fix replay where `join-sheets` operation hangs (reported by @agjohnson #1141)
 - [undo] no more KeyError when Undoing modifications (reported by @geekscrapy #1133)
