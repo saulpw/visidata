@@ -11,7 +11,8 @@ vd.option('histogram_bins', 0, 'number of bins for histogram of numeric columns'
 vd.option('numeric_binning', False, 'bin numeric columns into ranges', replay=True)
 
 
-def valueNames(discrete_vals, numeric_vals):
+@VisiData.api
+def valueNames(vd, discrete_vals, numeric_vals):
     ret = [ '+'.join(str(x) for x in discrete_vals) ]
     if numeric_vals != (0, 0):
         ret.append('%s-%s' % numeric_vals)
@@ -67,7 +68,7 @@ class FreqTableSheet(PivotSheet):
         'open copy of source sheet with rows that are grouped in current row'
         if row.sourcerows:
             vs = copy(self.source)
-            vs.name += "_"+valueNames(row.discrete_keys, row.numeric_key)
+            vs.name += "_"+vd.valueNames(row.discrete_keys, row.numeric_key)
             vs.rows=copy(row.sourcerows)
             return vs
         vd.warning("no source rows")
