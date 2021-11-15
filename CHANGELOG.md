@@ -1,6 +1,6 @@
 # VisiData version history
 
-# 2.7 (2021-11-XX)
+# 2.7 (2021-11-14)
 
 ## Features
 

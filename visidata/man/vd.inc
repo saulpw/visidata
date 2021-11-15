@@ -1,4 +1,4 @@
-.Dd September 19, 2021
+.Dd November 14, 2021
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -104,13 +104,15 @@ view sheet of command longnames and keybindings
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
-.It Ic "Arrow PgUp Home"
+.It Ic "Arrow PgUp"
 go as expected
 .It Ic " h   j   k   l"
 go left/down/up/right
 .It Ic "gh  gj  gk  gl"
 go all the way to the left/bottom/top/right of sheet
 .It Ic "     G  gg"
+go all the way to the bottom/top of sheet
+.It Ic. "End  Home"
 go all the way to the bottom/top of sheet
 .It Ic "^B  ^F"
 scroll one page back/forward

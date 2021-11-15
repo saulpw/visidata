@@ -52,10 +52,11 @@ vd(1)                                                                           
        <span style="font-weight:bold;">R</span>              redo the most recent undo (requires enabled <span style="font-weight:bold;">options.undo</span>)
 
    <span style="font-weight:bold;">Cursor</span> <span style="font-weight:bold;">Movement</span>
-     <span style="font-weight:bold;">Arrow</span> <span style="font-weight:bold;">PgUp</span> <span style="font-weight:bold;">Home</span>  go as expected
+     <span style="font-weight:bold;">Arrow</span> <span style="font-weight:bold;">PgUp</span>       go as expected
       <span style="font-weight:bold;">h</span>   <span style="font-weight:bold;">j</span>   <span style="font-weight:bold;">k</span>   <span style="font-weight:bold;">l</span>   go left/down/up/right
      <span style="font-weight:bold;">gh</span>  <span style="font-weight:bold;">gj</span>  <span style="font-weight:bold;">gk</span>  <span style="font-weight:bold;">gl</span>   go all the way to the left/bottom/top/right of sheet
           <span style="font-weight:bold;">G</span>  <span style="font-weight:bold;">gg</span>       go all the way to the bottom/top of sheet
+     Ic. End  Home    go all the way to the bottom/top of sheet
      <span style="font-weight:bold;">^B</span>  <span style="font-weight:bold;">^F</span>           scroll one page back/forward
      <span style="font-weight:bold;">^Left</span> <span style="font-weight:bold;">^Right</span>     scroll one page left/right
      <span style="font-weight:bold;">zz</span>               scroll current row to center of screen
@@ -423,7 +424,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--col-cache-size</span>=<span style="text-decoration:underline;">int</span>         0                  max number of cache entries in each cached column
      <span style="font-weight:bold;">--clean-names</span>                False              clean column/sheet names to be valid Python identifiers
      <span style="font-weight:bold;">--default-width</span>=<span style="text-decoration:underline;">int</span>          20                 default column width
-     <span style="font-weight:bold;">--default-height</span>=<span style="text-decoration:underline;">int</span>         10                 default column height
+     <span style="font-weight:bold;">--default-height</span>=<span style="text-decoration:underline;">int</span>         4                  default column height
      <span style="font-weight:bold;">--textwrap-cells</span>=<span style="text-decoration:underline;">bool</span>        True               wordwrap text for multiline rows
      <span style="font-weight:bold;">--quitguard</span>                  False              confirm before quitting modified sheet
      <span style="font-weight:bold;">--debug</span>                      False              exit on error and display stacktrace
@@ -439,7 +440,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--name-joiner</span>=<span style="text-decoration:underline;">str</span>            _                  string to join sheet or column names
      <span style="font-weight:bold;">--value-joiner</span>=<span style="text-decoration:underline;">str</span>                              string to join display values
      <span style="font-weight:bold;">--wrap</span>                       False              wrap text to fit window width on TextSheet
-     <span style="font-weight:bold;">--save-filetype</span>=<span style="text-decoration:underline;">str</span>                             specify default file type to save as
+     <span style="font-weight:bold;">--save-filetype</span>=<span style="text-decoration:underline;">str</span>          tsv                specify default file type to save as
      <span style="font-weight:bold;">--profile</span>                    False              enable profiling on threads
      <span style="font-weight:bold;">--min-memory-mb</span>=<span style="text-decoration:underline;">int</span>          0                  minimum memory to continue loading and async processing
      <span style="font-weight:bold;">--encoding</span>=<span style="text-decoration:underline;">str</span>               utf-8              encoding passed to codecs.open
@@ -494,6 +495,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--csv-escapechar</span>=<span style="text-decoration:underline;">NoneType</span>    None               escapechar passed to csv.reader
      <span style="font-weight:bold;">--csv-lineterminator</span>=<span style="text-decoration:underline;">str</span>                        &quot; lineterminator passed to csv.writer
      <span style="font-weight:bold;">--safety-first</span>               False              sanitize input/output to handle edge cases, with a performance cost
+     <span style="font-weight:bold;">--xlsx-meta-columns</span>          False              include columns for cell objects, font colors, and fill colors
      <span style="font-weight:bold;">--fixed-rows</span>=<span style="text-decoration:underline;">int</span>             1000               number of rows to check for fixed width columns
      <span style="font-weight:bold;">--fixed-maxcols</span>=<span style="text-decoration:underline;">int</span>          0                  max number of fixed-width columns to create (0 is no max)
      <span style="font-weight:bold;">--postgres-schema</span>=<span style="text-decoration:underline;">str</span>        public             The desired schema for the Postgres database
@@ -691,5 +693,5 @@ vd(1)                                                                           
 <span style="font-weight:bold;">AUTHOR</span>
      <span style="font-weight:bold;">VisiData</span> was made by Saul Pwanson &lt;<span style="text-decoration:underline;">vd@saul.pw</span>&gt;.
 
-Linux/MacOS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    September 19, 2021                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   Linux/MacOS
+Linux/MacOS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    November 14, 2021                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    Linux/MacOS
 </pre></section>
