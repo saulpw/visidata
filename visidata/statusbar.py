@@ -106,9 +106,9 @@ def drawLeftStatus(vd, scr, vs):
     cattr = colors.get_color('color_status')
     active = (vs is vd.activeSheet)
     if active:
-        cattr = update_attr(cattr, colors.color_active_status, 0)
+        cattr = update_attr(cattr, colors.color_active_status, 1)
     else:
-        cattr = update_attr(cattr, colors.color_inactive_status, 0)
+        cattr = update_attr(cattr, colors.color_inactive_status, 1)
 
     if scr is vd.winTop:
         cattr = update_attr(cattr, colors.color_top_status, 1)
@@ -195,9 +195,9 @@ def drawRightStatus(vd, scr, vs):
                 if scr is vd.winTop:
                     cattr = update_attr(cattr, colors.color_top_status, 0)
                 if active:
-                    cattr = update_attr(cattr, colors.color_active_status, 0)
+                    cattr = update_attr(cattr, colors.color_active_status, 1)
                 else:
-                    cattr = update_attr(cattr, colors.color_inactive_status, 0)
+                    cattr = update_attr(cattr, colors.color_inactive_status, 1)
                 statuslen = clipdraw(scr, vs.windowHeight-1, rightx, rstatus, cattr.attr, w=vs.windowWidth-1, rtl=True)
                 rightx -= statuslen
                 ret += statuslen
