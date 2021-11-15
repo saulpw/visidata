@@ -1,4 +1,4 @@
-.Dd September 19, 2021
+.Dd November 14, 2021
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -104,13 +104,15 @@ view sheet of command longnames and keybindings
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
-.It Ic "Arrow PgUp Home"
+.It Ic "Arrow PgUp"
 go as expected
 .It Ic " h   j   k   l"
 go left/down/up/right
 .It Ic "gh  gj  gk  gl"
 go all the way to the left/bottom/top/right of sheet
 .It Ic "     G  gg"
+go all the way to the bottom/top of sheet
+.It Ic. "End  Home"
 go all the way to the bottom/top of sheet
 .It Ic "^B  ^F"
 scroll one page back/forward
@@ -865,7 +867,7 @@ max number of cache entries in each cached column
 clean column/sheet names to be valid Python identifiers
 .It Sy --default-width Ns = Ns Ar "int         " No "20"
 default column width
-.It Sy --default-height Ns = Ns Ar "int        " No "10"
+.It Sy --default-height Ns = Ns Ar "int        " No "4"
 default column height
 .It Sy --textwrap-cells Ns = Ns Ar "bool       " No "True"
 wordwrap text for multiline rows
@@ -897,7 +899,7 @@ string to join sheet or column names
 string to join display values
 .It Sy --wrap No "                      False"
 wrap text to fit window width on TextSheet
-.It Sy --save-filetype Ns = Ns Ar "str         " No ""
+.It Sy --save-filetype Ns = Ns Ar "str         " No "tsv"
 specify default file type to save as
 .It Sy --profile No "                   False"
 enable profiling on threads
@@ -1005,6 +1007,8 @@ escapechar passed to csv.reader
 lineterminator passed to csv.writer
 .It Sy --safety-first No "              False"
 sanitize input/output to handle edge cases, with a performance cost
+.It Sy --xlsx-meta-columns No "         False"
+include columns for cell objects, font colors, and fill colors
 .It Sy --fixed-rows Ns = Ns Ar "int            " No "1000"
 number of rows to check for fixed width columns
 .It Sy --fixed-maxcols Ns = Ns Ar "int         " No "0"

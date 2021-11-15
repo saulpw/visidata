@@ -53,8 +53,12 @@ def setWindows(vd, scr, pct=None):
     topmenulines = 1 if disp_menu else 0
     h, w = scr.getmaxyx()
 
-    n = abs(pct)*h//100
-    # on 100 line screen, pct = 25 means second window on lines 75-100.  pct -25 -> lines 0-25
+    n = 0
+    if pct:
+        # on 100 line screen, pct = 25 means second window on lines 75-100.  pct -25 -> lines 0-25
+        n = abs(pct)*h//100
+        n = min(n, h-topmenulines-3)
+        n = max(3, n)
 
     desiredConfig = dict(pct=pct, n=n, h=h-topmenulines, w=w)
 

@@ -1,0 +1,4 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/test.jsonl	o	
+test	key2		addcol-expr	list(key2.strip())	=	create new column from Python expression, with column names as variables
+test	list(key2.strip())		unfurl-col			row-wise expand current column of lists (e.g. [2]) or dicts (e.g. {3}) within that column

@@ -42,6 +42,7 @@ class UnfurledSheet(Sheet):
                     self.addRow([row, TypedExceptionWrapper(None, exception=e), TypedExceptionWrapper(None, exception=e)])
                 else:
                     vd.exceptionCaught(e)
+                continue
 
             if not isinstance(val, Iterable) or isinstance(val, str):
                 val = [ val ]

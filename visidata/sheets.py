@@ -17,7 +17,7 @@ __all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'TableSh
 
 
 vd.option('default_width', 20, 'default column width', replay=True)   # TODO: make not replay and remove from markdown saver
-vd.option('default_height', 10, 'default column height')
+vd.option('default_height', 4, 'default column height')
 vd.option('textwrap_cells', True, 'wordwrap text for multiline rows')
 
 vd.option('quitguard', False, 'confirm before quitting modified sheet')
@@ -175,7 +175,7 @@ class TableSheet(BaseSheet):
         ColumnColorizer(2, 'color_current_col', lambda s,c,r,v: c is s.cursorCol),
         ColumnColorizer(1, 'color_key_col', lambda s,c,r,v: c and c.keycol),
         CellColorizer(0, 'color_default', lambda s,c,r,v: True),
-        RowColorizer(2, 'color_selected_row', lambda s,c,r,v: s.isSelected(r)),
+        RowColorizer(2, 'color_selected_row', lambda s,c,r,v: r is not None and s.isSelected(r)),
         RowColorizer(1, 'color_error', lambda s,c,r,v: isinstance(r, (Exception, TypedExceptionWrapper))),
     ]
     nKeys = 0  # columns[:nKeys] are key columns
@@ -332,19 +332,16 @@ class TableSheet(BaseSheet):
 
     @property
     def bottomRowIndex(self):
-        return max(self._rowLayout.keys()) if self._rowLayout else self.topRowIndex+self.nScreenRows-1
+        return self.topRowIndex+self.nScreenRows-1
 
     @bottomRowIndex.setter
     def bottomRowIndex(self, newidx):
-        'Set topRowIndex, by getting height of *newidx* row and going backwards until more than nScreenRows is allocated.'
-        nrows = 0
-        i = 0
-        while nrows < self.nScreenRows and newidx-i >= 0:
-            h = self.calc_height(self.rows[newidx-i])
-            nrows += h
-            i += 1
+        self._topRowIndex = newidx-self.nScreenRows+1
 
-        self._topRowIndex = newidx-i+2 if nrows == self.nScreenRows-1 else newidx-self.nScreenRows+1
+    @drawcache_property
+    def rowHeight(self):
+        cols = self.visibleCols
+        return max(c.height for c in cols) if cols else 1
 
     def __deepcopy__(self, memo):
         'same as __copy__'
@@ -371,7 +368,7 @@ class TableSheet(BaseSheet):
     @property
     def nScreenRows(self):
         'Number of visible rows at the current window height.'
-        return self.windowHeight-self.nHeaderRows-self.nFooterRows
+        return (self.windowHeight-self.nHeaderRows-self.nFooterRows)//self.rowHeight
 
     @drawcache_property
     def nHeaderRows(self):
@@ -570,8 +567,6 @@ class TableSheet(BaseSheet):
             self.topRowIndex = self.cursorRowIndex
         elif self.bottomRowIndex < self.cursorRowIndex:
             self.bottomRowIndex = self.cursorRowIndex
-        elif self.bottomRowIndex == self.cursorRowIndex and self._rowLayout and self._rowLayout[self.bottomRowIndex][1] > 1:
-            self.bottomRowIndex = self.cursorRowIndex
 
         if self.cursorCol and self.cursorCol.keycol:
             return
@@ -730,7 +725,7 @@ class TableSheet(BaseSheet):
 
         y = headerRow + numHeaderRows
 
-        rows = self.rows[self.topRowIndex:min(self.topRowIndex+self.nScreenRows, self.nRows)]
+        rows = self.rows[self.topRowIndex:min(self.topRowIndex+self.nScreenRows+1, self.nRows)]
         self.checkCursorNoExceptions()
 
         for rowidx, row in enumerate(rows):
@@ -771,12 +766,7 @@ class TableSheet(BaseSheet):
                         lines = [cellval.display]
                     displines[vcolidx] = (col, cellval, lines)
 
-            heights = [0]
-            for col, cellval, lines in displines.values():
-                h = len(lines)   # of this cell
-                heights.append(min(col.height, h))
-
-            return max(heights)
+            return self.rowHeight
 
     def drawRow(self, scr, row, rowidx, ybase, rowcattr: ColorAttr, maxheight,
             isNull='',
@@ -820,9 +810,10 @@ class TableSheet(BaseSheet):
                     cattr = update_attr(cattr, basecellcattr)
 
                     note = getattr(cellval, 'note', None)
+                    notewidth = 1 if note else 0
                     if note:
                         notecattr = update_attr(cattr, colors.get_color(cellval.notecolor), 10)
-                        clipdraw(scr, ybase, x+colwidth-len(note), note, notecattr.attr)
+                        clipdraw(scr, ybase, x+colwidth-notewidth, note, notecattr.attr)
 
                     if voffset >= 0:
                         if len(lines)-voffset > height:
@@ -873,7 +864,7 @@ class TableSheet(BaseSheet):
                                     sepchars = midsep
 
                         pre = disp_truncator if hoffset != 0 else disp_column_fill
-                        clipdraw(scr, y, x, (pre if colwidth > 2 else '')+line[hoffset:], cattr.attr, w=colwidth-(1 if note else 0))
+                        clipdraw(scr, y, x, (pre if colwidth > 2 else '')+line[hoffset:], cattr.attr, w=colwidth-notewidth)
                         vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='edit-cell')
 
                         if x+colwidth+len(sepchars) <= self.windowWidth:
@@ -972,7 +963,7 @@ class IndexSheet(Sheet):
 
     def addRow(self, sheet, **kwargs):
         super().addRow(sheet, **kwargs)
-        if not self.options.load_lazy:
+        if not self.options.load_lazy and not sheet.options.load_lazy:
             sheet.ensureLoaded()
 
     @asyncthread
@@ -1131,7 +1122,7 @@ def splitPane(sheet, pct=None):
 def async_deepcopy(sheet, rowlist):
     @asyncthread
     def _async_deepcopy(newlist, oldlist):
-        for r in Progress(oldlist, 'copying'):
+        for r in vd.Progress(oldlist, 'copying'):
             newlist.append(deepcopy(r))
 
     ret = []
@@ -1158,8 +1149,8 @@ Sheet.addCommand('ge', 'setcol-input', 'cursorCol.setValuesTyped(selectedRows, i
 
 Sheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.reload=lambda vs=vs,rows=selectedRows: setattr(vs, "rows", list(rows)); vd.push(vs)', 'open duplicate sheet with only selected rows'),
 Sheet.addCommand('g"', 'dup-rows', 'vs=copy(sheet); vs.name+="_copy"; vs.rows=list(rows); status("copied "+vs.name); vs.select(selectedRows); vd.push(vs)', 'open duplicate sheet with all rows'),
-Sheet.addCommand('z"', 'dup-selected-deep', 'vs = deepcopy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = async_deepcopy(vs, selectedRows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")', 'open duplicate sheet with deepcopy of selected rows'),
-Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = deepcopy(sheet); vs.name += "_deepcopy"; vs.rows = async_deepcopy(vs, rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")', 'open duplicate sheet with deepcopy of all rows'),
+Sheet.addCommand('z"', 'dup-selected-deep', 'vs = deepcopy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = vs.async_deepcopy(selectedRows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")', 'open duplicate sheet with deepcopy of selected rows'),
+Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = deepcopy(sheet); vs.name += "_deepcopy"; vs.rows = vs.async_deepcopy(rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")', 'open duplicate sheet with deepcopy of all rows'),
 
 Sheet.addCommand('z~', 'type-any', 'cursorCol.type = anytype', 'set type of current column to anytype')
 Sheet.addCommand('~', 'type-string', 'cursorCol.type = str', 'set type of current column to str')

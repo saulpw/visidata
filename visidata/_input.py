@@ -174,7 +174,7 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
 
     while True:
         updater(v)
-        vd.getHelpPane('input').draw(scr, y=y)
+        vd.getHelpPane('input', module=__name__).draw(scr, y=y)
 
         if display:
             dispval = clean_printable(v)

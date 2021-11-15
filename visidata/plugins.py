@@ -1,9 +1,14 @@
+import os.path
 import os
+import sys
 import re
 import zipfile
+import shutil
 import importlib
+import subprocess
+import urllib
 
-from visidata import *
+from visidata import VisiData, vd, Path, CellColorizer, JsonLinesSheet, AttrDict, Column, Progress, ExpectedException, BaseSheet, asyncsingle, asyncthread
 
 
 vd.option('plugins_url', 'https://visidata.org/plugins/plugins.jsonl', 'source of plugins sheet')
@@ -14,10 +19,10 @@ def pluginsSheet(p):
     return PluginsSheet('plugins_global')
 
 def _plugin_path(plugin):
-    return Path(os.path.join(options.visidata_dir, "plugins", plugin.name+".py"))
+    return Path(os.path.join(vd.options.visidata_dir, "plugins", plugin.name+".py"))
 
 def _plugin_init():
-    return Path(os.path.join(options.visidata_dir, "plugins", "__init__.py"))
+    return Path(os.path.join(vd.options.visidata_dir, "plugins", "__init__.py"))
 
 def _plugin_import(plugin):
     return "import " + _plugin_import_name(plugin)
@@ -60,7 +65,7 @@ def _pluginColorizer(s,c,r,v):
 def pipinstall(vd, deps):
     'Install *deps*, a list of pypi modules to install via pip into the plugins-deps directory. Return True if successful (no error).'
     p = subprocess.Popen([sys.executable, '-m', 'pip', 'install',
-                        '--target', str(Path(options.visidata_dir)/"plugins-deps"),
+                        '--target', str(Path(vd.options.visidata_dir)/"plugins-deps"),
                       ] + deps,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
@@ -84,7 +89,12 @@ class PluginsSheet(JsonLinesSheet):
 
     @asyncsingle
     def reload(self):
-        self.source = urlcache(options.plugins_url or vd.fail(), days=1)  # for VisiDataMetaSheet.reload()
+        try:
+            self.source = vd.urlcache(vd.options.plugins_url or vd.fail(), days=1)  # for VisiDataMetaSheet.reload()
+        except urllib.error.URLError as e:
+            vd.debug(e)
+            return
+
         super().reload.__wrapped__(self)
         self.addColumn(Column('available', width=0, getter=_installedStatus), index=1)
         self.addColumn(Column('installed', width=8, getter=lambda c,r: _loadedVersion(r)), index=2)
@@ -131,12 +141,15 @@ class PluginsSheet(JsonLinesSheet):
             out, err = p.communicate()
             vd.status(out.decode())
             if err:
-                vd.warning(err.decode())
+                vd.fail('pip install failed:%s' % err.decode())
         else:
-            with urlcache(plugin.url, days=0).open_text(encoding='utf-8') as pyfp:
+            with vd.urlcache(plugin.url, days=0).open_text(encoding='utf-8') as pyfp:
                 contents = pyfp.read()
-                if not _checkHash(contents, plugin.sha256):
-                    vd.error('%s plugin SHA256 does not match!' % plugin.name)
+                if plugin.sha256:
+                    if not _checkHash(contents, plugin.sha256):
+                        vd.error('%s plugin SHA256 does not match!' % plugin.name)
+                else:
+                    vd.warning('no SHA256 provided for %s plugin, not validating' % plugin.name)
                 with outpath.open_text(mode='w', encoding='utf-8') as outfp:
                     outfp.write(contents)
 

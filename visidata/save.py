@@ -103,13 +103,20 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
 
     filetype = givenpath.ext or options.save_filetype
 
+    vd.clearCaches()
+
     savefunc = getattr(vsheets[0], 'save_' + filetype, None) or getattr(vd, 'save_' + filetype, None)
+
+    using_save_filetype = False
 
     if savefunc is None:
         savefunc = getattr(vd, 'save_' + options.save_filetype, None) or vd.fail('no function to save as type %s, set options.save_filetype' % filetype)
         vd.warning(f'save for {filetype} unavailable, using {options.save_filetype}')
+        using_save_filetype = True
 
-    if givenpath.exists() and confirm_overwrite:
+    if using_save_filetype and givenpath.exists() and confirm_overwrite:
+        vd.confirm("%s already exists. overwrite with %s? " % (givenpath.given, options.save_filetype))
+    elif givenpath.exists() and confirm_overwrite:
         vd.confirm("%s already exists. overwrite? " % givenpath.given)
 
     vd.status('saving %s sheets to %s as %s' % (len(vsheets), givenpath.given, filetype))
@@ -117,9 +124,13 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
     if not givenpath.given.endswith('/'):  # forcibly specify save individual files into directory by ending path with /
         for vs in vsheets:
             vs.hasBeenModified = False
+        # savefuncs(vd, p, *vsheets) will have 2 argcount (*vsheets does not get counted as an arg)
+        # savefuncs(vd, p, vs) will have 3 argcount (vs counts as an arg, along with vd, path)
+        if savefunc.__code__.co_argcount == 3 and len(vsheets) > 1:
+            vd.fail(f'cannot save multiple {filetype} sheets to non-dir')
         return vd.execAsync(savefunc, givenpath, *vsheets)
 
-    # more than one sheet; either no specific multisave for save filetype, or path ends with /
+    # path is a dir
 
     # save as individual files in the givenpath directory
     try:
@@ -152,6 +163,6 @@ def save_txt(vd, p, *vsheets):
 
 BaseSheet.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName()), sheet, confirm_overwrite=options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)')
 BaseSheet.addCommand('g^S', 'save-all', 'vd.saveSheets(inputPath("save all sheets to: "), *vd.stackedSheets, confirm_overwrite=options.confirm_overwrite)', 'save all sheets to given file or directory)')
-IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelectedRows, value=str(source)), *selectedRows, confirm_overwrite=options.confirm_overwrite)', 'save all selected sheets to given file or directory')
+IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelectedRows, value="_".join(vs.name or "blank" for vs in source)), *selectedRows, confirm_overwrite=options.confirm_overwrite)', 'save all selected sheets to given file or directory')
 Sheet.addCommand('', 'save-col', 'save_cols([cursorCol])', 'save current column only to filename in format determined by extension (default .tsv)')
 Sheet.addCommand('', 'save-col-keys', 'save_cols(keyCols + [cursorCol])', 'save key columns and current column to filename in format determined by extension (default .tsv)')

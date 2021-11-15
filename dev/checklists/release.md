@@ -2,10 +2,6 @@
 
 1. Merge `stable` to `develop` (if necessary)
 
-2. Verify that VisiData is up-to-date:
-    * help menu
-    * plugins.jsonl
-
 2. Verify that documentation/docstrings are up-to-date on features and functionality
 
     a. CHANGELOG;
@@ -13,6 +9,10 @@
     b. manpage;
 
     c. visidata.org; (formats?)
+
+3. Verify that VisiData is up-to-date:
+    * help menu
+    * plugins.jsonl
 
 3. Ensure `develop` automated tests run correctly with dev/test.sh
 

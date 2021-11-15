@@ -1,5 +1,49 @@
 # VisiData version history
 
+# 2.7 (2021-11-14)
+
+## Improvements
+
+- [movement] bind Home/End to go-top/go-bottom (thanks @geekscrapy #1161)
+- [api] add vd.urlcache as alias for urlcache global (thanks @geekscrapy for PR #1164)
+- [plugins] do not continue installation if main package fails pip install (thanks @geekscrapy for PR #1194)
+- [plugins] allow for plugin records without SHA256; warn if absent (thanks @geekscrapy for PR #1183)
+- [load_lazy] do not load subsheets, if `sheet.options.load_lazy` is True (thanks @geekscrapy for PR #1193)
+- [save] confirm when `save_foo` function does not exist and saver fallsback to `options.save_filetype` (reported by @geekscrapy #1180)
+- [save] `options.save_filetype` default now 'tsv'
+- several cosmetic improvements
+
+## Loaders
+
+- [lsv] add `lsv` filetype for simple awk-like records (requested by @fourjay #1179)
+- [ods] add `odf` filetype for Open Document Format spreadsheets
+- [xlsx] add extra columns (`cellobject`, `fontcolor`, `fillcolor`) if `options.xlsx_meta_columns` (default False) (thanks @hoclun-rigsep for PR #1098)
+- [sqlite] allow query/insert (no modify/delete yet) for `WITHOUT ROWID` tables (requested by @stephancb #1111)
+
+## Bugfixes
+
+- [savers compression formats] fix corruption when saving to compression formats (#1159)
+- fix "ModuleNotFoundError: no module named 'plugins'" error on startup (#1131 #1152)
+- [windows] fix issue with Enter key on Windows (reported by @hossam-houssien #1154)
+- [draw] fix multiline rows by making height fixed for all rows (reported by @geekscrapy #916)
+- [DirSheet] fix bug where fix key column sheets (e.g. DirSheet, SqliteIndexSheet) keycols were not being saved in batchmode (reported by @geekscrapy #1181)
+- [async] make sure all threads started on sheet are cancelable (reported by @geekscrapy #1136)
+- [AttrDict] fix bug with setting value on nested AttrDict
+- [dup-X-deep] fix error with async_deepcopy (thanks @pstuifzand for fix)
+- [join] fix 'inconsistent-keys' issue when joining between XlsxSheet with typed columns and CsvSheet with untyped columns (reported by @davidwales #1124)
+- [sqlite] handle sqlite column names with spaces (thanks @davidskeck for PR #1157)
+- [sqlite] use `options.encoding` and `options.encoding_errors` for decoding of sqlite db text (reported by @WesleyAC #1156)
+- [xlsx] add handling for EmptyCell instances (thanks @hoclun-rigsep for PR #1121)
+- [xlsx] gate sheet name cleaning on `options.clean_names` (reported by @davidwales #1122)
+- [macos] fix bindings for `Option`+key
+- [random-rows] fix import (reported by @geekscrapy #1162)
+- [save-selected] better default save filename (reported by @geekscrapy #1180)
+- [save] fix bug where saving multiple sheets to a single non-embeddable format did not result in fail (reported by @geekscrapy #1180)
+- [slide] fix Shift slide-down and Shift slide-up with arrow keys (reported by @a-y-u-s-h #1137)
+- [replay] fix replay where `join-sheets` operation hangs (reported by @agjohnson #1141)
+- [undo] no more KeyError when Undoing modifications (reported by @geekscrapy #1133)
+- [unfurl-col] fix unfurl-col on cells containing exceptions (reported by @jsvine #1171)
+
 # 2.6.1 (2021-09-28)
 
 ## Bugfixes

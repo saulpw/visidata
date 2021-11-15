@@ -276,6 +276,7 @@ def addCommand(cls, keystrokes, longname, execstr, helpstr='', **kwargs):
     vd.commands.set(longname, Command(longname, execstr, helpstr=helpstr, **kwargs), cls)
     if keystrokes:
         vd.bindkeys.set(vd.prettykeys(keystrokes), longname, cls)
+    return longname
 
 def _command(cls, binding, longname, helpstr, **kwargs):
     def decorator(func):
@@ -362,6 +363,11 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
     for modname in (args.imports or vd.options.imports or '').split():
         try:
             vd.addGlobals(importlib.import_module(modname).__dict__)
+        except ModuleNotFoundError as e:
+            # issue #1131
+            if 'plugins' in e.args[0]:
+                continue
+            vd.exceptionCaught(e)
         except Exception as e:
             vd.exceptionCaught(e)
             continue

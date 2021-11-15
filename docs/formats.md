@@ -49,6 +49,8 @@ eleventyNavigation:
 |vcf           |Virtual Contact File \(vCard\)|2\.0             |                |  |1995     |Versit Consortium   |https://tools\.ietf\.org/html/rfc6350|                    |
 |rec           |recutils database file|2\.0             |displayed text  |  |2010     |Jose E\. Marchesi   |https://www\.gnu\.org/software/recutils/|                    |
 |eml           |Multipurpose Internet Mail Extensions \(MIME\)|2\.0             |                |  |1996     |Nathaniel Borenstein and Ned Freed|https://tools\.ietf\.org/html/rfc2045|                    |
+|ods           |OpenDocument Spreadsheet|2\.7             |                |  |2006     |[OASIS](https://en.wikipedia.org/wiki/OASIS_(organization))|https://docs.oasis-open.org/office/v1.1/|odfpy|
+|lsv           |awk-like key-value line-separated values|2\.7             |v2\.7                |  |     |   |   |   |
 
 
 # Extra notes about formats
@@ -97,6 +99,17 @@ eleventyNavigation:
     - `postgres_schema` (default: 'public') the desired schema for the Postgres database
 - `vd postgres://`*username*`:`*password*`@`*hostname*`:`*port*`/`*database* opens a connection to the given postgres database.
 
+### using VisiData as a pager within psql
+
+In psql:
+
+~~~
+\pset format csv
+\pset pager always
+\setenv PSQL_PAGER 'vd -f csv'
+\pset pager_min_lines
+~~~
+
 ## sqlite {#sqlite}
 - supports saving for CREATE/INSERT (not wholesale updates)
 - `z Ctrl+S` to commit any `add-row`/`edit-cell`/`delete-row`
@@ -137,6 +150,20 @@ vd -f pandas data.parquet
 ~~~
 
 loads a parquet file. When using the **pandas** loader, the `.fileformat` file extension is mandatory.
+
+To load a hierarchy of parquet files located in folder `data/`, run
+
+~~~
+vd -f parquet data/
+~~~
+
+or rename the directory to `data.parquet` and run
+
+~~~
+vd data.parquet -f pandas
+~~~
+
+This should similarly work for any format that has a `pandas.read_format()` function.
 
 ## vd {#vd}
 - Command history log format for a VisiData session.

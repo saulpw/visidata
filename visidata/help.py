@@ -19,7 +19,7 @@ class HelpSheet(MetaSheet):
         Column('all_bindings', width=0, getter=lambda col,row: list(set(col.sheet.revbinds.get(row.longname, [])))),
         Column('description', getter=lambda col,row: col.sheet.cmddict[(row.sheet, row.longname)].helpstr),
         ColumnAttr('execstr', width=0),
-        Column('logged', width=0, getter=lambda col,row: isLoggableCommand(row.longname)),
+        Column('logged', width=0, getter=lambda col,row: vd.isLoggableCommand(row.longname)),
     ]
     nKeys = 2
 
@@ -114,7 +114,7 @@ class HelpPane:
 def getHelpPane(vd, name, module='vdplus'):
     ret = HelpPane(name)
     try:
-        ret.amgr.load(name, Path(resource_filename(module, 'help/'+name+'.ddw')).open_text(encoding='utf-8'))
+        ret.amgr.load(name, Path(resource_filename(module,'ddw/'+name+'.ddw')).open_text(encoding='utf-8'))
         ret.amgr.trigger(name, loop=True)
     except FileNotFoundError as e:
         vd.debug(str(e))

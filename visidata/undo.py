@@ -37,7 +37,7 @@ def undo(vd, sheet):
     # don't allow undo of first command on a sheet, which is always the command that created the sheet.
     for cmdlogrow in sheet.cmdlog_sheet.rows[:0:-1]:
         if cmdlogrow.undofuncs:
-            for undofunc, args, kwargs, in cmdlogrow.undofuncs:
+            for undofunc, args, kwargs, in cmdlogrow.undofuncs[::-1]:
                 undofunc(*args, **kwargs)
             sheet.undone.append(cmdlogrow)
             sheet.cmdlog_sheet.rows.remove(cmdlogrow)

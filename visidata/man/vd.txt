@@ -53,10 +53,11 @@ DESCRIPTION
                       options.undo)
 
    Cursor Movement
-     Arrow PgUp Home  go as expected
+     Arrow PgUp       go as expected
       h   j   k   l   go left/down/up/right
      gh  gj  gk  gl   go all the way to the left/bottom/top/right of sheet
           G  gg       go all the way to the bottom/top of sheet
+     Ic. End  Home    go all the way to the bottom/top of sheet
      ^B  ^F           scroll one page back/forward
      ^Left ^Right     scroll one page left/right
      zz               scroll current row to center of screen
@@ -561,7 +562,7 @@ COMMANDLINE OPTIONS
                                                      to be valid Python iden‐
                                                      tifiers
      --default-width=int          20                 default column width
-     --default-height=int         10                 default column height
+     --default-height=int         4                  default column height
      --textwrap-cells=bool        True               wordwrap text for multi‐
                                                      line rows
      --quitguard                  False              confirm before quitting
@@ -592,7 +593,7 @@ COMMANDLINE OPTIONS
                                                      values
      --wrap                       False              wrap text to fit window
                                                      width on TextSheet
-     --save-filetype=str                             specify default file type
+     --save-filetype=str          tsv                specify default file type
                                                      to save as
      --profile                    False              enable profiling on
                                                      threads
@@ -714,6 +715,9 @@ COMMANDLINE OPTIONS
      --safety-first               False              sanitize input/output to
                                                      handle edge cases, with a
                                                      performance cost
+     --xlsx-meta-columns          False              include columns for cell
+                                                     objects, font colors, and
+                                                     fill colors
      --fixed-rows=int             1000               number of rows to check
                                                      for fixed width columns
      --fixed-maxcols=int          0                  max number of fixed-width
@@ -974,4 +978,4 @@ SUPPORTED SOURCES
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                   September 19, 2021                   Linux/MacOS
+Linux/MacOS                    November 14, 2021                   Linux/MacOS

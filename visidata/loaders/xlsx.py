@@ -1,5 +1,6 @@
 from visidata import *
 
+vd.option('xlsx_meta_columns', False, 'include columns for cell objects, font colors, and fill colors', replay=True)
 
 @VisiData.api
 def open_xls(vd, p):
@@ -28,33 +29,50 @@ class XlsxIndexSheet(IndexSheet):
             src = self.workbook[sheetname]
             yield XlsxSheet(self.name, sheetname, source=src)
 
-
 class XlsxSheet(SequenceSheet):
     # rowdef: AttrDict of column_letter to cell
     def setCols(self, headerrows):
+        from openpyxl.utils.cell import get_column_letter
         self.columns = []
         self._rowtype = AttrDict
 
         if not headerrows:
             return
 
-        headers = [[x.value for x in row.values()] for row in headerrows]
-        column_letters = [x.column_letter for x in headerrows[0].values()]
+        headers = [[cell.value for cell in row.values()] for row in headerrows]
+        column_letters = [
+                x.column_letter if 'column_letter' in dir(x)
+                else get_column_letter(i+1)
+                for i, x in enumerate(headerrows[0].values())]
 
         for i, colnamelines in enumerate(itertools.zip_longest(*headers, fillvalue='')):
             colnamelines = ['' if c is None else c for c in colnamelines]
-            self.addColumn(AttrColumn(''.join(map(str, colnamelines)), column_letters[i] +'.value'))
+            column_name = ''.join(map(str, colnamelines))
+            self.addColumn(AttrColumn(column_name, column_letters[i] + '.value'))
+            self.addXlsxMetaColumns(column_letters[i], column_name)
 
     def addRow(self, row, index=None):
         Sheet.addRow(self, row, index=index)  # skip SequenceSheet
         for column_letter, v in list(row.items())[len(self.columns):len(row)]:  # no-op if already done
-            self.addColumn(AttrColumn('', column_letter+'.value'))
+            self.addColumn(AttrColumn('', column_letter + '.value'))
+            self.addXlsxMetaColumns(column_letter, column_letter)
 
     def iterload(self):
+        from openpyxl.utils.cell import get_column_letter
         worksheet = self.source
         for row in Progress(worksheet.iter_rows(), total=worksheet.max_row or 0):
-            yield AttrDict({cell.column_letter:cell for cell in row})
+            yield AttrDict({get_column_letter(i+1): cell for i, cell in enumerate(row)})
 
+    def addXlsxMetaColumns(self, column_letter, column_name):
+        if self.options.xlsx_meta_columns:
+            self.addColumn(
+                    AttrColumn(column_name + '_cellPyObj', column_letter))
+            self.addColumn(
+                    AttrColumn(column_name + '_fontColor',
+                        column_letter + '.font.color.value'))
+            self.addColumn(
+                    AttrColumn(column_name + '_fillColor', column_letter +
+                        '.fill.start_color.value'))
 
 class XlsIndexSheet(IndexSheet):
     'Load XLS file (in Excel format).'
@@ -80,12 +98,15 @@ class XlsSheet(SequenceSheet):
             yield list(worksheet.cell(rownum, colnum).value for colnum in range(worksheet.ncols))
 
 
-def xls_name(name):
-    # sheet name can not be longer than 31 characters
-    xname = cleanName(name)[:31]
-    if xname != name:
-        vd.warning(f'{name} saved as {xname}')
-    return xname
+@Sheet.property
+def xls_name(vs):
+    name = vs.names[-1]
+    if vs.options.clean_names:
+        name = ''.join('_' if ch in ':[]*?/\\' else ch for ch in vs.name) #1122
+        name = cleaned_name[:31]  #594
+        name = name.strip('_')
+
+    return name
 
 
 @VisiData.api
@@ -96,7 +117,9 @@ def save_xlsx(vd, p, *sheets):
     wb.remove_sheet(wb['Sheet'])
 
     for vs in sheets:
-        ws = wb.create_sheet(title=xls_name(vs.name))
+        if vs.xls_name != vs.names[-1]:
+            vd.warning(f'saving {vs.name} as {vs.xls_name}')
+        ws = wb.create_sheet(title=vs.xls_name)
 
         headers = [col.name for col in vs.visibleCols]
         ws.append(headers)
@@ -126,7 +149,9 @@ def save_xls(vd, p, *sheets):
     wb = xlwt.Workbook()
 
     for vs in sheets:
-        ws1 = wb.add_sheet(xls_name(vs.name))
+        if vs.xls_name != vs.name:
+            vd.warning(f'saving {vs.name} as {vs.xls_name}')
+        ws1 = wb.add_sheet(vs.xls_name)
         for col_i, col in enumerate(vs.visibleCols):
             ws1.write(0, col_i, col.name)
 

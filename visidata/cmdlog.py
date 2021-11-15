@@ -12,7 +12,7 @@ vd.option('replay_movement', False, 'insert movements during replay', sheettype=
 # prefixes which should not be logged
 nonLogged = '''forget exec-longname undo redo quit
 show error errors statuses options threads jump
-replay cancel save-cmdlog macro
+replay cancel save-cmdlog macro cmdlog-sheet
 go- search scroll prev next page start end zoom resize visibility
 mouse suspend redraw no-op help syscopy sysopen profile toggle'''.split()
 
@@ -48,7 +48,7 @@ def fnSuffix(vd, prefix):
 
     return fn
 
-@Sheet.api
+@BaseSheet.api
 def inputLongname(sheet):
     longnames = set(k for (k, obj), v in vd.commands.iter(sheet))
     return vd.input("command name: ", completer=CompleteKey(sorted(longnames)), type='longname')
@@ -62,7 +62,8 @@ def indexMatch(L, func):
 def keystr(k):
     return  options.rowkey_prefix+','.join(map(str, k))
 
-def isLoggableCommand(longname):
+@VisiData.api
+def isLoggableCommand(vd, longname):
     for n in nonLogged:
         if longname.startswith(n):
             return False
@@ -159,7 +160,7 @@ class _CommandLog:
         return self._rowtype(**fields)
 
     def beforeExecHook(self, sheet, cmd, args, keystrokes):
-        if not isLoggableCommand(cmd.longname):
+        if not vd.isLoggableCommand(cmd.longname):
             return
 
         if vd.activeCommand:
@@ -195,7 +196,7 @@ class _CommandLog:
             vd.activeCommand[-1] += ' [%s]' % err
 
         # remove user-aborted commands and simple movements
-        if not escaped and isLoggableCommand(vd.activeCommand.longname):
+        if not escaped and vd.isLoggableCommand(vd.activeCommand.longname):
             if isLoggableSheet(sheet):      # don't record actions on global cmdlog or other internal sheets
                     self.addRow(vd.activeCommand)  # add to global cmdlog
             sheet.cmdlog_sheet.addRow(vd.activeCommand)  # add to sheet-specific cmdlog
@@ -365,6 +366,9 @@ def replay_sync(vd, cmdlog, live=False):
 @asyncthread
 def replay(vd, cmdlog):
         'Inject commands into live execution with interface.'
+        for thread in vd.threads:
+            if thread.name == 'replay':
+                thread.noblock = True
         vd.replay_sync(cmdlog, live=True)
 
 
@@ -430,7 +434,7 @@ def cmdlog(vd):
 
 @VisiData.property
 def modifyCommand(vd):
-    if vd.activeCommand is not None and isLoggableCommand(vd.activeCommand.longname):
+    if vd.activeCommand is not None and vd.isLoggableCommand(vd.activeCommand.longname):
         return vd.activeCommand
     if not vd.cmdlog.rows:
         return None

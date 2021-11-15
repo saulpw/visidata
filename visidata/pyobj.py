@@ -18,6 +18,8 @@ def getSampleRows(sheet):
     n = sheet.options.default_sample_size
     if n == 0 or n >= sheet.nRows:
         return sheet.rows
+
+    vd.warning(f'sampling {n} rows')
     seq = sheet.rows
     start = math.ceil(sheet.cursorRowIndex - n / 2) % len(seq)
     end = (start + n) % len(seq)
@@ -296,12 +298,20 @@ class PyobjSheet(PythonSheet):
         v = getattr(self.source, row)
         return PyobjSheet(self.name + "." + str(row), source=v() if callable(v) else v)
 
+
 @TableSheet.api
 def openRow(sheet, row):
     'Return Sheet diving into *row*.'
-    k = sheet.keystr(row) or [sheet.cursorRowIndex]
+    k = sheet.keystr(row) or sheet.cursorRowIndex
     name = f'{sheet.name}[{k}]'
-    return PyobjSheet(name, source=tuple(c.getTypedValue(row) for c in sheet.visibleCols))
+    return TableSheet(name,
+                      rows=sheet.visibleCols,
+                      sourceRow=sheet.cursorRow,
+                      columns=[
+                        Column('column', getter=lambda c,r: r.name),
+                        Column('value', getter=lambda c,r: r.getTypedValue(c.sheet.sourceRow), setter=lambda c,r,v: r.setValue(c.sheet.sourceRow, v)),
+                      ],
+                      nKeys=1)
 
 @TableSheet.api
 def openCell(sheet, col, row):

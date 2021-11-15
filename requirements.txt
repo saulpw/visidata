@@ -4,7 +4,7 @@ python-dateutil     # date type
 pandas>=1.0.5       # dta (Stata)
 requests            # http
 lxml                # html/xml
-openpyxl            # xlsx
+openpyxl>= 2.4      # xlsx
 xlrd                # xls
 h5py                # hdf5
 psycopg2-binary     # postgres
@@ -26,5 +26,6 @@ vobject             # vcf
 tabulate            # tabulate saver
 wcwidth             # tabulate saver with unicode
 zstandard           # read .zst files
+odfpy               # odt (OpenDocument)
 
 -e git+https://github.com/saulpw/pyxlsb.git@master#egg=pyxlsb # xlsb

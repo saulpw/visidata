@@ -25,6 +25,7 @@ vd.option('clipboard_paste_cmd', syspaste_cmd_default, 'command to send contents
 @Sheet.api
 def copyRows(sheet, rows):
     vd.memory.cliprows = rows
+    vd.memory.clipcols = list(sheet.visibleCols)
     if not rows:
         vd.warning('no %s selected; clipboard emptied' % sheet.rowtype)
     else:

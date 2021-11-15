@@ -2,7 +2,7 @@
 # Usage: $0 [<options>] [<input> ...]
 #        $0 [<options>] --play <cmdlog> [--batch] [-w <waitsecs>] [-o <output>] [field=value ...]
 
-__version__ = '2.6.1'
+__version__ = '2.7'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
 from copy import copy
@@ -81,7 +81,10 @@ optalias('force_valid_colnames', 'clean_names')  # deprecated
 
 def main_vd():
     'Open the given sources using the VisiData interface.'
-    locale.setlocale(locale.LC_ALL, '')
+    try:
+        locale.setlocale(locale.LC_ALL, '')
+    except locale.Error as e:
+        vd.warning(e)
     warnings.showwarning = vd.warning
 
     flPipedInput = not sys.stdin.isatty()
@@ -205,7 +208,7 @@ def main_vd():
         options.quitguard = False
         vd.status = lambda *args, **kwargs: print(*args, file=sys.stderr)  # ignore kwargs (like priority)
         vd.editline = lambda *args, **kwargs: ''
-        vd.execAsync = lambda func, *args, **kwargs: func(*args, **kwargs) # disable async
+        vd.execAsync = lambda func, *args, sheet=None, **kwargs: func(*args, **kwargs) # disable async
 
     for cmd in (args.preplay or '').split():
         BaseSheet('').execCommand(cmd)

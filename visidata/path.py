@@ -48,8 +48,11 @@ class FileProgress:
         # track Progress on original fp
         self.fp_orig_read = self.fp.read
         self.fp_orig_close = self.fp.close
-        self.fp.read = self.read
-        self.fp.close = self.close
+        # These two lines result in bug #1159, a corrupted save of corruption formats
+        # for now we are reverting by commenting out, and opened #1175 to investigate
+        # Progress bars for compression formats might not work in the meanwhile
+        #self.fp.read = self.read
+        #self.fp.close = self.close
 
         if self.prog:
             self.prog.__enter__()

@@ -1,0 +1,3 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	tests/without_rowid.db	o	
+without_rowid		キwithoutrowid	open-row		Enter	open sheet with copies of rows referenced in current row

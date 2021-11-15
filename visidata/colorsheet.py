@@ -39,7 +39,7 @@ class ColorSheet(Sheet):
             scr.addstr(y, x, s, colors[c])
 
 
-BaseSheet.addCommand(None, 'open-colors', 'vd.push(vd.colorsSheet)', 'open Color Sheet with avaiable terminal colors')
+BaseSheet.addCommand(None, 'open-colors', 'vd.push(vd.colorsSheet)', 'open Color Sheet with available terminal colors')
 
 @VisiData.lazy_property
 def colorsSheet(vd):
