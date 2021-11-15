@@ -44,11 +44,11 @@ class SqliteSheet(Sheet):
                 return int if f == '0' else float
             return anytype
 
+        self.rowidColumn = None
         with self.conn() as conn:
             tblname = self.tableName
             if not isinstance(self, SqliteIndexSheet):
                 self.columns = []
-                self.addColumn(ColumnItem('rowid', 0, type=int, width=0))
                 for r in self.execute(conn, 'PRAGMA TABLE_XINFO("%s")' % tblname):
                     colnum, colname, coltype, nullable, defvalue, colkey, *_ = r
                     c = ColumnItem(colname, colnum+1, type=parse_sqlite_type(coltype))
@@ -57,7 +57,14 @@ class SqliteSheet(Sheet):
                     if colkey:
                         self.setKeys([c])
 
-            r = self.execute(conn, 'SELECT rowid, * FROM "%s"' % tblname)
+                if 'WITHOUT ROWID' not in self.row[5]: # SQL used to create table
+                    self.rowidColumn = ColumnItem('rowid', 0, type=int, width=0)
+                    self.addColumn(self.rowidColumn, index=0)
+
+            if self.rowidColumn:
+                r = self.execute(conn, 'SELECT rowid, * FROM "%s"' % tblname)
+            else:
+                r = self.execute(conn, 'SELECT NULL, * FROM "%s"' % tblname)
             yield from Progress(r, total=r.rowcount-1)
 
     @asyncthread
@@ -82,7 +89,6 @@ class SqliteSheet(Sheet):
             return vals
 
         with self.conn() as conn:
-            wherecols = [self.columns[0]] # self.column("rowid")
             for r in adds.values():
                 cols = self.visibleCols
                 sql = 'INSERT INTO "%s" ' % self.tableName
@@ -93,6 +99,10 @@ class SqliteSheet(Sheet):
                     vd.warning('not all rows inserted') # f'{res.rowcount}/{res.arraysize} rows inserted'
 
             for row, rowmods in mods.values():
+                if not self.rowidColumn:
+                    vd.warning('cannot modify rows in tables without rowid')
+                    break
+                wherecols = [self.rowidColumn]
                 sql = 'UPDATE "%s" SET ' % self.tableName
                 sql += ', '.join('%s=?' % c.name for c, _ in rowmods.items())
                 sql += ' WHERE %s' % ' AND '.join('"%s"=?' % c.name for c in wherecols)
@@ -104,6 +114,11 @@ class SqliteSheet(Sheet):
                     vd.warning('not all rows updated') # f'{res.rowcount}/{res.arraysize} rows updated'
 
             for row in dels.values():
+                if not self.rowidColumn:
+                    vd.warning('cannot delete rows in tables without rowid')
+                    break
+
+                wherecols = [self.rowidColumn]
                 sql = 'DELETE FROM "%s" ' % self.tableName
                 sql += ' WHERE %s' % ' AND '.join('"%s"=?' % c.name for c in wherecols)
                 wherevals=list(Column.calcValue(c, row) for c in wherecols)
@@ -123,6 +138,7 @@ class SqliteIndexSheet(SqliteSheet, IndexSheet):
     savesToSource = True
     defer = True
     def iterload(self):
+        self.addColumn(Column('sql', width=0, getter=lambda c,r:r.row[5]))
         for row in SqliteSheet.iterload(self):
             if row[1] != 'index':
                 tblname = row[2]
