@@ -62,7 +62,8 @@ def indexMatch(L, func):
 def keystr(k):
     return  options.rowkey_prefix+','.join(map(str, k))
 
-def isLoggableCommand(longname):
+@VisiData.api
+def isLoggableCommand(vd, longname):
     for n in nonLogged:
         if longname.startswith(n):
             return False
@@ -159,7 +160,7 @@ class _CommandLog:
         return self._rowtype(**fields)
 
     def beforeExecHook(self, sheet, cmd, args, keystrokes):
-        if not isLoggableCommand(cmd.longname):
+        if not vd.isLoggableCommand(cmd.longname):
             return
 
         if vd.activeCommand:
@@ -195,7 +196,7 @@ class _CommandLog:
             vd.activeCommand[-1] += ' [%s]' % err
 
         # remove user-aborted commands and simple movements
-        if not escaped and isLoggableCommand(vd.activeCommand.longname):
+        if not escaped and vd.isLoggableCommand(vd.activeCommand.longname):
             if isLoggableSheet(sheet):      # don't record actions on global cmdlog or other internal sheets
                     self.addRow(vd.activeCommand)  # add to global cmdlog
             sheet.cmdlog_sheet.addRow(vd.activeCommand)  # add to sheet-specific cmdlog
@@ -433,7 +434,7 @@ def cmdlog(vd):
 
 @VisiData.property
 def modifyCommand(vd):
-    if vd.activeCommand is not None and isLoggableCommand(vd.activeCommand.longname):
+    if vd.activeCommand is not None and vd.isLoggableCommand(vd.activeCommand.longname):
         return vd.activeCommand
     if not vd.cmdlog.rows:
         return None
