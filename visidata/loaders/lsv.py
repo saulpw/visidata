@@ -4,12 +4,12 @@ from visidata import VisiData, Sheet, ItemColumn
 
 
 @VisiData.api
-def open_awk(vd, p):
-    return AwkSheet(p.name, source=p)
+def open_lsv(vd, p):
+    return LsvSheet(p.name, source=p)
 
 
 @VisiData.api
-def save_awk(vd, p, *vsheets):
+def save_lsv(vd, p, *vsheets):
     vs = vsheets[0]
     with p.open_text(mode='w', encoding=vs.options.encoding) as fp:
         for row in vs.iterrows():
@@ -18,7 +18,7 @@ def save_awk(vd, p, *vsheets):
             fp.write('\n')
 
 
-class AwkSheet(Sheet):
+class LsvSheet(Sheet):
     def addRow(self, row, **kwargs):
         super().addRow(row, **kwargs)
         for k in row:
