@@ -764,7 +764,7 @@ def runMenu(vd):
         elif k in ['KEY_UP', 'k']:
             sheet.activeMenuItems[-1] -= 1
 
-        elif k in [ENTER, ' ']:
+        elif k in [ENTER, ' ', '^J', '^M']:
             if currentItem.menus:
                 sheet.activeMenuItems.append(0)
             else:
