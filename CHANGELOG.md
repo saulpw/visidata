@@ -1,5 +1,9 @@
 # VisiData version history
 
+# 2.7.1 (2021-11-15)
+
+- Bugfix: fix Enter on helmenu (reported by @geekscrapy #1196)
+
 # 2.7 (2021-11-14)
 
 ## Improvements
