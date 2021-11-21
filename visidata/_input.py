@@ -135,8 +135,10 @@ class HistoryState:
 
 # history: earliest entry first
 @VisiData.api
-def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True, updater=lambda val: None, bindings={}):
-  'A better curses line editing widget.'
+def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True, updater=lambda val: None, bindings={}, clear=True):
+  '''A better curses line editing widget.
+  If *clear* is True, clear whole editing area before displaying.
+  '''
   with EnableCursor():
     ESC='^['
     TAB='^I'
@@ -197,8 +199,8 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
             k = 1 if w%2==0 else 0  # odd widths have one character more
             dispval = left_truncchar + dispval[i-w//2+1:i+w//2-k] + right_truncchar
 
-        prew = clipdraw(scr, y, x, dispval[:dispi], attr, w)
-        clipdraw(scr, y, x+prew, dispval[dispi:], attr, w-prew+1)
+        prew = clipdraw(scr, y, x, dispval[:dispi], attr, w, clear=clear)
+        clipdraw(scr, y, x+prew, dispval[dispi:], attr, w-prew+1, clear=clear)
         scr.move(y, x+prew)
         ch = vd.getkeystroke(scr)
         if ch == '':                               continue
