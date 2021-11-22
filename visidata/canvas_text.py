@@ -155,7 +155,7 @@ TextCanvas.addCommand('zt', 'toggle-top-cursor', 'source.toggle(list(itercursor(
 TextCanvas.addCommand('zu', 'unselect-top-cursor', 'source.unselect(list(itercursor(n=1)))')
 TextCanvas.addCommand('d', 'delete-cursor', 'source.deleteBy(lambda r,rows=cursorRows: r in rows)', 'delete first item under cursor')
 TextCanvas.addCommand('gd', 'delete-selected', 'source.deleteSelected()', 'delete selected rows on source sheet')
-TextCanvas.addCommand(ENTER, 'dive-cursor', 'vs=copy(sheet); vs.rows=cursorRows; vs.source=sheet; vd.push(vs)', 'dive into source rows under cursor')
+TextCanvas.addCommand(ENTER, 'dive-cursor', 'vs=copy(source); vs.rows=cursorRows; vs.source=sheet; vd.push(vs)', 'dive into source rows under cursor')
 TextCanvas.addCommand('g'+ENTER, 'dive-selected', 'vd.push(type(source)(source=sheet, rows=source.selectedRows))', 'dive into selected source rows')
 
 TextCanvas.addCommand('H', 'slide-left-obj',       'slide(source.selectedRows, -1, 0)', 'slide selected objects left one character')
