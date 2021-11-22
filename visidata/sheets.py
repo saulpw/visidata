@@ -1033,8 +1033,8 @@ def push(vd, vs, pane=0):
     if pane == -1:
         vs.pane = 2 if vd.activePane == 1 else 1
     elif pane == 0:
-        if not vd.sheetstack(1): vs.pane=1
-        elif not vd.sheetstack(2) and vd.options.disp_splitwin_pct != 0: vs.pane=2
+        if not vd.sheetstack(1): vd.activePane=vs.pane=1
+        elif not vd.sheetstack(2) and vd.options.disp_splitwin_pct != 0: vd.activePane=vs.pane=2
         else: vs.pane = vd.activePane
     else:
         vs.pane = pane
