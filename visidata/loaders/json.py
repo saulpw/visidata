@@ -54,6 +54,10 @@ class JsonSheet(PythonSheet):
                                 yield ret
                         break
 
+    def addColumn(self, *cols, index=None):
+        for c in cols:
+            self._knownKeys.add(c.name)
+        return super().addColumn(*cols, index=index)
 
     def addRow(self, row, index=None):
         # Wrap non-dict rows in a dummy object with a predictable key name.
@@ -68,7 +72,6 @@ class JsonSheet(PythonSheet):
         for k in row:
             if k not in self._knownKeys:
                 self.addColumn(ColumnItem(k, type=deduceType(row[k])))
-                self._knownKeys.add(k)
         return row
 
     def newRow(self):
