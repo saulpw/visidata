@@ -140,7 +140,7 @@ class PluginsSheet(JsonLinesSheet):
                     stderr=subprocess.PIPE)
             out, err = p.communicate()
             vd.status(out.decode())
-            if err:
+            if p.returncode != 0:
                 vd.fail('pip install failed:%s' % err.decode())
         else:
             with vd.urlcache(plugin.url, days=0).open_text(encoding='utf-8') as pyfp:
