@@ -33,7 +33,11 @@ class JsonSheet(PythonSheet):
                 try:
                     if L.startswith('#'): # skip commented lines
                         continue
+<<<<<<< HEAD
                     elif not L.strip(): # skip blank lines
+=======
+                    elif not L.strip():
+>>>>>>> bf8710091bfc34a28e89ab40ebca90ad0921592a
                         continue
                     ret = json.loads(L, object_hook=AttrDict)
                     if isinstance(ret, list):
