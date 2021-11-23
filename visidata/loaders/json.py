@@ -1,8 +1,6 @@
 import json
-from collections import OrderedDict
 
-from visidata import *
-
+from visidata import vd, date, VisiData, PythonSheet, deepcopy, AttrDict, stacktrace, TypedExceptionWrapper, options, visidata, ColumnItem, deduceType, wrapply, TypedWrapper, Progress
 
 vd.option('json_indent', None, 'indent to use when saving json')
 vd.option('json_sort_keys', False, 'sort object keys when saving to json')
@@ -34,6 +32,8 @@ class JsonSheet(PythonSheet):
             for L in fp:
                 try:
                     if L.startswith('#'): # skip commented lines
+                        continue
+                    elif not L.strip(): # skip blank lines
                         continue
                     ret = json.loads(L, object_hook=AttrDict)
                     if isinstance(ret, list):
