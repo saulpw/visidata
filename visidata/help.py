@@ -27,7 +27,11 @@ class HelpSheet(MetaSheet):
         cmdlist = VisiDataMetaSheet('cmdlist', source=None)
 
         self.cmddict = {}
-        itcmds = vd.commands.iterall()
+        if self.source:
+            itcmds = vd.commands.iter(obj=self.source)
+        else:
+            itcmds = vd.commands.iterall()
+
         for (k, o), v in itcmds:
             yield v
             v.sheet = o
