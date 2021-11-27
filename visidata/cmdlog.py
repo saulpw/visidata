@@ -160,9 +160,6 @@ class _CommandLog:
         return self._rowtype(**fields)
 
     def beforeExecHook(self, sheet, cmd, args, keystrokes):
-        if not vd.isLoggableCommand(cmd.longname):
-            return
-
         if vd.activeCommand:
             self.afterExecSheet(sheet, False, '')
 
@@ -195,10 +192,14 @@ class _CommandLog:
         if err:
             vd.activeCommand[-1] += ' [%s]' % err
 
-        # remove user-aborted commands and simple movements
-        if not escaped and vd.isLoggableCommand(vd.activeCommand.longname):
-            if isLoggableSheet(sheet):      # don't record actions on global cmdlog or other internal sheets
-                    self.addRow(vd.activeCommand)  # add to global cmdlog
+        if escaped:
+            vd.activeCommand = None
+            return
+
+        # remove user-aborted commands and simple movements (unless first command on the sheet, which created the sheet)
+        if not sheet.cmdlog.rows or vd.isLoggableCommand(vd.activeCommand.longname):
+            if isLoggableSheet(sheet):      # don't record actions from cmdlog or other internal sheets on global cmdlog
+                self.addRow(vd.activeCommand)  # add to global cmdlog
             sheet.cmdlog_sheet.addRow(vd.activeCommand)  # add to sheet-specific cmdlog
             if options.cmdlog_histfile:
                 if not getattr(vd, 'sessionlog', None):

@@ -155,6 +155,8 @@ class BaseSheet(DrawablePane):
         if vdglobals is None:
             vdglobals = vd.getGlobals()
 
+        vd.cmdlog  # make sure cmdlog has been created for first command
+
         try:
             for hookfunc in vd.beforeExecHooks:
                 hookfunc(self, cmd, '', keystrokes)
