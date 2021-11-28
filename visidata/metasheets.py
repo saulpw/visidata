@@ -241,7 +241,7 @@ def join_cols(sheet):
 
 
 # copy vd.sheets so that ColumnsSheet itself isn't included (for recalc in addRow)
-globalCommand('gC', 'columns-all', 'vd.push(vd.allColumnsSheet)', 'open Columns Sheet: edit column properties for all visible columns from all sheets')
+globalCommand('gC', 'columns-all', 'vd.push(vd.allColumnsSheet)', 'open Columns Sheet: edit column properties for all visible columns from all sheets on the sheets stack')
 globalCommand('O', 'options-global', 'vd.push(vd.globalOptionsSheet)', 'open Options Sheet: edit global options (apply to all sheets)')
 
 BaseSheet.addCommand('V', 'open-vd', 'vd.push(vd.vdmenu)', 'open VisiData menu: browse list of core sheets')
