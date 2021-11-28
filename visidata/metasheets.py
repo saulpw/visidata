@@ -158,10 +158,14 @@ class LastInputsSheet(JsonLinesSheet):
 @VisiData.lazy_property
 def lastInputsSheet(vd):
     name = options.input_history
+
     if not name:
         return LastInputsSheet('last_inputs', source=None, rows=[])
 
-    p = Path(options.visidata_dir)/f'{options.input_history}.jsonl'
+    p = Path(name)
+    if not p.is_absolute():
+        p = Path(options.visidata_dir)/f'{name}.jsonl'
+
     vs = LastInputsSheet(name, source=p)
     try:
         vs.reload.__wrapped__(vs)

@@ -202,8 +202,12 @@ class _CommandLog:
                 self.addRow(vd.activeCommand)  # add to global cmdlog
             sheet.cmdlog_sheet.addRow(vd.activeCommand)  # add to sheet-specific cmdlog
             if options.cmdlog_histfile:
+                name = date().strftime(options.cmdlog_histfile)
+                p = Path(name)
+                if not p.is_absolute():
+                    p = Path(options.visidata_dir)/f'{name}.jsonl'
                 if not getattr(vd, 'sessionlog', None):
-                    vd.sessionlog = vd.loadInternalSheet(CommandLog, Path(date().strftime(options.cmdlog_histfile)))
+                    vd.sessionlog = vd.loadInternalSheet(CommandLog, p)
                 vd.sessionlog.append_tsv_row(vd.activeCommand)
 
         vd.activeCommand = None
