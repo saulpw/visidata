@@ -1,4 +1,5 @@
 import os
+import sys
 import signal
 import subprocess
 import tempfile
@@ -67,6 +68,27 @@ def suspend():
     import signal
     with SuspendCurses():
         os.kill(os.getpid(), signal.SIGSTOP)
+
+
+def _breakpoint(*args, **kwargs):
+    import pdb
+    class VisiDataPdb(pdb.Pdb):
+        def precmd(self, line):
+            r = super().precmd(line)
+            if not r:
+                SuspendCurses.__exit__(None, None, None, None)
+            return r
+
+        def postcmd(self, stop, line):
+            if stop:
+                SuspendCurses.__enter__(None)
+            return super().postcmd(stop, line)
+
+    SuspendCurses.__enter__(None)
+    VisiDataPdb(nosigint=True).set_trace()
+
+
+sys.breakpointhook = _breakpoint
 
 
 visidata.globalCommand('^Z', 'suspend', 'suspend()', 'suspend VisiData process')
