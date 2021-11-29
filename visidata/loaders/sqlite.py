@@ -57,7 +57,8 @@ class SqliteSheet(Sheet):
                     if colkey:
                         self.setKeys([c])
 
-                if 'WITHOUT ROWID' not in self.row[5]: # SQL used to create table
+                sql = self.row[5]  # SQL used to create table
+                if 'WITHOUT ROWID' not in sql and 'CREATE VIEW' not in sql:
                     self.rowidColumn = ColumnItem('rowid', 0, type=int, width=0)
                     self.addColumn(self.rowidColumn, index=0)
 
