@@ -19,6 +19,9 @@ class LazyChainMap:
                 if k not in self.objs:
                     self.objs[k] = obj
 
+    def __contains__(self, k):
+        return k in self.objs
+
     def keys(self):
         return list(self.objs.keys())  # sum(set(dir(obj)) for obj in self.objs))
 
