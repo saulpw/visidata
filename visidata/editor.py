@@ -91,4 +91,5 @@ def _breakpoint(*args, **kwargs):
 sys.breakpointhook = _breakpoint
 
 
-visidata.globalCommand('^Z', 'suspend', 'suspend()', 'suspend VisiData process')
+BaseSheet.addCommand('^Z', 'suspend', 'suspend()', 'suspend VisiData process')
+BaseSheet.addCommand('z^D', 'breakpoint', 'breakpoint()', 'drop into pdb REPL')
