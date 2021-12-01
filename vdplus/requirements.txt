@@ -12,3 +12,4 @@ seaborn
 matplotlib # svg
 
 psutil # top
+ibis
