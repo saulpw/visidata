@@ -29,16 +29,16 @@ def getValues(self, rows):
 
 vd.aggregators = collections.OrderedDict()  # [aggname] -> annotated func, or list of same
 
-Column.init('aggregators', list)
+Column.init('aggstr', str)
 
-def aggstr_get(col):
+def aggregators_get(col):
     'A space-separated names of aggregators on this column.'
-    return ' '.join(aggr.name for aggr in col.aggregators)
+    return list(vd.aggregators[k] for k in (col.aggstr or '').split())
 
-def aggstr_set(col, v):
-    col.aggregators = list(vd.aggregators[k] for k in (v or '').split())
+def aggregators_set(col, aggs):
+    col.aggstr = ' '.join(agg.name for agg in aggs)
 
-Column.aggstr = property(aggstr_get, aggstr_set)
+Column.aggregators = property(aggregators_get, aggregators_set)
 
 
 class Aggregator:
