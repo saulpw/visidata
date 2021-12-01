@@ -942,7 +942,7 @@ class IndexSheet(Sheet):
     precious = False
 
     columns = [
-        ColumnAttr('name'),
+        Column('name', getter=lambda c,r: r.names[-1], setter=lambda c,r,v: setitem(r.names, -1, v)),
         ColumnAttr('rows', 'nRows', type=int, width=9),
         ColumnAttr('cols', 'nCols', type=int),
         ColumnAttr('keys', 'keyColNames'),
