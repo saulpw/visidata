@@ -114,7 +114,7 @@ class ColorMaker:
             curses.init_pair(255, r, 0)
             self.color_cache[colorname] = r
             return r
-        except curses.error as e:
+        except (curses.error, ValueError):
             return None  # not available
 
     def _colornames_to_cattr(self, colornamestr, precedence=0):
