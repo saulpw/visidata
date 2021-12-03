@@ -1,5 +1,7 @@
 import html
-from visidata import *
+import itertools
+
+from visidata import vd, VisiData, IndexSheet, Column, Sheet, Progress
 
 vd.option('html_title', '<h2>{sheet.name}</h2>', 'table header when saving to html')
 
@@ -29,7 +31,6 @@ class HtmlTablesSheet(IndexSheet):
         for i, e in enumerate(html.iter('table')):
             if e.tag == 'table':
                 yield HtmlTableSheet(e.attrib.get("id", "table_" + str(i)), source=e, html=e)
-
 
 def is_header(elem):
     scope = elem.attrib.get('scope', '')
@@ -102,7 +103,6 @@ class HtmlTableSheet(Sheet):
             for linknum in range(maxlinks.get(colnum, 0)):
                 self.addColumn(Column(name+'_link'+str(linknum), width=20, getter=lambda c,r,i=colnum,j=linknum: r[i][1][j]))
 
-
 @VisiData.api
 def save_html(vd, p, *vsheets):
     'Save vsheets as HTML tables in a single file'
@@ -110,8 +110,8 @@ def save_html(vd, p, *vsheets):
     with open(p, 'w', encoding='ascii', errors='xmlcharrefreplace') as fp:
         for sheet in vsheets:
 
-            if options.html_title:
-                fp.write(options.html_title.format(sheet=sheet, vd=vd))
+            if vd.options.html_title:
+                fp.write(vd.options.html_title.format(sheet=sheet, vd=vd))
 
             fp.write('<table id="{sheetname}">\n'.format(sheetname=html.escape(sheet.name)))
 
@@ -135,5 +135,9 @@ def save_html(vd, p, *vsheets):
             fp.write('</table>')
             vd.status('%s save finished' % p)
 
-
 VisiData.save_htm = VisiData.save_html
+
+vd.addGlobals({
+    'HtmlTablesSheet': HtmlTablesSheet,
+    'HtmlTableSheet': HtmlTableSheet
+})

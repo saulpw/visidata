@@ -1,4 +1,4 @@
-from visidata import *
+from visidata import vd, VisiData, IndexSheet, Progress
 
 @VisiData.api
 def open_frictionless(vd, p):
@@ -10,3 +10,7 @@ class FrictionlessIndexSheet(IndexSheet):
         self.dp = datapackage.Package(self.source.open_text(encoding='utf-8'))
         for r in Progress(self.dp.resources):
             yield vd.openSource(self.source.with_name(r.descriptor['path']), filetype=r.descriptor.get('format', 'json'))
+
+vd.addGlobals({
+    'FrictionlessIndexSheet': FrictionlessIndexSheet
+})

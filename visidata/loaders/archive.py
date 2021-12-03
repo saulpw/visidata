@@ -1,8 +1,9 @@
 import codecs
+import datetime
 import tarfile
 import zipfile
 
-from visidata import *
+from visidata import vd, Progress, VisiData, Sheet, ColumnAttr, Column, date, Path, asyncthread, Menu
 
 @VisiData.api
 def open_zip(vd, p):
@@ -40,9 +41,9 @@ class ZipSheet(Sheet):
 
     def openRow(self, fi):
             decodedfp = codecs.iterdecode(self.openZipFile(self.zfp, fi),
-                                          encoding=options.encoding,
-                                          errors=options.encoding_errors)
-            return vd.openSource(Path(fi.filename, fp=decodedfp, filesize=fi.file_size), filetype=options.filetype)
+                                          encoding=vd.options.encoding,
+                                          errors=vd.options.encoding_errors)
+            return vd.openSource(Path(fi.filename, fp=decodedfp, filesize=fi.file_size), filetype=vd.options.filetype)
 
     @asyncthread
     def extract(self, *rows, path=None):
@@ -74,8 +75,8 @@ class TarSheet(Sheet):
     def openRow(self, fi):
             tfp = tarfile.open(name=str(self.source))
             decodedfp = codecs.iterdecode(tfp.extractfile(fi),
-                                          encoding=options.encoding,
-                                          errors=options.encoding_errors)
+                                          encoding=vd.options.encoding,
+                                          errors=vd.options.encoding_errors)
             return vd.openSource(Path(fi.name, fp=decodedfp, filesize=fi.size))
 
     def iterload(self):
@@ -95,3 +96,8 @@ vd.addMenu(Menu('File', Menu('Extract',
         Menu('selected files', 'extract-selected'),
         Menu('selected files to', 'extract-selected-to'),
     )))
+
+vd.addGlobals({
+    'ZipSheet': ZipSheet,
+    'TarSheet': TarSheet
+})

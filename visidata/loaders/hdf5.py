@@ -1,4 +1,4 @@
-from visidata import *
+from visidata import vd, VisiData, Sheet, Column, Path, ColumnItem, BaseSheet
 
 @VisiData.api
 def open_h5(vd, p):
@@ -54,5 +54,8 @@ class Hdf5ObjSheet(Sheet):
         if isinstance(row, numpy.ndarray):
             return NpySheet(None, npy=row)
 
-
 Hdf5ObjSheet.addCommand('A', 'dive-metadata', 'vd.push(SheetDict(cursorRow.name + "_attrs", source=cursorRow.attrs))', 'open metadata sheet for object referenced in current row')
+
+vd.addGlobals({
+    'Hdf5ObjSheet': Hdf5ObjSheet
+})

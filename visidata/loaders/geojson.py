@@ -1,8 +1,7 @@
 from functools import reduce
 import json
 
-from visidata import *
-
+from visidata import vd, VisiData, PythonSheet, Column, Progress, InvertedCanvas, asyncthread, deepcopy
 
 @VisiData.api
 def open_geojson(vd, p):
@@ -137,3 +136,8 @@ def save_geojson(vd, p, vs):
 GeoJSONSheet.addCommand('.', 'plot-row', 'vd.push(GeoJSONMap(name+"_map", sourceRows=[cursorRow], textCol=cursorCol, source=sheet))', 'plot geospatial vector in current row')
 GeoJSONSheet.addCommand('g.', 'plot-rows', 'vd.push(GeoJSONMap(name+"_map", sourceRows=rows, textCol=cursorCol, source=sheet))', 'plot all geospatial vectors in current sheet')
 GeoJSONMap.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .geojson)')
+
+vd.addGlobals({
+    'GeoJSONSheet': GeoJSONSheet,
+    'GeoJSONMap': GeoJSONMap
+})

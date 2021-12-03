@@ -1,8 +1,6 @@
-from visidata import vd, options, TypedWrapper, asyncthread, Progress
-from visidata import wrapply, clean_to_id, VisiData, SIFormatter
+from visidata import vd, options, TypedWrapper, Progress, wrapply, clean_to_id, VisiData, SIFormatter
 
 vd.option('graphviz_edge_labels', True, 'whether to include edge labels on graphviz diagrams')
-
 
 def is_valid(v):
     if v is None:
@@ -10,7 +8,6 @@ def is_valid(v):
     if isinstance(v, TypedWrapper):
         return False
     return True
-
 
 @VisiData.api
 def save_dot(vd, p, vs):

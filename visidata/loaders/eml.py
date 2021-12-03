@@ -1,4 +1,6 @@
-from visidata import *
+import os
+
+from visidata import vd, VisiData, TableSheet, Column, vlen
 
 @VisiData.api
 def open_eml(vd, p):
@@ -41,9 +43,13 @@ def extract_parts(sheet, givenpath, *parts):
         for part in parts:
             vd.execAsync(sheet.extract_part, givenpath / part.get_filename(), part)
     elif len(parts) == 1:
-        vd.execAsync(sheet.extract_part, givenpath, part)
+        vd.execAsync(sheet.extract_part, givenpath, parts[0])
     else:
         vd.fail('cannot save multiple parts to non-dir')
 
 EmailSheet.addCommand('x', 'extract-part', 'extract_part(inputPath("save part as: ", value=cursorRow.get_filename()), cursorRow)')
 EmailSheet.addCommand('gx', 'extract-part-selected', 'extract_parts(inputPath("save %d parts in: " % nSelectedRows), *selectedRows)')
+
+vd.addGlobals({
+    'EmailSheet': EmailSheet
+})

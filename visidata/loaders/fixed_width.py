@@ -1,5 +1,4 @@
-
-from visidata import *
+from visidata import vd, VisiData, Column, SequenceSheet, Sheet, Progress
 
 vd.option('fixed_rows', 1000, 'number of rows to check for fixed width columns')
 vd.option('fixed_maxcols', 0, 'max number of fixed-width columns to create (0 is no max)')
@@ -43,7 +42,6 @@ def columnize(rows):
 
     yield colstart, prev+1   # final column gets rest of line
 
-
 class FixedWidthColumnsSheet(SequenceSheet):
     rowtype = 'lines'  # rowdef: [line] (wrapping in list makes it unique and modifiable)
     def addRow(self, row, index=None):
@@ -72,13 +70,12 @@ class FixedWidthColumnsSheet(SequenceSheet):
     def setCols(self, headerlines):
         self.headerlines = headerlines
 
-
 @VisiData.api
 def save_fixed(vd, p, *vsheets):
     with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
         for sheet in vsheets:
             if len(vsheets) > 1:
-                fp.write('%s\n\n' % vs.name)
+                fp.write('%s\n\n' % sheet.name)
 
             widths = {}  # Column -> width:int
             # headers
@@ -95,3 +92,8 @@ def save_fixed(vd, p, *vsheets):
                     fp.write('\n')
 
             vd.status('%s save finished' % p)
+
+vd.addGlobals({
+    'FixedWidthColumnsSheet': FixedWidthColumnsSheet,
+    'FixedWidthColumn': FixedWidthColumn
+})

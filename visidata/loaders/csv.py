@@ -1,5 +1,4 @@
-
-from visidata import *
+from visidata import vd, VisiData, SequenceSheet, stacktrace, TypedExceptionWrapper, Progress
 import csv
 
 vd.option('csv_dialect', 'excel', 'dialect passed to csv.reader', replay=True)
@@ -11,8 +10,6 @@ vd.option('csv_lineterminator', '\r\n', 'lineterminator passed to csv.writer', r
 vd.option('safety_first', False, 'sanitize input/output to handle edge cases, with a performance cost', replay=True)
 
 csv.field_size_limit(2**31-1) # Windows has max 32-bit
-
-options_num_first_rows = 10
 
 @VisiData.api
 def open_csv(vd, p):
@@ -28,10 +25,10 @@ class CsvSheet(SequenceSheet):
     def iterload(self):
         'Convert from CSV, first handling header row specially.'
         with self.source.open_text(encoding=self.options.encoding) as fp:
-            if options.safety_first:
-                rdr = csv.reader(removeNulls(fp), **options.getall('csv_'))
+            if vd.options.safety_first:
+                rdr = csv.reader(removeNulls(fp), **vd.options.getall('csv_'))
             else:
-                rdr = csv.reader(fp, **options.getall('csv_'))
+                rdr = csv.reader(fp, **vd.options.getall('csv_'))
 
             while True:
                 try:
@@ -42,12 +39,11 @@ class CsvSheet(SequenceSheet):
                 except StopIteration:
                     return
 
-
 @VisiData.api
 def save_csv(vd, p, sheet):
     'Save as single CSV file, handling column names as first line.'
     with p.open_text(mode='w', encoding=sheet.options.encoding) as fp:
-        cw = csv.writer(fp, **options.getall('csv_'))
+        cw = csv.writer(fp, **vd.options.getall('csv_'))
         colnames = [col.name for col in sheet.visibleCols]
         if ''.join(colnames):
             cw.writerow(colnames)
@@ -56,3 +52,6 @@ def save_csv(vd, p, sheet):
             for dispvals in sheet.iterdispvals(format=True):
                 cw.writerow(dispvals.values())
 
+vd.addGlobals({
+    'CsvSheet': CsvSheet
+})
