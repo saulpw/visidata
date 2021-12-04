@@ -334,7 +334,9 @@ class PandasSheet(Sheet):
         '''Delete all selected rows.'''
         self.deleteBy(self._selectedMask)
 
-def view_pandas(df):
+
+@VisiData.global_api
+def view_pandas(vd, df):
     run(PandasSheet('', source=df))
 
 
