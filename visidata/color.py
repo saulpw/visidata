@@ -114,8 +114,8 @@ class ColorMaker:
             curses.init_pair(255, r, 0)
             self.color_cache[colorname] = r
             return r
-        except curses.error:
-            return None
+        except curses.error as e:
+            return None  # not available
         except ValueError:  # Python 3.10+  issue #1227
             return None
 
