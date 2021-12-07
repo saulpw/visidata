@@ -114,7 +114,10 @@ class ColorMaker:
             curses.init_pair(255, r, 0)
             self.color_cache[colorname] = r
             return r
-        except (curses.error, ValueError):
+        except (
+            curses.error,
+            ValueError  # Python 3.10+ (see https://github.com/saulpw/visidata/issues/1227)
+        ):
             return None  # not available
 
     def _colornames_to_cattr(self, colornamestr, precedence=0):
