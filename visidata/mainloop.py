@@ -332,6 +332,8 @@ def run(*sheetlist):
 
         scr = initCurses()
         ret = vd.mainloop(scr)
+    except curses.error as e:
+        vd.fail(str(e))
     finally:
         if scr:
             curses.endwin()
