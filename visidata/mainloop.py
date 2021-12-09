@@ -323,7 +323,7 @@ def wrapper(f, *args, **kwargs):
 
 
 @VisiData.global_api
-def run(*sheetlist):
+def run(vd, *sheetlist):
     'Main entry point; launches vdtui with the given sheets already pushed (last one is visible)'
 
     scr = None
