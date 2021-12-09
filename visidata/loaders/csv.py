@@ -1,5 +1,5 @@
 
-from visidata import *
+from visidata import vd, VisiData, SequenceSheet, options, stacktrace, TypedExceptionWrapper, Progress
 import csv
 
 vd.option('csv_dialect', 'excel', 'dialect passed to csv.reader', replay=True)
@@ -56,3 +56,6 @@ def save_csv(vd, p, sheet):
             for dispvals in sheet.iterdispvals(format=True):
                 cw.writerow(dispvals.values())
 
+vd.addGlobals({
+    'CsvSheet': CsvSheet
+})

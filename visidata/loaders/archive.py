@@ -2,7 +2,7 @@ import codecs
 import tarfile
 import zipfile
 
-from visidata import *
+from visidata import VisiData, Sheet, ColumnAttr, Column, date, datetime, vd, options, Path, asyncthread, Progress, Menu
 
 @VisiData.api
 def open_zip(vd, p):
@@ -95,3 +95,8 @@ vd.addMenu(Menu('File', Menu('Extract',
         Menu('selected files', 'extract-selected'),
         Menu('selected files to', 'extract-selected-to'),
     )))
+
+vd.addGlobals({
+    'ZipSheet': ZipSheet,
+    'TarSheet': TarSheet
+})
