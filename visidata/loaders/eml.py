@@ -41,7 +41,7 @@ def extract_parts(sheet, givenpath, *parts):
         for part in parts:
             vd.execAsync(sheet.extract_part, givenpath / part.get_filename(), part)
     elif len(parts) == 1:
-        vd.execAsync(sheet.extract_part, givenpath, part)
+        vd.execAsync(sheet.extract_part, givenpath, parts[0])
     else:
         vd.fail('cannot save multiple parts to non-dir')
 
