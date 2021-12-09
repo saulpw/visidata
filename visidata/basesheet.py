@@ -287,7 +287,7 @@ def getSheet(vd, sheetname):
         pass
 
     if sheetname == 'options':
-        vs = self.optionsSheet
+        vs = vd.optionsSheet
         vs.reload()
         vs.vd = vd
         return vs
