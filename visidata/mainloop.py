@@ -8,6 +8,8 @@ from unittest import mock
 
 from visidata import vd, VisiData, colors, ESC, options
 
+__all__ = ['ReturnValue', 'run']
+
 vd.curses_timeout = 100 # curses timeout in ms
 vd.timeouts_before_idle = 10
 
