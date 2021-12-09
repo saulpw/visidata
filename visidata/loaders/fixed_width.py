@@ -78,7 +78,7 @@ def save_fixed(vd, p, *vsheets):
     with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
         for sheet in vsheets:
             if len(vsheets) > 1:
-                fp.write('%s\n\n' % vs.name)
+                fp.write('%s\n\n' % sheet.name)
 
             widths = {}  # Column -> width:int
             # headers
