@@ -324,6 +324,7 @@ def wrapper(f, *args, **kwargs):
 def run(*sheetlist):
     'Main entry point; launches vdtui with the given sheets already pushed (last one is visible)'
 
+    scr = None
     try:
         # Populate VisiData object with sheets from a given list.
         for vs in sheetlist:
@@ -332,7 +333,8 @@ def run(*sheetlist):
         scr = initCurses()
         ret = vd.mainloop(scr)
     finally:
-        curses.endwin()
+        if scr:
+            curses.endwin()
 
     if ret:
         print(ret)
