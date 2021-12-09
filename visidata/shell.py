@@ -1,9 +1,6 @@
 import os
-import io
 import shutil
-import sys
 import stat
-import locale
 import subprocess
 import contextlib
 try:
@@ -12,9 +9,9 @@ try:
 except ImportError:
     pass # pwd,grp modules not available on Windows
 
-from visidata import Column, Sheet, LazyComputeRow, asynccache, options, BaseSheet, vd
+from visidata import Column, Sheet, LazyComputeRow, asynccache, BaseSheet, vd
 from visidata import Path, ENTER, date, asyncthread, FileExistsError, VisiData
-from visidata import CellColorizer, RowColorizer, modtime, filesize, vstat, Progress
+from visidata import modtime, filesize, vstat, Progress, TextSheet
 
 
 vd.option('dir_recurse', False, 'walk source path recursively on DirSheet')
@@ -248,4 +245,6 @@ def copy_files(sheet, paths, dest):
             vd.exceptionCaught(e)
 
 
-vd.addGlobals({'DirSheet': DirSheet})
+vd.addGlobals({
+    'DirSheet': DirSheet
+})
