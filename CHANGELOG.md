@@ -1,8 +1,50 @@
 # VisiData version history
 
+# 2.8 (2021-12-XX)
+
+## Bugfixes
+
+- [curses] supress invalid color errors in Python 3.10 (thanks @ajkerrigan for reporting #1227 and for PR #1231)
+    - Adapt to [Python 3.10 curses changes][1], which can raise a `ValueError` on invalid color numbers.
+    [1]: https://docs.python.org/3/whatsnew/3.10.html#curses
+
+- [loaders json] skip blank lines in json files, instead of stopping at them (thanks @geekscrapy for PR #1216)
+- [loaders jsonl] fix duplicate columns when loading fixed columns sheets in jsonl format (report by @0ceanlight)
+    - example of formats with fixed columns is darkdraw's `DrawingSheet`
+- [loaders fixed] fix saver (thanks @geekscrapy for PR #1238)
+- [loaders postgres] fix recognition of postgres loader (reported by @ryanmjacobs #1229)
+- [loaders sqlite] fix the loading of sqlite VIEWs for sqlite version 3.36.0+ (reported by @frosencrantz #1222)
+- [help-commands] now lists commands only for the current sheet (reported by @geekscrapy #1217)
+- [textcanvas] ENTER on canvas, should push copied source sheet for points within cursor
+- [pivot freq] get `options.histogram_bins` from source sheet
+- [curses cosmetic] fix issue where if a curses initialisation Exception is called, a second Exception follows
+- [quit-sheet-free] fix bug where quit-sheet-free, when multiple sheets opened in CLI, was not working (reported by @geekscrapy #1236)
+- [options] fix instance where local options sheet was called, instead of global options sheet (thanks @geekscrapy for PR #1241)
+
+## Improvements
+
+- [curses costmetic] simplify error message print out, if curses fails to initialise
+- [plugins] include pip stderr in warning
+- [plugins] use returncode to determine if pip install failed, before adding to imports (thanks @geekscrapy for PR #1215)
+- [cmdlog] add sheet creation command to cmdlog (requested by @aborruso #1209)
+    - previously was not logged
+- [open] allow whitespace at the beginning and end of inputted filenames
+- [options] `options.input_history` and `options.cmdlog_histfile` can now be an absolute paths (requested by @geekscrapy #1200)
+    - relative paths are relative to `options.visidata_dir`
+- [splitwin] automatically switch to pane where sheet is pushed to
+
+
+## Developers
+
+- enable standard Python breakpoint
+    - add breakpoint() anywhere in VisiData code (including plugins and visidatarc) to drop into the pdb debugger.
+    - add `zCtrl+D` to drop into pdb REPL
+- export `run()` to global api
+- add CsvSheet, ZipSheet, TarSheet to global api (thanks @geekscrapy for PR #1235)
+
 # 2.7.1 (2021-11-15)
 
-- Bugfix: fix Enter on helmenu (reported by @geekscrapy #1196)
+- Bugfix: fix Enter on helpmenu (reported by @geekscrapy #1196)
 
 # 2.7 (2021-11-14)
 
