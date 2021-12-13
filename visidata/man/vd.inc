@@ -1,4 +1,4 @@
-.Dd November 14, 2021
+.Dd December 12, 2021
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -91,7 +91,7 @@ quit all sheets (clean exit)
 .It Ic "g^H"
 view this man page
 .It Ic "z^H"
-view sheet of command longnames and keybindings
+view sheet of command longnames and keybindings for current sheet
 .It Ic "Space" Ar longname
 .No execute command by its Ar longname
 .Pp
