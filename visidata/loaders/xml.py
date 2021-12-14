@@ -1,4 +1,4 @@
-from visidata import *
+from visidata import VisiData, vd, Sheet, options, Column, Progress, setitem, ColumnAttr, vlen, RowColorizer, Path, copy
 
 
 @VisiData.api

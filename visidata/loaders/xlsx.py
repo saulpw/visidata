@@ -1,4 +1,7 @@
-from visidata import *
+import itertools
+
+from visidata import VisiData, vd, Sheet, Column, Progress, IndexSheet, ColumnAttr, SequenceSheet, AttrDict, AttrColumn, date, datetime
+
 
 vd.option('xlsx_meta_columns', False, 'include columns for cell objects, font colors, and fill colors', replay=True)
 
@@ -102,8 +105,8 @@ class XlsSheet(SequenceSheet):
 def xls_name(vs):
     name = vs.names[-1]
     if vs.options.clean_names:
-        name = ''.join('_' if ch in ':[]*?/\\' else ch for ch in vs.name) #1122
-        name = cleaned_name[:31]  #594
+        cleaned_name = ''.join('_' if ch in ':[]*?/\\' else ch for ch in vs.name) #1122
+        name = cleaned_name[:31] #1122  #594
         name = name.strip('_')
 
     return name

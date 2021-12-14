@@ -1,7 +1,9 @@
 'Custom VisiData save format'
 
 import json
-from visidata import *
+
+from visidata import VisiData, Sheet, Progress, IndexSheet, SettableColumn
+
 
 NL='\n'
 

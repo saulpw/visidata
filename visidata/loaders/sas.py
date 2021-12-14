@@ -1,5 +1,6 @@
-from visidata import *
 import logging
+
+from visidata import VisiData, Sheet, Progress, ColumnItem, anytype
 
 SASTypes = {
     'string': str,

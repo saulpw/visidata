@@ -1,4 +1,6 @@
-from visidata import *
+import random
+
+from visidata import VisiData, vd, Sheet, options, anytype, urlparse, asyncthread, ColumnItem
 
 __all__ = ['openurl_postgres', 'openurl_postgresql', 'openurl_rds', 'PgTable', 'PgTablesSheet']
 

@@ -1,6 +1,7 @@
 import io
 
-from visidata import *
+from visidata import VisiData, vd, options, TableSheet, ColumnItem, IndexSheet
+from visidata.loaders._pandas import PandasSheet
 
 vd.option('pdf_tables', False, 'parse PDF for tables instead of pages of text', replay=True)
 

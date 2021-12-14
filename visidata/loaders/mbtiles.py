@@ -1,6 +1,5 @@
-from visidata import *
+from visidata import VisiData, vd, Sheet, Column, asyncthread, Progress, ColumnItem, InvertedCanvas
 
-import json
 import gzip
 import sqlite3
 

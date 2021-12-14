@@ -1,7 +1,7 @@
 from collections import defaultdict
-import string
 
-from visidata import *
+from visidata import VisiData, vd, Sheet, Column, asyncthread, CellColorizer, ColumnItem, ENTER
+
 
 vd.option('color_xword_active', 'green', 'color of active clue')
 

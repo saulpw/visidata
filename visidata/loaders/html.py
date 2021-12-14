@@ -1,5 +1,7 @@
 import html
-from visidata import *
+import itertools
+
+from visidata import VisiData, vd, Sheet, options, Column, Progress, IndexSheet
 
 vd.option('html_title', '<h2>{sheet.name}</h2>', 'table header when saving to html')
 
