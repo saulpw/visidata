@@ -1,8 +1,7 @@
 import collections
 import ipaddress
 
-from visidata import *
-
+from visidata import VisiData, vd, Sheet, options, Column, asyncthread, Progress, TsvSheet, getattrdeep, ColumnAttr, date, vlen, filesize
 
 vd.option('pcap_internet', 'n', '(y/s/n) if save_dot includes all internet hosts separately (y), combined (s), or does not include the internet (n)')
 

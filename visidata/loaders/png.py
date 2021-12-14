@@ -1,4 +1,6 @@
-from visidata import *
+import functools
+
+from visidata import VisiData, Sheet, Column, Progress, colors, ColumnItem, Canvas, asyncthread
 
 
 @VisiData.api

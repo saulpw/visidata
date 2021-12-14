@@ -1,7 +1,5 @@
-import math
-import collections
+from visidata import vd, Sheet, options, Column, asyncthread, Progress, PivotGroupRow, ENTER
 
-from visidata import *
 from visidata.loaders._pandas import PandasSheet
 from visidata.pivot import PivotSheet
 

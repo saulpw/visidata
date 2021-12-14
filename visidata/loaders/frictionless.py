@@ -1,4 +1,4 @@
-from visidata import *
+from visidata import VisiData, vd, Progress, IndexSheet
 
 @VisiData.api
 def open_frictionless(vd, p):

@@ -1,4 +1,6 @@
-from visidata import *
+import os
+
+from visidata import VisiData, vd, Column, TableSheet, vlen
 
 @VisiData.api
 def open_eml(vd, p):

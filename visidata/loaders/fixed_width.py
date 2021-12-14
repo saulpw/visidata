@@ -1,5 +1,6 @@
 
-from visidata import *
+from visidata import VisiData, vd, Sheet, Column, Progress, SequenceSheet
+
 
 vd.option('fixed_rows', 1000, 'number of rows to check for fixed width columns')
 vd.option('fixed_maxcols', 0, 'max number of fixed-width columns to create (0 is no max)')

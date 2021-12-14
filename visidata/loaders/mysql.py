@@ -1,5 +1,6 @@
-from visidata import *
 from contextlib import contextmanager
+
+from visidata import vd, Sheet, anytype, asyncthread, urlparse, ColumnItem
 
 __all__ = ['openurl_mysql', 'MyTable', 'MyTablesSheet']
 

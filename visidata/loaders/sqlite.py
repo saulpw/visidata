@@ -1,6 +1,7 @@
 import re
 
-from visidata import *
+from visidata import VisiData, vd, Sheet, options, Column, Progress, anytype, date, ColumnItem, asyncthread, TypedExceptionWrapper, TypedWrapper, IndexSheet, copy, currency, clean_to_id
+
 
 @VisiData.api
 def open_sqlite(vd, p):
