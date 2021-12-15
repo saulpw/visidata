@@ -43,3 +43,8 @@ jobs:
     <<: *test-template
     docker:
       - image: circleci/python:3.9
+
+  test-3.10:
+    <<: *test-template
+    docker:
+      - image: circleci/python:3.10
