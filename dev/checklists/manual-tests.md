@@ -21,21 +21,6 @@
     - edit
     - frequency table
 10. large dataset (311)
-11. multiline scrolling tests
-    - test case 1
-        - use vgit
-        - main status sheet is 1 line per row, scroll down manually to the bottom
-        - and past, ensure it scrolls well
-        - and then scroll to the top, and make sure it scrolls back
-     - test case 2
-        - start a few down from the top
-        - Ctrl+F
-        - make sure the cursor stays relatively positioned
-        - Ctrl+F and Ctrl+B should be reserves, at least in the middle of the sheet
-        - and then all the way to the bottom; j does nothing
-        - gj always puts the cursor on the bottom row
-     - test case 3
-        - Shift+L for log, same tests
 12. Options
     - local + global options should be set appropriately
         - bin/vd -f tsv sample_data/sample.tsv -f csv sample_data/benchmark.csv
@@ -58,7 +43,7 @@
     - -f should apply to inner file for zipped filetypes
         - bin/vd -f txt sample_data/y77d-th95.json.gz
 14. Testing the starting position syntax
-    - `bin/vd +:sample-salesv4:: sample_data/sample-sales-reps.xlsx`
+    - `bin/vd +:sample-salesv4:2:3 sample_data/sample-sales-reps.xlsx`
 15. Test loading url
 16. Split window
     - make sure that if you exit split window, all the sheets from both panes can be accessible on the resulting stack
@@ -68,9 +53,6 @@
         - first window should be active
         - Tab between
         - close top one, then redo and test closing bottom one
-            - bug?
-                - does not fullsize
-            - when top pane is quit, bottom pane is moved to the top
     - test 2
         - open 2 files
         - Z
