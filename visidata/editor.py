@@ -92,4 +92,4 @@ sys.breakpointhook = _breakpoint
 
 
 visidata.BaseSheet.addCommand('^Z', 'suspend', 'suspend()', 'suspend VisiData process')
-visidata.BaseSheet.addCommand('z^D', 'breakpoint', 'breakpoint()', 'drop into pdb REPL')
+visidata.BaseSheet.addCommand('', 'breakpoint', 'breakpoint()', 'drop into pdb REPL')

@@ -33,7 +33,6 @@
 ## API
 
 - add standard Python `breakpoint()` to drop into the pdb debugger
-    - `zCtrl+D` to drop into pdb REPL
 - export `run()` to global api
 - add CsvSheet, ZipSheet, TarSheet to global api (thanks @geekscrapy for PR #1235)
 
