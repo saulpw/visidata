@@ -1,4 +1,6 @@
-from visidata import *
+import functools
+
+from visidata import VisiData, Sheet, Column, Progress, colors, ColumnItem, Canvas, asyncthread
 
 
 @VisiData.api
@@ -25,8 +27,8 @@ class PNGSheet(Sheet):
 
     def iterload(self):
         import png
-        r = png.Reader(bytes=self.source.read_bytes())
-        self.width, self.height, pixels, md = r.asRGBA()
+        self.png = png.Reader(bytes=self.source.read_bytes())
+        self.width, self.height, pixels, md = self.png.asRGBA()
         for y, row in enumerate(pixels):
             for i in range(0, len(row)-1, 4):
                 r,g,b,a = row[i:i+4]

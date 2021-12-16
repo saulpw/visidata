@@ -1,4 +1,4 @@
-from visidata import *
+from visidata import VisiData, vd, Sheet, date, anytype, options, Column, Progress, ColumnItem, vlen, PyobjSheet, currency, floatlocale, TypedWrapper
 
 'Loaders for .npy and .npz.  Save to .npy.  Depends on the zip loader.'
 

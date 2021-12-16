@@ -173,7 +173,7 @@ class PivotSheet(Sheet):
         numericBins = []
         degenerateBinning = False
         if numericCols:
-            nbins = options.histogram_bins or int(len(self.source.rows) ** (1./2))
+            nbins = self.source.options.histogram_bins or int(len(self.source.rows) ** (1./2))
             vals = tuple(numericCols[0].getValues(self.source.rows))
             minval = min(vals)
             maxval = max(vals)

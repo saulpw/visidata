@@ -942,7 +942,7 @@ class IndexSheet(Sheet):
     precious = False
 
     columns = [
-        ColumnAttr('name'),
+        Column('name', getter=lambda c,r: r.names[-1], setter=lambda c,r,v: setitem(r.names, -1, v)),
         ColumnAttr('rows', 'nRows', type=int, width=9),
         ColumnAttr('cols', 'nCols', type=int),
         ColumnAttr('keys', 'keyColNames'),
@@ -1033,8 +1033,8 @@ def push(vd, vs, pane=0):
     if pane == -1:
         vs.pane = 2 if vd.activePane == 1 else 1
     elif pane == 0:
-        if not vd.sheetstack(1): vs.pane=1
-        elif not vd.sheetstack(2) and vd.options.disp_splitwin_pct != 0: vs.pane=2
+        if not vd.sheetstack(1): vd.activePane=vs.pane=1
+        elif not vd.sheetstack(2) and vd.options.disp_splitwin_pct != 0: vd.activePane=vs.pane=2
         else: vs.pane = vd.activePane
     else:
         vs.pane = pane
@@ -1090,13 +1090,14 @@ def newSheet(vd, name, ncols, **kwargs):
 
 
 @BaseSheet.api
-def releaseMemory(vs):
+def quitAndReleaseMemory(vs):
     'Release largest memory consumer refs on *vs* to free up memory.'
     if isinstance(vs.source, visidata.Path):
         vs.source.lines.clear() # clear cache of read lines
 
     if vs.precious: # only precious sheets have meaningful data
         vs.rows.clear()
+        vd.remove(vs)
         vd.allSheets.remove(vs)
 
 
@@ -1171,7 +1172,7 @@ SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThr
 SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(openRow(dest))', 'open sheet referenced in current row')
 
 BaseSheet.addCommand('q', 'quit-sheet',  'vd.quit(sheet)', 'quit current sheet')
-BaseSheet.addCommand('Q', 'quit-sheet-free',  'releaseMemory(); vd.quit(sheet)', 'discard current sheet and free memory')
+BaseSheet.addCommand('Q', 'quit-sheet-free',  'quitAndReleaseMemory()', 'discard current sheet and free memory')
 globalCommand('gq', 'quit-all', 'vd.quit(*vd.sheets)', 'quit all sheets (clean exit)')
 
 BaseSheet.addCommand('Z', 'splitwin-half', 'splitPane(vd.options.disp_splitwin_pct or 50)', 'ensure split pane is set and push under sheet onto other pane')

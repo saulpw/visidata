@@ -1,4 +1,4 @@
-from visidata import *
+from visidata import VisiData, vd, Sheet, Path, Column, ColumnItem, BaseSheet
 
 @VisiData.api
 def open_h5(vd, p):

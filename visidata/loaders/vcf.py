@@ -1,4 +1,5 @@
-from visidata import *
+from visidata import VisiData, Column, getitemdef, PythonSheet, asyncthread
+
 
 # requires (deb): libbz2-dev libcurl4-openssl-dev liblzma-dev
 

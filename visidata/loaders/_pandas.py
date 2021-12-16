@@ -1,6 +1,6 @@
 from functools import partial
 
-from visidata import *
+from visidata import VisiData, vd, Sheet, date, anytype, Path, options, Column, asyncthread, Progress, undoAttrCopyFunc, run
 
 @VisiData.api
 def open_pandas(vd, p):
@@ -334,7 +334,9 @@ class PandasSheet(Sheet):
         '''Delete all selected rows.'''
         self.deleteBy(self._selectedMask)
 
-def view_pandas(df):
+
+@VisiData.global_api
+def view_pandas(vd, df):
     run(PandasSheet('', source=df))
 
 

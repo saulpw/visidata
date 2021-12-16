@@ -116,8 +116,8 @@ def clipstr(s, dispw):
                 modch='',
                 combch='')
 
-def clipdraw(scr, y, x, s, attr, w=None, rtl=False):
-    'Draw string `s` at (y,x)-(y,x+w) with curses attr, clipping with ellipsis char.  if rtl, draw inside (x-w, x).  Returns width drawn (max of w).'
+def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False):
+    'Draw string `s` at (y,x)-(y,x+w) with curses attr, clipping with ellipsis char.  if rtl, draw inside (x-w, x).  If *clear*, clear whole editing area before displaying. Returns width drawn (max of w).'
     if scr:
         _, windowWidth = scr.getmaxyx()
     else:
@@ -139,7 +139,8 @@ def clipdraw(scr, y, x, s, attr, w=None, rtl=False):
 #            scr.addstr(y, x-dispw-1, disp_column_fill*dispw, attr)
             scr.addstr(y, x-dispw-1, clipped, attr)
         else:
-            scr.addstr(y, x, disp_column_fill*w, attr)  # clear whole area before displaying
+            if clear:
+                scr.addstr(y, x, disp_column_fill*w, attr)  # clear whole area before displaying
             scr.addstr(y, x, clipped, attr)
     except Exception as e:
         pass

@@ -1,4 +1,4 @@
-from visidata import *
+from visidata import VisiData, vd, options, Progress
 
 def markdown_escape(s, style='orgmode'):
     if style == 'jira':

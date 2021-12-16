@@ -6,7 +6,7 @@ vd.option('filetype', '', 'specify file type', replay=True)
 
 @VisiData.api
 def inputFilename(vd, prompt, *args, **kwargs):
-    return vd.input(prompt, type="filename", *args, completer=_completeFilename, **kwargs)
+    return vd.input(prompt, type="filename", *args, completer=_completeFilename, **kwargs).strip()
 
 
 @VisiData.api

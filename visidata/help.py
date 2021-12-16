@@ -27,7 +27,11 @@ class HelpSheet(MetaSheet):
         cmdlist = VisiDataMetaSheet('cmdlist', source=None)
 
         self.cmddict = {}
-        itcmds = vd.commands.iterall()
+        if self.source:
+            itcmds = vd.commands.iter(obj=self.source)
+        else:
+            itcmds = vd.commands.iterall()
+
         for (k, o), v in itcmds:
             yield v
             v.sheet = o
@@ -135,8 +139,8 @@ def openManPage(vd):
 
 # in VisiData, g^H refers to the man page
 BaseSheet.addCommand('g^H', 'sysopen-help', 'openManPage()', 'Show the UNIX man page for VisiData')
-BaseSheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))', 'view sheet of command longnames and keybindings for current sheet')
-BaseSheet.addCommand('gz^H', 'help-commands-all', 'vd.push(HelpSheet("all_commands", source=None, revbinds={}))', 'view sheet of command longnames and keybindings for all sheet types')
+BaseSheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))', 'list commands and keybindings available on current sheet')
+BaseSheet.addCommand('gz^H', 'help-commands-all', 'vd.push(HelpSheet("all_commands", source=None, revbinds={}))', 'list commands and keybindings for all sheet types')
 BaseSheet.addCommand(None, 'help-search', 'help_search(sheet, input("help: "))', 'search through command longnames with search terms')
 
 BaseSheet.bindkey('KEY_F(1)', 'sysopen-help')
@@ -147,3 +151,5 @@ HelpSheet.addCommand(ENTER, 'exec-command', 'quit(sheet); draw_all(); activeStac
 BaseSheet.addCommand(None, 'open-tutorial-visidata', 'launchBrowser("https://jsvine.github.io/intro-to-visidata/")', 'open https://jsvine.github.io/intro-to-visidata/')
 
 vd.addMenuItem("Help", "VisiData tutorial", 'open-tutorial-visidata')
+vd.addMenuItem("Help", 'Sheet commands', 'help-commands')
+vd.addMenuItem("Help", 'All commands', 'help-commands-all')

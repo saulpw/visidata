@@ -44,7 +44,8 @@ DESCRIPTION
       ^H              activate help menu (Enter/left-mouse to expand submenu
                       or execute command)
      g^H              view this man page
-     z^H              view sheet of command longnames and keybindings
+     z^H              view sheet of command longnames and keybindings for cur‐
+                      rent sheet
      Space longname   execute command by its longname
 
        U              undo the most recent modification (requires enabled
@@ -978,4 +979,4 @@ SUPPORTED SOURCES
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                    November 14, 2021                   Linux/MacOS
+Linux/MacOS                    December 12, 2021                   Linux/MacOS

@@ -8,6 +8,8 @@ from unittest import mock
 
 from visidata import vd, VisiData, colors, ESC, options
 
+__all__ = ['ReturnValue', 'run']
+
 vd.curses_timeout = 100 # curses timeout in ms
 vd.timeouts_before_idle = 10
 
@@ -321,9 +323,10 @@ def wrapper(f, *args, **kwargs):
 
 
 @VisiData.global_api
-def run(*sheetlist):
+def run(vd, *sheetlist):
     'Main entry point; launches vdtui with the given sheets already pushed (last one is visible)'
 
+    scr = None
     try:
         # Populate VisiData object with sheets from a given list.
         for vs in sheetlist:
@@ -331,8 +334,11 @@ def run(*sheetlist):
 
         scr = initCurses()
         ret = vd.mainloop(scr)
+    except curses.error as e:
+        vd.fail(str(e))
     finally:
-        curses.endwin()
+        if scr:
+            curses.endwin()
 
     if ret:
         print(ret)

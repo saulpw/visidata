@@ -19,6 +19,9 @@ class LazyChainMap:
                 if k not in self.objs:
                     self.objs[k] = obj
 
+    def __contains__(self, k):
+        return k in self.objs
+
     def keys(self):
         return list(self.objs.keys())  # sum(set(dir(obj)) for obj in self.objs))
 
@@ -155,6 +158,8 @@ class BaseSheet(DrawablePane):
         if vdglobals is None:
             vdglobals = vd.getGlobals()
 
+        vd.cmdlog  # make sure cmdlog has been created for first command
+
         try:
             for hookfunc in vd.beforeExecHooks:
                 hookfunc(self, cmd, '', keystrokes)
@@ -282,7 +287,7 @@ def getSheet(vd, sheetname):
         pass
 
     if sheetname == 'options':
-        vs = self.optionsSheet
+        vs = vd.globalOptionsSheet
         vs.reload()
         vs.vd = vd
         return vs

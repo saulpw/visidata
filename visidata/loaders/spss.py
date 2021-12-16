@@ -1,4 +1,5 @@
-from visidata import *
+from visidata import VisiData, Sheet, Progress, asyncthread, ColumnItem
+
 
 @VisiData.api
 def open_spss(vd, p):

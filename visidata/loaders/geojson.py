@@ -1,7 +1,7 @@
 from functools import reduce
 import json
 
-from visidata import *
+from visidata import VisiData, vd, Column, asyncthread, Progress, PythonSheet, InvertedCanvas, deepcopy
 
 
 @VisiData.api

@@ -1,4 +1,7 @@
-from visidata import *
+import re
+
+from visidata import VisiData, vd, Progress, TableSheet, IndexSheet, ItemColumn, ColumnItem
+
 
 @VisiData.api
 def open_rec(vd, p):

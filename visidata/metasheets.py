@@ -158,10 +158,14 @@ class LastInputsSheet(JsonLinesSheet):
 @VisiData.lazy_property
 def lastInputsSheet(vd):
     name = options.input_history
+
     if not name:
         return LastInputsSheet('last_inputs', source=None, rows=[])
 
-    p = Path(options.visidata_dir)/f'{options.input_history}.jsonl'
+    p = Path(name)
+    if not p.is_absolute():
+        p = Path(options.visidata_dir)/f'{name}.jsonl'
+
     vs = LastInputsSheet(name, source=p)
     try:
         vs.reload.__wrapped__(vs)
@@ -241,7 +245,7 @@ def join_cols(sheet):
 
 
 # copy vd.sheets so that ColumnsSheet itself isn't included (for recalc in addRow)
-globalCommand('gC', 'columns-all', 'vd.push(vd.allColumnsSheet)', 'open Columns Sheet: edit column properties for all visible columns from all sheets')
+globalCommand('gC', 'columns-all', 'vd.push(vd.allColumnsSheet)', 'open Columns Sheet: edit column properties for all visible columns from all sheets on the sheets stack')
 globalCommand('O', 'options-global', 'vd.push(vd.globalOptionsSheet)', 'open Options Sheet: edit global options (apply to all sheets)')
 
 BaseSheet.addCommand('V', 'open-vd', 'vd.push(vd.vdmenu)', 'open VisiData menu: browse list of core sheets')

@@ -1,4 +1,5 @@
-from visidata import *
+from visidata import VisiData, vd, Sheet, Column, Progress, ColumnAttr, ColumnItem, SubColumnItem, InvertedCanvas
+
 
 @VisiData.api
 def open_ttf(vd, p):

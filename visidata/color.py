@@ -116,6 +116,8 @@ class ColorMaker:
             return r
         except curses.error as e:
             return None  # not available
+        except ValueError:  # Python 3.10+  issue #1227
+            return None
 
     def _colornames_to_cattr(self, colornamestr, precedence=0):
         fg, bg, attrlist = self.split_colorstr(colornamestr)

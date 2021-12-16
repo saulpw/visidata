@@ -1,4 +1,6 @@
-from visidata import *
+import random
+
+from visidata import VisiData, vd, Sheet, options, anytype, urlparse, asyncthread, ColumnItem
 
 __all__ = ['openurl_postgres', 'openurl_postgresql', 'openurl_rds', 'PgTable', 'PgTablesSheet']
 
@@ -17,7 +19,8 @@ def codeToType(type_code, colname):
     return anytype
 
 
-def openurl_rds(url, filetype=None):
+@VisiData.api
+def openurl_rds(vd, url, filetype=None):
     import boto3
     import psycopg2
 
@@ -37,7 +40,8 @@ def openurl_rds(url, filetype=None):
     return PgTablesSheet(dbname+"_tables", sql=SQL(conn))
 
 
-def openurl_postgres(url, filetype=None):
+@VisiData.api
+def openurl_postgres(vd, url, filetype=None):
     import psycopg2
 
     url = urlparse(url.given)
@@ -52,7 +56,7 @@ def openurl_postgres(url, filetype=None):
     return PgTablesSheet(dbname+"_tables", sql=SQL(conn))
 
 
-openurl_postgresql=openurl_postgres
+VisiData.openurl_postgresql=VisiData.openurl_postgres
 
 
 class SQL:
