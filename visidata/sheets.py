@@ -506,6 +506,7 @@ class TableSheet(BaseSheet):
         ccol = self.cursorCol
         if ccol and not ccol.keycol:
             index = self.columns.index(ccol)+1
+            self.cursorVisibleColIndex += 1
         return self.addColumn(*cols, index=index)
 
     def setColNames(self, rows):
