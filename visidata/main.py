@@ -176,6 +176,9 @@ def main_vd():
                     startsheets = pos[:-2]
                     startrow, startcol = pos[-2:]
                     start_positions.append((startsheets, startrow, startcol))
+                if start_positions[-1]:
+                    # index subsheets need to be loaded *after* the cursor indexing
+                    options.set('load_lazy', True, obj=start_positions[-1][0])
             else:
                 start_positions.append((None, arg[1:], None))
 
