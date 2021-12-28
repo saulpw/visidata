@@ -194,7 +194,7 @@ class PivotSheet(Sheet):
         groups = {}  # [formattedDiscreteKeys] -> (numericGroupRows:dict(formattedNumericKeyRange -> PivotGroupRow), groupRow:PivotGroupRow)  # groupRow is main/error row
 
         for sourcerow in Progress(self.source.iterrows(), 'grouping', total=self.source.nRows):
-            discreteKeys = list(forward(origcol.getTypedValue(sourcerow)) for origcol in discreteCols)
+            discreteKeys = list(forward(origcol.getValue(sourcerow)) for origcol in discreteCols)
 
             # wrapply will pass-through a key-able TypedWrapper
             formattedDiscreteKeys = tuple(wrapply(c.format, v) for v, c in zip(discreteKeys, discreteCols))
