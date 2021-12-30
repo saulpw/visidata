@@ -20,7 +20,7 @@ A deeper explanation of all of these steps can be found [in the api documentatio
 
 - Host a single Python file containing all of the plugin's code.
 - Ensure the plugin has a `__version__`.
-- In the `visidata/plugins/plugins.jsonl` file in the VisiData repo, add a row for each plugin with all of the necessary information:
+- In the https://github.com/visidata/dlc/blob/stable/plugins.jsonl file in the `visidata:dlc` repo, add a row for each plugin with all of the necessary information:
     - `url`: link to where the plugin file is hosted; specific commit urls are preferred over branches.
     - `description`: a description of the plugin.
     - `latest_ver`: the current version of the plugin.
