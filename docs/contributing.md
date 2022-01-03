@@ -5,7 +5,7 @@ eleventyNavigation:
 ---
 
 ## [Submitting a Core Loader](#loader) {#loader}
-A deeper explanation of all of these steps can be found [in the api documentation](https://www.visidata.org/docs/api/loaders.html).
+A deeper explanation of all of these steps can be found [in the loaders api documentation](https://www.visidata.org/docs/api/loaders.html).
 
 - Create an `open_foo` function that returns the new `FooSheet`.
 - Set an appropriate `rowtype` string.
@@ -17,16 +17,7 @@ A deeper explanation of all of these steps can be found [in the api documentatio
 - add a section on the loader to the [formats.jsonl](https://github.com/saulpw/visidata/blob/develop/dev/formats.jsonl).
 
 ## [Submitting an External Plugin](#plugins) {#plugins}
+A deeper explanation of all of this framework can be found [in the plugins api documentation](https://www.visidata.org/docs/api/plugins.html).
 
 - Host a single Python file containing all of the plugin's code.
-- Ensure the plugin has a `__version__`.
-- In the https://github.com/visidata/dlc/blob/stable/plugins.jsonl file in the `visidata:dlc` repo, add a row for each plugin with all of the necessary information:
-    - `url`: link to where the plugin file is hosted; specific commit urls are preferred over branches.
-    - `description`: a description of the plugin.
-    - `latest_ver`: the current version of the plugin.
-    - `latest_release`: the date the current version of the plugin was shipped.
-    - `maintainer`: your contact information.
-    - `visidata_ver`: the latest version of visidata this plugin was tested on.
-    - `pydeps` (optional): Space-separated list of pip-installable Python modules required for the plugin.
-    - `vdpugindeps` (optional): Space-separated list of vd plugin dependencies.
-    - `sha256`: SHA256 hash of the contents of the plugin .py file for the `latest_release`. A script for obtaining this hash can be found [here](https://raw.githubusercontent.com/saulpw/visidata/develop/dev/vdhash.py).
+- In the https://github.com/visidata/dlc/blob/stable/plugins.jsonl file in the `visidata:dlc` repo, add a row for each plugin with all of the necessary information.
