@@ -38,7 +38,7 @@ To install it
 
 ## From within VisiData
 
-We maintain a list of plugins which can be downloaded and installed from within the application itself. To incorporate a plugin into this list, add it to [plugins.jsonl](https://github.com/saulpw/visidata/blob/develop/plugins/plugins.jsonl), and create a PR off of the `develop` branch.
+We maintain a list of plugins which can be downloaded and installed from within the application itself. To incorporate a plugin into this list, add it to [plugins.jsonl](https://raw.githubusercontent.com/visidata/dlc/stable/plugins.jsonl), and create a PR off of the `develop` branch.
 
 To install a plugin, and its dependencies, from within VisiData:
 

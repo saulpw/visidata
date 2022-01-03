@@ -13,7 +13,7 @@ Plugins can be installed and uninstalled in the :ref:`Plugins Sheet </docs/plugi
 Plugins often start as a small snippet in ``.visidatarc``, and then the code is migrated to a separate file when it gets too large to share with other people via a short code snippet.
 The actual code in either case should be identical.
 
-To publish a plugin, create a public repo with a .py file. Ensure the plugin has a ``__version__``. In the ``visidata/plugins/plugins.jsonl`` file in the VisiData repo, add a row for each plugin with all of the necessary information:
+To publish a plugin, create a public repo with a .py file. Ensure the plugin has a ``__version__``. In the `plugins.jsonl file <https://raw.githubusercontent.com/visidata/dlc/stable/plugins.jsonl>`__ in the `visidata:dlc repo <https://github.com/visidata/dlc>`__ , add a row for each plugin with all of the necessary information:
 
 - *name*: short name of the plugin (like ``vfake``).  Less than 20 characters.
 - *description*: a "one line" searchable description of the core features.  Less than 1000 characters.
@@ -24,7 +24,7 @@ To publish a plugin, create a public repo with a .py file. Ensure the plugin has
 - *visidata_ver*: version of VisiData required, like ``v2.0``.
 - *pydeps*: space-separated list of PyPI dependencies (like in ``requirements.txt``).
 - *vdplugindeps*: space-separated list of vd plugin dependencies.
-- *sha256*: SHA256 hash of plugin .py of most recent release.
+- *sha256*: SHA256 hash of plugin .py of most recent release. A script for obtaining this has can be found `in dev/vdhash.py <https://raw.githubusercontent.com/saulpw/visidata/develop/dev/vdhash.py>`__ .
 
 .. note::
 
@@ -81,4 +81,4 @@ Notes:
 - Include at least the author and version metadata elements.
 - Options at the top, commands at the bottom.
 - Avoid toplevel imports of non-stdlib Python extensions.
-- To share with other people, add it to the `plugins.jsonl <https://github.com/saulpw/visidata/blob/develop/plugins/plugins.jsonl>`__ and submit a PR to the `saulpw/visidata <https://github.com/saulpw/visidata/pulls>`__ Github repo.
+- To share with other people, add it to the `plugins.jsonl <https://raw.githubusercontent.com/visidata/dlc/stable/plugins.jsonl>`__ and submit a PR to the `saulpw/visidata <https://github.com/visidata/dlc/pulls>`__ Github repo.
