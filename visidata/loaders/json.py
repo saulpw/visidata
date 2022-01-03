@@ -1,6 +1,6 @@
 import json
 
-from visidata import vd, date, VisiData, PythonSheet, deepcopy, AttrDict, stacktrace, TypedExceptionWrapper, options, visidata, ColumnItem, deduceType, wrapply, TypedWrapper, Progress
+from visidata import vd, date, VisiData, PythonSheet, deepcopy, AttrDict, stacktrace, TypedExceptionWrapper, options, visidata, ColumnItem, deduceType, wrapply, TypedWrapper, Progress, Sheet
 
 vd.option('json_indent', None, 'indent to use when saving json')
 vd.option('json_sort_keys', False, 'sort object keys when saving to json')
@@ -135,16 +135,21 @@ def save_json(vd, p, *vsheets):
                     fp.write(chunk)
 
 
-@VisiData.api
-def save_jsonl(vd, p, *vsheets):
-    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
-      for vs in vsheets:
+@Sheet.api
+def write_jsonl(vs, fp):
         vcols = vs.visibleCols
         jsonenc = _vjsonEncoder()
         with Progress(gerund='saving'):
             for row in vs.iterrows():
                 rowdict = _rowdict(vcols, row)
                 fp.write(jsonenc.encode(rowdict) + '\n')
+
+
+@VisiData.api
+def save_jsonl(vd, p, *vsheets):
+    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
+        for vs in vsheets:
+            vs.write_jsonl(fp)
 
 
 JsonSheet.class_options.encoding = 'utf-8'
