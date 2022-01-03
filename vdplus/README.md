@@ -12,6 +12,12 @@ VisiData Plus contains many useful loaders and features for [VisiData](https://v
 - [RC Together](https://github.com/saulpw/vdplus/tree/develop/api/rctogether): control an army of bots via [RC Together API](https://docs.rctogether.com/).
 - [bit.io](https://github.com/saulpw/vdplus/tree/develop/api/bitio): interface to [bit.io](https://bit.io) API.
 
+
+### File formats
+
+- [orgmode](): read/save .org and .md files; filetypes `org`, `md`, `forg` (with a list of files), and `orgdir` (with a directory of .org files)
+- [jrnl.sh](https://jrnl.sh): read/save journal files; filetype `jrnl`
+
 ### Other features/tools
 
 - [graphing](https://github.com/saulpw/vdplus/tree/develop/graphing): save scatterplot as .svg
