@@ -12,4 +12,8 @@ seaborn
 matplotlib # svg
 
 psutil # top
+
 ibis
+
+orgparse
+sh
