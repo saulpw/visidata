@@ -101,7 +101,7 @@ def save_cols(vd, cols):
 def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
     'Save all *vsheets* to *givenpath*.'
 
-    filetype = vsheets[0].options.save_filetype or givenpath.ext
+    filetype = givenpath.ext or options.save_filetype
 
     vd.clearCaches()
 
