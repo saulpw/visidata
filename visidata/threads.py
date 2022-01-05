@@ -284,7 +284,8 @@ def open_pyprof(vd, p):
 
 
 @VisiData.api
-def toggleProfiling(vd, t):
+def toggleProfiling(vd):
+    t = threading.current_thread()
     if not t.profile:
         t.profile = cProfile.Profile()
         t.profile.enable()
@@ -416,7 +417,7 @@ ProfileSheet.addCommand('z^S', 'save-profile', 'source.dump_stats(input("save pr
 ProfileSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow.code.co_filename, "+%s" % cursorRow.code.co_firstlineno)', 'open current file at referenced row in external $EDITOR')
 ProfileStatsSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow[0], "+%s" % cursorRow[1])', 'open current file at referenced row in external $EDITOR')
 
-globalCommand('^_', 'toggle-profile', 'toggleProfiling(threading.current_thread())', 'Enable or disable profiling on main VisiData process')
+BaseSheet.addCommand('^_', 'toggle-profile', 'toggleProfiling()', 'Enable or disable profiling on main VisiData process')
 
 BaseSheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads or fail("no active threads on this sheet"))', 'abort all threads on current sheet')
 BaseSheet.addCommand('g^C', 'cancel-all', 'liveThreads=list(t for vs in vd.sheets for t in vs.currentThreads); cancelThread(*liveThreads); status("canceled %s threads" % len(liveThreads))', 'abort all secondary threads')
