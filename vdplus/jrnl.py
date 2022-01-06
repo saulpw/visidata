@@ -22,7 +22,7 @@ class JrnlSheet(TableSheet):
         re_title = re.compile(r'\[(.*?)\s(.*?)\] (.*)')
         prevline = ''
         for line in self.source:
-            tags = re.findall('@(\S+)', line)
+            tags = re.findall(r'(?<!\S)(@[-+*#/\w]+)', line)
             if not prevline:
                 m = re_title.match(line)
                 if m:
