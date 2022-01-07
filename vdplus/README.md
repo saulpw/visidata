@@ -17,11 +17,16 @@ VisiData Plus contains many useful loaders and features for [VisiData](https://v
 
 - [orgmode](): read/save .org and .md files; filetypes `org`, `md`, `forg` (with a list of files), and `orgdir` (with a directory of .org files)
 - [jrnl.sh](https://jrnl.sh): read/save journal files; filetype `jrnl`
+- various [mailbox formats](https://docs.python.org/3/library/mailbox.html): `mbox`, `maildir`, `mmdf`, `babyl`, `mh`
+
+### Other data libraries
+
+- [Ibis](https://ibis-project.org): connect to various database backends (currently only sqlite is supported in vdplus) and query without loading the entire database.
 
 ### Other features/tools
 
 - [graphing](https://github.com/saulpw/vdplus/tree/develop/graphing): save scatterplot as .svg
-- [Web Scraper](https://github.com/saulpw/vdplus/tree/develop/scraper): scrape urls from web pages and web pages from urls iteratively and interactively.
+- [web scraper](https://github.com/saulpw/vdplus/tree/develop/scraper): scrape urls from web pages and web pages from urls iteratively and interactively.
 - [ping](https://github.com/saulpw/vdplus/tree/develop/ping): interactive ping+traceroute
 - [top](https://github.com/saulpw/vdplus/tree/develop/top): interactive process viewer
 - [Galactic Conquest](https://github.com/saulpw/vdplus/tree/develop/galcon): a remake of the classic [Galcon](http://www.galcon.com/classic/history.html).
