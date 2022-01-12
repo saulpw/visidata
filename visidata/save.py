@@ -80,7 +80,7 @@ def getDefaultSaveName(sheet):
             return str(src.with_suffix('')) + '.' + sheet.options.save_filetype
         return str(src)
     else:
-        return sheet.name+'.'+getattr(sheet, 'filetype', options.save_filetype)
+        return sheet.name+'.'+getattr(sheet, 'filetype', options.save_filetype or 'vds')
 
 
 @VisiData.api
