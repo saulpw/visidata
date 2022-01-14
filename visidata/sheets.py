@@ -75,6 +75,8 @@ vd.option('name_joiner', '_', 'string to join sheet or column names')
 vd.option('value_joiner', ' ', 'string to join display values')
 
 
+@VisiData.api
+@drawcache
 def splitcell(sheet, s, width=0):
     if width <= 0 or not sheet.options.textwrap_cells:
         return [s]
