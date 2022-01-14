@@ -26,6 +26,8 @@ def addUndo(vd, undofunc, *args, **kwargs):
         # some special commands, like open-file, do not have an undofuncs set
         if not r or not isUndoableCommand(r.longname):
             return
+        if not r.undofuncs:
+            r.undofuncs = []
         r.undofuncs.append((undofunc, args, kwargs))
 
 
