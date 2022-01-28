@@ -2,7 +2,7 @@ import unicodedata
 import sys
 import functools
 
-from visidata import options
+from visidata import options, drawcache
 
 __all__ = ['clipstr', 'clipdraw', 'dispwidth']
 
@@ -52,6 +52,7 @@ def wcwidth(cc, ambig=1):
         return 0
 
 
+@functools.lru_cache(maxsize=100000)
 def dispwidth(ss, maxwidth=None):
     'Return display width of string, according to unicodedata width and options.disp_ambig_width.'
     disp_ambig_width = options.disp_ambig_width
@@ -102,6 +103,7 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
     return ret, w
 
 
+@drawcache
 def clipstr(s, dispw):
     if options.visibility:
         return _clipstr(s, dispw,
