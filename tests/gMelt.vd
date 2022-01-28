@@ -5,7 +5,7 @@ benchmark	'$'		rename-col	Unit_Currency	^
 benchmark	Unit_Currency		freeze-col		'	
 benchmark	Unit_Currency		hide-col		-	
 benchmark	Unit_Currency_frozen		rename-col	Unit_Currency	^	
-benchmark	Unit	0	split-col	[$]	:	
+benchmark	Unit	0	split-col	[$₪]	:	
 benchmark	Unit		hide-col		-	
 benchmark	Unit_re0		hide-col		-	
 benchmark	Unit_re1		rename-col	Unit	^	
