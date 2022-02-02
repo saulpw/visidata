@@ -145,6 +145,8 @@ import visidata.loaders.vds
 import visidata.loaders.odf
 import visidata.loaders.lsv
 
+import visidata.form
+
 import visidata.ddwplay
 import visidata.plugins
 
