@@ -105,7 +105,8 @@ class VisiData(visidata.Extensible):
             scr.refresh()
             k = scr.get_wch()
             vs = vs or self.activeSheet
-            self.drawRightStatus(vs._scr, vs) # continue to display progress %
+            if vs:
+                self.drawRightStatus(vs._scr, vs) # continue to display progress %
         except curses.error:
             return ''  # curses timeout
 
