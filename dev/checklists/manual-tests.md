@@ -93,3 +93,4 @@
     - save name makes sense
     - fails if not offered a directory
     - succeeds if offered a directory
+21. Test macro-record.
