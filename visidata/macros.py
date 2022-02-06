@@ -36,7 +36,7 @@ def setMacro(ks, vs):
 def saveMacro(self, rows, ks):
         vs = copy(self)
         vs.rows = rows
-        macropath = Path(fnSuffix(options.visidata_dir+"macro"))
+        macropath = Path(vd.fnSuffix(options.visidata_dir+"macro"))
         vd.save_vd(macropath, vs)
         setMacro(ks, vs)
         vd.macrosheet.source.append_tsv_row((ks, macropath))
