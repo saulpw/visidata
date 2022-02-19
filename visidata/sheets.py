@@ -499,6 +499,7 @@ class TableSheet(BaseSheet):
             col.recalc(self)
             self.columns.insert(index+i, col)
             Sheet.visibleCols.fget.cache_clear()
+        self.setModified()
 
         return cols[0]
 
