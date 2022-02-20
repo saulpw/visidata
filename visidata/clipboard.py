@@ -106,6 +106,10 @@ def delete_row(sheet, rowidx):
     if not sheet.defer:
         oldrow = sheet.rows.pop(rowidx)
         vd.addUndo(sheet.rows.insert, rowidx, oldrow)
+        # clear the deleted row from selected rows
+        if sheet.isSelected(oldrow):
+            sheet.addUndoSelection()
+            sheet.unselectRow(oldrow)
     else:
         oldrow = sheet.rows[rowidx]
         sheet.rowDeleted(oldrow)
