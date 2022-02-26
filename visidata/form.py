@@ -10,7 +10,7 @@ def open_mnu(vd, p):
 vd.save_mnu=vd.save_tsv
 
 class FormSheet(VisiDataMetaSheet):
-    rowtype='labels' # rowdef: { .x .y .text .color .command .input }
+    rowtype='labels' # rowdef: { .x .y .text .color .command .input .underline}
 
 @VisiData.api
 def replayCommand(vd, longname, sheet=None, col='', row=''):
@@ -33,12 +33,16 @@ class FormCanvas(BaseSheet):
                 continue
             x, y = r.x, r.y
             if isinstance(y, float) and (0 < y < 1) or (-1 < y < 0): y = h*y
-            if isinstance(x, float) and (0 < x < 1) or (-1 < x < 0): x = w*(x-len(r.text)*w)
+            if isinstance(x, float) and (0 < x < 1) or (-1 < x < 0): x = w*x-(len(r.text)/2)
             x = int(x)
             y = int(y)
             if y < 0: y += h
             if x < 0: x += w
             clipdraw(scr, y, x, r.text, colors[r.color])
+            # underline first occurrence of r.underline in r.text
+            if hasattr(r, 'underline') and r.underline:
+                index = r.text.find(r.underline)
+                clipdraw(scr, y, x+index, r.text[index:len(r.underline)+1], colors[r.color + " underline"])
             vd.onMouse(scr, y, x, 1, len(r.text), BUTTON1_RELEASED=lambda y,x,key,r=r,sheet=self: sheet.click(r))
 
     def run(self, scr):
@@ -75,10 +79,8 @@ def confirm(vd, prompt, exc=EscapeException):
     form = FormSheet('confirm', rows=[
         AttrDict(x=2, y=0, text=' confirm ', color='yellow'),
         AttrDict(x=2, y=1, text=prompt, color='yellow'),
-        AttrDict(x=.25, y=2, text=' yes ', color='black on yellow bold'),
-        AttrDict(x=.75, y=2, text=' no ', color='black on yellow bold'),
-        AttrDict(x=.25, y=2, text=' y', color='black on yellow bold'),
-        AttrDict(x=.75, y=2, text=' n', color='black on yellow bold'),
+        AttrDict(x=.25, y=2, text=' yes ', color='black on yellow bold', underline='y'),
+        AttrDict(x=.75, y=2, text=' no ', color='black on yellow bold', underline='n'),
         AttrDict(input='yn', keystrokes=['y', 'n', ENTER]),
     ])
 
