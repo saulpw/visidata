@@ -72,6 +72,8 @@ def cellChanged(col, row, val):
 def rowDeleted(self, row):
     'Mark row as a deferred delete-row'
     self._deferredDels[self.rowid(row)] = row
+    self.addUndoSelection()
+    self.unselectRow(row)
     def _undoRowDeleted(sheet, row):
         if sheet.rowid(row) not in sheet._deferredDels:
             vd.warning('cannot undo to before commit')
