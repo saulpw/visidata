@@ -151,6 +151,9 @@ class DirSheet(Sheet):
     def deleteSourceRow(self, r):
         self.removeFile(r)
 
+    def newRow(self):
+        vd.fail('new file not supported')
+
     def iterload(self):
         hidden_files = self.options.dir_hidden
 
