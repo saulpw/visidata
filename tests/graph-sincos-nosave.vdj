@@ -1,0 +1,19 @@
+#!vd -p
+{"sheet": "", "col": "", "row": "", "longname": "add-sheet", "input": "1", "keystrokes": "A", "comment": "open new blank sheet with number columns"}
+{"sheet": "unnamed", "col": "", "row": "", "longname": "add-rows", "input": "360", "keystrokes": "ga", "comment": "add N blank rows"}
+{"sheet": "unnamed", "col": "", "row": "", "longname": "select-rows", "input": "", "keystrokes": "gs", "comment": ""}
+{"sheet": "unnamed", "col": 0, "row": "", "longname": "setcol-iter", "input": "range(360)", "keystrokes": "gz=", "comment": "set selected rows in this column to the values in the given Python sequence expression"}
+{"sheet": "unnamed", "col": "", "row": "", "longname": "unselect-rows", "input": "", "keystrokes": "gu", "comment": ""}
+{"sheet": "unnamed", "col": 0, "row": "", "longname": "rename-col", "input": "xdeg", "keystrokes": "^", "comment": "edit name of current column"}
+{"sheet": "unnamed", "col": "xdeg", "row": "", "longname": "type-int", "input": "", "keystrokes": "#", "comment": "set type of current column to int"}
+{"sheet": "unnamed", "col": "xdeg", "row": "", "longname": "addcol-expr", "input": "xdeg*math.pi/180", "keystrokes": "=", "comment": "create new column from Python expression, with column names as variables"}
+{"sheet": "unnamed", "col": "xdeg*math.pi/180", "row": "", "longname": "rename-col", "input": "xrad", "keystrokes": "^", "comment": "edit name of current column"}
+{"sheet": "unnamed", "col": "xrad", "row": "", "longname": "type-float", "input": "", "keystrokes": "%", "comment": "set type of current column to float"}
+{"sheet": "unnamed", "col": "xrad", "row": "", "longname": "addcol-expr", "input": "math.sin(xrad)", "keystrokes": "=", "comment": "create new column from Python expression, with column names as variables"}
+{"sheet": "unnamed", "col": "math.sin(xrad)", "row": "", "longname": "type-float", "input": "", "keystrokes": "%", "comment": "set type of current column to float"}
+{"sheet": "unnamed", "col": "xdeg", "row": "", "longname": "key-col", "input": "", "keystrokes": "!", "comment": "pin current column on the left as a key column"}
+{"sheet": "unnamed", "col": "math.sin(xrad)", "row": "", "longname": "addcol-expr", "input": "math.cos(xrad)", "keystrokes": "=", "comment": "create new column from Python expression, with column names as variables"}
+{"sheet": "unnamed", "col": "math.sin(xrad)", "row": "", "longname": "type-float", "input": "", "keystrokes": "%", "comment": "set type of current column to float"}
+{"sheet": "unnamed", "col": "math.cos(xrad)", "row": "", "longname": "type-float", "input": "", "keystrokes": "%", "comment": "set type of current column to float"}
+{"sheet": "unnamed", "col": "xrad", "row": "", "longname": "hide-col", "input": "", "keystrokes": "-", "comment": "hide current column"}
+{"sheet": "unnamed", "col": "", "row": "", "longname": "plot-numerics", "input": "", "keystrokes": "g.", "comment": "graph all numeric columns vs the first key column (or row number)"}

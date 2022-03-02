@@ -1,0 +1,14 @@
+#!vd -p
+{"sheet": "", "col": "", "row": "", "longname": "add-sheet", "input": "1", "keystrokes": "A", "comment": "open new blank sheet with number columns"}
+{"sheet": "unnamed", "col": "", "row": "", "longname": "add-rows", "input": "100000", "keystrokes": "ga", "comment": "add N blank rows"}
+{"sheet": "unnamed", "col": 0, "row": "", "longname": "addcol-expr", "input": "random.random()", "keystrokes": "=", "comment": "create new column from Python expression, with column names as variables"}
+{"sheet": "unnamed", "col": "random.random()", "row": "", "longname": "type-float", "input": "", "keystrokes": "%", "comment": "set type of current column to float"}
+{"sheet": "unnamed", "col": "random.random()", "row": "", "longname": "rename-col", "input": "x", "keystrokes": "^", "comment": "edit name of current column"}
+{"sheet": "unnamed", "col": "x", "row": "", "longname": "addcol-expr", "input": "int(x*6+1)", "keystrokes": "=", "comment": "create new column from Python expression, with column names as variables"}
+{"sheet": "unnamed", "col": "x", "row": "", "longname": "hide-col", "input": "", "keystrokes": "-", "comment": "hide current column"}
+{"sheet": "unnamed", "col": "int(x*6+1)", "row": "", "longname": "rename-col", "input": "d6", "keystrokes": "^", "comment": "edit name of current column"}
+{"sheet": "unnamed", "col": "d6", "row": "", "longname": "addcol-expr", "input": "random.choice(string.ascii_uppercase)", "keystrokes": "=", "comment": "create new column from Python expression, with column names as variables"}
+{"sheet": "unnamed", "col": "d6", "row": "", "longname": "aggregate-col", "input": "sum", "keystrokes": "+", "comment": "add aggregator to the current column"}
+{"sheet": "unnamed", "col": "random.choice(string.ascii_uppercase)", "row": "", "longname": "freq-col", "input": "", "keystrokes": "F", "comment": "open Frequency Table grouped on current column"}
+{"sheet": "unnamed_random.choice(string.ascii_uppercase)_freq", "col": "random.choice(string.ascii_uppercase)", "row": "", "longname": "sort-desc", "input": "", "keystrokes": "]", "comment": "sort descending by current column"}
+{"sheet": "unnamed_random.choice(string.ascii_uppercase)_freq", "col": "random.choice(string.ascii_uppercase)", "row": "", "longname": "sort-asc", "input": "", "keystrokes": "[", "comment": "sort ascending by current column"}

@@ -8,21 +8,21 @@ shopt -s failglob
 trap "echo aborted; exit;" SIGINT SIGTERM
 
 if [ -z "$1" ] ; then
-    # test.sh; run all .vds in tests/
-    TESTS="tests/*.vd"
+    # test.sh; run all .vd/.vdj in tests/
+    TESTS="tests/*.vd*"
 else
     # test.sh testname; run tests/testname.vd
-    TESTS=tests/$1.vd
+    TESTS=tests/$1.vd*
 fi
 
 for i in $TESTS ; do
     echo "--- $i"
     outbase=${i##tests/}
-    if [ "${i%-nosave.vd}-nosave" == "${i%.vd}" ];
+    if [ "${i%-nosave.vd*}-nosave" == "${i%.vd*}" ];
     then
         PYTHONPATH=. bin/vd --play "$i" --batch --config tests/.visidatarc --visidata-dir tests/.visidata
     else
-        for goldfn in tests/golden/${outbase%.vd}.*; do
+        for goldfn in tests/golden/${outbase%.vd*}.*; do
             PYTHONPATH=. bin/vd --confirm-overwrite=False --play "$i" --batch --output "$goldfn" --config tests/.visidatarc --visidata-dir tests/.visidata
             echo "save: $goldfn"
         done
