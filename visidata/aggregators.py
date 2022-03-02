@@ -36,7 +36,16 @@ def aggregators_get(col):
     return list(vd.aggregators[k] for k in (col.aggstr or '').split())
 
 def aggregators_set(col, aggs):
-    col.aggstr = ' '.join(agg.name for agg in aggs)
+    if isinstance(aggs, str):
+        newaggs = []
+        for agg in aggs.split():
+            if agg not in vd.aggregators:
+                vd.fail(f'unknown aggregator {agg}')
+            newaggs.append(agg)
+    else:
+        newaggs = [agg.name for agg in aggs]
+
+    col.aggstr = ' '.join(newaggs)
 
 Column.aggregators = property(aggregators_get, aggregators_set)
 
@@ -129,7 +138,11 @@ vd.aggregators['q10'] = quantiles(10, 'deciles (10/20/30/40/50/60/70/80/90th pct
 vd.aggregators['keymax'] = _defaggr('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]), 'key of the maximum value')
 
 
-ColumnsSheet.columns += [ColumnAttr('aggregators','aggstr')]
+ColumnsSheet.columns += [
+    Column('aggregators',
+           getter=lambda c,r:r.aggstr,
+           setter=lambda c,r,v:setattr(r, 'aggregators', v))
+]
 
 @Sheet.api
 def addAggregators(sheet, cols, aggrnames):
