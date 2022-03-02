@@ -116,14 +116,14 @@ def getRowIndexFromStr(vs, rowstr):
         return None
 
 @Sheet.api
-def moveToCol(vs, colstr):
-    'Move cursor to column given by *colstr*, which can be either the column number or column name.'
-    try:
-        vcolidx = int(colstr)
-    except ValueError:
-        vcolidx = indexMatch(vs.visibleCols, lambda c,name=colstr: name == c.name)
+def moveToCol(vs, col):
+    'Move cursor to column given by *col*, which can be either the column number or column name.'
+    if isinstance(col, str):
+        vcolidx = indexMatch(vs.visibleCols, lambda c,name=col: name == c.name)
+    elif isinstance(col, int):
+        vcolidx = col
 
-    if vcolidx is None:
+    if vcolidx is None or vcolidx >= vs.nVisibleCols:
         return False
 
     if vs.options.replay_movement:
@@ -285,10 +285,10 @@ def replay_cancel(vd):
 @VisiData.api
 def moveToReplayContext(vd, r, vs):
         'set the sheet/row/col to the values in the replay row.  return sheet'
-        if r.row:
+        if r.row not in [None, '']:
             vs.moveToRow(r.row) or vd.error('no "%s" row' % r.row)
 
-        if r.col:
+        if r.col not in [None, '']:
             vs.moveToCol(r.col) or vd.error('no "%s" column' % r.col)
 
 
