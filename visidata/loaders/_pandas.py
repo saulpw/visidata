@@ -362,3 +362,7 @@ PandasSheet.addCommand('g\\', 'unselect-cols-regex', 'selectByRegex(regex=input(
 
 # Override with a pandas/dataframe-aware implementation
 PandasSheet.addCommand('"', 'dup-selected', 'vs=PandasSheet(sheet.name, "selectedref", source=selectedRows.df); vd.push(vs)', 'open duplicate sheet with only selected rows'),
+
+vd.addGlobals({
+    'PandasSheet': PandasSheet,
+})
