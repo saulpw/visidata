@@ -1,0 +1,6 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.parquet	o	
+sample		0	select-row		s	select current row
+sample		1	select-row		s	select current row
+sample		2	select-row		s	select current row
+sample			dup-selected		"	open duplicate sheet with only selected rows
