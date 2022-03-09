@@ -1,0 +1,6 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.tsv	o	
+sample	Rep		key-col		!	toggle current column as a key column
+sample	Units		type-int		#	set type of current column to int
+sample	Units		aggregate-col	q3	+	Add aggregator to current column
+sample			freq-keys		gShift+F	open Frequency Table grouped by all key columns on source sheet, with aggregations of other columns
