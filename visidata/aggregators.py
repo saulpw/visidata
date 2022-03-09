@@ -134,6 +134,11 @@ vd.aggregators['q4'] = quantiles(4, 'quartiles (25/50/75th pctile)')
 vd.aggregators['q5'] = quantiles(5, 'quintiles (20/40/60/80th pctiles)')
 vd.aggregators['q10'] = quantiles(10, 'deciles (10/20/30/40/50/60/70/80/90th pctiles)')
 
+# since bb29b6e, a record of every aggregator
+# is needed in vd.aggregators
+for pct in (10, 20, 25, 30, 33, 40, 50, 60, 67, 70, 75, 80, 90):
+    vd.aggregators[f'p{pct}'] = percentile(pct, f'{pct}th percentile')
+
 # returns keys of the row with the max value
 vd.aggregators['keymax'] = _defaggr('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]), 'key of the maximum value')
 
