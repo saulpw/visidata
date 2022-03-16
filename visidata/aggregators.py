@@ -42,6 +42,8 @@ def aggregators_set(col, aggs):
             if agg not in vd.aggregators:
                 vd.fail(f'unknown aggregator {agg}')
             newaggs.append(agg)
+    elif aggs is None:
+        newaggs = ''
     else:
         newaggs = [agg.name for agg in aggs]
 
