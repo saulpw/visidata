@@ -389,9 +389,7 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
         value = value or col.getDisplayValue(self.rows[self.cursorRowIndex])
 
     bindings={
-        'kUP':        acceptThenFunc('go-up', 'rename-col' if rowidx < 0 else 'edit-cell'),
         'KEY_SR':     acceptThenFunc('go-up', 'rename-col' if rowidx < 0 else 'edit-cell'),
-        'kDN':        acceptThenFunc('go-down', 'rename-col' if rowidx < 0 else 'edit-cell'),
         'KEY_SF':     acceptThenFunc('go-down', 'rename-col' if rowidx < 0 else 'edit-cell'),
         'KEY_SRIGHT': acceptThenFunc('go-right', 'rename-col' if rowidx < 0 else 'edit-cell'),
         'KEY_SLEFT':  acceptThenFunc('go-left', 'rename-col' if rowidx < 0 else 'edit-cell'),
