@@ -25,6 +25,10 @@ To install the cutting edge `develop` branch (no warranty expressed or implied):
 
 See [visidata.org/install](https://visidata.org/install) for detailed instructions for all available platforms and package managers.
 
+#### Shell completion
+
+Completion definitions for Zsh can be found in [`contrib/completion`](https://github.com/saulpw/visidata/tree/develop/contrib/completion). Please consult your shell's manual for how to take advantage of them.
+
 ### Usage
 
     $ vd <input>

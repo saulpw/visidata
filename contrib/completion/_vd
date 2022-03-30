@@ -1,0 +1,106 @@
+#compdef vd visidata
+
+(( $+functions[_vd_files] )) ||
+_vd_files () {
+  case $PREFIX in
+    (*) _files $* ;;
+  esac
+  case $PREFIX in
+    (+) _message -e 'toplevel:subsheet:col:row' ;;
+    (+<1->) _message -e 'toplevel' ;;
+    (+<1->:) _message -e 'subsheet' ;;
+    (+<1->:<1->:) _message -e 'col' ;;
+    (+<1->:<1->:<1->:) _message -e 'row' ;;
+  esac
+}
+
+_arguments -S \
+  '(*)'{-p,--play=}'[replay a saved cmdlog within the interface]:cmdlog:_files' \
+  '(*)'{-w,--replay-wait=}'[wait seconds between commands]:seconds' \
+  '(*)'{-b,--batch}'[replay in batch mode (with no interface)]' \
+  '(*)'{-o,--output=}'[save final visible sheet to file as .tsv]:file:_files' \
+  '(*)'--replay-movement'[toggle --play to move cursor cell-by-cell]' \
+  -P'[preplay longname before replay or regular launch; limited to Base Sheet bound commands]:longname' \
+  {-f,--filetype}'[set loader to use for filetype instead of file extension (default: tsv)]:filetype' \
+  --visidata-dir'[directory to load and store additional files (default: ~/.visidata/)]:str:_files' \
+  --mouse-interval'[max time between press/release for click (ms) (default: 1)]:int' \
+  --null-value'[a value to be counted as null (default: None)]:NoneType' \
+  --undo='[enable undo/redo (default: True)]:bool:(True False)' \
+  --col-cache-size'[max number of cache entries in each cached column (default: 0)]:int' \
+  --clean-names'[clean column/sheet names to be valid Python identifiers (default: False)]' \
+  --default-width'[default column width (default: 20)]:int' \
+  --default-height'[default column height (default: 4)]:int' \
+  --textwrap-cells='[wordwrap text for multiline rows (default: True)]:bool:(True False)' \
+  --quitguard'[confirm before quitting modified sheet (default: False)]' \
+  --debug'[exit on error and display stacktrace (default: False)]' \
+  --skip'[skip N rows before header (default: 0)]:int' \
+  --header'[parse first N rows as column names (default: 1)]:int' \
+  --load-lazy'[load subsheets always (False) or lazily (True) (default: False)]' \
+  --force-256-colors'[use 256 colors even if curses reports fewer (default: False)]' \
+  --note-pending'[note to display for pending cells (default: ⌛)]:str' \
+  --note-format-exc'[cell note for an exception during formatting (default: ?)]:str' \
+  --note-getter-exc'[cell note for an exception during computation (default: !)]:str' \
+  --note-type-exc'[cell note for an exception during type conversion (default: !)]:str' \
+  --scroll-incr'[amount to scroll with scrollwheel (default: 3)]:int' \
+  --name-joiner'[string to join sheet or column names (default: _)]:str' \
+  --value-joiner'[string to join display values]:str' \
+  --wrap'[wrap text to fit window width on TextSheet (default: False)]' \
+  --save-filetype'[specify default file type to save as (default: tsv)]:str' \
+  --profile'[enable profiling on threads (default: False)]' \
+  --min-memory-mb'[minimum memory to continue loading and async processing (default: 0)]:int' \
+  --encoding'[encoding passed to codecs.open (default: utf)]:str-8' \
+  --encoding-errors'[encoding_errors passed to codecs.open (default: surrogateescape)]:str' \
+  --input-history'[basename of file to store persistent input history]:str' \
+  --bulk-select-clear'[clear selected rows before new bulk selections (default: False)]' \
+  --some-selected-rows'[if no rows selected, if True, someSelectedRows returns all rows; if False, fails (default: False)]' \
+  --delimiter'[field delimiter to use for tsv/usv filetype]:str' \
+  --row-delimiter'[" row delimiter to use for tsv/usv filetype]:str' \
+  --tsv-safe-newline'[replacement for newline character when saving to tsv]:str' \
+  --tsv-safe-tab'[replacement for tab character when saving to tsv]:str' \
+  --visibility'[visibility level (0=low, 1=high) (default: 0)]:int' \
+  --default-sample-size'[number of rows to sample for regex.split (0=all) (default: 100)]:int' \
+  --json-indent'[indent to use when saving json (default: None)]:NoneType' \
+  --json-sort-keys'[sort object keys when saving to json (default: False)]' \
+  --default-colname'[column name to use for non-dict rows]:str' \
+  {-y=,--confirm-overwrite=}'[whether to prompt for overwrite confirmation on save (default: True)]:bool:(True False)' \
+  --safe-error'[error string to use while saving (default: #ERR)]:str' \
+  --clipboard-copy-cmd'[ipboard -filter (default: xclip)]:str -selection cl' \
+  --clipboard-paste-cmd'[ipboard -o (default: xclip)]:str -selection cl' \
+  --fancy-chooser'[a nicer selection interface for aggregators and jointype (default: False)]' \
+  --describe-aggrs'[numeric aggregators to calculate on Describe sheet (default: mean)]:str stdev' \
+  --histogram-bins'[number of bins for histogram of numeric columns (default: 0)]:int' \
+  --numeric-binning'[bin numeric columns into ranges (default: False)]' \
+  --rowkey-prefix'[string prefix for rowkey in the cmdlog (default: キ)]:str' \
+  --cmdlog-histfile'[file to autorecord each cmdlog action to]:str' \
+  --regex-flags'[flags to pass to re.compile() (AILMSUX) (default: I)]:str' \
+  --regex-maxsplit'[maxsplit to pass to regex.split (default: 0)]:int' \
+  --show-graph-labels='[show axes and legend on graph (default: True)]:bool:(True False)' \
+  --plot-colors'[list of distinct colors to use for plotting distinct objects]:str' \
+  --zoom-incr'[amount to multiply current zoomlevel when zooming (default: 2)]:float.0' \
+  --motd-url'[source of randomized startup messages]:str' \
+  --dir-recurse'[walk source path recursively on DirSheet (default: False)]' \
+  --dir-hidden'[load hidden files on DirSheet (default: False)]' \
+  --config'[config file to exec in Python (default: ~/.visidatarc)]:str:_files' \
+  --preplay'[longnames to preplay before replay]:str' \
+  --imports'[imports to preload before .visidatarc (command-line only) (default: plugins)]:str' \
+  --unfurl-empty'[if unfurl includes rows for empty containers (default: False)]' \
+  --incr-base'[start value for column increments (default: 1)]:float.0' \
+  --csv-dialect'[dialect passed to csv.reader (default: excel)]:str' \
+  --csv-delimiter'[delimiter passed to csv.reader (default: ,)]:str' \
+  --csv-quotechar'[quotechar passed to csv.reader (default: ")]:str' \
+  --csv-skipinitialspace='[skipinitialspace passed to csv.reader (default: True)]:bool:(True False)' \
+  --csv-escapechar'[escapechar passed to csv.reader (default: None)]:NoneType' \
+  --csv-lineterminator'[" lineterminator passed to csv.writer]:str' \
+  --safety-first'[sanitize input/output to handle edge cases, with a performance cost (default: False)]' \
+  --xlsx-meta-columns'[include columns for cell objects, font colors, and fill colors (default: False)]' \
+  --fixed-rows'[number of rows to check for fixed width columns (default: 1000)]:int' \
+  --fixed-maxcols'[max number of fixed-width columns to create (0 is no max) (default: 0)]:int' \
+  --postgres-schema'[The desired schema for the Postgres database (default: public)]:str' \
+  --http-max-next'[max next.url pages to follow in http response (default: 0)]:int' \
+  --html-title'[table header when saving to html (default: <h2>{sheet.name}</h2>)]:str' \
+  --pcap-internet'[save_dot]:str:((y\:"includes all internet hosts separately" s\:combined n\:"does not include the internet"))' \
+  --graphviz-edge-labels='[whether to include edge labels on graphviz diagrams (default: True)]:bool:(True False)' \
+  --npy-allow-pickle'[numpy allow unpickling objects (unsafe) (default: False)]' \
+  --pdf-tables'[parse PDF for tables instead of pages of text (default: False)]' \
+  --plugins-url'[source of plugins sheet (default: https://visidata.org/plugins/plugins.jsonl)]:str:_urls' \
+  '(-p --play -w --replay-wait -b --batch -o --output --replay-movement)*:file:_vd_files'
