@@ -13,6 +13,7 @@ import locale
 import datetime
 import signal
 import warnings
+from pkg_resources import resource_filename
 
 from visidata import vd, options, run, BaseSheet, AttrDict
 from visidata import Path
@@ -81,6 +82,14 @@ optalias('force_valid_colnames', 'clean_names')  # deprecated
 
 def main_vd():
     'Open the given sources using the VisiData interface.'
+    if '-v' in sys.argv or '--version' in sys.argv:
+        print(vd.version_info)
+        return 0
+    if '-h' in sys.argv or '--help' in sys.argv:
+        with open(resource_filename(__name__, 'man/vd.txt'), 'r') as fp:
+            print(fp.read())
+        return 0
+
     try:
         locale.setlocale(locale.LC_ALL, '')
     except locale.Error as e:
@@ -121,15 +130,8 @@ def main_vd():
             fmtargs.append(arg)
         elif arg in ['--']:
             optsdone = True
-        elif arg in ['-v', '--version']:
-            print(vd.version_info)
-            return 0
         elif arg == '-':
             inputs.append((vd.stdinSource, copy(current_args)))
-        elif arg in ['-h', '--help']:
-            import curses
-            curses.wrapper(lambda scr: vd.openManPage())
-            return 0
         elif arg in ['-g', '--global']:
             flGlobal = True
         elif arg in ['-n', '--nonglobal']:
