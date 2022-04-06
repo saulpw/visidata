@@ -13,7 +13,7 @@ matplotlib # svg
 
 psutil # top
 
-ibis
+ibis-framework
 
 orgparse
 sh
