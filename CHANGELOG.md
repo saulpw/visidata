@@ -1,5 +1,42 @@
 # VisiData version history
 
+# 2.9 (2022-04-XX)
+
+## Improvements
+
+- [cli] when `-v` or `-h` VisiData now does not read config or do anything else (requested by @geekscrapy #1340)
+- [regex] add unbound addcol-<regex> commands
+- [man] have `vd --help` open the .txt manpage by default (requested by @halloleo #1332)
+- [menu] minor improvements (reported by @frosencrantz #1243 #1329)
+- [performance] improvements to plotting of empty canvas, multiline display, and draw-ing functions
+- [ux] add confirming modal dialog
+    - only "y" required to confirm
+
+## Bugfixes
+
+- [aggregators] fail on setting an unknown aggregator in **Columns Sheet** (reported by @geekscrapy #1299)
+- [aggregators] handle `delete-cell` case for aggregators column in **Columns Sheet** (reported by @geekscrapy #1299)
+- [aggregators] fix quartile aggregators (reported by @pnfnp #1312)
+- [cli] fix +:subsheet:col:row: when load_lazy is False
+- [delete-row] clear deleted rows from `selectedRows` (reported by @geekscrapy #1284)
+- [DirSheet] disable adding a row (requested by @geekscrapy #1300)
+    - these commands are not supported on DirSheet
+- [exec-longname] output warning, if longname does not exist
+- [import-python] use command-specific history (reported by @frosencrantz #1243)
+- [IndexSheet] fix renaming of sheet names from an IndexSheet (reported by @aborruso #1339)
+- [loaders pandas] fix (`dup-selected`) `"`of selected rows for **Pandas Sheet** (reported and fixed by @jasonwrith #1315 #1316)
+- [replay] allow column names to be numbers (reported by @frosencrantz #1309)
+    - if wishing to reference a column index, required to be an int in a .vdj cmdlog
+- [macros] fix macro-record keystroke setting (reported by @fatherofinvention #1280)
+- [quitguard] confirm quit when adding a column to sheet
+- [save-selected] get sheet names for saving from selected rows (reported by @aborruso #1339)
+- [undo] fix issue where undoing a reload blanks the current sheet; do not set undos for reload sheet (#1302)
+- [unset-option] fix issue where Exception is raised on the next undo-able command run after `unset-option` (reported by @ajkerrigan #1267)
+
+## API
+
+- add SqliteQuerySheet to globals
+
 # 2.8 (2021-12-15)
 
 ## Improvements
