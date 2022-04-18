@@ -12,6 +12,7 @@ from visidata import VisiData, vd, Path, CellColorizer, JsonLinesSheet, AttrDict
 
 
 vd.option('plugins_url', 'https://visidata.org/plugins/plugins.jsonl', 'source of plugins sheet')
+vd.option('plugins_check', True, 'notify if plugin version is out of date')
 
 
 @VisiData.lazy_property
@@ -107,6 +108,10 @@ class PluginsSheet(JsonLinesSheet):
                 vd.addGlobals({funcname: func})
                 setattr(vd, funcname, func)
 
+            if vd.options.plugins_check: # show status if plugin update is found
+                ver = _loadedVersion(r)
+                if ver and ver != r.latest_ver:
+                    vd.status(f'update available for plugin "{r.name}"')
 
     def installPlugin(self, plugin):
         # pip3 install requirements
