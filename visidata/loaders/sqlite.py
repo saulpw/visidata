@@ -49,14 +49,27 @@ class SqliteSheet(Sheet):
         with self.conn() as conn:
             tblname = self.tableName
             if not isinstance(self, SqliteIndexSheet):
-                self.columns = []
+                newColumns = []
                 for r in self.execute(conn, 'PRAGMA TABLE_XINFO("%s")' % tblname):
                     colnum, colname, coltype, nullable, defvalue, colkey, *_ = r
-                    c = ColumnItem(colname, colnum+1, type=parse_sqlite_type(coltype))
-                    self.addColumn(c)
+                    sqlitetype = parse_sqlite_type(coltype)
+                    c = ColumnItem(colname, colnum+1, type=sqlitetype)
+                    c.sqlitetype = sqlitetype
+                    c.sqlitecolkey = colkey
+                    newColumns.append(c)
 
-                    if colkey:
-                        self.setKeys([c])
+                for newCol in newColumns:
+                    matchedCol = next((c for c in self.columns if c.name == newCol.name and c.sqlitetype == newCol.sqlitetype), None)
+                    if matchedCol is None:
+                        self.addColumn(newCol)
+
+                        if newCol.sqlitecolkey and len(self.keyCols) == 0:
+                            self.setKeys([newCol])
+
+                for existingCol in self.columns:
+                    matchedCol = next((c for c in newColumns if c.name == existingCol.name and c.sqlitetype == existingCol.sqlitetype), None)
+                    if matchedCol is None:
+                        self.columns.remove(existingCol)
 
                 sql = self.row[5]  # SQL used to create table
                 if 'WITHOUT ROWID' not in sql and 'CREATE VIEW' not in sql:
