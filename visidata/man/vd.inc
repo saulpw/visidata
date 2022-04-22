@@ -478,8 +478,6 @@ view traceback for error in current cell
 refresh screen
 .It Ic " ^R"
 reload current sheet
-.It Ic "z^R"
-clear cache for current column
 .It Ic " ^Z"
 suspend VisiData process
 .It Ic " ^G"
