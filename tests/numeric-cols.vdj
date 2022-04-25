@@ -1,0 +1,4 @@
+#!vd -p
+{"longname": "open-file", "input": "sample_data/numeric-cols.tsv", "keystrokes": "o"}
+{"sheet": "numeric-cols", "col": "5", "row": "", "longname": "hide-col", "input": "", "keystrokes": "-", "comment": "Hide current column"}
+{"sheet": "numeric-cols", "col": 1, "row": "", "longname": "rename-col", "input": "Rep", "keystrokes": "^", "comment": "edit name of current column"}
