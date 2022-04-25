@@ -190,7 +190,7 @@ class _CommandLog:
 
         comment = vd.currentReplayRow.comment if vd.currentReplayRow else cmd.helpstr
         vd.activeCommand = self.newRow(sheet=sheetname,
-                                            col=str(colname),
+                                            col=colname,
                                             row=str(rowname),
                                             keystrokes=keystrokes,
                                             input=args,
