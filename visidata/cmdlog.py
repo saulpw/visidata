@@ -48,10 +48,10 @@ def checkVersion(vd, desired_version):
 @VisiData.api
 def fnSuffix(vd, prefix):
     i = 0
-    fn = prefix + '.vd'
+    fn = prefix + '.vdj'
     while Path(fn).exists():
         i += 1
-        fn = f'{prefix}-{i}.vd'
+        fn = f'{prefix}-{i}.vdj'
 
     return fn
 
