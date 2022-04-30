@@ -508,7 +508,7 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
         attr = colors.color_menu
         bindattr = colors.color_keystrokes
 
-        if any(x.obj not in ['BaseSheet', 'TableSheet'] for x, _ in walkmenu(item)):
+        if any(foo.obj not in ['BaseSheet', 'TableSheet'] for foo, _ in walkmenu(item)):
             bindattr = attr = colors.color_menu_spec
 
         if level < len(sheet.activeMenuItems):
