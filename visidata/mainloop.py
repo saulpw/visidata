@@ -340,5 +340,7 @@ def run(vd, *sheetlist):
         if scr:
             curses.endwin()
 
+    vd.cancelThread(*[t for t in vd.unfinishedThreads if not t.name.startswith('save_')])
+
     if ret:
         print(ret)
