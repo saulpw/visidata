@@ -106,7 +106,6 @@ class LazyComputeRow:
         self.col = col
         self.sheet = sheet
         self._usedcols = set()
-        self._keys = [c.name for c in self.sheet.columns]
 
         self._lcm.clear()  # reset locals on lcm
 
@@ -118,7 +117,7 @@ class LazyComputeRow:
         return lcmobj._lcm
 
     def keys(self):
-        return self._keys + self._lcm.keys() + ['row', 'sheet', 'col']
+        return self.sheet._ordered_colnames + self._lcm.keys() + ['row', 'sheet', 'col']
 
     def __str__(self):
         return str(self.as_dict())
@@ -131,11 +130,11 @@ class LazyComputeRow:
 
     def __getitem__(self, colid):
         try:
-            i = self._keys.index(colid)
-            c = self.sheet.columns[i]
-            if c is self.col:
-                j = self._keys[i+1:].index(colid)
-                c = self.sheet.columns[i+j+1]
+            i = self.sheet._ordered_colnames.index(colid)
+            c = self.sheet._ordered_cols[i]
+            if c is self.col:  # ignore current column
+                j = self.sheet._ordered_colnames[i+1:].index(colid)
+                c = self.sheet._ordered_cols[i+j+1]
 
         except ValueError:
             try:
@@ -417,6 +416,16 @@ class TableSheet(BaseSheet):
     def keyCols(self):
         'List of visible key columns.'
         return sorted([c for c in self.columns if c.keycol and not c.hidden], key=lambda c:c.keycol)
+
+    @drawcache_property
+    def _ordered_cols(self):
+        'List of all columns, visible columns first.'
+        return self.visibleCols + [c for c in self.columns if c.hidden]
+
+    @drawcache_property
+    def _ordered_colnames(self):
+        'List of all column names, visible columns first.'
+        return [c.name for c in self._ordered_cols]
 
     @property
     def cursorColIndex(self):
