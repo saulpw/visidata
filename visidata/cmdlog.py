@@ -325,10 +325,11 @@ def replayOne(vd, r):
                 vd.exceptionCaught(e)
                 escaped = True
         else:
+            vs = vs or vd.activeSheet
             if vs:
                 vd.push(vs)
             else:
-                vs = vd.activeSheet or vd.cmdlog
+                vs = vd.cmdlog
 
             vd.moveToReplayContext(r, vs)
 
