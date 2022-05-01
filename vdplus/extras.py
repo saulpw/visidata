@@ -1,7 +1,8 @@
-from visidata import vd, Sheet, VisiData, FreqTableSheet
+from visidata import vd, Sheet, VisiData, FreqTableSheet, BaseSheet, asyncthread
 
 vd.options.disp_menu_fmt = '|  VisiData {vd.version} | {vd.motd}'
 
+vd.addMenuItem('Help', '+VisiData Plus', 'help-vdplus')
 
 # HTML("<html>...") and JSON('{"k":"v"...}')
 @VisiData.lazy_property
@@ -29,4 +30,15 @@ for c in visibleCols:
     c.name = c.name
 ''', 'set options.clean_names on sheet and clean visible column names')
 
-vd.addMenuItem('Help', '+VisiData Plus', 'help-vdplus')
+BaseSheet.addCommand('', 'reload-every', 'sheet.reload_every(input("reload interval (sec): ", value=1))') #683
+
+
+@BaseSheet.api
+@asyncthread
+def reload_every(sheet, seconds:int):
+    import time
+    while True:
+        sheet.reload()
+        time.sleep(seconds)
+
+
