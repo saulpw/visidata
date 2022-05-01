@@ -31,6 +31,8 @@ VisiData Plus contains many useful loaders and features for [VisiData](https://v
 - [top](https://github.com/saulpw/vdplus/tree/develop/top): interactive process viewer
 - [Galactic Conquest](https://github.com/saulpw/vdplus/tree/develop/galcon): a remake of the classic [Galcon](http://www.galcon.com/classic/history.html).
 
+- [light color scheme](https://github.com/saulpw/vdplus/tree/develop/lightscheme.py): use `vd.use_light_colors()` in .visidatarc
+
 ## License
 
 The code and documentation in this repository, hereafter "VisiData Plus", is **not** open-source software.
@@ -43,7 +45,7 @@ Other license terms are available for VisiData Plus; contact [Saul Pwanson](mail
 
 Individual components of VisiData Plus may be available to convert to open-source license, particularly if you are willing to expand, maintain, and package that component for release.
 
-If you submit a Pull Request to this repository, you **must** digitally sign the [Contributor Assignment Agreement](https://github.com/saulpw/vdplus/tree/develop/CONTRIBUTING.md) before they can be merged.
+If you submit a Pull Request to this repository, you **must** digitally sign the [Contributor Assignment Agreement](https://github.com/saulpw/vdplus/tree/develop/CONTRIBUTING.md) before it can be merged.
 
 ## Installing VisiData Plus
 
