@@ -249,7 +249,7 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
         first_action = False
         complete_state.reset()
 
-    return v
+    return type(value)(v)
 
 
 @VisiData.api
