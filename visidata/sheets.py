@@ -494,7 +494,7 @@ class TableSheet(BaseSheet):
         self.calcColLayout()
 
     def addColumn(self, *cols, index=None):
-        'Insert all *cols* into columns at *index*, or append to end of columns if *index* is None.  Return first column.'
+        'Insert all *cols* into columns at *index*, or append to end of columns if *index* is None.  Return first column.  Mark sheet as modified if *index* is not None.'
         if not cols:
             vd.warning('no columns to add')
             return
@@ -508,7 +508,9 @@ class TableSheet(BaseSheet):
             col.recalc(self)
             self.columns.insert(index+i, col)
             Sheet.visibleCols.fget.cache_clear()
-        self.setModified()
+
+        if index is not None:
+            self.setModified()
 
         return cols[0]
 
