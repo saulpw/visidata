@@ -1,0 +1,12 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.tsv	o	
+sample	Units		addcol-expr	Units	=	create new column from Python expression, with column names as variables
+sample	Units		freeze-col		'	add a frozen copy of current column with all cells evaluated
+sample	Units		hide-col		-	Hide current column
+sample	Units		hide-col		-	Hide current column
+sample	Units_frozen		rename-col	Units	^	edit name of current column
+sample			select-rows		gs	select all rows
+sample	Units	0	setcol-input	0	ge	set contents of current column for selected rows to same input
+sample			unselect-rows		gu	unselect all rows
+sample	Units		type-int		#	set type of current column to int
+sample	Units		addcol-expr	Units + 1	=	create new column from Python expression, with column names as variables
