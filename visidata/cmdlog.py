@@ -12,7 +12,7 @@ vd.option('replay_movement', False, 'insert movements during replay', sheettype=
 # prefixes which should not be logged
 nonLogged = '''forget exec-longname undo redo quit
 show error errors statuses options threads jump
-replay cancel save-cmdlog macro cmdlog-sheet
+replay cancel save-cmdlog macro cmdlog-sheet menu
 go- search scroll prev next page start end zoom resize visibility
 mouse suspend redraw no-op help syscopy sysopen profile toggle'''.split()
 
