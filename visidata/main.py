@@ -233,6 +233,7 @@ def main_vd():
             if not vs.options.is_set(k, vs):
                 vs.options[k] = v
 
+        # log source to cmdlog
         vd.cmdlog.openHook(vs, vs.source)
         sources.append(vs)
 
@@ -250,6 +251,9 @@ def main_vd():
                 vd.push(vd.newSheet(datestr, 1))
         else:
             vd.push(vd.currentDirSheet)
+
+            # log source to cmdlog
+            vd.cmdlog.openHook(vd.currentDirSheet, vd.currentDirSheet.source)
 
     if not args.play:
         if args.batch:
