@@ -321,11 +321,10 @@ def getCommand(sheet, cmd):
 
     return vd.commands._get(longname, obj=sheet)
 
+
 @VisiData.api
-def loadConfigFile(vd, fnrc, _globals=None):
-    if not fnrc:
-        return
-    p = visidata.Path(fnrc)
+def loadConfigFile(vd, fn='', _globals=None):
+    p = visidata.Path(fn or vd.options.config)
     if _globals is None:
         _globals = vd.getGlobals()
     if p.exists():
