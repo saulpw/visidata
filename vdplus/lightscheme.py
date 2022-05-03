@@ -10,6 +10,9 @@ def use_light_colors(obj, flag=True):
         obj.options.color_selected_row = '164 magenta'  # color of selected rows
         obj.options.color_note_row     = '164 magenta'  # color of row note on left edge
         obj.options.color_note_type    = '88 red'  # color of cell note for non-str types in anytype columns
+        obj.options.color_warning      = '202 11 yellow'
+        obj.options.color_add_pending  = '34 green'
+        obj.options.color_change_pending  = '166 yellow'
         obj.options.plot_colors = '20 red magenta black 28 88 94 99 106'
     else:
         obj.options.unset('color_default')
@@ -18,4 +21,7 @@ def use_light_colors(obj, flag=True):
         obj.options.unset('color_selected_row')
         obj.options.unset('color_note_row')
         obj.options.unset('color_note_type')
+        obj.options.unset('color_warning')
+        obj.options.unset('color_add_pending')
+        obj.options.unset('color_change_pending')
         obj.options.unset('plot_colors')
