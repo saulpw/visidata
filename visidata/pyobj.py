@@ -332,7 +332,7 @@ def pyobj_expr(sheet):
     vd.push(PyobjSheet(expr, source=sheet.evalExpr(expr)))
 
 BaseSheet.addCommand('^X', 'pyobj-expr', 'pyobj_expr()', 'evaluate Python expression and open result as Python object')
-globalCommand('', 'exec-python', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals(), LazyChainMap(sheet, *vd.contexts))', 'execute Python statement with expression scope')
+BaseSheet.addCommand('', 'exec-python', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals(), LazyChainMap(sheet, *vd.contexts, locals=vd.getGlobals()))', 'execute Python statement with expression scope')
 BaseSheet.addCommand('g^X', 'import-python', 'modname=input("import: ", type="import_python"); exec("import "+modname, getGlobals())', 'import Python module in the global scope')
 globalCommand('z^X', 'pyobj-expr-row', 'expr = input("eval over current row: ", "expr", completer=CompleteExpr()); vd.push(PyobjSheet(expr, source=evalExpr(expr, row=cursorRow)))', 'evaluate Python expression, in context of current row, and open result as Python object')
 

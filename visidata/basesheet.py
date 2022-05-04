@@ -11,8 +11,8 @@ vd.beforeExecHooks = [] # func(sheet, cmd, args, keystrokes) called before the e
 
 class LazyChainMap:
     'provides a lazy mapping to obj attributes.  useful when some attributes are expensive properties.'
-    def __init__(self, *objs):
-        self.locals = {}
+    def __init__(self, *objs, locals=None):
+        self.locals = {} if locals is None else locals
         self.objs = {} # [k] -> obj
         for obj in objs:
             for k in dir(obj):
