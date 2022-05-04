@@ -102,6 +102,7 @@ class VisiData(visidata.Extensible):
     def getkeystroke(self, scr, vs=None):
         'Get keystroke and display it on status bar.'
         k = None
+        curses.reset_prog_mode()  #1347
         try:
             scr.refresh()
             k = scr.get_wch()
