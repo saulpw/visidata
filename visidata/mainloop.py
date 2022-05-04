@@ -295,7 +295,6 @@ def initCurses():
     colors.setup()
 
     curses.noecho()
-    curses.cbreak()
 
     curses.raw()    # get control keys instead of signals
     curses.meta(1)  # allow "8-bit chars"

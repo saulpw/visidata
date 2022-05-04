@@ -99,7 +99,6 @@ def main_vd():
     flPipedInput = not sys.stdin.isatty()
     flPipedOutput = not sys.stdout.isatty()
 
-
     try:
         # workaround for bug in curses.wrapper #899
         # https://stackoverflow.com/questions/31440392/curses-wrapper-messing-up-terminal-after-background-foreground-sequence
