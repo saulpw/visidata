@@ -52,7 +52,8 @@ class FormCanvas(BaseSheet):
         maxw = max(int(r.x)+len(r.text) for r in drawnrows)
         maxh = max(int(r.y) for r in drawnrows)
         h, w = vd.scrFull.getmaxyx()
-        self.scrForm = vd.scrFull.derwin(maxh+2, maxw+1, (h-maxh)//2-1, (w-maxw)//2-1)
+        y, x = max(0, (h-maxh)//2-1), max(0, (w-maxw)//2-1)
+        self.scrForm = vd.scrFull.derwin(min(h-1, maxh+2), min(w-1, maxw+1), y, x)
         self.scrForm.keypad(1)
         curinput = inputs[0] if inputs else None
         while True:
