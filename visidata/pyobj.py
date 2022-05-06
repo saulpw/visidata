@@ -1,4 +1,6 @@
 from functools import singledispatch
+from typing import Mapping
+import inspect
 import math
 
 from visidata import *
@@ -257,6 +259,7 @@ class PyobjSheet(PythonSheet):
     columns = [
         Column('attribute'),
         ColumnSourceAttr('value'),
+        Column('signature', width=0, getter=lambda c,r: dict(inspect.signature(getattr(c.sheet.source, r)).parameters)),
         Column('docstring', getter=lambda c,r: docstring(c.sheet.source, r))
     ]
     nKeys = 1
@@ -269,7 +272,7 @@ class PyobjSheet(PythonSheet):
                 return SheetNamedTuple(*names, **kwargs)
             else:
                 return SheetList(*names, **kwargs)
-        elif isinstance(pyobj, dict):
+        elif isinstance(pyobj, Mapping):
             return SheetDict(*names, **kwargs)
         elif isinstance(pyobj, str):
             return TextSheet(*names, source=pyobj.splitlines())
