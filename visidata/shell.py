@@ -45,8 +45,8 @@ def addShellColumns(vd, cmd, sheet):
     shellcol = ColumnShell(cmd, source=sheet, width=0)
     sheet.addColumnAtCursor(
             shellcol,
-            Column(cmd+'_stdout', srccol=shellcol, getter=lambda col,row: col.srccol.getValue(row)[0]),
-            Column(cmd+'_stderr', srccol=shellcol, getter=lambda col,row: col.srccol.getValue(row)[1]))
+            Column(cmd+'_stdout', type=bytes.rstrip, srccol=shellcol, getter=lambda col,row: col.srccol.getValue(row)[0]),
+            Column(cmd+'_stderr', type=bytes.rstrip, srccol=shellcol, getter=lambda col,row: col.srccol.getValue(row)[1]))
 
 
 class ColumnShell(Column):
