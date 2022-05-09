@@ -99,6 +99,7 @@ import visidata.sort
 import visidata.unfurl
 import visidata.fill
 import visidata.incr
+import visidata.window
 import visidata.customdate
 import visidata.misc
 import visidata.memory

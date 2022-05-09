@@ -78,6 +78,7 @@ def aggregator(vd, name, func, helpstr='', *args, type=None):
             return e
 
     vd.aggregators[name] = _defaggr(name, type, _func, helpstr)
+    vd.addGlobals({name: func})
 
 ## specific aggregator implementations
 
