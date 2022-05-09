@@ -117,7 +117,7 @@ class HistoryState:
         if self.hist_idx > 0:
             self.hist_idx -= 1
             v = self.history[self.hist_idx]
-        i = len(v)
+        i = len(str(v))
         return v, i
 
     def down(self, v, i):
@@ -129,7 +129,7 @@ class HistoryState:
         else:
             v = self.prev_val
             self.hist_idx = None
-        i = len(v)
+        i = len(str(v))
         return v, i
 
 
@@ -245,6 +245,8 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
             i += 1
 
         if i < 0: i = 0
+        # v may have a non-str type with no len()
+        v = str(v)
         if i > len(v): i = len(v)
         first_action = False
         complete_state.reset()
