@@ -18,6 +18,7 @@ jobs:
       - run: sudo chown -R circleci:circleci /usr/local/share
       - run: sudo chown -R circleci:circleci /usr/local/lib
       - run: sudo chown -R circleci:circleci /usr/local/include/
+      - run: touch ~/.visidatarc
       - run: echo 'export PYTHONPATH=~/visidata:~/visidata/visidata' >> $BASH_ENV
       - run: source $BASH_ENV
       - run: locale
@@ -25,8 +26,10 @@ jobs:
           name: dependencies
           command: |
             pip3 install -r requirements.txt
+            pip3 install pytest
       - run:
           command: |
+            pytest -sv visidata/tests/test_commands.py
             dev/test.sh
 
   test-3.7:
