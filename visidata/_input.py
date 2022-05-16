@@ -265,8 +265,9 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
         except AcceptInput as e:
             v = e.args[0]
 
-        # clear keyboard buffer to neutralize multi-line pastes (issue#585)
-        curses.flushinp()
+        if vd.scrFull:  # check if curses initialised
+            # clear keyboard buffer to neutralize multi-line pastes (issue#585)
+            curses.flushinp()
 
     if display:
         vd.status('"%s"' % v)
