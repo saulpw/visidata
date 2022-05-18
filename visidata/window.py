@@ -7,12 +7,14 @@ from visidata import Sheet, Column, vd, asyncthread, Progress
 def window(sheet, before:int=0, after:int=0):
     '''Generate (row, list[row]) for each row in *sheet*, where list[row] is the rows within *before* number of rows before and *after* number of rows after the *row*.  The *row* itself is always included in the list.'''
     for i, r in enumerate(sheet.rows):
-        a = max(0, i-before)
-        yield r, sheet.rows[a:i+after+1]
+        a = max(0, i-before) if before >= 0 else None
+        b = (i+after+1) if after >= 0 else None
+        yield r, sheet.rows[a:b]
 
 
 @Column.api
 def window(col, before:int=0, after:int=0):
+    'Generate (row, list[values]) for each row in the sheet.  Values are the typed values for this column at that row.'
     for r, rows in col.sheet.window(before, after):
         yield r, [col.getTypedValue(x) for x in rows]
 
