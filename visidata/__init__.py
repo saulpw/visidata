@@ -145,6 +145,7 @@ import visidata.loaders.vds
 import visidata.loaders.odf
 import visidata.loaders.lsv
 import visidata.loaders.arrow
+import visidata.loaders.bam
 
 import visidata.form
 
