@@ -1,4 +1,5 @@
 import math
+import random
 
 from collections import defaultdict, Counter
 from visidata import *
