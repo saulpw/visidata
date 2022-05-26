@@ -104,21 +104,21 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
 
 
 @drawcache
-def clipstr(s, dispw):
+def clipstr(s, dispw, truncator=None, oddspace=None):
     if options.visibility:
         return _clipstr(s, dispw,
-                        trunch=options.disp_truncator,
-                        oddspacech=options.disp_oddspace,
+                        trunch=options.disp_truncator if truncator is None else truncator,
+                        oddspacech=options.disp_oddspace if oddspace is None else oddspace,
                         modch='\u25e6',
                         combch='\u25cc')
     else:
         return _clipstr(s, dispw,
-                trunch=options.disp_truncator,
-                oddspacech=options.disp_oddspace,
+                trunch=options.disp_truncator if truncator is None else truncator,
+                oddspacech=options.disp_oddspace if oddspace is None else oddspace,
                 modch='',
                 combch='')
 
-def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False):
+def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False, **kwargs):
     'Draw string `s` at (y,x)-(y,x+w) with curses attr, clipping with ellipsis char.  if rtl, draw inside (x-w, x).  If *clear*, clear whole editing area before displaying. Returns width drawn (max of w).'
     if scr:
         _, windowWidth = scr.getmaxyx()
@@ -135,7 +135,7 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False):
             return w
 
         # convert to string just before drawing
-        clipped, dispw = clipstr(str(s), w)
+        clipped, dispw = clipstr(str(s), w, **kwargs)
         if rtl:
             # clearing whole area (w) has negative display effects; clearing just dispw area is useless
 #            scr.addstr(y, x-dispw-1, disp_column_fill*dispw, attr)
