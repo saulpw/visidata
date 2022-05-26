@@ -461,6 +461,32 @@ def modifyCommand(vd):
     return vd.cmdlog.rows[-1]
 
 
+@CommandLog.api
+@asyncthread
+def repeat_for_n(cmdlog, n=1):
+    if not cmdlog.rows:
+        vd.fail("no recent command to repeat")
+
+    r = copy(cmdlog.rows[-1])
+    r.sheet = r.row = r.col = ""
+    for i in range(n):
+        vd.replayOne(r)
+
+@CommandLog.api
+@asyncthread
+def repeat_for_selected(cmdlog):
+    if not cmdlog.rows:
+        vd.fail("no recent command to repeat")
+
+    r = copy(cmdlog.rows[-1])
+    r.sheet = r.row = r.col = ""
+
+    for idx, r in enumerate(vd.sheet.rows):
+        if vd.sheet.isSelected(r):
+            vd.sheet.cursorRowIndex = idx
+            vd.replayOne(r)
+
+
 BaseSheet.init('_shortcut')
 
 
@@ -486,8 +512,14 @@ CommandLogJsonl.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("
 CommandLogJsonl.addCommand('gx', 'replay-all', 'vd.replay(sheet)', 'replay contents of entire CommandLog')
 CommandLogJsonl.addCommand('^C', 'replay-stop', 'sheet.cursorRowIndex = sheet.nRows', 'abort replay')
 
-BaseSheet.addCommand('', 'repeat-last', 'execCommand(cmdlog_sheet.rows[-1].longname) if cmdlog_sheet.rows else fail("no recent command to repeat")', 'run most recent command with an empty, queried input')
-BaseSheet.addCommand('', 'repeat-input', 'r = copy(cmdlog_sheet.rows[-1]) if cmdlog_sheet.rows else fail("no recent command to repeat"); r.sheet=r.row=r.col=""; vd.replayOne(r)', 'run previous command, along with any previous input to that command')
+BaseSheet.addCommand('', 'repeat-last', 'execCommand(vd.cmdlog.rows[-1].longname) if vd.cmdlog.rows else fail("no recent command to repeat")', 'run most recent command with an empty, queried input')
+BaseSheet.addCommand('', 'repeat-input', 'vd.cmdlog.repeat_for_n(1)', 'run previous modifying command (incl input)')
+BaseSheet.addCommand('', 'repeat-input-n', 'vd.cmdlog.repeat_for_n(input("# times to repeat prev command:", value=1))', 'run previous command (incl its input) N times')
+BaseSheet.addCommand('', 'repeat-input-selected', 'vd.cmdlog.repeat_for_selected()', 'run previous command (incl its input) for each selected row')
+
+vd.addMenuItem('Edit', 'Repeat', 'last command', 'repeat-input')
+vd.addMenuItem('Edit', 'Repeat', 'last command N times', 'repeat-input-n')
+vd.addMenuItem('Edit', 'Repeat', 'last command for all selected rows', 'repeat-input-selected')
 
 CommandLog.class_options.json_sort_keys = False
 CommandLog.class_options.encoding = 'utf-8'
