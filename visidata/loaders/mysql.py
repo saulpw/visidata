@@ -1,8 +1,6 @@
 from contextlib import contextmanager
 
-from visidata import vd, Sheet, anytype, asyncthread, urlparse, ColumnItem
-
-__all__ = ['openurl_mysql', 'MyTable', 'MyTablesSheet']
+from visidata import VisiData, vd, Sheet, anytype, asyncthread, urlparse, ColumnItem
 
 def codeToType(type_code, colname):
     import MySQLdb as mysql
@@ -21,7 +19,8 @@ def codeToType(type_code, colname):
     return anytype
 
 
-def openurl_mysql(url, filetype=None):
+@VisiData.api
+def openurl_mysql(vd, url, filetype=None):
     url = urlparse(url.given)
     dbname = url.path[1:]
     return MyTablesSheet(dbname+"_tables", sql=SQL(url), schema=dbname)
