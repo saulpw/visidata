@@ -29,7 +29,7 @@ def getValues(self, rows):
 
 vd.aggregators = collections.OrderedDict()  # [aggname] -> annotated func, or list of same
 
-Column.init('aggstr', str)
+Column.init('aggstr', str, copy=True)
 
 def aggregators_get(col):
     'A space-separated names of aggregators on this column.'
