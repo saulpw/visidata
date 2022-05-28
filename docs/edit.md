@@ -51,7 +51,7 @@ For most filetypes (e.g. csv, tsv, xls(x)) the loaders assume that the dataset's
 
 If the Excel file has multiple sheets with varying number of header rows:
 
-1. Pass `--header==0` while loading the file.
+1. Pass `--header=0` while loading the file.
 
 ~~~
 vd file.xlsx --header=0

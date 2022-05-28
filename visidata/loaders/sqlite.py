@@ -7,6 +7,10 @@ from visidata import VisiData, vd, Sheet, options, Column, Progress, anytype, da
 def open_sqlite(vd, p):
     return SqliteIndexSheet(p.name, source=p)
 
+@VisiData.api
+def openurl_sqlite(vd, p, filetype=None):
+    return SqliteIndexSheet(p.name, source=p)
+
 VisiData.open_sqlite3 = VisiData.open_sqlite
 VisiData.open_db = VisiData.open_sqlite
 
