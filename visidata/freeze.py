@@ -9,7 +9,10 @@ def resetCache(col):
 
 @Sheet.api
 def StaticColumn(sheet, col):
-    frozencol = SettableColumn(col.name+'_frozen', width=col.width, type=col.type, fmtstr=col._fmtstr)
+    frozencol = SettableColumn(col.name+'_frozen')
+    state = col.__getstate__()
+    state.pop('name')
+    frozencol.__setstate__(state)
     frozencol.recalc(sheet)
 
     @asyncthread
