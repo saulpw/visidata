@@ -119,7 +119,7 @@ class Column(Extensible):
         return self.__copy__()  # no separate deepcopy
 
     def __getstate__(self):
-        d = {k:getattr(self, k) for k in 'name width height expr keycol fmtstr voffset hoffset aggstr'.split()}
+        d = {k:getattr(self, k) for k in 'name width height expr keycol fmtstr voffset hoffset aggstr'.split() if hasattr(self, k)}
         d['type'] = self.type.__name__
         return d
 
