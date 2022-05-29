@@ -64,7 +64,7 @@ def save_tsv(vd, p, vs, delimiter='', row_delimiter=''):
     trdict = vs.safe_trdict()
 
     with p.open_text(mode='w', encoding=vs.options.encoding) as fp:
-        colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + options.row_delimiter
+        colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + rowsep
         fp.write(colhdr)
 
         for dispvals in vs.iterdispvals(format=True):
