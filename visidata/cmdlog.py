@@ -229,7 +229,7 @@ class _CommandLog:
     def openHook(self, vs, src):
         while isinstance(src, BaseSheet):
             src = src.source
-        r = self.newRow(keystrokes='o', input=src, longname='open-file')
+        r = self.newRow(keystrokes='o', input=str(src), longname='open-file')
         vs.cmdlog_sheet.addRow(r)
         self.addRow(r)
 
