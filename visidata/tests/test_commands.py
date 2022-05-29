@@ -55,6 +55,7 @@ inputLines = { 'save-sheet': 'tests/jetsam.csv',  # save to some tmp file
                  'setcol-expr': 'OrderDate',
                  'setcell-expr': 'OrderDate',
                  'setcol-range': 'range(100)',
+                 'repeat-input-n': '1',
                  'capture-col': '(.)(.*)',
                  'addcol-subst': r'Units/(\w)/\1', # the first character
                  'search-cols': 'foo',
@@ -103,6 +104,7 @@ class TestCommands:
     def runOneTest(self, mock_screen, longname):
         visidata.vd.clearCaches()  # we want vd to return a new VisiData object for each command
         vd = visidata.vd
+        vd.cmdlog.rows = []
         vd.scr = mock_screen
 
         if longname in inputLines:
