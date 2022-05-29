@@ -499,18 +499,17 @@ class TableSheet(BaseSheet):
             vd.warning('no columns to add')
             return
 
+        if index is not None:
+            self.setModified()
+
         for i, col in enumerate(cols):
             col.name = self.maybeClean(col.name)
 
             vd.addUndo(self.columns.remove, col)
-            if index is None:
-                index = len(self.columns)
+            idx = len(self.columns) if index is None else index
             col.recalc(self)
-            self.columns.insert(index+i, col)
+            self.columns.insert(idx+i, col)
             Sheet.visibleCols.fget.cache_clear()
-
-        if index is not None:
-            self.setModified()
 
         return cols[0]
 
