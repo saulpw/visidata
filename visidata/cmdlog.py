@@ -463,22 +463,14 @@ def modifyCommand(vd):
 
 @CommandLog.api
 @asyncthread
-def repeat_for_n(cmdlog, n=1):
-    if not cmdlog.rows:
-        vd.fail("no recent command to repeat")
-
-    r = copy(cmdlog.rows[-1])
+def repeat_for_n(cmdlog, r, n=1):
     r.sheet = r.row = r.col = ""
     for i in range(n):
         vd.replayOne(r)
 
 @CommandLog.api
 @asyncthread
-def repeat_for_selected(cmdlog):
-    if not cmdlog.rows:
-        vd.fail("no recent command to repeat")
-
-    r = copy(cmdlog.rows[-1])
+def repeat_for_selected(cmdlog, r):
     r.sheet = r.row = r.col = ""
 
     for idx, r in enumerate(vd.sheet.rows):
@@ -513,9 +505,9 @@ CommandLogJsonl.addCommand('gx', 'replay-all', 'vd.replay(sheet)', 'replay conte
 CommandLogJsonl.addCommand('^C', 'replay-stop', 'sheet.cursorRowIndex = sheet.nRows', 'abort replay')
 
 BaseSheet.addCommand('', 'repeat-last', 'execCommand(vd.cmdlog.rows[-1].longname) if vd.cmdlog.rows else fail("no recent command to repeat")', 'run most recent command with an empty, queried input')
-BaseSheet.addCommand('', 'repeat-input', 'vd.cmdlog.repeat_for_n(1)', 'run previous modifying command (incl input)')
-BaseSheet.addCommand('', 'repeat-input-n', 'vd.cmdlog.repeat_for_n(input("# times to repeat prev command:", value=1))', 'run previous command (incl its input) N times')
-BaseSheet.addCommand('', 'repeat-input-selected', 'vd.cmdlog.repeat_for_selected()', 'run previous command (incl its input) for each selected row')
+BaseSheet.addCommand('', 'repeat-input', 'r = copy(vd.cmdlog.rows[-1]) if vd.cmdlog.rows else fail("no recent command to repeat"); vd.cmdlog.repeat_for_n(r, 1)', 'run previous modifying command (incl input)')
+BaseSheet.addCommand('', 'repeat-input-n', 'r = copy(vd.cmdlog.rows[-1]) if vd.cmdlog.rows else fail("no recent command to repeat"); vd.cmdlog.repeat_for_n(r, input("# times to repeat prev command:", value=1))', 'run previous command (incl its input) N times')
+BaseSheet.addCommand('', 'repeat-input-selected', 'r = copy(vd.cmdlog.rows[-1]) if vd.cmdlog.rows else fail("no recent command to repeat"); vd.cmdlog.repeat_for_selected(r)', 'run previous command (incl its input) for each selected row')
 
 vd.addMenuItem('Edit', 'Repeat', 'last command', 'repeat-input')
 vd.addMenuItem('Edit', 'Repeat', 'last command N times', 'repeat-input-n')
