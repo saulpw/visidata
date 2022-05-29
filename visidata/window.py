@@ -51,4 +51,6 @@ def select_around(sheet, n):
 
 
 Sheet.addCommand('w', 'addcol-window', 'addcol_window(cursorCol)')
-Sheet.addCommand('', 'select-around-input', 'select_around(input("select rows around selected: ", value=1))')
+Sheet.addCommand('', 'select-around-n', 'select_around(input("select rows around selected: ", value=1))')
+
+vd.addMenuItem('Row', 'Select', 'N rows around each selected row', 'select-around-n')
