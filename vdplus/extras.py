@@ -21,6 +21,13 @@ def JSON(vd, s):
     return json.loads(s)
 
 
+@Sheet.api
+@asyncthread
+def select_equal_selected(sheet, col):
+    selectedVals = set(col.getDisplayValue(row) for row in Progress(sheet.selectedRows))
+    sheet.select(sheet.gatherBy(lambda r,c=col,vals=selectedVals: c.getDisplayValue(r) in vals), progress=False)
+
+
 Sheet.addCommand('', 'addcol-source', 'source.addColumn(copy(cursorCol))', 'add copy of current column to source sheet')  #988  frosencrantz
 FreqTableSheet.addCommand('', 'select-first', 'for r in rows: source.select([r.sourcerows[0]])', 'select first source row in each bin')
 
@@ -30,7 +37,10 @@ for c in visibleCols:
     c.name = c.name
 ''', 'set options.clean_names on sheet and clean visible column names')
 
-BaseSheet.addCommand('', 'reload-every', 'sheet.reload_every(input("reload interval (sec): ", value=1))') #683
+Sheet.addCommand('', 'select-equal-selected', 'select_equal_selected(cursorCol)', 'select rows with values in current column in already selected rows')
+
+BaseSheet.addCommand('', 'reload-every', 'sheet.reload_every(input("reload interval (sec): ", value=1))', 'schedule sheet reload every N seconds') #683
+BaseSheet.addCommand('', 'save-sheet-really', 'vd.saveSheets(Path(getDefaultSaveName()), sheet, confirm_overwrite=False)', 'save current sheet without asking for filename or confirmation')
 
 
 @BaseSheet.api
