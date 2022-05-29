@@ -27,10 +27,8 @@ jobs:
           command: |
             pip3 install -r requirements.txt
             pip3 install pytest
-      - run:
-          command: |
-            pytest -sv visidata/tests/test_commands.py
-            dev/test.sh
+      - run: pytest -sv visidata/tests/test_commands.py
+      - run: dev/test.sh
 
   test-3.7:
     <<: *test-template
