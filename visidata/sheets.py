@@ -1084,10 +1084,10 @@ def quit(vd, *sheets):
 def confirmQuit(vs, verb='quit'):
     if vs.options.quitguard and vs.precious and vs.hasBeenModified:
         vd.draw_all()
-        vd.confirm(f'{verb} modified sheet "{vs.name}?" ')
+        vd.confirm(f'{verb} modified sheet "{vs.name}"? ')
     elif vs.options.getonly('quitguard', vs, False):  # if this sheet is specifically guarded
         vd.draw_all()
-        vd.confirm(f'{verb} guarded sheet "{vs.name}?" ')
+        vd.confirm(f'{verb} guarded sheet "{vs.name}"? ')
 
 
 @BaseSheet.api
