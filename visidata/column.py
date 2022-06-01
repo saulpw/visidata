@@ -472,13 +472,15 @@ def getitemdef(o, k, default=None):
     except Exception:
         return default
 
-def ItemColumn(name=None, expr=None, **kwargs):
+class ItemColumn(Column):
     'Column using getitem/setitem with *key*.'
-    return Column(name,
+    def __init__(self, name=None, expr=None, **kwargs):
+        super().__init__(name,
             expr=expr if expr is not None else name,
             getter=lambda col,row: getitemdeep(row, col.expr, None),
             setter=lambda col,row,val: setitemdeep(row, col.expr, val),
             **kwargs)
+
 
 class SubColumnFunc(Column):
     'Column compositor; preprocess row with *subfunc*(row, *expr*) before passing to *origcol*.getValue and *origcol*.setValue.'
