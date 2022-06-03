@@ -84,8 +84,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">zh</span>  <span style="font-weight:bold;">zj</span>  <span style="font-weight:bold;">zk</span>  <span style="font-weight:bold;">zl</span>   scroll one left/down/up/right
 
    <span style="font-weight:bold;">Column</span> <span style="font-weight:bold;">Manipulation</span>
-       <span style="text-decoration:underline;">_</span> (underscore)
-                      toggle width of current column between full and default width
+       <span style="text-decoration:underline;">_</span> (underbar)   toggle width of current column between full and default width
       <span style="font-weight:bold;">g</span><span style="text-decoration:underline;">_</span>              toggle widths of all visible columns between full and default width
       <span style="font-weight:bold;">z</span><span style="text-decoration:underline;">_</span> <span style="text-decoration:underline;">number</span>       adjust width of current column to <span style="text-decoration:underline;">number</span>
      <span style="font-weight:bold;">gz</span><span style="text-decoration:underline;">_</span> <span style="text-decoration:underline;">number</span>       adjust widths of all visible columns to Ar number
@@ -107,7 +106,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">gz=</span> <span style="text-decoration:underline;">expr</span>         set current column for selected rows to the items in result of Python sequence <span style="text-decoration:underline;">expr</span>
       <span style="font-weight:bold;">z=</span> <span style="text-decoration:underline;">expr</span>         evaluate Python expression on current row and set current cell with result of Python <span style="text-decoration:underline;">expr</span>
 
-       i (iota)       add column with incremental values
+       i              add column with incremental values
       gi              set current column for selected rows to incremental values
       zi <span style="text-decoration:underline;">step</span>         add column with values at increment <span style="text-decoration:underline;">step</span>
      gzi <span style="text-decoration:underline;">step</span>         set current column for selected rows at increment <span style="text-decoration:underline;">step</span>
@@ -206,8 +205,8 @@ vd(1)                                                                           
 
      <span style="font-weight:bold;">Canvas-specific</span> <span style="font-weight:bold;">Commands</span>
          <span style="font-weight:bold;">+</span>   <span style="font-weight:bold;">-</span>              increase/decrease zoom level, centered on cursor
-         <span style="text-decoration:underline;">_</span> (underscore)     zoom to fit full extent
-        <span style="font-weight:bold;">z</span><span style="text-decoration:underline;">_</span> (underscore)     set aspect ratio
+         <span style="text-decoration:underline;">_</span> (underbar)       zoom to fit full extent
+        <span style="font-weight:bold;">z</span><span style="text-decoration:underline;">_</span> (underbar)       set aspect ratio
          <span style="font-weight:bold;">x</span> <span style="text-decoration:underline;">xmin</span> <span style="text-decoration:underline;">xmax</span>        set <span style="text-decoration:underline;">xmin</span>/<span style="text-decoration:underline;">xmax</span> on graph
          <span style="font-weight:bold;">y</span> <span style="text-decoration:underline;">ymin</span> <span style="text-decoration:underline;">ymax</span>        set <span style="text-decoration:underline;">ymin</span>/<span style="text-decoration:underline;">ymax</span> on graph
          <span style="font-weight:bold;">s</span>   <span style="font-weight:bold;">t</span>   <span style="font-weight:bold;">u</span>          select/toggle/unselect rows on source sheet contained within canvas cursor
@@ -232,7 +231,7 @@ vd(1)                                                                           
          <span style="font-weight:bold;">Z</span>                  push second sheet on current pane's stack to the top of the other pane's stack
          <span style="font-weight:bold;">Tab</span>                jump to other pane
         <span style="font-weight:bold;">gTab</span>                swap panes
-        <span style="font-weight:bold;">g^^</span> (g Ctrl+^)      cycle through sheets
+        <span style="font-weight:bold;">g</span> <span style="font-weight:bold;">Ctrl+^</span>            cycle through sheets
 
    <span style="font-weight:bold;">Other</span> <span style="font-weight:bold;">Commands</span>
      <span style="font-weight:bold;">Q</span>                quit current sheet and remove it from the <span style="font-weight:bold;">CommandLog</span>
@@ -243,7 +242,6 @@ vd(1)                                                                           
 
       <span style="font-weight:bold;">^L</span>              refresh screen
       <span style="font-weight:bold;">^R</span>              reload current sheet
-     <span style="font-weight:bold;">z^R</span>              clear cache for current column
       <span style="font-weight:bold;">^Z</span>              suspend VisiData process
       <span style="font-weight:bold;">^G</span>              show cursor position and bounds of current sheet on status line
       <span style="font-weight:bold;">^V</span>              show version and copyright information on status line
@@ -257,7 +255,6 @@ vd(1)                                                                           
      <span style="font-weight:bold;">g^X</span> <span style="text-decoration:underline;">module</span>       import Python <span style="text-decoration:underline;">module</span> in the global scope
 
    <span style="font-weight:bold;">Internal</span> <span style="font-weight:bold;">Sheets</span> <span style="font-weight:bold;">List</span>
-      <span style="font-weight:bold;">.</span>  <span style="font-weight:bold;">VisiDataMenu</span> (Shift+V)      browse list of core sheets
       <span style="font-weight:bold;">.</span>  <span style="font-weight:bold;">Directory</span> <span style="font-weight:bold;">Sheet</span>             browse properties of files in a directory
       <span style="font-weight:bold;">.</span>  <span style="font-weight:bold;">Plugins</span> <span style="font-weight:bold;">Sheet</span>               browse, install, and (de)activate plugins
       <span style="font-weight:bold;">.</span>  <span style="font-weight:bold;">Memory</span> <span style="font-weight:bold;">Sheet</span> (Alt+Shift+M)        browse saved values, including clipboard
@@ -436,7 +433,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--note-format-exc</span>=<span style="text-decoration:underline;">str</span>        ?                  cell note for an exception during formatting
      <span style="font-weight:bold;">--note-getter-exc</span>=<span style="text-decoration:underline;">str</span>        !                  cell note for an exception during computation
      <span style="font-weight:bold;">--note-type-exc</span>=<span style="text-decoration:underline;">str</span>          !                  cell note for an exception during type conversion
-     <span style="font-weight:bold;">--scroll-incr</span>=<span style="text-decoration:underline;">int</span>            3                  amount to scroll with scrollwheel
+     <span style="font-weight:bold;">--scroll-incr</span>=<span style="text-decoration:underline;">int</span>            -3                 amount to scroll with scrollwheel
      <span style="font-weight:bold;">--name-joiner</span>=<span style="text-decoration:underline;">str</span>            _                  string to join sheet or column names
      <span style="font-weight:bold;">--value-joiner</span>=<span style="text-decoration:underline;">str</span>                              string to join display values
      <span style="font-weight:bold;">--wrap</span>                       False              wrap text to fit window width on TextSheet

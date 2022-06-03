@@ -90,8 +90,7 @@ DESCRIPTION
      zh  zj  zk  zl   scroll one left/down/up/right
 
    Column Manipulation
-       _ (underscore)
-                      toggle width of current column between full and default
+       _ (underbar)   toggle width of current column between full and default
                       width
       g_              toggle widths of all visible columns between full and
                       default width
@@ -123,7 +122,7 @@ DESCRIPTION
       z= expr         evaluate Python expression on current row and set
                       current cell with result of Python expr
 
-       i (iota)       add column with incremental values
+       i              add column with incremental values
       gi              set current column for selected rows to incremental
                       values
       zi step         add column with values at increment step
@@ -266,8 +265,8 @@ DESCRIPTION
 
      Canvas-specific Commands
          +   -              increase/decrease zoom level, centered on cursor
-         _ (underscore)     zoom to fit full extent
-        z_ (underscore)     set aspect ratio
+         _ (underbar)       zoom to fit full extent
+        z_ (underbar)       set aspect ratio
          x xmin xmax        set xmin/xmax on graph
          y ymin ymax        set ymin/ymax on graph
          s   t   u          select/toggle/unselect rows on source sheet con‐
@@ -299,7 +298,7 @@ DESCRIPTION
                             top of the other pane's stack
          Tab                jump to other pane
         gTab                swap panes
-        g^^ (g Ctrl+^)      cycle through sheets
+        g Ctrl+^            cycle through sheets
 
    Other Commands
      Q                quit current sheet and remove it from the CommandLog
@@ -311,7 +310,6 @@ DESCRIPTION
 
       ^L              refresh screen
       ^R              reload current sheet
-     z^R              clear cache for current column
       ^Z              suspend VisiData process
       ^G              show cursor position and bounds of current sheet on sta‐
                       tus line
@@ -332,7 +330,6 @@ DESCRIPTION
      g^X module       import Python module in the global scope
 
    Internal Sheets List
-      .  VisiDataMenu (Shift+V)      browse list of core sheets
       .  Directory Sheet             browse properties of files in a directory
       .  Plugins Sheet               browse, install, and (de)activate plugins
       .  Memory Sheet (Alt+Shift+M)        browse saved values, including
@@ -586,7 +583,7 @@ COMMANDLINE OPTIONS
      --note-type-exc=str          !                  cell note for an excep‐
                                                      tion during type conver‐
                                                      sion
-     --scroll-incr=int            3                  amount to scroll with
+     --scroll-incr=int            -3                 amount to scroll with
                                                      scrollwheel
      --name-joiner=str            _                  string to join sheet or
                                                      column names

@@ -166,7 +166,7 @@ scroll one left/down/up/right
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
-.It Ic "  _" Ns " (underscore)"
+.It Ic "  _" Ns " (underbar)"
 toggle width of current column between full and default width
 .It Ic " g_"
 toggle widths of all visible columns between full and default width
@@ -204,7 +204,7 @@ set name of all visible columns to combined contents of current column for selec
 .It Ic " z=" Ar expr
 .No evaluate Python expression on current row and set current cell with result of Python Ar expr
 .Pp
-.It "  i" (iota)
+.It "  i"
 .No add column with incremental values
 .It " gi"
 .No set current column for selected rows to incremental values
@@ -406,9 +406,9 @@ open
 .Bl -tag -width XXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " +   -"
 increase/decrease zoom level, centered on cursor
-.It Ic " _" No (underscore)
+.It Ic " _" No (underbar)
 zoom to fit full extent
-.It Ic "z_" No (underscore)
+.It Ic "z_" No (underbar)
 set aspect ratio
 .It Ic " x" Ar xmin xmax
 .No set Ar xmin Ns / Ns Ar xmax No on graph
@@ -456,7 +456,7 @@ scroll canvas
 .No jump to other pane
 .It Ic "gTab"
 .No swap panes
-.It Ic "g^^" No (g Ctrl+^)
+.It Ic "g Ctrl+^"
 .No cycle through sheets
 .Pp
 .El
@@ -506,8 +506,6 @@ open current row/cell/sheet as Python object
 .
 .Ss Internal Sheets List
 .Bl -tag -width Xx -compact
-.It Sy " \&."
-.Sy VisiDataMenu No (Shift+V) "     browse list of core sheets"
 .It Sy " \&."
 .Sy Directory Sheet No "            browse properties of files in a directory"
 .It Sy " \&."
