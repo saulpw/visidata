@@ -11,13 +11,14 @@ def deprecated(ver, instead=''):
         def wrapper(*args, **kwargs):
             import traceback
 
-            for line in reversed(traceback.extract_stack(limit=6)[:-1]):
-                vd.warning(f'    file {line.filename} at line {line.lineno} in {line.name}')
-            vd.warning(f'Deprecated call traceback (most recent last):')
             msg = f'{func.__name__} deprecated since v{ver}'
             if instead:
                 msg += f'; use {instead}'
             vd.warning(msg)
+
+            for line in reversed(traceback.extract_stack(limit=6)[:-1]):
+                vd.warning(f'    {line.name} at {line.filename}:{line.lineno}')
+            vd.warning(f'Deprecated call traceback (most recent last):')
             return func(*args, **kwargs)
         return wrapper
     return decorator
