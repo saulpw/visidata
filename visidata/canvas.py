@@ -346,11 +346,12 @@ class Canvas(Plotter):
     def plotColor(self, k):
         attr = self.plotAttrs.get(k, None)
         if attr is None:
-            if len(self.unusedAttrs) > 1:
+            if self.unusedAttrs:
                 attr = self.unusedAttrs.pop(0)
                 legend = ' '.join(str(x) for x in k)
             else:
-                attr = self.unusedAttrs[0]
+                lastlegend, attr = list(self.legends.items())[-1]
+                del self.legends[lastlegend]
                 legend = '[other]'
 
             self.legendwidth = max(self.legendwidth, len(legend))
