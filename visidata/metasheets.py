@@ -175,46 +175,6 @@ def lastInputsSheet(vd):
     return vs
 
 
-class VisiDataSheet(IndexSheet):
-    rowtype = 'metasheets'
-    precious = False
-    columns = [
-        ColumnAttr('items', 'nRows', type=int),
-        ColumnAttr('name', width=0),
-        ColumnAttr('description', width=50),
-        ColumnAttr('command', 'longname', width=0),
-        ColumnAttr('shortcut', 'shortcut_en', width=11),
-    ]
-    nKeys = 0
-
-    def reload(self):
-        self.rows = []
-        for vdattr, sheetname, longname, shortcut, desc in [
-            ('currentDirSheet', '.', 'open-dir-current', '', 'DirSheet for the current directory'),
-            ('sheetsSheet', 'sheets', 'sheets-stack', 'Shift+S', 'current sheet stack'),
-            ('allSheetsSheet', 'sheets_all', 'sheets-all', 'g Shift+S', 'all sheets this session'),
-            ('allColumnsSheet', 'all_columns', 'columns-all', 'g Shift+C', 'all columns from all sheets'),
-            ('cmdlog', 'cmdlog', 'cmdlog-all', 'g Shift+D', 'log of all commands this session'),
-            ('globalOptionsSheet', 'options_global', 'open-global', 'Shift+O', 'default option values applying to every sheet'),
-            ('recentErrorsSheet', 'errors', 'open-errors', 'Ctrl+E', 'stacktrace of most recent error'),
-            ('statusHistorySheet', 'statuses', 'open-statuses', 'Ctrl+P', 'status messages from current session'),
-            ('threadsSheet', 'threads', 'open-threads', 'Ctrl+T', 'threads and profiling'),
-            ('vdmenu', 'visidata_menu', 'open-vd', 'Shift+V', 'VisiData menu (this sheet)'),
-            ('pluginsSheet', 'plugins', 'open-plugins', '', 'VisiData community plugins'),
-            ]:
-            vs = getattr(vd, vdattr)
-            vs.description = desc
-            vs.shortcut_en = shortcut
-            vs.longname = longname
-            if vs is not self:
-                vs.ensureLoaded()
-            self.addRow(vs)
-
-
-@VisiData.lazy_property
-def vdmenu(vd):
-    return VisiDataSheet('visidata_menu', source=vd)
-
 @VisiData.property
 def allColumnsSheet(vd):
     return ColumnsSheet("all_columns", source=vd.stackedSheets)
@@ -248,7 +208,6 @@ def join_cols(sheet):
 globalCommand('gC', 'columns-all', 'vd.push(vd.allColumnsSheet)', 'open Columns Sheet: edit column properties for all visible columns from all sheets on the sheets stack')
 globalCommand('O', 'options-global', 'vd.push(vd.globalOptionsSheet)', 'open Options Sheet: edit global options (apply to all sheets)')
 
-BaseSheet.addCommand('V', 'open-vd', 'vd.push(vd.vdmenu)', 'open VisiData menu: browse list of core sheets')
 BaseSheet.addCommand('zO', 'options-sheet', 'vd.push(sheet.optionsSheet)', 'open Options Sheet: edit sheet options (apply to current sheet only)')
 BaseSheet.addCommand(None, 'open-inputs', 'vd.push(lastInputsSheet)', '')
 

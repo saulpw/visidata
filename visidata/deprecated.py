@@ -139,6 +139,49 @@ def load_tsv(fn):
     vs = open_tsv(Path(fn))
     yield from vs.iterload()
 
+class VisiDataSheet(visidata.IndexSheet):
+    rowtype = 'metasheets'
+    precious = False
+    columns = [
+        visidata.ColumnAttr('items', 'nRows', type=int),
+        visidata.ColumnAttr('name', width=0),
+        visidata.ColumnAttr('description', width=50),
+        visidata.ColumnAttr('command', 'longname', width=0),
+        visidata.ColumnAttr('shortcut', 'shortcut_en', width=11),
+    ]
+    nKeys = 0
+
+    def reload(self):
+        self.rows = []
+        for vdattr, sheetname, longname, shortcut, desc in [
+            ('currentDirSheet', '.', 'open-dir-current', '', 'DirSheet for the current directory'),
+            ('sheetsSheet', 'sheets', 'sheets-stack', 'Shift+S', 'current sheet stack'),
+            ('allSheetsSheet', 'sheets_all', 'sheets-all', 'g Shift+S', 'all sheets this session'),
+            ('allColumnsSheet', 'all_columns', 'columns-all', 'g Shift+C', 'all columns from all sheets'),
+            ('cmdlog', 'cmdlog', 'cmdlog-all', 'g Shift+D', 'log of all commands this session'),
+            ('globalOptionsSheet', 'options_global', 'open-global', 'Shift+O', 'default option values applying to every sheet'),
+            ('recentErrorsSheet', 'errors', 'open-errors', 'Ctrl+E', 'stacktrace of most recent error'),
+            ('statusHistorySheet', 'statuses', 'open-statuses', 'Ctrl+P', 'status messages from current session'),
+            ('threadsSheet', 'threads', 'open-threads', 'Ctrl+T', 'threads and profiling'),
+            ('vdmenu', 'visidata_menu', 'open-vd', 'Shift+V', 'VisiData menu (this sheet)'),
+            ('pluginsSheet', 'plugins', 'open-plugins', '', 'VisiData community plugins'),
+            ]:
+            vs = getattr(vd, vdattr)
+            vs.description = desc
+            vs.shortcut_en = shortcut
+            vs.longname = longname
+            if vs is not self:
+                vs.ensureLoaded()
+            self.addRow(vs)
+
+
+@VisiData.lazy_property
+@deprecated('2.9', 'menu system at top of display')
+def vdmenu(vd):
+    return VisiDataSheet('visidata_menu', source=vd)
+
+
+visidata.BaseSheet.addCommand('', 'open-vd', 'vd.push(vd.vdmenu)', 'open VisiData menu: browse list of core sheets')
 # NOTE: you cannot use deprecated() with nonfuncs
 
 cancelThread = deprecated('2.6', 'vd.cancelThread')(vd.cancelThread)
