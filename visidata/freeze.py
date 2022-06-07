@@ -36,7 +36,8 @@ class StaticSheet(Sheet):
 
         self.columns = []
         for i, col in enumerate(self.source.visibleCols):
-            colcopy = ColumnItem(col.name, i, width=col.width, type=col.type, fmtstr=col._fmtstr)
+            colcopy = ColumnItem(col.name)
+            colcopy.__setstate__(col.__getstate__())
             self.addColumn(colcopy)
             if col in self.source.keyCols:
                 self.setKeys([colcopy])
