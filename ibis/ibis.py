@@ -166,11 +166,18 @@ class IbisSheet(Sheet):
 
     def openRow(self, row):
         vs = copy(self.source)
-        vs.name += '_'.join(str(x) for x in self.rowkey(row))
+        vs.names = list(vs.names) + ['_'.join(str(x) for x in self.rowkey(row))]
         vs.query = self.source.query.filter([
             self.groupByCols[0].ibis_col == self.rowkey(row)[0]
             # matching key of grouped columns
         ])
+        return vs
+
+    def unfurl_col(self, col):
+        vs = copy(self)
+        vs.names = [self.name, col.name, 'unfurled']
+        vs.query = self.query.mutate(**{col.name:col.ibis_col.unnest()})
+        vs.cursorVisibleColIndex = self.cursorVisibleColIndex
         return vs
 
     def openJoin(self, others, jointype=''):
