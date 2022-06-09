@@ -2,7 +2,7 @@
 
 from visidata import Sheet, CellColorizer, vd
 
-__version__ = "0.9"
+__version__ = "0.9.1"
 
 vd.option('color_diff', 'red', 'color of values different from --diff source')
 vd.option('color_diff_add', 'yellow', 'color of rows/columns added to --diff source')
@@ -10,7 +10,7 @@ vd.option('color_diff_add', 'yellow', 'color of rows/columns added to --diff sou
 
 def makeDiffColorizer(othersheet):
     def colorizeDiffs(sheet, col, row, cellval):
-        if not row or not col:
+        if row is None or col is None:
             return None
         vcolidx = sheet.visibleCols.index(col)
         rowidx = sheet.rows.index(row)
@@ -28,4 +28,4 @@ def setDiffSheet(vs):
     Sheet.colorizers.append(CellColorizer(8, None, makeDiffColorizer(vs)))
 
 
-BaseSheet.addCommand(None, 'setdiff-sheet', 'setDiffSheet()', 'set this sheet as diff sheet for all new sheets')
+Sheet.addCommand(None, 'setdiff-sheet', 'setDiffSheet()', 'set this sheet as diff sheet for all new sheets')
