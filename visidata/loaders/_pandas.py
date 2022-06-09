@@ -12,7 +12,7 @@ def open_dta(vd, p):
 
 VisiData.open_stata = VisiData.open_pandas
 
-for ft in 'feather gbq orc parquet pickle sas stata'.split():
+for ft in 'feather gbq orc pickle sas stata'.split():
     funcname ='open_'+ft
     if not getattr(VisiData, funcname, None):
         setattr(VisiData, funcname, lambda vd,p,ft=ft: PandasSheet(p.name, source=p, filetype=ft))

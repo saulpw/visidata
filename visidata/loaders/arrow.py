@@ -16,36 +16,35 @@ def open_arrows(vd, p):
     return ArrowSheet(p.name, source=p)
 
 
-class ArrowSheet(Sheet):
-    def iterload(self):
-        import pyarrow as pa
+def arrow_to_vdtype(t):
+    import pyarrow as pa
 
-        arrow_to_vd_typemap = {
-            pa.lib.Type_BOOL: bool,
-            pa.lib.Type_UINT8: int,
-            pa.lib.Type_UINT16: int,
-            pa.lib.Type_UINT32: int,
-            pa.lib.Type_UINT64: int,
-            pa.lib.Type_INT8: int,
-            pa.lib.Type_INT16: int,
-            pa.lib.Type_INT32: int,
-            pa.lib.Type_INT64: int,
-            pa.lib.Type_HALF_FLOAT: float,
-            pa.lib.Type_FLOAT: float,
-            pa.lib.Type_DOUBLE: float,
+    arrow_to_vd_typemap = {
+        pa.lib.Type_BOOL: bool,
+        pa.lib.Type_UINT8: int,
+        pa.lib.Type_UINT16: int,
+        pa.lib.Type_UINT32: int,
+        pa.lib.Type_UINT64: int,
+        pa.lib.Type_INT8: int,
+        pa.lib.Type_INT16: int,
+        pa.lib.Type_INT32: int,
+        pa.lib.Type_INT64: int,
+        pa.lib.Type_HALF_FLOAT: float,
+        pa.lib.Type_FLOAT: float,
+        pa.lib.Type_DOUBLE: float,
 #            pa.lib.Type_DECIMAL128: Decimal128Scalar,
 #            pa.lib.Type_DECIMAL256: Decimal256Scalar,
-            pa.lib.Type_DATE32: date,
-            pa.lib.Type_DATE64: date,
-            pa.lib.Type_TIME32: date,
-            pa.lib.Type_TIME64: date,
-            pa.lib.Type_TIMESTAMP: date,
-            pa.lib.Type_DURATION: int,
-            pa.lib.Type_BINARY: bytes,
-            pa.lib.Type_LARGE_BINARY: vlen,
+        pa.lib.Type_DATE32: date,
+        pa.lib.Type_DATE64: date,
+        pa.lib.Type_TIME32: date,
+        pa.lib.Type_TIME64: date,
+        pa.lib.Type_TIMESTAMP: date,
+        pa.lib.Type_DURATION: int,
+        pa.lib.Type_BINARY: bytes,
+        pa.lib.Type_LARGE_BINARY: vlen,
 #            pa.lib.Type_FIXED_SIZE_BINARY: bytes,
 #            pa.lib.Type_STRING: str,
-            pa.lib.Type_LARGE_STRING: vlen,
+        pa.lib.Type_LARGE_STRING: vlen,
 #            pa.lib.Type_LIST: list,
 #            pa.lib.Type_LARGE_LIST: list,
 #            pa.lib.Type_FIXED_SIZE_LIST: list,
@@ -54,7 +53,13 @@ class ArrowSheet(Sheet):
 #            pa.lib.Type_DICTIONARY: dict,
 #            pa.lib.Type_SPARSE_UNION: UnionScalar,
 #            pa.lib.Type_DENSE_UNION: UnionScalar,
-        }
+    }
+    return arrow_to_vd_typemap.get(t.id, anytype)
+
+class ArrowSheet(Sheet):
+    def iterload(self):
+        import pyarrow as pa
+
         try:
             with pa.OSFile(str(self.source), 'rb') as fp:
                 self.coldata = pa.ipc.open_file(fp).read_all()
@@ -64,7 +69,7 @@ class ArrowSheet(Sheet):
 
         self.columns = []
         for colnum, col in enumerate(self.coldata):
-            coltype = arrow_to_vd_typemap.get(self.coldata.schema.types[colnum].id, anytype)
+            coltype = arrow_to_vdtype(self.coldata.schema.types[colnum])
             colname = self.coldata.schema.names[colnum]
 
             self.addColumn(Column(colname, type=coltype, expr=colnum,
