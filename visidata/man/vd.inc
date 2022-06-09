@@ -300,13 +300,13 @@ append blank row/column; appended columns cannot be copied to clipboard
 delete current/selected row(s)
 .It Ic "  y   gy"
 .No yank (copy) current/all selected row(s) to clipboard in Sy Memory Sheet
-.It Ic "  x  gx"
+.It Ic "  x   gx"
 .No cut (copy and delete) current/all selected row(s) to clipboard in Sy Memory Sheet
 .It Ic " zy  gzy"
 .No yank (copy) contents of current column for current/selected row(s) to clipboard in Sy Memory Sheet
 .It Ic " zd  gzd"
 .No set contents of current column for current/selected row(s) to Sy options.null_value
-.It Ic " zx gzx"
+.It Ic " zx  gzx"
 .No cut (copy and delete) contents of current column for current/selected row(s) to clipboard in Sy Memory Sheet
 .It Ic "  p    P"
 paste clipboard rows after/before current row
