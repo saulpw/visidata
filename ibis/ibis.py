@@ -240,7 +240,7 @@ def get_ibis_col(col, query):
 
 @Column.property
 def ibis_aggrs(col):
-    return [getattr(col.ibis_col, aggname)() for aggname in (col.aggstr or '').split()]
+    return [getattr(col.ibis_col, aggname)().name(f'{aggname}_{col.name}') for aggname in (col.aggstr or '').split()]
 
 
 IbisSheet.init('ibis_filters', list, copy=True)
