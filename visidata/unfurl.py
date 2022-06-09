@@ -61,11 +61,10 @@ class UnfurledSheet(Sheet):
             if unfurl_empty and not nadded:
                 self.addRow([row, None, None])
 
+
 @Sheet.api
 def unfurl_col(sheet, col):
-    clean_id = clean_to_id(col.name)
-    vs = UnfurledSheet(f"{sheet.name}_{clean_id}_unfurled", source=sheet, source_col=col)
-    return vs
+    return UnfurledSheet(sheet.name, clean_to_id(col.name), 'unfurled', source=sheet, source_col=col)
 
 
 Sheet.addCommand("zM", "unfurl-col", "vd.push(unfurl_col(cursorCol))", "row-wise expand current column of lists (e.g. [2]) or dicts (e.g. {3}) within that column")

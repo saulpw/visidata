@@ -83,13 +83,12 @@ class MeltedSheet(Sheet):
                     self.addRow(meltedrow)
 
 
-@Sheet.command('M', 'melt', 'open Melted Sheet (unpivot), with key columns retained and all non-key columns reduced to Variable-Value rows')
-def melt(sheet):
-    vs = MeltedSheet(sheet.name + '_melted', source=sheet, regex='(.*)')
-    vd.push(vs)
+@Sheet.api
+def openMelt(sheet, regex='(.*)'):
+    return MeltedSheet(sheet.name, 'melted', source=sheet, regex=regex)
 
-@Sheet.command('gM', 'melt-regex', 'open Melted Sheet (unpivot), with key columns retained and regex capture groups determining how the non-key columns will be reduced to Variable-Value rows')
-def melt_regex(sheet):
-    regex = vd.input("regex to split colname: ", value="(.*)_(.*)", type="regex-capture")
-    vs = MeltedSheet(sheet.name + '_melted', source=sheet, regex=regex)
-    vd.push(vs)
+
+Sheet.addCommand('M', 'melt', 'vd.push(openMelt())', 'open Melted Sheet (unpivot), with key columns retained and all non-key columns reduced to Variable-Value rows')
+
+
+Sheet.addCommand('gM', 'melt-regex', 'vd.push(openMelt(vd.input("regex to split colname: ", value="(.*)_(.*)", type="regex-capture")))', 'open Melted Sheet (unpivot), with key columns retained and regex capture groups determining how the non-key columns will be reduced to Variable-Value rows')
