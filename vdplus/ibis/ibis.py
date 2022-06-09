@@ -251,6 +251,11 @@ IbisSheet.init('query_result', lambda: None, copy=False)
 IbisSheet.addCommand('F', 'freq-col', 'vd.push(groupBy([cursorCol]))')
 IbisSheet.addCommand('gF', 'freq-keys', 'vd.push(groupBy(keyCols))')
 
+@VisiData.api
+def negate(vd, expr):
+    return expr.ifelse(False, True)
+
+IbisSheet.addCommand('gt', 'stoggle-rows', 'toggle(rows)\nfor i in range(len(ibis_selection)): ibis_selection[i] = vd.negate(ibis_selection[i])', 'select rows matching current cell in current column')
 IbisSheet.addCommand(',', 'select-equal-cell', 'ibis_selection.append(cursorCol.ibis_col == cursorTypedValue); select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', 'select rows matching current cell in current column')
 #IbisSheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getDisplayValue(r) == c.getDisplayValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
 #IbisSheet.addCommand('z,', 'select-exact-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', 'select rows matching current cell in current column')
