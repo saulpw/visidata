@@ -17,7 +17,7 @@ Current features include:
 vgit is located as a module within the [VisiData repo](https://github.com/saulpw/visidata/vgit). It has its own setup.py. Note that installing vgit will also install VisiData.
 
 ```
-pip3 install git+git://github.com/saulpw/visidata/vgit@develop`
+pip3 install git+git://github.com/visidata/vdplus/vgit@develop`
 ```
 
 ### Dependencies
