@@ -26,6 +26,7 @@ def dtype_to_type(dtype):
 @VisiData.api
 def openurl_ibis(vd, p, filetype=None):
     import ibis
+    vd.aggregator('collect', ibis.expr.types.AnyValue.collect, 'collect a list of values')
     ibis.options.verbose_log = vd.status
     return IbisSqliteIndexSheet(p.name, source=p, filetype=filetype)
 
