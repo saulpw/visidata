@@ -40,13 +40,21 @@ def open_ibis(vd, p):
 class IbisSqliteIndexSheet(IndexSheet):
     def iterload(self):
         import ibis
+        from ibis.backends.duckdb.datatypes import parse_type
         if self.filetype:
             con = getattr(ibis, self.filetype).connect(str(self.source))
         else:
             con = ibis.connect(str(self.source))
 
         for tblname in con.list_tables():
-            yield IbisSheet(self.source.name, tblname, source=self.source, query=con.table(tblname))
+            tbl = self.tbl = con.table(tblname)
+            q = ibis.table(tbl.schema(), name=tblname)
+
+            yield IbisSheet(self.source.name, tblname,
+                    ibis_source=self.source,
+                    ibis_filetype=self.filetype,
+                    source=self.source,
+                    query=q)
 
 
 class IbisColumn(ItemColumn):
@@ -113,8 +121,10 @@ class IbisSheet(Sheet):
                 mutates[c.name] = ibis_col
                 projections.append(ibis_col)
 
-        q = q.projection(projections)
-#        q = q.mutate(**mutates)
+        if projections:
+            q = q.projection(projections)
+
+        q = q.mutate(**mutates)
 
         if self.ibis_filters:
             q = q.filter(self.ibis_filters)
@@ -127,7 +137,7 @@ class IbisSheet(Sheet):
     @property
     def ibis_sql(self):
         import sqlparse
-        sqlstr = str(self.ibis_expr.compile().compile(compile_kwargs={'literal_binds': True}))
+        sqlstr = str(self.con.compile(self.ibis_expr).compile(compile_kwargs={'literal_binds': True}))
         return sqlparse.format(sqlstr, reindent=True, keyword_case='upper')
 
     @property
@@ -137,10 +147,14 @@ class IbisSheet(Sheet):
         return compiler.compile(self.ibis_expr)
 
     def iterload(self):
-        self.query = deepcopy(self.ibis_expr)  # fresh connection
-        self.query._find_backend().reconnect()
+        import ibis
 
-        self.query_result = self.query.execute()
+        if getattr(self, 'ibis_filetype', None):
+            self.con = getattr(ibis, self.ibis_filetype).connect(str(self.ibis_source))
+        else:
+            self.con = ibis.connect(str(self.ibis_source))
+
+        self.query_result = self.con.execute(self.query)
 
         self.columns = []
         for i, colname in enumerate(self.query_result.columns):
@@ -159,6 +173,7 @@ class IbisSheet(Sheet):
                                  by=[c.ibis_col for c in groupByCols])
 
         return IbisSheet(self.name, *(col.name for col in groupByCols), 'freq',
+                             ibis_source=self.ibis_source,
                              source=self,
                              groupByCols=groupByCols,
                              query=groupq,
@@ -189,7 +204,7 @@ class IbisSheet(Sheet):
             q = self.query
             for other in others:
                 q = q.union(other.query)
-            return IbisSheet('&'.join(vs.name for vs in sheets), query=q)
+            return IbisSheet('&'.join(vs.name for vs in sheets), query=q, ibis_source=self.ibis_source)
 
         for s in sheets:
             s.keyCols or vd.fail(f'{s.name} has no key cols to join')
@@ -202,7 +217,7 @@ class IbisSheet(Sheet):
             preds = [(a.ibis_col == b.ibis_col) for a, b in zip(self.keyCols, other.keyCols)]
             q = q.join(other.query, predicates=preds, how=jointype)
 
-        return IbisSheet('+'.join(vs.name for vs in sheets), sources=sheets, query=q)
+        return IbisSheet('+'.join(vs.name for vs in sheets), sources=sheets, query=q, ibis_source=self.ibis_source)
 
 
 @Column.property
@@ -251,11 +266,7 @@ IbisSheet.init('query_result', lambda: None, copy=False)
 IbisSheet.addCommand('F', 'freq-col', 'vd.push(groupBy([cursorCol]))')
 IbisSheet.addCommand('gF', 'freq-keys', 'vd.push(groupBy(keyCols))')
 
-@VisiData.api
-def negate(vd, expr):
-    return expr.ifelse(False, True)
-
-IbisSheet.addCommand('gt', 'stoggle-rows', 'toggle(rows)\nfor i in range(len(ibis_selection)): ibis_selection[i] = vd.negate(ibis_selection[i])', 'select rows matching current cell in current column')
+IbisSheet.addCommand('gt', 'stoggle-rows', 'toggle(rows)\nfor i in range(len(ibis_selection)): ibis_selection[i] = ~ibis_selection[i]', 'select rows matching current cell in current column')
 IbisSheet.addCommand(',', 'select-equal-cell', 'ibis_selection.append(cursorCol.ibis_col == cursorTypedValue); select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', 'select rows matching current cell in current column')
 #IbisSheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getDisplayValue(r) == c.getDisplayValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
 #IbisSheet.addCommand('z,', 'select-exact-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', 'select rows matching current cell in current column')
