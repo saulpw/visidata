@@ -156,11 +156,16 @@ class IbisSheet(Sheet):
 
         self.query_result = self.con.execute(self.query)
 
+        oldkeycols = {c.name:c for c in self.keyCols}
         self.columns = []
         for i, colname in enumerate(self.query_result.columns):
+            keycol=oldkeycols.get(colname, Column()).keycol
+            if i < self.nKeys:
+                keycol = i+1
+
             self.addColumn(IbisColumn(colname, i+1,
                            type=dtype_to_type(self.query_result.dtypes[i]),
-                           keycol=(i+1) if i < self.nKeys else None,
+                           keycol=keycol,
                            ibis_name=colname))
 
         yield from self.query_result.itertuples()
