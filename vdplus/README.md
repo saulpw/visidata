@@ -19,10 +19,6 @@ VisiData Plus contains many useful loaders and features for [VisiData](https://v
 - [jrnl.sh](https://jrnl.sh): read/save journal files; filetype `jrnl`
 - various [mailbox formats](https://docs.python.org/3/library/mailbox.html): `mbox`, `maildir`, `mmdf`, `babyl`, `mh`
 
-### Other data libraries
-
-- [Ibis](https://ibis-project.org): connect to various database backends (currently only sqlite is supported in vdplus) and query without loading the entire database.
-
 ### Other features/tools
 
 - [graphing](https://github.com/saulpw/vdplus/tree/develop/graphing): save scatterplot as .svg

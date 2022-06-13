@@ -13,7 +13,5 @@ matplotlib # svg
 
 psutil # top
 
-ibis-framework
-
 orgparse
 sh
