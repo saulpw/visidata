@@ -24,28 +24,18 @@ def dtype_to_type(dtype):
 
 
 @VisiData.api
-def openurl_ibis(vd, p, filetype=None):
+def open_ibis(vd, p):
     import ibis
     vd.aggregator('collect', ibis.expr.types.AnyValue.collect, 'collect a list of values')
     ibis.options.verbose_log = vd.status
-    return IbisSqliteIndexSheet(p.name, source=p, filetype=filetype)
+    return IbisIndexSheet(p.name, source=p, filetype=None)
 
 
-@VisiData.api
-def open_ibis(vd, p):
-    import ibis
-    ibis.options.verbose_log = vd.status
-    return IbisSqliteIndexSheet(p.name, source=p, filetype=None)
-
-
-class IbisSqliteIndexSheet(IndexSheet):
+class IbisIndexSheet(IndexSheet):
     def iterload(self):
         import ibis
-        from ibis.backends.duckdb.datatypes import parse_type
-        if self.filetype:
-            con = getattr(ibis, self.filetype).connect(str(self.source))
-        else:
-            con = ibis.connect(str(self.source))
+
+        con = ibis.connect(str(self.source))
 
         for tblname in con.list_tables():
             tbl = self.tbl = con.table(tblname)
