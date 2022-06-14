@@ -50,6 +50,7 @@ inputLines = { 'save-sheet': 'tests/jetsam.csv',  # save to some tmp file
                  'addcol-expr': 'Unit',          # just copy the column
                  'addcol-incr-step': '2',
                  'setcol-incr-step': '2',
+                 'setcol-format-enum': '1=cat',
                  'split-col': '-',
                  'show-expr': 'OrderDate',
                  'setcol-expr': 'OrderDate',
