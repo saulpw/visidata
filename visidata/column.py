@@ -101,6 +101,7 @@ class Column(Extensible):
         self.height = 1       # max height, None/0 to auto-compute for each row
         self.keycol = 0       # keycol index (or 0 if not key column)
         self.expr = None      # Column-type-dependent parameter
+        self.formatter = 'generic'
 
         self.setCache(cache)
         for k, v in kwargs.items():
@@ -192,6 +193,12 @@ class Column(Extensible):
             self._width = w
 
     @property
+    def _formatdict(col):
+        if '=' in col.fmtstr:
+            return dict(val.split('=', maxsplit=1) for val in col.fmtstr.split())
+        return {}
+
+    @property
     def fmtstr(self):
         'Format string to use to display this column.'
         return self._fmtstr or vd.getType(self.type).fmtstr
@@ -202,15 +209,18 @@ class Column(Extensible):
 
     @property
     def formatter(self):
-        return self._formatter.__name__[7:]  # remove leading 'format_'
+        return self._formatter  # remove leading 'format_'
 
     @formatter.setter
     def formatter(self, v: str):
-        self._formatMaker = getattr(col, 'format_'+(v or 'generic'))
-        self._formatter = col._formatMaker(self._format)
+        self._formatMaker = getattr(self, 'format_'+(v or 'generic'))
+        self._formatter = self._formatMaker(self._formatdict)
 
     def format_generic(self, fmtstr):
         return self.formatValue
+
+    def format(self, *args, **kwargs):
+        return self.formatter(*args, **kwargs)
 
     def formatValue(self, typedval):
         'Return displayable string of *typedval* according to ``Column.fmtstr``.'
@@ -227,7 +237,7 @@ class Column(Extensible):
             typedval = typedval.decode(options.encoding, options.encoding_errors)
 
         return vd.getType(self.type).formatter(self.fmtstr, typedval)
-    format=formatValue
+
 
     def hide(self, hide=True):
         if hide:

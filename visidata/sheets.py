@@ -1210,13 +1210,8 @@ Sheet.addCommand('gz^', 'rename-cols-selected', 'updateColNames(selectedRows or 
 BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to: ", value=sheet.name)', 'Rename current sheet')
 
 
-@Column.cached_property
-def _format(col):
-    return dict(val.split('=', maxsplit=1) for val in col.fmtstr.split())
-
-
 @Column.api
-def format_enum(col, val):
-    return lambda val, vals=col._format: vals.__getitem__(val)
+def format_enum(col, fmtdict):
+    return lambda val, fmtdict=fmtdict: fmtdict.__getitem__(val)
 
 Sheet.addCommand('', 'setcol-format-enum', 'cursorCol.fmtstr=input("format replacements (k=v): ", value=f"{cursorDisplay}=", i=len(cursorDisplay)+1); cursorCol.formatter="enum"', 'add secondary type translator to current column from input enum (space-separated)')

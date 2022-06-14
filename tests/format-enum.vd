@@ -1,0 +1,8 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.tsv	o	
+sample	OrderDate		type-date		@	set type of current column to date
+sample	Units		type-int		#	set type of current column to int
+sample	Unit_Cost		type-float		%	set type of current column to float
+sample			columns-sheet		Shift+C	open Columns Sheet: edit column properties for current sheet
+sample_columns	fmtstr	キOrderDate	edit-cell	%Y	e	edit contents of current cell
+sample	Item	0	setcol-format-enum	Pencil=1 Binder=2 Pen=3 Desk=4		add secondary type translator to current column from input enum (space-separated)
