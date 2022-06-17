@@ -120,7 +120,7 @@ class Column(Extensible):
         return self.__copy__()  # no separate deepcopy
 
     def __getstate__(self):
-        d = {k:getattr(self, k) for k in 'name width height expr keycol _formatter fmtstr voffset hoffset aggstr'.split() if hasattr(self, k)}
+        d = {k:getattr(self, k) for k in 'name width height expr keycol formatter _fmtstr voffset hoffset aggstr'.split() if hasattr(self, k)}
         d['type'] = self.type.__name__
         return d
 
@@ -207,20 +207,12 @@ class Column(Extensible):
     def fmtstr(self, v):
         self._fmtstr = v
 
-    @property
-    def formatter(self):
-        return self._formatter  # remove leading 'format_'
-
-    @formatter.setter
-    def formatter(self, v: str):
-        self._formatMaker = getattr(self, 'format_'+(v or 'generic'))
-        self._formatter = self._formatMaker(self._formatdict)
-
     def format_generic(self, fmtstr):
         return self.formatValue
 
     def format(self, *args, **kwargs):
-        return self.formatter(*args, **kwargs)
+        self._formatMaker = getattr(self, 'format_'+(self.formatter or 'generic'))
+        return self._formatMaker(self._formatdict)(*args, **kwargs)
 
     def formatValue(self, typedval):
         'Return displayable string of *typedval* according to ``Column.fmtstr``.'
@@ -237,7 +229,6 @@ class Column(Extensible):
             typedval = typedval.decode(options.encoding, options.encoding_errors)
 
         return vd.getType(self.type).formatter(self.fmtstr, typedval)
-
 
     def hide(self, hide=True):
         if hide:
