@@ -219,9 +219,9 @@ class Column(Extensible):
 
         if self.type is anytype:
             if isinstance(typedval, (list, tuple)):
-                return '[%s]' % len(typedval)
+                return f'[{len(typedval)}] ' + '; '.join(typedval[0:10])
             if isinstance(typedval, dict):
-                return '{%s}' % len(typedval)
+                return f'{{{len(typedval)}}} ' + '; '.join(f'{k}={v}' for k, v in typedval[0:10])
 
         if isinstance(typedval, bytes):
             typedval = typedval.decode(options.encoding, options.encoding_errors)
