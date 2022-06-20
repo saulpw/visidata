@@ -221,7 +221,7 @@ class Column(Extensible):
             if isinstance(typedval, (list, tuple)):
                 return f'[{len(typedval)}] ' + '; '.join(typedval[0:10])
             if isinstance(typedval, dict):
-                return f'{{{len(typedval)}}} ' + '; '.join(f'{k}={v}' for k, v in typedval[0:10])
+                return f'{{{len(typedval)}}} ' + '; '.join(f'{k}={v}' for k, v in list(typedval.items())[0:10])
 
         if isinstance(typedval, bytes):
             typedval = typedval.decode(options.encoding, options.encoding_errors)
