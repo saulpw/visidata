@@ -21,7 +21,10 @@ setup(name='visidata',
         ],
       },
       py_modules = ['visidata'],
-      install_requires=['python-dateutil'],
+      install_requires=[
+          'python-dateutil',
+          'windows-curses; platform_system == "Windows"'
+      ],
       packages=['visidata',  'visidata.loaders', 'visidata.tests'],
       include_package_data=True,
       data_files = [('share/man/man1', ['visidata/man/vd.1', 'visidata/man/visidata.1'])],
