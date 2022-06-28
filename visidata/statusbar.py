@@ -7,7 +7,7 @@ from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColo
 vd.option('disp_rstatus_fmt', ' {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus} {sheet.options.disp_selected_note}{sheet.nSelectedRows}', 'right-side status format string')
 vd.option('disp_status_fmt', '{sheet.shortcut}› {sheet.name}| ', 'status line prefix')
 vd.option('disp_lstatus_max', 0, 'maximum length of left status line')
-vd.option('disp_status_sep', ' | ', 'separator between statuses')
+vd.option('disp_status_sep', ' │ ', 'separator between statuses')
 
 vd.option('color_keystrokes', 'bold 233 black on 110 cyan', 'color of input keystrokes on status line')
 vd.option('color_status', 'bold black on 110 cyan', 'status line color')

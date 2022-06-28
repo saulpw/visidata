@@ -46,9 +46,9 @@ vd.option('color_note_pending', 'bold magenta', 'color of note in pending cells'
 vd.option('color_note_type', '226 yellow', 'color of cell note for non-str types in anytype columns')
 vd.option('color_note_row', '220 yellow', 'color of row note on left edge')
 vd.option('scroll_incr', -3, 'amount to scroll with scrollwheel')
-vd.option('disp_column_sep', '|', 'separator between columns')
+vd.option('disp_column_sep', '│', 'separator between columns')
 vd.option('disp_keycol_sep', '║', 'separator between key columns and rest of columns')
-vd.option('disp_rowtop_sep', '|', '') # ╷│┬╽⌜⌐▇
+vd.option('disp_rowtop_sep', '│', '') # ╷│┬╽⌜⌐▇
 vd.option('disp_rowmid_sep', '⁝', '') # ┃┊│█
 vd.option('disp_rowbot_sep', '⁝', '') # ┊┴╿⌞█⍿╵⎢┴⌊  ⋮⁝
 vd.option('disp_rowend_sep', '║', '') # ┊┴╿⌞█⍿╵⎢┴⌊
