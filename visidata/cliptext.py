@@ -84,7 +84,6 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
     Note: width may differ from len(s) if East Asian chars are 'fullwidth'.'''
     w = 0
     ret = ''
-    ret += chr(0x2068)
 
     trunchlen = dispwidth(trunch)
     for c in s:
@@ -101,7 +100,6 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
             w += trunchlen
             break
 
-    ret += chr(0x2069)
     return ret, w
 
 
