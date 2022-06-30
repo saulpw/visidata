@@ -289,6 +289,13 @@ open duplicate sheet with all rows
 .It Ic "gz\&""
 open duplicate sheet with deepcopy of selected rows
 .El
+.
+.
+.Pp
+The rows in these duplicated sheets (except deepcopy) are references to rows on the original source sheets, and so edits to the filtered rows will naturally be reflected in the original rows.  Use
+.Ic "g'"
+to freeze sheet contents in a deliberate copy.
+.
 .Ss Editing Rows and Cells
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact

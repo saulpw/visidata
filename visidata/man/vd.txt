@@ -185,6 +185,11 @@ DESCRIPTION
      g"               open duplicate sheet with all rows
      gz"              open duplicate sheet with deepcopy of selected rows
 
+     The rows in these duplicated sheets (except deepcopy) are references to
+     rows on the original source sheets, and so edits to the filtered rows
+     will naturally be reflected in the original rows.  Use g' to freeze sheet
+     contents in a deliberate copy.
+
    Editing Rows and Cells
        a   za         append blank row/column; appended columns cannot be
                       copied to clipboard
@@ -192,13 +197,13 @@ DESCRIPTION
        d   gd         delete current/selected row(s)
        y   gy         yank (copy) current/all selected row(s) to clipboard in
                       Memory Sheet
-       x  gx          cut (copy and delete) current/all selected row(s) to
+       x   gx         cut (copy and delete) current/all selected row(s) to
                       clipboard in Memory Sheet
       zy  gzy         yank (copy) contents of current column for
                       current/selected row(s) to clipboard in Memory Sheet
       zd  gzd         set contents of current column for current/selected
                       row(s) to options.null_value
-      zx gzx          cut (copy and delete) contents of current column for
+      zx  gzx         cut (copy and delete) contents of current column for
                       current/selected row(s) to clipboard in Memory Sheet
        p    P         paste clipboard rows after/before current row
       zp  gzp         set cells of current column for current/selected row(s)

@@ -19,6 +19,14 @@ Command                    Operation
 `g*` *regex*/*subst*       replace matching *regex* in **current column for selected rows** with *subst*
 `g=` *expr*                evaluate Python *expr* over each selected row and set **current column** to the result
 
+## note!
+
+Modifications made to rows on derived sheets will be reflected on the source sheets.  This includes the Frequency Table: editing the key column there will change all instances on the source sheet, and if that sheet is derived from another source sheet, it will be reflected there, and so on.
+
+This does not apply to adding or deleting rows, only changes to existing rows.
+
+## Commands while editing
+
 While in editing mode, or anytime VisiData expects input (with e.g. `=`, `;`), typical readline commands become available:
 
 Command             Operation
@@ -60,7 +68,7 @@ vd file.xlsx --header=0
 2. For each sheet, press `s` or `t` to select the rows which represent the header rows.
 3. Press `g^` to set the names of the headers to the contents of selected rows.
 
-###### How to rename headers using the Columns sheet
+###### How to rename columns using the Columns sheet
 
 1. Press `Shift+C` to open the **Columns sheet**.
 2. Within the **name** column, move the cursor to the row which represents the source sheet.
