@@ -7,7 +7,7 @@ import re
 import time
 
 from visidata import options, anytype, stacktrace, vd
-from visidata import asyncthread, dispwidth
+from visidata import asyncthread, dispwidth, clipstr, iterchars
 from visidata import wrapply, TypedWrapper, TypedExceptionWrapper
 from visidata import Extensible, AttrDict, undoAttrFunc
 
@@ -220,10 +220,8 @@ class Column(Extensible):
             return None
 
         if self.type is anytype:
-            if isinstance(typedval, (list, tuple)):
-                return f'[{len(typedval)}] ' + '; '.join(typedval[0:10])
-            if isinstance(typedval, dict):
-                return f'{{{len(typedval)}}} ' + '; '.join(f'{k}={v}' for k, v in list(typedval.items())[0:10])
+            if isinstance(typedval, (dict, list, tuple)):
+                return clipstr(iterchars(typedval), self.width*2)[0]
 
         if isinstance(typedval, bytes):
             typedval = typedval.decode(options.encoding, options.encoding_errors)

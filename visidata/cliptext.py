@@ -4,7 +4,7 @@ import functools
 
 from visidata import options, drawcache
 
-__all__ = ['clipstr', 'clipdraw', 'dispwidth']
+__all__ = ['clipstr', 'clipdraw', 'dispwidth', 'iterchars']
 
 disp_column_fill = ' '
 
@@ -78,6 +78,27 @@ def _dispch(c, oddspacech=None, combch=None, modch=None):
 
     return c, dispwidth(c)
 
+
+def iterchars(x):
+    if isinstance(x, dict):
+        yield from '{%d}' % len(x)
+        for k, v in x.items():
+            yield ' '
+            yield from iterchars(k)
+            yield '='
+            yield from iterchars(v)
+
+    elif isinstance(x, (list, tuple)):
+        yield from '[%d] ' % len(x)
+        for i, v in enumerate(x):
+            if i != 0:
+                yield from '; '
+            yield from iterchars(v)
+
+    else:
+        yield from str(x)
+
+
 @functools.lru_cache(maxsize=100000)
 def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
     '''Return clipped string and width in terminal display characters.
@@ -135,7 +156,7 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False, **kwargs):
             return w
 
         # convert to string just before drawing
-        clipped, dispw = clipstr(str(s), w, **kwargs)
+        clipped, dispw = clipstr(s, w, **kwargs)
         if rtl:
             # clearing whole area (w) has negative display effects; clearing just dispw area is useless
 #            scr.addstr(y, x-dispw-1, disp_column_fill*dispw, attr)
