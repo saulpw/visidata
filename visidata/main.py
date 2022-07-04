@@ -17,11 +17,12 @@ from pkg_resources import resource_filename
 
 from visidata import vd, options, run, BaseSheet, AttrDict
 from visidata import Path
+from visidata.settings import _get_config_file
 import visidata
 
 vd.version_info = __version_info__
 
-vd.option('config', '~/.visidatarc', 'config file to exec in Python', sheettype=None)
+vd.option('config', _get_config_file(), 'config file to exec in Python', sheettype=None)
 vd.option('play', '', 'file.vd to replay')
 vd.option('batch', False, 'replay in batch mode (with no interface and all status sent to stdout)')
 vd.option('output', None, 'save the final visible sheet to output at the end of replay')
