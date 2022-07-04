@@ -1,6 +1,7 @@
 import codecs
 import tarfile
 import zipfile
+from visidata.loaders import unzip_http
 
 from visidata import vd, VisiData, asyncthread, Sheet, Progress, Menu, options
 from visidata import ColumnAttr, Column, date, datetime, Path
@@ -51,6 +52,9 @@ class ZipSheet(Sheet):
 
     @property
     def zfp(self):
+        if '://' in str(self.source):
+            return unzip_http.RemoteZipFile(str(self.source))
+
         return zipfile.ZipFile(str(self.source), 'r')
 
     def iterload(self):
