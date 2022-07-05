@@ -4,7 +4,7 @@ import functools
 
 from visidata import options, drawcache
 
-__all__ = ['clipstr', 'clipdraw', 'dispwidth', 'iterchars']
+__all__ = ['clipstr', 'clipdraw', 'clipbox', 'dispwidth', 'iterchars']
 
 disp_column_fill = ' '
 
@@ -171,3 +171,13 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False, **kwargs):
 #                ).with_traceback(sys.exc_info()[2])
 
     return dispw
+
+
+def clipbox(scr, lines, attr, title=''):
+    scr.erase()
+    scr.bkgd(attr)
+    scr.box()
+    h, w = scr.getmaxyx()
+    clipdraw(scr, 0, w-len(title)-6, f"| {title} |", attr)
+    for i, line in enumerate(lines):
+        clipdraw(scr, i+1, 2, line, attr)
