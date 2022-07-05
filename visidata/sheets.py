@@ -201,7 +201,6 @@ class TableSheet(BaseSheet):
         self.recalc()  # set .sheet on columns and start caches
 
         self.setKeys(self.columns[:self.nKeys])  # initial list of key columns
-        self.sidebar = ''
 
         self.__dict__.update(kwargs)  # also done earlier in BaseSheet.__init__
 

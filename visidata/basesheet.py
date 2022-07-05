@@ -99,6 +99,7 @@ class BaseSheet(DrawablePane):
         self.mouseX = 0
         self.mouseY = 0
         self.hasBeenModified = False
+        self.sidebar = ''
 
         super().__init__(**kwargs)
 
