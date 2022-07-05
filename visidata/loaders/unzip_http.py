@@ -20,7 +20,6 @@
 
 from dataclasses import dataclass
 
-import functools
 import sys
 import io
 import time
@@ -87,9 +86,11 @@ class RemoteZipFile:
     def __exit__(self, a, b, c):
         pass
 
-    @functools.cached_property
+    @property
     def files(self):
-        return {r.filename:r for r in self.infoiter()}
+        if not hasattr(self, '_files'):
+            self._files = {r.filename:r for r in self.infoiter()}
+        return self._files
 
     def infolist(self):
         return list(self.infoiter())
