@@ -328,7 +328,8 @@ def initCurses():
 
     curses.raw()    # get control keys instead of signals
     curses.meta(1)  # allow "8-bit chars"
-    curses.mousemask(-1 if options.mouse_interval else 0)
+    curses.MOUSE_ALL = 0xffffffff
+    curses.mousemask(curses.MOUSE_ALL if options.mouse_interval else 0)
     curses.mouseinterval(options.mouse_interval)
     curses.mouseEvents = {}
 
