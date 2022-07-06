@@ -328,7 +328,7 @@ def initCurses():
 
     curses.raw()    # get control keys instead of signals
     curses.meta(1)  # allow "8-bit chars"
-    curses.mousemask(-1 if options.mouse_interval else 0)
+    curses.mousemask((-1 + 2**32) if options.mouse_interval else 0) # mousemask is uint32 and pypy3 crashes on the negative number
     curses.mouseinterval(options.mouse_interval)
     curses.mouseEvents = {}
 
