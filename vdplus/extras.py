@@ -1,3 +1,5 @@
+import os
+
 from visidata import vd, Sheet, VisiData, FreqTableSheet, BaseSheet, asyncthread
 
 vd.options.disp_menu_fmt = '|  VisiData {vd.version} | {vd.motd}'
@@ -52,3 +54,11 @@ def reload_every(sheet, seconds:int):
         time.sleep(seconds)
 
 
+@VisiData.api
+def ansi(*args):
+    os.write(1, b'\x1b'+b''.join([x.encode('utf-8') for x in args]))
+
+
+@VisiData.api
+def set_titlebar(vd,title):
+    ansi(']2;', title, '\x07')
