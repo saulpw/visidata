@@ -29,7 +29,7 @@ import fnmatch
 
 import urllib3
 
-__version__ = '0.3dev'
+__version__ = '0.3'
 
 
 def error(s):
@@ -75,10 +75,13 @@ class RemoteZipFile:
     fmt_eocd64 = '<IQHHIIQQQQ'  # end of central directory ZIP64
     fmt_cdirentry = '<IHHHHIIIIHHHHHII'  # central directory entry
     fmt_localhdr = '<IHHHIIIIHH'  # local directory header
+    magic_eocd64 = b'\x50\x4b\x06\x06'
+    magic_eocd = b'\x50\x4b\x05\x06'
 
     def __init__(self, url):
         self.url = url
         self.http = urllib3.PoolManager()
+        self.zip_size = 0
 
     def __enter__(self):
         return self
@@ -101,25 +104,25 @@ class RemoteZipFile:
         if r != 'bytes':
             error(f"Accept-Ranges header must be 'bytes' ('{r}')")
 
-        sz = int(resp.headers['Content-Length'])
-        resp = self.get_range(sz-65536, 65536)
+        self.zip_size = int(resp.headers['Content-Length'])
+        resp = self.get_range(self.zip_size-65536, 65536)
 
         cdir_start = -1
-        i = resp.data.rfind(b'\x50\x4b\x06\x06')
+        i = resp.data.rfind(self.magic_eocd64)
         if i >= 0:
             magic, eocd_sz, create_ver, min_ver, disk_num, disk_start, disk_num_records, total_num_records, \
                 cdir_bytes, cdir_start = struct.unpack_from(self.fmt_eocd64, resp.data, offset=i)
         else:
-            i = resp.data.rfind(b'\x50\x4b\x05\x06')
+            i = resp.data.rfind(self.magic_eocd)
             if i >= 0:
                 magic, \
                     disk_num, disk_start, disk_num_records, total_num_records, \
                     cdir_bytes, cdir_start, comment_len = struct.unpack_from(self.fmt_eocd, resp.data, offset=i)
 
-        if cdir_start < 0 or cdir_start >= sz:
+        if cdir_start < 0 or cdir_start >= self.zip_size:
             error('cannot find central directory')
 
-        filehdr_index = 65536 - (sz - cdir_start)
+        filehdr_index = 65536 - (self.zip_size - cdir_start)
         cdir_end = filehdr_index + cdir_bytes
         while filehdr_index < cdir_end:
             sizeof_cdirentry = struct.calcsize(self.fmt_cdirentry)
@@ -180,6 +183,7 @@ class RemoteZipFile:
 
 class RemoteZipStream(io.RawIOBase):
     def __init__(self, fp, info):
+        super().__init__()
         self.raw = fp
         self._decompressor = zlib.decompressobj(-15)
         self._buffer = bytes()
