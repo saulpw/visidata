@@ -2,14 +2,19 @@
 
 import json
 
-from visidata import vd, Column, Sheet, asyncthread, Progress
+from visidata import vd, Column, Sheet, asyncthread, Progress, VisiData
 
 __author__ = 'Saul Pwanson <vd@saul.pw>'
-__version__ = '1.1'
+__version__ = '1.2'
 
 vd.option('locale', 'en_US', 'default locale to use for Faker', replay=True)
 vd.option('vfake_extra_providers', None, 'list of additional Provider classes to load via add_provider()', replay=True)
 vd.option('vfake_salt', '', 'Use a non-empty string to enable deterministic fakes')
+
+@VisiData.cached_property
+def fake(vd):
+    import faker
+    return faker
 
 def addFakerProviders(fake, providers):
     '''
