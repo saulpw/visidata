@@ -7,7 +7,7 @@ import os
 
 import visidata
 from visidata import VisiData, BaseSheet, vd, AttrDict
-from visidata.vendor.appdirs import user_config_dir
+from visidata.vendor.appdirs import user_config_dir, user_cache_dir
 
 
 # [settingname] -> { objname(Sheet-instance/Sheet-type/'global'/'default'): Option/Command/longname }
@@ -356,6 +356,10 @@ def _get_config_file():
         return xdg_config_file
     else:
         return visidata.Path('~/.visidatarc')
+
+
+def _get_cache_dir():
+    return visidata.Path(user_cache_dir('visidata'))
 
 
 @VisiData.api
