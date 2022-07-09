@@ -48,7 +48,9 @@ class ZipSheet(Sheet):
 
     @asyncthread
     def extract(self, *rows, path=None):
-        self.zfp.extractall(members=[r.filename for r in rows], path=path)
+        for r in Progress(rows):
+            self.zfp.extractall(members=[r.filename], path=path)
+            vd.status(f'extracted {r.filename}')
 
     @property
     def zfp(self):

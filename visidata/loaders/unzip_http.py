@@ -20,30 +20,48 @@
 
 from dataclasses import dataclass
 
+import os
 import sys
 import io
 import time
 import zlib
 import struct
 import fnmatch
+import pathlib
+import urllib.parse
 
 import urllib3
 
-__version__ = '0.3'
+__version__ = '0.4dev'
 
 
 def error(s):
     raise Exception(s)
 
 
-@dataclass
+def get_bits(val:int, *args):
+    'Generate bitfields (one for each arg) from LSB to MSB.'
+    for n in args:
+        x = val & (2**n-1)
+        val >>= n
+        yield x
+
+
 class RemoteZipInfo:
-    filename:str = ''
-    date_time:int = 0
-    header_offset:int = 0
-    compress_type:int = 0
-    compress_size:int = 0
-    file_size:int = 0
+    def __init__(self, filename:str='',
+                       date_time:int = 0,
+                       header_offset:int = 0,
+                       compress_type:int = 0,
+                       compress_size:int = 0,
+                       file_size:int = 0):
+        self.filename = filename
+        self.header_offset = header_offset
+        self.compress_type = compress_type
+        self.compress_size = compress_size
+        self.file_size = file_size
+
+        sec, mins, hour, day, mon, year = get_bits(date_time, 5, 6, 5, 5, 4, 7)
+        self.date_time = (year+1980, mon, day, hour, mins, sec)
 
     def parse_extra(self, extra):
         i = 0
@@ -98,11 +116,15 @@ class RemoteZipFile:
     def infolist(self):
         return list(self.infoiter())
 
+    def namelist(self):
+        return list(r.filename for r in self.infoiter())
+
     def infoiter(self):
         resp = self.http.request('HEAD', self.url)
         r = resp.headers.get('Accept-Ranges', '')
         if r != 'bytes':
-            error(f"Accept-Ranges header must be 'bytes' ('{r}')")
+            hostname = urllib.parse.urlparse(self.url).netloc
+            error(f"{hostname} does not support HTTP range requests (Accept-Ranges header ('{r}') is not 'bytes')")
 
         self.zip_size = int(resp.headers['Content-Length'])
         resp = self.get_range(self.zip_size-65536, 65536)
@@ -147,6 +169,19 @@ class RemoteZipFile:
 
             rzi.parse_extra(extra)
             yield rzi
+
+    def extractall(self, path, members=None):
+        path = path or pathlib.Path('.')
+        for fn in members or self.namelist():
+            outpath = path/fn
+            os.makedirs(outpath.parent, exist_ok=True)
+            with self.open(fn) as fpin:
+                with open(path/fn, mode='wb') as fpout:
+                    while True:
+                        r = fpin.read(65536)
+                        if not r:
+                            break
+                        fpout.write(r)
 
     def get_range(self, start, n):
         return self.http.request('GET', self.url, headers={'Range': f'bytes={start}-{start+n-1}'}, preload_content=False)
