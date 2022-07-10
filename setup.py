@@ -25,7 +25,7 @@ setup(name='visidata',
           'python-dateutil',
           'windows-curses; platform_system == "Windows"'
       ],
-      packages=['visidata',  'visidata.loaders', 'visidata.tests'],
+      packages=['visidata',  'visidata.loaders', 'visidata.vendor', 'visidata.tests'],
       include_package_data=True,
       data_files = [('share/man/man1', ['visidata/man/vd.1', 'visidata/man/visidata.1'])],
       package_data={'visidata': ['man/vd.1', 'man/vd.txt', 'ddw/input.ddw']},
