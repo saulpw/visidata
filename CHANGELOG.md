@@ -2,6 +2,10 @@
 
 # 2.9 (2022-04-XX)
 
+- add XDG support (thanks @jck for the PR #1420)
+    - `options.config` default is now `"$XDG_CONFIG_HOME"/visidata/config.py` if `$XDG_CONFIG_HOME` is set and `config.py` exists. If not, falls back to the standard `/home/.visidatarc`.
+    - vendors [appdirs.py](https://github.com/ActiveState/appdirs/blob/master/appdirs.py)
+
 ## Improvements
 
 - [cli] when `-v` or `-h` VisiData now does not read config or do anything else (requested by @geekscrapy #1340)
