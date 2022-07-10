@@ -12,6 +12,8 @@ For a primer on configuring VisiData through setting options, see [jsvine's tuto
 
 The **.visidatarc** in the user's home directory is plain Python code, and can contain additional commands or key bindings.
 
+(Alternatively, since v2.9, VisiData has [XDG support](https://github.com/saulpw/visidata/pull/1420). If `$XDG_CONFIG_HOME` is set and the file `"$XDG_CONFIG_HOME"/visidata/config.py` exists, this will be loaded as the user's default configuration file.)
+
 Longnames are names given to executable commands for ease of keystroke remapping. For example, the longname `select-row` is assigned to commands which select the current row in a sheet. On default, this longname is bound to the keystroke `s`.
 
 From within VisiData, type `z Ctrl+H` to open the **Commands Sheet**. This is a reference for all of the commands available on the current sheet. For a deeper exploration of commands, check out [API reference manual](https://www.visidata.org/docs/api/commands.html).
