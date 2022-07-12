@@ -35,9 +35,9 @@ class RangeColumn(Column):
         self.formatter = 'range'
 
     def format_range(self, fmtstr):
-        return self.formatrangecol
+        return self._format
 
-    def formatrangecol(self, typedval, *args, **kwargs):
+    def _format(self, typedval, *args, **kwargs):
         if typedval is None:
             return None
         return formatRange(self.origcol, typedval)
