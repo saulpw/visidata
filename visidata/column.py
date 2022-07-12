@@ -214,14 +214,14 @@ class Column(Extensible):
         self._formatMaker = getattr(self, 'format_'+(self.formatter or 'generic'))
         return self._formatMaker(self._formatdict)(*args, **kwargs)
 
-    def formatValue(self, typedval):
+    def formatValue(self, typedval, width=None):
         'Return displayable string of *typedval* according to ``Column.fmtstr``.'
         if typedval is None:
             return None
 
         if self.type is anytype:
             if isinstance(typedval, (dict, list, tuple)):
-                return clipstr(iterchars(typedval), self.width*2)[0]
+                return clipstr(iterchars(typedval), width)[0]
 
         if isinstance(typedval, bytes):
             typedval = typedval.decode(options.encoding, options.encoding_errors)
@@ -338,7 +338,7 @@ class Column(Extensible):
         dw = DisplayWrapper(cellval)
 
         try:
-            dw.display = self.format(typedval) or ''
+            dw.display = self.format(typedval, width=self.width*2) or ''
 
             # annotate cells with raw value type in anytype columns, except for strings
             if self.type is anytype and type(cellval) is not str:
