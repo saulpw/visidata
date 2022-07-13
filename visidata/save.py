@@ -52,6 +52,13 @@ def iterdispvals(sheet, *cols, format=False):
                     elif isinstance(dispval, TypedExceptionWrapper):
                         dispval = options_safe_error or str(dispval)
                         break
+                    # for format_generic, save dict, list, tuple as str
+                    # we want to apply e.g. format_range to tuple
+                    elif isinstance(dispval, (dict, list, tuple)):
+                        if t.__name__ == "formatValue":
+                            dispval = str(dispval)
+                        else:
+                            dispval = t(dispval)
                     else:
                         dispval = t(dispval)
 
