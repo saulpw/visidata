@@ -18,12 +18,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from dataclasses import dataclass
-
 import os
-import sys
 import io
-import time
 import zlib
 import struct
 import fnmatch
@@ -32,7 +28,7 @@ import urllib.parse
 
 import urllib3
 
-__version__ = '0.4dev'
+__version__ = '0.4'
 
 
 def error(s):
