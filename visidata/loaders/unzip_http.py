@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import sys
 import os
 import io
 import zlib
@@ -28,12 +29,14 @@ import urllib.parse
 
 import urllib3
 
-__version__ = '0.4'
+__version__ = '0.5'
 
 
 def error(s):
     raise Exception(s)
 
+def warning(s):
+    print(s, file=sys.stderr)
 
 def get_bits(val:int, *args):
     'Generate bitfields (one for each arg) from LSB to MSB.'
@@ -58,6 +61,9 @@ class RemoteZipInfo:
 
         sec, mins, hour, day, mon, year = get_bits(date_time, 5, 6, 5, 5, 4, 7)
         self.date_time = (year+1980, mon, day, hour, mins, sec)
+
+    def is_dir(self):
+        return self.filename.endswith('/')
 
     def parse_extra(self, extra):
         i = 0
@@ -117,6 +123,10 @@ class RemoteZipFile:
 
     def infoiter(self):
         resp = self.http.request('HEAD', self.url)
+        r = resp.headers.get('Accept-Ranges', '')
+        if r != 'bytes':
+            hostname = urllib.parse.urlparse(self.url).netloc
+            warning(f"{hostname} Accept-Ranges header ('{r}') is not 'bytes'--trying anyway")
 
         self.zip_size = int(resp.headers['Content-Length'])
         resp = self.get_range(self.zip_size-65536, 65536)
@@ -137,6 +147,11 @@ class RemoteZipFile:
             error('cannot find central directory')
 
         filehdr_index = 65536 - (self.zip_size - cdir_start)
+
+        if filehdr_index < 0:
+            resp = self.get_range(cdir_start, self.zip_size - cdir_start)
+            filehdr_index = 0
+
         cdir_end = filehdr_index + cdir_bytes
         while filehdr_index < cdir_end:
             sizeof_cdirentry = struct.calcsize(self.fmt_cdirentry)
@@ -200,12 +215,12 @@ class RemoteZipFile:
             return self.get_range(f.header_offset + sizeof_localhdr + fnlen + extralen, f.compress_size)
         elif method == 8: # DEFLATE
             resp = self.get_range(f.header_offset + sizeof_localhdr + fnlen + extralen, f.compress_size)
-            return RemoteZipStream(resp, f)
+            return io.BufferedReader(RemoteZipStream(resp, f))
         else:
             error(f'unknown compression method {method}')
 
     def open_text(self, fn):
-        return io.TextIOWrapper(io.BufferedReader(self.open(fn)))
+        return io.TextIOWrapper(self.open(fn))
 
 
 class RemoteZipStream(io.RawIOBase):
