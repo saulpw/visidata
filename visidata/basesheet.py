@@ -99,9 +99,10 @@ class BaseSheet(DrawablePane):
         self.mouseX = 0
         self.mouseY = 0
         self.hasBeenModified = False
-        self.sidebar = ''
 
         super().__init__(**kwargs)
+
+        self._sidebar = ''
 
     def setModified(self):
         if not self.hasBeenModified:
@@ -247,6 +248,16 @@ class BaseSheet(DrawablePane):
     def evalExpr(self, expr, **kwargs):
         'Evaluate Python expression *expr* in the context of *kwargs* (may vary by sheet type).'
         return eval(expr, vd.getGlobals(), None)
+
+    @property
+    def sidebar(self):
+        'Default implementation just returns set value.  Overrideable.'
+        return self._sidebar
+
+    @sidebar.setter
+    def sidebar(self, v):
+        'Default implementation just sets value.  Overrideable.'
+        self._sidebar = v
 
 
 @VisiData.api
