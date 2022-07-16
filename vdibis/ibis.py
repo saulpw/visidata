@@ -2,10 +2,6 @@ from copy import copy
 from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace
 from visidata import ItemColumn, AttrColumn, Column, TextSheet
 
-vd.option('color_sidebar', 'black on 114 blue', 'color of sidebar')
-vd.option('disp_sidebar', '', 'sheet attribute to display in a sidebar overlay')
-
-
 def dtype_to_type(dtype):
     import numpy as np
     # Find the underlying numpy dtype for any pandas extension dtypes
@@ -52,54 +48,23 @@ class IbisColumn(ItemColumn):
     pass
 
 
-def iterwraplines(lines, width=80):
-    import textwrap
-    for line in lines:
-        yield from textwrap.wrap(line, width=width, subsequent_indent='  ')
-
-
-def clipbox(scr, lines, attr, title=''):
-    scr.erase()
-    scr.bkgd(attr)
-    scr.box()
-    h, w = scr.getmaxyx()
-    clipdraw(scr, 0, w-len(title)-6, f"| {title} |", attr)
-    for i, line in enumerate(lines):
-        clipdraw(scr, i+1, 2, line, attr)
-
-
 class IbisSheet(Sheet):
-    def draw(self, scr):
-        super().draw(scr)
-
-        try:
-            sidebar_text = str(getattr(self, self.options.disp_sidebar, '')).splitlines()
-        except Exception as e:
-            vd.exceptionCaught(e)
-            sidebar_text = stacktrace(e)
-
-        if not sidebar_text:
-            return
-
-        h, w = scr.getmaxyx()
-        maxh, maxw = 0, 0
-
-        lines = list(iterwraplines(sidebar_text, width=w//2))
-
-        maxh = min(h-2, len(lines)+2)
-        maxw = min(w//2, max(map(len, lines))+4)
-
-        sidebar_scr = scr.derwin(maxh, maxw, h-maxh-1, w-maxw-1)
-        clipbox(sidebar_scr, lines, colors.color_sidebar, title=self.options.disp_sidebar)
-
     def cycle_sidebar(self):
         sidebars = ['', 'ibis_sql', 'ibis_expr', 'ibis_substrait']
         try:
-            i = sidebars.index(self.options.disp_sidebar)+1
+            i = sidebars.index(self._sidebar)+1
         except ValueError:
             i = 0
+        self._sidebar = sidebars[i%len(sidebars)]
 
-        vd.options.disp_sidebar = sidebars[i % len(sidebars)]
+    @property
+    def sidebar(self):
+        if self._sidebar == 'ibis_sql':
+            return self.ibis_sql
+        elif self._sidebar == 'ibis_expr':
+            return str(self.ibis_expr)
+        elif self._sidebar == 'ibis_substrait':
+            return str(self.ibis_substrait)
 
     @property
     def ibis_expr(self):
@@ -270,14 +235,12 @@ IbisSheet.addCommand(',', 'select-equal-cell', 'ibis_selection.append(cursorCol.
 IbisSheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.ibis_filters.extend(vs.ibis_selection); vs.ibis_selection.clear(); vd.push(vs)', 'open duplicate sheet with only selected rows'),
 IbisSheet.addCommand('v', 'sidebar-cycle', 'cycle_sidebar()')
 
-IbisSheet.addCommand('', 'sidebar-sql', 'vd.options.disp_sidebar="ibis_sql"')
-IbisSheet.addCommand('', 'sidebar-substrait', 'vd.options.disp_sidebar="ibis_substrait"')
-IbisSheet.addCommand('', 'sidebar-ibis-expr', 'vd.options.disp_sidebar="ibis_expr"')
-IbisSheet.addCommand('', 'sidebar-none', 'vd.options.disp_sidebar=""')
+IbisSheet.addCommand('', 'sidebar-sql', 'sheet.sidebar="ibis_sql"')
+IbisSheet.addCommand('', 'sidebar-substrait', 'sheet.sidebar="ibis_substrait"')
+IbisSheet.addCommand('', 'sidebar-ibis-expr', 'sheet.sidebar="ibis_expr"')
+IbisSheet.addCommand('', 'sidebar-none', 'sheet.sidebar=""')
 
-IbisSheet.addCommand('', 'open-ibis-expr', 'vd.push(TextSheet(name, "ibis", source=str(ibis_expr).splitlines()))')
-IbisSheet.addCommand('', 'open-ibis-sql', 'vd.push(TextSheet(name, "sql", source=ibis_sql.splitlines()))')
-IbisSheet.addCommand('', 'open-ibis-substrait', 'vd.push(TextSheet(name, "substrait", source=ibis_substrait.splitlines()))')
+IbisSheet.addCommand('', 'open-sidebar', 'vd.push(TextSheet(name, _sidebar, source=sidebar.splitlines()))')
 
 vd.addMenuItem('View', 'Sidebar', 'None', 'sidebar-none')
 vd.addMenuItem('View', 'Sidebar', 'Ibis expr', 'sidebar-ibis')
