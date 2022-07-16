@@ -1,6 +1,6 @@
 from copy import copy
 from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace
-from visidata import ItemColumn, AttrColumn, Column, TextSheet
+from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply
 
 def dtype_to_type(dtype):
     import numpy as np
@@ -46,6 +46,22 @@ class IbisIndexSheet(IndexSheet):
 
 class IbisColumn(ItemColumn):
     pass
+
+
+@IbisColumn.api
+@asyncthread
+def memo_aggregate(col, agg, rows):
+    'Show aggregated value in status, and add ibis expr to memory for use later.'
+
+    aggexpr = col.ibis_aggr(agg.name)  # ignore rows, do over whole query
+
+    aggval = col.sheet.con.execute(aggexpr)
+    typedval = wrapply(agg.type or col.type, aggval)
+    dispval = col.format(typedval)
+    k = col.name+'_'+agg.name
+    vd.status(f'{k}={dispval}')
+    vd.memory[k] = aggval
+    # store aggexpr somewhere to use in later subquery
 
 
 class IbisSheet(Sheet):
@@ -216,7 +232,12 @@ def get_ibis_col(col, query):
 
 @Column.property
 def ibis_aggrs(col):
-    return [getattr(col.ibis_col, aggname)().name(f'{aggname}_{col.name}') for aggname in (col.aggstr or '').split()]
+    return [col.ibis_aggr(aggname) for aggname in (col.aggstr or '').split()]
+
+
+@Column.api
+def ibis_aggr(col, aggname):
+    return getattr(col.ibis_col, aggname)().name(f'{aggname}_{col.name}')
 
 
 IbisSheet.init('ibis_filters', list, copy=True)
