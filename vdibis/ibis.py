@@ -1,4 +1,4 @@
-from copy import copy, deepcopy
+from copy import copy
 from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace
 from visidata import ItemColumn, AttrColumn, Column, TextSheet
 
@@ -121,7 +121,7 @@ class IbisSheet(Sheet):
             q = q.filter(self.ibis_filters)
 
         if self._ordering:
-            q = q.sort_by([(col.get_ibis_col(q), not rev) for col, rev in self._ordering])
+            q = q.sort_by([(col.get_ibis_col(self.query), not rev) for col, rev in self._ordering])
 
         return q
 
