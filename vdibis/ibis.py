@@ -126,14 +126,22 @@ class IbisSheet(Sheet):
         else:
             self.con = ibis.connect(str(self.ibis_source))
 
-        self.query_result = self.con.execute(self.query)
+        self.query_result = self.con.execute(self.query.mutate(__n__=lambda t: t.count()))
+
+        self.options.disp_rstatus_fmt = self.options.disp_rstatus_fmt.replace('nRows', 'countRows')
 
         oldkeycols = {c.name:c for c in self.keyCols}
         self.columns = []
+        self._nrows_col = -1
+
         for i, colname in enumerate(self.query_result.columns):
             keycol=oldkeycols.get(colname, Column()).keycol
             if i < self.nKeys:
                 keycol = i+1
+
+            if colname == '__n__':
+                self._nrows_col = i+1
+                continue
 
             self.addColumn(IbisColumn(colname, i+1,
                            type=dtype_to_type(self.query_result.dtypes[i]),
@@ -141,6 +149,12 @@ class IbisSheet(Sheet):
                            ibis_name=colname))
 
         yield from self.query_result.itertuples()
+
+    @property
+    def countRows(self):
+        if not self.rows or self._nrows_col < 0:
+            return self.nRows
+        return self.rows[0][self._nrows_col]  # __n__
 
     def groupBy(self, groupByCols):
         aggr_cols = [c.ibis_col.count() for c in groupByCols]
