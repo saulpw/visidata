@@ -26,13 +26,14 @@ Query various database backends without loading the entire database.
 
 - `v` to cycle the sidebar between the generated SQL, the Ibis expression, the Substrait, and no sidebar
 - `Shift+F` frequency table
-  - Enter to select one value
-- hide column
-- zM unfurl-col
-- set column types
-- rename col
-- aggregation (name must be function on Ibis column expr; e.g. use `mean`, `avg` is not available)
-- sort
+  - on the Frequency Sheet, `Enter` to select one value
+- `-` to hide column
+- `zM` unfurl-col
+- `~`/`@`/`#`/`$`/`%` to set column types
+- `^` to rename col
+- `+` to aggregate (name must be function on Ibis column expr; e.g. use `mean`, `avg` is not available)
+- `z+` to calculate aggregation immediately
+- `[` and `]` family to sort
 - `,` to select rows
 - `gt` to toggle selection
 - `"` to filter selection

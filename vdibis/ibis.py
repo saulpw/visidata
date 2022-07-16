@@ -75,12 +75,7 @@ class IbisSheet(Sheet):
 
     @property
     def sidebar(self):
-        if self._sidebar == 'ibis_sql':
-            return self.ibis_sql
-        elif self._sidebar == 'ibis_expr':
-            return str(self.ibis_expr)
-        elif self._sidebar == 'ibis_substrait':
-            return str(self.ibis_substrait)
+        return getattr(self, self._sidebar, '')
 
     @property
     def ibis_expr(self):
@@ -270,15 +265,7 @@ IbisSheet.addCommand(',', 'select-equal-cell', 'ibis_selection.append(cursorCol.
 IbisSheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.ibis_filters.extend(vs.ibis_selection); vs.ibis_selection.clear(); vd.push(vs)', 'open duplicate sheet with only selected rows'),
 IbisSheet.addCommand('v', 'sidebar-cycle', 'cycle_sidebar()')
 
-IbisSheet.addCommand('', 'sidebar-sql', 'sheet.sidebar="ibis_sql"')
-IbisSheet.addCommand('', 'sidebar-substrait', 'sheet.sidebar="ibis_substrait"')
-IbisSheet.addCommand('', 'sidebar-ibis-expr', 'sheet.sidebar="ibis_expr"')
-IbisSheet.addCommand('', 'sidebar-none', 'sheet.sidebar=""')
-
 IbisSheet.addCommand('', 'open-sidebar', 'vd.push(TextSheet(name, _sidebar, source=sidebar.splitlines()))')
 
-vd.addMenuItem('View', 'Sidebar', 'None', 'sidebar-none')
-vd.addMenuItem('View', 'Sidebar', 'Ibis expr', 'sidebar-ibis')
-vd.addMenuItem('View', 'Sidebar', 'SQL expr', 'sidebar-sql')
-vd.addMenuItem('View', 'Sidebar', 'Substrait', 'sidebar-substrait')
-vd.addMenuItem('View', 'Sidebar', 'Cycle options', 'sidebar-cycle')
+vd.addMenuItem('View', 'Sidebar', 'cycle' 'sidebar-cycle')
+vd.addMenuItem('View', 'Sidebar', 'open', 'open-sidebar')
