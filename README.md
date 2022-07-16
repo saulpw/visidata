@@ -4,15 +4,15 @@ Query various database backends without loading the entire database.
 
 ## Install
 
-1. Clone the repo:
+Clone the repo:
 
     git clone https://github.com/saulpw/vdibis.git
 
-2. Install the dependencies (`ibis-framework`):
+Install the dependencies (`ibis-framework`):
 
     pip install -r vdibis/requirements.txt
 
-3. Manually install and load the plugin:
+Manually install and load the plugin:
 
     mkdir -p ~/.visidata/plugins
     ln -s `pwd`/vdibis/vdibis ~/.visidata/plugins
