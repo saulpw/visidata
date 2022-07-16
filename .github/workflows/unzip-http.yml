@@ -1,0 +1,29 @@
+name: Update Vendorized unzip-http
+on:
+  repository_dispatch:
+    types: [unzip-http]
+
+
+jobs:
+  update-unzip-http:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: saulpw/unzip-http
+          path: unzip-http
+      - uses: actions/checkout@v3
+        with:
+          path: visidata
+      - name: copy unzip_http.py
+        run: |
+          cp "unzip-http/unzip_http.py" "visidata/loaders/"
+      - name: create pull request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          path: visidata
+          commit-message: "[zip http] upgrade vendor unzip_http"
+          delete-branch: true
+          base: develop
+          draft: false
