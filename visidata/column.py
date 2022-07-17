@@ -5,6 +5,7 @@ import itertools
 import threading
 import re
 import time
+import json
 
 from visidata import options, anytype, stacktrace, vd
 from visidata import asyncthread, dispwidth, clipstr, iterchars
@@ -101,7 +102,7 @@ class Column(Extensible):
         self.height = 1       # max height, None/0 to auto-compute for each row
         self.keycol = 0       # keycol index (or 0 if not key column)
         self.expr = None      # Column-type-dependent parameter
-        self.formatter = 'generic'
+        self.formatter = ''
 
         self.setCache(cache)
         for k, v in kwargs.items():
@@ -210,6 +211,12 @@ class Column(Extensible):
     def format_generic(self, fmtstr):
         return self.formatValue
 
+    def format_json(self, fmtstr):
+        return lambda v,*args,**kwargs: json.dumps(v)
+
+    def format_python(self, fmtstr):
+        return str
+
     def format(self, *args, **kwargs):
         self._formatMaker = getattr(self, 'format_'+(self.formatter or 'generic'))
         return self._formatMaker(self._formatdict)(*args, **kwargs)
@@ -221,7 +228,8 @@ class Column(Extensible):
 
         if self.type is anytype:
             if isinstance(typedval, (dict, list, tuple)):
-                return clipstr(iterchars(typedval), width)[0]
+                dispval, dispw = clipstr(iterchars(typedval), width)
+                return dispval
 
         if isinstance(typedval, bytes):
             typedval = typedval.decode(options.encoding, options.encoding_errors)

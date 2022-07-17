@@ -1,3 +1,4 @@
 sheet	col	row	longname	input	keystrokes	comment
 			open-file	sample_data/y77d-th95.json.gz	o	
 y77d-th95	geolocation		unfurl-col			row-wise expand current column of lists (e.g. [2]) or dicts (e.g. {3}) within that column
+y77d-th95_geolocation_unfurled	geolocation_value		setcol-formatter	json		set formatter for current column (generic, json, python)

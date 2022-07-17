@@ -1214,4 +1214,5 @@ BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to:
 def format_enum(col, fmtdict):
     return lambda val, fmtdict=fmtdict: fmtdict.__getitem__(val)
 
+Sheet.addCommand('', 'setcol-formatter', 'cursorCol.formatter=input("set formatter to: ", value=cursorCol.formatter or "generic")', 'set formatter for current column (generic, json, python)')
 Sheet.addCommand('', 'setcol-format-enum', 'cursorCol.fmtstr=input("format replacements (k=v): ", value=f"{cursorDisplay}=", i=len(cursorDisplay)+1); cursorCol.formatter="enum"', 'add secondary type translator to current column from input enum (space-separated)')

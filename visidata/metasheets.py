@@ -42,6 +42,7 @@ class ColumnsSheet(Sheet):
             ColumnAttr('voffset', type=int, width=0),
             ColumnAttr('type', 'typestr'),
             ColumnAttr('fmtstr'),
+            ColumnAttr('formatter'),
             ValueColumn('value'),
             ColumnAttr('expr'),
             ColumnAttr('ncalcs', type=int, width=0, cache=False),

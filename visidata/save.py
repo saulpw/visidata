@@ -3,6 +3,7 @@ from visidata import *
 
 vd.option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 vd.option('safe_error', '#ERR', 'error string to use while saving', replay=True)
+vd.option('disp_formatter', 'generic', 'formatter to use for display and saving', replay=True)
 
 @Sheet.api
 def safe_trdict(vs):
@@ -28,7 +29,7 @@ def iterdispvals(sheet, *cols, format=False):
     for col in cols:
         transformers[col] = [ col.type ]
         if format:
-            formatMaker = getattr(col, 'format_'+(col.formatter or 'generic'))
+            formatMaker = getattr(col, 'format_'+(col.formatter or sheet.options.disp_formatter))
             transformers[col].append(formatMaker(col._formatdict))
         trdict = sheet.safe_trdict()
         if trdict:
