@@ -42,7 +42,11 @@ class EnableCursor:
     def __exit__(self, exc_type, exc_val, tb):
         with suppress(curses.error):
             curses.curs_set(0)
-            curses.mousemask(curses.MOUSE_ALL if options.mouse_interval else 0)
+            if options.mouse_interval:
+                curses.mousemask(curses.MOUSE_ALL if hasattr(curses, "MOUSE_ALL") else -1)
+            else:
+                curses.mousemask(0)
+
 
 def until_get_wch(scr):
     'Ignores get_wch timeouts'
