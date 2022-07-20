@@ -50,7 +50,7 @@ def select_around(sheet, n):
     sheet.select(list(itertools.chain(*(winrows for row, winrows in sheet.window(n, n) if sheet.isSelected(row)))))
 
 
-Sheet.addCommand('w', 'addcol-window', 'addcol_window(cursorCol)')
+Sheet.addCommand('w', 'addcol-window', 'addcol_window(cursorCol)', 'add column where each row contains a list of that row, nBefore rows, and nAfter rows')
 Sheet.addCommand('', 'select-around-n', 'select_around(input("select rows around selected: ", value=1))')
 
 vd.addMenuItem('Row', 'Select', 'N rows around each selected row', 'select-around-n')

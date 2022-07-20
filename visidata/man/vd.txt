@@ -257,6 +257,10 @@ DESCRIPTION
       &               concatenate top two sheets in Sheets Stack
      g&               concatenate all sheets in Sheets Stack
 
+      w nBefore nAfter
+                      add column where each row contains a list of that row,
+                      nBefore rows, and nAfter rows
+
    Data Visualization
       . (dot)       plot current numeric column vs key columns. The numeric
                     key column is used for the x-axis; categorical key column
@@ -684,7 +688,8 @@ COMMANDLINE OPTIONS
                                                      sively on DirSheet
      --dir-hidden                 False              load hidden files on
                                                      DirSheet
-     --config=str                 ~/.visidatarc      config file to exec in
+     --config=Path                /home/kefala/.visidatarc
+                                                     config file to exec in
                                                      Python
      --play=str                                      file.vd to replay
      --batch                      False              replay in batch mode
@@ -753,6 +758,7 @@ COMMANDLINE OPTIONS
      (see FILES).
 
      disp_splitwin_pct   0                   height of second sheet on screen
+     color_sidebar       black on 114 blue   color of sidebar
      disp_currency_fmt   %.02f               default fmtstr to format for cur‐
                                              rency values
      disp_float_fmt      {:.02f}             default fmtstr to format for
@@ -781,10 +787,10 @@ COMMANDLINE OPTIONS
      color_note_type     226 yellow          color of cell note for non-str
                                              types in anytype columns
      color_note_row      220 yellow          color of row note on left edge
-     disp_column_sep     |                   separator between columns
+     disp_column_sep     │                   separator between columns
      disp_keycol_sep     ║                   separator between key columns and
                                              rest of columns
-     disp_rowtop_sep     |
+     disp_rowtop_sep     │
      disp_rowmid_sep     ⁝
      disp_rowbot_sep     ⁝
      disp_rowend_sep     ║
@@ -817,7 +823,7 @@ COMMANDLINE OPTIONS
                                              status line prefix
      disp_lstatus_max    0                   maximum length of left status
                                              line
-     disp_status_sep      |                  separator between statuses
+     disp_status_sep      │                  separator between statuses
      color_keystrokes    bold 233 black on 110 cyan
                                              color of input keystrokes on sta‐
                                              tus line
@@ -834,6 +840,8 @@ COMMANDLINE OPTIONS
      disp_edit_fill      _                   edit field fill character
      disp_unprintable    ·                   substitute character for unprint‐
                                              ables
+     disp_formatter      generic             formatter to use for display and
+                                             saving
      disp_menu           True                show menu on top line when not
                                              active
      disp_menu_keys      True                show keystrokes inline in sub‐
@@ -981,4 +989,4 @@ SUPPORTED SOURCES
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                    December 12, 2021                   Linux/MacOS
+Linux/MacOS                      July 19, 2022                     Linux/MacOS

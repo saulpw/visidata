@@ -1,4 +1,4 @@
-.Dd December 12, 2021
+.Dd July 19, 2022
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -397,6 +397,9 @@ open
 .No concatenate top two sheets in Sy Sheets Stack
 .It Ic "g&"
 .No concatenate all sheets in Sy Sheets Stack
+.Pp
+.It Ic " w" Ar nBefore nAfter
+.No add column where each row contains a list of that row, Ar nBefore No rows, and Ar nAfter No rows
 .Pp
 .El
 .Ss Data Visualization
@@ -979,7 +982,7 @@ source of randomized startup messages
 walk source path recursively on DirSheet
 .It Sy --dir-hidden No "                False"
 load hidden files on DirSheet
-.It Sy --config Ns = Ns Ar "str                " No "~/.visidatarc"
+.It Sy --config Ns = Ns Ar "Path               " No "/home/kefala/.visidatarc"
 config file to exec in Python
 .It Sy --play Ns = Ns Ar "str                  " No ""
 file.vd to replay
@@ -1041,6 +1044,8 @@ source of plugins sheet
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Sy "disp_splitwin_pct  " No "0"
 height of second sheet on screen
+.It Sy "color_sidebar      " No "black on 114 blue"
+color of sidebar
 .It Sy "disp_currency_fmt  " No "%.02f"
 default fmtstr to format for currency values
 .It Sy "disp_float_fmt     " No "{:.02f}"
@@ -1151,6 +1156,8 @@ cell color to use when editing cell
 edit field fill character
 .It Sy "disp_unprintable   " No "\[u00B7]"
 substitute character for unprintables
+.It Sy "disp_formatter     " No "generic"
+formatter to use for display and saving
 .It Sy "disp_menu          " No "True"
 show menu on top line when not active
 .It Sy "disp_menu_keys     " No "True"

@@ -199,6 +199,9 @@ vd(1)                                                                           
       <span style="font-weight:bold;">&amp;</span>               concatenate top two sheets in <span style="font-weight:bold;">Sheets</span> <span style="font-weight:bold;">Stack</span>
      <span style="font-weight:bold;">g&amp;</span>               concatenate all sheets in <span style="font-weight:bold;">Sheets</span> <span style="font-weight:bold;">Stack</span>
 
+      <span style="font-weight:bold;">w</span> <span style="text-decoration:underline;">nBefore</span> <span style="text-decoration:underline;">nAfter</span>
+                      add column where each row contains a list of that row, <span style="text-decoration:underline;">nBefore</span> rows, and <span style="text-decoration:underline;">nAfter</span> rows
+
    <span style="font-weight:bold;">Data</span> <span style="font-weight:bold;">Visualization</span>
       <span style="font-weight:bold;">.</span> (dot)       plot current numeric column vs key columns. The numeric key column is used for the x-axis; categorical key column values determine color.
      <span style="font-weight:bold;">g.</span>             plot a graph of all visible numeric columns vs key columns.
@@ -479,7 +482,8 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--motd-url</span>=<span style="text-decoration:underline;">str</span>                                  source of randomized startup messages
      <span style="font-weight:bold;">--dir-recurse</span>                False              walk source path recursively on DirSheet
      <span style="font-weight:bold;">--dir-hidden</span>                 False              load hidden files on DirSheet
-     <span style="font-weight:bold;">--config</span>=<span style="text-decoration:underline;">str</span>                 ~/.visidatarc      config file to exec in Python
+     <span style="font-weight:bold;">--config</span>=<span style="text-decoration:underline;">Path</span>                /home/kefala/.visidatarc
+                                                     config file to exec in Python
      <span style="font-weight:bold;">--play</span>=<span style="text-decoration:underline;">str</span>                                      file.vd to replay
      <span style="font-weight:bold;">--batch</span>                      False              replay in batch mode (with no interface and all status sent to stdout)
      <span style="font-weight:bold;">--output</span>=<span style="text-decoration:underline;">NoneType</span>            None               save the final visible sheet to output at the end of replay
@@ -512,6 +516,7 @@ vd(1)                                                                           
      Display options can only be set via the <span style="text-decoration:underline;">Options</span> <span style="text-decoration:underline;">Sheet</span> or a <span style="text-decoration:underline;">.visidatarc</span> (see <span style="text-decoration:underline;">FILES</span>).
 
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">splitwin</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">pct</span>   0                   height of second sheet on screen
+     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">sidebar</span>       black on 114 blue   color of sidebar
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">currency</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>   %.02f               default fmtstr to format for currency values
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">float</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>      {:.02f}             default fmtstr to format for float values
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">int</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>        {:.0f}              default fmtstr to format for int values
@@ -571,6 +576,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">edit</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">cell</span>     white               cell color to use when editing cell
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">edit</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fill</span>      _                   edit field fill character
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">unprintable</span>    ·                   substitute character for unprintables
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">formatter</span>      generic             formatter to use for display and saving
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span>           True                show menu on top line when not active
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">keys</span>      True                show keystrokes inline in submenus
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span>          black on 110 cyan   color of menu items in general
@@ -692,5 +698,5 @@ vd(1)                                                                           
 <span style="font-weight:bold;">AUTHOR</span>
      <span style="font-weight:bold;">VisiData</span> was made by Saul Pwanson &lt;<span style="text-decoration:underline;">vd@saul.pw</span>&gt;.
 
-Linux/MacOS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    December 12, 2021                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    Linux/MacOS
+Linux/MacOS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      July 19, 2022                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      Linux/MacOS
 </pre></section>

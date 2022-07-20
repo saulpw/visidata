@@ -1,4 +1,4 @@
-.Dd December 12, 2021
+.Dd July 19, 2022
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -397,6 +397,9 @@ open
 .No concatenate top two sheets in Sy Sheets Stack
 .It Ic "g&"
 .No concatenate all sheets in Sy Sheets Stack
+.Pp
+.It Ic " w" Ar nBefore nAfter
+.No add column where each row contains a list of that row, Ar nBefore No rows, and Ar nAfter No rows
 .Pp
 .El
 .Ss Data Visualization
