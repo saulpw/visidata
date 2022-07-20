@@ -4,21 +4,20 @@
 
 - add XDG support (thanks @jck for the PR #1420)
     - `options.config` default is now `"$XDG_CONFIG_HOME"/visidata/config.py` if `$XDG_CONFIG_HOME` is set and `config.py` exists. If not, falls back to the standard `/home/.visidatarc`.
-    - vendors [appdirs.py](https://github.com/ActiveState/appdirs/blob/master/appdirs.py)
+    - vendor [appdirs.py](https://github.com/ActiveState/appdirs/blob/master/appdirs.py)
 - [cmdlog] support variables in .vdj (requested by @jungle-boogie #1364)
-    - in the .vdj, write variables like so: ${variableName}
-    - then on the CLI: vd -p foo.vdj variableName=bar
-- [loaders arrow] new Apache Arrow IPC loader/saver (requested by @d-miketa #1369)
+    - in the .vdj, write variables like so: `${variableName}`
+    - then on the CLI: `vd -p foo.vdj variableName=bar`
+- [loaders arrow] new Apache Arrow IPC loader/saver (requested by @d-miketa #1369) (requires `pyarrow`)
     - add `.arrow` (file) and .arrows (streaming) formats
-    - many thanks to @voltrondata for its support of the open source data ecosystem!
-    - add more native **parquet** loader via `pyarrow`
+    - add more native `parquet` loader via `pyarrow`
 - preliminary "windowing" for referencing x rows before and y rows after in an expression (requested by @maxigit #1399, @MMesch #1129, @samuelludwig #1210)
     - press `w` (longname: `addcol-window`) followed by two numbers: the number of rows to aggregate *before* and *after* the current row.
-    - there will be a new column, "foo_window", where each row contains a list of aggregated rows. after that, e.g. `=` *sum(foo_window* to get a running total for each row
-- add `setcol-format-enum` which takes e.g. *"A=apple B=banana"* and uses that as a mapping when formatting a column.
+    - there will be a new column, `foo_window`, where each row contains a list of aggregated rows. after that, e.g. `=` `sum(foo_window)` to get a running total for each row
+- add `setcol-format-enum` which takes e.g. `A=apple B=banana` and uses that as a mapping when formatting a column.
 - vendor `https://github.com/saulpw/unzip-http`; allows the downloading of individual files from a .zip file over http without downloading the entire archive (requires `urllib3` package)
 - add `save-source` to save a root sheet directly to its source
-- add `setcol-formatter` to specify formatting function used for Column (default: `generic` formats based on type and fmtstr)
+- add `setcol-formatter` to specify formatting function used for Column (default: `generic` formats based on type and fmtstr).  Can be `json` or `python` or a custom formatter
 
 
 ## Improvements
@@ -31,7 +30,7 @@
     - If replaying, and *col* is an `int`, the CmdLog will index by position.
     - If *col* is a `str` it will index by column name.
 - [display] preview first n elements of a list/dict cell
-- [regex] add unbound addcol-<regex> commands
+- [regex] add unbound `addcol-<regex>` commands
 - [rtl] improvements to right-to-left text display (requested by @dotancohen #1392)
 - [man] have `vd --help` open the .txt manpage by default (requested by @halloleo #1332)
 - [mouse] invert scroll wheel direction (requested by @marcobra #1351)
@@ -47,7 +46,7 @@
 - [aggregators] fix quartile aggregators (reported by @pnfnp #1312)
 - [aggregators] fix copying of aggregators when duplicating a sheet (reported by @frosencrantz #1373)
 - [canvas] do not use "other" label when there are exactly 9 columns being plotted (reported by @tdussa #1198)
-- [cli] fix +:subsheet:col:row: when load_lazy is False
+- [cli] fix `+:subsheet:col:row:` when `load_lazy` is False
 - [delete-row] clear deleted rows from `selectedRows` (reported by @geekscrapy #1284)
 - [exec-longname] output warning, if longname does not exist
 - [expr] prefer visible columns over hidden columns (reported by @frosencrantz #1360)
