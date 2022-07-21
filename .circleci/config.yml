@@ -22,6 +22,8 @@ jobs:
       - run: echo 'export PYTHONPATH=~/visidata:~/visidata/visidata' >> $BASH_ENV
       - run: source $BASH_ENV
       - run: locale
+      - run: pip3 install .
+      - run: vd # make sure visidata runs without dependencies
       - run:
           name: dependencies
           command: |
