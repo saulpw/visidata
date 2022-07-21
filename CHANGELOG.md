@@ -1,7 +1,9 @@
 # VisiData version history
 
-# 2.9 (2022-04-XX)
+# 2.9 (2022-07-20)
 
+- [ux] add confirming modal dialog
+    - only "y" required to confirm
 - add XDG support (thanks @jck for the PR #1420)
     - `options.config` default is now `"$XDG_CONFIG_HOME"/visidata/config.py` if `$XDG_CONFIG_HOME` is set and `config.py` exists. If not, falls back to the standard `$HOME/.visidatarc`.
     - vendor [appdirs.py](https://github.com/ActiveState/appdirs/blob/master/appdirs.py)
@@ -36,8 +38,6 @@
 - [mouse] invert scroll wheel direction (requested by @marcobra #1351)
 - [performance] improvements to plotting of empty canvas, multiline display, and draw-ing functions
 - [plugins] notify when plugin update available (thanks @geekscrapy for PR #1355)
-- [ux] add confirming modal dialog
-    - only "y" required to confirm
 
 ## Bugfixes
 
