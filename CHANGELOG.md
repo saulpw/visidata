@@ -1,6 +1,6 @@
 # VisiData version history
 
-# 2.9 (2022-04-XX)
+# 2.9 (2022-07-20)
 
 - [ux] add confirming modal dialog
     - only "y" required to confirm
