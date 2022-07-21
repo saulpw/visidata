@@ -43,7 +43,7 @@ class EnableCursor:
         with suppress(curses.error):
             curses.curs_set(0)
             if options.mouse_interval:
-                curses.mousemask(curses.MOUSE_ALL if hasattr(curses, "MOUSE_ALL") else -1)
+                curses.mousemask(curses.MOUSE_ALL if hasattr(curses, "MOUSE_ALL") else 0xffffffff)
             else:
                 curses.mousemask(0)
 
