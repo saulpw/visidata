@@ -1,6 +1,7 @@
 import codecs
 import tarfile
 import zipfile
+from visidata.loaders import unzip_http
 
 from visidata import vd, VisiData, asyncthread, Sheet, Progress, Menu, options
 from visidata import ColumnAttr, Column, date, datetime, Path
@@ -20,14 +21,19 @@ VisiData.open_tbz2 = VisiData.open_tar
 @VisiData.api
 class ZipSheet(Sheet):
     'Wrapper for `zipfile` library.'
-    rowtype = 'files' # rowdef ZipInfo
+    rowtype = 'files' # rowdef [ZipInfo, zipfile.Path]
     columns = [
-        ColumnAttr('filename'),
-        ColumnAttr('file_size', type=int),
+        Column('directory',
+            getter=lambda col,row: str(row[1].parent) if str(row[1].parent) == '.' else str(row[1].parent) + '/'),
+        Column('filename', getter=lambda col,row: row[1].name + row[1].suffix),
+        Column('abspath', type=str, width=0, getter=lambda col,row: row[1]),
+        Column('ext', getter=lambda col,row: row[0].filename.endswith('/') and '/' or row[1].ext),
+        Column('size', getter=lambda col,row: row[0].file_size, type=int),
+        Column('compressed_size', type=int, getter=lambda col,row: row[0].compress_size),
         Column('date_time', type=date,
-               getter=lambda col, row: datetime.datetime(*row.date_time)),
-        ColumnAttr('compress_size', type=int)
+               getter=lambda col, row: datetime.datetime(*row[0].date_time)),
     ]
+    nKeys = 2
 
     def openZipFile(self, fp, *args, **kwargs):
         '''Use VisiData input to handle password-protected zip files.'''
@@ -39,7 +45,8 @@ class ZipSheet(Sheet):
                 return fp.open(*args, **kwargs, pwd=pwd.encode('utf-8'))
             vd.error(err)
 
-    def openRow(self, fi):
+    def openRow(self, row):
+            fi, zpath = row
             decodedfp = codecs.iterdecode(self.openZipFile(self.zfp, fi),
                                           encoding=options.encoding,
                                           errors=options.encoding_errors)
@@ -47,16 +54,23 @@ class ZipSheet(Sheet):
 
     @asyncthread
     def extract(self, *rows, path=None):
-        self.zfp.extractall(members=[r.filename for r in rows], path=path)
+        for r, path in Progress(rows):
+            self.zfp.extractall(members=[r.filename], path=path)
+            vd.status(f'extracted {r.filename}')
 
     @property
     def zfp(self):
+        if '://' in str(self.source):
+            unzip_http.warning = vd.warning
+            return unzip_http.RemoteZipFile(str(self.source))
+
         return zipfile.ZipFile(str(self.source), 'r')
 
     def iterload(self):
         with self.zfp as zf:
             for zi in Progress(zf.infolist()):
-                yield zi
+#                yield [zi, zipfile.Path(zf, at=zi.filename)]
+                yield [zi, Path(zi.filename)]
 
 
 class TarSheet(Sheet):

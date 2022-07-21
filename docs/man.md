@@ -84,8 +84,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">zh</span>  <span style="font-weight:bold;">zj</span>  <span style="font-weight:bold;">zk</span>  <span style="font-weight:bold;">zl</span>   scroll one left/down/up/right
 
    <span style="font-weight:bold;">Column</span> <span style="font-weight:bold;">Manipulation</span>
-       <span style="text-decoration:underline;">_</span> (underscore)
-                      toggle width of current column between full and default width
+       <span style="text-decoration:underline;">_</span> (underbar)   toggle width of current column between full and default width
       <span style="font-weight:bold;">g</span><span style="text-decoration:underline;">_</span>              toggle widths of all visible columns between full and default width
       <span style="font-weight:bold;">z</span><span style="text-decoration:underline;">_</span> <span style="text-decoration:underline;">number</span>       adjust width of current column to <span style="text-decoration:underline;">number</span>
      <span style="font-weight:bold;">gz</span><span style="text-decoration:underline;">_</span> <span style="text-decoration:underline;">number</span>       adjust widths of all visible columns to Ar number
@@ -107,7 +106,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">gz=</span> <span style="text-decoration:underline;">expr</span>         set current column for selected rows to the items in result of Python sequence <span style="text-decoration:underline;">expr</span>
       <span style="font-weight:bold;">z=</span> <span style="text-decoration:underline;">expr</span>         evaluate Python expression on current row and set current cell with result of Python <span style="text-decoration:underline;">expr</span>
 
-       i (iota)       add column with incremental values
+       i              add column with incremental values
       gi              set current column for selected rows to incremental values
       zi <span style="text-decoration:underline;">step</span>         add column with values at increment <span style="text-decoration:underline;">step</span>
      gzi <span style="text-decoration:underline;">step</span>         set current column for selected rows at increment <span style="text-decoration:underline;">step</span>
@@ -149,15 +148,17 @@ vd(1)                                                                           
      <span style="font-weight:bold;">g&quot;</span>               open duplicate sheet with all rows
      <span style="font-weight:bold;">gz&quot;</span>              open duplicate sheet with deepcopy of selected rows
 
+     The rows in these duplicated sheets (except deepcopy) are references to rows on the original source sheets, and so edits to the filtered rows will naturally be reflected in the original rows.  Use <span style="font-weight:bold;">g'</span> to freeze sheet contents in a deliberate copy.
+
    <span style="font-weight:bold;">Editing</span> <span style="font-weight:bold;">Rows</span> <span style="font-weight:bold;">and</span> <span style="font-weight:bold;">Cells</span>
        <span style="font-weight:bold;">a</span>   <span style="font-weight:bold;">za</span>         append blank row/column; appended columns cannot be copied to clipboard
       <span style="font-weight:bold;">ga</span>  <span style="font-weight:bold;">gza</span> <span style="text-decoration:underline;">number</span>  append <span style="text-decoration:underline;">number</span> blank rows/columns
        <span style="font-weight:bold;">d</span>   <span style="font-weight:bold;">gd</span>         delete current/selected row(s)
        <span style="font-weight:bold;">y</span>   <span style="font-weight:bold;">gy</span>         yank (copy) current/all selected row(s) to clipboard in <span style="font-weight:bold;">Memory</span> <span style="font-weight:bold;">Sheet</span>
-       <span style="font-weight:bold;">x</span>  <span style="font-weight:bold;">gx</span>          cut (copy and delete) current/all selected row(s) to clipboard in <span style="font-weight:bold;">Memory</span> <span style="font-weight:bold;">Sheet</span>
+       <span style="font-weight:bold;">x</span>   <span style="font-weight:bold;">gx</span>         cut (copy and delete) current/all selected row(s) to clipboard in <span style="font-weight:bold;">Memory</span> <span style="font-weight:bold;">Sheet</span>
       <span style="font-weight:bold;">zy</span>  <span style="font-weight:bold;">gzy</span>         yank (copy) contents of current column for current/selected row(s) to clipboard in <span style="font-weight:bold;">Memory</span> <span style="font-weight:bold;">Sheet</span>
       <span style="font-weight:bold;">zd</span>  <span style="font-weight:bold;">gzd</span>         set contents of current column for current/selected row(s) to <span style="font-weight:bold;">options.null</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">value</span>
-      <span style="font-weight:bold;">zx</span> <span style="font-weight:bold;">gzx</span>          cut (copy and delete) contents of current column for current/selected row(s) to clipboard in <span style="font-weight:bold;">Memory</span> <span style="font-weight:bold;">Sheet</span>
+      <span style="font-weight:bold;">zx</span>  <span style="font-weight:bold;">gzx</span>         cut (copy and delete) contents of current column for current/selected row(s) to clipboard in <span style="font-weight:bold;">Memory</span> <span style="font-weight:bold;">Sheet</span>
        <span style="font-weight:bold;">p</span>    <span style="font-weight:bold;">P</span>         paste clipboard rows after/before current row
       <span style="font-weight:bold;">zp</span>  <span style="font-weight:bold;">gzp</span>         set cells of current column for current/selected row(s) to last clipboard value
       <span style="font-weight:bold;">zP</span>  <span style="font-weight:bold;">gzP</span>         paste to cells of current column for current/selected row(s) using the system clipboard
@@ -198,6 +199,9 @@ vd(1)                                                                           
       <span style="font-weight:bold;">&amp;</span>               concatenate top two sheets in <span style="font-weight:bold;">Sheets</span> <span style="font-weight:bold;">Stack</span>
      <span style="font-weight:bold;">g&amp;</span>               concatenate all sheets in <span style="font-weight:bold;">Sheets</span> <span style="font-weight:bold;">Stack</span>
 
+      <span style="font-weight:bold;">w</span> <span style="text-decoration:underline;">nBefore</span> <span style="text-decoration:underline;">nAfter</span>
+                      add column where each row contains a list of that row, <span style="text-decoration:underline;">nBefore</span> rows, and <span style="text-decoration:underline;">nAfter</span> rows
+
    <span style="font-weight:bold;">Data</span> <span style="font-weight:bold;">Visualization</span>
       <span style="font-weight:bold;">.</span> (dot)       plot current numeric column vs key columns. The numeric key column is used for the x-axis; categorical key column values determine color.
      <span style="font-weight:bold;">g.</span>             plot a graph of all visible numeric columns vs key columns.
@@ -206,8 +210,8 @@ vd(1)                                                                           
 
      <span style="font-weight:bold;">Canvas-specific</span> <span style="font-weight:bold;">Commands</span>
          <span style="font-weight:bold;">+</span>   <span style="font-weight:bold;">-</span>              increase/decrease zoom level, centered on cursor
-         <span style="text-decoration:underline;">_</span> (underscore)     zoom to fit full extent
-        <span style="font-weight:bold;">z</span><span style="text-decoration:underline;">_</span> (underscore)     set aspect ratio
+         <span style="text-decoration:underline;">_</span> (underbar)       zoom to fit full extent
+        <span style="font-weight:bold;">z</span><span style="text-decoration:underline;">_</span> (underbar)       set aspect ratio
          <span style="font-weight:bold;">x</span> <span style="text-decoration:underline;">xmin</span> <span style="text-decoration:underline;">xmax</span>        set <span style="text-decoration:underline;">xmin</span>/<span style="text-decoration:underline;">xmax</span> on graph
          <span style="font-weight:bold;">y</span> <span style="text-decoration:underline;">ymin</span> <span style="text-decoration:underline;">ymax</span>        set <span style="text-decoration:underline;">ymin</span>/<span style="text-decoration:underline;">ymax</span> on graph
          <span style="font-weight:bold;">s</span>   <span style="font-weight:bold;">t</span>   <span style="font-weight:bold;">u</span>          select/toggle/unselect rows on source sheet contained within canvas cursor
@@ -232,7 +236,7 @@ vd(1)                                                                           
          <span style="font-weight:bold;">Z</span>                  push second sheet on current pane's stack to the top of the other pane's stack
          <span style="font-weight:bold;">Tab</span>                jump to other pane
         <span style="font-weight:bold;">gTab</span>                swap panes
-        <span style="font-weight:bold;">g^^</span> (g Ctrl+^)      cycle through sheets
+        <span style="font-weight:bold;">g</span> <span style="font-weight:bold;">Ctrl+^</span>            cycle through sheets
 
    <span style="font-weight:bold;">Other</span> <span style="font-weight:bold;">Commands</span>
      <span style="font-weight:bold;">Q</span>                quit current sheet and remove it from the <span style="font-weight:bold;">CommandLog</span>
@@ -243,7 +247,6 @@ vd(1)                                                                           
 
       <span style="font-weight:bold;">^L</span>              refresh screen
       <span style="font-weight:bold;">^R</span>              reload current sheet
-     <span style="font-weight:bold;">z^R</span>              clear cache for current column
       <span style="font-weight:bold;">^Z</span>              suspend VisiData process
       <span style="font-weight:bold;">^G</span>              show cursor position and bounds of current sheet on status line
       <span style="font-weight:bold;">^V</span>              show version and copyright information on status line
@@ -257,7 +260,6 @@ vd(1)                                                                           
      <span style="font-weight:bold;">g^X</span> <span style="text-decoration:underline;">module</span>       import Python <span style="text-decoration:underline;">module</span> in the global scope
 
    <span style="font-weight:bold;">Internal</span> <span style="font-weight:bold;">Sheets</span> <span style="font-weight:bold;">List</span>
-      <span style="font-weight:bold;">.</span>  <span style="font-weight:bold;">VisiDataMenu</span> (Shift+V)      browse list of core sheets
       <span style="font-weight:bold;">.</span>  <span style="font-weight:bold;">Directory</span> <span style="font-weight:bold;">Sheet</span>             browse properties of files in a directory
       <span style="font-weight:bold;">.</span>  <span style="font-weight:bold;">Plugins</span> <span style="font-weight:bold;">Sheet</span>               browse, install, and (de)activate plugins
       <span style="font-weight:bold;">.</span>  <span style="font-weight:bold;">Memory</span> <span style="font-weight:bold;">Sheet</span> (Alt+Shift+M)        browse saved values, including clipboard
@@ -436,7 +438,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--note-format-exc</span>=<span style="text-decoration:underline;">str</span>        ?                  cell note for an exception during formatting
      <span style="font-weight:bold;">--note-getter-exc</span>=<span style="text-decoration:underline;">str</span>        !                  cell note for an exception during computation
      <span style="font-weight:bold;">--note-type-exc</span>=<span style="text-decoration:underline;">str</span>          !                  cell note for an exception during type conversion
-     <span style="font-weight:bold;">--scroll-incr</span>=<span style="text-decoration:underline;">int</span>            3                  amount to scroll with scrollwheel
+     <span style="font-weight:bold;">--scroll-incr</span>=<span style="text-decoration:underline;">int</span>            -3                 amount to scroll with scrollwheel
      <span style="font-weight:bold;">--name-joiner</span>=<span style="text-decoration:underline;">str</span>            _                  string to join sheet or column names
      <span style="font-weight:bold;">--value-joiner</span>=<span style="text-decoration:underline;">str</span>                              string to join display values
      <span style="font-weight:bold;">--wrap</span>                       False              wrap text to fit window width on TextSheet
@@ -480,7 +482,8 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--motd-url</span>=<span style="text-decoration:underline;">str</span>                                  source of randomized startup messages
      <span style="font-weight:bold;">--dir-recurse</span>                False              walk source path recursively on DirSheet
      <span style="font-weight:bold;">--dir-hidden</span>                 False              load hidden files on DirSheet
-     <span style="font-weight:bold;">--config</span>=<span style="text-decoration:underline;">str</span>                 ~/.visidatarc      config file to exec in Python
+     <span style="font-weight:bold;">--config</span>=<span style="text-decoration:underline;">Path</span>                /home/kefala/.visidatarc
+                                                     config file to exec in Python
      <span style="font-weight:bold;">--play</span>=<span style="text-decoration:underline;">str</span>                                      file.vd to replay
      <span style="font-weight:bold;">--batch</span>                      False              replay in batch mode (with no interface and all status sent to stdout)
      <span style="font-weight:bold;">--output</span>=<span style="text-decoration:underline;">NoneType</span>            None               save the final visible sheet to output at the end of replay
@@ -513,6 +516,7 @@ vd(1)                                                                           
      Display options can only be set via the <span style="text-decoration:underline;">Options</span> <span style="text-decoration:underline;">Sheet</span> or a <span style="text-decoration:underline;">.visidatarc</span> (see <span style="text-decoration:underline;">FILES</span>).
 
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">splitwin</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">pct</span>   0                   height of second sheet on screen
+     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">sidebar</span>       black on 114 blue   color of sidebar
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">currency</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>   %.02f               default fmtstr to format for currency values
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">float</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>      {:.02f}             default fmtstr to format for float values
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">int</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>        {:.0f}              default fmtstr to format for int values
@@ -528,9 +532,9 @@ vd(1)                                                                           
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">note</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">pending</span>  bold magenta        color of note in pending cells
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">note</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">type</span>     226 yellow          color of cell note for non-str types in anytype columns
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">note</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">row</span>      220 yellow          color of row note on left edge
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">column</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">sep</span>     |                   separator between columns
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">column</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">sep</span>     │                   separator between columns
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">keycol</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">sep</span>     ║                   separator between key columns and rest of columns
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">rowtop</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">sep</span>     |
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">rowtop</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">sep</span>     │
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">rowmid</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">sep</span>     ⁝
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">rowbot</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">sep</span>     ⁝
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">rowend</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">sep</span>     ║
@@ -558,7 +562,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">status</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>     {sheet.shortcut}› {sheet.name}|
                                              status line prefix
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">lstatus</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">max</span>    0                   maximum length of left status line
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">status</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">sep</span>      |                  separator between statuses
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">status</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">sep</span>      │                  separator between statuses
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">keystrokes</span>    bold 233 black on 110 cyan
                                              color of input keystrokes on status line
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">status</span>        bold black on 110 cyan
@@ -572,6 +576,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">edit</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">cell</span>     white               cell color to use when editing cell
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">edit</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fill</span>      _                   edit field fill character
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">unprintable</span>    ·                   substitute character for unprintables
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">formatter</span>      generic             formatter to use for display and saving
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span>           True                show menu on top line when not active
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">keys</span>      True                show keystrokes inline in submenus
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span>          black on 110 cyan   color of menu items in general
@@ -693,5 +698,5 @@ vd(1)                                                                           
 <span style="font-weight:bold;">AUTHOR</span>
      <span style="font-weight:bold;">VisiData</span> was made by Saul Pwanson &lt;<span style="text-decoration:underline;">vd@saul.pw</span>&gt;.
 
-Linux/MacOS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    December 12, 2021                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    Linux/MacOS
+Linux/MacOS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      July 19, 2022                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      Linux/MacOS
 </pre></section>

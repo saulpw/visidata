@@ -1,0 +1,6 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.tsv	o	
+sample	Units		aggregate-col	sum	+	Add aggregator to current column
+sample	Units		type-int		#	set type of current column to int
+sample	Units		freeze-col		'	add a frozen copy of current column with all cells evaluated
+sample			columns-sheet		Shift+C	open Columns Sheet: edit column properties for current sheet

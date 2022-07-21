@@ -11,8 +11,10 @@ def ensureLoaded(vd, sheets):
     vd.status('loading %d sheets' % len([t for t in threads if t]))
 
 
-@VisiData.api
-def createJoinedSheet(vd, sheets, jointype=''):
+@Sheet.api
+def openJoin(sheet, others, jointype=''):
+    sheets = [sheet] + others
+
     sheets[1:] or vd.fail("join requires more than 1 sheet")
 
     if jointype == 'append':
@@ -28,6 +30,7 @@ def createJoinedSheet(vd, sheets, jointype=''):
         return vs
     else:
         return JoinSheet('+'.join(vs.name for vs in sheets), sources=sheets, jointype=jointype)
+
 
 vd.jointypes = [{'key': k, 'desc': v} for k, v in {
     'inner': 'only rows which match keys on all sheets',
@@ -291,9 +294,9 @@ class ConcatSheet(Sheet):
 
 
 
-IndexSheet.addCommand('&', 'join-selected', 'vd.push(createJoinedSheet(someSelectedRows, jointype=chooseOne(jointypes)))', 'merge selected sheets with visible columns from all, keeping rows according to jointype')
+IndexSheet.addCommand('&', 'join-selected', 'left, rights = someSelectedRows[0], someSelectedRows[1:]; vd.push(left.openJoin(rights, jointype=chooseOne(jointypes)))', 'merge selected sheets with visible columns from all, keeping rows according to jointype')
 IndexSheet.bindkey('g&', 'join-selected')
-Sheet.addCommand('&', 'join-sheets-top2', 'vd.push(createJoinedSheet(vd.sheets[:2], jointype=chooseOne(jointypes)))', 'concatenate top two sheets in Sheets Stack')
-Sheet.addCommand('g&', 'join-sheets-all', 'vd.push(createJoinedSheet(vd.sheets, jointype=chooseOne(jointypes)))', 'concatenate all sheets in Sheets Stack')
+Sheet.addCommand('&', 'join-sheets-top2', 'vd.push(openJoin(vd.sheets[1:2], jointype=chooseOne(jointypes)))', 'concatenate top two sheets in Sheets Stack')
+Sheet.addCommand('g&', 'join-sheets-all', 'vd.push(openJoin(vd.sheets[1:], jointype=chooseOne(jointypes)))', 'concatenate all sheets in Sheets Stack')
 
 vd.addMenuItem('Data', 'Join', 'selected sheets', 'join-selected')

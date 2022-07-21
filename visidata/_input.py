@@ -42,7 +42,11 @@ class EnableCursor:
     def __exit__(self, exc_type, exc_val, tb):
         with suppress(curses.error):
             curses.curs_set(0)
-            curses.mousemask(-1)
+            if options.mouse_interval:
+                curses.mousemask(curses.MOUSE_ALL if hasattr(curses, "MOUSE_ALL") else 0xffffffff)
+            else:
+                curses.mousemask(0)
+
 
 def until_get_wch(scr):
     'Ignores get_wch timeouts'
@@ -117,7 +121,7 @@ class HistoryState:
         if self.hist_idx > 0:
             self.hist_idx -= 1
             v = self.history[self.hist_idx]
-        i = len(v)
+        i = len(str(v))
         return v, i
 
     def down(self, v, i):
@@ -129,7 +133,7 @@ class HistoryState:
         else:
             v = self.prev_val
             self.hist_idx = None
-        i = len(v)
+        i = len(str(v))
         return v, i
 
 
@@ -245,11 +249,13 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
             i += 1
 
         if i < 0: i = 0
+        # v may have a non-str type with no len()
+        v = str(v)
         if i > len(v): i = len(v)
         first_action = False
         complete_state.reset()
 
-    return v
+    return type(value)(v)
 
 
 @VisiData.api
@@ -265,8 +271,9 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
         except AcceptInput as e:
             v = e.args[0]
 
-        # clear keyboard buffer to neutralize multi-line pastes (issue#585)
-        curses.flushinp()
+        if vd.scrFull:  # check if curses initialised
+            # clear keyboard buffer to neutralize multi-line pastes (issue#585)
+            curses.flushinp()
 
     if display:
         vd.status('"%s"' % v)

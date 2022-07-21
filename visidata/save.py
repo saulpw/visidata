@@ -3,6 +3,7 @@ from visidata import *
 
 vd.option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 vd.option('safe_error', '#ERR', 'error string to use while saving', replay=True)
+vd.option('disp_formatter', 'generic', 'formatter to use for display and saving', replay=True)
 
 @Sheet.api
 def safe_trdict(vs):
@@ -28,7 +29,8 @@ def iterdispvals(sheet, *cols, format=False):
     for col in cols:
         transformers[col] = [ col.type ]
         if format:
-            transformers[col].append(col.format)
+            formatMaker = getattr(col, 'format_'+(col.formatter or sheet.options.disp_formatter))
+            transformers[col].append(formatMaker(col._formatdict))
         trdict = sheet.safe_trdict()
         if trdict:
             transformers[col].append(lambda v,trdict=trdict: v.translate(trdict))
@@ -161,8 +163,17 @@ def save_txt(vd, p, *vsheets):
     vd.status('%s save finished' % p)
 
 
+@BaseSheet.api
+def rootSheet(sheet):
+    r = sheet
+    while isinstance(r.source, BaseSheet):
+        r = r.source
+
+    return r
+
 BaseSheet.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName()), sheet, confirm_overwrite=options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)')
+BaseSheet.addCommand('', 'save-source', 'vd.saveSheets(rootSheet().source, rootSheet(), confirm_overwrite=options.confirm_overwrite)', 'save root sheet to its source')
 BaseSheet.addCommand('g^S', 'save-all', 'vd.saveSheets(inputPath("save all sheets to: "), *vd.stackedSheets, confirm_overwrite=options.confirm_overwrite)', 'save all sheets to given file or directory)')
-IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelectedRows, value="_".join(vs.name or "blank" for vs in source)), *selectedRows, confirm_overwrite=options.confirm_overwrite)', 'save all selected sheets to given file or directory')
+IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelectedRows, value="_".join(getattr(vs, "name", None) or "blank" for vs in selectedRows)), *selectedRows, confirm_overwrite=options.confirm_overwrite)', 'save all selected sheets to given file or directory')
 Sheet.addCommand('', 'save-col', 'save_cols([cursorCol])', 'save current column only to filename in format determined by extension (default .tsv)')
 Sheet.addCommand('', 'save-col-keys', 'save_cols(keyCols + [cursorCol])', 'save key columns and current column to filename in format determined by extension (default .tsv)')

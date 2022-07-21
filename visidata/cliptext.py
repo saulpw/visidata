@@ -2,9 +2,9 @@ import unicodedata
 import sys
 import functools
 
-from visidata import options
+from visidata import options, drawcache
 
-__all__ = ['clipstr', 'clipdraw', 'dispwidth']
+__all__ = ['clipstr', 'clipdraw', 'clipbox', 'dispwidth', 'iterchars']
 
 disp_column_fill = ' '
 
@@ -52,6 +52,7 @@ def wcwidth(cc, ambig=1):
         return 0
 
 
+@functools.lru_cache(maxsize=100000)
 def dispwidth(ss, maxwidth=None):
     'Return display width of string, according to unicodedata width and options.disp_ambig_width.'
     disp_ambig_width = options.disp_ambig_width
@@ -77,6 +78,27 @@ def _dispch(c, oddspacech=None, combch=None, modch=None):
 
     return c, dispwidth(c)
 
+
+def iterchars(x):
+    if isinstance(x, dict):
+        yield from '{%d}' % len(x)
+        for k, v in x.items():
+            yield ' '
+            yield from iterchars(k)
+            yield '='
+            yield from iterchars(v)
+
+    elif isinstance(x, (list, tuple)):
+        yield from '[%d] ' % len(x)
+        for i, v in enumerate(x):
+            if i != 0:
+                yield from '; '
+            yield from iterchars(v)
+
+    else:
+        yield from str(x)
+
+
 @functools.lru_cache(maxsize=100000)
 def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
     '''Return clipped string and width in terminal display characters.
@@ -94,7 +116,7 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
             ret += c
             w += dispwidth(c)
 
-        if w > dispw-trunchlen+1:
+        if dispw and w > dispw-trunchlen+1:
             ret = ret[:-2] + trunch # replace final char with ellipsis
             w += trunchlen
             break
@@ -102,21 +124,22 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
     return ret, w
 
 
-def clipstr(s, dispw):
+@drawcache
+def clipstr(s, dispw, truncator=None, oddspace=None):
     if options.visibility:
         return _clipstr(s, dispw,
-                        trunch=options.disp_truncator,
-                        oddspacech=options.disp_oddspace,
+                        trunch=options.disp_truncator if truncator is None else truncator,
+                        oddspacech=options.disp_oddspace if oddspace is None else oddspace,
                         modch='\u25e6',
                         combch='\u25cc')
     else:
         return _clipstr(s, dispw,
-                trunch=options.disp_truncator,
-                oddspacech=options.disp_oddspace,
+                trunch=options.disp_truncator if truncator is None else truncator,
+                oddspacech=options.disp_oddspace if oddspace is None else oddspace,
                 modch='',
                 combch='')
 
-def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False):
+def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False, **kwargs):
     'Draw string `s` at (y,x)-(y,x+w) with curses attr, clipping with ellipsis char.  if rtl, draw inside (x-w, x).  If *clear*, clear whole editing area before displaying. Returns width drawn (max of w).'
     if scr:
         _, windowWidth = scr.getmaxyx()
@@ -133,7 +156,7 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False):
             return w
 
         # convert to string just before drawing
-        clipped, dispw = clipstr(str(s), w)
+        clipped, dispw = clipstr(s, w, **kwargs)
         if rtl:
             # clearing whole area (w) has negative display effects; clearing just dispw area is useless
 #            scr.addstr(y, x-dispw-1, disp_column_fill*dispw, attr)
@@ -148,3 +171,13 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False):
 #                ).with_traceback(sys.exc_info()[2])
 
     return dispw
+
+
+def clipbox(scr, lines, attr, title=''):
+    scr.erase()
+    scr.bkgd(attr)
+    scr.box()
+    h, w = scr.getmaxyx()
+    clipdraw(scr, 0, w-len(title)-6, f"| {title} |", attr)
+    for i, line in enumerate(lines):
+        clipdraw(scr, i+1, 2, line, attr)

@@ -47,7 +47,7 @@ class CsvSheet(SequenceSheet):
 @VisiData.api
 def save_csv(vd, p, sheet):
     'Save as single CSV file, handling column names as first line.'
-    with p.open_text(mode='w', encoding=sheet.options.encoding) as fp:
+    with p.open_text(mode='w', encoding=sheet.options.encoding, newline='') as fp:
         cw = csv.writer(fp, **options.getall('csv_'))
         colnames = [col.name for col in sheet.visibleCols]
         if ''.join(colnames):

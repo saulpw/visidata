@@ -1,0 +1,4 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.tsv	o	
+sample	Item	0	setcol-format-enum	Pencil=1		add secondary type translator to current column from input enum (space-separated)
+sample	Item		freeze-col		'	add a frozen copy of current column with all cells evaluated

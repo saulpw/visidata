@@ -45,10 +45,10 @@ vd.option('note_type_exc', '!', 'cell note for an exception during type conversi
 vd.option('color_note_pending', 'bold magenta', 'color of note in pending cells')
 vd.option('color_note_type', '226 yellow', 'color of cell note for non-str types in anytype columns')
 vd.option('color_note_row', '220 yellow', 'color of row note on left edge')
-vd.option('scroll_incr', 3, 'amount to scroll with scrollwheel')
-vd.option('disp_column_sep', '|', 'separator between columns')
+vd.option('scroll_incr', -3, 'amount to scroll with scrollwheel')
+vd.option('disp_column_sep', '│', 'separator between columns')
 vd.option('disp_keycol_sep', '║', 'separator between key columns and rest of columns')
-vd.option('disp_rowtop_sep', '|', '') # ╷│┬╽⌜⌐▇
+vd.option('disp_rowtop_sep', '│', '') # ╷│┬╽⌜⌐▇
 vd.option('disp_rowmid_sep', '⁝', '') # ┃┊│█
 vd.option('disp_rowbot_sep', '⁝', '') # ┊┴╿⌞█⍿╵⎢┴⌊  ⋮⁝
 vd.option('disp_rowend_sep', '║', '') # ┊┴╿⌞█⍿╵⎢┴⌊
@@ -75,6 +75,8 @@ vd.option('name_joiner', '_', 'string to join sheet or column names')
 vd.option('value_joiner', ' ', 'string to join display values')
 
 
+@VisiData.api
+@drawcache
 def splitcell(sheet, s, width=0):
     if width <= 0 or not sheet.options.textwrap_cells:
         return [s]
@@ -104,7 +106,6 @@ class LazyComputeRow:
         self.col = col
         self.sheet = sheet
         self._usedcols = set()
-        self._keys = [c.name for c in self.sheet.columns]
 
         self._lcm.clear()  # reset locals on lcm
 
@@ -116,7 +117,7 @@ class LazyComputeRow:
         return lcmobj._lcm
 
     def keys(self):
-        return self._keys + self._lcm.keys() + ['row', 'sheet', 'col']
+        return self.sheet._ordered_colnames + self._lcm.keys() + ['row', 'sheet', 'col']
 
     def __str__(self):
         return str(self.as_dict())
@@ -129,11 +130,11 @@ class LazyComputeRow:
 
     def __getitem__(self, colid):
         try:
-            i = self._keys.index(colid)
-            c = self.sheet.columns[i]
-            if c is self.col:
-                j = self._keys[i+1:].index(colid)
-                c = self.sheet.columns[i+j+1]
+            i = self.sheet._ordered_colnames.index(colid)
+            c = self.sheet._ordered_cols[i]
+            if c is self.col:  # ignore current column
+                j = self.sheet._ordered_colnames[i+1:].index(colid)
+                c = self.sheet._ordered_cols[i+j+1]
 
         except ValueError:
             try:
@@ -416,6 +417,16 @@ class TableSheet(BaseSheet):
         'List of visible key columns.'
         return sorted([c for c in self.columns if c.keycol and not c.hidden], key=lambda c:c.keycol)
 
+    @drawcache_property
+    def _ordered_cols(self):
+        'List of all columns, visible columns first.'
+        return self.visibleCols + [c for c in self.columns if c.hidden]
+
+    @drawcache_property
+    def _ordered_colnames(self):
+        'List of all column names, visible columns first.'
+        return [c.name for c in self._ordered_cols]
+
     @property
     def cursorColIndex(self):
         'Index of current column into `Sheet.columns`. Linear search; prefer `cursorCol` or `cursorVisibleColIndex`.'
@@ -483,19 +494,21 @@ class TableSheet(BaseSheet):
         self.calcColLayout()
 
     def addColumn(self, *cols, index=None):
-        'Insert all *cols* into columns at *index*, or append to end of columns if *index* is None.  Return first column.'
+        'Insert all *cols* into columns at *index*, or append to end of columns if *index* is None.  Return first column.  Mark sheet as modified if *index* is not None.'
         if not cols:
             vd.warning('no columns to add')
             return
+
+        if index is not None:
+            self.setModified()
 
         for i, col in enumerate(cols):
             col.name = self.maybeClean(col.name)
 
             vd.addUndo(self.columns.remove, col)
-            if index is None:
-                index = len(self.columns)
+            idx = len(self.columns) if index is None else index
             col.recalc(self)
-            self.columns.insert(index+i, col)
+            self.columns.insert(idx+i, col)
             Sheet.visibleCols.fget.cache_clear()
 
         return cols[0]
@@ -506,6 +519,7 @@ class TableSheet(BaseSheet):
         ccol = self.cursorCol
         if ccol and not ccol.keycol:
             index = self.columns.index(ccol)+1
+            self.cursorVisibleColIndex += 1
         return self.addColumn(*cols, index=index)
 
     def setColNames(self, rows):
@@ -942,7 +956,7 @@ class IndexSheet(Sheet):
     precious = False
 
     columns = [
-        Column('name', getter=lambda c,r: r.names[-1], setter=lambda c,r,v: setitem(r.names, -1, v)),
+        ColumnAttr('name'),
         ColumnAttr('rows', 'nRows', type=int, width=9),
         ColumnAttr('cols', 'nCols', type=int),
         ColumnAttr('keys', 'keyColNames'),
@@ -1070,10 +1084,10 @@ def quit(vd, *sheets):
 def confirmQuit(vs, verb='quit'):
     if vs.options.quitguard and vs.precious and vs.hasBeenModified:
         vd.draw_all()
-        vd.confirm(f'{verb} modified sheet "{vs.name}?" ')
+        vd.confirm(f'{verb} modified sheet "{vs.name}"? ')
     elif vs.options.getonly('quitguard', vs, False):  # if this sheet is specifically guarded
         vd.draw_all()
-        vd.confirm(f'{verb} guarded sheet "{vs.name}?" ')
+        vd.confirm(f'{verb} guarded sheet "{vs.name}"? ')
 
 
 @BaseSheet.api
@@ -1194,3 +1208,11 @@ Sheet.addCommand('z^', 'rename-col-selected', 'updateColNames(selectedRows or [c
 Sheet.addCommand('g^', 'rename-cols-row', 'updateColNames(selectedRows or [cursorRow], sheet.visibleCols)', 'set names of all unnamed visible columns to contents of selected rows (or current row)')
 Sheet.addCommand('gz^', 'rename-cols-selected', 'updateColNames(selectedRows or [cursorRow], sheet.visibleCols, overwrite=True)', 'set names of all visible columns to combined contents of selected rows (or current row)')
 BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to: ", value=sheet.name)', 'Rename current sheet')
+
+
+@Column.api
+def format_enum(col, fmtdict):
+    return lambda val, fmtdict=fmtdict,*args,**kwargs: fmtdict.__getitem__(val)
+
+Sheet.addCommand('', 'setcol-formatter', 'cursorCol.formatter=input("set formatter to: ", value=cursorCol.formatter or "generic")', 'set formatter for current column (generic, json, python)')
+Sheet.addCommand('', 'setcol-format-enum', 'cursorCol.fmtstr=input("format replacements (k=v): ", value=f"{cursorDisplay}=", i=len(cursorDisplay)+1); cursorCol.formatter="enum"', 'add secondary type translator to current column from input enum (space-separated)')

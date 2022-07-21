@@ -1,0 +1,5 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.tsv	o	
+sample	Units		type-int		#	set type of current column to int
+sample	Units		addcol-window	1 1	w	
+sample	Units_window		addcol-expr	sum(Units_window)	=	create new column from Python expression, with column names as variables

@@ -6,7 +6,7 @@ import threading
 import time
 from unittest import mock
 
-from visidata import vd, VisiData, colors, ESC, options
+from visidata import vd, VisiData, colors, ESC, options, clipbox
 
 __all__ = ['ReturnValue', 'run']
 
@@ -15,6 +15,8 @@ vd.timeouts_before_idle = 10
 
 vd.option('disp_splitwin_pct', 0, 'height of second sheet on screen')
 vd.option('mouse_interval', 1, 'max time between press/release for click (ms)', sheettype=None)
+vd.option('color_sidebar', 'black on 114 blue', 'color of sidebar')
+
 
 class ReturnValue(BaseException):
     'raise ReturnValue(ret) to exit from an inner runresult() with its result.'
@@ -24,7 +26,7 @@ class ReturnValue(BaseException):
 
 @VisiData.api
 def draw_sheet(self, scr, sheet):
-    'Erase *scr* and draw *sheet* on it, including status bars.'
+    'Erase *scr* and draw *sheet* on it, including status bars and sidebar.'
 
     sheet.ensureLoaded()
 
@@ -40,6 +42,34 @@ def draw_sheet(self, scr, sheet):
         sheet.draw(scr)
     except Exception as e:
         self.exceptionCaught(e)
+
+    try:
+        vd.drawSidebar(scr, sheet.sidebar)
+    except Exception as e:
+        vd.exceptionCaught(e)
+
+
+def iterwraplines(lines, width=80):
+    import textwrap
+    for line in lines:
+        yield from textwrap.wrap(line, width=width, subsequent_indent='  ')
+
+
+@VisiData.api
+def drawSidebar(vd, scr, text, title='sidebar'):
+    if not text:
+        return
+
+    h, w = scr.getmaxyx()
+    maxh, maxw = 0, 0
+
+    lines = list(iterwraplines(text.splitlines(), width=w//2))
+
+    maxh = min(h-2, len(lines)+2)
+    maxw = min(w//2, max(map(len, lines))+4)
+
+    sidebar_scr = scr.derwin(maxh, maxw, h-maxh-1, w-maxw-1)
+    clipbox(sidebar_scr, lines, colors.color_sidebar, title=title)
 
 
 vd.windowConfig = dict(pct=0, n=0, h=0, w=0)  # n=top line of bottom window; h=height of bottom window; w=width of screen
@@ -295,11 +325,11 @@ def initCurses():
     colors.setup()
 
     curses.noecho()
-    curses.cbreak()
 
     curses.raw()    # get control keys instead of signals
     curses.meta(1)  # allow "8-bit chars"
-    curses.mousemask(-1 if options.mouse_interval else 0)
+    curses.MOUSE_ALL = 0xffffffff
+    curses.mousemask(curses.MOUSE_ALL if options.mouse_interval else 0)
     curses.mouseinterval(options.mouse_interval)
     curses.mouseEvents = {}
 
@@ -339,6 +369,8 @@ def run(vd, *sheetlist):
     finally:
         if scr:
             curses.endwin()
+
+    vd.cancelThread(*[t for t in vd.unfinishedThreads if not t.name.startswith('save_')])
 
     if ret:
         print(ret)

@@ -12,7 +12,7 @@ vd.option('replay_movement', False, 'insert movements during replay', sheettype=
 # prefixes which should not be logged
 nonLogged = '''forget exec-longname undo redo quit
 show error errors statuses options threads jump
-replay cancel save-cmdlog macro cmdlog-sheet
+replay cancel save-cmdlog macro cmdlog-sheet menu repeat
 go- search scroll prev next page start end zoom resize visibility
 mouse suspend redraw no-op help syscopy sysopen profile toggle'''.split()
 
@@ -30,7 +30,14 @@ def open_vdj(vd, p):
     return CommandLogJsonl(p.name, source=p, precious=True)
 
 VisiData.save_vd = VisiData.save_tsv
-VisiData.save_vdj = VisiData.save_jsonl
+
+
+@VisiData.api
+def save_vdj(vd, p, *vsheets):
+    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
+        fp.write("#!vd -p\n")
+        for vs in vsheets:
+            vs.write_jsonl(fp)
 
 
 @VisiData.api
@@ -41,10 +48,10 @@ def checkVersion(vd, desired_version):
 @VisiData.api
 def fnSuffix(vd, prefix):
     i = 0
-    fn = prefix + '.vd'
+    fn = prefix + '.vdj'
     while Path(fn).exists():
         i += 1
-        fn = f'{prefix}-{i}.vd'
+        fn = f'{prefix}-{i}.vdj'
 
     return fn
 
@@ -52,6 +59,13 @@ def fnSuffix(vd, prefix):
 def inputLongname(sheet):
     longnames = set(k for (k, obj), v in vd.commands.iter(sheet))
     return vd.input("command name: ", completer=CompleteKey(sorted(longnames)), type='longname')
+
+@BaseSheet.api
+def exec_longname(sheet, longname):
+    if not sheet.getCommand(longname):
+        vd.warning(f'no command {longname}')
+        return
+    sheet.execCommand(longname)
 
 def indexMatch(L, func):
     'returns the smallest i for which func(L[i]) is true'
@@ -102,14 +116,14 @@ def getRowIndexFromStr(vs, rowstr):
         return None
 
 @Sheet.api
-def moveToCol(vs, colstr):
-    'Move cursor to column given by *colstr*, which can be either the column number or column name.'
-    try:
-        vcolidx = int(colstr)
-    except ValueError:
-        vcolidx = indexMatch(vs.visibleCols, lambda c,name=colstr: name == c.name)
+def moveToCol(vs, col):
+    'Move cursor to column given by *col*, which can be either the column number or column name.'
+    if isinstance(col, str):
+        vcolidx = indexMatch(vs.visibleCols, lambda c,name=col: name == c.name)
+    elif isinstance(col, int):
+        vcolidx = col
 
-    if vcolidx is None:
+    if vcolidx is None or vcolidx >= vs.nVisibleCols:
         return False
 
     if vs.options.replay_movement:
@@ -176,7 +190,7 @@ class _CommandLog:
 
         comment = vd.currentReplayRow.comment if vd.currentReplayRow else cmd.helpstr
         vd.activeCommand = self.newRow(sheet=sheetname,
-                                            col=str(colname),
+                                            col=colname,
                                             row=str(rowname),
                                             keystrokes=keystrokes,
                                             input=args,
@@ -215,7 +229,7 @@ class _CommandLog:
     def openHook(self, vs, src):
         while isinstance(src, BaseSheet):
             src = src.source
-        r = self.newRow(keystrokes='o', input=src, longname='open-file')
+        r = self.newRow(keystrokes='o', input=str(src), longname='open-file')
         vs.cmdlog_sheet.addRow(r)
         self.addRow(r)
 
@@ -271,10 +285,10 @@ def replay_cancel(vd):
 @VisiData.api
 def moveToReplayContext(vd, r, vs):
         'set the sheet/row/col to the values in the replay row.  return sheet'
-        if r.row:
+        if r.row not in [None, '']:
             vs.moveToRow(r.row) or vd.error('no "%s" row' % r.row)
 
-        if r.col:
+        if r.col not in [None, '']:
             vs.moveToCol(r.col) or vd.error('no "%s" column' % r.col)
 
 
@@ -311,10 +325,11 @@ def replayOne(vd, r):
                 vd.exceptionCaught(e)
                 escaped = True
         else:
+            vs = vs or vd.activeSheet
             if vs:
                 vd.push(vs)
             else:
-                vs = vd.activeSheet or vd.cmdlog
+                vs = vd.cmdlog
 
             vd.moveToReplayContext(r, vs)
 
@@ -446,12 +461,30 @@ def modifyCommand(vd):
     return vd.cmdlog.rows[-1]
 
 
+@CommandLog.api
+@asyncthread
+def repeat_for_n(cmdlog, r, n=1):
+    r.sheet = r.row = r.col = ""
+    for i in range(n):
+        vd.replayOne(r)
+
+@CommandLog.api
+@asyncthread
+def repeat_for_selected(cmdlog, r):
+    r.sheet = r.row = r.col = ""
+
+    for idx, r in enumerate(vd.sheet.rows):
+        if vd.sheet.isSelected(r):
+            vd.sheet.cursorRowIndex = idx
+            vd.replayOne(r)
+
+
 BaseSheet.init('_shortcut')
 
 
 globalCommand('gD', 'cmdlog-all', 'vd.push(vd.cmdlog)', 'open global CommandLog for all commands executed in current session')
 globalCommand('D', 'cmdlog-sheet', 'vd.push(sheet.cmdlog)', "open current sheet's CommandLog with all other loose ends removed; includes commands from parent sheets")
-globalCommand('zD', 'cmdlog-sheet-only', 'vd.push(sheet.cmdlog_sheet)', 'open current sheet\'s CommandLog with parent sheets commands\' removed')
+globalCommand('zD', 'cmdlog-sheet-only', 'vd.push(sheet.cmdlog_sheet)', 'open CommandLog for current sheet with commands from parent sheets removed')
 globalCommand('^D', 'save-cmdlog', 'saveSheets(inputPath("save cmdlog to: ", value=fnSuffix(name)), vd.cmdlog, confirm_overwrite=options.confirm_overwrite)', 'save CommandLog to filename.vd file')
 globalCommand('^U', 'replay-pause', 'vd.replay_pause()', 'pause/resume replay')
 globalCommand('^N', 'replay-advance', 'vd.replay_advance()', 'execute next row in replaying sheet')
@@ -461,7 +494,7 @@ globalCommand(None, 'show-status', 'status(input("status: "))', 'show given mess
 globalCommand('^V', 'show-version', 'status(__version_info__);', 'Show version and copyright information on status line')
 globalCommand('z^V', 'check-version', 'checkVersion(input("require version: ", value=__version_info__))', 'check VisiData version against given version')
 
-globalCommand(' ', 'exec-longname', 'execCommand(inputLongname())', 'execute command by its longname')
+globalCommand(' ', 'exec-longname', 'exec_longname(inputLongname())', 'execute command by its longname')
 
 CommandLog.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("replayed one row")', 'replay command in current row')
 CommandLog.addCommand('gx', 'replay-all', 'vd.replay(sheet)', 'replay contents of entire CommandLog')
@@ -471,8 +504,14 @@ CommandLogJsonl.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("
 CommandLogJsonl.addCommand('gx', 'replay-all', 'vd.replay(sheet)', 'replay contents of entire CommandLog')
 CommandLogJsonl.addCommand('^C', 'replay-stop', 'sheet.cursorRowIndex = sheet.nRows', 'abort replay')
 
-BaseSheet.addCommand('', 'repeat-last', 'execCommand(cmdlog_sheet.rows[-1].longname)', 'run most recent command with an empty, queried input')
-BaseSheet.addCommand('', 'repeat-input', 'r = copy(cmdlog_sheet.rows[-1]); r.sheet=r.row=r.col=""; vd.replayOne(r)', 'run previous command, along with any previous input to that command')
+BaseSheet.addCommand('', 'repeat-last', 'execCommand(vd.cmdlog.rows[-1].longname) if vd.cmdlog.rows else fail("no recent command to repeat")', 'run most recent command with an empty, queried input')
+BaseSheet.addCommand('', 'repeat-input', 'r = copy(vd.cmdlog.rows[-1]) if vd.cmdlog.rows else fail("no recent command to repeat"); vd.cmdlog.repeat_for_n(r, 1)', 'run previous modifying command (incl input)')
+BaseSheet.addCommand('', 'repeat-input-n', 'r = copy(vd.cmdlog.rows[-1]) if vd.cmdlog.rows else fail("no recent command to repeat"); vd.cmdlog.repeat_for_n(r, input("# times to repeat prev command:", value=1))', 'run previous command (incl its input) N times')
+BaseSheet.addCommand('', 'repeat-input-selected', 'r = copy(vd.cmdlog.rows[-1]) if vd.cmdlog.rows else fail("no recent command to repeat"); vd.cmdlog.repeat_for_selected(r)', 'run previous command (incl its input) for each selected row')
+
+vd.addMenuItem('Edit', 'Repeat', 'last command', 'repeat-input')
+vd.addMenuItem('Edit', 'Repeat', 'last command N times', 'repeat-input-n')
+vd.addMenuItem('Edit', 'Repeat', 'last command for all selected rows', 'repeat-input-selected')
 
 CommandLog.class_options.json_sort_keys = False
 CommandLog.class_options.encoding = 'utf-8'

@@ -7,7 +7,7 @@ BaseSheet.init('undone', list)  # list of CommandLogRow for redo after undo
 
 vd.option('undo', True, 'enable undo/redo')
 
-nonUndo = '''commit open-file'''.split()
+nonUndo = '''commit open-file reload-sheet'''.split()
 
 def isUndoableCommand(longname):
     for n in nonUndo:
@@ -26,6 +26,8 @@ def addUndo(vd, undofunc, *args, **kwargs):
         # some special commands, like open-file, do not have an undofuncs set
         if not r or not isUndoableCommand(r.longname):
             return
+        if not r.undofuncs:
+            r.undofuncs = []
         r.undofuncs.append((undofunc, args, kwargs))
 
 

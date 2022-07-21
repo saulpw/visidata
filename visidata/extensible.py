@@ -19,7 +19,7 @@ class Extensible:
         oldcopy = cls.__copy__
         def newcopy(self, *args, **kwargs):
             ret = oldcopy(self, *args, **kwargs)
-            setattr(ret, membername, getattr(self, membername) if copy else initfunc())
+            setattr(ret, membername, getattr(self, membername) if copy and hasattr(self, membername) else initfunc())
             return ret
         cls.__copy__ = newcopy
 

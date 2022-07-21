@@ -29,14 +29,25 @@ def getValues(self, rows):
 
 vd.aggregators = collections.OrderedDict()  # [aggname] -> annotated func, or list of same
 
-Column.init('aggstr', str)
+Column.init('aggstr', str, copy=True)
 
 def aggregators_get(col):
     'A space-separated names of aggregators on this column.'
     return list(vd.aggregators[k] for k in (col.aggstr or '').split())
 
 def aggregators_set(col, aggs):
-    col.aggstr = ' '.join(agg.name for agg in aggs)
+    if isinstance(aggs, str):
+        newaggs = []
+        for agg in aggs.split():
+            if agg not in vd.aggregators:
+                vd.fail(f'unknown aggregator {agg}')
+            newaggs.append(agg)
+    elif aggs is None:
+        newaggs = ''
+    else:
+        newaggs = [agg.name for agg in aggs]
+
+    col.aggstr = ' '.join(newaggs)
 
 Column.aggregators = property(aggregators_get, aggregators_set)
 
@@ -67,6 +78,7 @@ def aggregator(vd, name, func, helpstr='', *args, type=None):
             return e
 
     vd.aggregators[name] = _defaggr(name, type, _func, helpstr)
+    vd.addGlobals({name: func})
 
 ## specific aggregator implementations
 
@@ -125,11 +137,20 @@ vd.aggregators['q4'] = quantiles(4, 'quartiles (25/50/75th pctile)')
 vd.aggregators['q5'] = quantiles(5, 'quintiles (20/40/60/80th pctiles)')
 vd.aggregators['q10'] = quantiles(10, 'deciles (10/20/30/40/50/60/70/80/90th pctiles)')
 
+# since bb29b6e, a record of every aggregator
+# is needed in vd.aggregators
+for pct in (10, 20, 25, 30, 33, 40, 50, 60, 67, 70, 75, 80, 90):
+    vd.aggregators[f'p{pct}'] = percentile(pct, f'{pct}th percentile')
+
 # returns keys of the row with the max value
 vd.aggregators['keymax'] = _defaggr('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]), 'key of the maximum value')
 
 
-ColumnsSheet.columns += [ColumnAttr('aggregators','aggstr')]
+ColumnsSheet.columns += [
+    Column('aggregators',
+           getter=lambda c,r:r.aggstr,
+           setter=lambda c,r,v:setattr(r, 'aggregators', v))
+]
 
 @Sheet.api
 def addAggregators(sheet, cols, aggrnames):

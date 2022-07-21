@@ -1,7 +1,9 @@
 import math
+import random
 
 from collections import defaultdict, Counter
 from visidata import *
+from visidata.bezier import bezier
 
 # see www/design/graphics.md
 
@@ -190,7 +192,9 @@ class Plotter(BaseSheet):
     def getPixelAttrMost(self, x, y):
         'most common attr at this pixel.'
         r = self.pixels[y][x]
-        c = [(len(rows), attr, rows) for attr, rows in list(r.items()) if attr and attr not in self.hiddenAttrs]
+        if not r:
+            return 0
+        c = [(len(rows), attr, rows) for attr, rows in r.items() if attr and attr not in self.hiddenAttrs]
         if not c:
             return 0
         _, attr, rows = max(c)
@@ -342,11 +346,12 @@ class Canvas(Plotter):
     def plotColor(self, k):
         attr = self.plotAttrs.get(k, None)
         if attr is None:
-            if len(self.unusedAttrs) > 1:
+            if self.unusedAttrs:
                 attr = self.unusedAttrs.pop(0)
                 legend = ' '.join(str(x) for x in k)
             else:
-                attr = self.unusedAttrs[0]
+                lastlegend, attr = list(self.legends.items())[-1]
+                del self.legends[lastlegend]
                 legend = '[other]'
 
             self.legendwidth = max(self.legendwidth, len(legend))
@@ -443,63 +448,8 @@ class Canvas(Plotter):
         x2, y2 = vertexes[1]
         x3, y3 = vertexes[2]
 
-        self.point(x1, y1, attr, row)
-        self._recursive_bezier(x1, y1, x2, y2, x3, y3, attr, row)
-        self.point(x3, y3, attr, row)
-
-    def _recursive_bezier(self, x1, y1, x2, y2, x3, y3, attr, row, level=0):
-        'from http://www.antigrain.com/research/adaptive_bezier/'
-        m_approximation_scale = 10.0
-        m_distance_tolerance = (0.5 / m_approximation_scale) ** 2
-        m_angle_tolerance = 1 * 2*math.pi/360  # 15 degrees in rads
-        curve_angle_tolerance_epsilon = 0.01
-        curve_recursion_limit = 32
-        curve_collinearity_epsilon = 1e-30
-
-        if level > curve_recursion_limit:
-            return
-
-        # Calculate all the mid-points of the line segments
-
-        x12   = (x1 + x2) / 2
-        y12   = (y1 + y2) / 2
-        x23   = (x2 + x3) / 2
-        y23   = (y2 + y3) / 2
-        x123  = (x12 + x23) / 2
-        y123  = (y12 + y23) / 2
-
-        dx = x3-x1
-        dy = y3-y1
-        d = abs(((x2 - x3) * dy - (y2 - y3) * dx))
-
-        if d > curve_collinearity_epsilon:
-            # Regular care
-            if d*d <= m_distance_tolerance * (dx*dx + dy*dy):
-                # If the curvature doesn't exceed the distance_tolerance value, we tend to finish subdivisions.
-                if m_angle_tolerance < curve_angle_tolerance_epsilon:
-                    self.point(x123, y123, attr, row)
-                    return
-
-                # Angle & Cusp Condition
-                da = abs(math.atan2(y3 - y2, x3 - x2) - math.atan2(y2 - y1, x2 - x1))
-                if da >= math.pi:
-                    da = 2*math.pi - da
-
-                if da < m_angle_tolerance:
-                    # Finally we can stop the recursion
-                    self.point(x123, y123, attr, row)
-                    return
-        else:
-            # Collinear case
-            dx = x123 - (x1 + x3) / 2
-            dy = y123 - (y1 + y3) / 2
-            if dx*dx + dy*dy <= m_distance_tolerance:
-                self.point(x123, y123, attr, row)
-                return
-
-        # Continue subdivision
-        self._recursive_bezier(x1, y1, x12, y12, x123, y123, attr, row, level + 1)
-        self._recursive_bezier(x123, y123, x23, y23, x3, y3, attr, row, level + 1)
+        for x, y in bezier(x1, y1, x2, y2, x3, y3):
+            self.point(x, y, attr, row)
 
     def label(self, x, y, text, attr=0, row=None):
         self.gridlabels.append((x, y, text, attr, row))

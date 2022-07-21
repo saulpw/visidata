@@ -1,0 +1,42 @@
+#!vd -p
+{"sheet": "", "col": "", "row": "incr_base", "longname": "set-option", "input": "0", "keystrokes": "", "comment": ""}
+{"sheet": "", "col": "", "row": "", "longname": "open-new", "input": "1", "keystrokes": "A", "comment": "open new blank sheet with number columns"}
+{"sheet": "unnamed", "col": 0, "row": "", "longname": "rename-col", "input": "x", "keystrokes": "^", "comment": "edit name of current column"}
+{"sheet": "unnamed", "col": "", "row": "", "longname": "add-rows", "input": "100", "keystrokes": "ga", "comment": "add N blank rows"}
+{"sheet": "unnamed", "col": "", "row": "", "longname": "select-rows", "input": "", "keystrokes": "gs", "comment": ""}
+{"sheet": "unnamed", "col": "x", "row": "", "longname": "setcol-incr", "input": "", "keystrokes": "gi", "comment": "set selected rows in this column to the values in the given Python sequence expression"}
+{"sheet": "unnamed", "col": "", "row": "", "longname": "unselect-rows", "input": "", "keystrokes": "gu", "comment": ""}
+{"sheet": "unnamed", "col": "", "row": "", "longname": "exec-python", "input": "import math", "keystrokes": "g^X", "comment": "execute Python statement in the global scope"}
+{"sheet": "unnamed", "col": "x", "row": "", "longname": "type-int", "input": "", "keystrokes": "#", "comment": "set type of current column to int"}
+{"sheet": "unnamed", "col": "x", "row": "", "longname": "addcol-expr", "input": "math.e**x", "keystrokes": "=", "comment": "create new column from Python expression, with column names as variables"}
+{"sheet": "unnamed", "col": "math.e**x", "row": "", "longname": "type-int", "input": "", "keystrokes": "#", "comment": "set type of current column to int"}
+{"sheet": "unnamed", "col": "math.e**x", "row": "", "longname": "rename-col", "input": "y", "keystrokes": "^", "comment": "edit name of current column"}
+{"sheet": "unnamed", "col": "y", "row": "", "longname": "addcol-expr", "input": "1", "keystrokes": "=", "comment": "create new column from Python expression, with column names as variables"}
+{"sheet": "unnamed", "col": "", "row": "", "longname": "columns-sheet", "input": "", "keystrokes": "C", "comment": "open Columns Sheet"}
+{"sheet": "unnamed_columns", "col": "", "row": "\u30ad1", "longname": "copy-row", "input": "", "keystrokes": "y", "comment": "copy current row to clipboard"}
+{"sheet": "unnamed_columns", "col": "", "row": "\u30ad1", "longname": "paste-after", "input": "", "keystrokes": "p", "comment": "paste clipboard rows after current row"}
+{"sheet": "unnamed_columns", "col": "", "row": "\u30ad1", "longname": "paste-after", "input": "", "keystrokes": "p", "comment": "paste clipboard rows after current row"}
+{"sheet": "unnamed_columns", "col": "", "row": "\u30ad1", "longname": "paste-after", "input": "", "keystrokes": "p", "comment": "paste clipboard rows after current row"}
+{"sheet": "unnamed_columns", "col": "", "row": "\u30ad1", "longname": "paste-after", "input": "", "keystrokes": "p", "comment": "paste clipboard rows after current row"}
+{"sheet": "unnamed_columns", "col": "", "row": "\u30ad1", "longname": "paste-after", "input": "", "keystrokes": "p", "comment": "paste clipboard rows after current row"}
+{"sheet": "unnamed_columns", "col": "", "row": "\u30ad1", "longname": "paste-after", "input": "", "keystrokes": "p", "comment": "paste clipboard rows after current row"}
+{"sheet": "unnamed_columns", "col": "", "row": "\u30ad1", "longname": "paste-after", "input": "", "keystrokes": "p", "comment": "paste clipboard rows after current row"}
+{"sheet": "unnamed_columns", "col": "", "row": "\u30ad1", "longname": "paste-after", "input": "", "keystrokes": "p", "comment": "paste clipboard rows after current row"}
+{"sheet": "unnamed_columns", "col": "", "row": "\u30ad1", "longname": "paste-after", "input": "", "keystrokes": "p", "comment": "paste clipboard rows after current row"}
+{"sheet": "unnamed_columns", "col": "name", "row": "\u30ad1", "longname": "select-equal-cell", "input": "", "keystrokes": ",", "comment": "select rows matching current cell in current column"}
+{"sheet": "unnamed_columns", "col": "name", "row": "", "longname": "setcol-iter", "input": "('count_%s' % i for i in range(10))", "keystrokes": "gz=", "comment": "set selected rows in this column to the values in the given Python sequence expression"}
+{"sheet": "unnamed_columns", "col": "expr", "row": "", "longname": "setcol-iter", "input": "('str(y).count(\"%s\")' % i for i in range(10))", "keystrokes": "gz=", "comment": "set selected rows in this column to the values in the given Python sequence expression"}
+{"sheet": "unnamed_columns", "col": "", "row": "", "longname": "type-int-selected", "input": "", "keystrokes": "g#", "comment": "set type of selected columns to int"}
+{"sheet": "unnamed_columns", "col": "", "row": "", "longname": "quit-sheet", "input": "", "keystrokes": "q", "comment": "quit current sheet"}
+{"sheet": "unnamed", "col": "x", "row": "", "longname": "key-col", "input": "", "keystrokes": "!", "comment": "pin current column on the left as a key column"}
+{"sheet": "unnamed", "col": "y", "row": "", "longname": "key-col", "input": "", "keystrokes": "!", "comment": "pin current column on the left as a key column"}
+{"sheet": "unnamed", "col": "", "row": "", "longname": "melt", "input": "", "keystrokes": "M", "comment": "open melted sheet (unpivot)"}
+{"sheet": "unnamed_melted", "col": "Value", "row": "", "longname": "type-int", "input": "", "keystrokes": "#", "comment": "set type of current column to int"}
+{"sheet": "unnamed_melted", "col": "Value", "row": "", "longname": "addcol-expr", "input": "len(str(y))", "keystrokes": "=", "comment": "create new column from Python expression, with column names as variables"}
+{"sheet": "unnamed_melted", "col": "len(str(y))", "row": "", "longname": "type-int", "input": "", "keystrokes": "#", "comment": "set type of current column to int"}
+{"sheet": "unnamed_melted", "col": "len(str(y))", "row": "", "longname": "rename-col", "input": "ndigits", "keystrokes": "^", "comment": "edit name of current column"}
+{"sheet": "unnamed_melted", "col": "ndigits", "row": "", "longname": "addcol-expr", "input": "Value/ndigits", "keystrokes": "=", "comment": "create new column from Python expression, with column names as variables"}
+{"sheet": "unnamed_melted", "col": "Value/ndigits", "row": "", "longname": "type-float", "input": "", "keystrokes": "%", "comment": "set type of current column to float"}
+{"sheet": "unnamed_melted", "col": "Value/ndigits", "row": "", "longname": "sort-desc", "input": "", "keystrokes": "]", "comment": "sort descending by current column"}
+{"sheet": "unnamed_melted", "col": "Value", "row": "\u30ad1,2", "longname": "select-equal-cell", "input": "", "keystrokes": ",", "comment": "select rows matching current cell in current column"}
+{"sheet": "unnamed_melted", "col": "", "row": "", "longname": "delete-selected", "input": "", "keystrokes": "gd", "comment": "delete all selected rows and move them to clipboard"}

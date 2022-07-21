@@ -30,7 +30,14 @@ def formatRange(col, numeric_key):
     return ' - '.join(col.format(x) for x in numeric_key)
 
 class RangeColumn(Column):
-    def format(self, typedval):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.formatter = 'range'
+
+    def format_range(self, fmtstr):
+        return self._format
+
+    def _format(self, typedval, *args, **kwargs):
         if typedval is None:
             return None
         return formatRange(self.origcol, typedval)

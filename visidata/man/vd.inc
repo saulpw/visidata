@@ -1,4 +1,4 @@
-.Dd December 12, 2021
+.Dd July 19, 2022
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -166,7 +166,7 @@ scroll one left/down/up/right
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
-.It Ic "  _" Ns " (underscore)"
+.It Ic "  _" Ns " (underbar)"
 toggle width of current column between full and default width
 .It Ic " g_"
 toggle widths of all visible columns between full and default width
@@ -204,7 +204,7 @@ set name of all visible columns to combined contents of current column for selec
 .It Ic " z=" Ar expr
 .No evaluate Python expression on current row and set current cell with result of Python Ar expr
 .Pp
-.It "  i" (iota)
+.It "  i"
 .No add column with incremental values
 .It " gi"
 .No set current column for selected rows to incremental values
@@ -289,6 +289,13 @@ open duplicate sheet with all rows
 .It Ic "gz\&""
 open duplicate sheet with deepcopy of selected rows
 .El
+.
+.
+.Pp
+The rows in these duplicated sheets (except deepcopy) are references to rows on the original source sheets, and so edits to the filtered rows will naturally be reflected in the original rows.  Use
+.Ic "g'"
+to freeze sheet contents in a deliberate copy.
+.
 .Ss Editing Rows and Cells
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
@@ -300,13 +307,13 @@ append blank row/column; appended columns cannot be copied to clipboard
 delete current/selected row(s)
 .It Ic "  y   gy"
 .No yank (copy) current/all selected row(s) to clipboard in Sy Memory Sheet
-.It Ic "  x  gx"
+.It Ic "  x   gx"
 .No cut (copy and delete) current/all selected row(s) to clipboard in Sy Memory Sheet
 .It Ic " zy  gzy"
 .No yank (copy) contents of current column for current/selected row(s) to clipboard in Sy Memory Sheet
 .It Ic " zd  gzd"
 .No set contents of current column for current/selected row(s) to Sy options.null_value
-.It Ic " zx gzx"
+.It Ic " zx  gzx"
 .No cut (copy and delete) contents of current column for current/selected row(s) to clipboard in Sy Memory Sheet
 .It Ic "  p    P"
 paste clipboard rows after/before current row
@@ -391,6 +398,9 @@ open
 .It Ic "g&"
 .No concatenate all sheets in Sy Sheets Stack
 .Pp
+.It Ic " w" Ar nBefore nAfter
+.No add column where each row contains a list of that row, Ar nBefore No rows, and Ar nAfter No rows
+.Pp
 .El
 .Ss Data Visualization
 .Bl -tag -width XXXXXXXXXXXXX -compact
@@ -406,9 +416,9 @@ open
 .Bl -tag -width XXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " +   -"
 increase/decrease zoom level, centered on cursor
-.It Ic " _" No (underscore)
+.It Ic " _" No (underbar)
 zoom to fit full extent
-.It Ic "z_" No (underscore)
+.It Ic "z_" No (underbar)
 set aspect ratio
 .It Ic " x" Ar xmin xmax
 .No set Ar xmin Ns / Ns Ar xmax No on graph
@@ -456,7 +466,7 @@ scroll canvas
 .No jump to other pane
 .It Ic "gTab"
 .No swap panes
-.It Ic "g^^" No (g Ctrl+^)
+.It Ic "g Ctrl+^"
 .No cycle through sheets
 .Pp
 .El
@@ -478,8 +488,6 @@ view traceback for error in current cell
 refresh screen
 .It Ic " ^R"
 reload current sheet
-.It Ic "z^R"
-clear cache for current column
 .It Ic " ^Z"
 suspend VisiData process
 .It Ic " ^G"
@@ -508,8 +516,6 @@ open current row/cell/sheet as Python object
 .
 .Ss Internal Sheets List
 .Bl -tag -width Xx -compact
-.It Sy " \&."
-.Sy VisiDataMenu No (Shift+V) "     browse list of core sheets"
 .It Sy " \&."
 .Sy Directory Sheet No "            browse properties of files in a directory"
 .It Sy " \&."

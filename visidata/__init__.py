@@ -1,6 +1,6 @@
 'VisiData: a curses interface for exploring and arranging tabular data'
 
-__version__ = '2.8'
+__version__ = '2.9dev'
 __version_info__ = 'VisiData v' + __version__
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __status__ = 'Production/Stable'
@@ -99,6 +99,7 @@ import visidata.sort
 import visidata.unfurl
 import visidata.fill
 import visidata.incr
+import visidata.window
 import visidata.customdate
 import visidata.misc
 import visidata.memory
@@ -144,6 +145,10 @@ import visidata.loaders.eml
 import visidata.loaders.vds
 import visidata.loaders.odf
 import visidata.loaders.lsv
+import visidata.loaders.arrow
+import visidata.loaders.parquet
+
+import visidata.form
 
 import visidata.ddwplay
 import visidata.plugins

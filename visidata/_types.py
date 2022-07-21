@@ -14,9 +14,11 @@ vd.option('disp_int_fmt', '{:.0f}', 'default fmtstr to format for int values', r
 vd.option('disp_date_fmt','%Y-%m-%d', 'default fmtstr to strftime for date values', replay=True)
 
 try:
-    import dateutil.parser
+    from dateutil.parser import parse as date_parse
 except ImportError:
-    pass
+    def date_parse(r=''):
+        vd.warning('install python-dateutil for date type')
+        return r
 
 # VisiDataType .typetype are e.g. int, float, str, and used internally in these ways:
 #
@@ -163,7 +165,7 @@ class date(datetime.datetime):
         if isinstance(s, int) or isinstance(s, float):
             r = datetime.datetime.fromtimestamp(s)
         elif isinstance(s, str):
-            r = dateutil.parser.parse(s)
+            r = date_parse(s)
         elif isinstance(s, (datetime.datetime, datetime.date)):
             r = s
         else:

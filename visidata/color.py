@@ -119,6 +119,7 @@ class ColorMaker:
         except ValueError:  # Python 3.10+  issue #1227
             return None
 
+    @drawcache
     def _colornames_to_cattr(self, colornamestr, precedence=0):
         fg, bg, attrlist = self.split_colorstr(colornamestr)
         attrs = 0

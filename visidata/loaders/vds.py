@@ -2,7 +2,7 @@
 
 import json
 
-from visidata import VisiData, Sheet, Progress, IndexSheet, SettableColumn
+from visidata import VisiData, JsonSheet, Progress, IndexSheet, SettableColumn, ItemColumn
 
 
 NL='\n'
@@ -51,7 +51,7 @@ class VdsIndexSheet(IndexSheet):
                 line = fp.readline()
 
 
-class VdsSheet(Sheet):
+class VdsSheet(JsonSheet):
     def newRow(self):
         return {}   # rowdef: dict
 

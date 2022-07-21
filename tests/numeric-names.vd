@@ -1,0 +1,3 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/numeric-cols.tsv	o	
+numeric-cols	5		hide-col		-	Hide current column

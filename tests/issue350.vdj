@@ -1,0 +1,7 @@
+#!vd -p
+{"sheet": "", "col": "", "row": "", "longname": "open-file", "input": "tests/issue350.json", "keystrokes": "o", "comment": ""}
+{"sheet": "issue350", "col": "season", "row": "", "longname": "addcol-expr", "input": "episode", "keystrokes": "=", "comment": ""}
+{"sheet": "issue350", "col": "episode", "row": "", "longname": "rename-col", "input": "episode", "keystrokes": "^", "comment": ""}
+{"sheet": "issue350", "col": 1, "row": "", "longname": "slide-right", "input": "", "keystrokes": "L", "comment": "slide current column right"}
+{"sheet": "issue350", "col": 2, "row": "", "longname": "cache-col", "input": "", "keystrokes": "z'", "comment": "add/reset cache for current column"}
+{"sheet": "issue350", "col": 2, "row": "", "longname": "type-int", "input": "", "keystrokes": "#", "comment": "set type of current column to int"}

@@ -90,8 +90,7 @@ DESCRIPTION
      zh  zj  zk  zl   scroll one left/down/up/right
 
    Column Manipulation
-       _ (underscore)
-                      toggle width of current column between full and default
+       _ (underbar)   toggle width of current column between full and default
                       width
       g_              toggle widths of all visible columns between full and
                       default width
@@ -123,7 +122,7 @@ DESCRIPTION
       z= expr         evaluate Python expression on current row and set
                       current cell with result of Python expr
 
-       i (iota)       add column with incremental values
+       i              add column with incremental values
       gi              set current column for selected rows to incremental
                       values
       zi step         add column with values at increment step
@@ -186,6 +185,11 @@ DESCRIPTION
      g"               open duplicate sheet with all rows
      gz"              open duplicate sheet with deepcopy of selected rows
 
+     The rows in these duplicated sheets (except deepcopy) are references to
+     rows on the original source sheets, and so edits to the filtered rows
+     will naturally be reflected in the original rows.  Use g' to freeze sheet
+     contents in a deliberate copy.
+
    Editing Rows and Cells
        a   za         append blank row/column; appended columns cannot be
                       copied to clipboard
@@ -193,13 +197,13 @@ DESCRIPTION
        d   gd         delete current/selected row(s)
        y   gy         yank (copy) current/all selected row(s) to clipboard in
                       Memory Sheet
-       x  gx          cut (copy and delete) current/all selected row(s) to
+       x   gx         cut (copy and delete) current/all selected row(s) to
                       clipboard in Memory Sheet
       zy  gzy         yank (copy) contents of current column for
                       current/selected row(s) to clipboard in Memory Sheet
       zd  gzd         set contents of current column for current/selected
                       row(s) to options.null_value
-      zx gzx          cut (copy and delete) contents of current column for
+      zx  gzx         cut (copy and delete) contents of current column for
                       current/selected row(s) to clipboard in Memory Sheet
        p    P         paste clipboard rows after/before current row
       zp  gzp         set cells of current column for current/selected row(s)
@@ -253,6 +257,10 @@ DESCRIPTION
       &               concatenate top two sheets in Sheets Stack
      g&               concatenate all sheets in Sheets Stack
 
+      w nBefore nAfter
+                      add column where each row contains a list of that row,
+                      nBefore rows, and nAfter rows
+
    Data Visualization
       . (dot)       plot current numeric column vs key columns. The numeric
                     key column is used for the x-axis; categorical key column
@@ -266,8 +274,8 @@ DESCRIPTION
 
      Canvas-specific Commands
          +   -              increase/decrease zoom level, centered on cursor
-         _ (underscore)     zoom to fit full extent
-        z_ (underscore)     set aspect ratio
+         _ (underbar)       zoom to fit full extent
+        z_ (underbar)       set aspect ratio
          x xmin xmax        set xmin/xmax on graph
          y ymin ymax        set ymin/ymax on graph
          s   t   u          select/toggle/unselect rows on source sheet con‐
@@ -299,7 +307,7 @@ DESCRIPTION
                             top of the other pane's stack
          Tab                jump to other pane
         gTab                swap panes
-        g^^ (g Ctrl+^)      cycle through sheets
+        g Ctrl+^            cycle through sheets
 
    Other Commands
      Q                quit current sheet and remove it from the CommandLog
@@ -311,7 +319,6 @@ DESCRIPTION
 
       ^L              refresh screen
       ^R              reload current sheet
-     z^R              clear cache for current column
       ^Z              suspend VisiData process
       ^G              show cursor position and bounds of current sheet on sta‐
                       tus line
@@ -332,7 +339,6 @@ DESCRIPTION
      g^X module       import Python module in the global scope
 
    Internal Sheets List
-      .  VisiDataMenu (Shift+V)      browse list of core sheets
       .  Directory Sheet             browse properties of files in a directory
       .  Plugins Sheet               browse, install, and (de)activate plugins
       .  Memory Sheet (Alt+Shift+M)        browse saved values, including
@@ -586,7 +592,7 @@ COMMANDLINE OPTIONS
      --note-type-exc=str          !                  cell note for an excep‐
                                                      tion during type conver‐
                                                      sion
-     --scroll-incr=int            3                  amount to scroll with
+     --scroll-incr=int            -3                 amount to scroll with
                                                      scrollwheel
      --name-joiner=str            _                  string to join sheet or
                                                      column names
@@ -682,7 +688,8 @@ COMMANDLINE OPTIONS
                                                      sively on DirSheet
      --dir-hidden                 False              load hidden files on
                                                      DirSheet
-     --config=str                 ~/.visidatarc      config file to exec in
+     --config=Path                /home/kefala/.visidatarc
+                                                     config file to exec in
                                                      Python
      --play=str                                      file.vd to replay
      --batch                      False              replay in batch mode
@@ -751,6 +758,7 @@ COMMANDLINE OPTIONS
      (see FILES).
 
      disp_splitwin_pct   0                   height of second sheet on screen
+     color_sidebar       black on 114 blue   color of sidebar
      disp_currency_fmt   %.02f               default fmtstr to format for cur‐
                                              rency values
      disp_float_fmt      {:.02f}             default fmtstr to format for
@@ -779,10 +787,10 @@ COMMANDLINE OPTIONS
      color_note_type     226 yellow          color of cell note for non-str
                                              types in anytype columns
      color_note_row      220 yellow          color of row note on left edge
-     disp_column_sep     |                   separator between columns
+     disp_column_sep     │                   separator between columns
      disp_keycol_sep     ║                   separator between key columns and
                                              rest of columns
-     disp_rowtop_sep     |
+     disp_rowtop_sep     │
      disp_rowmid_sep     ⁝
      disp_rowbot_sep     ⁝
      disp_rowend_sep     ║
@@ -815,7 +823,7 @@ COMMANDLINE OPTIONS
                                              status line prefix
      disp_lstatus_max    0                   maximum length of left status
                                              line
-     disp_status_sep      |                  separator between statuses
+     disp_status_sep      │                  separator between statuses
      color_keystrokes    bold 233 black on 110 cyan
                                              color of input keystrokes on sta‐
                                              tus line
@@ -832,6 +840,8 @@ COMMANDLINE OPTIONS
      disp_edit_fill      _                   edit field fill character
      disp_unprintable    ·                   substitute character for unprint‐
                                              ables
+     disp_formatter      generic             formatter to use for display and
+                                             saving
      disp_menu           True                show menu on top line when not
                                              active
      disp_menu_keys      True                show keystrokes inline in sub‐
@@ -979,4 +989,4 @@ SUPPORTED SOURCES
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                    December 12, 2021                   Linux/MacOS
+Linux/MacOS                      July 19, 2022                     Linux/MacOS

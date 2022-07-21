@@ -2,8 +2,8 @@
 eleventyNavigation:
     key: Customizing VisiData
     order: 12
-Updated: 2021-11-18
-Version: VisiData v2.7
+Updated: 2022-04-05
+Version: VisiData v2.9
 ---
 
 For a primer on configuring VisiData through setting options, see [jsvine's tutorial](https://jsvine.github.io/intro-to-visidata/advanced/configuring-visidata/).
@@ -11,6 +11,8 @@ For a primer on configuring VisiData through setting options, see [jsvine's tuto
 ## How to configure commands {#commands}
 
 The **.visidatarc** in the user's home directory is plain Python code, and can contain additional commands or key bindings.
+
+(Alternatively, since v2.9, VisiData has [XDG support](https://github.com/saulpw/visidata/pull/1420). If `$XDG_CONFIG_HOME` is set and the file `"$XDG_CONFIG_HOME"/visidata/config.py` exists, this will be loaded as the user's default configuration file.)
 
 Longnames are names given to executable commands for ease of keystroke remapping. For example, the longname `select-row` is assigned to commands which select the current row in a sheet. On default, this longname is bound to the keystroke `s`.
 
@@ -34,8 +36,18 @@ Warning: bindings defined in a .visidatarc will overwrite default ones.
 In VisiData, pressing `e` enters edit mode for the current cell. Seasoned vim users might prefer to press `i` instead.
 
 1. Open `~/.visidatarc` in an editor.
-2. Add the line `bindkey('i', 'edit-cell')` to globally bind the keystroke `i` to the longname `edit-cell`.
+2. Add the line `TableSheet.bindkey('i', 'edit-cell')` to globally bind the keystroke `i` to the longname `edit-cell`.
 3. Launch VisiData, and press `i`.
+
+#### Example: Unbind `i` from addcol-incr globally
+
+If the above instructions are followed, a message will pop up that says "`i` was already bound to `addcol-incr`.
+
+To unbind `i` before binding it:
+
+1. Open `~/.visidatarc` in an editor.
+2. Add the line `TableSheet.unbindkey('i')` before any piece of code where it is re-bound.
+3. Launch VisiData.
 
 
 ### Creating new commands

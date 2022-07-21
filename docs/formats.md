@@ -51,6 +51,9 @@ eleventyNavigation:
 |eml           |Multipurpose Internet Mail Extensions \(MIME\)|2\.0             |                |  |1996     |Nathaniel Borenstein and Ned Freed|https://tools\.ietf\.org/html/rfc2045|                    |
 |ods           |OpenDocument Spreadsheet|2\.7             |                |  |2006     |[OASIS](https://en.wikipedia.org/wiki/OASIS_(organization))|https://docs.oasis-open.org/office/v1.1/|odfpy|
 |lsv           |awk-like key-value line-separated values|2\.7             |v2\.7                |  |     |   |   |   |
+|arrow         |              |Arrow IPC file format|2\.9             |                    |2016     |Apache Software Foundation|https://arrow\.apache\.org/docs/format/Columnar\.html|pyarrow             |
+|arrows        |              |Arrow IPC streaming format|2\.9             |                    |2016     |Apache Software Foundation|https://arrow\.apache\.org/docs/format/Columnar\.html|pyarrow             |
+|parquet       |              |Apache Parquet      |1\.3             |                    |2013     |Apache Software Foundation|https://parquet\.apache\.org/|pyarrow or pandas   |
 
 
 # Extra notes about formats

@@ -20,6 +20,9 @@ vd.option('disp_menu_fmt', 'Ctrl+H for help menu', 'right-side menu format strin
 BaseSheet.init('activeMenuItems', list)
 vd.menuRunning = False
 
+def menudraw(*args):
+    return clipdraw(*args, truncator=' ')
+
 
 def Menu(title, *args):
     'Construct menu command or submenu.  *title* is displayed text for this item; *args* is either a single command longname, or recursive Menu elements.'
@@ -183,13 +186,14 @@ vd.menus = [
 #            Menu('Visible rows ', 'delete-visible'),
         ),
         Menu('Copy',
-            Menu('current row', 'copy-row'),
             Menu('current cell', 'copy-cell'),
+            Menu('current row', 'copy-row'),
             Menu('selected cells', 'copy-cells'),
+            Menu('selected rows', 'copy-selected'),
             Menu('to system clipboard',
                 Menu('current cell', 'syscopy-cell'),
-                Menu('selected cells', 'syscopy-cells'),
                 Menu('current row', 'syscopy-row'),
+                Menu('selected cells', 'syscopy-cells'),
                 Menu('selected rows', 'syscopy-selected'),
             ),
         ),
@@ -321,8 +325,9 @@ vd.menus = [
                 Menu('one column', 'addcol-new'),
                 Menu('columns', 'addcol-bulk'),
             ),
-            Menu('regex capture', 'addcol-capture'),
-            Menu('regex subst', 'addcol-subst'),
+            Menu('capture by regex', 'addcol-capture'),
+            Menu('split by regex', 'addcol-split'),
+            Menu('subst by regex', 'addcol-subst'),
             Menu('Python expr', 'addcol-expr'),
             Menu('increment', 'addcol-incr'),
             Menu('shell', 'addcol-shell'),
@@ -349,11 +354,13 @@ vd.menus = [
                 Menu('page', 'go-pageup'),
                 Menu('null', 'go-prev-null'),
                 Menu('value', 'go-prev-value'),
+                Menu('selected', 'go-prev-selected'),
             ),
             Menu('next',
                 Menu('page', 'go-pagedown'),
                 Menu('null', 'go-next-null'),
                 Menu('value', 'go-next-value'),
+                Menu('selected', 'go-next-selected'),
             ),
         ),
         Menu('Select',
@@ -384,7 +391,7 @@ vd.menus = [
                 Menu('all columns', 'unselect-cols-regex'),
             ),
         ),
-        Menu('toggle select',
+        Menu('Toggle select',
             Menu('current row', 'stoggle-row'),
             Menu('all rows', 'stoggle-rows'),
             Menu('from top', 'stoggle-before'),
@@ -495,16 +502,16 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
 
     # draw borders before/under submenus
     if level > 1:
-        clipdraw(scr, y-1, x, tl+ts*(w+2)+tr, colors.color_menu)  # top
+        menudraw(scr, y-1, x, tl+ts*(w+2)+tr, colors.color_menu)  # top
 
-    clipdraw(scr, y+len(menus), x, bl+bs*(w+2)+br, colors.color_menu) #  bottom
+    menudraw(scr, y+len(menus), x, bl+bs*(w+2)+br, colors.color_menu) #  bottom
 
     i = 0
     for j, item in enumerate(menus):
         attr = colors.color_menu
         bindattr = colors.color_keystrokes
 
-        if any(x.obj not in ['BaseSheet', 'TableSheet'] for x, _ in walkmenu(item)):
+        if any(foo.obj not in ['BaseSheet', 'TableSheet'] for foo, _ in walkmenu(item)):
             bindattr = attr = colors.color_menu_spec
 
         if level < len(sheet.activeMenuItems):
@@ -514,7 +521,7 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
             if level < len(sheet.activeMenuItems):
                 vd.drawSubmenu(scr, sheet, y+i, x+w+4, item.menus, level+1, disp_menu_boxchars=disp_menu_boxchars)
 
-        clipdraw(scr, y+i, x, ls, colors.color_menu)
+        menudraw(scr, y+i, x, ls, colors.color_menu)
 
         title = item.title
         pretitle= ' '
@@ -540,11 +547,11 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
         # actually display the menu item
         title += ' '*(w-len(pretitle)-len(item.title)-maxbinding+1) # padding
 
-        clipdraw(scr, y+i, x+1, pretitle+title, attr)
+        menudraw(scr, y+i, x+1, pretitle+title, attr)
         if maxbinding:
-            clipdraw(scr, y+i, x+1+w-maxbinding, '  ' + mainbinding, bindattr)
-        clipdraw(scr, y+i, x+2+w, titlenote, attr)
-        clipdraw(scr, y+i, x+3+w, ls, colors.color_menu)
+            menudraw(scr, y+i, x+1+w-maxbinding, '  ' + mainbinding, bindattr)
+        menudraw(scr, y+i, x+2+w, titlenote, attr)
+        menudraw(scr, y+i, x+3+w, ls, colors.color_menu)
 
         vd.onMouse(scr, y+i, x, 1, w+3,
                 BUTTON1_PRESSED=lambda y,x,key,p=sheet.activeMenuItems[:level]+[j]: sheet.pressMenu(*p),
@@ -613,10 +620,10 @@ def drawMenu(vd, scr, sheet):
         else:
             attr = colors.color_menu
 
-        clipdraw(scr, 0, x, ' ', attr)
+        menudraw(scr, 0, x, ' ', attr)
         for j, ch in enumerate(item.title):
-            clipdraw(scr, 0, x+j+1, ch, attr | (curses.A_UNDERLINE if ch.isupper() else 0))
-        clipdraw(scr, 0, x+j+2, ' ', attr)
+            menudraw(scr, 0, x+j+1, ch, attr | (curses.A_UNDERLINE if ch.isupper() else 0))
+        menudraw(scr, 0, x+j+2, ' ', attr)
 
         vd.onMouse(scr, 0, x, 1, len(item.title)+2,
                 BUTTON1_PRESSED=lambda y,x,key,i=i,sheet=sheet: sheet.pressMenu(i),
@@ -629,7 +636,7 @@ def drawMenu(vd, scr, sheet):
 
 
     rightdisp = sheet.options.disp_menu_fmt.format(sheet=sheet, vd=vd)
-    clipdraw(scr, 0, x+4, rightdisp, colors.color_menu)
+    menudraw(scr, 0, x+4, rightdisp, colors.color_menu)
 
     if not sheet.activeMenuItems:
         return
@@ -659,30 +666,29 @@ def drawMenu(vd, scr, sheet):
     menuy = 16 # min(menuh, h-len(helplines)-3)
 
     y = menuy
-
-    clipdraw(scr, y, helpx, tl+ts*(helpw-2)+tr, helpattr) # top line
+    menudraw(scr, y, helpx, tl+ts*(helpw-2)+tr, helpattr) # top line
     y += 1
 
     # cmd.helpstr text
     for i, line in enumerate(helplines):
-        clipdraw(scr, y+i, helpx, ls+' '+line+' '*(helpw-len(line)-3)+rs, helpattr)
+        menudraw(scr, y+i, helpx, ls+' '+line+' '*(helpw-len(line)-3)+rs, helpattr)
     y += len(helplines)
 
     if sidelines:
-        clipdraw(scr, y, helpx, ls+' '*(helpw-2)+rs, helpattr)
+        menudraw(scr, y, helpx, ls+' '*(helpw-2)+rs, helpattr)
         for i, line in enumerate(sidelines):
-            clipdraw(scr, y+i+1, helpx, ls+'    '+line+' '*(helpw-len(line)-6)+rs, helpattr)
+            menudraw(scr, y+i+1, helpx, ls+'    '+line+' '*(helpw-len(line)-6)+rs, helpattr)
         y += len(sidelines)+1
 
-    clipdraw(scr, y, helpx, bl+bs*(helpw-2)+br, helpattr)
+    menudraw(scr, y, helpx, bl+bs*(helpw-2)+br, helpattr)
 
     mainbinding = sheet.revbinds.get(cmd.longname, [None])[0]
     if mainbinding:
-        clipdraw(scr, menuy, helpx+2, rsl, helpattr)
+        menudraw(scr, menuy, helpx+2, rsl, helpattr)
         ks = vd.prettykeys(mainbinding or '(unbound)')
-        clipdraw(scr, menuy, helpx+3, ' '+ks+' ', colors.color_menu_active)
-        clipdraw(scr, menuy, helpx+2+len(ks)+3, lsr, helpattr)
-    clipdraw(scr, menuy, helpx+19, ' '+cmd.longname+' ', helpattr)
+        menudraw(scr, menuy, helpx+3, ' '+ks+' ', colors.color_menu_active)
+        menudraw(scr, menuy, helpx+2+len(ks)+3, lsr, helpattr)
+    menudraw(scr, menuy, helpx+19, ' '+cmd.longname+' ', helpattr)
 
 
 @BaseSheet.api

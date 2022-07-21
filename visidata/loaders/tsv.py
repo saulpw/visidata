@@ -35,9 +35,12 @@ def splitter(fp, delim='\n'):
 
 # rowdef: list
 class TsvSheet(SequenceSheet):
+    delimiter = ''
+    row_delimiter = ''
+
     def iterload(self):
-        delim = self.options.delimiter
-        rowdelim = self.options.row_delimiter
+        delim = self.delimiter or self.options.delimiter
+        rowdelim = self.row_delimiter or self.options.row_delimiter
 
         with self.source.open_text(encoding=self.options.encoding) as fp:
                 for line in splitter(fp, rowdelim):
@@ -54,14 +57,14 @@ class TsvSheet(SequenceSheet):
 
 
 @VisiData.api
-def save_tsv(vd, p, vs):
+def save_tsv(vd, p, vs, delimiter='', row_delimiter=''):
     'Write sheet to file `fn` as TSV.'
-    unitsep = vs.options.delimiter
-    rowsep = vs.options.row_delimiter
+    unitsep = delimiter or vs.options.delimiter
+    rowsep = row_delimiter or vs.options.row_delimiter
     trdict = vs.safe_trdict()
 
     with p.open_text(mode='w', encoding=vs.options.encoding) as fp:
-        colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + options.row_delimiter
+        colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + rowsep
         fp.write(colhdr)
 
         for dispvals in vs.iterdispvals(format=True):

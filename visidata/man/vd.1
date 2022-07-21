@@ -1,4 +1,4 @@
-.Dd December 12, 2021
+.Dd July 19, 2022
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -166,7 +166,7 @@ scroll one left/down/up/right
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
 .
-.It Ic "  _" Ns " (underscore)"
+.It Ic "  _" Ns " (underbar)"
 toggle width of current column between full and default width
 .It Ic " g_"
 toggle widths of all visible columns between full and default width
@@ -204,7 +204,7 @@ set name of all visible columns to combined contents of current column for selec
 .It Ic " z=" Ar expr
 .No evaluate Python expression on current row and set current cell with result of Python Ar expr
 .Pp
-.It "  i" (iota)
+.It "  i"
 .No add column with incremental values
 .It " gi"
 .No set current column for selected rows to incremental values
@@ -289,6 +289,13 @@ open duplicate sheet with all rows
 .It Ic "gz\&""
 open duplicate sheet with deepcopy of selected rows
 .El
+.
+.
+.Pp
+The rows in these duplicated sheets (except deepcopy) are references to rows on the original source sheets, and so edits to the filtered rows will naturally be reflected in the original rows.  Use
+.Ic "g'"
+to freeze sheet contents in a deliberate copy.
+.
 .Ss Editing Rows and Cells
 .
 .Bl -tag -width XXXXXXXXXXXXXXX -compact
@@ -300,13 +307,13 @@ append blank row/column; appended columns cannot be copied to clipboard
 delete current/selected row(s)
 .It Ic "  y   gy"
 .No yank (copy) current/all selected row(s) to clipboard in Sy Memory Sheet
-.It Ic "  x  gx"
+.It Ic "  x   gx"
 .No cut (copy and delete) current/all selected row(s) to clipboard in Sy Memory Sheet
 .It Ic " zy  gzy"
 .No yank (copy) contents of current column for current/selected row(s) to clipboard in Sy Memory Sheet
 .It Ic " zd  gzd"
 .No set contents of current column for current/selected row(s) to Sy options.null_value
-.It Ic " zx gzx"
+.It Ic " zx  gzx"
 .No cut (copy and delete) contents of current column for current/selected row(s) to clipboard in Sy Memory Sheet
 .It Ic "  p    P"
 paste clipboard rows after/before current row
@@ -391,6 +398,9 @@ open
 .It Ic "g&"
 .No concatenate all sheets in Sy Sheets Stack
 .Pp
+.It Ic " w" Ar nBefore nAfter
+.No add column where each row contains a list of that row, Ar nBefore No rows, and Ar nAfter No rows
+.Pp
 .El
 .Ss Data Visualization
 .Bl -tag -width XXXXXXXXXXXXX -compact
@@ -406,9 +416,9 @@ open
 .Bl -tag -width XXXXXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " +   -"
 increase/decrease zoom level, centered on cursor
-.It Ic " _" No (underscore)
+.It Ic " _" No (underbar)
 zoom to fit full extent
-.It Ic "z_" No (underscore)
+.It Ic "z_" No (underbar)
 set aspect ratio
 .It Ic " x" Ar xmin xmax
 .No set Ar xmin Ns / Ns Ar xmax No on graph
@@ -456,7 +466,7 @@ scroll canvas
 .No jump to other pane
 .It Ic "gTab"
 .No swap panes
-.It Ic "g^^" No (g Ctrl+^)
+.It Ic "g Ctrl+^"
 .No cycle through sheets
 .Pp
 .El
@@ -478,8 +488,6 @@ view traceback for error in current cell
 refresh screen
 .It Ic " ^R"
 reload current sheet
-.It Ic "z^R"
-clear cache for current column
 .It Ic " ^Z"
 suspend VisiData process
 .It Ic " ^G"
@@ -508,8 +516,6 @@ open current row/cell/sheet as Python object
 .
 .Ss Internal Sheets List
 .Bl -tag -width Xx -compact
-.It Sy " \&."
-.Sy VisiDataMenu No (Shift+V) "     browse list of core sheets"
 .It Sy " \&."
 .Sy Directory Sheet No "            browse properties of files in a directory"
 .It Sy " \&."
@@ -891,7 +897,7 @@ cell note for an exception during formatting
 cell note for an exception during computation
 .It Sy --note-type-exc Ns = Ns Ar "str         " No "!"
 cell note for an exception during type conversion
-.It Sy --scroll-incr Ns = Ns Ar "int           " No "3"
+.It Sy --scroll-incr Ns = Ns Ar "int           " No "-3"
 amount to scroll with scrollwheel
 .It Sy --name-joiner Ns = Ns Ar "str           " No "_"
 string to join sheet or column names
@@ -976,7 +982,7 @@ source of randomized startup messages
 walk source path recursively on DirSheet
 .It Sy --dir-hidden No "                False"
 load hidden files on DirSheet
-.It Sy --config Ns = Ns Ar "str                " No "~/.visidatarc"
+.It Sy --config Ns = Ns Ar "Path               " No "/home/kefala/.visidatarc"
 config file to exec in Python
 .It Sy --play Ns = Ns Ar "str                  " No ""
 file.vd to replay
@@ -1038,6 +1044,8 @@ source of plugins sheet
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Sy "disp_splitwin_pct  " No "0"
 height of second sheet on screen
+.It Sy "color_sidebar      " No "black on 114 blue"
+color of sidebar
 .It Sy "disp_currency_fmt  " No "%.02f"
 default fmtstr to format for currency values
 .It Sy "disp_float_fmt     " No "{:.02f}"
@@ -1068,11 +1076,11 @@ color of note in pending cells
 color of cell note for non-str types in anytype columns
 .It Sy "color_note_row     " No "220 yellow"
 color of row note on left edge
-.It Sy "disp_column_sep    " No "|"
+.It Sy "disp_column_sep    " No "\[u2502]"
 separator between columns
 .It Sy "disp_keycol_sep    " No "\[u2551]"
 separator between key columns and rest of columns
-.It Sy "disp_rowtop_sep    " No "|"
+.It Sy "disp_rowtop_sep    " No "\[u2502]"
 
 .It Sy "disp_rowmid_sep    " No "\[u205D]"
 
@@ -1124,7 +1132,7 @@ right-side status format string
 status line prefix
 .It Sy "disp_lstatus_max   " No "0"
 maximum length of left status line
-.It Sy "disp_status_sep    " No " | "
+.It Sy "disp_status_sep    " No " \[u2502] "
 separator between statuses
 .It Sy "color_keystrokes   " No "bold 233 black on 110 cyan"
 color of input keystrokes on status line
@@ -1148,6 +1156,8 @@ cell color to use when editing cell
 edit field fill character
 .It Sy "disp_unprintable   " No "\[u00B7]"
 substitute character for unprintables
+.It Sy "disp_formatter     " No "generic"
+formatter to use for display and saving
 .It Sy "disp_menu          " No "True"
 show menu on top line when not active
 .It Sy "disp_menu_keys     " No "True"

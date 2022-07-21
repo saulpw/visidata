@@ -35,11 +35,13 @@
 {"Date": "2018-08-16", "Customer": "Michael Smith", "SKU": "BIRD160", "Item": "Parakeet, Blue (Melopsittacus undulatus)", "Quantity": 1, "Unit": 29.95, "Paid": "$31.85"}
 {"Date": "2018-08-17", "Customer": "Rubeus Hagrid", "SKU": "NSCT201", "Item": "Food, Spider", "Quantity": 5, "Unit": 0.05, "Paid": "$0.25"}
 {"Date": "2018-08-20", "Customer": "Kyle Kennedy", "SKU": "RETURN", "Item": "Dog, Golden Retriever (Canis lupus familiaris)", "Quantity": 1, "Unit": 1247.99, "Paid": "-$1247.99"}
+{"Date": "2018-08-20", "Customer": "\u05de\u05e8\u05d5\u05e1\u05d9\u05d4 \u05e0\u05d9\u05e1\u05e0\u05d4\u05d5\u05dc\u05e5 \u05d0\u05d1\u05d5\u05dc\u05e2\u05e4\u05d9\u05d4", "SKU": "GOAT224", "Item": "Goat, American Pygmy (Capra hircus)", "Quantity": 1, "Unit": 499.0, "Paid": "$160.51"}
 {"Date": "2018-08-20", "Customer": "Monica Johnson", "SKU": "NSCT201", "Item": "Crickets, Adult Live (Gryllus assimilis)", "Quantity": 30, "Unit": 0.05, "Paid": "$1.5"}
 {"Date": "2018-08-20", "Customer": "David Attenborough", "SKU": "NSCT084", "Item": "Food, Pangolin", "Quantity": 30, "Unit": 0.17, "Paid": "$5.10"}
 {"Date": "2018-08-21", "Customer": "Robert Armstrong", "SKU": "FOOD214", "Item": "BFF Oh My Gravy! Duck & Salmon 2.8oz", "Quantity": 4, "Unit": 12.95, "Paid": "$51.8"}
 {"Date": "2018-08-22", "Customer": "David Attenborough", "SKU": "BIRD160", "Item": "Food, Quoll", "Quantity": 1, "Unit": 29.95, "Paid": "$29.95"}
 {"Date": "2018-08-22", "Customer": "Jon Arbuckle", "SKU": "FOOD170", "Item": "Food, Adult Dog - 5kg", "Quantity": 1, "Unit": 44.95, "Paid": "$44.95"}
+{"Date": "2018-08-22", "Customer": "\u05de\u05e8\u05d5\u05e1\u05d9\u05d4 \u05e0\u05d9\u05e1\u05e0\u05d4\u05d5\u05dc\u05e5", "SKU": "SFTY052", "Item": "Fire Extinguisher, kitchen-rated", "Quantity": 1, "Unit": 61.7, "Paid": "$61.70"}
 {"Date": "2018-08-24", "Customer": "Robert Armstrong", "SKU": "FOOD218", "Item": "BFF Oh My Gravy! Chicken & Salmon 2.8oz", "Quantity": 4, "Unit": 12.95, "Paid": "$51.8"}
 {"Date": "2018-08-27", "Customer": "Monica Johnson", "SKU": "NSCT443", "Item": "Mealworms, Large (Tenebrio molitor) 100ct", "Quantity": 1, "Unit": 1.99, "Paid": "$1.99"}
 {"Date": "2018-08-28", "Customer": "Susan Ashworth", "SKU": "CAT020", "Item": "Cat, Scottish Fold (Felis catus)", "Quantity": 1, "Unit": 1964.53, "Paid": "$1964.53"}

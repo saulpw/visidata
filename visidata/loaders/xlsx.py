@@ -1,4 +1,5 @@
 import itertools
+import copy
 
 from visidata import VisiData, vd, Sheet, Column, Progress, IndexSheet, ColumnAttr, SequenceSheet, AttrDict, AttrColumn, date, datetime
 
@@ -31,6 +32,7 @@ class XlsxIndexSheet(IndexSheet):
         for sheetname in self.workbook.sheetnames:
             src = self.workbook[sheetname]
             yield XlsxSheet(self.name, sheetname, source=src)
+
 
 class XlsxSheet(SequenceSheet):
     # rowdef: AttrDict of column_letter to cell
@@ -76,6 +78,11 @@ class XlsxSheet(SequenceSheet):
             self.addColumn(
                     AttrColumn(column_name + '_fillColor', column_letter +
                         '.fill.start_color.value'))
+
+    def paste_after(self, rowidx):
+        to_paste = list(copy.copy(r) for r in reversed(vd.memory.cliprows))
+        self.addRows(to_paste, index=rowidx)
+
 
 class XlsIndexSheet(IndexSheet):
     'Load XLS file (in Excel format).'

@@ -1,4 +1,6 @@
 from functools import singledispatch
+from typing import Mapping
+import inspect
 import math
 
 from visidata import *
@@ -257,6 +259,7 @@ class PyobjSheet(PythonSheet):
     columns = [
         Column('attribute'),
         ColumnSourceAttr('value'),
+        Column('signature', width=0, getter=lambda c,r: dict(inspect.signature(getattr(c.sheet.source, r)).parameters)),
         Column('docstring', getter=lambda c,r: docstring(c.sheet.source, r))
     ]
     nKeys = 1
@@ -269,7 +272,7 @@ class PyobjSheet(PythonSheet):
                 return SheetNamedTuple(*names, **kwargs)
             else:
                 return SheetList(*names, **kwargs)
-        elif isinstance(pyobj, dict):
+        elif isinstance(pyobj, Mapping):
             return SheetDict(*names, **kwargs)
         elif isinstance(pyobj, str):
             return TextSheet(*names, source=pyobj.splitlines())
@@ -332,8 +335,8 @@ def pyobj_expr(sheet):
     vd.push(PyobjSheet(expr, source=sheet.evalExpr(expr)))
 
 BaseSheet.addCommand('^X', 'pyobj-expr', 'pyobj_expr()', 'evaluate Python expression and open result as Python object')
-globalCommand('', 'exec-python', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals(), LazyChainMap(sheet, *vd.contexts))', 'execute Python statement with expression scope')
-globalCommand('g^X', 'import-python', 'modname=input("import: "); exec("import "+modname, getGlobals())', 'import Python module in the global scope')
+BaseSheet.addCommand('', 'exec-python', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals(), LazyChainMap(sheet, *vd.contexts, locals=vd.getGlobals()))', 'execute Python statement with expression scope')
+BaseSheet.addCommand('g^X', 'import-python', 'modname=input("import: ", type="import_python"); exec("import "+modname, getGlobals())', 'import Python module in the global scope')
 globalCommand('z^X', 'pyobj-expr-row', 'expr = input("eval over current row: ", "expr", completer=CompleteExpr()); vd.push(PyobjSheet(expr, source=evalExpr(expr, row=cursorRow)))', 'evaluate Python expression, in context of current row, and open result as Python object')
 
 Sheet.addCommand('^Y', 'pyobj-row', 'status(type(cursorRow)); vd.push(PyobjSheet("%s[%s]" % (sheet.name, cursorRowIndex), source=cursorRow))', 'open current row as Python object')

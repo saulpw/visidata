@@ -7,6 +7,7 @@ import os
 
 import visidata
 from visidata import VisiData, BaseSheet, vd, AttrDict
+from visidata.vendor.appdirs import user_config_dir, user_cache_dir
 
 
 # [settingname] -> { objname(Sheet-instance/Sheet-type/'global'/'default'): Option/Command/longname }
@@ -321,11 +322,10 @@ def getCommand(sheet, cmd):
 
     return vd.commands._get(longname, obj=sheet)
 
+
 @VisiData.api
-def loadConfigFile(vd, fnrc, _globals=None):
-    if not fnrc:
-        return
-    p = visidata.Path(fnrc)
+def loadConfigFile(vd, fn='', _globals=None):
+    p = visidata.Path(fn or vd.options.config)
     if _globals is None:
         _globals = vd.getGlobals()
     if p.exists():
@@ -348,6 +348,18 @@ def addOptions(parser):
             parser.add_argument('--' + optname.replace('_', '-'), action=action, dest=optname, default=None, help=options._opts._get(optname).helpstr)
         except argparse.ArgumentError:
             pass
+
+
+def _get_config_file():
+    xdg_config_file = visidata.Path(user_config_dir('visidata')) / 'config.py'
+    if xdg_config_file.exists():
+        return xdg_config_file
+    else:
+        return visidata.Path('~/.visidatarc')
+
+
+def _get_cache_dir():
+    return visidata.Path(user_cache_dir('visidata'))
 
 
 @VisiData.api

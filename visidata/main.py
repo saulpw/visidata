@@ -2,7 +2,7 @@
 # Usage: $0 [<options>] [<input> ...]
 #        $0 [<options>] --play <cmdlog> [--batch] [-w <waitsecs>] [-o <output>] [field=value ...]
 
-__version__ = '2.8'
+__version__ = '2.9dev'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
 from copy import copy
@@ -13,14 +13,16 @@ import locale
 import datetime
 import signal
 import warnings
+from pkg_resources import resource_filename
 
 from visidata import vd, options, run, BaseSheet, AttrDict
 from visidata import Path
+from visidata.settings import _get_config_file
 import visidata
 
 vd.version_info = __version_info__
 
-vd.option('config', '~/.visidatarc', 'config file to exec in Python', sheettype=None)
+vd.option('config', _get_config_file(), 'config file to exec in Python', sheettype=None)
 vd.option('play', '', 'file.vd to replay')
 vd.option('batch', False, 'replay in batch mode (with no interface and all status sent to stdout)')
 vd.option('output', None, 'save the final visible sheet to output at the end of replay')
@@ -32,7 +34,11 @@ def eval_vd(logpath, *args, **kwargs):
     'Instantiate logpath with args/kwargs replaced and replay all commands.'
     log = logpath.read_text()
     if args or kwargs:
-        log = log.format(*args, **kwargs)
+        if logpath.ext in ['vdj', 'json', 'jsonl']:
+            from string import Template
+            log = Template(log).safe_substitute(**kwargs)
+        else:
+            log = log.format(*args, **kwargs)
 
     src = Path(logpath.given, fp=io.StringIO(log), filesize=len(log))
     vs = vd.openSource(src, filetype=src.ext)
@@ -81,6 +87,14 @@ optalias('force_valid_colnames', 'clean_names')  # deprecated
 
 def main_vd():
     'Open the given sources using the VisiData interface.'
+    if '-v' in sys.argv or '--version' in sys.argv:
+        print(vd.version_info)
+        return 0
+    if '-h' in sys.argv or '--help' in sys.argv:
+        with open(resource_filename(__name__, 'man/vd.txt'), 'r') as fp:
+            print(fp.read())
+        return 0
+
     try:
         locale.setlocale(locale.LC_ALL, '')
     except locale.Error as e:
@@ -89,7 +103,6 @@ def main_vd():
 
     flPipedInput = not sys.stdin.isatty()
     flPipedOutput = not sys.stdout.isatty()
-
 
     try:
         # workaround for bug in curses.wrapper #899
@@ -121,15 +134,8 @@ def main_vd():
             fmtargs.append(arg)
         elif arg in ['--']:
             optsdone = True
-        elif arg in ['-v', '--version']:
-            print(vd.version_info)
-            return 0
         elif arg == '-':
             inputs.append((vd.stdinSource, copy(current_args)))
-        elif arg in ['-h', '--help']:
-            import curses
-            curses.wrapper(lambda scr: vd.openManPage())
-            return 0
         elif arg in ['-g', '--global']:
             flGlobal = True
         elif arg in ['-n', '--nonglobal']:
@@ -176,6 +182,9 @@ def main_vd():
                     startsheets = pos[:-2]
                     startrow, startcol = pos[-2:]
                     start_positions.append((startsheets, startrow, startcol))
+                if start_positions[-1]:
+                    # index subsheets need to be loaded *after* the cursor indexing
+                    options.set('load_lazy', True, obj=start_positions[-1][0])
             else:
                 start_positions.append((None, arg[1:], None))
 
@@ -228,6 +237,7 @@ def main_vd():
             if not vs.options.is_set(k, vs):
                 vs.options[k] = v
 
+        # log source to cmdlog
         vd.cmdlog.openHook(vs, vs.source)
         sources.append(vs)
 
@@ -245,6 +255,9 @@ def main_vd():
                 vd.push(vd.newSheet(datestr, 1))
         else:
             vd.push(vd.currentDirSheet)
+
+            # log source to cmdlog
+            vd.cmdlog.openHook(vd.currentDirSheet, vd.currentDirSheet.source)
 
     if not args.play:
         if args.batch:

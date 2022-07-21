@@ -5,9 +5,10 @@ import itertools
 import threading
 import re
 import time
+import json
 
 from visidata import options, anytype, stacktrace, vd
-from visidata import asyncthread, dispwidth
+from visidata import asyncthread, dispwidth, clipstr, iterchars
 from visidata import wrapply, TypedWrapper, TypedExceptionWrapper
 from visidata import Extensible, AttrDict, undoAttrFunc
 
@@ -101,6 +102,7 @@ class Column(Extensible):
         self.height = 1       # max height, None/0 to auto-compute for each row
         self.keycol = 0       # keycol index (or 0 if not key column)
         self.expr = None      # Column-type-dependent parameter
+        self.formatter = ''
 
         self.setCache(cache)
         for k, v in kwargs.items():
@@ -119,7 +121,7 @@ class Column(Extensible):
         return self.__copy__()  # no separate deepcopy
 
     def __getstate__(self):
-        d = {k:getattr(self, k) for k in 'name width height expr keycol fmtstr voffset hoffset aggstr'.split()}
+        d = {k:getattr(self, k) for k in 'name width height expr keycol formatter fmtstr voffset hoffset aggstr'.split() if hasattr(self, k)}
         d['type'] = self.type.__name__
         return d
 
@@ -192,6 +194,12 @@ class Column(Extensible):
             self._width = w
 
     @property
+    def _formatdict(col):
+        if '=' in col.fmtstr:
+            return dict(val.split('=', maxsplit=1) for val in col.fmtstr.split())
+        return {}
+
+    @property
     def fmtstr(self):
         'Format string to use to display this column.'
         return self._fmtstr or vd.getType(self.type).fmtstr
@@ -200,22 +208,33 @@ class Column(Extensible):
     def fmtstr(self, v):
         self._fmtstr = v
 
-    def formatValue(self, typedval):
+    def format_generic(self, fmtstr):
+        return self.formatValue
+
+    def format_json(self, fmtstr):
+        return lambda v,*args,**kwargs: json.dumps(v)
+
+    def format_python(self, fmtstr):
+        return lambda v,*args,**kwargs: str(v)
+
+    def format(self, *args, **kwargs):
+        self._formatMaker = getattr(self, 'format_'+(self.formatter or self.sheet.options.disp_formatter))
+        return self._formatMaker(self._formatdict)(*args, **kwargs)
+
+    def formatValue(self, typedval, width=None):
         'Return displayable string of *typedval* according to ``Column.fmtstr``.'
         if typedval is None:
             return None
 
         if self.type is anytype:
-            if isinstance(typedval, (list, tuple)):
-                return '[%s]' % len(typedval)
-            if isinstance(typedval, dict):
-                return '{%s}' % len(typedval)
+            if isinstance(typedval, (dict, list, tuple)):
+                dispval, dispw = clipstr(iterchars(typedval), width)
+                return dispval
 
         if isinstance(typedval, bytes):
             typedval = typedval.decode(options.encoding, options.encoding_errors)
 
         return vd.getType(self.type).formatter(self.fmtstr, typedval)
-    format=formatValue
 
     def hide(self, hide=True):
         if hide:
@@ -327,7 +346,7 @@ class Column(Extensible):
         dw = DisplayWrapper(cellval)
 
         try:
-            dw.display = self.format(typedval) or ''
+            dw.display = self.format(typedval, width=self.width*2) or ''
 
             # annotate cells with raw value type in anytype columns, except for strings
             if self.type is anytype and type(cellval) is not str:
@@ -472,13 +491,15 @@ def getitemdef(o, k, default=None):
     except Exception:
         return default
 
-def ItemColumn(name=None, expr=None, **kwargs):
+class ItemColumn(Column):
     'Column using getitem/setitem with *key*.'
-    return Column(name,
+    def __init__(self, name=None, expr=None, **kwargs):
+        super().__init__(name,
             expr=expr if expr is not None else name,
             getter=lambda col,row: getitemdeep(row, col.expr, None),
             setter=lambda col,row,val: setitemdeep(row, col.expr, val),
             **kwargs)
+
 
 class SubColumnFunc(Column):
     'Column compositor; preprocess row with *subfunc*(row, *expr*) before passing to *origcol*.getValue and *origcol*.setValue.'

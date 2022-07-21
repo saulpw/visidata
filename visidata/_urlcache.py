@@ -5,18 +5,19 @@ from urllib.request import Request, urlopen
 import urllib.parse
 
 from visidata import vd, VisiData, Path, options, modtime
+from visidata.settings import _get_cache_dir
 
 @VisiData.global_api
 def urlcache(vd, url, days=1, text=True, headers={}):
     'Return Path object to local cache of url contents.'
-    p = Path(os.path.join(options.visidata_dir, 'cache', urllib.parse.quote(url, safe='')))
+    cache_dir = _get_cache_dir()
+    os.makedirs(cache_dir, exist_ok=True)
+
+    p = Path(cache_dir / urllib.parse.quote(url, safe=''))
     if p.exists():
         secs = time.time() - modtime(p)
         if secs < days*24*60*60:
             return p
-
-    if not p.parent.exists():
-        os.makedirs(p.parent, exist_ok=True)
 
     req = Request(url)
     for k, v in headers.items():

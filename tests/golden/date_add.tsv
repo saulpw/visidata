@@ -36,11 +36,13 @@ Date	Date+1	1+Date	Date+15*minutes	Customer	SKU	Item	Quantity	Unit	Paid
 2018-08-16	2018-08-17	2018-08-17	2018-08-16 17:30:00	Michael Smith	BIRD160	Parakeet, Blue (Melopsittacus undulatus)	1	29.95	$31.85
 2018-08-17	2018-08-18	2018-08-18	2018-08-17 09:41:00	Rubeus Hagrid	NSCT201	Food, Spider	5	$.05	$0.25
 2018-08-20	2018-08-21	2018-08-21	2018-08-20 09:51:00	Kyle Kennedy	RETURN	Dog, Golden Retriever (Canis lupus familiaris)	1	$1,247.99	-$1247.99
+2018-08-20	2018-08-21	2018-08-21	2018-08-20 14:02:00	מרוסיה ניסנהולץ אבולעפיה	GOAT224	Goat, American Pygmy (Capra hircus)	1	₪499	$160.51
 2018-08-20	2018-08-21	2018-08-21	2018-08-20 15:46:00	Monica Johnson	NSCT201	Crickets, Adult Live (Gryllus assimilis)	30	$.05	$1.5
 2018-08-20	2018-08-21	2018-08-21	2018-08-20 17:27:00	David Attenborough	NSCT084	Food, Pangolin	30	$.17	$5.10
 2018-08-21	2018-08-22	2018-08-22	2018-08-21 12:28:00	Robert Armstrong	FOOD214	BFF Oh My Gravy! Duck & Salmon 2.8oz	4	$12.95	$51.8
 2018-08-22	2018-08-23	2018-08-23	2018-08-22 09:53:00	David Attenborough	BIRD160	Food, Quoll	1	29.95	$29.95
 2018-08-22	2018-08-23	2018-08-23	2018-08-22 14:28:00	Jon Arbuckle	FOOD170	Food, Adult Dog - 5kg	1	$44.95	$44.95
+2018-08-22	2018-08-23	2018-08-23	2018-08-22 18:04:00	מרוסיה ניסנהולץ	SFTY052	Fire Extinguisher, kitchen-rated	1	$61.70	$61.70
 2018-08-24	2018-08-25	2018-08-25	2018-08-24 11:57:00	Robert Armstrong	FOOD218	BFF Oh My Gravy! Chicken & Salmon 2.8oz	4	$12.95	$51.8
 2018-08-27	2018-08-28	2018-08-28	2018-08-27 15:20:00	Monica Johnson	NSCT443	Mealworms, Large (Tenebrio molitor) 100ct	1	$1.99	$1.99
 2018-08-28	2018-08-29	2018-08-29	2018-08-28 17:47:00	Susan Ashworth	CAT020	Cat, Scottish Fold (Felis catus)	1	$1,964.53	$1964.53
