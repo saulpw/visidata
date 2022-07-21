@@ -3,7 +3,7 @@
 # 2.9 (2022-04-XX)
 
 - add XDG support (thanks @jck for the PR #1420)
-    - `options.config` default is now `"$XDG_CONFIG_HOME"/visidata/config.py` if `$XDG_CONFIG_HOME` is set and `config.py` exists. If not, falls back to the standard `/home/.visidatarc`.
+    - `options.config` default is now `"$XDG_CONFIG_HOME"/visidata/config.py` if `$XDG_CONFIG_HOME` is set and `config.py` exists. If not, falls back to the standard `$HOME/.visidatarc`.
     - vendor [appdirs.py](https://github.com/ActiveState/appdirs/blob/master/appdirs.py)
 - [cmdlog] support variables in .vdj (requested by @jungle-boogie #1364)
     - in the .vdj, write variables like so: `${variableName}`
