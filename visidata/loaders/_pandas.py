@@ -109,6 +109,7 @@ class PandasSheet(Sheet):
             col.sheet.df.loc[row.name, col.expr] = val
         self.setModified()
 
+    @asyncthread
     def reload(self):
         import pandas as pd
         if isinstance(self.source, pd.DataFrame):
