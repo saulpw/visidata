@@ -218,7 +218,7 @@ class Column(Extensible):
         return lambda v,*args,**kwargs: str(v)
 
     def format(self, *args, **kwargs):
-        self._formatMaker = getattr(self, 'format_'+(self.formatter or 'generic'))
+        self._formatMaker = getattr(self, 'format_'+(self.formatter or self.sheet.options.disp_formatter))
         return self._formatMaker(self._formatdict)(*args, **kwargs)
 
     def formatValue(self, typedval, width=None):
