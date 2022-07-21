@@ -215,7 +215,7 @@ class Column(Extensible):
         return lambda v,*args,**kwargs: json.dumps(v)
 
     def format_python(self, fmtstr):
-        return str
+        return lambda v,*args,**kwargs: str(v)
 
     def format(self, *args, **kwargs):
         self._formatMaker = getattr(self, 'format_'+(self.formatter or 'generic'))
