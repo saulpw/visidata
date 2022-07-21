@@ -1,4 +1,3 @@
-import codecs
 import tarfile
 import zipfile
 from visidata.loaders import unzip_http
@@ -47,10 +46,8 @@ class ZipSheet(Sheet):
 
     def openRow(self, row):
             fi, zpath = row
-            decodedfp = codecs.iterdecode(self.openZipFile(self.zfp, fi),
-                                          encoding=options.encoding,
-                                          errors=options.encoding_errors)
-            return vd.openSource(Path(fi.filename, fp=decodedfp, filesize=fi.file_size), filetype=options.filetype)
+            fp = self.openZipFile(self.zfp, fi)
+            return vd.openSource(Path(fi.filename, fp=fp, filesize=fi.file_size), filetype=options.filetype)
 
     @asyncthread
     def extract(self, *rows, path=None):
@@ -88,10 +85,7 @@ class TarSheet(Sheet):
 
     def openRow(self, fi):
             tfp = tarfile.open(name=str(self.source))
-            decodedfp = codecs.iterdecode(tfp.extractfile(fi),
-                                          encoding=options.encoding,
-                                          errors=options.encoding_errors)
-            return vd.openSource(Path(fi.name, fp=decodedfp, filesize=fi.size))
+            return vd.openSource(Path(fi.name, fp=tfp.extractfile(fi), filesize=fi.size))
 
     def iterload(self):
         with tarfile.open(name=str(self.source)) as tf:

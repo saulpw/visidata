@@ -1,6 +1,7 @@
 import os
 import os.path
 import sys
+import codecs
 import pathlib
 from urllib.parse import urlparse, urlunparse
 from functools import wraps
@@ -167,7 +168,10 @@ class Path(os.PathLike):
             return self.rfile
 
         if self.fp:
-            self.rfile = RepeatFile(self.fp)
+            decodedfp = codecs.iterdecode(self.fp,
+                                          encoding=options.encoding,
+                                          errors=options.encoding_errors)
+            self.rfile = RepeatFile(decodedfp)
             return self.rfile
 
         if 't' not in mode:
@@ -202,6 +206,9 @@ class Path(os.PathLike):
 
     @wraps(pathlib.Path.open)
     def open(self, *args, **kwargs):
+        if self.fp:
+            return FileProgress(self, fp=self.fp, **kwargs)
+
         path = self
         binmode = 'wb' if 'w' in kwargs.get('mode', '') else 'rb'
         if self.compression == 'gz':
