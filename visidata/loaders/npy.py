@@ -1,4 +1,4 @@
-from visidata import VisiData, vd, Sheet, date, anytype, options, Column, Progress, ColumnItem, vlen, PyobjSheet, currency, floatlocale, TypedWrapper
+from visidata import VisiData, vd, Sheet, date, anytype, options, Column, Progress, ColumnItem, vlen, PyobjSheet, currency, floatlocale, TypedWrapper, InferColumnsSheet
 
 'Loaders for .npy and .npz.  Save to .npy.  Depends on the zip loader.'
 
@@ -12,7 +12,7 @@ def open_npz(vd, p):
 
 vd.option('npy_allow_pickle', False, 'numpy allow unpickling objects (unsafe)')
 
-class NpySheet(Sheet):
+class NpySheet(InferColumnsSheet):
     def iterload(self):
         import numpy
         if not hasattr(self, 'npy'):
@@ -23,6 +23,8 @@ class NpySheet(Sheet):
     def reloadCols(self):
         self.columns = []
         for i, (name, fmt, *shape) in enumerate(self.npy.dtype.descr):
+            if not name:
+                continue
             if shape:
                 t = anytype
             elif 'M' in fmt:
@@ -46,7 +48,7 @@ class NpzSheet(vd.ZipSheet):
 
     def iterload(self):
         import numpy
-        self.npz = numpy.load(str(self.source), encoding='bytes')
+        self.npz = numpy.load(str(self.source), encoding='bytes', **self.options.getall('npy_'))
         yield from Progress(self.npz.items())
 
     def openRow(self, row):
