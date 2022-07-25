@@ -14,6 +14,41 @@ class PythonSheet(Sheet):
         return PyobjSheet("%s[%s]" % (self.name, self.keystr(row)), source=row)
 
 
+class InferColumnsSheet(Sheet):
+    _rowtype = dict
+    @asyncthread
+    def reload(self):
+        self.columns = []
+        self._knownKeys.clear()
+        for c in type(self).columns:
+            self.addColumn(deepcopy(c))
+
+        self.rows = []
+        for r in self.iterload():
+            self.addRow(r)
+
+        # if an ordering has been specified, sort the sheet
+        if self._ordering:
+            vd.sync(self.sort())
+
+    def addColumn(self, *cols, index=None):
+        for c in cols:
+            self._knownKeys.add(c.name)
+        return super().addColumn(*cols, index=index)
+
+    def addRow(self, row, index=None):
+        ret = super().addRow(row, index=index)
+        for k in row:
+            if k not in self._knownKeys:
+                self.addColumn(ColumnItem(k, type=deduceType(row[k])))
+
+        return ret
+
+
+InferColumnsSheet.init('_knownKeys', set, copy=True)  # set of row keys already seen
+InferColumnsSheet.init('_ordering', list, copy=True)
+
+
 @Sheet.api
 def getSampleRows(sheet):
     'Return list of sample rows centered around the cursor.'
@@ -366,6 +401,7 @@ vd.addGlobals({
     'closeColumn': closeColumn,
     'ListOfDictSheet': ListOfDictSheet,
     'SheetDict': SheetDict,
+    'InferColumnsSheet': InferColumnsSheet,
     'PyobjSheet': PyobjSheet,
     'view': view,
 })
