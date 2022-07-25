@@ -346,7 +346,7 @@ class Column(Extensible):
         dw = DisplayWrapper(cellval)
 
         try:
-            dw.display = self.format(typedval, width=self.width*2) or ''
+            dw.display = self.format(typedval, width=(self.width or 0)*2) or ''
 
             # annotate cells with raw value type in anytype columns, except for strings
             if self.type is anytype and type(cellval) is not str:
