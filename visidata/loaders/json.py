@@ -1,6 +1,7 @@
 import json
 
-from visidata import vd, date, VisiData, PythonSheet, deepcopy, AttrDict, stacktrace, TypedExceptionWrapper, options, visidata, ColumnItem, deduceType, wrapply, TypedWrapper, Progress, Sheet
+from copy import deepcopy
+from visidata import vd, date, VisiData, InferColumnsSheet, AttrDict, stacktrace, TypedExceptionWrapper, visidata, ColumnItem, deduceType, wrapply, TypedWrapper, Progress, Sheet, asyncthread
 
 vd.option('json_indent', None, 'indent to use when saving json')
 vd.option('json_sort_keys', False, 'sort object keys when saving to json')
@@ -16,18 +17,8 @@ def open_jsonl(vd, p):
 
 VisiData.open_ndjson = VisiData.open_ldjson = VisiData.open_json = VisiData.open_jsonl
 
-
-class JsonSheet(PythonSheet):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._knownKeys = set()  # set of row keys already seen
-
+class JsonSheet(InferColumnsSheet):
     def iterload(self):
-        self.columns = []
-        self._knownKeys.clear()
-        for c in type(self).columns:
-            self.addColumn(deepcopy(c))
-
         with self.source.open_text(encoding=self.options.encoding) as fp:
             for L in fp:
                 try:
@@ -54,25 +45,15 @@ class JsonSheet(PythonSheet):
                                 yield ret
                         break
 
-    def addColumn(self, *cols, index=None):
-        for c in cols:
-            self._knownKeys.add(c.name)
-        return super().addColumn(*cols, index=index)
-
     def addRow(self, row, index=None):
         # Wrap non-dict rows in a dummy object with a predictable key name.
         # This allows for more consistent handling of rows containing scalars
         # or lists.
         if not isinstance(row, dict):
-            v = {options.default_colname: row}
+            v = {self.options.default_colname: row}
             row = visidata.AlwaysDict(row, **v)
 
-        super().addRow(row, index=index)
-
-        for k in row:
-            if k not in self._knownKeys:
-                self.addColumn(ColumnItem(k, type=deduceType(row[k])))
-        return row
+        return super().addRow(row, index=index)
 
     def newRow(self):
         return {}
