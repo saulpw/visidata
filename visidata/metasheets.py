@@ -172,6 +172,8 @@ def lastInputsSheet(vd):
         vs.reload.__wrapped__(vs)
     except FileNotFoundError:
         pass
+    except Exception as e:
+        vd.exceptionCaught(e)
 
     return vs
 
