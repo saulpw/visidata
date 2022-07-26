@@ -55,8 +55,8 @@ class JsonSheet(InferColumnsSheet):
 
         return super().addRow(row, index=index)
 
-    def newRow(self):
-        return {}
+    def newRow(self, **fields):
+        return fields
 
 
 ## saving json and jsonl

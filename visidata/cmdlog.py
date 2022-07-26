@@ -238,8 +238,10 @@ class CommandLog(_CommandLog, VisiDataMetaSheet):
 
 class CommandLogJsonl(_CommandLog, JsonLinesSheet):
 
-    def newRow(self):
-        return JsonLinesSheet.newRow(self)
+    filetype = 'vdj'
+
+    def newRow(self, **fields):
+        return AttrDict(JsonLinesSheet.newRow(self, **fields))
 
     def iterload(self):
         for r in JsonLinesSheet.iterload(self):
@@ -420,12 +422,12 @@ def cmdlog(sheet):
     rows = sheet.cmdlog_sheet.rows
     if isinstance(sheet.source, BaseSheet):
         rows = sheet.source.cmdlog.rows + rows
-    return CommandLog(sheet.name+'_cmdlog', source=sheet, rows=rows)
+    return CommandLogJsonl(sheet.name+'_cmdlog', source=sheet, rows=rows)
 
 
 @BaseSheet.lazy_property
 def cmdlog_sheet(sheet):
-    return CommandLog(sheet.name+'_cmdlog', source=sheet, rows=[])
+    return CommandLogJsonl(sheet.name+'_cmdlog', source=sheet, rows=[])
 
 
 @BaseSheet.property
@@ -448,7 +450,7 @@ def shortcut(self):
 @VisiData.property
 def cmdlog(vd):
     if not vd._cmdlog:
-        vd._cmdlog = CommandLog('cmdlog', rows=[])
+        vd._cmdlog = CommandLogJsonl('cmdlog', rows=[])
         vd.beforeExecHooks.append(vd._cmdlog.beforeExecHook)
     return vd._cmdlog
 
