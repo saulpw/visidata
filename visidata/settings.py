@@ -371,6 +371,15 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
     sys.path.append(str(visidata.Path(vd.options.visidata_dir)))
     sys.path.append(str(visidata.Path(vd.options.visidata_dir)/"plugins-deps"))
 
+    # autoload installed plugins first
+    from importlib_metadata import entry_points
+
+    if vd.options.plugins_autoload:
+        for ep in entry_points(group='visidata.plugins'):
+            plug = ep.load()
+            sys.modules[f'visidata.plugins.{ep.name}'] = plug
+            vd.status(f'Plugin {ep.name} loaded')
+
     # import plugins from .visidata/plugins before .visidatarc, so plugin options can be overridden
     for modname in (args.imports or vd.options.imports or '').split():
         try:

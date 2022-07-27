@@ -104,20 +104,15 @@ class PluginsSheet(JsonLinesSheet):
         self.column('description').width = 40
         self.setKeys([self.column("name")])
 
-        if vd.options.plugins_autoload:
-            from importlib_metadata import entry_points
-
-            for ep in entry_points(group='visidata.plugins'):
-                plug = ep.load()
-                sys.modules[f'visidata.plugins.{ep.name}'] = plug
-                self.addRow(AttrDict(name=ep.name,
-                                     description=getattr(plug, '__description__', plug.__doc__),
-                                     maintainer=getattr(plug, '__author__', None),
-                                     latest_release='',
-                                     latest_ver='',
-                                     url=''
-                                     ))
-                vd.status(f'Plugin {ep.name} loaded')
+        for name, mod in sys.modules.items():
+            if name.startswith('visidata.plugins.'):
+                self.addRow(AttrDict(name='.'.join(name.split('.')[2:]),
+                                 description=getattr(mod, '__description__', mod.__doc__),
+                                 maintainer=getattr(mod, '__author__', None),
+                                 latest_release='',
+                                 latest_ver='',
+                                 url=''
+                                 ))
 
         for r in Progress(self.rows):
             for funcname in (r.provides or '').split():
