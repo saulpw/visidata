@@ -2,7 +2,11 @@
 
 Query various database backends without loading the entire database.
 
-## Install
+## Install latest released version via pip
+
+    pip install vdibis
+
+## Install VisiData plugin manually
 
 Clone the repo:
 
