@@ -29,7 +29,7 @@ def iterdispvals(sheet, *cols, format=False):
     for col in cols:
         transformers[col] = [ col.type ]
         if format:
-            formatMaker = getattr(col, 'format_'+(col.formatter or sheet.options.disp_formatter))
+            formatMaker = getattr(col, 'formatter_'+(col.formatter or sheet.options.disp_formatter))
             transformers[col].append(formatMaker(col._formatdict))
         trdict = sheet.safe_trdict()
         if trdict:

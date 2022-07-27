@@ -208,18 +208,33 @@ class Column(Extensible):
     def fmtstr(self, v):
         self._fmtstr = v
 
-    def format_generic(self, fmtstr):
+    def _format_len(self, typedval, **kwargs):
+        if isinstance(typedval, dict):
+            return f'{len(typedval)}'
+        elif isinstance(typedval, (list, tuple)):
+            return f'[len(typedval)]'
+
+        return self.formatValue(typedval, **kwargs)
+
+    def formatter_len(self, fmtstr):
+        return self._format_len
+
+    def formatter_generic(self, fmtstr):
         return self.formatValue
 
-    def format_json(self, fmtstr):
+    def formatter_json(self, fmtstr):
         return lambda v,*args,**kwargs: json.dumps(v)
 
-    def format_python(self, fmtstr):
+    def formatter_python(self, fmtstr):
         return lambda v,*args,**kwargs: str(v)
 
+    def make_formatter(self):
+        'Return function for format(v) from the current formatter and fmtstr'
+        _formatMaker = getattr(self, 'formatter_'+(self.formatter or self.sheet.options.disp_formatter))
+        return _formatMaker(self._formatdict)
+
     def format(self, *args, **kwargs):
-        self._formatMaker = getattr(self, 'format_'+(self.formatter or self.sheet.options.disp_formatter))
-        return self._formatMaker(self._formatdict)(*args, **kwargs)
+        return self.make_formatter()(*args, **kwargs)
 
     def formatValue(self, typedval, width=None):
         'Return displayable string of *typedval* according to ``Column.fmtstr``.'

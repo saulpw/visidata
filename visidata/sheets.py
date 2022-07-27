@@ -1211,7 +1211,7 @@ BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to:
 
 
 @Column.api
-def format_enum(col, fmtdict):
+def formatter_enum(col, fmtdict):
     return lambda val, fmtdict=fmtdict,*args,**kwargs: fmtdict.__getitem__(val)
 
 Sheet.addCommand('', 'setcol-formatter', 'cursorCol.formatter=input("set formatter to: ", value=cursorCol.formatter or "generic")', 'set formatter for current column (generic, json, python)')
