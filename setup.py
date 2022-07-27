@@ -30,6 +30,7 @@ setup(
         author="Saul Pwanson",
         url="https://github.com/visidata/vdibis",
         python_requires=">=3.8",
+        packages=["vdibis"],
         py_modules=["vdibis"],
         entry_points={'visidata.plugins': 'vdibis=vdibis'},
         install_requires=requirements(),
