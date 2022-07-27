@@ -21,7 +21,7 @@ def vstat(path, force=False):
 def filesize(path):
     if hasattr(path, 'filesize') and path.filesize is not None:
         return path.filesize
-    if path.fp or path.is_url():
+    if path.has_fp() or path.is_url():
         return 0
     st = path.stat() # vstat(path)
     return st and st.st_size
@@ -97,9 +97,10 @@ class FileProgress:
 
 class Path(os.PathLike):
     'File and path-handling class, modeled on `pathlib.Path`.'
-    def __init__(self, given, fp=None, lines=None, filesize=None):
+    def __init__(self, given, fp=None, fptext=None, lines=None, filesize=None):
         # Resolve pathname shell variables and ~userdir
         self.given = os.path.expandvars(os.path.expanduser(str(given)))
+        self.fptext = fptext
         self.fp = fp
         self.lines = lines or []  # shared among all RepeatFile instances
         self.filesize = filesize
@@ -156,7 +157,11 @@ class Path(os.PathLike):
     def __truediv__(self, a):
         return Path(self._path.__truediv__(a))
 
-    def open_text(self, mode='rt', encoding=None, newline=None):
+    def has_fp(self):
+        'Return True if this is a virtual Path to an already open file.'
+        return bool(self.fp or self.fptext)
+
+    def open_text(self, mode='rt', encoding=None, encoding_errors=None, newline=None):
         'Open path in text mode, using options.encoding and options.encoding_errors.  Return open file-pointer or file-pointer-like.'
         # rfile makes a single-access fp reusable
 
@@ -164,10 +169,12 @@ class Path(os.PathLike):
             return self.rfile
 
         if self.fp:
-            decodedfp = codecs.iterdecode(self.fp,
-                                          encoding=options.encoding,
-                                          errors=options.encoding_errors)
-            self.rfile = RepeatFile(decodedfp)
+            self.fptext = codecs.iterdecode(self.fp,
+                                            encoding=encoding or options.encoding,
+                                            errors=encoding_errors or options.encoding_errors)
+
+        if self.fptext:
+            self.rfile = RepeatFile(self.fptext)
             return self.rfile
 
         if 't' not in mode:
@@ -262,7 +269,7 @@ class Path(os.PathLike):
     @wraps(pathlib.Path.exists)
     def exists(self):
         'Return True if the path can be opened.'
-        if self.fp or self.is_url():
+        if self.has_fp() or self.is_url():
             return True
         return self._path.exists()
 

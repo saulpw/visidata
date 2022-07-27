@@ -40,7 +40,7 @@ def eval_vd(logpath, *args, **kwargs):
         else:
             log = log.format(*args, **kwargs)
 
-    src = Path(logpath.given, fp=io.StringIO(log), filesize=len(log))
+    src = Path(logpath.given, fptext=io.StringIO(log), filesize=len(log))
     vs = vd.openSource(src, filetype=src.ext)
     vs.name += '_vd'
     vs.reload()
@@ -206,7 +206,7 @@ def main_vd():
         options.set(k, v, obj='global')
 
     vd._stdin, vd._stdout = duptty()  # always dup stdin/stdout
-    vd.stdinSource.fp = vd._stdin
+    vd.stdinSource.fptext = vd._stdin
 
     # fetch motd and plugins *after* options parsing/setting
     vd.pluginsSheet.ensureLoaded()

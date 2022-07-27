@@ -64,7 +64,7 @@ def openurl_http(vd, path, filetype=None):
             response = requests.get(src, stream=True, **vd.options.getall('http_req_'))
 
     # add resettable iterator over contents as an already-open fp
-    path.fp = RepeatFile(_iter_lines())
+    path.fptext = RepeatFile(_iter_lines())
 
     return vd.openSource(path, filetype=filetype)
 
