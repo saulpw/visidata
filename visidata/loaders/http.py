@@ -5,6 +5,7 @@ content_filetypes = {
 }
 
 vd.option('http_max_next', 0, 'max next.url pages to follow in http response') #848
+vd.option('http_req_headers', {}, 'http headers to send to requests')
 
 
 @VisiData.api
@@ -19,7 +20,7 @@ def openurl_http(vd, path, filetype=None):
 
     import requests
 
-    response = requests.get(path.given, stream=True)
+    response = requests.get(path.given, stream=True, **vd.options.getall('http_req_'))
     response.raise_for_status()
 
     if not filetype:
@@ -60,7 +61,7 @@ def openurl_http(vd, path, filetype=None):
                 break
 
             vd.status(f'fetching next page from {src}')
-            response = requests.get(src, stream=True)
+            response = requests.get(src, stream=True, **vd.options.getall('http_req_'))
 
     # add resettable iterator over contents as an already-open fp
     path.fp = RepeatFile(_iter_lines())
