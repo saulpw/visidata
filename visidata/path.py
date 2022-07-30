@@ -122,19 +122,15 @@ class Path(os.PathLike):
         else:
             self._path = pathlib.Path(given)
 
-        self.ext = self.suffix[1:]
-        if self.suffix:
-            self.name = self._path.name[:-len(self.suffix)]
-        else:
-            self.name = self._path.name
-
         # check if file is compressed
         if self.suffix in ['.gz', '.bz2', '.xz', '.lzma', '.zst']:
-            self.compression = self.ext
             uncompressedpath = Path(self.given[:-len(self.suffix)])
             self.name = uncompressedpath.name
             self.ext = uncompressedpath.ext
+            self.compression = self.suffix[1:]
         else:
+            self.name = self._path.name[:-sum(map(len, self.suffixes))]
+            self.ext = self.suffix[1:]  # filetype is "final" extension (excluding compression)
             self.compression = None
 
     def __getattr__(self, k):
