@@ -1,6 +1,7 @@
 import os
 import os.path
 import sys
+import io
 import codecs
 import pathlib
 from urllib.parse import urlparse, urlunparse
@@ -29,6 +30,30 @@ def filesize(path):
 def modtime(path):
     st = path.stat()
     return st and st.st_mtime
+
+
+# from https://stackoverflow.com/questions/55889474/convert-io-stringio-to-io-bytesio
+class BytesIOWrapper(io.BufferedReader):
+    """Wrap a buffered bytes stream over TextIOBase string stream."""
+
+    def __init__(self, text_io_buffer, encoding=None, errors=None, **kwargs):
+        super(BytesIOWrapper, self).__init__(text_io_buffer, **kwargs)
+        self.encoding = encoding or text_io_buffer.encoding or options.encoding
+        self.errors = errors or text_io_buffer.errors or options.encoding_errors
+
+    def _encoding_call(self, method_name, *args, **kwargs):
+        raw_method = getattr(self.raw, method_name)
+        val = raw_method(*args, **kwargs)
+        return val.encode(self.encoding, errors=self.errors)
+
+    def read(self, size=-1):
+        return self._encoding_call('read', size)
+
+    def read1(self, size=-1):
+        return self._encoding_call('read1', size)
+
+    def peek(self, size=-1):
+        return self._encoding_call('peek', size)
 
 
 class FileProgress:
@@ -211,6 +236,9 @@ class Path(os.PathLike):
     def open(self, *args, **kwargs):
         if self.fp:
             return FileProgress(self, fp=self.fp, **kwargs)
+
+        if self.fptext:
+            return FileProgress(self, fp=BytesIOWrapper(self.fptext), **kwargs)
 
         path = self
         binmode = 'wb' if 'w' in kwargs.get('mode', '') else 'rb'
