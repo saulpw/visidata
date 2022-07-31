@@ -24,7 +24,7 @@ setup(name='visidata',
       install_requires=[
           'python-dateutil',
           'windows-curses; platform_system == "Windows"',
-          'importlib-metadata >= 4.4; python_version < "3.10"',
+          'importlib-metadata >= 4.4; python_version < "3.8"',
       ],
       packages=['visidata',  'visidata.loaders', 'visidata.vendor', 'visidata.tests'],
       include_package_data=True,
