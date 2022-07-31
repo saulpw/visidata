@@ -1,30 +1,21 @@
-# [VisiData](https://visidata.org) plugin for [Ibis](https://ibis-project.org)
+# [VisiData](https://visidata.org) plugin for integrations with the [Apache Arrow](https://arrow.apache.org/) ecosystem
 
-Query various database backends without loading the entire database.
+- load and save Arrow formats (using [pyarrow](https://arrow.apache.org/docs/python/index.html))
+- query various database backends without loading the entire database (using [Ibis](https://ibis-project.org))
 
 ## Install latest released version via pip
 
-    pip install vdibis
+    pip install vdarrow
 
 ## Install VisiData plugin manually
 
-Clone the repo:
-
-    git clone https://github.com/saulpw/vdibis.git
-
-Install the dependencies (`ibis-framework`):
-
-    pip install -r vdibis/requirements.txt
-
-Manually install and load the plugin:
-
-    mkdir -p ~/.visidata/plugins
-    ln -s `pwd`/vdibis/vdibis ~/.visidata/plugins
-    echo 'import plugins.vdibis' >> ~/.visidatarc
+    pip install https://github.com/visidata/vdarrow.git
 
 ## Usage
 
-    vd -f ibis foo.duckdb
+    vd -f ibis <file_or_url>
+
+where `file_or_url` is any connection string supported by `ibis.connect()`.
 
 ## implemented
 

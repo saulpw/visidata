@@ -3,7 +3,7 @@
 from setuptools import setup
 
 
-exec(open('vdibis/__about__.py').read())
+exec(open('vdarrow/__about__.py').read())
 
 
 def readme():
@@ -17,7 +17,7 @@ def requirements():
 
 
 setup(
-        name="vdibis",
+        name="vdarrow",
         version=__version__,
         description=__description__,
         long_description=readme(),
@@ -26,12 +26,12 @@ setup(
             "Development Status :: 4 - Beta",
             "Programming Language :: Python :: 3",
         ],
-        keywords="visidata ibis apache sql substrait",
+        keywords="visidata ibis arrow apache sql substrait",
         author="Saul Pwanson",
-        url="https://github.com/visidata/vdibis",
+        url="https://github.com/visidata/vdarrow",
         python_requires=">=3.8",
-        packages=["vdibis"],
-        py_modules=["vdibis"],
-        entry_points={'visidata.plugins': 'vdibis=vdibis'},
+        packages=["vdarrow"],
+        py_modules=["vdarrow"],
+        entry_points={'visidata.plugins': 'vdarrow=vdarrow'},
         install_requires=requirements(),
 )
