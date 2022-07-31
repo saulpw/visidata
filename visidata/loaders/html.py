@@ -50,13 +50,17 @@ class HtmlLinksSheet(Sheet):
         ItemColumn('element', 0, width=0),
         Column('tag', getter=lambda c,r:r[0].tag),
         ItemColumn('attribute', 1),
-        ItemColumn('link', 2),
+        Column('text', getter=lambda c,r:r[0].text),
+        ItemColumn('link', 2, width=40),
     ]
     def iterload(self):
         from lxml.html import iterlinks
         root = self.source.getroot()
         root.make_links_absolute(self.source.docinfo.URL)
         yield from iterlinks(root)
+
+    def openRow(self, row):
+        return vd.openSource(row[2])
 
 class HtmlElementsSheet(InferColumnsSheet):
     rowtype = 'links'  #  dict
