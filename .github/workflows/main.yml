@@ -1,0 +1,53 @@
+name: visidata-ci-build
+on:
+  pull_request:
+    branches:
+      - stable
+      - develop
+  push:
+    branches:
+    - stable
+    - develop
+
+jobs:
+  run-tests:
+
+    strategy:
+      matrix:
+        python-version: [3.6, 3.7, 3.8, 3.9, "3.10"]
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.pythonversion }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Create .visidatarc
+      run: touch ~/.visidatarc
+
+    - name: Set up Environment
+      run: |
+        export PYTHONPATH=~/visidata:~/visidata/visidata
+        locale
+
+    - name: Install Base VisiData
+      run: pip3 install .
+
+    - name: Ensure VisiData works with Base Dependencies
+      run: vd --version
+
+    - name: Install optional dependencies
+      run: |
+        pip3 install -r requirements.txt
+        pip3 install pytest
+
+    - name: Run test_commands
+      run: |
+        pytest -sv visidata/tests/test_commands.py
+
+    - name: Run Cmdlog Tests
+      run: dev/test.sh
+
