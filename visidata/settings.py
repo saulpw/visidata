@@ -372,7 +372,10 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
     sys.path.append(str(visidata.Path(vd.options.visidata_dir)/"plugins-deps"))
 
     # autoload installed plugins first
-    from importlib_metadata import entry_points
+    try:
+        from importlib.metadata import entry_points
+    except ModuleNotFoundError:
+        from importlib_metadata import entry_points  # for python <3.8
 
     if vd.options.plugins_autoload:
         for ep in entry_points(group='visidata.plugins'):
