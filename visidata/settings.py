@@ -378,7 +378,7 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
         except ModuleNotFoundError:
             from importlib_metadata import entry_points  # for python <3.8
 
-        for ep in entry_points(group='visidata.plugins'):
+        for ep in entry_points().get('visidata.plugins', []):
             plug = ep.load()
             sys.modules[f'visidata.plugins.{ep.name}'] = plug
             vd.status(f'Plugin {ep.name} loaded')
