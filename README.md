@@ -1,4 +1,4 @@
-# [VisiData](https://visidata.org) plugin for integrations with the [Apache Arrow](https://arrow.apache.org/) ecosystem
+# [VisiData](https://visidata.org) plugin for [Apache Arrow](https://arrow.apache.org/) columnar stores
 
 - load and save Arrow formats (using [pyarrow](https://arrow.apache.org/docs/python/index.html))
 - query various database backends without loading the entire database (using [Ibis](https://ibis-project.org))
