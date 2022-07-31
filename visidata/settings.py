@@ -374,8 +374,10 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
     # autoload installed plugins first
     try:
         from importlib.metadata import entry_points
+        vd.status(importlib.metadata)
     except ModuleNotFoundError:
         from importlib_metadata import entry_points  # for python <3.8
+        vd.status(importlib_metadata)
 
     if vd.options.plugins_autoload:
         for ep in entry_points(group='visidata.plugins'):
