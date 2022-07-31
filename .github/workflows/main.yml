@@ -50,4 +50,5 @@ jobs:
 
     - name: Run Cmdlog Tests
       run: dev/test.sh
+      shell: bash
 
