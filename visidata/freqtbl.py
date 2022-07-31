@@ -70,6 +70,7 @@ class FreqTableSheet(PivotSheet):
             vs = copy(self.source)
             vs.name += "_"+vd.valueNames(row.discrete_keys, row.numeric_key)
             vs.rows=copy(row.sourcerows)
+            vs.source=self.source
             return vs
         vd.warning("no source rows")
 
