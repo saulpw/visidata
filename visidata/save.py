@@ -109,16 +109,10 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
 
     savefunc = getattr(vsheets[0], 'save_' + filetype, None) or getattr(vd, 'save_' + filetype, None)
 
-    using_save_filetype = False
-
     if savefunc is None:
-        savefunc = getattr(vd, 'save_' + options.save_filetype, None) or vd.fail('no function to save as type %s, set options.save_filetype' % filetype)
-        vd.warning(f'save for {filetype} unavailable, using {options.save_filetype}')
-        using_save_filetype = True
+        vd.fail(f'no function to save as {filetype}')
 
-    if using_save_filetype and givenpath.exists() and confirm_overwrite:
-        vd.confirm("%s already exists. overwrite with %s? " % (givenpath.given, options.save_filetype))
-    elif givenpath.exists() and confirm_overwrite:
+    if givenpath.exists() and confirm_overwrite:
         vd.confirm("%s already exists. overwrite? " % givenpath.given)
 
     vd.status('saving %s sheets to %s as %s' % (len(vsheets), givenpath.given, filetype))
