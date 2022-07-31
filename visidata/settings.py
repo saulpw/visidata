@@ -373,10 +373,7 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
 
     # autoload installed plugins first
     if vd.options.plugins_autoload:
-        try:
-            from importlib.metadata import entry_points
-        except ModuleNotFoundError:
-            from importlib_metadata import entry_points  # for python <3.8
+        from importlib_metadata import entry_points  # a backport which supports < 3.8 https://github.com/pypa/twine/pull/732
 
         for ep in entry_points().get('visidata.plugins', []):
             plug = ep.load()
