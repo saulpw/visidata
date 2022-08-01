@@ -27,6 +27,10 @@ def open_ibis(vd, p):
     return IbisIndexSheet(p.name, source=p, filetype=None)
 
 
+vd.open_duckdb = vd.open_ibis
+vd.open_ddb = vd.open_ibis
+
+
 class IbisIndexSheet(IndexSheet):
     def iterload(self):
         import ibis
