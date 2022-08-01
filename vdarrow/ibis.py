@@ -79,7 +79,7 @@ class IbisSheet(Sheet):
 
     @property
     def sidebar(self):
-        return getattr(self, self._sidebar, '')
+        return str(getattr(self, self._sidebar, ''))
 
     @property
     def ibis_expr(self):
