@@ -6,3 +6,4 @@ pyarrow
 
 sqlalchemy
 sqlparse
+pyarrow

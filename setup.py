@@ -3,7 +3,7 @@
 from setuptools import setup
 
 
-exec(open('vdarrow/__about__.py').read())
+exec(open('vdsql/__about__.py').read())
 
 
 def readme():
@@ -17,7 +17,7 @@ def requirements():
 
 
 setup(
-        name="vdarrow",
+        name="vdsql",
         version=__version__,
         description=__description__,
         long_description=readme(),
@@ -26,12 +26,12 @@ setup(
             "Development Status :: 4 - Beta",
             "Programming Language :: Python :: 3",
         ],
-        keywords="visidata ibis arrow apache sql substrait",
+        keywords="visidata sql rdbms ibis substrait",
         author="Saul Pwanson",
-        url="https://github.com/visidata/vdarrow",
+        url="https://github.com/visidata/vdsql",
         python_requires=">=3.8",
-        packages=["vdarrow"],
-        py_modules=["vdarrow"],
-        entry_points={'visidata.plugins': 'vdarrow=vdarrow'},
+        packages=["vdsql"],
+        py_modules=["vdsql"],
+        entry_points={'visidata.plugins': 'vdsql=vdsql'},
         install_requires=requirements(),
 )

@@ -17,13 +17,16 @@ To ~/.visidatarc:
 
 ## Usage
 
+### deferred execution with Ibis
+
     vd -f ibis <file_or_url>
 
 where `file_or_url` is any connection string supported by `ibis.connect()`.
 
-## implemented
+## IbisSheet
 
-- `v` to cycle the sidebar between the generated SQL, the Ibis expression, the Substrait, and no sidebar
+Only these commands are implemented to use Ibis expressions; others will use the internal VisiData implementation (and will only use the currently loaded rowset, limited to 10000 rows).
+
 - `Shift+F` frequency table
   - on the Frequency Sheet, `Enter` to select one value
 - `-` to hide column
@@ -37,6 +40,10 @@ where `file_or_url` is any connection string supported by `ibis.connect()`.
 - `gt` to toggle selection
 - `"` to filter selection
 - `&` to join
+
+### new commands for IbisSheet
+
+- `v` to cycle the sidebar between the generated SQL, the Ibis expression, the Substrait, and no sidebar
 
 ## Notes
 
