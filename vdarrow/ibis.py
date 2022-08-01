@@ -2,6 +2,9 @@ from copy import copy
 from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace
 from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply
 
+vd.option('disp_ibis_sidebar', '', 'sidebar to display')
+
+
 def dtype_to_type(dtype):
     import numpy as np
     # Find the underlying numpy dtype for any pandas extension dtypes
@@ -68,18 +71,20 @@ def memo_aggregate(col, agg, rows):
     # store aggexpr somewhere to use in later subquery
 
 
+
 class IbisSheet(Sheet):
     def cycle_sidebar(self):
         sidebars = ['', 'ibis_sql', 'ibis_expr', 'ibis_substrait']
         try:
-            i = sidebars.index(self._sidebar)+1
+            i = sidebars.index(vd.options.disp_ibis_sidebar)+1
         except ValueError:
+            vd.warning(f'unknown sidebar option {vd.options.disp_ibis_sidebar}, resetting')
             i = 0
-        self._sidebar = sidebars[i%len(sidebars)]
+        vd.options.disp_ibis_sidebar = sidebars[i%len(sidebars)]
 
     @property
     def sidebar(self):
-        return str(getattr(self, self._sidebar, ''))
+        return str(getattr(self, self.options.disp_ibis_sidebar, ''))
 
     @property
     def ibis_expr(self):
@@ -269,7 +274,7 @@ IbisSheet.addCommand(',', 'select-equal-cell', 'ibis_selection.append(cursorCol.
 IbisSheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.ibis_filters.extend(vs.ibis_selection); vs.ibis_selection.clear(); vd.push(vs)', 'open duplicate sheet with only selected rows'),
 IbisSheet.addCommand('v', 'sidebar-cycle', 'cycle_sidebar()')
 
-IbisSheet.addCommand('', 'open-sidebar', 'vd.push(TextSheet(name, _sidebar, source=sidebar.splitlines()))')
+IbisSheet.addCommand('', 'open-sidebar', 'vd.push(TextSheet(name, options.disp_ibis_sidebar, source=sidebar.splitlines()))')
 
 vd.addMenuItem('View', 'Sidebar', 'cycle' 'sidebar-cycle')
 vd.addMenuItem('View', 'Sidebar', 'open', 'open-sidebar')
