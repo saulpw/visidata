@@ -276,5 +276,5 @@ IbisSheet.addCommand('v', 'sidebar-cycle', 'cycle_sidebar()')
 
 IbisSheet.addCommand('', 'open-sidebar', 'vd.push(TextSheet(name, options.disp_ibis_sidebar, source=sidebar.splitlines()))')
 
-vd.addMenuItem('View', 'Sidebar', 'cycle' 'sidebar-cycle')
+vd.addMenuItem('View', 'Sidebar', 'cycle', 'sidebar-cycle')
 vd.addMenuItem('View', 'Sidebar', 'open', 'open-sidebar')

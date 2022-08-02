@@ -9,7 +9,11 @@
 
 ## Install VisiData plugin manually
 
-    pip install https://github.com/visidata/vdarrow.git
+    pip install git+https://github.com/visidata/vdarrow.git
+
+To ~/.visidatarc:
+
+    import vdarrow
 
 ## Usage
 
