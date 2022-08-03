@@ -1,19 +1,47 @@
-# [VisiData](https://visidata.org) plugin for [Apache Arrow](https://arrow.apache.org/) columnar stores
+# vdsql: [VisiData](https://visidata.org) plugin for SQL Databases
 
-- load and save Arrow formats (using [pyarrow](https://arrow.apache.org/docs/python/index.html))
-- query various database backends without loading the entire database (using [Ibis](https://ibis-project.org))
+A VisiData interface for relational and columnar databases
 
-## Install latest released version via pip
+Powered by [Ibis](https://ibis-project.org).
 
-    pip install vdarrow
+## Features
 
-## Install VisiData plugin manually
+- query data in VisiData from any supported backend
+- output resulting query in SQL, Substrait, or Python
+- modify data (for supported updatecommit data back to 
 
-    pip install git+https://github.com/visidata/vdarrow.git
+### [Backends supported by Ibis](https://ibis-project.org/docs/3.1.0/backends/) (read)
 
-To ~/.visidatarc:
+- SQLite
+- DuckDB
+- PostgreSQL
+- MySQL
+- ClickHouse
+- Apache Impala
+- Datafusion
+- Dask
+- PySpark
+- HeavyAI
+- Google BigQuery
+- [Substrait](https://substrait.io/)
 
-    import vdarrow
+### Backends supported for modifying
+
+- SQLite
+
+## Install latest release
+
+This will install both:
+  - the usual `vd` with the vdsql plugin available (use `-f ibis` to use Ibis instead of builtin loaders),
+  - the `vdsql` script that acts identically to `vd` but will use Ibis instead of the builtin loader.
+
+    pip install vdsql
+
+## Install manually as a VisiData plugin (development)
+
+    pip install git+https://github.com/visidata/vdsql.git
+
+    echo "import vdsql" >> ~/.visidatarc
 
 ## Usage
 
