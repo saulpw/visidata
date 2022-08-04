@@ -1,0 +1,19 @@
+#compdef vd visidata
+
+(( $+functions[_vd_files] )) ||
+_vd_files () {
+  case $PREFIX in
+    (*) _files $* ;;
+  esac
+  case $PREFIX in
+    (+) _message -e 'toplevel:subsheet:col:row' ;;
+    (+<1->) _message -e 'toplevel' ;;
+    (+<1->:) _message -e 'subsheet' ;;
+    (+<1->:<1->:) _message -e 'col' ;;
+    (+<1->:<1->:<1->:) _message -e 'row' ;;
+  esac
+}
+
+_arguments -S \
+    {{flags}} \
+  '(-p --play -w --replay-wait -b --batch -o --output --replay-movement)*:file:_vd_files'
