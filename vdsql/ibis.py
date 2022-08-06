@@ -157,7 +157,7 @@ class IbisSheet(Sheet):
     @property
     def countRows(self):
         if not self.rows or self._nrows_col < 0:
-            return self.nRows
+            return None
         return self.rows[0][self._nrows_col]  # __n__
 
     def groupBy(self, groupByCols):
