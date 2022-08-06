@@ -27,28 +27,80 @@ def open_ibis(vd, p):
     import ibis
     vd.aggregator('collect', ibis.expr.types.AnyValue.collect, 'collect a list of values')
     ibis.options.verbose_log = vd.status
-    return IbisIndexSheet(p.name, source=p, filetype=None)
+    return IbisTableIndexSheet(p.name, source=p, filetype=None, database_name=None, ibis_con=None)
 
 
 vd.open_duckdb = vd.open_ibis
 vd.open_ddb = vd.open_ibis
 
 
-class IbisIndexSheet(IndexSheet):
+@VisiData.api
+def openurl_bigquery(vd, p, filetype=None):
+    return BigqueryDatabaseIndexSheet(p.name, source=p, ibis_con=None)
+
+vd.openurl_bq = openurl_bigquery
+
+
+class IbisTableIndexSheet(IndexSheet):
+    @property
+    def con(self):
+        if not self.ibis_con:
+            import ibis
+            self.ibis_con = ibis.connect(str(self.source))
+
+        return self.ibis_con
+
     def iterload(self):
         import ibis
 
-        con = ibis.connect(str(self.source))
+        con = self.con
+        if self.database_name:
+            con.set_database(self.database_name)
+
+        # use the actual count instead of the returned limit
+        nrows_col = self.column('rows')
+        nrows_col.expr = 'countRows'
+        nrows_col.width += 3
 
         for tblname in con.list_tables():
-            tbl = self.tbl = con.table(tblname)
+            tbl = con.table(tblname)
             q = ibis.table(tbl.schema(), name=tblname)
 
-            yield IbisSheet(self.source.name, tblname,
+            yield IbisTableSheet(*self.names, tblname,
                     ibis_source=self.source,
                     ibis_filetype=self.filetype,
+                    ibis_con=self.con,
+                    database_name=self.database_name,
                     source=self.source,
                     query=q)
+
+
+
+
+class BigqueryDatabaseIndexSheet(Sheet):
+    rowtype = 'databases'  # rowdef: DatasetListItem
+    columns = [
+#        AttrColumn('project', width=0),
+        AttrColumn('dataset_id'),
+        AttrColumn('friendly_name'),
+        AttrColumn('full_dataset_id', width=0),
+        AttrColumn('labels'),
+    ]
+    nKeys = 1
+
+    @property
+    def con(self):
+        if not self.ibis_con:
+            import ibis
+            self.ibis_con = ibis.bigquery.connect(project_id=self.source.name)
+        return self.ibis_con
+
+    def iterload(self):
+        yield from self.con.client.list_datasets()
+
+    def openRow(self, row):
+        return IbisTableIndexSheet(row.dataset_id, database_name=row.dataset_id, ibis_con=self.con, source=row, filetype=None)
+
 
 
 class IbisColumn(ItemColumn):
@@ -72,7 +124,16 @@ def memo_aggregate(col, agg, rows):
 
 
 
-class IbisSheet(Sheet):
+class IbisTableSheet(Sheet):
+    @property
+    def con(self):
+        if not self.ibis_con:
+            import ibis
+            self.ibis_con = ibis.connect(str(self.source))
+
+        return self.ibis_con
+
+
     def cycle_sidebar(self):
         sidebars = ['', 'ibis_sql', 'ibis_expr', 'ibis_substrait']
         try:
@@ -123,13 +184,6 @@ class IbisSheet(Sheet):
         return compiler.compile(self.ibis_expr)
 
     def iterload(self):
-        import ibis
-
-        if getattr(self, 'ibis_filetype', None):
-            self.con = getattr(ibis, self.ibis_filetype).connect(str(self.ibis_source))
-        else:
-            self.con = ibis.connect(str(self.ibis_source))
-
         self.query_result = self.con.execute(self.query.mutate(__n__=lambda t: t.count()))
 
         self.options.disp_rstatus_fmt = self.options.disp_rstatus_fmt.replace('nRows', 'countRows')
@@ -167,7 +221,8 @@ class IbisSheet(Sheet):
         groupq = self.query.aggregate(aggr_cols,
                                  by=[c.ibis_col for c in groupByCols])
 
-        return IbisSheet(self.name, *(col.name for col in groupByCols), 'freq',
+        return IbisTableSheet(self.name, *(col.name for col in groupByCols), 'freq',
+                             ibis_con=self.ibis_con,
                              ibis_source=self.ibis_source,
                              source=self,
                              groupByCols=groupByCols,
@@ -199,7 +254,7 @@ class IbisSheet(Sheet):
             q = self.query
             for other in others:
                 q = q.union(other.query)
-            return IbisSheet('&'.join(vs.name for vs in sheets), query=q, ibis_source=self.ibis_source)
+            return IbisTableSheet('&'.join(vs.name for vs in sheets), query=q, ibis_source=self.ibis_source, ibis_con=self.ibis_con)
 
         for s in sheets:
             s.keyCols or vd.fail(f'{s.name} has no key cols to join')
@@ -212,7 +267,7 @@ class IbisSheet(Sheet):
             preds = [(a.ibis_col == b.ibis_col) for a, b in zip(self.keyCols, other.keyCols)]
             q = q.join(other.query, predicates=preds, how=jointype)
 
-        return IbisSheet('+'.join(vs.name for vs in sheets), sources=sheets, query=q, ibis_source=self.ibis_source)
+        return IbisTableSheet('+'.join(vs.name for vs in sheets), sources=sheets, query=q, ibis_source=self.ibis_source, ibis_con=self.ibis_con)
 
 
 @Column.property
@@ -258,23 +313,24 @@ def ibis_aggr(col, aggname):
     return getattr(col.ibis_col, aggname)().name(f'{aggname}_{col.name}')
 
 
-IbisSheet.init('ibis_filters', list, copy=True)
-IbisSheet.init('ibis_selection', list, copy=True)
-IbisSheet.init('_sqlscr', lambda: None, copy=False)
-IbisSheet.init('query_result', lambda: None, copy=False)
+IbisTableSheet.init('ibis_filters', list, copy=True)
+IbisTableSheet.init('ibis_selection', list, copy=True)
+IbisTableSheet.init('_sqlscr', lambda: None, copy=False)
+IbisTableSheet.init('query_result', lambda: None, copy=False)
+IbisTableSheet.init('ibis_con', lambda: None, copy=True)
 
-IbisSheet.addCommand('F', 'freq-col', 'vd.push(groupBy([cursorCol]))')
-IbisSheet.addCommand('gF', 'freq-keys', 'vd.push(groupBy(keyCols))')
+IbisTableSheet.addCommand('F', 'freq-col', 'vd.push(groupBy([cursorCol]))')
+IbisTableSheet.addCommand('gF', 'freq-keys', 'vd.push(groupBy(keyCols))')
 
-IbisSheet.addCommand('gt', 'stoggle-rows', 'toggle(rows)\nfor i in range(len(ibis_selection)): ibis_selection[i] = ~ibis_selection[i]', 'select rows matching current cell in current column')
-IbisSheet.addCommand(',', 'select-equal-cell', 'ibis_selection.append(cursorCol.ibis_col == cursorTypedValue); select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', 'select rows matching current cell in current column')
-#IbisSheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getDisplayValue(r) == c.getDisplayValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
-#IbisSheet.addCommand('z,', 'select-exact-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', 'select rows matching current cell in current column')
-#IbisSheet.addCommand('gz,', 'select-exact-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getTypedValue(r) == c.getTypedValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
-IbisSheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.ibis_filters.extend(vs.ibis_selection); vs.ibis_selection.clear(); vd.push(vs)', 'open duplicate sheet with only selected rows'),
-IbisSheet.addCommand('v', 'sidebar-cycle', 'cycle_sidebar()')
+IbisTableSheet.addCommand('gt', 'stoggle-rows', 'toggle(rows)\nfor i in range(len(ibis_selection)): ibis_selection[i] = ~ibis_selection[i]', 'select rows matching current cell in current column')
+IbisTableSheet.addCommand(',', 'select-equal-cell', 'ibis_selection.append(cursorCol.ibis_col == cursorTypedValue); select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', 'select rows matching current cell in current column')
+#IbisTableSheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getDisplayValue(r) == c.getDisplayValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
+#IbisTableSheet.addCommand('z,', 'select-exact-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', 'select rows matching current cell in current column')
+#IbisTableSheet.addCommand('gz,', 'select-exact-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getTypedValue(r) == c.getTypedValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
+IbisTableSheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.ibis_filters.extend(vs.ibis_selection); vs.ibis_selection.clear(); vd.push(vs)', 'open duplicate sheet with only selected rows'),
+IbisTableSheet.addCommand('v', 'sidebar-cycle', 'cycle_sidebar()')
 
-IbisSheet.addCommand('', 'open-sidebar', 'vd.push(TextSheet(name, options.disp_ibis_sidebar, source=sidebar.splitlines()))')
+IbisTableSheet.addCommand('', 'open-sidebar', 'vd.push(TextSheet(name, options.disp_ibis_sidebar, source=sidebar.splitlines()))')
 
 vd.addMenuItem('View', 'Sidebar', 'cycle', 'sidebar-cycle')
 vd.addMenuItem('View', 'Sidebar', 'open', 'open-sidebar')

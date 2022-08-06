@@ -6,3 +6,5 @@ pyarrow
 
 sqlalchemy
 sqlparse
+
+ibis-bigquery
