@@ -13,6 +13,8 @@ import locale
 import datetime
 import signal
 import warnings
+import builtins  # to override print
+
 from pkg_resources import resource_filename
 
 from visidata import vd, options, run, BaseSheet, AttrDict
@@ -99,7 +101,9 @@ def main_vd():
         locale.setlocale(locale.LC_ALL, '')
     except locale.Error as e:
         vd.warning(e)
+
     warnings.showwarning = vd.warning
+    builtins.print = vd.status
 
     flPipedInput = not sys.stdin.isatty()
     flPipedOutput = not sys.stdout.isatty()
