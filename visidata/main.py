@@ -103,6 +103,7 @@ def main_vd():
         vd.warning(e)
 
     warnings.showwarning = vd.warning
+    builtins.print = wraps(builtins.print)(vd.status)
     builtins.print = vd.status
 
     flPipedInput = not sys.stdin.isatty()
