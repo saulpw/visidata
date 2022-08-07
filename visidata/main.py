@@ -103,7 +103,7 @@ def main_vd():
         vd.warning(e)
 
     warnings.showwarning = vd.warning
-    builtins.print = vd.status
+    builtins.print = lambda *args, **kwargs: vd.status(*args)
 
     flPipedInput = not sys.stdin.isatty()
     flPipedOutput = not sys.stdout.isatty()
