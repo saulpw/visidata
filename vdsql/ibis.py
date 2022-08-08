@@ -38,7 +38,10 @@ class IbisIndexSheet(IndexSheet):
     def iterload(self):
         import ibis
 
-        con = ibis.connect(str(self.source))
+        try:
+            con = ibis.connect(str(self.source))
+        except AttributeError:
+            vd.fail(f'{self.source} backend not supported')
 
         for tblname in con.list_tables():
             tbl = self.tbl = con.table(tblname)

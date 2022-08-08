@@ -8,7 +8,6 @@ Powered by [Ibis](https://ibis-project.org).
 
 - query data in VisiData from any supported backend
 - output resulting query in SQL, Substrait, or Python
-- modify data (for supported updatecommit data back to 
 
 ### [Backends supported by Ibis](https://ibis-project.org/docs/3.1.0/backends/) (read)
 
@@ -56,7 +55,7 @@ where `file_or_url` is any connection string supported by `ibis.connect()`.
 Only these commands are implemented to use Ibis expressions; others will use the internal VisiData implementation (and will only use the currently loaded rowset, limited to 10000 rows).
 
 - `Shift+F` frequency table
-  - on the Frequency Sheet, `Enter` to select one value
+  - on the Frequency Sheet, `Enter` to filter source rows by that value
 - `-` to hide column
 - `zM` unfurl-col
 - `~`/`@`/`#`/`$`/`%` to set column types
