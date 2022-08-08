@@ -1,5 +1,9 @@
 # vdsql version history
 
+# 0.1.1 (2022-08-08)
+
+- limit install of ibis-framework dependencies to sqlite and duckdb
+
 # 0.1 (2022-08-08)
 
 - load data in VisiData for sqlite and duckdb with `vdsql` filetype
