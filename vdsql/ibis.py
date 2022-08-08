@@ -22,16 +22,33 @@ def dtype_to_type(dtype):
     return anytype
 
 
+ibis_extmap = dict(
+    db='sqlite',
+    sqlite3='sqlite',
+    sqlite='sqlite',
+    duckdb='duckdb',
+    ddb='duckdb',
+)
+
+ibis_schememap = dict(
+    postgres='postgres',
+    pg='postgres',
+    mysql='mysql',
+)
+
 @VisiData.api
-def open_ibis(vd, p):
+def open_vdsql(vd, p):
+    if p.is_url():
+        backend = ibis_schememap.get(p.scheme, None)
+    else:
+        backend = ibis_extmap.get(p.ext, None)
+
     import ibis
     vd.aggregator('collect', ibis.expr.types.AnyValue.collect, 'collect a list of values')
     ibis.options.verbose_log = vd.status
     return IbisTableIndexSheet(p.name, source=p, filetype=None, database_name=None, ibis_con=None)
 
-
-vd.open_duckdb = vd.open_ibis
-vd.open_ddb = vd.open_ibis
+vd.open_ibis = open_vdsql
 
 
 @VisiData.api
@@ -46,7 +63,13 @@ class IbisTableIndexSheet(IndexSheet):
     def con(self):
         if not self.ibis_con:
             import ibis
-            self.ibis_con = ibis.connect(str(self.source))
+            try:
+                if getattr(self, 'ibis_backend', None):
+                    self.ibis_con = getattr(ibis, self.ibis_backend).connect(str(self.source))
+                else:
+                    self.ibis_con = ibis.connect(str(self.source))
+            except AttributeError:
+                vd.fail(f'{self.source} backend not found')
 
         return self.ibis_con
 
@@ -129,7 +152,13 @@ class IbisTableSheet(Sheet):
     def con(self):
         if not self.ibis_con:
             import ibis
-            self.ibis_con = ibis.connect(str(self.source))
+            try:
+                if getattr(self, 'ibis_backend', None):
+                    self.ibis_con = getattr(ibis, self.ibis_backend).connect(str(self.source))
+                else:
+                    self.ibis_con = ibis.connect(str(self.source))
+            except AttributeError:
+                vd.fail(f'{self.source} backend not found')
 
         return self.ibis_con
 

@@ -32,6 +32,7 @@ setup(
         python_requires=">=3.8",
         packages=["vdsql"],
         py_modules=["vdsql"],
+        scripts=['bin/vdsql'],
         entry_points={'visidata.plugins': 'vdsql=vdsql'},
         install_requires=requirements(),
 )
