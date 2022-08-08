@@ -36,8 +36,6 @@ This will install both:
 
     pip install vdsql
 
-    echo "import vdsql" >> ~/.visidatarc
-
 ## Install manually as a VisiData plugin (development)
 
     pip install git+https://github.com/visidata/vdsql.git
