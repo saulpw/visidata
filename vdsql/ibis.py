@@ -22,16 +22,33 @@ def dtype_to_type(dtype):
     return anytype
 
 
+ibis_extmap = dict(
+    db='sqlite',
+    sqlite3='sqlite',
+    sqlite='sqlite',
+    duckdb='duckdb',
+    ddb='duckdb',
+)
+
+ibis_schememap = dict(
+    postgres='postgres',
+    pg='postgres',
+    mysql='mysql',
+)
+
 @VisiData.api
-def open_ibis(vd, p):
+def open_vdsql(vd, p):
+    if p.is_url():
+        backend = ibis_schememap.get(p.scheme, None)
+    else:
+        backend = ibis_extmap.get(p.ext, None)
+
     import ibis
     vd.aggregator('collect', ibis.expr.types.AnyValue.collect, 'collect a list of values')
     ibis.options.verbose_log = vd.status
-    return IbisIndexSheet(p.name, source=p, filetype=None)
+    return IbisIndexSheet(p.name, source=p, backend=backend)
 
-
-vd.open_duckdb = vd.open_ibis
-vd.open_ddb = vd.open_ibis
+vd.open_ibis = open_vdsql
 
 
 class IbisIndexSheet(IndexSheet):
@@ -39,9 +56,12 @@ class IbisIndexSheet(IndexSheet):
         import ibis
 
         try:
-            con = ibis.connect(str(self.source))
+            if getattr(self, 'ibis_backend', None):
+                con = getattr(ibis, self.ibis_backend).connect(str(self.source))
+            else:
+                con = ibis.connect(str(self.source))
         except AttributeError:
-            vd.fail(f'{self.source} backend not supported')
+            vd.fail(f'{self.source} backend not found')
 
         for tblname in con.list_tables():
             tbl = self.tbl = con.table(tblname)
@@ -49,7 +69,7 @@ class IbisIndexSheet(IndexSheet):
 
             yield IbisSheet(self.source.name, tblname,
                     ibis_source=self.source,
-                    ibis_filetype=self.filetype,
+                    ibis_backend=self.backend,
                     source=self.source,
                     query=q)
 
@@ -128,8 +148,8 @@ class IbisSheet(Sheet):
     def iterload(self):
         import ibis
 
-        if getattr(self, 'ibis_filetype', None):
-            self.con = getattr(ibis, self.ibis_filetype).connect(str(self.ibis_source))
+        if getattr(self, 'ibis_backend', None):
+            self.con = getattr(ibis, self.ibis_backend).connect(str(self.ibis_source))
         else:
             self.con = ibis.connect(str(self.ibis_source))
 

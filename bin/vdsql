@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+
+from visidata import vd, main
+import vdsql
+
+
+for ext in 'db ddb duckdb sqlite sqlite3'.split():
+    setattr(vd, f'open_{ext}', vd.open_vdsql)
+
+for scheme in 'postgres mysql'.split():
+    setattr(vd, f'openurl_{scheme}', vd.open_vdsql)
+
+
+if __name__ == '__main__':
+    main.vd_cli()
