@@ -51,13 +51,6 @@ def open_vdsql(vd, p):
 vd.open_ibis = open_vdsql
 
 
-@VisiData.api
-def openurl_bigquery(vd, p, filetype=None):
-    return BigqueryDatabaseIndexSheet(p.name, source=p, ibis_con=None)
-
-vd.openurl_bq = openurl_bigquery
-
-
 class IbisTableIndexSheet(IndexSheet):
     @property
     def con(self):
@@ -87,7 +80,7 @@ class IbisTableIndexSheet(IndexSheet):
 
         for tblname in con.list_tables():
             tbl = con.table(tblname)
-            q = ibis.table(tbl.schema(), name=tblname)
+            q = ibis.table(tbl.schema(), name=con._fully_qualified_name(tblname, self.database_name))
 
             yield IbisTableSheet(*self.names, tblname,
                     ibis_source=self.source,
@@ -96,34 +89,6 @@ class IbisTableIndexSheet(IndexSheet):
                     database_name=self.database_name,
                     source=self.source,
                     query=q)
-
-
-
-
-class BigqueryDatabaseIndexSheet(Sheet):
-    rowtype = 'databases'  # rowdef: DatasetListItem
-    columns = [
-#        AttrColumn('project', width=0),
-        AttrColumn('dataset_id'),
-        AttrColumn('friendly_name'),
-        AttrColumn('full_dataset_id', width=0),
-        AttrColumn('labels'),
-    ]
-    nKeys = 1
-
-    @property
-    def con(self):
-        if not self.ibis_con:
-            import ibis
-            self.ibis_con = ibis.bigquery.connect(project_id=self.source.name)
-        return self.ibis_con
-
-    def iterload(self):
-        yield from self.con.client.list_datasets()
-
-    def openRow(self, row):
-        return IbisTableIndexSheet(row.dataset_id, database_name=row.dataset_id, ibis_con=self.con, source=row, filetype=None)
-
 
 
 class IbisColumn(ItemColumn):
