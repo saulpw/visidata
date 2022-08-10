@@ -213,7 +213,7 @@ class IbisTableSheet(Sheet):
         return compiler.compile(self.ibis_expr)
 
     def iterload(self):
-        self.query_result = self.con.execute(self.query.mutate(__n__=lambda t: t.count()))
+        self.query_result = self.con.execute(self.query.cross_join(self.query.aggregate(__n__=lambda t: t.count())))
 
         self.options.disp_rstatus_fmt = self.options.disp_rstatus_fmt.replace('nRows', 'countRows')
 
