@@ -373,4 +373,4 @@ def run(vd, *sheetlist):
     vd.cancelThread(*[t for t in vd.unfinishedThreads if not t.name.startswith('save_')])
 
     if ret:
-        print(ret)
+        vd.printout(ret)
