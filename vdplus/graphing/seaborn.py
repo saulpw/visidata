@@ -54,6 +54,9 @@ def plotsea(sheet):
     import matplotlib.pyplot as plt
     import seaborn as sns
 
+    # Set the default theme
+    sns.set()
+    
     plt.figure(figsize=(10, 6))
     plt.title('')
     plt.xticks(rotation=15)
