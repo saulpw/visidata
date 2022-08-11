@@ -11,8 +11,10 @@ Powered by [Ibis](https://ibis-project.org).
 
 ### Confirmed supported backends
 
-- SQLite
-- DuckDB
+- SQLite: `vdsql database.sqlite` (or `.sqlite3` or `.db`)
+- DuckDB: `vdsql database.duckdb` (or `.ddb`)
+- ClickHouse: `vdsql clickhouse://user@localhost:9000/database`
+- Google BigQuery:  `vdsql bigquery:///bigquery-public-data`
 
 ### [Other backends supported by Ibis](https://ibis-project.org/docs/3.1.0/backends/) (read)
 
@@ -20,13 +22,11 @@ These backends are supported by Ibis and should work, but haven't been tested.  
 
 - PostgreSQL
 - MySQL
-- ClickHouse
 - Apache Impala
 - Datafusion
 - Dask
 - PySpark
 - HeavyAI
-- Google BigQuery
 
 ## Install latest release
 
