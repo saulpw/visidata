@@ -11,6 +11,7 @@ import io
 import sys
 import locale
 import datetime
+import functools
 import signal
 import warnings
 import builtins  # to override print
@@ -103,7 +104,9 @@ def main_vd():
         vd.warning(e)
 
     warnings.showwarning = vd.warning
-    builtins.print = lambda *args, **kwargs: vd.status(*args)
+    builtins.print = functools.wraps(builtins.print)(lambda *args, **kwargs: vd.status(*args))
+    vd.printout = print.__wrapped__
+    vd.printerr = lambda *args, **kwargs: print.__wrapped__(*args, file=sys.stderr)  # ignore kwargs (like priority)
 
     flPipedInput = not sys.stdin.isatty()
     flPipedOutput = not sys.stdout.isatty()
@@ -219,7 +222,7 @@ def main_vd():
     if args.batch:
         options.undo = False
         options.quitguard = False
-        vd.status = lambda *args, **kwargs: print(*args, file=sys.stderr)  # ignore kwargs (like priority)
+        vd.status = vd.printerr
         vd.editline = lambda *args, **kwargs: ''
         vd.execAsync = lambda func, *args, sheet=None, **kwargs: func(*args, **kwargs) # disable async
 
@@ -330,7 +333,7 @@ def main_vd():
 
     saver_threads = [t for t in vd.unfinishedThreads if t.name.startswith('save_')]
     if saver_threads:
-        print('finishing %d savers' % len(saver_threads))
+        vd.printout('finishing %d savers' % len(saver_threads))
         vd.sync(*saver_threads)
 
     vd._stdout.flush()
