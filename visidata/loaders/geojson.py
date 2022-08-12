@@ -110,11 +110,11 @@ def reduce_coords(coords, initial):
         lambda a,n: [min(a[0],n[0]), min(a[1],n[1]), max(a[2],n[0]), max(a[3],n[1])],
         coords, initial)
 
-@GeoJSONMap.api
+@VisiData.api
 def save_geojson(vd, p, vs):
     features = []
-    visibleCols = list(map(lambda c: c.name, vs.source.visibleCols))
-    for row in Progress(vs.sourceRows, 'saving'):
+    visibleCols = list(map(lambda c: c.name, vs.visibleCols))
+    for row in Progress(vs.rows, 'saving'):
         row = deepcopy(row)
         row['properties'] = {k:v for k,v in row.get('properties', {}).items() if k in visibleCols}
         features.append(row)
@@ -137,3 +137,7 @@ def save_geojson(vd, p, vs):
 GeoJSONSheet.addCommand('.', 'plot-row', 'vd.push(GeoJSONMap(name+"_map", sourceRows=[cursorRow], textCol=cursorCol, source=sheet))', 'plot geospatial vector in current row')
 GeoJSONSheet.addCommand('g.', 'plot-rows', 'vd.push(GeoJSONMap(name+"_map", sourceRows=rows, textCol=cursorCol, source=sheet))', 'plot all geospatial vectors in current sheet')
 GeoJSONMap.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .geojson)')
+
+vd.addGlobals({
+    'GeoJSONMap': GeoJSONMap,
+})
