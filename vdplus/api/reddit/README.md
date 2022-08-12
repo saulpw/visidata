@@ -8,21 +8,26 @@
 
 3. Add import and credentials to visidatarc:
 
+```
     import vdplus.api.reddit
     options.reddit_client_id = '...'      # below the description in the upper left
     options.reddit_client_secret = '...'
+```
 
 ## Use 'reddit' filetype for subreddits or users
 
+```
     vd r/commandline.reddit
     vd u/gallowboob.reddit
     vd r/neovim -f reddit
+```
 
 Multiple may be specified, joined with `+`:
 
+```
     vd r/rust+golang+python.reddit
     vd u/spez+kn0thing.reddit
-
+```
 ## Commands available from Reddit Sheets
 
 ### SubredditSheet
