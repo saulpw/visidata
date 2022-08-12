@@ -1,0 +1,9 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.geojson	o	
+sample			addcol-incr		i	
+sample	A		slide-left		Shift+H	
+sample	state		hide-col		-	
+sample	postal-code	2	edit-cell	92104	e	
+sample	county_fips		type-string		~	
+sample	county_fips		addcol-expr	"06"	=	
+sample	"06"		rename-col	state_fips	^	
