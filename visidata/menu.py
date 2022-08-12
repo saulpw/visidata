@@ -726,6 +726,7 @@ def runMenu(vd):
     vd.menuRunning = True
     sheet = vd.activeSheet
     vd.setWindows(vd.scrFull)
+    nEscapes = 0
 
     try:
       while True:
@@ -738,7 +739,12 @@ def runMenu(vd):
 
         currentItem = getMenuItem(sheet)
 
-        if k in ['^C', '^Q', '^[', 'q']:
+        if k == '^[':  # ESC
+            nEscapes += 1  #1470
+        else:
+            nEscapes = 0
+
+        if nEscapes > 1 or k in ['^C', '^Q', 'q']:
             return
 
         elif k in ['KEY_MOUSE']:
