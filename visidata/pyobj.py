@@ -169,8 +169,9 @@ def closeColumn(sheet, col):
 
 
 #### generic list/dict/object browsing
-def view(obj):
-    run(PyobjSheet(getattr(obj, '__name__', ''), source=obj))
+@VisiData.global_api
+def view(vd, obj):
+    vd.run(PyobjSheet(getattr(obj, '__name__', ''), source=obj))
 
 
 
