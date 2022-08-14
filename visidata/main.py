@@ -106,7 +106,7 @@ def main_vd():
     warnings.showwarning = vd.warning
     builtins.print = functools.wraps(builtins.print)(lambda *args, **kwargs: vd.status(*args) if not kwargs else builtins.print.__wrapped__(*args, **kwargs))
     vd.printout = print.__wrapped__
-    vd.printerr = lambda *args, **kwargs: print.__wrapped__(*args, file=sys.stderr)  # ignore kwargs (like priority)
+    vd.printerr = lambda *args, **kwargs: print(*args, file=sys.stderr)  # ignore kwargs (like priority)
 
     flPipedInput = not sys.stdin.isatty()
     flPipedOutput = not sys.stdout.isatty()
