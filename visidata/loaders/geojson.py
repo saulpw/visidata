@@ -10,11 +10,11 @@ def open_geojson(vd, p):
 
 class GeoJSONColumn(Column):
     def calcValue(self, row):
-        return row.get('properties', {}).get(self.prop)
+        return row.get('properties', {}).get(self.expr)
 
     def putValue(self, row, val):
         properties = row.setdefault('properties', {})
-        properties[self.prop] = val
+        properties[self.expr] = val
 
 class GeoJSONSheet(PythonSheet):
     rowtype = 'shapes'
@@ -39,7 +39,7 @@ class GeoJSONSheet(PythonSheet):
                 for prop in feature.get('properties', {}).keys():
                     prop = self.maybeClean(prop)
                     if prop not in self.colnames:
-                        c = GeoJSONColumn(name=prop, prop=prop)
+                        c = GeoJSONColumn(name=prop, expr=prop)
                         self.colnames[prop] = c
                         self.addColumn(c)
                 yield feature
