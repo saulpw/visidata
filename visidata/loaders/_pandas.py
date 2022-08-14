@@ -122,7 +122,8 @@ class PandasSheet(Sheet):
                 readfunc = partial(pd.read_json, lines=True)
             else:
                 readfunc = getattr(pd, 'read_'+filetype) or vd.error('no pandas.read_'+filetype)
-            df = readfunc(self.source.open(), **options.getall('pandas_'+filetype+'_'))
+            # readfunc() handles binary and text open()
+            df = readfunc(self.source, **options.getall('pandas_'+filetype+'_'))
             if (filetype == 'pickle') and not isinstance(df, pd.DataFrame):
                 vd.fail('pandas loader can only unpickle dataframes')
         else:
