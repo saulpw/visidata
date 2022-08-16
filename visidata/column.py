@@ -210,9 +210,9 @@ class Column(Extensible):
 
     def _format_len(self, typedval, **kwargs):
         if isinstance(typedval, dict):
-            return f'{len(typedval)}'
+            return f'{{{len(typedval)}}}'
         elif isinstance(typedval, (list, tuple)):
-            return f'[len(typedval)]'
+            return f'[{len(typedval)}]'
 
         return self.formatValue(typedval, **kwargs)
 
