@@ -37,7 +37,7 @@ ibis_schememap = dict(
 )
 
 @VisiData.api
-def open_vdsql(vd, p):
+def open_vdsql(vd, p, filetype=None):
     if p.is_url():
         backend = ibis_schememap.get(p.scheme, None)
     else:

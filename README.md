@@ -13,7 +13,7 @@ Powered by [Ibis](https://ibis-project.org).
 
 - SQLite: `vdsql database.sqlite` (or `.sqlite3` or `.db`)
 - DuckDB: `vdsql database.duckdb` (or `.ddb`)
-- ClickHouse: `vdsql clickhouse://user@localhost:9000/database`
+- ClickHouse: `vdsql clickhouse://explorer@play.clickhouse.com:9440/?secure=1`
 - Google BigQuery:  `vdsql bigquery:///bigquery-public-data`
 
 ### [Other backends supported by Ibis](https://ibis-project.org/docs/3.1.0/backends/) (read)
@@ -31,8 +31,8 @@ These backends are supported by Ibis and should work, but haven't been tested.  
 ## Install latest release
 
 This will install both:
-  - the usual `vd` with the vdsql plugin available (use `-f ibis` to use Ibis instead of builtin loaders),
-  - the `vdsql` script that acts identically to `vd` but will use Ibis instead of the builtin loader.
+  - the usual `vd` with the vdsql plugin available (use `-f vdsql` to use Ibis instead of builtin loaders),
+  - the `vdsql` script that acts identically to `vd` but will use Ibis instead of VisiData's builtin loader.
 
     pip install vdsql
 
