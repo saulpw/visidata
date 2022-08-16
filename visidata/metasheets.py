@@ -185,11 +185,11 @@ def allColumnsSheet(vd):
 @VisiData.api
 def save_visidatarc(vd, p, vs):
     with p.open_text(mode='w') as fp:
-        for optname, val in sorted(vd.options.getall().items()):
-            rval = repr(val)
-            defopt = vd.options._get(optname, 'default')
-            leading = '# ' if val == defopt.value else ''
-            fp.write(f'{leading}options.{optname:25s} = {rval:10s}  # {defopt.helpstr}\n')
+        for opt in vs.rows:
+            rval = repr(opt.value)
+            defopt = vd.options._get(opt.name, 'default')
+            leading = '# ' if opt.value == defopt.value else ''
+            fp.write(f'{leading}options.{opt.name:25s} = {rval:10s}  # {defopt.helpstr}\n')
 
 
 @ColumnsSheet.command('&', 'join-cols', 'add column from concatenating selected source columns')
