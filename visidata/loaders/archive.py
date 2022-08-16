@@ -57,11 +57,14 @@ class ZipSheet(Sheet):
 
     @property
     def zfp(self):
-        if '://' in str(self.source):
-            unzip_http.warning = vd.warning
-            return unzip_http.RemoteZipFile(str(self.source))
+        if not self._zfp:
+            if '://' in str(self.source):
+                unzip_http.warning = vd.warning
+                self._zfp = unzip_http.RemoteZipFile(str(self.source))
+            else:
+                self._zfp = zipfile.ZipFile(str(self.source), 'r')
 
-        return zipfile.ZipFile(str(self.source), 'r')
+        return self._zfp
 
     def iterload(self):
         with self.zfp as zf:
@@ -92,6 +95,8 @@ class TarSheet(Sheet):
             for ti in Progress(tf.getmembers()):
                 yield ti
 
+
+ZipSheet.init('_zfp', lambda: None, copy=True)
 
 ZipSheet.addCommand('x', 'extract-file', 'extract(cursorRow)', 'extract current file to current directory')
 ZipSheet.addCommand('gx', 'extract-selected', 'extract(*onlySelectedRows)', 'extract selected files to current directory')
