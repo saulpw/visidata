@@ -520,7 +520,8 @@ class TableSheet(BaseSheet):
         if ccol and not ccol.keycol:
             index = self.columns.index(ccol)+1
 
-        firstnewcol = self.addColumn(*cols, index=index)
+        self.addColumn(*cols, index=index)
+        firstnewcol = [c for c in newcols if not c.hidden][0]
         self.cursorVisibleColIndex = self.visibleCols.index(firstnewcol)
         return firstnewcol
 
