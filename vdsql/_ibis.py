@@ -99,16 +99,14 @@ class IbisTableIndexSheet(IndexSheet):
             nrows_col.width += 3
 
             for tblname in con.list_tables():
-                tbl = con.table(tblname)
-                q = ibis.table(tbl.schema(), name=con._fully_qualified_name(tblname, self.database_name))
-
                 yield IbisTableSheet(*self.names, tblname,
                         ibis_source=self.source,
                         ibis_filetype=self.filetype,
                         ibis_conpool=self.ibis_conpool,
                         database_name=self.database_name,
+                        table_name=tblname,
                         source=self.source,
-                        query=q)
+                        query=None)
 
 
 class IbisColumn(ItemColumn):
@@ -190,7 +188,13 @@ class IbisTableSheet(Sheet):
         return compiler.compile(self.ibis_expr)
 
     def iterload(self):
+        import ibis
+
         with self.con as con:
+            if self.query is None:
+                tbl = con.table(self.table_name)
+                self.query = ibis.table(tbl.schema(), name=con._fully_qualified_name(self.table_name, self.database_name))
+
             self.query_result = con.execute(self.query.cross_join(self.query.aggregate(__n__=lambda t: t.count())))
 
         self.options.disp_rstatus_fmt = self.options.disp_rstatus_fmt.replace('nRows', 'countRows')
