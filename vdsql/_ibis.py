@@ -47,6 +47,9 @@ def open_vdsql(vd, p, filetype=None):
     import ibis
     vd.aggregator('collect', ibis.expr.types.AnyValue.collect, 'collect a list of values')
     ibis.options.verbose_log = vd.status
+    if vd.options.debug:
+        ibis.options.verbose = True
+
     return IbisTableIndexSheet(p.name, source=p, filetype=None, database_name=None,
                                ibis_conpool=IbisConnectionPool(p, backend=backend))
 
