@@ -521,7 +521,7 @@ class TableSheet(BaseSheet):
             index = self.columns.index(ccol)+1
 
         self.addColumn(*cols, index=index)
-        firstnewcol = [c for c in newcols if not c.hidden][0]
+        firstnewcol = [c for c in cols if not c.hidden][0]
         self.cursorVisibleColIndex = self.visibleCols.index(firstnewcol)
         return firstnewcol
 
