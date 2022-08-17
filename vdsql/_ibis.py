@@ -1,4 +1,5 @@
 from copy import copy
+from contextlib import contextmanager
 from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace
 from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply
 
@@ -46,49 +47,68 @@ def open_vdsql(vd, p, filetype=None):
     import ibis
     vd.aggregator('collect', ibis.expr.types.AnyValue.collect, 'collect a list of values')
     ibis.options.verbose_log = vd.status
-    return IbisTableIndexSheet(p.name, source=p, filetype=None, database_name=None, ibis_con=None)
+    return IbisTableIndexSheet(p.name, source=p, filetype=None, database_name=None,
+                               ibis_conpool=IbisConnectionPool(p, backend=backend))
+
 
 vd.open_ibis = open_vdsql
+
+
+class IbisConnectionPool:
+    def __init__(self, source, backend=None, pool=None):
+        self.source = source
+        self.backend = backend
+        self.pool = pool if pool is not None else []
+
+    def __copy__(self):
+        return IbisConnectionPool(self.source, self.backend, self.pool)
+
+    @contextmanager
+    def get_conn(self):
+        if not self.pool:
+            import ibis
+
+            if self.backend:
+                r = getattr(ibis, self.backend).connect(str(self.source))
+            else:
+                r = ibis.connect(str(self.source))
+        else:
+            r = self.pool.pop(0)
+
+        try:
+            yield r
+        finally:
+            self.pool.append(r)
 
 
 class IbisTableIndexSheet(IndexSheet):
     @property
     def con(self):
-        if not self.ibis_con:
-            import ibis
-            try:
-                if getattr(self, 'ibis_backend', None):
-                    self.ibis_con = getattr(ibis, self.ibis_backend).connect(str(self.source))
-                else:
-                    self.ibis_con = ibis.connect(str(self.source))
-            except AttributeError:
-                vd.fail(f'{self.source} backend not found')
-
-        return self.ibis_con
+        return self.ibis_conpool.get_conn()
 
     def iterload(self):
         import ibis
 
-        con = self.con
-        if self.database_name:
-            con.set_database(self.database_name)
+        with self.con as con:
+            if self.database_name:
+                con.set_database(self.database_name)
 
-        # use the actual count instead of the returned limit
-        nrows_col = self.column('rows')
-        nrows_col.expr = 'countRows'
-        nrows_col.width += 3
+            # use the actual count instead of the returned limit
+            nrows_col = self.column('rows')
+            nrows_col.expr = 'countRows'
+            nrows_col.width += 3
 
-        for tblname in con.list_tables():
-            tbl = con.table(tblname)
-            q = ibis.table(tbl.schema(), name=con._fully_qualified_name(tblname, self.database_name))
+            for tblname in con.list_tables():
+                tbl = con.table(tblname)
+                q = ibis.table(tbl.schema(), name=con._fully_qualified_name(tblname, self.database_name))
 
-            yield IbisTableSheet(*self.names, tblname,
-                    ibis_source=self.source,
-                    ibis_filetype=self.filetype,
-                    ibis_con=self.con,
-                    database_name=self.database_name,
-                    source=self.source,
-                    query=q)
+                yield IbisTableSheet(*self.names, tblname,
+                        ibis_source=self.source,
+                        ibis_filetype=self.filetype,
+                        ibis_conpool=self.ibis_conpool,
+                        database_name=self.database_name,
+                        source=self.source,
+                        query=q)
 
 
 class IbisColumn(ItemColumn):
@@ -102,7 +122,9 @@ def memo_aggregate(col, agg, rows):
 
     aggexpr = col.ibis_aggr(agg.name)  # ignore rows, do over whole query
 
-    aggval = col.sheet.con.execute(aggexpr)
+    with col.sheet.con as con:
+        aggval = con.execute(aggexpr)
+
     typedval = wrapply(agg.type or col.type, aggval)
     dispval = col.format(typedval)
     k = col.name+'_'+agg.name
@@ -115,18 +137,7 @@ def memo_aggregate(col, agg, rows):
 class IbisTableSheet(Sheet):
     @property
     def con(self):
-        if not self.ibis_con:
-            import ibis
-            try:
-                if getattr(self, 'ibis_backend', None):
-                    self.ibis_con = getattr(ibis, self.ibis_backend).connect(str(self.source))
-                else:
-                    self.ibis_con = ibis.connect(str(self.source))
-            except AttributeError:
-                vd.fail(f'{self.source} backend not found')
-
-        return self.ibis_con
-
+        return self.ibis_conpool.get_conn()
 
     def cycle_sidebar(self):
         sidebars = ['', 'ibis_sql', 'ibis_expr', 'ibis_substrait']
@@ -168,7 +179,8 @@ class IbisTableSheet(Sheet):
     @property
     def ibis_sql(self):
         import sqlparse
-        sqlstr = str(self.con.compile(self.ibis_expr).compile(compile_kwargs={'literal_binds': True}))
+        with self.con as con:
+            sqlstr = str(con.compile(self.ibis_expr).compile(compile_kwargs={'literal_binds': True}))
         return sqlparse.format(sqlstr, reindent=True, keyword_case='upper')
 
     @property
@@ -178,7 +190,8 @@ class IbisTableSheet(Sheet):
         return compiler.compile(self.ibis_expr)
 
     def iterload(self):
-        self.query_result = self.con.execute(self.query.cross_join(self.query.aggregate(__n__=lambda t: t.count())))
+        with self.con as con:
+            self.query_result = con.execute(self.query.cross_join(self.query.aggregate(__n__=lambda t: t.count())))
 
         self.options.disp_rstatus_fmt = self.options.disp_rstatus_fmt.replace('nRows', 'countRows')
 
@@ -216,7 +229,7 @@ class IbisTableSheet(Sheet):
                                  by=[c.ibis_col for c in groupByCols])
 
         return IbisTableSheet(self.name, *(col.name for col in groupByCols), 'freq',
-                             ibis_con=self.ibis_con,
+                             ibis_conpool=self.ibis_conpool,
                              ibis_source=self.ibis_source,
                              source=self,
                              groupByCols=groupByCols,
@@ -248,7 +261,7 @@ class IbisTableSheet(Sheet):
             q = self.query
             for other in others:
                 q = q.union(other.query)
-            return IbisTableSheet('&'.join(vs.name for vs in sheets), query=q, ibis_source=self.ibis_source, ibis_con=self.ibis_con)
+            return IbisTableSheet('&'.join(vs.name for vs in sheets), query=q, ibis_source=self.ibis_source, ibis_conpool=self.ibis_conpool)
 
         for s in sheets:
             s.keyCols or vd.fail(f'{s.name} has no key cols to join')
@@ -261,7 +274,7 @@ class IbisTableSheet(Sheet):
             preds = [(a.ibis_col == b.ibis_col) for a, b in zip(self.keyCols, other.keyCols)]
             q = q.join(other.query, predicates=preds, how=jointype)
 
-        return IbisTableSheet('+'.join(vs.name for vs in sheets), sources=sheets, query=q, ibis_source=self.ibis_source, ibis_con=self.ibis_con)
+        return IbisTableSheet('+'.join(vs.name for vs in sheets), sources=sheets, query=q, ibis_source=self.ibis_source, ibis_conpool=self.ibis_conpool)
 
 
 @Column.property
@@ -311,7 +324,7 @@ IbisTableSheet.init('ibis_filters', list, copy=True)
 IbisTableSheet.init('ibis_selection', list, copy=True)
 IbisTableSheet.init('_sqlscr', lambda: None, copy=False)
 IbisTableSheet.init('query_result', lambda: None, copy=False)
-IbisTableSheet.init('ibis_con', lambda: None, copy=True)
+IbisTableSheet.init('ibis_conpool', lambda: None, copy=True)
 
 IbisTableSheet.addCommand('F', 'freq-col', 'vd.push(groupBy([cursorCol]))')
 IbisTableSheet.addCommand('gF', 'freq-keys', 'vd.push(groupBy(keyCols))')
