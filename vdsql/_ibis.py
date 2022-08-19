@@ -1,7 +1,7 @@
 from copy import copy
 from contextlib import contextmanager
 from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace
-from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply
+from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet
 
 vd.option('disp_ibis_sidebar', '', 'sidebar to display')
 
@@ -30,6 +30,11 @@ def open_vdsql(vd, p, filetype=None):
     ibis.options.verbose_log = vd.status
     if vd.options.debug:
         ibis.options.verbose = True
+
+    if 'ibis_type' not in set(c.expr for c in ColumnsSheet.columns):
+        ColumnsSheet.columns += [
+            AttrColumn('ibis_type', type=str)
+        ]
 
     return IbisTableIndexSheet(p.name, source=p, filetype=None, database_name=None,
                                ibis_conpool=IbisConnectionPool(p))
@@ -90,7 +95,10 @@ class IbisTableIndexSheet(IndexSheet):
 
 
 class IbisColumn(ItemColumn):
-    pass
+    @property
+    def ibis_type(self):
+        return self.sheet.query[self.ibis_name].type()
+
 
 
 @IbisColumn.api
