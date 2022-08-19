@@ -66,10 +66,6 @@ class HtmlAttrColumn(Column):
     def calcValue(self, row):
         return row.attrs.get(self.expr)
 
-def _getRootSheet(sheet):
-    if not isinstance(sheet.source, Sheet):
-        return sheet
-    return _getRootSheet(sheet.source)
 
 def prev_header(r):
     hdrtags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
@@ -105,7 +101,7 @@ class HtmlElementsSheet(Sheet):
 
     @property
     def rootSource(self):
-        return _getRootSheet(self).source
+        return self.rootSheet.source
 
     def openRows(self, rows):
         realurls = [urljoin(self.rootSource.given, r.attrs.get('href')) for r in rows]
