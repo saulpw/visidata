@@ -1,7 +1,7 @@
 from copy import copy
 from contextlib import contextmanager
 from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace
-from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet
+from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet, UNLOADED
 
 vd.option('disp_ibis_sidebar', '', 'which sidebar property to display')
 vd.option('sql_always_count', False, 'whether to always query a count of the number of results')
@@ -222,6 +222,8 @@ class IbisTableSheet(Sheet):
 
     @property
     def countRows(self):
+        if self.rows is UNLOADED:
+            return None
         if not self.rows or self._nrows_col < 0:
             return self.nRows
         return self.rows[0][self._nrows_col]  # __n__

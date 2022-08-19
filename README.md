@@ -15,13 +15,13 @@ Powered by [Ibis](https://ibis-project.org).
 - DuckDB: `vdsql database.duckdb` (or `.ddb`)
 - ClickHouse: `vdsql clickhouse://explorer@play.clickhouse.com:9440/?secure=1`
 - Google BigQuery:  `vdsql bigquery:///bigquery-public-data`
+- MySQL: `vdsql mysql://...`
+- PostgreSQL: `vdsql postgres://...`
 
 ### [Other backends supported by Ibis](https://ibis-project.org/docs/3.1.0/backends/) (read)
 
 These backends are supported by Ibis and should work, but haven't been tested.  If you have have problems connecting, please [file an issue](https://github.com/visidata/vdsql/issues/new).
 
-- PostgreSQL
-- MySQL
 - Apache Impala
 - Datafusion
 - Dask
