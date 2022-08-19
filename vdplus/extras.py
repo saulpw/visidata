@@ -1,6 +1,6 @@
 import os
 
-from visidata import vd, Sheet, VisiData, FreqTableSheet, BaseSheet, asyncthread
+from visidata import vd, Sheet, VisiData, FreqTableSheet, BaseSheet, asyncthread, CellColorizer
 
 vd.options.disp_menu_fmt = '|  VisiData {vd.version} | {vd.motd}'
 
@@ -62,3 +62,9 @@ def ansi(*args):
 @VisiData.api
 def set_titlebar(vd,title):
     ansi(']2;', title, '\x07')
+
+
+vd.option('color_current_cell', '', 'color of current cell, if different from color_current_row+color_current_col')
+Sheet.colorizers += [
+    CellColorizer(3, 'color_current_cell', lambda s,c,r,v: c is s.cursorCol and r is s.cursorRow)
+]
