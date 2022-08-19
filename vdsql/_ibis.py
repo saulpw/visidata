@@ -3,7 +3,8 @@ from contextlib import contextmanager
 from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace
 from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet
 
-vd.option('disp_ibis_sidebar', '', 'sidebar to display')
+vd.option('disp_ibis_sidebar', '', 'which sidebar property to display')
+vd.option('sql_always_count', False, 'whether to always query a count of the number of results')
 
 
 def dtype_to_type(dtype):
@@ -166,14 +167,26 @@ class IbisTableSheet(Sheet):
     def ibis_sql(self):
         import sqlparse
         with self.con as con:
-            sqlstr = str(con.compile(self.ibis_expr).compile(compile_kwargs={'literal_binds': True}))
-        return sqlparse.format(sqlstr, reindent=True, keyword_case='upper')
+            expr = self.ibis_expr
+            if vd.options.debug:
+                expr = self.with_count(expr)
+
+            compiled = con.compile(expr)
+            if not isinstance(compiled, str):
+                compiled = str(compiled.compile(compile_kwargs={'literal_binds': True}))
+        return sqlparse.format(compiled, reindent=True, keyword_case='upper')
 
     @property
     def ibis_substrait(self):
         from ibis_substrait.compiler.core import SubstraitCompiler
         compiler = SubstraitCompiler()
         return compiler.compile(self.ibis_expr)
+
+    def with_count(self, q):
+        if self.options.sql_always_count:
+            # return q.mutate(__n__=q.count())
+            return q.cross_join(q.aggregate(__n__=lambda t: t.count()))
+        return q
 
     def iterload(self):
         import ibis
@@ -183,7 +196,7 @@ class IbisTableSheet(Sheet):
                 tbl = con.table(self.table_name)
                 self.query = ibis.table(tbl.schema(), name=con._fully_qualified_name(self.table_name, self.database_name))
 
-            self.query_result = con.execute(self.query.cross_join(self.query.aggregate(__n__=lambda t: t.count())))
+            self.query_result = con.execute(self.with_count(self.ibis_expr))
 
         self.options.disp_rstatus_fmt = self.options.disp_rstatus_fmt.replace('nRows', 'countRows')
 
@@ -210,7 +223,7 @@ class IbisTableSheet(Sheet):
     @property
     def countRows(self):
         if not self.rows or self._nrows_col < 0:
-            return None
+            return self.nRows
         return self.rows[0][self._nrows_col]  # __n__
 
     def groupBy(self, groupByCols):
