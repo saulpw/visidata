@@ -23,27 +23,8 @@ def dtype_to_type(dtype):
     return anytype
 
 
-ibis_extmap = dict(
-    db='sqlite',
-    sqlite3='sqlite',
-    sqlite='sqlite',
-    duckdb='duckdb',
-    ddb='duckdb',
-)
-
-ibis_schememap = dict(
-    postgres='postgres',
-    pg='postgres',
-    mysql='mysql',
-)
-
 @VisiData.api
 def open_vdsql(vd, p, filetype=None):
-    if p.is_url():
-        backend = ibis_schememap.get(p.scheme, None)
-    else:
-        backend = ibis_extmap.get(p.ext, None)
-
     import ibis
     vd.aggregator('collect', ibis.expr.types.AnyValue.collect, 'collect a list of values')
     ibis.options.verbose_log = vd.status
@@ -51,30 +32,26 @@ def open_vdsql(vd, p, filetype=None):
         ibis.options.verbose = True
 
     return IbisTableIndexSheet(p.name, source=p, filetype=None, database_name=None,
-                               ibis_conpool=IbisConnectionPool(p, backend=backend))
+                               ibis_conpool=IbisConnectionPool(p))
 
 
 vd.open_ibis = open_vdsql
 
 
 class IbisConnectionPool:
-    def __init__(self, source, backend=None, pool=None):
+    def __init__(self, source, pool=None, total=0):
         self.source = source
-        self.backend = backend
         self.pool = pool if pool is not None else []
+        self.total = total
 
     def __copy__(self):
-        return IbisConnectionPool(self.source, self.backend, self.pool)
+        return IbisConnectionPool(self.source, pool=self.pool, total=self.total)
 
     @contextmanager
     def get_conn(self):
         if not self.pool:
             import ibis
-
-            if self.backend:
-                r = getattr(ibis, self.backend).connect(str(self.source))
-            else:
-                r = ibis.connect(str(self.source))
+            r = ibis.connect(str(self.source))
         else:
             r = self.pool.pop(0)
 
