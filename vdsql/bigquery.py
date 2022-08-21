@@ -1,5 +1,5 @@
 from visidata import vd, VisiData, Sheet, AttrColumn
-from . import IbisTableIndexSheet
+from . import IbisTableIndexSheet, IbisConnectionPool
 
 
 @VisiData.api
@@ -36,5 +36,6 @@ class BigqueryDatabaseIndexSheet(Sheet):
         return IbisTableIndexSheet(row.dataset_id,
                                    database_name=self.source.name+'.'+row.dataset_id,
                                    ibis_con=self.con,
+                                   ibis_conpool=IbisConnectionPool(f"{self.source}/{row.dataset_id}"),
                                    source=row,
                                    filetype=None)
