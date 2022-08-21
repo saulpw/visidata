@@ -100,7 +100,7 @@ class ThreadsSheet(Sheet):
         ColumnAttr('exception'),
     ]
     def reload(self):
-        self.rows = vd.threads
+        self.rows = self.source
 
     def openRow(self, row):
         'push profile sheet for this action'
@@ -171,10 +171,6 @@ def _annotate_thread(t, endTime=None):
 
 # all long-running threads, including main and finished
 VisiData.init('threads', lambda: [_annotate_thread(threading.current_thread(), 0)])
-
-@VisiData.lazy_property
-def threadsSheet(self):
-    return ThreadsSheet('threads')
 
 @VisiData.api
 def execAsync(self, func, *args, sheet=None, **kwargs):
@@ -398,9 +394,12 @@ BaseSheet.addCommand('^_', 'toggle-profile', 'toggleProfiling()', 'Enable or dis
 BaseSheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads or fail("no active threads on this sheet"))', 'abort all threads on current sheet')
 BaseSheet.addCommand('g^C', 'cancel-all', 'liveThreads=list(t for vs in vd.sheets for t in vs.currentThreads); cancelThread(*liveThreads); status("canceled %s threads" % len(liveThreads))', 'abort all secondary threads')
 
-BaseSheet.addCommand('^T', 'threads-all', 'vd.push(vd.threadsSheet)', 'open Threads Sheet')
+
+BaseSheet.addCommand('^T', 'threads-all', 'vd.push(ThreadsSheet("threads", source=vd.threads))', 'open Threads for all sheets')
+BaseSheet.addCommand('z^T', 'threads-sheet', 'vd.push(ThreadsSheet("threads", source=sheet.currentThreads))', 'open Threads for this sheet')
 
 vd.addGlobals({
+    'ThreadsSheet': ThreadsSheet,
     'Progress': Progress,
     'asynccache': asynccache,
     'asyncsingle': asyncsingle,
