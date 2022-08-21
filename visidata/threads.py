@@ -176,10 +176,6 @@ VisiData.init('threads', lambda: [_annotate_thread(threading.current_thread(), 0
 def threadsSheet(self):
     return ThreadsSheet('threads')
 
-@VisiData.lazy_property
-def memoryUsageSheet(self):
-    return MemoryUsageSheet("memory_usage")
-
 @VisiData.api
 def execAsync(self, func, *args, sheet=None, **kwargs):
     'Execute ``func(*args, **kwargs)`` in a separate thread.'
@@ -390,28 +386,8 @@ def codestr(code):
     return code.co_name
 
 
-class MemoryUsageSheet(Sheet):
-    rowtype = 'samples'  # rowdef: dict(t:time_t, data_MB:float)
-    columns = [
-        ItemColumn('t', type=date, fmtstr="%H:%M:%S"),
-        ItemColumn('data_MB', type=int),
-    ]
-    nKeys = 1
-    def iterload(self):
-        import psutil
-        proc = psutil.Process()
-        while True:
-            r = proc.memory_info()
-            yield {
-                't': time.time(),
-                'data_MB': r.data/1000000,
-            }
-            time.sleep(1)
-
-
 ThreadsSheet.addCommand('^C', 'cancel-thread', 'cancelThread(cursorRow)', 'abort thread at current row')
 ThreadsSheet.addCommand(None, 'add-row', 'fail("cannot add new rows on Threads Sheet")', 'invalid command')
-
 
 ProfileSheet.addCommand('z^S', 'save-profile', 'source.dump_stats(input("save profile to: ", value=name+".prof"))', 'save profile')
 ProfileSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow.code.co_filename, "+%s" % cursorRow.code.co_firstlineno)', 'open current file at referenced row in external $EDITOR')
@@ -423,8 +399,6 @@ BaseSheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads o
 BaseSheet.addCommand('g^C', 'cancel-all', 'liveThreads=list(t for vs in vd.sheets for t in vs.currentThreads); cancelThread(*liveThreads); status("canceled %s threads" % len(liveThreads))', 'abort all secondary threads')
 
 BaseSheet.addCommand('^T', 'threads-all', 'vd.push(vd.threadsSheet)', 'open Threads Sheet')
-BaseSheet.addCommand('z^T', 'open-memusage', 'vd.push(vd.memoryUsageSheet)', 'open Memory Usage Sheet')
-
 
 vd.addGlobals({
     'Progress': Progress,
