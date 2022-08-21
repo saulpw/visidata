@@ -101,8 +101,14 @@ def _(sampleValue, col, vals):
         })
 
     return [
-        ExpandedColumn(col.sheet.options.fmt_expand_dict % (col.name, k), type=v, origCol=col, key=k)
+        ExpandedColumn(col.sheet.options.fmt_expand_dict % (col.name, k), type=v, origCol=col, expr=k)
             for k, v in newcols.items()
+    ]
+
+def _createExpandedColumnsNamedTuple(col, val):
+    return [
+        ExpandedColumn(col.sheet.options.fmt_expand_dict % (col.name, k), type=colType, origCol=col, expr=i)
+            for i, (k, colType) in enumerate(zip(val._fields, (deduceType(v) for v in val)))
     ]
 
 @_createExpandedColumns.register(list)
@@ -115,10 +121,14 @@ def _(sampleValue, col, vals):
             return len(v)
         except Exception as e:
             return 0
+
+    if hasattr(sampleValue, '_fields'):  # looks like a namedtuple
+        return _createExpandedColumnsNamedTuple(col, vals[0])
+
     longestSeq = max(vals, key=lenNoExceptions)
     colTypes = [deduceType(v) for v in longestSeq]
     return [
-        ExpandedColumn(col.sheet.options.fmt_expand_list % (col.name, k), type=colType, origCol=col, key=k)
+        ExpandedColumn(col.sheet.options.fmt_expand_list % (col.name, k), type=colType, origCol=col, expr=k)
             for k, colType in enumerate(colTypes)
     ]
 
@@ -157,10 +167,10 @@ def deduceType(v):
 
 class ExpandedColumn(Column):
     def calcValue(self, row):
-        return getitemdef(self.origCol.getValue(row), self.key)
+        return getitemdef(self.origCol.getValue(row), self.expr)
 
     def setValue(self, row, value):
-        self.origCol.getValue(row)[self.key] = value
+        self.origCol.getValue(row)[self.expr] = value
 
 
 def closeColumn(sheet, col):
