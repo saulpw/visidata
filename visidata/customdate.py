@@ -16,5 +16,5 @@ def customdate(sheet, fmtstr):
     return _customdate
 
 
-Sheet.addCommand('z@', 'type-customdate', 'cursorCol.type=cursorCol.type=customdate(input("date format: ", type="fmtstr"))', 'set type of current column to custom date format')
+Sheet.addCommand('z@', 'type-customdate', 'cursorCol.type=customdate(input("date format: ", type="fmtstr"))', 'set type of current column to custom date format')
 ColumnsSheet.addCommand('gz@', 'type-customdate-selected', 'onlySelectedRows.type=customdate(input("date format: ", type="fmtstr"))', 'set type of selected columns to date')
