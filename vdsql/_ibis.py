@@ -1,7 +1,7 @@
 from copy import copy
 from contextlib import contextmanager
 from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace
-from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet, UNLOADED
+from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet, UNLOADED, ExprColumn
 from ibis.backends.base import _connect
 
 vd.option('disp_ibis_sidebar', '', 'which sidebar property to display')
@@ -153,11 +153,15 @@ class IbisTableSheet(Sheet):
         q = self.query
         projections = []
         mutates = {}
+        ibis_locals = {col.name: col.get_ibis_col(q) for col in self.visibleCols}
         for c in self.visibleCols:
             ibis_col = c.get_ibis_col(q)
             if ibis_col is not None:
                 mutates[c.name] = ibis_col
                 projections.append(ibis_col)
+            elif isinstance(c, ExprColumn):
+                r = eval(c.expr, vd.getGlobals(), ibis_locals)
+                mutates[c.name] = get_typed_ibis_col(c, r)
 
         if projections:
             q = q.projection(projections)
@@ -300,7 +304,6 @@ def ibis_col(col):
 
 @Column.api
 def get_ibis_col(col, query):
-    import ibis.expr.datatypes as dt
     import ibis.common.exceptions
 
     if not hasattr(col, 'ibis_name'):
@@ -315,6 +318,13 @@ def get_ibis_col(col, query):
     if r is None:
         return r
 
+    return get_typed_ibis_col(col, r)
+
+
+def get_typed_ibis_col(col, ibis_col):
+    import ibis.expr.datatypes as dt
+
+    r = ibis_col
     if col.type is int:
         r = r.cast(dt.int)
     elif col.type is float:
