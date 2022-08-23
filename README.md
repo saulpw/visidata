@@ -67,6 +67,7 @@ Only these commands are implemented to use Ibis expressions; others will use the
 - `gt` to toggle selection
 - `"` to filter selection
 - `&` to join
+- `=` to add a new expression
 
 ### new commands for IbisSheet
 
