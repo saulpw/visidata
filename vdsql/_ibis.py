@@ -145,7 +145,7 @@ class IbisTableSheet(Sheet):
         return self.ibis_conpool.get_conn()
 
     def cycle_sidebar(self):
-        sidebars = ['', 'ibis_sql', 'ibis_expr', 'ibis_substrait']
+        sidebars = ['', 'ibis_current_sql', 'ibis_future_sql', 'ibis_current_expr', 'ibis_substrait']
         try:
             i = sidebars.index(vd.options.disp_ibis_sidebar)+1
         except ValueError:
@@ -162,7 +162,7 @@ class IbisTableSheet(Sheet):
         return LazyIbisColMap(self, self.query)
 
     @property
-    def ibis_expr(self):
+    def ibis_current_expr(self):
         q = self.query
         projections = []
         mutates = {}
@@ -176,7 +176,11 @@ class IbisTableSheet(Sheet):
             q = q.projection(projections)
 
         q = q.mutate(**mutates)
+        return q
 
+    @property
+    def ibis_future_expr(self):
+        q = self.ibis_current_expr
         if self.ibis_filters:
             filters = [self.ibisCompileExpr(f, q) for f in self.ibis_filters]
             q = q.filter(filters)
@@ -193,10 +197,16 @@ class IbisTableSheet(Sheet):
             return expr
 
     @property
-    def ibis_sql(self):
+    def ibis_current_sql(self):
+        return self.sqlize(self.ibis_current_expr)
+
+    @property
+    def ibis_future_sql(self):
+        return self.sqlize(self.ibis_future_expr)
+
+    def sqlize(self, expr):
         import sqlparse
         with self.con as con:
-            expr = self.ibis_expr
             if vd.options.debug:
                 expr = self.with_count(expr)
 
@@ -209,7 +219,7 @@ class IbisTableSheet(Sheet):
     def ibis_substrait(self):
         from ibis_substrait.compiler.core import SubstraitCompiler
         compiler = SubstraitCompiler()
-        return compiler.compile(self.ibis_expr)
+        return compiler.compile(self.ibis_current_expr)
 
     def with_count(self, q):
         if self.options.sql_always_count:
@@ -225,10 +235,11 @@ class IbisTableSheet(Sheet):
                 tbl = con.table(self.table_name)
                 self.query = ibis.table(tbl.schema(), name=con._fully_qualified_name(self.table_name, self.database_name))
 
-            actual_query = self.with_count(self.ibis_expr)
+            actual_query = self.with_count(self.ibis_current_expr)
             self.query_result = con.execute(actual_query)
 
         self.options.disp_rstatus_fmt = self.options.disp_rstatus_fmt.replace('nRows', 'countRows')
+        self.options.disp_rstatus_fmt = self.options.disp_rstatus_fmt.replace('nSelectedRows', 'countSelectedRows')
 
         oldkeycols = {c.name:c for c in self.keyCols}
         self.columns = []
@@ -251,6 +262,10 @@ class IbisTableSheet(Sheet):
         yield from self.query_result.itertuples()
 
     @property
+    def countSelectedRows(self):
+        return f'{self.nSelectedRows}+'
+
+    @property
     def countRows(self):
         if self.rows is UNLOADED:
             return None
@@ -262,7 +277,7 @@ class IbisTableSheet(Sheet):
         aggr_cols = [c.ibis_col.count() for c in groupByCols]
         for c in self.visibleCols:
             aggr_cols.extend(c.ibis_aggrs)
-        groupq = self.ibis_expr.aggregate(aggr_cols,
+        groupq = self.ibis_current_expr.aggregate(aggr_cols,
                                  by=[c.ibis_col for c in groupByCols])
 
         return IbisTableSheet(self.name, *(col.name for col in groupByCols), 'freq',
@@ -316,7 +331,7 @@ class IbisTableSheet(Sheet):
 
 @Column.property
 def ibis_col(col):
-    return col.get_ibis_col(col.sheet.ibis_expr)
+    return col.get_ibis_col(col.sheet.ibis_current_expr)
 
 
 @IbisTableSheet.api
@@ -370,8 +385,8 @@ def ibis_aggr(col, aggname):
     return getattr(col.ibis_col, aggname)().name(f'{aggname}_{col.name}')
 
 
-IbisTableSheet.init('ibis_filters', list, copy=True)
-IbisTableSheet.init('ibis_selection', list, copy=True)
+IbisTableSheet.init('ibis_filters', list, copy=False)
+IbisTableSheet.init('ibis_selection', list, copy=False)
 IbisTableSheet.init('_sqlscr', lambda: None, copy=False)
 IbisTableSheet.init('query_result', lambda: None, copy=False)
 IbisTableSheet.init('ibis_conpool', lambda: None, copy=True)
@@ -401,7 +416,7 @@ def clearSelected(sheet):
     sheet.ibis_filters.clear()
 
 
-IbisTableSheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.ibis_filters.extend(vs.ibis_selection); vs.ibis_selection.clear(); vd.push(vs)', 'open duplicate sheet with only selected rows'),
+IbisTableSheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.query=ibis_future_expr; vd.push(vs)', 'open duplicate sheet with only selected rows'),
 IbisTableSheet.addCommand('v', 'sidebar-cycle', 'cycle_sidebar()')
 
 IbisTableSheet.addCommand('', 'open-sidebar', 'vd.push(TextSheet(name, options.disp_ibis_sidebar, source=sidebar.splitlines()))')
