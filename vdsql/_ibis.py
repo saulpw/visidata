@@ -110,6 +110,15 @@ class IbisColumn(ItemColumn):
         return self.sheet.query[self.ibis_name].type()
 
 
+class LazyIbisColMap:
+    def __init__(self, sheet):
+        self._sheet = sheet
+        self._map = {col.name: col for col in sheet.visibleCols}
+
+    def __getitem__(self, k):
+        col = self._map[k]
+        return col.get_ibis_col(col.sheet.query)
+
 
 @IbisColumn.api
 @asyncthread
@@ -149,19 +158,19 @@ class IbisTableSheet(Sheet):
         return str(getattr(self, self.options.disp_ibis_sidebar, ''))
 
     @property
+    def ibis_locals(self):
+        return LazyIbisColMap(self)
+
+    @property
     def ibis_expr(self):
         q = self.query
         projections = []
         mutates = {}
-        ibis_locals = {col.name: col.get_ibis_col(q) for col in self.visibleCols}
         for c in self.visibleCols:
             ibis_col = c.get_ibis_col(q)
             if ibis_col is not None:
                 mutates[c.name] = ibis_col
                 projections.append(ibis_col)
-            elif isinstance(c, ExprColumn):
-                r = eval(c.expr, vd.getGlobals(), ibis_locals)
-                mutates[c.name] = get_typed_ibis_col(c, r)
 
         if projections:
             q = q.projection(projections)
@@ -299,21 +308,23 @@ class IbisTableSheet(Sheet):
 
 @Column.property
 def ibis_col(col):
-    return col.get_ibis_col(col.sheet.query)
+    return col.get_ibis_col(col.sheet.ibis_expr)
 
 
 @Column.api
 def get_ibis_col(col, query):
     import ibis.common.exceptions
 
-    if not hasattr(col, 'ibis_name'):
-        return
-
     r = None
-    try:
-        r = query.get_column(col.ibis_name)
-    except (ibis.common.exceptions.IbisTypeError, AttributeError):
-        r = query.get_column(col.name)
+    if isinstance(col, ExprColumn):
+        r = eval(col.expr, vd.getGlobals(), col.sheet.ibis_locals)
+    elif not hasattr(col, 'ibis_name'):
+        return
+    else:
+        try:
+            r = query.get_column(col.ibis_name)
+        except (ibis.common.exceptions.IbisTypeError, AttributeError):
+            r = query.get_column(col.name)
 
     if r is None:
         return r
