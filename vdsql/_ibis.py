@@ -344,6 +344,12 @@ def evalIbisExpr(sheet, expr):
     return eval(expr, vd.getGlobals(), sheet.ibis_locals)
 
 
+@IbisColumn.api
+def expand(col):
+    super(IbisColumn, col).expand()
+    self.query = self.query.unpack(col.ibis_name)
+
+
 @Column.api
 def get_ibis_col(col, query):
     import ibis.common.exceptions
