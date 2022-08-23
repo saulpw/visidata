@@ -50,7 +50,7 @@ def open_vdsql(vd, p, filetype=None):
                                ibis_conpool=IbisConnectionPool(p))
 
 
-vd.open_ibis = open_vdsql
+vd.open_ibis = vd.open_vdsql
 
 
 class IbisConnectionPool:
