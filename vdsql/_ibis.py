@@ -181,8 +181,8 @@ class IbisTableSheet(Sheet):
     @property
     def ibis_future_expr(self):
         q = self.ibis_current_expr
-        if self.ibis_filters:
-            filters = [self.ibisCompileExpr(f, q) for f in self.ibis_filters]
+        if self.ibis_selection:
+            filters = [self.ibisCompileExpr(f, q) for f in self.ibis_selection]
             q = q.filter(filters)
 
         if self._ordering:
@@ -390,7 +390,6 @@ def ibis_aggr(col, aggname):
     return getattr(col.ibis_col, aggname)().name(f'{aggname}_{col.name}')
 
 
-IbisTableSheet.init('ibis_filters', list, copy=False)
 IbisTableSheet.init('ibis_selection', list, copy=False)
 IbisTableSheet.init('_sqlscr', lambda: None, copy=False)
 IbisTableSheet.init('query_result', lambda: None, copy=False)
@@ -409,7 +408,7 @@ IbisTableSheet.addCommand(',', 'select-equal-cell', 'ibis_selection.append(curso
 @IbisTableSheet.api
 def select_expr(sheet, expr):
     sheet.select(sheet.gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalExpr(expr, r)), progress=False)
-    sheet.ibis_filters.append(expr)
+    sheet.ibis_selection.append(expr)
 
 
 IbisTableSheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: "); select_expr(expr)', 'select rows matching Python expression in any visible column')
@@ -418,7 +417,7 @@ IbisTableSheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: 
 @IbisTableSheet.api
 def clearSelected(sheet):
     super(IbisTableSheet, sheet).clearSelected()
-    sheet.ibis_filters.clear()
+    sheet.ibis_selection.clear()
 
 
 IbisTableSheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.query=ibis_future_expr; vd.push(vs)', 'open duplicate sheet with only selected rows'),
