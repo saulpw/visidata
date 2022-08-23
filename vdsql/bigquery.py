@@ -7,7 +7,7 @@ def openurl_bigquery(vd, p, filetype=None):
     return BigqueryDatabaseIndexSheet(p.name, source=p, ibis_con=None)
 
 
-vd.openurl_bq = openurl_bigquery
+vd.openurl_bq = vd.openurl_bigquery
 
 
 class BigqueryDatabaseIndexSheet(Sheet):

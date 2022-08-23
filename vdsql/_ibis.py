@@ -318,8 +318,13 @@ class IbisTableSheet(Sheet):
         for s in sheets:
             s.keyCols or vd.fail(f'{s.name} has no key cols to join')
 
-        if jointype == 'extend':
+        if jointype in ['extend', 'outer']:
             jointype = 'left'
+        elif jointype in ['full']:
+            jointype = 'outer'
+#        elif jointype in ['inner']:
+#            jointype = 'inner'
+
 
         q = self.query
         for other in others:
