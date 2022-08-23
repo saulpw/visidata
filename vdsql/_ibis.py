@@ -17,15 +17,14 @@ def _(_: str, *, project_id: str, dataset_id: str):
 
 
 def dtype_to_type(dtype):
-    import numpy as np
-    # Find the underlying numpy dtype for any pandas extension dtypes
-    dtype = getattr(dtype, 'numpy_dtype', dtype)
+    from ibis.expr import datatypes as dt
+
     try:
-        if np.issubdtype(dtype, np.integer):
+        if isinstance(dtype, dt.Integer):
             return int
-        if np.issubdtype(dtype, np.floating):
+        if isinstance(dtype, dt.Floating):
             return float
-        if np.issubdtype(dtype, np.datetime64):
+        if isinstance(dtype, (dt.Date, dt.Timestamp)):
             return date
     except TypeError:
         # For categoricals and other pandas-defined dtypes
@@ -111,13 +110,14 @@ class IbisColumn(ItemColumn):
 
 
 class LazyIbisColMap:
-    def __init__(self, sheet):
+    def __init__(self, sheet, q):
         self._sheet = sheet
+        self._query = q
         self._map = {col.name: col for col in sheet.visibleCols}
 
     def __getitem__(self, k):
         col = self._map[k]
-        return col.get_ibis_col(col.sheet.query)
+        return col.get_ibis_col(self._query)
 
 
 @IbisColumn.api
@@ -159,7 +159,7 @@ class IbisTableSheet(Sheet):
 
     @property
     def ibis_locals(self):
-        return LazyIbisColMap(self)
+        return LazyIbisColMap(self, self.query)
 
     @property
     def ibis_expr(self):
@@ -178,12 +178,19 @@ class IbisTableSheet(Sheet):
         q = q.mutate(**mutates)
 
         if self.ibis_filters:
-            q = q.filter(self.ibis_filters)
+            filters = [self.ibisCompileExpr(f, q) for f in self.ibis_filters]
+            q = q.filter(filters)
 
         if self._ordering:
             q = q.sort_by([(col.get_ibis_col(self.query), not rev) for col, rev in self._ordering])
 
         return q
+
+    def ibisCompileExpr(self, expr, q):
+        if isinstance(expr, str):
+            return eval(expr, vd.getGlobals(), LazyIbisColMap(self, q))
+        else:
+            return expr
 
     @property
     def ibis_sql(self):
@@ -218,7 +225,8 @@ class IbisTableSheet(Sheet):
                 tbl = con.table(self.table_name)
                 self.query = ibis.table(tbl.schema(), name=con._fully_qualified_name(self.table_name, self.database_name))
 
-            self.query_result = con.execute(self.with_count(self.ibis_expr))
+            actual_query = self.with_count(self.ibis_expr)
+            self.query_result = con.execute(actual_query)
 
         self.options.disp_rstatus_fmt = self.options.disp_rstatus_fmt.replace('nRows', 'countRows')
 
@@ -226,7 +234,7 @@ class IbisTableSheet(Sheet):
         self.columns = []
         self._nrows_col = -1
 
-        for i, colname in enumerate(self.query_result.columns):
+        for i, (colname, dtype) in enumerate(actual_query.schema().items()):
             keycol=oldkeycols.get(colname, Column()).keycol
             if i < self.nKeys:
                 keycol = i+1
@@ -236,7 +244,7 @@ class IbisTableSheet(Sheet):
                 continue
 
             self.addColumn(IbisColumn(colname, i+1,
-                           type=dtype_to_type(self.query_result.dtypes[i]),
+                           type=dtype_to_type(dtype),
                            keycol=keycol,
                            ibis_name=colname))
 
@@ -254,7 +262,7 @@ class IbisTableSheet(Sheet):
         aggr_cols = [c.ibis_col.count() for c in groupByCols]
         for c in self.visibleCols:
             aggr_cols.extend(c.ibis_aggrs)
-        groupq = self.query.aggregate(aggr_cols,
+        groupq = self.ibis_expr.aggregate(aggr_cols,
                                  by=[c.ibis_col for c in groupByCols])
 
         return IbisTableSheet(self.name, *(col.name for col in groupByCols), 'freq',
@@ -311,13 +319,18 @@ def ibis_col(col):
     return col.get_ibis_col(col.sheet.ibis_expr)
 
 
+@IbisTableSheet.api
+def evalIbisExpr(sheet, expr):
+    return eval(expr, vd.getGlobals(), sheet.ibis_locals)
+
+
 @Column.api
 def get_ibis_col(col, query):
     import ibis.common.exceptions
 
     r = None
     if isinstance(col, ExprColumn):
-        r = eval(col.expr, vd.getGlobals(), col.sheet.ibis_locals)
+        r = col.sheet.evalIbisExpr(col.expr)
     elif not hasattr(col, 'ibis_name'):
         return
     else:
@@ -371,6 +384,23 @@ IbisTableSheet.addCommand(',', 'select-equal-cell', 'ibis_selection.append(curso
 #IbisTableSheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getDisplayValue(r) == c.getDisplayValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
 #IbisTableSheet.addCommand('z,', 'select-exact-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', 'select rows matching current cell in current column')
 #IbisTableSheet.addCommand('gz,', 'select-exact-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getTypedValue(r) == c.getTypedValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
+
+
+@IbisTableSheet.api
+def select_expr(sheet, expr):
+    sheet.select(sheet.gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalExpr(expr, r)), progress=False)
+    sheet.ibis_filters.append(expr)
+
+
+IbisTableSheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: "); select_expr(expr)', 'select rows matching Python expression in any visible column')
+#IbisTableSheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalExpr(expr, r)), progress=False)', 'unselect rows matching Python expression in any visible column')
+
+@IbisTableSheet.api
+def clearSelected(sheet):
+    super(IbisTableSheet, sheet).clearSelected()
+    sheet.ibis_filters.clear()
+
+
 IbisTableSheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.ibis_filters.extend(vs.ibis_selection); vs.ibis_selection.clear(); vd.push(vs)', 'open duplicate sheet with only selected rows'),
 IbisTableSheet.addCommand('v', 'sidebar-cycle', 'cycle_sidebar()')
 
