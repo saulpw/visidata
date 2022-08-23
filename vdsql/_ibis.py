@@ -300,7 +300,7 @@ class IbisTableSheet(Sheet):
     def unfurl_col(self, col):
         vs = copy(self)
         vs.names = [self.name, col.name, 'unfurled']
-        vs.query = self.query.mutate(**{col.name:col.ibis_col.unnest()})
+        vs.query = self.ibis_current_expr.mutate(**{col.name:col.ibis_col.unnest()})
         vs.cursorVisibleColIndex = self.cursorVisibleColIndex
         return vs
 
@@ -310,9 +310,9 @@ class IbisTableSheet(Sheet):
         sheets[1:] or vd.fail("join requires more than 1 sheet")
 
         if jointype == 'append':
-            q = self.query
+            q = self.ibis_current_expr
             for other in others:
-                q = q.union(other.query)
+                q = q.union(other.ibis_current_expr)
             return IbisTableSheet('&'.join(vs.name for vs in sheets), query=q, ibis_source=self.ibis_source, ibis_conpool=self.ibis_conpool)
 
         for s in sheets:
@@ -326,10 +326,10 @@ class IbisTableSheet(Sheet):
 #            jointype = 'inner'
 
 
-        q = self.query
+        q = self.ibis_current_expr
         for other in others:
             preds = [(a.ibis_col == b.ibis_col) for a, b in zip(self.keyCols, other.keyCols)]
-            q = q.join(other.query, predicates=preds, how=jointype)
+            q = q.join(other.ibis_current_expr, predicates=preds, how=jointype)
 
         return IbisTableSheet('+'.join(vs.name for vs in sheets), sources=sheets, query=q, ibis_source=self.ibis_source, ibis_conpool=self.ibis_conpool)
 
@@ -345,9 +345,9 @@ def evalIbisExpr(sheet, expr):
 
 
 @IbisColumn.api
-def expand(col):
-    super(IbisColumn, col).expand()
-    self.query = self.query.unpack(col.ibis_name)
+def expand(col, rows):
+    super(IbisColumn, col).expand(rows)
+    col.sheet.query = col.sheet.ibis_current_expr.unpack(col.ibis_name)
 
 
 @Column.api
