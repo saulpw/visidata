@@ -253,7 +253,7 @@ class IbisTableSheet(Sheet):
                 tbl = con.table(self.table_name)
                 self.query = ibis.table(tbl.schema(), name=con._fully_qualified_name(self.table_name, self.database_name))
 
-            actual_query = self.with_count(self.ibis_current_expr)
+            actual_query = self.with_count(self.query)
             self.query_result = con.execute(actual_query)
 
         self.options.disp_rstatus_fmt = self.options.disp_rstatus_fmt.replace('nRows', 'countRows')
