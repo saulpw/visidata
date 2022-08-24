@@ -47,11 +47,13 @@ def draw_sheet(self, scr, sheet):
 
     try:
         sidebar = sheet.sidebar
+        sidebar_title = sheet.sidebar_title
     except Exception as e:
         vd.exceptionCaught(e)
         sidebar = str(e)
+        sidebar_title = 'error'
 
-    vd.drawSidebar(scr, sidebar)
+    vd.drawSidebar(scr, sidebar, title=sidebar_title)
 
 
 def iterwraplines(lines, width=80):

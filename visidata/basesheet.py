@@ -259,6 +259,11 @@ class BaseSheet(DrawablePane):
         'Default implementation just sets value.  Overrideable.'
         self._sidebar = v
 
+    @property
+    def sidebar_title(self):
+        'Default implementation returns fixed value.  Overrideable.'
+        return 'sidebar'
+
 
 @VisiData.api
 def redraw(vd):
