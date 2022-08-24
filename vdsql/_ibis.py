@@ -1,4 +1,7 @@
 from copy import copy
+import functools
+import operator
+
 from contextlib import contextmanager
 from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace
 from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet, UNLOADED, ExprColumn, undoAttrCopyFunc
@@ -191,11 +194,14 @@ class IbisTableSheet(Sheet):
         return q
 
     @property
+    def ibis_filter(self):
+        return functools.reduce(operator.or_, [self.ibisCompileExpr(f, self.ibis_current_expr) for f in self.ibis_selection])
+
+    @property
     def ibis_future_expr(self):
         q = self.ibis_current_expr
         if self.ibis_selection:
-            filters = [self.ibisCompileExpr(f, q) for f in self.ibis_selection]
-            q = q.filter(filters)
+            q = q.filter(self.ibis_filter)
 
         if self._ordering:
             q = q.sort_by([(col.get_ibis_col(self.query), not rev) for col, rev in self._ordering])
@@ -420,14 +426,7 @@ IbisTableSheet.addCommand('gF', 'freq-keys', 'vd.push(groupBy(keyCols))')
 @IbisTableSheet.api
 def stoggle_rows(sheet):
     sheet.toggle(sheet.rows)
-    for i in range(len(sheet.ibis_selection)):
-        s = sheet.ibis_selection[i]
-        if isinstance(s, str):
-            s = f'~({s})'
-        else:
-            s = ~s
-
-        sheet.ibis_selection[i] = s   # wrong for multiple selections!  ~(X and Y) == ~X OR ~Y
+    sheet.ibis_selection = [~sheet.ibis_filter]
 
 
 @IbisTableSheet.api
