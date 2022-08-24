@@ -8,12 +8,20 @@ vd.option('disp_ibis_sidebar', '', 'which sidebar property to display')
 vd.option('sql_always_count', False, 'whether to always query a count of the number of results')
 
 
-@_connect.register(rf"bigquery://(?P<project_id>[^/]+)(?:/(?P<dataset_id>.+))?", priority=13)
+@_connect.register(r"bigquery://(?P<project_id>[^/]+)(?:/(?P<dataset_id>.+))?", priority=13)
 def _(_: str, *, project_id: str, dataset_id: str):
     """Connect to BigQuery with `project_id` and optional `dataset_id`."""
     import ibis
 
     return ibis.bigquery.connect(project_id=project_id, dataset_id=dataset_id or "")
+
+
+@_connect.register(r".+\.ddb", priority=13)
+def _(source: str):
+    """Connect to DuckDb with .ddb extension."""
+    import ibis
+
+    return ibis.duckdb.connect(source)
 
 
 def dtype_to_type(dtype):
