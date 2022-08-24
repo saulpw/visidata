@@ -158,6 +158,10 @@ class IbisTableSheet(Sheet):
         return str(getattr(self, self.options.disp_ibis_sidebar, ''))
 
     @property
+    def sidebar_title(self):
+        return self.options.disp_ibis_sidebar
+
+    @property
     def ibis_locals(self):
         return LazyIbisColMap(self, self.query)
 
