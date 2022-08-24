@@ -1,7 +1,7 @@
 from copy import copy
 from contextlib import contextmanager
 from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace
-from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet, UNLOADED, ExprColumn
+from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet, UNLOADED, ExprColumn, undoAttrCopyFunc
 from ibis.backends.base import _connect
 
 vd.option('disp_ibis_sidebar', '', 'which sidebar property to display')
@@ -404,11 +404,36 @@ IbisTableSheet.init('ibis_conpool', lambda: None, copy=True)
 IbisTableSheet.addCommand('F', 'freq-col', 'vd.push(groupBy([cursorCol]))')
 IbisTableSheet.addCommand('gF', 'freq-keys', 'vd.push(groupBy(keyCols))')
 
-IbisTableSheet.addCommand('gt', 'stoggle-rows', 'toggle(rows)\nfor i in range(len(ibis_selection)): ibis_selection[i] = ~ibis_selection[i]', 'select rows matching current cell in current column')
-IbisTableSheet.addCommand(',', 'select-equal-cell', 'ibis_selection.append(cursorCol.ibis_col == cursorTypedValue); select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', 'select rows matching current cell in current column')
-#IbisTableSheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getDisplayValue(r) == c.getDisplayValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
-#IbisTableSheet.addCommand('z,', 'select-exact-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', 'select rows matching current cell in current column')
-#IbisTableSheet.addCommand('gz,', 'select-exact-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getTypedValue(r) == c.getTypedValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
+
+@IbisTableSheet.api
+def stoggle_rows(sheet):
+    sheet.toggle(sheet.rows)
+    for i in range(len(sheet.ibis_selection)):
+        s = sheet.ibis_selection[i]
+        if isinstance(s, str):
+            s = f'~({s})'
+        else:
+            s = ~s
+
+        sheet.ibis_selection[i] = s   # wrong for multiple selections!  ~(X and Y) == ~X OR ~Y
+
+
+@IbisTableSheet.api
+def clearSelected(sheet):
+    super(IbisTableSheet, sheet).clearSelected()
+    sheet.ibis_selection.clear()
+
+
+@IbisTableSheet.api
+def addUndoSelection(sheet):
+    super(IbisTableSheet, sheet).addUndoSelection()
+    vd.addUndo(undoAttrCopyFunc([sheet], 'ibis_selection'))
+
+
+@IbisTableSheet.api
+def select_equal_cell(sheet, col, typedval):
+    sheet.select(sheet.gatherBy(lambda r,c=col,v=typedval: c.getTypedValue(r) == v), progress=False)
+    sheet.ibis_selection.append(col.ibis_col == typedval)
 
 
 @IbisTableSheet.api
@@ -417,14 +442,16 @@ def select_expr(sheet, expr):
     sheet.ibis_selection.append(expr)
 
 
+
+IbisTableSheet.addCommand('gt', 'stoggle-rows', 'stoggle_rows()', 'select rows matching current cell in current column')
+IbisTableSheet.addCommand(',', 'select-equal-cell', 'select_equal_cell(cursorCol, cursorTypedValue)', 'select rows matching current cell in current column')
+#IbisTableSheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getDisplayValue(r) == c.getDisplayValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
+#IbisTableSheet.addCommand('z,', 'select-exact-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', 'select rows matching current cell in current column')
+#IbisTableSheet.addCommand('gz,', 'select-exact-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getTypedValue(r) == c.getTypedValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
+
+
 IbisTableSheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: "); select_expr(expr)', 'select rows matching Python expression in any visible column')
 #IbisTableSheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalExpr(expr, r)), progress=False)', 'unselect rows matching Python expression in any visible column')
-
-@IbisTableSheet.api
-def clearSelected(sheet):
-    super(IbisTableSheet, sheet).clearSelected()
-    sheet.ibis_selection.clear()
-
 
 IbisTableSheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.query=ibis_future_expr; vd.push(vs)', 'open duplicate sheet with only selected rows'),
 IbisTableSheet.addCommand('v', 'sidebar-cycle', 'cycle_sidebar()')
