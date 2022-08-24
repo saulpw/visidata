@@ -165,6 +165,24 @@ class IbisTableSheet(Sheet):
         vd.options.disp_ibis_sidebar = sidebars[i%len(sidebars)]
 
     @property
+    def ibis_curcol_sql(self):
+        expr = self.cursorCol.get_ibis_col(self.ibis_current_expr)
+        return self.ibis_to_sql(expr, fragment=True)
+
+    def ibis_to_sql(self, expr, fragment=False):
+        import sqlparse
+        with self.con as con:
+            context = con.compiler.make_context()
+            trclass = con.compiler.translator_class(expr, context=context)
+            if fragment:
+                compiled = trclass.get_result()
+            else:
+                compiled = con.compile(expr)
+            if not isinstance(compiled, str):
+                compiled = str(compiled.compile(compile_kwargs={'literal_binds': True}))
+        return sqlparse.format(compiled, reindent=True, keyword_case='upper')
+
+    @property
     def sidebar(self):
         return str(getattr(self, self.options.disp_ibis_sidebar, ''))
 
@@ -223,15 +241,9 @@ class IbisTableSheet(Sheet):
         return self.sqlize(self.ibis_future_expr)
 
     def sqlize(self, expr):
-        import sqlparse
-        with self.con as con:
-            if vd.options.debug:
-                expr = self.with_count(expr)
-
-            compiled = con.compile(expr)
-            if not isinstance(compiled, str):
-                compiled = str(compiled.compile(compile_kwargs={'literal_binds': True}))
-        return sqlparse.format(compiled, reindent=True, keyword_case='upper')
+        if vd.options.debug:
+            expr = self.with_count(expr)
+        return self.ibis_to_sql(expr)
 
     @property
     def ibis_substrait(self):
@@ -466,6 +478,7 @@ IbisTableSheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: 
 
 IbisTableSheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.query=ibis_future_expr; vd.push(vs)', 'open duplicate sheet with only selected rows'),
 IbisTableSheet.addCommand('v', 'sidebar-cycle', 'cycle_sidebar()')
+IbisTableSheet.addCommand('zv', 'sidebar-current-col', 'vd.options.disp_ibis_sidebar = "ibis_curcol_sql"')
 
 IbisTableSheet.addCommand('', 'open-sidebar', 'vd.push(TextSheet(name, options.disp_ibis_sidebar, source=sidebar.splitlines()))')
 
