@@ -53,6 +53,7 @@ def moveListItem(L, fromidx, toidx):
 def cleanName(s):
     s = re.sub(r'[^\w\d_]', '_', s)  # replace non-alphanum chars with _
     s = re.sub(r'_+', '_', s)  # replace runs of _ with a single _
+    s = s.strip('_')
     return s
 
 
