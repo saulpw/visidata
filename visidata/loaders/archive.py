@@ -67,10 +67,8 @@ class ZipSheet(Sheet):
         return self._zfp
 
     def iterload(self):
-        with self.zfp as zf:
-            for zi in Progress(zf.infolist()):
-#                yield [zi, zipfile.Path(zf, at=zi.filename)]
-                yield [zi, Path(zi.filename)]
+        for zi in Progress(self.zfp.infolist()):
+            yield [zi, Path(zi.filename)]
 
 
 class TarSheet(Sheet):
