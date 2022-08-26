@@ -425,7 +425,19 @@ def ibis_aggrs(col):
 
 @Column.api
 def ibis_aggr(col, aggname):
-    return getattr(col.ibis_col, aggname)().name(f'{aggname}_{col.name}')
+    aggname = {
+        'avg': 'mean',
+        'median': 'approx_median',
+        'mode': 'notimpl',
+        'distinct': 'nunique',
+        'list': 'collect',
+        'stdev': 'std',
+#        'p99': 'quantile(0.99)',
+#        'q10': 'quantile([.1,.2,.3,.4,.5,.6,.7,.8,.9])',
+    }.get(aggname, aggname)
+
+    agg = getattr(col.ibis_col, aggname)
+    return agg().name(f'{aggname}_{col.name}')
 
 
 IbisTableSheet.init('ibis_selection', list, copy=False)
