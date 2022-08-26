@@ -304,11 +304,22 @@ class IbisTableSheet(Sheet):
         return self.rows[0][self._nrows_col]  # __n__
 
     def groupBy(self, groupByCols):
-        aggr_cols = [c.ibis_col.count() for c in groupByCols]
+        from ibis import _
+        import ibis
+        from ibis.expr import datatypes as dt
+        aggr_cols = [groupByCols[0].ibis_col.count()]
         for c in self.visibleCols:
             aggr_cols.extend(c.ibis_aggrs)
-        groupq = self.ibis_current_expr.aggregate(aggr_cols,
-                                 by=[c.ibis_col for c in groupByCols])
+
+        q = self.ibis_current_expr
+        groupq = q.aggregate(aggr_cols, by=[c.ibis_col for c in groupByCols])
+        if len(aggr_cols) == 1:
+            groupq = groupq.mutate(_largest=_['count'].max())
+            hval = ibis.literal(self.options.disp_histogram, type=dt.string)
+            histolen = self.options.disp_histolen
+            groupq = groupq.mutate(histogram=lambda t, hval=hval, histolen=histolen: hval.repeat((histolen*t['count']/t._largest).cast(dt.int)))
+        groupq = groupq.mutate(percent=_['count']*100 / _['count'].sum().over(ibis.window()))
+#        groupq = groupq[]
 
         return IbisTableSheet(self.name, *(col.name for col in groupByCols), 'freq',
                              ibis_conpool=self.ibis_conpool,
