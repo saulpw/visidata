@@ -3,7 +3,7 @@ import functools
 import operator
 
 from contextlib import contextmanager
-from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace
+from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace, PyobjSheet, BaseSheet, ExpectedException, anytype
 from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet, UNLOADED, ExprColumn, undoAttrCopyFunc
 from ibis.backends.base import _connect
 
@@ -319,6 +319,8 @@ class IbisTableSheet(Sheet):
                              nKeys=len(groupByCols))
 
     def openRow(self, row):
+        if not hasattr(self, 'groupByCols'):
+            return super().openRow(row)
         vs = copy(self.source)
         vs.names = list(vs.names) + ['_'.join(str(x) for x in self.rowkey(row))]
         vs.query = self.source.query.filter([
