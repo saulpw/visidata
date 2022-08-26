@@ -1,5 +1,9 @@
 # VisiData version history
 
+# v2.9.1 (2022-07-21)
+
+- [unzip-http] move urllib3 to optional dependencies
+
 # 2.9 (2022-07-20)
 
 - [ux] add confirming modal dialog
