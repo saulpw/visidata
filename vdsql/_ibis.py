@@ -27,7 +27,7 @@ def _(source: str):
     return ibis.duckdb.connect(source)
 
 
-def dtype_to_type(dtype):
+def dtype_to_vdtype(dtype):
     from ibis.expr import datatypes as dt
 
     try:
@@ -285,7 +285,7 @@ class IbisTableSheet(Sheet):
                 continue
 
             self.addColumn(IbisColumn(colname, i+1,
-                           type=dtype_to_type(dtype),
+                           type=dtype_to_vdtype(dtype),
                            keycol=keycol,
                            ibis_name=colname))
 
