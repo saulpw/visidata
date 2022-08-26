@@ -26,6 +26,13 @@ def _(source: str):
 
     return ibis.duckdb.connect(source)
 
+def vdtype_to_ibis_type(t):
+    from ibis.expr import datatypes as dt
+    return {
+        int: dt.int,
+        float: dt.float,
+        date: dt.date,
+    }.get(t, dt.string)
 
 def dtype_to_vdtype(dtype):
     from ibis.expr import datatypes as dt
@@ -489,6 +496,15 @@ def select_expr(sheet, expr):
     sheet.select(sheet.gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalExpr(expr, r)), progress=False)
     sheet.ibis_selection.append(expr)
 
+
+@IbisTableSheet.api
+def addcol_cast(sheet, col):
+    sheet.query = sheet.query.mutate(**{col.name:sheet.ibis_current_expr[col.name].cast(vdtype_to_ibis_type(col.type))})
+    newcol = copy(col)
+    newcol.type = anytype
+    col.hide()
+    sheet.addColumnAtCursor(newcol)
+
 # disable not implemented commands
 
 @BaseSheet.property
@@ -538,8 +554,11 @@ IbisTableSheet.addCommand('v', 'sidebar-cycle', 'cycle_sidebar()')
 IbisTableSheet.addCommand('zv', 'sidebar-current-col', 'vd.options.disp_ibis_sidebar = "ibis_curcol_sql"')
 
 IbisTableSheet.addCommand('', 'open-sidebar', 'vd.push(TextSheet(name, options.disp_ibis_sidebar, source=sidebar.splitlines()))')
+IbisTableSheet.addCommand("'", 'addcol-cast', 'addcol_cast(cursorCol)')
 
 IbisTableSheet.class_options.clean_names = True
 
 vd.addMenuItem('View', 'Sidebar', 'cycle', 'sidebar-cycle')
 vd.addMenuItem('View', 'Sidebar', 'open', 'open-sidebar')
+
+# make it easier to reload with different limit.  z" ?
