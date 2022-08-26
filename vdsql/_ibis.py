@@ -489,6 +489,38 @@ def select_expr(sheet, expr):
     sheet.select(sheet.gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalExpr(expr, r)), progress=False)
     sheet.ibis_selection.append(expr)
 
+# disable not implemented commands
+
+@BaseSheet.property
+def notimpl(sheet):
+    vd.status(f"copy to new non-ibis sheet with g'")
+    vd.fail(f"{vd.activeCommand.longname} not implemented for {type(sheet).__name__}")
+
+
+dml_cmds = '''addcol-bulk addcol-new add-row add-rows
+copy-cell copy-cells copy-row copy-selected commit-sheet cut-cell cut-cells cut-row cut-selected delete-cell delete-cells delete-row delete-selected
+edit-cell paste-after paste-before paste-cell setcell-expr
+setcol-clipboard setcol-expr setcol-fake setcol-fill setcol-format-enum setcol-formatter setcol-incr setcol-incr-step setcol-input setcol-iter setcol-subst setcol-subst-all
+'''.split()
+
+neverimpl_cmds = '''
+select-after select-around-n select-before select-equal-row select-error stoggle-after stoggle-before stoggle-row unselect-after unselect-before unselect-cols-regex
+'''.split()
+
+notimpl_cmds = '''
+addcol-capture addcol-incr addcol-incr-step addcol-split addcol-subst addcol-window capture-col split-col
+contract-col expand-col expand-col-depth expand-cols expand-cols-depth melt melt-regex pivot random-rows transpose
+select-col-regex select-cols-regex select-error-col select-exact-cell select-exact-row select-row select-rows
+unselect-col-regex unselect-expr unselect-row unselect-rows
+describe-sheet freq-summary
+cache-col cache-cols
+dive-selected dive-selected-cells
+dup-rows dup-rows-deep dup-selected-deep
+'''.split()
+
+for longname in list(notimpl_cmds) + list(neverimpl_cmds) + list(dml_cmds):
+    if longname:
+        IbisTableSheet.addCommand('', longname, 'notimpl')
 
 
 IbisTableSheet.addCommand('gt', 'stoggle-rows', 'stoggle_rows()', 'select rows matching current cell in current column')
