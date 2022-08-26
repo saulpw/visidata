@@ -205,17 +205,14 @@ class IbisTableSheet(Sheet):
     def ibis_current_expr(self):
         q = self.query
         projections = []
-        mutates = {}
         for c in self.visibleCols:
             ibis_col = c.get_ibis_col(q)
             if ibis_col is not None:
-                mutates[c.name] = ibis_col
                 projections.append(ibis_col)
 
         if projections:
             q = q.projection(projections)
 
-        q = q.mutate(**mutates)
         return q
 
     @property
@@ -422,16 +419,7 @@ def get_ibis_col(col, query):
 
 
 def get_typed_ibis_col(col, ibis_col):
-    import ibis.expr.datatypes as dt
-
     r = ibis_col
-    if col.type is int:
-        r = r.cast(dt.int)
-    elif col.type is float:
-        r = r.cast(dt.float)
-    elif col.type is date:
-        r = r.cast(dt.date)
-
     r = r.name(col.name)
     return r
 
