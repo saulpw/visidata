@@ -13,3 +13,4 @@ tags
 /tests/log/
 # Mac files
 .DS_Store
+.direnv
