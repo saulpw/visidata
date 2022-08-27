@@ -13,7 +13,7 @@ vd.option('replay_movement', False, 'insert movements during replay', sheettype=
 nonLogged = '''forget exec-longname undo redo quit
 show error errors statuses options threads jump
 replay cancel save-cmdlog macro cmdlog-sheet menu repeat
-go- search scroll prev next page start end zoom resize visibility
+go- search scroll prev next page start end zoom resize visibility sidebar
 mouse suspend redraw no-op help syscopy sysopen profile toggle'''.split()
 
 vd.option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog', sheettype=None)
