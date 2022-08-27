@@ -1,0 +1,43 @@
+def renamerizer(new_name, sheet):
+    sheet.names = (new_name,)
+    return sheet
+
+
+class DataCatalog(IndexSheet):
+    rowtype = "data sources"  # rowdef: IndexSheet
+
+    def iterload(self):
+        yield renamerizer(
+            "Clickhouse playground",
+            vd.open_vdsql(Path("clickhouse://play@play.clickhouse.com:9440/?secure=1")),
+        )
+        yield vd.openurl_https(
+            Path(
+                "https://jsvine.github.io/intro-to-visidata/_downloads/83e70cf67e909f3ac177575439e5f3c5/faa-wildlife-strikes.csv"
+            )
+        )
+        yield vd.open_vdsql(Path("bigquery://bigquery-public-data"))
+        yield renamerizer(
+            "Wikipedia Infoboxen",
+            vd.openurl_https(Path("https://data.saul.pw/wp.zip")),
+        )
+        yield renamerizer(
+            "Arrow PRs",
+            vd.openurl_https(Path("https://api.github.com/repos/apache/arrow/pulls"))
+        )
+
+
+@VisiData.api
+def openurl_catalog(vd, p, filetype=None):
+    return DataCatalog("data_catalog")
+
+
+options.motd_url = "https://visidata.org/motd-vdwww"
+options.cmdlog_histfile = "/app/log/visidata_commands.log"
+options.http_max_next = 100
+
+# options.quitguard=True
+options.min_memory_mb = 100
+
+Canvas.bindkey("2097152", "zoomin-mouse")
+bindkey("2097152", "scroll-down")
