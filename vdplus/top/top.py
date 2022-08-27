@@ -36,16 +36,33 @@ class CPUStatsSheet(Sheet):
 class MemStatsSheet(Sheet):
     rowtype = ''  # rowdef: (name, value)
     columns = [
-        ColumnItem('name', 0),
-        ColumnItem('value', 1)
+        AttrColumn('t', type=date, fmtstr='%H:%M:%S'),
+        AttrColumn('meminfo'),
+        AttrColumn('virtmem'),
+        AttrColumn('swapmem'),
     ]
+    nKeys = 1
 
     def iterload(self):
         import psutil
-        virtmem = psutil.virtual_memory()
-        swapmem = psutil.swap_memory()
-        yield from zip([(x+'_bytes') for x in virtmem._fields], virtmem)
-        yield from zip([(x+'swap_bytes') for x in swapmem._fields], swapmem)
+        import time
+
+        proc = psutil.Process()
+
+        while True:
+            yield AttrDict(t=time.time(),
+                         virtmem=psutil.virtual_memory(),
+                         swapmem=psutil.swap_memory(),
+                         meminfo=proc.memory_info(),
+                        )
+
+            if self.nRows == 1:  # first time through
+                for n in 'meminfo virtmem swapmem'.split():
+                    c = self.column(n)
+                    if not c.hidden:
+                        c.expand([self.rows[0]])
+
+            time.sleep(1)
 
 
 class UsefulProcessesSheet(Sheet):
@@ -151,18 +168,22 @@ class RlimitsSheet(Sheet):
                 yield (r[7:], getattr(psutil, r))
 
 
-vd.cpuStats = CPUStatsSheet('cpustats')
-vd.memStats = MemStatsSheet('mem_stats')
+@VisiData.lazy_property
+def cpuStats(vd):
+    return CPUStatsSheet('cpu_stats')
+
+@VisiData.lazy_property
+def memStats(vd):
+    return MemStatsSheet('memory_stats')
 
 @VisiData.lazy_property
 def processes(vd):
     return ProcessesSheet('processes')
 
 
-
-BaseSheet.addCommand('', 'open-cpu', 'vd.push(vd.cpuStats)', 'open status for CPU usage stats' )
-BaseSheet.addCommand('', 'open-memory', 'vd.push(vd.memStats)', 'open stats for memory usage stats')
-BaseSheet.addCommand('', 'open-processes', 'vd.push(vd.processes)', 'open stats of system process stats')
+BaseSheet.addCommand('', 'open-cpustats', 'vd.push(vd.cpuStats)', 'open CPU usage stats' )
+BaseSheet.addCommand('', 'open-memstats', 'vd.push(vd.memStats)', 'open memory usage stats')
+BaseSheet.addCommand('', 'open-processes', 'vd.push(vd.processes)', 'open system process stats')
 
 @VisiData.api
 def chooseSignal(vd):
@@ -186,6 +207,6 @@ vd.addMenuItem('System', 'Signal', 'selected processes', 'TERMinate', 'term-sele
 vd.addMenuItem('System', 'Signal', 'selected processes', 'KILL', 'kill-selected')
 vd.addMenuItem('System', 'Signal', 'selected processes', 'choose signal', 'signal-selected')
 vd.addMenuItem('View', 'Resource limits', 'open-rlimits')
-vd.addMenuItem('System', '+Statistics', 'CPU', 'open-cpu')
-vd.addMenuItem('System', '+Statistics', 'Memory', 'open-memory')
+vd.addMenuItem('System', '+Statistics', 'CPU', 'open-cpustats')
+vd.addMenuItem('System', '+Statistics', 'Memory', 'open-memstats')
 vd.addMenuItem('System', '+Statistics', 'Processes', 'open-processes')
