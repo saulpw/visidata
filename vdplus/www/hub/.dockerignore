@@ -1,8 +1,0 @@
-Dockerfile
-spa/node_modules/*
-spa/dist/*
-*.log
-.pytest_cache
-__pycache__
-hub/test/screenshots
-.env

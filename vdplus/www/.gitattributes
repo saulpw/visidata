@@ -1,2 +1,0 @@
-k8s/secrets.tf filter=git-crypt diff=git-crypt
-k8s/ci_user.k8s_config filter=git-crypt diff=git-crypt
