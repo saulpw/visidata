@@ -35,8 +35,8 @@ RUN apk update \
     && cp ./gotty /app \
     && cd .. \
     && rm -r g \
-    && pip install --no-warn-conflicts -U \
-    'git+https://github.com/ibis-project/ibis.git#egg=ibis-framework[clickhouse,duckdb,postgres,mysql,sqlite]' \
+    && pip install --no-cache-dir -U \
+    'git+https://github.com/cpcloud/ibis.git@clickhouse-window#egg=ibis-framework[clickhouse,duckdb,postgres,mysql,sqlite]' \
     'git+https://github.com/cpcloud/ibis-bigquery.git@unconstrain-pyarrow' \
     'git+https://github.com/saulpw/visidata.git' \
     'git+https://github.com/visidata/vdsql.git' \
