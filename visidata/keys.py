@@ -74,7 +74,8 @@ def prettykeys(vd, key):
 
     # replace ^ with Ctrl but not if ^ is last char
     key = key[:-1].replace('^', 'Ctrl+')+key[-1]
-    if key[-1] in string.ascii_uppercase and '+' not in key and '_' not in key:
+    # allow Shift+ for Alt keys
+    if key[-1] in string.ascii_uppercase and ('+' not in key and 'Alt+' not in key) and '_' not in key:
         key = key[:-1] + 'Shift+' + key[-1]
 
     return key.strip()
