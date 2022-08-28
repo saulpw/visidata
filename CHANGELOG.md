@@ -5,7 +5,7 @@
 - [plugins] load all entry points in `visidata.plugins` group before config load
   - add entry_points={'visidata.plugins': 'foo=foo'} to plugin load plugin automatically when launching VisiData
 
-- [deps] require `importlib_metadata` > 3.6
+- [deps] require `importlib_metadata` >= 3.6
   - following https://github.com/pypa/twine/pull/732
 
 ## Improvements
@@ -33,7 +33,7 @@
 - [loader geojson] fix plotting and saving geojson files (fixed by @mwayne #1477)
 - [loader geojson] improve feature property manipulation (fixed by @mwayne #1477)
 - [menu] upon menu item keypress, move to item (reported by @reagle #1470)
-- [menu] fix `ALT+<keystroke>` navigation while in menu (reported by @reagle #1470)
+- [menu] fix `ALT+<keystroke>` navigation while within menu (reported by @reagle #1470)
   - now requires two `ESC` to exit
 - [open] allow binary files from archives (reported by @frosencrantz #1430)
 - [save] do not save unknown filetype as `save_filetype`

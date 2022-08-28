@@ -94,3 +94,4 @@
     - fails if not offered a directory
     - succeeds if offered a directory
 21. Test macro-record.
+22. Test `open-row` on an html link: https://hls.gsfc.nasa.gov/data/
