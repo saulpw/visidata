@@ -50,7 +50,7 @@
 
 ## vdplus
 
-- `open-memusage` is now in vdplus
+- `open-memusage` was moved to vdplus
 
 ## API
 
@@ -62,7 +62,7 @@
   - print() calls with kwargs are forwarded to buildins.print
 - add `vd.view()`
 - fix Extensible.init() to work with classes with no `__init__`
-- add @sidebar for creating sidebars
+- add `Sheet.sidebar` and `Sheet.sidebar_title` properties
 
 ## Deprecated
 
