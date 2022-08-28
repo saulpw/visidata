@@ -16,10 +16,6 @@
     - numerical, boolean and string option
     - sheet-specific and global
     - motd_url
-9. using the pandas loader
-    - select
-    - edit
-    - frequency table
 10. large dataset (311)
 12. Options
     - local + global options should be set appropriately
