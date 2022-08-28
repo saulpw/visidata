@@ -16,7 +16,6 @@ class DataCatalog(IndexSheet):
                 "https://jsvine.github.io/intro-to-visidata/_downloads/83e70cf67e909f3ac177575439e5f3c5/faa-wildlife-strikes.csv"
             )
         )
-        yield vd.open_vdsql(Path("bigquery://bigquery-public-data"))
         yield renamerizer(
             "Wikipedia Infoboxen",
             vd.openurl_https(Path("https://data.saul.pw/wp.zip")),
