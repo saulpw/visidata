@@ -14,4 +14,3 @@ tags
 # Mac files
 .DS_Store
 .direnv
-.envrc
