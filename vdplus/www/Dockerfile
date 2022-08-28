@@ -22,13 +22,9 @@ RUN apk update \
         py3-cachetools \
         py3-platformdirs \
         py3-wheel \
-        procps
-
-# RUN sed -i '/path-exclude \/usr\/share\/man/d' /etc/dpkg/dpkg.cfg.d/docker
-# RUN sed -i '/path-exclude \/usr\/share\/groff/d' /etc/dpkg/dpkg.cfg.d/docker
-# RUN apt-get install groff-base --reinstall
-
-RUN apk add --no-cache go git \
+        procps \
+        go \
+        git \
     && git config --global advice.detachedHead false \
     && git clone --depth 1 --branch v2.0.0-alpha.3 https://github.com/yudai/gotty g \
     && cd g \
