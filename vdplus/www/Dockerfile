@@ -29,6 +29,7 @@ RUN apk update \
 # RUN apt-get install groff-base --reinstall
 
 RUN apk add --no-cache go git \
+    && git config --global advice.detachedHead false \
     && git clone --depth 1 --branch v2.0.0-alpha.3 https://github.com/yudai/gotty g \
     && cd g \
     && go mod init \
