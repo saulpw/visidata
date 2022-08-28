@@ -306,7 +306,11 @@ def main_vd():
             if startcol:
                 for vs in sheets:
                     if vs:
-                        vs.moveToCol(startcol) or vd.warning(f'{vs} has no column "{startcol}"')
+                        if not vs.moveToCol(startcol):
+                            if startcol.isdigit():
+                                vs.moveToCol(int(startcol)) # handle indexing by column number
+                            else:
+                                vd.warning(f'{vs} has no column "{startcol}"')
 
         if not args.batch:
             run(vd.sheets[0])
