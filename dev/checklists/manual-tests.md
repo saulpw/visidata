@@ -83,7 +83,8 @@
 17. Anything new in this release (should it have its own automated test?)
 18. `edit-cell` and then `Ctrl+O` to launch editor.
 19. Save to a non-existent format.
-    - Saves to tsv by default
+    - Saves to save-filetype by default
+    - If save-filetype is a non-existent format, blocks
     - Save to it a second time, asks for confirmation, if confirm_overwrite=True
 20. Save multiple sheets to a single non-embeddable format
     - save name makes sense
