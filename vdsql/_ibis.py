@@ -34,7 +34,7 @@ def vdtype_to_ibis_type(t):
         int: dt.int,
         float: dt.float,
         date: dt.date,
-    }.get(t, dt.string)
+    }.get(t)
 
 def dtype_to_vdtype(dtype):
     from ibis.expr import datatypes as dt
@@ -489,7 +489,13 @@ def select_expr(sheet, expr):
 
 @IbisTableSheet.api
 def addcol_cast(sheet, col):
-    sheet.query = sheet.query.mutate(**{col.name:sheet.ibis_current_expr[col.name].cast(vdtype_to_ibis_type(col.type))})
+    # sheet.query and sheet.ibis_current_expr don't match
+    new_type = vdtype_to_ibis_type(col.type)
+    if new_type is None:
+        vd.warning(f"no type for vd type {col.type}")
+        return
+    expr = sheet.query[col.name].cast(new_type)
+    sheet.query = sheet.query.mutate(**{col.name: expr})
     newcol = copy(col)
     newcol.type = anytype
     col.hide()
