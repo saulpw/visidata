@@ -2,7 +2,6 @@ import os.path
 import os
 import sys
 import re
-import zipfile
 import shutil
 import importlib
 import subprocess
@@ -12,6 +11,7 @@ from visidata import VisiData, vd, Path, CellColorizer, JsonLinesSheet, AttrDict
 
 
 vd.option('plugins_url', 'https://visidata.org/plugins/plugins.jsonl', 'source of plugins sheet')
+vd.option('plugins_autoload', True, 'do not autoload plugins if False')
 
 
 @VisiData.lazy_property
@@ -28,6 +28,8 @@ def _plugin_import(plugin):
     return "import " + _plugin_import_name(plugin)
 
 def _plugin_import_name(plugin):
+    if not plugin.url:
+        return 'visidata.plugins.'+plugin.name
     if 'git+' in plugin.url:
         return plugin.name
     return "plugins."+plugin.name
@@ -57,6 +59,7 @@ def _pluginColorizer(s,c,r,v):
     if not r: return None
     ver = _loadedVersion(r)
     if not ver: return None
+    if not r.latest_ver: return None
     if ver != r.latest_ver: return 'color_warning'
     return 'color_working'
 
@@ -101,6 +104,16 @@ class PluginsSheet(JsonLinesSheet):
         self.column('description').width = 40
         self.setKeys([self.column("name")])
 
+        for name, mod in sys.modules.items():
+            if name.startswith('visidata.plugins.'):
+                self.addRow(AttrDict(name='.'.join(name.split('.')[2:]),
+                                 description=getattr(mod, '__description__', mod.__doc__),
+                                 maintainer=getattr(mod, '__author__', None),
+                                 latest_release='',
+                                 latest_ver='',
+                                 url=''
+                                 ))
+
         for r in Progress(self.rows):
             for funcname in (r.provides or '').split():
                 func = lambda *args, **kwargs: vd.fail('this requires the %s plugin' % r.name)
@@ -110,8 +123,8 @@ class PluginsSheet(JsonLinesSheet):
         # check for plugins with newer versions
         def is_stale(r):
             v = _loadedVersion(r)
-            return v and v != r.latest_ver
-        
+            return v and r.latest_ver and v != r.latest_ver
+
         stale_plugins = list(filter(is_stale, self.rows))
         if len(stale_plugins) > 0:
             vd.warning(f'update available for {len(stale_plugins)} plugins')

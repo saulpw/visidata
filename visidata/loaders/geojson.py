@@ -1,17 +1,20 @@
 from functools import reduce
 import json
 
-from visidata import VisiData, vd, Column, asyncthread, Progress, PythonSheet, InvertedCanvas, deepcopy
+from visidata import VisiData, vd, Column, asyncthread, Progress, PythonSheet, InvertedCanvas, deepcopy, date, wrapply, TypedExceptionWrapper, TypedWrapper
 
 
 @VisiData.api
 def open_geojson(vd, p):
     return GeoJSONSheet(p.name, source=p)
 
-def getter_factory(prop):
-    def getter(col, row):
-        return row.get('properties', {}).get(prop)
-    return getter
+class GeoJSONColumn(Column):
+    def calcValue(self, row):
+        return row.get('properties', {}).get(self.expr)
+
+    def putValue(self, row, val):
+        properties = row.setdefault('properties', {})
+        properties[self.expr] = val
 
 class GeoJSONSheet(PythonSheet):
     rowtype = 'shapes'
@@ -36,7 +39,7 @@ class GeoJSONSheet(PythonSheet):
                 for prop in feature.get('properties', {}).keys():
                     prop = self.maybeClean(prop)
                     if prop not in self.colnames:
-                        c = Column(name=prop, getter=getter_factory(prop))
+                        c = GeoJSONColumn(name=prop, expr=prop)
                         self.colnames[prop] = c
                         self.addColumn(c)
                 yield feature
@@ -110,14 +113,27 @@ def reduce_coords(coords, initial):
         lambda a,n: [min(a[0],n[0]), min(a[1],n[1]), max(a[2],n[0]), max(a[3],n[1])],
         coords, initial)
 
-@GeoJSONMap.api
+def _rowdict(cols, row):
+    ret = {}
+    for col in cols:
+        o = wrapply(col.getTypedValue, row)
+        if isinstance(o, TypedExceptionWrapper):
+            o = col.sheet.options.safe_error or str(o.exception)
+        elif isinstance(o, TypedWrapper):
+            o = o.val
+        elif isinstance(o, date):
+            o = col.getDisplayValue(row)
+        if o is not None:
+            ret[col.name] = o
+    return ret
+
+@VisiData.api
 def save_geojson(vd, p, vs):
     features = []
-    visibleCols = list(map(lambda c: c.name, vs.source.visibleCols))
-    for row in Progress(vs.sourceRows, 'saving'):
-        row = deepcopy(row)
-        row['properties'] = {k:v for k,v in row.get('properties', {}).items() if k in visibleCols}
-        features.append(row)
+    for row in Progress(vs.rows, 'saving'):
+        copyrow = deepcopy(row)
+        copyrow['properties'] = _rowdict(vs.visibleCols, row)
+        features.append(copyrow)
 
     featcoll = {
         'type': 'FeatureCollection',
@@ -137,3 +153,7 @@ def save_geojson(vd, p, vs):
 GeoJSONSheet.addCommand('.', 'plot-row', 'vd.push(GeoJSONMap(name+"_map", sourceRows=[cursorRow], textCol=cursorCol, source=sheet))', 'plot geospatial vector in current row')
 GeoJSONSheet.addCommand('g.', 'plot-rows', 'vd.push(GeoJSONMap(name+"_map", sourceRows=rows, textCol=cursorCol, source=sheet))', 'plot all geospatial vectors in current sheet')
 GeoJSONMap.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .geojson)')
+
+vd.addGlobals({
+    'GeoJSONMap': GeoJSONMap,
+})

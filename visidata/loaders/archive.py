@@ -1,4 +1,3 @@
-import codecs
 import tarfile
 import zipfile
 from visidata.loaders import unzip_http
@@ -47,30 +46,29 @@ class ZipSheet(Sheet):
 
     def openRow(self, row):
             fi, zpath = row
-            decodedfp = codecs.iterdecode(self.openZipFile(self.zfp, fi),
-                                          encoding=options.encoding,
-                                          errors=options.encoding_errors)
-            return vd.openSource(Path(fi.filename, fp=decodedfp, filesize=fi.file_size), filetype=options.filetype)
+            fp = self.openZipFile(self.zfp, fi)
+            return vd.openSource(Path(fi.filename, fp=fp, filesize=fi.file_size), filetype=options.filetype)
 
     @asyncthread
     def extract(self, *rows, path=None):
-        for r, path in Progress(rows):
+        for r, _ in Progress(rows):
             self.zfp.extractall(members=[r.filename], path=path)
             vd.status(f'extracted {r.filename}')
 
     @property
     def zfp(self):
-        if '://' in str(self.source):
-            unzip_http.warning = vd.warning
-            return unzip_http.RemoteZipFile(str(self.source))
+        if not self._zfp:
+            if '://' in str(self.source):
+                unzip_http.warning = vd.warning
+                self._zfp = unzip_http.RemoteZipFile(str(self.source))
+            else:
+                self._zfp = zipfile.ZipFile(str(self.source), 'r')
 
-        return zipfile.ZipFile(str(self.source), 'r')
+        return self._zfp
 
     def iterload(self):
-        with self.zfp as zf:
-            for zi in Progress(zf.infolist()):
-#                yield [zi, zipfile.Path(zf, at=zi.filename)]
-                yield [zi, Path(zi.filename)]
+        for zi in Progress(self.zfp.infolist()):
+            yield [zi, Path(zi.filename)]
 
 
 class TarSheet(Sheet):
@@ -88,16 +86,15 @@ class TarSheet(Sheet):
 
     def openRow(self, fi):
             tfp = tarfile.open(name=str(self.source))
-            decodedfp = codecs.iterdecode(tfp.extractfile(fi),
-                                          encoding=options.encoding,
-                                          errors=options.encoding_errors)
-            return vd.openSource(Path(fi.name, fp=decodedfp, filesize=fi.size))
+            return vd.openSource(Path(fi.name, fp=tfp.extractfile(fi), filesize=fi.size))
 
     def iterload(self):
         with tarfile.open(name=str(self.source)) as tf:
             for ti in Progress(tf.getmembers()):
                 yield ti
 
+
+ZipSheet.init('_zfp', lambda: None, copy=True)
 
 ZipSheet.addCommand('x', 'extract-file', 'extract(cursorRow)', 'extract current file to current directory')
 ZipSheet.addCommand('gx', 'extract-selected', 'extract(*onlySelectedRows)', 'extract selected files to current directory')

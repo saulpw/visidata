@@ -109,6 +109,7 @@ class PandasSheet(Sheet):
             col.sheet.df.loc[row.name, col.expr] = val
         self.setModified()
 
+    @asyncthread
     def reload(self):
         import pandas as pd
         if isinstance(self.source, pd.DataFrame):
@@ -121,7 +122,8 @@ class PandasSheet(Sheet):
                 readfunc = partial(pd.read_json, lines=True)
             else:
                 readfunc = getattr(pd, 'read_'+filetype) or vd.error('no pandas.read_'+filetype)
-            df = readfunc(str(self.source), **options.getall('pandas_'+filetype+'_'))
+            # readfunc() handles binary and text open()
+            df = readfunc(self.source, **options.getall('pandas_'+filetype+'_'))
             if (filetype == 'pickle') and not isinstance(df, pd.DataFrame):
                 vd.fail('pandas loader can only unpickle dataframes')
         else:

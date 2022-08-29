@@ -1,7 +1,8 @@
 import html
+import copy
 import itertools
 
-from visidata import VisiData, vd, Sheet, options, Column, Progress, IndexSheet
+from visidata import VisiData, vd, Sheet, options, Column, Progress, IndexSheet, ItemColumn, InferColumnsSheet
 
 vd.option('html_title', '<h2>{sheet.name}</h2>', 'table header when saving to html')
 
@@ -19,18 +20,19 @@ class HtmlTablesSheet(IndexSheet):
         Column('classes', getter=lambda col,row: row.html.attrib.get('class')),
     ]
     def iterload(self):
-        import lxml.html
-        from lxml import etree
-        utf8_parser = etree.HTMLParser(encoding='utf-8')
+        from lxml import html
+        utf8_parser = html.HTMLParser(encoding='utf-8')
         with self.source.open_text(encoding='utf-8') as fp:
-            html = lxml.html.etree.parse(fp, parser=utf8_parser)
+            doc = html.parse(fp, parser=utf8_parser, base_url=self.source.given)
         self.setKeys([self.column('name')])
         self.column('keys').hide()
         self.column('source').hide()
 
-        for i, e in enumerate(html.iter('table')):
+        for i, e in enumerate(doc.iter('table')):
             if e.tag == 'table':
                 yield HtmlTableSheet(e.attrib.get("id", "table_" + str(i)), source=e, html=e)
+
+        yield HtmlLinksSheet(*self.names, 'links', source=doc, html=doc.getroot())
 
 
 def is_header(elem):
@@ -41,6 +43,44 @@ def is_header(elem):
             return True
 
     return False
+
+class HtmlLinksSheet(Sheet):
+    rowtype = 'links'  #  rowdef: tuple(element, attribute, link, pos)
+    columns = [
+        ItemColumn('element', 0, width=0),
+        Column('tag', getter=lambda c,r:r[0].tag),
+        ItemColumn('attribute', 1),
+        Column('text', getter=lambda c,r:r[0].text),
+        ItemColumn('link', 2, width=40),
+    ]
+    def iterload(self):
+        from lxml.html import iterlinks
+        root = self.source.getroot()
+        root.make_links_absolute(self.source.docinfo.URL)
+        yield from iterlinks(root)
+
+    def openRow(self, row):
+        return vd.openSource(row[2])
+
+class HtmlElementsSheet(InferColumnsSheet):
+    rowtype = 'links'  #  dict
+    columns = [
+        ItemColumn('__element__', width=0),
+    ]
+    def iterload(self):
+        yield from self.source.iterlinks()
+        return
+        for r in self.source.iter(self.source_tag):
+            row = copy.copy(r.attrib)
+            row['__element__'] = r
+            if row.get('href'):
+                row['href'] = canonicalize_url(row.get('href'), self.source.URL)
+
+            yield row
+
+    def openRow(self, row):
+        return vd.openSource(row.url)
+
 
 class HtmlTableSheet(Sheet):
     rowtype = 'rows'  #  list of strings

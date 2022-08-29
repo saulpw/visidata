@@ -1,6 +1,8 @@
 import os
 import os.path
 import sys
+import io
+import codecs
 import pathlib
 from urllib.parse import urlparse, urlunparse
 from functools import wraps
@@ -20,7 +22,7 @@ def vstat(path, force=False):
 def filesize(path):
     if hasattr(path, 'filesize') and path.filesize is not None:
         return path.filesize
-    if path.fp or path.is_url():
+    if path.has_fp() or path.is_url():
         return 0
     st = path.stat() # vstat(path)
     return st and st.st_size
@@ -28,6 +30,30 @@ def filesize(path):
 def modtime(path):
     st = path.stat()
     return st and st.st_mtime
+
+
+# from https://stackoverflow.com/questions/55889474/convert-io-stringio-to-io-bytesio
+class BytesIOWrapper(io.BufferedReader):
+    """Wrap a buffered bytes stream over TextIOBase string stream."""
+
+    def __init__(self, text_io_buffer, encoding=None, errors=None, **kwargs):
+        super(BytesIOWrapper, self).__init__(text_io_buffer, **kwargs)
+        self.encoding = encoding or text_io_buffer.encoding or options.encoding
+        self.errors = errors or text_io_buffer.errors or options.encoding_errors
+
+    def _encoding_call(self, method_name, *args, **kwargs):
+        raw_method = getattr(self.raw, method_name)
+        val = raw_method(*args, **kwargs)
+        return val.encode(self.encoding, errors=self.errors)
+
+    def read(self, size=-1):
+        return self._encoding_call('read', size)
+
+    def read1(self, size=-1):
+        return self._encoding_call('read1', size)
+
+    def peek(self, size=-1):
+        return self._encoding_call('peek', size)
 
 
 class FileProgress:
@@ -96,9 +122,10 @@ class FileProgress:
 
 class Path(os.PathLike):
     'File and path-handling class, modeled on `pathlib.Path`.'
-    def __init__(self, given, fp=None, lines=None, filesize=None):
+    def __init__(self, given, fp=None, fptext=None, lines=None, filesize=None):
         # Resolve pathname shell variables and ~userdir
         self.given = os.path.expandvars(os.path.expanduser(str(given)))
+        self.fptext = fptext
         self.fp = fp
         self.lines = lines or []  # shared among all RepeatFile instances
         self.filesize = filesize
@@ -122,15 +149,15 @@ class Path(os.PathLike):
             self._path = pathlib.Path(given)
 
         self.ext = self.suffix[1:]
-        if self.suffix:
-            self.name = self._path.name[:-len(self.suffix)]
+        if self.suffixes:  #1450  don't make this a oneliner; [:-0] doesn't work
+            self.name = self._path.name[:-sum(map(len, self.suffixes))]
         else:
             self.name = self._path.name
 
         # check if file is compressed
         if self.suffix in ['.gz', '.bz2', '.xz', '.lzma', '.zst']:
             self.compression = self.ext
-            uncompressedpath = Path(self.given[:-len(self.suffix)])
+            uncompressedpath = Path(self.given[:-len(self.suffix)])  # strip suffix
             self.name = uncompressedpath.name
             self.ext = uncompressedpath.ext
         else:
@@ -159,7 +186,11 @@ class Path(os.PathLike):
     def __truediv__(self, a):
         return Path(self._path.__truediv__(a))
 
-    def open_text(self, mode='rt', encoding=None, newline=None):
+    def has_fp(self):
+        'Return True if this is a virtual Path to an already open file.'
+        return bool(self.fp or self.fptext)
+
+    def open_text(self, mode='rt', encoding=None, encoding_errors=None, newline=None):
         'Open path in text mode, using options.encoding and options.encoding_errors.  Return open file-pointer or file-pointer-like.'
         # rfile makes a single-access fp reusable
 
@@ -167,7 +198,12 @@ class Path(os.PathLike):
             return self.rfile
 
         if self.fp:
-            self.rfile = RepeatFile(self.fp)
+            self.fptext = codecs.iterdecode(self.fp,
+                                            encoding=encoding or options.encoding,
+                                            errors=encoding_errors or options.encoding_errors)
+
+        if self.fptext:
+            self.rfile = RepeatFile(self.fptext)
             return self.rfile
 
         if 't' not in mode:
@@ -202,6 +238,12 @@ class Path(os.PathLike):
 
     @wraps(pathlib.Path.open)
     def open(self, *args, **kwargs):
+        if self.fp:
+            return FileProgress(self, fp=self.fp, **kwargs)
+
+        if self.fptext:
+            return FileProgress(self, fp=BytesIOWrapper(self.fptext), **kwargs)
+
         path = self
         binmode = 'wb' if 'w' in kwargs.get('mode', '') else 'rb'
         if self.compression == 'gz':
@@ -259,7 +301,7 @@ class Path(os.PathLike):
     @wraps(pathlib.Path.exists)
     def exists(self):
         'Return True if the path can be opened.'
-        if self.fp or self.is_url():
+        if self.has_fp() or self.is_url():
             return True
         return self._path.exists()
 

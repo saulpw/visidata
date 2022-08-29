@@ -46,7 +46,9 @@ visidata.vd.prettykeys_trdict = {
         'BUTTON2_PRESSED': 'MiddleClick',
         'BUTTON3_PRESSED': 'RightClick',
         'BUTTON4_PRESSED': 'ScrollwheelUp',
+        'BUTTON5_PRESSED': 'ScrollwheelDown',
         'REPORT_MOUSE_POSITION': 'ScrollwheelDown',
+        '2097152': 'ScrollwheelDown',
         'KEY_F(1)': 'F1',
         'KEY_F(2)': 'F2',
         'KEY_F(3)': 'F3',
@@ -72,7 +74,8 @@ def prettykeys(vd, key):
 
     # replace ^ with Ctrl but not if ^ is last char
     key = key[:-1].replace('^', 'Ctrl+')+key[-1]
-    if key[-1] in string.ascii_uppercase and '+' not in key and '_' not in key:
+    # 1497: allow Shift+ for Alt keys
+    if key[-1] in string.ascii_uppercase and ('+' not in key or 'Alt+' in key) and '_' not in key:
         key = key[:-1] + 'Shift+' + key[-1]
 
     return key.strip()

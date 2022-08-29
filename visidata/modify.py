@@ -283,7 +283,7 @@ def new_rows(sheet, n):
 
 Sheet.addCommand('a', 'add-row', 'addRows([newRow()], index=cursorRowIndex); cursorDown(1)', 'append a blank row')
 Sheet.addCommand('ga', 'add-rows', 'n=int(input("add rows: ", value=1)); addRows(new_rows(n), index=cursorRowIndex); cursorDown(1)', 'append N blank rows')
-Sheet.addCommand('za', 'addcol-new', 'addColumnAtCursor(SettableColumn(input("column name: "))); cursorRight(1)', 'append an empty column')
-Sheet.addCommand('gza', 'addcol-bulk', 'addColumnAtCursor(*(SettableColumn() for c in range(int(input("add columns: "))))); cursorRight(1)', 'append N empty columns')
+Sheet.addCommand('za', 'addcol-new', 'addColumnAtCursor(SettableColumn(input("column name: ")))', 'append an empty column')
+Sheet.addCommand('gza', 'addcol-bulk', 'addColumnAtCursor(*(SettableColumn() for c in range(int(input("add columns: ")))))', 'append N empty columns')
 
 Sheet.addCommand('z^S', 'commit-sheet', 'commit()', 'commit changes back to source.  not undoable!')

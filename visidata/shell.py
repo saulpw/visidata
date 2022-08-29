@@ -44,9 +44,9 @@ def open_fdir(vd, p):
 def addShellColumns(vd, cmd, sheet):
     shellcol = ColumnShell(cmd, source=sheet, width=0)
     sheet.addColumnAtCursor(
-            shellcol,
             Column(cmd+'_stdout', type=bytes.rstrip, srccol=shellcol, getter=lambda col,row: col.srccol.getValue(row)[0]),
-            Column(cmd+'_stderr', type=bytes.rstrip, srccol=shellcol, getter=lambda col,row: col.srccol.getValue(row)[1]))
+            Column(cmd+'_stderr', type=bytes.rstrip, srccol=shellcol, getter=lambda col,row: col.srccol.getValue(row)[1]),
+            shellcol)
 
 
 class ColumnShell(Column):
@@ -82,7 +82,7 @@ class DirSheet(Sheet):
             getter=lambda col,row: str(row.parent) if str(row.parent) == '.' else str(row.parent) + '/',
             setter=lambda col,row,val: col.sheet.moveFile(row, val)),
         Column('filename',
-            getter=lambda col,row: row.name + row.suffix,
+            getter=lambda col,row: row.name + ''.join(row.suffixes),
             setter=lambda col,row,val: col.sheet.renameFile(row, val)),
         Column('abspath', width=0, type=str,
             getter=lambda col,row: row,

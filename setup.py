@@ -3,7 +3,7 @@
 from setuptools import setup
 # tox can't actually run python3 setup.py: https://github.com/tox-dev/tox/issues/96
 #from visidata import __version__
-__version__ = '2.9.1'
+__version__ = '2.10'
 
 setup(name='visidata',
       version=__version__,
@@ -23,7 +23,8 @@ setup(name='visidata',
       py_modules = ['visidata'],
       install_requires=[
           'python-dateutil',
-          'windows-curses; platform_system == "Windows"'
+          'windows-curses; platform_system == "Windows"',
+          'importlib-metadata >= 3.6',
       ],
       packages=['visidata',  'visidata.loaders', 'visidata.vendor', 'visidata.tests'],
       include_package_data=True,

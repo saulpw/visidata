@@ -26,7 +26,9 @@ class MemorySheet(Sheet):
         pass
 
 
-vd.memosSheet = MemorySheet('memos')
+@VisiData.lazy_property
+def memosSheet(vd):
+    return MemorySheet('memos')
 
 
 Sheet.addCommand('^[M', 'open-memos', 'vd.push(vd.memosSheet)', 'open the Memory Sheet')

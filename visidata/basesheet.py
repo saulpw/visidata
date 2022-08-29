@@ -92,7 +92,7 @@ class BaseSheet(DrawablePane):
     def __init__(self, *names, **kwargs):
         self._name = None   # initial cache value necessary for self.options
         self.names = names
-        self.name = self.options.name_joiner.join(str(x) for x in self.names)
+        self.name = self.options.name_joiner.join(str(x) for x in self.names if x)
         self.source = None
         self.rows = UNLOADED      # list of opaque objects
         self._scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
@@ -258,6 +258,11 @@ class BaseSheet(DrawablePane):
     def sidebar(self, v):
         'Default implementation just sets value.  Overrideable.'
         self._sidebar = v
+
+    @property
+    def sidebar_title(self):
+        'Default implementation returns fixed value.  Overrideable.'
+        return 'sidebar'
 
 
 @VisiData.api

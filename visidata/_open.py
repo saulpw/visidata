@@ -39,7 +39,7 @@ def _completeFilename(val, state):
 def openPath(vd, p, filetype=None, create=False):
     '''Call ``open_<filetype>(p)`` or ``openurl_<p.scheme>(p, filetype)``.  Return constructed but unloaded sheet of appropriate type.
     If True, *create* will return a new, blank **Sheet** if file does not exist.'''
-    if p.scheme and not p.fp: # isinstance(p, UrlPath):
+    if p.scheme and not p.has_fp():
         schemes = p.scheme.split('+')
         openfuncname = 'openurl_' + schemes[-1]
 
@@ -98,7 +98,7 @@ def openSource(vd, p, filetype=None, create=False, **kwargs):
         else:
             vs = vd.openPath(Path(p), filetype=filetype, create=create)  # convert to Path and recurse
     else:
-        vs = vs or vd.openPath(p, filetype=filetype, create=create)
+        vs = vd.openPath(p, filetype=filetype, create=create)
 
     for optname, optval in kwargs.items():
         vs.options[optname] = optval

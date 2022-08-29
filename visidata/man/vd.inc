@@ -1,4 +1,4 @@
-.Dd July 19, 2022
+.Dd August 27, 2022
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -382,8 +382,8 @@ open
 .No Note: if the format does not support multisave, or the Ar filename No ends in a Sy / Ns , a directory will be created.
 .It Ic "z^S" Ar filename
 .No save current column only to Ar filename No in format determined by extension (default .tsv)
-.It Ic "^D" Ar filename.vd
-.No save Sy CommandLog No to Ar filename.vd No file
+.It Ic "^D" Ar filename.vdj
+.No save Sy CommandLog No to Ar filename.vdj No file
 .It Ic "A"
 .No open new blank sheet with one column
 .It Ic "T"
@@ -553,14 +553,6 @@ open current row/cell/sheet as Python object
 .El
 .
 .Ss INTERNAL SHEETS
-.Ss VisiDataMenu (Shift+V)
-.Bl -inset -compact
-.It (sheet-specific commands)
-.El
-.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic Enter
-.No load sheet in current row
-.El
 .Ss Directory Sheet
 .Bl -inset -compact
 .It (global commands)
@@ -755,6 +747,26 @@ replay command in current row
 replay contents of entire CommandLog
 .It Ic " ^C"
 abort replay
+.El
+.
+.Ss Threads Sheet (Ctrl+T)
+.Bl -inset -compact
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic  ^T
+.No open global Sy Threads Sheet No for all asynchronous threads running
+.It Ic z^T
+.No open current sheet's Sy Threads Sheet No
+.El
+.Bl -inset -compact
+.It (sheet-specific commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic " ^C"
+abort thread at current row
+.It Ic "g^C"
+.No abort all threads on current Sy Threads Sheet No
 .El
 .
 .Ss DERIVED SHEETS

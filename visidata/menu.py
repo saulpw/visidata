@@ -726,6 +726,7 @@ def runMenu(vd):
     vd.menuRunning = True
     sheet = vd.activeSheet
     vd.setWindows(vd.scrFull)
+    nEscapes = 0
 
     try:
       while True:
@@ -738,7 +739,12 @@ def runMenu(vd):
 
         currentItem = getMenuItem(sheet)
 
-        if k in ['^C', '^Q', '^[', 'q']:
+        if k == '^[':  # ESC
+            nEscapes += 1  #1470
+        else:
+            nEscapes = 0
+
+        if nEscapes > 1 or k in ['^C', '^Q', 'q']:
             return
 
         elif k in ['KEY_MOUSE']:
@@ -776,6 +782,10 @@ def runMenu(vd):
             else:
                 break
 
+        elif k in main_menu.keys():
+            sheet.pressMenu(main_menu[k])
+
+
         sheet.checkMenu()
 
     finally:
@@ -786,6 +796,7 @@ def runMenu(vd):
     vd.draw_all()
     sheet.execCommand(currentItem.longname)
 
+main_menu = {'f': 'File', 'e': 'Edit', 'v': 'View', 'c': 'Column', 'r': 'Row', 'd': 'Data', 'p': 'Plot', 's': 'System', 'h': 'Help'}
 
 BaseSheet.addCommand('^[f', 'menu-file', 'pressMenu("File")', '')
 BaseSheet.addCommand('^[e', 'menu-edit', 'pressMenu("Edit")', '')

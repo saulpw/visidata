@@ -13,7 +13,7 @@ vd.option('replay_movement', False, 'insert movements during replay', sheettype=
 nonLogged = '''forget exec-longname undo redo quit
 show error errors statuses options threads jump
 replay cancel save-cmdlog macro cmdlog-sheet menu repeat
-go- search scroll prev next page start end zoom resize visibility
+go- search scroll prev next page start end zoom resize visibility sidebar
 mouse suspend redraw no-op help syscopy sysopen profile toggle'''.split()
 
 vd.option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog', sheettype=None)
@@ -146,7 +146,7 @@ def commandCursor(sheet, execstr):
         k = sheet.rowkey(sheet.cursorRow)
         rowname = keystr(k) if k else sheet.cursorRowIndex
 
-    if contains(execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol'):
+    if contains(execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol', 'ColumnAtCursor'):
         colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
     return colname, rowname
 
@@ -238,8 +238,10 @@ class CommandLog(_CommandLog, VisiDataMetaSheet):
 
 class CommandLogJsonl(_CommandLog, JsonLinesSheet):
 
-    def newRow(self):
-        return JsonLinesSheet.newRow(self)
+    filetype = 'vdj'
+
+    def newRow(self, **fields):
+        return AttrDict(JsonLinesSheet.newRow(self, **fields))
 
     def iterload(self):
         for r in JsonLinesSheet.iterload(self):
@@ -420,12 +422,12 @@ def cmdlog(sheet):
     rows = sheet.cmdlog_sheet.rows
     if isinstance(sheet.source, BaseSheet):
         rows = sheet.source.cmdlog.rows + rows
-    return CommandLog(sheet.name+'_cmdlog', source=sheet, rows=rows)
+    return CommandLogJsonl(sheet.name+'_cmdlog', source=sheet, rows=rows)
 
 
 @BaseSheet.lazy_property
 def cmdlog_sheet(sheet):
-    return CommandLog(sheet.name+'_cmdlog', source=sheet, rows=[])
+    return CommandLogJsonl(sheet.name+'_cmdlog', source=sheet, rows=[])
 
 
 @BaseSheet.property
@@ -448,7 +450,8 @@ def shortcut(self):
 @VisiData.property
 def cmdlog(vd):
     if not vd._cmdlog:
-        vd._cmdlog = CommandLog('cmdlog', rows=[])
+        vd._cmdlog = CommandLogJsonl('cmdlog', rows=[])  # no reload
+        vd._cmdlog.reloadCols()
         vd.beforeExecHooks.append(vd._cmdlog.beforeExecHook)
     return vd._cmdlog
 

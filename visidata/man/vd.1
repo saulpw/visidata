@@ -1,4 +1,4 @@
-.Dd July 19, 2022
+.Dd August 27, 2022
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -382,8 +382,8 @@ open
 .No Note: if the format does not support multisave, or the Ar filename No ends in a Sy / Ns , a directory will be created.
 .It Ic "z^S" Ar filename
 .No save current column only to Ar filename No in format determined by extension (default .tsv)
-.It Ic "^D" Ar filename.vd
-.No save Sy CommandLog No to Ar filename.vd No file
+.It Ic "^D" Ar filename.vdj
+.No save Sy CommandLog No to Ar filename.vdj No file
 .It Ic "A"
 .No open new blank sheet with one column
 .It Ic "T"
@@ -553,14 +553,6 @@ open current row/cell/sheet as Python object
 .El
 .
 .Ss INTERNAL SHEETS
-.Ss VisiDataMenu (Shift+V)
-.Bl -inset -compact
-.It (sheet-specific commands)
-.El
-.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic Enter
-.No load sheet in current row
-.El
 .Ss Directory Sheet
 .Bl -inset -compact
 .It (global commands)
@@ -757,6 +749,26 @@ replay contents of entire CommandLog
 abort replay
 .El
 .
+.Ss Threads Sheet (Ctrl+T)
+.Bl -inset -compact
+.It (global commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic  ^T
+.No open global Sy Threads Sheet No for all asynchronous threads running
+.It Ic z^T
+.No open current sheet's Sy Threads Sheet No
+.El
+.Bl -inset -compact
+.It (sheet-specific commands)
+.El
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic " ^C"
+abort thread at current row
+.It Ic "g^C"
+.No abort all threads on current Sy Threads Sheet No
+.El
+.
 .Ss DERIVED SHEETS
 .Ss Frequency Table (Shift+F)
 .Bl -inset -compact
@@ -934,6 +946,10 @@ replacement for tab character when saving to tsv
 visibility level (0=low, 1=high)
 .It Sy --default-sample-size Ns = Ns Ar "int   " No "100"
 number of rows to sample for regex.split (0=all)
+.It Sy --fmt-expand-dict Ns = Ns Ar "str       " No "%s.%s"
+format str to use for names of columns expanded from dict (colname, key)
+.It Sy --fmt-expand-list Ns = Ns Ar "str       " No "%s[%s]"
+format str to use for names of columns expanded from list (colname, index)
 .It Sy --json-indent Ns = Ns Ar "NoneType      " No "None"
 indent to use when saving json
 .It Sy --json-sort-keys No "            False"
@@ -982,7 +998,7 @@ source of randomized startup messages
 walk source path recursively on DirSheet
 .It Sy --dir-hidden No "                False"
 load hidden files on DirSheet
-.It Sy --config Ns = Ns Ar "Path               " No "/home/kefala/.visidatarc"
+.It Sy --config Ns = Ns Ar "Path               " No "/home/<user>/.visidatarc"
 config file to exec in Python
 .It Sy --play Ns = Ns Ar "str                  " No ""
 file.vd to replay
@@ -1023,6 +1039,8 @@ max number of fixed-width columns to create (0 is no max)
 The desired schema for the Postgres database
 .It Sy --http-max-next Ns = Ns Ar "int         " No "0"
 max next.url pages to follow in http response
+.It Sy --http-req-headers Ns = Ns Ar "dict     " No "{}"
+http headers to send to requests
 .It Sy --html-title Ns = Ns Ar "str            " No "<h2>{sheet.name}</h2>"
 table header when saving to html
 .It Sy --pcap-internet Ns = Ns Ar "str         " No "n"
@@ -1035,6 +1053,8 @@ numpy allow unpickling objects (unsafe)
 parse PDF for tables instead of pages of text
 .It Sy --plugins-url Ns = Ns Ar "str           " No "https://visidata.org/plugins/plugins.jsonl"
 source of plugins sheet
+.It Sy --plugins-autoload Ns = Ns Ar "bool     " No "True"
+do not autoload plugins if False
 .El
 .
 .Ss DISPLAY OPTIONS

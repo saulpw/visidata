@@ -1,0 +1,7 @@
+sheet	col	row	longname	input	keystrokes	comment
+global		filetype	set-option	pandas		
+			open-file	sample_data/co3.stata	o	
+co3	s		freq-col		Shift+F	open Frequency Table grouped on current column, with aggregations of other columns
+co3_s_freq	s		sort-asc		[	sort ascending by current column; replace any existing sort criteria
+co3_s_freq	histogram		hide-col		-	Hide current column
+co3_s_freq	percent		hide-col		-	Hide current column

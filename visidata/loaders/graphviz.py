@@ -20,7 +20,8 @@ def save_dot(vd, p, vs):
     srccol = vs.keyCols[0]
     dstcol = vs.keyCols[1]
     with p.open_text(mode='w', encoding='utf-8') as fp:
-        print('graph { concentrate=true;', file=fp)
+        pfp = lambda *args: print(*args, file=fp)
+        pfp('graph { concentrate=true;')
         for row in Progress(vs.rows, 'saving'):
             src = srccol.getTypedValue(row)
             dst = dstcol.getTypedValue(row)
@@ -41,16 +42,16 @@ def save_dot(vd, p, vs):
                 label = '/'.join(str(x) for x in nodelabels if is_valid(x))
             else:
                 label = ''
-            print('\t%s[label="%s"];' % (downsrc, src), file=fp)
-            print('\t%s[label="%s"];' % (downdst, dst), file=fp)
-            print('\t%s -- %s[label="%s", color=%s];' % (downsrc, downdst, label, color), file=fp)
+            pfp('\t%s[label="%s"];' % (downsrc, src))
+            pfp('\t%s[label="%s"];' % (downdst, dst))
+            pfp('\t%s -- %s[label="%s", color=%s];' % (downsrc, downdst, label, color))
 
-        print('label="%s"' % vs.name, file=fp)
-        print('node[shape=plaintext];', file=fp)
-        print('subgraph cluster_legend {', file=fp)
-        print('label="Legend";', file=fp)
+        pfp('label="%s"' % vs.name)
+        pfp('node[shape=plaintext];')
+        pfp('subgraph cluster_legend {')
+        pfp('label="Legend";')
         for i, (k, color) in enumerate(assignedColors.items()):
-            print('key%d[label="%s", fontcolor=%s];' % (i, k, color), file=fp)
+            pfp('key%d[label="%s", fontcolor=%s];' % (i, k, color))
 
-        print('}', file=fp)  # legend subgraph
-        print('}', file=fp)
+        pfp('}')  # legend subgraph
+        pfp('}')

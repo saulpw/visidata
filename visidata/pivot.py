@@ -34,7 +34,7 @@ class RangeColumn(Column):
         super().__init__(*args, **kwargs)
         self.formatter = 'range'
 
-    def format_range(self, fmtstr):
+    def formatter_range(self, fmtstr):
         return self._format
 
     def _format(self, typedval, *args, **kwargs):

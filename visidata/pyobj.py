@@ -7,11 +7,51 @@ from visidata import *
 
 vd.option('visibility', 0, 'visibility level')
 vd.option('default_sample_size', 100, 'number of rows to sample for regex.split (0=all)', replay=True)
+vd.option('fmt_expand_dict', '%s.%s', 'format str to use for names of columns expanded from dict (colname, key)') #1457
+vd.option('fmt_expand_list', '%s[%s]', 'format str to use for names of columns expanded from list (colname, index)')
 
 
 class PythonSheet(Sheet):
     def openRow(self, row):
         return PyobjSheet("%s[%s]" % (self.name, self.keystr(row)), source=row)
+
+
+class InferColumnsSheet(Sheet):
+    _rowtype = dict
+    @asyncthread
+    def reload(self):
+        self.reloadCols()
+
+        self.rows = []
+        for r in self.iterload():
+            self.addRow(r)
+
+        # if an ordering has been specified, sort the sheet
+        if self._ordering:
+            vd.sync(self.sort())
+
+    def reloadCols(self):
+        self.columns = []
+        self._knownKeys.clear()
+        for c in type(self).columns:
+            self.addColumn(deepcopy(c))
+
+    def addColumn(self, *cols, index=None):
+        for c in cols:
+            self._knownKeys.add(c.expr or c.name)
+        return super().addColumn(*cols, index=index)
+
+    def addRow(self, row, index=None):
+        ret = super().addRow(row, index=index)
+        for k in row:
+            if k not in self._knownKeys:
+                self.addColumn(ColumnItem(k, type=deduceType(row[k])))
+
+        return ret
+
+
+InferColumnsSheet.init('_knownKeys', set, copy=True)  # set of row keys already seen
+InferColumnsSheet.init('_ordering', list, copy=True)
 
 
 @Sheet.api
@@ -38,7 +78,7 @@ def expand_cols_deep(sheet, cols, rows=None, depth=0):  # depth == 0 means drill
         rows = sheet.getSampleRows()
 
     for col in cols:
-        newcols = _addExpandedColumns(col, rows, sheet.columns.index(col))
+        newcols = col.expand(rows)
         if depth != 1:  # countdown not yet complete, or negative (indefinite)
             ret.extend(expand_cols_deep.__wrapped__(sheet, newcols, rows, depth-1))
     return ret
@@ -64,8 +104,14 @@ def _(sampleValue, col, vals):
         })
 
     return [
-        ExpandedColumn('%s.%s' % (col.name, k), type=v, origCol=col, key=k)
+        ExpandedColumn(col.sheet.options.fmt_expand_dict % (col.name, k), type=v, origCol=col, expr=k)
             for k, v in newcols.items()
+    ]
+
+def _createExpandedColumnsNamedTuple(col, val):
+    return [
+        ExpandedColumn(col.sheet.options.fmt_expand_dict % (col.name, k), type=colType, origCol=col, expr=i)
+            for i, (k, colType) in enumerate(zip(val._fields, (deduceType(v) for v in val)))
     ]
 
 @_createExpandedColumns.register(list)
@@ -78,14 +124,20 @@ def _(sampleValue, col, vals):
             return len(v)
         except Exception as e:
             return 0
+
+    if hasattr(sampleValue, '_fields'):  # looks like a namedtuple
+        return _createExpandedColumnsNamedTuple(col, vals[0])
+
     longestSeq = max(vals, key=lenNoExceptions)
     colTypes = [deduceType(v) for v in longestSeq]
     return [
-        ExpandedColumn('%s[%s]' % (col.name, k), type=colType, origCol=col, key=k)
+        ExpandedColumn(col.sheet.options.fmt_expand_list % (col.name, k), type=colType, origCol=col, expr=k)
             for k, colType in enumerate(colTypes)
     ]
 
-def _addExpandedColumns(col, rows, idx):
+
+@Column.api
+def expand(col, rows):
     isNull = col.sheet.isNullFunc()
     nonNulls = [
         col.getTypedValue(row)
@@ -99,6 +151,8 @@ def _addExpandedColumns(col, rows, idx):
     # The type of the first non-null value for col determines if and how the
     # column can be expanded.
     expandedCols = _createExpandedColumns(nonNulls[0], col, nonNulls)
+
+    idx = col.sheet.columns.index(col)
 
     for i, c in enumerate(expandedCols):
         col.sheet.addColumn(c, index=idx+i+1)
@@ -116,10 +170,10 @@ def deduceType(v):
 
 class ExpandedColumn(Column):
     def calcValue(self, row):
-        return getitemdef(self.origCol.getValue(row), self.key)
+        return getitemdef(self.origCol.getValue(row), self.expr)
 
     def setValue(self, row, value):
-        self.origCol.getValue(row)[self.key] = value
+        self.origCol.getValue(row)[self.expr] = value
 
 
 def closeColumn(sheet, col):
@@ -134,8 +188,9 @@ def closeColumn(sheet, col):
 
 
 #### generic list/dict/object browsing
-def view(obj):
-    run(PyobjSheet(getattr(obj, '__name__', ''), source=obj))
+@VisiData.global_api
+def view(vd, obj):
+    vd.run(PyobjSheet(getattr(obj, '__name__', ''), source=obj))
 
 
 
@@ -366,6 +421,7 @@ vd.addGlobals({
     'closeColumn': closeColumn,
     'ListOfDictSheet': ListOfDictSheet,
     'SheetDict': SheetDict,
+    'InferColumnsSheet': InferColumnsSheet,
     'PyobjSheet': PyobjSheet,
     'view': view,
 })

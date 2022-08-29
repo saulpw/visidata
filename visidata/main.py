@@ -2,7 +2,7 @@
 # Usage: $0 [<options>] [<input> ...]
 #        $0 [<options>] --play <cmdlog> [--batch] [-w <waitsecs>] [-o <output>] [field=value ...]
 
-__version__ = '2.9.1'
+__version__ = '2.10'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
 from copy import copy
@@ -11,8 +11,11 @@ import io
 import sys
 import locale
 import datetime
+import functools
 import signal
 import warnings
+import builtins  # to override print
+
 from pkg_resources import resource_filename
 
 from visidata import vd, options, run, BaseSheet, AttrDict
@@ -40,7 +43,7 @@ def eval_vd(logpath, *args, **kwargs):
         else:
             log = log.format(*args, **kwargs)
 
-    src = Path(logpath.given, fp=io.StringIO(log), filesize=len(log))
+    src = Path(logpath.given, fptext=io.StringIO(log), filesize=len(log))
     vs = vd.openSource(src, filetype=src.ext)
     vs.name += '_vd'
     vs.reload()
@@ -99,7 +102,10 @@ def main_vd():
         locale.setlocale(locale.LC_ALL, '')
     except locale.Error as e:
         vd.warning(e)
+
     warnings.showwarning = vd.warning
+    vd.printout = builtins.print
+    vd.printerr = lambda *args, **kwargs: builtins.print(*args, file=sys.stderr)  # ignore kwargs (like priority)
 
     flPipedInput = not sys.stdin.isatty()
     flPipedOutput = not sys.stdout.isatty()
@@ -206,7 +212,7 @@ def main_vd():
         options.set(k, v, obj='global')
 
     vd._stdin, vd._stdout = duptty()  # always dup stdin/stdout
-    vd.stdinSource.fp = vd._stdin
+    vd.stdinSource.fptext = vd._stdin
 
     # fetch motd and plugins *after* options parsing/setting
     vd.pluginsSheet.ensureLoaded()
@@ -215,7 +221,7 @@ def main_vd():
     if args.batch:
         options.undo = False
         options.quitguard = False
-        vd.status = lambda *args, **kwargs: print(*args, file=sys.stderr)  # ignore kwargs (like priority)
+        vd.status = vd.printerr
         vd.editline = lambda *args, **kwargs: ''
         vd.execAsync = lambda func, *args, sheet=None, **kwargs: func(*args, **kwargs) # disable async
 
@@ -299,7 +305,11 @@ def main_vd():
             if startcol:
                 for vs in sheets:
                     if vs:
-                        vs.moveToCol(startcol) or vd.warning(f'{vs} has no column "{startcol}"')
+                        if not vs.moveToCol(startcol):
+                            if startcol.isdigit():
+                                vs.moveToCol(int(startcol)) # handle indexing by column number
+                            else:
+                                vd.warning(f'{vs} has no column "{startcol}"')
 
         if not args.batch:
             run(vd.sheets[0])
@@ -326,7 +336,7 @@ def main_vd():
 
     saver_threads = [t for t in vd.unfinishedThreads if t.name.startswith('save_')]
     if saver_threads:
-        print('finishing %d savers' % len(saver_threads))
+        vd.printout('finishing %d savers' % len(saver_threads))
         vd.sync(*saver_threads)
 
     vd._stdout.flush()

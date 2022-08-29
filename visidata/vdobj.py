@@ -40,6 +40,7 @@ class VisiData(visidata.Extensible):
         self.sheets = []  # list of BaseSheet; all sheets on the sheet stack
         self.allSheets = []  # list of all non-precious sheets ever pushed
         self.lastErrors = []
+        self.pendingKeys = []
         self.keystrokes = ''
         self.scrFull = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
         self._cmdlog = None
@@ -99,18 +100,39 @@ class VisiData(visidata.Extensible):
         'Invalidate internal caches between command inputs.'
         visidata.Extensible.clear_all_caches()
 
+    def drainPendingKeys(self, scr):
+        '''Call scr.get_wch() until no more keypresses are available.  Return True if any keypresses are pending.'''
+        scr.timeout(0)
+        try:
+            while True:
+                k = scr.get_wch()
+                if k:
+                    self.pendingKeys.append(k)
+                else:
+                    break
+        except curses.error:
+            pass
+        finally:
+            scr.timeout(self.curses_timeout)
+
+        return bool(self.pendingKeys)
+
     def getkeystroke(self, scr, vs=None):
         'Get keystroke and display it on status bar.'
+        self.drainPendingKeys(scr)
         k = None
-        curses.reset_prog_mode()  #1347
-        try:
-            scr.refresh()
-            k = scr.get_wch()
-            vs = vs or self.activeSheet
-            if vs:
-                self.drawRightStatus(vs._scr, vs) # continue to display progress %
-        except curses.error:
-            return ''  # curses timeout
+        if self.pendingKeys:
+            k = self.pendingKeys.pop(0)
+        else:
+            curses.reset_prog_mode()  #1347
+            try:
+                scr.refresh()
+                k = scr.get_wch()
+                vs = vs or self.activeSheet
+                if vs:
+                    self.drawRightStatus(vs._scr, vs) # continue to display progress %
+            except curses.error:
+                return ''  # curses timeout
 
         if isinstance(k, str):
             if ord(k) >= 32 and ord(k) != 127:  # 127 == DEL or ^?

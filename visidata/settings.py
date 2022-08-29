@@ -371,6 +371,15 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
     sys.path.append(str(visidata.Path(vd.options.visidata_dir)))
     sys.path.append(str(visidata.Path(vd.options.visidata_dir)/"plugins-deps"))
 
+    # autoload installed plugins first
+    if vd.options.plugins_autoload:
+        from importlib_metadata import entry_points  # a backport which supports < 3.8 https://github.com/pypa/twine/pull/732
+
+        for ep in entry_points().get('visidata.plugins', []):
+            plug = ep.load()
+            sys.modules[f'visidata.plugins.{ep.name}'] = plug
+            vd.status(f'Plugin {ep.name} loaded')
+
     # import plugins from .visidata/plugins before .visidatarc, so plugin options can be overridden
     for modname in (args.imports or vd.options.imports or '').split():
         try:

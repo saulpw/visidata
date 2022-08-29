@@ -8,20 +8,31 @@ class Extensible:
 
     @classmethod
     def init(cls, membername, initfunc=lambda: None, copy=False):
-        'Append equivalent of ``self.<membername> = initfunc()`` to ``<cls>.__init__``.'
-        oldinit = cls.__init__
+        'Append equivalent of ``self.<membername> = initfunc()`` to ``<cls>.__init__``.  If *copy* is True, <membername> will be copied when object is copied.'
+
+        def thisclass_hasattr(cls, k):
+            return getattr(cls, k, None) is not getattr(cls.__bases__[0], k, None)
+
+        # must check hasattr first or else this might be parent's __init__
+        oldinit = thisclass_hasattr(cls, '__init__') and getattr(cls, '__init__')
         def newinit(self, *args, **kwargs):
-            oldinit(self, *args, **kwargs)
+            if oldinit:
+                oldinit(self, *args, **kwargs)
+            else:
+                super(cls, self).__init__(*args, **kwargs)
             if not hasattr(self, membername):  # can be overridden by a subclass
                 setattr(self, membername, initfunc())
-        cls.__init__ = newinit
+        cls.__init__ = wraps(oldinit)(newinit) if oldinit else newinit
 
-        oldcopy = cls.__copy__
+        oldcopy = thisclass_hasattr(cls, '__copy__') and getattr(cls, '__copy__')
         def newcopy(self, *args, **kwargs):
-            ret = oldcopy(self, *args, **kwargs)
+            if oldcopy:
+                ret = oldcopy(self, *args, **kwargs)
+            else:
+                ret = super(cls, self).__copy__(*args, **kwargs)
             setattr(ret, membername, getattr(self, membername) if copy and hasattr(self, membername) else initfunc())
             return ret
-        cls.__copy__ = newcopy
+        cls.__copy__ = wraps(oldcopy)(newcopy) if oldcopy else newcopy
 
     @classmethod
     def api(cls, func):

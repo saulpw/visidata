@@ -246,7 +246,7 @@ DESCRIPTION
                       filename ends in a /, a directory will be created.
      z^S filename     save current column only to filename in format
                       determined by extension (default .tsv)
-     ^D filename.vd   save CommandLog to filename.vd file
+     ^D filename.vdj  save CommandLog to filename.vdj file
      A                open new blank sheet with one column
      T                open new sheet that has rows and columns of current
                       sheet transposed
@@ -366,10 +366,6 @@ DESCRIPTION
          transposed
 
    INTERNAL SHEETS
-   VisiDataMenu (Shift+V)
-     (sheet-specific commands)
-        Enter            load sheet in current row
-
    Directory Sheet
      (global commands)
         Space open-dir-current
@@ -483,6 +479,15 @@ DESCRIPTION
           x              replay command in current row
          gx              replay contents of entire CommandLog
          ^C              abort replay
+
+   Threads Sheet (Ctrl+T)
+     (global commands)
+        ^T               open global Threads Sheet for all asynchronous
+                         threads running
+        z^T              open current sheet's Threads Sheet
+     (sheet-specific commands)
+         ^C              abort thread at current row
+        g^C              abort all threads on current Threads Sheet
 
    DERIVED SHEETS
    Frequency Table (Shift+F)
@@ -632,6 +637,13 @@ COMMANDLINE OPTIONS
                                                      1=high)
      --default-sample-size=int    100                number of rows to sample
                                                      for regex.split (0=all)
+     --fmt-expand-dict=str        %s.%s              format str to use for
+                                                     names of columns expanded
+                                                     from dict (colname, key)
+     --fmt-expand-list=str        %s[%s]             format str to use for
+                                                     names of columns expanded
+                                                     from list (colname, in‐
+                                                     dex)
      --json-indent=NoneType       None               indent to use when saving
                                                      json
      --json-sort-keys             False              sort object keys when
@@ -688,7 +700,7 @@ COMMANDLINE OPTIONS
                                                      sively on DirSheet
      --dir-hidden                 False              load hidden files on
                                                      DirSheet
-     --config=Path                /home/kefala/.visidatarc
+     --config=Path                /home/<user>/.visidatarc
                                                      config file to exec in
                                                      Python
      --play=str                                      file.vd to replay
@@ -735,6 +747,8 @@ COMMANDLINE OPTIONS
                                                      the Postgres database
      --http-max-next=int          0                  max next.url pages to
                                                      follow in http response
+     --http-req-headers=dict      {}                 http headers to send to
+                                                     requests
      --html-title=str             <h2>{sheet.name}</h2>
                                                      table header when saving
                                                      to html
@@ -752,6 +766,8 @@ COMMANDLINE OPTIONS
                                                      stead of pages of text
      --plugins-url=str            https://visidata.org/plugins/plugins.jsonl
                                                      source of plugins sheet
+     --plugins-autoload=bool      True               do not autoload plugins
+                                                     if False
 
    DISPLAY OPTIONS
      Display options can only be set via the Options Sheet or a .visidatarc
@@ -989,4 +1005,4 @@ SUPPORTED SOURCES
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                      July 19, 2022                     Linux/MacOS
+Linux/MacOS                     August 27, 2022                    Linux/MacOS

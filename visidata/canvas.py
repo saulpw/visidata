@@ -651,9 +651,8 @@ Canvas.addCommand('BUTTON1_RELEASED', 'end-cursor', 'setCursorSize(canvasMouse)'
 Canvas.addCommand('BUTTON3_PRESSED', 'start-move', 'sheet.anchorPoint = canvasMouse', 'mark grid point to move')
 Canvas.addCommand('BUTTON3_RELEASED', 'end-move', 'fixPoint(plotterMouse, anchorPoint)', 'mark canvas anchor point')
 
-Canvas.addCommand('BUTTON4_PRESSED', 'zoomin-mouse', 'tmp=canvasMouse; incrZoom(1.0/options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom in with scroll wheel')
-Canvas.addCommand('REPORT_MOUSE_POSITION', 'zoomout-mouse', 'tmp=canvasMouse; incrZoom(options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom out with scroll wheel')
-Canvas.bindkey('2097152', 'zoomout-mouse')
+Canvas.addCommand('ScrollwheelUp', 'zoomin-mouse', 'tmp=canvasMouse; incrZoom(1.0/options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom in with scroll wheel')
+Canvas.addCommand('ScrollwheelDown', 'zoomout-mouse', 'tmp=canvasMouse; incrZoom(options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom out with scroll wheel')
 
 Canvas.addCommand('s', 'select-cursor', 'source.select(list(rowsWithin(plotterCursorBox)))', 'select rows on source sheet contained within canvas cursor')
 Canvas.addCommand('t', 'stoggle-cursor', 'source.toggle(list(rowsWithin(plotterCursorBox)))', 'toggle selection of rows on source sheet contained within canvas cursor')
