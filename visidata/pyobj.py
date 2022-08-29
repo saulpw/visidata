@@ -20,10 +20,7 @@ class InferColumnsSheet(Sheet):
     _rowtype = dict
     @asyncthread
     def reload(self):
-        self.columns = []
-        self._knownKeys.clear()
-        for c in type(self).columns:
-            self.addColumn(deepcopy(c))
+        self.reloadCols()
 
         self.rows = []
         for r in self.iterload():
@@ -33,9 +30,15 @@ class InferColumnsSheet(Sheet):
         if self._ordering:
             vd.sync(self.sort())
 
+    def reloadCols(self):
+        self.columns = []
+        self._knownKeys.clear()
+        for c in type(self).columns:
+            self.addColumn(deepcopy(c))
+
     def addColumn(self, *cols, index=None):
         for c in cols:
-            self._knownKeys.add(c.name)
+            self._knownKeys.add(c.expr or c.name)
         return super().addColumn(*cols, index=index)
 
     def addRow(self, row, index=None):

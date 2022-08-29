@@ -450,7 +450,8 @@ def shortcut(self):
 @VisiData.property
 def cmdlog(vd):
     if not vd._cmdlog:
-        vd._cmdlog = CommandLogJsonl('cmdlog', rows=[])
+        vd._cmdlog = CommandLogJsonl('cmdlog', rows=[])  # no reload
+        vd._cmdlog.reloadCols()
         vd.beforeExecHooks.append(vd._cmdlog.beforeExecHook)
     return vd._cmdlog
 
