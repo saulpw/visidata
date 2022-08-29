@@ -1,6 +1,6 @@
 # VisiData version history
 
-# v2.10 (2022-08-XX)
+# v2.10 (2022-08-28)
 
 - [plugins] load all entry points in `visidata.plugins` group before config load
   - add entry_points={'visidata.plugins': 'foo=foo'} to plugin load plugin automatically when launching VisiData
@@ -57,9 +57,7 @@
 - add InferColumnsSheet
   - it infers the columns and their types from the rows it gets which are dicts
   - used by json, npy loader
-- overload builtins.print to use vd.status
-  - add vd.printout and vd.printerr for original builtins.print
-  - print() calls with kwargs are forwarded to buildins.print
+- add vd.printout and vd.printerr for builtins.print to stdout and stderr
 - add `vd.view()`
 - fix Extensible.init() to work with classes with no `__init__`
 - add `Sheet.sidebar` and `Sheet.sidebar_title` properties
