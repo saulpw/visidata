@@ -339,7 +339,7 @@ class IbisTableSheet(Sheet):
         vs = copy(self.source)
         vs.names = list(vs.names) + ['_'.join(str(x) for x in self.rowkey(row))]
         vs.query = self.source.query.filter([
-            self.groupByCols[0].ibis_col == self.rowkey(row)[0]
+            self.groupByCols[0].get_ibis_col(self.source.query) == self.rowkey(row)[0]
             # matching key of grouped columns
         ])
         return vs
