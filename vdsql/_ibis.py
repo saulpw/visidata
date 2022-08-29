@@ -16,9 +16,7 @@ def _(_: str, *, project_id: str, dataset_id: str):
     """Connect to BigQuery with `project_id` and optional `dataset_id`."""
     import ibis
 
-    con = ibis.bigquery.connect(project_id="ibis-gbq", dataset_id=dataset_id or "")
-    con.data_project = project_id
-    return con
+    return ibis.bigquery.connect(project_id=project_id, dataset_id=dataset_id or "")
 
 
 @_connect.register(r".+\.ddb", priority=13)
