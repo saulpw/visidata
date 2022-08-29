@@ -1,6 +1,9 @@
 from visidata import vd, VisiData, Sheet, AttrColumn
 from . import IbisTableIndexSheet, IbisConnectionPool
 
+import ibis
+import ibis.expr.operations as ops
+
 
 @VisiData.api
 def openurl_bigquery(vd, p, filetype=None):
@@ -39,3 +42,17 @@ class BigqueryDatabaseIndexSheet(Sheet):
                                    ibis_conpool=IbisConnectionPool(f"{self.source}/{row.dataset_id}"),
                                    source=row,
                                    filetype=None)
+
+
+@ibis.bigquery.add_operation(ops.TimestampDiff)
+def bq_timestamp_diff(t, expr):
+    op = expr.op()
+    left = t.translate(op.left)
+    right = t.translate(op.right)
+    return f"TIMESTAMP_DIFF({left}, {right}, SECOND)"
+
+
+@ibis.bigquery.add_operation(ops.ToIntervalUnit)
+def bq_to_interval_unit(t, expr):
+    op = expr.op()
+    return t.translate(op.arg)
