@@ -508,8 +508,13 @@ def addUndoSelection(sheet):
 
 @IbisTableSheet.api
 def select_equal_cell(sheet, col, typedval):
+    if sheet.isNullFunc()(typedval):
+        expr = col.ibis_col.isnull()
+    else:
+        expr = col.ibis_col == typedval
+
+    sheet.ibis_selection.append(expr)
     sheet.select(sheet.gatherBy(lambda r,c=col,v=typedval: c.getTypedValue(r) == v), progress=False)
-    sheet.ibis_selection.append(col.ibis_col == typedval)
 
 
 @IbisTableSheet.api
