@@ -115,7 +115,7 @@ class IbisTableIndexSheet(IndexSheet):
             nrows_col.width += 3
 
             for tblname in con.list_tables():
-                yield IbisTableSheet(*self.names, tblname,
+                yield IbisTableSheet(tblname,
                         ibis_source=self.source,
                         ibis_filetype=self.filetype,
                         ibis_conpool=self.ibis_conpool,
