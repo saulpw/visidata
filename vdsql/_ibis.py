@@ -4,6 +4,7 @@ import operator
 
 from contextlib import contextmanager
 from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace, PyobjSheet, BaseSheet, ExpectedException, anytype
+from visidata.pyobj import ExpandedColumn
 from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet, UNLOADED, ExprColumn, undoAttrCopyFunc
 from ibis.backends.base import _connect
 
@@ -219,8 +220,10 @@ class IbisTableSheet(Sheet):
                         if not isinstance(ibis_col.type(), (dt.Timestamp, dt.Date)):
                             ibis_col = ibis_col.cast(dt.date)
 
-                ibis_col = ibis_col.name(c.name)
+                    ibis_col = ibis_col.name(c.name)
                 projections.append(ibis_col)
+            else:
+                vd.warning(f'no column {c.name}')
 
         if projections:
             q = q.projection(projections)
@@ -414,8 +417,15 @@ def evalIbisExpr(sheet, expr):
 
 @IbisColumn.api
 def expand(col, rows):
-    super(IbisColumn, col).expand(rows)
-    col.sheet.query = col.sheet.ibis_current_expr.unpack(col.ibis_name)
+    oldexpr = col.sheet.ibis_current_expr
+    struct_field = col.get_ibis_col(oldexpr)
+    struct_fields = [struct_field[name] for name in struct_field.names]
+    expandedCols = super(IbisColumn, col).expand(rows)   # this must go after ibis_current_expr, because it alters ibis_current_expr
+    fields = []
+    for ibiscol, expcol in zip(struct_fields, expandedCols):
+        fields.append(ibiscol.name(expcol.name))
+    col.sheet.query = oldexpr.drop([struct_field.get_name()]).mutate(fields)
+    return expandedCols
 
 
 @Column.api
@@ -425,6 +435,8 @@ def get_ibis_col(col, query):
     r = None
     if isinstance(col, ExprColumn):
         r = col.sheet.evalIbisExpr(col.expr)
+    elif isinstance(col, ExpandedColumn):
+        r = query.get_column(col.name)
     elif not hasattr(col, 'ibis_name'):
         return
     else:
@@ -534,7 +546,7 @@ select-after select-around-n select-before select-equal-row select-error stoggle
 
 notimpl_cmds = '''
 addcol-capture addcol-incr addcol-incr-step addcol-split addcol-subst addcol-window capture-col split-col
-contract-col expand-col expand-col-depth expand-cols expand-cols-depth melt melt-regex pivot random-rows transpose
+contract-col expand-col-depth expand-cols expand-cols-depth melt melt-regex pivot random-rows transpose
 select-col-regex select-cols-regex select-error-col select-exact-cell select-exact-row select-row select-rows
 unselect-col-regex unselect-expr unselect-row
 describe-sheet freq-summary
