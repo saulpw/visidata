@@ -162,17 +162,12 @@ class IbisTableSheet(Sheet):
     def con(self):
         return self.ibis_conpool.get_conn()
 
-    def cycle_sidebar(self):
-        sidebars = ['', 'ibis_current_sql', 'ibis_future_sql', 'ibis_current_expr', 'ibis_substrait']
-        try:
-            i = sidebars.index(vd.options.disp_ibis_sidebar)+1
-        except ValueError:
-            vd.warning(f'unknown sidebar option {vd.options.disp_ibis_sidebar}, resetting')
-            i = 0
-        vd.options.disp_ibis_sidebar = sidebars[i%len(sidebars)]
+    def choose_sidebar(self):
+        sidebars = ['base_sql', 'pending_sql', 'curcol_sql', 'substrait', 'ibis_current_expr']
+        vd.options.disp_ibis_sidebar = vd.chooseOne([{'key': s, 'value':getattr(self, s)} for s in sidebars])
 
     @property
-    def ibis_curcol_sql(self):
+    def curcol_sql(self):
         expr = self.cursorCol.get_ibis_col(self.ibis_current_expr)
         return self.ibis_to_sql(expr, fragment=True)
 
@@ -237,11 +232,11 @@ class IbisTableSheet(Sheet):
             return expr
 
     @property
-    def ibis_current_sql(self):
+    def base_sql(self):
         return self.sqlize(self.ibis_current_expr)
 
     @property
-    def ibis_future_sql(self):
+    def pending_sql(self):
         return self.sqlize(self.ibis_future_expr)
 
     def sqlize(self, expr):
@@ -250,7 +245,7 @@ class IbisTableSheet(Sheet):
         return self.ibis_to_sql(expr)
 
     @property
-    def ibis_substrait(self):
+    def substrait(self):
         from ibis_substrait.compiler.core import SubstraitCompiler
         compiler = SubstraitCompiler()
         return compiler.compile(self.ibis_current_expr)
@@ -547,12 +542,15 @@ IbisTableSheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_sel
 IbisTableSheet.addCommand('v', 'sidebar-cycle', 'cycle_sidebar()')
 IbisTableSheet.addCommand('zv', 'sidebar-current-col', 'vd.options.disp_ibis_sidebar = "ibis_curcol_sql"')
 
-IbisTableSheet.addCommand('', 'open-sidebar', 'vd.push(TextSheet(name, options.disp_ibis_sidebar, source=sidebar.splitlines()))')
 IbisTableSheet.addCommand("'", 'addcol-cast', 'addcol_cast(cursorCol)')
+
+IbisTableSheet.addCommand('gv', 'open-sidebar', 'vd.push(TextSheet(name, options.disp_ibis_sidebar, source=sidebar.splitlines()))')
+IbisTableSheet.addCommand('zv', 'sidebar-choose', 'choose_sidebar()', 'choose vdsql sidebar to show')
+IbisTableSheet.addCommand('v', 'sidebar-toggle', 'vd.options.disp_ibis_sidebar = "" if vd.options.disp_ibis_sidebar else "base_sql"', 'cycle vdsql sidebar on/off')
 
 IbisTableSheet.class_options.clean_names = True
 
-vd.addMenuItem('View', 'Sidebar', 'cycle', 'sidebar-cycle')
+vd.addMenuItem('View', 'Sidebar', 'choose', 'sidebar-choose')
 vd.addMenuItem('View', 'Sidebar', 'open', 'open-sidebar')
 
 # make it easier to reload with different limit.  z" ?
