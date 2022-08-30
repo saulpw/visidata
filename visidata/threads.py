@@ -255,10 +255,10 @@ def sync(self, *joiningThreads):
         threads -= deads
         for t in threads:
             try:
-                if not t.is_alive() or getattr(t, 'noblock', False) is True:
+                if not t.is_alive() or t not in threading.enumerate() or getattr(t, 'noblock', False) is True:
                     deads.add(t)
                 else:
-                    t.join()
+                    t.join(timeout=1)
             except RuntimeError as e:  # maybe thread hasn't started yet or has already joined
                 vd.exceptionCaught(e)
                 pass

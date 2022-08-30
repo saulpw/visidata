@@ -230,7 +230,7 @@ def mainloop(self, scr):
         sheet = self.activeSheet
 
         if not sheet:
-            continue
+            continue  # waiting for replay to push sheet
 
         threading.current_thread().sheet = sheet
         vd.drawThread = threading.current_thread()
