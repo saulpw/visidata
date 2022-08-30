@@ -187,13 +187,13 @@ toggle/unset current column as a key column
 .It Ic "~  #  %  $  @  z#"
 set type of current column to str/int/float/currency/date/len
 .It Ic "  ^"
-edit name of current column
+rename current column
 .It Ic " g^"
-set names of all unnamed visible columns to contents of selected rows (or current row)
+rename all unnamed visible columns to contents of selected rows (or current row)
 .It Ic " z^"
-set name of current column to combined contents of current cell in selected rows (or current row)
+rename current column to combined contents of current cell in selected rows (or current row)
 .It Ic "gz^"
-set name of all visible columns to combined contents of current column for selected rows (or current row)
+rename all visible columns to combined contents of current column for selected rows (or current row)
 .Pp
 .It Ic "  =" Ar expr
 .No create new column from Python Ar expr Ns , with column names, and attributes, as variables
