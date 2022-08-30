@@ -9,6 +9,7 @@ from ibis.backends.base import _connect
 
 vd.option('disp_ibis_sidebar', '', 'which sidebar property to display')
 vd.option('sql_always_count', False, 'whether to always query a count of the number of results')
+vd.option('ibis_limit', 10000, 'max number of rows to get in query')
 
 
 @_connect.register(r"bigquery://(?P<project_id>[^/]+)(?:/(?P<dataset_id>.+))?", priority=13)
@@ -182,7 +183,7 @@ class IbisTableSheet(Sheet):
                 compiled = con.compile(expr)
             if not isinstance(compiled, str):
                 compiled = str(compiled.compile(compile_kwargs={'literal_binds': True}))
-        return sqlparse.format(compiled, reindent=True, keyword_case='upper')
+        return sqlparse.format(compiled, reindent=True, keyword_case='upper', wrap_after=40)
 
     @property
     def sidebar(self):
@@ -265,7 +266,7 @@ class IbisTableSheet(Sheet):
                 self.query = ibis.table(tbl.schema(), name=con._fully_qualified_name(self.table_name, self.database_name))
 
             actual_query = self.with_count(self.query)
-            self.query_result = con.execute(actual_query)
+            self.query_result = con.execute(actual_query, limit=self.options.ibis_limit or None)
 
         self.options.disp_rstatus_fmt = self.options.disp_rstatus_fmt.replace('nRows', 'countRows')
         self.options.disp_rstatus_fmt = self.options.disp_rstatus_fmt.replace('nSelectedRows', 'countSelectedRows')
@@ -538,9 +539,34 @@ IbisTableSheet.addCommand(',', 'select-equal-cell', 'select_equal_cell(cursorCol
 IbisTableSheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: "); select_expr(expr)', 'select rows matching Python expression in any visible column')
 #IbisTableSheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalExpr(expr, r)), progress=False)', 'unselect rows matching Python expression in any visible column')
 
-IbisTableSheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.query=ibis_future_expr; vd.push(vs)', 'open duplicate sheet with only selected rows'),
-IbisTableSheet.addCommand('v', 'sidebar-cycle', 'cycle_sidebar()')
-IbisTableSheet.addCommand('zv', 'sidebar-current-col', 'vd.options.disp_ibis_sidebar = "ibis_curcol_sql"')
+@IbisTableSheet.api
+def dup_selected(sheet):
+    vs=copy(sheet)
+    vs.query=sheet.ibis_future_expr
+    vs.incrementName()
+    vd.push(vs)
+
+
+@BaseSheet.api
+def incrementName(sheet):
+    if isinstance(sheet.names[-1], int):
+        sheet.names[-1] += 1
+    else:
+        sheet.names = list(sheet.names) + [1]
+    sheet.name = '_'.join(map(str, sheet.names))
+
+
+@IbisTableSheet.api
+def dup_limit(sheet, limit:int):
+    vs=copy(sheet)
+    vs.name += f"_top{limit}" if limit else "_all"
+    vs.query=sheet.ibis_future_expr
+    vs.options.ibis_limit=limit
+
+
+IbisTableSheet.addCommand('"', 'dup-selected', 'vd.push(dup_selected())', 'open duplicate sheet with selected rows (default limit)'),
+IbisTableSheet.addCommand('z"', 'dup-limit', 'vd.push(dup_limit(input("max rows: ", value=vs.options.ibis_limit)))', 'open duplicate sheet with only selected rows (input limit)'),
+IbisTableSheet.addCommand('gz"', 'dup-nolimit', 'vd.push(dup_limit(0))', 'open duplicate sheet with only selected rows (no limit--be careful!)')
 
 IbisTableSheet.addCommand("'", 'addcol-cast', 'addcol_cast(cursorCol)')
 
