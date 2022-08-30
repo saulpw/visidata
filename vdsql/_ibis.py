@@ -167,7 +167,7 @@ class IbisTableSheet(Sheet):
         return self.ibis_conpool.get_conn()
 
     def choose_sidebar(self):
-        sidebars = ['base_sql', 'pending_sql', 'curcol_sql', 'substrait', 'ibis_current_expr']
+        sidebars = ['base_sql', 'pending_sql', 'curcol_sql', 'substrait', 'ibis_current_expr', 'pending_expr']
         vd.options.disp_ibis_sidebar = vd.chooseOne([{'key': s, 'value':getattr(self, s)} for s in sidebars])
 
     @property
@@ -232,8 +232,8 @@ class IbisTableSheet(Sheet):
         return functools.reduce(operator.or_, [self.ibisCompileExpr(f, self.ibis_current_expr) for f in self.ibis_selection])
 
     @property
-    def ibis_future_expr(self):
-        q = self.ibis_current_expr
+    def pending_expr(self):
+        q = self.get_current_expr(typed=True)
         if self.ibis_selection:
             q = q.filter(self.ibis_filter)
 
@@ -254,7 +254,7 @@ class IbisTableSheet(Sheet):
 
     @property
     def pending_sql(self):
-        return self.sqlize(self.ibis_future_expr)
+        return self.sqlize(self.pending_expr)
 
     def sqlize(self, expr):
         if vd.options.debug:
@@ -436,11 +436,6 @@ def get_ibis_col(col, query):
     if r is None:
         return r
 
-    return get_typed_ibis_col(col, r)
-
-
-def get_typed_ibis_col(col, ibis_col):
-    r = ibis_col
     r = r.name(col.name)
     return r
 
@@ -566,7 +561,7 @@ IbisTableSheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: 
 @IbisTableSheet.api
 def dup_selected(sheet):
     vs=copy(sheet)
-    vs.query=sheet.ibis_future_expr
+    vs.query=sheet.pending_expr
     vs.incrementName()
     vd.push(vs)
 
@@ -584,7 +579,7 @@ def incrementName(sheet):
 def dup_limit(sheet, limit:int):
     vs=copy(sheet)
     vs.name += f"_top{limit}" if limit else "_all"
-    vs.query=sheet.ibis_future_expr
+    vs.query=sheet.pending_expr
     vs.options.ibis_limit=limit
 
 
