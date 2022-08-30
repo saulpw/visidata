@@ -584,6 +584,7 @@ IbisTableSheet.addCommand('zv', 'sidebar-choose', 'choose_sidebar()', 'choose vd
 IbisTableSheet.addCommand('v', 'sidebar-toggle', 'vd.options.disp_ibis_sidebar = "" if vd.options.disp_ibis_sidebar else "base_sql"', 'cycle vdsql sidebar on/off')
 
 IbisTableSheet.class_options.clean_names = True
+IbisTableSheet.class_options.disp_histolen = 0  # disable histograms by default
 
 vd.addMenuItem('View', 'Sidebar', 'choose', 'sidebar-choose')
 vd.addMenuItem('View', 'Sidebar', 'open', 'open-sidebar')
