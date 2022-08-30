@@ -1,6 +1,6 @@
-# vdsql: [VisiData](https://visidata.org) plugin for SQL Databases
+# vdsql: [VisiData](https://visidata.org) for Databases
 
-A VisiData interface for relational and columnar databases
+A VisiData interface for databases
 
 Powered by [Ibis](https://ibis-project.org).
 
@@ -9,18 +9,25 @@ Powered by [Ibis](https://ibis-project.org).
 - query data in VisiData from any supported backend
 - output resulting query in SQL, Substrait, or Python
 
+## Requirements
+
+- Python 3.8
+- VisiData v2.10
+- Ibis 3.1
+
 ### Confirmed supported backends
 
-- SQLite: `vdsql database.sqlite` (or `.sqlite3` or `.db`)
-- DuckDB: `vdsql database.duckdb` (or `.ddb`)
-- ClickHouse: `vdsql clickhouse://explorer@play.clickhouse.com:9440/?secure=1`
-- Google BigQuery:  `vdsql bigquery:///bigquery-public-data`
-- MySQL: `vdsql mysql://...`
-- PostgreSQL: `vdsql postgres://...`
+- SQLite
+- MySQL
+- PostgreSQL
+- DuckDB
+- ClickHouse
+- Google BigQuery
 
-### [Other backends supported by Ibis](https://ibis-project.org/docs/3.1.0/backends/) (read)
+### [Other backends supported by Ibis](https://ibis-project.org/docs/3.1.0/backends/)
 
-These backends are supported by Ibis and should work, but haven't been tested.  If you have have problems connecting, please [file an issue](https://github.com/visidata/vdsql/issues/new).
+These backends are supported by Ibis and should work, but haven't specifically been tested with vdsql.
+If you have have problems connecting, please [file an issue](https://github.com/visidata/vdsql/issues/new).
 
 - Apache Impala
 - Datafusion
@@ -36,7 +43,7 @@ This will install both:
 
     pip install vdsql
 
-## Install manually as a VisiData plugin (development)
+## Install manually as a VisiData plugin (cutting edge development)
 
     pip install git+https://github.com/visidata/vdsql.git
 
@@ -44,36 +51,49 @@ This will install both:
 
 ## Usage
 
-### deferred execution with Ibis
+### Open a database
+
+    vdsql foo.sqlite  # or .sqlite3
+    vdsql mysql://...
+    vdsql postgres://...
+    vdsql foo.duckdb  # or .ddb
+    vdsql clickhouse://explorer@play.clickhouse.com:9440/?secure=1
+    vdsql bigquery:///bigquery-public-data
+
+    vdsql <file_or_url>
 
     vd -f ibis <file_or_url>
 
-where `file_or_url` is any connection string supported by `ibis.connect()`.
+where `file_or_url` is any connection string supported by `ibis.connect()` or any of the filetypes and options that VisiData itself supports.
 
-## IbisSheet
+### Commands
 
-Only these commands are implemented to use Ibis expressions; others will use the internal VisiData implementation (and will only use the currently loaded rowset, limited to 10000 rows).
+A decent amount of work has gone into making `vdsql` work just like VisiData.
 
-- `Shift+F` frequency table
-  - on the Frequency Sheet, `Enter` to filter source rows by that value
-- `-` to hide column
-- `zM` unfurl-col
-- `~`/`@`/`#`/`$`/`%` to set column types
-- `^` to rename col
-- `+` to aggregate (name must be function on Ibis column expr; e.g. use `mean`, `avg` is not available)
-- `z+` to calculate aggregation immediately
-- `[` and `]` family to sort
-- `,` to select rows
-- `gt` to toggle selection
-- `"` to filter selection
-- `&` to join
-- `=` to add a new expression
+You can learn about VisiData starting with the [Intro to VisiData Tutorial](https://jsvine.github.io/intro-to-visidata/) and the [VisiData documentation](https://visidata.org/docs).
 
-### new commands for IbisSheet
+There are a few differences, however:
 
-- `v` to cycle the sidebar between the generated SQL, the Ibis expression, the Substrait, and no sidebar
+- By default vdsql will only get 10000 rows from a database source.  To get a different number, use `z"` to create a new sheet with a different limit.
+- Some VisiData commands aren't implemented using the database engine.
+The base VisiData commands can only use the 10000 loaded rows, and this may give incorrect and misleading results.
+So these not-implemented commands are disabled, but you can still use the base VisiData commands by first freezing the sheet with `g'` which converts it into a plain old non-database VisiData sheet.
 
-## Notes
+Use `"` (dup-sheet) to run a new base query, including added columns, filtering for the current selection, and applying the current sort order.
 
-- the SQL/sidebar expression shows what would be executed during reload, not necessarily what the current view is.
-  - For example, opening a table through Ibis only loads the first 10,000 rows.  Sorting the table adds an `ORDER BY` clause to the SQL, but only sorts those first 10,000 rows within VisiData.  To re-run the query including the new ORDER BY clause, use `Ctrl+R` to reload the sheet.
+### Sidebar
+
+`vdsql` uses the VisiData sidebar (new in v2.9) to show the SQL query for the current view.
+
+- To toggle the sidebar on/off, press `v`.
+- To cycle through the various sidebar options, press `zv`.
+- To open the sidebar as its own sheet, press `gv`.
+
+Use the `open-sidebar` command (no keyboard shortcut; `Space` to execute a command by its longname, or in the menu) to open a new sheet with the contents of the sidebar, to view or save.
+
+In this way you can compose a SQL expression using VisiData commands, open the SQL sidebar, and save the resulting query to a file (or copy it into your system clipboard buffer).
+
+### Credits
+
+- Saul Pwanson
+- Phillip Cloud
