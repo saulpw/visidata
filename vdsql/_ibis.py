@@ -233,7 +233,11 @@ class IbisTableSheet(Sheet):
 
     @property
     def ibis_filter(self):
-        return functools.reduce(operator.or_, [self.ibisCompileExpr(f, self.ibis_current_expr) for f in self.ibis_selection])
+        import ibis
+        selectors = [self.ibisCompileExpr(f, self.ibis_current_expr) for f in self.ibis_selection]
+        if not selectors:
+            return ibis.literal(True)
+        return functools.reduce(operator.or_, selectors)
 
     @property
     def pending_expr(self):
