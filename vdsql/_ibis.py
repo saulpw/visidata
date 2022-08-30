@@ -307,19 +307,26 @@ class IbisTableSheet(Sheet):
         from ibis import _
         import ibis
         from ibis.expr import datatypes as dt
-        aggr_cols = [groupByCols[0].ibis_col.count()]
+        aggr_cols = [groupByCols[0].ibis_col.count().name('count')]
         for c in self.visibleCols:
             aggr_cols.extend(c.ibis_aggrs)
 
         q = self.ibis_current_expr
         groupq = q.aggregate(aggr_cols, by=[c.ibis_col for c in groupByCols])
-        if len(aggr_cols) == 1:
-            groupq = groupq.mutate(_largest=_['count'].max())
-            hval = ibis.literal(self.options.disp_histogram, type=dt.string)
-            histolen = self.options.disp_histolen
-            groupq = groupq.mutate(histogram=lambda t, hval=hval, histolen=histolen: hval.repeat((histolen*t['count']/t._largest).cast(dt.int)))
         groupq = groupq.mutate(percent=_['count']*100 / _['count'].sum().over(ibis.window()))
-#        groupq = groupq[]
+
+        histolen = self.options.disp_histolen
+        histogram = self.options.disp_histogram
+        if histolen and histogram and len(aggr_cols) == 1:
+            groupq = groupq.mutate(maxcount=_['count'].max())
+            hval = ibis.literal(histogram, type=dt.string)
+
+            def histogram(t):
+                return hval.repeat((histolen*t['count']/t.maxcount).cast(dt.int))
+
+            groupq = groupq.mutate(histogram=histogram)
+
+        groupq = groupq.sort_by([('count', False)])
 
         return IbisTableSheet(self.name, *(col.name for col in groupByCols), 'freq',
                              ibis_conpool=self.ibis_conpool,
@@ -332,10 +339,12 @@ class IbisTableSheet(Sheet):
     def openRow(self, row):
         if not hasattr(self, 'groupByCols'):
             return super().openRow(row)
+
+        # we're on a frequency table
         vs = copy(self.source)
         vs.names = list(vs.names) + ['_'.join(str(x) for x in self.rowkey(row))]
         vs.query = self.source.query.filter([
-            self.groupByCols[0].get_ibis_col(self.source.query) == self.rowkey(row)[0]
+            c.get_ibis_col(self.source.query) == self.rowkey(row)[i] for i, c in enumerate(self.groupByCols)
             # matching key of grouped columns
         ])
         return vs
