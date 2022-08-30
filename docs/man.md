@@ -96,10 +96,10 @@ vd(1)                                                                           
      <span style="font-weight:bold;">!</span> <span style="font-weight:bold;">z!</span>             toggle/unset current column as a key column
      <span style="font-weight:bold;">~</span>  <span style="font-weight:bold;">#</span>  <span style="font-weight:bold;">%</span>  <span style="font-weight:bold;">$</span>  <span style="font-weight:bold;">@</span>  <span style="font-weight:bold;">z#</span>
                       set type of current column to str/int/float/currency/date/len
-       <span style="font-weight:bold;">^</span>              edit name of current column
-      <span style="font-weight:bold;">g^</span>              set names of all unnamed visible columns to contents of selected rows (or current row)
-      <span style="font-weight:bold;">z^</span>              set name of current column to combined contents of current cell in selected rows (or current row)
-     <span style="font-weight:bold;">gz^</span>              set name of all visible columns to combined contents of current column for selected rows (or current row)
+       <span style="font-weight:bold;">^</span>              rename current column
+      <span style="font-weight:bold;">g^</span>              rename all unnamed visible columns to contents of selected rows (or current row)
+      <span style="font-weight:bold;">z^</span>              rename current column to combined contents of current cell in selected rows (or current row)
+     <span style="font-weight:bold;">gz^</span>              rename all visible columns to combined contents of current column for selected rows (or current row)
 
        <span style="font-weight:bold;">=</span> <span style="text-decoration:underline;">expr</span>         create new column from Python <span style="text-decoration:underline;">expr</span>, with column names, and attributes, as variables
       <span style="font-weight:bold;">g=</span> <span style="text-decoration:underline;">expr</span>         set current column for selected rows to result of Python <span style="text-decoration:underline;">expr</span>

@@ -105,13 +105,13 @@ DESCRIPTION
      ~  #  %  $  @  z#
                       set type of current column to str/int/float/cur‐
                       rency/date/len
-       ^              edit name of current column
-      g^              set names of all unnamed visible columns to contents of
-                      selected rows (or current row)
-      z^              set name of current column to combined contents of cur‐
-                      rent cell in selected rows (or current row)
-     gz^              set name of all visible columns to combined contents of
-                      current column for selected rows (or current row)
+       ^              rename current column
+      g^              rename all unnamed visible columns to contents of se‐
+                      lected rows (or current row)
+      z^              rename current column to combined contents of current
+                      cell in selected rows (or current row)
+     gz^              rename all visible columns to combined contents of cur‐
+                      rent column for selected rows (or current row)
 
        = expr         create new column from Python expr, with column names,
                       and attributes, as variables
