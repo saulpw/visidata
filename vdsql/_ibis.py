@@ -27,13 +27,16 @@ def _(source: str):
 
     return ibis.duckdb.connect(source)
 
+
 def vdtype_to_ibis_type(t):
     from ibis.expr import datatypes as dt
     return {
         int: dt.int,
         float: dt.float,
         date: dt.date,
+        str: dt.string,
     }.get(t)
+
 
 def dtype_to_vdtype(dtype):
     from ibis.expr import datatypes as dt
@@ -199,11 +202,24 @@ class IbisTableSheet(Sheet):
 
     @property
     def ibis_current_expr(self):
+        return self.get_current_expr(typed=False)
+
+    def get_current_expr(self, typed=False):
         q = self.query
         projections = []
         for c in self.visibleCols:
             ibis_col = c.get_ibis_col(q)
             if ibis_col is not None:
+                if typed:
+                    import ibis.expr.datatypes as dt
+                    if c.type is str: ibis_col = ibis_col.cast(dt.string)
+                    if c.type is int: ibis_col = ibis_col.cast(dt.int)
+                    if c.type is float: ibis_col = ibis_col.cast(dt.float)
+                    if c.type is date:
+                        if not isinstance(ibis_col.type(), (dt.Timestamp, dt.Date)):
+                            ibis_col = ibis_col.cast(dt.date)
+
+                ibis_col = ibis_col.name(c.name)
                 projections.append(ibis_col)
 
         if projections:
@@ -500,7 +516,6 @@ def addcol_cast(sheet, col):
     expr = sheet.query[col.name].cast(new_type)
     sheet.query = sheet.query.mutate(**{col.name: expr})
     newcol = copy(col)
-    newcol.type = anytype
     col.hide()
     sheet.addColumnAtCursor(newcol)
 
