@@ -536,7 +536,7 @@ notimpl_cmds = '''
 addcol-capture addcol-incr addcol-incr-step addcol-split addcol-subst addcol-window capture-col split-col
 contract-col expand-col expand-col-depth expand-cols expand-cols-depth melt melt-regex pivot random-rows transpose
 select-col-regex select-cols-regex select-error-col select-exact-cell select-exact-row select-row select-rows
-unselect-col-regex unselect-expr unselect-row unselect-rows
+unselect-col-regex unselect-expr unselect-row
 describe-sheet freq-summary
 cache-col cache-cols
 dive-selected dive-selected-cells
