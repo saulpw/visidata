@@ -422,6 +422,11 @@ def evalIbisExpr(sheet, expr):
 
 @IbisColumn.api
 def expand(col, rows):
+    return col.expand_struct(rows)
+
+
+@IbisColumn.api
+def expand_struct(col, rows):
     oldexpr = col.sheet.ibis_current_expr
     struct_field = col.get_ibis_col(oldexpr)
     struct_fields = [struct_field[name] for name in struct_field.names]
@@ -429,7 +434,8 @@ def expand(col, rows):
     fields = []
     for ibiscol, expcol in zip(struct_fields, expandedCols):
         fields.append(ibiscol.name(expcol.name))
-    col.sheet.query = oldexpr.drop([struct_field.get_name()]).mutate(fields)
+#    col.sheet.query = oldexpr.drop([struct_field.get_name()]).mutate(fields)
+    col.sheet.query = oldexpr.mutate(fields)
     return expandedCols
 
 
