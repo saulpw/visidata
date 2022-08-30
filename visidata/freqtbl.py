@@ -1,8 +1,7 @@
-import math
-import collections
+from copy import copy
 
-from visidata import *
-from visidata.pivot import PivotSheet
+from visidata import vd, asyncthread, vlen, VisiData, Column, AttrColumn, Sheet, ColumnsSheet, ENTER
+from visidata.pivot import PivotSheet, PivotGroupRow
 
 
 vd.option('disp_histogram', '*', 'histogram element character')
