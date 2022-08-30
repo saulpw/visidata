@@ -594,10 +594,11 @@ def dup_limit(sheet, limit:int):
     vs.name += f"_top{limit}" if limit else "_all"
     vs.query=sheet.pending_expr
     vs.options.ibis_limit=limit
+    return vs
 
 
 IbisTableSheet.addCommand('"', 'dup-selected', 'vd.push(dup_selected())', 'open duplicate sheet with selected rows (default limit)'),
-IbisTableSheet.addCommand('z"', 'dup-limit', 'vd.push(dup_limit(input("max rows: ", value=vs.options.ibis_limit)))', 'open duplicate sheet with only selected rows (input limit)'),
+IbisTableSheet.addCommand('z"', 'dup-limit', 'vd.push(dup_limit(input("max rows: ", value=options.ibis_limit)))', 'open duplicate sheet with only selected rows (input limit)'),
 IbisTableSheet.addCommand('gz"', 'dup-nolimit', 'vd.push(dup_limit(0))', 'open duplicate sheet with only selected rows (no limit--be careful!)')
 
 IbisTableSheet.addCommand("'", 'addcol-cast', 'addcol_cast(cursorCol)')
