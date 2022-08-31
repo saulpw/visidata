@@ -40,7 +40,7 @@ RUN mkdir -p /etc/vd \
     && rm -r /tmp/gotty /root/go \
     && cd /app \
     && pip install --no-cache-dir -U \
-    'git+https://github.com/cpcloud/ibis.git#egg=ibis-framework[clickhouse,duckdb,postgres,mysql,sqlite]' \
+    'git+https://github.com/ibis-project/ibis.git#egg=ibis-framework[clickhouse,duckdb,postgres,mysql,sqlite]' \
     'git+https://github.com/cpcloud/ibis-bigquery.git@unconstrain-pyarrow' \
     'git+https://github.com/saulpw/visidata.git' \
     'git+https://github.com/visidata/vdsql.git' \
