@@ -13,20 +13,6 @@ vd.option('sql_always_count', False, 'whether to always query a count of the num
 vd.option('ibis_limit', 10000, 'max number of rows to get in query')
 
 
-@_connect.register(r"bigquery://(?P<project_id>[^/]+)(?:/(?P<dataset_id>.+))?", priority=13)
-def _(_: str, *, project_id: str, dataset_id: str):
-    """Connect to BigQuery with `project_id` and optional `dataset_id`."""
-    import ibis
-
-    return ibis.bigquery.connect(project_id=project_id, dataset_id=dataset_id or "")
-
-
-@_connect.register(r".+\.ddb", priority=13)
-def _(source: str):
-    """Connect to DuckDb with .ddb extension."""
-    import ibis
-
-    return ibis.duckdb.connect(source)
 
 
 def vdtype_to_ibis_type(t):
@@ -62,6 +48,16 @@ def open_vdsql(vd, p, filetype=None):
     ibis.options.verbose_log = vd.status
     if vd.options.debug:
         ibis.options.verbose = True
+
+    @_connect.register(r"bigquery://(?P<project_id>[^/]+)(?:/(?P<dataset_id>.+))?", priority=13)
+    def _(_: str, *, project_id: str, dataset_id: str):
+        """Connect to BigQuery with `project_id` and optional `dataset_id`."""
+        return ibis.bigquery.connect(project_id=project_id, dataset_id=dataset_id or "")
+
+    @_connect.register(r".+\.ddb", priority=13)
+    def _(source: str):
+        """Connect to DuckDb with .ddb extension."""
+        return ibis.duckdb.connect(source)
 
     if 'ibis_type' not in set(c.expr for c in ColumnsSheet.columns):
         ColumnsSheet.columns += [
@@ -557,12 +553,12 @@ setcol-clipboard setcol-expr setcol-fake setcol-fill setcol-format-enum setcol-f
 '''.split()
 
 neverimpl_cmds = '''
-select-after select-around-n select-before select-equal-row select-error stoggle-after stoggle-before stoggle-row unselect-after unselect-before unselect-cols-regex
+select-after select-around-n select-before select-equal-row select-error stoggle-after stoggle-before stoggle-row unselect-after unselect-before unselect-cols-regex transpose
 '''.split()
 
 notimpl_cmds = '''
 addcol-capture addcol-incr addcol-incr-step addcol-split addcol-subst addcol-window capture-col split-col
-contract-col expand-col-depth expand-cols expand-cols-depth melt melt-regex pivot random-rows transpose
+contract-col expand-col-depth expand-cols expand-cols-depth melt melt-regex pivot random-rows
 select-col-regex select-cols-regex select-error-col select-exact-cell select-exact-row select-row select-rows
 unselect-col-regex unselect-expr unselect-row
 describe-sheet freq-summary
@@ -618,9 +614,9 @@ IbisTableSheet.addCommand('gz"', 'dup-nolimit', 'vd.push(dup_limit(0))', 'open d
 
 IbisTableSheet.addCommand("'", 'addcol-cast', 'addcol_cast(cursorCol)')
 
-IbisTableSheet.addCommand('gv', 'open-sidebar', 'vd.push(TextSheet(name, options.disp_ibis_sidebar, source=sidebar.splitlines()))')
-IbisTableSheet.addCommand('zv', 'sidebar-choose', 'choose_sidebar()', 'choose vdsql sidebar to show')
-IbisTableSheet.addCommand('v', 'sidebar-toggle', 'vd.options.disp_ibis_sidebar = "" if vd.options.disp_ibis_sidebar else "base_sql"', 'cycle vdsql sidebar on/off')
+IbisTableSheet.addCommand('gb', 'open-sidebar', 'vd.push(TextSheet(name, options.disp_ibis_sidebar, source=sidebar.splitlines()))')
+IbisTableSheet.addCommand('zb', 'sidebar-choose', 'choose_sidebar()', 'choose vdsql sidebar to show')
+IbisTableSheet.addCommand('b', 'sidebar-toggle', 'vd.options.disp_ibis_sidebar = "" if vd.options.disp_ibis_sidebar else "base_sql"', 'cycle vdsql sidebar on/off')
 
 IbisTableSheet.class_options.clean_names = True
 IbisTableSheet.class_options.disp_histolen = 0  # disable histograms by default

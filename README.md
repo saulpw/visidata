@@ -12,7 +12,7 @@ Powered by [Ibis](https://ibis-project.org).
 ## Requirements
 
 - Python 3.8
-- VisiData v2.10
+- VisiData 2.10
 - Ibis 3.1
 
 ### Confirmed supported backends
@@ -74,26 +74,32 @@ You can learn about VisiData starting with the [Intro to VisiData Tutorial](http
 
 There are a few differences, however:
 
+- Use `"` (dup-sheet) to run a new base query, including added columns, filtering for the current selection, and applying the current sort order.
 - By default vdsql will only get 10000 rows from a database source.  To get a different number, use `z"` to create a new sheet with a different limit.
 - Some VisiData commands aren't implemented using the database engine.
-The base VisiData commands can only use the 10000 loaded rows, and this may give incorrect and misleading results.
-So these not-implemented commands are disabled, but you can still use the base VisiData commands by first freezing the sheet with `g'` which converts it into a plain old non-database VisiData sheet.
 
-Use `"` (dup-sheet) to run a new base query, including added columns, filtering for the current selection, and applying the current sort order.
+The base VisiData commands can only use the 10000 loaded rows, and this might be misleading, so most not-implemented commands should be disabled.
+
+But if you want to use the commands anyway, knowing the dataset is incomplete, you can use `g'` to freeze the current set of loaded rows into a new sheet.
+
+This sheet is a plain (non-database) VisiData sheet, so all VisiData commands can be used on it.
+
+### Freezing the column type
+
+Use `'` to cast the current column to its given type, which persists into future queries (with `"`).
 
 ### Sidebar
 
-`vdsql` uses the VisiData sidebar (new in v2.9) to show the SQL query for the current view.
+`vdsql` uses the VisiData sidebar (introduced in v2.9) to show the SQL query for the current view.
 
-- To toggle the sidebar on/off, press `v`.
-- To cycle through the various sidebar options, press `zv`.
-- To open the sidebar as its own sheet, press `gv`.
-
-Use the `open-sidebar` command (no keyboard shortcut; `Space` to execute a command by its longname, or in the menu) to open a new sheet with the contents of the sidebar, to view or save.
+- To toggle the sidebar on/off, press `b`.
+- To choose a sidebar option, press `zb`.
+- To open the sidebar as its own sheet, press `gb`.
 
 In this way you can compose a SQL expression using VisiData commands, open the SQL sidebar, and save the resulting query to a file (or copy it into your system clipboard buffer).
 
-### Credits
+# License
 
-- Saul Pwanson
-- Phillip Cloud
+`vdsql` is licensed under the Apache 2.0 license.
+
+Share and enjoy!
