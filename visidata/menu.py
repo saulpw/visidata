@@ -557,6 +557,7 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
                 BUTTON1_PRESSED=lambda y,x,key,p=sheet.activeMenuItems[:level]+[j]: sheet.pressMenu(*p),
                 BUTTON2_PRESSED=vd.nop,
                 BUTTON3_PRESSED=vd.nop,
+                BUTTON1_CLICKED=lambda y,x,key,p=sheet.activeMenuItems[:level]+[j]: sheet.pressMenu(*p),
                 BUTTON1_RELEASED=vd.nop,
                 BUTTON2_RELEASED=vd.nop,
                 BUTTON3_RELEASED=vd.nop)
@@ -629,6 +630,7 @@ def drawMenu(vd, scr, sheet):
                 BUTTON1_PRESSED=lambda y,x,key,i=i,sheet=sheet: sheet.pressMenu(i),
                 BUTTON2_PRESSED=vd.nop,
                 BUTTON3_PRESSED=vd.nop,
+                BUTTON1_CLICKED=lambda y,x,key,i=i,sheet=sheet: sheet.pressMenu(i),
                 BUTTON1_RELEASED=vd.nop,
                 BUTTON2_RELEASED=vd.nop,
                 BUTTON3_RELEASED=vd.nop)
