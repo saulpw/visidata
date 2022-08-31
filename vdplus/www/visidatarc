@@ -33,7 +33,8 @@ def openurl_catalog(vd, p, filetype=None):
 
 options.motd_url = "https://visidata.org/motd-vdwww"
 options.cmdlog_histfile = "/app/log/visidata_commands.log"
-options.http_max_next = 100
+options.http_max_next = 10
+options.lazy_load = True
 
 # options.quitguard=True
 options.min_memory_mb = 100
