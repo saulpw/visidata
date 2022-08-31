@@ -6,7 +6,7 @@ import textwrap
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException, setitem
 from visidata import (options, Column, namedlist, SettableColumn,
 TypedExceptionWrapper, BaseSheet, UNLOADED,
-vd, clipdraw, ColorAttr, update_attr, colors, undoAttrFunc)
+clipdraw, ColorAttr, update_attr, colors, undoAttrFunc, vlen)
 import visidata
 
 

@@ -415,6 +415,7 @@ PyobjSheet.addCommand('gv', 'show-hidden', 'sheet.options.visibility = 2; reload
 PyobjSheet.addCommand('zv', 'hide-hidden', 'sheet.options.visibility -= 1; reload()', 'hide methods and hidden properties')
 
 vd.addGlobals({
+    'ExpandedColumn': ExpandedColumn,
     'PythonSheet': PythonSheet,
     'expand_cols_deep': expand_cols_deep,
     'deduceType': deduceType,
