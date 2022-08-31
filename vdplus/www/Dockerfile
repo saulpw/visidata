@@ -14,6 +14,7 @@ RUN mkdir -p /etc/vd \
         py3-apache-arrow \
         py3-cachetools \
         py3-greenlet \
+        py3-lxml \
         py3-lz4 \
         py3-numpy \
         py3-pandas \
@@ -24,6 +25,7 @@ RUN mkdir -p /etc/vd \
         py3-pydantic \
         py3-pymysql \
         py3-regex \
+        py3-requests \
         py3-toolz \
         py3-wheel \
         procps \
@@ -44,7 +46,6 @@ RUN mkdir -p /etc/vd \
     'git+https://github.com/visidata/vdsql.git' \
     && apk del go git build-base
 
-RUN pip install lxml requests
 ENV PORT=9500
 
 ENV TERM=xterm-256color
