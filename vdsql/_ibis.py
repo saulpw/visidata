@@ -527,6 +527,17 @@ def select_expr(sheet, expr):
 
 
 @IbisTableSheet.api
+def addcol_split(sheet, col, delim):
+    c = Column(col.name+'_split',
+               getter=lambda col,row: col.origCol.getDisplayValue(row).split(col.expr),
+               expr=delim,
+               origCol=col,
+               ibis_name=col.name+'_split')
+    sheet.query = sheet.query.mutate(**{c.name:col.get_ibis_col(sheet.query).split(delim)})
+    return c
+
+
+@IbisTableSheet.api
 def addcol_cast(sheet, col):
     # sheet.query and sheet.ibis_current_expr don't match
     new_type = vdtype_to_ibis_type(col.type)
@@ -558,7 +569,7 @@ select-after select-around-n select-before select-equal-row select-error stoggle
 '''.split()
 
 notimpl_cmds = '''
-addcol-capture addcol-incr addcol-incr-step addcol-split addcol-subst addcol-window capture-col split-col
+addcol-capture addcol-incr addcol-incr-step addcol-subst addcol-window capture-col
 contract-col expand-col-depth expand-cols expand-cols-depth melt melt-regex pivot random-rows
 select-col-regex select-cols-regex select-error-col select-exact-cell select-exact-row select-row select-rows
 unselect-col-regex unselect-expr unselect-row
@@ -573,6 +584,8 @@ for longname in list(notimpl_cmds) + list(neverimpl_cmds) + list(dml_cmds):
         IbisTableSheet.addCommand('', longname, 'notimpl')
 
 
+IbisTableSheet.addCommand('', 'addcol-split', 'addColumnAtCursor(addcol_split(cursorCol, input("split by delimiter: ", type="delim-split")))')
+IbisTableSheet.bindkey('split-col', 'addcol-split')
 IbisTableSheet.addCommand('gt', 'stoggle-rows', 'stoggle_rows()', 'select rows matching current cell in current column')
 IbisTableSheet.addCommand(',', 'select-equal-cell', 'select_equal_cell(cursorCol, cursorTypedValue)', 'select rows matching current cell in current column')
 #IbisTableSheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getDisplayValue(r) == c.getDisplayValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
