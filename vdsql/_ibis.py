@@ -13,8 +13,6 @@ vd.option('sql_always_count', False, 'whether to always query a count of the num
 vd.option('ibis_limit', 10000, 'max number of rows to get in query')
 
 
-
-
 def vdtype_to_ibis_type(t):
     from ibis.expr import datatypes as dt
     return {
@@ -56,8 +54,11 @@ def open_vdsql(vd, p, filetype=None):
 
     @_connect.register(r".+\.ddb", priority=13)
     def _(source: str):
-        """Connect to DuckDb with .ddb extension."""
         return ibis.duckdb.connect(source)
+
+    @_connect.register(r".+\.sqlite3", priority=13)
+    def _(source: str):
+        return ibis.sqlite.connect(source)
 
     if 'ibis_type' not in set(c.expr for c in ColumnsSheet.columns):
         ColumnsSheet.columns += [
