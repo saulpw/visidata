@@ -3,7 +3,7 @@ import functools
 import operator
 
 from contextlib import contextmanager
-from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace, PyobjSheet, BaseSheet, ExpectedException, anytype
+from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace, PyobjSheet, BaseSheet, ExpectedException
 from visidata.pyobj import ExpandedColumn
 from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet, UNLOADED, ExprColumn, undoAttrCopyFunc
 from ibis.backends.base import _connect
