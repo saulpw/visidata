@@ -608,6 +608,23 @@ def dup_limit(sheet, limit:int):
     vs.options.ibis_limit=limit
     return vs
 
+@IbisTableSheet.api
+def rawSql(sheet, qstr):
+    with sheet.con as con:
+        return IbisTableSheet('rawsql',
+                          ibis_conpool=sheet.ibis_conpool,
+                          ibis_source=qstr,
+                          source=qstr,
+                          query=con.sql(qstr))
+
+@IbisTableIndexSheet.api
+def rawSql(sheet, qstr):
+    with sheet.con as con:
+        return IbisTableSheet('rawsql',
+                          ibis_conpool=sheet.ibis_conpool,
+                          ibis_source=qstr,
+                          source=qstr,
+                          query=con.sql(qstr))
 
 IbisTableSheet.addCommand('"', 'dup-selected', 'vd.push(dup_selected())', 'open duplicate sheet with selected rows (default limit)'),
 IbisTableSheet.addCommand('z"', 'dup-limit', 'vd.push(dup_limit(input("max rows: ", value=options.ibis_limit)))', 'open duplicate sheet with only selected rows (input limit)'),
@@ -618,10 +635,13 @@ IbisTableSheet.addCommand("'", 'addcol-cast', 'addcol_cast(cursorCol)')
 IbisTableSheet.addCommand('gb', 'open-sidebar', 'vd.push(TextSheet(name, options.disp_ibis_sidebar, source=sidebar.splitlines()))')
 IbisTableSheet.addCommand('zb', 'sidebar-choose', 'choose_sidebar()', 'choose vdsql sidebar to show')
 IbisTableSheet.addCommand('b', 'sidebar-toggle', 'vd.options.disp_ibis_sidebar = "" if vd.options.disp_ibis_sidebar else "base_sql"', 'cycle vdsql sidebar on/off')
+IbisTableSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("SQL query: ")))', 'open sheet with results of raw SQL query')
+IbisTableIndexSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("SQL query: ")))', 'open sheet with results of raw SQL query')
 
 IbisTableSheet.class_options.clean_names = True
 IbisTableSheet.class_options.disp_histolen = 0  # disable histograms by default
 
+vd.addMenuItem('View', 'Sidebar', 'toggle', 'sidebar-toggle')
 vd.addMenuItem('View', 'Sidebar', 'choose', 'sidebar-choose')
 vd.addMenuItem('View', 'Sidebar', 'open', 'open-sidebar')
 
