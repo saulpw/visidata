@@ -1,14 +1,13 @@
-.PHONY: run build
+.PHONY: run build push deploy
 
 run: build
-	docker run \
-		-e GOOGLE_APPLICATION_CREDENTIALS=/creds/default_application_credentials.json \
-		-v "$$HOME/.config/gcloud":/creds \
-		-v "$$PWD":/etc/vd \
-		-e PORT=9500 \
-		-p 9500:9500 \
-		--rm \
-		vdwww:latest
+	docker run -v "$$PWD":/etc/vd -e ORT=9500 -p 9500:9500 --rm vdwww:latest
 
 build:
-	docker build . -t vdwww:latest
+	docker build . -t vdwww:latest -t gcr.io/psp-sandbox/vdwww
+
+push: build
+	docker push gcr.io/psp-sandbox/vdwww
+
+deploy: push
+	gcloud run deploy vdemo --image gcr.io/psp-sandbox/vdwww --region us-central1

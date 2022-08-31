@@ -7,42 +7,41 @@ RUN apk update \
     && apk upgrade \
     && apk add --no-cache \
         mandoc \
+        build-base \
         py3-apache-arrow \
+        py3-cachetools \
         py3-greenlet \
         py3-lz4 \
         py3-numpy \
         py3-pandas \
         py3-pip \
+        py3-platformdirs \
         py3-protobuf \
         py3-psycopg2 \
         py3-pydantic \
         py3-pymysql \
         py3-regex \
         py3-toolz \
-        py3-cachetools \
-        py3-platformdirs \
         py3-wheel \
         procps \
         go \
         git \
     && git config --global advice.detachedHead false \
-    && git clone --depth 1 --branch v2.0.0-alpha.3 https://github.com/yudai/gotty g \
-    && cd g \
-    && go mod init \
-    && go get \
-    && go mod vendor \
-    && go build \
+    && git clone --depth 1 --branch v2.0.0-alpha.3 https://github.com/yudai/gotty /tmp/gotty \
+    && cd /tmp/gotty \
+    && go mod init && go get && go mod vendor && go build \
+    && strip ./gotty \
     && cp ./gotty /app \
-    && cd .. \
-    && rm -r g \
+    && rm -r /tmp/gotty /root/go \
+    && cd /app \
     && pip install --no-cache-dir -U \
-    'git+https://github.com/cpcloud/ibis.git@clickhouse-window#egg=ibis-framework[clickhouse,duckdb,postgres,mysql,sqlite]' \
+    'git+https://github.com/cpcloud/ibis.git#egg=ibis-framework[clickhouse,duckdb,postgres,mysql,sqlite]' \
     'git+https://github.com/cpcloud/ibis-bigquery.git@unconstrain-pyarrow' \
     'git+https://github.com/saulpw/visidata.git' \
     'git+https://github.com/visidata/vdsql.git' \
-    && apk del go git
+    && apk del go git build-base
 
-ENV PORT=9999
+ENV PORT=9500
 ENV TERM=xterm-256color
 
 ENTRYPOINT exec /app/gotty -w -p "$PORT" vd "catalog://" -c /etc/vd/visidatarc
