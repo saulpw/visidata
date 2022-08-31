@@ -3,7 +3,8 @@ FROM alpine:3.16
 RUN mkdir /app
 WORKDIR /app
 
-RUN apk update \
+RUN mkdir -p /etc/vd \
+    && apk update \
     && apk upgrade \
     && apk add --no-cache \
         mandoc \
@@ -48,5 +49,7 @@ ENV PORT=9500
 
 ENV TERM=xterm-256color
 ENV EDITOR=nvim
+
+COPY ./visidatarc /etc/vd/visidatarc
 
 ENTRYPOINT exec /app/gotty -w -p "$PORT" vd "catalog://" -c /etc/vd/visidatarc
