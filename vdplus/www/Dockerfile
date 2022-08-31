@@ -46,6 +46,7 @@ RUN mkdir -p /etc/vd \
     'git+https://github.com/visidata/vdsql.git' \
     && apk del go git build-base
 
+COPY ./visidatarc /etc/vd/visidatarc
 ENV PORT=9500
 
 ENV TERM=xterm-256color
