@@ -7,6 +7,8 @@ RUN apk update \
     && apk upgrade \
     && apk add --no-cache \
         mandoc \
+        nano \
+        neovim \
         build-base \
         py3-apache-arrow \
         py3-cachetools \
@@ -43,5 +45,6 @@ RUN apk update \
 
 ENV PORT=9500
 ENV TERM=xterm-256color
+ENV EDITOR=nvim
 
 ENTRYPOINT exec /app/gotty -w -p "$PORT" vd "catalog://" -c /etc/vd/visidatarc
