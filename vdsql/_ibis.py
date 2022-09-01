@@ -7,7 +7,6 @@ from contextlib import contextmanager
 from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace, PyobjSheet, BaseSheet, ExpectedException
 from visidata.pyobj import ExpandedColumn
 from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet, UNLOADED, ExprColumn, undoAttrCopyFunc
-from ibis.backends.base import _connect
 
 vd.option('disp_ibis_sidebar', '', 'which sidebar property to display')
 vd.option('sql_always_count', False, 'whether to always query a count of the number of results')
@@ -43,6 +42,8 @@ def dtype_to_vdtype(dtype):
 @VisiData.api
 def open_vdsql(vd, p, filetype=None):
     import ibis
+    from ibis.backends.base import _connect
+
     vd.aggregator('collect', ibis.expr.types.AnyValue.collect, 'collect a list of values')
     ibis.options.verbose_log = vd.status
     if vd.options.debug:
@@ -102,8 +103,6 @@ class IbisTableIndexSheet(IndexSheet):
         return self.ibis_conpool.get_conn()
 
     def iterload(self):
-        import ibis
-
         with self.con as con:
             if self.database_name:
                 con.set_database(self.database_name)
