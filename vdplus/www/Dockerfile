@@ -10,7 +10,6 @@ RUN mkdir -p /etc/vd \
         mandoc \
         nano \
         neovim \
-        build-base \
         py3-apache-arrow \
         py3-cachetools \
         py3-greenlet \
@@ -35,16 +34,14 @@ RUN mkdir -p /etc/vd \
     && git clone --depth 1 --branch v2.0.0-alpha.3 https://github.com/yudai/gotty /tmp/gotty \
     && cd /tmp/gotty \
     && go mod init && go get && go mod vendor && go build \
-    && strip ./gotty \
     && cp ./gotty /app \
     && rm -r /tmp/gotty /root/go \
-    && cd /app \
     && pip install --no-cache-dir -U \
     'git+https://github.com/ibis-project/ibis.git#egg=ibis-framework[clickhouse,duckdb,postgres,mysql,sqlite]' \
     'git+https://github.com/cpcloud/ibis-bigquery.git@unconstrain-pyarrow' \
     'git+https://github.com/saulpw/visidata.git' \
     'git+https://github.com/visidata/vdsql.git' \
-    && apk del go git build-base
+    && apk del go git
 
 COPY ./visidatarc /etc/vd/visidatarc
 
