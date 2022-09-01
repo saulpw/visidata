@@ -1,6 +1,7 @@
 from copy import copy
 import functools
 import operator
+import re
 
 from contextlib import contextmanager
 from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace, PyobjSheet, BaseSheet, ExpectedException
@@ -538,6 +539,17 @@ def addcol_split(sheet, col, delim):
 
 
 @IbisTableSheet.api
+def addcol_subst(sheet, origcol, regex):
+    before, after = vd.parse_sed_transform(regex)
+    c = Column(origcol.name + "_re",
+               getter=lambda col,row,before=before,after=after: re.sub(before, after, col.origcol.getDisplayValue(row)),
+               origcol=origcol,
+               ibis_name=origcol.name + "_re")
+    sheet.query = sheet.query.mutate(**{c.name:origcol.get_ibis_col(sheet.query).re_replace(before, after)})
+    return c
+
+
+@IbisTableSheet.api
 def addcol_cast(sheet, col):
     # sheet.query and sheet.ibis_current_expr don't match
     new_type = vdtype_to_ibis_type(col.type)
@@ -569,7 +581,7 @@ select-after select-around-n select-before select-equal-row select-error stoggle
 '''.split()
 
 notimpl_cmds = '''
-addcol-capture addcol-incr addcol-incr-step addcol-subst addcol-window capture-col
+addcol-capture addcol-incr addcol-incr-step addcol-window capture-col
 contract-col expand-col-depth expand-cols expand-cols-depth melt melt-regex pivot random-rows
 select-col-regex select-cols-regex select-error-col select-exact-cell select-exact-row select-row select-rows
 unselect-col-regex unselect-expr unselect-row
@@ -583,7 +595,7 @@ for longname in list(notimpl_cmds) + list(neverimpl_cmds) + list(dml_cmds):
     if longname:
         IbisTableSheet.addCommand('', longname, 'notimpl')
 
-
+IbisTableSheet.addCommand('', 'addcol-subst', 'addColumnAtCursor(addcol_subst(cursorCol, input("transform column by regex: ", type="regex-subst")))')
 IbisTableSheet.addCommand('', 'addcol-split', 'addColumnAtCursor(addcol_split(cursorCol, input("split by delimiter: ", type="delim-split")))')
 IbisTableSheet.bindkey('split-col', 'addcol-split')
 IbisTableSheet.addCommand('gt', 'stoggle-rows', 'stoggle_rows()', 'select rows matching current cell in current column')
