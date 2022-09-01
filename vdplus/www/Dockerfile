@@ -47,11 +47,9 @@ RUN mkdir -p /etc/vd \
     && apk del go git build-base
 
 COPY ./visidatarc /etc/vd/visidatarc
-ENV PORT=9500
 
+ENV PORT=9500
 ENV TERM=xterm-256color
 ENV EDITOR=nvim
-
-COPY ./visidatarc /etc/vd/visidatarc
 
 ENTRYPOINT exec /app/gotty -w -p "$PORT" vd "catalog://" -c /etc/vd/visidatarc
