@@ -48,9 +48,6 @@ This will install both:
 
     pip install git+https://github.com/visidata/vdsql.git
 
-    echo "import vdsql" >> ~/.visidatarc
-
-
 ### Install Ibis backends
 
 To minimize dependencies, only the sqlite backend is included by default.
