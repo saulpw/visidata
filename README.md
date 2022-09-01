@@ -43,11 +43,19 @@ This will install both:
 
     pip install vdsql
 
-## Install manually as a VisiData plugin (cutting edge development)
+## Or install manually as a VisiData plugin (cutting edge development)
 
     pip install git+https://github.com/visidata/vdsql.git
 
     echo "import vdsql" >> ~/.visidatarc
+
+
+### Install Ibis backends
+
+To minimize dependencies, only the sqlite backend is included by default.
+[Install other backends for Ibis](https://ibis-project.org/docs/3.1.0/backends/#direct-execution-backends) directly, and they will be supported automatically:
+
+    pip install 'ibis-framework[postgres]'
 
 ## Usage
 
