@@ -2,6 +2,8 @@ import os
 import contextlib
 import itertools
 import collections
+import math
+import time
 
 from visidata import vd, asyncthread, options, Progress, ColumnItem, SequenceSheet, Sheet, FileExistsError, getType, VisiData
 from visidata import namedlist, filesize
@@ -11,6 +13,7 @@ vd.option('row_delimiter', '\n', 'row delimiter to use for tsv/usv filetype', re
 vd.option('tsv_safe_newline', '\u001e', 'replacement for newline character when saving to tsv', replay=True)
 vd.option('tsv_safe_tab', '\u001f', 'replacement for tab character when saving to tsv', replay=True)
 
+MAX_BUFFER_SIZE = 65536
 
 @VisiData.api
 def open_tsv(vd, p):
@@ -21,14 +24,29 @@ def splitter(fp, delim='\n'):
     'Generates one line/row/record at a time from fp, separated by delim'
 
     buf = ''
+    buffer_size = 8
+    processed_buffer_size = 0
+    previous_start_time = time.time()
     while True:
-        nextbuf = fp.read(65536)
+        nextbuf = fp.read(max(buffer_size, 1))
         if not nextbuf:
             break
         buf += nextbuf
+        processed_buffer_size += len(nextbuf)
 
         *rows, buf = buf.split(delim)
         yield from rows
+
+        current_time = time.time()
+        current_delta = current_time - previous_start_time
+
+        if current_delta < 1:
+            buffer_size = min(buffer_size * 2, MAX_BUFFER_SIZE)
+            continue
+
+        previous_start_time = current_time
+        buffer_size = math.ceil(min(processed_buffer_size / current_delta, MAX_BUFFER_SIZE))
+        processed_buffer_size = 0
 
     yield from buf.rstrip(delim).split(delim)
 
