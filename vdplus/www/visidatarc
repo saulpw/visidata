@@ -8,12 +8,12 @@ class DataCatalog(IndexSheet):
 
     def iterload(self):
         yield renamerizer(
-            "Clickhouse playground",
+            "ClickHouse playground",
             vd.open_vdsql(Path("clickhouse://play@play.clickhouse.com:9440/?secure=1")),
         )
         yield renamerizer(
-            "Bigquery sandbox",
-            vd.open_vdsql(Path("bigquery://psp-sandbox")),
+            "BigQuery sandbox",
+            vd.openurl_bigquery(Path("bigquery://psp-sandbox")),
         )
         yield vd.openurl_https(
             Path(
