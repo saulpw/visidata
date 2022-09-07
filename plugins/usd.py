@@ -47,7 +47,6 @@ def currency_multiplier(src_currency, dest_currency):
     return usd_mult/currency_rates()[dest_currency]
 
 def USD(s):
-    callage = "USD(%s)" % (s)
     for currency_symbol, currency_code in currency_symbols.items():
         if currency_symbol in s:
             amt = float(s.replace(currency_symbol, ''))
