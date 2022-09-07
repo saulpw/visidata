@@ -7,6 +7,7 @@ import functools
 import json
 
 vd.option('fixer_key', '', 'API Key for fixer.io')
+vd.option('fixer_currency_cache_days', 1, 'Cache days for currency conversions')
 
 currency_symbols = {
     '$': 'USD',
@@ -21,7 +22,12 @@ currency_symbols = {
 
 def currency_rates_json(date='latest', base='USD'):
     url = 'https://api.apilayer.com/fixer/%s?base=%s' % (date, base)
-    return vd.urlcache(url, days=1, headers={'apikey': vd.options.fixer_key}, http_library='requests').read_text()
+    return vd.urlcache(
+        url, 
+        days=vd.options.fixer_currency_cache_days, 
+        headers={'apikey': vd.options.fixer_key}, 
+        http_library='requests'
+    ).read_text()
 
 @functools.lru_cache()
 def currency_rates():
