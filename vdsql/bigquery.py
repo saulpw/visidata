@@ -1,5 +1,6 @@
 from visidata import vd, VisiData, Sheet, AttrColumn
 from . import IbisTableIndexSheet, IbisConnectionPool
+from ._ibis import _register_bigquery_connect
 
 import ibis
 import ibis.expr.operations as ops
@@ -7,6 +8,7 @@ import ibis.expr.operations as ops
 
 @VisiData.api
 def openurl_bigquery(vd, p, filetype=None):
+    _register_bigquery_connect()
     return BigqueryDatabaseIndexSheet(p.name, source=p, ibis_con=None)
 
 

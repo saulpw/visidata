@@ -39,6 +39,16 @@ def dtype_to_vdtype(dtype):
     return anytype
 
 
+def _register_bigquery_connect():
+    from ibis.backends.base import _connect
+
+    @_connect.register(r"bigquery://(?P<project_id>[^/]+)(?:/(?P<dataset_id>.+))?", priority=13)
+    def _(_: str, *, project_id: str, dataset_id: str):
+        """Connect to BigQuery with `project_id` and optional `dataset_id`."""
+        import ibis
+        return ibis.bigquery.connect(project_id=project_id, dataset_id=dataset_id or "")
+
+
 @VisiData.api
 def open_vdsql(vd, p, filetype=None):
     import ibis
@@ -49,10 +59,7 @@ def open_vdsql(vd, p, filetype=None):
     if vd.options.debug:
         ibis.options.verbose = True
 
-    @_connect.register(r"bigquery://(?P<project_id>[^/]+)(?:/(?P<dataset_id>.+))?", priority=13)
-    def _(_: str, *, project_id: str, dataset_id: str):
-        """Connect to BigQuery with `project_id` and optional `dataset_id`."""
-        return ibis.bigquery.connect(project_id=project_id, dataset_id=dataset_id or "")
+    _register_bigquery_connect()
 
     @_connect.register(r".+\.ddb", priority=13)
     def _(source: str):
