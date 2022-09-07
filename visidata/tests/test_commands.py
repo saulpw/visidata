@@ -114,7 +114,7 @@ class TestCommands:
         else:
             vd.getkeystroke = Mock(side_effect=['^J'])
 
-        sample_file = pkg_resources.resource_filename('visidata', '../sample_data/sample.tsv')
+        sample_file = pkg_resources.resource_filename('visidata', 'tests/sample.tsv')
         vs = visidata.TsvSheet('test_commands', source=visidata.Path(sample_file))
         vs.reload.__wrapped__(vs)
         vs.vd = vd
