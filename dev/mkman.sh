@@ -7,7 +7,10 @@
 #   - BUILD should be tmpdir and cleaned up afterwards
 #   - parse_options should be moved to bin/
 
-set -e
+# -e - exit on error
+# -u - exit on undefined
+# -o pipefail - exit on error in a pipe
+set -eu -o pipefail
 
 VD=$(dirname $0)/..
 MAN=$VD/visidata/man

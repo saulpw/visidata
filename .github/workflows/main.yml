@@ -52,3 +52,5 @@ jobs:
       run: dev/test.sh
       shell: bash
 
+    - name: Check docs are build without errors
+      run: dev/mkman.sh
