@@ -1,3 +1,3 @@
 sheet	col	row	longname	input	keystrokes	comment
 			open-file	sample_data/employees.sqlite	o	
-employees		キemp_view	open-row		Enter	open sheet with copies of rows referenced in current row
+employees		キemp_view	open-row-pyobj		Enter	open sheet with copies of rows referenced in current row

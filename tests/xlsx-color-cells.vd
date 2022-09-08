@@ -1,4 +1,4 @@
 sheet	col	row	longname	input	keystrokes	comment
 global		xlsx_meta_columns	set-option	True		
 			open-file	sample_data/color-merged-cells.xlsx	o	
-color-merged-cells		キSheet1	open-row		Enter	open sheet with copies of rows referenced in current row
+color-merged-cells		キSheet1	open-row-pyobj		Enter	open sheet with copies of rows referenced in current row
