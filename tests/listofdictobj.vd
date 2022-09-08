@@ -1,4 +1,4 @@
 sheet	col	row	longname	input	keystrokes	comment
 			open-file	sample_data/y77d-th95.json.gz	o	
 y77d-th95	geolocation		expand-col-depth	1	z(	expand current column of containers to given depth (0=fully)
-	geolocation.coordinates	0	open-cell		z^J	open sheet with copies of rows referenced in current cell
+	geolocation.coordinates	0	open-cell-pyobj		z^J	open sheet with copies of rows referenced in current cell
