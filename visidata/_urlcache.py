@@ -3,17 +3,13 @@ import os.path
 import time
 from urllib.request import Request, urlopen
 import urllib.parse
-import requests
 
 from visidata import vd, VisiData, Path, options, modtime
 from visidata.settings import _get_cache_dir
 
 @VisiData.global_api
-def urlcache(vd, url, days=1, text=True, headers={}, http_library='urllib'):
+def urlcache(vd, url, days=1, text=True, headers={}):
     'Return Path object to local cache of url contents.'
-    assert http_library in ['urllib', 'requests'], "http_library %s should be one of 'urllib' or 'requests'"
-    assert not (http_library == 'requests' and text == False), "requests library only implemented for textual requests"
-
     cache_dir = _get_cache_dir()
     os.makedirs(cache_dir, exist_ok=True)
 
@@ -23,25 +19,19 @@ def urlcache(vd, url, days=1, text=True, headers={}, http_library='urllib'):
         if secs < days*24*60*60:
             return p
 
-    if http_library == 'urllib':
-        req = Request(url)
-        for k, v in headers.items():
-            req.add_header(k, v)
+    req = Request(url)
+    for k, v in headers.items():
+        req.add_header(k, v)
 
-        with urlopen(req) as fp:
-            ret = fp.read()
-            if text:
-                ret = ret.decode('utf-8').strip()
-                with p.open_text(mode='w', encoding='utf-8') as fpout:
-                    fpout.write(ret)
-            else:
-                with p.open_bytes(mode='w') as fpout:
-                    fpout.write(ret)
-
-    elif http_library == 'requests':
-        response = requests.request("GET", url, headers=headers)
-        with p.open_text(mode="w", encoding="utf-8") as fpout:
-            fpout.write(response.text)
+    with urlopen(req) as fp:
+        ret = fp.read()
+        if text:
+            ret = ret.decode('utf-8').strip()
+            with p.open_text(mode='w', encoding='utf-8') as fpout:
+                fpout.write(ret)
+        else:
+            with p.open_bytes(mode='w') as fpout:
+                fpout.write(ret)
 
     return p
 
