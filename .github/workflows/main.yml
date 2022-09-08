@@ -52,5 +52,7 @@ jobs:
       run: dev/test.sh
       shell: bash
 
-    - name: Check docs are build without errors
-      run: dev/mkman.sh
+    - name: Check docs are built without errors
+      run: |
+        sudo apt install aha
+        dev/mkman.sh
