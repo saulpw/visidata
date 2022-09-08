@@ -132,3 +132,4 @@ def loadInternalSheet(vd, cls, p, **kwargs):
 
 
 BaseSheet.addCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: "), create=True))', 'Open file or URL')
+TableSheet.addCommand('zo', 'open-cell', 'vd.push(openSource(cursorDisplay))', 'Open file or URL from path in current cell')
