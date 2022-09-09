@@ -1200,6 +1200,7 @@ BaseSheet.addCommand('zZ', 'splitwin-input', 'vd.options.disp_splitwin_pct = inp
 
 BaseSheet.addCommand('^L', 'redraw', 'vd.redraw(); sheet.refresh()', 'Refresh screen')
 BaseSheet.addCommand(None, 'guard-sheet', 'options.set("quitguard", True, sheet); status("guarded")', 'Set quitguard on current sheet to confirm before quit')
+BaseSheet.addCommand(None, 'unguard-sheet', 'options.set("quitguard", False, sheet)', 'Unset quitguard on current sheet to not confirm before quit')
 BaseSheet.addCommand(None, 'open-source', 'vd.push(source)', 'jump to the source of this sheet')
 
 BaseSheet.bindkey('KEY_RESIZE', 'redraw')
