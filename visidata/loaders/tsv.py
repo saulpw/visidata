@@ -13,17 +13,13 @@ vd.option('row_delimiter', '\n', 'row delimiter to use for tsv/usv filetype', re
 vd.option('tsv_safe_newline', '\u001e', 'replacement for newline character when saving to tsv', replay=True)
 vd.option('tsv_safe_tab', '\u001f', 'replacement for tab character when saving to tsv', replay=True)
 
-MAX_BUFFER_SIZE = 65536
 
 @VisiData.api
 def open_tsv(vd, p):
     return TsvSheet(p.name, source=p)
 
 
-def splitter(fp, delim='\n'):
-    'Generates one line/row/record at a time from fp, separated by delim'
-
-    buf = ''
+def bufferer(fp, MAX_BUFFER_SIZE=65536):
     buffer_size = 8
     processed_buffer_size = 0
     previous_start_time = time.time()
@@ -31,22 +27,31 @@ def splitter(fp, delim='\n'):
         nextbuf = fp.read(max(buffer_size, 1))
         if not nextbuf:
             break
-        buf += nextbuf
+            
+        yield nextbuf
+        
         processed_buffer_size += len(nextbuf)
-
-        *rows, buf = buf.split(delim)
-        yield from rows
 
         current_time = time.time()
         current_delta = current_time - previous_start_time
 
         if current_delta < 1:
             buffer_size = min(buffer_size * 2, MAX_BUFFER_SIZE)
-            continue
+        else:
+            previous_start_time = current_time
+            buffer_size = math.ceil(min(processed_buffer_size / current_delta, MAX_BUFFER_SIZE))
+            processed_buffer_size = 0
 
-        previous_start_time = current_time
-        buffer_size = math.ceil(min(processed_buffer_size / current_delta, MAX_BUFFER_SIZE))
-        processed_buffer_size = 0
+
+def splitter(fp, delim='\n'):
+    'Generates one line/row/record at a time from fp, separated by delim'
+
+    buf = ''
+    for b in fp:
+        buf += b
+
+        *rows, buf = buf.split(delim)
+        yield from rows
 
     yield from buf.rstrip(delim).split(delim)
 
@@ -61,7 +66,7 @@ class TsvSheet(SequenceSheet):
         rowdelim = self.row_delimiter or self.options.row_delimiter
 
         with self.source.open_text(encoding=self.options.encoding) as fp:
-                for line in splitter(fp, rowdelim):
+                for line in bufferer(splitter(fp, rowdelim)):
                     if not line:
                         continue
 
