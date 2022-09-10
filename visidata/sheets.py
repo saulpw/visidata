@@ -1061,8 +1061,6 @@ def push(vd, vs, pane=0):
     if vs.precious and vs not in vd.allSheets:
         vd.allSheets.append(vs)
 
-    vs.ensureLoaded()
-
 
 @VisiData.lazy_property
 def allSheetsSheet(vd):
