@@ -14,6 +14,7 @@ import io
 def open_mysqlclient(vd, p):
     return MysqlClientSheet(p.name, source=p)
 
+
 def _mysqlclient_split_lines(fp):
     buf = ''
     while True:
@@ -31,7 +32,7 @@ def _mysqlclient_split_lines(fp):
 # rowdef: list
 class MysqlClientSheet(SequenceSheet):
     def iterload(self):
-        with io.TextIOWrapper(self.source.open("rb"), errors="replace", newline="\n", encoding=self.options.getonly('encoding', 'global', 'utf-8')) as fp:
+        with self.source.open_text("rt", encoding_errors="replace", newline="\n") as fp:
             for line in _mysqlclient_split_lines(fp):
                 if not line:
                     continue

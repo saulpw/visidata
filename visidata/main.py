@@ -56,7 +56,7 @@ def duptty():
     try:
         fin = open('/dev/tty')
         fout = open('/dev/tty', mode='w')
-        stdin = open(os.dup(0), mode='rb')
+        stdin = open(os.dup(0), encoding=vd.options.getonly('encoding', 'global', 'utf-8'))
         stdout = open(os.dup(1))  # for dumping to stdout from interface
         os.dup2(fin.fileno(), 0)
         os.dup2(fout.fileno(), 1)
@@ -212,7 +212,7 @@ def main_vd():
         options.set(k, v, obj='global')
 
     vd._stdin, vd._stdout = duptty()  # always dup stdin/stdout
-    vd.stdinSource.fp = vd._stdin
+    vd.stdinSource.fptext = vd._stdin
 
     # fetch motd and plugins *after* options parsing/setting
     vd.pluginsSheet.ensureLoaded()
