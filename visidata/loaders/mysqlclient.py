@@ -7,15 +7,11 @@ silent
 pager=vd -f mysqlclient
 """
 
-from visidata import SequenceSheet
+from visidata import SequenceSheet, VisiData
 import io
 
-
-def load_mysqlclient(fn):
-    vs = open_mysqlclient(Path(fn))
-    yield from vs.iterload()
-
-def open_mysqlclient(p):
+@VisiData.api
+def open_mysqlclient(vd, p):
     return MysqlClientSheet(p.name, source=p)
 
 def _mysqlclient_split_lines(fp):
