@@ -19,41 +19,50 @@ def open_tsv(vd, p):
     return TsvSheet(p.name, source=p)
 
 
-def bufferer(fp, MAX_BUFFER_SIZE=65536):
+def adaptive_bufferer(fp, max_buffer_size=65536):
+    """Loading e.g. tsv files goes faster with a large buffer. But when the input stream
+    is slow (e.g. 1 byte/second) and the buffer size is large, it can take a long time until
+    the buffer is filled. Only when the buffer is filled (or the input stream is finished)
+    you can see the data visiualized in visidata. Thats why we use an adaptive buffer.
+    For fast input streams, the buffer becomes large, for slow input streams, the buffer stays
+    small"""
     buffer_size = 8
     processed_buffer_size = 0
     previous_start_time = time.time()
     while True:
-        nextbuf = fp.read(max(buffer_size, 1))
-        if not nextbuf:
+        next_chunk = fp.read(max(buffer_size, 1))
+        if not next_chunk:
             break
-            
-        yield nextbuf
-        
-        processed_buffer_size += len(nextbuf)
+
+        yield next_chunk
+
+        processed_buffer_size += len(next_chunk)
 
         current_time = time.time()
         current_delta = current_time - previous_start_time
 
         if current_delta < 1:
-            buffer_size = min(buffer_size * 2, MAX_BUFFER_SIZE)
+            # if it takes longer than one second to fill the buffer, double the size of the buffer
+            buffer_size = min(buffer_size * 2, max_buffer_size)
         else:
+            # if it takes less than one second, increase the buffer size so it takes about
+            # 1 second to fill it
             previous_start_time = current_time
-            buffer_size = math.ceil(min(processed_buffer_size / current_delta, MAX_BUFFER_SIZE))
+            buffer_size = math.ceil(min(processed_buffer_size / current_delta, max_buffer_size))
             processed_buffer_size = 0
 
 
-def splitter(fp, delim='\n'):
+def splitter(stream, delim='\n'):
     'Generates one line/row/record at a time from fp, separated by delim'
 
-    buf = ''
-    for b in fp:
-        buf += b
+    buffer = ''
+    for chunk in stream:
+        buffer += chunk
 
-        *rows, buf = buf.split(delim)
+        *rows, buffer = buffer.split(delim)
         yield from rows
 
-    yield from buf.rstrip(delim).split(delim)
+    yield from buffer.rstrip(delim).split(delim)
 
 
 # rowdef: list
@@ -66,17 +75,17 @@ class TsvSheet(SequenceSheet):
         rowdelim = self.row_delimiter or self.options.row_delimiter
 
         with self.source.open_text(encoding=self.options.encoding) as fp:
-                for line in bufferer(splitter(fp, rowdelim)):
-                    if not line:
-                        continue
+            for line in splitter(adaptive_bufferer(fp), rowdelim):
+                if not line:
+                    continue
 
-                    row = list(line.split(delim))
+                row = list(line.split(delim))
 
-                    if len(row) < self.nVisibleCols:
-                        # extend rows that are missing entries
-                        row.extend([None]*(self.nVisibleCols-len(row)))
+                if len(row) < self.nVisibleCols:
+                    # extend rows that are missing entries
+                    row.extend([None]*(self.nVisibleCols-len(row)))
 
-                    yield row
+                yield row
 
 
 @VisiData.api
