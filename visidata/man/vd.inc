@@ -859,6 +859,7 @@ show/hide methods and hidden properties
 .No launch vd with Ar subsheet No of Ar toplevel No at top-of-stack, and cursor at Ar col No and Ar row Ns ; all arguments are optional
 .Pp
 .Lo f filetype filetype
+.Lo d delimiter delimiter
 .No "tsv               "
 set loader to use for
 .Ar filetype
