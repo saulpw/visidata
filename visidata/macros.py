@@ -71,6 +71,10 @@ def startMacro(cmdlog):
         vd.status("recording macro")
         vd.macroMode = CommandLogJsonl('current_macro', rows=[])
 
+@VisiData.before
+def run(vd, *args, **kwargs):
+    vd.macrosheet
+
 
 Sheet.addCommand('m', 'macro-record', 'vd.cmdlog.startMacro()', 'record macro')
 Sheet.addCommand('gm', 'macro-sheet', 'vd.push(vd.macrosheet)', 'open macros sheet')
