@@ -464,14 +464,14 @@ def modifyCommand(vd):
     return vd.cmdlog.rows[-1]
 
 
-@CommandLog.api
+@CommandLogJsonl.api
 @asyncthread
 def repeat_for_n(cmdlog, r, n=1):
     r.sheet = r.row = r.col = ""
     for i in range(n):
         vd.replayOne(r)
 
-@CommandLog.api
+@CommandLogJsonl.api
 @asyncthread
 def repeat_for_selected(cmdlog, r):
     r.sheet = r.row = r.col = ""
