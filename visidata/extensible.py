@@ -43,6 +43,37 @@ class Extensible:
         return func
 
     @classmethod
+    def before(cls, beforefunc):
+        funcname = beforefunc.__name__
+        oldfunc = getattr(cls, funcname, None)
+        if not oldfunc:
+            vd.fail('@before on non-existing func {cls.__name__}.{funcname}')
+
+        @wraps(oldfunc)
+        def wrappedfunc(*args, **kwargs):
+            beforefunc(*args, **kwargs)
+            return oldfunc(*args, **kwargs)
+
+        setattr(cls,  funcname, wrappedfunc)
+        return wrappedfunc
+
+    @classmethod
+    def after(cls, beforefunc):
+        funcname = beforefunc.__name__
+        oldfunc = getattr(cls, funcname, None)
+        if not oldfunc:
+            vd.fail('@after on non-existing func {cls.__name__}.{funcname}')
+
+        @wraps(oldfunc)
+        def wrappedfunc(*args, **kwargs):
+            r = oldfunc(*args, **kwargs)
+            beforefunc(*args, **kwargs)
+            return r
+
+        setattr(cls,  funcname, wrappedfunc)
+        return wrappedfunc
+
+    @classmethod
     def class_api(cls, func):
         name = func.__get__(None, dict).__func__.__name__
         oldfunc = getattr(cls, name, None)
