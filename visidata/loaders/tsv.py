@@ -6,7 +6,7 @@ import collections
 from visidata import vd, asyncthread, options, Progress, ColumnItem, SequenceSheet, Sheet, FileExistsError, getType, VisiData
 from visidata import namedlist, filesize
 
-vd.option('delimiter', '\t', 'field delimiter to use for tsv/usv filetype', replay=True)
+vd.option('-d --delimiter', '\t', 'field delimiter to use for tsv/usv filetype', replay=True)
 vd.option('row_delimiter', '\n', 'row delimiter to use for tsv/usv filetype', replay=True)
 vd.option('tsv_safe_newline', '\u001e', 'replacement for newline character when saving to tsv', replay=True)
 vd.option('tsv_safe_tab', '\u001f', 'replacement for tab character when saving to tsv', replay=True)
