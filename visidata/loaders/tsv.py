@@ -1,13 +1,16 @@
 import os
+import codecs
 import contextlib
 import itertools
 import collections
 
-from visidata import vd, asyncthread, options, Progress, ColumnItem, SequenceSheet, Sheet, FileExistsError, getType, VisiData
+from visidata import vd, asyncthread, options, Progress, ColumnItem, SequenceSheet, Sheet, FileExistsError, getType, VisiData, RepeatFile
 from visidata import namedlist, filesize
 
 vd.option('delimiter', '\t', 'field delimiter to use for tsv/usv filetype', replay=True)
 vd.option('row_delimiter', '\n', 'row delimiter to use for tsv/usv filetype', replay=True)
+vd.option('disable_universal_newline', False, 'causes strict interpretaion of newlines', replay=True)
+vd.option('interpret_escaped_chars', False, 'enable interpretation of backslash escapes', replay=True)
 vd.option('tsv_safe_newline', '\u001e', 'replacement for newline character when saving to tsv', replay=True)
 vd.option('tsv_safe_tab', '\u001f', 'replacement for tab character when saving to tsv', replay=True)
 
@@ -41,19 +44,32 @@ class TsvSheet(SequenceSheet):
     def iterload(self):
         delim = self.delimiter or self.options.delimiter
         rowdelim = self.row_delimiter or self.options.row_delimiter
+        disable_inversal_newline = bool(self.options.disable_universal_newline)
+        interpret_escaped_chars = bool(self.options.interpret_escaped_chars)
 
-        with self.source.open_text(encoding=self.options.encoding) as fp:
-                for line in splitter(fp, rowdelim):
-                    if not line:
-                        continue
+        if interpret_escaped_chars:
+            fp = self.source.open_bytes()
+        else:
+            fp = self.source.open_text(encoding=self.options.encoding)
 
+        with fp:
+            if interpret_escaped_chars:
+                fp = RepeatFile(codecs.iterdecode(fp, encoding=options.encoding, errors=options.encoding_errors))
+
+            for line in splitter(fp, rowdelim):
+                if not line:
+                    continue
+
+                if interpret_escaped_chars:
+                    row = list(s.encode("utf-8").decode("unicode_escape") for s in line.split(delim))
+                else:
                     row = list(line.split(delim))
 
-                    if len(row) < self.nVisibleCols:
-                        # extend rows that are missing entries
-                        row.extend([None]*(self.nVisibleCols-len(row)))
+                if len(row) < self.nVisibleCols:
+                    # extend rows that are missing entries
+                    row.extend([None]*(self.nVisibleCols-len(row)))
 
-                    yield row
+                yield row
 
 
 @VisiData.api
