@@ -376,6 +376,8 @@ autocomplete input (when available)
 .It Ic " o" Ar input
 open
 .Ar input No in Sy VisiData
+.It Ic "zo"
+open file or url from path in current cell
 .It Ic "^S g^S" Ar filename
 .No save current/all sheet(s) to Ar filename No in format determined by extension (default .tsv)
 .It ""
@@ -859,11 +861,14 @@ show/hide methods and hidden properties
 .No launch vd with Ar subsheet No of Ar toplevel No at top-of-stack, and cursor at Ar col No and Ar row Ns ; all arguments are optional
 .Pp
 .Lo f filetype filetype
-.Lo d delimiter delimiter
 .No "tsv               "
 set loader to use for
 .Ar filetype
 instead of file extension
+.
+.Lo d delimiter delimiter
+.No "\t                "
+field delimiter to use for tsv/usv filetype
 .
 .Lo y confirm-overwrite F
 .No "True              "

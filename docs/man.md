@@ -187,6 +187,7 @@ vd(1)                                                                           
 
    <span style="font-weight:bold;">Data</span> <span style="font-weight:bold;">Toolkit</span>
       <span style="font-weight:bold;">o</span> <span style="text-decoration:underline;">input</span>         open <span style="text-decoration:underline;">input</span> in <span style="font-weight:bold;">VisiData</span>
+     <span style="font-weight:bold;">zo</span>               open file or url from path in current cell
      <span style="font-weight:bold;">^S</span> <span style="font-weight:bold;">g^S</span> <span style="text-decoration:underline;">filename</span>  save current/all sheet(s) to <span style="text-decoration:underline;">filename</span> in format determined by extension (default .tsv)
                       Note: if the format does not support multisave, or the <span style="text-decoration:underline;">filename</span> ends in a <span style="font-weight:bold;">/</span>, a directory will be created.
      <span style="font-weight:bold;">z^S</span> <span style="text-decoration:underline;">filename</span>     save current column only to <span style="text-decoration:underline;">filename</span> in format determined by extension (default .tsv)
@@ -422,6 +423,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">+</span><span style="text-decoration:underline;">toplevel</span>:<span style="text-decoration:underline;">subsheet</span>:<span style="text-decoration:underline;">col</span>:<span style="text-decoration:underline;">row</span>   launch vd with <span style="text-decoration:underline;">subsheet</span> of <span style="text-decoration:underline;">toplevel</span> at top-of-stack, and cursor at <span style="text-decoration:underline;">col</span> and <span style="text-decoration:underline;">row</span>; all arguments are optional
 
      <span style="font-weight:bold;">-f</span>, <span style="font-weight:bold;">--filetype</span>=<span style="text-decoration:underline;">filetype</span>      tsv                set loader to use for <span style="text-decoration:underline;">filetype</span> instead of file extension
+     <span style="font-weight:bold;">-d</span>, <span style="font-weight:bold;">--delimiter</span>=<span style="text-decoration:underline;">delimiter</span>                          field delimiter to use for tsv/usv filetype
      <span style="font-weight:bold;">-y</span>, <span style="font-weight:bold;">--confirm-overwrite</span>=<span style="text-decoration:underline;">F</span>    True               overwrite existing files without confirmation
      <span style="font-weight:bold;">--visidata-dir</span>=<span style="text-decoration:underline;">str</span>           ~/.visidata/       directory to load and store additional files
      <span style="font-weight:bold;">--mouse-interval</span>=<span style="text-decoration:underline;">int</span>         1                  max time between press/release for click (ms)
