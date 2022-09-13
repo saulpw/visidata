@@ -6,7 +6,7 @@ import re
 from contextlib import contextmanager
 from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace, PyobjSheet, BaseSheet, ExpectedException
 from visidata.pyobj import ExpandedColumn
-from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet, UNLOADED, ExprColumn, undoAttrCopyFunc
+from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet, UNLOADED, ExprColumn, undoAttrCopyFunc, ENTER
 
 vd.option('disp_ibis_sidebar', '', 'which sidebar property to display')
 vd.option('sql_always_count', False, 'whether to always query a count of the number of results')
@@ -27,6 +27,11 @@ def dtype_to_vdtype(dtype):
     from ibis.expr import datatypes as dt
 
     try:
+        if isinstance(dtype, dt.Decimal):
+            if dtype.scale == 0:
+                return int
+            else:
+                return float
         if isinstance(dtype, dt.Integer):
             return int
         if isinstance(dtype, dt.Floating):
@@ -214,18 +219,8 @@ class IbisTableSheet(Sheet):
         q = self.query
         projections = []
         for c in self.visibleCols:
-            ibis_col = c.get_ibis_col(q)
+            ibis_col = c.get_ibis_col(q, typed=typed)
             if ibis_col is not None:
-                if typed:
-                    import ibis.expr.datatypes as dt
-                    if c.type is str: ibis_col = ibis_col.cast(dt.string)
-                    if c.type is int: ibis_col = ibis_col.cast(dt.int)
-                    if c.type is float: ibis_col = ibis_col.cast(dt.float)
-                    if c.type is date:
-                        if not isinstance(ibis_col.type(), (dt.Timestamp, dt.Date)):
-                            ibis_col = ibis_col.cast(dt.date)
-
-                    ibis_col = ibis_col.name(c.name)
                 projections.append(ibis_col)
             else:
                 vd.warning(f'no column {c.name}')
@@ -357,7 +352,7 @@ class IbisTableSheet(Sheet):
 
         groupq = groupq.sort_by([('count', False)])
 
-        return IbisTableSheet(self.name, *(col.name for col in groupByCols), 'freq',
+        return IbisFreqTable(self.name, *(col.name for col in groupByCols), 'freq',
                              ibis_conpool=self.ibis_conpool,
                              ibis_source=self.ibis_source,
                              source=self,
@@ -372,9 +367,19 @@ class IbisTableSheet(Sheet):
         # we're on a frequency table
         vs = copy(self.source)
         vs.names = list(vs.names) + ['_'.join(str(x) for x in self.rowkey(row))]
+        vs.query = self.source.query.filter(self.freqExpr(row))
+        return vs
+
+    def openRows(self, rows):
+        'On FreqTable, return sheet with union of all selected items.'
+        if not hasattr(self, 'groupByCols'):
+            vd.fail('Use " to filter selection')
+
+        vs = copy(self.source)
+        vs.names = list(vs.names) + ['several']
+
         vs.query = self.source.query.filter([
-            c.get_ibis_col(self.source.query) == self.rowkey(row)[i] for i, c in enumerate(self.groupByCols)
-            # matching key of grouped columns
+            functools.reduce(operator.or_, [self.freqExpr(row) for row in rows])
         ])
         return vs
 
@@ -434,6 +439,9 @@ def expand(col, rows):
 def expand_struct(col, rows):
     oldexpr = col.sheet.ibis_current_expr
     struct_field = col.get_ibis_col(oldexpr)
+    if struct_field is not StructType:
+        vd.fail('vdsql can only expand Struct columns')
+
     struct_fields = [struct_field[name] for name in struct_field.names]
     expandedCols = super(IbisColumn, col).expand(rows)   # this must go after ibis_current_expr, because it alters ibis_current_expr
     fields = []
@@ -445,7 +453,7 @@ def expand_struct(col, rows):
 
 
 @Column.api
-def get_ibis_col(col, query):
+def get_ibis_col(col, query, typed=False):
     import ibis.common.exceptions
 
     r = None
@@ -463,6 +471,15 @@ def get_ibis_col(col, query):
 
     if r is None:
         return r
+
+    if typed:
+        import ibis.expr.datatypes as dt
+        if col.type is str: r = r.cast(dt.string)
+        if col.type is int: r = r.cast(dt.int)
+        if col.type is float: r = r.cast(dt.float)
+        if col.type is date:
+            if not isinstance(r.type(), (dt.Timestamp, dt.Date)):
+                r = r.cast(dt.date)
 
     r = r.name(col.name)
     return r
@@ -512,6 +529,14 @@ def clearSelected(sheet):
 
 
 @IbisTableSheet.api
+def selectRow(sheet, row):
+    super(IbisTableSheet, sheet).selectRow(row)
+    if hasattr(sheet, 'groupByCols'):  # freq table
+#        sheet.source.select(sheet.gatherBy(lambda r, sheet=sheet, expr=self.freqExpr(row): sheet.evalExpr(expr, r)), progress=False)
+        sheet.source.ibis_selection.append(sheet.freqExpr(row))
+
+
+@IbisTableSheet.api
 def addUndoSelection(sheet):
     super(IbisTableSheet, sheet).addUndoSelection()
     vd.addUndo(undoAttrCopyFunc([sheet], 'ibis_selection'))
@@ -536,12 +561,13 @@ def select_expr(sheet, expr):
 
 @IbisTableSheet.api
 def addcol_split(sheet, col, delim):
+    from ibis.expr import datatypes as dt
     c = Column(col.name+'_split',
                getter=lambda col,row: col.origCol.getDisplayValue(row).split(col.expr),
                expr=delim,
                origCol=col,
                ibis_name=col.name+'_split')
-    sheet.query = sheet.query.mutate(**{c.name:col.get_ibis_col(sheet.query).split(delim)})
+    sheet.query = sheet.query.mutate(**{c.name:col.get_ibis_col(sheet.query).cast(dt.string).split(delim)})
     return c
 
 
@@ -590,11 +616,11 @@ select-after select-around-n select-before select-equal-row select-error stoggle
 notimpl_cmds = '''
 addcol-capture addcol-incr addcol-incr-step addcol-window capture-col
 contract-col expand-col-depth expand-cols expand-cols-depth melt melt-regex pivot random-rows
-select-col-regex select-cols-regex select-error-col select-exact-cell select-exact-row select-row select-rows
-unselect-col-regex unselect-expr unselect-row
+select-col-regex select-cols-regex select-error-col select-exact-cell select-exact-row select-rows
+unselect-col-regex unselect-expr
 describe-sheet freq-summary
 cache-col cache-cols
-dive-selected dive-selected-cells
+dive-selected-cells
 dup-rows dup-rows-deep dup-selected-deep
 '''.split()
 
@@ -658,6 +684,11 @@ def rawSql(sheet, qstr):
                           source=qstr,
                           query=con.sql(qstr))
 
+class IbisFreqTable(IbisTableSheet):
+    def freqExpr(self, row):
+        # matching key of grouped columns
+        return functools.reduce(operator.and_, [c.get_ibis_col(self.source.query, typed=True) == self.rowkey(row)[i] for i, c in enumerate(self.groupByCols)])
+
 IbisTableSheet.addCommand('"', 'dup-selected', 'vd.push(dup_selected())', 'open duplicate sheet with selected rows (default limit)'),
 IbisTableSheet.addCommand('z"', 'dup-limit', 'vd.push(dup_limit(input("max rows: ", value=options.ibis_limit)))', 'open duplicate sheet with only selected rows (input limit)'),
 IbisTableSheet.addCommand('gz"', 'dup-nolimit', 'vd.push(dup_limit(0))', 'open duplicate sheet with only selected rows (no limit--be careful!)')
@@ -668,6 +699,9 @@ IbisTableSheet.addCommand('gb', 'open-sidebar', 'vd.push(TextSheet(name, options
 IbisTableSheet.addCommand('zb', 'sidebar-choose', 'choose_sidebar()', 'choose vdsql sidebar to show')
 IbisTableSheet.addCommand('b', 'sidebar-toggle', 'vd.options.disp_ibis_sidebar = "" if vd.options.disp_ibis_sidebar else "base_sql"', 'cycle vdsql sidebar on/off')
 IbisTableSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("SQL query: ")))', 'open sheet with results of raw SQL query')
+
+IbisFreqTable.addCommand('g'+ENTER, 'open-selected', 'vd.push(openRows(selectedRows))')
+
 IbisTableIndexSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("SQL query: ")))', 'open sheet with results of raw SQL query')
 
 IbisTableSheet.class_options.clean_names = True
