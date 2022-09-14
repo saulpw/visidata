@@ -867,7 +867,7 @@ set loader to use for
 instead of file extension
 .
 .Lo d delimiter delimiter
-.No "\t                "
+.No "\(rst                "
 field delimiter to use for tsv/usv filetype
 .
 .Lo y confirm-overwrite F

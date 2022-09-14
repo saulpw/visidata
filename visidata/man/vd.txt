@@ -558,7 +558,7 @@ COMMANDLINE OPTIONS
 
      -f, --filetype=filetype      tsv                set loader to use for
                                   filetype instead of file extension
-     -d, --delimiter=delimiter                          field delimiter to use
+     -d, --delimiter=delimiter    \t                 field delimiter to use
                                   for tsv/usv filetype
      -y, --confirm-overwrite=F    True               overwrite existing files
                                   without confirmation
