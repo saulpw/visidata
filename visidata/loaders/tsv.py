@@ -1,8 +1,18 @@
+"""You can use this loader to use visidata in mysql (or mycli) client. Use the following config to enable
+visidata by default in the mysql client:
+
+Edit ~/.my.cnf:
+[mysql]
+silent
+pager=pager=vd --disable-universal-newline=1 --interpret_escaped_chars=1 -f tsv
+"""
+
 import os
 import codecs
 import contextlib
 import itertools
 import collections
+import io
 
 from visidata import vd, asyncthread, options, Progress, ColumnItem, SequenceSheet, Sheet, FileExistsError, getType, VisiData, RepeatFile
 from visidata import namedlist, filesize
@@ -47,21 +57,21 @@ class TsvSheet(SequenceSheet):
         disable_inversal_newline = bool(self.options.disable_universal_newline)
         interpret_escaped_chars = bool(self.options.interpret_escaped_chars)
 
-        if interpret_escaped_chars:
+        if disable_inversal_newline:
             fp = self.source.open_bytes()
         else:
             fp = self.source.open_text(encoding=self.options.encoding)
 
-        with fp:
-            if interpret_escaped_chars:
-                fp = RepeatFile(codecs.iterdecode(fp, encoding=options.encoding, errors=options.encoding_errors))
+        if disable_inversal_newline:
+            fp = io.TextIOWrapper(fp, encoding=options.encoding, errors=options.encoding_errors, newline=rowdelim)
 
+        with fp:
             for line in splitter(fp, rowdelim):
                 if not line:
                     continue
 
                 if interpret_escaped_chars:
-                    row = list(s.encode("utf-8").decode("unicode_escape") for s in line.split(delim))
+                    row = list(s.encode("utf-8", errors=options.encoding_errors).decode("unicode_escape", errors=options.encoding_errors) for s in line.split(delim))
                 else:
                     row = list(line.split(delim))
 
