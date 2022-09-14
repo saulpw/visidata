@@ -8,14 +8,10 @@ pager=pager=vd --disable-universal-newline=1 --interpret_escaped_chars=1 -f tsv
 """
 
 import os
-import codecs
 import contextlib
-import itertools
-import collections
 import io
 
-from visidata import vd, asyncthread, options, Progress, ColumnItem, SequenceSheet, Sheet, FileExistsError, getType, VisiData, RepeatFile
-from visidata import namedlist, filesize
+from visidata import vd, options, SequenceSheet, Sheet, FileExistsError, VisiData
 
 vd.option('delimiter', '\t', 'field delimiter to use for tsv/usv filetype', replay=True)
 vd.option('row_delimiter', '\n', 'row delimiter to use for tsv/usv filetype', replay=True)
