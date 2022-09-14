@@ -298,16 +298,16 @@ class IbisTableSheet(Sheet):
         self.columns = []
         self._nrows_col = -1
 
-        for i, (colname, dtype) in enumerate(actual_query.schema().items()):
+        for i, (colname, dtype) in enumerate(actual_query.schema().items(), start=1):
             keycol=oldkeycols.get(colname, Column()).keycol
             if i < self.nKeys:
-                keycol = i+1
+                keycol = i
 
             if colname == '__n__':
-                self._nrows_col = i+1
+                self._nrows_col = i
                 continue
 
-            self.addColumn(IbisColumn(colname, i+1,
+            self.addColumn(IbisColumn(colname, i,
                            type=dtype_to_vdtype(dtype),
                            keycol=keycol,
                            ibis_name=colname))
