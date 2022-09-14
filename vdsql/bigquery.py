@@ -1,6 +1,5 @@
 from visidata import vd, VisiData, Sheet, AttrColumn
 from . import IbisTableIndexSheet, IbisConnectionPool
-from ._ibis import _register_bigquery_connect
 
 import ibis
 import ibis.expr.operations as ops
@@ -8,11 +7,21 @@ import ibis.expr.operations as ops
 
 @VisiData.api
 def openurl_bigquery(vd, p, filetype=None):
-    _register_bigquery_connect()
+    vd.configure_ibis()
     return BigqueryDatabaseIndexSheet(p.name, source=p, ibis_con=None)
 
-
 vd.openurl_bq = vd.openurl_bigquery
+
+
+@VisiData.after
+def configure_ibis(vd):
+    from ibis.backends.base import _connect
+
+    @_connect.register(r"bigquery://(?P<project_id>[^/]+)(?:/(?P<dataset_id>.+))?", priority=13)
+    def _(_: str, *, project_id: str, dataset_id: str):
+        """Connect to BigQuery with `project_id` and optional `dataset_id`."""
+        import ibis
+        return ibis.bigquery.connect(project_id=project_id, dataset_id=dataset_id or "")
 
 
 class BigqueryDatabaseIndexSheet(Sheet):

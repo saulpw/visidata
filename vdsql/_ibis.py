@@ -44,18 +44,8 @@ def dtype_to_vdtype(dtype):
     return anytype
 
 
-def _register_bigquery_connect():
-    from ibis.backends.base import _connect
-
-    @_connect.register(r"bigquery://(?P<project_id>[^/]+)(?:/(?P<dataset_id>.+))?", priority=13)
-    def _(_: str, *, project_id: str, dataset_id: str):
-        """Connect to BigQuery with `project_id` and optional `dataset_id`."""
-        import ibis
-        return ibis.bigquery.connect(project_id=project_id, dataset_id=dataset_id or "")
-
-
 @VisiData.api
-def open_vdsql(vd, p, filetype=None):
+def configure_ibis(vd):
     import ibis
     from ibis.backends.base import _connect
 
@@ -64,7 +54,10 @@ def open_vdsql(vd, p, filetype=None):
     if vd.options.debug:
         ibis.options.verbose = True
 
-    _register_bigquery_connect()
+    if 'ibis_type' not in set(c.expr for c in ColumnsSheet.columns):
+        ColumnsSheet.columns += [
+            AttrColumn('ibis_type', type=str)
+        ]
 
     @_connect.register(r".+\.ddb", priority=13)
     def _(source: str):
@@ -74,14 +67,12 @@ def open_vdsql(vd, p, filetype=None):
     def _(source: str):
         return ibis.sqlite.connect(source)
 
-    if 'ibis_type' not in set(c.expr for c in ColumnsSheet.columns):
-        ColumnsSheet.columns += [
-            AttrColumn('ibis_type', type=str)
-        ]
 
+@VisiData.api
+def open_vdsql(vd, p, filetype=None):
+    vd.configure_ibis()
     return IbisTableIndexSheet(p.name, source=p, filetype=None, database_name=None,
-                               ibis_conpool=IbisConnectionPool(p))
-
+                               ibis_conpool=IbisConnectionPool(p), sheet_type=IbisTableSheet)
 
 vd.open_ibis = vd.open_vdsql
 
@@ -125,7 +116,7 @@ class IbisTableIndexSheet(IndexSheet):
             nrows_col.width += 3
 
             for tblname in con.list_tables():
-                yield IbisTableSheet(tblname,
+                yield self.sheet_type(tblname,
                         ibis_source=self.source,
                         ibis_filetype=self.filetype,
                         ibis_conpool=self.ibis_conpool,
@@ -265,7 +256,7 @@ class IbisTableSheet(Sheet):
 
     def sqlize(self, expr):
         if vd.options.debug:
-            expr = self.with_count(expr)
+            expr = self.withRowcount(expr)
         return self.ibis_to_sql(expr)
 
     @property
@@ -274,31 +265,42 @@ class IbisTableSheet(Sheet):
         compiler = SubstraitCompiler()
         return compiler.compile(self.ibis_current_expr)
 
-    def with_count(self, q):
+    def withRowcount(self, q):
         if self.options.sql_always_count:
             # return q.mutate(__n__=q.count())
             return q.cross_join(q.aggregate(__n__=lambda t: t.count()))
         return q
 
-    def iterload(self):
-        import ibis
-
-        with self.con as con:
-            if self.query is None:
-                tbl = con.table(self.table_name)
-                self.query = ibis.table(tbl.schema(), name=con._fully_qualified_name(self.table_name, self.database_name))
-
-            actual_query = self.with_count(self.query)
-            self.query_result = con.execute(actual_query, limit=self.options.ibis_limit or None)
-
+    def preload(self):
         self.options.disp_rstatus_fmt = self.options.disp_rstatus_fmt.replace('nRows', 'countRows')
         self.options.disp_rstatus_fmt = self.options.disp_rstatus_fmt.replace('nSelectedRows', 'countSelectedRows')
 
+    def baseQuery(self, con):
+        'Return base table for {database_name}.{table_name}'
+        import ibis
+        tbl = con.table(self.table_name)
+        return ibis.table(tbl.schema(), name=con._fully_qualified_name(self.table_name, self.database_name))
+
+    def iterload(self):
+        self.preload()
+
+        with self.con as con:
+            if self.query is None:
+                self.query = self.baseQuery(con)
+
+            self.reloadColumns(self.query)  # columns based on query without metadata
+            self.query_result = con.execute(self.withRowcount(self.query),
+                                            limit=self.options.ibis_limit or None)
+
+            yield from self.query_result.itertuples()
+
+
+    def reloadColumns(self, expr):
         oldkeycols = {c.name:c for c in self.keyCols}
         self.columns = []
         self._nrows_col = -1
 
-        for i, (colname, dtype) in enumerate(actual_query.schema().items(), start=1):
+        for i, (colname, dtype) in enumerate(expr.schema().items(), start=1):
             keycol=oldkeycols.get(colname, Column()).keycol
             if i < self.nKeys:
                 keycol = i
@@ -311,8 +313,6 @@ class IbisTableSheet(Sheet):
                            type=dtype_to_vdtype(dtype),
                            keycol=keycol,
                            ibis_name=colname))
-
-        yield from self.query_result.itertuples()
 
     @property
     def countSelectedRows(self):
