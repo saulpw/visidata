@@ -47,7 +47,7 @@ def saveMacro(self, rows, ks):
         vd.save_vdj(macropath, vs)
         setMacro(ks, vs)
         vd.macrosheet.source.append_tsv_row((ks, macropath))
-        vd.macrosheet.source.reload()
+        vd.macrosheet.addRow(vd.loadInternalSheet(CommandLogJsonl, macropath))
 
 @CommandLogJsonl.api
 @wraps(CommandLogJsonl.afterExecSheet)
