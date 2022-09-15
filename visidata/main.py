@@ -247,7 +247,8 @@ def main_vd():
         vd.cmdlog.openHook(vs, vs.source)
         sources.append(vs)
 
-    vd.sheets.extend(sources)  # purposefully do not load everything
+    for vs in sources:
+        vd.push(vs)
 
     if not vd.sheets and not args.play and not args.batch:
         if 'filetype' in current_args:
