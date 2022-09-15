@@ -2,4 +2,4 @@ sheet	col	row	longname	input	keystrokes	comment
 global		encoding	set-option	latin-1		
 invalid_unicode		encoding	set-option	latin-1		
 			open-file	tests/invalid_unicode.sqlite	o	
-invalid_unicode		キTest	open-row		Enter	open sheet with copies of rows referenced in current row
+invalid_unicode		キTest	open-row-pyobj		Enter	open sheet with copies of rows referenced in current row

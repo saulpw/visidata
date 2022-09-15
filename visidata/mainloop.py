@@ -70,7 +70,7 @@ def drawSidebar(vd, scr, text, title='sidebar'):
     h, w = scr.getmaxyx()
     maxh, maxw = 0, 0
 
-    lines = list(iterwraplines(text.splitlines(), width=w//2))
+    lines = list(iterwraplines(text.splitlines(), width=w//2-2))
 
     maxh = min(h-2, len(lines)+2)
     maxw = min(w//2, max(map(len, lines))+4)
@@ -230,7 +230,7 @@ def mainloop(self, scr):
         sheet = self.activeSheet
 
         if not sheet:
-            continue
+            continue  # waiting for replay to push sheet
 
         threading.current_thread().sheet = sheet
         vd.drawThread = threading.current_thread()

@@ -1,8 +1,7 @@
-import math
-import collections
+from copy import copy
 
-from visidata import *
-from visidata.pivot import PivotSheet
+from visidata import vd, asyncthread, vlen, VisiData, Column, AttrColumn, Sheet, ColumnsSheet, ENTER
+from visidata.pivot import PivotSheet, PivotGroupRow
 
 
 vd.option('disp_histogram', '*', 'histogram element character')
@@ -47,10 +46,18 @@ class FreqTableSheet(PivotSheet):
 
         # add default bonus columns
         for c in [
-                    ColumnAttr('count', 'sourcerows', type=vlen),
-                    Column('percent', type=float, getter=lambda col,row: len(row.sourcerows)*100/col.sheet.source.nRows),
-                    Column('histogram', type=str, getter=lambda col,row: options.disp_histogram*(options.disp_histolen*len(row.sourcerows)//col.sheet.largest), width=options.disp_histolen+2),
-                    ]:
+            AttrColumn('count', 'sourcerows', type=vlen),
+            Column('percent', type=float, getter=lambda col,row: len(row.sourcerows)*100/col.sheet.source.nRows),
+        ]:
+            self.addColumn(c)
+
+        if self.options.disp_histolen and self.options.disp_histogram:
+            def histogram(col, row):
+                histogram = col.sheet.options.disp_histogram
+                histolen = col.sheet.options.disp_histolen
+                return histogram*(histolen*len(row.sourcerows)//col.sheet.largest)
+
+            c = Column('histogram', type=str, getter=histogram, width=self.options.disp_histolen+2)
             self.addColumn(c)
 
         # two more threads

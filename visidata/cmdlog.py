@@ -35,7 +35,7 @@ VisiData.save_vd = VisiData.save_tsv
 @VisiData.api
 def save_vdj(vd, p, *vsheets):
     with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
-        fp.write("#!vd -p\n")
+        fp.write("#!/usr/bin/env vd -p\n")
         for vs in vsheets:
             vs.write_jsonl(fp)
 
@@ -178,7 +178,7 @@ class _CommandLog:
             self.afterExecSheet(sheet, False, '')
 
         colname, rowname, sheetname = '', '', None
-        if sheet and not (cmd.longname.startswith('open-') and not cmd.longname in ('open-row', 'open-cell')):
+        if sheet and not (cmd.longname.startswith('open-') and not cmd.longname in ('open-row-pyobj', 'open-cell-pyobj')):
             sheetname = sheet.name
 
             colname, rowname = sheet.commandCursor(cmd.execstr)
@@ -464,14 +464,14 @@ def modifyCommand(vd):
     return vd.cmdlog.rows[-1]
 
 
-@CommandLog.api
+@CommandLogJsonl.api
 @asyncthread
 def repeat_for_n(cmdlog, r, n=1):
     r.sheet = r.row = r.col = ""
     for i in range(n):
         vd.replayOne(r)
 
-@CommandLog.api
+@CommandLogJsonl.api
 @asyncthread
 def repeat_for_selected(cmdlog, r):
     r.sheet = r.row = r.col = ""

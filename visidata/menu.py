@@ -116,7 +116,10 @@ vd.menus = [
         Menu('New', 'open-new'),
         Menu('Open file/url', 'open-file'),
         Menu('Rename', 'rename-sheet'),
-        Menu('Guard', 'guard-sheet'),
+        Menu('Guard', 
+            Menu('on', 'guard-sheet'),
+            Menu('off', 'guard-sheet-off')
+        ),
         Menu('Duplicate',
             Menu('selected rows by ref', 'dup-selected'),
             Menu('all rows by ref', 'dup-rows'),
@@ -557,6 +560,7 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
                 BUTTON1_PRESSED=lambda y,x,key,p=sheet.activeMenuItems[:level]+[j]: sheet.pressMenu(*p),
                 BUTTON2_PRESSED=vd.nop,
                 BUTTON3_PRESSED=vd.nop,
+                BUTTON1_CLICKED=lambda y,x,key,p=sheet.activeMenuItems[:level]+[j]: sheet.pressMenu(*p),
                 BUTTON1_RELEASED=vd.nop,
                 BUTTON2_RELEASED=vd.nop,
                 BUTTON3_RELEASED=vd.nop)
@@ -629,6 +633,7 @@ def drawMenu(vd, scr, sheet):
                 BUTTON1_PRESSED=lambda y,x,key,i=i,sheet=sheet: sheet.pressMenu(i),
                 BUTTON2_PRESSED=vd.nop,
                 BUTTON3_PRESSED=vd.nop,
+                BUTTON1_CLICKED=lambda y,x,key,i=i,sheet=sheet: sheet.pressMenu(i),
                 BUTTON1_RELEASED=vd.nop,
                 BUTTON2_RELEASED=vd.nop,
                 BUTTON3_RELEASED=vd.nop)

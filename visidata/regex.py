@@ -79,14 +79,17 @@ def addRegexColumns(vs, regexMaker, origcol, regexstr):
 
 @VisiData.api
 def regexTransform(vd, origcol, instr):
+    before, after = vd.parse_sed_transform(instr)
+    return lambda col,row,origcol=origcol,before=before,after=after,flags=origcol.sheet.regex_flags(): re.sub(before, after, origcol.getDisplayValue(row), flags=flags)
+
+
+@VisiData.api
+def parse_sed_transform(vd, instr):
     i = indexWithEscape(instr, '/')
     if i is None:
-        before = instr
-        after = ''
+        return instr, ''
     else:
-        before = instr[:i]
-        after = instr[i+1:]
-    return lambda col,row,origcol=origcol,before=before,after=after,flags=origcol.sheet.regex_flags(): re.sub(before, after, origcol.getDisplayValue(row), flags=flags)
+        return instr[:i], instr[i+1:]
 
 
 def indexWithEscape(s, char, escape_char='\\'):

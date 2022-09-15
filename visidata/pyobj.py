@@ -405,8 +405,8 @@ Sheet.addCommand('gz(', 'expand-cols-depth', 'expand_cols_deep(sheet, visibleCol
 
 Sheet.addCommand(')', 'contract-col', 'closeColumn(sheet, cursorCol)', 'unexpand current column; restore original column and remove other columns at this level')
 
-Sheet.addCommand(ENTER, 'open-row', 'vd.push(openRow(cursorRow))', 'open sheet with copies of rows referenced in current row')
-Sheet.addCommand('z'+ENTER, 'open-cell', 'vd.push(openCell(cursorCol, cursorRow))', 'open sheet with copies of rows referenced in current cell')
+Sheet.addCommand(ENTER, 'open-row-pyobj', 'vd.push(openRow(cursorRow))', 'open sheet with copies of rows referenced in current row')
+Sheet.addCommand('z'+ENTER, 'open-cell-pyobj', 'vd.push(openCell(cursorCol, cursorRow))', 'open sheet with copies of rows referenced in current cell')
 Sheet.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(openRow(r))', 'open sheet with copies of rows referenced in selected rows')
 Sheet.addCommand('gz'+ENTER, 'dive-selected-cells', 'for r in selectedRows: vd.push(openCell(cursorCol, r))', 'open sheet with copies of rows referenced in selected rows')
 
@@ -415,6 +415,7 @@ PyobjSheet.addCommand('gv', 'show-hidden', 'sheet.options.visibility = 2; reload
 PyobjSheet.addCommand('zv', 'hide-hidden', 'sheet.options.visibility -= 1; reload()', 'hide methods and hidden properties')
 
 vd.addGlobals({
+    'ExpandedColumn': ExpandedColumn,
     'PythonSheet': PythonSheet,
     'expand_cols_deep': expand_cols_deep,
     'deduceType': deduceType,

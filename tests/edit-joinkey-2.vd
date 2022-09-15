@@ -16,4 +16,4 @@ data2+data1	A		key-col		!
 data2+data1	Key	キ2	edit-cell	4	e	
 data2+data1			reload-sheet		^R	
 data2			sheets-stack		S	
-sheets		キdata1	open-row		^J	
+sheets		キdata1	open-row-pyobj		^J	

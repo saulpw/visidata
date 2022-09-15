@@ -105,13 +105,13 @@ DESCRIPTION
      ~  #  %  $  @  z#
                       set type of current column to str/int/float/cur‐
                       rency/date/len
-       ^              edit name of current column
-      g^              set names of all unnamed visible columns to contents of
-                      selected rows (or current row)
-      z^              set name of current column to combined contents of cur‐
-                      rent cell in selected rows (or current row)
-     gz^              set name of all visible columns to combined contents of
-                      current column for selected rows (or current row)
+       ^              rename current column
+      g^              rename all unnamed visible columns to contents of se‐
+                      lected rows (or current row)
+      z^              rename current column to combined contents of current
+                      cell in selected rows (or current row)
+     gz^              rename all visible columns to combined contents of cur‐
+                      rent column for selected rows (or current row)
 
        = expr         create new column from Python expr, with column names,
                       and attributes, as variables
@@ -240,6 +240,7 @@ DESCRIPTION
 
    Data Toolkit
       o input         open input in VisiData
+     zo               open file or url from path in current cell
      ^S g^S filename  save current/all sheet(s) to filename in format
                       determined by extension (default .tsv)
                       Note: if the format does not support multisave, or the
@@ -557,6 +558,8 @@ COMMANDLINE OPTIONS
 
      -f, --filetype=filetype      tsv                set loader to use for
                                   filetype instead of file extension
+     -d, --delimiter=delimiter    \t                 field delimiter to use
+                                  for tsv/usv filetype
      -y, --confirm-overwrite=F    True               overwrite existing files
                                   without confirmation
      --visidata-dir=str           ~/.visidata/       directory to load and

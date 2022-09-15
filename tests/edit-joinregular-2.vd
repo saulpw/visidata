@@ -15,4 +15,4 @@ data2+data1			sort-keys-asc		g[
 data2+data1	A		key-col		!	
 data2+data1	C	キ2	edit-cell	a3	e	
 data2+data1			sheets-stack		S	
-sheets		キdata2	open-row		^J	
+sheets		キdata2	open-row-pyobj		^J	

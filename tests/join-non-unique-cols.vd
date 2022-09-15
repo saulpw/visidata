@@ -14,4 +14,4 @@ sheets			join-sheets	outer	&
 benchmark+sample			columns-sheet		C	
 benchmark+sample_columns	name		sort-desc		]	
 benchmark+sample_columns			sheets-stack		S	
-sheets		キbenchmark+sample	open-row		^J	
+sheets		キbenchmark+sample	open-row-pyobj		^J	
