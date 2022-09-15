@@ -1,4 +1,4 @@
-.Dd August 27, 2022
+.Dd September 13, 2022
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .

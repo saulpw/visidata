@@ -1008,4 +1008,4 @@ SUPPORTED SOURCES
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                     August 27, 2022                    Linux/MacOS
+Linux/MacOS                   September 13, 2022                   Linux/MacOS
