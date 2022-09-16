@@ -364,6 +364,9 @@ class RepeatFile:
         except StopIteration:
             return ''
 
+    def write(self, s):
+        return self.iter_lines.write(s)
+
     def __iter__(self):
         return RepeatFileIter(self)
 

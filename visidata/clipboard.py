@@ -73,16 +73,13 @@ def syscopyCells_async(sheet, cols, rows, filetype):
     vd.status(f'copying {vs.nRows} {vs.rowtype} to system clipboard as {filetype}')
 
     # use NTF to generate filename and delete file on context exit
-    with tempfile.NamedTemporaryFile(suffix='.'+filetype) as temp:
-        # Windows won't open a file which is already open.
-        # I'd prefer to reuse the open file handle like we do for syscopyValue
-        # above, but vd.SaveSheets expects to open a file from a file path, and
-        # won't accept an open file handle without refactoring.
-        temp.close()
-        vd.sync(vd.saveSheets(Path(temp.name), vs))
+    with tempfile.NamedTemporaryFile(mode='w+', suffix='.'+filetype) as temp:
+        # Windows: Reuse the open file handle instead of opening twice.
+        vd.sync(vd.saveSheets(Path(temp.name, fptext=temp), vs))
+        temp.seek(0)
         p = subprocess.Popen(
             sheet.options.clipboard_copy_cmd.split(),
-            stdin=open(temp.name, 'r', encoding=sheet.options.encoding),
+            stdin=temp,
             stdout=subprocess.DEVNULL,
             close_fds=True)
         p.communicate()
