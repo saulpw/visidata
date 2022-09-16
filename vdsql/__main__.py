@@ -10,7 +10,9 @@ def main():
         setattr(vd, f"open_{ext}", vd.open_vdsql)
 
     for entry_point in ibis.util.backend_entry_points():
-        setattr(vd, f"openurl_{entry_point.name}", vd.open_vdsql)
+        attrname = f"openurl_{entry_point.name}"
+        if not hasattr(vd, attrname):
+            setattr(vd, attrname, vd.open_vdsql)
 
     main.vd_cli()
 
