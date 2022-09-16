@@ -341,7 +341,8 @@ class IbisTableSheet(Sheet):
 
         q = self.ibis_current_expr
         groupq = q.aggregate(aggr_cols, by=[c.ibis_col for c in groupByCols])
-        groupq = groupq.mutate(percent=_['count']*100 / _['count'].sum().over(ibis.window()))
+        win = ibis.window(order_by=ibis.NA)
+        groupq = groupq.mutate(percent=_['count']*100 / _['count'].sum().over(win))
 
         histolen = self.options.disp_histolen
         histogram = self.options.disp_histogram
