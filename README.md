@@ -23,6 +23,7 @@ Powered by [Ibis](https://ibis-project.org).
 - DuckDB
 - ClickHouse
 - Google BigQuery
+- Snowflake
 
 ### [Other backends supported by Ibis](https://ibis-project.org/docs/3.1.0/backends/)
 

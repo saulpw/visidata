@@ -295,12 +295,12 @@ class IbisTableSheet(Sheet):
             yield from self.query_result.itertuples()
 
 
-    def reloadColumns(self, expr):
+    def reloadColumns(self, expr, start=1):
         oldkeycols = {c.name:c for c in self.keyCols}
         self.columns = []
         self._nrows_col = -1
 
-        for i, (colname, dtype) in enumerate(expr.schema().items(), start=1):
+        for i, (colname, dtype) in enumerate(expr.schema().items(), start=start):
             keycol=oldkeycols.get(colname, Column()).keycol
             if i < self.nKeys:
                 keycol = i

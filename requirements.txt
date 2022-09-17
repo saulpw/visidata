@@ -1,4 +1,4 @@
-visidata >= 2.9.1
+visidata >= 2.10.1
 ibis-framework[duckdb,sqlite,clickhouse] >= 3.2
 ibis-substrait
 
