@@ -247,7 +247,7 @@ def main_vd():
         vd.cmdlog.openHook(vs, vs.source)
         sources.append(vs)
 
-    for vs in sources:
+    for vs in reversed(sources):
         vd.push(vs)
 
     if not vd.sheets and not args.play and not args.batch:
