@@ -75,17 +75,17 @@ class TsvSheet(SequenceSheet):
         rowdelim = self.row_delimiter or self.options.row_delimiter
 
         with self.source.open_text(encoding=self.options.encoding) as fp:
-            for line in splitter(adaptive_bufferer(fp), rowdelim):
-                if not line:
-                    continue
+                for line in splitter(adaptive_bufferer(fp), rowdelim):
+                    if not line:
+                        continue
 
-                row = list(line.split(delim))
+                    row = list(line.split(delim))
 
-                if len(row) < self.nVisibleCols:
-                    # extend rows that are missing entries
-                    row.extend([None]*(self.nVisibleCols-len(row)))
+                    if len(row) < self.nVisibleCols:
+                        # extend rows that are missing entries
+                        row.extend([None]*(self.nVisibleCols-len(row)))
 
-                yield row
+                    yield row
 
 
 @VisiData.api
