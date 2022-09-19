@@ -8,13 +8,14 @@ import ibis.expr.operations as ops
 @VisiData.api
 def openurl_bigquery(vd, p, filetype=None):
     vd.configure_ibis()
+    vd.configure_bigquery()
     return BigqueryDatabaseIndexSheet(p.name, source=p, ibis_con=None)
 
 vd.openurl_bq = vd.openurl_bigquery
 
 
-@VisiData.after
-def configure_ibis(vd):
+@VisiData.api
+def configure_bigquery(vd):
     from ibis.backends.base import _connect
 
     @_connect.register(r"bigquery://(?P<project_id>[^/]+)(?:/(?P<dataset_id>.+))?", priority=13)
@@ -22,6 +23,18 @@ def configure_ibis(vd):
         """Connect to BigQuery with `project_id` and optional `dataset_id`."""
         import ibis
         return ibis.bigquery.connect(project_id=project_id, dataset_id=dataset_id or "")
+
+    @ibis.bigquery.add_operation(ops.TimestampDiff)
+    def bq_timestamp_diff(t, expr):
+        op = expr.op()
+        left = t.translate(op.left)
+        right = t.translate(op.right)
+        return f"TIMESTAMP_DIFF({left}, {right}, SECOND)"
+
+    @ibis.bigquery.add_operation(ops.ToIntervalUnit)
+    def bq_to_interval_unit(t, expr):
+        op = expr.op()
+        return t.translate(op.arg)
 
 
 class BigqueryDatabaseIndexSheet(Sheet):
@@ -55,15 +68,3 @@ class BigqueryDatabaseIndexSheet(Sheet):
                                    filetype=None)
 
 
-@ibis.bigquery.add_operation(ops.TimestampDiff)
-def bq_timestamp_diff(t, expr):
-    op = expr.op()
-    left = t.translate(op.left)
-    right = t.translate(op.right)
-    return f"TIMESTAMP_DIFF({left}, {right}, SECOND)"
-
-
-@ibis.bigquery.add_operation(ops.ToIntervalUnit)
-def bq_to_interval_unit(t, expr):
-    op = expr.op()
-    return t.translate(op.arg)

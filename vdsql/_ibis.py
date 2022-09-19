@@ -174,7 +174,7 @@ class IbisTableSheet(Sheet):
     @property
     def curcol_sql(self):
         expr = self.cursorCol.get_ibis_col(self.ibis_current_expr)
-        if expr:
+        if expr is not None:
             return self.ibis_to_sql(expr, fragment=True)
 
     def ibis_to_sql(self, expr, fragment=False):
