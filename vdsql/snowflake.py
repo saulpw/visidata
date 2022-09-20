@@ -44,7 +44,10 @@ class SnowflakeSheet(IbisTableSheet):
     def iterload(self):
         self.preload()
         try:
-            yield from self.executeSql(self.ibis_to_sql(self.withRowcount(self.baseQuery(con))))
+            with self.con as con:
+                if self.query is None:
+                    self.query = self.baseQuery(con)
+                yield from self.executeSql(self.ibis_to_sql(self.withRowcount(self.baseQuery(con))))
         except BaseException:
             if self.cursor:
                 self.cancelQuery(self.cursor.sfqid)
