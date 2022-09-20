@@ -181,7 +181,7 @@ class IbisTableSheet(Sheet):
         import sqlparse
         with self.con as con:
             context = con.compiler.make_context()
-            trclass = con.compiler.translator_class(expr, context=context)
+            trclass = con.compiler.translator_class(expr.op(), context=context)
             if fragment:
                 compiled = trclass.get_result()
             else:
