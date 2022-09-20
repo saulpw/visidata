@@ -701,10 +701,11 @@ IbisTableSheet.addCommand('b', 'sidebar-toggle', 'vd.options.disp_ibis_sidebar =
 IbisTableSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("SQL query: ")))', 'open sheet with results of raw SQL query')
 
 IbisFreqTable.addCommand('g'+ENTER, 'open-selected', 'vd.push(openRows(selectedRows))')
-
 IbisTableIndexSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("SQL query: ")))', 'open sheet with results of raw SQL query')
 
+IbisTableIndexSheet.class_options.load_lazy = True
 IbisTableSheet.class_options.clean_names = True
+IbisTableSheet.class_options.regex_flags = ''
 IbisTableSheet.class_options.disp_histolen = 0  # disable histograms by default
 
 vd.addMenuItem('View', 'Sidebar', 'toggle', 'sidebar-toggle')
