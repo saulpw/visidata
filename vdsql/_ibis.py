@@ -554,6 +554,12 @@ def select_equal_cell(sheet, col, typedval):
 
 
 @IbisTableSheet.api
+def select_col_regex(sheet, col, regex):
+    sheet.selectByIdx(vd.searchRegex(sheet, regex=regex, columns="cursorCol"))
+    sheet.ibis_selection.append(col.get_ibis_col(col.sheet.query).re_search(regex))
+
+
+@IbisTableSheet.api
 def select_expr(sheet, expr):
     sheet.select(sheet.gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalExpr(expr, r)), progress=False)
     sheet.ibis_selection.append(expr)
@@ -610,14 +616,14 @@ setcol-clipboard setcol-expr setcol-fake setcol-fill setcol-format-enum setcol-f
 '''.split()
 
 neverimpl_cmds = '''
-select-after select-around-n select-before select-equal-row select-error stoggle-after stoggle-before stoggle-row unselect-after unselect-before unselect-cols-regex transpose
+select-after select-around-n select-before select-equal-row select-error stoggle-after stoggle-before stoggle-row unselect-after unselect-before select-cols-regex unselect-cols-regex transpose
 '''.split()
 
 notimpl_cmds = '''
 addcol-capture addcol-incr addcol-incr-step addcol-window capture-col
 contract-col expand-col-depth expand-cols expand-cols-depth melt melt-regex pivot random-rows
-select-col-regex select-cols-regex select-error-col select-exact-cell select-exact-row select-rows
-unselect-col-regex unselect-expr
+select-error-col select-exact-cell select-exact-row select-rows
+unselect-expr
 describe-sheet freq-summary
 cache-col cache-cols
 dive-selected-cells
@@ -637,6 +643,7 @@ IbisTableSheet.addCommand(',', 'select-equal-cell', 'select_equal_cell(cursorCol
 #IbisTableSheet.addCommand('z,', 'select-exact-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', 'select rows matching current cell in current column')
 #IbisTableSheet.addCommand('gz,', 'select-exact-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getTypedValue(r) == c.getTypedValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
 
+IbisTableSheet.addCommand('', 'select-col-regex', 'select_col_regex(cursorCol, input("select regex: ", type="regex", defaultLast=True))', 'select rows matching regex in current column')
 
 IbisTableSheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: "); select_expr(expr)', 'select rows matching Python expression in any visible column')
 #IbisTableSheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalExpr(expr, r)), progress=False)', 'unselect rows matching Python expression in any visible column')
