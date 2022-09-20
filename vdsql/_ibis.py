@@ -302,8 +302,8 @@ class IbisTableSheet(Sheet):
 
         for i, (colname, dtype) in enumerate(expr.schema().items(), start=start):
             keycol=oldkeycols.get(colname, Column()).keycol
-            if i < self.nKeys:
-                keycol = i
+            if i-start < self.nKeys:
+                keycol = i+1
 
             if colname == '__n__':
                 self._nrows_col = i
