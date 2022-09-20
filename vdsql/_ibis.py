@@ -694,7 +694,10 @@ def rawSql(sheet, qstr):
 class IbisFreqTable(IbisTableSheet):
     def freqExpr(self, row):
         # matching key of grouped columns
-        return functools.reduce(operator.and_, [c.get_ibis_col(self.source.query, typed=True) == self.rowkey(row)[i] for i, c in enumerate(self.groupByCols)])
+        return functools.reduce(operator.and_, [
+            c.get_ibis_col(self.source.query, typed=True) == self.rowkey(row)[i]
+                for i, c in enumerate(self.groupByCols)
+        ])
 
 IbisTableSheet.addCommand('"', 'dup-selected', 'vd.push(dup_selected())', 'open duplicate sheet with selected rows (default limit)'),
 IbisTableSheet.addCommand('z"', 'dup-limit', 'vd.push(dup_limit(input("max rows: ", value=options.ibis_limit)))', 'open duplicate sheet with only selected rows (input limit)'),
