@@ -137,7 +137,7 @@ def moveToCol(vs, col):
     return True
 
 
-@TableSheet.api
+@BaseSheet.api
 def commandCursor(sheet, execstr):
     'Return (col, row) of cursor suitable for cmdlog replay of execstr.'
     colname, rowname = '', ''
