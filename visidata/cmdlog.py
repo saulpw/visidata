@@ -152,7 +152,7 @@ def commandCursor(sheet, execstr):
 
 
 # rowdef: namedlist (like TsvSheet)
-class _CommandLog:
+class CommandLogBase:
     'Log of commands for current session.'
     rowtype = 'logged commands'
     precious = False
@@ -233,10 +233,10 @@ class _CommandLog:
         vs.cmdlog_sheet.addRow(r)
         self.addRow(r)
 
-class CommandLog(_CommandLog, VisiDataMetaSheet):
+class CommandLog(CommandLogBase, VisiDataMetaSheet):
     pass
 
-class CommandLogJsonl(_CommandLog, JsonLinesSheet):
+class CommandLogJsonl(CommandLogBase, JsonLinesSheet):
 
     filetype = 'vdj'
 
@@ -510,3 +510,5 @@ CommandLogJsonl.addCommand('^C', 'replay-stop', 'sheet.cursorRowIndex = sheet.nR
 CommandLog.options.json_sort_keys = False
 CommandLog.options.encoding = 'utf-8'
 CommandLogJsonl.options.json_sort_keys = False
+
+vd.addGlobals({"CommandLogBase": CommandLogBase})
