@@ -286,7 +286,7 @@ def replay_cancel(vd):
 
 @VisiData.api
 def moveToReplayContext(vd, r, vs):
-        'set the sheet/row/col to the values in the replay row.  return sheet'
+        'set the sheet/row/col to the values in the replay row'
         if r.row not in [None, '']:
             vs.moveToRow(r.row) or vd.error('no "%s" row' % r.row)
 

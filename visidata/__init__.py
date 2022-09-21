@@ -148,6 +148,8 @@ import visidata.loaders.lsv
 import visidata.loaders.arrow
 import visidata.loaders.parquet
 
+import visidata.loaders.vdx
+
 import visidata.form
 
 import visidata.ddwplay
