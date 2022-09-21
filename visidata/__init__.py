@@ -105,6 +105,7 @@ import visidata.misc
 import visidata.memory
 import visidata.macros
 import visidata.macos
+import visidata.repeat
 
 import visidata.loaders.csv
 import visidata.loaders.archive
