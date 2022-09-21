@@ -146,7 +146,7 @@ def main_vd():
             flGlobal = True
         elif arg in ['-n', '--nonglobal']:
             flGlobal = False
-        elif arg[0] == '-':
+        elif arg.startswith('-'):
             optname = arg.lstrip('-')
             optval = None
             try:
