@@ -105,6 +105,14 @@ class IbisTableIndexSheet(IndexSheet):
     def con(self):
         return self.ibis_conpool.get_conn()
 
+    def rawSql(self, qstr):
+        with self.con as con:
+            return IbisTableSheet('rawsql',
+                                  ibis_conpool=self.ibis_conpool,
+                                  ibis_source=qstr,
+                                  source=qstr,
+                                  query=con.sql(qstr))
+
     def iterload(self):
         with self.con as con:
             if self.database_name:
@@ -131,6 +139,40 @@ class IbisColumn(ItemColumn):
     def ibis_type(self):
         return self.sheet.query[self.ibis_name].type()
 
+    @asyncthread
+    def memo_aggregate(self, agg, rows):
+        'Show aggregated value in status, and add ibis expr to memory for use later.'
+
+        aggexpr = self.ibis_aggr(agg.name)  # ignore rows, do over whole query
+
+        with self.sheet.con as con:
+            aggval = con.execute(aggexpr)
+
+        typedval = wrapply(agg.type or self.type, aggval)
+        dispval = self.format(typedval)
+        k = self.name+'_'+agg.name
+        vd.status(f'{k}={dispval}')
+        vd.memory[k] = aggval
+        # store aggexpr somewhere to use in later subquery
+
+    def expand(self, rows):
+        return self.expand_struct(rows)
+
+    def expand_struct(self, rows):
+        oldexpr = self.sheet.ibis_current_expr
+        struct_field = self.get_ibis_col(oldexpr)
+#        if struct_field is not StructType:
+#            vd.fail('vdsql can only expand Struct columns')
+
+        struct_fields = [struct_field[name] for name in struct_field.names]
+        expandedCols = super().expand(rows)   # this must go after ibis_current_expr, because it alters ibis_current_expr
+        fields = []
+        for ibiscol, expcol in zip(struct_fields, expandedCols):
+            fields.append(ibiscol.name(expcol.name))
+    #    self.sheet.query = oldexpr.drop([struct_field.get_name()]).mutate(fields)
+        self.sheet.query = oldexpr.mutate(fields)
+        return expandedCols
+
 
 class LazyIbisColMap:
     def __init__(self, sheet, q):
@@ -141,25 +183,6 @@ class LazyIbisColMap:
     def __getitem__(self, k):
         col = self._map[k]
         return col.get_ibis_col(self._query)
-
-
-@IbisColumn.api
-@asyncthread
-def memo_aggregate(col, agg, rows):
-    'Show aggregated value in status, and add ibis expr to memory for use later.'
-
-    aggexpr = col.ibis_aggr(agg.name)  # ignore rows, do over whole query
-
-    with col.sheet.con as con:
-        aggval = con.execute(aggexpr)
-
-    typedval = wrapply(agg.type or col.type, aggval)
-    dispval = col.format(typedval)
-    k = col.name+'_'+agg.name
-    vd.status(f'{k}={dispval}')
-    vd.memory[k] = aggval
-    # store aggexpr somewhere to use in later subquery
-
 
 
 class IbisTableSheet(Sheet):
@@ -245,6 +268,9 @@ class IbisTableSheet(Sheet):
             return eval(expr, vd.getGlobals(), LazyIbisColMap(self, q))
         else:
             return expr
+
+    def evalIbisExpr(self, expr):
+        return eval(expr, vd.getGlobals(), self.ibis_locals)
 
     @property
     def base_sql(self):
@@ -360,29 +386,6 @@ class IbisTableSheet(Sheet):
                              query=groupq,
                              nKeys=len(groupByCols))
 
-    def openRow(self, row):
-        if not hasattr(self, 'groupByCols'):
-            return super().openRow(row)
-
-        # we're on a frequency table
-        vs = copy(self.source)
-        vs.names = list(vs.names) + ['_'.join(str(x) for x in self.rowkey(row))]
-        vs.query = self.source.query.filter(self.freqExpr(row))
-        return vs
-
-    def openRows(self, rows):
-        'On FreqTable, return sheet with union of all selected items.'
-        if not hasattr(self, 'groupByCols'):
-            vd.fail('Use " to filter selection')
-
-        vs = copy(self.source)
-        vs.names = list(vs.names) + ['several']
-
-        vs.query = self.source.query.filter([
-            functools.reduce(operator.or_, [self.freqExpr(row) for row in rows])
-        ])
-        return vs
-
     def unfurl_col(self, col):
         vs = copy(self)
         vs.names = [self.name, col.name, 'unfurled']
@@ -423,33 +426,6 @@ class IbisTableSheet(Sheet):
 @Column.property
 def ibis_col(col):
     return col.get_ibis_col(col.sheet.ibis_current_expr)
-
-
-@IbisTableSheet.api
-def evalIbisExpr(sheet, expr):
-    return eval(expr, vd.getGlobals(), sheet.ibis_locals)
-
-
-@IbisColumn.api
-def expand(col, rows):
-    return col.expand_struct(rows)
-
-
-@IbisColumn.api
-def expand_struct(col, rows):
-    oldexpr = col.sheet.ibis_current_expr
-    struct_field = col.get_ibis_col(oldexpr)
-    if struct_field is not StructType:
-        vd.fail('vdsql can only expand Struct columns')
-
-    struct_fields = [struct_field[name] for name in struct_field.names]
-    expandedCols = super(IbisColumn, col).expand(rows)   # this must go after ibis_current_expr, because it alters ibis_current_expr
-    fields = []
-    for ibiscol, expcol in zip(struct_fields, expandedCols):
-        fields.append(ibiscol.name(expcol.name))
-#    col.sheet.query = oldexpr.drop([struct_field.get_name()]).mutate(fields)
-    col.sheet.query = oldexpr.mutate(fields)
-    return expandedCols
 
 
 @Column.api
@@ -512,10 +488,6 @@ IbisTableSheet.init('_sqlscr', lambda: None, copy=False)
 IbisTableSheet.init('query_result', lambda: None, copy=False)
 IbisTableSheet.init('ibis_conpool', lambda: None, copy=True)
 
-IbisTableSheet.addCommand('F', 'freq-col', 'vd.push(groupBy([cursorCol]))')
-IbisTableSheet.addCommand('gF', 'freq-keys', 'vd.push(groupBy(keyCols))')
-
-
 @IbisTableSheet.api
 def stoggle_rows(sheet):
     sheet.toggle(sheet.rows)
@@ -527,13 +499,6 @@ def clearSelected(sheet):
     super(IbisTableSheet, sheet).clearSelected()
     sheet.ibis_selection.clear()
 
-
-@IbisTableSheet.api
-def selectRow(sheet, row):
-    super(IbisTableSheet, sheet).selectRow(row)
-    if hasattr(sheet, 'groupByCols'):  # freq table
-#        sheet.source.select(sheet.gatherBy(lambda r, sheet=sheet, expr=self.freqExpr(row): sheet.evalExpr(expr, r)), progress=False)
-        sheet.source.ibis_selection.append(sheet.freqExpr(row))
 
 
 @IbisTableSheet.api
@@ -634,20 +599,6 @@ for longname in list(notimpl_cmds) + list(neverimpl_cmds) + list(dml_cmds):
     if longname:
         IbisTableSheet.addCommand('', longname, 'notimpl')
 
-IbisTableSheet.addCommand('', 'addcol-subst', 'addColumnAtCursor(addcol_subst(cursorCol, input("transform column by regex: ", type="regex-subst")))')
-IbisTableSheet.addCommand('', 'addcol-split', 'addColumnAtCursor(addcol_split(cursorCol, input("split by delimiter: ", type="delim-split")))')
-IbisTableSheet.bindkey('split-col', 'addcol-split')
-IbisTableSheet.addCommand('gt', 'stoggle-rows', 'stoggle_rows()', 'select rows matching current cell in current column')
-IbisTableSheet.addCommand(',', 'select-equal-cell', 'select_equal_cell(cursorCol, cursorTypedValue)', 'select rows matching current cell in current column')
-#IbisTableSheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getDisplayValue(r) == c.getDisplayValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
-#IbisTableSheet.addCommand('z,', 'select-exact-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', 'select rows matching current cell in current column')
-#IbisTableSheet.addCommand('gz,', 'select-exact-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getTypedValue(r) == c.getTypedValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
-
-IbisTableSheet.addCommand('', 'select-col-regex', 'select_col_regex(cursorCol, input("select regex: ", type="regex", defaultLast=True))', 'select rows matching regex in current column')
-
-IbisTableSheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: "); select_expr(expr)', 'select rows matching Python expression in any visible column')
-#IbisTableSheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalExpr(expr, r)), progress=False)', 'unselect rows matching Python expression in any visible column')
-
 @IbisTableSheet.api
 def dup_selected(sheet):
     vs=copy(sheet)
@@ -682,15 +633,6 @@ def rawSql(sheet, qstr):
                           source=qstr,
                           query=con.sql(qstr))
 
-@IbisTableIndexSheet.api
-def rawSql(sheet, qstr):
-    with sheet.con as con:
-        return IbisTableSheet('rawsql',
-                          ibis_conpool=sheet.ibis_conpool,
-                          ibis_source=qstr,
-                          source=qstr,
-                          query=con.sql(qstr))
-
 class IbisFreqTable(IbisTableSheet):
     def freqExpr(self, row):
         # matching key of grouped columns
@@ -698,6 +640,31 @@ class IbisFreqTable(IbisTableSheet):
             c.get_ibis_col(self.source.query, typed=True) == self.rowkey(row)[i]
                 for i, c in enumerate(self.groupByCols)
         ])
+
+    def selectRow(self, row):
+        super().selectRow(row)
+        self.source.select(self.gatherBy(lambda r, sheet=self, expr=self.freqExpr(row): sheet.evalExpr(expr, r)), progress=False)
+        self.source.ibis_selection.append(self.freqExpr(row))
+
+    def openRow(self, row):
+        vs = copy(self.source)
+        vs.names = list(vs.names) + ['_'.join(str(x) for x in self.rowkey(row))]
+        vs.query = self.source.query.filter(self.freqExpr(row))
+        return vs
+
+    def openRows(self, rows):
+        'Return sheet with union of all selected items.'
+        vs = copy(self.source)
+        vs.names = list(vs.names) + ['several']
+
+        vs.query = self.source.query.filter([
+            functools.reduce(operator.or_, [self.freqExpr(row) for row in rows])
+        ])
+        return vs
+
+
+IbisTableSheet.addCommand('F', 'freq-col', 'vd.push(groupBy([cursorCol]))')
+IbisTableSheet.addCommand('gF', 'freq-keys', 'vd.push(groupBy(keyCols))')
 
 IbisTableSheet.addCommand('"', 'dup-selected', 'vd.push(dup_selected())', 'open duplicate sheet with selected rows (default limit)'),
 IbisTableSheet.addCommand('z"', 'dup-limit', 'vd.push(dup_limit(input("max rows: ", value=options.ibis_limit)))', 'open duplicate sheet with only selected rows (input limit)'),
@@ -709,6 +676,19 @@ IbisTableSheet.addCommand('gb', 'open-sidebar', 'vd.push(TextSheet(name, options
 IbisTableSheet.addCommand('zb', 'sidebar-choose', 'choose_sidebar()', 'choose vdsql sidebar to show')
 IbisTableSheet.addCommand('b', 'sidebar-toggle', 'vd.options.disp_ibis_sidebar = "" if vd.options.disp_ibis_sidebar else "base_sql"', 'cycle vdsql sidebar on/off')
 IbisTableSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("SQL query: ")))', 'open sheet with results of raw SQL query')
+IbisTableSheet.addCommand('', 'addcol-subst', 'addColumnAtCursor(addcol_subst(cursorCol, input("transform column by regex: ", type="regex-subst")))')
+IbisTableSheet.addCommand('', 'addcol-split', 'addColumnAtCursor(addcol_split(cursorCol, input("split by delimiter: ", type="delim-split")))')
+IbisTableSheet.bindkey('split-col', 'addcol-split')
+IbisTableSheet.addCommand('gt', 'stoggle-rows', 'stoggle_rows()', 'select rows matching current cell in current column')
+IbisTableSheet.addCommand(',', 'select-equal-cell', 'select_equal_cell(cursorCol, cursorTypedValue)', 'select rows matching current cell in current column')
+#IbisTableSheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getDisplayValue(r) == c.getDisplayValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
+#IbisTableSheet.addCommand('z,', 'select-exact-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', 'select rows matching current cell in current column')
+#IbisTableSheet.addCommand('gz,', 'select-exact-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getTypedValue(r) == c.getTypedValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
+
+IbisTableSheet.addCommand('', 'select-col-regex', 'select_col_regex(cursorCol, input("select regex: ", type="regex", defaultLast=True))', 'select rows matching regex in current column')
+
+IbisTableSheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: "); select_expr(expr)', 'select rows matching Python expression in any visible column')
+#IbisTableSheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalExpr(expr, r)), progress=False)', 'unselect rows matching Python expression in any visible column')
 
 IbisFreqTable.addCommand('g'+ENTER, 'open-selected', 'vd.push(openRows(selectedRows))')
 IbisTableIndexSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("SQL query: ")))', 'open sheet with results of raw SQL query')
@@ -721,5 +701,3 @@ IbisTableSheet.class_options.disp_histolen = 0  # disable histograms by default
 vd.addMenuItem('View', 'Sidebar', 'toggle', 'sidebar-toggle')
 vd.addMenuItem('View', 'Sidebar', 'choose', 'sidebar-choose')
 vd.addMenuItem('View', 'Sidebar', 'open', 'open-sidebar')
-
-# make it easier to reload with different limit.  z" ?
