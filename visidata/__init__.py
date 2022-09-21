@@ -67,6 +67,8 @@ import visidata.loaders.tsv
 import visidata.pyobj
 import visidata.loaders.json
 import visidata._open
+import visidata.metasheets
+import visidata.cmdlog
 import visidata.save
 import visidata.clipboard
 import visidata.slide
@@ -75,14 +77,12 @@ import visidata.expr
 
 import visidata.menu
 import visidata.choose
-import visidata.metasheets
 import visidata.join
 import visidata.aggregators
 import visidata.describe
 import visidata.pivot
 import visidata.freqtbl
 import visidata.melt
-import visidata.cmdlog
 import visidata.freeze
 import visidata.regex
 import visidata.canvas
