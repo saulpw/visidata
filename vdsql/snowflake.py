@@ -17,7 +17,7 @@ class SnowflakeSheet(IbisTableSheet):
     def countRows(self):
         r = super().countRows
         if r is None and self.cursor is None:
-            return 'no cursor yet'
+            return None  # no cursor yet
         return r
 
     def executeSql(self, sql):
