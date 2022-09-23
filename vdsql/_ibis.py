@@ -231,6 +231,22 @@ class IbisTableSheet(Sheet):
     def ibis_locals(self):
         return LazyIbisColMap(self, self.query)
 
+    def selectRow(self, row):
+        k = self.rowkey(row) or vd.fail('need key column to select individual rows')
+        super().selectRow(row)
+        self.ibis_selection.append(self.matchRowKeyExpr(row))
+
+    def unselectRow(self, row):
+        k = self.rowkey(row) or vd.fail('need key column to select individual rows')
+        super().unselectRow(row)
+        self.ibis_selection = [ self.ibis_filter & ~self.matchRowKeyExpr(row) ]
+
+    def matchRowKeyExpr(self, row):
+        return functools.reduce(operator.and_, [
+            c.get_ibis_col(self.query, typed=True) == self.rowkey(row)[i]
+                for i, c in enumerate(self.keyCols)
+        ])
+
     @property
     def ibis_current_expr(self):
         return self.get_current_expr(typed=False)
