@@ -31,6 +31,7 @@ vd.option('batch', False, 'replay in batch mode (with no interface and all statu
 vd.option('output', None, 'save the final visible sheet to output at the end of replay')
 vd.option('preplay', '', 'longnames to preplay before replay')
 vd.option('imports', 'plugins', 'imports to preload before .visidatarc (command-line only)')
+vd.option('nothing', False, 'no config, no plugins, nothing extra')
 
 # for --play
 def eval_vd(logpath, *args, **kwargs):
@@ -75,6 +76,7 @@ def optalias(abbr, name, val=None):
     option_aliases[abbr] = (name, val)
 
 
+optalias('N', 'nothing')
 optalias('f', 'filetype')
 optalias('p', 'play')
 optalias('b', 'batch')
@@ -206,7 +208,8 @@ def main_vd():
 
     args = AttrDict(current_args)
 
-    vd.loadConfigAndPlugins(args)
+    if not args.nothing:
+        vd.loadConfigAndPlugins(args)
 
     for k, v in global_args.items():
         options.set(k, v, obj='global')
