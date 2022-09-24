@@ -19,20 +19,26 @@ options_num_first_rows = 10
 def open_csv(vd, p):
     return CsvSheet(p.name, source=p)
 
-def removeNulls(fp):
+def remove_nulls(fp):
     for line in fp:
         yield line.replace('\0', '')
 
 class CsvSheet(SequenceSheet):
     _rowtype = list  # rowdef: list of values
+    _proposed_delimiter = None
+    _delimiter = None
 
     def iterload(self):
         'Convert from CSV, first handling header row specially.'
+        reader_options = options.getall('csv_')
+        if self._delimiter is not None:
+            reader_options["delimiter"] = self._delimiter
+
         with self.source.open_text(encoding=self.options.encoding) as fp:
             if options.safety_first:
-                rdr = csv.reader(removeNulls(fp), **options.getall('csv_'))
+                rdr = csv.reader(self._suggest_dialect(remove_nulls(fp)), **reader_options)
             else:
-                rdr = csv.reader(fp, **options.getall('csv_'))
+                rdr = csv.reader(self._suggest_dialect(fp), **reader_options)
 
             while True:
                 try:
@@ -43,6 +49,40 @@ class CsvSheet(SequenceSheet):
                 except StopIteration:
                     return
 
+    def reload_with_proper_encoding(self):
+        self._delimiter = self._proposed_delimiter
+        self.reload()
+
+    def _suggest_dialect(self, lines):
+        chunk = ""
+        for line in lines:
+            if chunk is None:
+                yield line
+                continue
+
+            chunk += "\n" + line
+            if len(chunk) > 1024 * 1024:
+                self._suggest_dialect_based_on_chunk(chunk[1:])
+                chunk = None
+
+            yield line
+
+        if chunk is not None and len(chunk) > 0:
+            self._suggest_dialect_based_on_chunk(chunk[1:])
+
+    def _suggest_dialect_based_on_chunk(self, chunk):
+        proposed_dialect = csv.Sniffer().sniff(chunk)
+        actual_delimiter = self._delimiter if self._delimiter is not None else options.csv_delimiter
+
+        # EU CSV delimiter is different from US.
+        # As quoted from https://en.wikipedia.org/wiki/Comma-separated_values
+        # "Semicolons are often used instead of commas in many European locales in order to use the comma as the decimal separator and, possibly, the period as a decimal grouping character."
+        if proposed_dialect.delimiter == actual_delimiter:
+            return
+
+        self._proposed_delimiter = proposed_dialect.delimiter
+        self.addCommand('z^R', 'reload-csv-with-proper-dialect', 'sheet.reload_with_proper_encoding()')
+        vd.warning("Probably you CSV file is loaded incorrectly because the delimiter is wrong. Press z CRTL-r to reload with proper delimeter.")
 
 @VisiData.api
 def save_csv(vd, p, sheet):
