@@ -178,7 +178,7 @@ class CommandLogBase:
             self.afterExecSheet(sheet, False, '')
 
         colname, rowname, sheetname = '', '', None
-        if sheet and not (cmd.longname.startswith('open-') and not cmd.longname in ('open-row-pyobj', 'open-cell-pyobj')):
+        if sheet and not (cmd.longname.startswith('open-') and not cmd.longname in ('open-row', 'open-cell')):
             sheetname = sheet.name
 
             colname, rowname = sheet.commandCursor(cmd.execstr)
