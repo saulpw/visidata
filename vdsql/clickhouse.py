@@ -37,8 +37,9 @@ class ClickhouseSheet(IbisTableSheet):
                     self.query_result = con.con.execute_iter(sqlstr, settings, chunk_size=1000, query_id=qid)
                     qid = str(time.time())
                     for row in self.query_result:
-                        prog.total = con.con.last_query.progress.total_rows # min(self.options.ibis_limit or self.total_rows, self.total_rows)
+                        prog.total = con.con.last_query.progress.total_rows
                         prog.made = con.con.last_query.progress.rows
+                        self.total_rows = prog.total
                         yield from row
 
             except Exception as e:
@@ -49,3 +50,5 @@ class ClickhouseSheet(IbisTableSheet):
 
 
 ClickhouseSheet.init('total_rows', lambda: None)
+
+#ClickhouseSheet.class_options.sql_always_count = True
