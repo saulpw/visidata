@@ -2,9 +2,11 @@
 
 def main():
     import ibis
+    import visidata
     from visidata import main, vd
 
-    import vdsql as _  # noqa: F401
+    import vdsql
+    visidata.__version_info__ = f'vdsql {vdsql.__version__}'
 
     for ext in "db ddb duckdb sqlite sqlite3".split():
         setattr(vd, f"open_{ext}", vd.open_vdsql)
