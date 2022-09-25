@@ -197,7 +197,7 @@ class IbisTableSheet(Sheet):
         return self.ibis_conpool.get_conn()
 
     def choose_sidebar(self):
-        sidebars = ['base_sql', 'pending_sql', 'curcol_sql', 'substrait', 'ibis_current_expr', 'pending_expr']
+        sidebars = ['base_sql', 'pending_sql', 'curcol_sql', 'ibis_current_expr', 'pending_expr']
         vd.options.disp_ibis_sidebar = vd.chooseOne([{'key': s, 'value':getattr(self, s)} for s in sidebars])
 
     @property
