@@ -516,6 +516,6 @@ vd.addMenuItem('Edit', 'Repeat', 'last command', 'repeat-input')
 vd.addMenuItem('Edit', 'Repeat', 'last command N times', 'repeat-input-n')
 vd.addMenuItem('Edit', 'Repeat', 'last command for all selected rows', 'repeat-input-selected')
 
-CommandLog.class_options.json_sort_keys = False
-CommandLog.class_options.encoding = 'utf-8'
-CommandLogJsonl.class_options.json_sort_keys = False
+CommandLog.options.json_sort_keys = False
+CommandLog.options.encoding = 'utf-8'
+CommandLogJsonl.options.json_sort_keys = False

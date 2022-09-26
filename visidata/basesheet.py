@@ -73,6 +73,19 @@ class DrawablePane(Extensible):
             return True
 
 
+class _dualproperty:
+    'Return *obj_method* or *cls_method* depending on whether property is on instance or class.'
+    def __init__(self, obj_method, cls_method):
+        self._obj_method = obj_method
+        self._cls_method = cls_method
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self._cls_method(objtype)
+        else:
+            return self._obj_method(obj)
+
+
 class BaseSheet(DrawablePane):
     'Base class for all sheet types.'
     _rowtype = object    # callable (no parms) that returns new empty item
@@ -81,13 +94,13 @@ class BaseSheet(DrawablePane):
     precious = True      # False for a few discardable metasheets
     defer = False        # False for not deferring changes until save
 
-    @visidata.classproperty
-    def class_options(cls):
+    def _obj_options(self):
+        return vd.OptionsObject(vd._options, obj=self)
+
+    def _class_options(cls):
         return vd.OptionsObject(vd._options, obj=cls)
 
-    @property
-    def options(self):
-        return vd.OptionsObject(vd._options, obj=self)
+    class_options = options = _dualproperty(_obj_options, _class_options)
 
     def __init__(self, *names, **kwargs):
         self._name = None   # initial cache value necessary for self.options

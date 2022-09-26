@@ -179,7 +179,7 @@ PandasFreqTableSheet.addCommand('s', 'select-row', 'select([cursorRow]); cursorD
 PandasFreqTableSheet.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)', 'unselect rows grouped in current row in source sheet')
 PandasFreqTableSheet.addCommand(ENTER, 'open-row', 'vd.push(source.expand_source_rows(cursorRow))', 'open copy of source sheet with rows that are grouped in current row')
 
-PandasFreqTableSheet.class_options.numeric_binning = False
+PandasFreqTableSheet.options.numeric_binning = False
 
 vd.addGlobals({
         'PandasFreqTableSheet': PandasFreqTableSheet,
