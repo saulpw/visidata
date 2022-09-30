@@ -381,9 +381,14 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
             vd.warning('plugin autoload failed; see issue #1529')
 
         for ep in eps:
-            plug = ep.load()
-            sys.modules[f'visidata.plugins.{ep.name}'] = plug
-            vd.status(f'Plugin {ep.name} loaded')
+            try:
+                plug = ep.load()
+                sys.modules[f'visidata.plugins.{ep.name}'] = plug
+                vd.debug(f'Plugin {ep.name} loaded')
+            except Exception as e:
+                vd.warning(f'Plugin {ep.name} failed to load')
+                vd.exceptionCaught(e)
+                continue
 
     # import plugins from .visidata/plugins before .visidatarc, so plugin options can be overridden
     for modname in (args.imports or vd.options.imports or '').split():
