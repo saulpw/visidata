@@ -214,6 +214,8 @@ def parseMouse(vd, **kwargs):
 @VisiData.api
 def mainloop(self, scr):
     'Manage execution of keystrokes and subsequent redrawing of screen.'
+    nonidle_timeout = vd.curses_timeout
+
     scr.timeout(vd.curses_timeout)
     with contextlib.suppress(curses.error):
         curses.curs_set(0)
@@ -313,13 +315,15 @@ def mainloop(self, scr):
         # no idle redraw unless background threads are running
         time.sleep(0)  # yield to other threads which may not have started yet
         if vd.unfinishedThreads:
-            scr.timeout(vd.curses_timeout)
+            scr.timeout(nonidle_timeout)
         else:
             numTimeouts += 1
             if vd.timeouts_before_idle >= 0 and numTimeouts > vd.timeouts_before_idle:
-                scr.timeout(-1)
+                vd.curses_timeout = -1
             else:
-                scr.timeout(vd.curses_timeout)
+                vd.curses_timeout = nonidle_timeout
+
+            scr.timeout(vd.curses_timeout)
 
 
 def initCurses():
