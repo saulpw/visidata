@@ -60,7 +60,7 @@ def until_get_wch(scr):
     return ret
 
 
-def splice(v, i, s):
+def splice(v:str, i:int, s:str):
     'Insert `s` into string `v` at `i` (such that v[i] == s[0]).'
     return v if i < 0 else v[:i] + s + v[i:]
 
@@ -227,7 +227,7 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
         elif ch == '^U':                           v = v[i:]; i = 0  # clear to beginning
         elif ch == '^V':                           v = splice(v, i, until_get_wch(scr)); i += 1  # literal character
         elif ch == '^W':                           j = find_nonword(v, 0, i-1, -1); v = v[:j+1] + v[i:]; i = j+1  # erase word
-        elif ch == '^Y':                           v = splice(v, i, vd.memory.clipval)
+        elif ch == '^Y':                           v = splice(v, i, str(vd.memory.clipval))
         elif ch == '^Z':                           suspend()
         # CTRL+arrow
         elif ch == 'kLFT5':                        i = find_nonword(v, 0, i-1, -1)+1; # word left
