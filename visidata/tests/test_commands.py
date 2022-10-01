@@ -29,11 +29,11 @@ def isTestableCommand(longname, cmdlist):
     return True
 
 
-inputLines = { 'save-sheet': 'tests/jetsam.csv',  # save to some tmp file
-                'save-all': 'tests/lagan.csv',
-                 'open-file': 'tests/jetsam.csv',  # reopen what was just saved ('o' must come after ^S in the commands list)
-                 'save-col': 'tests/flotsam.csv',
-                 'save-col-keys': 'tests/debris.csv',
+inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
+                'save-all': 'lagan.csv',
+                 'open-file': 'jetsam.csv',  # reopen what was just saved ('o' must come after ^S in the commands list)
+                 'save-col': 'flotsam.csv',
+                 'save-col-keys': 'debris.csv',
                 'pyobj-expr': '2+2',            # open the python object for '4'
                 'edit-cell': '3',
                  'search-col': 'foo',
@@ -114,7 +114,7 @@ class TestCommands:
         else:
             vd.getkeystroke = Mock(side_effect=['^J'])
 
-        sample_file = pkg_resources.resource_filename('visidata', '../sample_data/sample.tsv')
+        sample_file = pkg_resources.resource_filename('visidata', 'tests/sample.tsv')
         vs = visidata.TsvSheet('test_commands', source=visidata.Path(sample_file))
         vs.reload.__wrapped__(vs)
         vs.vd = vd

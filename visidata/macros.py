@@ -1,7 +1,7 @@
 from visidata import *
 from functools import wraps
 
-from visidata.cmdlog import CommandLog
+from visidata.cmdlog import CommandLog, CommandLogJsonl
 
 vd.macroMode = None
 vd.macrobindings = {}
@@ -13,7 +13,14 @@ def macrosheet(vd):
 
     real_macrosheet = IndexSheet('user_macros', rows=[], source=macrosheet)
     for ks, fn in macrosheet.rows:
-        vs = vd.loadInternalSheet(CommandLog, Path(fn))
+        fp = Path(fn)
+        if fp.ext == 'vd':
+            vs = vd.loadInternalSheet(CommandLog, fp)
+        elif fp.ext == 'vdj':
+            vs = vd.loadInternalSheet(CommandLogJsonl, fp)
+        else:
+            vd.warning(f'failed to load macro {fn}')
+            continue
         vd.status(f"setting {ks}")
         setMacro(ks, vs)
         real_macrosheet.addRow(vs)
@@ -32,17 +39,18 @@ def setMacro(ks, vs):
         BaseSheet.addCommand(ks, vs.name, 'runMacro(vd.macrobindings[keystrokes])')
 
 
-@CommandLog.api
+@CommandLogJsonl.api
 def saveMacro(self, rows, ks):
         vs = copy(self)
         vs.rows = rows
         macropath = Path(vd.fnSuffix(options.visidata_dir+"macro"))
-        vd.save_vd(macropath, vs)
+        vd.save_vdj(macropath, vs)
         setMacro(ks, vs)
         vd.macrosheet.source.append_tsv_row((ks, macropath))
+        vd.macrosheet.addRow(vd.loadInternalSheet(CommandLogJsonl, macropath))
 
-@CommandLog.api
-@wraps(CommandLog.afterExecSheet)
+@CommandLogJsonl.api
+@wraps(CommandLogJsonl.afterExecSheet)
 def afterExecSheet(cmdlog, sheet, escaped, err):
     if vd.macroMode and (vd.activeCommand is not None) and (vd.activeCommand is not UNLOADED):
         cmd = copy(vd.activeCommand)
@@ -53,7 +61,7 @@ def afterExecSheet(cmdlog, sheet, escaped, err):
     # once cmdlog.afterExecSheet.__wrapped__ runs, vd.activeCommand resets to None
     cmdlog.afterExecSheet.__wrapped__(cmdlog, sheet, escaped, err)
 
-@CommandLog.api
+@CommandLogJsonl.api
 def startMacro(cmdlog):
     if vd.macroMode:
         ks = vd.input('save macro for keystroke: ')
@@ -61,7 +69,11 @@ def startMacro(cmdlog):
         vd.macroMode = None
     else:
         vd.status("recording macro")
-        vd.macroMode = CommandLog('current_macro', rows=[])
+        vd.macroMode = CommandLogJsonl('current_macro', rows=[])
+
+@VisiData.before
+def run(vd, *args, **kwargs):
+    vd.macrosheet
 
 
 Sheet.addCommand('m', 'macro-record', 'vd.cmdlog.startMacro()', 'record macro')

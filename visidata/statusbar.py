@@ -195,9 +195,9 @@ def drawRightStatus(vd, scr, vs):
                 if scr is vd.winTop:
                     cattr = update_attr(cattr, colors.color_top_status, 0)
                 if active:
-                    cattr = update_attr(cattr, colors.color_active_status, 1)
+                    cattr = update_attr(cattr, colors.color_active_status, 0)
                 else:
-                    cattr = update_attr(cattr, colors.color_inactive_status, 1)
+                    cattr = update_attr(cattr, colors.color_inactive_status, 0)
                 statuslen = clipdraw(scr, vs.windowHeight-1, rightx, rstatus, cattr.attr, w=vs.windowWidth-1, rtl=True)
                 rightx -= statuslen
                 ret += statuslen

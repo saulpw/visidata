@@ -192,7 +192,7 @@ class date(datetime.datetime):
         return NotImplemented
 
     def __ge__(self, b):
-        if isinstance(b, datetime.datetime): return datetime.datetime.__le__(self, b)
+        if isinstance(b, datetime.datetime): return datetime.datetime.__ge__(self, b)
         elif isinstance(b, datetime.date):   return self.date().__ge__(b)
         return NotImplemented
 

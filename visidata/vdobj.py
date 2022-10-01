@@ -31,7 +31,7 @@ class VisiData(visidata.Extensible):
     def global_api(cls, func):
         'Make global func() and identical vd.func()'
         def _vdfunc(*args, **kwargs):
-            return func(visidata.vd, *args, **kwargs)
+            return getattr(visidata.vd, func.__name__)(*args, **kwargs)
         visidata.vd.addGlobals({func.__name__: func})
         setattr(cls, func.__name__, func)
         return wraps(func)(_vdfunc)

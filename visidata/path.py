@@ -149,8 +149,8 @@ class Path(os.PathLike):
             self._path = pathlib.Path(given)
 
         self.ext = self.suffix[1:]
-        if self.suffixes:  #1450  don't make this a oneliner; [:-0] doesn't work
-            self.name = self._path.name[:-sum(map(len, self.suffixes))]
+        if self.suffix:  #1450  don't make this a oneliner; [:-0] doesn't work
+            self.name = self._path.name[:-len(self.suffix)]
         else:
             self.name = self._path.name
 
@@ -347,6 +347,9 @@ class RepeatFile:
             except StopIteration:
                 break  # end of file
         return r
+
+    def write(self, s):
+        return self.iter_lines.write(s)
 
     def tell(self):
         '''Tells the current position as an opaque line marker.'''
