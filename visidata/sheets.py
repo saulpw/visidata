@@ -1038,7 +1038,7 @@ def remove(vd, vs):
 
 
 @VisiData.api
-def push(vd, vs, pane=0):
+def push(vd, vs, pane=0, load=True):
     'Push Sheet *vs* onto ``vd.sheets`` stack for *pane* (0 for active pane, -1 for inactive pane).  Remove from other position if already on sheets stack.'
     if not isinstance(vs, BaseSheet):
         return  # return instead of raise, some commands need this
@@ -1060,6 +1060,9 @@ def push(vd, vs, pane=0):
 
     if vs.precious and vs not in vd.allSheets:
         vd.allSheets.append(vs)
+
+    if load:
+        vs.ensureLoaded()
 
 
 @VisiData.lazy_property

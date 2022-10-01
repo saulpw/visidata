@@ -369,7 +369,7 @@ def run(vd, *sheetlist):
     try:
         # Populate VisiData object with sheets from a given list.
         for vs in sheetlist:
-            vd.push(vs)
+            vd.push(vs, load=False)
 
         scr = initCurses()
         ret = vd.mainloop(scr)
