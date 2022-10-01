@@ -74,11 +74,11 @@ class VisiDataMetaSheet(TsvSheet):
     pass
 
 # commandline must not override these for internal sheets
-VisiDataMetaSheet.class_options.delimiter = vd_system_sep
-VisiDataMetaSheet.class_options.header = 1
-VisiDataMetaSheet.class_options.skip = 0
-VisiDataMetaSheet.class_options.row_delimiter = '\n'
-VisiDataMetaSheet.class_options.encoding = 'utf-8'
+VisiDataMetaSheet.options.delimiter = vd_system_sep
+VisiDataMetaSheet.options.header = 1
+VisiDataMetaSheet.options.skip = 0
+VisiDataMetaSheet.options.row_delimiter = '\n'
+VisiDataMetaSheet.options.encoding = 'utf-8'
 
 
 class OptionsSheet(Sheet):
@@ -237,7 +237,7 @@ OptionsSheet.addCommand('d', 'unset-option', 'options.unset(cursorRow.name, str(
 OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)', 'edit option at current row')
 OptionsSheet.bindkey('e', 'edit-option')
 OptionsSheet.bindkey(ENTER, 'edit-option')
-MetaSheet.class_options.header = 0
+MetaSheet.options.header = 0
 
 
 vd.addGlobals({

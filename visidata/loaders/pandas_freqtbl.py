@@ -164,6 +164,9 @@ class PandasFreqTableSheet(PivotSheet):
                 {}
             ))
 
+    def openRow(self, row):
+        return self.source.expand_source_rows(row)
+
 @Sheet.api
 def expand_source_rows(sheet, row):
     """Support for expanding a row of frequency table to underlying rows"""
@@ -174,12 +177,7 @@ def expand_source_rows(sheet, row):
 PandasSheet.addCommand('F', 'freq-col', 'vd.push(PandasFreqTableSheet(sheet, cursorCol))', 'open Frequency Table grouped on current column, with aggregations of other columns')
 PandasSheet.addCommand('gF', 'freq-keys', 'vd.push(PandasFreqTableSheet(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on source sheet, with aggregations of other columns')
 
-PandasFreqTableSheet.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)', 'toggle selection of rows grouped in current row in source sheet')
-PandasFreqTableSheet.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)', 'select rows grouped in current row in source sheet')
-PandasFreqTableSheet.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)', 'unselect rows grouped in current row in source sheet')
-PandasFreqTableSheet.addCommand(ENTER, 'open-row', 'vd.push(source.expand_source_rows(cursorRow))', 'open copy of source sheet with rows that are grouped in current row')
-
-PandasFreqTableSheet.class_options.numeric_binning = False
+PandasFreqTableSheet.options.numeric_binning = False
 
 vd.addGlobals({
         'PandasFreqTableSheet': PandasFreqTableSheet,

@@ -17,6 +17,7 @@ def open_tar(vd, p):
 VisiData.open_tgz = VisiData.open_tar
 VisiData.open_txz = VisiData.open_tar
 VisiData.open_tbz2 = VisiData.open_tar
+VisiData.open_whl = VisiData.open_zip
 
 @VisiData.api
 class ZipSheet(Sheet):

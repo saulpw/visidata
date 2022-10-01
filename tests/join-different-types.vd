@@ -1,16 +1,16 @@
 sheet	col	row	longname	input	keystrokes	comment
 			open-file	tests/joining_error.xlsx	o	
 			open-file	tests/joining_error_interesting_records.csv	o	
-joining_error		キrecords	open-row-pyobj		^J	open sheet with copies of rows referenced in current row
+joining_error		キrecords	open-row		^J	open sheet with copies of rows referenced in current row
 joining_error_records			sheets-stack		S	open Sheets Stack: join or jump between the active sheets on the current stack
 sheets		キjoining_error_interesting_records	slide-up		K	slide current row up
 sheets		キjoining_error_interesting_records	slide-up		K	slide current row up
 sheets		キjoining_error_interesting_records	select-row		s	select current row
 sheets		キjoining_error_records	select-row		s	select current row
-sheets		キjoining_error_interesting_records	open-row-pyobj		^J	open sheet referenced in current row
+sheets		キjoining_error_interesting_records	open-row		^J	open sheet referenced in current row
 joining_error_interesting_records	Row		key-col		!	toggle current column as a key column
 joining_error_interesting_records			sheets-stack		S	open Sheets Stack: join or jump between the active sheets on the current stack
-sheets		キjoining_error_records	open-row-pyobj		^J	open sheet referenced in current row
+sheets		キjoining_error_records	open-row		^J	open sheet referenced in current row
 joining_error_records	Row		key-col		!	toggle current column as a key column
 joining_error_records			sheets-stack		S	open Sheets Stack: join or jump between the active sheets on the current stack
 sheets		キjoining_error_interesting_records	slide-up		K	slide current row up

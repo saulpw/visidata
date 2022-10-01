@@ -1,9 +1,6 @@
 from copy import copy
 from visidata import vd, asyncthread, Progress, Sheet, options, UNLOADED
 
-Sheet.init('_ordering', list, copy=True)  # (col:Column, reverse:bool)
-
-
 @Sheet.api
 def orderBy(sheet, *cols, reverse=False):
     'Add *cols* to internal ordering and re-sort the rows accordingly.  Pass *reverse* as True to order these *cols* descending.  Pass empty *cols* (or cols[0] of None) to clear internal ordering.'
