@@ -135,7 +135,7 @@ def save_jsonl(vd, p, *vsheets):
             vs.write_jsonl(fp)
 
 
-JsonSheet.class_options.encoding = 'utf-8'
+JsonSheet.options.encoding = 'utf-8'
 VisiData.save_ndjson = VisiData.save_jsonl
 VisiData.save_ldjson = VisiData.save_jsonl
 

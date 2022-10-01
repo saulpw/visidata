@@ -372,29 +372,39 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
     sys.path.append(str(visidata.Path(vd.options.visidata_dir)/"plugins-deps"))
 
     # autoload installed plugins first
-    if vd.options.plugins_autoload:
+    if not args.nothing and args.plugins_autoload and vd.options.plugins_autoload:
         from importlib_metadata import entry_points  # a backport which supports < 3.8 https://github.com/pypa/twine/pull/732
-
-        for ep in entry_points().get('visidata.plugins', []):
-            plug = ep.load()
-            sys.modules[f'visidata.plugins.{ep.name}'] = plug
-            vd.status(f'Plugin {ep.name} loaded')
-
-    # import plugins from .visidata/plugins before .visidatarc, so plugin options can be overridden
-    for modname in (args.imports or vd.options.imports or '').split():
         try:
-            vd.addGlobals(importlib.import_module(modname).__dict__)
-        except ModuleNotFoundError as e:
-            # issue #1131
-            if 'plugins' in e.args[0]:
+            eps = entry_points().get('visidata.plugins', [])
+        except TypeError:
+            eps = []
+            vd.warning('plugin autoload failed; see issue #1529')
+
+        for ep in eps:
+            try:
+                plug = ep.load()
+                sys.modules[f'visidata.plugins.{ep.name}'] = plug
+                vd.debug(f'Plugin {ep.name} loaded')
+            except Exception as e:
+                vd.warning(f'Plugin {ep.name} failed to load')
+                vd.exceptionCaught(e)
                 continue
-            vd.exceptionCaught(e)
-        except Exception as e:
-            vd.exceptionCaught(e)
-            continue
+
+        # import plugins from .visidata/plugins before .visidatarc, so plugin options can be overridden
+        for modname in (args.imports or vd.options.imports or '').split():
+            try:
+                vd.addGlobals(importlib.import_module(modname).__dict__)
+            except ModuleNotFoundError as e:  #1131
+                if 'plugins' in e.args[0]:
+                    continue
+                vd.exceptionCaught(e)
+            except Exception as e:
+                vd.exceptionCaught(e)
+                continue
 
     # user customisations in config file in standard location
-    vd.loadConfigFile(vd.options.config, vd.getGlobals())
+    if vd.options.config:
+        vd.loadConfigFile(vd.options.config, vd.getGlobals())
 
 
 vd.option('visidata_dir', '~/.visidata/', 'directory to load and store additional files', sheettype=None)

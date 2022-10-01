@@ -1,3 +1,4 @@
+import pathlib
 import tarfile
 import zipfile
 from visidata.loaders import unzip_http
@@ -16,6 +17,7 @@ def open_tar(vd, p):
 VisiData.open_tgz = VisiData.open_tar
 VisiData.open_txz = VisiData.open_tar
 VisiData.open_tbz2 = VisiData.open_tar
+VisiData.open_whl = VisiData.open_zip
 
 @VisiData.api
 class ZipSheet(Sheet):
@@ -49,10 +51,21 @@ class ZipSheet(Sheet):
             fp = self.openZipFile(self.zfp, fi)
             return vd.openSource(Path(fi.filename, fp=fp, filesize=fi.file_size), filetype=options.filetype)
 
-    @asyncthread
     def extract(self, *rows, path=None):
+        path = path or pathlib.Path('.')
+
+        files = []
+        for row in rows:
+            r, _ = row
+            if (path/r.filename).exists():
+                vd.confirm(f'{r.filename} exists, overwrite? ')  #1452
+            self.extract_async(row)
+
+    @asyncthread
+    def extract_async(self, *rows, path=None):
+        'Extract rows to *path*, without confirmation.'
         for r, _ in Progress(rows):
-            self.zfp.extractall(members=[r.filename], path=path)
+            self.zfp.extract(member=r.filename, path=path)
             vd.status(f'extracted {r.filename}')
 
     @property

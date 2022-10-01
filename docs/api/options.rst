@@ -35,8 +35,16 @@ Options can be overridden globally, or for all sheets of a specific type, or onl
 The options context should be referenced directly when setting:
 
     - ``sheet.options`` to *set* an option on a specific sheet instance (**sheet override**).
-    - ``<SheetType>.class_options`` to *set* a option default for a particular type of Sheet (**class override**).
+    - ``<SheetType>.options`` to *set* a option default for a particular type of Sheet (**class override**).
     - ``vd.options`` (or plain ``options``) to *set* an option globally for all sheets, except for sheets that have a sheet override (**global override**).
+
+.. note::
+
+    Class overrides prior to v2.10
+    ------------------------------
+
+    In VisiData v2.10 and earlier, class overrides had to be specified using ``<SheetType>.class_options``.
+    In subsequent versions, ``.options`` can be used for getting and setting options at all levels.
 
 Use ``sheet.options`` to *get* an option within the context of a specific sheet.
 This is strongly preferred, so the user can override the option setting on a sheet-specific basis.
@@ -44,7 +52,7 @@ However, some options and situations are truly sheet-agnostic, and so ``vd.optio
 
 When getting an option value, VisiData will look for a sheet override first, then class overrides next (from most specific subclass all the way up to BaseSheet), then a global override, before returning the default value from the option definition itself.
 
-In general, plugins should use ``FooSheet.class_options`` to override values for the plugin-specific sheet type.
+In general, plugins should use ``FooSheet.options`` to override values for the plugin-specific sheet type.
 
 .. note::
 
@@ -118,4 +126,4 @@ Examples
     sheet.options.color_current_row = 'bold blue'
 
     # option set for all DirSheets
-    DirSheet.class_options.color_current_row = 'reverse green'
+    DirSheet.options.color_current_row = 'reverse green'

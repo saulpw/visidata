@@ -7,6 +7,7 @@ import functools
 import json
 
 vd.option('fixer_key', '', 'API Key for fixer.io')
+vd.option('fixer_currency_cache_days', 1, 'Cache days for currency conversions')
 
 currency_symbols = {
     '$': 'USD',
@@ -19,9 +20,25 @@ currency_symbols = {
     '₫': 'VND',
 }
 
-def currency_rates_json(date='latest'):
-    url = 'http://data.fixer.io/api/%s?access_key=%s' % (date, vd.options.fixer_key)
-    return vd.urlcache(url).read_text()
+def currency_rates_json(date='latest', base='USD'):
+    url = 'https://api.apilayer.com/fixer/%s?base=%s' % (date, base)
+    return vd.urlcache(
+        url, 
+        days=vd.options.fixer_currency_cache_days, 
+        headers={
+            # First need to set some additional headers as otherwise apilayers will block it with a 403
+            # See also https://stackoverflow.com/questions/13303449/urllib2-httperror-http-error-403-forbidden
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+            'Accept-Encoding': 'none',
+            'Accept-Language': 'en-US,en;q=0.8',
+            'Connection': 'keep-alive',
+
+            # Finally set Apikey
+            'apikey': vd.options.fixer_key
+        } 
+    ).read_text()
 
 @functools.lru_cache()
 def currency_rates():
@@ -37,6 +54,7 @@ def currency_multiplier(src_currency, dest_currency):
     usd_mult = eur_usd_mult/eur_src_mult
     if dest_currency == 'USD':
         return usd_mult
+    
     return usd_mult/currency_rates()[dest_currency]
 
 def USD(s):

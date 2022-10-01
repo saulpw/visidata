@@ -29,6 +29,7 @@ def formatRange(col, numeric_key):
         return col.format(a)
     return ' - '.join(col.format(x) for x in numeric_key)
 
+
 class RangeColumn(Column):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -41,6 +42,18 @@ class RangeColumn(Column):
         if typedval is None:
             return None
         return formatRange(self.origcol, typedval)
+
+
+def AggrColumn(aggcol, aggregator):
+    aggname = '%s_%s' % (aggcol.name, aggregator.name)
+
+    return Column(aggname,
+                  type=aggregator.type or aggcol.type,
+                  fmtstr=aggcol.fmtstr,
+                  getter=lambda col,row,agg=aggregator: agg(col.origCol, row.sourcerows),
+                  origCol=aggcol,
+                  )
+
 
 class PivotSheet(Sheet):
     'Summarize key columns in pivot table and display as new sheet.'
@@ -116,12 +129,7 @@ class PivotSheet(Sheet):
         if not self.pivotCols:
             for aggcol, aggregatorlist in aggcols.items():
                 for aggregator in aggregatorlist:
-                    aggname = '%s_%s' % (aggcol.name, aggregator.name)
-
-                    c = Column(aggname,
-                                type=aggregator.type or aggcol.type,
-                                fmtstr=aggcol.fmtstr,
-                                getter=lambda col,row,aggcol=aggcol,agg=aggregator: agg(aggcol, row.sourcerows))
+                    c = AggrColumn(aggcol, aggregator)
                     self.addColumn(c)
 
         # add pivoted columns
@@ -258,7 +266,17 @@ class PivotSheet(Sheet):
             c.setCache(True)
 
 
+@PivotSheet.api
+def addcol_aggr(sheet, col):
+    hasattr(col, 'origCol') or vd.fail('not an aggregation column')
+    for agg in vd.chooseMany(vd.aggregator_choices):
+        sheet.addColumnAtCursor(AggrColumn(col.origCol, vd.aggregators[agg]))
+
+
 Sheet.addCommand('W', 'pivot', 'vd.push(Pivot(sheet, keyCols, [cursorCol]))', 'open Pivot Table: group rows by key column and summarize current column')
+
+PivotSheet.addCommand('', 'addcol-aggr', 'addcol_aggr(cursorCol)', 'add aggregation column from source of current column')
+vd.addMenuItem('Column', 'Add column', 'aggregator', 'addcol-aggr')
 
 vd.addGlobals({
     'Pivot': Pivot,

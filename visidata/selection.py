@@ -19,10 +19,34 @@ def toggle(self, rows):
         if not self.unselectRow(r):
             self.selectRow(r)
 
+
+@Sheet.api
+def select_row(self, row):
+    'Add single *row* to set of selected rows.'
+    self.addUndoSelection()
+    self.selectRow(row)
+
+
+@Sheet.api
+def toggle_row(self, row):
+    'Toggle selection of given *row*.'
+    self.addUndoSelection()
+    if not self.unselectRow(row):
+        self.selectRow(row)
+
+
+@Sheet.api
+def unselect_row(self, row):
+    'Remove single *row* from set of selected rows.'
+    self.addUndoSelection()
+    self.unselectRow(row) or vd.warning('row not selected')
+
+
 @Sheet.api
 def selectRow(self, row):
-    'Add *row* to set of selected rows.  Overrideable.'
+    'Add *row* to set of selected rows.  May be called multiple times in one command.  Overrideable.'
     self._selectedRows[self.rowid(row)] = row
+
 
 @Sheet.api
 def unselectRow(self, row):
@@ -45,7 +69,7 @@ def select(self, rows, status=True, progress=True):
     "Add *rows* to set of selected rows. Async. Don't show progress if *progress* is False; don't show status if *status* is False."
     self.addUndoSelection()
     before = self.nSelectedRows
-    if options.bulk_select_clear:
+    if self.options.bulk_select_clear:
         self.clearSelected()
     for r in (Progress(rows, 'selecting') if progress else rows):
         self.selectRow(r)
@@ -135,9 +159,9 @@ def addUndoSelection(sheet):
     vd.addUndo(undoAttrCopyFunc([sheet], '_selectedRows'))
 
 
-Sheet.addCommand('t', 'stoggle-row', 'toggle([cursorRow]); cursorDown(1)', 'toggle selection of current row')
-Sheet.addCommand('s', 'select-row', 'select([cursorRow]); cursorDown(1)', 'select current row')
-Sheet.addCommand('u', 'unselect-row', 'unselect([cursorRow]); cursorDown(1)', 'unselect current row')
+Sheet.addCommand('t', 'stoggle-row', 'toggle_row(cursorRow); cursorDown(1)', 'toggle selection of current row')
+Sheet.addCommand('s', 'select-row', 'select_row(cursorRow); cursorDown(1)', 'select current row')
+Sheet.addCommand('u', 'unselect-row', 'unselect_row(cursorRow); cursorDown(1)', 'unselect current row')
 
 Sheet.addCommand('gt', 'stoggle-rows', 'toggle(rows)', 'toggle selection of all rows')
 Sheet.addCommand('gs', 'select-rows', 'select(rows)', 'select all rows')

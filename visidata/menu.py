@@ -116,7 +116,10 @@ vd.menus = [
         Menu('New', 'open-new'),
         Menu('Open file/url', 'open-file'),
         Menu('Rename', 'rename-sheet'),
-        Menu('Guard', 'guard-sheet'),
+        Menu('Guard', 
+            Menu('on', 'guard-sheet'),
+            Menu('off', 'guard-sheet-off')
+        ),
         Menu('Duplicate',
             Menu('selected rows by ref', 'dup-selected'),
             Menu('all rows by ref', 'dup-rows'),

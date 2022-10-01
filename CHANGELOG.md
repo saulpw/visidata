@@ -1,5 +1,37 @@
 # VisiData version history
 
+# v2.10.1 (2022-09-14)
+
+## Improvements
+
+- [docs] document `-d` option (thanks @abitrolly for PR #1515)
+- [freq] disable histogram if `disp_histlen` or `disp_histogram` set to 0 or empty string
+- [guard] add `guard-sheet-off` which unsets `options.quitguard` on current sheet (thanks @hanfried for PR #1517)
+- [menu] add `BUTTON1_CLICKED` (same as `BUTTON1_PRESSED`)
+- [open] add `zo` to open file or url from path in current cell
+
+## Bugfixes
+
+- fix Guix build problems (reported by @ryanprior #1499)
+- add support for sheet names with multiple `.` (periods) in the name (requested by @geekscrapy #1494)
+- [cmdlog] add more portable shebang in vdj
+- [date] fix custom date greater than or equal to comparison
+- [macros] fix `macro-record` (#1513)
+- [macros] refresh `macro-sheet` upon macro addition
+- [macros] ensure macros are set upon startup
+- [plugins] update usd plugin api (thanks @hanfried for PR #1510)
+- [repeat] fix `repeat-` (#1513)
+- [status] reduce priority of active colouring (reported by @geekscrapy #804)
+
+## API
+
+- add `ExpandedColumn` to globals
+- add `Extensible.before` and `Extensible.after`
+  - `def foo` decorated with `@VisiData.before` will run it before `vd.foo()`
+  - `def foo` decorated with `@VisiData.after` will run it immediately after
+
+
+
 # v2.10 (2022-08-28)
 
 - [plugins] load all entry points in `visidata.plugins` group before config load
