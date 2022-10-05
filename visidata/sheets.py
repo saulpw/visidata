@@ -956,7 +956,6 @@ class SequenceSheet(Sheet):
 class IndexSheet(Sheet):
     'Base class for tabular sheets with rows that are Sheets.'
     rowtype = 'sheets'  # rowdef: Sheet
-    precious = False
 
     columns = [
         Column('name', getter=lambda c,r: r.names[-1], setter=lambda c,r,v: setitem(r.names, -1, v)),
@@ -1004,6 +1003,7 @@ class SheetsSheet(IndexSheet):
         ColumnAttr('progressPct'),
 #        ColumnAttr('threads', 'currentThreads', type=vlen),
     ]
+    precious = False
     nKeys = 1
     def reload(self):
         self.rows = self.source
