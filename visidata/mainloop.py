@@ -315,7 +315,7 @@ def mainloop(self, scr):
         # no idle redraw unless background threads are running
         time.sleep(0)  # yield to other threads which may not have started yet
         if vd.unfinishedThreads:
-            scr.timeout(nonidle_timeout)
+            vd.curses_timeout = nonidle_timeout
         else:
             numTimeouts += 1
             if vd.timeouts_before_idle >= 0 and numTimeouts > vd.timeouts_before_idle:
@@ -323,7 +323,7 @@ def mainloop(self, scr):
             else:
                 vd.curses_timeout = nonidle_timeout
 
-            scr.timeout(vd.curses_timeout)
+        scr.timeout(vd.curses_timeout)
 
 
 def initCurses():
