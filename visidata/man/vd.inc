@@ -1,4 +1,4 @@
-.Dd September 13, 2022
+.Dd October 06, 2022
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -874,6 +874,9 @@ field delimiter to use for tsv/usv filetype
 .No "True              "
 overwrite existing files without confirmation
 .
+.Lo N nothing T
+.No "False              "
+disable loading .visidatarc and plugin addons
 .
 .El
 .so vd-cli.inc
