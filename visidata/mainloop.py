@@ -260,18 +260,18 @@ def mainloop(self, scr):
             self.statuses.clear()
 
             if keystroke == 'KEY_MOUSE':
-                self.keystrokes = ''
-                keystroke, y, x, winname, winscr = vd.parseMouse(top=vd.winTop, bot=vd.winBottom, menu=vd.scrMenu)
-
-                pct = vd.windowConfig['pct']
-                topPaneActive = ((vd.activePane == 2 and pct < 0)  or (vd.activePane == 1 and pct > 0))
-                bottomPaneActive = ((vd.activePane == 1 and pct < 0)  or (vd.activePane == 2 and pct > 0))
-
-                if (bottomPaneActive and winname == 'top') or (topPaneActive and winname == 'bot'):
-                    self.activePane = 1 if self.activePane == 2 else 2
-                    sheet = self.activeSheet
-
                 try:
+                    self.keystrokes = ''
+                    keystroke, y, x, winname, winscr = vd.parseMouse(top=vd.winTop, bot=vd.winBottom, menu=vd.scrMenu)
+
+                    pct = vd.windowConfig['pct']
+                    topPaneActive = ((vd.activePane == 2 and pct < 0)  or (vd.activePane == 1 and pct > 0))
+                    bottomPaneActive = ((vd.activePane == 1 and pct < 0)  or (vd.activePane == 2 and pct > 0))
+
+                    if (bottomPaneActive and winname == 'top') or (topPaneActive and winname == 'bot'):
+                        self.activePane = 1 if self.activePane == 2 else 2
+                        sheet = self.activeSheet
+
                     f = self.getMouse(winscr, x, y, keystroke)
                     sheet.mouseX, sheet.mouseY = x, y
                     if f:
