@@ -562,6 +562,8 @@ COMMANDLINE OPTIONS
                                   for tsv/usv filetype
      -y, --confirm-overwrite=F    True               overwrite existing files
                                   without confirmation
+     -N, --nothing=T              False               disable loading
+                                  .visidatarc and plugin addons
      --visidata-dir=str           ~/.visidata/       directory to load and
                                                      store additional files
      --mouse-interval=int         1                  max time between
@@ -654,6 +656,15 @@ COMMANDLINE OPTIONS
      --default-colname=str                           column name to use for
                                                      non-dict rows
      --filetype=str                                  specify file type
+     --replay-wait=float          0.0                time to wait between re‐
+                                                     played commands, in sec‐
+                                                     onds
+     --replay-movement            False              insert movements during
+                                                     replay
+     --rowkey-prefix=str          キ                 string prefix for rowkey
+                                                     in the cmdlog
+     --cmdlog-histfile=str                           file to autorecord each
+                                                     cmdlog action to
      --confirm-overwrite=bool     True               whether to prompt for
                                                      overwrite confirmation on
                                                      save
@@ -676,15 +687,6 @@ COMMANDLINE OPTIONS
                                                      togram of numeric columns
      --numeric-binning            False              bin numeric columns into
                                                      ranges
-     --replay-wait=float          0.0                time to wait between re‐
-                                                     played commands, in sec‐
-                                                     onds
-     --replay-movement            False              insert movements during
-                                                     replay
-     --rowkey-prefix=str          キ                 string prefix for rowkey
-                                                     in the cmdlog
-     --cmdlog-histfile=str                           file to autorecord each
-                                                     cmdlog action to
      --regex-flags=str            I                  flags to pass to re.com‐
                                                      pile() [AILMSUX]
      --regex-maxsplit=int         0                  maxsplit to pass to
@@ -719,6 +721,8 @@ COMMANDLINE OPTIONS
      --imports=str                plugins            imports to preload before
                                                      .visidatarc (command-line
                                                      only)
+     --nothing                    False              no config, no plugins,
+                                                     nothing extra
      --unfurl-empty               False              if unfurl includes rows
                                                      for empty containers
      --incr-base=float            1.0                start value for column
@@ -859,6 +863,11 @@ COMMANDLINE OPTIONS
      disp_edit_fill      _                   edit field fill character
      disp_unprintable    ·                   substitute character for unprint‐
                                              ables
+     disp_replay_play    ▶                   status indicator for active re‐
+                                             play
+     disp_replay_pause   ‖                   status indicator for paused re‐
+                                             play
+     color_status_replay green               color of replay status indicator
      disp_formatter      generic             formatter to use for display and
                                              saving
      disp_menu           True                show menu on top line when not
@@ -882,11 +891,6 @@ COMMANDLINE OPTIONS
                                              right-side menu format string
      disp_histogram      *                   histogram element character
      disp_histolen       50                  width of histogram column
-     disp_replay_play    ▶                   status indicator for active re‐
-                                             play
-     disp_replay_pause   ‖                   status indicator for paused re‐
-                                             play
-     color_status_replay green               color of replay status indicator
      disp_canvas_charset
                                              ⠀⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿⡀⡁⡂⡃⡄⡅⡆⡇⡈⡉⡊⡋⡌⡍⡎⡏⡐⡑⡒⡓⡔⡕⡖⡗⡘⡙⡚⡛⡜⡝⡞⡟⡠⡡⡢⡣⡤⡥⡦⡧⡨⡩⡪⡫⡬⡭⡮⡯⡰⡱⡲⡳⡴⡵⡶⡷⡸⡹⡺⡻⡼⡽⡾⡿⢀⢁⢂⢃⢄⢅⢆⢇⢈⢉⢊⢋⢌⢍⢎⢏⢐⢑⢒⢓⢔⢕⢖⢗⢘⢙⢚⢛⢜⢝⢞⢟⢠⢡⢢⢣⢤⢥⢦⢧⢨⢩⢪⢫⢬⢭⢮⢯⢰⢱⢲⢳⢴⢵⢶⢷⢸⢹⢺⢻⢼⢽⢾⢿⣀⣁⣂⣃⣄⣅⣆⣇⣈⣉⣊⣋⣌⣍⣎⣏⣐⣑⣒⣓⣔⣕⣖⣗⣘⣙⣚⣛⣜⣝⣞⣟⣠⣡⣢⣣⣤⣥⣦⣧⣨⣩⣪⣫⣬⣭⣮⣯⣰⣱⣲⣳⣴⣵⣶⣷⣸⣹⣺⣻⣼⣽⣾⣿
                                              charset to render 2x4 blocks on
@@ -1008,4 +1012,4 @@ SUPPORTED SOURCES
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                   September 13, 2022                   Linux/MacOS
+Linux/MacOS                    October 06, 2022                    Linux/MacOS

@@ -47,7 +47,7 @@ class Extensible:
         funcname = beforefunc.__name__
         oldfunc = getattr(cls, funcname, None)
         if not oldfunc:
-            vd.fail('@before on non-existing func {cls.__name__}.{funcname}')
+            setattr(cls, funcname, beforefunc)
 
         @wraps(oldfunc)
         def wrappedfunc(*args, **kwargs):
@@ -58,16 +58,16 @@ class Extensible:
         return wrappedfunc
 
     @classmethod
-    def after(cls, beforefunc):
-        funcname = beforefunc.__name__
+    def after(cls, afterfunc):
+        funcname = afterfunc.__name__
         oldfunc = getattr(cls, funcname, None)
         if not oldfunc:
-            vd.fail('@after on non-existing func {cls.__name__}.{funcname}')
+            setattr(cls, funcname, afterfunc)
 
         @wraps(oldfunc)
         def wrappedfunc(*args, **kwargs):
             r = oldfunc(*args, **kwargs)
-            beforefunc(*args, **kwargs)
+            afterfunc(*args, **kwargs)
             return r
 
         setattr(cls,  funcname, wrappedfunc)

@@ -1,6 +1,6 @@
 'VisiData: a curses interface for exploring and arranging tabular data'
 
-__version__ = '2.10.1'
+__version__ = '2.10.2'
 __version_info__ = 'VisiData v' + __version__
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __status__ = 'Production/Stable'
@@ -67,6 +67,8 @@ import visidata.loaders.tsv
 import visidata.pyobj
 import visidata.loaders.json
 import visidata._open
+import visidata.metasheets
+import visidata.cmdlog
 import visidata.save
 import visidata.clipboard
 import visidata.slide
@@ -75,14 +77,12 @@ import visidata.expr
 
 import visidata.menu
 import visidata.choose
-import visidata.metasheets
 import visidata.join
 import visidata.aggregators
 import visidata.describe
 import visidata.pivot
 import visidata.freqtbl
 import visidata.melt
-import visidata.cmdlog
 import visidata.freeze
 import visidata.regex
 import visidata.canvas
@@ -105,6 +105,7 @@ import visidata.misc
 import visidata.memory
 import visidata.macros
 import visidata.macos
+import visidata.repeat
 
 import visidata.loaders.csv
 import visidata.loaders.archive
@@ -147,6 +148,8 @@ import visidata.loaders.odf
 import visidata.loaders.lsv
 import visidata.loaders.arrow
 import visidata.loaders.parquet
+
+import visidata.loaders.vdx
 
 import visidata.form
 

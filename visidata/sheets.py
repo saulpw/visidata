@@ -956,7 +956,6 @@ class SequenceSheet(Sheet):
 class IndexSheet(Sheet):
     'Base class for tabular sheets with rows that are Sheets.'
     rowtype = 'sheets'  # rowdef: Sheet
-    precious = False
 
     columns = [
         Column('name', getter=lambda c,r: r.names[-1], setter=lambda c,r,v: setitem(r.names, -1, v)),
@@ -1004,6 +1003,7 @@ class SheetsSheet(IndexSheet):
         ColumnAttr('progressPct'),
 #        ColumnAttr('threads', 'currentThreads', type=vlen),
     ]
+    precious = False
     nKeys = 1
     def reload(self):
         self.rows = self.source
@@ -1038,7 +1038,7 @@ def remove(vd, vs):
 
 
 @VisiData.api
-def push(vd, vs, pane=0):
+def push(vd, vs, pane=0, load=True):
     'Push Sheet *vs* onto ``vd.sheets`` stack for *pane* (0 for active pane, -1 for inactive pane).  Remove from other position if already on sheets stack.'
     if not isinstance(vs, BaseSheet):
         return  # return instead of raise, some commands need this
@@ -1061,7 +1061,8 @@ def push(vd, vs, pane=0):
     if vs.precious and vs not in vd.allSheets:
         vd.allSheets.append(vs)
 
-    vs.ensureLoaded()
+    if load:
+        vs.ensureLoaded()
 
 
 @VisiData.lazy_property
@@ -1148,10 +1149,12 @@ def async_deepcopy(sheet, rowlist):
     return ret
 
 
-IndexSheet.class_options.header = 0
-IndexSheet.class_options.skip = 0
+IndexSheet.options.header = 0
+IndexSheet.options.skip = 0
 
 BaseSheet.init('pane', lambda: 1)
+
+Sheet.init('_ordering', list, copy=True)  # (col:Column, reverse:bool)
 
 globalCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)', 'open Sheets Stack: join or jump between the active sheets on the current stack')
 globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)', 'open Sheets Sheet: join or jump between all sheets from current session')

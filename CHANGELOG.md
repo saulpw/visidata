@@ -1,5 +1,43 @@
 # VisiData version history
 
+# v2.10.2 (2022-10-XX)
+
+- add .vdx, a simplified new cmdlog format
+- add `-N`/`--nothing` command to disable loading .visidatarc and plugin addons
+- add `addcol-aggr` to add an aggregator column to the **FreqTable** without needing to
+  regenerate it (requested by @geekscrapy #1541)
+
+## Improvements
+
+- [cli] load commandline file arguments from the start (requested by @reagle #1471)
+- [cli] `--config=''` now does not try to load any config
+- [open] rename `zo` `open-cell` command to `open-cell-file`
+- [loaders whl] load python .whl (reported by @frosencrantz #1539)
+
+## Bugfixes
+
+- [cli] fix for empty arg
+- [DirSheet] fix bug where `Enter` no longer opened a file from the **DirSheet** (reported by @frosencrantz #1527)
+- [input paste] fix pasting via a Path via `Ctrl+Y`  into input (reported by @frosencrantz #1546)
+- [menu] allow VisiData to run without menu
+- [mouse] catch any curses.getmouse() errors (reported by @geekscrapy #1553)
+- [performance] allow vd to be truly idle (reported by WizzardUU #1532)
+- [plugins_autoload] catch error for environment having invalid package metadata (reported by @jsdealy #1529)
+- [plugins_autoload] catch exception if plugin fails to load
+- [plugins-autoload] fix check for if plugins_autoload is set in args
+- [plugins-autoload] update for importlib-metadata 5.0 API (reported by @jkerhin #1550)
+- [pyobj] undo rename of `open-row`/`open-cell` (were renamed to `open-X-pyobj`) (revert of eff9833e6A)
+- [sheets] ensure IndexSheets are precious, and that **SheetsSheet** is not (reported by @frosencrantz #1547)
+- [unzip-http] extracting a file now checks for overwrite (reported by @frosencrantz #1452)
+- [windows clipboard] fix piping to clip command through stdin (thanks @daviewales for the fix; reported by @pshangov #1431)
+
+## API
+
+- expose `CommandLogBase` (was `_CommandLog`)
+- [options] allow FooSheet.options instead of .class_options
+- add seperate non-async `select_row`, `toggle_row`, and `unselect_row` for selection of single rows
+- the before/after decorators now do not fail if api functions they are decorating do not already exist
+
 # v2.10.1 (2022-09-14)
 
 ## Improvements

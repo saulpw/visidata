@@ -236,7 +236,11 @@ def save_sqlite(vd, p, *vsheets):
 
 SqliteIndexSheet.addCommand('a', 'add-table', 'fail("create a new table by saving a sheet to this database file")', 'stub; add table by saving a sheet to the db file instead')
 SqliteIndexSheet.bindkey('ga', 'add-table')
-SqliteSheet.class_options.header = 0
+SqliteSheet.options.header = 0
 VisiData.save_db = VisiData.save_sqlite
 
-vd.addGlobals({'SqliteQuerySheet': SqliteQuerySheet})
+vd.addGlobals({
+    'SqliteIndexSheet': SqliteIndexSheet,
+    'SqliteSheet': SqliteSheet,
+    'SqliteQuerySheet': SqliteQuerySheet
+})

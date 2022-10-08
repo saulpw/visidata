@@ -348,6 +348,9 @@ class RepeatFile:
                 break  # end of file
         return r
 
+    def write(self, s):
+        return self.iter_lines.write(s)
+
     def tell(self):
         '''Tells the current position as an opaque line marker.'''
         return self.iter.nextIndex

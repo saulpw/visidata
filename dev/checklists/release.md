@@ -30,14 +30,25 @@
 
    b. update the date in the manpage;
 
-   c. update version number on README and front page of website (update dates here too);
+   c. update version number on README
 
    d. bump version in `__version__` in source code (visidata/main.py, visidata/__init__.py) and setup.py;
 
 6. Run dev/mkman.sh to build the manpage and updated website
     - Run ./mkmanhtml.sh, and move that to visidata.org:site/docs/man, and to visidata:docs/man.md
 
-7. Push `develop` to testpypi
+7. Merge `develop` to stable
+
+8. Merge `stable` back into other branches
+
+    a. if the branch works with minimal conflicts, keep the branch
+
+    b. otherwise, clean out the branch
+
+
+9. Push code to stable
+
+10. Push `develop` to pypi
 
     a. set up a ~/.pypirc
 
@@ -57,69 +68,38 @@
     password:
     ```
 
-    b. push to testpypi
 
+  Push to pypi
     ```
     python3 setup.py sdist bdist_wheel --universal
-    twine upload dist/* -r testpypi
+    twine upload dist/*
     ```
 
-8. Test install from testpypi
-
-   a. on virgin instance
-
-   b. on mac and linux
-
-   c. See if windows works
-
-   d. from git clone
-
-   ```
-   pip3 install -i https://test.pypi.org/simple/ visidata
-   ```
-
-9. Merge `develop` to stable
-
-10. Merge `stable` back into other branches
-
-    a. if the branch works with minimal conflicts, keep the branch
-
-    b. otherwise, clean out the branch
-
-
-11. Push code to stable
-
-12. Push stable to pypi
-
-```
-twine upload dist/*
-```
-
-13. Test install/upgrade from pypi
+11. Test install/upgrade from pypi
 
   a. Build and deploy the website
 
    b. Ask someone else to test install
 
-14. Create a tag `v#.#.#` for that commit
+12. Create a tag `v#.#.#` for that commit
 
 ```
 git tag v#.#.#
 git push --tags
 ```
 
-15. Write up the release notes and add it to `www/releases.md`. Add it to index.md.
+13. Write up the release notes and add it to `www/releases.md`. Add it to index.md.
 
-16. Upload new motd
+14. Upload new motd
 
-17. Update the website by pushing to master. Update with new manpage. Update redirect to point to new manpage.
+15. Update the website by pushing to master. Update with new manpage. Update redirect to point to new manpage.
     - release notes
 
-18. Comb through issues and close the ones that have been solved, referencing the version number
+16. Comb through issues and close the ones that have been solved, referencing the version number
 
-19. Post github release notes on patreon.
+17. Post github release notes on patreon.
 
-20. Update the other distributions.
+18. Update the other distributions.
 
 # conda
 

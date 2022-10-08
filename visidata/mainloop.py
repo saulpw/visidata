@@ -88,7 +88,7 @@ def setWindows(vd, scr, pct=None):
     'Assign winTop, winBottom, win1 and win2 according to options.disp_splitwin_pct.'
     if pct is None:
         pct = options.disp_splitwin_pct  # percent of window for secondary sheet (negative means bottom)
-    disp_menu = vd.menuRunning or vd.options.disp_menu
+    disp_menu = getattr(vd, 'menuRunning', None) or vd.options.disp_menu
     topmenulines = 1 if disp_menu else 0
     h, w = scr.getmaxyx()
 
@@ -214,6 +214,8 @@ def parseMouse(vd, **kwargs):
 @VisiData.api
 def mainloop(self, scr):
     'Manage execution of keystrokes and subsequent redrawing of screen.'
+    nonidle_timeout = vd.curses_timeout
+
     scr.timeout(vd.curses_timeout)
     with contextlib.suppress(curses.error):
         curses.curs_set(0)
@@ -258,18 +260,18 @@ def mainloop(self, scr):
             self.statuses.clear()
 
             if keystroke == 'KEY_MOUSE':
-                self.keystrokes = ''
-                keystroke, y, x, winname, winscr = vd.parseMouse(top=vd.winTop, bot=vd.winBottom, menu=vd.scrMenu)
-
-                pct = vd.windowConfig['pct']
-                topPaneActive = ((vd.activePane == 2 and pct < 0)  or (vd.activePane == 1 and pct > 0))
-                bottomPaneActive = ((vd.activePane == 1 and pct < 0)  or (vd.activePane == 2 and pct > 0))
-
-                if (bottomPaneActive and winname == 'top') or (topPaneActive and winname == 'bot'):
-                    self.activePane = 1 if self.activePane == 2 else 2
-                    sheet = self.activeSheet
-
                 try:
+                    self.keystrokes = ''
+                    keystroke, y, x, winname, winscr = vd.parseMouse(top=vd.winTop, bot=vd.winBottom, menu=vd.scrMenu)
+
+                    pct = vd.windowConfig['pct']
+                    topPaneActive = ((vd.activePane == 2 and pct < 0)  or (vd.activePane == 1 and pct > 0))
+                    bottomPaneActive = ((vd.activePane == 1 and pct < 0)  or (vd.activePane == 2 and pct > 0))
+
+                    if (bottomPaneActive and winname == 'top') or (topPaneActive and winname == 'bot'):
+                        self.activePane = 1 if self.activePane == 2 else 2
+                        sheet = self.activeSheet
+
                     f = self.getMouse(winscr, x, y, keystroke)
                     sheet.mouseX, sheet.mouseY = x, y
                     if f:
@@ -313,13 +315,15 @@ def mainloop(self, scr):
         # no idle redraw unless background threads are running
         time.sleep(0)  # yield to other threads which may not have started yet
         if vd.unfinishedThreads:
-            scr.timeout(vd.curses_timeout)
+            vd.curses_timeout = nonidle_timeout
         else:
             numTimeouts += 1
             if vd.timeouts_before_idle >= 0 and numTimeouts > vd.timeouts_before_idle:
-                scr.timeout(-1)
+                vd.curses_timeout = -1
             else:
-                scr.timeout(vd.curses_timeout)
+                vd.curses_timeout = nonidle_timeout
+
+        scr.timeout(vd.curses_timeout)
 
 
 def initCurses():
@@ -369,7 +373,7 @@ def run(vd, *sheetlist):
     try:
         # Populate VisiData object with sheets from a given list.
         for vs in sheetlist:
-            vd.push(vs)
+            vd.push(vs, load=False)
 
         scr = initCurses()
         ret = vd.mainloop(scr)

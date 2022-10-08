@@ -1,6 +1,7 @@
 from copy import copy, deepcopy
 import shutil
 import subprocess
+import io
 import sys
 import tempfile
 import functools
@@ -42,17 +43,13 @@ def copyCells(sheet, col, rows):
 
 @Sheet.api
 def syscopyValue(sheet, val):
-    # use NTF to generate filename and delete file on context exit
-    with tempfile.NamedTemporaryFile(suffix='.txt') as temp:
-        with open(temp.name, "w", encoding=sheet.options.encoding) as fp:
-            fp.write(val)
+    # pipe val to stdin of clipboard command
 
-        p = subprocess.Popen(
-            sheet.options.clipboard_copy_cmd.split(),
-            stdin=open(temp.name, 'r', encoding=sheet.options.encoding),
-            stdout=subprocess.DEVNULL,
-            close_fds=True)
-        p.communicate()
+    p = subprocess.run(
+        sheet.options.clipboard_copy_cmd.split(),
+        input=val,
+        encoding=sheet.options.encoding,
+        stdout=subprocess.DEVNULL)
 
     vd.status('copied value to system clipboard')
 
@@ -72,15 +69,13 @@ def syscopyCells_async(sheet, cols, rows, filetype):
 
     vd.status(f'copying {vs.nRows} {vs.rowtype} to system clipboard as {filetype}')
 
-    # use NTF to generate filename and delete file on context exit
-    with tempfile.NamedTemporaryFile(suffix='.'+filetype) as temp:
-        vd.sync(vd.saveSheets(Path(temp.name), vs))
-        p = subprocess.Popen(
+    with io.StringIO() as buf:
+        vd.sync(vd.saveSheets(Path(sheet.name+'.'+filetype, fptext=buf), vs))
+        subprocess.run(
             sheet.options.clipboard_copy_cmd.split(),
-            stdin=open(temp.name, 'r', encoding=sheet.options.encoding),
-            stdout=subprocess.DEVNULL,
-            close_fds=True)
-        p.communicate()
+            input=buf.getvalue(),
+            encoding=sheet.options.encoding,
+            stdout=subprocess.DEVNULL)
 
 
 @VisiData.api

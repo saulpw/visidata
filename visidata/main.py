@@ -2,7 +2,7 @@
 # Usage: $0 [<options>] [<input> ...]
 #        $0 [<options>] --play <cmdlog> [--batch] [-w <waitsecs>] [-o <output>] [field=value ...]
 
-__version__ = '2.10.1'
+__version__ = '2.10.2'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
 from copy import copy
@@ -31,6 +31,7 @@ vd.option('batch', False, 'replay in batch mode (with no interface and all statu
 vd.option('output', None, 'save the final visible sheet to output at the end of replay')
 vd.option('preplay', '', 'longnames to preplay before replay')
 vd.option('imports', 'plugins', 'imports to preload before .visidatarc (command-line only)')
+vd.option('nothing', False, 'no config, no plugins, nothing extra')
 
 # for --play
 def eval_vd(logpath, *args, **kwargs):
@@ -75,6 +76,7 @@ def optalias(abbr, name, val=None):
     option_aliases[abbr] = (name, val)
 
 
+optalias('N', 'nothing')
 optalias('f', 'filetype')
 optalias('p', 'play')
 optalias('b', 'batch')
@@ -146,7 +148,7 @@ def main_vd():
             flGlobal = True
         elif arg in ['-n', '--nonglobal']:
             flGlobal = False
-        elif arg[0] == '-':
+        elif arg.startswith('-'):
             optname = arg.lstrip('-')
             optval = None
             try:
@@ -206,7 +208,8 @@ def main_vd():
 
     args = AttrDict(current_args)
 
-    vd.loadConfigAndPlugins(args)
+    if not args.nothing:
+        vd.loadConfigAndPlugins(args)
 
     for k, v in global_args.items():
         options.set(k, v, obj='global')
@@ -247,7 +250,8 @@ def main_vd():
         vd.cmdlog.openHook(vs, vs.source)
         sources.append(vs)
 
-    vd.sheets.extend(sources)  # purposefully do not load everything
+    for vs in reversed(sources):
+        vd.push(vs, load=False) #1471, 1555
 
     if not vd.sheets and not args.play and not args.batch:
         if 'filetype' in current_args:

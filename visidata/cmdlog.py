@@ -35,7 +35,7 @@ VisiData.save_vd = VisiData.save_tsv
 @VisiData.api
 def save_vdj(vd, p, *vsheets):
     with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
-        fp.write("#!/usr/bin/env vd -p\n")
+        fp.write("#!vd -p\n")
         for vs in vsheets:
             vs.write_jsonl(fp)
 
@@ -137,7 +137,7 @@ def moveToCol(vs, col):
     return True
 
 
-@TableSheet.api
+@BaseSheet.api
 def commandCursor(sheet, execstr):
     'Return (col, row) of cursor suitable for cmdlog replay of execstr.'
     colname, rowname = '', ''
@@ -152,7 +152,7 @@ def commandCursor(sheet, execstr):
 
 
 # rowdef: namedlist (like TsvSheet)
-class _CommandLog:
+class CommandLogBase:
     'Log of commands for current session.'
     rowtype = 'logged commands'
     precious = False
@@ -178,7 +178,7 @@ class _CommandLog:
             self.afterExecSheet(sheet, False, '')
 
         colname, rowname, sheetname = '', '', None
-        if sheet and not (cmd.longname.startswith('open-') and not cmd.longname in ('open-row-pyobj', 'open-cell-pyobj')):
+        if sheet and not (cmd.longname.startswith('open-') and not cmd.longname in ('open-row', 'open-cell')):
             sheetname = sheet.name
 
             colname, rowname = sheet.commandCursor(cmd.execstr)
@@ -233,10 +233,10 @@ class _CommandLog:
         vs.cmdlog_sheet.addRow(r)
         self.addRow(r)
 
-class CommandLog(_CommandLog, VisiDataMetaSheet):
+class CommandLog(CommandLogBase, VisiDataMetaSheet):
     pass
 
-class CommandLogJsonl(_CommandLog, JsonLinesSheet):
+class CommandLogJsonl(CommandLogBase, JsonLinesSheet):
 
     filetype = 'vdj'
 
@@ -286,7 +286,7 @@ def replay_cancel(vd):
 
 @VisiData.api
 def moveToReplayContext(vd, r, vs):
-        'set the sheet/row/col to the values in the replay row.  return sheet'
+        'set the sheet/row/col to the values in the replay row'
         if r.row not in [None, '']:
             vs.moveToRow(r.row) or vd.error('no "%s" row' % r.row)
 
@@ -507,15 +507,8 @@ CommandLogJsonl.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("
 CommandLogJsonl.addCommand('gx', 'replay-all', 'vd.replay(sheet)', 'replay contents of entire CommandLog')
 CommandLogJsonl.addCommand('^C', 'replay-stop', 'sheet.cursorRowIndex = sheet.nRows', 'abort replay')
 
-BaseSheet.addCommand('', 'repeat-last', 'execCommand(vd.cmdlog.rows[-1].longname) if vd.cmdlog.rows else fail("no recent command to repeat")', 'run most recent command with an empty, queried input')
-BaseSheet.addCommand('', 'repeat-input', 'r = copy(vd.cmdlog.rows[-1]) if vd.cmdlog.rows else fail("no recent command to repeat"); vd.cmdlog.repeat_for_n(r, 1)', 'run previous modifying command (incl input)')
-BaseSheet.addCommand('', 'repeat-input-n', 'r = copy(vd.cmdlog.rows[-1]) if vd.cmdlog.rows else fail("no recent command to repeat"); vd.cmdlog.repeat_for_n(r, input("# times to repeat prev command:", value=1))', 'run previous command (incl its input) N times')
-BaseSheet.addCommand('', 'repeat-input-selected', 'r = copy(vd.cmdlog.rows[-1]) if vd.cmdlog.rows else fail("no recent command to repeat"); vd.cmdlog.repeat_for_selected(r)', 'run previous command (incl its input) for each selected row')
+CommandLog.options.json_sort_keys = False
+CommandLog.options.encoding = 'utf-8'
+CommandLogJsonl.options.json_sort_keys = False
 
-vd.addMenuItem('Edit', 'Repeat', 'last command', 'repeat-input')
-vd.addMenuItem('Edit', 'Repeat', 'last command N times', 'repeat-input-n')
-vd.addMenuItem('Edit', 'Repeat', 'last command for all selected rows', 'repeat-input-selected')
-
-CommandLog.class_options.json_sort_keys = False
-CommandLog.class_options.encoding = 'utf-8'
-CommandLogJsonl.class_options.json_sort_keys = False
+vd.addGlobals({"CommandLogBase": CommandLogBase})
