@@ -222,7 +222,7 @@ BaseSheet.addCommand('', 'open-dir-current', 'vd.push(vd.currentDirSheet)', 'ope
 
 Sheet.addCommand('z;', 'addcol-sh', 'cmd=inputShell(); addShellColumns(cmd, sheet)', 'create new column from bash expression, with $columnNames as variables')
 
-DirSheet.addCommand(ENTER, 'open-file-row', 'vd.push(openSource(cursorRow or fail("no row"), filetype="dir" if cursorRow.is_dir() else LazyComputeRow(sheet, cursorRow).ext))', 'open current file as a new sheet')
+DirSheet.addCommand(ENTER, 'open-row-file', 'vd.push(openSource(cursorRow or fail("no row"), filetype="dir" if cursorRow.is_dir() else LazyComputeRow(sheet, cursorRow).ext))', 'open current file as a new sheet')
 DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r))', 'open selected files as new sheets')
 DirSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow)', 'open current file in external $EDITOR')
 DirSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*selectedRows)', 'open selected files in external $EDITOR')
