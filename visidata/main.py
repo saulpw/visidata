@@ -251,7 +251,7 @@ def main_vd():
         sources.append(vs)
 
     for vs in reversed(sources):
-        vd.push(vs)
+        vd.push(vs, load=False)
 
     if not vd.sheets and not args.play and not args.batch:
         if 'filetype' in current_args:
@@ -286,8 +286,7 @@ def main_vd():
                     vd.warning(f'no sheet "{startsheet}"')
                     continue
 
-                vs.ensureLoaded()
-                vd.sync()
+                vd.sync(vs.ensureLoaded())
                 vd.clearCaches()
                 for startsheet in startsheets[1:]:
                     rowidx = vs.getRowIndexFromStr(options.rowkey_prefix + startsheet)

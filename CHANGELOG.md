@@ -19,7 +19,6 @@
 - [cli] fix for empty arg
 - [DirSheet] fix bug where `Enter` no longer opened a file from the **DirSheet** (reported by @frosencrantz #1527)
 - [input paste] fix pasting via a Path via `Ctrl+Y`  into input (reported by @frosencrantz #1546)
-- [index] ensure all subsheets of an **IndexSheet** are loaded before indexing by +::: (reported by @frosencrantz #1555)
 - [menu] allow VisiData to run without menu
 - [mouse] catch any curses.getmouse() errors (reported by @geekscrapy #1553)
 - [performance] allow vd to be truly idle (reported by WizzardUU #1532)
