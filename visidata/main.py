@@ -286,7 +286,8 @@ def main_vd():
                     vd.warning(f'no sheet "{startsheet}"')
                     continue
 
-                vd.sync(vs.ensureLoaded())
+                vs.ensureLoaded()
+                vd.sync()
                 vd.clearCaches()
                 for startsheet in startsheets[1:]:
                     rowidx = vs.getRowIndexFromStr(options.rowkey_prefix + startsheet)
