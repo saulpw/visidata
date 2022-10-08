@@ -71,7 +71,7 @@
 
   Push to pypi
     ```
-    python3 setup.py sdist bdist_wheel --universal
+    python3 setup.py sdist bdist_wheel
     twine upload dist/*
     ```
 
