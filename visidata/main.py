@@ -251,7 +251,7 @@ def main_vd():
         sources.append(vs)
 
     for vs in reversed(sources):
-        vd.push(vs, load=False)
+        vd.push(vs, load=False) #1471, 1555
 
     if not vd.sheets and not args.play and not args.batch:
         if 'filetype' in current_args:
