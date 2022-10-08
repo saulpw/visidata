@@ -1,4 +1,4 @@
-.Dd September 13, 2022
+.Dd October 06, 2022
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -874,6 +874,9 @@ field delimiter to use for tsv/usv filetype
 .No "True              "
 overwrite existing files without confirmation
 .
+.Lo N nothing T
+.No "False              "
+disable loading .visidatarc and plugin addons
 .
 .El
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
@@ -964,6 +967,14 @@ sort object keys when saving to json
 column name to use for non-dict rows
 .It Sy --filetype Ns = Ns Ar "str              " No ""
 specify file type
+.It Sy --replay-wait Ns = Ns Ar "float         " No "0.0"
+time to wait between replayed commands, in seconds
+.It Sy --replay-movement No "           False"
+insert movements during replay
+.It Sy --rowkey-prefix Ns = Ns Ar "str         " No "\[u30AD]"
+string prefix for rowkey in the cmdlog
+.It Sy --cmdlog-histfile Ns = Ns Ar "str       " No ""
+file to autorecord each cmdlog action to
 .It Sy --confirm-overwrite Ns = Ns Ar "bool    " No "True"
 whether to prompt for overwrite confirmation on save
 .It Sy --safe-error Ns = Ns Ar "str            " No "#ERR"
@@ -980,14 +991,6 @@ numeric aggregators to calculate on Describe sheet
 number of bins for histogram of numeric columns
 .It Sy --numeric-binning No "           False"
 bin numeric columns into ranges
-.It Sy --replay-wait Ns = Ns Ar "float         " No "0.0"
-time to wait between replayed commands, in seconds
-.It Sy --replay-movement No "           False"
-insert movements during replay
-.It Sy --rowkey-prefix Ns = Ns Ar "str         " No "\[u30AD]"
-string prefix for rowkey in the cmdlog
-.It Sy --cmdlog-histfile Ns = Ns Ar "str       " No ""
-file to autorecord each cmdlog action to
 .It Sy --regex-flags Ns = Ns Ar "str           " No "I"
 flags to pass to re.compile() [AILMSUX]
 .It Sy --regex-maxsplit Ns = Ns Ar "int        " No "0"
@@ -1016,6 +1019,8 @@ save the final visible sheet to output at the end of replay
 longnames to preplay before replay
 .It Sy --imports Ns = Ns Ar "str               " No "plugins"
 imports to preload before .visidatarc (command-line only)
+.It Sy --nothing No "                   False"
+no config, no plugins, nothing extra
 .It Sy --unfurl-empty No "              False"
 if unfurl includes rows for empty containers
 .It Sy --incr-base Ns = Ns Ar "float           " No "1.0"
@@ -1182,6 +1187,12 @@ cell color to use when editing cell
 edit field fill character
 .It Sy "disp_unprintable   " No "\[u00B7]"
 substitute character for unprintables
+.It Sy "disp_replay_play   " No "\[u25B6]"
+status indicator for active replay
+.It Sy "disp_replay_pause  " No "\[u2016]"
+status indicator for paused replay
+.It Sy "color_status_replay" No "green"
+color of replay status indicator
 .It Sy "disp_formatter     " No "generic"
 formatter to use for display and saving
 .It Sy "disp_menu          " No "True"
@@ -1210,12 +1221,6 @@ right-side menu format string
 histogram element character
 .It Sy "disp_histolen      " No "50"
 width of histogram column
-.It Sy "disp_replay_play   " No "\[u25B6]"
-status indicator for active replay
-.It Sy "disp_replay_pause  " No "\[u2016]"
-status indicator for paused replay
-.It Sy "color_status_replay" No "green"
-color of replay status indicator
 .It Sy "disp_canvas_charset" No "\[u2800]\[u2801]\[u2802]\[u2803]\[u2804]\[u2805]\[u2806]\[u2807]\[u2808]\[u2809]\[u280A]\[u280B]\[u280C]\[u280D]\[u280E]\[u280F]\[u2810]\[u2811]\[u2812]\[u2813]\[u2814]\[u2815]\[u2816]\[u2817]\[u2818]\[u2819]\[u281A]\[u281B]\[u281C]\[u281D]\[u281E]\[u281F]\[u2820]\[u2821]\[u2822]\[u2823]\[u2824]\[u2825]\[u2826]\[u2827]\[u2828]\[u2829]\[u282A]\[u282B]\[u282C]\[u282D]\[u282E]\[u282F]\[u2830]\[u2831]\[u2832]\[u2833]\[u2834]\[u2835]\[u2836]\[u2837]\[u2838]\[u2839]\[u283A]\[u283B]\[u283C]\[u283D]\[u283E]\[u283F]\[u2840]\[u2841]\[u2842]\[u2843]\[u2844]\[u2845]\[u2846]\[u2847]\[u2848]\[u2849]\[u284A]\[u284B]\[u284C]\[u284D]\[u284E]\[u284F]\[u2850]\[u2851]\[u2852]\[u2853]\[u2854]\[u2855]\[u2856]\[u2857]\[u2858]\[u2859]\[u285A]\[u285B]\[u285C]\[u285D]\[u285E]\[u285F]\[u2860]\[u2861]\[u2862]\[u2863]\[u2864]\[u2865]\[u2866]\[u2867]\[u2868]\[u2869]\[u286A]\[u286B]\[u286C]\[u286D]\[u286E]\[u286F]\[u2870]\[u2871]\[u2872]\[u2873]\[u2874]\[u2875]\[u2876]\[u2877]\[u2878]\[u2879]\[u287A]\[u287B]\[u287C]\[u287D]\[u287E]\[u287F]\[u2880]\[u2881]\[u2882]\[u2883]\[u2884]\[u2885]\[u2886]\[u2887]\[u2888]\[u2889]\[u288A]\[u288B]\[u288C]\[u288D]\[u288E]\[u288F]\[u2890]\[u2891]\[u2892]\[u2893]\[u2894]\[u2895]\[u2896]\[u2897]\[u2898]\[u2899]\[u289A]\[u289B]\[u289C]\[u289D]\[u289E]\[u289F]\[u28A0]\[u28A1]\[u28A2]\[u28A3]\[u28A4]\[u28A5]\[u28A6]\[u28A7]\[u28A8]\[u28A9]\[u28AA]\[u28AB]\[u28AC]\[u28AD]\[u28AE]\[u28AF]\[u28B0]\[u28B1]\[u28B2]\[u28B3]\[u28B4]\[u28B5]\[u28B6]\[u28B7]\[u28B8]\[u28B9]\[u28BA]\[u28BB]\[u28BC]\[u28BD]\[u28BE]\[u28BF]\[u28C0]\[u28C1]\[u28C2]\[u28C3]\[u28C4]\[u28C5]\[u28C6]\[u28C7]\[u28C8]\[u28C9]\[u28CA]\[u28CB]\[u28CC]\[u28CD]\[u28CE]\[u28CF]\[u28D0]\[u28D1]\[u28D2]\[u28D3]\[u28D4]\[u28D5]\[u28D6]\[u28D7]\[u28D8]\[u28D9]\[u28DA]\[u28DB]\[u28DC]\[u28DD]\[u28DE]\[u28DF]\[u28E0]\[u28E1]\[u28E2]\[u28E3]\[u28E4]\[u28E5]\[u28E6]\[u28E7]\[u28E8]\[u28E9]\[u28EA]\[u28EB]\[u28EC]\[u28ED]\[u28EE]\[u28EF]\[u28F0]\[u28F1]\[u28F2]\[u28F3]\[u28F4]\[u28F5]\[u28F6]\[u28F7]\[u28F8]\[u28F9]\[u28FA]\[u28FB]\[u28FC]\[u28FD]\[u28FE]\[u28FF]"
 charset to render 2x4 blocks on canvas
 .It Sy "disp_pixel_random  " No "False"
