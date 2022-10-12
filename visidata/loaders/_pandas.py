@@ -17,6 +17,40 @@ for ft in 'feather gbq orc pickle sas stata'.split():
     if not getattr(VisiData, funcname, None):
         setattr(VisiData, funcname, lambda vd,p,ft=ft: PandasSheet(p.name, source=p, filetype=ft))
 
+@VisiData.api
+@asyncthread
+def save_dta(vd, p, *sheets):
+    import pandas as pd
+    import numpy as np
+
+    # STATA is a one-sheet software
+    # Save only the first sheet
+    vs = sheets[0]
+
+    columns = [col.name for col in vs.visibleCols]
+    
+    # Get data types
+    types = list()
+    dispvals = next(vs.iterdispvals(format=True))
+    for col,_ in dispvals.items():
+        if col.type in [bool, int, float]:
+            types.append(col.type)
+        elif vd.isNumeric(col):
+            types.append(float)
+        else:
+            types.append(str)
+
+    # Populate numpy array
+    data = np.empty((vs.nRows, len(columns)), dtype=object)
+    for r_i, dispvals in enumerate(vs.iterdispvals(format=True)):
+        for c_i, v in enumerate(dispvals.values()):
+            data[r_i, c_i] = v
+
+    # Convert to pandas DataFrame and save
+    dtype = {col:t for col,t in zip(columns, types)}
+    df = pd.DataFrame(data, columns=columns)
+    df = df.astype(dtype)
+    df.to_stata(p, version=118, write_index=False)
 
 class DataFrameAdapter:
     def __init__(self, df):
