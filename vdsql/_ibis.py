@@ -197,8 +197,16 @@ class IbisTableSheet(Sheet):
         return self.ibis_conpool.get_conn()
 
     def choose_sidebar(self):
-        sidebars = ['base_sql', 'pending_sql', 'curcol_sql', 'ibis_current_expr', 'pending_expr']
-        vd.options.disp_ibis_sidebar = vd.chooseOne([{'key': s, 'value':getattr(self, s)} for s in sidebars])
+        sidebars = ['base_sql', 'pending_sql', 'ibis_current_expr', 'curcol_sql', 'pending_expr']
+        opts = []
+        for s in sidebars:
+            try:
+                opts.append({'key': s, 'value':getattr(self, s)})
+            except Exception as e:
+                if self.options.debug:
+                    vd.exceptionCaught()
+
+        vd.options.disp_ibis_sidebar = vd.chooseOne(opts)
 
     @property
     def curcol_sql(self):
