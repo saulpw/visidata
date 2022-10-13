@@ -1,6 +1,6 @@
 # vdsql version history
 
-# 0.2 (2022-08-31)
+# 0.2 (2022-10-12)
 
 Added and tested support for these backends:
 
@@ -18,8 +18,11 @@ Added options:
    - enable by setting `options.disp_histogram` and `options.disp_histolen`
 
 - set `options.clean_names` to `True` for all ibis sheets
+- set `options.load_lazy` to `True` for all ibis sheets
+- set `regex_flags` to not ignorecase
 
 - [columns sheet] add `ibis_type`
+- [load] provide helpful message if `ibis-framework` dependencies are not installed
 
 Additional commands added:
 - `exec-sql` command
@@ -53,7 +56,7 @@ Not implemented commands (but probably will be soon/someday):
   - random-rows
   - select-exact-cell - select-exact-row
   - select-rows
-  - unselect-expr
+  - unselect-expr - select-expr
   - cache-col - cache-cols
   - dive-selected-cells
   - dup-rows - dup-rows-deep - dup-selected-deep
@@ -67,6 +70,10 @@ These commands will probably never be implemented:
   - less common select commands like select-after, select-error
 
 Of course you can still do any of these commands, by first using the VisiData command `freeze-sheet` or `g'` to copy the sheet's values into a new VisiData (i.e. non-vdsql) sheet.
+
+## Bugfixes
+
+- fix key columns on sheets with start=0
 
 # 0.1.1 (2022-08-08)
 
