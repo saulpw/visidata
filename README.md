@@ -12,8 +12,8 @@ Powered by [Ibis](https://ibis-project.org).
 ## Requirements
 
 - Python 3.8
-- VisiData 2.10
-- Ibis 3.1
+- VisiData 2.10.2
+- Ibis 3.2
 
 ### Confirmed supported backends
 
