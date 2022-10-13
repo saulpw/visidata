@@ -624,7 +624,7 @@ notimpl_cmds = '''
 addcol-capture addcol-incr addcol-incr-step addcol-window capture-col
 contract-col expand-col-depth expand-cols expand-cols-depth melt melt-regex pivot random-rows
 select-error-col select-exact-cell select-exact-row select-rows
-unselect-expr
+unselect-expr select-expr
 describe-sheet freq-summary
 cache-col cache-cols
 dive-selected-cells
@@ -726,7 +726,7 @@ IbisTableSheet.addCommand('u', 'unselect-row', 'unselect_row(cursorRow); cursorD
 
 IbisTableSheet.addCommand('', 'select-col-regex', 'select_col_regex(cursorCol, input("select regex: ", type="regex", defaultLast=True))', 'select rows matching regex in current column')
 
-IbisTableSheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: "); select_expr(expr)', 'select rows matching Python expression in any visible column')
+#IbisTableSheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: "); select_expr(expr)', 'select rows matching Python expression in any visible column')
 #IbisTableSheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalExpr(expr, r)), progress=False)', 'unselect rows matching Python expression in any visible column')
 
 IbisFreqTable.addCommand('g'+ENTER, 'open-selected', 'vd.push(openRows(selectedRows))')
