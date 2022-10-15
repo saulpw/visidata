@@ -8,7 +8,7 @@ def resetCache(col):
 
 
 @Sheet.api
-def StaticColumn(sheet, col):
+def freeze_col(sheet, col):
     frozencol = SettableColumn(col.name+'_frozen')
     state = col.__getstate__()
     state.pop('name')

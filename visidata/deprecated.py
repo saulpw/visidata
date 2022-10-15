@@ -5,20 +5,26 @@ import visidata
 
 alias = visidata.BaseSheet.bindkey
 
+def deprecated_warn(func, ver, instead):
+    import traceback
+
+    msg = f'{func.__name__} deprecated since v{ver}'
+    if instead:
+        msg += f'; use {instead}'
+
+    vd.warning(msg)
+
+    if vd.options.debug:
+        for line in reversed(traceback.extract_stack(limit=7)[:-2]):
+            vd.warning(f'    {line.name} at {line.filename}:{line.lineno}')
+        vd.warning(f'Deprecated call traceback (most recent last):')
+
+
 def deprecated(ver, instead=''):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            import traceback
-
-            msg = f'{func.__name__} deprecated since v{ver}'
-            if instead:
-                msg += f'; use {instead}'
-            vd.warning(msg)
-
-            for line in reversed(traceback.extract_stack(limit=6)[:-1]):
-                vd.warning(f'    {line.name} at {line.filename}:{line.lineno}')
-            vd.warning(f'Deprecated call traceback (most recent last):')
+            deprecated_warn(func, ver, instead)
             return func(*args, **kwargs)
         return wrapper
     return decorator
@@ -156,3 +162,4 @@ launchEditor = deprecated('2.6', 'vd.launchEditor')(vd.launchEditor)
 exceptionCaught = deprecated('2.6', 'vd.exceptionCaught')(vd.exceptionCaught)
 openSource = deprecated('2.6', 'vd.openSource')(vd.openSource)
 globalCommand = visidata.BaseSheet.addCommand
+visidata.Sheet.StaticColumn = deprecated('2.11', 'Sheet.freeze_col')(visidata.Sheet.StaticColumn)
