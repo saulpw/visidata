@@ -162,4 +162,4 @@ launchEditor = deprecated('2.6', 'vd.launchEditor')(vd.launchEditor)
 exceptionCaught = deprecated('2.6', 'vd.exceptionCaught')(vd.exceptionCaught)
 openSource = deprecated('2.6', 'vd.openSource')(vd.openSource)
 globalCommand = visidata.BaseSheet.addCommand
-visidata.Sheet.StaticColumn = deprecated('2.11', 'Sheet.freeze_col')(visidata.Sheet.StaticColumn)
+visidata.Sheet.StaticColumn = deprecated('2.11', 'Sheet.freeze_col')(visidata.Sheet.freeze_col)
