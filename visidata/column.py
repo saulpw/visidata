@@ -586,15 +586,14 @@ class ExprColumn(Column):
 
 class SettableColumn(Column):
     'Column using rowid to store and retrieve values internally.'
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._store = {}
-
     def putValue(self, row, value):
         self._store[self.sheet.rowid(row)] = value
 
     def calcValue(self, row):
         return self._store.get(self.sheet.rowid(row), None)
+
+
+SettableColumn.init('_store', dict, copy=True)
 
 
 # synonyms
