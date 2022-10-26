@@ -90,7 +90,7 @@ vd.aggregator('irr', np.irr, type=float)
 
 Any numeric aggregator can be added!
 
-Supply a space-separated list of aggreagator names to `options.describe_aggrs` in your .visidatarc.
+Supply a space-separated list of aggregator names to `options.describe_aggrs` in your .visidatarc.
 
 ```
 options.describe_aggrs = 'mean stdev irr'
