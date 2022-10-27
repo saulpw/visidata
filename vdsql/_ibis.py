@@ -47,7 +47,6 @@ def dtype_to_vdtype(dtype):
 @VisiData.api
 def configure_ibis(vd):
     import ibis
-    from ibis.backends.base import _connect
 
     vd.aggregator('collect', ibis.expr.types.AnyValue.collect, 'collect a list of values')
     ibis.options.verbose_log = vd.status
@@ -59,13 +58,9 @@ def configure_ibis(vd):
             AttrColumn('ibis_type', type=str)
         ]
 
-    @_connect.register(r".+\.ddb", priority=13)
-    def _(source: str):
-        return ibis.duckdb.connect(source)
-
-    @_connect.register(r".+\.sqlite3", priority=13)
-    def _(source: str):
-        return ibis.sqlite.connect(source)
+    ibis.ddb = ibis.duckdb
+    ibis.sqlite3 = ibis.sqlite
+    ibis.db = ibis.sqlite
 
 
 @VisiData.api
