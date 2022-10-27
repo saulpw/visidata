@@ -1,5 +1,5 @@
 from visidata import vd, VisiData, Sheet, AttrColumn
-from . import IbisTableIndexSheet, IbisConnectionPool
+from . import IbisTableSheet, IbisTableIndexSheet, IbisConnectionPool
 
 import ibis
 import ibis.expr.operations as ops
@@ -16,14 +16,6 @@ vd.openurl_bq = vd.openurl_bigquery
 
 @VisiData.api
 def configure_bigquery(vd):
-    from ibis.backends.base import _connect
-
-    @_connect.register(r"bigquery://(?P<project_id>[^/]+)(?:/(?P<dataset_id>.+))?", priority=13)
-    def _(_: str, *, project_id: str, dataset_id: str):
-        """Connect to BigQuery with `project_id` and optional `dataset_id`."""
-        import ibis
-        return ibis.bigquery.connect(project_id=project_id, dataset_id=dataset_id or "")
-
     @ibis.bigquery.add_operation(ops.TimestampDiff)
     def bq_timestamp_diff(t, expr):
         op = expr.op()
@@ -65,6 +57,5 @@ class BigqueryDatabaseIndexSheet(Sheet):
                                    ibis_con=self.con,
                                    ibis_conpool=IbisConnectionPool(f"{self.source}/{row.dataset_id}"),
                                    source=row,
-                                   filetype=None)
-
-
+                                   filetype=None,
+                                   sheet_type=IbisTableSheet)
