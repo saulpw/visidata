@@ -72,6 +72,7 @@
   Push to pypi
     ```
     python3 setup.py sdist bdist_wheel
+    chmod -R a+rX .
     twine upload dist/*
     ```
 
