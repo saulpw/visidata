@@ -218,6 +218,7 @@ def inputShell(vd):
         vd.warning('no $column in command')
     return cmd
 
+DirSheet.addCommand('`', 'open-dir-parent', 'vd.push(openSource(source/".."))', 'open parent directory')
 BaseSheet.addCommand('', 'open-dir-current', 'vd.push(vd.currentDirSheet)', 'open Directory Sheet: browse properties of files in current directory')
 
 Sheet.addCommand('z;', 'addcol-sh', 'cmd=inputShell(); addShellColumns(cmd, sheet)', 'create new column from bash expression, with $columnNames as variables')
