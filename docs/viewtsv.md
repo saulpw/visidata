@@ -9,12 +9,12 @@ Version: 1.0
 
 # viewtsv
 
-[viewtsv](https://github.com/saulpw/visidata/blob/stable/bin/viewtsv)
+[viewtsv.py](https://github.com/saulpw/visidata/blob/stable/bin/viewtsv.py)
 is a great example of a minimal VisiData application.  This is an extremely functional utility in 25 lines of code, leveraging the essence of the VisiData architecture.  Here it is in its entirety, with line by line annotations:
 
     #!/usr/bin/env python3
 
-VisiData 1.x requires Python 3.4+.
+VisiData 2.x requires Python 3.6+.
 
     import sys
     from visidata import Sheet, ColumnItem, options, asyncthread, run
@@ -55,10 +55,8 @@ The [`reload()`](/docs/loaders) function collects data from the source and puts 
 
 For each line, strip the included newline character, and filter out any blank lines.  Add each split tuple to `rows`.
 
-            self.columns = [
-                ColumnItem(colname, i)
-                    for i, colname in enumerate(self.rows[0])
-            ]
+            for i, colname in enumerate(self.rows[0]):
+                self.addColumn(ColumnItem(colname, i))
 
 The actual columns are set from the first (header) row.
 `ColumnItem` is a builtin, which creates a column to use getitem/setitem with the given key/index.
@@ -69,7 +67,7 @@ The header row is removed from the list of rows.  (Column names are displayed on
 
     run(*(TsvSheet(fn, source=fn) for fn in sys.argv[1:]))
 
-`run(*sheets)` is the toplevel entry point for vdtui.
+`run(*sheets)` is the toplevel entry point for a VisiData application.
 
 
 
