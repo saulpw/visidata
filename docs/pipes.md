@@ -7,16 +7,10 @@ Version: VisiData 2.0
 ---
 
 
-## STDOUT pipe/redirect
+## stdin/stdout pipe/redirect
 
-Visdata is pipe-friendly, it works well with other tools in a pipeline.  Visidata can interactively filter stdin, and save the
-results to stdout.
-
-Visdata is more convenient than standard Unix filtering commands because it allows interactive edits in the middle of a pipeline.
-Visidata shines over other pickers like `fzf` with the ability to select lines based on values other than
-the name of the items being selected.  Visidata understands numeric, date, currency, and custom values.  Visidata can
-sort by file size, sort processes by memory usage, or last modification times.  By first sorting or filtering by
-this metadata, you can more easily find what file(s) or process(es) you want to choose.
+VisiData works with other tools in a pipeline. VisiData will read any piped input from stdin as a sheet, and save the
+results of any remaining sheets to stdout Visdata allows interactive edits in the middle of a pipeline.
 
    - Use it to manually update (sort, filter, edit) tabular data in a pipeline  `mysql < query.sql | vd | awk 'awkity {awk}'
    - Use it to interactively pick processes to kill `ps -ef | vd | tail -n +2 | xargs --no-run-if-empty kill`
