@@ -139,7 +139,7 @@ vd.aggregators['q10'] = quantiles(10, 'deciles (10/20/30/40/50/60/70/80/90th pct
 
 # since bb29b6e, a record of every aggregator
 # is needed in vd.aggregators
-for pct in (10, 20, 25, 30, 33, 40, 50, 60, 67, 70, 75, 80, 90):
+for pct in (10, 20, 25, 30, 33, 40, 50, 60, 67, 70, 75, 80, 90, 95, 99):
     vd.aggregators[f'p{pct}'] = percentile(pct, f'{pct}th percentile')
 
 # returns keys of the row with the max value
