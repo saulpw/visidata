@@ -289,7 +289,7 @@ class IbisTableSheet(Sheet):
             q = q.filter(self.ibis_filter)
 
         if self._ordering:
-            q = q.sort_by([(col.get_ibis_col(self.query), not rev) for col, rev in self._ordering])
+            q = q.order_by([(col.get_ibis_col(self.query), not rev) for col, rev in self._ordering])
 
         return q
 
@@ -406,7 +406,7 @@ class IbisTableSheet(Sheet):
 
             groupq = groupq.mutate(histogram=histogram)
 
-        groupq = groupq.sort_by([('count', False)])
+        groupq = groupq.order_by([('count', False)])
 
         return IbisFreqTable(self.name, *(col.name for col in groupByCols), 'freq',
                              ibis_conpool=self.ibis_conpool,
