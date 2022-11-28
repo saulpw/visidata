@@ -1,4 +1,5 @@
 from copy import copy
+import itertools
 
 from visidata import vd, asyncthread, vlen, VisiData, Column, AttrColumn, Sheet, ColumnsSheet, ENTER
 from visidata.pivot import PivotSheet, PivotGroupRow
@@ -81,6 +82,12 @@ class FreqTableSheet(PivotSheet):
             return vs
         vd.warning("no source rows")
 
+    def openRows(self, rows):
+        vs = copy(self.source)
+        vs.name += "_several"
+        vs.rows = list(itertools.chain.from_iterable(row.sourcerows for row in rows))
+        return vs
+
     def openCell(self, col, row):
         return Sheet.openCell(self, col, row)
 
@@ -100,7 +107,7 @@ ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(FreqTableSheet(source[0], cu
 vd.addMenuItem('Data', 'Frequency table', 'current row', 'freq-row')
 
 FreqTableSheet.addCommand('gu', 'unselect-rows', 'unselect(selectedRows)', 'unselect all source rows grouped in current row')
-FreqTableSheet.addCommand('g'+ENTER, 'dive-rows', 'vs = copy(source); vs.name += "_several"; vs.rows=list(itertools.chain.from_iterable(row.sourcerows for row in selectedRows)); vd.push(vs)', 'open copy of source sheet with rows that are grouped in selected rows')
+FreqTableSheet.addCommand('g'+ENTER, 'dive-selected', 'vd.push(openRows(selectedRows))', 'open copy of source sheet with rows that are grouped in selected rows')
 
 vd.addGlobals({
     'FreqTableSheet': FreqTableSheet,

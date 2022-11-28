@@ -126,6 +126,7 @@ alias('dive-row', 'open-row')
 alias('add-sheet', 'open-new')
 alias('save-sheets-selected', 'save-selected')
 alias('join-sheets', 'join-selected')
+alias('dive-rows', 'dive-selected')
 
 # v2.3
 alias('show-aggregate', 'memo-aggregate')
