@@ -24,9 +24,9 @@ class AttrDict(dict):
             if isinstance(v, dict) and not isinstance(v, AttrDict):
                 v = AttrDict(v)
             return v
-        except KeyError:
+        except KeyError as e:
             if k.startswith("__"):
-                raise AttributeError
+                raise AttributeError from e
             return None
 
     def __setattr__(self, k, v):
@@ -99,8 +99,8 @@ def namedlist(objname, fieldnames):
             'to enable .fieldname'
             try:
                 return self[self._fields.index(k)]
-            except ValueError:
-                raise AttributeError
+            except ValueError as e:
+                raise AttributeError from e
 
         def __setattr__(self, k, v):
             'to enable .fieldname ='
