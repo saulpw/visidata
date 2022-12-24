@@ -139,12 +139,12 @@ class LazyComputeRow:
         except ValueError:
             try:
                 c = self._lcm[colid]
-            except (KeyError, AttributeError):
+            except (KeyError, AttributeError) as e:
                 if colid == 'sheet': return self.sheet
                 elif colid == 'row': c = self.row
                 elif colid == 'col': c = self.col
                 else:
-                    raise KeyError(colid)
+                    raise KeyError(colid) from e
 
         if not isinstance(c, Column):  # columns calc in the context of the row of the cell being calc'ed
             return c
