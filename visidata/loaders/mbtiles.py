@@ -119,11 +119,11 @@ class PbfCanvas(InvertedCanvas):
         self.reset()
 
         for r in Progress(self.sourceRows):
-            for vertexes, attr, row in self.iterpolylines(r):
-                self.polyline(vertexes, attr, row)
+            for vertices, attr, row in self.iterpolylines(r):
+                self.polyline(vertices, attr, row)
 
-                if len(vertexes) == 1:
-                    textx, texty = vertexes[0]
+                if len(vertices) == 1:
+                    textx, texty = vertices[0]
                     disptext = self.textCol.getDisplayValue(row)
                     if disptext:
                         self.label(textx, texty, disptext, attr, row)

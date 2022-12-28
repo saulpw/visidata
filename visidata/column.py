@@ -387,7 +387,7 @@ class Column(Extensible):
         return self.getCell(row).display
 
     def putValue(self, row, val):
-        'Change value for *row* in this column to *val* immediately.  Does not check the type.  Overrideable; by default calls ``.setter(row, val)``.'
+        'Change value for *row* in this column to *val* immediately.  Does not check the type.  Overridable; by default calls ``.setter(row, val)``.'
         return self.setter(self, row, val)
 
     def setValue(self, row, val):
@@ -478,7 +478,7 @@ def setattrdeep(obj, attr, val, getter=getattr, setter=setattr):
         try:
             obj = getter(obj, a)
         except Exception as e:
-            obj = obj[a] = type(obj)()  # assume homogenous nesting
+            obj = obj[a] = type(obj)()  # assume homogeneous nesting
 
     setter(obj, attrs[-1], val)
 

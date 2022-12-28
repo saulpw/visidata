@@ -35,7 +35,7 @@
 
 - expose `CommandLogBase` (was `_CommandLog`)
 - [options] allow FooSheet.options instead of .class_options
-- add seperate non-async `select_row`, `toggle_row`, and `unselect_row` for selection of single rows
+- add separate non-async `select_row`, `toggle_row`, and `unselect_row` for selection of single rows
 - the before/after decorators now do not fail if api functions they are decorating do not already exist
 
 # v2.10.1 (2022-09-14)
@@ -549,7 +549,7 @@
     - [cmdlog] for `open-file` source logging in cmdlog, we want paths to physical files, so if src is a **Sheet** grabs its source
     - [defer] fix pasting in deferred sheets
     - [eval] fix **ExprColumns** on empty rows
-    - [help] move signal config earlier in runcycle, to accomodate --help (thanks @frosencrantz #926)
+    - [help] move signal config earlier in runcycle, to accommodate --help (thanks @frosencrantz #926)
     - [open] create blank sheet of appropriate type when path does not exist
     - [pandas] fix conflict between dropped index and existing column (thanks thomanq #937)
     - [plugins] only check for plugins.jsonl once daily (previously: every start-up)
@@ -587,7 +587,7 @@
 
     - [cli options] now global by default; use `-n` to set option as sheet-specific instead
         - add `-n`/`--nonglobal` to make subsequent CLI options "sheet-specific" (applying only to paths specified directly on the CLI)
-        - keep `-g`/`--global` to make subsequent CLI options "global" (applying to all sheets by default unless overriden)
+        - keep `-g`/`--global` to make subsequent CLI options "global" (applying to all sheets by default unless overridden)
         - invert the default: now CLI options are global by default (thus `-g` is a no-op unless preceded by `-n` on the CLI)
         - `-g` no longer acts as a toggle
 
@@ -706,7 +706,7 @@
     - [loaders zip] add extract-file, extract-selected, extract-file-to, extract-selected-to commands
     - [macros] add improved macro system (thanks @bob-u for feature request #755)
         - `m` (`macro-record`) begins recording macro; `m` prompts for keystroke, and completes recording
-        - macro can then be executed everytime provided keystroke is used, will override existing keybinding
+        - macro can then be executed every time provided keystroke is used, will override existing keybinding
         - `gm` opens an index of all existing macros, can be directly viewed with `Enter` and then modified with `Ctrl+S`
         - macros will run command on current row, column sheet
         - remove deprecated `z Ctrl+D` older iteration of macro system
@@ -974,7 +974,7 @@
         - sheet names for join-sheets are still joined with '+' or '&' for the time being
     - [loaders html] add `options.html_title` to exclude the sheetname when saving sheet as html table (thanks @geekscrapy for PR #566)
     - [loaders postgres] add support for custom postgres schema (Thanks @p3k for PR #615)
-        - schema defaults to `public` but can be overriden using the `--postgres-schema` flag:
+        - schema defaults to `public` but can be overridden using the `--postgres-schema` flag:
         - `vd --postgres-schema=foo postgres://user:pw@localhost/foobar`
     - [loaders zip] -f filetype now applies to inner files
     - [mouse] add options.mouse_interval to control the max time between press/release for click (ms)
@@ -1252,7 +1252,7 @@
     - [fixed] various improvements to fixed-width sheet loader (thanks @frosencrantz for thorough bughunting #331)
     - [http] use options.encoding when no encoding is provided by responses headers (thanks @tsibley for the PR #370)
     - [join] joining columns in the ColumnSheet resulted in exception (thanks @frosencrantz for bug report #336)
-    - [load] fix replay sync bug (required wait prevously)
+    - [load] fix replay sync bug (required wait previously)
         - however, look out for `vd *` with lots of big datasets, they will now all load simultaneously
     - [longname] fix getCommand() error reporting
     - [mbtiles] now works again
@@ -1262,7 +1262,7 @@
     - [options] no error on unset if option not already set
     - [path] filesize of url is 0
     - [path] fix piping bug (vd failed to read stdin) (thanks @ajkerrigan for bug report #354)
-    - [plugins] ensure consisten Python exe for plugin installs (thanks @ajkerrigan for fix)
+    - [plugins] ensure consistent Python exe for plugin installs (thanks @ajkerrigan for fix)
     - [plugins] make plugin removal more predictable (thanks @ajkerrigan for fix)
     - [prev-sheet] would stack trace if more than one sheet loaded and no other sheet visited (thanks @frosencrantz for bug report #342)
     - [regex] will not silently fail if some example rows are not matches
@@ -1421,7 +1421,7 @@
 - [loader fixed] provide a way to limit the max number of columns created (thanks @frosencrantz for suggestion #313)
     - added `options.fixed_maxcols` (default: no limit)
 - [loader fixed] loaders override putValue, not setValue (thanks @aborruso for bug report #298)
-- [loader jira] add suport for jira filetype, a markdown derivative compatible with Atlassian JIRA (thanks @layertwo #301)
+- [loader jira] add support for jira filetype, a markdown derivative compatible with Atlassian JIRA (thanks @layertwo #301)
 - [loader Pyobj] `py` filetype to import and explore a python module: `vd -f py curses`
 - [loader pyxlsb] add .xlsb loader (suggested by @woutervdijke #246)
 - [loader ndjson ldjson] add as aliases for jsonl
@@ -1438,7 +1438,7 @@
 - [option vd] `--config` option to specify visidatarc file (suggested by @jsvine #236)
 - [option vdtui] remove `curses_timeout` option (fix to 100ms)
 - [pandas] support multi-line column names (suggested by @jtrakk #223)
-- [pandas] impement sort() for pandas DataFrame (suggested by @migueldvb #257)
+- [pandas] implement sort() for pandas DataFrame (suggested by @migueldvb #257)
 - [pandas] use value_counts() for PandasSheetFreqTable (thanks @azjps for PR #267)
 - [pandas] selection support for PandasSheet (thanks @azjps for PR #267)
 - [pandas] reset index (thanks @danlat #277)
@@ -1962,7 +1962,7 @@ Command additions/changes:
 - Fix cursor row highlighting of identical rows
 
 ## v0.95.2
-- move some functionality out of vdtui into seperate python files
+- move some functionality out of vdtui into separate python files
 - add Ctrl+z command to launch external $EDITOR
 - add ``options.force_valid_names``
 

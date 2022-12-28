@@ -187,7 +187,7 @@ The following example uses [benchmarks.csv](https://raw.githubusercontent.com/sa
 
 1. Move cursor to **SKU** column.
 2. Press `gs` to select all rows.
-3. Type `g*` folowed by *food/nutri*.
+3. Type `g*` followed by *food/nutri*.
 
 - tests/transform-cols.vd
 
@@ -270,7 +270,7 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 4. Type `|` followed by `True` to select all rows where there were more than 10 **Units** sold.
 5. Press `"` to open a duplicate sheet with only those selected rows.
 
-**Question** I have a dateset with separate columns for **Year**, **Month** and **Day**. How can I concatenate them into a single date column?
+**Question** I have a dataset with separate columns for **Year**, **Month** and **Day**. How can I concatenate them into a single date column?
 
 1. Type `=` followed by `Year + '-' + Month + '-' + Day`.
 2. Set the type of the new derived column by pressing `@` (date).

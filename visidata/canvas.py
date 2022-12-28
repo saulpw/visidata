@@ -431,22 +431,22 @@ class Canvas(Plotter):
     def line(self, x1, y1, x2, y2, attr=0, row=None):
         self.polylines.append(([(x1, y1), (x2, y2)], attr, row))
 
-    def polyline(self, vertexes, attr=0, row=None):
-        'adds lines for (x,y) vertexes of a polygon'
-        self.polylines.append((vertexes, attr, row))
+    def polyline(self, vertices, attr=0, row=None):
+        'adds lines for (x,y) vertices of a polygon'
+        self.polylines.append((vertices, attr, row))
 
-    def polygon(self, vertexes, attr=0, row=None):
-        'adds lines for (x,y) vertexes of a polygon'
-        self.polylines.append((vertexes + [vertexes[0]], attr, row))
+    def polygon(self, vertices, attr=0, row=None):
+        'adds lines for (x,y) vertices of a polygon'
+        self.polylines.append((vertices + [vertices[0]], attr, row))
 
-    def qcurve(self, vertexes, attr=0, row=None):
-        'Draw quadratic curve from vertexes[0] to vertexes[2] with control point at vertexes[1]'
-        if len(vertexes) != 3:
-            vd.fail('need exactly 3 points for qcurve (got %d)' % len(vertexes))
+    def qcurve(self, vertices, attr=0, row=None):
+        'Draw quadratic curve from vertices[0] to vertices[2] with control point at vertices[1]'
+        if len(vertices) != 3:
+            vd.fail('need exactly 3 points for qcurve (got %d)' % len(vertices))
 
-        x1, y1 = vertexes[0]
-        x2, y2 = vertexes[1]
-        x3, y3 = vertexes[2]
+        x1, y1 = vertices[0]
+        x2, y2 = vertices[1]
+        x3, y3 = vertices[2]
 
         for x, y in bezier(x1, y1, x2, y2, x3, y3):
             self.point(x, y, attr, row)
@@ -476,8 +476,8 @@ class Canvas(Plotter):
         'create canvasBox and cursorBox if necessary, and set visibleBox w/h according to zoomlevels.  then redisplay labels.'
         if not self.canvasBox:
             xmin, ymin, xmax, ymax = None, None, None, None
-            for vertexes, attr, row in self.polylines:
-                for x, y in vertexes:
+            for vertices, attr, row in self.polylines:
+                for x, y in vertices:
                     if xmin is None or x < xmin: xmin = x
                     if ymin is None or y < ymin: ymin = y
                     if xmax is None or x > xmax: xmax = x
@@ -576,9 +576,9 @@ class Canvas(Plotter):
         xfactor, yfactor = self.xScaler, self.yScaler
         plotxmin, plotymin = self.plotviewBox.xmin, self.plotviewBox.ymin
 
-        for vertexes, attr, row in Progress(self.polylines, 'rendering'):
-            if len(vertexes) == 1:  # single point
-                x1, y1 = vertexes[0]
+        for vertices, attr, row in Progress(self.polylines, 'rendering'):
+            if len(vertices) == 1:  # single point
+                x1, y1 = vertices[0]
                 x1, y1 = float(x1), float(y1)
                 if xmin <= x1 <= xmax and ymin <= y1 <= ymax:
                     x = plotxmin+(x1-xmin)*xfactor
@@ -586,8 +586,8 @@ class Canvas(Plotter):
                     self.plotpixel(round(x), round(y), attr, row)
                 continue
 
-            prev_x, prev_y = vertexes[0]
-            for x, y in vertexes[1:]:
+            prev_x, prev_y = vertices[0]
+            for x, y in vertices[1:]:
                 r = clipline(prev_x, prev_y, x, y, xmin, ymin, xmax, ymax)
                 if r:
                     x1, y1, x2, y2 = r
