@@ -48,7 +48,7 @@ This example uses the file [sample.tsv](https://raw.githubusercontent.com/saulpw
 </div>
 
 1. Press `!` on the independent variable to set it as a key column.
-2. Press `+` on a second column to add an *aggregrate*. This configures which column is to be composed in relation to others.
+2. Press `+` on a second column to add an *aggregate*. This configures which column is to be composed in relation to others.
 3. Optional: Set the type for the column being aggregated by pressing `~` (string), `#` (int), `%` (float), `$` (currency), or `@` (date).
 4. Press `Shift+W` on the dependent categorical variable to pivot on it.
 

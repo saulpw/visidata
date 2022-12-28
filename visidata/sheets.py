@@ -263,7 +263,7 @@ class TableSheet(BaseSheet):
         return row
 
     def newRow(self):
-        'Return new blank row compatible with this sheet.  Overrideable.'
+        'Return new blank row compatible with this sheet.  Overridable.'
         return type(self)._rowtype()
 
     @drawcache_property
@@ -363,7 +363,7 @@ class TableSheet(BaseSheet):
         return eval(expr, vd.getGlobals(), contexts)
 
     def rowid(self, row):
-        'Return a unique and stable hash of the *row* object.  Must be fast.  Overrideable.'
+        'Return a unique and stable hash of the *row* object.  Must be fast.  Overridable.'
         return id(row)
 
     @property
@@ -1186,7 +1186,7 @@ Sheet.addCommand('', 'type-floatlocale', 'cursorCol.type = floatlocale', 'set ty
 # when diving into a sheet, remove the index unless it is precious
 IndexSheet.addCommand('g^R', 'reload-selected', 'reloadSheets(selectedRows or rows)', 'reload all selected sheets')
 SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_columns", source=selectedRows))', 'open Columns Sheet with all visible columns from selected sheets')
-SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visble columns from selected sheets')
+SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visible columns from selected sheets')
 SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)', 'abort async thread for current sheet')
 SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)', 'abort async threads for selected sheets')
 SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(openRow(dest))', 'open sheet referenced in current row')

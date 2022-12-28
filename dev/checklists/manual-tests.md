@@ -58,7 +58,7 @@
             - columns sheet should remain where it is, and the source sheet below gets moved to the top of the other window
         - redo with opening the columns sheet on the other
             - bug
-                - when Shift+Z is done on bottom pane, its second sheet becomes the second sheet of the top stack, isntead of the first sheet of the top stack
+                - when Shift+Z is done on bottom pane, its second sheet becomes the second sheet of the top stack, instead of the first sheet of the top stack
         - test 3
             - Shift+Z with only one file
             - Shift+Z with two panes, each pane's stack only has one file

@@ -61,7 +61,7 @@ eleventyNavigation:
 ## tsv {#tsv}
 - loader-specific options
     - `delimiter` (default: '\t') field delimiter to use for tsv/usv filetype
-    - `row_delimiter` (default: '\n') row delimeter to use for tsv/usv filetype
+    - `row_delimiter` (default: '\n') row delimiter to use for tsv/usv filetype
     - `tsv_safe_newline` (default: '\u001e') replacement for newline character when saving to tsv
     - `tsv_safe_tab` (default: '\u001f') replacement for tab character when saving to tsv
 

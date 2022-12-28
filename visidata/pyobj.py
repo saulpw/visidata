@@ -208,7 +208,7 @@ def AttrColumns(attrnames):
 
 
 def SheetList(*names, **kwargs):
-    'Creates a Sheet from a list of homogenous dicts or namedtuples.'
+    'Creates a Sheet from a list of homogeneous dicts or namedtuples.'
 
     src = kwargs.get('source', None)
     if not src:
