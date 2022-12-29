@@ -10,8 +10,9 @@ except ImportError:
     pass # pwd,grp modules not available on Windows
 
 from visidata import Column, Sheet, LazyComputeRow, asynccache, BaseSheet, vd
-from visidata import Path, ENTER, date, asyncthread, FileExistsError, VisiData
+from visidata import Path, ENTER, asyncthread, FileExistsError, VisiData
 from visidata import modtime, filesize, vstat, Progress, TextSheet
+from visidata.type_date import date
 
 
 vd.option('dir_recurse', False, 'walk source path recursively on DirSheet')

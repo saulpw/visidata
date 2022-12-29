@@ -1,3 +1,5 @@
+import functools
+import collections
 from pkg_resources import resource_filename
 
 from visidata import *

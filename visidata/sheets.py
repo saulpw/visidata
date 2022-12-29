@@ -1187,12 +1187,9 @@ Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = deepcopy(sheet); vs.name += "_dee
 
 Sheet.addCommand('z~', 'type-any', 'cursorCol.type = anytype', 'set type of current column to anytype')
 Sheet.addCommand('~', 'type-string', 'cursorCol.type = str', 'set type of current column to str')
-Sheet.addCommand('@', 'type-date', 'cursorCol.type = date', 'set type of current column to date')
 Sheet.addCommand('#', 'type-int', 'cursorCol.type = int', 'set type of current column to int')
 Sheet.addCommand('z#', 'type-len', 'cursorCol.type = vlen', 'set type of current column to len')
-Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency', 'set type of current column to currency')
 Sheet.addCommand('%', 'type-float', 'cursorCol.type = float', 'set type of current column to float')
-Sheet.addCommand('z%', 'type-floatsi', 'cursorCol.type = floatsi', 'set type of current column to SI float')
 Sheet.addCommand('', 'type-floatlocale', 'cursorCol.type = floatlocale', 'set type of current column to float using system locale set in LC_NUMERIC')
 
 # when diving into a sheet, remove the index unless it is precious

@@ -1,7 +1,7 @@
 import math
 import random
 
-from collections import defaultdict, Counter
+from collections import defaultdict, Counter, OrderedDict
 from visidata import *
 from visidata.bezier import bezier
 
@@ -327,7 +327,7 @@ class Canvas(Plotter):
         self.polylines = []   # list of ([(canvas_x, canvas_y), ...], attr, row)
         self.gridlabels = []  # list of (grid_x, grid_y, label, attr, row)
 
-        self.legends = collections.OrderedDict()   # txt: attr  (visible legends only)
+        self.legends = OrderedDict()   # txt: attr  (visible legends only)
         self.plotAttrs = {}   # key: attr  (all keys, for speed)
         self.reset()
 

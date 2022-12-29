@@ -1,5 +1,4 @@
 from contextlib import suppress
-import collections
 import curses
 
 import visidata

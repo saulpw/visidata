@@ -1,7 +1,7 @@
 import re
 
-from visidata import VisiData, vd, Sheet, options, Column, Progress, anytype, date, ColumnItem, asyncthread, TypedExceptionWrapper, TypedWrapper, IndexSheet, copy, currency, clean_to_id
-
+from visidata import VisiData, vd, Sheet, options, Column, Progress, anytype, ColumnItem, asyncthread, TypedExceptionWrapper, TypedWrapper, IndexSheet, copy, clean_to_id, vlen
+from visidata.type_date import date
 
 def requery(url, **kwargs):
     'Return *url* with added or replaced query parameters from *kwargs*.'
@@ -212,9 +212,14 @@ def save_sqlite(vd, p, *vsheets):
 
     sqltypes = {
         int: 'INTEGER',
+        vlen: 'INTEGER',
         float: 'REAL',
-        currency: 'REAL'
+        date: 'DATE',
     }
+
+    for t in vd.numericTypes:
+        if t not in sqltypes:
+            sqltypes[t] = 'REAL'
 
     for vs in vsheets:
         vs.ensureLoaded()

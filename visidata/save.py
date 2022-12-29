@@ -1,3 +1,5 @@
+import collections
+
 from visidata import *
 
 

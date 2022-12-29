@@ -1,4 +1,4 @@
-from visidata import VisiData, vd, Sheet, date, anytype, options, Column, Progress, ColumnItem, vlen, PyobjSheet, currency, floatlocale, TypedWrapper, InferColumnsSheet
+from visidata import VisiData, vd, Sheet, date, anytype, options, Column, Progress, ColumnItem, vlen, PyobjSheet, TypedWrapper, InferColumnsSheet
 
 'Loaders for .npy and .npz.  Save to .npy.  Depends on the zip loader.'
 
@@ -69,10 +69,10 @@ def save_npy(vd, p, sheet):
     for col in Progress(sheet.visibleCols):
         if col.type in (int, vlen):
             dt = 'i8'
-        elif col.type in (float, currency, floatlocale):
-            dt = 'f8'
         elif col.type is date:
             dt = 'datetime64[s]'
+        elif col.type in vd.numericTypes:
+            dt = 'f8'
 
         else: #  if col.type in (str, anytype):
             width = col.getMaxWidth(sheet.rows)
