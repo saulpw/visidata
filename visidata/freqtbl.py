@@ -19,6 +19,12 @@ def valueNames(vd, discrete_vals, numeric_vals):
 
     return '+'.join(ret)
 
+class HistogramColumn(Column):
+    def calcValue(col, row):
+        histogram = col.sheet.options.disp_histogram
+        histolen = col.sheet.options.disp_histolen
+        return histogram*(histolen*len(row.sourcerows)//col.sheet.largest)
+
 
 class FreqTableSheet(PivotSheet):
     'Generate frequency-table sheet on currently selected column.'
@@ -53,12 +59,7 @@ class FreqTableSheet(PivotSheet):
             self.addColumn(c)
 
         if self.options.disp_histolen and self.options.disp_histogram:
-            def histogram(col, row):
-                histogram = col.sheet.options.disp_histogram
-                histolen = col.sheet.options.disp_histolen
-                return histogram*(histolen*len(row.sourcerows)//col.sheet.largest)
-
-            c = Column('histogram', type=str, getter=histogram, width=self.options.disp_histolen+2)
+            c = HistogramColumn('histogram', type=str, width=self.options.disp_histolen+2)
             self.addColumn(c)
 
         # two more threads
