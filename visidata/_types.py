@@ -1,24 +1,14 @@
-# VisiData uses Python native int, float, str, and adds simple date, currency, and anytype.
+# VisiData uses Python native int, float, str, and adds simple anytype.
 
-import collections
-import functools
-import datetime
 import locale
 from visidata import options, TypedWrapper, vd, VisiData
 
 #__all__ = ['anytype', 'vdtype', ]
 
-vd.option('disp_currency_fmt', '%.02f', 'default fmtstr to format for currency values', replay=True)
 vd.option('disp_float_fmt', '{:.02f}', 'default fmtstr to format for float values', replay=True)
 vd.option('disp_int_fmt', '{:.0f}', 'default fmtstr to format for int values', replay=True)
-vd.option('disp_date_fmt','%Y-%m-%d', 'default fmtstr to strftime for date values', replay=True)
 
-try:
-    from dateutil.parser import parse as date_parse
-except ImportError:
-    def date_parse(r=''):
-        vd.warning('install python-dateutil for date type')
-        return r
+vd.numericTypes = [int,float]
 
 # VisiDataType .typetype are e.g. int, float, str, and used internally in these ways:
 #
@@ -38,7 +28,8 @@ def anytype(r=None):
 anytype.__name__ = ''
 
 
-def numericFormatter(fmtstr, typedval):
+@VisiData.global_api
+def numericFormatter(vd, fmtstr, typedval):
     try:
         fmtstr = fmtstr or options['disp_'+type(typedval).__name__+'_fmt']
         if fmtstr[0] == '%':
@@ -49,38 +40,20 @@ def numericFormatter(fmtstr, typedval):
         return str(typedval)
 
 
-vd.si_prefixes='p n u m . kK M G T P Q'.split()
-
-def floatsi(*args):
-    if not args:
-        return 0.0
-    if not isinstance(args[0], str):
-        return args[0]
-
-    s=args[0].strip()
-    for i, p in enumerate(vd.si_prefixes):
-        if s[-1] in p:
-            return float(s[:-1]) * (1000 ** (i-4))
-
-    return float(s)
-
-
-def SIFormatter(fmtstr, val):
-    level = 4
-    if val != 0:
-        while abs(val) > 1000:
-            val /= 1000
-            level += 1
-        while abs(val) < 0.001:
-            val *= 1000
-            level -= 1
-
-    return numericFormatter(fmtstr, val) + (vd.si_prefixes[level][0] if level != 4 else '')
+@VisiData.api
+def numericType(vd, icon='', fmtstr='', formatter=vd.numericFormatter):
+    '''Decorator for numeric types.'''
+    def _decorator(f):
+        vd.addType(f, icon=icon, fmtstr=fmtstr, formatter=formatter)
+        vd.numericTypes.append(f)
+        vd.addGlobals({f.__name__: f})
+        return f
+    return _decorator
 
 
 class VisiDataType:
     'Register *typetype* in the typemap.'
-    def __init__(self, typetype=None, icon=None, fmtstr='', formatter=numericFormatter, key='', name=None):
+    def __init__(self, typetype=None, icon=None, fmtstr='', formatter=vd.numericFormatter, key='', name=None):
         self.typetype = typetype or anytype # int or float or other constructor
         self.name = name or getattr(typetype, '__name__', str(typetype))
         self.icon = icon      # show in rightmost char of column
@@ -89,7 +62,7 @@ class VisiDataType:
         self.key = key
 
 @VisiData.api
-def addType(vd, typetype=None, icon=None, fmtstr='', formatter=numericFormatter, key='', name=None):
+def addType(vd, typetype=None, icon=None, fmtstr='', formatter=vd.numericFormatter, key='', name=None):
     '''Add type to type map.
 
     - *typetype*: actual type class *TYPE* above
@@ -103,6 +76,7 @@ def addType(vd, typetype=None, icon=None, fmtstr='', formatter=numericFormatter,
     return t
 
 vdtype = vd.addType
+
 
 # typemap [vtype] -> VisiDataType
 vd.typemap = {}
@@ -121,17 +95,11 @@ vdtype(list, '')
 
 @VisiData.api
 def isNumeric(vd, col):
-    return col.type in (int,vlen,float,currency,date,floatsi,floatlocale)
+    return col.type in vd.numericTypes
 
 ##
 
-floatchars='+-0123456789.'
-def currency(*args):
-    'dirty float (strip non-numeric characters)'
-    if args and isinstance(args[0], str):
-        args = [''.join(ch for ch in args[0] if ch in floatchars)]
-    return float(*args)
-
+@vd.numericType('%')
 def floatlocale(*args):
     'Calculate float() using system locale set in LC_NUMERIC.'
     if not args:
@@ -140,6 +108,7 @@ def floatlocale(*args):
     return locale.atof(*args)
 
 
+@vd.numericType('♯', fmtstr='%.0f')
 class vlen(int):
     def __new__(cls, v=0):
         if isinstance(v, (vlen, int, float)):
@@ -149,99 +118,3 @@ class vlen(int):
 
     def __len__(self):
         return self
-
-
-class date(datetime.datetime):
-    'datetime wrapper, constructed from time_t or from str with dateutil.parse'
-
-    def __new__(cls, *args, **kwargs):
-        'datetime is immutable so needs __new__ instead of __init__'
-        if not args:
-            return datetime.datetime.now()
-        elif len(args) > 1:
-            return super().__new__(cls, *args, **kwargs)
-
-        s = args[0]
-        if isinstance(s, int) or isinstance(s, float):
-            r = datetime.datetime.fromtimestamp(s)
-        elif isinstance(s, str):
-            r = date_parse(s)
-        elif isinstance(s, (datetime.datetime, datetime.date)):
-            r = s
-        else:
-            raise Exception('invalid type for date %s' % type(s).__name__)
-
-        t = r.timetuple()
-        ms = getattr(r, 'microsecond', 0)
-        tzinfo = getattr(r, 'tzinfo', None)
-        return super().__new__(cls, *t[:6], microsecond=ms, tzinfo=tzinfo, **kwargs)
-
-    def __lt__(self, b):
-        if isinstance(b, datetime.datetime): return datetime.datetime.__lt__(self, b)
-        elif isinstance(b, datetime.date):   return not self.date().__eq__(b) and self.date().__lt__(b)
-        return NotImplemented
-
-    def __gt__(self, b):
-        if isinstance(b, datetime.datetime): return datetime.datetime.__gt__(self, b)
-        elif isinstance(b, datetime.date):   return not self.date().__eq__(b) and self.date().__gt__(b)
-        return NotImplemented
-
-    def __le__(self, b):
-        if isinstance(b, datetime.datetime): return datetime.datetime.__le__(self, b)
-        elif isinstance(b, datetime.date):   return self.date().__le__(b)
-        return NotImplemented
-
-    def __ge__(self, b):
-        if isinstance(b, datetime.datetime): return datetime.datetime.__ge__(self, b)
-        elif isinstance(b, datetime.date):   return self.date().__ge__(b)
-        return NotImplemented
-
-    def __eq__(self, b):
-        if isinstance(b, datetime.datetime): return datetime.datetime.__eq__(self, b)
-        elif isinstance(b, datetime.date): return self.date().__eq__(b)
-        return NotImplemented
-
-    def __str__(self):
-        return self.strftime(options.disp_date_fmt)
-
-    def __hash__(self):
-        return super().__hash__()
-
-    def __float__(self):
-        return self.timestamp()
-
-    def __radd__(self, n):
-        return self.__add__(n)
-
-    def __add__(self, n):
-        'add n days (int or float) to the date'
-        if isinstance(n, (int, float)):
-            n = datetime.timedelta(days=n)
-        return date(super().__add__(n))
-
-    def __sub__(self, n):
-        'subtract n days (int or float) from the date.  or subtract another date for a timedelta'
-        if isinstance(n, (int, float)):
-            n = datetime.timedelta(days=n)
-        elif isinstance(n, (date, datetime.datetime)):
-            return datedelta(super().__sub__(n).total_seconds()/(24*60*60))
-        return super().__sub__(n)
-
-class datedelta(datetime.timedelta):
-    def __float__(self):
-        return self.total_seconds()
-
-vdtype(vlen, '♯', '%.0f')
-vdtype(floatlocale, '%')
-vdtype(date, '@', '', formatter=lambda fmtstr,val: val.strftime(fmtstr or options.disp_date_fmt))
-vdtype(currency, '$')
-vdtype(floatsi, '‱', formatter=SIFormatter)
-
-# simple constants, for expressions like 'timestamp+15*minutes'
-years=365.25
-months=30.0
-weeks=7.0
-days=1.0
-hours=days/24
-minutes=days/(24*60)
-seconds=days/(24*60*60)

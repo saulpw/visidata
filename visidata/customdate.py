@@ -1,5 +1,6 @@
 import time
-from visidata import vd, date, Sheet, ColumnsSheet
+from visidata import vd, Sheet, ColumnsSheet
+from visidata.type_date import date
 
 
 @Sheet.api

@@ -63,6 +63,10 @@ from .path import *
 import visidata._input
 import visidata.movement
 
+import visidata.type_currency
+import visidata.type_date
+import visidata.type_floatsi
+
 import visidata._urlcache
 import visidata.selection
 import visidata.loaders.tsv
