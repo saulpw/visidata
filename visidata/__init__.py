@@ -12,10 +12,12 @@ class EscapeException(BaseException):
     pass
 
 
-def addGlobals(g):
-    '''Update the VisiData globals dict with items from *g*, which is a mapping of names to functions.
+def addGlobals(*args, **kwargs):
+    '''Update the VisiData globals dict with items from *args* and *kwargs*, which are mappings of names to functions.
     Importers can call ``addGlobals(globals())`` to have their globals accessible to execstrings.'''
-    globals().update(g)
+    for g in args:
+        globals().update(g)
+    globals().update(kwargs)
 
 
 def getGlobals():
