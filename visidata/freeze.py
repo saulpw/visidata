@@ -1,4 +1,5 @@
 from visidata import *
+import collections
 
 
 @Column.api
