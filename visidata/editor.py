@@ -46,10 +46,11 @@ def launchExternalEditor(vd, v, linenum=0):
     with tempfile.NamedTemporaryFile() as temp:
         with open(temp.name, 'w') as fp:
             fp.write(v)
-        return launchExternalEditorPath(visidata.Path(temp.name), linenum)
+        return vd.launchExternalEditorPath(visidata.Path(temp.name), linenum)
 
 
-def launchExternalEditorPath(path, linenum=0):
+@visidata.VisiData.api
+def launchExternalEditorPath(vd, path, linenum=0):
         'Launch $EDITOR to edit *path* starting on line *linenum*.'
         if linenum:
             visidata.vd.launchEditor(path, '+%s' % linenum)
