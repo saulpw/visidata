@@ -47,7 +47,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'go-col-number': '2',
                  'go-row-number': '5',              # go to row 5
                  'addcol-bulk': '1',
-                 'addcol-expr': 'Unit',          # just copy the column
+                 'addcol-expr': '1+1',          # just copy the column
                  'addcol-incr-step': '2',
                  'setcol-incr-step': '2',
                  'setcol-format-enum': '1=cat',
