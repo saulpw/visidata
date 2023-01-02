@@ -22,6 +22,7 @@
 
 ## Bugfixes
 
+- [columns] `dup-sheet` now carries over attributes of columns added by `add-column`
 - [describe] fix custom describe aggregators (reported by @edupont #1574)
 - [install] ensure setuptools files have appropriate permissions (reported by @icp1994 #1591)
 - [loaders xlsx] store `Null` as empty string in `save_xlsx` (reported and PR by @dbaynard #1626 #1629)
