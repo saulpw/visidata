@@ -8,7 +8,18 @@ from visidata import *
 @VisiData.api
 def ensureLoaded(vd, sheets):
     threads = [vs.ensureLoaded() for vs in sheets]
-    vd.status('loading %d sheets' % len([t for t in threads if t]))
+    threads = [t for t in threads if t]
+    vd.status('loading %d sheets' % len(threads))
+    return threads
+
+
+@asyncthread
+def _appendRowsAfterLoading(joinsheet, origsheets):
+    if vd.ensureLoaded(origsheets):
+        vd.sync()
+
+    for vs in origsheets:
+        joinsheet.rows.extend(vs.rows)
 
 
 @Sheet.api
@@ -18,7 +29,19 @@ def openJoin(sheet, others, jointype=''):
     sheets[1:] or vd.fail("join requires more than 1 sheet")
 
     if jointype == 'append':
-        return ConcatSheet('&'.join(vs.name for vs in sheets), source=sheets)
+        name = '&'.join(vs.name for vs in sheets)
+        sheettypes = set(type(vs) for vs in sheets)
+        if len(sheettypes) == 1:  # only one type of sheet #1598
+            joinsheet = copy(sheet)
+            joinsheet.name = name
+            joinsheet.rows = []
+            joinsheet.source = sheets
+
+            _appendRowsAfterLoading(joinsheet, sheets)
+
+            return joinsheet
+
+        return ConcatSheet(name, source=sheets)
 
     for s in sheets:
         s.keyCols or vd.fail(f'{s.name} has no key cols to join')
