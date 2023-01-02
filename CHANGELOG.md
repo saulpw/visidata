@@ -1,5 +1,38 @@
 # VisiData version history
 
+# vX.X.X (2023-XX-XX)
+
+- drop support for Python 3.6
+    - related to https://github.com/actions/setup-python/issues/543
+
+- [dirsheet] add `open-dir-parent` (bound to `\``)
+- [loaders zip] add multisave for `.zip`
+    - saves all sheets into one `.zip`
+- [sysedit] add `sysedit-selected` (default: `g Ctrl+O`) (requested by @Delapouite #1596)
+    - edit cells in multiple rows in `$EDITOR`
+    - only handles cell modifications
+
+## Improvements
+
+- [aggregators] add 95 and 99 percentile
+- [frequency table] `dive-rows` becomes `dive-selected`
+- [graph] fail if no numeric xcols are given
+- [open-cell-files] warn when file or url in cell does not exist (requested by @geekscrapy #1540)
+- [tests] add testing support for Python 3.11 (#1585)
+
+## Bugfixes
+
+- [describe] fix custom describe aggregators (reported by @edupont #1574)
+- [install] ensure setuptools files have appropriate permissions (reported by @icp1994 #1591)
+- [loaders xlsx] store `Null` as empty string in `save_xlsx` (reported and PR by @dbaynard #1626 #1629)
+- [unzip-http] fix extraction
+- [zsh-completion] fixed (reported by @pigmonkey #1583; PR by @Freed-Wu #1646)
+
+## API
+
+- fix Exception causes in utils.py (PR by @cool-RR #1633)
+- add `HistogramColumn` to allow overrides (requested by @andycraig #1621)
+
 # v2.10.2 (2022-10-XX)
 
 - add .vdx, a simplified new cmdlog format
