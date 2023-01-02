@@ -159,7 +159,7 @@ def drawLeftStatus(vd, scr, vs):
 
 @VisiData.api
 def rightStatus(vd, sheet):
-    'Return right side of status bar.  Overrideable.'
+    'Return right side of status bar.  Overridable.'
     return MissingAttrFormatter().format(sheet.options.disp_rstatus_fmt, sheet=sheet, vd=vd)
 
 

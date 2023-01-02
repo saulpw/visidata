@@ -13,11 +13,9 @@ class AttrDict(dict):
             if isinstance(v, dict):
                 v = AttrDict(v)
             return v
-        except AttributeError:
-            raise "eofo"
-        except KeyError:
+        except KeyError as e:
             if k.startswith("__"):
-                raise AttributeError
+                raise AttributeError from e
             return ''
     def __setattr__(self, k, v):
         self[k] = v

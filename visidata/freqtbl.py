@@ -1,4 +1,5 @@
 from copy import copy
+import itertools
 
 from visidata import vd, asyncthread, vlen, VisiData, Column, AttrColumn, Sheet, ColumnsSheet, ENTER
 from visidata.pivot import PivotSheet, PivotGroupRow
@@ -17,6 +18,12 @@ def valueNames(vd, discrete_vals, numeric_vals):
         ret.append('%s-%s' % numeric_vals)
 
     return '+'.join(ret)
+
+class HistogramColumn(Column):
+    def calcValue(col, row):
+        histogram = col.sheet.options.disp_histogram
+        histolen = col.sheet.options.disp_histolen
+        return histogram*(histolen*len(row.sourcerows)//col.sheet.largest)
 
 
 class FreqTableSheet(PivotSheet):
@@ -52,12 +59,7 @@ class FreqTableSheet(PivotSheet):
             self.addColumn(c)
 
         if self.options.disp_histolen and self.options.disp_histogram:
-            def histogram(col, row):
-                histogram = col.sheet.options.disp_histogram
-                histolen = col.sheet.options.disp_histolen
-                return histogram*(histolen*len(row.sourcerows)//col.sheet.largest)
-
-            c = Column('histogram', type=str, getter=histogram, width=self.options.disp_histolen+2)
+            c = HistogramColumn('histogram', type=str, width=self.options.disp_histolen+2)
             self.addColumn(c)
 
         # two more threads
@@ -81,6 +83,12 @@ class FreqTableSheet(PivotSheet):
             return vs
         vd.warning("no source rows")
 
+    def openRows(self, rows):
+        vs = copy(self.source)
+        vs.name += "_several"
+        vs.rows = list(itertools.chain.from_iterable(row.sourcerows for row in rows))
+        return vs
+
     def openCell(self, col, row):
         return Sheet.openCell(self, col, row)
 
@@ -100,7 +108,7 @@ ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(FreqTableSheet(source[0], cu
 vd.addMenuItem('Data', 'Frequency table', 'current row', 'freq-row')
 
 FreqTableSheet.addCommand('gu', 'unselect-rows', 'unselect(selectedRows)', 'unselect all source rows grouped in current row')
-FreqTableSheet.addCommand('g'+ENTER, 'dive-rows', 'vs = copy(source); vs.name += "_several"; vs.rows=list(itertools.chain.from_iterable(row.sourcerows for row in selectedRows)); vd.push(vs)', 'open copy of source sheet with rows that are grouped in selected rows')
+FreqTableSheet.addCommand('g'+ENTER, 'dive-selected', 'vd.push(openRows(selectedRows))', 'open copy of source sheet with rows that are grouped in selected rows')
 
 vd.addGlobals({
     'FreqTableSheet': FreqTableSheet,

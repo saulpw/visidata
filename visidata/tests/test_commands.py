@@ -43,11 +43,11 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'unselect-col-regex': '.',
                  'unselect-cols-regex': '.',
                  'edit-cell': '',               # no change should not error
-                 'go-col-regex': 'Unit',          # column name in sample
+                 'go-col-regex': 'Units',          # column name in sample
                  'go-col-number': '2',
                  'go-row-number': '5',              # go to row 5
                  'addcol-bulk': '1',
-                 'addcol-expr': 'Unit',          # just copy the column
+                 'addcol-expr': 'Units',          # just copy the column
                  'addcol-incr-step': '2',
                  'setcol-incr-step': '2',
                  'setcol-format-enum': '1=cat',

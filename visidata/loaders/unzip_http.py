@@ -28,7 +28,7 @@ import pathlib
 import urllib.parse
 
 
-__version__ = '0.5'
+__version__ = '0.5.1'
 
 
 def error(s):
@@ -177,18 +177,25 @@ class RemoteZipFile:
             rzi.parse_extra(extra)
             yield rzi
 
-    def extractall(self, path, members=None):
-        path = path or pathlib.Path('.')
-        for fn in members or self.namelist():
-            outpath = path/fn
+    def extract(self, member, path=None, pwd=None):
+            if pwd:
+                raise NotImplementedError('Passwords not supported yet')
+
+            path = path or pathlib.Path('.')
+
+            outpath = path/member
             os.makedirs(outpath.parent, exist_ok=True)
-            with self.open(fn) as fpin:
-                with open(path/fn, mode='wb') as fpout:
+            with self.open(member) as fpin:
+                with open(path/member, mode='wb') as fpout:
                     while True:
                         r = fpin.read(65536)
                         if not r:
                             break
                         fpout.write(r)
+
+    def extractall(self, path=None, members=None, pwd=None):
+        for fn in members or self.namelist():
+            self.extract(fn, path, pwd=pwd)
 
     def get_range(self, start, n):
         return self.http.request('GET', self.url, headers={'Range': f'bytes={start}-{start+n-1}'}, preload_content=False)

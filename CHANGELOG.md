@@ -1,5 +1,77 @@
 # VisiData version history
 
+# vX.X.X (2023-XX-XX)
+
+- drop support for Python 3.6
+    - related to https://github.com/actions/setup-python/issues/543
+
+- [dirsheet] add `open-dir-parent` (bound to `\``)
+- [loaders zip] add multisave for `.zip`
+    - saves all sheets into one `.zip`
+- [sysedit] add `sysedit-selected` (default: `g Ctrl+O`) (requested by @Delapouite #1596)
+    - edit cells in multiple rows in `$EDITOR`
+    - only handles cell modifications
+
+## Improvements
+
+- [aggregators] add 95 and 99 percentile
+- [frequency table] `dive-rows` becomes `dive-selected`
+- [graph] fail if no numeric xcols are given
+- [open-cell-files] warn when file or url in cell does not exist (requested by @geekscrapy #1540)
+- [tests] add testing support for Python 3.11 (#1585)
+
+## Bugfixes
+
+- [columns] `dup-sheet` now carries over attributes of columns added by `add-column`
+- [describe] fix custom describe aggregators (reported by @edupont #1574)
+- [install] ensure setuptools files have appropriate permissions (reported by @icp1994 #1591)
+- [loaders xlsx] store `Null` as empty string in `save_xlsx` (reported and PR by @dbaynard #1626 #1629)
+- [unzip-http] fix extraction
+- [zsh-completion] fixed (reported by @pigmonkey #1583; PR by @Freed-Wu #1646)
+
+## API
+
+- fix Exception causes in utils.py (PR by @cool-RR #1633)
+- add `HistogramColumn` to allow overrides (requested by @andycraig #1621)
+
+# v2.10.2 (2022-10-XX)
+
+- add .vdx, a simplified new cmdlog format
+- add `-N`/`--nothing` command to disable loading .visidatarc and plugin addons
+- add `addcol-aggr` to add an aggregator column to the **FreqTable** without needing to
+  regenerate it (requested by @geekscrapy #1541)
+
+## Improvements
+
+- [cli] load commandline file arguments from the start (requested by @reagle #1471)
+- [cli] `--config=''` now does not try to load any config
+- [open] rename `zo` `open-cell` command to `open-cell-file`
+- [loaders whl] load python .whl (reported by @frosencrantz #1539)
+
+## Bugfixes
+
+- [cli] fix for empty arg
+- [DirSheet] fix bug where `Enter` no longer opened a file from the **DirSheet** (reported by @frosencrantz #1527)
+- [input paste] fix pasting via a Path via `Ctrl+Y`  into input (reported by @frosencrantz #1546)
+- [menu] allow VisiData to run without menu
+- [mouse] catch any curses.getmouse() errors (reported by @geekscrapy #1553)
+- [performance] allow vd to be truly idle (reported by WizzardUU #1532)
+- [plugins_autoload] catch error for environment having invalid package metadata (reported by @jsdealy #1529)
+- [plugins_autoload] catch exception if plugin fails to load
+- [plugins-autoload] fix check for if plugins_autoload is set in args
+- [plugins-autoload] update for importlib-metadata 5.0 API (reported by @jkerhin #1550)
+- [pyobj] undo rename of `open-row`/`open-cell` (were renamed to `open-X-pyobj`) (revert of eff9833e6A)
+- [sheets] ensure IndexSheets are precious, and that **SheetsSheet** is not (reported by @frosencrantz #1547)
+- [unzip-http] extracting a file now checks for overwrite (reported by @frosencrantz #1452)
+- [windows clipboard] fix piping to clip command through stdin (thanks @daviewales for the fix; reported by @pshangov #1431)
+
+## API
+
+- expose `CommandLogBase` (was `_CommandLog`)
+- [options] allow FooSheet.options instead of .class_options
+- add seperate non-async `select_row`, `toggle_row`, and `unselect_row` for selection of single rows
+- the before/after decorators now do not fail if api functions they are decorating do not already exist
+
 # v2.10.1 (2022-09-14)
 
 ## Improvements

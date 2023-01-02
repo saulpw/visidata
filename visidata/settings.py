@@ -372,15 +372,17 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
     sys.path.append(str(visidata.Path(vd.options.visidata_dir)/"plugins-deps"))
 
     # autoload installed plugins first
-    if not args.nothing and args.plugins_autoload and vd.options.plugins_autoload:
+    args_plugins_autoload = args.plugins_autoload if 'plugins_autoload' in args else True
+    if not args.nothing and args_plugins_autoload and vd.options.plugins_autoload:
         from importlib_metadata import entry_points  # a backport which supports < 3.8 https://github.com/pypa/twine/pull/732
         try:
-            eps = entry_points().get('visidata.plugins', [])
-        except TypeError:
-            eps = []
+            eps = entry_points()
+            eps_visidata = eps.select(group='visidata.plugins') if 'visidata.plugins' in eps.groups else []
+        except Exception as e:
+            eps_visidata = []
             vd.warning('plugin autoload failed; see issue #1529')
 
-        for ep in eps:
+        for ep in eps_visidata:
             try:
                 plug = ep.load()
                 sys.modules[f'visidata.plugins.{ep.name}'] = plug

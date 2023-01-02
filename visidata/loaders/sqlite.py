@@ -43,7 +43,7 @@ class SqliteSheet(Sheet):
             if not m: return anytype
             typename, _, i, _, f = m.groups()
             if typename == 'DATE': return date
-            if typename == 'INTEGER': return int
+            if 'INT' in typename: return int
             if typename == 'REAL': return float
             if typename == 'NUMBER':
                 return int if f == '0' else float

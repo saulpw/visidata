@@ -5,14 +5,14 @@ import io
 import codecs
 import pathlib
 from urllib.parse import urlparse, urlunparse
-from functools import wraps
+from functools import wraps, lru_cache
 
 from visidata import *
 
 vd.option('encoding', 'utf-8', 'encoding passed to codecs.open', replay=True)
 vd.option('encoding_errors', 'surrogateescape', 'encoding_errors passed to codecs.open', replay=True)
 
-@functools.lru_cache()
+@lru_cache()
 def vstat(path, force=False):
     try:
         return os.stat(path)
@@ -131,7 +131,7 @@ class Path(os.PathLike):
         self.filesize = filesize
         self.rfile = None
 
-    @functools.lru_cache()
+    @lru_cache()
     def stat(self, force=False):
         return self._path.stat()
 
@@ -289,7 +289,7 @@ class Path(os.PathLike):
         return str(self._path)
 
     @wraps(pathlib.Path.stat)
-    @functools.lru_cache()
+    @lru_cache()
     def stat(self, force=False):
         'Return Path.stat() if relevant.'
         try:

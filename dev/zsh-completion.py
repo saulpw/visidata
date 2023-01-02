@@ -33,13 +33,14 @@ def generate_completion(opt):
         completion += ":_files"
     elif opt.name in ["plugins_url", "motd_url"]:
         completion += ":_urls"
-    helpstr = opt.helpstr.replace("[", "\\[").replace("]", "\\]")
+    helpstr = opt.helpstr
     selections = pat_select.findall(helpstr)
     if len(selections):
         completion += f":{selections[0].replace('/', ' ')}"
     # TODO: use `zstyle ':completion:*' extra-verbose true`
     # to control the display of default value
     helpstr = helpstr + f" (default: {opt.value})"
+    helpstr = helpstr.replace("[", "\\[").replace("]", "\\]")
     return f"{prefix}'[{helpstr}]{completion}'"
 
 
