@@ -15,7 +15,7 @@ VisiData supports tsv, csv, sqlite, json, xlsx (Excel), hdf5, and [many other fo
 ## Platform requirements
 
 - Linux, OS/X, or Windows (with WSL)
-- Python 3.6+
+- Python 3.7+
 - additional Python modules are required for certain formats and sources
 
 ## Install
