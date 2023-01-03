@@ -22,7 +22,6 @@ def macrosheet(vd):
         else:
             vd.warning(f'failed to load macro {fn}')
             continue
-        vd.status(f"setting {ks}")
         setMacro(ks, vs)
         real_macrosheet.addRow(vs)
 
