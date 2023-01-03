@@ -1,4 +1,5 @@
 import html
+import urllib.parse
 import copy
 import itertools
 
@@ -11,6 +12,7 @@ def open_html(vd, p):
     return HtmlTablesSheet(p.name, source=p)
 
 VisiData.open_htm = VisiData.open_html
+
 
 class HtmlTablesSheet(IndexSheet):
     rowtype = 'sheets'  # rowdef: HtmlTableSheet (sheet.html = lxml.html.HtmlElement)
@@ -74,7 +76,7 @@ class HtmlElementsSheet(InferColumnsSheet):
             row = copy.copy(r.attrib)
             row['__element__'] = r
             if row.get('href'):
-                row['href'] = canonicalize_url(row.get('href'), self.source.URL)
+                row['href'] = urllib.parse.urljoin(self.source.URL, row.get('href'))
 
             yield row
 
@@ -107,7 +109,7 @@ class HtmlTableSheet(Sheet):
                 colspan = int(cell.attrib.get('colspan', 1))
                 rowspan = int(cell.attrib.get('rowspan', 1))
                 cellval = ' '.join(x.strip() for x in cell.itertext())  # text only without markup
-                links = [x.get('href') for x in cell.iter('a')]
+                links = [urllib.parse.urljoin(self.source.base_url, x.get('href')) for x in cell.iter('a')]
                 maxlinks[colnum] = max(maxlinks.get(colnum, 0), len(links))
 
                 if is_header(cell):
