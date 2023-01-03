@@ -1,4 +1,4 @@
-from visidata import VisiData, vd, Sheet, Path, Column, ColumnItem, BaseSheet
+from visidata import VisiData, vd, Sheet, Path, Column, ItemColumn, BaseSheet
 
 @VisiData.api
 def open_h5(vd, p):
@@ -27,19 +27,24 @@ class Hdf5ObjSheet(Sheet):
                 yield Hdf5ObjSheet(self.name, k, source=v)
         elif isinstance(source, h5py.Dataset):
             if len(source.shape) == 1:
-                for i, colname in enumerate(source.dtype.names or [0]):
-                    self.addColumn(ColumnItem(colname, colname), index=i)
-                yield from source  # copy
+                if source.dtype.names:
+                    for i, colname in enumerate(source.dtype.names):
+                        self.addColumn(ItemColumn(colname, colname), index=i)
+                    yield from source  # copy
+                else:
+                    self.addColumn(ItemColumn(source.name, 0))
+                    for v in source:
+                        yield [v]
             elif len(source.shape) == 2:  # matrix
                 ncols = source.shape[1]
                 for i in range(ncols):
-                    self.addColumn(ColumnItem('', i, width=8), index=i)
+                    self.addColumn(ItemColumn('', i, width=8), index=i)
                 self.recalc()
                 yield from source  # copy
             else:
-                vd.status('too many dimensions in shape %s' % str(source.shape))
+                vd.fail('too many dimensions in shape %s' % str(source.shape))
         else:
-            vd.status('unknown h5 object type %s' % type(source))
+            vd.fail('unknown h5 object type %s' % type(source))
 
 
     def openRow(self, row):
