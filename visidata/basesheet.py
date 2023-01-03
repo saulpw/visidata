@@ -25,7 +25,7 @@ class LazyChainMap:
     def keys(self):
         return list(self.objs.keys())  # sum(set(dir(obj)) for obj in self.objs))
 
-    def get(self, key, default=None, /):
+    def get(self, key, default=None):
         if key in self.locals:
             return self.locals[key]
         return self.objs.get(key, default)
