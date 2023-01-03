@@ -71,7 +71,7 @@ def _dispch(c, oddspacech=None, combch=None, modch=None):
     if ccat in ['Mn', 'Sk', 'Lm']:
         if unicodedata.name(c).startswith('MODIFIER'):
             return modch, 1
-    elif c != ' ' and ccat in ('Cc', 'Zs', 'Zl'):  # control char, space, line sep
+    elif c != ' ' and ccat in ('Cc', 'Zs', 'Zl', 'Cs'):  # control char, space, line sep, surrogate
         return oddspacech, 1
     elif c in ZERO_WIDTH_CF:
         return combch, 1
