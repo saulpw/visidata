@@ -18,8 +18,14 @@ def _appendRowsAfterLoading(joinsheet, origsheets):
     if vd.ensureLoaded(origsheets):
         vd.sync()
 
+    colnames = {c.name:c for c in joinsheet.visibleCols}
     for vs in origsheets:
         joinsheet.rows.extend(vs.rows)
+        for c in vs.visibleCols:
+            if c.name not in colnames:
+                newcol = copy(c)
+                colnames[c.name] = newcol
+                joinsheet.addColumn(newcol)
 
 
 @Sheet.api
@@ -28,19 +34,23 @@ def openJoin(sheet, others, jointype=''):
 
     sheets[1:] or vd.fail("join requires more than 1 sheet")
 
-    if jointype == 'append':
+    if jointype == 'concat':
         name = '&'.join(vs.name for vs in sheets)
         sheettypes = set(type(vs) for vs in sheets)
-        if len(sheettypes) == 1:  # only one type of sheet #1598
-            joinsheet = copy(sheet)
-            joinsheet.name = name
-            joinsheet.rows = []
-            joinsheet.source = sheets
+        if len(sheettypes) != 1:  # only one type of sheet #1598
+            vd.fail(f'only same sheet types can be concat-joined; use "append"')
 
-            _appendRowsAfterLoading(joinsheet, sheets)
+        joinsheet = copy(sheet)
+        joinsheet.name = name
+        joinsheet.rows = []
+        joinsheet.source = sheets
 
-            return joinsheet
+        _appendRowsAfterLoading(joinsheet, sheets)
 
+        return joinsheet
+
+    elif jointype == 'append':
+        name = '&'.join(vs.name for vs in sheets)
         return ConcatSheet(name, source=sheets)
 
     for s in sheets:
@@ -56,12 +66,13 @@ def openJoin(sheet, others, jointype=''):
 
 
 vd.jointypes = [{'key': k, 'desc': v} for k, v in {
-    'inner': 'only rows which match keys on all sheets',
-    'outer': 'all rows from first selected sheet',
+    'inner': 'only rows with matching keys on all sheets',
+    'outer': 'only rows with matching keys on first selected sheet',
     'full': 'all rows from all sheets (union)',
     'diff': 'only rows NOT in all sheets',
-    'append': 'columns all sheets; extend with rows from all sheets',
-    'extend': 'only rows from first sheet; extend with columns from all sheets',
+    'append': 'all rows from all sheets; columns from all sheets',
+    'concat': 'all rows from all sheets; columns and type from first sheet',
+    'extend': 'only rows from first sheet; type from first sheet; columns from all sheets',
     'merge': 'merge differences from other sheets into first sheet',
 }.items()]
 
