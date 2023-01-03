@@ -6,10 +6,11 @@ from visidata.cmdlog import CommandLog, CommandLogJsonl
 vd.macroMode = None
 vd.macrobindings = {}
 
+
 @VisiData.lazy_property
 def macrosheet(vd):
     macrospath = Path(os.path.join(options.visidata_dir, 'macros.tsv'))
-    macrosheet = vd.loadInternalSheet(TsvSheet, macrospath, columns=(ColumnItem('command', 0), ColumnItem('filename', 1))) or vd.error('error loading macros')
+    macrosheet = vd.loadInternalSheet(VisiDataMetaSheet, macrospath, columns=(ColumnItem('command', 0), ColumnItem('filename', 1))) or vd.error('error loading macros')
 
     real_macrosheet = IndexSheet('user_macros', rows=[], source=macrosheet)
     for ks, fn in macrosheet.rows:

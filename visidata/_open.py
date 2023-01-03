@@ -121,7 +121,7 @@ def open_txt(vd, p):
 
 @VisiData.api
 def loadInternalSheet(vd, cls, p, **kwargs):
-    'Load internal sheet of given class.  Internal sheets are always tsv.'
+    'Load internal sheet of given class.'
     vs = cls(p.name, source=p, **kwargs)
     options._set('encoding', 'utf8', vs)
     if p.exists():
