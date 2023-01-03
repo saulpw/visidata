@@ -1011,6 +1011,10 @@ class SheetsSheet(IndexSheet):
     def sort(self):
         self.rows[1:] = sorted(self.rows[1:], key=self.sortkey)
 
+class GlobalSheetsSheet(SheetsSheet):  #1620
+    def sort(self):
+        IndexSheet.sort(self)
+
 @VisiData.property
 @drawcache
 def _evalcontexts(vd):
@@ -1067,7 +1071,7 @@ def push(vd, vs, pane=0, load=True):
 
 @VisiData.lazy_property
 def allSheetsSheet(vd):
-    return SheetsSheet("sheets_all", source=vd.allSheets)
+    return GlobalSheetsSheet("sheets_all", source=vd.allSheets)
 
 @VisiData.lazy_property
 def sheetsSheet(vd):
