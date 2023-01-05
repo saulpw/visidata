@@ -82,7 +82,7 @@ class DirSheet(Sheet):
             getter=lambda col,row: str(row.parent) if str(row.parent) == '.' else str(row.parent) + '/',
             setter=lambda col,row,val: col.sheet.moveFile(row, val)),
         Column('filename',
-            getter=lambda col,row: row.name + ''.join(row.suffixes),
+            getter=lambda col,row: row._path.name,
             setter=lambda col,row,val: col.sheet.renameFile(row, val)),
         Column('abspath', width=0, type=str,
             getter=lambda col,row: row,
