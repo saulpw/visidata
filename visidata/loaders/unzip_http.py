@@ -146,7 +146,7 @@ class RemoteZipFile:
         if cdir_start < 0 or cdir_start >= self.zip_size:
             error('cannot find central directory')
 
-        filehdr_index = 65536 - (self.zip_size - cdir_start)
+        filehdr_index = len(resp.data) - (self.zip_size - cdir_start)
 
         if filehdr_index < 0:
             resp = self.get_range(cdir_start, self.zip_size - cdir_start)
