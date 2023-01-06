@@ -24,9 +24,6 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    
-    - name: Create .visidatarc
-      run: touch ~/.visidatarc
 
     - name: Set up Environment
       run: |
