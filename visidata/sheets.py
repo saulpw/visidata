@@ -494,13 +494,21 @@ class TableSheet(BaseSheet):
         self.calcColLayout()
 
     def addColumn(self, *cols, index=None):
-        'Insert all *cols* into columns at *index*, or append to end of columns if *index* is None.  Return first column.  Mark sheet as modified if *index* is not None.'
+        '''Insert all *cols* into columns at *index*, or append to end of columns if *index* is None.
+           If *index* is None, columns are being added by loader, instead of by user.
+           If added by user, mark sheet as modified.
+           Columns added by loader share sheet's defer status.
+           Columns added by user are not marked as deferred.
+           Return first column.'''
         if not cols:
             vd.warning('no columns to add')
             return
 
         if index is not None:
             self.setModified()
+        else:
+            for col in cols:
+                col.defer = self.defer
 
         for i, col in enumerate(cols):
             col.name = self.maybeClean(col.name)

@@ -103,6 +103,7 @@ class Column(Extensible):
         self.keycol = 0       # keycol index (or 0 if not key column)
         self.expr = None      # Column-type-dependent parameter
         self.formatter = ''
+        self.defer = False
 
         self.setCache(cache)
         for k, v in kwargs.items():
@@ -296,7 +297,7 @@ class Column(Extensible):
     def getValue(self, row):
         'Return value for *row* in this column, calculating if not cached.'
 
-        if self.sheet.defer:
+        if self.defer:
             try:
                 row, rowmods = self.sheet._deferredMods[self.sheet.rowid(row)]
                 return rowmods[self]
@@ -391,8 +392,8 @@ class Column(Extensible):
         return self.setter(self, row, val)
 
     def setValue(self, row, val):
-        'Change value for *row* in this column to *val*.  Call ``putValue`` immediately if parent ``sheet.defer`` is False, otherwise cache until later ``putChanges``.  Caller must add undo function.'
-        if self.sheet.defer:
+        'Change value for *row* in this column to *val*.  Call ``putValue`` immediately if not a deferred column (added to deferred parent at load-time); otherwise cache until later ``putChanges``.  Caller must add undo function.'
+        if self.defer:
             self.cellChanged(row, val)
         else:
             self.putValue(row, val)
