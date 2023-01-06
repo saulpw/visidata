@@ -110,13 +110,14 @@ def openSource(vd, p, filetype=None, create=False, **kwargs):
 @VisiData.api
 def open_txt(vd, p):
     'Create sheet from `.txt` file at Path `p`, checking whether it is TSV.'
-    with p.open_text(encoding=vd.options.encoding) as fp:
-        try:
-            if options.delimiter in next(fp):    # peek at the first line
-                return vd.open_tsv(p)  # TSV often have .txt extension
-        except StopIteration:
-            return Sheet(p.name, columns=[SettableColumn()], source=p)
-        return TextSheet(p.name, source=p)
+    if p.exists(): #1611
+        with p.open_text(encoding=vd.options.encoding) as fp:
+            try:
+                if options.delimiter in next(fp):    # peek at the first line
+                    return vd.open_tsv(p)  # TSV often have .txt extension
+            except StopIteration:
+                return Sheet(p.name, columns=[SettableColumn()], source=p)
+    return TextSheet(p.name, source=p)
 
 
 @VisiData.api
