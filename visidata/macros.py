@@ -65,6 +65,8 @@ def afterExecSheet(cmdlog, sheet, escaped, err):
 def startMacro(cmdlog):
     if vd.macroMode:
         ks = vd.input('save macro for keystroke: ')
+        while ks in vd.macrobindings:
+            ks = vd.input(f'{ks} already in use; save macro for keystroke: ')
         vd.cmdlog.saveMacro(vd.macroMode.rows, ks)
         vd.macroMode = None
     else:
