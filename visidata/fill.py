@@ -9,7 +9,7 @@ def fillNullValues(vd, col, rows):
     oldvals = [] # for undo
     isNull = col.sheet.isNullFunc()
     n = 0
-    rowsToFill = [id(r) for r in rows]
+    rowsToFill = { id(r):True for r in rows }
     for r in Progress(col.sheet.rows, 'filling'):  # loop over all rows
         try:
             val = col.getValue(r)
