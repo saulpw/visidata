@@ -52,7 +52,7 @@ def saveMacro(self, rows, ks):
 @CommandLogJsonl.api
 @wraps(CommandLogJsonl.afterExecSheet)
 def afterExecSheet(cmdlog, sheet, escaped, err):
-    if vd.macroMode and (vd.activeCommand is not None) and (vd.activeCommand is not UNLOADED):
+    if vd.macroMode and (vd.activeCommand is not None) and (vd.activeCommand is not UNLOADED) and (vd.isLoggableCommand(vd.activeCommand.longname)):
         cmd = copy(vd.activeCommand)
         cmd.row = cmd.col = cmd.sheet = ''
         vd.macroMode.addRow(cmd)
