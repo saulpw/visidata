@@ -53,9 +53,9 @@ jobs:
       run: |
         mkdir -p ~/.visidata
         cp tests/macros/macro* ~/.visidata/
-        vd --batch -p tests/macros/test_macro.vd --output test_macro.tsv
+        vd --batch -p tests/macros/test_macro.vd --output tests/macros/golden/test_macro.tsv
         git --no-pager diff --numstat tests/
-        git --no-page diff --exit-code tests/
+        git --no-pager diff --exit-code tests/
 
     - name: Check docs are built without errors
       run: |
