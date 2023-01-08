@@ -129,7 +129,8 @@ def drawLeftStatus(vd, scr, vs):
         x = clipdraw(scr, y, 0, lstatus, attr, w=vs.windowWidth-1)
 
         vd.onMouse(scr, y, 0, 1, x,
-                        BUTTON1_PRESSED='sheets',
+                        BUTTON1_PRESSED='sheets-stack',
+                        BUTTON1_RELEASED='sheets-stack',
                         BUTTON3_PRESSED='rename-sheet',
                         BUTTON3_CLICKED='rename-sheet')
     except Exception as e:
