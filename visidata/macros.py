@@ -6,24 +6,32 @@ from visidata.cmdlog import CommandLog, CommandLogJsonl
 vd.macroMode = None
 vd.macrobindings = {}
 
+class MacroSheet(IndexSheet):
+
+    def reload(self):
+        self.rows = []
+        vd.sync(self.source.reload())
+        for ks, fn in self.source.rows:
+            fp = Path(fn)
+            if fp.ext == 'vd':
+                vs = vd.loadInternalSheet(CommandLog, fp)
+            elif fp.ext == 'vdj':
+                vs = vd.loadInternalSheet(CommandLogJsonl, fp)
+            else:
+                vd.warning(f'failed to load macro {fn}')
+                continue
+            setMacro(ks, vs)
+            self.addRow(vs)
+
+
 
 @VisiData.lazy_property
 def macrosheet(vd):
     macrospath = Path(os.path.join(options.visidata_dir, 'macros.tsv'))
     macrosheet = vd.loadInternalSheet(VisiDataMetaSheet, macrospath, columns=(ColumnItem('command', 0), ColumnItem('filename', 1))) or vd.error('error loading macros')
 
-    real_macrosheet = IndexSheet('user_macros', rows=[], source=macrosheet)
-    for ks, fn in macrosheet.rows:
-        fp = Path(fn)
-        if fp.ext == 'vd':
-            vs = vd.loadInternalSheet(CommandLog, fp)
-        elif fp.ext == 'vdj':
-            vs = vd.loadInternalSheet(CommandLogJsonl, fp)
-        else:
-            vd.warning(f'failed to load macro {fn}')
-            continue
-        setMacro(ks, vs)
-        real_macrosheet.addRow(vs)
+    real_macrosheet = MacroSheet('user_macros', rows=[], source=macrosheet)
+    real_macrosheet.reload()
 
     return real_macrosheet
 
