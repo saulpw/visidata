@@ -180,17 +180,9 @@ def runresult(vd):
 
 @VisiData.api
 def parseMouse(vd, **kwargs):
-    devid, x, y, z, bstate = curses.getmouse()
+    'Return list of mouse interactions (clicktype, y, x, name, scr) for curses screens given in kwargs as name:scr.'
 
-    found = False
-    for winname, winscr in kwargs.items():
-        py, px = winscr.getparyx()
-        mh, mw = winscr.getmaxyx()
-        if py <= y < py+mh and px <= x < px+mw:
-            y, x, = y-py, x-px
-            found = True
-            # vd.status('clicked at (%s, %s) in %s' % (y, x, winname))
-            break
+    devid, x, y, z, bstate = curses.getmouse()
 
     clicktype = ''
     if bstate & curses.BUTTON_CTRL:
@@ -205,10 +197,15 @@ def parseMouse(vd, **kwargs):
 
     keystroke = clicktype + curses.mouseEvents.get(bstate, str(bstate))
 
-    if found:
-        return keystroke, y, x, winname, winscr
+    found = []
+    for winname, winscr in kwargs.items():
+        py, px = winscr.getparyx()
+        mh, mw = winscr.getmaxyx()
+        if py <= y < py+mh and px <= x < px+mw:
+            found.append((keystroke, y-py, x-px, winname, winscr))
+#            vd.debug(f'{keystroke} at ({x-px}, {y-py}) in window {winname} {winscr}')
 
-    return keystroke, y, x, "whatwin", None
+    return found
 
 
 @VisiData.api
@@ -262,8 +259,6 @@ def mainloop(self, scr):
             if keystroke == 'KEY_MOUSE':
                 try:
                     self.keystrokes = ''
-                    keystroke, y, x, winname, winscr = vd.parseMouse(top=vd.winTop, bot=vd.winBottom, menu=vd.scrMenu)
-
                     pct = vd.windowConfig['pct']
                     topPaneActive = ((vd.activePane == 2 and pct < 0)  or (vd.activePane == 1 and pct > 0))
                     bottomPaneActive = ((vd.activePane == 1 and pct < 0)  or (vd.activePane == 2 and pct > 0))
@@ -272,17 +267,19 @@ def mainloop(self, scr):
                         self.activePane = 1 if self.activePane == 2 else 2
                         sheet = self.activeSheet
 
-                    f = self.getMouse(winscr, x, y, keystroke)
-                    sheet.mouseX, sheet.mouseY = x, y
-                    if f:
-                        if isinstance(f, str):
-                            for cmd in f.split():
-                                sheet.execCommand(cmd)
-                        else:
-                            f(y, x, keystroke)
+                    for keystroke, y, x, winname, winscr in vd.parseMouse(top=vd.winTop, bot=vd.winBottom, menu=vd.scrMenu):
+                        f = self.getMouse(winscr, x, y, keystroke)
+                        sheet.mouseX, sheet.mouseY = x, y
+                        if f:
+                            if isinstance(f, str):
+                                for cmd in f.split():
+                                    sheet.execCommand(cmd)
+                            else:
+                                f(y, x, keystroke)
 
-                        self.keystrokes = self.prettykeys(keystroke)
-                        keystroke = ''   # already handled
+                            self.keystrokes = self.prettykeys(keystroke)
+                            keystroke = ''   # already handled
+                            break  # first successful command stops checking
                 except curses.error:
                     pass
                 except Exception as e:
