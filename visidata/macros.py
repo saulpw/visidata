@@ -72,9 +72,9 @@ def afterExecSheet(cmdlog, sheet, escaped, err):
 @CommandLogJsonl.api
 def startMacro(cmdlog):
     if vd.macroMode:
-        ks = vd.input('save macro for keystroke: ')
+        ks = vd.input('set macro to keybinding: ')
         while ks in vd.macrobindings:
-            ks = vd.input(f'{ks} already in use; save macro for keystroke: ')
+            ks = vd.input(f'{ks} already in use; set macro to keybinding: ')
         vd.cmdlog.saveMacro(vd.macroMode.rows, ks)
         vd.macroMode = None
     else:
