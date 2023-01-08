@@ -46,7 +46,8 @@ class XmlSheet(Sheet):
     def iterload(self):
         if isinstance(self.source, Path):
             from lxml import etree, objectify
-            self.root = etree.parse(self.source.open_text(encoding=self.options.encoding))
+            p = etree.XMLParser(huge_tree=True)
+            self.root = etree.parse(self.source.open_text(encoding=self.options.encoding), parser=p)
             objectify.deannotate(self.root, cleanup_namespaces=True)
         else: #        elif isinstance(self.source, XmlElement):
             self.root = self.source
