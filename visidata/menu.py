@@ -753,15 +753,14 @@ def runMenu(vd):
             return
 
         elif k in ['KEY_MOUSE']:
-            keystroke, y, x, winname, winscr = vd.parseMouse(menu=vd.scrMenu, top=vd.winTop, bot=vd.winBottom)
-            if winname != 'menu':  # clicking off the menu is an escape
-                return
-            f = vd.getMouse(winscr, x, y, keystroke)
-            if f:
-                if f(y, x, keystroke):
-                    break
-            else:
-                return
+            for keystroke, y, x, winname, winscr in vd.parseMouse(menu=vd.scrMenu, top=vd.winTop, bot=vd.winBottom):
+                if winname == 'menu':
+                    f = vd.getMouse(winscr, x, y, keystroke)
+                    if f:
+                        if f(y, x, keystroke):
+                            break
+                    else:
+                        return  # clicking off the menu is an escape
 
         elif k in ['KEY_RIGHT', 'l']:
             if currentItem.menus and sheet.activeMenuItems[1] != 0:  # not first item
