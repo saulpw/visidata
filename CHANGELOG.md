@@ -1,40 +1,59 @@
 # VisiData version history
 
-# vX.X.X (2023-XX-XX)
+# v2.11 (2023-01-XX)
 
-- drop support for Python 3.6
-    - related to https://github.com/actions/setup-python/issues/543
+- [ci] drop support for Python 3.6 (related to https://github.com/actions/setup-python/issues/543)
+- [ci] add support for Python 3.11 (#1585)
 
-- [dirsheet] add `open-dir-parent` (bound to `\``)
-- [loaders zip] add multisave for `.zip`
-    - saves all sheets into one `.zip`
-- [sysedit] add `sysedit-selected` (default: `g Ctrl+O`) (requested by @Delapouite #1596)
+- [dirsheet] add `open-dir-parent` (bound to backtick)
+- [join] add new "concat" jointype to behave similar to "append" but keeps first sheet type and columns (requested by @frosencrantz #1598)
+- [zip] add multisave for `.zip` (save each sheet in options.save_filetype format into given .zip file)
+- [sysedit] add `sysedit-selected` (bound to `g Ctrl+O`) (requested by @Delapouite #1596)
     - edit cells in multiple rows in `$EDITOR`
-    - only handles cell modifications
+    - only handles cell modifications, not added or deleted rows
 
 ## Improvements
 
-- [aggregators] add 95 and 99 percentile
-- [frequency table] `dive-rows` becomes `dive-selected`
+- [aggregators] add 95 and 99 percentile (p95 and p99)
+- [fill-col] speed up `fill-col` for sheets with many empty cells (PR by @midichef #1657)
+- [loaders hdf5] add support for arrays of scalars (requested by @linwaytin #1602)
 - [graph] fail if no numeric xcols are given
 - [open-cell-files] warn when file or url in cell does not exist (requested by @geekscrapy #1540)
-- [tests] add testing support for Python 3.11 (#1585)
 
 ## Bugfixes
 
 - [columns] `dup-sheet` now carries over attributes of columns added by `add-column`
+- [columns] **SettableColumn** should not be deferred (reported by @frosencrantz #1568)
+- [customdate] recognise type-customdate as numeric (requested by @tdussa #1613)
 - [describe] fix custom describe aggregators (reported by @edupont #1574)
+- [dirsheet] fix incorrect filename with multiple extensions (reported by @kunliugithub #1571)
+- [display] show `disp_oddspace` for surrogate escapes (reported by @geekscrapy #1544)
 - [install] ensure setuptools files have appropriate permissions (reported by @icp1994 #1591)
-- [loaders xlsx] store `Null` as empty string in `save_xlsx` (reported and PR by @dbaynard #1626 #1629)
-- [unzip-http] fix extraction
+- [keystrokes] add `kDN` and `kUP` to translation table (reported by @djpohly #1336)
+- [loaders html] fix loading of relative links in html table (reported by @frosencrantz #1599)
+- [loaders xlsx] store `None` as empty string in `save_xlsx` (reported and PR by @dbaynard #1626 #1629)
+- [macros] override CLI parsing options for MacrosSheet (reported by @frosencrantz #1607)
+- [macros] query again for keystroke if used by existing macro (#1658)
+- [macros] do not include `nonLogged` commands in macro (reported by @geekscrapy #1569)
+- [macros] add reload for **MacroSheet** (reported by @geekscrapy #1569)
+- [mouse] fix mouse-clicks on statusbar when splitpane is off (reported by @frosencrantz #1625)
+- [open_txt] fix Exception with `open-config` when no `~/.visidatarc` (reported by @gunchev #1611)
+- [pdb] fix entering of pdb breakpoints for Python 3.9+ (reported by @jasonwirth #1317)
+- [sheets] sort all sheets on global **Sheets Sheet** (reported by @franzhuang #1620)
+- [sqlite] add passthrough options for `connect()` (reported by @cwarden #1622)
+- [unzip-http] fix file extraction (`x`) on remote zip file
+- [unzip-http] handle files smaller than 64K (reported by @frosencrantz #1567)
 - [zsh-completion] fixed (reported by @pigmonkey #1583; PR by @Freed-Wu #1646)
 
 ## API
 
-- fix Exception causes in utils.py (PR by @cool-RR #1633)
+- raise Exception from causes in utils.py (PR by @cool-RR #1633)
 - add `HistogramColumn` to allow overrides (requested by @andycraig #1621)
+- easier external numeric types with `@vd.numericType()` decorator (inspired by @s1291 #1394)
 
-# v2.10.2 (2022-10-XX)
+- [frequency table] `dive-rows` renamed to `dive-selected`
+
+# v2.10.2 (2022-10-08)
 
 - add .vdx, a simplified new cmdlog format
 - add `-N`/`--nothing` command to disable loading .visidatarc and plugin addons
