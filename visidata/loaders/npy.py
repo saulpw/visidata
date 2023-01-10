@@ -12,7 +12,7 @@ def open_npz(vd, p):
 
 vd.option('npy_allow_pickle', False, 'numpy allow unpickling objects (unsafe)')
 
-class NpySheet(InferColumnsSheet):
+class NpySheet(Sheet):
     def iterload(self):
         import numpy
         if not hasattr(self, 'npy'):
