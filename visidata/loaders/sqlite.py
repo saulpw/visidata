@@ -3,6 +3,9 @@ import re
 from visidata import VisiData, vd, Sheet, options, Column, Progress, anytype, ColumnItem, asyncthread, TypedExceptionWrapper, TypedWrapper, IndexSheet, copy, clean_to_id, vlen
 from visidata.type_date import date
 
+vd.option('sqlite_onconnect', '', 'sqlite statement to execute after opening a connection')
+
+
 def requery(url, **kwargs):
     'Return *url* with added or replaced query parameters from *kwargs*.'
     from urllib.parse import urlencode, urlparse, parse_qsl, urlunparse
@@ -42,6 +45,8 @@ class SqliteSheet(Sheet):
 
         con = sqlite3.connect(url, uri=True, **self.options.getall('sqlite_connect_'))
         con.text_factory = lambda s, enc=self.options.encoding, encerrs=self.options.encoding_errors: s.decode(enc, encerrs)
+        if self.options.sqlite_onconnect:
+            con.execute(self.options.sqlite_onconnect)
         return con
 
     def execute(self, conn, sql, parms=None):
