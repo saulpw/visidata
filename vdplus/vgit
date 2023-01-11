@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+
+import os.path
+import sys
+import subprocess
+from visidata import Sheet, Column, ColumnAttr, Path, ENTER, asyncthread, vd, TextSheet
+from visidata import *
+
+import git
+
+__version__ = 'v0.4-dev'
+__version_info__ = 'saul.pw/vgit ' + __version__
+
+
+#vd.option('config', '~/.vgitrc', 'config file to exec in Python')
+vd.options.motd_url = 'https://visidata.org/vgit/motd-' + __version__
+vd.option('vgit_pager', False, 'fallback to pager instead of passthrough')
+
+@VisiData.api
+def git_log(vd, args, topsheet):
+    return git.GitLogSheet(topsheet.branch+"_log", ref=topsheet.branch, source=topsheet)
+
+@VisiData.api
+def git_status(vd, args, topsheet):
+    return git.GitStatus(topsheet.source)
+
+@VisiData.api
+def git_blame(vd, args, topsheet):
+    return git.GitBlame(GitFile(args[0]), source=topsheet)
+
+@VisiData.api
+def git_grep(vd, args, topsheet):
+    return git.GitGrep(args[0], regex=args[0], source=topsheet)
+
+def somegit(args=None):
+    cwd = Path('.')
+
+    if cwd.joinpath('.git').exists() or git.getRepoPath(cwd):
+        top = git.GitStatus(cwd)
+    else:
+        top = git.GitOverview('gitrepos', source=cwd)
+
+    if not args:
+        return top
+
+    cmd = args[0]
+
+    funcname = 'git_'+args[0]
+    func = getattr(vd, funcname, None)
+    if func:
+        return func(args[1:], top)
+    else:
+        print(f"no {funcname}")
+
+
+def main():
+    args = sys.argv[1:]
+
+    vd.loadConfigAndPlugins()
+
+    vs = somegit(args)
+    print(vs)
+
+    if vs is None:
+        if vd.options.vgit_pager:
+            cmdstr = ' '.join(args)
+            vs = TextSheet(cmdstr, source=somegit().git_lines(*args))
+        else:
+            return subprocess.run(['git', *args]).returncode
+
+    vd.domotd()
+    vd.run(vs)
+
+
+vd.addGlobals(globals())
+
+if __name__ == '__main__':
+    vd.status(__version_info__)
+    rc = main()
+    sys.exit(rc)

@@ -1,0 +1,87 @@
+{"x": 1, "y": 7, "text": "Ctrl+A or Ctrl+E", "color": "black on black", "tags": [], "group": "", "frame": "advanced"}
+{"x": 0, "y": 6, "text": "Ctrl+B or Ctrl+F", "color": "black on black", "tags": [], "group": "", "frame": "advanced"}
+{"x": 0, "y": 6, "text": "\u2190", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 11, "y": 6, "text": "go to prev char", "color": "", "tags": [], "group": ""}
+{"x": 0, "y": 4, "text": "Ctrl", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 9, "y": 4, "text": "cancel input (abort command)", "color": "", "tags": [], "group": ""}
+{"x": 45, "y": 7, "text": "delete one char at cursor", "color": "", "tags": [], "group": ""}
+{"x": 45, "y": 8, "text": "delete one char before cursor", "color": "", "tags": [], "group": ""}
+{"x": 0, "y": 16, "text": "Shift", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 0, "y": 3, "text": "Enter", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 9, "y": 3, "text": "accept input (continue command)", "color": "", "tags": [], "group": ""}
+{"x": 39, "y": 9, "text": "K", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 45, "y": 9, "text": "delete all chars after cursor", "color": "", "tags": [], "group": ""}
+{"x": 39, "y": 15, "text": "O", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 45, "y": 15, "text": "open input in external editor", "color": "", "tags": [], "group": ""}
+{"x": 39, "y": 16, "text": "R", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 45, "y": 16, "text": "reload default value", "color": "", "tags": [], "group": ""}
+{"x": 39, "y": 12, "text": "T", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 45, "y": 12, "text": "swap last two chars", "color": "", "tags": [], "group": ""}
+{"x": 39, "y": 10, "text": "U", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 45, "y": 10, "text": "delete all chars before cursor", "color": "", "tags": [], "group": ""}
+{"x": 39, "y": 13, "text": "V", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 45, "y": 13, "text": "insert literal char", "color": "", "tags": [], "group": ""}
+{"x": 39, "y": 11, "text": "W", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 45, "y": 11, "text": "delete one word before cursor", "color": "", "tags": [], "group": ""}
+{"x": 39, "y": 14, "text": "Y", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 45, "y": 14, "text": "insert clipboard text at cursor", "color": "", "tags": [], "group": ""}
+{"x": 5, "y": 10, "text": "\u2190", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 11, "y": 10, "text": "go to prev word", "color": "", "tags": [], "group": ""}
+{"x": 0, "y": 0, "text": "Start typing to erase the default value.", "color": "", "tags": [], "group": ""}
+{"x": 0, "y": 1, "text": "To edit the default value, press a movement key first.", "color": "", "tags": [], "group": ""}
+{"x": 0, "y": 13, "text": "\u2191", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 0, "y": 14, "text": "\u2193", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 0, "y": 8, "text": "Home", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 11, "y": 8, "text": "go to start of input", "color": "", "tags": [], "group": ""}
+{"x": 0, "y": 9, "text": "End", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 0, "y": 7, "text": "\u2192", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 34, "y": 7, "text": "Delete", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 34, "y": 8, "text": "Backspace", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 0, "y": 9, "text": "Ctrl+D", "color": "", "tags": [], "group": "", "frame": "advanced"}
+{"x": 0, "y": 10, "text": "Ctrl+H", "color": "", "tags": [], "group": "", "frame": "advanced"}
+{"x": 34, "y": 6, "text": "Insert", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 45, "y": 6, "text": "toggle insert mode", "color": "", "tags": [], "group": ""}
+{"x": 0, "y": 15, "text": "Tab", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 0, "y": 10, "text": "Ctrl", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 34, "y": 9, "text": "Ctrl", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 34, "y": 10, "text": "Ctrl", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 34, "y": 12, "text": "Ctrl", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 34, "y": 11, "text": "Ctrl", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 34, "y": 13, "text": "Ctrl", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 34, "y": 14, "text": "Ctrl", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 34, "y": 15, "text": "Ctrl", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 34, "y": 16, "text": "Ctrl", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 4, "y": 10, "text": "+", "color": "", "tags": [], "group": ""}
+{"x": 38, "y": 9, "text": "+", "color": "", "tags": [], "group": ""}
+{"x": 38, "y": 10, "text": "+", "color": "", "tags": [], "group": ""}
+{"x": 38, "y": 11, "text": "+", "color": "", "tags": [], "group": ""}
+{"x": 38, "y": 12, "text": "+", "color": "", "tags": [], "group": ""}
+{"x": 38, "y": 13, "text": "+", "color": "", "tags": [], "group": ""}
+{"x": 38, "y": 14, "text": "+", "color": "", "tags": [], "group": ""}
+{"x": 38, "y": 15, "text": "+", "color": "", "tags": [], "group": ""}
+{"x": 38, "y": 16, "text": "+", "color": "", "tags": [], "group": ""}
+{"x": 0, "y": 11, "text": "Ctrl", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 4, "y": 11, "text": "+", "color": "", "tags": [], "group": ""}
+{"x": 5, "y": 11, "text": "\u2192", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 11, "y": 11, "text": "go to next word", "color": "", "tags": [], "group": ""}
+{"x": 11, "y": 9, "text": "go to end of input", "color": "", "tags": [], "group": ""}
+{"x": 11, "y": 7, "text": "go to next char", "color": "", "tags": [], "group": ""}
+{"x": 11, "y": 13, "text": "next input history", "color": "", "tags": [], "group": ""}
+{"x": 11, "y": 14, "text": "prev input history", "color": "", "tags": [], "group": ""}
+{"x": 11, "y": 15, "text": "next autocomplete", "color": "", "tags": [], "group": ""}
+{"x": 11, "y": 16, "text": "prev autocomplete", "color": "", "tags": [], "group": ""}
+{"x": 4, "y": 4, "text": "+", "color": "", "tags": [], "group": ""}
+{"x": 5, "y": 4, "text": "C", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 5, "y": 16, "text": "+", "color": "", "tags": [], "group": ""}
+{"x": 6, "y": 16, "text": "Tab", "color": "bold white on 237", "tags": [], "group": ""}
+{"x": 32, "y": 6, "text": "\u2502", "color": "", "tags": [], "group": ""}
+{"x": 32, "y": 7, "text": "\u2502", "color": "", "tags": [], "group": ""}
+{"x": 32, "y": 8, "text": "\u2502", "color": "", "tags": [], "group": ""}
+{"x": 32, "y": 9, "text": "\u2502", "color": "", "tags": [], "group": ""}
+{"x": 32, "y": 10, "text": "\u2502", "color": "", "tags": [], "group": ""}
+{"x": 32, "y": 11, "text": "\u2502", "color": "", "tags": [], "group": ""}
+{"x": 32, "y": 12, "text": "\u2502", "color": "", "tags": [], "group": ""}
+{"x": 32, "y": 13, "text": "\u2502", "color": "", "tags": [], "group": ""}
+{"x": 32, "y": 14, "text": "\u2502", "color": "", "tags": [], "group": ""}
+{"x": 32, "y": 15, "text": "\u2502", "color": "", "tags": [], "group": ""}
+{"x": 32, "y": 16, "text": "\u2502", "color": "", "tags": [], "group": ""}
