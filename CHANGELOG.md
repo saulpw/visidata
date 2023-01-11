@@ -19,6 +19,8 @@
 - [loaders hdf5] add support for arrays of scalars (requested by @linwaytin #1602)
 - [graph] fail if no numeric xcols are given
 - [open-cell-files] warn when file or url in cell does not exist (requested by @geekscrapy #1540)
+- [sqlite] add passthrough options (reported by @cwarden #1622)
+- [xml] add passthrough options for xml_parser; default xml_parser_huge_tree=True (PR by @midichef #1668)
 
 ## Bugfixes
 
@@ -40,7 +42,6 @@
 - [open_txt] fix Exception with `open-config` when no `~/.visidatarc` (reported by @gunchev #1611)
 - [pdb] fix entering of pdb breakpoints for Python 3.9+ (reported by @jasonwirth #1317)
 - [sheets] sort all sheets on global **Sheets Sheet** (reported by @franzhuang #1620)
-- [sqlite] add passthrough options for `connect()` (reported by @cwarden #1622)
 - [unzip-http] fix file extraction (`x`) on remote zip file
 - [unzip-http] handle files smaller than 64K (reported by @frosencrantz #1567)
 - [zsh-completion] fixed (reported by @pigmonkey #1583; PR by @Freed-Wu #1646)
