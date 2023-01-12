@@ -97,7 +97,7 @@ def composeStatus(msgparts, n):
 @BaseSheet.api
 def leftStatus(sheet):
     'Return left side of status bar for this sheet. Overridable.'
-    return options.disp_status_fmt.format(sheet=sheet, vd=vd)
+    return MissingAttrFormatter().format(sheet.options.disp_status_fmt, sheet=sheet, vd=vd)
 
 
 @VisiData.api
