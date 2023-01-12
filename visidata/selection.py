@@ -1,9 +1,16 @@
-from visidata import vd, Sheet, Progress, asyncthread, options, rotateRange, Fanout, undoAttrCopyFunc, copy
+from visidata import vd, Sheet, Progress, asyncthread, options, rotateRange, Fanout, undoAttrCopyFunc, copy, RowColorizer
 
 vd.option('bulk_select_clear', False, 'clear selected rows before new bulk selections', replay=True)
 vd.option('some_selected_rows', False, 'if no rows selected, if True, someSelectedRows returns all rows; if False, fails')
 
 Sheet.init('_selectedRows', dict)  # rowid(row) -> row
+
+vd.rowNoters.append(
+        lambda sheet, row: sheet.isSelected(row) and sheet.options.disp_selected_note
+)
+Sheet.colorizers.append( RowColorizer(2, 'color_selected_row', lambda s,c,r,v:
+    r is not None and s.isSelected(r))
+)
 
 @Sheet.api
 def isSelected(self, row):
