@@ -742,14 +742,20 @@ def runMenu(vd):
 
         k = vd.getkeystroke(vd.scrMenu, sheet)
 
+        if not k:
+            continue
+
         currentItem = getMenuItem(sheet)
 
         if k == '^[':  # ESC
             nEscapes += 1  #1470
+            if nEscapes > 1:
+                return
+            continue
         else:
             nEscapes = 0
 
-        if nEscapes > 1 or k in ['^C', '^Q', 'q']:
+        if k in ['^C', '^Q', 'q']:
             return
 
         elif k in ['KEY_MOUSE']:
@@ -789,6 +795,8 @@ def runMenu(vd):
         elif k in main_menu.keys():
             sheet.pressMenu(main_menu[k])
 
+        else:
+            vd.warning(f'unknown keystroke {k}')
 
         sheet.checkMenu()
 
