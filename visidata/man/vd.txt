@@ -222,14 +222,15 @@ DESCRIPTION
 
      Commands While Editing Input
         Enter  ^C        accept/abort input
-        ^O               open external $EDITOR to edit contents
+        ^O  g^O          open external $EDITOR to edit contents of current/se‐
+                         lected rows in current column
         ^R               reload initial value
-        ^A  ^E           go to beginning/end of line
-        ^B  ^F           go back/forward one character
-        ^←  ^→ (arrow)   go back/forward one word
-        ^H  ^D           delete previous/current character
+        ^A   ^E          go to beginning/end of line
+        ^B   ^F          go back/forward one character
+        ^←   ^→ (arrow)  go back/forward one word
+        ^H   ^D          delete previous/current character
         ^T               transpose previous and current characters
-        ^U  ^K           clear from cursor to beginning/end of line
+        ^U   ^K          clear from cursor to beginning/end of line
         ^Y               paste from cell clipboard
         Backspace  Del   delete previous/current character
         Insert           toggle insert mode
@@ -255,8 +256,8 @@ DESCRIPTION
       + aggregator    add aggregator to current column (see Frequency Table)
      z+ aggregator    display result of aggregator over values in selected
                       rows for current column; store result in Memory Sheet
-      &               concatenate top two sheets in Sheets Stack
-     g&               concatenate all sheets in Sheets Stack
+      &               append top two sheets in Sheets Stack
+     g&               append all sheets in Sheets Stack
 
       w nBefore nAfter
                       add column where each row contains a list of that row,
@@ -381,6 +382,7 @@ DESCRIPTION
                          copy current/selected file(s) to given directory,
                          upon commit
           e   ge name    rename current/selected file(s) to name
+          ` (backtick)   open parent directory
         z^S              commit changes to file system
 
    Plugins Sheet
@@ -415,7 +417,7 @@ DESCRIPTION
         gC               open Columns Sheet with all visible columns from all
                          sheets
      (sheet-specific commands)
-         &               add column from concatenating selected source columns
+         &               add column from appending selected source columns
         g! gz!           toggle/unset selected columns as key columns on
                          source sheet
         g+ aggregator    add Ar aggregator No to selected source columns
@@ -449,8 +451,9 @@ DESCRIPTION
                          .  outer  keep all rows from first selected sheet
                          .  full   keep all rows from all sheets (union)
                          .  diff   keep only rows NOT in all sheets
-                         .  append keep all rows from all sheets
-                            (concatenation)
+                         .  append combine all rows from all sheets
+                         .  concat similar to 'append' but keep first sheet
+                            type and columns
                          .  extend copy first selected sheet, keeping all rows
                             and sheet type, and extend with columns from other
                             sheets
@@ -705,7 +708,7 @@ COMMANDLINE OPTIONS
                                                      sively on DirSheet
      --dir-hidden                 False              load hidden files on
                                                      DirSheet
-     --config=Path                /home/<user>/.visidatarc
+     --config=Path                /home/kefala/.visidatarc
                                                      config file to exec in
                                                      Python
      --play=str                                      file.vd to replay
@@ -764,6 +767,8 @@ COMMANDLINE OPTIONS
                                                      separately (y), combined
                                                      (s), or does not include
                                                      the internet (n)
+     --xml-parser-huge-tree=bool  True               allow very deep trees and
+                                                     very long text content
      --graphviz-edge-labels=bool  True               whether to include edge
                                                      labels on graphviz dia‐
                                                      grams
@@ -782,14 +787,10 @@ COMMANDLINE OPTIONS
 
      disp_splitwin_pct   0                   height of second sheet on screen
      color_sidebar       black on 114 blue   color of sidebar
-     disp_currency_fmt   %.02f               default fmtstr to format for cur‐
-                                             rency values
      disp_float_fmt      {:.02f}             default fmtstr to format for
                                              float values
      disp_int_fmt        {:.0f}              default fmtstr to format for int
                                              values
-     disp_date_fmt       %Y-%m-%d            default fmtstr to strftime for
-                                             date values
      disp_note_none      ⌀                   visible contents of a cell whose
                                              value is None
      disp_truncator      …                   indicator that the contents are
@@ -863,6 +864,10 @@ COMMANDLINE OPTIONS
      disp_edit_fill      _                   edit field fill character
      disp_unprintable    ·                   substitute character for unprint‐
                                              ables
+     disp_currency_fmt   %.02f               default fmtstr to format for cur‐
+                                             rency values
+     disp_date_fmt       %Y-%m-%d            default fmtstr to strftime for
+                                             date values
      disp_replay_play    ▶                   status indicator for active re‐
                                              play
      disp_replay_pause   ‖                   status indicator for paused re‐
@@ -1012,4 +1017,4 @@ SUPPORTED SOURCES
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                    October 06, 2022                    Linux/MacOS
+Linux/MacOS                    January 11, 2023                    Linux/MacOS
