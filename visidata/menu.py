@@ -573,6 +573,11 @@ def nop(vd, *args, **kwargs):
     return False
 
 
+def _done(vd, *args, **kwargs):
+    'Accept and execute current menu item (like pressing Enter).'
+    return True
+
+
 @BaseSheet.property
 @drawcache
 def menus(sheet):
@@ -639,7 +644,6 @@ def drawMenu(vd, scr, sheet):
                 BUTTON3_RELEASED=vd.nop)
         x += len(item.title)+2
 
-
     rightdisp = sheet.options.disp_menu_fmt.format(sheet=sheet, vd=vd)
     menudraw(scr, 0, x+4, rightdisp, colors.color_menu)
 
@@ -695,6 +699,13 @@ def drawMenu(vd, scr, sheet):
         menudraw(scr, menuy, helpx+2+len(ks)+3, lsr, helpattr)
     menudraw(scr, menuy, helpx+19, ' '+cmd.longname+' ', helpattr)
 
+    vd.onMouse(scr, menuy, helpx, y-menuy+1, helpw,
+               BUTTON1_PRESSED=_done,
+               BUTTON1_CLICKED=_done,
+               BUTTON1_RELEASED=vd.nop,
+               BUTTON2_RELEASED=vd.nop,
+               BUTTON3_RELEASED=vd.nop)
+
 
 @BaseSheet.api
 def pressMenu(sheet, *args):
@@ -733,6 +744,16 @@ def runMenu(vd):
     vd.setWindows(vd.scrFull)
     nEscapes = 0
 
+    def _clickedDuringMenu():
+            for keystroke, y, x, winname, winscr in vd.parseMouse(menu=vd.scrMenu, top=vd.winTop, bot=vd.winBottom):
+                if winname == 'menu':
+                    f = vd.getMouse(winscr, x, y, keystroke)
+                    if f:
+                        if f(y, x, keystroke):  # call each function until one returns a true-ish value
+                            return 'doit'
+                    else:
+                        return 'offmenu'
+
     try:
       while True:
         if len(sheet.activeMenuItems) < 2:
@@ -753,14 +774,11 @@ def runMenu(vd):
             return
 
         elif k in ['KEY_MOUSE']:
-            for keystroke, y, x, winname, winscr in vd.parseMouse(menu=vd.scrMenu, top=vd.winTop, bot=vd.winBottom):
-                if winname == 'menu':
-                    f = vd.getMouse(winscr, x, y, keystroke)
-                    if f:
-                        if f(y, x, keystroke):
-                            break
-                    else:
-                        return  # clicking off the menu is an escape
+            r = _clickedDuringMenu()
+            if r == 'offmenu':
+                return  # clicking off the menu is an escape
+            elif r == 'doit':
+                break
 
         elif k in ['KEY_RIGHT', 'l']:
             if currentItem.menus and sheet.activeMenuItems[1] != 0:  # not first item
@@ -788,7 +806,6 @@ def runMenu(vd):
 
         elif k in main_menu.keys():
             sheet.pressMenu(main_menu[k])
-
 
         sheet.checkMenu()
 
