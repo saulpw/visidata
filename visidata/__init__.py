@@ -164,6 +164,8 @@ import visidata.ddwplay
 import visidata.plugins
 
 import visidata.colorsheet
+import visidata.theme
+import themes
 
 from .deprecated import *
 
@@ -171,6 +173,6 @@ import math
 import random
 from math import *
 
-vd.finalInit()
+vd.finalInit()  # call all VisiData.init() from modules
 
 vd.addGlobals(globals())
