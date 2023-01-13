@@ -44,6 +44,7 @@ class VisiData(visidata.Extensible):
         self.keystrokes = ''
         self.scrFull = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
         self._cmdlog = None
+        self.currentReplay = None
         self.contexts = [self]  # objects whose attributes are in the fallback context for eval/exec.
 
     def sheetstack(self, pane=0):
