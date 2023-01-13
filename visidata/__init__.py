@@ -166,6 +166,7 @@ import visidata.plugins
 import visidata.colorsheet
 import visidata.theme
 import themes
+import features  # additional independent features
 
 from .deprecated import *
 
