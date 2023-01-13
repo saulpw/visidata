@@ -21,6 +21,7 @@ INPROGRESS = TypedExceptionWrapper(None, exception=InProgress())  # sentinel
 
 vd.option('col_cache_size', 0, 'max number of cache entries in each cached column')
 vd.option('clean_names', False, 'clean column/sheet names to be valid Python identifiers', replay=True)
+vd.option('disp_formatter', 'generic', 'formatter to use for display and saving', replay=True)
 
 __all__ = [
     'clean_to_id',

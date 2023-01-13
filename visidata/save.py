@@ -5,7 +5,6 @@ from visidata import *
 
 vd.option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 vd.option('safe_error', '#ERR', 'error string to use while saving', replay=True)
-vd.option('disp_formatter', 'generic', 'formatter to use for display and saving', replay=True)
 
 @Sheet.api
 def safe_trdict(vs):
