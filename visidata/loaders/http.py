@@ -34,7 +34,8 @@ def openurl_http(vd, path, filetype=None):
             # if extension unknown, fallback to mime-type
             contenttype = response.headers['content-type']
             subtype = contenttype.split(';')[0].split('/')[-1]
-            filetype = content_filetypes.get(subtype, subtype)
+            subtypes = [ s[3:] if s.startswith('x-') else s for s in subtype.split('+')]
+            filetype = [ content_filetypes.get(subtype, subtype) for subtype in subtypes ]
 
     # If no charset is provided by response headers, use the user-specified
     # encoding option (which defaults to UTF-8) and hope for the best.  The
