@@ -38,6 +38,7 @@ def _completeFilename(val, state):
 @VisiData.api
 def openPath(vd, p, filetype=None, create=False):
     '''Call ``open_<filetype>(p)`` or ``openurl_<p.scheme>(p, filetype)``.  Return constructed but unloaded sheet of appropriate type.
+    filetype may be an array, in which case all types will be tested until a valid one is found.
     If True, *create* will return a new, blank **Sheet** if file does not exist.'''
     if p.scheme and not p.has_fp():
         schemes = p.scheme.split('+')
@@ -58,12 +59,20 @@ def openPath(vd, p, filetype=None, create=False):
         else:
             filetype = p.ext or options.filetype or 'txt'
 
-    filetype = filetype.lower()
+    if isinstance(filetype, str):
+        candidate_filetypes = [filetype]
+    else:
+        candidate_filetypes = filetype
+
+    candidate_filetypes = [filetype.lower() for filetype in candidate_filetypes]
 
     if not p.exists():
         if not create:
             return None
-        newfunc = getattr(vd, 'new_' + filetype, vd.getGlobals().get('new_' + filetype))
+        for filetype in candidate_filetypes:
+            newfunc = getattr(vd, 'new_' + filetype, vd.getGlobals().get('new_' + filetype))
+            if newfunc:
+                break
         if not newfunc:
             vd.warning('%s does not exist, creating new sheet' % p)
             return vd.newSheet(p.name, 1, source=p)
@@ -71,9 +80,15 @@ def openPath(vd, p, filetype=None, create=False):
         vd.status('creating blank %s' % (p.given))
         return newfunc(p)
 
-    openfunc = getattr(vd, 'open_' + filetype, vd.getGlobals().get('open_' + filetype))
+    for filetype in candidate_filetypes:
+        openfunc = getattr(vd, 'open_' + filetype, vd.getGlobals().get('open_' + filetype))
+        if openfunc:
+            break
     if not openfunc:
-        vd.warning('unknown "%s" filetype' % filetype)
+        if len(candidate_filetypes) > 1:
+            vd.warning('unknown filetypes "%s"' % (", ".join(candidate_filetypes)))
+        else:
+            vd.warning('unknown "%s" filetype' % filetype)
         filetype = 'txt'
         openfunc = vd.open_txt
 
