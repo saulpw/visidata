@@ -41,17 +41,6 @@ for c in visibleCols:
 
 Sheet.addCommand('', 'select-equal-selected', 'select_equal_selected(cursorCol)', 'select rows with values in current column in already selected rows')
 
-BaseSheet.addCommand('', 'reload-every', 'sheet.reload_every(input("reload interval (sec): ", value=1))', 'schedule sheet reload every N seconds') #683
-BaseSheet.addCommand('', 'save-sheet-really', 'vd.saveSheets(Path(getDefaultSaveName()), sheet, confirm_overwrite=False)', 'save current sheet without asking for filename or confirmation')
-
-
-@BaseSheet.api
-@asyncthread
-def reload_every(sheet, seconds:int):
-    import time
-    while True:
-        sheet.reload()
-        time.sleep(seconds)
 
 
 @VisiData.api
