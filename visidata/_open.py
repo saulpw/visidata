@@ -112,8 +112,9 @@ def open_txt(vd, p):
     'Create sheet from `.txt` file at Path `p`, checking whether it is TSV.'
     if p.exists(): #1611
         with p.open_text(encoding=vd.options.encoding) as fp:
+            delimiter = options.delimiter
             try:
-                if options.delimiter in next(fp):    # peek at the first line
+                if delimiter and delimiter in next(fp):    # peek at the first line
                     return vd.open_tsv(p)  # TSV often have .txt extension
             except StopIteration:
                 return Sheet(p.name, columns=[SettableColumn()], source=p)
