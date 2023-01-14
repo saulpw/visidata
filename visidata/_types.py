@@ -6,7 +6,7 @@ from visidata import options, TypedWrapper, vd, VisiData
 #__all__ = ['anytype', 'vdtype', ]
 
 vd.option('disp_float_fmt', '{:.02f}', 'default fmtstr to format for float values', replay=True)
-vd.option('disp_int_fmt', '{:.0f}', 'default fmtstr to format for int values', replay=True)
+vd.option('disp_int_fmt', '{:d}', 'default fmtstr to format for int values', replay=True)
 
 vd.numericTypes = [int,float]
 
@@ -108,7 +108,7 @@ def floatlocale(*args):
     return locale.atof(*args)
 
 
-@vd.numericType('♯', fmtstr='%.0f')
+@vd.numericType('♯', fmtstr='%d')
 class vlen(int):
     def __new__(cls, v=0):
         if isinstance(v, (vlen, int, float)):
