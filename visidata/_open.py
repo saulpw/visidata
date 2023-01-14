@@ -126,9 +126,9 @@ def loadInternalSheet(vd, cls, p, **kwargs):
     vs = cls(p.name, source=p, **kwargs)
     options._set('encoding', 'utf8', vs)
     if p.exists():
-        vd.sheets.insert(0, vs)
+#        vd.sheets.insert(0, vs) # broke replay with macros.reload()
         vs.reload.__wrapped__(vs)
-        vd.sheets.pop(0)
+#        vd.sheets.pop(0)
     return vs
 
 
