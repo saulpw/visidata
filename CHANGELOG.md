@@ -12,7 +12,6 @@
     - edit cells in multiple rows in `$EDITOR`
     - only handles cell modifications, not added or deleted rows
 
-- [build] update data files in setup.py based on PEP 420 (reported by @Oblomov #1675)
 
 ## Improvements
 
@@ -20,7 +19,7 @@
 - [fill-col] speed up `fill-col` for sheets with many empty cells (PR by @midichef #1657)
 - [loaders hdf5] add support for arrays of scalars (requested by @linwaytin #1602)
 - [graph] fail if no numeric xcols are given
-- [open-cell-files] warn when file or url in cell does not exist (requested by @geekscrapy #1540)
+- [open-cell-file] warn when file or url in cell does not exist (requested by @geekscrapy #1540)
 - [sqlite] add passthrough options (reported by @cwarden #1622)
 - [sqlite] add options.sqlite_onconnect to be executed before running any statement (requested by @cwarden #1622)
 - [xml] add passthrough options for xml_parser; default xml_parser_huge_tree=True (PR by @midichef #1668)
@@ -34,6 +33,7 @@
 - [dirsheet] fix incorrect filename with multiple extensions (reported by @kunliugithub #1571)
 - [display] show `disp_oddspace` for surrogate escapes (reported by @geekscrapy #1544)
 - [install] ensure setuptools files have appropriate permissions (reported by @icp1994 #1591)
+- [install] update data files in setup.py based on PEP 420 (reported by @Oblomov #1675)
 - [keystrokes] add `kDN` and `kUP` to translation table (reported by @djpohly #1336)
 - [loaders html] fix loading of relative links in html table (reported by @frosencrantz #1599)
 - [loaders xlsx] store `None` as empty string in `save_xlsx` (reported and PR by @dbaynard #1626 #1629)
