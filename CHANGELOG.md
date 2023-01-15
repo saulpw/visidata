@@ -12,6 +12,8 @@
     - edit cells in multiple rows in `$EDITOR`
     - only handles cell modifications, not added or deleted rows
 
+- [build] update data files in setup.py based on PEP 420 (reported by @Oblomov #1675)
+
 ## Improvements
 
 - [aggregators] add 95 and 99 percentile (p95 and p99)
@@ -20,6 +22,7 @@
 - [graph] fail if no numeric xcols are given
 - [open-cell-files] warn when file or url in cell does not exist (requested by @geekscrapy #1540)
 - [sqlite] add passthrough options (reported by @cwarden #1622)
+- [sqlite] add options.sqlite_onconnect to be executed before running any statement (requested by @cwarden #1622)
 - [xml] add passthrough options for xml_parser; default xml_parser_huge_tree=True (PR by @midichef #1668)
 
 ## Bugfixes
@@ -38,7 +41,9 @@
 - [macros] query again for keystroke if used by existing macro (#1658)
 - [macros] do not include `nonLogged` commands in macro (reported by @geekscrapy #1569)
 - [macros] add reload for **MacroSheet** (reported by @geekscrapy #1569)
+- [menu] 2x ESC should exit menu
 - [mouse] fix mouse-clicks on statusbar when splitpane is off (reported by @frosencrantz #1625)
+- [numpy] fix loader
 - [open_txt] fix Exception with `open-config` when no `~/.visidatarc` (reported by @gunchev #1611)
 - [pdb] fix entering of pdb breakpoints for Python 3.9+ (reported by @jasonwirth #1317)
 - [sheets] sort all sheets on global **Sheets Sheet** (reported by @franzhuang #1620)
