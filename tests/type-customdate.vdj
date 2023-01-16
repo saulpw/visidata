@@ -1,0 +1,7 @@
+#!vd -p
+{"sheet": "global", "row": "disp_formatter", "longname": "set-option", "input": "python", "keystrokes": ""}
+{"longname": "open-file", "input": "sample_data/sample.tsv", "keystrokes": "o"}
+{"sheet": "sample", "col": "", "row": "", "longname": "select-rows", "input": "", "keystrokes": "gs", "comment": "select all rows"}
+{"sheet": "sample", "col": "OrderDate", "row": "0", "longname": "setcol-input", "input": "05/1991", "keystrokes": "ge", "comment": "set contents of current column for selected rows to same input"}
+{"sheet": "sample", "col": "", "row": "", "longname": "unselect-rows", "input": "", "keystrokes": "gu", "comment": "unselect all rows"}
+{"sheet": "sample", "col": "OrderDate", "row": "", "longname": "type-customdate", "input": "%m/%Y", "comment": "set type of current column to custom date format"}

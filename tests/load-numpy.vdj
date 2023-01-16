@@ -1,0 +1,3 @@
+#!vd -p
+{"sheet": "global", "row": "npy_allow_pickle", "longname": "set-option", "input": "True", "keystrokes": ""}
+{"longname": "open-file", "input": "sample_data/goog.npy", "keystrokes": "o"}
