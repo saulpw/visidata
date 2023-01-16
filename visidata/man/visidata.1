@@ -1046,6 +1046,8 @@ lineterminator passed to csv.writer
 sanitize input/output to handle edge cases, with a performance cost
 .It Sy --xlsx-meta-columns No "         False"
 include columns for cell objects, font colors, and fill colors
+.It Sy --sqlite-onconnect Ns = Ns Ar "str      " No ""
+sqlite statement to execute after opening a connection
 .It Sy --fixed-rows Ns = Ns Ar "int            " No "1000"
 number of rows to check for fixed width columns
 .It Sy --fixed-maxcols Ns = Ns Ar "int         " No "0"
@@ -1085,7 +1087,7 @@ height of second sheet on screen
 color of sidebar
 .It Sy "disp_float_fmt     " No "{:.02f}"
 default fmtstr to format for float values
-.It Sy "disp_int_fmt       " No "{:.0f}"
+.It Sy "disp_int_fmt       " No "{:d}"
 default fmtstr to format for int values
 .It Sy "disp_note_none     " No "\[u2300]"
 visible contents of a cell whose value is None

@@ -1,6 +1,6 @@
 # VisiData version history
 
-# v2.11 (2023-01-XX)
+# v2.11 (2023-01-15)
 
 - [ci] drop support for Python 3.6 (related to https://github.com/actions/setup-python/issues/543)
 - [ci] add support for Python 3.11 (#1585)

@@ -748,6 +748,9 @@ COMMANDLINE OPTIONS
      --xlsx-meta-columns          False              include columns for cell
                                                      objects, font colors, and
                                                      fill colors
+     --sqlite-onconnect=str                          sqlite statement to exe‐
+                                                     cute after opening a con‐
+                                                     nection
      --fixed-rows=int             1000               number of rows to check
                                                      for fixed width columns
      --fixed-maxcols=int          0                  max number of fixed-width
@@ -789,7 +792,7 @@ COMMANDLINE OPTIONS
      color_sidebar       black on 114 blue   color of sidebar
      disp_float_fmt      {:.02f}             default fmtstr to format for
                                              float values
-     disp_int_fmt        {:.0f}              default fmtstr to format for int
+     disp_int_fmt        {:d}                default fmtstr to format for int
                                              values
      disp_note_none      ⌀                   visible contents of a cell whose
                                              value is None
