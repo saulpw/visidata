@@ -32,6 +32,7 @@
 - [describe] fix custom describe aggregators (reported by @edupont #1574)
 - [dirsheet] fix incorrect filename with multiple extensions (reported by @kunliugithub #1571)
 - [display] show `disp_oddspace` for surrogate escapes (reported by @geekscrapy #1544)
+- [graph] fix div-by-zero with only one y-value (reported by @midichef #1673)
 - [install] ensure setuptools files have appropriate permissions (reported by @icp1994 #1591)
 - [install] update data files in setup.py based on PEP 420 (reported by @Oblomov #1675)
 - [keystrokes] add `kDN` and `kUP` to translation table (reported by @djpohly #1336)
@@ -47,6 +48,7 @@
 - [open_txt] fix Exception with `open-config` when no `~/.visidatarc` (reported by @gunchev #1611)
 - [pdb] fix entering of pdb breakpoints for Python 3.9+ (reported by @jasonwirth #1317)
 - [sheets] sort all sheets on global **Sheets Sheet** (reported by @franzhuang #1620)
+- [types] format int/vlen as true int (reported by @xlucn #1674)
 - [unzip-http] fix file extraction (`x`) on remote zip file
 - [unzip-http] handle files smaller than 64K (reported by @frosencrantz #1567)
 - [zsh-completion] fixed (reported by @pigmonkey #1583; PR by @Freed-Wu #1646)
