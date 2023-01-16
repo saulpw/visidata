@@ -139,12 +139,12 @@ class LazyComputeRow:
         except ValueError:
             try:
                 c = self._lcm[colid]
-            except (KeyError, AttributeError):
+            except (KeyError, AttributeError) as e:
                 if colid == 'sheet': return self.sheet
                 elif colid == 'row': c = self.row
                 elif colid == 'col': c = self.col
                 else:
-                    raise KeyError(colid)
+                    raise KeyError(colid) from e
 
         if not isinstance(c, Column):  # columns calc in the context of the row of the cell being calc'ed
             return c
@@ -263,7 +263,7 @@ class TableSheet(BaseSheet):
         return row
 
     def newRow(self):
-        'Return new blank row compatible with this sheet.  Overrideable.'
+        'Return new blank row compatible with this sheet.  Overridable.'
         return type(self)._rowtype()
 
     @drawcache_property
@@ -363,7 +363,7 @@ class TableSheet(BaseSheet):
         return eval(expr, vd.getGlobals(), contexts)
 
     def rowid(self, row):
-        'Return a unique and stable hash of the *row* object.  Must be fast.  Overrideable.'
+        'Return a unique and stable hash of the *row* object.  Must be fast.  Overridable.'
         return id(row)
 
     @property
@@ -494,13 +494,21 @@ class TableSheet(BaseSheet):
         self.calcColLayout()
 
     def addColumn(self, *cols, index=None):
-        'Insert all *cols* into columns at *index*, or append to end of columns if *index* is None.  Return first column.  Mark sheet as modified if *index* is not None.'
+        '''Insert all *cols* into columns at *index*, or append to end of columns if *index* is None.
+           If *index* is None, columns are being added by loader, instead of by user.
+           If added by user, mark sheet as modified.
+           Columns added by loader share sheet's defer status.
+           Columns added by user are not marked as deferred.
+           Return first column.'''
         if not cols:
             vd.warning('no columns to add')
             return
 
         if index is not None:
             self.setModified()
+        else:
+            for col in cols:
+                col.defer = self.defer
 
         for i, col in enumerate(cols):
             col.name = self.maybeClean(col.name)
@@ -1011,6 +1019,10 @@ class SheetsSheet(IndexSheet):
     def sort(self):
         self.rows[1:] = sorted(self.rows[1:], key=self.sortkey)
 
+class GlobalSheetsSheet(SheetsSheet):  #1620
+    def sort(self):
+        IndexSheet.sort(self)
+
 @VisiData.property
 @drawcache
 def _evalcontexts(vd):
@@ -1067,7 +1079,7 @@ def push(vd, vs, pane=0, load=True):
 
 @VisiData.lazy_property
 def allSheetsSheet(vd):
-    return SheetsSheet("sheets_all", source=vd.allSheets)
+    return GlobalSheetsSheet("sheets_all", source=vd.allSheets)
 
 @VisiData.lazy_property
 def sheetsSheet(vd):
@@ -1175,18 +1187,15 @@ Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = deepcopy(sheet); vs.name += "_dee
 
 Sheet.addCommand('z~', 'type-any', 'cursorCol.type = anytype', 'set type of current column to anytype')
 Sheet.addCommand('~', 'type-string', 'cursorCol.type = str', 'set type of current column to str')
-Sheet.addCommand('@', 'type-date', 'cursorCol.type = date', 'set type of current column to date')
 Sheet.addCommand('#', 'type-int', 'cursorCol.type = int', 'set type of current column to int')
 Sheet.addCommand('z#', 'type-len', 'cursorCol.type = vlen', 'set type of current column to len')
-Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency', 'set type of current column to currency')
 Sheet.addCommand('%', 'type-float', 'cursorCol.type = float', 'set type of current column to float')
-Sheet.addCommand('z%', 'type-floatsi', 'cursorCol.type = floatsi', 'set type of current column to SI float')
 Sheet.addCommand('', 'type-floatlocale', 'cursorCol.type = floatlocale', 'set type of current column to float using system locale set in LC_NUMERIC')
 
 # when diving into a sheet, remove the index unless it is precious
 IndexSheet.addCommand('g^R', 'reload-selected', 'reloadSheets(selectedRows or rows)', 'reload all selected sheets')
 SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_columns", source=selectedRows))', 'open Columns Sheet with all visible columns from selected sheets')
-SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visble columns from selected sheets')
+SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visible columns from selected sheets')
 SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)', 'abort async thread for current sheet')
 SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)', 'abort async threads for selected sheets')
 SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(openRow(dest))', 'open sheet referenced in current row')

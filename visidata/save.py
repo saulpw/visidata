@@ -1,3 +1,5 @@
+import collections
+
 from visidata import *
 
 
@@ -143,6 +145,23 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
             savefunc(p, vs)
             vs.hasBeenModified = False
     return vd.execAsync(_savefiles, vsheets, givenpath, savefunc, filetype)
+
+
+@VisiData.api
+def save_zip(vd, p, *vsheets):
+    vd.clearCaches()
+
+    import tempfile
+    import zipfile
+    with tempfile.TemporaryDirectory() as tmpdir:
+        with zipfile.ZipFile(str(p), 'w', zipfile.ZIP_DEFLATED, allowZip64=True, compresslevel=9) as zfp:
+            for vs in Progress(vsheets):
+                filetype = vs.options.save_filetype
+                tmpp = Path(f'{tmpdir}{vs.name}.{filetype}')
+                savefunc = getattr(vs, 'save_' + filetype, None) or getattr(vd, 'save_' + filetype, None)
+                savefunc(tmpp, vs)
+                zfp.write(tmpp, f'{vs.name}.{vs.options.save_filetype}')
+    vd.status('%s save finished' % p)
 
 
 @VisiData.api

@@ -1,0 +1,12 @@
+#!vd -p
+{"sheet": "global", "row": "disp_formatter", "longname": "set-option", "input": "python", "keystrokes": ""}
+{"longname": "open-file", "input": "sample_data/benchmark.csv", "keystrokes": "o"}
+{"sheet": "benchmark", "col": "Customer", "row": "3", "longname": "delete-cell", "input": "", "keystrokes": "zd", "comment": "delete current cell (set to None)"}
+{"sheet": "benchmark", "col": "Customer", "row": "3", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "delete current cell (set to None)"}
+{"sheet": "benchmark", "col": "Customer", "row": "4", "longname": "delete-cell", "input": "", "keystrokes": "zd", "comment": "delete current cell (set to None)"}
+{"sheet": "benchmark", "col": "Customer", "row": "4", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "delete current cell (set to None)"}
+{"sheet": "benchmark", "col": "Customer", "row": "13", "longname": "delete-cell", "input": "", "keystrokes": "zd", "comment": "delete current cell (set to None)"}
+{"sheet": "benchmark", "col": "Customer", "row": "13", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "delete current cell (set to None)"}
+{"sheet": "benchmark", "col": "Customer", "row": "21", "longname": "delete-cell", "input": "", "keystrokes": "zd", "comment": "delete current cell (set to None)"}
+{"sheet": "benchmark", "col": "Customer", "row": "21", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "delete current cell (set to None)"}
+{"sheet": "benchmark", "col": "Customer", "row": "", "longname": "setcol-fill", "input": "", "keystrokes": "f", "comment": "fills null cells in selected rows of current column with contents of non-null cells up the current column"}

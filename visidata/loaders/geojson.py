@@ -16,12 +16,13 @@ class GeoJSONColumn(Column):
         properties = row.setdefault('properties', {})
         properties[self.expr] = val
 
+
 class GeoJSONSheet(PythonSheet):
     rowtype = 'shapes'
+    columns = [Column('json_row', width=0)]
 
     def iterload(self):
         self.colnames = {}
-        self.columns = [Column('json_row', width=0)]
 
         with self.source.open_text(encoding='utf-8') as fp:
             ret = json.load(fp)

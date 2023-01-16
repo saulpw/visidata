@@ -97,7 +97,7 @@ def composeStatus(msgparts, n):
 @BaseSheet.api
 def leftStatus(sheet):
     'Return left side of status bar for this sheet. Overridable.'
-    return options.disp_status_fmt.format(sheet=sheet, vd=vd)
+    return MissingAttrFormatter().format(sheet.options.disp_status_fmt, sheet=sheet, vd=vd)
 
 
 @VisiData.api
@@ -129,7 +129,8 @@ def drawLeftStatus(vd, scr, vs):
         x = clipdraw(scr, y, 0, lstatus, attr, w=vs.windowWidth-1)
 
         vd.onMouse(scr, y, 0, 1, x,
-                        BUTTON1_PRESSED='sheets',
+                        BUTTON1_PRESSED='sheets-stack',
+                        BUTTON1_RELEASED='sheets-stack',
                         BUTTON3_PRESSED='rename-sheet',
                         BUTTON3_CLICKED='rename-sheet')
     except Exception as e:
@@ -159,7 +160,7 @@ def drawLeftStatus(vd, scr, vs):
 
 @VisiData.api
 def rightStatus(vd, sheet):
-    'Return right side of status bar.  Overrideable.'
+    'Return right side of status bar.  Overridable.'
     return MissingAttrFormatter().format(sheet.options.disp_rstatus_fmt, sheet=sheet, vd=vd)
 
 

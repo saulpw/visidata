@@ -110,26 +110,27 @@ def openSource(vd, p, filetype=None, create=False, **kwargs):
 @VisiData.api
 def open_txt(vd, p):
     'Create sheet from `.txt` file at Path `p`, checking whether it is TSV.'
-    with p.open_text(encoding=vd.options.encoding) as fp:
-        try:
-            if options.delimiter in next(fp):    # peek at the first line
-                return vd.open_tsv(p)  # TSV often have .txt extension
-        except StopIteration:
-            return Sheet(p.name, columns=[SettableColumn()], source=p)
-        return TextSheet(p.name, source=p)
+    if p.exists(): #1611
+        with p.open_text(encoding=vd.options.encoding) as fp:
+            try:
+                if options.delimiter in next(fp):    # peek at the first line
+                    return vd.open_tsv(p)  # TSV often have .txt extension
+            except StopIteration:
+                return Sheet(p.name, columns=[SettableColumn()], source=p)
+    return TextSheet(p.name, source=p)
 
 
 @VisiData.api
 def loadInternalSheet(vd, cls, p, **kwargs):
-    'Load internal sheet of given class.  Internal sheets are always tsv.'
+    'Load internal sheet of given class.'
     vs = cls(p.name, source=p, **kwargs)
     options._set('encoding', 'utf8', vs)
     if p.exists():
-        vd.sheets.insert(0, vs)
+#        vd.sheets.insert(0, vs) # broke replay with macros.reload()
         vs.reload.__wrapped__(vs)
-        vd.sheets.pop(0)
+#        vd.sheets.pop(0)
     return vs
 
 
 BaseSheet.addCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: "), create=True))', 'Open file or URL')
-TableSheet.addCommand('zo', 'open-cell-file', 'vd.push(openSource(cursorDisplay))', 'Open file or URL from path in current cell')
+TableSheet.addCommand('zo', 'open-cell-file', 'vd.push(openSource(cursorDisplay) or fail(f"file {cursorDisplay} does not exist"))', 'Open file or URL from path in current cell')

@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from visidata import Sheet, VisiData, TypedWrapper, anytype, date, floatsi, currency, vlen, floatlocale, Column, vd
+from visidata import Sheet, VisiData, TypedWrapper, anytype, date, vlen, Column, vd
 
 
 
@@ -89,12 +89,13 @@ def save_arrow(vd, p, sheet, streaming=False):
         int: pa.int64(),
         vlen: pa.int64(),
         float: pa.float64(),
-        floatlocale: pa.float64(),
-        floatsi: pa.float64(),
-        currency: pa.float64(),
         str: pa.string(),
         date: pa.date64(),
     }
+
+    for t in vd.numericTypes:
+        if t not in typemap:
+            typemap[t] = pa.float64()
 
     databycol = defaultdict(list)   # col -> [values]
 

@@ -1,7 +1,9 @@
 import itertools
 import copy
+import datetime
 
-from visidata import VisiData, vd, Sheet, Column, Progress, IndexSheet, ColumnAttr, SequenceSheet, AttrDict, AttrColumn, date, datetime
+from visidata import VisiData, vd, Sheet, Column, Progress, IndexSheet, ColumnAttr, SequenceSheet, AttrDict, AttrColumn
+from visidata.type_date import date
 
 
 vd.option('xlsx_meta_columns', False, 'include columns for cell objects, font colors, and fill colors', replay=True)
@@ -138,7 +140,9 @@ def save_xlsx(vd, p, *sheets):
 
             row = []
             for col, v in dispvals.items():
-                if col.type == date:
+                if v is None:
+                    v = ""
+                elif col.type == date:
                     v = datetime.datetime.fromtimestamp(int(v.timestamp()))
                 elif not vd.isNumeric(col):
                     v = str(v)

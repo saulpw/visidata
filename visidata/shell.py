@@ -10,8 +10,9 @@ except ImportError:
     pass # pwd,grp modules not available on Windows
 
 from visidata import Column, Sheet, LazyComputeRow, asynccache, BaseSheet, vd
-from visidata import Path, ENTER, date, asyncthread, FileExistsError, VisiData
+from visidata import Path, ENTER, asyncthread, FileExistsError, VisiData
 from visidata import modtime, filesize, vstat, Progress, TextSheet
+from visidata.type_date import date
 
 
 vd.option('dir_recurse', False, 'walk source path recursively on DirSheet')
@@ -82,7 +83,7 @@ class DirSheet(Sheet):
             getter=lambda col,row: str(row.parent) if str(row.parent) == '.' else str(row.parent) + '/',
             setter=lambda col,row,val: col.sheet.moveFile(row, val)),
         Column('filename',
-            getter=lambda col,row: row.name + ''.join(row.suffixes),
+            getter=lambda col,row: row._path.name,
             setter=lambda col,row,val: col.sheet.renameFile(row, val)),
         Column('abspath', width=0, type=str,
             getter=lambda col,row: row,
@@ -218,6 +219,7 @@ def inputShell(vd):
         vd.warning('no $column in command')
     return cmd
 
+DirSheet.addCommand('`', 'open-dir-parent', 'vd.push(openSource(source/".."))', 'open parent directory')
 BaseSheet.addCommand('', 'open-dir-current', 'vd.push(vd.currentDirSheet)', 'open Directory Sheet: browse properties of files in current directory')
 
 Sheet.addCommand('z;', 'addcol-sh', 'cmd=inputShell(); addShellColumns(cmd, sheet)', 'create new column from bash expression, with $columnNames as variables')

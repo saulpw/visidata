@@ -1,5 +1,7 @@
 from visidata import VisiData, vd, Sheet, options, Column, Progress, setitem, ColumnAttr, vlen, RowColorizer, Path, copy
 
+vd.option('xml_parser_huge_tree', True, 'allow very deep trees and very long text content')
+
 
 @VisiData.api
 def open_xml(vd, p):
@@ -46,7 +48,8 @@ class XmlSheet(Sheet):
     def iterload(self):
         if isinstance(self.source, Path):
             from lxml import etree, objectify
-            self.root = etree.parse(self.source.open_text(encoding=self.options.encoding))
+            p = etree.XMLParser(**self.options.getall('xml_parser_'))
+            self.root = etree.parse(self.source.open_text(encoding=self.options.encoding), parser=p)
             objectify.deannotate(self.root, cleanup_namespaces=True)
         else: #        elif isinstance(self.source, XmlElement):
             self.root = self.source

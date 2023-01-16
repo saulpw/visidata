@@ -1,5 +1,10 @@
 
-# VisiData v2.10.2 [![twitter @VisiData][1.1]][1] [![CircleCI](https://circleci.com/gh/saulpw/visidata/tree/stable.svg?style=svg)](https://circleci.com/gh/saulpw/visidata/tree/stable) [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/saulpw/visidata)
+# VisiData v2.11
+
+[![twitter @VisiData][1.1]][1]
+[![Tests](https://github.com/saulpw/visidata/workflows/visidata-ci-build/badge.svg)](https://github.com/saulpw/visidata/actions/workflows/main.yml)
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/saulpw/visidata)
+[![discord](https://img.shields.io/discord/880915750007750737?label=discord)](https://visidata.org/chat)
 
 A terminal interface for exploring and arranging tabular data.
 
@@ -10,7 +15,7 @@ VisiData supports tsv, csv, sqlite, json, xlsx (Excel), hdf5, and [many other fo
 ## Platform requirements
 
 - Linux, OS/X, or Windows (with WSL)
-- Python 3.6+
+- Python 3.7+
 - additional Python modules are required for certain formats and sources
 
 ## Install

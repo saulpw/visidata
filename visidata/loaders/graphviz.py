@@ -1,5 +1,5 @@
 from visidata import vd, options, TypedWrapper, asyncthread, Progress
-from visidata import wrapply, clean_to_id, VisiData, SIFormatter
+from visidata import wrapply, clean_to_id, VisiData
 
 vd.option('graphviz_edge_labels', True, 'whether to include edge labels on graphviz diagrams')
 
@@ -38,7 +38,7 @@ def save_dot(vd, p, vs):
                 assignedColors[edgetype] = color
 
             if options.graphviz_edge_labels:
-                nodelabels = [wrapply(SIFormatter, '%0.1f', c.getTypedValue(row)) for c in vs.nonKeyVisibleCols if vd.isNumeric(c)]
+                nodelabels = [wrapply(vd.SIFormatter, '%0.1f', c.getTypedValue(row)) for c in vs.nonKeyVisibleCols if vd.isNumeric(c)]
                 label = '/'.join(str(x) for x in nodelabels if is_valid(x))
             else:
                 label = ''

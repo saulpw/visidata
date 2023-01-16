@@ -742,26 +742,31 @@ def runMenu(vd):
 
         k = vd.getkeystroke(vd.scrMenu, sheet)
 
+        if not k:
+            continue
+
         currentItem = getMenuItem(sheet)
 
         if k == '^[':  # ESC
             nEscapes += 1  #1470
+            if nEscapes > 1:
+                return
+            continue
         else:
             nEscapes = 0
 
-        if nEscapes > 1 or k in ['^C', '^Q', 'q']:
+        if k in ['^C', '^Q', 'q']:
             return
 
         elif k in ['KEY_MOUSE']:
-            keystroke, y, x, winname, winscr = vd.parseMouse(menu=vd.scrMenu, top=vd.winTop, bot=vd.winBottom)
-            if winname != 'menu':  # clicking off the menu is an escape
-                return
-            f = vd.getMouse(winscr, x, y, keystroke)
-            if f:
-                if f(y, x, keystroke):
-                    break
-            else:
-                return
+            for keystroke, y, x, winname, winscr in vd.parseMouse(menu=vd.scrMenu, top=vd.winTop, bot=vd.winBottom):
+                if winname == 'menu':
+                    f = vd.getMouse(winscr, x, y, keystroke)
+                    if f:
+                        if f(y, x, keystroke):
+                            break
+                    else:
+                        return  # clicking off the menu is an escape
 
         elif k in ['KEY_RIGHT', 'l']:
             if currentItem.menus and sheet.activeMenuItems[1] != 0:  # not first item
@@ -790,6 +795,8 @@ def runMenu(vd):
         elif k in main_menu.keys():
             sheet.pressMenu(main_menu[k])
 
+        else:
+            vd.warning(f'unknown keystroke {k}')
 
         sheet.checkMenu()
 

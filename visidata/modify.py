@@ -213,7 +213,7 @@ def deleteSourceRow(sheet, row):
 @asyncthread
 @Sheet.api
 def putChanges(sheet):
-    'Commit changes to ``sheet.source``. May overwrite source completely without confirmation.  Overrideable.'
+    'Commit changes to ``sheet.source``. May overwrite source completely without confirmation.  Overridable.'
     sheet.commitAdds()
     sheet.commitMods()
     sheet.commitDeletes()

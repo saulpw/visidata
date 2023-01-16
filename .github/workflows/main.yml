@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9, "3.10"]
+        python-version: [3.7, 3.8, 3.9, "3.10", "3.11"]
 
     runs-on: ubuntu-latest
     steps:
@@ -24,9 +24,6 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    
-    - name: Create .visidatarc
-      run: touch ~/.visidatarc
 
     - name: Set up Environment
       run: |
@@ -51,4 +48,17 @@ jobs:
     - name: Run Cmdlog Tests
       run: dev/test.sh
       shell: bash
+
+    - name: Test macros
+      run: |
+        mkdir -p ~/.visidata
+        cp tests/macros/macro* ~/.visidata/
+        vd --batch -p tests/macros/test_macro.vd --output tests/macros/golden/test_macro.tsv
+        git --no-pager diff --numstat tests/
+        git --no-pager diff --exit-code tests/
+
+    - name: Check docs are built without errors
+      run: |
+        sudo apt install aha
+        dev/mkman.sh
 

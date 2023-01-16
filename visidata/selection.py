@@ -44,13 +44,13 @@ def unselect_row(self, row):
 
 @Sheet.api
 def selectRow(self, row):
-    'Add *row* to set of selected rows.  May be called multiple times in one command.  Overrideable.'
+    'Add *row* to set of selected rows.  May be called multiple times in one command.  Overridable.'
     self._selectedRows[self.rowid(row)] = row
 
 
 @Sheet.api
 def unselectRow(self, row):
-    'Remove *row* from set of selected rows.  Return True if row was previously selected.  Overrideable.'
+    'Remove *row* from set of selected rows.  Return True if row was previously selected.  Overridable.'
     if self.rowid(row) in self._selectedRows:
         del self._selectedRows[self.rowid(row)]
         return True

@@ -2,7 +2,7 @@
 Plugin for viewing files with appropriate mailcap-specified application.
 Add mailcap-view and mailcap-view-selected commands to DirSheet.
 
-mimetype can be given explicity with `mimetype` option; will be guessed by filename otherwise.
+mimetype can be given explicitly with `mimetype` option; will be guessed by filename otherwise.
 
 Usage:
    1. copy to plugins dir

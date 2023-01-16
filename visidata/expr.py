@@ -21,7 +21,7 @@ class CompleteExpr:
 
         varnames = []
         varnames.extend(sorted((base+col.name) for col in self.sheet.columns if col.name.startswith(partial)))
-        varnames.extend(sorted((base+x) for x in globals() if x.startswith(partial)))
+        varnames.extend(sorted((base+x) for x in vd.getGlobals() if x.startswith(partial)))
 
         # Remove duplicate tabbing suggestions
         varnames_dict = {var:None for var in varnames}

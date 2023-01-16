@@ -1,4 +1,4 @@
-.Dd October 06, 2022
+.Dd January 11, 2023
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -340,21 +340,21 @@ edit contents of current cell
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter  ^C"
 accept/abort input
-.It Ic ^O
-open external $EDITOR to edit contents
+.It Ic "^O  g^O"
+open external $EDITOR to edit contents of current/selected rows in current column
 .It Ic ^R
 reload initial value
-.It Ic "^A  ^E"
+.It Ic "^A   ^E"
 go to beginning/end of line
-.It Ic "^B  ^F"
+.It Ic "^B   ^F"
 go back/forward one character
-.It Ic "^←  ^→" No (arrow)
+.It Ic "^←   ^→" No (arrow)
 go back/forward one word
-.It Ic "^H  ^D"
+.It Ic "^H   ^D"
 delete previous/current character
 .It Ic ^T
 transpose previous and current characters
-.It Ic "^U  ^K"
+.It Ic "^U   ^K"
 clear from cursor to beginning/end of line
 .It Ic "^Y"
 paste from cell clipboard
@@ -396,9 +396,9 @@ open file or url from path in current cell
 .It Ic "z+" Ar aggregator
 .No display result of Ar aggregator No over values in selected rows for current column; store result in Sy Memory Sheet
 .It Ic " &"
-.No concatenate top two sheets in Sy Sheets Stack
+.No append top two sheets in Sy Sheets Stack
 .It Ic "g&"
-.No concatenate all sheets in Sy Sheets Stack
+.No append all sheets in Sy Sheets Stack
 .Pp
 .It Ic " w" Ar nBefore nAfter
 .No add column where each row contains a list of that row, Ar nBefore No rows, and Ar nAfter No rows
@@ -579,6 +579,8 @@ delete current/selected file(s) from filesystem, upon commit
 .No copy current/selected file(s) to given Ar directory Ns , upon commit
 .It Ic "  e   ge" Ar name
 .No rename current/selected file(s) to Ar name
+.It Ic "  ` (backtick)"
+open parent directory
 .It Ic "z^S"
 commit changes to file system
 .El
@@ -641,7 +643,7 @@ edit either value or name, to edit reference
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " &"
-add column from concatenating selected source columns
+add column from appending selected source columns
 .It Ic "g! gz!"
 toggle/unset selected columns as key columns on source sheet
 .It Ic "g+" Ar aggregator
@@ -696,7 +698,9 @@ save selected or all sheets
 .It Sy "\&."
 .Sy diff No "  keep only rows NOT in all sheets"
 .It Sy "\&."
-.Sy append No "keep all rows from all sheets (concatenation)"
+.Sy append No "combine all rows from all sheets"
+.It Sy "\&."
+.Sy concat No "similar to 'append' but keep first sheet type and columns"
 .It Sy "\&."
 .Sy extend No "copy first selected sheet, keeping all rows and sheet type, and extend with columns from other sheets"
 .It Sy "\&."

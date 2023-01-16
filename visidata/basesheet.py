@@ -25,6 +25,11 @@ class LazyChainMap:
     def keys(self):
         return list(self.objs.keys())  # sum(set(dir(obj)) for obj in self.objs))
 
+    def get(self, key, default=None):
+        if key in self.locals:
+            return self.locals[key]
+        return self.objs.get(key, default)
+
     def clear(self):
         self.locals.clear()
 
@@ -245,11 +250,11 @@ class BaseSheet(DrawablePane):
 
     @property
     def cursorRow(self):
-        'The row object at the row cursor.  Overrideable.'
+        'The row object at the row cursor.  Overridable.'
         return None
 
     def checkCursor(self):
-        'Check cursor and fix if out-of-bounds.  Overrideable.'
+        'Check cursor and fix if out-of-bounds.  Overridable.'
         pass
 
     def checkCursorNoExceptions(self):
@@ -264,17 +269,17 @@ class BaseSheet(DrawablePane):
 
     @property
     def sidebar(self):
-        'Default implementation just returns set value.  Overrideable.'
+        'Default implementation just returns set value.  Overridable.'
         return self._sidebar
 
     @sidebar.setter
     def sidebar(self, v):
-        'Default implementation just sets value.  Overrideable.'
+        'Default implementation just sets value.  Overridable.'
         self._sidebar = v
 
     @property
     def sidebar_title(self):
-        'Default implementation returns fixed value.  Overrideable.'
+        'Default implementation returns fixed value.  Overridable.'
         return 'sidebar'
 
 

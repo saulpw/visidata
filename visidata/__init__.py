@@ -1,6 +1,6 @@
 'VisiData: a curses interface for exploring and arranging tabular data'
 
-__version__ = '2.10.2'
+__version__ = '2.11'
 __version_info__ = 'VisiData v' + __version__
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __status__ = 'Production/Stable'
@@ -12,10 +12,12 @@ class EscapeException(BaseException):
     pass
 
 
-def addGlobals(g):
-    '''Update the VisiData globals dict with items from *g*, which is a mapping of names to functions.
+def addGlobals(*args, **kwargs):
+    '''Update the VisiData globals dict with items from *args* and *kwargs*, which are mappings of names to functions.
     Importers can call ``addGlobals(globals())`` to have their globals accessible to execstrings.'''
-    globals().update(g)
+    for g in args:
+        globals().update(g)
+    globals().update(kwargs)
 
 
 def getGlobals():
@@ -61,6 +63,10 @@ from .path import *
 import visidata._input
 import visidata.movement
 
+import visidata.type_currency
+import visidata.type_date
+import visidata.type_floatsi
+
 import visidata._urlcache
 import visidata.selection
 import visidata.loaders.tsv
@@ -71,6 +77,7 @@ import visidata.metasheets
 import visidata.cmdlog
 import visidata.save
 import visidata.clipboard
+import visidata.sysedit
 import visidata.slide
 import visidata.search
 import visidata.expr

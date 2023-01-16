@@ -103,6 +103,7 @@ class Column(Extensible):
         self.keycol = 0       # keycol index (or 0 if not key column)
         self.expr = None      # Column-type-dependent parameter
         self.formatter = ''
+        self.defer = False
 
         self.setCache(cache)
         for k, v in kwargs.items():
@@ -296,7 +297,7 @@ class Column(Extensible):
     def getValue(self, row):
         'Return value for *row* in this column, calculating if not cached.'
 
-        if self.sheet.defer:
+        if self.defer:
             try:
                 row, rowmods = self.sheet._deferredMods[self.sheet.rowid(row)]
                 return rowmods[self]
@@ -387,12 +388,12 @@ class Column(Extensible):
         return self.getCell(row).display
 
     def putValue(self, row, val):
-        'Change value for *row* in this column to *val* immediately.  Does not check the type.  Overrideable; by default calls ``.setter(row, val)``.'
+        'Change value for *row* in this column to *val* immediately.  Does not check the type.  Overridable; by default calls ``.setter(row, val)``.'
         return self.setter(self, row, val)
 
     def setValue(self, row, val):
-        'Change value for *row* in this column to *val*.  Call ``putValue`` immediately if parent ``sheet.defer`` is False, otherwise cache until later ``putChanges``.  Caller must add undo function.'
-        if self.sheet.defer:
+        'Change value for *row* in this column to *val*.  Call ``putValue`` immediately if not a deferred column (added to deferred parent at load-time); otherwise cache until later ``putChanges``.  Caller must add undo function.'
+        if self.defer:
             self.cellChanged(row, val)
         else:
             self.putValue(row, val)
@@ -478,7 +479,7 @@ def setattrdeep(obj, attr, val, getter=getattr, setter=setattr):
         try:
             obj = getter(obj, a)
         except Exception as e:
-            obj = obj[a] = type(obj)()  # assume homogenous nesting
+            obj = obj[a] = type(obj)()  # assume homogeneous nesting
 
     setter(obj, attrs[-1], val)
 
@@ -586,15 +587,14 @@ class ExprColumn(Column):
 
 class SettableColumn(Column):
     'Column using rowid to store and retrieve values internally.'
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._store = {}
-
     def putValue(self, row, value):
         self._store[self.sheet.rowid(row)] = value
 
     def calcValue(self, row):
         return self._store.get(self.sheet.rowid(row), None)
+
+
+SettableColumn.init('_store', dict, copy=True)
 
 
 # synonyms

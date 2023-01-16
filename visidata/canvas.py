@@ -1,7 +1,7 @@
 import math
 import random
 
-from collections import defaultdict, Counter
+from collections import defaultdict, Counter, OrderedDict
 from visidata import *
 from visidata.bezier import bezier
 
@@ -327,7 +327,7 @@ class Canvas(Plotter):
         self.polylines = []   # list of ([(canvas_x, canvas_y), ...], attr, row)
         self.gridlabels = []  # list of (grid_x, grid_y, label, attr, row)
 
-        self.legends = collections.OrderedDict()   # txt: attr  (visible legends only)
+        self.legends = OrderedDict()   # txt: attr  (visible legends only)
         self.plotAttrs = {}   # key: attr  (all keys, for speed)
         self.reset()
 
@@ -482,7 +482,7 @@ class Canvas(Plotter):
                     if ymin is None or y < ymin: ymin = y
                     if xmax is None or x > xmax: xmax = x
                     if ymax is None or y > ymax: ymax = y
-            self.canvasBox = BoundingBox(float(xmin or 0), float(ymin or 0), float(xmax or 1), float(ymax or 1))
+            self.canvasBox = BoundingBox(float(xmin or 0), float(ymin or 0), float(xmax or 0)+1, float(ymax or 0)+1)
 
         if not self.visibleBox:
             # initialize minx/miny, but w/h must be set first to center properly
