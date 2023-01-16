@@ -1,3 +1,5 @@
+'''Loader for the jrnl.sh CLI journal file format'''
+
 import re
 
 

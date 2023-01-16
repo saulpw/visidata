@@ -4,8 +4,6 @@ from visidata import vd, Sheet, VisiData, FreqTableSheet, BaseSheet, asyncthread
 
 vd.options.disp_menu_fmt = '|  VisiData {vd.version} | {vd.motd}'
 
-vd.addMenuItem('Help', '+VisiData Plus', 'help-vdplus')
-
 # HTML("<html>...") and JSON('{"k":"v"...}')
 @VisiData.lazy_property
 def utf8_parser(vd):

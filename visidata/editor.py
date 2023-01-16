@@ -34,7 +34,7 @@ def launchEditor(vd, *args):
 @visidata.VisiData.api
 def launchBrowser(vd, *args):
     'Launch $BROWSER with *args* as arguments.'
-    browser = os.environ.get('BROWSER') or vd.fail('(no $BROWSER) for %s' % args[0])
+    browser = os.environ.get('BROWSER') or vd.fail('no $BROWSER for %s' % args[0])
     args = [browser] + list(args)
     subprocess.call(args)
 
