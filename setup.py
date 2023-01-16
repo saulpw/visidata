@@ -3,7 +3,7 @@
 from setuptools import setup
 # tox can't actually run python3 setup.py: https://github.com/tox-dev/tox/issues/96
 #from visidata import __version__
-__version__ = '2.11dev'
+__version__ = '2.11'
 
 setup(name='visidata',
       version=__version__,
@@ -20,16 +20,15 @@ setup(name='visidata',
           'visidata=visidata.main:vd_cli'
         ],
       },
-      py_modules = ['visidata'],
+      py_modules=['visidata'],
       install_requires=[
           'python-dateutil',
           'windows-curses; platform_system == "Windows"',
           'importlib-metadata >= 3.6',
       ],
-      packages=['visidata',  'visidata.loaders', 'visidata.vendor', 'visidata.tests'],
-      include_package_data=True,
-      data_files = [('share/man/man1', ['visidata/man/vd.1', 'visidata/man/visidata.1'])],
-      package_data={'visidata': ['man/vd.1', 'man/vd.txt', 'ddw/input.ddw', 'tests/sample.tsv']},
+      packages=['visidata', 'visidata.loaders', 'visidata.vendor', 'visidata.tests', 'visidata.ddw', 'visidata.man'],
+      data_files=[('share/man/man1', ['visidata/man/vd.1', 'visidata/man/visidata.1'])],
+      package_data={'visidata.man': ['vd.1', 'vd.txt'], 'visidata.ddw': ['input.ddw'], 'visidata.tests': ['sample.tsv']},
       license='GPLv3',
       classifiers=[
           'Development Status :: 5 - Production/Stable',

@@ -8,9 +8,7 @@ vd.macrobindings = {}
 
 class MacroSheet(IndexSheet):
 
-    def reload(self):
-        self.rows = []
-        vd.sync(self.source.reload())
+    def iterload(self):
         for ks, fn in self.source.rows:
             fp = Path(fn)
             if fp.ext == 'vd':
@@ -21,7 +19,7 @@ class MacroSheet(IndexSheet):
                 vd.warning(f'failed to load macro {fn}')
                 continue
             setMacro(ks, vs)
-            self.addRow(vs)
+            yield vs
 
 
 
@@ -55,7 +53,8 @@ def saveMacro(self, rows, ks):
         vd.save_vdj(macropath, vs)
         setMacro(ks, vs)
         vd.macrosheet.source.append_tsv_row((ks, macropath))
-        vd.macrosheet.addRow(vd.loadInternalSheet(CommandLogJsonl, macropath))
+        vd.sync(vd.macrosheet.source.reload())
+        vd.sync(vd.macrosheet.reload())
 
 @CommandLogJsonl.api
 @wraps(CommandLogJsonl.afterExecSheet)

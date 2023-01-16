@@ -170,14 +170,14 @@ vd(1)                                                                           
 
      <span style="font-weight:bold;">Commands</span> <span style="font-weight:bold;">While</span> <span style="font-weight:bold;">Editing</span> <span style="font-weight:bold;">Input</span>
         <span style="font-weight:bold;">Enter</span>  <span style="font-weight:bold;">^C</span>        accept/abort input
-        <span style="font-weight:bold;">^O</span>               open external $EDITOR to edit contents
+        <span style="font-weight:bold;">^O</span>  <span style="font-weight:bold;">g^O</span>          open external $EDITOR to edit contents of current/selected rows in current column
         <span style="font-weight:bold;">^R</span>               reload initial value
-        <span style="font-weight:bold;">^A</span>  <span style="font-weight:bold;">^E</span>           go to beginning/end of line
-        <span style="font-weight:bold;">^B</span>  <span style="font-weight:bold;">^F</span>           go back/forward one character
-        <span style="font-weight:bold;">^←</span>  <span style="font-weight:bold;">^→</span> (arrow)   go back/forward one word
-        <span style="font-weight:bold;">^H</span>  <span style="font-weight:bold;">^D</span>           delete previous/current character
+        <span style="font-weight:bold;">^A</span>   <span style="font-weight:bold;">^E</span>          go to beginning/end of line
+        <span style="font-weight:bold;">^B</span>   <span style="font-weight:bold;">^F</span>          go back/forward one character
+        <span style="font-weight:bold;">^←</span>   <span style="font-weight:bold;">^→</span> (arrow)  go back/forward one word
+        <span style="font-weight:bold;">^H</span>   <span style="font-weight:bold;">^D</span>          delete previous/current character
         <span style="font-weight:bold;">^T</span>               transpose previous and current characters
-        <span style="font-weight:bold;">^U</span>  <span style="font-weight:bold;">^K</span>           clear from cursor to beginning/end of line
+        <span style="font-weight:bold;">^U</span>   <span style="font-weight:bold;">^K</span>          clear from cursor to beginning/end of line
         <span style="font-weight:bold;">^Y</span>               paste from cell clipboard
         <span style="font-weight:bold;">Backspace</span>  <span style="font-weight:bold;">Del</span>   delete previous/current character
         <span style="font-weight:bold;">Insert</span>           toggle insert mode
@@ -197,8 +197,8 @@ vd(1)                                                                           
 
       <span style="font-weight:bold;">+</span> <span style="text-decoration:underline;">aggregator</span>    add <span style="text-decoration:underline;">aggregator</span> to current column (see <span style="font-weight:bold;">Frequency</span> <span style="font-weight:bold;">Table</span>)
      <span style="font-weight:bold;">z+</span> <span style="text-decoration:underline;">aggregator</span>    display result of <span style="text-decoration:underline;">aggregator</span> over values in selected rows for current column; store result in <span style="font-weight:bold;">Memory</span> <span style="font-weight:bold;">Sheet</span>
-      <span style="font-weight:bold;">&amp;</span>               concatenate top two sheets in <span style="font-weight:bold;">Sheets</span> <span style="font-weight:bold;">Stack</span>
-     <span style="font-weight:bold;">g&amp;</span>               concatenate all sheets in <span style="font-weight:bold;">Sheets</span> <span style="font-weight:bold;">Stack</span>
+      <span style="font-weight:bold;">&amp;</span>               append top two sheets in <span style="font-weight:bold;">Sheets</span> <span style="font-weight:bold;">Stack</span>
+     <span style="font-weight:bold;">g&amp;</span>               append all sheets in <span style="font-weight:bold;">Sheets</span> <span style="font-weight:bold;">Stack</span>
 
       <span style="font-weight:bold;">w</span> <span style="text-decoration:underline;">nBefore</span> <span style="text-decoration:underline;">nAfter</span>
                       add column where each row contains a list of that row, <span style="text-decoration:underline;">nBefore</span> rows, and <span style="text-decoration:underline;">nAfter</span> rows
@@ -252,7 +252,7 @@ vd(1)                                                                           
       <span style="font-weight:bold;">^G</span>              show cursor position and bounds of current sheet on status line
       <span style="font-weight:bold;">^V</span>              show version and copyright information on status line
       <span style="font-weight:bold;">^P</span>              open <span style="font-weight:bold;">Status</span> <span style="font-weight:bold;">History</span>
-     m <span style="text-decoration:underline;">keystroke</span>      first, begin recording macro; second, prompt for <span style="text-decoration:underline;">keystroke</span> , and complete recording. Macro can then be executed every time provided keystroke is used. Will override existing keybinding. Macros will run on current row, column, sheet.
+     m <span style="text-decoration:underline;">keystroke</span>      first, begin recording macro; second, prompt for <span style="text-decoration:underline;">keystroke</span> , and complete recording. Macro can then be executed everytime provided keystroke is used. Will override existing keybinding. Macros will run on current row, column, sheet.
      gm               open an index of all existing macros. Can be directly viewed with <span style="font-weight:bold;">Enter</span>, and then modified with <span style="font-weight:bold;">^S</span>.
 
       <span style="font-weight:bold;">^Y</span>  <span style="font-weight:bold;">z^Y</span>  <span style="font-weight:bold;">g^Y</span>    open current row/cell/sheet as Python object
@@ -294,6 +294,7 @@ vd(1)                                                                           
           <span style="font-weight:bold;">y</span>   <span style="font-weight:bold;">gy</span> <span style="text-decoration:underline;">directory</span>
                          copy current/selected file(s) to given <span style="text-decoration:underline;">directory</span>, upon commit
           <span style="font-weight:bold;">e</span>   <span style="font-weight:bold;">ge</span> <span style="text-decoration:underline;">name</span>    rename current/selected file(s) to <span style="text-decoration:underline;">name</span>
+          <span style="font-weight:bold;">`</span> <span style="font-weight:bold;">(backtick)</span>   open parent directory
         <span style="font-weight:bold;">z^S</span>              commit changes to file system
 
    <span style="font-weight:bold;">Plugins</span> <span style="font-weight:bold;">Sheet</span>
@@ -319,7 +320,7 @@ vd(1)                                                                           
      (global commands)
         <span style="font-weight:bold;">gC</span>               open <span style="font-weight:bold;">Columns</span> <span style="font-weight:bold;">Sheet</span> with all visible columns from all sheets
      (sheet-specific commands)
-         <span style="font-weight:bold;">&amp;</span>               add column from concatenating selected source columns
+         <span style="font-weight:bold;">&amp;</span>               add column from appending selected source columns
         <span style="font-weight:bold;">g!</span> <span style="font-weight:bold;">gz!</span>           toggle/unset selected columns as key columns on source sheet
         <span style="font-weight:bold;">g+</span> <span style="text-decoration:underline;">aggregator</span>    add Ar aggregator No to selected source columns
         <span style="font-weight:bold;">g-</span> (hyphen)      hide selected columns on source sheet
@@ -345,7 +346,8 @@ vd(1)                                                                           
                          <span style="font-weight:bold;">.</span>  <span style="font-weight:bold;">outer</span>  keep all rows from first selected sheet
                          <span style="font-weight:bold;">.</span>  <span style="font-weight:bold;">full</span>   keep all rows from all sheets (union)
                          <span style="font-weight:bold;">.</span>  <span style="font-weight:bold;">diff</span>   keep only rows NOT in all sheets
-                         <span style="font-weight:bold;">.</span>  <span style="font-weight:bold;">append</span> keep all rows from all sheets (concatenation)
+                         <span style="font-weight:bold;">.</span>  <span style="font-weight:bold;">append</span> combine all rows from all sheets
+                         <span style="font-weight:bold;">.</span>  <span style="font-weight:bold;">concat</span> similar to 'append' but keep first sheet type and columns
                          <span style="font-weight:bold;">.</span>  <span style="font-weight:bold;">extend</span> copy first selected sheet, keeping all rows and sheet type, and extend with columns from other sheets
                          <span style="font-weight:bold;">.</span>  <span style="font-weight:bold;">merge</span>  mostly keep all rows from first selected sheet, except prioritise cells with non-null/non-error values
 
@@ -425,6 +427,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">-f</span>, <span style="font-weight:bold;">--filetype</span>=<span style="text-decoration:underline;">filetype</span>      tsv                set loader to use for <span style="text-decoration:underline;">filetype</span> instead of file extension
      <span style="font-weight:bold;">-d</span>, <span style="font-weight:bold;">--delimiter</span>=<span style="text-decoration:underline;">delimiter</span>    \t                 field delimiter to use for tsv/usv filetype
      <span style="font-weight:bold;">-y</span>, <span style="font-weight:bold;">--confirm-overwrite</span>=<span style="text-decoration:underline;">F</span>    True               overwrite existing files without confirmation
+     <span style="font-weight:bold;">-N</span>, <span style="font-weight:bold;">--nothing</span>=<span style="text-decoration:underline;">T</span>              False               disable loading .visidatarc and plugin addons
      <span style="font-weight:bold;">--visidata-dir</span>=<span style="text-decoration:underline;">str</span>           ~/.visidata/       directory to load and store additional files
      <span style="font-weight:bold;">--mouse-interval</span>=<span style="text-decoration:underline;">int</span>         1                  max time between press/release for click (ms)
      <span style="font-weight:bold;">--null-value</span>=<span style="text-decoration:underline;">NoneType</span>        None               a value to be counted as null
@@ -468,6 +471,10 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--json-sort-keys</span>             False              sort object keys when saving to json
      <span style="font-weight:bold;">--default-colname</span>=<span style="text-decoration:underline;">str</span>                           column name to use for non-dict rows
      <span style="font-weight:bold;">--filetype</span>=<span style="text-decoration:underline;">str</span>                                  specify file type
+     <span style="font-weight:bold;">--replay-wait</span>=<span style="text-decoration:underline;">float</span>          0.0                time to wait between replayed commands, in seconds
+     <span style="font-weight:bold;">--replay-movement</span>            False              insert movements during replay
+     <span style="font-weight:bold;">--rowkey-prefix</span>=<span style="text-decoration:underline;">str</span>          キ                 string prefix for rowkey in the cmdlog
+     <span style="font-weight:bold;">--cmdlog-histfile</span>=<span style="text-decoration:underline;">str</span>                           file to autorecord each cmdlog action to
      <span style="font-weight:bold;">--confirm-overwrite</span>=<span style="text-decoration:underline;">bool</span>     True               whether to prompt for overwrite confirmation on save
      <span style="font-weight:bold;">--safe-error</span>=<span style="text-decoration:underline;">str</span>             #ERR               error string to use while saving
      <span style="font-weight:bold;">--clipboard-copy-cmd</span>=<span style="text-decoration:underline;">str</span>     xclip -selection clipboard -filter
@@ -478,10 +485,6 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--describe-aggrs</span>=<span style="text-decoration:underline;">str</span>         mean stdev         numeric aggregators to calculate on Describe sheet
      <span style="font-weight:bold;">--histogram-bins</span>=<span style="text-decoration:underline;">int</span>         0                  number of bins for histogram of numeric columns
      <span style="font-weight:bold;">--numeric-binning</span>            False              bin numeric columns into ranges
-     <span style="font-weight:bold;">--replay-wait</span>=<span style="text-decoration:underline;">float</span>          0.0                time to wait between replayed commands, in seconds
-     <span style="font-weight:bold;">--replay-movement</span>            False              insert movements during replay
-     <span style="font-weight:bold;">--rowkey-prefix</span>=<span style="text-decoration:underline;">str</span>          キ                 string prefix for rowkey in the cmdlog
-     <span style="font-weight:bold;">--cmdlog-histfile</span>=<span style="text-decoration:underline;">str</span>                           file to autorecord each cmdlog action to
      <span style="font-weight:bold;">--regex-flags</span>=<span style="text-decoration:underline;">str</span>            I                  flags to pass to re.compile() [AILMSUX]
      <span style="font-weight:bold;">--regex-maxsplit</span>=<span style="text-decoration:underline;">int</span>         0                  maxsplit to pass to regex.split
      <span style="font-weight:bold;">--show-graph-labels</span>=<span style="text-decoration:underline;">bool</span>     True               show axes and legend on graph
@@ -497,6 +500,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--output</span>=<span style="text-decoration:underline;">NoneType</span>            None               save the final visible sheet to output at the end of replay
      <span style="font-weight:bold;">--preplay</span>=<span style="text-decoration:underline;">str</span>                                   longnames to preplay before replay
      <span style="font-weight:bold;">--imports</span>=<span style="text-decoration:underline;">str</span>                plugins            imports to preload before .visidatarc (command-line only)
+     <span style="font-weight:bold;">--nothing</span>                    False              no config, no plugins, nothing extra
      <span style="font-weight:bold;">--unfurl-empty</span>               False              if unfurl includes rows for empty containers
      <span style="font-weight:bold;">--incr-base</span>=<span style="text-decoration:underline;">float</span>            1.0                start value for column increments
      <span style="font-weight:bold;">--csv-dialect</span>=<span style="text-decoration:underline;">str</span>            excel              dialect passed to csv.reader
@@ -507,6 +511,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--csv-lineterminator</span>=<span style="text-decoration:underline;">str</span>                        &quot; lineterminator passed to csv.writer
      <span style="font-weight:bold;">--safety-first</span>               False              sanitize input/output to handle edge cases, with a performance cost
      <span style="font-weight:bold;">--xlsx-meta-columns</span>          False              include columns for cell objects, font colors, and fill colors
+     <span style="font-weight:bold;">--sqlite-onconnect</span>=<span style="text-decoration:underline;">str</span>                          sqlite statement to execute after opening a connection
      <span style="font-weight:bold;">--fixed-rows</span>=<span style="text-decoration:underline;">int</span>             1000               number of rows to check for fixed width columns
      <span style="font-weight:bold;">--fixed-maxcols</span>=<span style="text-decoration:underline;">int</span>          0                  max number of fixed-width columns to create (0 is no max)
      <span style="font-weight:bold;">--postgres-schema</span>=<span style="text-decoration:underline;">str</span>        public             The desired schema for the Postgres database
@@ -515,6 +520,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--html-title</span>=<span style="text-decoration:underline;">str</span>             &lt;h2&gt;{sheet.name}&lt;/h2&gt;
                                                      table header when saving to html
      <span style="font-weight:bold;">--pcap-internet</span>=<span style="text-decoration:underline;">str</span>          n                  (y/s/n) if save_dot includes all internet hosts separately (y), combined (s), or does not include the internet (n)
+     <span style="font-weight:bold;">--xml-parser-huge-tree</span>=<span style="text-decoration:underline;">bool</span>  True               allow very deep trees and very long text content
      <span style="font-weight:bold;">--graphviz-edge-labels</span>=<span style="text-decoration:underline;">bool</span>  True               whether to include edge labels on graphviz diagrams
      <span style="font-weight:bold;">--npy-allow-pickle</span>           False              numpy allow unpickling objects (unsafe)
      <span style="font-weight:bold;">--pdf-tables</span>                 False              parse PDF for tables instead of pages of text
@@ -527,10 +533,8 @@ vd(1)                                                                           
 
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">splitwin</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">pct</span>   0                   height of second sheet on screen
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">sidebar</span>       black on 114 blue   color of sidebar
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">currency</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>   %.02f               default fmtstr to format for currency values
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">float</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>      {:.02f}             default fmtstr to format for float values
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">int</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>        {:.0f}              default fmtstr to format for int values
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">date</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>       %Y-%m-%d            default fmtstr to strftime for date values
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">int</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>        {:d}                default fmtstr to format for int values
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">note</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">none</span>      ⌀                   visible contents of a cell whose value is None
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">truncator</span>      …                   indicator that the contents are only partially visible
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">oddspace</span>       ·                   displayable character for odd whitespace
@@ -586,6 +590,11 @@ vd(1)                                                                           
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">edit</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">cell</span>     white               cell color to use when editing cell
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">edit</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fill</span>      _                   edit field fill character
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">unprintable</span>    ·                   substitute character for unprintables
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">currency</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>   %.02f               default fmtstr to format for currency values
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">date</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>       %Y-%m-%d            default fmtstr to strftime for date values
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">replay</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">play</span>    ▶                   status indicator for active replay
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">replay</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">pause</span>   ‖                   status indicator for paused replay
+     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">status</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">replay</span> green               color of replay status indicator
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">formatter</span>      generic             formatter to use for display and saving
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span>           True                show menu on top line when not active
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">keys</span>      True                show keystrokes inline in submenus
@@ -603,9 +612,6 @@ vd(1)                                                                           
                                              right-side menu format string
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">histogram</span>      *                   histogram element character
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">histolen</span>       50                  width of histogram column
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">replay</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">play</span>    ▶                   status indicator for active replay
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">replay</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">pause</span>   ‖                   status indicator for paused replay
-     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">status</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">replay</span> green               color of replay status indicator
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">canvas</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">charset</span> ⠀⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿⡀⡁⡂⡃⡄⡅⡆⡇⡈⡉⡊⡋⡌⡍⡎⡏⡐⡑⡒⡓⡔⡕⡖⡗⡘⡙⡚⡛⡜⡝⡞⡟⡠⡡⡢⡣⡤⡥⡦⡧⡨⡩⡪⡫⡬⡭⡮⡯⡰⡱⡲⡳⡴⡵⡶⡷⡸⡹⡺⡻⡼⡽⡾⡿⢀⢁⢂⢃⢄⢅⢆⢇⢈⢉⢊⢋⢌⢍⢎⢏⢐⢑⢒⢓⢔⢕⢖⢗⢘⢙⢚⢛⢜⢝⢞⢟⢠⢡⢢⢣⢤⢥⢦⢧⢨⢩⢪⢫⢬⢭⢮⢯⢰⢱⢲⢳⢴⢵⢶⢷⢸⢹⢺⢻⢼⢽⢾⢿⣀⣁⣂⣃⣄⣅⣆⣇⣈⣉⣊⣋⣌⣍⣎⣏⣐⣑⣒⣓⣔⣕⣖⣗⣘⣙⣚⣛⣜⣝⣞⣟⣠⣡⣢⣣⣤⣥⣦⣧⣨⣩⣪⣫⣬⣭⣮⣯⣰⣱⣲⣳⣴⣵⣶⣷⣸⣹⣺⣻⣼⣽⣾⣿
                                              charset to render 2x4 blocks on canvas
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">pixel</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">random</span>   False               randomly choose attr from set of pixels instead of most common
@@ -708,5 +714,5 @@ vd(1)                                                                           
 <span style="font-weight:bold;">AUTHOR</span>
      <span style="font-weight:bold;">VisiData</span> was made by Saul Pwanson &lt;<span style="text-decoration:underline;">vd@saul.pw</span>&gt;.
 
-Linux/MacOS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    September 13, 2022                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   Linux/MacOS
+Linux/MacOS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     January 11, 2023                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    Linux/MacOS
 </pre></section>

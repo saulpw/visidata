@@ -1,0 +1,9 @@
+#!vd -p
+{"longname": "open-file", "input": "sample_data/sample.tsv", "keystrokes": "o"}
+{"sheet": "sample", "col": "Units", "row": "", "longname": "addcol-new", "input": "integers", "keystrokes": "za", "comment": "append an empty column"}
+{"sheet": "sample", "col": "", "row": "", "longname": "select-rows", "input": "", "keystrokes": "gs", "comment": "select all rows"}
+{"sheet": "sample", "col": "integers", "row": "", "longname": "setcol-iter", "input": "range(1, 100)", "keystrokes": "gz=", "comment": "set current column for selected rows to the items in result of Python sequence expression"}
+{"sheet": "sample", "col": "integers", "row": "", "longname": "type-int", "input": "", "keystrokes": "#", "comment": "set type of current column to int"}
+{"sheet": "sample", "col": "integers", "row": "", "longname": "aggregate-col", "input": "mean", "keystrokes": "+", "comment": "Add aggregator to current column"}
+{"sheet": "sample", "col": "", "row": "", "longname": "dup-selected", "input": "", "keystrokes": "\"", "comment": "open duplicate sheet with only selected rows"}
+{"sheet": "sample_selectedref", "col": "", "row": "", "longname": "columns-sheet", "input": "", "keystrokes": "Shift+C", "comment": "open Columns Sheet: edit column properties for current sheet"}

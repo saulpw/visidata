@@ -1,4 +1,4 @@
-.Dd October 06, 2022
+.Dd January 11, 2023
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -340,21 +340,21 @@ edit contents of current cell
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Enter  ^C"
 accept/abort input
-.It Ic ^O
-open external $EDITOR to edit contents
+.It Ic "^O  g^O"
+open external $EDITOR to edit contents of current/selected rows in current column
 .It Ic ^R
 reload initial value
-.It Ic "^A  ^E"
+.It Ic "^A   ^E"
 go to beginning/end of line
-.It Ic "^B  ^F"
+.It Ic "^B   ^F"
 go back/forward one character
-.It Ic "^\[u2190]  ^\[u2192]" No (arrow)
+.It Ic "^\[u2190]   ^\[u2192]" No (arrow)
 go back/forward one word
-.It Ic "^H  ^D"
+.It Ic "^H   ^D"
 delete previous/current character
 .It Ic ^T
 transpose previous and current characters
-.It Ic "^U  ^K"
+.It Ic "^U   ^K"
 clear from cursor to beginning/end of line
 .It Ic "^Y"
 paste from cell clipboard
@@ -396,9 +396,9 @@ open file or url from path in current cell
 .It Ic "z+" Ar aggregator
 .No display result of Ar aggregator No over values in selected rows for current column; store result in Sy Memory Sheet
 .It Ic " &"
-.No concatenate top two sheets in Sy Sheets Stack
+.No append top two sheets in Sy Sheets Stack
 .It Ic "g&"
-.No concatenate all sheets in Sy Sheets Stack
+.No append all sheets in Sy Sheets Stack
 .Pp
 .It Ic " w" Ar nBefore nAfter
 .No add column where each row contains a list of that row, Ar nBefore No rows, and Ar nAfter No rows
@@ -499,7 +499,7 @@ show version and copyright information on status line
 .It Ic " ^P"
 .No open Sy Status History
 .It "m" Ar keystroke
-.No first, begin recording macro; second, prompt for Ar keystroke No , and complete recording. Macro can then be executed every time provided keystroke is used. Will override existing keybinding. Macros will run on current row, column, sheet.
+.No first, begin recording macro; second, prompt for Ar keystroke No , and complete recording. Macro can then be executed everytime provided keystroke is used. Will override existing keybinding. Macros will run on current row, column, sheet.
 .It "gm"
 .No open an index of all existing macros. Can be directly viewed with Sy Enter Ns , and then modified with Sy ^S Ns .
 .
@@ -579,6 +579,8 @@ delete current/selected file(s) from filesystem, upon commit
 .No copy current/selected file(s) to given Ar directory Ns , upon commit
 .It Ic "  e   ge" Ar name
 .No rename current/selected file(s) to Ar name
+.It Ic "  ` (backtick)"
+open parent directory
 .It Ic "z^S"
 commit changes to file system
 .El
@@ -641,7 +643,7 @@ edit either value or name, to edit reference
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic " &"
-add column from concatenating selected source columns
+add column from appending selected source columns
 .It Ic "g! gz!"
 toggle/unset selected columns as key columns on source sheet
 .It Ic "g+" Ar aggregator
@@ -696,7 +698,9 @@ save selected or all sheets
 .It Sy "\&."
 .Sy diff No "  keep only rows NOT in all sheets"
 .It Sy "\&."
-.Sy append No "keep all rows from all sheets (concatenation)"
+.Sy append No "combine all rows from all sheets"
+.It Sy "\&."
+.Sy concat No "similar to 'append' but keep first sheet type and columns"
 .It Sy "\&."
 .Sy extend No "copy first selected sheet, keeping all rows and sheet type, and extend with columns from other sheets"
 .It Sy "\&."
@@ -1007,7 +1011,7 @@ source of randomized startup messages
 walk source path recursively on DirSheet
 .It Sy --dir-hidden No "                False"
 load hidden files on DirSheet
-.It Sy --config Ns = Ns Ar "Path               " No "/home/<user>/.visidatarc"
+.It Sy --config Ns = Ns Ar "Path               " No "/home/kefala/.visidatarc"
 config file to exec in Python
 .It Sy --play Ns = Ns Ar "str                  " No ""
 file.vd to replay
@@ -1042,6 +1046,8 @@ lineterminator passed to csv.writer
 sanitize input/output to handle edge cases, with a performance cost
 .It Sy --xlsx-meta-columns No "         False"
 include columns for cell objects, font colors, and fill colors
+.It Sy --sqlite-onconnect Ns = Ns Ar "str      " No ""
+sqlite statement to execute after opening a connection
 .It Sy --fixed-rows Ns = Ns Ar "int            " No "1000"
 number of rows to check for fixed width columns
 .It Sy --fixed-maxcols Ns = Ns Ar "int         " No "0"
@@ -1056,6 +1062,8 @@ http headers to send to requests
 table header when saving to html
 .It Sy --pcap-internet Ns = Ns Ar "str         " No "n"
 (y/s/n) if save_dot includes all internet hosts separately (y), combined (s), or does not include the internet (n)
+.It Sy --xml-parser-huge-tree Ns = Ns Ar "bool " No "True"
+allow very deep trees and very long text content
 .It Sy --graphviz-edge-labels Ns = Ns Ar "bool " No "True"
 whether to include edge labels on graphviz diagrams
 .It Sy --npy-allow-pickle No "          False"
@@ -1077,14 +1085,10 @@ do not autoload plugins if False
 height of second sheet on screen
 .It Sy "color_sidebar      " No "black on 114 blue"
 color of sidebar
-.It Sy "disp_currency_fmt  " No "%.02f"
-default fmtstr to format for currency values
 .It Sy "disp_float_fmt     " No "{:.02f}"
 default fmtstr to format for float values
-.It Sy "disp_int_fmt       " No "{:.0f}"
+.It Sy "disp_int_fmt       " No "{:d}"
 default fmtstr to format for int values
-.It Sy "disp_date_fmt      " No "%Y-%m-%d"
-default fmtstr to strftime for date values
 .It Sy "disp_note_none     " No "\[u2300]"
 visible contents of a cell whose value is None
 .It Sy "disp_truncator     " No "\[u2026]"
@@ -1187,6 +1191,10 @@ cell color to use when editing cell
 edit field fill character
 .It Sy "disp_unprintable   " No "\[u00B7]"
 substitute character for unprintables
+.It Sy "disp_currency_fmt  " No "%.02f"
+default fmtstr to format for currency values
+.It Sy "disp_date_fmt      " No "%Y-%m-%d"
+default fmtstr to strftime for date values
 .It Sy "disp_replay_play   " No "\[u25B6]"
 status indicator for active replay
 .It Sy "disp_replay_pause  " No "\[u2016]"

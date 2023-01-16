@@ -1,6 +1,6 @@
 # VisiData version history
 
-# v2.11 (2023-01-XX)
+# v2.11 (2023-01-15)
 
 - [ci] drop support for Python 3.6 (related to https://github.com/actions/setup-python/issues/543)
 - [ci] add support for Python 3.11 (#1585)
@@ -12,13 +12,17 @@
     - edit cells in multiple rows in `$EDITOR`
     - only handles cell modifications, not added or deleted rows
 
+
 ## Improvements
 
 - [aggregators] add 95 and 99 percentile (p95 and p99)
 - [fill-col] speed up `fill-col` for sheets with many empty cells (PR by @midichef #1657)
 - [loaders hdf5] add support for arrays of scalars (requested by @linwaytin #1602)
 - [graph] fail if no numeric xcols are given
-- [open-cell-files] warn when file or url in cell does not exist (requested by @geekscrapy #1540)
+- [open-cell-file] warn when file or url in cell does not exist (requested by @geekscrapy #1540)
+- [sqlite] add passthrough options (reported by @cwarden #1622)
+- [sqlite] add options.sqlite_onconnect to be executed before running any statement (requested by @cwarden #1622)
+- [xml] add passthrough options for xml_parser; default xml_parser_huge_tree=True (PR by @midichef #1668)
 
 ## Bugfixes
 
@@ -28,7 +32,9 @@
 - [describe] fix custom describe aggregators (reported by @edupont #1574)
 - [dirsheet] fix incorrect filename with multiple extensions (reported by @kunliugithub #1571)
 - [display] show `disp_oddspace` for surrogate escapes (reported by @geekscrapy #1544)
+- [graph] fix div-by-zero with only one y-value (reported by @midichef #1673)
 - [install] ensure setuptools files have appropriate permissions (reported by @icp1994 #1591)
+- [install] update data files in setup.py based on PEP 420 (reported by @Oblomov #1675)
 - [keystrokes] add `kDN` and `kUP` to translation table (reported by @djpohly #1336)
 - [loaders html] fix loading of relative links in html table (reported by @frosencrantz #1599)
 - [loaders xlsx] store `None` as empty string in `save_xlsx` (reported and PR by @dbaynard #1626 #1629)
@@ -36,11 +42,13 @@
 - [macros] query again for keystroke if used by existing macro (#1658)
 - [macros] do not include `nonLogged` commands in macro (reported by @geekscrapy #1569)
 - [macros] add reload for **MacroSheet** (reported by @geekscrapy #1569)
+- [menu] 2x ESC should exit menu
 - [mouse] fix mouse-clicks on statusbar when splitpane is off (reported by @frosencrantz #1625)
+- [numpy] fix loader
 - [open_txt] fix Exception with `open-config` when no `~/.visidatarc` (reported by @gunchev #1611)
 - [pdb] fix entering of pdb breakpoints for Python 3.9+ (reported by @jasonwirth #1317)
 - [sheets] sort all sheets on global **Sheets Sheet** (reported by @franzhuang #1620)
-- [sqlite] add passthrough options for `connect()` (reported by @cwarden #1622)
+- [types] format int/vlen as true int (reported by @xlucn #1674)
 - [unzip-http] fix file extraction (`x`) on remote zip file
 - [unzip-http] handle files smaller than 64K (reported by @frosencrantz #1567)
 - [zsh-completion] fixed (reported by @pigmonkey #1583; PR by @Freed-Wu #1646)
