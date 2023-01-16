@@ -263,11 +263,12 @@ def mainloop(self, scr):
                     topPaneActive = ((vd.activePane == 2 and pct < 0)  or (vd.activePane == 1 and pct > 0))
                     bottomPaneActive = ((vd.activePane == 1 and pct < 0)  or (vd.activePane == 2 and pct > 0))
 
-                    if (bottomPaneActive and winname == 'top') or (topPaneActive and winname == 'bot'):
-                        self.activePane = 1 if self.activePane == 2 else 2
-                        sheet = self.activeSheet
+                    r = vd.parseMouse(top=vd.winTop, bot=vd.winBottom, menu=vd.scrMenu)
+                    for keystroke, y, x, winname, winscr in reversed(r):
+                        if (bottomPaneActive and winname == 'top') or (topPaneActive and winname == 'bot'):
+                            self.activePane = 1 if self.activePane == 2 else 2
+                            sheet = self.activeSheet
 
-                    for keystroke, y, x, winname, winscr in vd.parseMouse(top=vd.winTop, bot=vd.winBottom, menu=vd.scrMenu):
                         f = self.getMouse(winscr, x, y, keystroke)
                         sheet.mouseX, sheet.mouseY = x, y
                         if f:
