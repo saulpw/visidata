@@ -1126,6 +1126,7 @@ def quitAndReleaseMemory(vs):
 
     if vs.precious: # only precious sheets have meaningful data
         vs.rows.clear()
+        vs.rows = UNLOADED
         vd.remove(vs)
         vd.allSheets.remove(vs)
 
