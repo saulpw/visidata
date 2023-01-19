@@ -185,7 +185,7 @@ class CommandLogBase:
 
             contains = lambda s, *substrs: any((a in s) for a in substrs)
             if contains(cmd.execstr, 'pasteFromClipboard'):
-                args = vd.sysclip_value().strip()
+                args = vd.sysclipValue().strip()
 
 
         comment = vd.currentReplayRow.comment if vd.currentReplayRow else cmd.helpstr

@@ -79,7 +79,7 @@ def syscopyCells_async(sheet, cols, rows, filetype):
 
 
 @VisiData.api
-def sysclip_value(vd):
+def sysclipValue(vd):
     cmd = vd.options.clipboard_paste_cmd
     return subprocess.check_output(vd.options.clipboard_paste_cmd.split()).decode('utf-8')
 
@@ -87,7 +87,7 @@ def sysclip_value(vd):
 @VisiData.api
 @asyncthread
 def pasteFromClipboard(vd, cols, rows):
-    text = vd.getLastArgs() or vd.sysclip_value().strip() or vd.fail('system clipboard is empty')
+    text = vd.getLastArgs() or vd.sysclipValue().strip() or vd.fail('system clipboard is empty')
 
     vd.addUndoSetValues(cols, rows)
     lines = text.split('\n')
