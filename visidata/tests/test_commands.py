@@ -13,9 +13,11 @@ import visidata
 nonTested = (
         'syscopy',
         'syspaste',
+        'open-syspaste',
         'macro',
         'mouse',
         'suspend',
+        'reload-every',
         'breakpoint',
         'redraw',
         'menu',
@@ -68,6 +70,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'random-rows': '3',
                  'import-python': 'math',
                  'pyobj-expr-row': 'Units + "s"',            # open the python object for '4'
+                 'theme-input': 'light',
               }
 
 @pytest.mark.usefixtures('curses_setup')
