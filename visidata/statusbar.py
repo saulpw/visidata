@@ -1,7 +1,7 @@
 import collections
 import curses
 
-from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, MissingAttrFormatter
+from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr
 
 
 vd.option('disp_rstatus_fmt', ' {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus} {sheet.options.disp_selected_note}{sheet.nSelectedRows}', 'right-side status format string')
@@ -97,7 +97,7 @@ def composeStatus(msgparts, n):
 @BaseSheet.api
 def leftStatus(sheet):
     'Return left side of status bar for this sheet. Overridable.'
-    return MissingAttrFormatter().format(sheet.options.disp_status_fmt, sheet=sheet, vd=vd)
+    return sheet.formatString(sheet.options.disp_status_fmt)
 
 
 @VisiData.api
@@ -161,7 +161,7 @@ def drawLeftStatus(vd, scr, vs):
 @VisiData.api
 def rightStatus(vd, sheet):
     'Return right side of status bar.  Overridable.'
-    return MissingAttrFormatter().format(sheet.options.disp_rstatus_fmt, sheet=sheet, vd=vd)
+    return sheet.formatString(sheet.options.disp_rstatus_fmt)
 
 
 @VisiData.api

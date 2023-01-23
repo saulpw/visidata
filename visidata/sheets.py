@@ -28,6 +28,7 @@ vd.option('load_lazy', False, 'load subsheets always (False) or lazily (True)')
 
 vd.option('force_256_colors', False, 'use 256 colors even if curses reports fewer')
 
+vd.option('disp_sidebar_fmt', '', 'format string for default sidebar')
 vd.option('disp_note_none', '⌀',  'visible contents of a cell whose value is None')
 vd.option('disp_truncator', '…', 'indicator that the contents are only partially visible')
 vd.option('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')

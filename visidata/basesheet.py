@@ -1,7 +1,7 @@
 import os
 
 import visidata
-from visidata import Extensible, VisiData, vd, EscapeException, cleanName
+from visidata import Extensible, VisiData, vd, EscapeException, cleanName, MissingAttrFormatter
 from unittest import mock
 
 
@@ -267,15 +267,14 @@ class BaseSheet(DrawablePane):
         'Evaluate Python expression *expr* in the context of *kwargs* (may vary by sheet type).'
         return eval(expr, vd.getGlobals(), None)
 
+    def formatString(self, fmt):
+        'Return formatted string with *sheet* and *vd* accessible to expressions.  Missing expressions return empty strings instead of error.'
+        return MissingAttrFormatter().format(fmt, sheet=self, vd=vd)
+
     @property
     def sidebar(self):
         'Default implementation just returns set value.  Overridable.'
-        return self._sidebar
-
-    @sidebar.setter
-    def sidebar(self, v):
-        'Default implementation just sets value.  Overridable.'
-        self._sidebar = v
+        return self.formatString(self.options.disp_sidebar_fmt)
 
     @property
     def sidebar_title(self):
