@@ -32,51 +32,51 @@ eleventyNavigation:
     * [Accessing other loaded or derived sheets](/docs/loading#accessing-other-loaded-or-derived-sheets)
     * [Converting a dataset from one supported filetype into another](/docs/loading#convert)
 * [Navigation](/docs/navigate)
-    * How to rapidly scroll through a sheet
-    * How to search within a sheet
-    * How to move between sheets
+    * rapidly scroll through a sheet
+    * search within a sheet
+    * move between sheets
 * [Rows](/docs/rows)
-    * How to perform operations on a subset of rows
-    * How to filter rows
-    * How to filter a random subset of rows
-    * How to select rows where the current column is not null
-    * How to select rows where the current column is null
-    * How to move, copy and remove rows
-    * How to sort rows
+    * perform operations on a subset of rows
+    * filter rows
+    * filter a random subset of rows
+    * select rows where the current column is not null
+    * select rows where the current column is null
+    * move, copy and remove rows
+    * sort rows
 * [Columns](/docs/columns)
-    * How to manipulate columns
-    * How to hide (remove) and unhide columns
-    * How to specify column types
-    * How to split a column
-    * How to expand columns that contain nested data
-    * How to create derivative columns
-    * How to configure multiple columns
+    * manipulate columns
+    * hide (remove) and unhide columns
+    * specify column types
+    * split a column
+    * expand columns that contain nested data
+    * create derivative columns
+    * configure multiple columns
 * [Editing contents](/docs/edit)
-    * How to edit cells
-    * How to rename columns
+    * edit cells
+    * rename columns
 * [Grouping data and descriptive statistics](/docs/group)
-    * How to set statistical aggregators
-    * How to create a pivot table
-    * How to create a frequency chart
-    * How to calculate descriptive statistics
-    * How to filter for grouped or described rows
+    * set statistical aggregators
+    * create a pivot table
+    * create a frequency chart
+    * calculate descriptive statistics
+    * filter for grouped or described rows
 * [Creating sheets, rows and columns](/docs/crud)
-    * How to configure the cursor to move right after a successful edit
-    * How to set up a sheet for data collection
-    * How to add a new blank column
-    * How to fill a column with a range of numbers
+    * configure the cursor to move right after a successful edit
+    * set up a sheet for data collection
+    * add a new blank column
+    * fill a column with a range of numbers
 * [Combining datasets](/docs/join)
-    * How to perform a join
-    * How to append two datasets
+    * perform a join
+    * append two datasets
 * [Drawing graphs](/docs/graph)
-    * How to graph a single column
-    * How to graph multiple columns
-    * How to interact with graphs
+    * graph a single column
+    * graph multiple columns
+    * interact with graphs
 * [How to save and replay a VisiData session](/docs/save-restore)
 * [Customizing VisiData](/docs/customize)
-    * How to configure VisiData (user)
-    * How to configure VisiData (dev)
-    * How to have configurations persist
-    * How to configure commands
+    * configure VisiData (user)
+    * configure VisiData (dev)
+    * have configurations persist
+    * configure commands
 * [Plugins - extending VisiData functionality](/docs/api/plugins)
 * [STDOUT pipe/redirect](/docs/pipes)
