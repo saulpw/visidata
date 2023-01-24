@@ -1,3 +1,10 @@
+'''
+Add svg saver to Canvas.
+
+Requires matplotlib.pyplot
+'''
+
+
 import collections
 
 from visidata import VisiData, Canvas, vd, Progress
@@ -56,7 +63,7 @@ def save_svg(vd, p, *sheets):
             continue
         vs.plot_sheet(ax)
 
-#    ax.grid()
-#    ax.set_title('foo')
+    ax.grid()
+    ax.set_title('\n'.join(vs.name for vs in sheets))
     plt.xticks()
     plt.savefig(p, format='svg')
