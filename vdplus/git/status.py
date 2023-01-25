@@ -187,7 +187,7 @@ GitStatus.addCommand(None, 'ignore-wildcard', 'open(workdir+"/.gitignore", "a").
 GitStatus.addCommand('z^J', 'diff-file-staged', 'vd.push(getStagedHunksSheet(sheet, cursorRow))', 'push staged diffs for this file'),
 GitStatus.addCommand('gz^J', 'diff-selected-staged', 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files'),
 
-BaseSheet.addCommand('^[g', 'menu-git', 'pressMenu("Git")', 'open Git submenu')
+BaseSheet.addCommand(ESC+'g', 'menu-git', 'pressMenu("Git")', 'open Git submenu')
 
 vd.addMenuItem('Git', 'View staged changes', 'current file', 'diff-file-staged')
 vd.addMenuItem('Git', 'View staged changes', 'selected files', 'staged changes', 'diff-selected-staged')

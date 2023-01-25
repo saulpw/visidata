@@ -828,15 +828,15 @@ def runMenu(vd):
 
 main_menu = {'f': 'File', 'e': 'Edit', 'v': 'View', 'c': 'Column', 'r': 'Row', 'd': 'Data', 'p': 'Plot', 's': 'System', 'h': 'Help'}
 
-BaseSheet.addCommand('^[f', 'menu-file', 'pressMenu("File")', '')
-BaseSheet.addCommand('^[e', 'menu-edit', 'pressMenu("Edit")', '')
-BaseSheet.addCommand('^[v', 'menu-view', 'pressMenu("View")', '')
-BaseSheet.addCommand('^[c', 'menu-column', 'pressMenu("Column")', '')
-BaseSheet.addCommand('^[r', 'menu-row', 'pressMenu("Row")', '')
-BaseSheet.addCommand('^[d', 'menu-data', 'pressMenu("Data")', '')
-BaseSheet.addCommand('^[p', 'menu-plot', 'pressMenu("Plot")', '')
-BaseSheet.addCommand('^[s', 'menu-system', 'pressMenu("System")', '')
-BaseSheet.addCommand('^[h', 'menu-help', 'pressMenu("Help")', '')
+BaseSheet.addCommand(ESC+'f', 'menu-file', 'pressMenu("File")', '')
+BaseSheet.addCommand(ESC+'e', 'menu-edit', 'pressMenu("Edit")', '')
+BaseSheet.addCommand(ESC+'v', 'menu-view', 'pressMenu("View")', '')
+BaseSheet.addCommand(ESC+'c', 'menu-column', 'pressMenu("Column")', '')
+BaseSheet.addCommand(ESC+'r', 'menu-row', 'pressMenu("Row")', '')
+BaseSheet.addCommand(ESC+'d', 'menu-data', 'pressMenu("Data")', '')
+BaseSheet.addCommand(ESC+'p', 'menu-plot', 'pressMenu("Plot")', '')
+BaseSheet.addCommand(ESC+'s', 'menu-system', 'pressMenu("System")', '')
+BaseSheet.addCommand(ESC+'h', 'menu-help', 'pressMenu("Help")', '')
 BaseSheet.bindkey('^H', 'menu-help')
 BaseSheet.bindkey('KEY_BACKSPACE', 'menu-help')
 

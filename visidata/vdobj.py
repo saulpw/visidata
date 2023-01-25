@@ -25,7 +25,7 @@ def asyncthread(func):
 
 
 class VisiData(visidata.Extensible):
-    allPrefixes = ['g', 'z', ESC]  # embig'g'en, 'z'mallify, ESC=Alt/Meta
+    allPrefixes = ['g', 'z', 'Alt+']  # embig'g'en, 'z'mallify, Alt/Esc=Meta
 
     @classmethod
     def global_api(cls, func):
