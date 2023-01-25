@@ -18,7 +18,7 @@ def run(vd, *args, **kwargs):
 @Sheet.api
 @VisiData.api
 def set_theme(obj, theme=''):
-    if theme not in vd.themes:
+    if theme and theme not in vd.themes:
         vd.warning(f'no "{theme}" theme available')
         return
 
