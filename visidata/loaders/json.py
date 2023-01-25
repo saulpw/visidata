@@ -1,6 +1,6 @@
 import json
 
-from visidata import vd, date, VisiData, PyobjSheet, deepcopy, AttrDict, stacktrace, TypedExceptionWrapper, options, visidata, ColumnItem, deduceType, wrapply, TypedWrapper, Progress, Sheet, InferColumnsSheet
+from visidata import vd, date, VisiData, PyobjSheet, deepcopy, AttrDict, stacktrace, TypedExceptionWrapper, options, visidata, ColumnItem, wrapply, TypedWrapper, Progress, Sheet, InferColumnsSheet
 
 vd.option('json_indent', None, 'indent to use when saving json')
 vd.option('json_sort_keys', False, 'sort object keys when saving to json')
