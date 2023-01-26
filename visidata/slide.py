@@ -19,26 +19,6 @@ def slide_row(sheet, rowidx, newcolidx):
     return moveListItem(sheet.rows, rowidx, newcolidx)
 
 
-@Sheet.api
-def onClick(sheet, vcolidx, rowidx):
-    pass
-
-@Sheet.api
-def onRelease(sheet, vcolidx, rowidx, destx, desty):
-    newvcolidx = sheet.visibleColAtX(destx)
-    newrowidx = sheet.visibleRowAtY(desty)
-
-    if newvcolidx is not None and newvcolidx != vcolidx:
-        sheet.cursorVisibleColIndex = sheet.slide_col(vcolidx, newvcolidx)
-
-    # else: only move row if within same column (if column not moved above)
-    elif newrowidx is not None and newrowidx != rowidx:
-        sheet.cursorRowIndex = sheet.slide_row(rowidx, newrowidx)
-
-    else:
-        sheet.onClick(vcolidx, rowidx)
-
-
 def moveKeyCol(sheet, fromKeyColIdx, toKeyColIdx):
     'Move key column to another key column position in sheet.'
     if not (1 <= toKeyColIdx <= len(sheet.keyCols)):
