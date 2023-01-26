@@ -1,8 +1,6 @@
 from visidata import *
 from functools import wraps, partial
 
-__version__ = '0.10-dev'
-
 
 @asyncthread
 @Sheet.api
