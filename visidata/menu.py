@@ -75,6 +75,21 @@ def addMenuItem(vd, *args):
 
 
 @VisiData.api
+def addMenuItems(vd, *itemgroups):
+    '''Add any number of commands to menu, separated by lines, with individual menupaths separated by '>' character.  Example:
+        vd.addMenuItems("""
+            Help > About > credits > show-credits
+            Help > About > environment > show-env
+        """)
+    '''
+    for itemgroup in itemgroups:
+        for itemline in itemgroup.splitlines():
+            if not itemline: continue
+            menupath = [x.strip() for x in itemline.split('>')]
+            vd.addMenuItem(*menupath)
+
+
+@VisiData.api
 def addMenu(vd, *args):
     '''Incorporate submenus and commands into hierarchical menu.  Wrap all in Menu() objects.  Example:
 
