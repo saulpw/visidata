@@ -300,7 +300,9 @@ def inputsingle(vd, prompt, record=True):
     rstatuslen = vd.drawRightStatus(sheet._scr, sheet)
     promptlen = clipdraw(sheet._scr, y, 0, prompt, 0, w=w-rstatuslen-1)
     sheet._scr.move(y, w-promptlen-rstatuslen-2)
-    v = vd.getkeystroke(sheet._scr)
+
+    while not v:
+        v = vd.getkeystroke(sheet._scr)
 
     if record and vd.cmdlog:
         vd.setLastArgs(v)
