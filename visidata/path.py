@@ -401,3 +401,10 @@ class RepeatFileIter:
 
         self.nextIndex += 1
         return r
+
+
+vd.addGlobals(RepeatFile=RepeatFile,
+              Path=Path,
+              modtime=modtime,
+              filesize=filesize,
+              vstat=vstat)

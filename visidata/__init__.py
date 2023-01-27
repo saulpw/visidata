@@ -59,7 +59,8 @@ import visidata.statusbar
 
 import visidata.textsheet
 import visidata.threads
-from .path import *
+import visidata.path
+
 import visidata._input
 import visidata.movement
 
