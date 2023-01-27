@@ -137,12 +137,14 @@ class OptionsObject:
     def _get(self, k, obj=None):
         'Return Option object for k in context of obj. Cache result until any set().'
         opt = self._cache.get((k, obj or vd.activeSheet), None)
+#        if k == 'disp_sidebar_fmt':
+#            breakpoint()
         if opt is None:
             opt = self._opts._get(k, obj)
             self._cache[(k, obj or vd.activeSheet)] = opt
         return opt
 
-    def _set(self, k, v, obj=None, helpstr='', module=''):
+    def _set(self, k, v, obj=None, helpstr='', module=None):
         self._cache.clear()  # invalidate entire cache on any change
         opt = self._get(k) or Option(k, v, '', module)
         return self._opts.set(k, Option(k, v, opt.helpstr or helpstr, opt.module or module), obj)
@@ -178,6 +180,7 @@ class OptionsObject:
     def set(self, optname, value, obj='global'):
         "Override *value* for *optname* in the options context, or in the *obj* context if given."
         opt = self._get(optname)
+        module = None  # keep default
         if opt:
             curval = opt.value
             t = type(curval)
@@ -202,8 +205,9 @@ class OptionsObject:
         else:
             curval = None
             vd.warning('setting unknown option %s' % optname)
+            module = 'unknown'
 
-        return self._set(optname, value, obj)
+        return self._set(optname, value, obj, module=module)
 
     def unset(self, optname, obj=None):
         'Remove setting value for given context.'
