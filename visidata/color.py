@@ -1,10 +1,10 @@
 import curses
 import functools
 from copy import copy
-
-from visidata import options, Extensible, drawcache, drawcache_property, VisiData
-import visidata
 from collections import namedtuple
+
+from visidata import vd, options, Extensible, drawcache, drawcache_property, VisiData
+import visidata
 
 __all__ = ['ColorAttr', 'colors', 'update_attr', 'ColorMaker']
 
@@ -157,3 +157,6 @@ class ColorMaker:
         return r
 
 colors = ColorMaker()
+
+import sys
+vd.addGlobals({k:getattr(sys.modules[__name__], k) for k in __all__})

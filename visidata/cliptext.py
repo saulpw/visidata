@@ -2,7 +2,7 @@ import unicodedata
 import sys
 import functools
 
-from visidata import options, drawcache
+from visidata import options, drawcache, vd
 
 __all__ = ['clipstr', 'clipdraw', 'clipbox', 'dispwidth', 'iterchars']
 
@@ -181,3 +181,7 @@ def clipbox(scr, lines, attr, title=''):
     clipdraw(scr, 0, w-len(title)-6, f"| {title} |", attr)
     for i, line in enumerate(lines):
         clipdraw(scr, i+1, 2, line, attr)
+
+
+import sys
+vd.addGlobals({k:getattr(sys.modules[__name__], k) for k in __all__})

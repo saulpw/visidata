@@ -23,23 +23,6 @@ vd.option('col_cache_size', 0, 'max number of cache entries in each cached colum
 vd.option('clean_names', False, 'clean column/sheet names to be valid Python identifiers', replay=True)
 vd.option('disp_formatter', 'generic', 'formatter to use for display and saving', replay=True)
 
-__all__ = [
-    'clean_to_id',
-    'Column',
-    'setitem',
-    'getattrdeep',
-    'setattrdeep',
-    'getitemdef',
-    'ColumnAttr', 'AttrColumn',
-    'ColumnItem', 'ItemColumn',
-    'SettableColumn',
-    'SubColumnFunc',
-    'SubColumnItem',
-    'SubColumnAttr',
-    'ColumnExpr', 'ExprColumn',
-    'DisplayWrapper',
-]
-
 
 class DisplayWrapper:
     def __init__(self, value=None, *, display=None, note=None, notecolor=None, error=None):
@@ -598,7 +581,24 @@ class SettableColumn(Column):
 SettableColumn.init('_store', dict, copy=True)
 
 
+vd.addGlobals(
+    clean_to_id=clean_to_id,
+    Column=Column,
+    setitem=setitem,
+    getattrdeep=getattrdeep,
+    setattrdeep=setattrdeep,
+    getitemdef=getitemdef,
+    AttrColumn=AttrColumn,
+    ItemColumn=ItemColumn,
+    ExprColumn=ExprColumn,
+    SettableColumn=SettableColumn,
+    SubColumnFunc=SubColumnFunc,
+    SubColumnItem=SubColumnItem,
+    SubColumnAttr=SubColumnAttr,
+
 # synonyms
-ColumnItem = ItemColumn
-ColumnAttr = AttrColumn
-ColumnExpr = ExprColumn
+    ColumnItem=ItemColumn,
+    ColumnAttr=AttrColumn,
+    ColumnExpr=ExprColumn,
+    DisplayWrapper=DisplayWrapper
+)

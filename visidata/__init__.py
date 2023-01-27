@@ -41,21 +41,24 @@ vd.getGlobals = getGlobals
 import visidata.keys
 
 from .basesheet import *
+
 import visidata.settings
-from .errors import *
-from .editor import *
-from .cliptext import *
-from .color import *
-from .mainloop import *
-from .wrappers import *
-from .undo import *
-
-from ._types import *
-from .column import *
-
-from .sheets import *
 
 for line in '''
+import visidata.errors
+import visidata.editor
+import visidata.cliptext
+import visidata.color
+import visidata.mainloop
+
+import visidata.wrappers
+import visidata.undo
+import visidata._types
+import visidata.column
+
+import visidata.interface
+import visidata.sheets
+
 import visidata.statusbar
 
 import visidata.textsheet

@@ -386,3 +386,7 @@ def run(vd, *sheetlist):
 
     if ret:
         vd.printout(ret)
+
+
+import sys
+vd.addGlobals({k:getattr(sys.modules[__name__], k) for k in __all__})

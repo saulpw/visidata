@@ -1,5 +1,6 @@
 import string
 import textwrap
+import curses
 
 from visidata import *
 

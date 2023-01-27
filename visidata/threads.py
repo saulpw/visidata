@@ -5,6 +5,8 @@ import functools
 import cProfile
 import threading
 import collections
+import subprocess
+import curses
 
 from visidata import VisiData, vd, options, globalCommand, Sheet, EscapeException
 from visidata import ColumnAttr, Column

@@ -5,7 +5,7 @@ import visidata
 
 from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiData
 from visidata import vd, options, colors
-from visidata import suspend, ColumnItem, AttrDict
+from visidata import AttrDict
 
 
 vd.option('color_edit_cell', 'white', 'cell color to use when editing cell')
@@ -227,7 +227,7 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
         elif ch == '^V':                           v = splice(v, i, until_get_wch(scr)); i += 1  # literal character
         elif ch == '^W':                           j = find_nonword(v, 0, i-1, -1); v = v[:j+1] + v[i:]; i = j+1  # erase word
         elif ch == '^Y':                           v = splice(v, i, str(vd.memory.clipval))
-        elif ch == '^Z':                           suspend()
+        elif ch == '^Z':                           vd.suspend()
         # CTRL+arrow
         elif ch == 'kLFT5':                        i = find_nonword(v, 0, i-1, -1)+1; # word left
         elif ch == 'kRIT5':                        i = find_nonword(v, i+1, len(v)-1, +1)+1; # word right

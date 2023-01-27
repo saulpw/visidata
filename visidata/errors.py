@@ -28,4 +28,8 @@ def exceptionCaught(vd, exc=None, status=True, **kwargs):
     if vd.options.debug:
         raise
 
+
+import sys
+vd.addGlobals({k:getattr(sys.modules[__name__], k) for k in __all__})
+
 # see textsheet.py for ErrorSheet and associated commands

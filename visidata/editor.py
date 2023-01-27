@@ -67,7 +67,8 @@ def launchExternalEditorPath(vd, path, linenum=0):
                 return ''
 
 
-def suspend():
+@visidata.VisiData.api
+def suspend(vd):
     import signal
     with SuspendCurses():
         os.kill(os.getpid(), signal.SIGSTOP)
@@ -96,3 +97,5 @@ sys.breakpointhook = _breakpoint
 
 visidata.BaseSheet.addCommand('^Z', 'suspend', 'suspend()', 'suspend VisiData process')
 visidata.BaseSheet.addCommand('', 'breakpoint', 'breakpoint()', 'drop into pdb REPL')
+
+visidata.vd.addGlobals(SuspendCurses=SuspendCurses)
