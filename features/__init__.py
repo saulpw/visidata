@@ -3,6 +3,8 @@
 import pkgutil
 import os.path
 
-__all__ = list(module for _, module, _ in pkgutil.iter_modules([os.path.dirname(__file__)]))
+from visidata import vd
 
-from . import *
+
+for _, module, _ in pkgutil.iter_modules([os.path.dirname(__file__)]):
+    vd.importModule(__package__, module)

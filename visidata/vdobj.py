@@ -46,6 +46,7 @@ class VisiData(visidata.Extensible):
         self._cmdlog = None
         self.currentReplay = None
         self.contexts = [self]  # objects whose attributes are in the fallback context for eval/exec.
+        self.importingModule = None
 
     def sheetstack(self, pane=0):
         'Return list of sheets in given *pane*. pane=0 is the active pane.  pane=-1 is the inactive pane.'

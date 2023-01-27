@@ -16,6 +16,7 @@ class HelpSheet(MetaSheet):
 
     columns = [
         ColumnAttr('sheet'),
+        ColumnAttr('module'),
         ColumnAttr('longname'),
         Column('keystrokes', getter=lambda col,row: col.sheet.revbinds.get(row.longname, [None])[0]),
         Column('all_bindings', width=0, getter=lambda col,row: list(set(col.sheet.revbinds.get(row.longname, [])))),

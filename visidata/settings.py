@@ -98,19 +98,21 @@ class SettingsMgr(collections.OrderedDict):
 
 
 class Command:
-    def __init__(self, longname, execstr, helpstr=''):
+    def __init__(self, longname, execstr, helpstr='', module=''):
         self.longname = longname
         self.execstr = execstr
         self.helpstr = helpstr
+        self.module = module
 
 
 class Option:
-    def __init__(self, name, value, helpstr=''):
+    def __init__(self, name, value, helpstr='', module=''):
         self.name = name
         self.value = value
         self.helpstr = helpstr
         self.replayable = False
         self.sheettype = BaseSheet
+        self.module = module
 
     def __str__(self):
         return str(self.value)
@@ -140,9 +142,10 @@ class OptionsObject:
             self._cache[(k, obj or vd.activeSheet)] = opt
         return opt
 
-    def _set(self, k, v, obj=None, helpstr=''):
+    def _set(self, k, v, obj=None, helpstr='', module=''):
         self._cache.clear()  # invalidate entire cache on any change
-        return self._opts.set(k, Option(k, v, helpstr), obj)
+        opt = self._get(k) or Option(k, v, '', module)
+        return self._opts.set(k, Option(k, v, opt.helpstr or helpstr, opt.module or module), obj)
 
     def is_set(self, k, obj=None):
         d = self._opts.get(k, None)
@@ -214,8 +217,8 @@ class OptionsObject:
         self._cache.clear()  # invalidate entire cache on any change
         return v
 
-    def setdefault(self, optname, value, helpstr):
-        return self._set(optname, value, 'default', helpstr=helpstr)
+    def setdefault(self, optname, value, helpstr, module):
+        return self._set(optname, value, 'default', helpstr=helpstr, module=module)
 
     def getall(self, prefix=''):
         'Return dictionary of all options beginning with `prefix` (with `prefix` removed from the name).'
@@ -258,7 +261,7 @@ def option(vd, name, default, helpstr, replay=False, sheettype=BaseSheet):
    - `replay`: ``True`` if changes to the option should be stored in the **Command Log**
    - `sheettype`: ``None`` if the option is not sheet-specific, to make it global on CLI
     '''
-    opt = vd.options.setdefault(name, default, helpstr)
+    opt = vd.options.setdefault(name, default, helpstr, vd.importingModule)
     opt.replayable = replay
     opt.sheettype=sheettype
     return opt
@@ -274,7 +277,7 @@ def addCommand(cls, keystrokes, longname, execstr, helpstr='', **kwargs):
     - *execstr*: Python statement to pass to `exec()`'ed when the command is executed.
     - *helpstr*: help string shown in the **Commands Sheet**.
     '''
-    vd.commands.set(longname, Command(longname, execstr, helpstr=helpstr, **kwargs), cls)
+    vd.commands.set(longname, Command(longname, execstr, helpstr=helpstr, module=vd.importingModule, **kwargs), cls)
     if keystrokes:
         vd.bindkeys.set(vd.prettykeys(keystrokes), longname, cls)
     return longname
@@ -407,6 +410,14 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
     # user customisations in config file in standard location
     if vd.options.config:
         vd.loadConfigFile(vd.options.config, vd.getGlobals())
+
+
+@VisiData.api
+def importModule(vd, *args):
+    modname = '.'.join(args)
+    vd.importingModule = args[-1] # modname
+    importlib.import_module(modname)
+    vd.importingModule = None
 
 
 vd.option('visidata_dir', '~/.visidata/', 'directory to load and store additional files', sheettype=None)
