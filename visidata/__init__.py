@@ -55,6 +55,7 @@ from .column import *
 
 from .sheets import *
 
+for line in '''
 import visidata.statusbar
 
 import visidata.textsheet
@@ -166,6 +167,12 @@ import visidata.plugins
 
 import visidata.colorsheet
 import visidata.theme
+'''.splitlines():
+    if not line: continue
+    assert line.startswith('import visidata.'), line
+    module = line[len('import visidata.'):]
+    vd.importModule('visidata', module)
+
 import themes
 import features  # additional independent features
 

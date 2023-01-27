@@ -339,9 +339,12 @@ def loadConfigFile(vd, fn='', _globals=None):
         try:
             with open(p) as fd:
                 code = compile(fd.read(), str(p), 'exec')
+            vd.importingModule = 'visidatarc'
             exec(code, _globals)
         except Exception as e:
             vd.exceptionCaught(e)
+        finally:
+            vd.importingModule = None
 
     vd.addGlobals(_globals)
 
@@ -391,13 +394,15 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
 
         for ep in eps_visidata:
             try:
+                vd.importingModule = ep.name
                 plug = ep.load()
                 sys.modules[f'visidata.plugins.{ep.name}'] = plug
                 vd.debug(f'Plugin {ep.name} loaded')
             except Exception as e:
                 vd.warning(f'Plugin {ep.name} failed to load')
                 vd.exceptionCaught(e)
-                continue
+            finally:
+                vd.importingModule = None
 
         # import plugins from .visidata/plugins before .visidatarc, so plugin options can be overridden
         for modname in (args.imports or vd.options.imports or '').split():
