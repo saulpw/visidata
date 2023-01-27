@@ -1103,8 +1103,6 @@ def async_deepcopy(sheet, rowlist):
     return ret
 
 
-IndexSheet.options.header = 0
-IndexSheet.options.skip = 0
 
 BaseSheet.init('pane', lambda: 1)
 
