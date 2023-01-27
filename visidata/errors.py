@@ -4,6 +4,9 @@ from visidata import vd, VisiData, options
 
 __all__ = ['stacktrace', 'ExpectedException']
 
+vd.option('debug', False, 'exit on error and display stacktrace')
+
+
 class ExpectedException(Exception):
     'Controlled Exception from fail() or confirm().  Status or other interface update is done by raiser.'
     pass

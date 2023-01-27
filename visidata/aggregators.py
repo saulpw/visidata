@@ -3,8 +3,11 @@ import functools
 import collections
 from statistics import mode, stdev
 
-from visidata import Progress, Column
+from visidata import vd, Progress, Column, vlen
 from visidata import *
+
+
+vd.option('null_value', None, 'a value to be counted as null', replay=True)
 
 
 @Column.api

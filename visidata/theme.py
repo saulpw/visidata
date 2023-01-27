@@ -4,6 +4,7 @@ from visidata import vd, VisiData, Sheet, BaseSheet
 
 
 vd.option('theme', '', 'display/color theme to use')
+vd.option('color_sidebar', 'black on 114 blue', 'color of sidebar')
 
 vd.themes = {}
 

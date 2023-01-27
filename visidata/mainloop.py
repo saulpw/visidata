@@ -15,10 +15,6 @@ vd.timeouts_before_idle = 10
 vd.min_draw_ms = 100  # draw_all at least this often, even if keystrokes are pending
 vd._lastDrawTime = 0  # last time drawn (from time.time())
 
-vd.option('disp_splitwin_pct', 0, 'height of second sheet on screen')
-vd.option('mouse_interval', 1, 'max time between press/release for click (ms)', sheettype=None)
-vd.option('color_sidebar', 'black on 114 blue', 'color of sidebar')
-
 
 class ReturnValue(BaseException):
     'raise ReturnValue(ret) to exit from an inner runresult() with its result.'

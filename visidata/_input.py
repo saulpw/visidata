@@ -11,6 +11,7 @@ from visidata import AttrDict
 vd.option('color_edit_cell', 'white', 'cell color to use when editing cell')
 vd.option('disp_edit_fill', '_', 'edit field fill character')
 vd.option('disp_unprintable', '·', 'substitute character for unprintables')
+vd.option('mouse_interval', 1, 'max time between press/release for click (ms)', sheettype=None)
 
 vd.option('input_history', '', 'basename of file to store persistent input history')
 
