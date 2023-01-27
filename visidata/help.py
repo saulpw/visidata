@@ -156,3 +156,5 @@ BaseSheet.addCommand(None, 'open-tutorial-visidata', 'launchBrowser("https://jsv
 vd.addMenuItem("Help", "VisiData tutorial", 'open-tutorial-visidata')
 vd.addMenuItem("Help", 'Sheet commands', 'help-commands')
 vd.addMenuItem("Help", 'All commands', 'help-commands-all')
+
+vd.addGlobals(HelpSheet=HelpSheet)
