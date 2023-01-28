@@ -74,6 +74,7 @@ import visidata.type_floatsi
 
 import visidata._urlcache
 import visidata.selection
+import visidata.loaders
 import visidata.loaders.tsv
 import visidata.pyobj
 import visidata.loaders.json
@@ -119,50 +120,6 @@ import visidata.macros
 import visidata.macos
 import visidata.repeat
 
-import visidata.loaders.csv
-import visidata.loaders.archive
-import visidata.loaders.xlsx
-import visidata.loaders.xlsb
-import visidata.loaders.hdf5
-import visidata.loaders.sqlite
-import visidata.loaders.fixed_width
-import visidata.loaders.postgres
-import visidata.loaders.mysql
-import visidata.loaders.shp
-import visidata.loaders.geojson
-import visidata.loaders.mbtiles
-import visidata.loaders.http
-import visidata.loaders.html
-import visidata.loaders.markdown
-import visidata.loaders.pcap
-import visidata.loaders.png
-import visidata.loaders.ttf
-import visidata.loaders.sas
-import visidata.loaders.spss
-import visidata.loaders.xml
-import visidata.loaders.yaml
-import visidata.loaders._pandas
-import visidata.loaders.graphviz
-import visidata.loaders.npy
-import visidata.loaders.usv
-import visidata.loaders.frictionless
-import visidata.loaders.imap
-
-import visidata.loaders.pdf
-import visidata.loaders.pandas_freqtbl
-import visidata.loaders.xword
-import visidata.loaders.vcf
-import visidata.loaders.texttables
-import visidata.loaders.rec
-import visidata.loaders.eml
-import visidata.loaders.vds
-import visidata.loaders.odf
-import visidata.loaders.lsv
-import visidata.loaders.arrow
-import visidata.loaders.parquet
-
-import visidata.loaders.vdx
-
 import visidata.form
 
 import visidata.ddwplay
@@ -175,6 +132,12 @@ import visidata.theme
     assert line.startswith('import visidata.'), line
     module = line[len('import visidata.'):]
     vd.importModule('visidata', module)
+
+
+import pkgutil
+import os
+for _, module, _ in pkgutil.iter_modules([os.path.join(os.path.dirname(__file__), 'loaders')]):
+    vd.importModule('visidata.loaders', module)
 
 import themes
 import features  # additional independent features
