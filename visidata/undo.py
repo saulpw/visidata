@@ -118,3 +118,8 @@ vd.addGlobals(
     undoAttrFunc=undoAttrFunc,
     Fanout=Fanout,
     undoAttrCopyFunc=undoAttrCopyFunc)
+
+vd.addMenuItems('''
+    Edit > Undo > undo-last
+    Edit > Redo > redo-last
+''')

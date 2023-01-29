@@ -407,3 +407,8 @@ vd.addGlobals({
     'asynccache': asynccache,
     'asyncsingle': asyncsingle,
 })
+
+vd.addMenuItems('''
+    System > Threads sheet > threads-all
+    System > Toggle profiling > toggle-profile
+''')

@@ -158,3 +158,8 @@ vd.addMenuItem("Help", 'Sheet commands', 'help-commands')
 vd.addMenuItem("Help", 'All commands', 'help-commands-all')
 
 vd.addGlobals(HelpSheet=HelpSheet)
+
+vd.addMenuItems('''
+    Help > Quick reference > sysopen-help
+    Help > Command list > help-commands
+''')

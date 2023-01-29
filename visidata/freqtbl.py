@@ -115,3 +115,8 @@ vd.addGlobals({
     'FreqTableSheet': FreqTableSheet,
     'FreqTableSheetSummary': FreqTableSheetSummary,
 })
+
+vd.addMenuItems('''
+    Data > Frequency table > current column > freq-col
+    Data > Frequency table > key columns > freq-keys
+''')

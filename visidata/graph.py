@@ -185,3 +185,8 @@ vd.addGlobals({
     'GraphSheet': GraphSheet,
     'InvertedCanvas': InvertedCanvas,
 })
+
+vd.addMenuItems('''
+    Plot > Graph > current column > plot-column
+    Plot > Graph > all numeric columns > plot-numerics
+''')

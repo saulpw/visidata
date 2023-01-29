@@ -234,3 +234,7 @@ def statusHistorySheet(vd):
 
 
 BaseSheet.addCommand('^P', 'open-statuses', 'vd.push(vd.statusHistorySheet)', 'open Status History')
+
+vd.addMenuItems('''
+    View > Statuses > open-statuses
+''')

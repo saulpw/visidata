@@ -197,3 +197,24 @@ Sheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); 
 
 Sheet.addCommand(None, 'select-error-col', 'select(gatherBy(lambda r,c=cursorCol: c.isError(r)), progress=False)', 'select rows with errors in current column')
 Sheet.addCommand(None, 'select-error', 'select(gatherBy(lambda r,vcols=visibleCols: isinstance(r, TypedExceptionWrapper) or any([c.isError(r) for c in vcols])), progress=False)', 'select rows with errors in any column')
+
+vd.addMenuItems('''
+    Row > Select > current row > select-row
+    Row > Select > all rows > select-rows
+    Row > Select > from top > select-before
+    Row > Select > to bottom > select-after
+    Row > Select > by Python expr > select-expr
+    Row > Select > equal to current cell > select-equal-cell
+    Row > Select > equal to current row > select-equal-row
+    Row > Select > errors > current column > select-error-col
+    Row > Select > errors > any column > select-error
+    Row > Unselect > current row > unselect-row
+    Row > Unselect > all rows > unselect-rows
+    Row > Unselect > from top > unselect-before
+    Row > Unselect > to bottom > unselect-after
+    Row > Unselect > by Python expr > unselect-expr
+    Row > Toggle select > current row > stoggle-row
+    Row > Toggle select > all rows > stoggle-rows
+    Row > Toggle select > from top > stoggle-before
+    Row > Toggle select > to bottom > stoggle-after
+''')

@@ -1184,3 +1184,40 @@ vd.addGlobals(
     SequenceSheet=SequenceSheet,
     IndexSheet=IndexSheet,
     SheetsSheet=SheetsSheet)
+
+vd.addMenuItems('''
+    File > New > open-new
+    File > Rename > rename-sheet
+    File > Guard > on > guard-sheet
+    File > Guard > off > guard-sheet-off
+    File > Duplicate > selected rows by ref > dup-selected
+    File > Duplicate > all rows by ref > dup-rows
+    File > Duplicate > selected rows deep > dup-selected-deep
+    File > Duplicate > all rows deep > dup-rows-deep
+    File > Reload > reload-sheet
+    File > Quit > top sheet > quit-sheet
+    File > Quit > all sheets > quit-all
+    Edit > Modify > current cell > input > edit-cell
+    Edit > Modify > selected cells > from input > setcol-input
+    View > Sheets > stack > sheets-stack
+    View > Sheets > all > sheets-all
+    View > Other sheet > source sheet > open-source
+    View > Split pane > in half > splitwin-half
+    View > Split pane > in percent > splitwin-input
+    View > Split pane > unsplit > splitwin-close
+    View > Split pane > swap panes > splitwin-swap-pane
+    View > Split pane > goto other pane > splitwin-swap
+    View > Refresh screen > redraw
+    Column > Rename > current column > rename-col
+    Column > Rename > from selected cells > current column > rename-col-selected
+    Column > Rename > from selected cells > unnamed columns > rename-cols-row
+    Column > Rename > from selected cells > all columns > rename-cols-selected
+    Column > Type as > anytype > type-any
+    Column > Type as > string > type-string
+    Column > Type as > integer > type-int
+    Column > Type as > float > type-float
+    Column > Type as > locale float > type-floatlocale
+    Column > Type as > length > type-len
+    Column > Key > toggle current column > key-col
+    Column > Key > unkey current column > key-col-off
+''')

@@ -87,3 +87,7 @@ def run(vd, *args, **kwargs):
 
 Sheet.addCommand('m', 'macro-record', 'vd.cmdlog.startMacro()', 'record macro')
 Sheet.addCommand('gm', 'macro-sheet', 'vd.push(vd.macrosheet)', 'open macros sheet')
+
+vd.addMenuItems('''
+    System > Macros sheet > macro-sheet
+''')

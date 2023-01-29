@@ -666,7 +666,6 @@ Canvas.addCommand('gu', 'unselect-visible', 'source.unselect(list(rowsWithin(plo
 Canvas.addCommand('g'+ENTER, 'dive-visible', 'vs=copy(source); vs.rows=list(rowsWithin(plotterVisibleBox)); vd.push(vs)', 'open sheet of source rows visible on screen')
 Canvas.addCommand('gd', 'delete-visible', 'deleteSourceRows(rowsWithin(plotterVisibleBox))', 'delete rows on source sheet visible on screen')
 
-
 vd.addGlobals({
     'Canvas': Canvas,
     'Plotter': Plotter,
@@ -674,3 +673,22 @@ vd.addGlobals({
     'Box': Box,
     'Point': Point,
 })
+
+vd.addMenuItems('''
+    Plot > Resize cursor > height > double > resize-cursor-doubleheight
+    Plot > Resize cursor > height > half > resize-cursor-halfheight
+    Plot > Resize cursor > height > shorter > resize-cursor-shorter
+    Plot > Resize cursor > height > taller > resize-cursor-taller
+    Plot > Resize cursor > width > double > resize-cursor-doublewide
+    Plot > Resize cursor > width > half > resize-cursor-halfwide
+    Plot > Resize cursor > width > thinner > resize-cursor-thinner
+    Plot > Resize cursor > width > wider > resize-cursor-wider
+    Plot > Resize graph > X axis > resize-x-input
+    Plot > Resize graph > Y axis > resize-y-input
+    Plot > Resize graph > aspect ratio > set-aspect
+    Plot > Zoom > out > zoomout-cursor
+    Plot > Zoom > in > zoomin-cursor
+    Plot > Zoom > cursor > zoom-all
+    Plot > Dive into cursor > dive-cursor
+    Plot > Delete > under cursor > delete-cursor
+''')

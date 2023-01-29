@@ -276,9 +276,13 @@ def addcol_aggr(sheet, col):
 Sheet.addCommand('W', 'pivot', 'vd.push(Pivot(sheet, keyCols, [cursorCol]))', 'open Pivot Table: group rows by key column and summarize current column')
 
 PivotSheet.addCommand('', 'addcol-aggr', 'addcol_aggr(cursorCol)', 'add aggregation column from source of current column')
-vd.addMenuItem('Column', 'Add column', 'aggregator', 'addcol-aggr')
 
 vd.addGlobals({
     'Pivot': Pivot,
     'PivotGroupRow': PivotGroupRow,
 })
+
+vd.addMenuItems('''
+    Column > Add column > aggregator > addcol-aggr
+    Data > Pivot > pivot
+''')
