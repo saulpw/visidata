@@ -46,6 +46,7 @@ vd.option('color_column_sep', '246 blue', 'color of column separators')
 vd.option('color_key_col', '81 cyan', 'color of key columns')
 vd.option('color_hidden_col', '8', 'color of hidden columns on metasheets')
 vd.option('color_selected_row', '215 yellow', 'color of selected rows')
+vd.option('color_sidebar', 'black on 114 blue', 'color of sidebar')
 
 
 vd.option('force_256_colors', False, 'use 256 colors even if curses reports fewer')

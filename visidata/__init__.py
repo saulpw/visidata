@@ -135,12 +135,13 @@ vd.importSubmodules('visidata.themes')
 
 vd.importSubmodules('visidata.loaders')
 
+vd.importStar('visidata.deprecated')
+
 vd.importStar('builtins')
 vd.importStar('copy')
 vd.importStar('math')
 vd.importStar('random')
 
-from .deprecated import *
 
 vd.finalInit()  # call all VisiData.init() from modules
 
