@@ -80,7 +80,6 @@ import visidata.metasheets
 import visidata.cmdlog
 import visidata.save
 import visidata.clipboard
-import visidata.sysedit
 import visidata.search
 import visidata.expr
 
