@@ -1,6 +1,6 @@
 '''slide rows/columns around'''
 
-from visidata import Sheet, moveListItem, globalCommand, vd
+from visidata import Sheet, moveListItem, vd
 
 @Sheet.api
 def slide_col(sheet, colidx, newcolidx):
@@ -81,3 +81,18 @@ Sheet.bindkey('gKEY_SLEFT', 'slide-leftmost')
 Sheet.bindkey('gkDN', 'slide-bottom')
 Sheet.bindkey('gkUP', 'slide-top')
 Sheet.bindkey('gKEY_SRIGHT', 'slide-rightmost')
+
+vd.addMenuItems('''
+    Edit > Slide > Row > up > slide-up
+    Edit > Slide > Row > up N > slide-up-n
+    Edit > Slide > Row > down > slide-down
+    Edit > Slide > Row > down N > slide-down-n
+    Edit > Slide > Row > to top > slide-top
+    Edit > Slide > Row > to bottom > slide-bottom
+    Edit > Slide > Column > left > slide-left
+    Edit > Slide > Column > left N > slide-left-n
+    Edit > Slide > Column > leftmost > slide-leftmost
+    Edit > Slide > Column > right > slide-right
+    Edit > Slide > Column > right N > slide-right-n
+    Edit > Slide > Column > rightmost > slide-rightmost
+''')
