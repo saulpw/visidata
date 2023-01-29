@@ -48,6 +48,7 @@ import visidata.cliptext
 import visidata.color
 import visidata.mainloop
 
+import visidata.menu
 import visidata.wrappers
 import visidata.undo
 import visidata._types
@@ -65,9 +66,7 @@ import visidata.path
 import visidata._input
 import visidata.movement
 
-import visidata.type_currency
 import visidata.type_date
-import visidata.type_floatsi
 
 import visidata._urlcache
 import visidata.selection
@@ -76,14 +75,15 @@ import visidata.loaders.tsv
 import visidata.pyobj
 import visidata.loaders.json
 import visidata._open
-import visidata.metasheets
-import visidata.cmdlog
 import visidata.save
-import visidata.clipboard
 import visidata.search
-import visidata.expr
 
-import visidata.menu
+import visidata.expr
+import visidata.metasheets
+import visidata.type_currency
+import visidata.type_floatsi
+import visidata.cmdlog
+import visidata.clipboard
 import visidata.choose
 import visidata.aggregators
 import visidata.pivot

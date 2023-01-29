@@ -14,3 +14,7 @@ def currency(*args):
 
 
 Sheet.addCommand('$', 'type-currency', 'cursorCol.type = currency', 'set type of current column to currency')
+
+vd.addMenuItems('''
+    Column > Type as > dirty float > type-currency
+''')

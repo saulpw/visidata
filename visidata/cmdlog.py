@@ -512,3 +512,11 @@ CommandLog.options.encoding = 'utf-8'
 CommandLogJsonl.options.json_sort_keys = False
 
 vd.addGlobals({"CommandLogBase": CommandLogBase})
+
+vd.addMenuItems('''
+            View > Command log > this sheet > cmdlog-sheet
+    View > Command log > this sheet only > cmdlog-sheet-only
+    View > Command log > all commands > cmdlog-all
+    System > Execute longname > exec-longname
+    Help > Version > show-version
+''')

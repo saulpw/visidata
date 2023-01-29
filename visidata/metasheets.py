@@ -247,3 +247,10 @@ vd.addGlobals({
     'OptionsSheet': OptionsSheet,
     'VisiDataMetaSheet': VisiDataMetaSheet,
 })
+
+vd.addMenuItems('''
+    File > Options > all sheets > options-global
+    File > Options > this sheet > options-sheet
+    View > Columns > this sheet > columns-sheet
+    View > Columns > all sheets > columns-all
+''')
