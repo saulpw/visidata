@@ -298,7 +298,6 @@ vd.menus = [
             Menu('locale float', 'type-floatlocale'),
             Menu('dirty float', 'type-currency'),
             Menu('date', 'type-date'),
-            Menu('custom date format', 'type-customdate'),
             Menu('length', 'type-len'),
         ),
         Menu('Key',

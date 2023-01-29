@@ -21,3 +21,5 @@ def customdate(sheet, fmtstr):
 
 Sheet.addCommand('z@', 'type-customdate', 'fmt=input("date format: ", type="fmtstr"); cursorCol.type=customdate(fmt); cursorCol.fmtstr=fmt', 'set type of current column to custom date format')
 ColumnsSheet.addCommand('gz@', 'type-customdate-selected', 'fmt=input("date format: ", type="fmtstr"); onlySelectedRows.type=customdate(fmt); onlySelectedRows.fmtstr=fmt', 'set type of selected columns to date')
+
+vd.addMenuItems('Column > Type as > custom date format > type-customdate')
