@@ -118,7 +118,7 @@ def setValuesFromRegex(cols, rows, rex):
 @BaseSheet.api
 def regex_flags(sheet):
     'Return flags to pass to regex functions from options'
-    return sum(getattr(re, f.upper()) for f in options.regex_flags)
+    return sum(getattr(re, f.upper()) for f in sheet.options.regex_flags)
 
 
 Sheet.addCommand(':', 'split-col', 'addRegexColumns(makeRegexSplitter, cursorCol, input("split regex: ", type="regex-split"))', 'Add new columns from regex split')

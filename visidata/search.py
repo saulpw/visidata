@@ -23,7 +23,8 @@ def searchRegex(vd, sheet, moveCursor=False, reverse=False, **kwargs):
 
         regex = kwargs.get("regex")
         if regex:
-            vd.searchContext["regex"] = re.compile(regex, sheet.regex_flags()) or vd.error('invalid regex: %s' % regex)
+            regex_flags = sum(getattr(re, f.upper()) for f in sheet.options.regex_flags)  # regex_flags defined in features.regex
+            vd.searchContext["regex"] = re.compile(regex, regex_flags) or vd.error('invalid regex: %s' % regex)
 
         regex = vd.searchContext.get("regex") or vd.fail("no regex")
 
