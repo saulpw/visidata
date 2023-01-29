@@ -3,7 +3,7 @@ import itertools
 import functools
 from copy import copy
 
-from visidata import *
+from visidata import vd, VisiData, asyncthread, Sheet, Progress, IndexSheet, Column, CellColorizer
 
 @VisiData.api
 def ensureLoaded(vd, sheets):
@@ -333,4 +333,8 @@ IndexSheet.bindkey('g&', 'join-selected')
 Sheet.addCommand('&', 'join-sheets-top2', 'vd.push(openJoin(vd.sheets[1:2], jointype=chooseOne(jointypes)))', 'concatenate top two sheets in Sheets Stack')
 Sheet.addCommand('g&', 'join-sheets-all', 'vd.push(openJoin(vd.sheets[1:], jointype=chooseOne(jointypes)))', 'concatenate all sheets in Sheets Stack')
 
-vd.addMenuItem('Data', 'Join', 'selected sheets', 'join-selected')
+vd.addMenuItems('''
+    Data > Join > selected sheets > join-selected
+    Data > Join > top two sheets > join-sheets-top2
+    Data > Join > all sheets > join-sheets-all
+''')

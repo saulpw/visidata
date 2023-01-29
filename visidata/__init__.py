@@ -87,7 +87,6 @@ import visidata.expr
 
 import visidata.menu
 import visidata.choose
-import visidata.join
 import visidata.aggregators
 import visidata.describe
 import visidata.pivot

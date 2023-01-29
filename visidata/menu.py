@@ -413,10 +413,6 @@ vd.menus = [
             Menu('nonkey columns', 'melt'),
             Menu('nonkey columns by regex', 'melt-regex'),
         ),
-        Menu('Join',
-            Menu('top two sheets', 'join-sheets-top2'),
-            Menu('all sheets', 'join-sheets-all'),
-        ),
     ),
 
     Menu('Plot',
