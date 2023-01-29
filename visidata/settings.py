@@ -422,11 +422,23 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
 
 
 @VisiData.api
-def importModule(vd, *args):
-    modname = '.'.join(args)
-    vd.importingModule = args[-1] # modname
-    importlib.import_module(modname)
+def importModule(vd, pkgname):
+    modparts = pkgname.split('.')
+    vd.importingModule = modparts[-1]
+    r = importlib.import_module(pkgname)
     vd.importingModule = None
+    return r
+
+
+@VisiData.api
+def importSubmodules(vd, pkgname):
+    'Import all files below the given packagepkgname/modnamevd.importSiblings("visidata", "loaders/api")'
+    import pkgutil
+    import os.path
+
+    m = vd.importModule(pkgname)
+    for module in pkgutil.walk_packages(m.__path__):
+        vd.importModule(pkgname + '.' + module.name)
 
 
 vd.option('visidata_dir', '~/.visidata/', 'directory to load and store additional files', sheettype=None)

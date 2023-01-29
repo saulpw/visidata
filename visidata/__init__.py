@@ -131,16 +131,13 @@ import visidata.theme
     if not line: continue
     assert line.startswith('import visidata.'), line
     module = line[len('import visidata.'):]
-    vd.importModule('visidata', module)
+    vd.importModule('visidata.' + module)
 
 
-import pkgutil
-import os
-for _, module, _ in pkgutil.iter_modules([os.path.join(os.path.dirname(__file__), 'loaders')]):
-    vd.importModule('visidata.loaders', module)
+vd.importSubmodules('features')
+vd.importSubmodules('themes')
 
-import themes
-import features  # additional independent features
+vd.importSubmodules('visidata.loaders')
 
 from .deprecated import *
 
