@@ -98,7 +98,6 @@ import visidata.main
 import visidata.help
 import visidata.modify
 import visidata.sort
-import visidata.customdate
 import visidata.misc
 import visidata.memory
 import visidata.macros
