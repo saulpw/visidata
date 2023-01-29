@@ -142,7 +142,6 @@ vd.menus = [
             Menu('selected rows deep', 'dup-selected-deep'),
             Menu('all rows deep', 'dup-rows-deep'),
         ),
-        Menu('Freeze', 'freeze-sheet'),
         Menu('Save',
             Menu('current sheet', 'save-sheet'),
             Menu('all sheets', 'save-all'),
@@ -355,7 +354,6 @@ vd.menus = [
         ),
         Menu('Contract', 'contract-col'),
         Menu('Add aggregator', 'aggregate-col'),
-        Menu('Freeze', 'freeze-col'),
     ),
 
     Menu('Row',

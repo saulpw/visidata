@@ -92,7 +92,6 @@ import visidata.aggregators
 import visidata.describe
 import visidata.pivot
 import visidata.freqtbl
-import visidata.freeze
 import visidata.canvas
 import visidata.canvas_text
 import visidata.graph

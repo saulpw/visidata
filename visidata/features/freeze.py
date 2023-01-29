@@ -62,3 +62,6 @@ Sheet.addCommand("'", 'freeze-col', 'sheet.addColumnAtCursor(StaticColumn(cursor
 Sheet.addCommand("g'", 'freeze-sheet', 'vd.push(StaticSheet(sheet)); status("pushed frozen copy of "+name)', 'open a frozen copy of current sheet with all visible columns evaluated')
 Sheet.addCommand("z'", 'cache-col', 'cursorCol.resetCache()', 'add/reset cache for current column')
 Sheet.addCommand("gz'", 'cache-cols', 'for c in visibleCols: c.resetCache()', 'add/reset cache for all visible columns')
+
+vd.addMenuItem('Column', 'Freeze', 'freeze-col')
+vd.addMenuItem('File', 'Freeze', 'freeze-sheet')
