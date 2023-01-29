@@ -130,8 +130,8 @@ import visidata.theme
     module = line[len('import visidata.'):]
     vd.importModule('visidata.' + module)
 
-vd.importSubmodules('features')
-vd.importSubmodules('themes')
+vd.importSubmodules('visidata.features')
+vd.importSubmodules('visidata.themes')
 
 vd.importSubmodules('visidata.loaders')
 
