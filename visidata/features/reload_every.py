@@ -1,4 +1,4 @@
-from visidata import BaseSheet, asyncthread
+from visidata import vd, BaseSheet, asyncthread
 
 
 @BaseSheet.api
@@ -11,3 +11,8 @@ def reload_every(sheet, seconds:int):
 
 
 BaseSheet.addCommand('', 'reload-every', 'sheet.reload_every(input("reload interval (sec): ", value=1))', 'schedule sheet reload every N seconds') #683
+
+vd.addMenuItems('''
+    File > Reload > sheet > reload-sheet
+    File > Reload > every N seconds > reload-every
+''')

@@ -93,7 +93,6 @@ import visidata.describe
 import visidata.pivot
 import visidata.freqtbl
 import visidata.freeze
-import visidata.regex
 import visidata.canvas
 import visidata.canvas_text
 import visidata.graph
@@ -109,7 +108,6 @@ import visidata.misc
 import visidata.memory
 import visidata.macros
 import visidata.macos
-import visidata.repeat
 
 import visidata.form
 
