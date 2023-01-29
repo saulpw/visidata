@@ -390,10 +390,6 @@ vd.menus = [
             Menu('key columns', 'freq-keys'),
         ),
         Menu('Pivot', 'pivot'),
-        Menu('Melt',
-            Menu('nonkey columns', 'melt'),
-            Menu('nonkey columns by regex', 'melt-regex'),
-        ),
     ),
 
     Menu('Plot',
