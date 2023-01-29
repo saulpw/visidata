@@ -93,7 +93,6 @@ import visidata.canvas_text
 import visidata.graph
 import visidata.motd
 import visidata.shell
-import visidata.layout
 import visidata.main
 import visidata.help
 import visidata.modify

@@ -42,3 +42,12 @@ Sheet.addCommand('z-', 'resize-col-half', 'cursorCol.setWidth(cursorCol.width//2
 Sheet.addCommand('gv', 'unhide-cols', 'unhide_cols(columns, visibleRows)', 'Show all columns')
 Sheet.addCommand('v', 'visibility-sheet', 'for c in visibleCols: c.toggleVisibility()')
 Sheet.addCommand('zv', 'visibility-col', 'cursorCol.toggleVisibility()')
+
+vd.addMenuItems('''
+    Column > Hide > hide-col
+    Column > Unhide all > unhide-cols
+    Column > Resize > half > resize-col-half
+    Column > Resize > current column to max > resize-col-max
+    Column > Resize > current column to input > resize-col-input
+    Column > Resize > all columns max > resize-cols-max
+''')
