@@ -136,33 +136,16 @@ def _intMenuPath(obj, menupath):
 vd.menus = []
 
 vd.addMenu(
-    Menu('File',
-        Menu('Options',
-            Menu('edit config file', 'open-config'),
-        ),
-    ),
-
-    Menu('Edit',
-    ),
-
-    Menu('View',
-    ),
-    Menu('Column',
-    ),
-
-    Menu('Row',
-    ),
-
-    Menu('Data',
-    ),
-
-    Menu('Plot',
-    ),
-    Menu('System',
-        Menu('Suspend to shell', 'suspend'),
-    ),
-    Menu('Help',
-    ))
+    Menu('File'),
+    Menu('Edit'),
+    Menu('View'),
+    Menu('Column'),
+    Menu('Row'),
+    Menu('Data'),
+    Menu('Plot'),
+    Menu('System'),
+    Menu('Help')
+)
 
 
 @BaseSheet.api
