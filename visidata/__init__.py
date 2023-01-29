@@ -87,7 +87,6 @@ import visidata.expr
 import visidata.menu
 import visidata.choose
 import visidata.aggregators
-import visidata.describe
 import visidata.pivot
 import visidata.freqtbl
 import visidata.canvas

@@ -389,7 +389,6 @@ vd.menus = [
             Menu('current column', 'freq-col'),
             Menu('key columns', 'freq-keys'),
         ),
-        Menu('Statistics', 'describe-sheet'),
         Menu('Pivot', 'pivot'),
         Menu('Melt',
             Menu('nonkey columns', 'melt'),
