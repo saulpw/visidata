@@ -75,3 +75,12 @@ Sheet.addCommand('z[', 'sort-asc-add', 'orderBy(cursorCol)', 'sort ascending by 
 Sheet.addCommand('z]', 'sort-desc-add', 'orderBy(cursorCol, reverse=True)', 'sort descending by current column; add to existing sort criteria')
 Sheet.addCommand('gz[', 'sort-keys-asc-add', 'orderBy(*keyCols)', 'sort ascending by all key columns; add to existing sort criteria')
 Sheet.addCommand('gz]', 'sort-keys-desc-add', 'orderBy(*keyCols, reverse=True)', 'sort descending by all key columns; add to existing sort criteria')
+
+vd.addMenuItems('''
+    Column > Sort by > current column only > ascending > sort-asc
+    Column > Sort by > current column only > descending > sort-desc
+    Column > Sort by > current column also > ascending > sort-asc-add
+    Column > Sort by > current column also > descending > sort-desc-add
+    Column > Sort by > key columns > ascending > sort-keys-asc
+    Column > Sort by > key columns > descending > sort-keys-desc
+''')
