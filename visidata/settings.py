@@ -432,13 +432,24 @@ def importModule(vd, pkgname):
 
 @VisiData.api
 def importSubmodules(vd, pkgname):
-    'Import all files below the given packagepkgname/modnamevd.importSiblings("visidata", "loaders/api")'
+    'Import all files below the given *pkgname*'
     import pkgutil
     import os.path
 
     m = vd.importModule(pkgname)
     for module in pkgutil.walk_packages(m.__path__):
         vd.importModule(pkgname + '.' + module.name)
+
+
+@VisiData.api
+def importStar(vd, pkgname):
+    'Import all symbols from *pkgname'
+    import pkgutil
+    import os.path
+
+    m = vd.importModule(pkgname)
+    vd.addGlobals({k:v for k, v in m.__dict__.items() if not k.startswith('__')})
+    vd.addGlobals({pkgname:m})
 
 
 vd.option('visidata_dir', '~/.visidata/', 'directory to load and store additional files', sheettype=None)

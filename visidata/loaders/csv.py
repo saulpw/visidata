@@ -13,7 +13,6 @@ vd.option('safety_first', False, 'sanitize input/output to handle edge cases, wi
 
 csv.field_size_limit(2**31-1) # Windows has max 32-bit
 
-options_num_first_rows = 10
 
 @VisiData.api
 def open_csv(vd, p):

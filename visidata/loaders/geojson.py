@@ -1,7 +1,10 @@
 from functools import reduce
+from copy import deepcopy
+
 import json
 
-from visidata import VisiData, vd, Column, asyncthread, Progress, PythonSheet, InvertedCanvas, deepcopy, date, wrapply, TypedExceptionWrapper, TypedWrapper
+from visidata import VisiData, vd, Column, asyncthread, Progress, PythonSheet, InvertedCanvas, date, wrapply, TypedExceptionWrapper, TypedWrapper
+
 
 
 @VisiData.api

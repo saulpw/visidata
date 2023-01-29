@@ -3,7 +3,7 @@ import contextlib
 import itertools
 import collections
 
-from visidata import vd, asyncthread, options, Progress, ColumnItem, SequenceSheet, Sheet, FileExistsError, VisiData
+from visidata import vd, asyncthread, options, Progress, ColumnItem, SequenceSheet, Sheet, VisiData
 from visidata import namedlist, filesize
 
 vd.option('delimiter', '\t', 'field delimiter to use for tsv/usv filetype', replay=True)

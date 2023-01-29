@@ -24,9 +24,6 @@ def getGlobals():
     'Return the VisiData globals dict.'
     return globals()
 
-from builtins import *
-from copy import copy, deepcopy
-
 from .utils import *
 
 from .extensible import *
@@ -133,17 +130,17 @@ import visidata.theme
     module = line[len('import visidata.'):]
     vd.importModule('visidata.' + module)
 
-
 vd.importSubmodules('features')
 vd.importSubmodules('themes')
 
 vd.importSubmodules('visidata.loaders')
 
-from .deprecated import *
+vd.importStar('builtins')
+vd.importStar('copy')
+vd.importStar('math')
+vd.importStar('random')
 
-import math
-import random
-from math import *
+from .deprecated import *
 
 vd.finalInit()  # call all VisiData.init() from modules
 

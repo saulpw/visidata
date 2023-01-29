@@ -2,6 +2,7 @@ from functools import singledispatch
 from typing import Mapping
 import inspect
 import math
+from copy import deepcopy
 
 from visidata import *
 
