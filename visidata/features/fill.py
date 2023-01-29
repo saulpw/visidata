@@ -1,4 +1,4 @@
-from visidata import *
+from visidata import vd, VisiData, asyncthread, Sheet
 
 
 @VisiData.api
@@ -34,3 +34,5 @@ def fillNullValues(vd, col, rows):
 
 
 Sheet.addCommand('f', 'setcol-fill', 'fillNullValues(cursorCol, someSelectedRows)', 'fills null cells in selected rows of current column with contents of non-null cells up the current column')
+
+vd.addMenuItems('Column > Fill > setcol-fill')

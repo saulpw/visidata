@@ -92,24 +92,18 @@ import visidata.aggregators
 import visidata.describe
 import visidata.pivot
 import visidata.freqtbl
-import visidata.melt
 import visidata.freeze
 import visidata.regex
 import visidata.canvas
 import visidata.canvas_text
 import visidata.graph
 import visidata.motd
-import visidata.transpose
 import visidata.shell
 import visidata.layout
 import visidata.main
 import visidata.help
 import visidata.modify
 import visidata.sort
-import visidata.unfurl
-import visidata.fill
-import visidata.incr
-import visidata.window
 import visidata.customdate
 import visidata.misc
 import visidata.memory
@@ -122,7 +116,6 @@ import visidata.form
 import visidata.ddwplay
 import visidata.plugins
 
-import visidata.colorsheet
 import visidata.theme
 '''.splitlines():
     if not line: continue

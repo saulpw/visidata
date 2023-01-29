@@ -360,7 +360,6 @@ vd.menus = [
         Menu('Contract', 'contract-col'),
         Menu('Split', 'split-col'),
         Menu('Add aggregator', 'aggregate-col'),
-        Menu('Fill', 'setcol-fill'),
         Menu('Freeze', 'freeze-col'),
     ),
 
@@ -419,14 +418,12 @@ vd.menus = [
     ),
 
     Menu('Data',
-        Menu('Transpose', 'transpose'),
         Menu('Frequency table',
             Menu('current column', 'freq-col'),
             Menu('key columns', 'freq-keys'),
         ),
         Menu('Statistics', 'describe-sheet'),
         Menu('Pivot', 'pivot'),
-        Menu('Unfurl column', 'unfurl-col'),
         Menu('Melt',
             Menu('nonkey columns', 'melt'),
             Menu('nonkey columns by regex', 'melt-regex'),

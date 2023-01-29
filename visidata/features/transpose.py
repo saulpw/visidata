@@ -1,4 +1,4 @@
-from visidata import VisiData, Sheet, asyncthread, Progress, Column
+from visidata import vd, VisiData, Sheet, asyncthread, Progress, Column
 
 # rowdef: Column
 @VisiData.api
@@ -23,3 +23,5 @@ class TransposeSheet(Sheet):
         self.rows = list(self.source.nonKeyVisibleCols)
 
 Sheet.addCommand('T', 'transpose', 'vd.push(TransposeSheet(name+"_T", source=sheet))', 'open new sheet with rows and columns transposed')
+
+vd.addMenuItems('Data > Transpose > transpose')
