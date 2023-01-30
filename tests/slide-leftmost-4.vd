@@ -1,4 +1,0 @@
-sheet	col	row	longname	input	keystrokes	comment
-			open-file	sample_data/benchmark.csv	o	
-benchmark	Date		key-col		!	
-benchmark	Date		slide-leftmost		gH	

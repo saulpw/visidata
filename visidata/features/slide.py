@@ -1,5 +1,6 @@
 '''slide rows/columns around'''
 
+import visidata
 from visidata import Sheet, moveListItem, vd
 
 @Sheet.api
@@ -96,3 +97,61 @@ vd.addMenuItems('''
     Edit > Slide > Column > right N > slide-right-n
     Edit > Slide > Column > rightmost > slide-rightmost
 ''')
+
+## tests
+
+
+def make_tester(setup_vdx):
+    def t(vdx, golden):
+        global vd
+        vd = visidata.vd.resetVisiData()
+        vd.runvdx(setup_vdx)
+
+        vd.runvdx(vdx)
+        colnames = [c.name for c in vd.sheet.visibleCols]
+        assert colnames == golden.split(), ' '.join(colnames)
+
+    return t
+
+def test_slide_keycol_1(vd):
+    t = make_tester('''
+            open-file sample_data/sample.tsv
+            +::OrderDate key-col
+            +::Region key-col
+            +::Rep key-col
+        ''')
+
+    t('',                             'OrderDate Region Rep Item Units Unit_Cost Total')
+    t('+::Rep slide-leftmost',        'Rep OrderDate Region Item Units Unit_Cost Total')
+    t('+::OrderDate slide-rightmost', 'Region Rep OrderDate Item Units Unit_Cost Total')
+    t('+::Rep slide-left',            'OrderDate Rep Region Item Units Unit_Cost Total')
+    t('+::OrderDate slide-right',     'Region OrderDate Rep Item Units Unit_Cost Total')
+
+    t('''
+        +::Item key-col
+        +::Item slide-left
+        slide-left
+        slide-right
+        slide-right
+        slide-left
+        slide-left
+    ''', 'OrderDate Item Region Rep Units Unit_Cost Total')
+
+
+def test_slide_leftmost(vd):
+    t = make_tester('''open-file sample_data/benchmark.csv''')
+
+    t('+::Paid slide-leftmost', 'Paid Date Customer SKU Item Quantity Unit')
+
+    t = make_tester('''
+         open-file sample_data/benchmark.csv
+         +::Date key-col
+    ''')
+
+    t('', 'Date Customer SKU Item Quantity Unit Paid')
+    t('''+::Item slide-leftmost''', 'Date Item Customer SKU Quantity Unit Paid')
+    t('''+::SKU key-col
+         +::Quantity slide-leftmost''', 'Date SKU Quantity Customer Item Unit Paid')
+    t('''+::Date slide-leftmost''', 'Date Customer SKU Item Quantity Unit Paid')
+    t('''+::Item slide-leftmost
+         +::SKU slide-leftmost''', 'Date SKU Item Customer Quantity Unit Paid')

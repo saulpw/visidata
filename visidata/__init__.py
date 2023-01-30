@@ -41,6 +41,7 @@ from .basesheet import *
 
 import visidata.settings
 
+# importModule tracks where commands/options/etc are coming from (via vd.importingModule)
 for line in '''
 import visidata.errors
 import visidata.editor

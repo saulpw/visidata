@@ -125,4 +125,4 @@ class TestCommands:
         vd.allSheets = [vs]
         vs.mouseX, vs.mouseY = (4, 4)
         vs.draw(mock_screen)
-        vs.execCommand(longname, vdglobals=vars(visidata))
+        vs.execCommand(longname, vdglobals=vd.getGlobals())
