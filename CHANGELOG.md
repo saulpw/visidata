@@ -5,7 +5,8 @@
 - [reorg] move independent modules into visidata/{features|experimental}
 - [modules] include module name in Option/Command sheets
 
-- [loaders] mailbox formats mbox/maildir/mmdf/babyl/mh (as supported by Python mailbox stdlib)
+- [loaders] mailbox formats mbox/maildir/mmdf/babyl/mh loader (as supported by Python mailbox stdlib)
+- [loaders] .jrnl format (jrnl.sh) loader+saver
 - [themes] add options.theme and visidata/themes directory of additional themes (light, ascii8, asciimono)
 - [graph] colorbrewer palette chooser (thanks @er1kb)
 - [graph] add commands to open external graph with matplotlib
