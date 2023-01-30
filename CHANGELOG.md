@@ -1,5 +1,44 @@
 # VisiData version history
 
+# v3.x (dev)
+
+- [reorg] move independent modules into visidata/{features|experimental}
+- [modules] include module name in Option/Command sheets
+
+- [loaders] mailbox formats mbox/maildir/mmdf/babyl/mh (as supported by Python mailbox stdlib)
+- [themes] add options.theme and visidata/themes directory of additional themes (light, ascii8, asciimono)
+- [graph] colorbrewer palette chooser (thanks @er1kb)
+- [graph] add commands to open external graph with matplotlib
+- [open-syspaste] create new table from system clipboard #1680
+- [sidebar] add options.disp_sidebar_fmt as default #1685
+- [freq] add select-first command
+- [tests] call all test_func(vd) defined in modules during pytest
+
+## experimental features (must be imported manually)
+
+- [mark] mark rows to more easily move cursor to them
+- [rownum] addcol-rownum and addcol-delta
+- [slide-cells] shift cells in cursor row to the right
+- [guide] GuideGuide
+
+## bugfixes
+
+- re-entering a subsheet left using quit-sheet-free should reload the subsheet #1679
+- [paste] add new rows to sheet if necessary
+- [reload-every] do not replay
+- [input-] fix ^T swap on empty string #1684
+- [inputsingle-] loop until keystroke (do not timeout)
+- [curses] allow breakpoint() before initwin
+
+
+## api
+
+- [keys] use prettykeys for allPrefixes #1592
+- [menu] vd.addMenuItems with convenient string syntax
+- [modules] vd.importModule, vd.importSubmodules, vd.importStar
+- [vdx] runvdx() to execute vdx strings
+- [tests] add vd.resetVisiData
+
 # v2.11 (2023-01-15)
 
 - [ci] drop support for Python 3.6 (related to https://github.com/actions/setup-python/issues/543)
