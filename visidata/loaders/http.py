@@ -18,9 +18,10 @@ def openurl_http(vd, path, filetype=None):
             vd.fail(f'no vd.openhttp_{sch}')
         return openfunc(Path(schemes[-1]+'://'+path.given.split('://')[1]))
 
+    certfile = vd.options.get('certfile')
     import requests
 
-    response = requests.get(path.given, stream=True, **vd.options.getall('http_req_'))
+    response = requests.get(path.given, stream=True, **vd.options.getall('http_req_'), verify = certfile)
     response.raise_for_status()
 
     if not filetype:
@@ -61,7 +62,7 @@ def openurl_http(vd, path, filetype=None):
                 break
 
             vd.status(f'fetching next page from {src}')
-            response = requests.get(src, stream=True, **vd.options.getall('http_req_'))
+            response = requests.get(src, stream=True, **vd.options.getall('http_req_'), verify = certfile)
 
     # add resettable iterator over contents as an already-open fp
     path.fptext = RepeatFile(_iter_lines())
