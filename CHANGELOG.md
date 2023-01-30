@@ -14,6 +14,7 @@
 - [sidebar] add options.disp_sidebar_fmt as default #1685
 - [freq] add select-first command
 - [tests] call all test_func(vd) defined in modules during pytest
+- [features] procmgr to view/manage processes, memory/cpu stats
 
 ## experimental features (must be imported manually)
 
