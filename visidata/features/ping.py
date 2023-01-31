@@ -1,20 +1,19 @@
 # requires shell tools: ping traceroute
 #   these tools aren't inlined as they require root privs
 
+import re
 import time
 from statistics import mean
 
-import sh
+from visidata import vd, VisiData, BaseSheet, Sheet, Column, AttrColumn, Progress
 
-from visidata import VisiData, Sheet, Column
-from visidata import *
-
-vd.option('ping_count', 3, 'send this many pings to each host')   # TODO: alias to -c
-vd.option('ping_interval', 0.1, 'wait between ping rounds, in seconds')   # TODO: alias to -i
+vd.option('ping_count', 3, 'send this many pings to each host')
+vd.option('ping_interval', 0.1, 'wait between ping rounds, in seconds')
 
 
 @VisiData.api
 def new_ping(vd, p):
+    'Open a sheet with the round-trip time for each hop along the path to the given host.'
     pingsheet = PingSheet(p.given, source=p.given)
     return StatsSheet("traceroute_"+pingsheet.name, source=pingsheet)
 
@@ -31,7 +30,7 @@ class StatsSheet(Sheet):
     ]
     def reload(self):
         sheet = self.source
-        sheet.reload()
+        sheet.ensureLoaded()
 
         self.rows = sheet.columns
 
@@ -89,6 +88,8 @@ class PingSheet(Sheet):
         self.send_trace(ip, len(rtes)+1)  # and one more for the road
 
     def send_trace(self, ip, n):
+        import sh
+
         while n > len(self.routes[ip]):
             self.routes[ip].append(None)
 
@@ -101,11 +102,12 @@ class PingSheet(Sheet):
                       _out=lambda data,self=self,ip=ip,a=1: self.traceroute_response(ip, data),
                       _err=lambda data,self=self,ip=ip,a=1: self.ping_error(ip, data))
 
-    @asyncthread
-    def reload(self):
+    def iterload(self):
+        import sh
+
         self.stop = False
         self.start_time = time.time()
-        self.columns = []
+        self.columns.clear()
 
         for ip in self.sources:
             self.addColumn(PingColumn(ip, ip))
@@ -117,7 +119,7 @@ class PingSheet(Sheet):
         with Progress(total=ping_count*len(self.sources), gerund='pinging') as prog:
           while not self.stop:
             r = {'time':time.time()}
-            self.addRow(r)
+            yield r
 
             npings = 0  # this loop
             for ip in self.sources:
@@ -138,4 +140,9 @@ class PingSheet(Sheet):
             time.sleep(self.options.ping_interval)
 
 
-PingSheet.class_options.null_value = False
+PingSheet.options.null_value = False
+BaseSheet.addCommand('', 'open-ping', 'vd.push(openSource(input("ping: ", type="hostip"), filetype="ping"))')
+
+vd.addMenuItems('''
+    System > Ping IP/hostname > open-ping
+''')

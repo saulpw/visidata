@@ -15,6 +15,7 @@
 - [freq] add select-first command
 - [tests] call all test_func(vd) defined in modules during pytest
 - [features] procmgr to view/manage processes, memory/cpu stats
+- [features] ping to traceroute a hostip
 
 ## experimental features (must be imported manually)
 
