@@ -9,7 +9,9 @@ from visidata import vd, VisiData, BaseSheet, Sheet, Column, AttrColumn, Progres
 
 vd.option('ping_count', 3, 'send this many pings to each host')
 vd.option('ping_interval', 0.1, 'wait between ping rounds, in seconds')
-vd.option('color_code', '47', 'wait between ping rounds, in seconds')
+vd.option('color_shellcmd', '21 on 114 green', '')
+vd.option('color_colname', 'underline', '')
+vd.option('color_longname', 'bold 52 on 114 green', '')
 
 
 @VisiData.api
@@ -21,9 +23,9 @@ def new_ping(vd, p):
 
 class PingStatsSheet(Sheet):
     help='''# ping/traceroute
-This sheet runs {code}traceroute{} to generate intermediate hops, then runs {code}ping{} against each hop N times to get the {underline}avg_ms{} and {underline}max_ms{} ping time.
+This sheet runs {shellcmd}traceroute{} to generate intermediate hops, then runs {shellcmd}ping{} against each hop N times to get the {colname}avg_ms{} and {colname}max_ms{} ping time.
 
-⧳open-source to open the raw ping data.
+{longname}open-source{} to open the raw ping data.
 '''
     rowtype='hosts' # rowdef: PingColumn
     columns = [
