@@ -1,3 +1,4 @@
+from copy import copy
 from visidata import *
 
 vd.option('color_add_pending', 'green', 'color for rows pending add')

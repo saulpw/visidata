@@ -1,4 +1,5 @@
 import collections
+from copy import copy
 
 from visidata import *
 
