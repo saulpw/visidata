@@ -6,7 +6,7 @@ import threading
 import time
 from unittest import mock
 
-from visidata import vd, VisiData, colors, ESC, options, clipbox
+from visidata import vd, VisiData, colors, ESC, options, clipbox, colorbox
 
 __all__ = ['ReturnValue', 'run']
 
@@ -55,24 +55,29 @@ def draw_sheet(self, scr, sheet):
 def iterwraplines(lines, width=80):
     import textwrap
     for line in lines:
-        yield from textwrap.wrap(line, width=width, subsequent_indent='  ')
+        if line:
+            yield from textwrap.wrap(line, width=width, subsequent_indent='  ')
+        else:
+            yield ''
 
 
 @VisiData.api
-def drawSidebar(vd, scr, text, title='sidebar'):
+def drawSidebar(vd, scr, text, title=''):
     if not text:
         return
 
     h, w = scr.getmaxyx()
-    maxh, maxw = 0, 0
+    maxh, maxw = h-2, w//2
 
-    lines = list(iterwraplines(text.splitlines(), width=w//2-2))
+    lines = list(iterwraplines(text.splitlines(), width=maxw))
+    maxw = min(maxw, max(map(len, lines)))
+    maxh = min(maxh, len(lines)+3)
 
-    maxh = min(h-2, len(lines)+2)
-    maxw = min(w//2, max(map(len, lines))+4)
+    lines = list(iterwraplines(text.splitlines(), width=maxw-4))
 
     sidebar_scr = scr.derwin(maxh, maxw, h-maxh-1, w-maxw-1)
-    clipbox(sidebar_scr, lines, colors.color_sidebar, title=title)
+    colorbox(sidebar_scr, lines, colors.get_color('color_sidebar'), title=title)
+
 
 
 vd.windowConfig = dict(pct=0, n=0, h=0, w=0)  # n=top line of bottom window; h=height of bottom window; w=width of screen

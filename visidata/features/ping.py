@@ -9,16 +9,22 @@ from visidata import vd, VisiData, BaseSheet, Sheet, Column, AttrColumn, Progres
 
 vd.option('ping_count', 3, 'send this many pings to each host')
 vd.option('ping_interval', 0.1, 'wait between ping rounds, in seconds')
+vd.option('color_code', '47', 'wait between ping rounds, in seconds')
 
 
 @VisiData.api
 def new_ping(vd, p):
     'Open a sheet with the round-trip time for each hop along the path to the given host.'
     pingsheet = PingSheet(p.given, source=p.given)
-    return StatsSheet("traceroute_"+pingsheet.name, source=pingsheet)
+    return PingStatsSheet("traceroute_"+pingsheet.name, source=pingsheet)
 
 
-class StatsSheet(Sheet):
+class PingStatsSheet(Sheet):
+    help='''# ping/traceroute
+This sheet runs {code}traceroute{} to generate intermediate hops, then runs {code}ping{} against each hop N times to get the {underline}avg_ms{} and {underline}max_ms{} ping time.
+
+⧳open-source to open the raw ping data.
+'''
     rowtype='hosts' # rowdef: PingColumn
     columns = [
         Column('hop', type=int, width=5, getter=lambda col,r: col.sheet.source.sources.index(r.ip)+1),

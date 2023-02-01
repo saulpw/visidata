@@ -279,7 +279,7 @@ class BaseSheet(DrawablePane):
     @property
     def sidebar_title(self):
         'Default implementation returns fixed value.  Overridable.'
-        return 'sidebar'
+        return ''
 
 
 @VisiData.api

@@ -1,10 +1,11 @@
 import unicodedata
 import sys
+import re
 import functools
 
-from visidata import options, drawcache, vd
+from visidata import options, drawcache, vd, update_attr, colors
 
-__all__ = ['clipstr', 'clipdraw', 'clipbox', 'dispwidth', 'iterchars']
+__all__ = ['clipstr', 'clipdraw', 'clipbox', 'colorbox', 'dispwidth', 'iterchars']
 
 disp_column_fill = ' '
 
@@ -173,14 +174,44 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False, **kwargs):
     return dispw
 
 
+def colorbox(scr, lines, cattr, title=''):
+    origattr = cattr
+    scr.erase()
+    scr.bkgd(cattr.attr)
+    scr.box()
+    h, w = scr.getmaxyx()
+    i = 0
+    for line in lines:
+        if line.startswith('# '):
+            if not title:
+                title = line[1:].strip()
+                continue
+
+        x = 2
+        for chunk in re.split(r'(\{[a-z_ 0-9]*\})', line):
+            if chunk.startswith('{') and chunk.endswith('}'):
+                chunk = chunk[1:-1]
+                if chunk:
+                    cattr = update_attr(cattr, colors.get_color(chunk), 8)
+                else:
+                    cattr = origattr
+            else:
+                x += clipdraw(scr, i+1, x, chunk, cattr.attr)
+
+        i += 1
+
+    clipdraw(scr, 0, w-len(title)-6, f"| {title} |", cattr.attr)
+
+
 def clipbox(scr, lines, attr, title=''):
     scr.erase()
     scr.bkgd(attr)
     scr.box()
     h, w = scr.getmaxyx()
-    clipdraw(scr, 0, w-len(title)-6, f"| {title} |", attr)
     for i, line in enumerate(lines):
         clipdraw(scr, i+1, 2, line, attr)
+
+    clipdraw(scr, 0, w-len(title)-6, f"| {title} |", attr)
 
 
 import sys

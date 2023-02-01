@@ -151,7 +151,7 @@ class ColorMaker:
         'colors.color_foo returns colors[options.color_foo]'
         r = self.colorcache.get(optname, None)
         if r is None:
-            coloropt = options._get(optname)
+            coloropt = options._get(optname) or options._get('color_'+optname)
             colornamestr = coloropt.value if coloropt else optname
             r = self.colorcache[optname] = self._colornames_to_cattr(colornamestr, precedence)
         return r

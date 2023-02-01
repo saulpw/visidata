@@ -45,8 +45,8 @@ import visidata.settings
 for line in '''
 import visidata.errors
 import visidata.editor
-import visidata.cliptext
 import visidata.color
+import visidata.cliptext
 import visidata.mainloop
 
 import visidata.menu
