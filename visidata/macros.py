@@ -1,5 +1,7 @@
-from visidata import *
+from copy import copy
 from functools import wraps
+
+from visidata import *
 
 from visidata.cmdlog import CommandLog, CommandLogJsonl
 
