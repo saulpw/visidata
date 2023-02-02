@@ -3,7 +3,7 @@ import itertools
 import functools
 from copy import copy
 
-from visidata import vd, VisiData, asyncthread, Sheet, Progress, IndexSheet, Column, CellColorizer
+from visidata import vd, VisiData, asyncthread, Sheet, Progress, IndexSheet, Column, CellColorizer, ColumnItem
 
 @VisiData.api
 def ensureLoaded(vd, sheets):
