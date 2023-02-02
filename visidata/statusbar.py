@@ -7,10 +7,10 @@ from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColo
 vd.option('disp_rstatus_fmt', ' {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus} {sheet.options.disp_selected_note}{sheet.nSelectedRows}', 'right-side status format string')
 vd.option('disp_status_fmt', '{sheet.shortcut}› {sheet.name}| ', 'status line prefix')
 vd.option('disp_lstatus_max', 0, 'maximum length of left status line')
-vd.option('disp_status_sep', ' │ ', 'separator between statuses')
+vd.option('disp_status_sep', '│', 'separator between statuses')
 
 vd.option('color_keystrokes', 'bold 233 black on 110 cyan', 'color of input keystrokes on status line')
-vd.option('color_status', 'bold black on 110 cyan', 'status line color')
+vd.option('color_status', 'bold on 238', 'status line color')
 vd.option('color_error', 'red', 'error message color')
 vd.option('color_warning', 'yellow', 'warning message color')
 vd.option('color_top_status', 'underline', 'top window status bar color')
@@ -103,7 +103,7 @@ def leftStatus(sheet):
 @VisiData.api
 def drawLeftStatus(vd, scr, vs):
     'Draw left side of status bar.'
-    cattr = colors.get_color('color_status')
+    cattr = colors.get_color('color_active_status')
     active = (vs is vd.activeSheet)
     if active:
         cattr = update_attr(cattr, colors.color_active_status, 1)
@@ -114,8 +114,10 @@ def drawLeftStatus(vd, scr, vs):
         cattr = update_attr(cattr, colors.color_top_status, 1)
 
     attr = cattr.attr
-    error_attr = update_attr(cattr, colors.color_error, 1).attr
-    warn_attr = update_attr(cattr, colors.color_warning, 2).attr
+
+    status_cattr = colors.get_color('color_status', 1)
+    error_attr = update_attr(status_cattr, colors.color_error, 3).attr
+    warn_attr = update_attr(status_cattr, colors.color_warning, 3).attr
     sep = options.disp_status_sep
 
     x = 0
@@ -139,21 +141,37 @@ def drawLeftStatus(vd, scr, vs):
     if not active:
         return
 
-    one = False
-    for (pri, msgparts), n in sorted(vd.statuses.items(), key=lambda k: -k[0][0]):
+    statuses = vd.statuses.items()
+    maxlen = 0
+    if statuses:
+        maxlen = max(len(composeStatus(msgparts, n)) for (pri, msgparts), n in statuses)+2
+        maxlen = min(vs.windowWidth-x, maxlen)+2
+
+    def draw_status_line(y, x, s, attr):
+        clipdraw(scr, y, x, sep, status_cattr.attr, w=len(sep))
+        clipdraw(scr, y, x+len(sep), ' '+s+' ', attr, w=maxlen-2*len(sep))
+        clipdraw(scr, y, x+maxlen-len(sep), sep, status_cattr.attr, w=len(sep))
+
+    statuses = list(reversed(statuses))
+
+    if len(statuses) > 5:
+        draw_status_line(y, x, 'Ctrl+P to view all status messages', colors.color_keystrokes)
+        y -= 1
+        statuses = sorted(statuses, key=lambda k: -k[0][0])[:5]
+
+
+    for (pri, msgparts), n in statuses:
         try:
             if x > vs.windowWidth:
                 break
-            if one:  # any messages already:
-                x += clipdraw(scr, y, x, sep, attr, w=vs.windowWidth-x)
-            one = True
             msg = composeStatus(msgparts, n)
 
             if pri == 3: msgattr = error_attr
             elif pri == 2: msgattr = warn_attr
             elif pri == 1: msgattr = warn_attr
-            else: msgattr = attr
-            x += clipdraw(scr, y, x, msg, msgattr, w=vs.windowWidth-x)
+            else: msgattr = status_cattr.attr
+            draw_status_line(y, x, msg, msgattr)
+            y -= 1
         except Exception as e:
             vd.exceptionCaught(e)
 
@@ -171,7 +189,7 @@ def drawRightStatus(vd, scr, vs):
 
     ret = 0
     statcolors = [
-        (vd.rightStatus(vs), 'color_status'),
+        (vd.rightStatus(vs), 'color_active_status'),
     ]
 
     active = vs is vd.activeSheet

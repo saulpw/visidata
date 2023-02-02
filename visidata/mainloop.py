@@ -33,13 +33,14 @@ def draw_sheet(self, scr, sheet):
 
     sheet._scr = scr
 
-    self.drawLeftStatus(scr, sheet)
-    self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
 
     try:
         sheet.draw(scr)
     except Exception as e:
         self.exceptionCaught(e)
+
+    self.drawLeftStatus(scr, sheet)
+    self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
 
     try:
         sidebar = sheet.sidebar
