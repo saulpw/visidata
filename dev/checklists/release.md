@@ -135,7 +135,7 @@ Registry: https://github.com/saulpw/homebrew-vd
 2. tar -xzmf visidata.tar.gz
 3. cp visidata.ver.tar.gz visidata_ver.orig.tar.gz
 4. cd visidata-ver/
-5. Place there the contents of the debian directory from github.com/saulpw/visidata/dev/debian/
+5. Place there the contents of the debian directory from git@salsa.debian.org:anjakefala/visidata.git
 6. Update changelog
 ```
 dch -v new_version
