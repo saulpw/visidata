@@ -4,6 +4,7 @@ from unittest.mock import Mock
 
 import itertools
 import visidata
+from pathlib import Path
 
 # test separately as needed
 
@@ -104,6 +105,12 @@ class TestCommands:
         print('%s/%s commands had errors' % (nerrs, ntotal))
         if nerrs > 0:
             assert False
+
+        # cleanup
+        for f in ['flotsam.csv', 'debris.csv', 'jetsam.csv', 'lagan.csv', 'test_commands.vdj']:
+            pf = Path(f)
+            if pf.exists: pf.unlink()
+
 
     def runOneTest(self, mock_screen, longname):
         visidata.vd.clearCaches()  # we want vd to return a new VisiData object for each command
