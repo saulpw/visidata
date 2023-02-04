@@ -451,6 +451,8 @@ def getattrdeep(obj, attr, *default, getter=getattr):
         try:  # if attribute exists, return toplevel value, even if dotted
             if attr in obj:
                 return getter(obj, attr)
+        except RecursionError:  #1696
+            raise
         except Exception as e:
             pass
 
