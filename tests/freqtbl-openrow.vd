@@ -1,0 +1,6 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.tsv	o	
+sample	OrderDate		freq-col		Shift+F	open Frequency Table grouped on current column, with aggregations of other columns
+sample_OrderDate_freq	count		freq-col		Shift+F	open Frequency Table grouped on current column, with aggregations of other columns
+sample_OrderDate_freq_count_freq		キ1	open-row		Enter	open current row with sheet-specific dive
+sample_OrderDate_freq_1		キ2016-01-06	open-row		Enter	open current row with sheet-specific dive
