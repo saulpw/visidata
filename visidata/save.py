@@ -106,6 +106,10 @@ def save_cols(vd, cols):
 def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
     'Save all *vsheets* to *givenpath*.'
 
+    if not vsheets: # blank tuple
+        vd.warning('no sheets to save')
+        return
+
     filetype = givenpath.ext or options.save_filetype
 
     vd.clearCaches()
