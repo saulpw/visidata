@@ -607,7 +607,7 @@ class TableSheet(BaseSheet):
                     break
                 mincolidx, maxcolidx = min(self._visibleColLayout.keys()), max(self._visibleColLayout.keys())
                 if self.cursorVisibleColIndex < mincolidx:
-                    self.leftVisibleColIndex -= max((self.cursorVisibleColIndex - mincolid)//2, 1)
+                    self.leftVisibleColIndex -= max((self.cursorVisibleColIndex - mincolidx)//2, 1)
                     continue
                 elif self.cursorVisibleColIndex > maxcolidx:
                     self.leftVisibleColIndex += max((maxcolidx - self.cursorVisibleColIndex)//2, 1)
