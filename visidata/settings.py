@@ -450,8 +450,8 @@ def importStar(vd, pkgname):
     import os.path
 
     m = vd.importModule(pkgname)
-    vd.addGlobals({k:v for k, v in m.__dict__.items() if not k.startswith('__')})
     vd.addGlobals({pkgname:m})
+    vd.addGlobals({k:v for k, v in m.__dict__.items() if not k.startswith('__')})
 
 
 vd.option('visidata_dir', '~/.visidata/', 'directory to load and store additional files', sheettype=None)
