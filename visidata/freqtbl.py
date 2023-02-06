@@ -26,14 +26,16 @@ class HistogramColumn(Column):
         return histogram*(histolen*len(row.sourcerows)//col.sheet.largest)
 
 
+def makeFreqTable(sheet, *groupByCols):
+    return FreqTableSheet(sheet.name,
+                          '%s_freq' % '-'.join(col.name for col in groupByCols),
+                          groupByCols=groupByCols,
+                          source=sheet)
+
+
 class FreqTableSheet(PivotSheet):
     'Generate frequency-table sheet on currently selected column.'
     rowtype = 'bins'  # rowdef FreqRow(keys, sourcerows)
-
-    def __init__(self, sheet, *groupByCols):
-        fqcolname = '%s_%s_freq' % (sheet.name, '-'.join(col.name for col in groupByCols))
-        super().__init__(fqcolname, groupByCols, [], source=sheet)
-        self.largest = 1
 
     def selectRow(self, row):
         self.source.select(row.sourcerows)     # select all entries in the bin on the source sheet
@@ -77,14 +79,15 @@ class FreqTableSheet(PivotSheet):
         'open copy of source sheet with rows that are grouped in current row'
         if row.sourcerows:
             vs = copy(self.source)
-            vs.name += "_"+vd.valueNames(row.discrete_keys, row.numeric_key)
+            vs.names.append(vd.valueNames(row.discrete_keys, row.numeric_key))
             vs.rows=copy(row.sourcerows)
             return vs
         vd.warning("no source rows")
 
     def openRows(self, rows):
         vs = copy(self.source)
-        vs.name += "_several"
+        vs.names.append("several")
+        vs.source = self
         vs.rows = list(itertools.chain.from_iterable(row.sourcerows for row in rows))
         return vs
 
@@ -93,25 +96,27 @@ class FreqTableSheet(PivotSheet):
 
 
 class FreqTableSheetSummary(FreqTableSheet):
-    'Append a PivotGroupRow to FreqTable with only selectedRows.'
+    'Append a PivotGroupRow to FreqTableSheet with only selectedRows.'
     @asyncthread
     def reload(self):
         FreqTableSheet.reload.__wrapped__(self)
         self.addRow(PivotGroupRow(['Selected'], (0,0), self.source.selectedRows, {}))
 
-Sheet.addCommand('F', 'freq-col', 'vd.push(FreqTableSheet(sheet, cursorCol))', 'open Frequency Table grouped on current column, with aggregations of other columns')
-Sheet.addCommand('gF', 'freq-keys', 'vd.push(FreqTableSheet(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on source sheet, with aggregations of other columns')
+Sheet.addCommand('F', 'freq-col', 'vd.push(makeFreqTable(sheet, cursorCol))', 'open Frequency Table grouped on current column, with aggregations of other columns')
+Sheet.addCommand('gF', 'freq-keys', 'vd.push(makeFreqTable(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on source sheet, with aggregations of other columns')
 Sheet.addCommand('zF', 'freq-summary', 'vd.push(FreqTableSheetSummary(sheet, Column("Total", sheet=sheet, getter=lambda col, row: "Total")))', 'open one-line summary for all rows and selected rows')
 
-ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(FreqTableSheet(source[0], cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row')
+ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(makeFreqTable(source[0], cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row')
 vd.addMenuItem('Data', 'Frequency table', 'current row', 'freq-row')
 
 FreqTableSheet.addCommand('gu', 'unselect-rows', 'unselect(selectedRows)', 'unselect all source rows grouped in current row')
 FreqTableSheet.addCommand('g'+ENTER, 'dive-selected', 'vd.push(openRows(selectedRows))', 'open copy of source sheet with rows that are grouped in selected rows')
 FreqTableSheet.addCommand('', 'select-first', 'for r in rows: source.select([r.sourcerows[0]])', 'select first source row in each bin')
 
+FreqTableSheet.init('largest', lambda: 1)
+
 vd.addGlobals({
-    'FreqTableSheet': FreqTableSheet,
+    'makeFreqTable': makeFreqTable,
     'FreqTableSheetSummary': FreqTableSheetSummary,
 })
 

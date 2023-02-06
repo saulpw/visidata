@@ -9,10 +9,10 @@ from visidata import *
 # pivotrows is { pivot_values: list(source.rows in group with pivot_values) }
 PivotGroupRow = collections.namedtuple('PivotGroupRow', 'discrete_keys numeric_key sourcerows pivotrows'.split())
 
-def Pivot(source, groupByCols, pivotCols):
+def makePivot(source, groupByCols, pivotCols):
     return PivotSheet('',
-            groupByCols,
-            pivotCols,
+            groupByCols=groupByCols,
+            pivotCols=pivotCols,
             source=source)
 
 def makeErrorKey(col):
@@ -59,11 +59,11 @@ def AggrColumn(aggcol, aggregator):
 class PivotSheet(Sheet):
     'Summarize key columns in pivot table and display as new sheet.'
     rowtype = 'grouped rows'  # rowdef: PivotGroupRow
-    def __init__(self, name, groupByCols, pivotCols, **kwargs):
-        super().__init__(name, **kwargs)
-
-        self.pivotCols = pivotCols  # whose values become columns
-        self.groupByCols = groupByCols  # whose values become rows
+    def __init__(self, *names, groupByCols=[], pivotCols=[], **kwargs):
+        super().__init__(*names,
+                pivotCols=pivotCols, # whose values become columns
+                groupByCols=groupByCols,  # whose values become rows
+                **kwargs)
 
     def isNumericRange(self, col):
         return vd.isNumeric(col) and self.source.options.numeric_binning
@@ -274,12 +274,12 @@ def addcol_aggr(sheet, col):
         sheet.addColumnAtCursor(AggrColumn(col.origCol, vd.aggregators[agg]))
 
 
-Sheet.addCommand('W', 'pivot', 'vd.push(Pivot(sheet, keyCols, [cursorCol]))', 'open Pivot Table: group rows by key column and summarize current column')
+Sheet.addCommand('W', 'pivot', 'vd.push(makePivot(sheet, keyCols, [cursorCol]))', 'open Pivot Table: group rows by key column and summarize current column')
 
 PivotSheet.addCommand('', 'addcol-aggr', 'addcol_aggr(cursorCol)', 'add aggregation column from source of current column')
 
 vd.addGlobals({
-    'Pivot': Pivot,
+    'makePivot': makePivot,
     'PivotGroupRow': PivotGroupRow,
 })
 

@@ -5,7 +5,7 @@ from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColo
 
 
 vd.option('disp_rstatus_fmt', ' {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus} {sheet.options.disp_selected_note}{sheet.nSelectedRows}', 'right-side status format string')
-vd.option('disp_status_fmt', '{sheet.shortcut}› {sheet.name}| ', 'status line prefix')
+vd.option('disp_status_fmt', '{sheet.shortcut}› | ', 'status line prefix')
 vd.option('disp_lstatus_max', 0, 'maximum length of left status line')
 vd.option('disp_status_sep', '│', 'separator between statuses')
 
@@ -115,11 +115,6 @@ def drawLeftStatus(vd, scr, vs):
 
     attr = cattr.attr
 
-    status_cattr = colors.get_color('color_status', 1)
-    error_attr = update_attr(status_cattr, colors.color_error, 3).attr
-    warn_attr = update_attr(status_cattr, colors.color_warning, 3).attr
-    sep = options.disp_status_sep
-
     x = 0
     y = vs.windowHeight-1  # status for each window
     try:
@@ -141,6 +136,34 @@ def drawLeftStatus(vd, scr, vs):
     if not active:
         return
 
+    x += vd.drawSheetBox(scr, vs, y, 3, colors.get_color('black on 223'))
+    x += vd.drawStatusMessageBox(scr, vs, y, x, cattr)
+
+
+@BaseSheet.property
+def parents(sheet):
+    if not isinstance(sheet.source, BaseSheet):
+        return [sheet]
+    return sheet.source.parents+[sheet]
+
+
+@VisiData.api
+def drawSheetBox(vd, scr, sheet, y, x, cattr):
+    vs = sheet
+    names = [vs.names[-1] for vs in sheet.parents]
+    maxnamelen = max(map(len, names))
+    for s in names:
+        clipdraw(scr, y, x, '| ' + s + ' |', cattr.attr, w=maxnamelen+4)
+        y -= 1
+    return maxnamelen+4
+
+@VisiData.api
+def drawStatusMessageBox(vd, scr, vs, y, x, cattr):
+    status_cattr = colors.get_color('color_status', 1)
+    error_attr = update_attr(status_cattr, colors.color_error, 3).attr
+    warn_attr = update_attr(status_cattr, colors.color_warning, 3).attr
+    sep = vs.options.disp_status_sep
+
     statuses = vd.statuses.items()
     maxlen = 0
     if statuses:
@@ -159,7 +182,6 @@ def drawLeftStatus(vd, scr, vs):
         y -= 1
         statuses = sorted(statuses, key=lambda k: -k[0][0])[:5]
 
-
     for (pri, msgparts), n in statuses:
         try:
             if x > vs.windowWidth:
@@ -175,6 +197,7 @@ def drawLeftStatus(vd, scr, vs):
         except Exception as e:
             vd.exceptionCaught(e)
 
+    return maxlen
 
 @VisiData.api
 def rightStatus(vd, sheet):
