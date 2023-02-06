@@ -33,3 +33,7 @@ def floatsi(*args):
 
 
 Sheet.addCommand('z%', 'type-floatsi', 'cursorCol.type = floatsi', 'set type of current column to SI float')
+
+vd.addMenuItems('''
+    Column > Type as > SI float > type-floatsi
+''')

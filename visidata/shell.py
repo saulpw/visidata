@@ -10,7 +10,7 @@ except ImportError:
     pass # pwd,grp modules not available on Windows
 
 from visidata import Column, Sheet, LazyComputeRow, asynccache, BaseSheet, vd
-from visidata import Path, ENTER, asyncthread, FileExistsError, VisiData
+from visidata import Path, ENTER, asyncthread, VisiData
 from visidata import modtime, filesize, vstat, Progress, TextSheet
 from visidata.type_date import date
 
@@ -222,7 +222,7 @@ def inputShell(vd):
 DirSheet.addCommand('`', 'open-dir-parent', 'vd.push(openSource(source/".."))', 'open parent directory')
 BaseSheet.addCommand('', 'open-dir-current', 'vd.push(vd.currentDirSheet)', 'open Directory Sheet: browse properties of files in current directory')
 
-Sheet.addCommand('z;', 'addcol-sh', 'cmd=inputShell(); addShellColumns(cmd, sheet)', 'create new column from bash expression, with $columnNames as variables')
+Sheet.addCommand('z;', 'addcol-shell', 'cmd=inputShell(); addShellColumns(cmd, sheet)', 'create new column from bash expression, with $columnNames as variables')
 
 DirSheet.addCommand(ENTER, 'open-row-file', 'vd.push(openSource(cursorRow or fail("no row"), filetype="dir" if cursorRow.is_dir() else LazyComputeRow(sheet, cursorRow).ext))', 'open current file as a new sheet')
 DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r))', 'open selected files as new sheets')
@@ -253,3 +253,7 @@ def copy_files(sheet, paths, dest):
 vd.addGlobals({
     'DirSheet': DirSheet
 })
+
+vd.addMenuItems('''
+    Column > Add column > shell > addcol-shell
+''')

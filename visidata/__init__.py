@@ -24,9 +24,6 @@ def getGlobals():
     'Return the VisiData globals dict.'
     return globals()
 
-from builtins import *
-from copy import copy, deepcopy
-
 from .utils import *
 
 from .extensible import *
@@ -41,138 +38,94 @@ vd.getGlobals = getGlobals
 import visidata.keys
 
 from .basesheet import *
+
 import visidata.settings
-from .errors import *
-from .editor import *
-from .cliptext import *
-from .color import *
-from .mainloop import *
-from .wrappers import *
-from .undo import *
 
-from ._types import *
-from .column import *
+# importModule tracks where commands/options/etc are coming from (via vd.importingModule)
+for line in '''
+import visidata.errors
+import visidata.editor
+import visidata.color
+import visidata.cliptext
+import visidata.mainloop
 
-from .sheets import *
+import visidata.menu
+import visidata.wrappers
+import visidata.undo
+import visidata._types
+import visidata.column
+
+import visidata.interface
+import visidata.sheets
 
 import visidata.statusbar
 
 import visidata.textsheet
 import visidata.threads
-from .path import *
+import visidata.path
+
 import visidata._input
 import visidata.movement
 
-import visidata.type_currency
 import visidata.type_date
-import visidata.type_floatsi
 
 import visidata._urlcache
 import visidata.selection
+import visidata.loaders
 import visidata.loaders.tsv
 import visidata.pyobj
 import visidata.loaders.json
 import visidata._open
-import visidata.metasheets
-import visidata.cmdlog
 import visidata.save
-import visidata.clipboard
-import visidata.sysedit
-import visidata.slide
 import visidata.search
-import visidata.expr
 
-import visidata.menu
+import visidata.expr
+import visidata.metasheets
+import visidata.type_currency
+import visidata.type_floatsi
+import visidata.cmdlog
+import visidata.clipboard
 import visidata.choose
-import visidata.join
 import visidata.aggregators
-import visidata.describe
 import visidata.pivot
 import visidata.freqtbl
-import visidata.melt
-import visidata.freeze
-import visidata.regex
 import visidata.canvas
 import visidata.canvas_text
 import visidata.graph
 import visidata.motd
-import visidata.transpose
 import visidata.shell
-import visidata.layout
 import visidata.main
 import visidata.help
 import visidata.modify
 import visidata.sort
-import visidata.unfurl
-import visidata.fill
-import visidata.incr
-import visidata.window
-import visidata.customdate
-import visidata.misc
 import visidata.memory
 import visidata.macros
 import visidata.macos
-import visidata.repeat
-
-import visidata.loaders.csv
-import visidata.loaders.archive
-import visidata.loaders.xlsx
-import visidata.loaders.xlsb
-import visidata.loaders.hdf5
-import visidata.loaders.sqlite
-import visidata.loaders.fixed_width
-import visidata.loaders.postgres
-import visidata.loaders.mysql
-import visidata.loaders.shp
-import visidata.loaders.geojson
-import visidata.loaders.mbtiles
-import visidata.loaders.http
-import visidata.loaders.html
-import visidata.loaders.markdown
-import visidata.loaders.pcap
-import visidata.loaders.png
-import visidata.loaders.ttf
-import visidata.loaders.sas
-import visidata.loaders.spss
-import visidata.loaders.xml
-import visidata.loaders.yaml
-import visidata.loaders._pandas
-import visidata.loaders.graphviz
-import visidata.loaders.npy
-import visidata.loaders.usv
-import visidata.loaders.frictionless
-import visidata.loaders.imap
-
-import visidata.loaders.pdf
-import visidata.loaders.pandas_freqtbl
-import visidata.loaders.xword
-import visidata.loaders.vcf
-import visidata.loaders.texttables
-import visidata.loaders.rec
-import visidata.loaders.eml
-import visidata.loaders.vds
-import visidata.loaders.odf
-import visidata.loaders.lsv
-import visidata.loaders.arrow
-import visidata.loaders.parquet
-
-import visidata.loaders.vdx
 
 import visidata.form
 
 import visidata.ddwplay
 import visidata.plugins
 
-import visidata.colorsheet
 import visidata.theme
-import themes
-import features  # additional independent features
+'''.splitlines():
+    if not line: continue
+    assert line.startswith('import visidata.'), line
+    module = line[len('import visidata.'):]
+    vd.importModule('visidata.' + module)
 
-from .deprecated import *
+vd.importSubmodules('visidata.features')
+vd.importSubmodules('visidata.themes')
 
-import math
-import random
-from math import *
+vd.importSubmodules('visidata.loaders')
+
+vd.importStar('visidata.deprecated')
+
+vd.importStar('builtins')
+vd.importStar('copy')
+vd.importStar('math')
+vd.importStar('random')
+
 
 vd.finalInit()  # call all VisiData.init() from modules
 

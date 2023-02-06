@@ -3,8 +3,11 @@ import functools
 import collections
 from statistics import mode, stdev
 
-from visidata import Progress, Column
+from visidata import vd, Progress, Column, vlen
 from visidata import *
+
+
+vd.option('null_value', None, 'a value to be counted as null', replay=True)
 
 
 @Column.api
@@ -193,3 +196,7 @@ def aggregator_choices(vd):
 Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregator_choices))', 'Add aggregator to current column')
 Sheet.addCommand('z+', 'memo-aggregate', 'for agg in chooseMany(aggregator_choices): cursorCol.memo_aggregate(aggregators[agg], selectedRows or rows)', 'memo result of aggregator over values in selected rows for current column')
 ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseMany(aggregator_choices))', 'add aggregators to selected source columns')
+
+vd.addMenuItems('''
+    Column > Add aggregator > aggregate-col
+''')

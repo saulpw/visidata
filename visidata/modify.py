@@ -1,3 +1,4 @@
+from copy import copy
 from visidata import *
 
 vd.option('color_add_pending', 'green', 'color for rows pending add')
@@ -287,3 +288,10 @@ Sheet.addCommand('za', 'addcol-new', 'addColumnAtCursor(SettableColumn(input("co
 Sheet.addCommand('gza', 'addcol-bulk', 'addColumnAtCursor(*(SettableColumn() for c in range(int(input("add columns: ")))))', 'append N empty columns')
 
 Sheet.addCommand('z^S', 'commit-sheet', 'commit()', 'commit changes back to source.  not undoable!')
+
+vd.addMenuItems('''
+    File > Commit > commit-sheet
+    Edit > Add rows > add-rows
+    Column > Add column > empty > one column > addcol-new
+    Column > Add column > empty > columns > addcol-bulk
+''')

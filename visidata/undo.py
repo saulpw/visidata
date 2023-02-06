@@ -113,3 +113,13 @@ def addUndoColNames(vd, cols):
 
 BaseSheet.addCommand('U', 'undo-last', 'vd.undo(sheet)', 'Undo the most recent change (options.undo must be enabled)')
 BaseSheet.addCommand('R', 'redo-last', 'vd.redo(sheet)', 'Redo the most recent undo (options.undo must be enabled)')
+
+vd.addGlobals(
+    undoAttrFunc=undoAttrFunc,
+    Fanout=Fanout,
+    undoAttrCopyFunc=undoAttrCopyFunc)
+
+vd.addMenuItems('''
+    Edit > Undo > undo-last
+    Edit > Redo > redo-last
+''')

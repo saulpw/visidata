@@ -2,6 +2,7 @@ from functools import singledispatch
 from typing import Mapping
 import inspect
 import math
+from copy import deepcopy
 
 from visidata import *
 
@@ -427,3 +428,20 @@ vd.addGlobals({
     'PyobjSheet': PyobjSheet,
     'view': view,
 })
+
+vd.addMenuItems('''
+    Column > Expand > one level > expand-col
+    Column > Expand > to depth > expand-col-depth
+    Column > Expand > all columns one level > expand-cols
+    Column > Expand > all columns to depth > expand-cols-depth
+    Column > Contract > contract-col
+    View > Visibility > Methods and dunder attributes > show > show-hidden
+    View > Visibility > Methods and dunder attributes > hide > hide-hidden
+    Row > Dive into > open-row
+    System > Python > import library > import-python
+    System > Python > current sheet > pyobj-sheet
+    System > Python > current row > pyobj-row
+    System > Python > current cell > pyobj-cell
+    System > Python > expression > pyobj-expr
+    System > Python > exec() > exec-python
+''')

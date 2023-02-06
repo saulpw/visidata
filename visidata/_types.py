@@ -3,8 +3,6 @@
 import locale
 from visidata import options, TypedWrapper, vd, VisiData
 
-#__all__ = ['anytype', 'vdtype', ]
-
 vd.option('disp_float_fmt', '{:.02f}', 'default fmtstr to format for float values', replay=True)
 vd.option('disp_int_fmt', '{:d}', 'default fmtstr to format for int values', replay=True)
 
@@ -118,3 +116,7 @@ class vlen(int):
 
     def __len__(self):
         return self
+
+
+vd.addGlobals(anytype=anytype,
+              vdtype=vdtype)

@@ -13,65 +13,6 @@ import visidata
 vd.activePane = 1   # pane numbering starts at 1; pane 0 means active pane
 
 
-__all__ = ['RowColorizer', 'CellColorizer', 'ColumnColorizer', 'Sheet', 'TableSheet', 'IndexSheet', 'SheetsSheet', 'LazyComputeRow', 'SequenceSheet']
-
-
-vd.option('default_width', 20, 'default column width', replay=True)   # TODO: make not replay and remove from markdown saver
-vd.option('default_height', 4, 'default column height')
-vd.option('textwrap_cells', True, 'wordwrap text for multiline rows')
-
-vd.option('quitguard', False, 'confirm before quitting modified sheet')
-vd.option('debug', False, 'exit on error and display stacktrace')
-vd.option('skip', 0, 'skip N rows before header', replay=True)
-vd.option('header', 1, 'parse first N rows as column names', replay=True)
-vd.option('load_lazy', False, 'load subsheets always (False) or lazily (True)')
-
-vd.option('force_256_colors', False, 'use 256 colors even if curses reports fewer')
-
-vd.option('disp_sidebar_fmt', '', 'format string for default sidebar')
-vd.option('disp_note_none', '⌀',  'visible contents of a cell whose value is None')
-vd.option('disp_truncator', '…', 'indicator that the contents are only partially visible')
-vd.option('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
-vd.option('disp_more_left', '<', 'header note indicating more columns to the left')
-vd.option('disp_more_right', '>', 'header note indicating more columns to the right')
-vd.option('disp_error_val', '', 'displayed contents for computation exception')
-vd.option('disp_ambig_width', 1, 'width to use for unicode chars marked ambiguous')
-
-vd.option('disp_pending', '', 'string to display in pending cells')
-vd.option('note_pending', '⌛', 'note to display for pending cells')
-vd.option('note_format_exc', '?', 'cell note for an exception during formatting')
-vd.option('note_getter_exc', '!', 'cell note for an exception during computation')
-vd.option('note_type_exc', '!', 'cell note for an exception during type conversion')
-
-vd.option('color_note_pending', 'bold magenta', 'color of note in pending cells')
-vd.option('color_note_type', '226 yellow', 'color of cell note for non-str types in anytype columns')
-vd.option('color_note_row', '220 yellow', 'color of row note on left edge')
-vd.option('scroll_incr', -3, 'amount to scroll with scrollwheel')
-vd.option('disp_column_sep', '│', 'separator between columns')
-vd.option('disp_keycol_sep', '║', 'separator between key columns and rest of columns')
-vd.option('disp_rowtop_sep', '│', '') # ╷│┬╽⌜⌐▇
-vd.option('disp_rowmid_sep', '⁝', '') # ┃┊│█
-vd.option('disp_rowbot_sep', '⁝', '') # ┊┴╿⌞█⍿╵⎢┴⌊  ⋮⁝
-vd.option('disp_rowend_sep', '║', '') # ┊┴╿⌞█⍿╵⎢┴⌊
-vd.option('disp_keytop_sep', '║', '') # ╽╿┃╖╟
-vd.option('disp_keymid_sep', '║', '') # ╽╿┃
-vd.option('disp_keybot_sep', '║', '') # ╽╿┃╜‖
-vd.option('disp_endtop_sep', '║', '') # ╽╿┃╖╢
-vd.option('disp_endmid_sep', '║', '') # ╽╿┃
-vd.option('disp_endbot_sep', '║', '') # ╽╿┃╜‖
-vd.option('disp_selected_note', '•', '') #
-vd.option('disp_sort_asc', '↑↟⇞⇡⇧⇑', 'characters for ascending sort') # ↑▲↟↥↾↿⇞⇡⇧⇈⤉⤒⥔⥘⥜⥠⍏˄ˆ
-vd.option('disp_sort_desc', '↓↡⇟⇣⇩⇓', 'characters for descending sort') # ↓▼↡↧⇂⇃⇟⇣⇩⇊⤈⤓⥕⥙⥝⥡⍖˅ˇ
-vd.option('color_default', 'white on black', 'the default fg and bg colors')
-vd.option('color_default_hdr', 'bold', 'color of the column headers')
-vd.option('color_bottom_hdr', 'underline', 'color of the bottom header row')
-vd.option('color_current_row', 'reverse', 'color of the cursor row')
-vd.option('color_current_col', 'bold', 'color of the cursor column')
-vd.option('color_current_hdr', 'bold reverse', 'color of the header for the cursor column')
-vd.option('color_column_sep', '246 blue', 'color of column separators')
-vd.option('color_key_col', '81 cyan', 'color of key columns')
-vd.option('color_hidden_col', '8', 'color of hidden columns on metasheets')
-vd.option('color_selected_row', '215 yellow', 'color of selected rows')
 vd.option('name_joiner', '_', 'string to join sheet or column names')
 vd.option('value_joiner', ' ', 'string to join display values')
 
@@ -1162,8 +1103,6 @@ def async_deepcopy(sheet, rowlist):
     return ret
 
 
-IndexSheet.options.header = 0
-IndexSheet.options.skip = 0
 
 BaseSheet.init('pane', lambda: 1)
 
@@ -1196,7 +1135,6 @@ Sheet.addCommand('', 'type-floatlocale', 'cursorCol.type = floatlocale', 'set ty
 # when diving into a sheet, remove the index unless it is precious
 IndexSheet.addCommand('g^R', 'reload-selected', 'reloadSheets(selectedRows or rows)', 'reload all selected sheets')
 SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_columns", source=selectedRows))', 'open Columns Sheet with all visible columns from selected sheets')
-SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visible columns from selected sheets')
 SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)', 'abort async thread for current sheet')
 SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)', 'abort async threads for selected sheets')
 SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(openRow(dest))', 'open sheet referenced in current row')
@@ -1233,3 +1171,53 @@ def formatter_enum(col, fmtdict):
 
 Sheet.addCommand('', 'setcol-formatter', 'cursorCol.formatter=input("set formatter to: ", value=cursorCol.formatter or "generic")', 'set formatter for current column (generic, json, python)')
 Sheet.addCommand('', 'setcol-format-enum', 'cursorCol.fmtstr=input("format replacements (k=v): ", value=f"{cursorDisplay}=", i=len(cursorDisplay)+1); cursorCol.formatter="enum"', 'add secondary type translator to current column from input enum (space-separated)')
+
+
+vd.addGlobals(
+    RowColorizer=RowColorizer,
+    CellColorizer=CellColorizer,
+    ColumnColorizer=ColumnColorizer,
+    RecursiveExprException=RecursiveExprException,
+    LazyComputeRow=LazyComputeRow,
+    Sheet=Sheet,
+    TableSheet=TableSheet,
+    SequenceSheet=SequenceSheet,
+    IndexSheet=IndexSheet,
+    SheetsSheet=SheetsSheet)
+
+vd.addMenuItems('''
+    File > New > open-new
+    File > Rename > rename-sheet
+    File > Guard > on > guard-sheet
+    File > Guard > off > guard-sheet-off
+    File > Duplicate > selected rows by ref > dup-selected
+    File > Duplicate > all rows by ref > dup-rows
+    File > Duplicate > selected rows deep > dup-selected-deep
+    File > Duplicate > all rows deep > dup-rows-deep
+    File > Reload > reload-sheet
+    File > Quit > top sheet > quit-sheet
+    File > Quit > all sheets > quit-all
+    Edit > Modify > current cell > input > edit-cell
+    Edit > Modify > selected cells > from input > setcol-input
+    View > Sheets > stack > sheets-stack
+    View > Sheets > all > sheets-all
+    View > Other sheet > source sheet > open-source
+    View > Split pane > in half > splitwin-half
+    View > Split pane > in percent > splitwin-input
+    View > Split pane > unsplit > splitwin-close
+    View > Split pane > swap panes > splitwin-swap-pane
+    View > Split pane > goto other pane > splitwin-swap
+    View > Refresh screen > redraw
+    Column > Rename > current column > rename-col
+    Column > Rename > from selected cells > current column > rename-col-selected
+    Column > Rename > from selected cells > unnamed columns > rename-cols-row
+    Column > Rename > from selected cells > all columns > rename-cols-selected
+    Column > Type as > anytype > type-any
+    Column > Type as > string > type-string
+    Column > Type as > integer > type-int
+    Column > Type as > float > type-float
+    Column > Type as > locale float > type-floatlocale
+    Column > Type as > length > type-len
+    Column > Key > toggle current column > key-col
+    Column > Key > unkey current column > key-col-off
+''')

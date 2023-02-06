@@ -166,3 +166,5 @@ globalCommand = visidata.BaseSheet.addCommand
 visidata.Sheet.StaticColumn = deprecated('2.11', 'Sheet.freeze_col')(visidata.Sheet.freeze_col)
 
 vd.sysclip_value = deprecated('3.0', 'vd.sysclipValue')(vd.sysclipValue)
+
+vd.addGlobals(globals())

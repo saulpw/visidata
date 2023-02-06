@@ -46,6 +46,8 @@ class VisiData(visidata.Extensible):
         self._cmdlog = None
         self.currentReplay = None
         self.contexts = [self]  # objects whose attributes are in the fallback context for eval/exec.
+        self.importingModule = None
+        self.importedModules = []
 
     def sheetstack(self, pane=0):
         'Return list of sheets in given *pane*. pane=0 is the active pane.  pane=-1 is the inactive pane.'
@@ -100,6 +102,14 @@ class VisiData(visidata.Extensible):
     def clearCaches(self):
         'Invalidate internal caches between command inputs.'
         visidata.Extensible.clear_all_caches()
+
+    def resetVisiData(self):
+        self.clearCaches()  # we want vd to return a new VisiData object for each command
+        vd = visidata.vd  # get the new vd
+        vd.cmdlog.rows = []
+        vd.sheets = []
+        vd.allSheets = []
+        return vd
 
     def drainPendingKeys(self, scr):
         '''Call scr.get_wch() until no more keypresses are available.  Return True if any keypresses are pending.'''

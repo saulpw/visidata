@@ -108,8 +108,14 @@ vd.addMenuItem('Data', 'Frequency table', 'current row', 'freq-row')
 
 FreqTableSheet.addCommand('gu', 'unselect-rows', 'unselect(selectedRows)', 'unselect all source rows grouped in current row')
 FreqTableSheet.addCommand('g'+ENTER, 'dive-selected', 'vd.push(openRows(selectedRows))', 'open copy of source sheet with rows that are grouped in selected rows')
+FreqTableSheet.addCommand('', 'select-first', 'for r in rows: source.select([r.sourcerows[0]])', 'select first source row in each bin')
 
 vd.addGlobals({
     'FreqTableSheet': FreqTableSheet,
     'FreqTableSheetSummary': FreqTableSheetSummary,
 })
+
+vd.addMenuItems('''
+    Data > Frequency table > current column > freq-col
+    Data > Frequency table > key columns > freq-keys
+''')
