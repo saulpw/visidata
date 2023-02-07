@@ -421,8 +421,7 @@ class Column(Extensible):
                 if w_max < row_w:
                     w_max = row_w
             w = w_max
-            w = max(w, nlen)+2
-        w = max(w, nlen)
+        w = max(w, nlen)+2
         return w
 
 
