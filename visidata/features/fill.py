@@ -1,4 +1,4 @@
-from visidata import vd, VisiData, asyncthread, Sheet
+from visidata import vd, VisiData, asyncthread, Sheet, Progress
 
 
 @VisiData.api
