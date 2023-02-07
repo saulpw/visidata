@@ -18,6 +18,9 @@ nonTested = (
         'macro',
         'mouse',
         'suspend',
+        'open-memstats',  # TODO add testing support
+        'plot-column-ext',
+        'plot-numerics-ext',
         'reload-every',
         'breakpoint',
         'redraw',
