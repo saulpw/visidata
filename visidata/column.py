@@ -421,6 +421,7 @@ class Column(Extensible):
                     w_max = row_w
             w = w_max
         w = max(w, nlen)+2
+        w = min(w, self.sheet.windowWidth)
         return w
 
 
