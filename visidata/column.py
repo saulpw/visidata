@@ -420,6 +420,8 @@ class Column(Extensible):
                 row_w = dispwidth(self.getDisplayValue(r), maxwidth=self.sheet.windowWidth)
                 if w_max < row_w:
                     w_max = row_w
+                if w_max >= self.sheet.windowWidth:
+                    break
             w = w_max
         w = max(w, nlen)+2
         w = min(w, self.sheet.windowWidth)
