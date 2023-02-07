@@ -415,8 +415,16 @@ class Column(Extensible):
         w = 0
         nlen = dispwidth(self.name)
         if len(rows) > 0:
-            w = max(max(dispwidth(self.getDisplayValue(r), maxwidth=self.sheet.windowWidth) for r in rows), nlen)+2
-        return max(w, nlen)
+            w_max = 0
+            for r in rows:
+                row_w = dispwidth(self.getDisplayValue(r), maxwidth=self.sheet.windowWidth)
+                if w_max < row_w:
+                    w_max = row_w
+            w = w_max
+            w = max(w, nlen)+2
+        w = max(w, nlen)
+        return w
+
 
 
 # ---- Column makers
