@@ -57,6 +57,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'split-col': '-',
                  'show-expr': 'OrderDate',
                  'setcol-expr': 'OrderDate',
+                 'open-ping': 'localhost',
                  'setcell-expr': 'OrderDate',
                  'setcol-range': 'range(100)',
                  'repeat-input-n': '1',
