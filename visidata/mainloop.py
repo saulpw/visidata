@@ -43,7 +43,7 @@ def draw_sheet(self, scr, sheet):
     self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
 
     try:
-        sidebar = sheet.sidebar
+        sidebar = vd.recentStatusMessages or sheet.sidebar
         sidebar_title = sheet.sidebar_title
     except Exception as e:
         vd.exceptionCaught(e)

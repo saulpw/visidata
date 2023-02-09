@@ -137,7 +137,6 @@ def drawLeftStatus(vd, scr, vs):
         return
 
     x += vd.drawSheetBox(scr, vs, y, 3, colors.get_color('black on 223'))
-    x += vd.drawStatusMessageBox(scr, vs, y, x, cattr)
 
 
 @BaseSheet.property
@@ -157,47 +156,29 @@ def drawSheetBox(vd, scr, sheet, y, x, cattr):
         y -= 1
     return maxnamelen+4
 
-@VisiData.api
-def drawStatusMessageBox(vd, scr, vs, y, x, cattr):
-    status_cattr = colors.get_color('color_status', 1)
-    error_attr = update_attr(status_cattr, colors.color_error, 3).attr
-    warn_attr = update_attr(status_cattr, colors.color_warning, 3).attr
-    sep = vs.options.disp_status_sep
 
-    statuses = vd.statuses.items()
-    maxlen = 0
-    if statuses:
-        maxlen = max(len(composeStatus(msgparts, n)) for (pri, msgparts), n in statuses)+2
-        maxlen = min(vs.windowWidth-x, maxlen)+2
+@VisiData.property
+def recentStatusMessages(vd):
+    r = ''
+    for (pri, msgparts), n in vd.statuses.items():
+        msg = '; '.join(wrmap(str, msgparts))
+        msg = f'[{n}x] {msg}' if n > 1 else msg
 
-    def draw_status_line(y, x, s, attr):
-        clipdraw(scr, y, x, sep, status_cattr.attr, w=len(sep))
-        clipdraw(scr, y, x+len(sep), ' '+s+' ', attr, w=maxlen-2*len(sep))
-        clipdraw(scr, y, x+maxlen-len(sep), sep, status_cattr.attr, w=len(sep))
+        if pri == 3: msgattr = '{error}'
+        elif pri == 2: msgattr = '{warning}'
+        elif pri == 1: msgattr = '{warning}'
+        else: msgattr = ''
 
-    statuses = list(reversed(statuses))
+        if msgattr:
+            msg = ' ' + msg + ' '
 
-    if len(statuses) > 5:
-        draw_status_line(y, x, 'Ctrl+P to view all status messages', colors.color_keystrokes)
-        y -= 1
-        statuses = sorted(statuses, key=lambda k: -k[0][0])[:5]
+        r += f'\n{msgattr}{msg}{{}}'
 
-    for (pri, msgparts), n in statuses:
-        try:
-            if x > vs.windowWidth:
-                break
-            msg = composeStatus(msgparts, n)
+    if r:
+        r = '# statuses' + r
+        r += '\n| {reverse} Ctrl+P to view all status messages {} |  '
+        return r
 
-            if pri == 3: msgattr = error_attr
-            elif pri == 2: msgattr = warn_attr
-            elif pri == 1: msgattr = warn_attr
-            else: msgattr = status_cattr.attr
-            draw_status_line(y, x, msg, msgattr)
-            y -= 1
-        except Exception as e:
-            vd.exceptionCaught(e)
-
-    return maxlen
 
 @VisiData.api
 def rightStatus(vd, sheet):
