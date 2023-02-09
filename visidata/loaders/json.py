@@ -126,6 +126,8 @@ def write_jsonl(vs, fp):
             for row in vs.iterrows():
                 rowdict = _rowdict(vcols, row)
                 fp.write(jsonenc.encode(rowdict) + '\n')
+        if len(vs) == 0:
+            vd.warning("output file is empty - cannot save headers without data for jsonl")
 
 
 @VisiData.api
