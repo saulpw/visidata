@@ -30,5 +30,8 @@ zstandard           # read .zst files
 odfpy               # odt (OpenDocument)
 urllib3             # .zip over http
 pyarrow             # arrow arrows (Apache Arrow)
+seaborn             # plot via seaborn
+sh                  # ping
+psutil              # procmgr
 
 -e git+https://github.com/saulpw/pyxlsb.git@master#egg=pyxlsb # xlsb

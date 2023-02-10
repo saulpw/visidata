@@ -16,10 +16,11 @@ class HelpSheet(MetaSheet):
 
     columns = [
         ColumnAttr('sheet'),
+        ColumnAttr('module'),
         ColumnAttr('longname'),
         Column('keystrokes', getter=lambda col,row: col.sheet.revbinds.get(row.longname, [None])[0]),
         Column('all_bindings', width=0, getter=lambda col,row: list(set(col.sheet.revbinds.get(row.longname, [])))),
-        Column('description', getter=lambda col,row: col.sheet.cmddict[(row.sheet, row.longname)].helpstr),
+        Column('description', width=40, getter=lambda col,row: col.sheet.cmddict[(row.sheet, row.longname)].helpstr),
         ColumnAttr('execstr', width=0),
         Column('logged', width=0, getter=lambda col,row: vd.isLoggableCommand(row.longname)),
     ]
@@ -155,3 +156,10 @@ BaseSheet.addCommand(None, 'open-tutorial-visidata', 'launchBrowser("https://jsv
 vd.addMenuItem("Help", "VisiData tutorial", 'open-tutorial-visidata')
 vd.addMenuItem("Help", 'Sheet commands', 'help-commands')
 vd.addMenuItem("Help", 'All commands', 'help-commands-all')
+
+vd.addGlobals(HelpSheet=HelpSheet)
+
+vd.addMenuItems('''
+    Help > Quick reference > sysopen-help
+    Help > Command list > help-commands
+''')

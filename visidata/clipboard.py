@@ -167,3 +167,27 @@ Sheet.addCommand('gzx', 'cut-cells', 'copyCells(cursorCol, onlySelectedRows); cu
 
 Sheet.bindkey('KEY_DC', 'delete-cell'),
 Sheet.bindkey('gKEY_DC', 'delete-cells'),
+
+vd.addMenuItems('''
+    Edit > Delete > current row > delete-row
+    Edit > Delete > current cell > delete-cell
+    Edit > Delete > selected rows > delete-selected
+    Edit > Delete > selected cells > delete-cells
+    Edit > Copy > current cell > copy-cell
+    Edit > Copy > current row > copy-row
+    Edit > Copy > selected cells > copy-cells
+    Edit > Copy > selected rows > copy-selected
+    Edit > Copy > to system clipboard > current cell > syscopy-cell
+    Edit > Copy > to system clipboard > current row > syscopy-row
+    Edit > Copy > to system clipboard > selected cells > syscopy-cells
+    Edit > Copy > to system clipboard > selected rows > syscopy-selected
+    Edit > Cut > current row > cut-row
+    Edit > Cut > selected cells > cut-selected
+    Edit > Cut > current cell > cut-cell
+    Edit > Paste > row after > paste-after
+    Edit > Paste > row before > paste-before
+    Edit > Paste > into selected cells > setcol-clipboard
+    Edit > Paste > into current cell > paste-cell
+    Edit > Paste > from system clipboard > cells at cursor > syspaste-cells
+    Edit > Paste > from system clipboard > selected cells > syspaste-cells-selected
+''')

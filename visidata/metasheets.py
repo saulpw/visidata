@@ -87,6 +87,7 @@ class OptionsSheet(Sheet):
     precious = False
     columns = (
         Column('option', getter=lambda col,row: row.name),
+        Column('module', getter=lambda col,row: row.module),
         Column('value',
             getter=lambda col,row: col.sheet.diffOption(row.name),
             setter=lambda col,row,val: options.set(row.name, val, col.sheet.source),
@@ -96,9 +97,9 @@ class OptionsSheet(Sheet):
         ColumnAttr('replayable'),
     )
     colorizers = [
-        CellColorizer(3, None, lambda s,c,r,v: v.value if r and c in s.columns[1:3] and r.name.startswith('color_') else None),
+        CellColorizer(3, None, lambda s,c,r,v: v.value if r and c in s.columns[2:4] and r.name.startswith('color_') else None),
     ]
-    nKeys = 1
+    nKeys = 2
 
     def diffOption(self, optname):
         return options.getonly(optname, self.source, '')
@@ -109,14 +110,14 @@ class OptionsSheet(Sheet):
         if isinstance(row.value, bool):
             options.set(row.name, not currentValue, self.source)
         else:
-            options.set(row.name, self.editCell(1, value=currentValue), self.source)
+            options.set(row.name, self.editCell(2, value=currentValue), self.source)
 
     def reload(self):
         self.rows = []
         for k in options.keys():
             opt = options._get(k)
             self.addRow(opt)
-        self.columns[1].name = 'global_value' if self.source == 'global' else 'sheet_value'
+        self.columns[2].name = 'global_value' if self.source == 'global' else 'sheet_value'
 
 
 vd._lastInputs = collections.defaultdict(dict)  # [input_type] -> {'input': anything}
@@ -246,3 +247,10 @@ vd.addGlobals({
     'OptionsSheet': OptionsSheet,
     'VisiDataMetaSheet': VisiDataMetaSheet,
 })
+
+vd.addMenuItems('''
+    File > Options > all sheets > options-global
+    File > Options > this sheet > options-sheet
+    View > Columns > this sheet > columns-sheet
+    View > Columns > all sheets > columns-all
+''')

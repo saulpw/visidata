@@ -5,6 +5,8 @@ import functools
 import cProfile
 import threading
 import collections
+import subprocess
+import curses
 
 from visidata import VisiData, vd, options, globalCommand, Sheet, EscapeException
 from visidata import ColumnAttr, Column
@@ -405,3 +407,8 @@ vd.addGlobals({
     'asynccache': asynccache,
     'asyncsingle': asyncsingle,
 })
+
+vd.addMenuItems('''
+    System > Threads sheet > threads-all
+    System > Toggle profiling > toggle-profile
+''')

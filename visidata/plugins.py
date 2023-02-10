@@ -227,3 +227,7 @@ BaseSheet.addCommand(None, 'open-plugins', 'vd.push(vd.pluginsSheet)', 'Open Plu
 
 PluginsSheet.addCommand('a', 'add-plugin', 'installPlugin(cursorRow)', 'Install and enable current plugin')
 PluginsSheet.addCommand('d', 'delete-plugin', 'removePluginIfExists(cursorRow)', 'Disable current plugin')
+
+vd.addMenuItems('''
+    View > Plugins > open-plugins
+''')

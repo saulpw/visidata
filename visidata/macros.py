@@ -1,5 +1,7 @@
-from visidata import *
+from copy import copy
 from functools import wraps
+
+from visidata import *
 
 from visidata.cmdlog import CommandLog, CommandLogJsonl
 
@@ -87,3 +89,7 @@ def run(vd, *args, **kwargs):
 
 Sheet.addCommand('m', 'macro-record', 'vd.cmdlog.startMacro()', 'record macro')
 Sheet.addCommand('gm', 'macro-sheet', 'vd.push(vd.macrosheet)', 'open macros sheet')
+
+vd.addMenuItems('''
+    System > Macros sheet > macro-sheet
+''')

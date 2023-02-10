@@ -4,6 +4,7 @@ from unittest.mock import Mock
 
 import itertools
 import visidata
+from pathlib import Path
 
 # test separately as needed
 
@@ -17,6 +18,9 @@ nonTested = (
         'macro',
         'mouse',
         'suspend',
+        'open-memstats',  # TODO add testing support
+        'plot-column-ext',
+        'plot-numerics-ext',
         'reload-every',
         'breakpoint',
         'redraw',
@@ -56,6 +60,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'split-col': '-',
                  'show-expr': 'OrderDate',
                  'setcol-expr': 'OrderDate',
+                 'open-ping': 'localhost',
                  'setcell-expr': 'OrderDate',
                  'setcol-range': 'range(100)',
                  'repeat-input-n': '1',
@@ -105,6 +110,12 @@ class TestCommands:
         if nerrs > 0:
             assert False
 
+        # cleanup
+        for f in ['flotsam.csv', 'debris.csv', 'jetsam.csv', 'lagan.csv', 'test_commands.vdj']:
+            pf = Path(f)
+            if pf.exists: pf.unlink()
+
+
     def runOneTest(self, mock_screen, longname):
         visidata.vd.clearCaches()  # we want vd to return a new VisiData object for each command
         vd = visidata.vd
@@ -125,4 +136,4 @@ class TestCommands:
         vd.allSheets = [vs]
         vs.mouseX, vs.mouseY = (4, 4)
         vs.draw(mock_screen)
-        vs.execCommand(longname, vdglobals=vars(visidata))
+        vs.execCommand(longname, vdglobals=vd.getGlobals())

@@ -215,3 +215,22 @@ BaseSheet.addCommand(None, 'mouse-disable', 'mm, _ = curses.mousemask(0); status
 
 
 vd.addGlobals({'rotateRange': rotateRange})
+
+vd.addMenuItems('''
+    View > Other sheet > previous sheet > jump-prev
+    View > Other sheet > first sheet > jump-first
+    Column > Goto > by number > go-col-number
+    Column > Goto > by name > go-col-regex
+    Row > Goto > top > go-top
+    Row > Goto > bottom > go-bottom
+    Row > Goto > previous > page > go-pageup
+    Row > Goto > previous > null > go-prev-null
+    Row > Goto > previous > value > go-prev-value
+    Row > Goto > previous > selected > go-prev-selected
+    Row > Goto > next > page > go-pagedown
+    Row > Goto > next > null > go-next-null
+    Row > Goto > next > value > go-next-value
+    Row > Goto > next > selected > go-next-selected
+    View > Other sheet > previous sheet > jump-prev
+    View > Other sheet > first sheet > jump-first
+''')

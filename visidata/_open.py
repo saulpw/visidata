@@ -86,8 +86,9 @@ def openPath(vd, p, filetype=None, create=False):
 def openSource(vd, p, filetype=None, create=False, **kwargs):
     '''Return unloaded sheet object for *p* opened as the given *filetype* and with *kwargs* as option overrides. *p* can be a Path or a string (filename, url, or "-" for stdin).
     when true, *create* will return a blank sheet, if file does not exist.'''
-    if not filetype:
-        filetype = options.getonly('filetype', 'global', '')
+
+    filetype = filetype or vd.options.getonly('filetype', str(p), '')  #1710
+    filetype = filetype or vd.options.getonly('filetype', 'global', '')
 
     vs = None
     if isinstance(p, str):
@@ -135,3 +136,7 @@ def loadInternalSheet(vd, cls, p, **kwargs):
 
 BaseSheet.addCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: "), create=True))', 'Open file or URL')
 TableSheet.addCommand('zo', 'open-cell-file', 'vd.push(openSource(cursorDisplay) or fail(f"file {cursorDisplay} does not exist"))', 'Open file or URL from path in current cell')
+
+vd.addMenuItems('''
+    File > Open file/url > open-file
+''')

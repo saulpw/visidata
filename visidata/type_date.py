@@ -109,3 +109,7 @@ vd.addGlobals(
 
 
 Sheet.addCommand('@', 'type-date', 'cursorCol.type = date', 'set type of current column to date')
+
+vd.addMenuItems('''
+    Column > Type as > date > type-date
+''')

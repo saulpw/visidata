@@ -23,7 +23,8 @@ def searchRegex(vd, sheet, moveCursor=False, reverse=False, **kwargs):
 
         regex = kwargs.get("regex")
         if regex:
-            vd.searchContext["regex"] = re.compile(regex, sheet.regex_flags()) or vd.error('invalid regex: %s' % regex)
+            regex_flags = sum(getattr(re, f.upper()) for f in sheet.options.regex_flags)  # regex_flags defined in features.regex
+            vd.searchContext["regex"] = re.compile(regex, regex_flags) or vd.error('invalid regex: %s' % regex)
 
         regex = vd.searchContext.get("regex") or vd.fail("no regex")
 
@@ -81,3 +82,15 @@ Sheet.addCommand('g/', 'search-cols', 'vd.moveRegex(sheet, regex=input("g/", typ
 Sheet.addCommand('g?', 'searchr-cols', 'vd.moveRegex(sheet, regex=input("g?", type="regex", defaultLast=True), backward=True, columns="visibleCols")', 'search for regex backwards over all visible columns'),
 Sheet.addCommand('z/', 'search-expr', 'search_expr(inputExpr("search by expr: ") or fail("no expr"))', 'search by Python expression forwards in current column (with column names as variables)')
 Sheet.addCommand('z?', 'searchr-expr', 'search_expr(inputExpr("searchr by expr: ") or fail("no expr"), reverse=True)', 'search by Python expression backwards in current column (with column names as variables)')
+
+vd.addMenuItems('''
+    View > Search > current column > search-col
+    View > Search > visible columns > search-cols
+    View > Search > key columns > search-keys
+    View > Search > by Python expr > search-expr
+    View > Search > again > search-next
+    View > Search backward > current column > searchr-col
+    View > Search backward > visible columns > searchr-cols
+    View > Search backward > by Python expr > searchr-expr
+    View > Search backward > again > searchr-next
+''')

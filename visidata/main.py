@@ -90,6 +90,74 @@ optalias('r', 'dir_recurse')
 optalias('force_valid_colnames', 'clean_names')  # deprecated
 
 
+@visidata.VisiData.api
+def parsePos(vd, arg:str):
+    'Return (startsheets:list, startrow:str, startcol:str) from *arg* like "+sheet:subsheet:col:row".  Empty sheetstr in startsheets means the starting pos applies to all sheets.'
+    startsheets, startrow, startcol = [], None, None
+
+    if ':' not in arg:
+        return (None, arg, None)
+
+    pos = arg.split(':')
+    if len(pos) == 1:
+        startsheet = [Path(inputs[-1]).name] if inputs else None
+        start_pos = (startsheet, pos[0], None)
+    elif len(pos) == 2:
+        startsheet = [Path(inputs[-1]).name] if inputs else None
+        startrow, startcol = pos
+        start_pos = (None, startrow, startcol)
+    else:  # if len(pos) >= 3:
+        startsheets = pos[:-2]
+        startrow, startcol = pos[-2:]
+        start_pos = (startsheets, startrow, startcol)
+
+    # index subsheets need to be loaded *after* the cursor indexing
+    vd.options.set('load_lazy', True, obj=start_pos[0])
+
+    return start_pos
+
+
+@visidata.VisiData.api
+def moveToPos(vd, sources, startsheets, startrow, startcol):
+    sheets = []  # sheets to apply startrow:startcol to
+    if not startsheets:
+        sheets = sources  # apply row/col to all sheets
+    else:
+        startsheet = startsheets[0] or sources[-1]
+        vs = vd.getSheet(startsheet)
+        if not vs:
+            vd.warning(f'no sheet "{startsheet}"')
+            return
+
+        vd.sync(vs.ensureLoaded())
+        vd.clearCaches()
+        for startsheet in startsheets[1:]:
+            rowidx = vs.getRowIndexFromStr(vd.options.rowkey_prefix + startsheet)
+            if rowidx is None:
+                vd.warning(f'{vs.name} has no subsheet "{startsheet}"')
+                vs = None
+                break
+            vs = vs.rows[rowidx]
+            vd.sync(vs.ensureLoaded())
+            vd.clearCaches()
+        if vs:
+            vd.push(vs)
+            sheets = [vs]
+
+    if startrow:
+        for vs in sheets:
+            if vs:
+                vs.moveToRow(startrow) or vd.warning(f'{vs} has no row "{startrow}"')
+
+    if startcol:
+        for vs in sheets:
+            if vs:
+                if not vs.moveToCol(startcol):
+                    if startcol.isdigit():
+                        vs.moveToCol(int(startcol)) # handle indexing by column number
+                    else:
+                        vd.warning(f'{vs} has no column "{startcol}"')
+
 def main_vd():
     'Open the given sources using the VisiData interface.'
     if '-v' in sys.argv or '--version' in sys.argv:
@@ -122,8 +190,7 @@ def main_vd():
     vd.stdinSource = Path('-', fp=None)  # fp filled in below after options parsed for encoding
 
     # parse args, including +sheetname:subsheet:4:3 starting at row:col on sheetname:subsheet[:...]
-    start_positions = []  # (list_of_sheetstr, str, str)  # empty sheetstr means all sheets
-    startsheets, startrow, startcol = [], None, None
+    after_config = []
     fmtargs = []
     fmtkwargs = {}
     inputs = []
@@ -177,24 +244,7 @@ def main_vd():
                 global_args[optname] = optval
 
         elif arg.startswith('+'):  # position cursor at start
-            if ':' in arg:
-                pos = arg[1:].split(':')
-                if len(pos) == 1:
-                    startsheet = [Path(inputs[-1]).name] if inputs else None
-                    start_positions.append((startsheet, pos[0], None))
-                elif len(pos) == 2:
-                    startsheet = [Path(inputs[-1]).name] if inputs else None
-                    startrow, startcol = pos
-                    start_positions.append((None, startrow, startcol))
-                elif len(pos) >= 3:
-                    startsheets = pos[:-2]
-                    startrow, startcol = pos[-2:]
-                    start_positions.append((startsheets, startrow, startcol))
-                if start_positions[-1]:
-                    # index subsheets need to be loaded *after* the cursor indexing
-                    options.set('load_lazy', True, obj=start_positions[-1][0])
-            else:
-                start_positions.append((None, arg[1:], None))
+            after_config.append((vd.moveToPos, *vd.parsePos(arg[1:])))
 
         elif current_args.get('play', None) and '=' in arg:
             # parse 'key=value' pairs for formatting cmdlog template in replay mode
@@ -275,45 +325,8 @@ def main_vd():
                 vd.push(sources[0])
                 sources[0].reload()
 
-        for startsheets, startrow, startcol in start_positions:
-            sheets = []  # sheets to apply startrow:startcol to
-            if not startsheets:
-                sheets = sources  # apply row/col to all sheets
-            else:
-                startsheet = startsheets[0] or sources[-1]
-                vs = vd.getSheet(startsheet)
-                if not vs:
-                    vd.warning(f'no sheet "{startsheet}"')
-                    continue
-
-                vd.sync(vs.ensureLoaded())
-                vd.clearCaches()
-                for startsheet in startsheets[1:]:
-                    rowidx = vs.getRowIndexFromStr(options.rowkey_prefix + startsheet)
-                    if rowidx is None:
-                        vd.warning(f'{vs.name} has no subsheet "{startsheet}"')
-                        vs = None
-                        break
-                    vs = vs.rows[rowidx]
-                    vd.sync(vs.ensureLoaded())
-                    vd.clearCaches()
-                if vs:
-                    vd.push(vs)
-                    sheets = [vs]
-
-            if startrow:
-                for vs in sheets:
-                    if vs:
-                        vs.moveToRow(startrow) or vd.warning(f'{vs} has no row "{startrow}"')
-
-            if startcol:
-                for vs in sheets:
-                    if vs:
-                        if not vs.moveToCol(startcol):
-                            if startcol.isdigit():
-                                vs.moveToCol(int(startcol)) # handle indexing by column number
-                            else:
-                                vd.warning(f'{vs} has no column "{startcol}"')
+        for (f, *parms) in after_config:
+            f(sources, *parms)
 
         if not args.batch:
             run(vd.sheets[0])

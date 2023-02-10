@@ -1,5 +1,7 @@
+import re
+
 import visidata
-from visidata import VisiData, CommandLogBase, BaseSheet, Sheet, AttrDict
+from visidata import VisiData, CommandLogBase, BaseSheet, Sheet, AttrDict, Progress
 
 
 @VisiData.api
@@ -38,6 +40,29 @@ def save_vdx(vd, p, *vsheets):
                 fp.write(line + '\n')
 
                 prevrow = r
+
+
+@VisiData.api
+def runvdx(vd, vdx:str):
+    for line in Progress(vdx.splitlines()):
+        vs = vd.sheet or Sheet()
+        vs.ensureLoaded()
+        line = line.strip()
+        if not line or line[0] == '#':
+            continue
+
+        m = re.match(r'^(\+(\S+) )?(\S+)(.*)$', line)
+        if not m:
+            print('bad:', line)
+            continue
+
+        _, pos, longname, rest = m.groups()
+        vd.currentReplayRow = AttrDict(longname=longname, input=rest)
+        if pos:
+            vd.moveToPos(vd.sheets, *vd.parsePos(pos))
+        print(vs.name, longname)
+        vs.execCommand(longname)
+        vd.sync()
 
 
 BaseSheet.addCommand('', 'sheet', 'n=input("sheet to jump to: "); vd.push(vd.getSheet(n) or fail(f"no such sheet {n}"))', 'jump to named sheet')

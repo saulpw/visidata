@@ -1,10 +1,10 @@
 import curses
 import functools
 from copy import copy
-
-from visidata import options, Extensible, drawcache, drawcache_property, VisiData
-import visidata
 from collections import namedtuple
+
+from visidata import vd, options, Extensible, drawcache, drawcache_property, VisiData
+import visidata
 
 __all__ = ['ColorAttr', 'colors', 'update_attr', 'ColorMaker']
 
@@ -151,9 +151,12 @@ class ColorMaker:
         'colors.color_foo returns colors[options.color_foo]'
         r = self.colorcache.get(optname, None)
         if r is None:
-            coloropt = options._get(optname)
+            coloropt = options._get(optname) or options._get('color_'+optname)
             colornamestr = coloropt.value if coloropt else optname
             r = self.colorcache[optname] = self._colornames_to_cattr(colornamestr, precedence)
         return r
 
 colors = ColorMaker()
+
+import sys
+vd.addGlobals({k:getattr(sys.modules[__name__], k) for k in __all__})

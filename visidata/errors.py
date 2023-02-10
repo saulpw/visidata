@@ -4,6 +4,9 @@ from visidata import vd, VisiData, options
 
 __all__ = ['stacktrace', 'ExpectedException']
 
+vd.option('debug', False, 'exit on error and display stacktrace')
+
+
 class ExpectedException(Exception):
     'Controlled Exception from fail() or confirm().  Status or other interface update is done by raiser.'
     pass
@@ -27,5 +30,9 @@ def exceptionCaught(vd, exc=None, status=True, **kwargs):
         vd.addToStatusHistory(vd.lastErrors[-1][-1])
     if vd.options.debug:
         raise
+
+
+import sys
+vd.addGlobals({k:getattr(sys.modules[__name__], k) for k in __all__})
 
 # see textsheet.py for ErrorSheet and associated commands

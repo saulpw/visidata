@@ -1,6 +1,7 @@
 import random
+from urllib.parse import urlparse
 
-from visidata import VisiData, vd, Sheet, options, anytype, urlparse, asyncthread, ColumnItem
+from visidata import VisiData, vd, Sheet, options, anytype, asyncthread, ColumnItem
 
 __all__ = ['openurl_postgres', 'openurl_postgresql', 'openurl_rds', 'PgTable', 'PgTablesSheet']
 

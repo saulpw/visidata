@@ -29,7 +29,6 @@ def select_equal_selected(sheet, col):
 
 
 Sheet.addCommand('', 'addcol-source', 'source.addColumn(copy(cursorCol))', 'add copy of current column to source sheet')  #988  frosencrantz
-FreqTableSheet.addCommand('', 'select-first', 'for r in rows: source.select([r.sourcerows[0]])', 'select first source row in each bin')
 
 Sheet.addCommand('', 'clean-names', '''
 options.clean_names = True;

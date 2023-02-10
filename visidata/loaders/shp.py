@@ -1,6 +1,7 @@
 import json
+from copy import copy
 
-from visidata import VisiData, vd, Sheet, Column, Progress, date, copy, InvertedCanvas, asyncthread
+from visidata import VisiData, vd, Sheet, Column, Progress, date, InvertedCanvas, asyncthread
 
 # requires pyshp
 

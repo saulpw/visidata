@@ -5,12 +5,12 @@ from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColo
 
 
 vd.option('disp_rstatus_fmt', ' {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus} {sheet.options.disp_selected_note}{sheet.nSelectedRows}', 'right-side status format string')
-vd.option('disp_status_fmt', '{sheet.shortcut}› {sheet.name}| ', 'status line prefix')
+vd.option('disp_status_fmt', '{sheet.shortcut}› | ', 'status line prefix')
 vd.option('disp_lstatus_max', 0, 'maximum length of left status line')
-vd.option('disp_status_sep', ' │ ', 'separator between statuses')
+vd.option('disp_status_sep', '│', 'separator between statuses')
 
 vd.option('color_keystrokes', 'bold 233 black on 110 cyan', 'color of input keystrokes on status line')
-vd.option('color_status', 'bold black on 110 cyan', 'status line color')
+vd.option('color_status', 'bold on 238', 'status line color')
 vd.option('color_error', 'red', 'error message color')
 vd.option('color_warning', 'yellow', 'warning message color')
 vd.option('color_top_status', 'underline', 'top window status bar color')
@@ -103,7 +103,7 @@ def leftStatus(sheet):
 @VisiData.api
 def drawLeftStatus(vd, scr, vs):
     'Draw left side of status bar.'
-    cattr = colors.get_color('color_status')
+    cattr = colors.get_color('color_active_status')
     active = (vs is vd.activeSheet)
     if active:
         cattr = update_attr(cattr, colors.color_active_status, 1)
@@ -114,9 +114,6 @@ def drawLeftStatus(vd, scr, vs):
         cattr = update_attr(cattr, colors.color_top_status, 1)
 
     attr = cattr.attr
-    error_attr = update_attr(cattr, colors.color_error, 1).attr
-    warn_attr = update_attr(cattr, colors.color_warning, 2).attr
-    sep = options.disp_status_sep
 
     x = 0
     y = vs.windowHeight-1  # status for each window
@@ -139,23 +136,48 @@ def drawLeftStatus(vd, scr, vs):
     if not active:
         return
 
-    one = False
-    for (pri, msgparts), n in sorted(vd.statuses.items(), key=lambda k: -k[0][0]):
-        try:
-            if x > vs.windowWidth:
-                break
-            if one:  # any messages already:
-                x += clipdraw(scr, y, x, sep, attr, w=vs.windowWidth-x)
-            one = True
-            msg = composeStatus(msgparts, n)
+    x += vd.drawSheetBox(scr, vs, y, 3, colors.get_color('black on 223'))
 
-            if pri == 3: msgattr = error_attr
-            elif pri == 2: msgattr = warn_attr
-            elif pri == 1: msgattr = warn_attr
-            else: msgattr = attr
-            x += clipdraw(scr, y, x, msg, msgattr, w=vs.windowWidth-x)
-        except Exception as e:
-            vd.exceptionCaught(e)
+
+@BaseSheet.property
+def parents(sheet):
+    if not isinstance(sheet.source, BaseSheet):
+        return [sheet]
+    return sheet.source.parents+[sheet]
+
+
+@VisiData.api
+def drawSheetBox(vd, scr, sheet, y, x, cattr):
+    vs = sheet
+    names = [vs.names[-1] for vs in sheet.parents]
+    maxnamelen = max(map(len, names))
+    for s in names:
+        clipdraw(scr, y, x, '| ' + s + ' |', cattr.attr, w=maxnamelen+4)
+        y -= 1
+    return maxnamelen+4
+
+
+@VisiData.property
+def recentStatusMessages(vd):
+    r = ''
+    for (pri, msgparts), n in vd.statuses.items():
+        msg = '; '.join(wrmap(str, msgparts))
+        msg = f'[{n}x] {msg}' if n > 1 else msg
+
+        if pri == 3: msgattr = '{error}'
+        elif pri == 2: msgattr = '{warning}'
+        elif pri == 1: msgattr = '{warning}'
+        else: msgattr = ''
+
+        if msgattr:
+            msg = ' ' + msg + ' '
+
+        r += f'\n{msgattr}{msg}{{}}'
+
+    if r:
+        r = '# statuses' + r
+        r += '\n| {reverse} Ctrl+P to view all status messages {} |  '
+        return r
 
 
 @VisiData.api
@@ -171,7 +193,7 @@ def drawRightStatus(vd, scr, vs):
 
     ret = 0
     statcolors = [
-        (vd.rightStatus(vs), 'color_status'),
+        (vd.rightStatus(vs), 'color_active_status'),
     ]
 
     active = vs is vd.activeSheet
@@ -234,3 +256,7 @@ def statusHistorySheet(vd):
 
 
 BaseSheet.addCommand('^P', 'open-statuses', 'vd.push(vd.statusHistorySheet)', 'open Status History')
+
+vd.addMenuItems('''
+    View > Statuses > open-statuses
+''')

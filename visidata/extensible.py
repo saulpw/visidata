@@ -39,6 +39,8 @@ class Extensible:
         oldfunc = getattr(cls, func.__name__, None)
         if oldfunc:
             func = wraps(oldfunc)(func)
+        from visidata import vd
+        func.importingModule = vd.importingModule
         setattr(cls, func.__name__, func)
         return func
 

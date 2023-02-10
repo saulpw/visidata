@@ -109,7 +109,7 @@ class BaseSheet(DrawablePane):
 
     def __init__(self, *names, **kwargs):
         self._name = None   # initial cache value necessary for self.options
-        self.names = names
+        self.names = list(names)
         self.name = self.options.name_joiner.join(str(x) for x in self.names if x)
         self.source = None
         self.rows = UNLOADED      # list of opaque objects
@@ -279,7 +279,7 @@ class BaseSheet(DrawablePane):
     @property
     def sidebar_title(self):
         'Default implementation returns fixed value.  Overridable.'
-        return 'sidebar'
+        return ''
 
 
 @VisiData.api
