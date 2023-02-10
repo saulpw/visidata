@@ -1,3 +1,7 @@
+'''
+Load new table from system clipboard
+'''
+
 from visidata import vd, BaseSheet, Path
 
 
@@ -11,4 +15,4 @@ def open_syspaste(sheet, filetype='tsv'):
     return vd.openSource(p, filetype=filetype)
 
 
-BaseSheet.addCommand('', 'open-syspaste', 'vd.push(open_syspaste())', 'open clipboard as tsv')
+BaseSheet.addCommand('gShift+P', 'open-syspaste', 'vd.push(open_syspaste(filetype=vd.input("paste as filetype: ", value="tsv")))', 'open clipboard as filetype')
