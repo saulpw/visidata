@@ -102,9 +102,17 @@ class FreqTableSheetSummary(FreqTableSheet):
         FreqTableSheet.reload.__wrapped__(self)
         self.addRow(PivotGroupRow(['Selected'], (0,0), self.source.selectedRows, {}))
 
+
+def makeFreqTableSheetSummary(sheet, *groupByCols):
+    return FreqTableSheetSummary(sheet.name,
+                          '%s_freq' % '-'.join(col.name for col in groupByCols),
+                          groupByCols=groupByCols,
+                          source=sheet)
+
+
 Sheet.addCommand('F', 'freq-col', 'vd.push(makeFreqTable(sheet, cursorCol))', 'open Frequency Table grouped on current column, with aggregations of other columns')
 Sheet.addCommand('gF', 'freq-keys', 'vd.push(makeFreqTable(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on source sheet, with aggregations of other columns')
-Sheet.addCommand('zF', 'freq-summary', 'vd.push(FreqTableSheetSummary(sheet, Column("Total", sheet=sheet, getter=lambda col, row: "Total")))', 'open one-line summary for all rows and selected rows')
+Sheet.addCommand('zF', 'freq-summary', 'vd.push(makeFreqTableSheetSummary(sheet, Column("Total", sheet=sheet, getter=lambda col, row: "Total")))', 'open one-line summary for all rows and selected rows')
 
 ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(makeFreqTable(source[0], cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row')
 vd.addMenuItem('Data', 'Frequency table', 'current row', 'freq-row')
@@ -117,7 +125,7 @@ FreqTableSheet.init('largest', lambda: 1)
 
 vd.addGlobals({
     'makeFreqTable': makeFreqTable,
-    'FreqTableSheetSummary': FreqTableSheetSummary,
+    'makeFreqTableSheetSummary': makeFreqTableSheetSummary,
 })
 
 vd.addMenuItems('''
