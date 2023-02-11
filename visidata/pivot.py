@@ -278,10 +278,11 @@ Sheet.addCommand('W', 'pivot', 'vd.push(makePivot(sheet, keyCols, [cursorCol]))'
 
 PivotSheet.addCommand('', 'addcol-aggr', 'addcol_aggr(cursorCol)', 'add aggregation column from source of current column')
 
-vd.addGlobals({
-    'makePivot': makePivot,
-    'PivotGroupRow': PivotGroupRow,
-})
+vd.addGlobals(
+    makePivot=makePivot,
+    PivotSheet=PivotSheet,
+    PivotGroupRow=PivotGroupRow,
+)
 
 vd.addMenuItems('''
     Column > Add column > aggregator > addcol-aggr

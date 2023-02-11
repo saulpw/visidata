@@ -123,10 +123,12 @@ FreqTableSheet.addCommand('', 'select-first', 'for r in rows: source.select([r.s
 
 FreqTableSheet.init('largest', lambda: 1)
 
-vd.addGlobals({
-    'makeFreqTable': makeFreqTable,
-    'makeFreqTableSheetSummary': makeFreqTableSheetSummary,
-})
+vd.addGlobals(
+    makeFreqTable=makeFreqTable,
+    makeFreqTableSheetSummary=makeFreqTableSheetSummary,
+    FreqTableSheet=FreqTableSheet,
+    FreqTableSheetSummary=FreqTableSheetSummary,
+)
 
 vd.addMenuItems('''
     Data > Frequency table > current column > freq-col
