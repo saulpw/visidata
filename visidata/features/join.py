@@ -53,8 +53,9 @@ def openJoin(sheet, others, jointype=''):
         name = '&'.join(vs.name for vs in sheets)
         return ConcatSheet(name, source=sheets)
 
-    for s in sheets:
-        s.keyCols or vd.fail(f'{s.name} has no key cols to join')
+    nkeys = set(len(s.keyCols) for s in sheets)
+    if 0 in nkeys or len(nkeys) != 1:
+        vd.fail(f'all sheets must have the same number of key columns')
 
     if jointype == 'extend':
         vs = copy(sheets[0])
