@@ -328,15 +328,23 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
     history = self.lastInputsSheet.history(type)
 
     sheet = self.activeSheet
-    rstatuslen = self.drawRightStatus(sheet._scr, sheet)
-    attr = 0
-    promptlen = clipdraw(sheet._scr, sheet.windowHeight-1, 0, prompt, attr, w=sheet.windowWidth-rstatuslen-1)
-    ret = self.editText(sheet.windowHeight-1, promptlen, sheet.windowWidth-promptlen-rstatuslen-2,
-                        attr=colors.color_edit_cell,
-                        unprintablechar=options.disp_unprintable,
-                        truncchar=options.disp_truncator,
-                        history=history,
-                        **kwargs)
+    if not sheet._scr:
+        if kwargs.get('display', True):
+            import builtins
+            ret = builtins.input(prompt)
+        else:
+            import getpass
+            ret = getpass.getpass(prompt)
+    else:
+        rstatuslen = self.drawRightStatus(sheet._scr, sheet)
+        attr = 0
+        promptlen = clipdraw(sheet._scr, sheet.windowHeight-1, 0, prompt, attr, w=sheet.windowWidth-rstatuslen-1)
+        ret = self.editText(sheet.windowHeight-1, promptlen, sheet.windowWidth-promptlen-rstatuslen-2,
+                            attr=colors.color_edit_cell,
+                            unprintablechar=options.disp_unprintable,
+                            truncchar=options.disp_truncator,
+                            history=history,
+                            **kwargs)
 
     if ret:
         self.lastInputsSheet.appendRow(AttrDict(type=type, input=ret))
