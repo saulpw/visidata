@@ -1,5 +1,13 @@
-from visidata import vd, VisiData, Sheet, Column, ItemColumn, date
-from visidata import *
+'''
+# Matrix Chat Sheet
+A list of messages from [:underline]{sheet.sourcename}[:].
+
+ [:keys]Enter[:] to push a sheet with all the messages from [:underline]{sheet.cursorRow.room.display_name}[:].
+ [:keys]a[:] to send a message to [:underline]{sheet.cursorRow.room.display_name}[:].
+'''
+
+from visidata import vd, VisiData, Sheet, Column, ItemColumn, date, asyncthread, AttrDict, vlen, Path
+
 
 vd.option('matrix_token', '', 'matrix API token')
 vd.option('matrix_user_id', '', 'matrix user ID associated with token')
@@ -10,20 +18,26 @@ vd.matrix_client = None
 
 @VisiData.api
 def openhttp_matrix(vd, p):
+    vd.importExternal('matrix_client')
+
     if not vd.options.matrix_token:
         import builtins
         import getpass
 
         from matrix_client.client import MatrixClient
 
-        username = builtins.input(f'{p.given} username: ')
-        password = getpass.getpass('password: ')
+        username = vd.input(f'{p.given} username: ', record=False)
+        password = vd.input('password: ', record=False, display=False)
 
         vd.matrix_client = MatrixClient(p.given)
-        vd.options.matrix_token = vd.matrix_client.login(username, password,
-                                                    device_id=vd.options.matrix_device_id)
-        with open(str(Path(vd.options.config)), mode='a') as fp:
-            fp.write(f'options.matrix_token="{vd.options.matrix_token}"\n')
+        vd.options.matrix_user_id = username
+        vd.options.matrix_token = vd.matrix_client.login(username, password, device_id=vd.options.matrix_device_id)
+
+        yn = vd.input(f'Save auth to {vd.options.config}? ', record=False)[0:1]
+        if yn and yn in 'Yy':
+            with open(str(Path(vd.options.config)), mode='a') as fp:
+                fp.write(f'options.matrix_user_id="{vd.options.matrix_user_id}"\n')
+                fp.write(f'options.matrix_token="{vd.options.matrix_token}"\n')
 
     vd.timeouts_before_idle = -1
     return MatrixSheet(p.name, source=p)
@@ -35,16 +49,26 @@ class MatrixRoomsSheet(Sheet):
 
 
 class MatrixSheet(Sheet):
+    help = __doc__
     columns = [
-        Column('room', getter=lambda c,r: r.room.display_name),
-        ItemColumn('sender', width=10),
-        ItemColumn('type', width=0),
+        Column('room', width=12, getter=lambda c,r: r.room.display_name),
+        ItemColumn('sender', width=0),
+        Column('sender', width=10, getter=lambda c,r: r.sender.split(':')[0][1:]),
         Column('timestamp', width=16, type=date, getter=lambda c,r: r and r.origin_server_ts/1000, fmtstr='%Y-%m-%d %H:%m'),
+        ItemColumn('type', width=15),
         ItemColumn('content', width=0),
-        ItemColumn('content.body', width=40),
+        ItemColumn('content.body', width=50),
         ItemColumn('received', type=vlen, width=0),
         ItemColumn('content.msgtype'),
     ]
+
+    @property
+    def sourcename(self):
+        from matrix_client.room import Room
+        if isinstance(self.source, Room):
+            return self.source.display_name or self.source.room_id
+        else:
+            return str(self.source)
 
     @asyncthread
     def reload(self):
@@ -87,7 +111,7 @@ class MatrixSheet(Sheet):
                     r['room'] = room
                     self.addRow(r)
 
-                if ret['end'] == room.prev_batch:
+                if 'end' not in ret or ret['end'] == room.prev_batch:
                     break
                 room.prev_batch = ret['end']
         except Exception as e:
@@ -129,5 +153,5 @@ class MatrixSheet(Sheet):
 
 MatrixSheet.init('event_index', dict)
 
-MatrixSheet.addCommand('a', 'add-msg', 'cursorRow.room.send_text(input(cursorRow.room.display_name+"> "))', 'send chat message to current room')
-vd.addMenuItem('Edit', 'Add', '+matrix message', 'add-msg')
+MatrixSheet.addCommand('a', 'add-row', 'cursorRow.room.send_text(input(cursorRow.room.display_name+"> "))', 'send chat message to current room')
+vd.addMenuItems('Row > Add > send matrix message > add-msg')

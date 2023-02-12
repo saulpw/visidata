@@ -35,6 +35,7 @@ sh                  # ping
 psutil              # procmgr
 
 requests_cache      # scraper
-praw                # reddit
+praw                # reddit API
+matrix_client       # matrix API
 
 -e git+https://github.com/saulpw/pyxlsb.git@master#egg=pyxlsb # xlsb
