@@ -1,6 +1,6 @@
 import json
 
-from visidata import vd, date, VisiData, PyobjSheet, AttrDict, stacktrace, TypedExceptionWrapper, options, visidata, ColumnItem, wrapply, TypedWrapper, Progress, Sheet, InferColumnsSheet
+from visidata import vd, date, VisiData, PyobjSheet, AttrDict, stacktrace, TypedExceptionWrapper, options, visidata, ColumnItem, wrapply, TypedWrapper, Progress, Sheet, InferColumnsSheet, deduceType, SequenceSheet
 
 vd.option('json_indent', None, 'indent to use when saving json')
 vd.option('json_sort_keys', False, 'sort object keys when saving to json')
@@ -15,6 +15,47 @@ def open_jsonl(vd, p):
     return JsonSheet(p.name, source=p)
 
 VisiData.open_ndjson = VisiData.open_ldjson = VisiData.open_json = VisiData.open_jsonl
+
+
+def is_jsonl_header_array(L):
+    ret = json.loads(L)
+    return type(ret) is list and all(type(v) is str for v in ret)
+
+
+@VisiData.api
+def open_jsonla(vd, p):
+    '''A JSONLA file is a JSONL file with rows of arrays, where the first row
+    is a header array:
+
+    ["A", "B", "C"]
+    [1, "blue", true]
+    [2, "yellow", false]
+
+    The header array must be a flat array of strings
+
+    If no suitable header is found, fall back to generic JSON load.
+    '''
+
+    with p.open_text(encoding=JsonlaSheet.options.encoding) as fp:
+        first_line = next(fp)
+
+    if is_jsonl_header_array(first_line):
+        return JsonlaSheet(p.name, source=p)
+    else:
+        vd.warning("jsonl header array missing for %s" % p.name)
+        return JsonSheet(p.name, source=p)
+
+
+class JsonlaSheet(SequenceSheet):
+    rowtype = 'rows'    # rowdef: list of Python objects decoded from JSON
+    def iterload(self):
+        with self.source.open_text(encoding=self.options.encoding) as fp:
+            for L in fp:
+                yield json.loads(L)
+
+        # set column types from first row
+        for i, c in enumerate(self.columns):
+            c.type = deduceType(self.rows[0][i])
 
 
 class JsonSheet(InferColumnsSheet):
