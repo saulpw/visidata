@@ -143,8 +143,8 @@ class OptionsObject:
         return opt
 
     def _set(self, k, v, obj=None, helpstr='', module=None):
-        self._cache.clear()  # invalidate entire cache on any change
         opt = self._get(k) or Option(k, v, '', module)
+        self._cache.clear()  # invalidate entire cache on any change
         return self._opts.set(k, Option(k, v, opt.helpstr or helpstr, opt.module or module), obj)
 
     def is_set(self, k, obj=None):
