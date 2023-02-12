@@ -127,6 +127,7 @@ vd.importStar('math')
 vd.importStar('random')
 vd.importStar('itertools')
 
+import visidata.experimental  # import nothing by default but make package accessible
 
 vd.finalInit()  # call all VisiData.init() from modules
 

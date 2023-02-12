@@ -1,17 +1,20 @@
+'''
+# A Guide to VisiData Guides
+Each guide shows you how to use a major feature in VisiData.
+
+  {bold}Up/Down{} to move the row cursor
+  {bold}Enter{} to view a topic
+  {bold}Backspace{} to come back to this list of guides
+'''
+
 import re
 
-from visidata import vd, BaseSheet, Sheet, ItemColumn, Column
+from visidata import vd, BaseSheet, Sheet, ItemColumn, Column, VisiData
 
 
 @VisiData.api
 class GuideGuide(Sheet):
-    help = '''
-Each guide shows you how to use a major feature in VisiData.
-
-- {`Up`}/{`Down`} to move the cursor
-- {`Enter`} to view a topic
-- {`q`} to come back to list of guides
-'''
+    help = __doc__
     columns = [
         ItemColumn('n', 0, type=int),
         ItemColumn('sheetname', 1, width=0),

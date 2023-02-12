@@ -137,8 +137,6 @@ class OptionsObject:
     def _get(self, k, obj=None):
         'Return Option object for k in context of obj. Cache result until any set().'
         opt = self._cache.get((k, obj or vd.activeSheet), None)
-#        if k == 'disp_sidebar_fmt':
-#            breakpoint()
         if opt is None:
             opt = self._opts._get(k, obj)
             self._cache[(k, obj or vd.activeSheet)] = opt
