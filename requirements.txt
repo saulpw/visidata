@@ -34,4 +34,7 @@ seaborn             # plot via seaborn
 sh                  # ping
 psutil              # procmgr
 
+requests_cache      # scraper
+praw                # reddit
+
 -e git+https://github.com/saulpw/pyxlsb.git@master#egg=pyxlsb # xlsb

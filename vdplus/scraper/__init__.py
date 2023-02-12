@@ -14,16 +14,6 @@ def soup(vd, s):
     from bs4 import BeautifulSoup
     return BeautifulSoup(s, 'html.parser')
 
-@VisiData.api
-def enable_requests_cache(vd):
-    try:
-        import requests
-        import requests_cache
-
-        requests_cache.install_cache(str(Path(os.path.join(options.visidata_dir, 'httpcache'))), backend='sqlite', expire_after=24*60*60)
-    except ModuleNotFoundError:
-        vd.warning('install requests_cache for less intrusive scraping')
-
 
 @VisiData.api
 def open_scrape(vd, p):

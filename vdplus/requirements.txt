@@ -3,10 +3,8 @@ airtable-python-wrapper>=0.15.2
 google_auth_oauthlib
 google-api-python-client
 
-requests_cache  # scraper
 beautifulsoup4  # scraper
 
-praw # reddit
 
 seaborn
 matplotlib # svg

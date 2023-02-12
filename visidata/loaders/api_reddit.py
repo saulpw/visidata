@@ -1,6 +1,39 @@
-#!/usr/bin/env python3
+'''
+# Authenticate Reddit
+The Reddit API must be configured before use.
 
-from visidata import *
+1. Login to Reddit and go to [reddit.com/prefs/apps](https://www.reddit.com/prefs/apps):
+2. Create a "script" app. (Use http://localhost:8000 for the redirect uri)
+3. Add credentials to visidatarc:
+{code}
+    options.reddit_client_id = '...'      # below the description in the upper left
+    options.reddit_client_secret = '...'
+{}
+## Use 'reddit' filetype for subreddits or users
+
+Multiple may be specified, joined with "+".
+
+    vd r/commandline.reddit
+    vd u/gallowboob.reddit
+    vd r/rust+golang+python.reddit
+    vd u/spez+kn0thing.reddit
+
+{keys}Ctrl+O{} to open a browser tab of the current subreddit
+{keys}g Ctrl+O{} to open browser windows for all selected subreddits
+
+- `ENTER` (`dive-row`): open sheet with top ~1000 submissions for that subreddit
+- `g ENTER` (`open-subreddits`): open sheet with top ~1000 submissions for each selected subreddit
+- `ga` (`add-subreddits-match`): add subreddits matching input by name or description
+
+### SubmissionsSheet
+
+- `ENTER` (`dive-row`): open sheet with comments for this post
+- `ga` (`add-submissions-match`): add posts in this subreddit matching input
+'''
+
+import visidata
+from visidata import vd, VisiData, Sheet, AttrColumn, asyncthread, ENTER, anytype, date
+
 
 vd.option('reddit_client_id', '', 'client_id for reddit api')
 vd.option('reddit_client_secret', '', 'client_secret for reddit api')
@@ -10,6 +43,10 @@ vd.option('reddit_user_agent', visidata.__version__, 'user_agent for reddit api'
 @VisiData.api
 def open_reddit(vd, p):
     vd.enable_requests_cache()
+
+    if not vd.options.reddit_client_id:
+        return RedditGuide('reddit_guide')
+
     if p.given.startswith('r/') or p.given.startswith('/r/'):
         return SubredditSheet(p.name, source=p.name.split('+'), search=(p.given[0]=='/'))
 
@@ -23,8 +60,11 @@ vd.new_reddit = vd.open_reddit
 @VisiData.cached_property
 def reddit(vd):
     import praw
-    return praw.Reddit(**vd.options.getall('reddit_'))
+    return praw.Reddit(check_for_updates=False, **vd.options.getall('reddit_'))
 
+
+class RedditGuide(Sheet):
+    help = __doc__
 
 subreddit_hidden_attrs='''
 name #accounts_active accounts_active_is_fuzzed advertiser_category
@@ -242,7 +282,8 @@ def addRowsFromQuery(sheet, q):
 
 @VisiData.api
 def sysopen_subreddits(vd, *subreddits):
-    vd.launchBrowser("-new-tab", "https://www.reddit.com/r/"+"+".join(subreddits))
+    url = "https://www.reddit.com/r/"+"+".join(subreddits)
+    vd.launchBrowser(url)
 
 
 SubredditSheet.addCommand('^O', 'sysopen-subreddit', 'sysopen_subreddits(cursorRow.display_name)', 'open browser window with subreddit')
@@ -251,8 +292,12 @@ SubredditSheet.addCommand('g'+ENTER, 'open-subreddits', 'vd.push(openRows(select
 SubredditSheet.addCommand('ga', 'add-subreddits-match', 'addRowsFromQuery(input("add subreddits matching: "))', 'add subreddits matching input by name or description')
 RedditSubmissions.addCommand('ga', 'add-submissions-match', 'addRowsFromQuery(input("add posts matching: "))', 'add posts in this subreddit matching input')
 
-vd.addMenuItem('Reddit', '+Open', 'selected subreddits', 'open-subreddits')
-vd.addMenuItem('Reddit', '+Add', 'matching subreddits', 'add-subreddits-match')
-vd.addMenuItem('Reddit', '+Add', 'matching submissions', 'add-submissions-match')
-vd.addMenuItem('Reddit', '+Open in browser', 'subreddit in current row', 'sysopen-subreddit')
-vd.addMenuItem('Reddit', '+Open in browser', 'selected subreddits', 'sysopen-subreddits')
+RedditGuide.options.disp_sidebar_fmt = '{sheet.help}'
+
+vd.addMenuItems('''
+    File > Reddit > open selected subreddits > open-subreddits
+    File > Reddit > add > matching subreddits > add-subreddits-match
+    File > Reddit > add > matching submissions > add-submissions-match
+    File > Reddit > open in browser > subreddit in current row > sysopen-subreddit
+    File > Reddit > open in browser > selected subreddits > sysopen-subreddits
+''')
