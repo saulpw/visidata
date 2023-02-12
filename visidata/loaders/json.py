@@ -178,6 +178,30 @@ def save_jsonl(vd, p, *vsheets):
             vs.write_jsonl(fp)
 
 
+def get_jsonla_rows(sheet, cols):
+    for row in Progress(sheet.rows):
+        yield [col.getTypedValue(row) for col in cols]
+
+
+@Sheet.api
+def write_jsonla(vs, fp):
+        vcols = vs.visibleCols
+        jsonenc = _vjsonEncoder()
+        with Progress(gerund='saving'):
+            header = [col.name for col in vcols]
+            fp.write(jsonenc.encode(header) + '\n')
+            rows = get_jsonla_rows(vs, vcols)
+            for row in rows:
+                fp.write(jsonenc.encode(row) + '\n')
+
+
+@VisiData.api
+def save_jsonla(vd, p, *vsheets):
+    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
+        for vs in vsheets:
+            vs.write_jsonla(fp)
+
+
 JsonSheet.options.encoding = 'utf-8'
 VisiData.save_ndjson = VisiData.save_jsonl
 VisiData.save_ldjson = VisiData.save_jsonl
