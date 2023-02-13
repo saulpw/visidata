@@ -79,14 +79,14 @@ class FreqTableSheet(PivotSheet):
         'open copy of source sheet with rows that are grouped in current row'
         if row.sourcerows:
             vs = copy(self.source)
-            vs.names.append(vd.valueNames(row.discrete_keys, row.numeric_key))
+            vs.names += vd.valueNames(row.discrete_keys, row.numeric_key)
             vs.rows=copy(row.sourcerows)
             return vs
         vd.warning("no source rows")
 
     def openRows(self, rows):
         vs = copy(self.source)
-        vs.names.append("several")
+        vs.names += "several"
         vs.source = self
         vs.rows = list(itertools.chain.from_iterable(row.sourcerows for row in rows))
         return vs
