@@ -6,7 +6,7 @@ import threading
 import time
 from unittest import mock
 
-from visidata import vd, VisiData, colors, ESC, options, clipbox, colorbox
+from visidata import vd, VisiData, colors, ESC, options, colorpanel
 
 __all__ = ['ReturnValue', 'run']
 
@@ -53,31 +53,17 @@ def draw_sheet(self, scr, sheet):
     vd.drawSidebar(scr, sidebar, title=sidebar_title)
 
 
-def iterwraplines(lines, width=80):
-    import textwrap
-    for line in lines:
-        if line:
-            yield from textwrap.wrap(line, width=width, subsequent_indent='  ')
-        else:
-            yield ''
-
 
 @VisiData.api
 def drawSidebar(vd, scr, text, title=''):
-    if not text:
-        return
+    scrh, scrw = scr.getmaxyx()
+    def _place(maxlinew, nlines):
+        winw = min(scrw//2, maxlinew+4)
+        winh = min(scrh-2, nlines+ (1 if text.endswith('\n') else 0))
+        return (scrw-winw-1, scrh-winh-1, winw, winh)
 
-    h, w = scr.getmaxyx()
-    maxh, maxw = h-2, w//2
+    colorpanel(scr, text, scrw//2, colors.get_color('color_sidebar'), _place)
 
-    lines = list(iterwraplines(text.splitlines(), width=maxw))
-    maxlinew = max(map(len, lines))
-
-    winw = min(maxw, maxlinew+4)
-    winh = min(maxh, len(lines)+ (1 if text.endswith('\n') else 0))
-
-    sidebar_scr = scr.derwin(winh, winw, h-winh-1, w-winw-1)
-    colorbox(sidebar_scr, lines, colors.get_color('color_sidebar'), title=title)
 
 
 vd.windowConfig = dict(pct=0, n=0, h=0, w=0)  # n=top line of bottom window; h=height of bottom window; w=width of screen

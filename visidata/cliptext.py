@@ -5,8 +5,6 @@ import functools
 
 from visidata import options, drawcache, vd, update_attr, colors
 
-__all__ = ['clipstr', 'clipdraw', 'clipbox', 'colorbox', 'dispwidth', 'iterchars']
-
 disp_column_fill = ' '
 
 ### Curses helpers
@@ -174,14 +172,61 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False, **kwargs):
     return dispw
 
 
-def colorbox(scr, lines, cattr, title=''):
+def iterwraplines(lines, width=80, indent='  '):
+    import textwrap
+    import re
+
+    for line in lines:
+        if not line:
+            yield '', ''
+            continue
+
+        chunks = re.split(r'(\[:[a-z_ 0-9]*\])', line)
+        textchunks = [x for x in chunks if not (x.startswith('[:') and x.endswith(']'))]
+        for linenum, textline in enumerate(textwrap.wrap(''.join(textchunks), width=width, drop_whitespace=False)):
+            txt = textline
+            r = ''
+            while chunks:
+                c = chunks[0]
+                if len(c) > len(txt):
+                    r += txt
+                    chunks[0] = c[len(txt):]
+                    break
+
+                if len(chunks) == 1:
+                    r += chunks.pop(0)
+                else:
+                    chunks.pop(0)
+                    r += txt[:len(c)] + chunks.pop(0)
+
+                txt = txt[len(c):]
+
+            if linenum > 0:
+                r = indent + r
+            yield r, textline
+
+        for c in chunks:
+            yield c, ''
+
+
+def colorpanel(scr, text, maxw, cattr, placementfunc=lambda maxwrapw, nwraplines: (0, 0, maxwrapw, nwraplines)):
+    '''placementfunc(maxwrapw, nwraplines) -> (x, y, w, h) area to display it in'''
+    if not text:
+        return
+
+    lines = list(iterwraplines(text.splitlines(), width=maxw-4))
+    maxlinew = max(len(textonly) for line, textonly in lines)
+
+    x, y, w, h = placementfunc(maxlinew, len(lines))
+    scr = scr.derwin(h, w, y, x)
+
     origattr = cattr
     scr.erase()
     scr.bkgd(cattr.attr)
-    scr.box()
-    h, w = scr.getmaxyx()
+    scr.border()
     i = 0
-    for line in lines:
+    title = ''
+    for line, _ in lines:
         if line.startswith('# '):
             if not title:
                 title = line[1:].strip()
@@ -214,5 +259,9 @@ def clipbox(scr, lines, attr, title=''):
     clipdraw(scr, 0, w-len(title)-6, f"| {title} |", attr)
 
 
-import sys
-vd.addGlobals({k:getattr(sys.modules[__name__], k) for k in __all__})
+vd.addGlobals(clipstr=clipstr,
+              clipdraw=clipdraw,
+              clipbox=clipbox,
+              dispwidth=dispwidth,
+              iterchars=iterchars,
+              colorpanel=colorpanel)
