@@ -291,7 +291,8 @@ Sheet.addCommand('z^S', 'commit-sheet', 'commit()', 'commit changes back to sour
 
 vd.addMenuItems('''
     File > Commit > commit-sheet
-    Edit > Add rows > add-rows
+    Row > Add > one row
+    Row > Add > multiple rows
     Column > Add column > empty > one column > addcol-new
-    Column > Add column > empty > columns > addcol-bulk
+    Column > Add column > empty > multiple columns > addcol-bulk
 ''')
