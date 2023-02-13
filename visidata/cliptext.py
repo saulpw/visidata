@@ -188,9 +188,9 @@ def colorbox(scr, lines, cattr, title=''):
                 continue
 
         x = 2
-        for chunk in re.split(r'(\{[a-z_ 0-9]*\})', line):
-            if chunk.startswith('{') and chunk.endswith('}'):
-                chunk = chunk[1:-1]
+        for chunk in re.split(r'(\[:[a-z_ 0-9]*\])', line):
+            if chunk.startswith('[:') and chunk.endswith(']'):
+                chunk = chunk[2:-1]
                 if chunk:
                     cattr = update_attr(cattr, colors.get_color(chunk), 8)
                 else:

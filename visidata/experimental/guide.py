@@ -1,10 +1,10 @@
 '''
 # A Guide to VisiData Guides
-Each guide shows you how to use a major feature in VisiData.
+Each guide shows you how to use a particular feature in VisiData.
 
-  {bold}Up/Down{} to move the row cursor
-  {bold}Enter{} to view a topic
-  {bold}Backspace{} to come back to this list of guides
+  [:keys]Up/Down[:] to move the row cursor
+  [:keys]Enter[:] to view a topic
+  [:keys]Backspace[:] to come back to this list of guides
 '''
 
 import re

@@ -1,34 +1,12 @@
-'''
-# Authenticate Reddit
-The Reddit API must be configured before use.
+'''# RedditSheet
 
-1. Login to Reddit and go to [reddit.com/prefs/apps](https://www.reddit.com/prefs/apps):
-2. Create a "script" app. (Use http://localhost:8000 for the redirect uri)
-3. Add credentials to visidatarc:
-{code}
-    options.reddit_client_id = '...'      # below the description in the upper left
-    options.reddit_client_secret = '...'
-{}
-## Use 'reddit' filetype for subreddits or users
+  [:keys]Ctrl+O[:] to open a browser tab to [:code]{sheet.cursorRow.display_name_prefixed}[:]
+  [:keys]g Ctrl+O[:] to open browser windows for {sheet.nSelectedRows} selected subreddits
 
-Multiple may be specified, joined with "+".
+  [:keys]Enter[:] to open sheet with top ~1000 submissions for [:code]{sheet.cursorRow.display_name_prefixed}[:]
+  [:keys]g Enter[:] to open sheet with top ~1000 submissions for {sheet.nSelectedRows} selected subreddits
 
-    vd r/commandline.reddit
-    vd u/gallowboob.reddit
-    vd r/rust+golang+python.reddit
-    vd u/spez+kn0thing.reddit
-
-{keys}Ctrl+O{} to open a browser tab of the current subreddit
-{keys}g Ctrl+O{} to open browser windows for all selected subreddits
-
-- `ENTER` (`dive-row`): open sheet with top ~1000 submissions for that subreddit
-- `g ENTER` (`open-subreddits`): open sheet with top ~1000 submissions for each selected subreddit
-- `ga` (`add-subreddits-match`): add subreddits matching input by name or description
-
-### SubmissionsSheet
-
-- `ENTER` (`dive-row`): open sheet with comments for this post
-- `ga` (`add-submissions-match`): add posts in this subreddit matching input
+  [:keys]ga[:] to append more subreddits matching input by name or description
 '''
 
 import visidata
@@ -64,7 +42,25 @@ def reddit(vd):
 
 
 class RedditGuide(Sheet):
-    help = __doc__
+    help = '''# Authenticate Reddit
+The Reddit API must be configured before use.
+
+1. Login to Reddit and go to [:underline]https://www.reddit.com/prefs/apps[:].
+2. Create a "script" app. (Use "[:underline]http://localhost:8000[:]" for the redirect uri)
+3. Add credentials to visidatarc:
+[:code]
+    options.reddit_client_id = '...'      # below the description in the upper left
+    options.reddit_client_secret = '...'
+[:]
+## Use 'reddit' filetype for subreddits or users
+
+Multiple may be specified, joined with "+".
+[:code]
+    vd r/commandline.reddit
+    vd u/gallowboob.reddit
+    vd r/rust+golang+python.reddit
+    vd u/spez+kn0thing.reddit
+[:]'''
 
 subreddit_hidden_attrs='''
 name #accounts_active accounts_active_is_fuzzed advertiser_category
@@ -154,6 +150,7 @@ def hiddenCols(hidden_attrs):
 
 
 class SubredditSheet(Sheet):
+    help = __doc__
     # source is a text list of subreddits
     rowtype = 'subreddits'  # rowdef: praw.Subreddit
     nKeys=1
@@ -217,6 +214,11 @@ class RedditorsSheet(Sheet):
 
 
 class RedditSubmissions(Sheet):
+    help = '''# Reddit Submissions
+
+  [:keys]Enter[:] to open sheet with comments for the current post
+  [:keys]ga[:] to add posts in this subreddit matching input'''
+
     # source=ListingGenerator
     rowtype='reddit posts' # rowdef: praw.Submission
     nKeys=2

@@ -10,6 +10,7 @@ vd.option('disp_lstatus_max', 0, 'maximum length of left status line')
 vd.option('disp_status_sep', '│', 'separator between statuses')
 
 vd.option('color_keystrokes', 'bold 233 black on 110 cyan', 'color of input keystrokes on status line')
+vd.option('color_keys', 'bold', 'color of keystrokes in help')
 vd.option('color_status', 'bold on 238', 'status line color')
 vd.option('color_error', 'red', 'error message color')
 vd.option('color_warning', 'yellow', 'warning message color')
@@ -164,19 +165,19 @@ def recentStatusMessages(vd):
         msg = '; '.join(wrmap(str, msgparts))
         msg = f'[{n}x] {msg}' if n > 1 else msg
 
-        if pri == 3: msgattr = '{error}'
-        elif pri == 2: msgattr = '{warning}'
-        elif pri == 1: msgattr = '{warning}'
+        if pri == 3: msgattr = '[:error]'
+        elif pri == 2: msgattr = '[:warning]'
+        elif pri == 1: msgattr = '[:warning]'
         else: msgattr = ''
 
         if msgattr:
             msg = ' ' + msg + ' '
 
-        r += f'\n{msgattr}{msg}{{}}'
+        r += f'\n{msgattr}{msg}[:]'
 
     if r:
         r = '# statuses' + r
-        r += '\n| {reverse} Ctrl+P to view all status messages {} |  '
+        r += '\n| [:reverse] Ctrl+P to view all status messages [:] |  '
         return r
 
 
