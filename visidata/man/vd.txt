@@ -569,11 +569,8 @@ COMMANDLINE OPTIONS
                                   .visidatarc and plugin addons
      --visidata-dir=str           ~/.visidata/       directory to load and
                                                      store additional files
-     --mouse-interval=int         1                  max time between
-                                                     press/release for click
-                                                     (ms)
-     --null-value=NoneType        None               a value to be counted as
-                                                     null
+     --debug                      False              exit on error and display
+                                                     stacktrace
      --undo=bool                  True               enable undo/redo
      --col-cache-size=int         0                  max number of cache en‐
                                                      tries in each cached col‐
@@ -581,21 +578,6 @@ COMMANDLINE OPTIONS
      --clean-names                False              clean column/sheet names
                                                      to be valid Python iden‐
                                                      tifiers
-     --default-width=int          20                 default column width
-     --default-height=int         4                  default column height
-     --textwrap-cells=bool        True               wordwrap text for multi‐
-                                                     line rows
-     --quitguard                  False              confirm before quitting
-                                                     modified sheet
-     --debug                      False              exit on error and display
-                                                     stacktrace
-     --skip=int                   0                  skip N rows before header
-     --header=int                 1                  parse first N rows as
-                                                     column names
-     --load-lazy                  False              load subsheets always
-                                                     (False) or lazily (True)
-     --force-256-colors           False              use 256 colors even if
-                                                     curses reports fewer
      --note-pending=str           ⌛                 note to display for pend‐
                                                      ing cells
      --note-format-exc=str        ?                  cell note for an excep‐
@@ -607,6 +589,14 @@ COMMANDLINE OPTIONS
                                                      sion
      --scroll-incr=int            -3                 amount to scroll with
                                                      scrollwheel
+     --force-256-colors           False              use 256 colors even if
+                                                     curses reports fewer
+     --quitguard                  False              confirm before quitting
+                                                     modified sheet
+     --default-width=int          20                 default column width
+     --default-height=int         4                  default column height
+     --textwrap-cells=bool        True               wordwrap text for multi‐
+                                                     line rows
      --name-joiner=str            _                  string to join sheet or
                                                      column names
      --value-joiner=str                              string to join display
@@ -624,6 +614,9 @@ COMMANDLINE OPTIONS
                                                      codecs.open
      --encoding-errors=str        surrogateescape    encoding_errors passed to
                                                      codecs.open
+     --mouse-interval=int         1                  max time between
+                                                     press/release for click
+                                                     (ms)
      --input-history=str                             basename of file to store
                                                      persistent input history
      --bulk-select-clear          False              clear selected rows be‐
@@ -632,6 +625,11 @@ COMMANDLINE OPTIONS
                                                      True, someSelectedRows
                                                      returns all rows; if
                                                      False, fails
+     --load-lazy                  False              load subsheets always
+                                                     (False) or lazily (True)
+     --skip=int                   0                  skip N rows before header
+     --header=int                 1                  parse first N rows as
+                                                     column names
      --delimiter=str                                 field delimiter to use
                                                      for tsv/usv filetype
      --row-delimiter=str                             " row delimiter to use
@@ -641,8 +639,7 @@ COMMANDLINE OPTIONS
                                                      tsv
      --tsv-safe-tab=str                              replacement for tab char‐
                                                      acter when saving to tsv
-     --visibility=int             0                  visibility level (0=low,
-                                                     1=high)
+     --visibility=int             0                  visibility level
      --default-sample-size=int    100                number of rows to sample
                                                      for regex.split (0=all)
      --fmt-expand-dict=str        %s.%s              format str to use for
@@ -659,6 +656,11 @@ COMMANDLINE OPTIONS
      --default-colname=str                           column name to use for
                                                      non-dict rows
      --filetype=str                                  specify file type
+     --confirm-overwrite=bool     True               whether to prompt for
+                                                     overwrite confirmation on
+                                                     save
+     --safe-error=str             #ERR               error string to use while
+                                                     saving
      --replay-wait=float          0.0                time to wait between re‐
                                                      played commands, in sec‐
                                                      onds
@@ -668,11 +670,6 @@ COMMANDLINE OPTIONS
                                                      in the cmdlog
      --cmdlog-histfile=str                           file to autorecord each
                                                      cmdlog action to
-     --confirm-overwrite=bool     True               whether to prompt for
-                                                     overwrite confirmation on
-                                                     save
-     --safe-error=str             #ERR               error string to use while
-                                                     saving
      --clipboard-copy-cmd=str     xclip -selection clipboard -filter
                                                      command to copy stdin to
                                                      system clipboard
@@ -683,17 +680,12 @@ COMMANDLINE OPTIONS
      --fancy-chooser              False              a nicer selection inter‐
                                                      face for aggregators and
                                                      jointype
-     --describe-aggrs=str         mean stdev         numeric aggregators to
-                                                     calculate on Describe
-                                                     sheet
+     --null-value=NoneType        None               a value to be counted as
+                                                     null
      --histogram-bins=int         0                  number of bins for his‐
                                                      togram of numeric columns
      --numeric-binning            False              bin numeric columns into
                                                      ranges
-     --regex-flags=str            I                  flags to pass to re.com‐
-                                                     pile() [AILMSUX]
-     --regex-maxsplit=int         0                  maxsplit to pass to
-                                                     regex.split
      --show-graph-labels=bool     True               show axes and legend on
                                                      graph
      --plot-colors=str                               list of distinct colors
@@ -708,7 +700,7 @@ COMMANDLINE OPTIONS
                                                      sively on DirSheet
      --dir-hidden                 False              load hidden files on
                                                      DirSheet
-     --config=Path                /home/kefala/.visidatarc
+     --config=Path                /home/anja/.visidatarc
                                                      config file to exec in
                                                      Python
      --play=str                                      file.vd to replay
@@ -726,10 +718,30 @@ COMMANDLINE OPTIONS
                                                      only)
      --nothing                    False              no config, no plugins,
                                                      nothing extra
-     --unfurl-empty               False              if unfurl includes rows
-                                                     for empty containers
+     --plugins-url=str            https://visidata.org/plugins/plugins.jsonl
+                                                     source of plugins sheet
+     --plugins-autoload=bool      True               do not autoload plugins
+                                                     if False
+     --theme=str                                     display/color theme to
+                                                     use
+     --plt-marker=str             .                  matplotlib.markers
+     --plot-palette=str           Set3               colorbrewer palette to
+                                                     use
+     --describe-aggrs=str         mean stdev         numeric aggregators to
+                                                     calculate on Describe
+                                                     sheet
      --incr-base=float            1.0                start value for column
                                                      increments
+     --ping-count=int             3                  send this many pings to
+                                                     each host
+     --ping-interval=float        0.1                wait between ping rounds,
+                                                     in seconds
+     --regex-flags=str            I                  flags to pass to re.com‐
+                                                     pile() [AILMSUX]
+     --regex-maxsplit=int         0                  maxsplit to pass to
+                                                     regex.split
+     --unfurl-empty               False              if unfurl includes rows
+                                                     for empty containers
      --csv-dialect=str            excel              dialect passed to
                                                      csv.reader
      --csv-delimiter=str          ,                  delimiter passed to
@@ -745,55 +757,72 @@ COMMANDLINE OPTIONS
      --safety-first               False              sanitize input/output to
                                                      handle edge cases, with a
                                                      performance cost
-     --xlsx-meta-columns          False              include columns for cell
-                                                     objects, font colors, and
-                                                     fill colors
-     --sqlite-onconnect=str                          sqlite statement to exe‐
-                                                     cute after opening a con‐
-                                                     nection
      --fixed-rows=int             1000               number of rows to check
                                                      for fixed width columns
      --fixed-maxcols=int          0                  max number of fixed-width
                                                      columns to create (0 is
                                                      no max)
-     --postgres-schema=str        public             The desired schema for
-                                                     the Postgres database
+     --graphviz-edge-labels=bool  True               whether to include edge
+                                                     labels on graphviz dia‐
+                                                     grams
+     --html-title=str             <h2>{sheet.name}</h2>
+                                                     table header when saving
+                                                     to html
      --http-max-next=int          0                  max next.url pages to
                                                      follow in http response
      --http-req-headers=dict      {}                 http headers to send to
                                                      requests
-     --html-title=str             <h2>{sheet.name}</h2>
-                                                     table header when saving
-                                                     to html
+     --npy-allow-pickle           False              numpy allow unpickling
+                                                     objects (unsafe)
      --pcap-internet=str          n                  (y/s/n) if save_dot in‐
                                                      cludes all internet hosts
                                                      separately (y), combined
                                                      (s), or does not include
                                                      the internet (n)
-     --xml-parser-huge-tree=bool  True               allow very deep trees and
-                                                     very long text content
-     --graphviz-edge-labels=bool  True               whether to include edge
-                                                     labels on graphviz dia‐
-                                                     grams
-     --npy-allow-pickle           False              numpy allow unpickling
-                                                     objects (unsafe)
      --pdf-tables                 False              parse PDF for tables in‐
                                                      stead of pages of text
-     --plugins-url=str            https://visidata.org/plugins/plugins.jsonl
-                                                     source of plugins sheet
-     --plugins-autoload=bool      True               do not autoload plugins
-                                                     if False
+     --postgres-schema=str        public             The desired schema for
+                                                     the Postgres database
+     --sqlite-onconnect=str                          sqlite statement to exe‐
+                                                     cute after opening a con‐
+                                                     nection
+     --xlsx-meta-columns          False              include columns for cell
+                                                     objects, font colors, and
+                                                     fill colors
+     --xml-parser-huge-tree=bool  True               allow very deep trees and
+                                                     very long text content
 
    DISPLAY OPTIONS
      Display options can only be set via the Options Sheet or a .visidatarc
      (see FILES).
 
-     disp_splitwin_pct   0                   height of second sheet on screen
-     color_sidebar       black on 114 blue   color of sidebar
+     disp_menu           True                show menu on top line when not
+                                             active
+     disp_menu_keys      True                show keystrokes inline in sub‐
+                                             menus
+     color_menu          black on 110 cyan   color of menu items in general
+     color_menu_active   223 yellow on black
+                                             color of active menu items
+     color_menu_spec     black on 34 green   color of sheet-specific menu
+                                             items
+     color_menu_help     black italic on 110 cyan
+                                             color of helpbox
+     disp_menu_boxchars  ││──┌┐└┘├┤          box characters to use for menus
+     disp_menu_more      »                   command submenu indicator
+     disp_menu_push      ⎘                   indicator if command pushes sheet
+                                             onto sheet stack
+     disp_menu_input     …                   indicator if input required for
+                                             command
+     disp_menu_fmt       Ctrl+H for help menu
+                                             right-side menu format string
      disp_float_fmt      {:.02f}             default fmtstr to format for
                                              float values
      disp_int_fmt        {:d}                default fmtstr to format for int
                                              values
+     disp_formatter      generic             formatter to use for display and
+                                             saving
+     disp_splitwin_pct   0                   height of second sheet on screen
+     disp_sidebar_fmt                        format string for default sidebar
      disp_note_none      ⌀                   visible contents of a cell whose
                                              value is None
      disp_truncator      …                   indicator that the contents are
@@ -842,20 +871,20 @@ COMMANDLINE OPTIONS
      color_hidden_col    8                   color of hidden columns on
                                              metasheets
      color_selected_row  215 yellow          color of selected rows
+     color_sidebar       black on 114 blue   color of sidebar
      disp_rstatus_fmt     {sheet.longname} {sheet.nRows:9d} {sheet.rowtype}
                                              {sheet.modifiedStatus}
                                              {sheet.options.disp_selected_note}{sheet.nSelectedRows}
                                              right-side status format string
-     disp_status_fmt     {sheet.shortcut}› {sheet.name}|
+     disp_status_fmt     {sheet.shortcut}› |
                                              status line prefix
      disp_lstatus_max    0                   maximum length of left status
                                              line
-     disp_status_sep      │                  separator between statuses
+     disp_status_sep     │                   separator between statuses
      color_keystrokes    bold 233 black on 110 cyan
                                              color of input keystrokes on sta‐
                                              tus line
-     color_status        bold black on 110 cyan
-                                             status line color
+     color_status        bold on 238         status line color
      color_error         red                 error message color
      color_warning       yellow              warning message color
      color_top_status    underline           top window status bar color
@@ -867,36 +896,15 @@ COMMANDLINE OPTIONS
      disp_edit_fill      _                   edit field fill character
      disp_unprintable    ·                   substitute character for unprint‐
                                              ables
-     disp_currency_fmt   %.02f               default fmtstr to format for cur‐
-                                             rency values
      disp_date_fmt       %Y-%m-%d            default fmtstr to strftime for
                                              date values
+     disp_currency_fmt   %.02f               default fmtstr to format for cur‐
+                                             rency values
      disp_replay_play    ▶                   status indicator for active re‐
                                              play
      disp_replay_pause   ‖                   status indicator for paused re‐
                                              play
      color_status_replay green               color of replay status indicator
-     disp_formatter      generic             formatter to use for display and
-                                             saving
-     disp_menu           True                show menu on top line when not
-                                             active
-     disp_menu_keys      True                show keystrokes inline in sub‐
-                                             menus
-     color_menu          black on 110 cyan   color of menu items in general
-     color_menu_active   223 yellow on black
-                                             color of active menu items
-     color_menu_spec     black on 34 green   color of sheet-specific menu
-                                             items
-     color_menu_help     black italic on 110 cyan
-                                             color of helpbox
-     disp_menu_boxchars  ││──┌┐└┘├┤          box characters to use for menus
-     disp_menu_more      »                   command submenu indicator
-     disp_menu_push      ⎘                   indicator if command pushes sheet
-                                             onto sheet stack
-     disp_menu_input     …                   indicator if input required for
-                                             command
-     disp_menu_fmt       Ctrl+H for help menu
-                                             right-side menu format string
      disp_histogram      *                   histogram element character
      disp_histolen       50                  width of histogram column
      disp_canvas_charset
@@ -913,6 +921,10 @@ COMMANDLINE OPTIONS
      color_change_pending reverse yellow     color for cells pending modifica‐
                                              tion
      color_delete_pending red                color for rows pending delete
+     color_shellcmd      21 on 114 green
+     color_colname       underline
+     color_longname      bold 52 on 114 green
+
      color_xword_active  green               color of active clue
 
 EXAMPLES

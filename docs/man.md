@@ -429,25 +429,20 @@ vd(1)                                                                           
      <span style="font-weight:bold;">-y</span>, <span style="font-weight:bold;">--confirm-overwrite</span>=<span style="text-decoration:underline;">F</span>    True               overwrite existing files without confirmation
      <span style="font-weight:bold;">-N</span>, <span style="font-weight:bold;">--nothing</span>=<span style="text-decoration:underline;">T</span>              False               disable loading .visidatarc and plugin addons
      <span style="font-weight:bold;">--visidata-dir</span>=<span style="text-decoration:underline;">str</span>           ~/.visidata/       directory to load and store additional files
-     <span style="font-weight:bold;">--mouse-interval</span>=<span style="text-decoration:underline;">int</span>         1                  max time between press/release for click (ms)
-     <span style="font-weight:bold;">--null-value</span>=<span style="text-decoration:underline;">NoneType</span>        None               a value to be counted as null
+     <span style="font-weight:bold;">--debug</span>                      False              exit on error and display stacktrace
      <span style="font-weight:bold;">--undo</span>=<span style="text-decoration:underline;">bool</span>                  True               enable undo/redo
      <span style="font-weight:bold;">--col-cache-size</span>=<span style="text-decoration:underline;">int</span>         0                  max number of cache entries in each cached column
      <span style="font-weight:bold;">--clean-names</span>                False              clean column/sheet names to be valid Python identifiers
-     <span style="font-weight:bold;">--default-width</span>=<span style="text-decoration:underline;">int</span>          20                 default column width
-     <span style="font-weight:bold;">--default-height</span>=<span style="text-decoration:underline;">int</span>         4                  default column height
-     <span style="font-weight:bold;">--textwrap-cells</span>=<span style="text-decoration:underline;">bool</span>        True               wordwrap text for multiline rows
-     <span style="font-weight:bold;">--quitguard</span>                  False              confirm before quitting modified sheet
-     <span style="font-weight:bold;">--debug</span>                      False              exit on error and display stacktrace
-     <span style="font-weight:bold;">--skip</span>=<span style="text-decoration:underline;">int</span>                   0                  skip N rows before header
-     <span style="font-weight:bold;">--header</span>=<span style="text-decoration:underline;">int</span>                 1                  parse first N rows as column names
-     <span style="font-weight:bold;">--load-lazy</span>                  False              load subsheets always (False) or lazily (True)
-     <span style="font-weight:bold;">--force-256-colors</span>           False              use 256 colors even if curses reports fewer
      <span style="font-weight:bold;">--note-pending</span>=<span style="text-decoration:underline;">str</span>           ⌛                 note to display for pending cells
      <span style="font-weight:bold;">--note-format-exc</span>=<span style="text-decoration:underline;">str</span>        ?                  cell note for an exception during formatting
      <span style="font-weight:bold;">--note-getter-exc</span>=<span style="text-decoration:underline;">str</span>        !                  cell note for an exception during computation
      <span style="font-weight:bold;">--note-type-exc</span>=<span style="text-decoration:underline;">str</span>          !                  cell note for an exception during type conversion
      <span style="font-weight:bold;">--scroll-incr</span>=<span style="text-decoration:underline;">int</span>            -3                 amount to scroll with scrollwheel
+     <span style="font-weight:bold;">--force-256-colors</span>           False              use 256 colors even if curses reports fewer
+     <span style="font-weight:bold;">--quitguard</span>                  False              confirm before quitting modified sheet
+     <span style="font-weight:bold;">--default-width</span>=<span style="text-decoration:underline;">int</span>          20                 default column width
+     <span style="font-weight:bold;">--default-height</span>=<span style="text-decoration:underline;">int</span>         4                  default column height
+     <span style="font-weight:bold;">--textwrap-cells</span>=<span style="text-decoration:underline;">bool</span>        True               wordwrap text for multiline rows
      <span style="font-weight:bold;">--name-joiner</span>=<span style="text-decoration:underline;">str</span>            _                  string to join sheet or column names
      <span style="font-weight:bold;">--value-joiner</span>=<span style="text-decoration:underline;">str</span>                              string to join display values
      <span style="font-weight:bold;">--wrap</span>                       False              wrap text to fit window width on TextSheet
@@ -456,14 +451,18 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--min-memory-mb</span>=<span style="text-decoration:underline;">int</span>          0                  minimum memory to continue loading and async processing
      <span style="font-weight:bold;">--encoding</span>=<span style="text-decoration:underline;">str</span>               utf-8              encoding passed to codecs.open
      <span style="font-weight:bold;">--encoding-errors</span>=<span style="text-decoration:underline;">str</span>        surrogateescape    encoding_errors passed to codecs.open
+     <span style="font-weight:bold;">--mouse-interval</span>=<span style="text-decoration:underline;">int</span>         1                  max time between press/release for click (ms)
      <span style="font-weight:bold;">--input-history</span>=<span style="text-decoration:underline;">str</span>                             basename of file to store persistent input history
      <span style="font-weight:bold;">--bulk-select-clear</span>          False              clear selected rows before new bulk selections
      <span style="font-weight:bold;">--some-selected-rows</span>         False              if no rows selected, if True, someSelectedRows returns all rows; if False, fails
+     <span style="font-weight:bold;">--load-lazy</span>                  False              load subsheets always (False) or lazily (True)
+     <span style="font-weight:bold;">--skip</span>=<span style="text-decoration:underline;">int</span>                   0                  skip N rows before header
+     <span style="font-weight:bold;">--header</span>=<span style="text-decoration:underline;">int</span>                 1                  parse first N rows as column names
      <span style="font-weight:bold;">--delimiter</span>=<span style="text-decoration:underline;">str</span>                                 field delimiter to use for tsv/usv filetype
      <span style="font-weight:bold;">--row-delimiter</span>=<span style="text-decoration:underline;">str</span>                             &quot; row delimiter to use for tsv/usv filetype
      <span style="font-weight:bold;">--tsv-safe-newline</span>=<span style="text-decoration:underline;">str</span>                          replacement for newline character when saving to tsv
      <span style="font-weight:bold;">--tsv-safe-tab</span>=<span style="text-decoration:underline;">str</span>                              replacement for tab character when saving to tsv
-     <span style="font-weight:bold;">--visibility</span>=<span style="text-decoration:underline;">int</span>             0                  visibility level (0=low, 1=high)
+     <span style="font-weight:bold;">--visibility</span>=<span style="text-decoration:underline;">int</span>             0                  visibility level
      <span style="font-weight:bold;">--default-sample-size</span>=<span style="text-decoration:underline;">int</span>    100                number of rows to sample for regex.split (0=all)
      <span style="font-weight:bold;">--fmt-expand-dict</span>=<span style="text-decoration:underline;">str</span>        %s.%s              format str to use for names of columns expanded from dict (colname, key)
      <span style="font-weight:bold;">--fmt-expand-list</span>=<span style="text-decoration:underline;">str</span>        %s[%s]             format str to use for names of columns expanded from list (colname, index)
@@ -471,29 +470,27 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--json-sort-keys</span>             False              sort object keys when saving to json
      <span style="font-weight:bold;">--default-colname</span>=<span style="text-decoration:underline;">str</span>                           column name to use for non-dict rows
      <span style="font-weight:bold;">--filetype</span>=<span style="text-decoration:underline;">str</span>                                  specify file type
+     <span style="font-weight:bold;">--confirm-overwrite</span>=<span style="text-decoration:underline;">bool</span>     True               whether to prompt for overwrite confirmation on save
+     <span style="font-weight:bold;">--safe-error</span>=<span style="text-decoration:underline;">str</span>             #ERR               error string to use while saving
      <span style="font-weight:bold;">--replay-wait</span>=<span style="text-decoration:underline;">float</span>          0.0                time to wait between replayed commands, in seconds
      <span style="font-weight:bold;">--replay-movement</span>            False              insert movements during replay
      <span style="font-weight:bold;">--rowkey-prefix</span>=<span style="text-decoration:underline;">str</span>          キ                 string prefix for rowkey in the cmdlog
      <span style="font-weight:bold;">--cmdlog-histfile</span>=<span style="text-decoration:underline;">str</span>                           file to autorecord each cmdlog action to
-     <span style="font-weight:bold;">--confirm-overwrite</span>=<span style="text-decoration:underline;">bool</span>     True               whether to prompt for overwrite confirmation on save
-     <span style="font-weight:bold;">--safe-error</span>=<span style="text-decoration:underline;">str</span>             #ERR               error string to use while saving
      <span style="font-weight:bold;">--clipboard-copy-cmd</span>=<span style="text-decoration:underline;">str</span>     xclip -selection clipboard -filter
                                                      command to copy stdin to system clipboard
      <span style="font-weight:bold;">--clipboard-paste-cmd</span>=<span style="text-decoration:underline;">str</span>    xclip -selection clipboard -o
                                                      command to send contents of system clipboard to stdout
      <span style="font-weight:bold;">--fancy-chooser</span>              False              a nicer selection interface for aggregators and jointype
-     <span style="font-weight:bold;">--describe-aggrs</span>=<span style="text-decoration:underline;">str</span>         mean stdev         numeric aggregators to calculate on Describe sheet
+     <span style="font-weight:bold;">--null-value</span>=<span style="text-decoration:underline;">NoneType</span>        None               a value to be counted as null
      <span style="font-weight:bold;">--histogram-bins</span>=<span style="text-decoration:underline;">int</span>         0                  number of bins for histogram of numeric columns
      <span style="font-weight:bold;">--numeric-binning</span>            False              bin numeric columns into ranges
-     <span style="font-weight:bold;">--regex-flags</span>=<span style="text-decoration:underline;">str</span>            I                  flags to pass to re.compile() [AILMSUX]
-     <span style="font-weight:bold;">--regex-maxsplit</span>=<span style="text-decoration:underline;">int</span>         0                  maxsplit to pass to regex.split
      <span style="font-weight:bold;">--show-graph-labels</span>=<span style="text-decoration:underline;">bool</span>     True               show axes and legend on graph
      <span style="font-weight:bold;">--plot-colors</span>=<span style="text-decoration:underline;">str</span>                               list of distinct colors to use for plotting distinct objects
      <span style="font-weight:bold;">--zoom-incr</span>=<span style="text-decoration:underline;">float</span>            2.0                amount to multiply current zoomlevel when zooming
      <span style="font-weight:bold;">--motd-url</span>=<span style="text-decoration:underline;">str</span>                                  source of randomized startup messages
      <span style="font-weight:bold;">--dir-recurse</span>                False              walk source path recursively on DirSheet
      <span style="font-weight:bold;">--dir-hidden</span>                 False              load hidden files on DirSheet
-     <span style="font-weight:bold;">--config</span>=<span style="text-decoration:underline;">Path</span>                /home/kefala/.visidatarc
+     <span style="font-weight:bold;">--config</span>=<span style="text-decoration:underline;">Path</span>                /home/anja/.visidatarc
                                                      config file to exec in Python
      <span style="font-weight:bold;">--play</span>=<span style="text-decoration:underline;">str</span>                                      file.vd to replay
      <span style="font-weight:bold;">--batch</span>                      False              replay in batch mode (with no interface and all status sent to stdout)
@@ -501,8 +498,19 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--preplay</span>=<span style="text-decoration:underline;">str</span>                                   longnames to preplay before replay
      <span style="font-weight:bold;">--imports</span>=<span style="text-decoration:underline;">str</span>                plugins            imports to preload before .visidatarc (command-line only)
      <span style="font-weight:bold;">--nothing</span>                    False              no config, no plugins, nothing extra
-     <span style="font-weight:bold;">--unfurl-empty</span>               False              if unfurl includes rows for empty containers
+     <span style="font-weight:bold;">--plugins-url</span>=<span style="text-decoration:underline;">str</span>            https://visidata.org/plugins/plugins.jsonl
+                                                     source of plugins sheet
+     <span style="font-weight:bold;">--plugins-autoload</span>=<span style="text-decoration:underline;">bool</span>      True               do not autoload plugins if False
+     <span style="font-weight:bold;">--theme</span>=<span style="text-decoration:underline;">str</span>                                     display/color theme to use
+     <span style="font-weight:bold;">--plt-marker</span>=<span style="text-decoration:underline;">str</span>             .                  matplotlib.markers
+     <span style="font-weight:bold;">--plot-palette</span>=<span style="text-decoration:underline;">str</span>           Set3               colorbrewer palette to use
+     <span style="font-weight:bold;">--describe-aggrs</span>=<span style="text-decoration:underline;">str</span>         mean stdev         numeric aggregators to calculate on Describe sheet
      <span style="font-weight:bold;">--incr-base</span>=<span style="text-decoration:underline;">float</span>            1.0                start value for column increments
+     <span style="font-weight:bold;">--ping-count</span>=<span style="text-decoration:underline;">int</span>             3                  send this many pings to each host
+     <span style="font-weight:bold;">--ping-interval</span>=<span style="text-decoration:underline;">float</span>        0.1                wait between ping rounds, in seconds
+     <span style="font-weight:bold;">--regex-flags</span>=<span style="text-decoration:underline;">str</span>            I                  flags to pass to re.compile() [AILMSUX]
+     <span style="font-weight:bold;">--regex-maxsplit</span>=<span style="text-decoration:underline;">int</span>         0                  maxsplit to pass to regex.split
+     <span style="font-weight:bold;">--unfurl-empty</span>               False              if unfurl includes rows for empty containers
      <span style="font-weight:bold;">--csv-dialect</span>=<span style="text-decoration:underline;">str</span>            excel              dialect passed to csv.reader
      <span style="font-weight:bold;">--csv-delimiter</span>=<span style="text-decoration:underline;">str</span>          ,                  delimiter passed to csv.reader
      <span style="font-weight:bold;">--csv-quotechar</span>=<span style="text-decoration:underline;">str</span>          &quot;                  quotechar passed to csv.reader
@@ -510,31 +518,43 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--csv-escapechar</span>=<span style="text-decoration:underline;">NoneType</span>    None               escapechar passed to csv.reader
      <span style="font-weight:bold;">--csv-lineterminator</span>=<span style="text-decoration:underline;">str</span>                        &quot; lineterminator passed to csv.writer
      <span style="font-weight:bold;">--safety-first</span>               False              sanitize input/output to handle edge cases, with a performance cost
-     <span style="font-weight:bold;">--xlsx-meta-columns</span>          False              include columns for cell objects, font colors, and fill colors
-     <span style="font-weight:bold;">--sqlite-onconnect</span>=<span style="text-decoration:underline;">str</span>                          sqlite statement to execute after opening a connection
      <span style="font-weight:bold;">--fixed-rows</span>=<span style="text-decoration:underline;">int</span>             1000               number of rows to check for fixed width columns
      <span style="font-weight:bold;">--fixed-maxcols</span>=<span style="text-decoration:underline;">int</span>          0                  max number of fixed-width columns to create (0 is no max)
-     <span style="font-weight:bold;">--postgres-schema</span>=<span style="text-decoration:underline;">str</span>        public             The desired schema for the Postgres database
-     <span style="font-weight:bold;">--http-max-next</span>=<span style="text-decoration:underline;">int</span>          0                  max next.url pages to follow in http response
-     <span style="font-weight:bold;">--http-req-headers</span>=<span style="text-decoration:underline;">dict</span>      {}                 http headers to send to requests
+     <span style="font-weight:bold;">--graphviz-edge-labels</span>=<span style="text-decoration:underline;">bool</span>  True               whether to include edge labels on graphviz diagrams
      <span style="font-weight:bold;">--html-title</span>=<span style="text-decoration:underline;">str</span>             &lt;h2&gt;{sheet.name}&lt;/h2&gt;
                                                      table header when saving to html
-     <span style="font-weight:bold;">--pcap-internet</span>=<span style="text-decoration:underline;">str</span>          n                  (y/s/n) if save_dot includes all internet hosts separately (y), combined (s), or does not include the internet (n)
-     <span style="font-weight:bold;">--xml-parser-huge-tree</span>=<span style="text-decoration:underline;">bool</span>  True               allow very deep trees and very long text content
-     <span style="font-weight:bold;">--graphviz-edge-labels</span>=<span style="text-decoration:underline;">bool</span>  True               whether to include edge labels on graphviz diagrams
+     <span style="font-weight:bold;">--http-max-next</span>=<span style="text-decoration:underline;">int</span>          0                  max next.url pages to follow in http response
+     <span style="font-weight:bold;">--http-req-headers</span>=<span style="text-decoration:underline;">dict</span>      {}                 http headers to send to requests
      <span style="font-weight:bold;">--npy-allow-pickle</span>           False              numpy allow unpickling objects (unsafe)
+     <span style="font-weight:bold;">--pcap-internet</span>=<span style="text-decoration:underline;">str</span>          n                  (y/s/n) if save_dot includes all internet hosts separately (y), combined (s), or does not include the internet (n)
      <span style="font-weight:bold;">--pdf-tables</span>                 False              parse PDF for tables instead of pages of text
-     <span style="font-weight:bold;">--plugins-url</span>=<span style="text-decoration:underline;">str</span>            https://visidata.org/plugins/plugins.jsonl
-                                                     source of plugins sheet
-     <span style="font-weight:bold;">--plugins-autoload</span>=<span style="text-decoration:underline;">bool</span>      True               do not autoload plugins if False
+     <span style="font-weight:bold;">--postgres-schema</span>=<span style="text-decoration:underline;">str</span>        public             The desired schema for the Postgres database
+     <span style="font-weight:bold;">--sqlite-onconnect</span>=<span style="text-decoration:underline;">str</span>                          sqlite statement to execute after opening a connection
+     <span style="font-weight:bold;">--xlsx-meta-columns</span>          False              include columns for cell objects, font colors, and fill colors
+     <span style="font-weight:bold;">--xml-parser-huge-tree</span>=<span style="text-decoration:underline;">bool</span>  True               allow very deep trees and very long text content
 
    <span style="font-weight:bold;">DISPLAY</span> <span style="font-weight:bold;">OPTIONS</span>
      Display options can only be set via the <span style="text-decoration:underline;">Options</span> <span style="text-decoration:underline;">Sheet</span> or a <span style="text-decoration:underline;">.visidatarc</span> (see <span style="text-decoration:underline;">FILES</span>).
 
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">splitwin</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">pct</span>   0                   height of second sheet on screen
-     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">sidebar</span>       black on 114 blue   color of sidebar
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span>           True                show menu on top line when not active
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">keys</span>      True                show keystrokes inline in submenus
+     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span>          black on 110 cyan   color of menu items in general
+     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">active</span>   223 yellow on black
+                                             color of active menu items
+     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">spec</span>     black on 34 green   color of sheet-specific menu items
+     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">help</span>     black italic on 110 cyan
+                                             color of helpbox
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">boxchars</span>  ││──┌┐└┘├┤          box characters to use for menus
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">more</span>      »                   command submenu indicator
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">push</span>      ⎘                   indicator if command pushes sheet onto sheet stack
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">input</span>     …                   indicator if input required for command
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>       Ctrl+H for help menu
+                                             right-side menu format string
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">float</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>      {:.02f}             default fmtstr to format for float values
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">int</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>        {:d}                default fmtstr to format for int values
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">formatter</span>      generic             formatter to use for display and saving
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">splitwin</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">pct</span>   0                   height of second sheet on screen
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">sidebar</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>                        format string for default sidebar
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">note</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">none</span>      ⌀                   visible contents of a cell whose value is None
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">truncator</span>      …                   indicator that the contents are only partially visible
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">oddspace</span>       ·                   displayable character for odd whitespace
@@ -571,16 +591,16 @@ vd(1)                                                                           
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">key</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">col</span>       81 cyan             color of key columns
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">hidden</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">col</span>    8                   color of hidden columns on metasheets
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">selected</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">row</span>  215 yellow          color of selected rows
+     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">sidebar</span>       black on 114 blue   color of sidebar
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">rstatus</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>     {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus} {sheet.options.disp_selected_note}{sheet.nSelectedRows}
                                              right-side status format string
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">status</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>     {sheet.shortcut}› {sheet.name}|
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">status</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>     {sheet.shortcut}› |
                                              status line prefix
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">lstatus</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">max</span>    0                   maximum length of left status line
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">status</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">sep</span>      │                  separator between statuses
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">status</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">sep</span>     │                   separator between statuses
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">keystrokes</span>    bold 233 black on 110 cyan
                                              color of input keystrokes on status line
-     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">status</span>        bold black on 110 cyan
-                                             status line color
+     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">status</span>        bold on 238         status line color
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">error</span>         red                 error message color
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">warning</span>       yellow              warning message color
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">top</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">status</span>    underline           top window status bar color
@@ -590,26 +610,11 @@ vd(1)                                                                           
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">edit</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">cell</span>     white               cell color to use when editing cell
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">edit</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fill</span>      _                   edit field fill character
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">unprintable</span>    ·                   substitute character for unprintables
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">currency</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>   %.02f               default fmtstr to format for currency values
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">date</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>       %Y-%m-%d            default fmtstr to strftime for date values
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">currency</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>   %.02f               default fmtstr to format for currency values
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">replay</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">play</span>    ▶                   status indicator for active replay
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">replay</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">pause</span>   ‖                   status indicator for paused replay
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">status</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">replay</span> green               color of replay status indicator
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">formatter</span>      generic             formatter to use for display and saving
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span>           True                show menu on top line when not active
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">keys</span>      True                show keystrokes inline in submenus
-     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span>          black on 110 cyan   color of menu items in general
-     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">active</span>   223 yellow on black
-                                             color of active menu items
-     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">spec</span>     black on 34 green   color of sheet-specific menu items
-     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">help</span>     black italic on 110 cyan
-                                             color of helpbox
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">boxchars</span>  ││──┌┐└┘├┤          box characters to use for menus
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">more</span>      »                   command submenu indicator
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">push</span>      ⎘                   indicator if command pushes sheet onto sheet stack
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">input</span>     …                   indicator if input required for command
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>       Ctrl+H for help menu
-                                             right-side menu format string
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">histogram</span>      *                   histogram element character
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">histolen</span>       50                  width of histogram column
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">canvas</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">charset</span> ⠀⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿⡀⡁⡂⡃⡄⡅⡆⡇⡈⡉⡊⡋⡌⡍⡎⡏⡐⡑⡒⡓⡔⡕⡖⡗⡘⡙⡚⡛⡜⡝⡞⡟⡠⡡⡢⡣⡤⡥⡦⡧⡨⡩⡪⡫⡬⡭⡮⡯⡰⡱⡲⡳⡴⡵⡶⡷⡸⡹⡺⡻⡼⡽⡾⡿⢀⢁⢂⢃⢄⢅⢆⢇⢈⢉⢊⢋⢌⢍⢎⢏⢐⢑⢒⢓⢔⢕⢖⢗⢘⢙⢚⢛⢜⢝⢞⢟⢠⢡⢢⢣⢤⢥⢦⢧⢨⢩⢪⢫⢬⢭⢮⢯⢰⢱⢲⢳⢴⢵⢶⢷⢸⢹⢺⢻⢼⢽⢾⢿⣀⣁⣂⣃⣄⣅⣆⣇⣈⣉⣊⣋⣌⣍⣎⣏⣐⣑⣒⣓⣔⣕⣖⣗⣘⣙⣚⣛⣜⣝⣞⣟⣠⣡⣢⣣⣤⣥⣦⣧⣨⣩⣪⣫⣬⣭⣮⣯⣰⣱⣲⣳⣴⣵⣶⣷⣸⣹⣺⣻⣼⣽⣾⣿
@@ -621,6 +626,10 @@ vd(1)                                                                           
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">add</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">pending</span>   green               color for rows pending add
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">change</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">pending</span> reverse yellow     color for cells pending modification
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">delete</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">pending</span> red                color for rows pending delete
+     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">shellcmd</span>      21 on 114 green
+     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">colname</span>       underline
+     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">longname</span>      bold 52 on 114 green
+
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">xword</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">active</span>  green               color of active clue
 
 <span style="font-weight:bold;">EXAMPLES</span>
