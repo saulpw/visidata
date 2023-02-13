@@ -292,8 +292,6 @@ SubredditSheet.addCommand('g'+ENTER, 'open-subreddits', 'vd.push(openRows(select
 SubredditSheet.addCommand('ga', 'add-subreddits-match', 'addRowsFromQuery(input("add subreddits matching: "))', 'add subreddits matching input by name or description')
 RedditSubmissions.addCommand('ga', 'add-submissions-match', 'addRowsFromQuery(input("add posts matching: "))', 'add posts in this subreddit matching input')
 
-RedditGuide.options.disp_sidebar_fmt = '{sheet.help}'
-
 vd.addMenuItems('''
     File > Reddit > open selected subreddits > open-subreddits
     File > Reddit > add > matching subreddits > add-subreddits-match

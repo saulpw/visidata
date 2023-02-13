@@ -98,6 +98,7 @@ class BaseSheet(DrawablePane):
     rowtype = 'objects'  # one word, plural, describing the items
     precious = True      # False for a few discardable metasheets
     defer = False        # False for not deferring changes until save
+    help = ''            # default to show in sidebar
 
     def _obj_options(self):
         return vd.OptionsObject(vd._options, obj=self)
@@ -274,7 +275,8 @@ class BaseSheet(DrawablePane):
     @property
     def sidebar(self):
         'Default implementation just returns set value.  Overridable.'
-        return self.formatString(self.options.disp_sidebar_fmt)
+        fmt = self.options.disp_sidebar_fmt or self.help
+        return self.formatString(fmt)
 
     @property
     def sidebar_title(self):

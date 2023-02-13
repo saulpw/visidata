@@ -87,5 +87,3 @@ InputEditorGuide ("Using the builtin line editor")
                 i += 1
 
 BaseSheet.addCommand('', 'open-guide', 'vd.push(GuideGuide("VisiData_Guide"))')
-
-GuideGuide.options.disp_sidebar_fmt = '{sheet.help}'
