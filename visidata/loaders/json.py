@@ -216,7 +216,6 @@ def save_jsonla(vd, p, *vsheets):
 JsonSheet.options.encoding = 'utf-8'
 VisiData.save_ndjson = VisiData.save_jsonl
 VisiData.save_ldjson = VisiData.save_jsonl
-VisiData.save_jsonla = VisiData.save_jsonl
 
 vd.addGlobals({
     'JsonSheet': JsonSheet,

@@ -1,0 +1,3 @@
+#!vd -p
+{"longname": "open-file", "input": "sample_data/sample.tsv", "keystrokes": "o"}
+{"sheet": "sample", "col": "", "row": "", "longname": "save-sheet", "input": "tests/golden/save-jsonla.jsonla", "keystrokes": "Ctrl+S", "comment": "save current sheet to filename in format determined by extension (default .tsv)"}
