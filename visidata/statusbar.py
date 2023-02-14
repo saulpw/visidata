@@ -150,7 +150,10 @@ def parents(sheet):
 @VisiData.api
 def drawSheetBox(vd, scr, sheet, y, x, cattr):
     vs = sheet
-    names = [vs.names[-1] for vs in sheet.parents]
+    if vs.names:
+        names = [vs.names[-1] for vs in sheet.parents]
+    else:
+        names = [vs.name]
     maxnamelen = max(map(len, names))
     for s in names:
         clipdraw(scr, y, x, '| ' + s + ' |', cattr.attr, w=maxnamelen+4)
