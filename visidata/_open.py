@@ -1,4 +1,7 @@
-from visidata import *
+import os
+import os.path
+
+from visidata import VisiData, vd, Path, BaseSheet, TableSheet, TextSheet, SettableColumn
 
 
 vd.option('filetype', '', 'specify file type', replay=True)
@@ -113,12 +116,12 @@ def open_txt(vd, p):
     'Create sheet from `.txt` file at Path `p`, checking whether it is TSV.'
     if p.exists(): #1611
         with p.open_text(encoding=vd.options.encoding) as fp:
-            delimiter = options.delimiter
+            delimiter = vd.options.delimiter
             try:
                 if delimiter and delimiter in next(fp):    # peek at the first line
                     return vd.open_tsv(p)  # TSV often have .txt extension
             except StopIteration:
-                return Sheet(p.name, columns=[SettableColumn()], source=p)
+                return TableSheet(p.name, columns=[SettableColumn()], source=p)
     return TextSheet(p.name, source=p)
 
 
@@ -126,7 +129,7 @@ def open_txt(vd, p):
 def loadInternalSheet(vd, cls, p, **kwargs):
     'Load internal sheet of given class.'
     vs = cls(p.name, source=p, **kwargs)
-    options._set('encoding', 'utf8', vs)
+    vd.options._set('encoding', 'utf8', vs)
     if p.exists():
 #        vd.sheets.insert(0, vs) # broke replay with macros.reload()
         vs.reload.__wrapped__(vs)
