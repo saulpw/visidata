@@ -9,6 +9,16 @@ from visidata import ColumnAttr, Column, Path
 from visidata.type_date import date
 
 @VisiData.api
+def guess_zip(vd, p):
+    if not p.is_url() and zipfile.is_zipfile(p.open_bytes()):
+        return dict(filetype='zip')
+
+@VisiData.api
+def guess_tar(vd, p):
+    if tarfile.is_tarfile(p.open_bytes()):
+        return dict(filetype='tar')
+
+@VisiData.api
 def open_zip(vd, p):
     return vd.ZipSheet(p.name, source=p)
 

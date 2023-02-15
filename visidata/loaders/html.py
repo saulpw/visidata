@@ -7,6 +7,12 @@ from visidata import VisiData, vd, Sheet, options, Column, Progress, IndexSheet,
 
 vd.option('html_title', '<h2>{sheet.name}</h2>', 'table header when saving to html')
 
+
+@VisiData.api
+def guess_html(vd, p):
+    if next(p.open_text()).startswith('<'):
+        return dict(filetype='html', _likelihood=1)
+
 @VisiData.api
 def open_html(vd, p):
     return HtmlTablesSheet(p.name, source=p)

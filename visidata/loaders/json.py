@@ -7,6 +7,20 @@ vd.option('json_sort_keys', False, 'sort object keys when saving to json')
 vd.option('default_colname', '', 'column name to use for non-dict rows')
 
 @VisiData.api
+def guess_json(vd, p):
+    with p.open_text(encoding=vd.options.encoding) as fp:
+        line = next(fp)
+
+    line = line.strip()
+
+    if line.startswith('{') and line.endswith('}'):
+        return dict(filetype='jsonl')
+
+    if line.startswith(tuple('[{')):
+        return dict(filetype='json')
+
+
+@VisiData.api
 def open_jsonobj(vd, p):
     return JsonSheet(p.name, source=p)
 

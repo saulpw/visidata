@@ -18,6 +18,12 @@ def requery(url, **kwargs):
 
 
 @VisiData.api
+def guess_sqlite(vd, p):
+    if p.open_bytes().read(16).startswith(b'SQLite format'):
+        return dict(filetype='sqlite')
+
+
+@VisiData.api
 def open_sqlite(vd, p):
     return SqliteIndexSheet(p.name, source=p)
 

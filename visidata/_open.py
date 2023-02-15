@@ -37,6 +37,23 @@ def _completeFilename(val, state):
     files.sort()
     return files[state%len(files)]
 
+@VisiData.api
+def guessFiletype(vd, p):
+    '''Call all vd.guess_<filetype>(p) functions and return best candidate sheet based on file contents.'''
+
+    guessfuncs = [getattr(vd, x) for x in dir(vd) if x.startswith('guess_')]
+    filetypes = []
+    for f in guessfuncs:
+        try:
+            filetype = f(p)
+            if filetype:
+                filetypes.append(filetype)
+        except Exception as e:
+            vd.exceptionCaught(e)
+
+    if filetypes:
+        return sorted(filetypes, key=lambda r: -r.get('_likelihood', 1))[0]
+
 
 @VisiData.api
 def openPath(vd, p, filetype=None, create=False):
@@ -59,7 +76,7 @@ def openPath(vd, p, filetype=None, create=False):
         if p.is_dir():
             filetype = 'dir'
         else:
-            filetype = p.ext or options.filetype or 'txt'
+            filetype = p.ext or vd.options.filetype
 
     filetype = filetype.lower()
 
@@ -74,9 +91,22 @@ def openPath(vd, p, filetype=None, create=False):
         vd.status('creating blank %s' % (p.given))
         return newfunc(p)
 
-    openfunc = getattr(vd, 'open_' + filetype, vd.getGlobals().get('open_' + filetype))
+    openfuncname = 'open_' + filetype
+    openfunc = getattr(vd, openfuncname, vd.getGlobals().get(openfuncname))
     if not openfunc:
+        opts = vd.guessFiletype(p)
+        if opts and 'filetype' in opts:
+            openfuncname = 'open_' + opts['filetype']
+            openfunc = getattr(vd, openfuncname, vd.getGlobals().get(openfuncname))
+            vs = openfunc(p)
+            for k, v in opts.items():
+                if k != 'filetype' and not k.startswith('_'):
+                    setattr(vs.options, k, v)
+            vd.warning('guessed "%s" filetype based on contents' % opts['filetype'])
+            return vs
+
         vd.warning('unknown "%s" filetype' % filetype)
+
         filetype = 'txt'
         openfunc = vd.open_txt
 
