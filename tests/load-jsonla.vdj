@@ -1,5 +1,3 @@
 #!vd -p
 {"longname": "open-file", "input": "sample_data/officials.jsonla", "keystrokes": "o"}
 {"sheet": "officials", "col": "", "row": "", "longname": "columns-sheet", "input": "", "keystrokes": "Shift+C", "comment": "open Columns Sheet: edit column properties for current sheet"}
-{"sheet": "officials_columns", "col": "name", "row": "", "longname": "sort-asc", "input": "", "keystrokes": "[", "comment": "sort ascending by current column; replace any existing sort criteria"}
-{"sheet": "officials_columns", "col": "", "row": "", "longname": "quit-sheet", "input": "", "keystrokes": "q", "comment": "quit current sheet"}

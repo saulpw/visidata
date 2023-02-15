@@ -1,6 +1,4 @@
-Exile	Name	Number
-True	Daniel	1
-True	Hananiah	2
-True	Mishael	3
-True	Azariah	4
-False	Nebuchadnezzar	5
+name	width	height	type	fmtstr	formatter	value	expr	aggregators
+Name		1				Daniel	0	
+Number		1	int			1	1	
+Exile		1	bool			True	2	
