@@ -5,8 +5,6 @@ from visidata import vd, date, VisiData, PyobjSheet, AttrDict, stacktrace, Typed
 vd.option('json_indent', None, 'indent to use when saving json')
 vd.option('json_sort_keys', False, 'sort object keys when saving to json')
 vd.option('default_colname', '', 'column name to use for non-dict rows')
-vd.option('json_save_arrays', False, 'save table as rows of JSON arrays instead of JSONL dicts')
-vd.option('json_load_arrays', False, 'load table as rows of JSON arrays instead of JSONL dicts')
 
 @VisiData.api
 def open_jsonobj(vd, p):
@@ -14,10 +12,7 @@ def open_jsonobj(vd, p):
 
 @VisiData.api
 def open_jsonl(vd, p):
-    if vd.options.json_load_arrays:
-        return open_jsonla(vd, p)
-    else:
-        return JsonSheet(p.name, source=p)
+    return JsonSheet(p.name, source=p)
 
 VisiData.open_ndjson = VisiData.open_ldjson = VisiData.open_json = VisiData.open_jsonl
 
@@ -36,7 +31,7 @@ def open_jsonla(vd, p):
     If no suitable header is found, fall back to generic JSON load.
     '''
 
-    with p.open_text(encoding=JsonlaSheet.options.encoding) as fp:
+    with p.open_text(encoding=vd.options.encoding) as fp:
         first_line = next(fp)
 
     ret = json.loads(first_line)
@@ -171,7 +166,7 @@ def write_jsonl(vs, fp):
         if len(vs) == 0:
             vd.warning(
                 "Output file is empty - cannot save headers without data for jsonl.\n"
-                "Use `options.json_save_arrays = True` to save as JSONL arrays format "
+                "Use `.jsonla` filetype to save as JSONL arrays format "
                 "rather than JSONL dict format to preserve the headers."
             )
 
@@ -197,19 +192,13 @@ def write_jsonla(vs, fp):
 def save_jsonl(vd, p, *vsheets):
     with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
         for vs in vsheets:
-            if vs.options.json_save_arrays:
-                vd.status("Saving JSONL arrays")
-                vs.write_jsonla(fp)
-            else:
-                vd.status("Saving JSONL dicts")
-                vs.write_jsonl(fp)
+            vs.write_jsonl(fp)
 
 
 @VisiData.api
 def save_jsonla(vd, p, *vsheets):
     with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
         for vs in vsheets:
-            vd.status("Saving JSONL arrays")
             vs.write_jsonla(fp)
 
 
