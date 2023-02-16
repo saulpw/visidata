@@ -167,4 +167,10 @@ visidata.Sheet.StaticColumn = deprecated('2.11', 'Sheet.freeze_col')(visidata.Sh
 
 vd.sysclip_value = deprecated('3.0', 'vd.sysclipValue')(vd.sysclipValue)
 
+def itemsetter(i):
+    def g(obj, v):
+        obj[i] = v
+    return g
+
+
 vd.addGlobals(globals())

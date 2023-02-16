@@ -4,7 +4,7 @@ import re
 
 'Various helper classes and functions.'
 
-__all__ = ['AlwaysDict', 'AttrDict', 'moveListItem', 'namedlist', 'classproperty', 'cleanName', 'MissingAttrFormatter']
+__all__ = ['AlwaysDict', 'AttrDict', 'moveListItem', 'namedlist', 'classproperty', 'cleanName', 'MissingAttrFormatter', 'getitem', 'setitem', 'getitemdef', 'getitemdeep', 'setitemdeep', 'getattrdeep', 'setattrdeep']
 
 
 class AlwaysDict(dict):
@@ -74,10 +74,70 @@ class OnExit:
             vd.exceptionCaught(e)
 
 
-def itemsetter(i):
-    def g(obj, v):
-        obj[i] = v
-    return g
+def setitem(r, i, v):  # function needed for use in lambda
+    r[i] = v
+    return True
+
+def getitem(o, k, default=None):
+    return default if o is None else o[k]
+
+def getitemdef(o, k, default=None):
+    try:
+        return default if o is None else o[k]
+    except Exception:
+        return default
+
+
+def getattrdeep(obj, attr, *default, getter=getattr):
+    try:
+        'Return dotted attr (like "a.b.c") from obj, or default if any of the components are missing.'
+        if not isinstance(attr, str):
+            return getter(obj, attr, *default)
+
+        try:  # if attribute exists, return toplevel value, even if dotted
+            if attr in obj:
+                return getter(obj, attr)
+        except RecursionError:  #1696
+            raise
+        except Exception as e:
+            pass
+
+        attrs = attr.split('.')
+        for a in attrs[:-1]:
+            obj = getter(obj, a)
+
+        return getter(obj, attrs[-1])
+    except Exception as e:
+        if not default: raise
+        return default[0]
+
+
+def setattrdeep(obj, attr, val, getter=getattr, setter=setattr):
+    'Set dotted attr (like "a.b.c") on obj to val.'
+    if not isinstance(attr, str):
+        return setter(obj, attr, val)
+
+    try:  # if attribute exists, overwrite toplevel value, even if dotted
+        getter(obj, attr)
+        return setter(obj, attr, val)
+    except Exception as e:
+        pass
+
+    attrs = attr.split('.')
+    for a in attrs[:-1]:
+        try:
+            obj = getter(obj, a)
+        except Exception as e:
+            obj = obj[a] = type(obj)()  # assume homogeneous nesting
+
+    setter(obj, attrs[-1], val)
+
+
+def getitemdeep(obj, k, *default):
+    return getattrdeep(obj, k, *default, getter=getitem)
+
+def setitemdeep(obj, k, val):
+    return setattrdeep(obj, k, val, getter=getitemdef, setter=setitem)
 
 
 def namedlist(objname, fieldnames):
@@ -113,9 +173,9 @@ def namedlist(objname, fieldnames):
 
 class MissingAttrFormatter(string.Formatter):
     "formats {} fields with `''`, that would normally result in a raised KeyError or AttributeError; intended for user customisable format strings."
-    def get_field(self, field_name, *args, **kwargs):
+    def get_field(self, field_name, args, kwargs):
         try:
-            return super().get_field(field_name, *args, **kwargs)
+            return super().get_field(field_name, args, kwargs)
         except (KeyError, AttributeError):
             return (None, field_name)
 

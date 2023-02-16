@@ -11,6 +11,7 @@ from visidata import options, anytype, stacktrace, vd
 from visidata import asyncthread, dispwidth, clipstr, iterchars
 from visidata import wrapply, TypedWrapper, TypedExceptionWrapper
 from visidata import Extensible, AttrDict, undoAttrFunc
+from visidata import getitem, setitem, getitemdef, getitemdeep, setitemdeep, getattrdeep, setattrdeep
 
 class InProgress(Exception):
     @property
@@ -420,62 +421,6 @@ class Column(Extensible):
 
 # ---- Column makers
 
-def setitem(r, i, v):  # function needed for use in lambda
-    r[i] = v
-    return True
-
-
-def getattrdeep(obj, attr, *default, getter=getattr):
-    try:
-        'Return dotted attr (like "a.b.c") from obj, or default if any of the components are missing.'
-        if not isinstance(attr, str):
-            return getter(obj, attr, *default)
-
-        try:  # if attribute exists, return toplevel value, even if dotted
-            if attr in obj:
-                return getter(obj, attr)
-        except RecursionError:  #1696
-            raise
-        except Exception as e:
-            pass
-
-        attrs = attr.split('.')
-        for a in attrs[:-1]:
-            obj = getter(obj, a)
-
-        return getter(obj, attrs[-1])
-    except Exception as e:
-        if not default: raise
-        return default[0]
-
-
-def setattrdeep(obj, attr, val, getter=getattr, setter=setattr):
-    'Set dotted attr (like "a.b.c") on obj to val.'
-    if not isinstance(attr, str):
-        return setter(obj, attr, val)
-
-    try:  # if attribute exists, overwrite toplevel value, even if dotted
-        getter(obj, attr)
-        return setter(obj, attr, val)
-    except Exception as e:
-        pass
-
-    attrs = attr.split('.')
-    for a in attrs[:-1]:
-        try:
-            obj = getter(obj, a)
-        except Exception as e:
-            obj = obj[a] = type(obj)()  # assume homogeneous nesting
-
-    setter(obj, attrs[-1], val)
-
-
-def getitemdeep(obj, k, *default):
-    return getattrdeep(obj, k, *default, getter=getitem)
-
-def setitemdeep(obj, k, val):
-    return setattrdeep(obj, k, val, getter=getitemdef, setter=setitem)
-
 def AttrColumn(name='', attr=None, **kwargs):
     'Column using getattr/setattr with *attr*.'
     return Column(name,
@@ -483,15 +428,6 @@ def AttrColumn(name='', attr=None, **kwargs):
                   getter=lambda col,row: getattrdeep(row, col.expr),
                   setter=lambda col,row,val: setattrdeep(row, col.expr, val),
                   **kwargs)
-
-def getitem(o, k, default=None):
-    return default if o is None else o[k]
-
-def getitemdef(o, k, default=None):
-    try:
-        return default if o is None else o[k]
-    except Exception:
-        return default
 
 class ItemColumn(Column):
     'Column using getitem/setitem with *key*.'
