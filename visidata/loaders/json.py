@@ -1,6 +1,6 @@
 import json
 
-from visidata import vd, date, VisiData, PyobjSheet, AttrDict, stacktrace, TypedExceptionWrapper, options, visidata, ColumnItem, wrapply, TypedWrapper, Progress, Sheet, InferColumnsSheet, deduceType, SequenceSheet
+from visidata import vd, date, VisiData, PyobjSheet, AttrDict, stacktrace, TypedExceptionWrapper, options, visidata, ColumnItem, wrapply, TypedWrapper, Progress, Sheet, InferColumnsSheet
 
 vd.option('json_indent', None, 'indent to use when saving json')
 vd.option('json_sort_keys', False, 'sort object keys when saving to json')
@@ -29,44 +29,6 @@ def open_jsonl(vd, p):
     return JsonSheet(p.name, source=p)
 
 VisiData.open_ndjson = VisiData.open_ldjson = VisiData.open_json = VisiData.open_jsonl
-
-
-@VisiData.api
-def open_jsonla(vd, p):
-    '''A JSONLA file is a JSONL file with rows of arrays, where the first row
-    is a header array:
-
-    ["A", "B", "C"]
-    [1, "blue", true]
-    [2, "yellow", false]
-
-    The header array must be a flat array of strings
-
-    If no suitable header is found, fall back to generic JSON load.
-    '''
-
-    with p.open_text(encoding=vd.options.encoding) as fp:
-        first_line = next(fp)
-
-    ret = json.loads(first_line)
-    if type(ret) is list and all(type(v) is str for v in ret):
-        return JsonlaSheet(p.name, source=p)
-    else:
-        vd.warning("jsonl header array missing for %s" % p.name)
-        return JsonSheet(p.name, source=p)
-
-
-class JsonlaSheet(SequenceSheet):
-    rowtype = 'rows'    # rowdef: list of Python objects decoded from JSON
-    def iterload(self):
-        with self.source.open_text(encoding=self.options.encoding) as fp:
-            for L in fp:
-                yield json.loads(L)
-
-        # set column types from first row
-        for i, c in enumerate(self.columns):
-            c.type = deduceType(self.rows[0][i])
-
 
 class JsonSheet(InferColumnsSheet):
     def iterload(self):
@@ -177,6 +139,7 @@ def write_jsonl(vs, fp):
             for row in vs.iterrows():
                 rowdict = _rowdict(vcols, row)
                 fp.write(jsonenc.encode(rowdict) + '\n')
+
         if len(vs) == 0:
             vd.warning(
                 "Output file is empty - cannot save headers without data for jsonl.\n"
@@ -185,35 +148,11 @@ def write_jsonl(vs, fp):
             )
 
 
-def get_jsonla_rows(sheet, cols):
-    for row in Progress(sheet.rows):
-        yield [col.getTypedValue(row) for col in cols]
-
-
-@Sheet.api
-def write_jsonla(vs, fp):
-        vcols = vs.visibleCols
-        jsonenc = _vjsonEncoder()
-        with Progress(gerund='saving'):
-            header = [col.name for col in vcols]
-            fp.write(jsonenc.encode(header) + '\n')
-            rows = get_jsonla_rows(vs, vcols)
-            for row in rows:
-                fp.write(jsonenc.encode(row) + '\n')
-
-
 @VisiData.api
 def save_jsonl(vd, p, *vsheets):
     with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
         for vs in vsheets:
             vs.write_jsonl(fp)
-
-
-@VisiData.api
-def save_jsonla(vd, p, *vsheets):
-    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
-        for vs in vsheets:
-            vs.write_jsonla(fp)
 
 
 JsonSheet.options.encoding = 'utf-8'
