@@ -181,6 +181,11 @@ def iterwraplines(lines, width=80, indent='  '):
             yield '', ''
             continue
 
+        line = re.sub(r'`(.*?)`', r'[:code]\1[:]', line)
+        line = re.sub(r'\*\*(.*?)\*\*', r'[:bold]\1[:]', line)
+        line = re.sub(r'\*(.*?)\*', r'[:italic]\1[:]', line)
+        line = re.sub(r'\b_(.*?)_\b', r'[:underline]\1[:]', line)
+
         chunks = re.split(r'(\[:[a-z_ 0-9]*\])', line)
         textchunks = [x for x in chunks if not (x.startswith('[:') and x.endswith(']'))]
         for linenum, textline in enumerate(textwrap.wrap(''.join(textchunks), width=width, drop_whitespace=False)):
