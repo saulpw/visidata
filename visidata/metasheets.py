@@ -25,6 +25,16 @@ class ColumnsSheet(Sheet):
     _rowtype = Column
     _coltype = ColumnAttr
     precious = False
+    help = '''# Columns Sheet
+This the list of {sheet.nCols} columns for {sheet.displaySource}.  You can _edit_ properties of "columns" (rows on this sheet), and the columns on the source sheet will reflect those changes.
+
+Some commands on the source sheet that affect columns, can also be done in bulk on the Columns Sheet, with the `g` prefix:
+
+- `ge` to bulk set the value for _{sheet.cursorCol.name}_ in all selected rows
+- `g-` to hide selected columns
+- `g#` (or any standard type) to set the type of all selected columns
+'''
+
     class ValueColumn(Column):
         'passthrough to the value on the source cursorRow'
         def calcValue(self, srcCol):

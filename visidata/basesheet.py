@@ -166,6 +166,19 @@ class BaseSheet(DrawablePane):
             return vs in self.source
         return False
 
+    @property
+    def displaySource(self):
+        if isinstance(self.source, BaseSheet):
+            return f'the *{self.source[0]}* sheet'
+
+        if isinstance(self.source, (list, tuple)):
+            if len(self.source) == 1:
+                return f'the *{self.source[0]}* sheet'
+            r = ' '.join(f'*{x}*' for x in self.source)
+            return f'{len(self.source)} sheets ({r})'
+
+        return f'*{self.source}*'
+
     def execCommand(self, cmd, vdglobals=None, keystrokes=None):
         cmd = self.getCommand(cmd or keystrokes)
         if not cmd:
