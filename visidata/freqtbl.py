@@ -35,7 +35,24 @@ def makeFreqTable(sheet, *groupByCols):
 
 class FreqTableSheet(PivotSheet):
     'Generate frequency-table sheet on currently selected column.'
+    help = '''# Frequency Table
+This is a *frequency analysis* of _{sheet.groupByColsName}_ from the *{sheet.groupByCols[0].sheet}* sheet.
+
+Each row on this sheet corresponds to a *bin* of rows on the source sheet that have a distinct value.  The _count_ and _percent_ columns show how many rows on the source sheet are in this bin.
+
+- `Enter` to open a copy of the source sheet, with only the rows in the current bin.
+- `g Enter` to open a copy of the source sheet, with a combination of the rows from all selected bins.
+
+## Tips
+
+- Use `+` on the source sheet, to add aggregators on other columns, and those metrics will appear as separate columns here.
+- Selecting bins on this sheet will select those rows on the source sheet.
+'''
     rowtype = 'bins'  # rowdef FreqRow(keys, sourcerows)
+
+    @property
+    def groupByColsName(self):
+        return '+'.join(c.name for c in self.groupByCols)
 
     def selectRow(self, row):
         self.source.select(row.sourcerows)     # select all entries in the bin on the source sheet
