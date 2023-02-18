@@ -2,10 +2,16 @@ from visidata import vd, IndexSheet, VisiData
 
 'Requires visidata/deps/pyxlsb fork'
 
+@VisiData.api
+def guess_xls(vd, p):
+    if p.open_bytes().read(16).startswith(b'\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1'):
+        return dict(filetype='xlsb', _likelihood=10)
+
 
 @VisiData.api
 def open_xlsb(vd, p):
     return XlsbIndex(p.name, source=p)
+
 
 class XlsbIndex(IndexSheet):
     def iterload(self):

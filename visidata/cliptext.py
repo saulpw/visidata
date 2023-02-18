@@ -172,7 +172,7 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False, **kwargs):
     return dispw
 
 
-def iterwraplines(lines, width=80, indent='  '):
+def iterwraplines(lines, width=80, indent=''):
     import textwrap
     import re
 
