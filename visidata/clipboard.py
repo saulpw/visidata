@@ -10,8 +10,8 @@ from visidata import VisiData, vd, asyncthread
 from visidata import Sheet, Path
 
 if sys.platform == 'win32':
-    syscopy_cmd_default = 'clip'
-    syspaste_cmd_default = 'clip'
+    syscopy_cmd_default = 'clip.exe'
+    syspaste_cmd_default = 'clip.exe'
 elif sys.platform == 'darwin':
     syscopy_cmd_default = 'pbcopy w'
     syspaste_cmd_default = 'pbpaste'
