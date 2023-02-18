@@ -11,5 +11,4 @@ matplotlib # svg
 
 psutil # top
 
-orgparse
 sh

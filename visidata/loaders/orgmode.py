@@ -1,9 +1,32 @@
+'''
+View sections in one or more .org files.  Easily edit sections within the system editor.
+
+## Supported syntax
+
+- `--- [comment]` at start of line starts a new section
+- any number of `#` or `*` (followed by a space) leads a headline
+- `#+key: value` adds metadata to next element (headline, table, section, )
+- orgmode style tags: `:tag1:tag2:`
+- `[[tagname]]` links to that set of tags
+- `[[url]]` links to external url
+- orgmode and markdown links
+   - `[[url][linktext]]`
+   - `[linktext](url)`
+- all other markup/orgmode/whatever is ignored and passed through
+
+## Usage
+
+- `vd file.org`
+- or `find orgfiles/ -name '*.org' | vd -f forg`
+- or `vd orgfiles/ -f orgdir`
+'''
+
 import collections
 import datetime
+import os
 import re
 
-from visidata import *
-import orgparse
+from visidata import vd, VisiData, Column, Sheet, ItemColumn, vlen, asyncthread, Path, AttrDict, date
 
 
 @VisiData.api
@@ -138,7 +161,17 @@ def orgmode_parse_title(line):
                 prio=m.group('prio') or '',
                 title=line)
 
+
 class OrgSheet(Sheet):
+    help = '''# Orgmode Sheet (experimental)
+A list of orgmode sections from _{sheet.source}_.
+
+- `Enter` to expand current section
+- `z Enter` to contract current section
+- `ga` to combine selected sections into a new entry
+- `Ctrl+O` to edit section in system editor (edits source directly)
+- `g Ctrl+S` to save all org files
+'''
     defer = True
     columns = [
         Column('path', getter=lambda c,r: _root(r).path, width=0),
@@ -147,7 +180,7 @@ class OrgSheet(Sheet):
 #        ItemColumn('date', width=0, type=date),
         ItemColumn('tags', width=10, type=lambda v: ' '.join(v)),
         ItemColumn('links', type=vlen),
-        ItemColumn('parent', width=0),
+#        ItemColumn('parent', width=0),
         ItemColumn('children', type=vlen),
         ItemColumn('linenum', width=0, type=int),
         Column('to_string', width=0, getter=lambda c,r: orgmode_to_string(r)),
@@ -298,7 +331,7 @@ def combine_rows(sheet, rows):
     newrow = sheet.newRow()
     newrow.date = datetime.datetime.today()
     orgid = clean_to_id(rows[0].title)
-    newrow.path = Path('~/lifefs/zk')/((orgid or encode_date())+'.org')
+    newrow.path = Path((orgid or encode_date())+'.org')
     for r in rows:
         hdr = sheet.newRow()
         if hdr.title:
