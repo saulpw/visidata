@@ -26,13 +26,14 @@ class ColumnsSheet(Sheet):
     _coltype = ColumnAttr
     precious = False
     help = '''# Columns Sheet
-This the list of {sheet.nCols} columns for {sheet.displaySource}.  You can _edit_ properties of "columns" (rows on this sheet), and the columns on the source sheet will reflect those changes.
+This is a list of {sheet.nCols} columns on the source sheet {sheet.displaySource}.  You can edit values on this sheet to change the column's appearance on the source sheet.
+For example, edit the _{sheet.cursorCol.name}_ column to {sheet.cursorCol.help}.
 
-Some commands on the source sheet that affect columns, can also be done in bulk on the Columns Sheet, with the `g` prefix:
+Some column commands can also be done in bulk here, with the `g` prefix:
 
-- `ge` to bulk set the value for _{sheet.cursorCol.name}_ in all selected rows
-- `g-` to hide selected columns
-- `g#` (or any standard type) to set the type of all selected columns
+- `ge` to bulk set the _{sheet.cursorCol.name}_ for all selected "columns"
+- `g-` to hide selected "columns"
+- `g#` (or any standard type) to set the type of all selected "columns"
 '''
 
     class ValueColumn(Column):
@@ -44,17 +45,17 @@ Some commands on the source sheet that affect columns, can also be done in bulk 
 
     columns = [
             ColumnAttr('sheet', type=str),
-            ColumnAttr('name'),
+            ColumnAttr('name', help='rename the column on the source sheet'),
             ColumnAttr('keycol', type=int, width=0),
-            ColumnAttr('width', type=int),
-            ColumnAttr('height', type=int),
+            ColumnAttr('width', type=int, help='set the column width (`0` to hide completely)'),
+            ColumnAttr('height', type=int, help='set a maximum height for the row, if this column will fill it'),
             ColumnAttr('hoffset', type=int, width=0),
             ColumnAttr('voffset', type=int, width=0),
-            ColumnAttr('type', 'typestr'),
-            ColumnAttr('fmtstr'),
-            ColumnAttr('formatter'),
-            ValueColumn('value'),
-            ColumnAttr('expr'),
+            ColumnAttr('type', 'typestr', help='convert all values to a specific type'),
+            ColumnAttr('fmtstr', help='use a custom format string; use either C-style (`%0.4f`) or Python-style (`{:0.4f}`)'),
+            ColumnAttr('formatter', help='use a custom formatting function (advanced)'),
+            ValueColumn('value', help='change the value of this cell on the source sheet'),
+            ColumnAttr('expr', help='change the main column parameter'),
             ColumnAttr('ncalcs', type=int, width=0, cache=False),
             ColumnAttr('maxtime', type=float, width=0, cache=False),
             ColumnAttr('totaltime', type=float, width=0, cache=False),

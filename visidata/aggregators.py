@@ -152,7 +152,8 @@ vd.aggregators['keymax'] = _defaggr('keymax', anytype, lambda col, rows: col.she
 ColumnsSheet.columns += [
     Column('aggregators',
            getter=lambda c,r:r.aggstr,
-           setter=lambda c,r,v:setattr(r, 'aggregators', v))
+           setter=lambda c,r,v:setattr(r, 'aggregators', v),
+           help='change the metrics calculated in every Frequency or Pivot derived from the source sheet')
 ]
 
 @Sheet.api
