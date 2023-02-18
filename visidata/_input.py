@@ -328,7 +328,7 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
     history = self.lastInputsSheet.history(type)
 
     sheet = self.activeSheet
-    if not vd.scrFull:  # no curses yet
+    if not vd.scrFull and not vd.options.batch:  # no curses yet but we still want input
         if kwargs.get('display', True):
             import builtins
             ret = builtins.input(prompt)

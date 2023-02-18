@@ -32,6 +32,7 @@ vd.option('output', None, 'save the final visible sheet to output at the end of 
 vd.option('preplay', '', 'longnames to preplay before replay')
 vd.option('imports', 'plugins', 'imports to preload before .visidatarc (command-line only)')
 vd.option('nothing', False, 'no config, no plugins, nothing extra')
+vd.option('interactive', False, 'run interactive mode after batch replay')
 
 # for --play
 def eval_vd(logpath, *args, **kwargs):
@@ -76,6 +77,7 @@ def optalias(abbr, name, val=None):
     option_aliases[abbr] = (name, val)
 
 
+optalias('i', 'interactive')
 optalias('N', 'nothing')
 optalias('f', 'filetype')
 optalias('p', 'play')
@@ -342,8 +344,14 @@ def main_vd():
         if args.batch:
             if vd.replay_sync(vs):  # error
                 return 1
+
+            if vd.options.interactive:
+                vd.status = lambda *args, vd=vd, **kwargs: visidata.VisiData.status(vd, *args, **kwargs)
+                vd.editline = lambda *args, vd=vd, **kwargs: visidata.VisiData.editline(vd, *args, **kwargs)
+                vd.execAsync = lambda *args, vd=vd, **kwargs: visidata.VisiData.execAsync(vd, *args, **kwargs)
+                vd.sheets[0].rows = visidata.UNLOADED
+                run()
         else:
-            vd.currentReplay = vs
             vd.replay(vs)
             run()
 
