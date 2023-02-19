@@ -15,29 +15,20 @@ vd.option('matrix_device_id', 'VisiData', 'device ID associated with matrix logi
 
 vd.matrix_client = None
 
-
 @VisiData.api
 def openhttp_matrix(vd, p):
     vd.importExternal('matrix_client')
 
     if not vd.options.matrix_token:
-        import builtins
-        import getpass
-
         from matrix_client.client import MatrixClient
 
         username = vd.input(f'{p.given} username: ', record=False)
         password = vd.input('password: ', record=False, display=False)
 
         vd.matrix_client = MatrixClient(p.given)
-        vd.options.matrix_user_id = username
-        vd.options.matrix_token = vd.matrix_client.login(username, password, device_id=vd.options.matrix_device_id)
+        matrix_token = vd.matrix_client.login(username, password, device_id=vd.options.matrix_device_id)
 
-        yn = vd.input(f'Save auth to {vd.options.config}? ', record=False)[0:1]
-        if yn and yn in 'Yy':
-            with open(str(Path(vd.options.config)), mode='a') as fp:
-                fp.write(f'options.matrix_user_id="{vd.options.matrix_user_id}"\n')
-                fp.write(f'options.matrix_token="{vd.options.matrix_token}"\n')
+        vd.setPersistentOptions(matrix_user_id=username, matrix_token=matrix_token)
 
     vd.timeouts_before_idle = -1
     return MatrixSheet(p.name, source=p)

@@ -452,6 +452,30 @@ def importStar(vd, pkgname):
     vd.addGlobals({k:v for k, v in m.__dict__.items() if not k.startswith('__')})
 
 
+@VisiData.api
+def importExternal(vd, modname, pipmodname=''):
+    pipmodname = pipmodname or modname
+    try:
+        m = importlib.import_module(modname)
+        vd.addGlobals({modname:m})
+    except ModuleNotFoundError as e:
+        vd.fail(f'To install support for "{modname}": pip install {pipmodname}')
+
+
+@VisiData.api
+def setPersistentOptions(vd, **kwargs):
+    for optname, optval in kwargs.items():
+        setattr(vd.options, optname, optval)
+
+    optnames = ' '.join(kwargs.keys())
+    yn = vd.input(f'Save {len(kwargs)} options ({optnames}) to {vd.options.config}? ', record=False)[0:1]
+
+    if yn and yn in 'Yy':
+        with open(str(visidata.Path(vd.options.config)), mode='a') as fp:
+            for optname, optval in kwargs.items():
+                fp.write(f'options.{optname}={repr(optval)}\n')
+
+
 vd.option('visidata_dir', '~/.visidata/', 'directory to load and store additional files', sheettype=None)
 
 BaseSheet.bindkey('^M', '^J')  # for windows ENTER
