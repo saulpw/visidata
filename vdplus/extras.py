@@ -24,12 +24,6 @@ def JSON(vd, s):
 
 Sheet.addCommand('', 'addcol-source', 'source.addColumn(copy(cursorCol))', 'add copy of current column to source sheet')  #988  frosencrantz
 
-Sheet.addCommand('', 'clean-names', '''
-options.clean_names = True;
-for c in visibleCols:
-    c.name = c.name
-''', 'set options.clean_names on sheet and clean visible column names')
-
 
 
 
