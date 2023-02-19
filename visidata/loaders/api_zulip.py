@@ -12,10 +12,21 @@ vd.option('zulip_email', '', 'Email for use with Zulip API key')
 
 @VisiData.api
 def open_zulip(vd, p):
+    vd.importExternal('zulip')
     import zulip
+
+    if not vd.options.zulip_api_key:
+        email = vd.input(f'email to use with {p.given}: ', record=False)
+        api_key = vd.input(f'your API key (see https://zulip.com/api/api-keys): ', record=False)
+
+        vd.setPersistentOptions(zulip_email=email, zulip_api_key=api_key)
+
     vd.z_client = zulip.Client(site=p.given, api_key=vd.options.zulip_api_key, email=vd.options.zulip_email)
 
     return vd.subscribedStreams
+
+
+VisiData.openhttp_zulip = VisiData.open_zulip
 
 
 @VisiData.api
@@ -80,6 +91,11 @@ class ZulipAPISheet(Sheet):
 
 
 class ZulipStreamsSheet(ZulipAPISheet):
+    help = '''# Zulip Streams
+
+- `Enter` to open recent messages from the stream
+- `z Enter` to open list of topics from the stream
+'''
     rowtype = 'streams'  # rowdef: dict of stream from server
     fields = '-#stream_id name @date_created description -rendered_description -invite_only -is_web_public -stream_post_policy -history_public_to_subscribers -#first_message_id -#message_retention_days -is_announcement_only'
 
@@ -92,6 +108,7 @@ class ZulipStreamsSheet(ZulipAPISheet):
                              zulip_args=[r.stream_id],
                              zulip_result_key='topics')
 
+
 class ZulipTopicsSheet(ZulipAPISheet):
     rowtype = 'topics'  # rowdef: dict of topic from server
     fields='name #max_id'
@@ -100,6 +117,9 @@ class ZulipTopicsSheet(ZulipAPISheet):
 
 
 class ZulipMembersSheet(ZulipAPISheet):
+    help = '''# Zulip Members
+- `Enter` to open list of messages from this member
+'''
     rowtype = 'members'  # rowdef: dict of member from server
     fields = '''-#user_id full_name email timezone @date_joined -#avatar_version -is_admin -is_owner -is_guest -is_bot -#role -is_active -avatar_url -bot_type -#bot_owner_id'''
     def openRow(self, r):
@@ -107,6 +127,12 @@ class ZulipMembersSheet(ZulipAPISheet):
 
 
 class ZulipMessagesSheet(Sheet):
+    help = '''# Zulip Messages Sheet
+Loads continuously starting with most recent, until all messages have been read.
+
+- `Ctrl+C` to cancel loading.
+- `Enter` to open message in word-wrapped text sheet
+'''
     rowtype = 'messages'  # rowdef: dict of message from server
 #    fields = ''
     columns = [
@@ -201,19 +227,21 @@ vd.addGlobals({
     'ZulipMessagesSheet': ZulipMessagesSheet,
 })
 
-BaseSheet.addCommand('', 'open-zulip-profile', 'vd.push(PyobjSheet("profile", source=z_client.get_profile()))', 'push the connected user\'s profile')
-BaseSheet.addCommand('', 'open-zulip-members', 'vd.push(ZulipMembersSheet("members", zulip_func=z_client.get_users, zulip_result_key="members"))', 'push list of members')
-BaseSheet.addCommand('', 'open-zulip-streams', 'vd.push(vd.allStreams)', 'show list of all streams/topics')
-BaseSheet.addCommand('', 'open-zulip-subs', 'vd.push(vd.subscribedStreams)', 'push list of subscribed streams')
-BaseSheet.addCommand('', 'open-zulip-msgs', 'vd.push(vd.allMessages)', 'push list of all messages')
+BaseSheet.addCommand('', 'open-zulip-profile', 'vd.push(PyobjSheet("profile", source=z_client.get_profile()))', 'open connected user\'s profile')
+BaseSheet.addCommand('', 'open-zulip-members', 'vd.push(ZulipMembersSheet("members", zulip_func=z_client.get_users, zulip_result_key="members"))', 'open list of all members')
+BaseSheet.addCommand('', 'open-zulip-streams', 'vd.push(vd.allStreams)', 'open list of all streams')
+BaseSheet.addCommand('', 'open-zulip-subs', 'vd.push(vd.subscribedStreams)', 'open list of subscribed streams')
+BaseSheet.addCommand('', 'open-zulip-msgs', 'vd.push(vd.allMessages)', 'open list of all messages')
 
 ZulipMessagesSheet.addCommand('', 'reply-zulip-msg', 'reply_message(input(cursorRow["display_recipient"][1]["short_name"]+"> ", "message"), cursorRow)', 'reply to current topic')
 ZulipMessagesSheet.addCommand('', 'edit-zulip-msg', 'update_message(cursorRow["id"], editCell(3, cursorRowIndex))', 'edit message content')
 
-vd.addMenuItem('Zulip', '+Open', 'profile', 'open-zulip-profile')
-vd.addMenuItem('Zulip', '+Open', 'member list', 'open-zulip-members')
-vd.addMenuItem('Zulip', '+Open', 'streams', 'open-zulip-streams')
-vd.addMenuItem('Zulip', '+Open', 'subscriptions', 'open-zulip-subs')
-vd.addMenuItem('Zulip', '+Open', 'messages', 'open-zulip-subs')
-vd.addMenuItem('Zulip', '+Reply', 'reply-zulip-msg')
-vd.addMenuItem('Zulip', '+Edit message', 'edit-zulip-msg')
+vd.addMenuItems('''
+File > Zulip > profile > open-zulip-profile
+File > Zulip > member list > open-zulip-members
+File > Zulip > streams > open-zulip-streams
+File > Zulip > subscriptions > open-zulip-subs
+File > Zulip > messages > open-zulip-subs
+File > Zulip > reply > reply-zulip-msg
+File > Zulip > edit message > edit-zulip-msg
+''')

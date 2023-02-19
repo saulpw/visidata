@@ -2,9 +2,8 @@
 
 ## Setup
 
-Get an [API key for Zulip](https://zulip.com/api/api-keys) and add import and options to .visidatarc:
+Get an [API key for Zulip](https://zulip.com/api/api-keys) and options to .visidatarc:
 
-    import vdplus.api.zulip
     options.zulip_api_key='...'
     options.zulip_email='you@example.com'
 

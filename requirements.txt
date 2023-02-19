@@ -31,11 +31,13 @@ odfpy               # odt (OpenDocument)
 urllib3             # .zip over http
 pyarrow             # arrow arrows (Apache Arrow)
 seaborn             # plot via seaborn
+matplotlib          # svg saver
 sh                  # ping
 psutil              # procmgr
 
 requests_cache      # scraper
 praw                # reddit API
 matrix_client       # matrix API
+zulip               # zulip API
 
 -e git+https://github.com/saulpw/pyxlsb.git@master#egg=pyxlsb # xlsb
