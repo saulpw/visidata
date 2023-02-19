@@ -2,8 +2,8 @@
 # Matrix Chat Sheet
 A list of messages from [:underline]{sheet.sourcename}[:].
 
- [:keys]Enter[:] to push a sheet with all the messages from [:underline]{sheet.cursorRow.room.display_name}[:].
- [:keys]a[:] to send a message to [:underline]{sheet.cursorRow.room.display_name}[:].
+- `Enter` to push a sheet with all the messages from [:underline]{sheet.cursorRow.room.display_name}[:].
+- `a` to send a message to [:underline]{sheet.cursorRow.room.display_name}[:].
 '''
 
 from visidata import vd, VisiData, Sheet, Column, ItemColumn, date, asyncthread, AttrDict, vlen, Path
