@@ -20,6 +20,7 @@ vd.option('reddit_user_agent', visidata.__version__, 'user_agent for reddit api'
 
 @VisiData.api
 def open_reddit(vd, p):
+    vd.importExternal('praw')
     vd.enable_requests_cache()
 
     if not vd.options.reddit_client_id:
