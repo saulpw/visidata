@@ -2,12 +2,14 @@
 
 __all__=[ 'SelectorColumn', 'soupstr' ]
 
-from visidata import *
-
 import os.path
 from urllib.parse import urljoin
 
 import concurrent.futures
+import functools
+
+from visidata import vd, VisiData, TableSheet, vdtype, Column, AttrColumn, Progress, date
+
 
 @VisiData.api
 def soup(vd, s):
@@ -17,11 +19,15 @@ def soup(vd, s):
 
 @VisiData.api
 def open_scrape(vd, p):
+    vd.importExternal('bs4', 'beautifulsoup4')
+
     vd.enable_requests_cache()
     if p.is_url():
         return HtmlDocsSheet(p.name, source=p, urls=[p.given])
     else:
         return HtmlElementsSheet(p.name, source=p, elements=None)
+
+VisiData.openhttp_scrape = VisiData.open_scrape
 
 def node_name(node):
     me = node.name
@@ -67,14 +73,24 @@ def prev_header(r):
 
 
 # one row per element
-class HtmlElementsSheet(Sheet):
+class HtmlElementsSheet(TableSheet):
+    help = '''# HTMLElements
+
+This is a list of HTML elements from _{sheet.source}_ as parsed by `beautifulsoup4`.
+
+Standard VisiData exploration techniques can be used to find relevant data, which will help determine the proper selector to use.
+
+- `Enter` to dive into children of cursor element (or children of all selected rows with `g Enter`)
+- `go` to batch open links in selected rows on new RequestsSheet, which will fetch each page
+- `~` to use the `soupstr` type to join all the text elements
+'''
     # source=[element, ...]
     rowtype='dom nodes'  # rowdef soup.element
     columns = [
         Column('name', getter=lambda c,r: node_name(r)),
         Column('selector', getter=lambda c,r: calc_selector(r), cache='async', width=0),
         AttrColumn('string'),
-        Column('depth', cache=True, getter=lambda c,r: list(c.sheet.parents(r))),
+        Column('depth', cache=True, getter=lambda c,r: list(c.sheet.html_parents(r))),
         Column('prev_header', getter=lambda c,r: prev_header(r), cache=True),
         HtmlAttrColumn('href', expr='href'),
     ]
@@ -84,7 +100,7 @@ class HtmlElementsSheet(Sheet):
                 if x.string:
                     yield x
 
-    def parents(self, row):
+    def html_parents(self, row):
         while row.parent and row.parent is not row:
             yield row.parent
             row = row.parent
@@ -112,7 +128,13 @@ class SelectorColumn(Column):
 
 
 # urls=list of urls to scrape
-class HtmlDocsSheet(Sheet):
+class HtmlDocsSheet(TableSheet):
+    help='''# HtmlDocsSheet
+
+- `Enter` to open the current request as list of HTMLElements
+- `;` to add column of elements matching given css selector
+  - this is how to cross-tabulate data from multiple pages
+'''
     rowtype='requests'  # rowdef: requests.Response
     columns = [
         AttrColumn('url'),

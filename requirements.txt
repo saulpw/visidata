@@ -36,6 +36,8 @@ sh                  # ping
 psutil              # procmgr
 
 requests_cache      # scraper
+beautifulsoup4      # scraper
+
 praw                # reddit API
 matrix_client       # matrix API
 zulip               # zulip API

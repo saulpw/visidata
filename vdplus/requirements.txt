@@ -2,5 +2,3 @@ airtable-python-wrapper>=0.15.2
 
 google_auth_oauthlib
 google-api-python-client
-
-beautifulsoup4  # scraper
