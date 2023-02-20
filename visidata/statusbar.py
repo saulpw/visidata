@@ -5,7 +5,7 @@ from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColo
 
 
 vd.option('disp_rstatus_fmt', ' {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus} {sheet.options.disp_selected_note}{sheet.nSelectedRows}', 'right-side status format string')
-vd.option('disp_status_fmt', '{sheet.shortcut}› {sheet.name}| ', 'status line prefix')
+vd.option('disp_status_fmt', '{sheet.shortcut}› | ', 'status line prefix')
 vd.option('disp_lstatus_max', 0, 'maximum length of left status line')
 vd.option('disp_status_sep', '│', 'separator between statuses')
 
@@ -115,11 +115,6 @@ def drawLeftStatus(vd, scr, vs):
 
     attr = cattr.attr
 
-    status_cattr = colors.get_color('color_status', 1)
-    error_attr = update_attr(status_cattr, colors.color_error, 3).attr
-    warn_attr = update_attr(status_cattr, colors.color_warning, 3).attr
-    sep = options.disp_status_sep
-
     x = 0
     y = vs.windowHeight-1  # status for each window
     try:
@@ -141,39 +136,48 @@ def drawLeftStatus(vd, scr, vs):
     if not active:
         return
 
-    statuses = vd.statuses.items()
-    maxlen = 0
-    if statuses:
-        maxlen = max(len(composeStatus(msgparts, n)) for (pri, msgparts), n in statuses)+2
-        maxlen = min(vs.windowWidth-x, maxlen)+2
+    x += vd.drawSheetBox(scr, vs, y, 3, colors.get_color('black on 223'))
 
-    def draw_status_line(y, x, s, attr):
-        clipdraw(scr, y, x, sep, status_cattr.attr, w=len(sep))
-        clipdraw(scr, y, x+len(sep), ' '+s+' ', attr, w=maxlen-2*len(sep))
-        clipdraw(scr, y, x+maxlen-len(sep), sep, status_cattr.attr, w=len(sep))
 
-    statuses = list(reversed(statuses))
+@BaseSheet.property
+def parents(sheet):
+    if not isinstance(sheet.source, BaseSheet):
+        return [sheet]
+    return sheet.source.parents+[sheet]
 
-    if len(statuses) > 5:
-        draw_status_line(y, x, 'Ctrl+P to view all status messages', colors.color_keystrokes)
+
+@VisiData.api
+def drawSheetBox(vd, scr, sheet, y, x, cattr):
+    vs = sheet
+    names = [vs.names[-1] for vs in sheet.parents]
+    maxnamelen = max(map(len, names))
+    for s in names:
+        clipdraw(scr, y, x, '| ' + s + ' |', cattr.attr, w=maxnamelen+4)
         y -= 1
-        statuses = sorted(statuses, key=lambda k: -k[0][0])[:5]
+    return maxnamelen+4
 
 
-    for (pri, msgparts), n in statuses:
-        try:
-            if x > vs.windowWidth:
-                break
-            msg = composeStatus(msgparts, n)
+@VisiData.property
+def recentStatusMessages(vd):
+    r = ''
+    for (pri, msgparts), n in vd.statuses.items():
+        msg = '; '.join(wrmap(str, msgparts))
+        msg = f'[{n}x] {msg}' if n > 1 else msg
 
-            if pri == 3: msgattr = error_attr
-            elif pri == 2: msgattr = warn_attr
-            elif pri == 1: msgattr = warn_attr
-            else: msgattr = status_cattr.attr
-            draw_status_line(y, x, msg, msgattr)
-            y -= 1
-        except Exception as e:
-            vd.exceptionCaught(e)
+        if pri == 3: msgattr = '{error}'
+        elif pri == 2: msgattr = '{warning}'
+        elif pri == 1: msgattr = '{warning}'
+        else: msgattr = ''
+
+        if msgattr:
+            msg = ' ' + msg + ' '
+
+        r += f'\n{msgattr}{msg}{{}}'
+
+    if r:
+        r = '# statuses' + r
+        r += '\n| {reverse} Ctrl+P to view all status messages {} |  '
+        return r
 
 
 @VisiData.api

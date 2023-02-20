@@ -43,7 +43,7 @@ def draw_sheet(self, scr, sheet):
     self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
 
     try:
-        sidebar = sheet.sidebar
+        sidebar = vd.recentStatusMessages or sheet.sidebar
         sidebar_title = sheet.sidebar_title
     except Exception as e:
         vd.exceptionCaught(e)
@@ -71,14 +71,13 @@ def drawSidebar(vd, scr, text, title=''):
     maxh, maxw = h-2, w//2
 
     lines = list(iterwraplines(text.splitlines(), width=maxw))
-    maxw = min(maxw, max(map(len, lines)))
-    maxh = min(maxh, len(lines)+3)
+    maxlinew = max(map(len, lines))
 
-    lines = list(iterwraplines(text.splitlines(), width=maxw-4))
+    winw = min(maxw, maxlinew+4)
+    winh = min(maxh, len(lines)+ (1 if text.endswith('\n') else 0))
 
-    sidebar_scr = scr.derwin(maxh, maxw, h-maxh-1, w-maxw-1)
+    sidebar_scr = scr.derwin(winh, winw, h-winh-1, w-winw-1)
     colorbox(sidebar_scr, lines, colors.get_color('color_sidebar'), title=title)
-
 
 
 vd.windowConfig = dict(pct=0, n=0, h=0, w=0)  # n=top line of bottom window; h=height of bottom window; w=width of screen

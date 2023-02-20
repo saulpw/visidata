@@ -23,8 +23,8 @@ options_menu_skel = '''.It Sy "{optname:<19}" No "{default}"
 {description}
 '''
 
-visidata.options.setdefault('plot_colors', '', visidata.options._opts._get('plot_colors', 'default').helpstr)
-visidata.options.setdefault('motd_url', '', visidata.options._opts._get('motd_url', 'default').helpstr)
+visidata.options.setdefault('plot_colors', '', visidata.options._opts._get('plot_colors', 'default').helpstr, visidata.options._opts._get('plot_colors', 'default').module)
+visidata.options.setdefault('motd_url', '', visidata.options._opts._get('motd_url', 'default').helpstr, visidata.options._opts._get('motd_url', 'default').module)
 
 with open(fncli, 'w') as cliOut:
     with open(fnopts, 'w') as menuOut:

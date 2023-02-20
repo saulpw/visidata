@@ -109,7 +109,7 @@ class BaseSheet(DrawablePane):
 
     def __init__(self, *names, **kwargs):
         self._name = None   # initial cache value necessary for self.options
-        self.names = names
+        self.names = list(names)
         self.name = self.options.name_joiner.join(str(x) for x in self.names if x)
         self.source = None
         self.rows = UNLOADED      # list of opaque objects
