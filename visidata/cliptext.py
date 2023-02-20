@@ -2,6 +2,7 @@ import unicodedata
 import sys
 import re
 import functools
+import textwrap
 
 from visidata import options, drawcache, vd, update_attr, colors
 
@@ -173,7 +174,6 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False, **kwargs):
 
 
 def iterwraplines(lines, width=80, indent=''):
-    import textwrap
     import re
 
     for line in lines:
@@ -219,7 +219,7 @@ def colorpanel(scr, text, maxw, cattr, placementfunc=lambda maxwrapw, nwraplines
     if not text:
         return
 
-    lines = list(iterwraplines(text.splitlines(), width=maxw-4))
+    lines = list(iterwraplines(textwrap.dedent(text.lstrip('\n')).splitlines(), width=maxw-4))
     maxlinew = max(len(textonly) for line, textonly in lines)
 
     x, y, w, h = placementfunc(maxlinew, len(lines))

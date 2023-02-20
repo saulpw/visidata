@@ -28,12 +28,12 @@ class DescribeColumn(Column):
 # rowdef: Column from source sheet
 class DescribeSheet(ColumnsSheet):
 #    rowtype = 'columns'
-    help = '''# Describe Sheet
+    help = '''
+        # Describe Sheet
+        This `Describe Sheet` shows a few basic metrics over data in {sheet.displaySource}, with each column represented by a row.
 
-This `Describe Sheet` shows a few basic metrics over data in {sheet.displaySource}, with each column represented by a row.
-
-For example, row {sheet.cursorRowIndex} describes the _{sheet.cursorRow.name}_ column, showing its minimum value, maximum value, mean, median, and other measures.
-'''
+        For example, row {sheet.cursorRowIndex} describes the _{sheet.cursorRow.name}_ column, showing its minimum value, maximum value, mean, median, and other measures.
+    '''
     precious = True
     columns = [
             ColumnAttr('sheet', 'sheet', width=0),
