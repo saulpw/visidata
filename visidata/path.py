@@ -22,7 +22,9 @@ def vstat(path, force=False):
 def filesize(path):
     if hasattr(path, 'filesize') and path.filesize is not None:
         return path.filesize
-    if path.has_fp() or path.is_url():
+    if hasattr(path, 'is_url') and path.is_url():
+        return 0
+    if hasattr(path, 'has_fp') and path.has_fp():
         return 0
     st = path.stat() # vstat(path)
     return st and st.st_size
