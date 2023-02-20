@@ -4,4 +4,4 @@
 
 [submodule "deps/requests-cache"]
 	path = deps/requests-cache
-	url = git@igthub.com:saulpw/requests-cache.git
+	url = git@github.com:saulpw/requests-cache.git
