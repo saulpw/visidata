@@ -177,7 +177,6 @@ def main_vd():
 
     warnings.showwarning = vd.warning
     vd.printout = builtins.print
-    vd.printerr = lambda *args, **kwargs: builtins.print(*args, file=sys.stderr)  # ignore kwargs (like priority)
 
     flPipedInput = not sys.stdin.isatty()
     flPipedOutput = not sys.stdout.isatty()
@@ -276,7 +275,6 @@ def main_vd():
     if args.batch:
         options.undo = False
         options.quitguard = False
-        vd.status = vd.printerr
         vd.editline = lambda *args, **kwargs: ''
         vd.execAsync = lambda func, *args, sheet=None, **kwargs: func(*args, **kwargs) # disable async
 
@@ -346,7 +344,6 @@ def main_vd():
                 return 1
 
             if vd.options.interactive:
-                vd.status = lambda *args, vd=vd, **kwargs: visidata.VisiData.status(vd, *args, **kwargs)
                 vd.editline = lambda *args, vd=vd, **kwargs: visidata.VisiData.editline(vd, *args, **kwargs)
                 vd.execAsync = lambda *args, vd=vd, **kwargs: visidata.VisiData.execAsync(vd, *args, **kwargs)
                 vd.sheets[0].rows = visidata.UNLOADED

@@ -1,5 +1,7 @@
+import builtins
 import collections
 import curses
+import sys
 
 from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr
 
@@ -46,6 +48,9 @@ def status(vd, *args, priority=0):
     k = (priority, tuple(map(str, args)))
     vd.statuses[k] = vd.statuses.get(k, 0) + 1
 
+    if not vd.cursesEnabled:
+        builtins.print(composeStatus(args), file=sys.stderr)
+
     return vd.addToStatusHistory(*args, priority=priority)
 
 @VisiData.api
@@ -88,7 +93,7 @@ def middleTruncate(s, w):
     return s[:w] + options.disp_truncator + s[-w:]
 
 
-def composeStatus(msgparts, n):
+def composeStatus(msgparts, n=1):
     msg = '; '.join(wrmap(str, msgparts))
     if n > 1:
         msg = '[%sx] %s' % (n, msg)
