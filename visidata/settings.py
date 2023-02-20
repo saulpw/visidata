@@ -463,7 +463,24 @@ def importExternal(vd, modname, pipmodname=''):
 
 
 @VisiData.api
+def requireOptions(vd, *args, help=''):
+    '''Prompt user to input values for option names in *args* if current values
+    are non-false.  Offer to persist the values to visidatarc.'''
+
+    optvals = {}
+    for optname in args:
+        if not getattr(vd.options, optname):
+            if help:
+                vd.status(help)
+            v = vd.input(f'{optname}: ', record=False, display='password' not in optname)
+            optvals[optname] = v
+
+    vd.setPersistentOptions(**optvals)
+
+
+@VisiData.api
 def setPersistentOptions(vd, **kwargs):
+    '''Set options from *kwargs* and offer to save them to visidatarc.'''
     for optname, optval in kwargs.items():
         setattr(vd.options, optname, optval)
 
