@@ -59,7 +59,7 @@ def drawSidebar(vd, scr, text, title=''):
     scrh, scrw = scr.getmaxyx()
     def _place(maxlinew, nlines):
         winw = min(scrw//2, maxlinew+4)
-        winh = min(scrh-2, nlines+ (1 if text.endswith('\n') else 0))
+        winh = min(scrh-2, nlines+1)
         return (scrw-winw-1, scrh-winh-1, winw, winh)
 
     colorpanel(scr, text, scrw//2, colors.get_color('color_sidebar'), _place)
