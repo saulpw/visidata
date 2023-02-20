@@ -420,7 +420,7 @@ class Column(Extensible):
                 if w_max < row_w:
                     w_max = row_w
                 if w_max >= self.sheet.windowWidth:
-                    break
+                    break  #1747  early out to speed up wide columns
             w = w_max
         w = max(w, nlen)+2
         w = min(w, self.sheet.windowWidth)
