@@ -139,32 +139,6 @@ def drawLeftStatus(vd, scr, vs):
     except Exception as e:
         vd.exceptionCaught(e)
 
-    if not active:
-        return
-
-    x += vd.drawSheetBox(scr, vs, y, 3, colors.get_color('black on 223'))
-
-
-@BaseSheet.property
-def parents(sheet):
-    if not isinstance(sheet.source, BaseSheet):
-        return [sheet]
-    return sheet.source.parents+[sheet]
-
-
-@VisiData.api
-def drawSheetBox(vd, scr, sheet, y, x, cattr):
-    vs = sheet
-    if vs.names:
-        names = [vs.names[-1] for vs in sheet.parents]
-    else:
-        names = [vs.name]
-    maxnamelen = max(map(len, names))
-    for s in names:
-        clipdraw(scr, y, x, '| ' + s + ' |', cattr.attr, w=maxnamelen+4)
-        y -= 1
-    return maxnamelen+4
-
 
 @VisiData.property
 def recentStatusMessages(vd):
