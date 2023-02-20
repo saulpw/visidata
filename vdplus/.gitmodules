@@ -1,3 +1,0 @@
-[submodule "requests-cache"]
-	path = requests-cache
-	url = git@github.com:saulpw/requests-cache.git
