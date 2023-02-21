@@ -10,11 +10,18 @@ def git_grep(vd, args):
 
 class GitGrep(GitSheet):
     rowtype = 'results' # rowdef: list(file, line, line_contents)
+    help = '''
+        # vgit grep
+        Each row on this sheet is a line matching the regex pattern `{sheet.regex}` in the tracked files of the current directory.
+
+        - `Ctrl+O` to open _{sheet.cursorRow[0]}:{sheet.cursorRow[1]}_ in the system editor; saved changes will be reflected automatically.
+    '''
     columns = [
-        ColumnItem('file', 0),
-        ColumnItem('line', 1),
-        ColumnItem('text', 2),
+        ColumnItem('file', 0, help='filename of the match'),
+        ColumnItem('line', 1, help='line number within file'),
+        ColumnItem('text', 2, width=120, help='matching line of text'),
     ]
+    nKeys = 2
 
     def iterload(self):
         tmp = (self.topRowIndex, self.cursorRowIndex)
