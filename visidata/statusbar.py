@@ -158,9 +158,7 @@ def recentStatusMessages(vd):
         r += f'\n{msgattr}{msg}[:]'
 
     if r:
-        r = '# statuses' + r
-        r += '\n| [:reverse] Ctrl+P to view all status messages [:] |  '
-        return r
+        return '# statuses\n[:reverse] Ctrl+P to view all status messages [:]' + r
 
 
 @VisiData.api
