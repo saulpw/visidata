@@ -123,19 +123,3 @@ class GitUndo:
 
 BaseSheet.addCommand('gD', 'git-output', 'vd.push(vd.gitcmdlog)', 'show output of git commands this session')
 
-@BaseSheet.property
-def progressStatus(sheet):
-    inp = vd.gitInProgress()
-    return ('[%s] ' % inp) if inp else ''
-
-@BaseSheet.property
-def branchStatus(sheet):
-    if hasattr(sheet.rootSheet, 'branch'):
-        return '%s%s' % (sheet.rootSheet.branch, sheet.rootSheet.remotediff)
-    return ''
-
-@BaseSheet.property
-def rootSheet(sheet):
-    if isinstance(sheet.source, GitSheet):
-        return sheet.source.rootSheet
-    return sheet

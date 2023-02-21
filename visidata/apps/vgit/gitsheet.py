@@ -19,7 +19,7 @@ class GitContext:
                 return None
             return _getRepoPath(p.resolve().parent)
 
-        worktree = _getRepoPath(self.getRootSheet().source)  # Path
+        worktree = _getRepoPath(self.gitRootSheet.source)  # Path
         if not worktree:
             return []
 
@@ -80,30 +80,15 @@ class GitContext:
 
         self.reload()
 
-    def getRootSheet(self):
+    @property
+    def gitRootSheet(self):
         if isinstance(self.source, GitSheet):
-            return self.source.getRootSheet()
-        elif isinstance(self.source, Path):
-            return self
-        else:
-            vd.error('no apparent root GitStatus')
+            return self.source.gitRootSheet
+        return self
 
-    def gitPath(self, s):
-        return Path('.git')/s
-
-    def gitInProgress(self):
-        p = self.gitPath
-        if (p/'rebase-merge').exists() or (p/'rebase-apply/rebasing').exists():
-            return 'rebasing'
-        elif p/'rebase-apply'.exists():
-            return 'applying'
-        elif p/'CHERRY_PICK_HEAD'.exists():
-            return 'cherry-picking'
-        elif p/'MERGE_HEAD'.exists():
-            return 'merging'
-        elif p/'BISECT_LOG'.exists():
-            return 'bisecting'
-        return ''
+    @property
+    def gitPath(self):
+        return Path('.git')  # XXX from git root
 
 
 class GitSheet(GitContext, Sheet):
