@@ -1,3 +1,4 @@
+import builtins
 import contextlib
 import os
 import curses
@@ -374,7 +375,7 @@ def run(vd, *sheetlist):
     vd.cancelThread(*[t for t in vd.unfinishedThreads if not t.name.startswith('save_')])
 
     if ret:
-        vd.printout(ret)
+        builtins.print(ret)
 
 
 import sys
