@@ -1,0 +1,9 @@
+#!/usr/bin/env python3
+
+import sys
+from visidata.apps.vgit.main import vgit_cli
+
+
+if __name__ == '__main__':
+    rc = vgit_cli()
+    sys.exit(rc)
