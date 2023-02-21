@@ -1,6 +1,5 @@
 import functools
 import collections
-from pkg_resources import resource_filename
 
 from visidata import *
 
@@ -119,6 +118,7 @@ class HelpPane:
 @VisiData.api
 @functools.lru_cache(maxsize=None)
 def getHelpPane(vd, name, module='vdplus'):
+    from pkg_resources import resource_filename
     ret = HelpPane(name)
     try:
         ret.amgr.load(name, Path(resource_filename(module,'ddw/'+name+'.ddw')).open_text(encoding='utf-8'))
@@ -134,6 +134,7 @@ def getHelpPane(vd, name, module='vdplus'):
 
 @VisiData.api
 def openManPage(vd):
+    from pkg_resources import resource_filename
     import os
     with SuspendCurses():
         if os.system(' '.join(['man', resource_filename(__name__, 'man/vd.1')])) != 0:

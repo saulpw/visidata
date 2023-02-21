@@ -16,8 +16,6 @@ import signal
 import warnings
 import builtins  # to override print
 
-from pkg_resources import resource_filename
-
 from visidata import vd, options, run, BaseSheet, AttrDict
 from visidata import Path
 from visidata.settings import _get_config_file
@@ -166,6 +164,7 @@ def main_vd():
         print(vd.version_info)
         return 0
     if '-h' in sys.argv or '--help' in sys.argv:
+        from pkg_resources import resource_filename
         with open(resource_filename(__name__, 'man/vd.txt'), 'r') as fp:
             print(fp.read())
         return 0
