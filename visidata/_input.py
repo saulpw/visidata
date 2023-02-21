@@ -359,7 +359,7 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
 @VisiData.api
 def confirm(vd, prompt, exc=EscapeException):
     'Display *prompt* on status line and demand input that starts with "Y" or "y" to proceed.  Raise *exc* otherwise.  Return True.'
-    if options.batch:
+    if options.batch and not options.interactive:
         return vd.fail('cannot confirm in batch mode: ' + prompt)
 
     yn = vd.input(prompt, value='no', record=False)[:1]
