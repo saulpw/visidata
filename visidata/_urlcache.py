@@ -1,15 +1,17 @@
 import os
 import os.path
 import time
-from urllib.request import Request, urlopen
-import urllib.parse
 
 from visidata import vd, VisiData, Path, modtime
 from visidata.settings import _get_cache_dir
 
+
 @VisiData.global_api
 def urlcache(vd, url, days=1, text=True, headers={}):
     'Return Path object to local cache of url contents.'
+    from urllib.request import Request, urlopen
+    import urllib.parse
+
     cache_dir = _get_cache_dir()
     os.makedirs(cache_dir, exist_ok=True)
 
