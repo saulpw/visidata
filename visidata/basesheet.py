@@ -2,7 +2,6 @@ import os
 
 import visidata
 from visidata import Extensible, VisiData, vd, EscapeException, cleanName, MissingAttrFormatter
-from unittest import mock
 
 
 UNLOADED = tuple()  # sentinel for a sheet not yet loaded for the first time
@@ -114,7 +113,7 @@ class BaseSheet(DrawablePane):
         self.name = self.options.name_joiner.join(str(x) for x in self.names if x)
         self.source = None
         self.rows = UNLOADED      # list of opaque objects
-        self._scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
+        self._scr = None
         self.mouseX = 0
         self.mouseY = 0
         self.hasBeenModified = False
@@ -302,10 +301,11 @@ def redraw(vd):
     'Clear the terminal screen and let the next draw cycle recreate the windows and redraw everything.'
     for vs in vd.sheets:
         vs._scr = None
-    vd.scrFull.clear()
-    vd.win1.clear()
-    vd.win2.clear()
-    vd.setWindows(vd.scrFull)
+    if vd.win1: vd.win1.clear()
+    if vd.win2: vd.win2.clear()
+    if vd.scrFull:
+        vd.scrFull.clear()
+        vd.setWindows(vd.scrFull)
 
 
 @VisiData.property

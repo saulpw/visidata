@@ -4,7 +4,6 @@ import curses
 import signal
 import threading
 import time
-from unittest import mock
 
 from visidata import vd, VisiData, colors, ESC, options, colorpanel
 
@@ -67,8 +66,11 @@ def drawSidebar(vd, scr, text, title=''):
 
 
 vd.windowConfig = dict(pct=0, n=0, h=0, w=0)  # n=top line of bottom window; h=height of bottom window; w=width of screen
-vd.winTop = mock.MagicMock(__bool__=mock.Mock(return_value=False))
-vd.scrMenu = mock.MagicMock(__bool__=mock.Mock(return_value=False))
+
+vd.winTop = None
+vd.scrMenu = None
+vd.scrFull = None
+
 
 @VisiData.api
 def setWindows(vd, scr, pct=None):
@@ -102,7 +104,7 @@ def setWindows(vd, scr, pct=None):
         if pct == 0 or pct >= 100:  # no second pane
             vd.win1 = vd.winBottom
             # drawing to 0-line window causes problems
-            vd.win2 = mock.MagicMock(__bool__=mock.Mock(return_value=False))
+            vd.win2 = None
         elif pct > 0: # pane 2 from line n to bottom
             vd.win1 = vd.winTop
             vd.win2 = vd.winBottom

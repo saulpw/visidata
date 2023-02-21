@@ -1,5 +1,4 @@
 from functools import wraps
-from unittest import mock
 import curses
 
 import visidata
@@ -42,7 +41,7 @@ class VisiData(visidata.Extensible):
         self.lastErrors = []
         self.pendingKeys = []
         self.keystrokes = ''
-        self.scrFull = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
+        self.scrFull = None
         self._cmdlog = None
         self.currentReplay = None
         self.contexts = [self]  # objects whose attributes are in the fallback context for eval/exec.
