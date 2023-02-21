@@ -1,13 +1,15 @@
 import datetime
 
-from visidata import vd, Sheet
+from visidata import VisiData, vd, Sheet
 
-try:
-    from dateutil.parser import parse as date_parse
-except ImportError:
-    def date_parse(r=''):
+@VisiData.lazy_property
+def date_parse(vd):
+    try:
+        from dateutil.parser import parse
+        return parse
+    except ImportError:
         vd.warning('install python-dateutil for date type')
-        return r
+        return str
 
 
 vd.option('disp_date_fmt','%Y-%m-%d', 'default fmtstr to strftime for date values', replay=True)
@@ -28,7 +30,7 @@ class date(datetime.datetime):
         if isinstance(s, int) or isinstance(s, float):
             r = datetime.datetime.fromtimestamp(s)
         elif isinstance(s, str):
-            r = date_parse(s)
+            r = vd.date_parse(s)
         elif isinstance(s, (datetime.datetime, datetime.date)):
             r = s
         else:
