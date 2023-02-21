@@ -11,12 +11,13 @@ import sys
 
 
 def vgit_cli():
+    import visidata
     from visidata import vd, Path
 
     args = sys.argv[1:]
 
     if not args:
-#        return vd.run(vd.git_status())
+#        return vd.run(vd.git_help())
         return
 
     func = getattr(vd, 'git_'+args[0], None)
@@ -25,6 +26,7 @@ def vgit_cli():
         return subprocess.run(['git', *args]).returncode
 
     vd.loadConfigAndPlugins()
+    vd.status(visidata.__version_info__)
     vd.domotd()
 
     vs = func(args[1:])
