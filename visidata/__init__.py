@@ -108,6 +108,7 @@ import visidata.ddwplay
 import visidata.plugins
 
 import visidata.theme
+import visidata.apps
 '''.splitlines():
     if not line: continue
     assert line.startswith('import visidata.'), line
