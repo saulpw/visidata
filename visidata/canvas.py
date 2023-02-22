@@ -482,11 +482,15 @@ class Canvas(Plotter):
                     if ymin is None or y < ymin: ymin = y
                     if xmax is None or x > xmax: xmax = x
                     if ymax is None or y > ymax: ymax = y
+            xmin = xmin or 0
+            xmax = xmax or 0
+            ymin = ymin or 0
+            ymax = ymax or 0
             if xmin == xmax:
                 xmax += 1
             if ymin == ymax:
                 ymax += 1
-            self.canvasBox = BoundingBox(float(xmin or 0), float(ymin or 0), float(xmax or 0), float(ymax or 0))
+            self.canvasBox = BoundingBox(float(xmin), float(ymin), float(xmax), float(ymax))
 
         if not self.visibleBox:
             # initialize minx/miny, but w/h must be set first to center properly
