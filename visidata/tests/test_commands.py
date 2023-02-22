@@ -17,6 +17,9 @@ nonTested = (
         'open-syspaste',
         'macro',
         'mouse',
+        'add-subreddits',
+        'add-submissions',
+        'open-zulip',
         'suspend',
         'open-memstats',  # TODO add testing support
         'plot-column-ext',
@@ -48,7 +51,6 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'select-cols-regex': '.',
                  'unselect-col-regex': '.',
                  'unselect-cols-regex': '.',
-                 'edit-cell': '',               # no change should not error
                  'go-col-regex': 'Units',          # column name in sample
                  'go-col-number': '2',
                  'go-row-number': '5',              # go to row 5
@@ -56,8 +58,10 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'addcol-expr': 'Units',          # just copy the column
                  'addcol-incr-step': '2',
                  'setcol-incr-step': '2',
+                 'setcol-iter': 'range(1, 100)',
                  'setcol-format-enum': '1=cat',
                  'split-col': '-',
+                 'setcol-input': '5',
                  'show-expr': 'OrderDate',
                  'setcol-expr': 'OrderDate',
                  'open-ping': 'localhost',
@@ -136,4 +140,5 @@ class TestCommands:
         vd.allSheets = [vs]
         vs.mouseX, vs.mouseY = (4, 4)
         vs.draw(mock_screen)
+        vd.options.batch = True
         vs.execCommand(longname, vdglobals=vd.getGlobals())
