@@ -1067,6 +1067,7 @@ def quitAndReleaseMemory(vs):
         vs.source.lines.clear() # clear cache of read lines
 
     if vs.precious: # only precious sheets have meaningful data
+        vs.confirmQuit('quit')
         vs.rows.clear()
         vs.rows = UNLOADED
         vd.remove(vs)
