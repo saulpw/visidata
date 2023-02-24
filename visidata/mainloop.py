@@ -42,27 +42,8 @@ def draw_sheet(self, scr, sheet):
     self.drawLeftStatus(scr, sheet)
     self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
 
-    try:
-        sidebar = vd.recentStatusMessages or sheet.sidebar
-        sidebar_title = sheet.sidebar_title
-    except Exception as e:
-        vd.exceptionCaught(e)
-        sidebar = str(e)
-        sidebar_title = 'error'
+    self.drawSidebar(scr, sheet)
 
-    vd.drawSidebar(scr, sidebar, title=sidebar_title)
-
-
-
-@VisiData.api
-def drawSidebar(vd, scr, text, title=''):
-    scrh, scrw = scr.getmaxyx()
-    def _place(maxlinew, nlines):
-        winw = min(scrw//2, maxlinew+4)
-        winh = min(scrh-2, nlines+1)
-        return (scrw-winw-1, scrh-winh-1, winw, winh)
-
-    colorpanel(scr, text, scrw//2, colors.get_color('color_sidebar'), _place)
 
 
 

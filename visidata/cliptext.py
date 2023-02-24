@@ -218,8 +218,7 @@ def colorpanel(scr, text, maxw, cattr, placementfunc=lambda maxwrapw, nwraplines
     '''placementfunc(maxwrapw, nwraplines) -> (x, y, w, h) area to display it in'''
     if not text:
         return
-
-    lines = list(iterwraplines(textwrap.dedent(text.lstrip('\n')).splitlines(), width=maxw-4))
+    lines = list(iterwraplines(text.splitlines(), width=maxw-4))
     maxlinew = max(len(textonly) for line, textonly in lines)
 
     x, y, w, h = placementfunc(maxlinew, len(lines))

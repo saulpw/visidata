@@ -2,7 +2,6 @@ from visidata import vd
 
 
 vd.option('disp_splitwin_pct', 0, 'height of second sheet on screen')
-vd.option('disp_sidebar_fmt', '', 'format string for default sidebar')
 vd.option('disp_note_none', '⌀',  'visible contents of a cell whose value is None')
 vd.option('disp_truncator', '…', 'indicator that the contents are only partially visible')
 vd.option('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
@@ -46,7 +45,6 @@ vd.option('color_column_sep', '246 blue', 'color of column separators')
 vd.option('color_key_col', '81 cyan', 'color of key columns')
 vd.option('color_hidden_col', '8', 'color of hidden columns on metasheets')
 vd.option('color_selected_row', '215 yellow', 'color of selected rows')
-vd.option('color_sidebar', 'black on 114 blue', 'color of sidebar')
 vd.option('color_code', 'bold', 'color of code sample')
 
 

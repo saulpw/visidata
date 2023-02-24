@@ -103,6 +103,7 @@ import visidata.macros
 import visidata.macos
 
 import visidata.form
+import visidata.sidebar
 
 import visidata.ddwplay
 import visidata.plugins

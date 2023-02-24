@@ -284,16 +284,6 @@ class BaseSheet(DrawablePane):
         'Return formatted string with *sheet* and *vd* accessible to expressions.  Missing expressions return empty strings instead of error.'
         return MissingAttrFormatter().format(fmt, sheet=self, vd=vd)
 
-    @property
-    def sidebar(self):
-        'Default implementation just returns set value.  Overridable.'
-        fmt = self.options.disp_sidebar_fmt or self.help
-        return self.formatString(fmt)
-
-    @property
-    def sidebar_title(self):
-        'Default implementation returns fixed value.  Overridable.'
-        return ''
 
 
 @VisiData.api
