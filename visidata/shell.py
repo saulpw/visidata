@@ -76,19 +76,20 @@ class ColumnShell(Column):
 
 class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
-    help = '''# Directory Sheet
-This is a list of files in the {sheet.displaySource} folder.
+    help = '''
+        # Directory Sheet
+        This is a list of files in the {sheet.displaySource} folder.
 
-- `Enter` to open a file as a separate sheet
-- `g Enter` to open all selected files, each in a separate sheet
-- [:bold]`[:] to push the parent folder
-- `Ctrl+O` to open the current file in your system editor
+        - `Enter` to open a file as a separate sheet
+        - `g Enter` to open all selected files, each in a separate sheet
+        - [:bold]`[:] to push the parent folder
+        - `Ctrl+O` to open the current file in your system editor
 
-## Options (must reload to take effect)
+        ## Options (must reload to take effect)
 
-- `--dir-recurse` (or `-r`) to include all files in all subfolders
-- `--dir-hidden` to include hidden dotfiles
-'''
+        - `--dir-recurse` (or `-r`) to include all files in all subfolders
+        - `--dir-hidden` to include hidden dotfiles
+    '''
     rowtype = 'files' # rowdef: Path
     defer = True
     columns = [
