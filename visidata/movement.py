@@ -231,6 +231,7 @@ vd.addMenuItems('''
     Row > Goto > next > null > go-next-null
     Row > Goto > next > value > go-next-value
     Row > Goto > next > selected > go-next-selected
+    Row > Goto > by number > go-row-number
     View > Other sheet > previous sheet > jump-prev
     View > Other sheet > first sheet > jump-first
 ''')
