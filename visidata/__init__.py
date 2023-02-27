@@ -100,7 +100,9 @@ import visidata.modify
 import visidata.sort
 import visidata.memory
 import visidata.macros
+
 import visidata.macos
+import visidata.windows
 
 import visidata.form
 import visidata.sidebar
