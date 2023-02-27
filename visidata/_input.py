@@ -205,7 +205,7 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
 
         prew = clipdraw(scr, y, x, dispval[:dispi], attr, w, clear=clear)
         clipdraw(scr, y, x+prew, dispval[dispi:], attr, w-prew+1, clear=clear)
-        scr.move(y, x+prew)
+        if scr: scr.move(y, x+prew)
         ch = vd.getkeystroke(scr)
         if ch == '':                               continue
         elif ch == 'KEY_IC':                       insert_mode = not insert_mode
