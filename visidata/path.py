@@ -197,7 +197,7 @@ class Path(os.PathLike):
         # rfile makes a single-access fp reusable
 
         if self.rfile:
-            return self.rfile
+            return self.rfile.reopen()
 
         if self.fp:
             self.fptext = codecs.iterdecode(self.fp,
@@ -333,10 +333,14 @@ class RepeatFile:
 
     def __enter__(self):
         '''Returns a new independent file-like object, sharing the same line cache.'''
-        return RepeatFile(self.iter_lines, lines=self.lines)
+        return self.reopen()
 
     def __exit__(self, a,b,c):
         pass
+
+    def reopen(self):
+        'Return copy of file-like with internal iterator reset.'
+        return RepeatFile(self.iter_lines, lines=self.lines)
 
     def read(self, n=None):
         r = ''
