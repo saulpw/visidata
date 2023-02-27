@@ -49,7 +49,7 @@ def guessFiletype(vd, p):
             if filetype:
                 filetypes.append(filetype)
         except Exception as e:
-            vd.exceptionCaught(e)
+            vd.debug(f'{f.__name__}: {e}')
 
     if filetypes:
         return sorted(filetypes, key=lambda r: -r.get('_likelihood', 1))[0]
