@@ -508,7 +508,7 @@ class ExprColumn(Column):
         a = self.getDisplayValue(row)
         b = self.format(self.type(val))
         if a != b:
-            vd.warning('%s calced %s not %s' % (self.name, a, b))
+            vd.warning("Cannot change value of calculated column.  Use `'` to freeze column.")
 
     @property
     def expr(self):
