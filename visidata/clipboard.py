@@ -5,6 +5,7 @@ import io
 import sys
 import tempfile
 import functools
+import os
 
 from visidata import VisiData, vd, asyncthread
 from visidata import Sheet, Path
@@ -16,8 +17,12 @@ elif sys.platform == 'darwin':
     syscopy_cmd_default = 'pbcopy w'
     syspaste_cmd_default = 'pbpaste'
 else:
-    syscopy_cmd_default = 'xclip -selection clipboard -filter'  # xsel --clipboard --input
-    syspaste_cmd_default = 'xclip -selection clipboard -o'  # xsel --clipboard
+    if 'WAYLAND_DISPLAY' in os.environ:
+        syscopy_cmd_default = 'wl-copy'
+        syspaste_cmd_default = 'wl-paste'
+    else:
+        syscopy_cmd_default = 'xclip -selection clipboard -filter'  # xsel --clipboard --input
+        syspaste_cmd_default = 'xclip -selection clipboard -o'  # xsel --clipboard
 
 vd.option('clipboard_copy_cmd', syscopy_cmd_default, 'command to copy stdin to system clipboard', sheettype=None)
 vd.option('clipboard_paste_cmd', syspaste_cmd_default, 'command to send contents of system clipboard to stdout', sheettype=None)
