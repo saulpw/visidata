@@ -2,8 +2,6 @@ import traceback
 
 from visidata import vd, VisiData, options
 
-__all__ = ['stacktrace', 'ExpectedException']
-
 vd.option('debug', False, 'exit on error and display stacktrace')
 
 
@@ -32,7 +30,6 @@ def exceptionCaught(vd, exc=None, status=True, **kwargs):
         raise
 
 
-import sys
-vd.addGlobals({k:getattr(sys.modules[__name__], k) for k in __all__})
+vd.addGlobals(stacktrace=stacktrace, ExpectedException=ExpectedException)
 
 # see textsheet.py for ErrorSheet and associated commands
