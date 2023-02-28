@@ -153,6 +153,8 @@ class Path(os.PathLike):
         self.ext = self.suffix[1:]
         if self.suffix:  #1450  don't make this a oneliner; [:-0] doesn't work
             self.name = self._path.name[:-len(self.suffix)]
+        elif self._given == '.':  #1768
+            self.name = '.'
         else:
             self.name = self._path.name
 
