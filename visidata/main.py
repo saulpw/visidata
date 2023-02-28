@@ -91,7 +91,7 @@ optalias('force_valid_colnames', 'clean_names')  # deprecated
 
 
 @visidata.VisiData.api
-def parsePos(vd, arg:str):
+def parsePos(vd, arg:str, inputs=None):
     'Return (startsheets:list, startrow:str, startcol:str) from *arg* like "+sheet:subsheet:col:row".  Empty sheetstr in startsheets means the starting pos applies to all sheets.'
     startsheets, startrow, startcol = [], None, None
 
@@ -244,7 +244,7 @@ def main_vd():
                 global_args[optname] = optval
 
         elif arg.startswith('+'):  # position cursor at start
-            after_config.append((vd.moveToPos, *vd.parsePos(arg[1:])))
+            after_config.append((vd.moveToPos, *vd.parsePos(arg[1:], inputs=inputs)))
 
         elif current_args.get('play', None) and '=' in arg:
             # parse 'key=value' pairs for formatting cmdlog template in replay mode
