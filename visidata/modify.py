@@ -219,8 +219,6 @@ def putChanges(sheet):
     sheet.commitMods()
     sheet.commitDeletes()
 
-    vd.saveSheets(Path(sheet.source), sheet, confirm_overwrite=False)
-
     # clear after save, to ensure cstr (in commit()) is aware of deletes
     sheet._deferredDels.clear()
 
