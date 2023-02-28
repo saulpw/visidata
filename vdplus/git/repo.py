@@ -5,67 +5,9 @@ import re
 from visidata import *
 from . import GitSheet, GitStatus, GitContext
 
-__all__ = ['GitBranches', 'GitOptions', 'GitStashes', 'GitRemotes', 'GitLogSheet']
+__all__ = ['GitStashes', 'GitRemotes', 'GitLogSheet']
 
 theme('color_vgit_unpushed', 'cyan', 'unpushed commits on log sheet')
-theme('color_vgit_current_branch', 'underline', 'current branch on branches sheet')
-theme('color_vgit_local_branch', 'cyan', 'color of non-remote branches')
-
-def remove_prefix(text, prefix):
-    if text.startswith(prefix):
-        return text[len(prefix):]
-    return text
-
-class GitBranches(GitSheet):
-    rowtype = 'branches'  # rowdef: AttrDict from regex (in reload below)
-    columns = [
-        Column('branch', getter=lambda c,r: remove_prefix(r['localbranch'], 'remotes/'), width=20),
-#        Column('remote', getter=lambda c,r: r['localbranch'].startswith('remotes/') and '*' or '', width=3),
-        ColumnItem('head_commitid', 'refid', width=0),
-        ColumnItem('tracking', 'remotebranch'),
-        ColumnItem('upstream'),
-        ColumnItem('merge_base', 'merge_name', width=20),
-        ColumnItem('extra', width=0),
-        ColumnItem('head_commitmsg', 'msg', width=50),
-        ColumnItem('last_commit', type=date),
-        ColumnItem('last_author'),
-    ]
-    colorizers = [
-        RowColorizer(10, 'color_vgit_current_branch', lambda s,c,r,v: r and r['current']),
-        RowColorizer(10, 'color_vgit_local_branch', lambda s,c,r,v: r and not r['localbranch'].startswith('remotes/')),
-    ]
-    nKeys = 1
-
-    @asyncthread
-    def reload(self):
-        self.rows = []
-        branches_lines = self.git_lines('branch', '--list', '-vv', '--no-color', '--all')
-        for line in branches_lines:
-            if '->' in line:
-                continue
-
-            m = re.match(r'''(?P<current>\*?)\s+
-                             (?P<localbranch>\S+)\s+
-                             (?P<refid>\w+)\s+
-                             (?:\[
-                               (?P<remotebranch>[^\s\]:]+):?
-                               \s*(?P<extra>.*?)
-                             \])?
-                             \s*(?P<msg>.*)''', line, re.VERBOSE)
-            if m:
-                row = AttrDict(m.groupdict())
-                self.addRow(row)
-
-        for row in Progress(self.rows):
-            merge_base = self.git_all("show-branch", "--merge-base", row.localbranch, self.rootSheet.branch, _ok_code=[0,1]).strip()
-            row.merge_name = self.git_all("name-rev", "--name-only", merge_base).strip() if merge_base else ''
-            row.upstream = self.rootSheet.getBranchStatuses().get(row.localbranch)
-            row.last_commit = self.git_all("show", "--no-patch", '--pretty=%ai', row.localbranch).strip()
-            row.last_author = self.git_all("show", "--no-patch", '--pretty=%an', row.localbranch).strip()
-
-    def openRow(self, row):
-        return GitLogSheet(row.localbranch+"_log", source=self, ref=row.localbranch)
-
 
 # how to incorporate fetch/push/pull?
 class GitRemotes(GitSheet):
@@ -163,14 +105,6 @@ GitLogSheet.addCommand(None, 'add-row', 'error("commits cannot be added")')
 
 
 @GitStatus.lazy_property
-def gitBranchesSheet(self):
-    return GitBranches('branches', source=self)
-
-@GitStatus.lazy_property
-def gitOptionsSheet(self):
-    return GitOptions('git-options', source=self)
-
-@GitStatus.lazy_property
 def gitStashesSheet(self):
     return GitStashes('stashes', source=self)
 
@@ -186,12 +120,6 @@ Sheet.unbindkey('L')
 #unbindkey('gO')
 
 BaseSheet.addCommand('L', 'git-log', 'vd.push(GitLogSheet(branch+"_log", ref=branch, source=sheet))', 'push log of current branch')
-
-GitBranches.addCommand('a', 'git-branch-create', 'git("branch", input("create branch: ", type="branch"))', 'create a new branch off the current checkout'),
-GitBranches.addCommand('d', 'git-branch-delete', 'git("branch", "--delete", cursorRow.localbranch)', 'delete this branch'),
-GitBranches.addCommand('e', 'git-branch-rename', 'git("branch", "-v", "--move", cursorRow.localbranch, editCell(0))', 'rename this branch'),
-GitBranches.addCommand('c', 'git-checkout', 'git("checkout", cursorRow.localbranch)', 'checkout this branch'),
-GitBranches.addCommand('m', 'git-branch-merge', 'git("merge", cursorRow.localbranch)', 'merge this branch into the current branch'),
 
 GitStashes.addCommand('a', 'git-stash-apply', 'git("stash", "apply", cursorRow[0])', 'apply this stashed change without removing'),
 GitStashes.addCommand('', 'git-stash-pop-row', 'git("stash", "pop", cursorRow[0])', 'apply this stashed change and drop it'),

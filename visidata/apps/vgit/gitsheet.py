@@ -47,6 +47,25 @@ class GitContext:
 
         return gcmd.output
 
+    def git_all(self, *args, **kwargs):
+        'Return entire output of git command.'
+        import sh
+        git=self.loggit
+        try:
+            cmd = git('--no-pager',
+                      *self._git_args(),
+                      *args,
+                      _decode_errors='replace',
+                      **kwargs)
+            out = cmd.stdout
+        except sh.ErrorReturnCode as e:
+            vd.status('git '+' '.join(args), 'error=%s' % e.exit_code)
+            out = e.stdout
+
+        out = out.decode('utf-8')
+
+        return out
+
     def git_lines(self, *args, **kwargs):
         'Generator of stdout lines from given git command'
         import sh
@@ -133,8 +152,14 @@ class GitSheet(GitContext, Sheet):
     def git_exec(self, cmdstr):
         vd.push(TextSheet(cmdstr, source=sheet.git_lines(*cmdstr.split())))
 
+@GitSheet.lazy_property
+def branch(self):
+    return self.git_all('rev-parse', '--abbrev-ref', 'HEAD').strip()
+
+
 
 GitSheet.options.disp_note_none = ''
+GitSheet.options.disp_status_fmt = '{sheet.progressStatus}‹{sheet.branchStatus}› {sheet.name}| '
 BaseSheet.addCommand('gi', 'git-exec', 'sheet.git_exec(input("gi", type="git"))')
 
 GitSheet.addCommand('Alt+g', 'menu-git', 'pressMenu("Git")', '')

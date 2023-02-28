@@ -95,31 +95,6 @@ class GitStatus(GitSheet):
         return False
 
 
-    def getBranchStatuses(self):
-        ret = {}  # localbranchname -> "+5/-2"
-        for branch_status in self.git_lines('for-each-ref', '--format=%(refname:short) %(upstream:short) %(upstream:track)', 'refs/heads'):
-            m = re.search(r'''(\S+)\s*
-                              (\S+)?\s*
-                              (\[
-                              (ahead.(\d+)),?\s*
-                              (behind.(\d+))?
-                              \])?''', branch_status, re.VERBOSE)
-            if not m:
-                status('unmatched branch status: ' + branch_status)
-                continue
-
-            localb, remoteb, _, _, nahead, _, nbehind = m.groups()
-            if nahead:
-                r = '+%s' % nahead
-            else:
-                r = ''
-            if nbehind:
-                if r:
-                    r += '/'
-                r += '-%s' % nbehind
-            ret[localb] = r
-
-        return ret
 
     @asyncthread
     def reload(self):
