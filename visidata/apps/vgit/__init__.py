@@ -1,1 +1,1 @@
-from visidata.apps.vgit import grep, abort, statusbar
+from visidata.apps.vgit import grep, abort, statusbar, config

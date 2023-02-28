@@ -7,6 +7,7 @@ vd.option('vgit_logfile', '', 'file to log all git commands run by vgit')
 
 GitCmd = AttrDict   # sheet, command, output
 
+
 class GitContext:
     def _git_args(self):
         'Return list of extra args to all git commands'
@@ -64,6 +65,43 @@ class GitContext:
 
         except sh.ErrorReturnCode as e:
             vd.error('git '+' '.join(args), 'error=%s' % e.exit_code)
+
+        errlines = err.getvalue().splitlines()
+        if errlines:
+            vd.warning('git stderr: ' + '\n'.join(errlines))
+
+    def git_iter(self, *args, sep='\0', **kwargs):
+        'Generator of chunks of stdout from given git command, delineated by sep character'
+        import sh
+        err = io.StringIO()
+        git = self.loggit
+
+        bufsize = 512
+        chunks = []
+        try:
+          for data in git('--no-pager',
+                          *self._git_args(),
+                          *args,
+                          _decode_errors='replace',
+                          _out_bufsize=bufsize,
+                          _iter=True,
+                          _err=err,
+                          **kwargs):
+            while True:
+                i = data.find(sep)
+                if i < 0:
+                    break
+                chunks.append(data[:i])
+                data = data[i+1:]
+                yield ''.join(chunks)
+                chunks.clear()
+
+            chunks.append(data)
+        except sh.ErrorReturnCode as e:
+            vd.error('git '+' '.join(args), 'error=%s' % e.exit_code)
+
+        if chunks:
+            yield ''.join(chunks)
 
         errlines = err.getvalue().splitlines()
         if errlines:

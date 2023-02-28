@@ -67,37 +67,6 @@ class GitBranches(GitSheet):
         return GitLogSheet(row.localbranch+"_log", source=self, ref=row.localbranch)
 
 
-class GitOptions(GitSheet):
-    CONFIG_CONTEXTS = ('local', 'local', 'global', 'system')
-    def __init__(self, name, **kwargs):
-        super().__init__(name, **kwargs)
-        self.columns = [Column('option', getter=lambda c,r: r[0])]
-        for i, ctx in enumerate(self.CONFIG_CONTEXTS[1:]):
-            self.columns.append(Column(ctx, getter=lambda c,r, i=i: r[1][i], setter=self.config_setter(ctx)))
-
-        self.nKeys = 1
-
-    def config_setter(self, ctx):
-        def setter(r, v):
-            self.git('config', '--'+ctx, r[0], v)
-        return setter
-
-    def reload(self):
-        opts = {}
-        for i, ctx in enumerate(self.CONFIG_CONTEXTS[1:]):
-            try:
-                for line in self.git_iter('config', '--list', '--'+ctx, '-z'):
-                    if line:
-                        k, v = line.splitlines()
-                        if k not in opts:
-                            opts[k] = [None, None, None]
-                        opts[k][i] = v
-            except Exception:
-                pass # exceptionCaught()
-
-        self.rows = sorted(list(opts.items()))
-
-
 # how to incorporate fetch/push/pull?
 class GitRemotes(GitSheet):
     columns=[
@@ -210,7 +179,6 @@ def gitRemotesSheet(self):
     return GitRemotes('remotes', source=self)
 
 BaseSheet.addCommand('B', 'git-branches', 'vd.push(getRootSheet(sheet).gitBranchesSheet)', 'push branches sheet')
-BaseSheet.addCommand('gO', 'git-options', 'vd.push(getRootSheet(sheet).gitOptionsSheet)', 'push sheet of git options')
 BaseSheet.addCommand('T', 'git-stashes', 'vd.push(getRootSheet(sheet).gitStashesSheet)', 'push stashes sheet')
 BaseSheet.addCommand('R', 'git-remotes', 'vd.push(getRootSheet(sheet).gitRemotesSheet)', 'push remotes sheet')
 Sheet.unbindkey('T')
@@ -229,12 +197,6 @@ GitStashes.addCommand('a', 'git-stash-apply', 'git("stash", "apply", cursorRow[0
 GitStashes.addCommand('', 'git-stash-pop-row', 'git("stash", "pop", cursorRow[0])', 'apply this stashed change and drop it'),
 GitStashes.addCommand('d', 'git-stash-drop-row', 'git("stash", "drop", cursorRow[0])', 'drop this stashed change'),
 GitStashes.addCommand('b', 'git-stash-branch', 'git("stash", "branch", input("create branch from stash named: "), cursorRow[0])', 'create branch from stash'),
-
-GitOptions.addCommand('d', 'git-config-unset', 'git("config", "--unset", "--"+CONFIG_CONTEXTS[cursorColIndex], cursorRow[0])', 'unset this config value'),
-GitOptions.addCommand('gd', 'git-config-unset-selected', 'for r in selectedRows: git("config", "--unset", "--"+CONFIG_CONTEXTS[cursorColIndex], r[0])', 'unset selected config values'),
-#GitOptions.addCommand('e', 'i=(cursorVisibleColIndex or 1); visibleCols[i].setValues(sheet, [cursorRow], editCell(i)); sheet.cursorRowIndex += 1', 'edit this option'),
-#GitOptions.addCommand('ge', 'i=(cursorVisibleColIndex or 1); visibleCols[i].setValues(sheet, selectedRows, input("set selected to: ", value=cursorValue))', 'edit this option for all selected rows'),
-GitOptions.addCommand('a', 'git-config-add', 'git("config", "--add", "--"+CONFIG_CONTEXTS[cursorColIndex], input("option to add: "), "added")', 'add new option'),
 
 GitRemotes.addCommand('d', 'git-remote-delete', 'git("remote", "rm", cursorRow[0])', 'delete remote'),
 GitRemotes.addCommand('a', 'git-remote-add', 'git("remote", "add", input("new remote name: ", type="remote"), input("url: ", type="url"))', 'add new remote')
