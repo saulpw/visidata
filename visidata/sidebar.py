@@ -3,14 +3,16 @@ import textwrap
 from visidata import vd, VisiData, BaseSheet, colorpanel, colors, TextSheet
 
 
-vd.option('disp_sidebar_fmt', '', 'format string for default sidebar')
+vd.option('disp_sidebar_fmt', '{help}', 'format string for default sidebar')
 vd.option('color_sidebar', 'black on 114 blue', 'base color of sidebar')
 
 
 @BaseSheet.property
 def sidebar(sheet):
     'Default to format options.disp_sidebar_fmt.  Overridable.'
-    fmt = sheet.options.disp_sidebar_fmt or sheet.help
+    fmt = sheet.options.disp_sidebar_fmt
+    if fmt == '{help}':
+        fmt = sheet.help
     return textwrap.dedent(sheet.formatString(fmt).strip('\n'))
 
 
@@ -36,7 +38,7 @@ def drawSidebar(vd, scr, sheet):
 @BaseSheet.api
 def sidebar_toggle(sheet):
     v = sheet.options.disp_sidebar_fmt
-    v = '' if v else None
+    v = '{help}' if not v else ''
     sheet.options.disp_sidebar_fmt = v
 
 
