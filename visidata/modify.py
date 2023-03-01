@@ -305,7 +305,7 @@ Sheet.addCommand('gza', 'addcol-bulk', 'addColumnAtCursor(*(SettableColumn() for
 Sheet.addCommand('z^S', 'commit-sheet', 'commit()', 'commit changes back to source.  not undoable!')
 
 vd.addMenuItems('''
-    File > Commit > commit-sheet
+    File > Save > changes to source > commit-sheet
     Row > Add > one row
     Row > Add > multiple rows
     Column > Add column > empty > one column > addcol-new
