@@ -163,7 +163,7 @@ class DirSheet(Sheet):
         else:
             path.unlink()
 
-    def deleteSourceRow(self, r):
+    def commitDeleteRow(self, r):
         self.removeFile(r)
 
     def newRow(self):

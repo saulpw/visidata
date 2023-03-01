@@ -137,7 +137,7 @@ def deleteBy(sheet, func, commit=False, undo=True):
             if r is newCursorRow:
                 sheet.cursorRowIndex = len(sheet.rows)-1
         else:
-            sheet.deleteSourceRow(r)
+            sheet.commitDeleteRow(r)
             ndeleted += 1
 
     if undo:
@@ -177,11 +177,21 @@ def getSourceValue(col, row):
 @Sheet.api
 def commitAdds(self):
     'Return the number of rows that have been marked for deferred add-row. Clear the marking.'
-    nadded = len(self._deferredAdds.values())
-    if nadded:
-        vd.status('added %s %s' % (nadded, self.rowtype))
+    nadded = 0
+    nerrors = 0
+    for row in self._deferredAdds.values():
+        try:
+            self.commitAddRow(row)
+            nadded += 1
+        except Exception as e:
+            vd.exceptionCaught(e)
+            nerrors += 1
+
+    vd.status(f'added {nadded} {self.rowtype} ({nerrors} errors)')
+
     self._deferredAdds.clear()
     return nadded
+
 
 @Sheet.api
 def commitMods(self):
@@ -207,9 +217,16 @@ def commitDeletes(self):
         vd.status('deleted %s %s' % (ndeleted, self.rowtype))
     return ndeleted
 
+
 @Sheet.api
-def deleteSourceRow(sheet, row):
-    pass
+def commitAddRow(self, row):
+    'To commit an added row.  Override per sheet type.'
+
+
+@Sheet.api
+def commitDeleteRow(self, row):
+    'To commit a deleted row.  Override per sheet type.'
+
 
 @asyncthread
 @Sheet.api
