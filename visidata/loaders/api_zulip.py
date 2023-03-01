@@ -229,11 +229,11 @@ vd.addGlobals({
     'ZulipMessagesSheet': ZulipMessagesSheet,
 })
 
-BaseSheet.addCommand('', 'open-zulip-profile', 'vd.push(PyobjSheet("profile", source=z_client.get_profile()))', 'open connected user\'s profile')
-BaseSheet.addCommand('', 'open-zulip-members', 'vd.push(ZulipMembersSheet("members", zulip_func=z_client.get_users, zulip_result_key="members"))', 'open list of all members')
-BaseSheet.addCommand('', 'open-zulip-streams', 'vd.push(vd.allStreams)', 'open list of all streams')
-BaseSheet.addCommand('', 'open-zulip-subs', 'vd.push(vd.subscribedStreams)', 'open list of subscribed streams')
-BaseSheet.addCommand('', 'open-zulip-msgs', 'vd.push(vd.allMessages)', 'open list of all messages')
+ZulipAPISheet.addCommand('', 'open-zulip-profile', 'vd.push(PyobjSheet("profile", source=z_client.get_profile()))', 'open connected user\'s profile')
+ZulipAPISheet.addCommand('', 'open-zulip-members', 'vd.push(ZulipMembersSheet("members", zulip_func=z_client.get_users, zulip_result_key="members"))', 'open list of all members')
+ZulipAPISheet.addCommand('', 'open-zulip-streams', 'vd.push(vd.allStreams)', 'open list of all streams')
+ZulipAPISheet.addCommand('', 'open-zulip-subs', 'vd.push(vd.subscribedStreams)', 'open list of subscribed streams')
+ZulipAPISheet.addCommand('', 'open-zulip-msgs', 'vd.push(vd.allMessages)', 'open list of all messages')
 
 ZulipMessagesSheet.addCommand('', 'reply-zulip-msg', 'reply_message(input(cursorRow["display_recipient"][1]["short_name"]+"> ", "message"), cursorRow)', 'reply to current topic')
 ZulipMessagesSheet.addCommand('', 'edit-zulip-msg', 'update_message(cursorRow["id"], editCell(3, cursorRowIndex))', 'edit message content')
