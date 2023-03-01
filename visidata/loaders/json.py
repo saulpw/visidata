@@ -4,6 +4,7 @@ from visidata import vd, date, VisiData, PyobjSheet, AttrDict, stacktrace, Typed
 
 vd.option('json_indent', None, 'indent to use when saving json')
 vd.option('json_sort_keys', False, 'sort object keys when saving to json')
+vd.option('json_ensure_ascii', False, 'ensure ascii encode when saving json')
 vd.option('default_colname', '', 'column name to use for non-dict rows')
 
 @VisiData.api
@@ -111,7 +112,7 @@ def save_json(vd, p, *vsheets):
         except Exception:
             indent = vs.options.json_indent
 
-        jsonenc = _vjsonEncoder(indent=indent, sort_keys=vs.options.json_sort_keys)
+        jsonenc = _vjsonEncoder(indent=indent, sort_keys=vs.options.json_sort_keys, ensure_ascii=vs.options.json_ensure_ascii)
 
         if len(vsheets) == 1:
             fp.write('[\n')
