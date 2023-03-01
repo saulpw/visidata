@@ -436,19 +436,19 @@ class Column(Extensible):
 
 def AttrColumn(name='', attr=None, **kwargs):
     'Column using getattr/setattr with *attr*.'
+    kwargs.setdefault('setter', lambda col,row,val: setattrdeep(row, col.expr, val))
     return Column(name,
                   expr=attr if attr is not None else name,
                   getter=lambda col,row: getattrdeep(row, col.expr),
-                  setter=lambda col,row,val: setattrdeep(row, col.expr, val),
                   **kwargs)
 
 class ItemColumn(Column):
     'Column using getitem/setitem with *key*.'
     def __init__(self, name=None, expr=None, **kwargs):
+        kwargs.setdefault('setter', lambda col,row,val: setitemdeep(row, col.expr, val))
         super().__init__(name,
             expr=expr if expr is not None else name,
             getter=lambda col,row: getitemdeep(row, col.expr, None),
-            setter=lambda col,row,val: setitemdeep(row, col.expr, val),
             **kwargs)
 
 
