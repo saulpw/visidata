@@ -4,7 +4,7 @@ from visidata import vd, date, VisiData, PyobjSheet, AttrDict, stacktrace, Typed
 
 vd.option('json_indent', None, 'indent to use when saving json')
 vd.option('json_sort_keys', False, 'sort object keys when saving to json')
-vd.option('json_ensure_ascii', False, 'ensure ascii encode when saving json')
+vd.option('json_ensure_ascii', True, 'ensure ascii encode when saving json')
 vd.option('default_colname', '', 'column name to use for non-dict rows')
 
 @VisiData.api
