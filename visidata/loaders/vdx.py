@@ -29,9 +29,9 @@ def save_vdx(vd, p, *vsheets):
             for r in vs.rows:
                 if prevrow is not None and r.sheet and prevrow.sheet != r.sheet:
                     fp.write(f'sheet {r.sheet}\n')
-                if r.col and (prevrow.col != r.col or prevrow is None):
+                if r.col and (prevrow is None or prevrow.col != r.col):
                     fp.write(f'col {r.col}\n')
-                if r.row and (prevrow.row != r.row or prevrow is None):
+                if r.row and (prevrow is None or prevrow.row != r.row):
                     fp.write(f'row {r.row}\n')
 
                 line = r.longname
