@@ -137,7 +137,7 @@ class TableSheet(BaseSheet):
         self._visibleColLayout = {}      # [vcolidx] -> (x, w)
 
         # list of all columns in display order
-        cols = kwargs.get('columns') or self.__class__.columns or [Column('_')]
+        cols = kwargs.pop('columns', None) or self.__class__.columns or [Column('_')]
         self.columns = []
         for c in cols:
             self.addColumn(copy(c))
