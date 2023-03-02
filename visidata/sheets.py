@@ -458,12 +458,10 @@ class TableSheet(BaseSheet):
 
         if index is not None:
             self.setModified()
-        else:
-            for col in cols:
-                col.defer = self.defer
 
         for i, col in enumerate(cols):
             col.name = self.maybeClean(col.name)
+            col.defer = self.defer
 
             vd.addUndo(self.columns.remove, col)
             idx = len(self.columns) if index is None else index
