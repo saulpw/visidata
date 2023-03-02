@@ -15,6 +15,9 @@ def vgit_cli():
     from visidata import vd, Path
 
     args = sys.argv[1:]
+    flDebug = '--debug' in args
+    if flDebug:
+        args.remove('--debug')
 
     if not args:
 #        return vd.run(vd.git_help())
@@ -32,6 +35,8 @@ def vgit_cli():
                 return vd.run(vs)
         except Exception as e:
             vd.exceptionCaught(e)
+            if flDebug:
+                raise
 
     import subprocess
     return subprocess.run(['git', *args]).returncode
