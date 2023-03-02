@@ -5,9 +5,6 @@ from visidata import AttrDict, vd, Path, asyncthread, BaseSheet, Sheet
 vd.option('vgit_logfile', '', 'file to log all git commands run by vgit')
 
 
-GitCmd = AttrDict   # sheet, command, output
-
-
 class GitContext:
     def _git_args(self):
         'Return list of extra args to all git commands'
@@ -29,28 +26,26 @@ class GitContext:
             '--work-tree', str(worktree),
         ]
 
-    def maybeloggit(self, *args, **kwargs):
+    def debugloggit(self, *args, **kwargs):
         import sh
+        return self.loggit(*args, logger=vd.debug, **kwargs)
+
+    def loggit(self, *args, logger=vd.status, **kwargs):
+        import sh
+        cmdstr = 'git ' + ' '.join(str(x) for x in args)
+
+        vd.warning(cmdstr)
 
         if self.options.vgit_logfile:
-            cmdstr = 'git ' + ' '.join(args)
             with open(self.options.vgit_logfile, 'a') as fp:
                 fp.write(cmdstr + '\n')
 
         return sh.git(*args, **kwargs)
 
-    def loggit(self, *args, **kwargs):
-        cmdstr = 'git ' + ' '.join(str(x) for x in args)
-        gcmd = GitCmd(sheet=vd.sheet, command=cmdstr, output=None)
-
-        gcmd.output = self.maybeloggit(*args, **kwargs)
-
-        return gcmd.output
-
-    def git_all(self, *args, **kwargs):
+    def git_all(self, *args, git=None, **kwargs):
         'Return entire output of git command.'
         import sh
-        git=self.loggit
+        git = git or self.loggit
         try:
             cmd = git('--no-pager',
                       *self._git_args(),
