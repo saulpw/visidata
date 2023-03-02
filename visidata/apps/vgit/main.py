@@ -21,13 +21,17 @@ def vgit_cli():
         return
 
     func = getattr(vd, 'git_'+args[0], None)
-    if not func:
-        import subprocess
-        return subprocess.run(['git', *args]).returncode
+    if func:
+        vd.loadConfigAndPlugins()
+        vd.status(visidata.__version_info__)
+        vd.domotd()
 
-    vd.loadConfigAndPlugins()
-    vd.status(visidata.__version_info__)
-    vd.domotd()
+        try:
+            vs = func(args[1:])
+            if vs:
+                return vd.run(vs)
+        except Exception as e:
+            vd.exceptionCaught(e)
 
-    vs = func(args[1:])
-    return vd.run(vs)
+    import subprocess
+    return subprocess.run(['git', *args]).returncode
