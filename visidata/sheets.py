@@ -269,10 +269,17 @@ class TableSheet(BaseSheet):
         'Copy sheet design but remain unloaded. Deepcopy columns so their attributes (width, type, name) may be adjusted independently of the original.'
         ret = super().__copy__()
         ret.rows = UNLOADED
-        ret.columns = [copy(c) for c in self.keyCols]
+
+        ret.columns = []
+        for c in self.keyCols:
+            ret.addColumn(copy(c))
+
         ret.setKeys(ret.columns)
-        ret.columns.extend(copy(c) for c in self.columns if c not in self.keyCols)
-        ret.recalc()  # set .sheet on columns
+
+        for c in self.columns:
+            if c not in self.keyCols:
+                ret.addColumn(copy(c))
+
         ret.topRowIndex = ret.cursorRowIndex = 0
         return ret
 
