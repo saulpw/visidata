@@ -80,7 +80,7 @@ class Column(Extensible):
         self.fmtstr = ''      # by default, use str()
         self._type = type     # anytype/str/int/float/date/func
         self.getter = lambda col, row: row
-        self.setter = lambda col, row, value: vd.fail(col.name+' column cannot be changed')
+        self.setter = None
         self._width = None    # == 0 if hidden, None if auto-compute next time
         self.hoffset = 0      # starting horizontal (char) offset of displayed column value
         self.voffset = 0      # starting vertical (line) offset of displayed column value
@@ -377,7 +377,8 @@ class Column(Extensible):
 
     def putValue(self, row, val):
         'Change value for *row* in this column to *val* immediately.  Does not check the type.  Overridable; by default calls ``.setter(row, val)``.'
-        return self.setter(self, row, val)
+        if self.setter:
+            return self.setter(self, row, val)
 
     def setValue(self, row, val):
         'Change value for *row* in this column to *val*.  Call ``putValue`` immediately if not a deferred column (added to deferred parent at load-time); otherwise cache until later ``putChanges``.  Caller must add undo function.'
