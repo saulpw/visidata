@@ -28,7 +28,7 @@ class GitRemotes(GitSheet):
     defer = True
 
     def set_remote(self, col, row, val):
-        self.loggit('remote', 'rename', row.remote, val)
+        self.loggit('remote', 'rename', self.column('remote').getSourceValue(row), val)
 
     def set_url(self, col, row, val):
         self.loggit('remote', 'set-url', row.remote, val)
@@ -42,9 +42,9 @@ class GitRemotes(GitSheet):
         self.loggit('remote', 'remove', row.remote)
 
     def commitAddRow(self, row):
-        remote = self.column('remote').getValue(row)
-        url = self.column('url').getValue(row)
-        self.loggit('remote', 'add', remote, url)
+        row.remote = self.column('remote').getValue(row)
+        row.url = self.column('url').getValue(row)
+        self.loggit('remote', 'add', row.remote, row.url)
 
     def newRow(self):
         return AttrDict()
