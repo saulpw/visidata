@@ -6,7 +6,7 @@ import signal
 import threading
 import time
 
-from visidata import vd, VisiData, colors, ESC, options, colorpanel
+from visidata import vd, VisiData, colors, ESC, options, colorpanel, BaseSheet
 
 __all__ = ['ReturnValue', 'run']
 
@@ -357,6 +357,11 @@ def run(vd, *sheetlist):
 
     if ret:
         builtins.print(ret)
+
+
+@VisiData.api
+def addCommand(vd, *args, **kwargs):
+    return BaseSheet.addCommand(*args, **kwargs)
 
 
 import sys
