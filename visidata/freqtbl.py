@@ -96,14 +96,14 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
         'open copy of source sheet with rows that are grouped in current row'
         if row.sourcerows:
             vs = copy(self.source)
-            vs.names += vd.valueNames(row.discrete_keys, row.numeric_key)
+            vs.names = vs.names + [vd.valueNames(row.discrete_keys, row.numeric_key)]
             vs.rows=copy(row.sourcerows)
             return vs
         vd.warning("no source rows")
 
     def openRows(self, rows):
         vs = copy(self.source)
-        vs.names += "several"
+        vs.names = vs.names + ["several"]
         vs.source = self
         vs.rows = list(itertools.chain.from_iterable(row.sourcerows for row in rows))
         return vs
