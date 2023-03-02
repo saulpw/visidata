@@ -432,24 +432,32 @@ class Column(Extensible):
 
 
 
-# ---- Column makers
+# ---- basic Columns
 
-def AttrColumn(name='', attr=None, **kwargs):
+class AttrColumn(Column):
     'Column using getattr/setattr with *attr*.'
-    kwargs.setdefault('setter', lambda col,row,val: setattrdeep(row, col.expr, val))
-    return Column(name,
-                  expr=attr if attr is not None else name,
-                  getter=lambda col,row: getattrdeep(row, col.expr),
-                  **kwargs)
+    def __init__(self, name=None, expr=None, **kwargs):
+        super().__init__(name,
+            expr=expr if expr is not None else name,
+            getter=lambda col,row: getattrdeep(row, col.expr, None),
+            **kwargs)
+
+    def putValue(self, row, val):
+        super().putValue(row, val)
+        setattrdeep(row, self.expr, val)
+
 
 class ItemColumn(Column):
-    'Column using getitem/setitem with *key*.'
+    'Column using getitem/setitem with *expr*.'
     def __init__(self, name=None, expr=None, **kwargs):
-        kwargs.setdefault('setter', lambda col,row,val: setitemdeep(row, col.expr, val))
         super().__init__(name,
             expr=expr if expr is not None else name,
             getter=lambda col,row: getitemdeep(row, col.expr, None),
             **kwargs)
+
+    def putValue(self, row, val):
+        super().putValue(row, val)
+        setitemdeep(row, self.expr, val)
 
 
 class SubColumnFunc(Column):

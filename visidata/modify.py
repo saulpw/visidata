@@ -187,17 +187,20 @@ def commitAdds(self):
             vd.exceptionCaught(e)
             nerrors += 1
 
-    vd.status(f'added {nadded} {self.rowtype} ({nerrors} errors)')
+    if nadded or nerrors:
+        vd.status(f'added {nadded} {self.rowtype} ({nerrors} errors)')
 
     self._deferredAdds.clear()
     return nadded
 
 
 @Sheet.api
-def commitMods(self):
-    'Return the number of modifications (that are not deferred deletes or adds) that been marked for defer mod. Change value to mod for row in col. Clear the marking.'
+def commitMods(sheet):
+    'Commit all deferred modifications (that are not from rows added or deleted in this commit.  Return number of cells changed.'
+    _, deferredmods, _ = sheet.getDeferredChanges()
+
     nmods = 0
-    for row, rowmods in self._deferredMods.values():
+    for row, rowmods in deferredmods.values():
         for col, val in rowmods.items():
             try:
                 col.putValue(row, val)
@@ -205,7 +208,7 @@ def commitMods(self):
             except Exception as e:
                 vd.exceptionCaught(e)
 
-    self._deferredMods.clear()
+    sheet._deferredMods.clear()
     return nmods
 
 @Sheet.api
