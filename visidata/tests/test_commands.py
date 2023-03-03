@@ -164,5 +164,8 @@ class TestCommands:
         vd.allSheets = [vs]
         vs.mouseX, vs.mouseY = (4, 4)
         vs.draw(mock_screen)
-        vd.options.batch = True
+        if longname in inputLines:
+            vd.currentReplayRow = vd.cmdlog.newRow(longname=longname, input=inputLines[longname])
+        else:
+            vd.currentReplayRow = vd.cmdlog.newRow(longname=longname)
         vs.execCommand(longname, vdglobals=vd.getGlobals())
