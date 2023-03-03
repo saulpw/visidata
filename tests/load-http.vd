@@ -1,3 +1,0 @@
-sheet	col	row	longname	input	keystrokes	comment
-	override	filetype	set-option	csv		
-			open-file	https://raw.githubusercontent.com/saulpw/visidata/develop/sample_data/benchmark.csv	o	
