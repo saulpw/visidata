@@ -50,6 +50,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'select-col-regex': '.',
                  'select-cols-regex': '.',
                  'unselect-col-regex': '.',
+                 'exec-python': 'import time',
                  'unselect-cols-regex': '.',
                  'go-col-regex': 'Units',          # column name in sample
                  'go-col-number': '2',
@@ -79,7 +80,30 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'random-rows': '3',
                  'import-python': 'math',
                  'pyobj-expr-row': 'Units + "s"',            # open the python object for '4'
+                 'expand-col-depth': '0',
+                 'expand-cols-depth': '0',
+                 'save-cmdlog': 'test-commands.vd',
+                 'aggregate-col': 'mean',
+                 'memo-aggregate': 'mean',
+                 'addcol-shell': '',
                  'theme-input': 'light',
+                 'add-rows': '1',
+                 'join-sheets-top2': 'append',
+                 'join-sheets-all': 'append',
+                 'resize-col-input': '10',
+                 'resize-cols-input': '10',
+                 'melt-regex': '(.*)_(.*)',
+                 'addcol-split': '-',
+                 'addcol-capture': '(.*)_(.*)',
+                 'slide-left-n': '2',
+                 'slide-right-n': '1',
+                 'slide-down-n': '1',
+                 'slide-up-n': '1',
+                 'addcol-window': '0 2',
+                 'select-around-n': '1',
+                 'sheet': '',
+                 'col': 'Units',
+                 'row': '5',
               }
 
 @pytest.mark.usefixtures('curses_setup')
