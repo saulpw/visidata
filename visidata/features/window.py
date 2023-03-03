@@ -47,7 +47,7 @@ def addcol_window(sheet, curcol):
 
 @Sheet.api
 def select_around(sheet, n):
-    sheet.select(list(itertools.chain(*(winrows for row, winrows in sheet.window(n, n) if sheet.isSelected(row)))))
+    sheet.select(list(itertools.chain(*(winrows for row, winrows in sheet.window(int(n), int(n)) if sheet.isSelected(row)))))
 
 
 Sheet.addCommand('w', 'addcol-window', 'addcol_window(cursorCol)', 'add column where each row contains a list of that row, nBefore rows, and nAfter rows')
