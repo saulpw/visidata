@@ -271,7 +271,7 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
         except AcceptInput as e:
             v = e.args[0]
 
-        if vd.scrFull:  # check if curses initialised
+        if vd.cursesEnabled:
             # clear keyboard buffer to neutralize multi-line pastes (issue#585)
             curses.flushinp()
 
@@ -325,26 +325,29 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
         - *bindings*: dict of keystroke to func(v, i) that returns updated (v, i)
     '''
 
-    history = self.lastInputsSheet.history(type)
-
     sheet = self.activeSheet
-    if not vd.scrFull and not vd.options.batch:  # no curses yet but we still want input
+    if not vd.cursesEnabled:
+        if kwargs.get('record', True) and vd.cmdlog:
+            return vd.getLastArgs()
+
         if kwargs.get('display', True):
             import builtins
-            ret = builtins.input(prompt)
+            return builtins.input(prompt)
         else:
             import getpass
-            ret = getpass.getpass(prompt)
-    else:
-        rstatuslen = self.drawRightStatus(sheet._scr, sheet)
-        attr = 0
-        promptlen = clipdraw(sheet._scr, sheet.windowHeight-1, 0, prompt, attr, w=sheet.windowWidth-rstatuslen-1)
-        ret = self.editText(sheet.windowHeight-1, promptlen, sheet.windowWidth-promptlen-rstatuslen-2,
-                            attr=colors.color_edit_cell,
-                            unprintablechar=options.disp_unprintable,
-                            truncchar=options.disp_truncator,
-                            history=history,
-                            **kwargs)
+            return getpass.getpass(prompt)
+
+    history = self.lastInputsSheet.history(type)
+
+    rstatuslen = self.drawRightStatus(sheet._scr, sheet)
+    attr = 0
+    promptlen = clipdraw(sheet._scr, sheet.windowHeight-1, 0, prompt, attr, w=sheet.windowWidth-rstatuslen-1)
+    ret = self.editText(sheet.windowHeight-1, promptlen, sheet.windowWidth-promptlen-rstatuslen-2,
+                        attr=colors.color_edit_cell,
+                        unprintablechar=options.disp_unprintable,
+                        truncchar=options.disp_truncator,
+                        history=history,
+                        **kwargs)
 
     if ret:
         self.lastInputsSheet.appendRow(AttrDict(type=type, input=ret))
