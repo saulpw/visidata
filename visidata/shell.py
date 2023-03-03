@@ -22,7 +22,7 @@ vd.option('dir_hidden', False, 'load hidden files on DirSheet')
 @VisiData.lazy_property
 def currentDirSheet(p):
     'Support opening the current DirSheet from the vdmenu'
-    return DirSheet('.', source=Path('.'))
+    return DirSheet(Path('.').absolute().name, source=Path('.'))
 
 @asyncthread
 def exec_shell(*args):
@@ -219,6 +219,9 @@ class DirSheet(Sheet):
 
         self._deferredDels.clear()
         self.reload()
+
+    def getDefaultSaveName(sheet):
+        return sheet.name + '.' + sheet.options.save_filetype
 
 
 class FileListSheet(DirSheet):
