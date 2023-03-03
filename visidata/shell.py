@@ -188,7 +188,9 @@ class DirSheet(Sheet):
         def _listfiles(p):
             basepath = str(p)
             for fn in os.listdir(basepath):
-                yield p/fn
+                fn = p/fn
+                fn.name = p.name + "_" + fn.name
+                yield fn
 
 
         basepath = str(self.source)
