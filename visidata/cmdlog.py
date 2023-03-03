@@ -147,7 +147,10 @@ def commandCursor(sheet, execstr):
         rowname = keystr(k) if k else sheet.cursorRowIndex
 
     if contains(execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol', 'ColumnAtCursor'):
-        colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
+        if sheet.cursorCol:
+            colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
+        else:
+            colname = None
     return colname, rowname
 
 
