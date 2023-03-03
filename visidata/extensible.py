@@ -96,11 +96,12 @@ class Extensible:
     @classmethod
     def lazy_property(cls, func):
         'Return ``func()`` on first access and cache result; return cached result thereafter.'
+        name = '_' + func.__name__
+        cls.init(name, lambda: None, copy=False)
         @property
         @wraps(func)
         def get_if_not(self):
-            name = '_' + func.__name__
-            if not hasattr(self, name):
+            if getattr(self, name) is None:
                 setattr(self, name, func(self))
             return getattr(self, name)
         setattr(cls, func.__name__, get_if_not)
