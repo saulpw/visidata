@@ -255,6 +255,7 @@ def sync(self, *joiningThreads):
         threads = joiningThreads or set(self.unfinishedThreads)
         threads -= set([threading.current_thread(), getattr(vd, 'drawThread', None)])
         threads -= deads
+        threads -= set([None])
         for t in threads:
             try:
                 if not t.is_alive() or t not in threading.enumerate() or getattr(t, 'noblock', False) is True:
