@@ -24,6 +24,8 @@ def makeRegexSplitter(vd, regex, origcol):
 
 @VisiData.api
 def makeRegexMatcher(vd, regex, origcol):
+    if not regex.groups:
+        vd.fail('specify a capture group')  #1778
     def _regexMatcher(row):
         m = regex.search(origcol.getDisplayValue(row))
         if m:
