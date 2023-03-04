@@ -266,6 +266,7 @@ def main_vd():
 
     vd._stdin, vd._stdout = duptty()  # always dup stdin/stdout
     vd.stdinSource.fptext = vd._stdin
+    vd._stdin.close = vd.nop  #1759
 
     # fetch motd and plugins *after* options parsing/setting
     vd.pluginsSheet.ensureLoaded()
