@@ -74,6 +74,10 @@ def addRegexColumns(vs, regexMaker, origcol, regexstr):
         else:
             raise TypeError("addRegexColumns() expects a dict, list, or tuple from regexMaker, but got a "+type(m).__name__)
 
+    if not cols:
+        vd.warning("no regex matches found, didn't add column")
+        return
+
     vs.addColumnAtCursor(*cols.values())
 
 
