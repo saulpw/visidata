@@ -76,11 +76,9 @@ class FileProgress:
         # track Progress on original fp
         self.fp_orig_read = self.fp.read
         self.fp_orig_close = self.fp.close
-        # These two lines result in bug #1159, a corrupted save of corruption formats
-        # for now we are reverting by commenting out, and opened #1175 to investigate
-        # Progress bars for compression formats might not work in the meanwhile
-        #self.fp.read = self.read
-        #self.fp.close = self.close
+
+        self.fp.read = self.read
+        self.fp.close = self.close
 
         if self.prog:
             self.prog.__enter__()
@@ -249,21 +247,28 @@ class Path(os.PathLike):
             return FileProgress(self, fp=BytesIOWrapper(self.fptext), **kwargs)
 
         path = self
-        binmode = 'wb' if 'w' in kwargs.get('mode', '') else 'rb'
+
         if self.compression == 'gz':
             import gzip
-            return gzip.open(FileProgress(path, fp=open(path, mode=binmode), **kwargs), *args, **kwargs)
+            zopen = gzip.open
         elif self.compression == 'bz2':
             import bz2
-            return bz2.open(FileProgress(path, fp=open(path, mode=binmode), **kwargs), *args, **kwargs)
+            zopen = bz2.open
         elif self.compression in ['xz', 'lzma']:
             import lzma
-            return lzma.open(FileProgress(path, fp=open(path, mode=binmode), **kwargs), *args, **kwargs)
+            zopen = lzma.open
         elif self.compression == 'zst':
             import zstandard
-            return zstandard.open(FileProgress(path, fp=open(path, mode=binmode), **kwargs), *args, **kwargs)
+            zopen = zstandard.open
         else:
             return FileProgress(path, fp=self._path.open(*args, **kwargs), **kwargs)
+
+        if 'w' in kwargs.get('mode', ''):
+            #1159 FileProgress on the outside to close properly when writing
+            return FileProgress(path, fp=zopen(path, **kwargs), **kwargs)
+
+        #1255 FileProgress on the inside to track uncompressed bytes when reading
+        return zopen(FileProgress(path, fp=open(path, mode='rb'), **kwargs), **kwargs)
 
     def __iter__(self):
         with Progress(total=filesize(self)) as prog:
