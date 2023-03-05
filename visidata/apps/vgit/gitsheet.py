@@ -155,7 +155,7 @@ def branch(self):
 
 GitSheet.options.disp_note_none = ''
 GitSheet.options.disp_status_fmt = '{sheet.progressStatus}‹{sheet.branchStatus}› {sheet.name}| '
-BaseSheet.addCommand('gi', 'git-exec', 'sheet.git_exec(input("gi", type="git"))')
+GitSheet.addCommand('gi', 'git-exec', 'sheet.git_exec(input("gi", type="git"))')
 
 GitSheet.addCommand('Alt+g', 'menu-git', 'pressMenu("Git")', '')
 

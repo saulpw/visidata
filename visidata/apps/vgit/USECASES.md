@@ -21,13 +21,13 @@ f) brag tweet
 # 3. vgit config
 
 - add new config value
-- edit config value
-- unset config value
++ edit config value
++ unset config value
 
 
 # 2. vgit branch
 
-- view branches incl metadata (last commit)
++ view branches incl metadata (last commit)
 - checkout branch
 - create branch
 - delete branch
@@ -49,7 +49,7 @@ f) brag tweet
 - edit commit message like vgit amend
 
 # 5. vgit blame
-- basic sheet
++ basic sheet
 - combo with vgit grep somehow?
 
 # 6. vgit stash
@@ -78,8 +78,10 @@ f) brag tweet
 
 # 9. vgit remote
 
-- add remote
-- delete remote
++ add remote
++ delete remote
++ rename remote
++ edit remote url
 
 # 10. vgit amend
 

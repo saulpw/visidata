@@ -20,6 +20,9 @@ class FormatColumn(Column):
 # source = GitSheet; .gitfile=GitFile
 class GitBlame(GitSheet):
     rowtype = 'lines'
+    help = '''
+        # git blame
+    '''
     columns = [
         ItemColumn('sha', width=0),
         ItemColumn('orig_linenum', width=0, type=int),
