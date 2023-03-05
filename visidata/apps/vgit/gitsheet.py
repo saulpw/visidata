@@ -148,25 +148,6 @@ def branch(self):
     return self.rogit('rev-parse', '--abbrev-ref', 'HEAD').strip()
 
 
-class GitLinesColumn(Column):
-    def __init__(self, name, cmd, *args, **kwargs):
-        super().__init__(name, cache=True, **kwargs)
-        cmdparts = cmd.split()
-        if cmdparts[0] == 'git':
-            cmdparts = cmdparts[1:]
-        self.gitargs = cmdparts + list(args)
-
-    def calcValue(self, r):
-        gitdir = GitSheet(source=r).gitPath
-        return list(self.sheet.git_lines('--git-dir', gitdir, *self.gitargs))
-
-
-class GitAllColumn(GitLinesColumn):
-    def calcValue(self, r):
-        gitdir = GitSheet(source=r).gitPath
-        return self.sheet.git_all('--git-dir', gitdir, *self.gitargs).strip()
-
-
 GitSheet.options.disp_note_none = ''
 GitSheet.options.disp_status_fmt = '{sheet.progressStatus}‹{sheet.branchStatus}› {sheet.name}| '
 GitSheet.addCommand('gi', 'git-exec', 'sheet.git_exec(input("gi", type="git"))')

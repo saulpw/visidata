@@ -1,8 +1,21 @@
-from visidata import Sheet, Column, ColumnAttr, date, vlen, asyncthread, Path, ENTER, namedlist
-import git
+from visidata import vd, VisiData, Sheet, Column, AttrColumn, date, vlen, asyncthread, Path, namedlist, PyobjSheet, modtime, AttrDict
+
+from .gitsheet import GitSheet
+
+@VisiData.api
+def guess_git(vd, p):
+    if (p/'.git').is_dir():
+        return dict(filetype='git')
 
 
-GitRepo = namedlist('GitRepo', 'path stashes cached changes'.split())
+@VisiData.api
+def open_git(vd, p):
+    return GitRepos(p.name, source=p)
+
+
+@VisiData.api
+def git_repos(vd, p, args):
+    return GitRepos(p.name, source=p)
 
 
 class GitLinesColumn(Column):
@@ -11,44 +24,46 @@ class GitLinesColumn(Column):
         cmdparts = cmd.split()
         if cmdparts[0] == 'git':
             cmdparts = cmdparts[1:]
-        self.cmd = cmdparts + list(args)
+        self.gitargs = cmdparts + list(args)
 
     def calcValue(self, r):
-        return list(vgit.git_lines('--git-dir', r.path.joinpath('.git'), *self.cmd))
+        gitdir = GitSheet(source=r).gitPath
+        return list(self.sheet.git_lines('--git-dir', gitdir, *self.gitargs))
 
 
 class GitAllColumn(GitLinesColumn):
     def calcValue(self, r):
-        return vgit.git_all('--git-dir', r.path.joinpath('.git'), *self.cmd).strip()
+        gitdir = GitSheet(source=r).gitPath
+        return self.sheet.git_all('--git-dir', gitdir, *self.gitargs).strip()
 
 
 
-class GitOverview(Sheet):
-    rowtype = 'repos'  # rowdef: GitRepo
+class GitRepos(GitSheet):
+    help = '''
+        # git repos
+        A list of git repositories under `{sheet.source}`
+
+        - `Enter` to open the status sheet for the current repo
+    '''
+    rowtype = 'repos'  # rowdef: Path
     columns = [
-        ColumnAttr('repo', 'path', type=str),
-        GitLinesColumn('stashes', 'git stash list', type=vlen),
-        GitLinesColumn('cached', 'git diff --cached', type=vlen),
-        GitLinesColumn('branches', 'git branch --no-color', type=vlen),
-        GitAllColumn('branch', 'git rev-parse --abbrev-ref HEAD'),
-        Column('modtime', type=date, getter=lambda c,r: modtime(r.path)),
+        Column('repo', type=str, width=30),
+        GitAllColumn('branch', 'git rev-parse --abbrev-ref HEAD', width=8),
+        GitLinesColumn('stashes', 'git stash list', type=vlen, width=8),
+        GitLinesColumn('cached', 'git diff --cached', type=vlen, width=8),
+        GitLinesColumn('branches', 'git branch --no-color', type=vlen, width=8),
+        Column('modtime', type=date, getter=lambda c,r: modtime(r)),
     ]
     nKeys = 1
 
-    @asyncthread
-    def reload(self):
+    def iterload(self):
         import glob
-        import os.path
-        self.rows = []
-        for fn in glob.glob(os.path.join('**', '.git/'), recursive=True):
-            if fn == '.git/':
-                path = Path('.')
-            else:
-                path = Path(fn).parent.parent
-            self.addRow(GitRepo([path]))
+        for fn in glob.glob('**/.git', root_dir=self.source, recursive=True):
+            yield Path(fn).parent
+
 
     def openRow(self, row):
-        return open_git(row.path)
+        return vd.open_git(row)
 
     def openCell(self, col, row):
         val = col.getValue(row)
