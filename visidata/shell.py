@@ -19,6 +19,12 @@ vd.option('dir_recurse', False, 'walk source path recursively on DirSheet')
 vd.option('dir_hidden', False, 'load hidden files on DirSheet')
 
 
+@VisiData.api
+def guess_dir(vd, p):
+    if p.is_dir():
+        return dict(filetype='dir')
+
+
 @VisiData.lazy_property
 def currentDirSheet(p):
     'Support opening the current DirSheet from the vdmenu'

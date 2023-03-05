@@ -73,10 +73,7 @@ def openPath(vd, p, filetype=None, create=False):
         return None
 
     if not filetype:
-        if p.is_dir():
-            filetype = 'dir'
-        else:
-            filetype = p.ext or vd.options.filetype
+        filetype = p.ext or vd.options.filetype
 
     filetype = filetype.lower()
 
