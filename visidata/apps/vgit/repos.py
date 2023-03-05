@@ -5,7 +5,7 @@ from .gitsheet import GitSheet
 @VisiData.api
 def guess_git(vd, p):
     if (p/'.git').is_dir():
-        return dict(filetype='git')
+        return dict(filetype='git', _likelihood=10)
 
 
 @VisiData.api
