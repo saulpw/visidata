@@ -20,7 +20,7 @@ def git_repos(vd, p, args):
 
 class GitLinesColumn(Column):
     def __init__(self, name, cmd, *args, **kwargs):
-        super().__init__(name, cache=True, **kwargs)
+        super().__init__(name, cache='async', **kwargs)
         cmdparts = cmd.split()
         if cmdparts[0] == 'git':
             cmdparts = cmdparts[1:]
