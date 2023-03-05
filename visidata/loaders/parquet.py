@@ -1,4 +1,4 @@
-from visidata import VisiData, Sheet, Column
+from visidata import VisiData, Sheet, Column, vd
 
 
 @VisiData.api
@@ -13,7 +13,7 @@ class ParquetColumn(Column):
 class ParquetSheet(Sheet):
     # rowdef: {'__rownum__':int, parquet_col:overridden_value, ...}
     def iterload(self):
-        import pyarrow.parquet as pq
+        pq = vd.importExternal('pyarrow.parquet', 'pyarrow')
         from visidata.loaders.arrow import arrow_to_vdtype
 
         self.tbl = pq.read_table(self.source)

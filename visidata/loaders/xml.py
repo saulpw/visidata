@@ -48,6 +48,7 @@ class XmlSheet(Sheet):
 
     def iterload(self):
         if isinstance(self.source, Path):
+            vd.importExternal('lxml')
             from lxml import etree, objectify
             p = etree.XMLParser(**self.options.getall('xml_parser_'))
             self.root = etree.parse(self.source.open_text(encoding=self.options.encoding), parser=p)

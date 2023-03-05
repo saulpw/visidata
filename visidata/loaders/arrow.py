@@ -17,7 +17,7 @@ def open_arrows(vd, p):
 
 
 def arrow_to_vdtype(t):
-    import pyarrow as pa
+    pa = vd.importExternal('pyarrow')
 
     arrow_to_vd_typemap = {
         pa.lib.Type_BOOL: bool,
@@ -58,7 +58,7 @@ def arrow_to_vdtype(t):
 
 class ArrowSheet(Sheet):
     def iterload(self):
-        import pyarrow as pa
+        pa = vd.importExternal('pyarrow')
 
         try:
             with pa.OSFile(str(self.source), 'rb') as fp:
@@ -81,8 +81,8 @@ class ArrowSheet(Sheet):
 
 @VisiData.api
 def save_arrow(vd, p, sheet, streaming=False):
-    import pyarrow as pa
-    import numpy as np
+    pa = vd.importExternal('pyarrow')
+    np = vd.importExternal('numpy')
 
     typemap = {
         anytype: pa.string(),

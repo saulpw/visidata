@@ -9,7 +9,7 @@ VisiData.open_hdf5 = VisiData.open_h5
 class Hdf5ObjSheet(Sheet):
     'Support sheets in HDF5 format.'
     def iterload(self):
-        import h5py
+        h5py = vd.importExternal('h5py')
         source = self.source
         if isinstance(self.source, Path):
             source = h5py.File(str(self.source), 'r')
@@ -48,13 +48,13 @@ class Hdf5ObjSheet(Sheet):
 
 
     def openRow(self, row):
-        import h5py
+        h5py = vd.importExternal('h5py')
         if isinstance(row, BaseSheet):
             return row
         if isinstance(row, h5py.HLObject):
             return Hdf5ObjSheet(row)
 
-        import numpy
+        numpy = vd.importExternal('numpy')
         from .npy import NpySheet
         if isinstance(row, numpy.ndarray):
             return NpySheet(None, npy=row)

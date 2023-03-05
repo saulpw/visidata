@@ -18,7 +18,7 @@ def openurl_http(vd, path, filetype=None):
             vd.fail(f'no vd.openhttp_{sch}')
         return openfunc(Path(schemes[-1]+'://'+path.given.split('://')[1]))
 
-    import requests
+    requests = vd.importExternal('requests')
 
     response = requests.get(path.given, stream=True, **vd.options.getall('http_req_'))
     response.raise_for_status()

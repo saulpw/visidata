@@ -14,7 +14,7 @@ vd.option('plt_marker', '.', 'matplotlib.markers')
 
 @Canvas.api
 def plot_sheet(self, ax):
-    import matplotlib.pyplot as plt
+    plt = vd.importExternal('matplotlib.pyplot', 'matplotlib')
     nerrors = 0
     nplotted = 0
 
@@ -55,7 +55,7 @@ def plot_sheet(self, ax):
 
 @VisiData.api
 def save_svg(vd, p, *sheets):
-    import matplotlib.pyplot as plt
+    plt = vd.importExternal('matplotlib.pyplot', 'matplotlib')
     fig_, ax = plt.subplots()
     for vs in sheets:
         if not isinstance(vs, Canvas):

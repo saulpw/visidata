@@ -1,6 +1,6 @@
 import functools
 
-from visidata import VisiData, Sheet, Column, Progress, colors, ColumnItem, Canvas, asyncthread
+from visidata import VisiData, Sheet, Column, Progress, colors, ColumnItem, Canvas, asyncthread, vd
 
 
 @VisiData.api
@@ -26,7 +26,7 @@ class PNGSheet(Sheet):
         return list((None, None, 0, 0, 0, 0))
 
     def iterload(self):
-        import png
+        png = vd.importExternal('png', 'pypng')
         self.png = png.Reader(bytes=self.source.read_bytes())
         self.width, self.height, pixels, md = self.png.asRGBA()
         for y, row in enumerate(pixels):
@@ -78,7 +78,7 @@ def save_png(vd, p, vs):
 
     vd.status('saving %sx%s' % (vs.width, vs.height))
 
-    import png
+    vd.importExternal('png', 'pypng')
     img = png.from_array(pixels, mode='RGBA')
     with open(p, 'wb') as fp:
         img.write(fp)

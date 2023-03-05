@@ -27,11 +27,11 @@ class GitContext:
         ]
 
     def debugloggit(self, *args, **kwargs):
-        import sh
+        sh = vd.importExternal('sh')
         return self.loggit(*args, logger=vd.debug, **kwargs)
 
     def loggit(self, *args, logger=vd.status, **kwargs):
-        import sh
+        sh = vd.importExternal('sh')
         cmdstr = 'git ' + ' '.join(str(x) for x in args)
 
         vd.warning(cmdstr)
@@ -44,7 +44,7 @@ class GitContext:
 
     def git_all(self, *args, git=None, **kwargs):
         'Return entire output of git command.'
-        import sh
+        sh = vd.importExternal('sh')
         git = git or self.loggit
         try:
             cmd = git('--no-pager',
@@ -63,7 +63,7 @@ class GitContext:
 
     def git_lines(self, *args, **kwargs):
         'Generator of stdout lines from given git command'
-        import sh
+        sh = vd.importExternal('sh')
         err = io.StringIO()
         git = self.loggit
         try:
@@ -86,7 +86,7 @@ class GitContext:
 
     def git_iter(self, *args, sep='\0', **kwargs):
         'Generator of chunks of stdout from given git command, delineated by sep character'
-        import sh
+        sh = vd.importExternal('sh')
         err = io.StringIO()
         git = self.loggit
 

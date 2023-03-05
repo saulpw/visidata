@@ -11,7 +11,7 @@ VisiData.open_yaml = VisiData.open_yml
 
 class YamlSheet(JsonSheet):
     def iterload(self):
-        import yaml
+        yaml = vd.importExternal('yaml', 'PyYAML')
         with self.source.open_text() as fp:
             documents = yaml.safe_load_all(fp)
 

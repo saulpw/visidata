@@ -96,7 +96,7 @@ class PingSheet(Sheet):
         self.send_trace(ip, len(rtes)+1)  # and one more for the road
 
     def send_trace(self, ip, n):
-        import sh
+        sh = vd.importExternal('sh')
 
         while n > len(self.routes[ip]):
             self.routes[ip].append(None)
@@ -111,7 +111,7 @@ class PingSheet(Sheet):
                       _err=lambda data,self=self,ip=ip,a=1: self.ping_error(ip, data))
 
     def iterload(self):
-        import sh
+        sh = vd.importExternal('sh')
 
         self.stop = False
         self.start_time = time.time()

@@ -26,6 +26,7 @@ import struct
 import fnmatch
 import pathlib
 import urllib.parse
+from visidata import vd
 
 
 __version__ = '0.5.1'
@@ -98,7 +99,7 @@ class RemoteZipFile:
     magic_eocd = b'\x50\x4b\x05\x06'
 
     def __init__(self, url):
-        import urllib3
+        urllib3 = vd.importExternal('urllib3')
         self.url = url
         self.http = urllib3.PoolManager()
         self.zip_size = 0
