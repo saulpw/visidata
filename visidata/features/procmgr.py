@@ -9,7 +9,7 @@ def new_top(vd, p):
 class CPUStatsSheet(Sheet):
     rowtype='CPUs'  # rowdef = (count, perfect, times, freq) from psutil (see below)
     def reload(self):
-        import psutil
+        psutil = vd.importExternal('psutil')
 
         self.columns = []
         for c in [
@@ -44,7 +44,7 @@ class MemStatsSheet(Sheet):
     nKeys = 1
 
     def iterload(self):
-        import psutil
+        psutil = vd.importExternal('psutil')
         import time
 
         proc = psutil.Process()
@@ -79,7 +79,7 @@ class UsefulProcessesSheet(Sheet):
         Column('system_time_s', type=float, getter=lambda c,r: r[0].cpu_times()[1]),
     ]
     def iterload(self):
-        import psutil
+        psutil = vd.importExternal('psutil')
         for pr in psutil.process_iter():
             yield (pr, pr.memory_full_info())
 
@@ -130,7 +130,7 @@ class ProcessesSheet(Sheet):
     nKeys = 2
 
     def iterload(self):
-        import psutil
+        psutil = vd.importExternal('psutil')
 #        self.columns = []
 #        for c in ProcessesSheet.columns:
 #            self.addColumn(c)
@@ -162,7 +162,7 @@ class RlimitsSheet(Sheet):
         self.source.rlimit(r[1], (self.soft(r), v))
 
     def iterload(self):
-        import psutil
+        psutil = vd.importExternal('psutil')
         for r in dir(psutil):
             if r.startswith('RLIMIT'):
                 yield (r[7:], getattr(psutil, r))

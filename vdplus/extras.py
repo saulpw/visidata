@@ -7,12 +7,12 @@ vd.options.disp_menu_fmt = '|  VisiData {vd.version} | {vd.motd}'
 # HTML("<html>...") and JSON('{"k":"v"...}')
 @VisiData.lazy_property
 def utf8_parser(vd):
-    from lxml import etree
-    return etree.HTMLParser(encoding='utf-8')
+    lxml = vd.importExternal('lxml')
+    return lxml.etree.HTMLParser(encoding='utf-8')
 
 @VisiData.api
 def HTML(vd, s):
-    import lxml.html
+    lxml = vd.importExternal('lxml')
     return lxml.html.etree.fromstring(s, parser=vd.utf8_parser)
 
 @VisiData.api

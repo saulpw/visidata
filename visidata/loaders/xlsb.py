@@ -15,6 +15,7 @@ def open_xlsb(vd, p):
 
 class XlsbIndex(IndexSheet):
     def iterload(self):
+        vd.importExternal('pyxlsb', '-e git+https://github.com/saulpw/pyxlsb.git@visidata#egg=pyxlsb')
         from pyxlsb import open_workbook
 
         wb = open_workbook(str(self.source))

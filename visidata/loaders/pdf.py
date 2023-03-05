@@ -20,6 +20,7 @@ class PdfMinerSheet(TableSheet):
         ColumnItem('contents', 2),
     ]
     def iterload(self):
+        vd.importExternal('pdfminer.high_level', 'pdfminer.six')
         import pdfminer.high_level
         from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
         from pdfminer.converter import TextConverter, PDFPageAggregator
@@ -38,6 +39,6 @@ class PdfMinerSheet(TableSheet):
 
 class TabulaSheet(IndexSheet):
     def iterload(self):
-        import tabula
+        tabula = vd.importExternal('tabula')
         for i, t in enumerate(tabula.read_pdf(self.source, pages='all', multiple_tables=True)):
             yield PandasSheet(self.source.name, i, source=t)

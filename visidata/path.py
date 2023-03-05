@@ -258,7 +258,7 @@ class Path(os.PathLike):
             import lzma
             zopen = lzma.open
         elif self.compression == 'zst':
-            import zstandard
+            zstandard = vd.importExternal('zstandard')
             zopen = zstandard.open
         else:
             return FileProgress(path, fp=self._path.open(*args, **kwargs), **kwargs)

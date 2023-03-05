@@ -83,8 +83,8 @@ def init_pcap():
         return
 
     global dpkt, dnslib
-    import dpkt
-    import dnslib
+    dpkt = vd.importExternal('dpkt')
+    dnslib = vd.importExternal('dnslib')
 
     load_consts(protocols['ethernet'], dpkt.ethernet, 'ETH_TYPE_')
     load_consts(protocols['ip'], dpkt.ip, 'IP_PROTO_')

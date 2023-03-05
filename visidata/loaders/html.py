@@ -28,6 +28,7 @@ class HtmlTablesSheet(IndexSheet):
         Column('classes', getter=lambda col,row: row.html.attrib.get('class')),
     ]
     def iterload(self):
+        lxml = vd.importExternal('lxml')
         from lxml import html
         utf8_parser = html.HTMLParser(encoding='utf-8')
         with self.source.open_text(encoding='utf-8') as fp:
@@ -62,6 +63,7 @@ class HtmlLinksSheet(Sheet):
         ItemColumn('link', 2, width=40),
     ]
     def iterload(self):
+        lxml = vd.importExternal('lxml')
         from lxml.html import iterlinks
         root = self.source.getroot()
         root.make_links_absolute(self.source.docinfo.URL)

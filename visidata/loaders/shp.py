@@ -34,7 +34,7 @@ class ShapeSheet(Sheet):
         Column('shapeType', width=0, getter=lambda col,row: row.shape.shapeType)
     ]
     def iterload(self):
-        import shapefile
+        shapefile = vd.importExternal('shapefile', 'pyshp')
         self.sf = shapefile.Reader(str(self.source))
         self.reloadCols()
         for shaperec in Progress(self.sf.iterShapeRecords(), total=self.sf.numRecords):

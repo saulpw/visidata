@@ -14,9 +14,9 @@ def plot_seaborn(vd, rows, xcols, ycols):
 
 
 def ext_plot_seaborn(rows, xcols, ycols):
-    import pandas as pd
-    import matplotlib.pyplot as plt
-    import seaborn as sns
+    pd = vd.importExternal('pandas')
+    plt = vd.importExternal('matplotlib.pyplot', 'matplotlib')
+    sns = vd.importExternal('seaborn')
 
     # Set the default theme
     sns.set()
@@ -25,9 +25,6 @@ def ext_plot_seaborn(rows, xcols, ycols):
     plt.title('')
     plt.xticks(rotation=15)
 
-    import pandas as pd
-    import matplotlib.pyplot as plt
-    import seaborn as sns
     nerrors = 0
     nplotted = 0
 

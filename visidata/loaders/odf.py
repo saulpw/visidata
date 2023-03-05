@@ -8,6 +8,7 @@ def open_ods(vd, p):
 
 class OdsIndexSheet(IndexSheet):
     def iterload(self):
+        vd.importExternal('odf', 'odfpy')
         import odf.opendocument
         import odf.table
         self.doc = odf.opendocument.load(self.source)
@@ -16,6 +17,7 @@ class OdsIndexSheet(IndexSheet):
 
 
 def _get_cell_string_value(cell, text_s):
+        vd.importExternal('odf', 'odfpy')
         from odf.element import Element
         from odf.namespaces import TEXTNS
 
@@ -34,6 +36,7 @@ def _get_cell_string_value(cell, text_s):
 
 class OdsSheet(SequenceSheet):
     def iterload(self):
+        vd.importExternal('odf', 'odfpy')
         import odf.table
         import odf.text
         from odf.namespaces import TABLENS, OFFICENS

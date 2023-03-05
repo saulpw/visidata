@@ -24,9 +24,9 @@ class TTFTablesSheet(Sheet):
         return TTFGlyphsSheet(self.name+'_glyphs', source=self, sourceRows=[row], ttf=self.ttf)
 
     def iterload(self):
-        import fontTools.ttLib
+        fontTools = vd.importExternal('fontTools.ttLib', 'fonttools')
 
-        self.ttf = fontTools.ttLib.TTFont(str(self.source), 0, allowVID=0, ignoreDecompileErrors=True, fontNumber=-1)
+        self.ttf = fontTools.TTFont(str(self.source), 0, allowVID=0, ignoreDecompileErrors=True, fontNumber=-1)
         for cmap in self.ttf["cmap"].tables:
             yield cmap
 
@@ -53,10 +53,8 @@ class TTFGlyphsSheet(Sheet):
 
 
 def makePen(*args, **kwargs):
-    try:
-        from fontTools.pens.basePen import BasePen
-    except ImportError as e:
-        vd.error('fonttools not installed')
+    fontTools = vd.importExternal('fontTools', 'fonttools')
+    from fontTools.pens.basePen import BasePen
 
     class GlyphPen(InvertedCanvas, BasePen):
         aspectRatio = 1.0

@@ -36,7 +36,7 @@ class MbtilesSheet(Sheet):
     ]
 
     def getTile(self, zoom_level, tile_col, tile_row):
-        import mapbox_vector_tile
+        mapbox_vector_tile = vd.importExternal('mapbox_vector_tile', 'mapbox-vector-tile')
 
         con = sqlite3.connect(str(self.source))
         tile_data = con.execute('''

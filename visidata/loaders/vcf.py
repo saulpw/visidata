@@ -1,4 +1,4 @@
-from visidata import VisiData, Column, getitemdef, PythonSheet, asyncthread
+from visidata import VisiData, Column, getitemdef, PythonSheet, asyncthread, vd
 
 
 # requires (deb): libbz2-dev libcurl4-openssl-dev liblzma-dev
@@ -20,7 +20,7 @@ class VcfSheet(PythonSheet):
     rowtype = 'cards'
     @asyncthread
     def reload(self):
-        import vobject
+        vobject = vd.importExternal('vobject')
         self.rows = []
         self.columns = []
 
