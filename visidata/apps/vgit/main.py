@@ -28,6 +28,8 @@ def vgit_cli():
         vd.loadConfigAndPlugins()
         vd.status(visidata.__version_info__)
         vd.domotd()
+        if flDebug:
+            vd.options.debug = True
 
         rc = 0
         try:
