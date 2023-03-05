@@ -16,7 +16,7 @@ class GitContext:
         'Run git command with *args*, and post a status message.'
         import sh
         vd.warning('git ' + ' '.join(str(x) for x in args))
-        return sh.git(*args, 
+        return sh.git(*args,
                       _cwd=self.gitRootPath,
                       **kwargs)
 
@@ -28,6 +28,7 @@ class GitContext:
             cmd = self.git('--no-pager',
                       *args,
                       _decode_errors='replace',
+                      _bg_exc=False,
                       **kwargs)
             out = cmd.stdout
         except sh.ErrorReturnCode as e:

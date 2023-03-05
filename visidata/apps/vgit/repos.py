@@ -10,7 +10,7 @@ def guess_git(vd, p):
 
 @VisiData.api
 def open_git(vd, p):
-    return GitRepos(p.name, source=p)
+    return vd.git_status(p, [])
 
 
 @VisiData.api
@@ -45,7 +45,7 @@ class GitRepos(GitSheet):
 
         - `Enter` to open the status sheet for the current repo
     '''
-    rowtype = 'repos'  # rowdef: Path
+    rowtype = 'git repos'  # rowdef: Path
     columns = [
         Column('repo', type=str, width=30),
         GitAllColumn('branch', 'git rev-parse --abbrev-ref HEAD', width=8),
@@ -64,7 +64,7 @@ class GitRepos(GitSheet):
 
 
     def openRow(self, row):
-        return vd.open_git(row)
+        return vd.git_status(row, [])
 
     def openCell(self, col, row):
         val = col.getValue(row)

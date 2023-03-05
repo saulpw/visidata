@@ -59,13 +59,13 @@ f) brag tweet
 - see stash in sidebar as scrolling by
 - create new branch from stashed change?
 
-# 7. toplevel `g Ctrl+<>` to reset current checkout to known state
+# 7. toplevel `g Ctrl+?` to reset current checkout to known state
 - branch HEAD
 - no diffs in any files
 - not merging, not fixing conflicts
 - not bisecting, etc
 
-# 8. vgit status  -> GitOverview
+# 8. vgit status
 
 - move files between staging/unstaged
 - delete file 'd'
@@ -76,7 +76,11 @@ f) brag tweet
 - remove ignore-file and ignore-wildcard
 - edit file
 
-# 9. vgit remote
+# 9. vgit repos
+
++ show all repos at a glance
+
+# 10. vgit remote
 
 + add remote
 + delete remote
