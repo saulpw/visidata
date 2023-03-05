@@ -4,9 +4,10 @@
 The syntax for vgit is the same as the syntax for git.
 By default, will pass the command to git verbatim, as quickly as possible.
 If vgit can provide an interactive interface for a particular subcommand,
-it will open the sheet returned by vd.git_<subcommand>().
+it will open the sheet returned by vd.git_<subcommand>(path, args).
 '''
 
+import os
 import sys
 
 
@@ -20,8 +21,7 @@ def vgit_cli():
         args.remove('--debug')
 
     if not args:
-#        return vd.run(vd.git_help())
-        return
+        args = ['help']
 
     func = getattr(vd, 'git_'+args[0], None)
     if func:
@@ -29,14 +29,25 @@ def vgit_cli():
         vd.status(visidata.__version_info__)
         vd.domotd()
 
+        rc = 0
         try:
-            vs = func(args[1:])
+            p = Path('.')
+            vs = func(p, args[1:])
             if vs:
-                return vd.run(vs)
+                vd.run(vs)
+        except BrokenPipeError:
+            os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno()) # handle broken pipe gracefully
+        except visidata.ExpectedException as e:
+            print(str(e))
         except Exception as e:
+            rc = 1
             vd.exceptionCaught(e)
             if flDebug:
                 raise
+
+        sys.stderr.flush()
+        sys.stdout.flush()
+        os._exit(rc)  # cleanup can be expensive
 
     import subprocess
     return subprocess.run(['git', *args]).returncode

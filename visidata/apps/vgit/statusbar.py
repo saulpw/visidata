@@ -19,6 +19,8 @@ def branchStatus(sheet):
 @GitSheet.api
 def gitInProgress(sheet):
     p = sheet.gitPath
+    if not p:
+        return 'no repo'
     if (p/'rebase-merge').exists() or (p/'rebase-apply/rebasing').exists():
         return 'rebasing'
     elif p/'rebase-apply'.exists():

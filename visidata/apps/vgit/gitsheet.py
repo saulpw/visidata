@@ -1,23 +1,13 @@
 import io
 
-from visidata import AttrDict, vd, Path, asyncthread, BaseSheet, Sheet
-
-vd.option('vgit_logfile', '', 'file to log all git commands run by vgit')
+from visidata import AttrDict, vd, Path, asyncthread, Sheet
 
 
 class GitContext:
     def _git_args(self):
         'Return list of extra args to all git commands'
 
-        def _getRepoPath(p):
-            'Return path at p or above which has .git subdir'
-            if p.joinpath('.git').exists():
-                return p
-            if getattr(p, 'given', None) in ['/','']:
-                return None
-            return _getRepoPath(p.resolve().parent)
-
-        worktree = _getRepoPath(self.gitRootSheet.source)  # Path
+        worktree = self.gitPath
         if not worktree:
             return []
 
@@ -26,28 +16,23 @@ class GitContext:
             '--work-tree', str(worktree),
         ]
 
-    def debugloggit(self, *args, **kwargs):
+    def git(self, *args, **kwargs):
+        'For non-modifying commands; not logged except in debug mode'
         sh = vd.importExternal('sh')
-        return self.loggit(*args, logger=vd.debug, **kwargs)
-
-    def loggit(self, *args, logger=vd.status, **kwargs):
-        sh = vd.importExternal('sh')
-        cmdstr = 'git ' + ' '.join(str(x) for x in args)
-
-        vd.warning(cmdstr)
-
-        if self.options.vgit_logfile:
-            with open(self.options.vgit_logfile, 'a') as fp:
-                fp.write(cmdstr + '\n')
-
+        vd.debug('git ' + ' '.join(str(x) for x in args))
         return sh.git(*args, **kwargs)
 
-    def git_all(self, *args, git=None, **kwargs):
+    def loggit(self, *args, **kwargs):
+        'Run git command with *args*, and post a status message.'
+        import sh
+        vd.warning('git ' + ' '.join(str(x) for x in args))
+        return sh.git(*args, **kwargs)
+
+    def git_all(self, *args, **kwargs):
         'Return entire output of git command.'
         sh = vd.importExternal('sh')
-        git = git or self.loggit
         try:
-            cmd = git('--no-pager',
+            cmd = self.git('--no-pager',
                       *self._git_args(),
                       *args,
                       _decode_errors='replace',
@@ -65,9 +50,8 @@ class GitContext:
         'Generator of stdout lines from given git command'
         sh = vd.importExternal('sh')
         err = io.StringIO()
-        git = self.loggit
         try:
-            for line in git('--no-pager',
+            for line in self.git('--no-pager',
                             *self._git_args(),
                             *args,
                             _decode_errors='replace',
@@ -78,7 +62,7 @@ class GitContext:
                 yield line[:-1]  # remove EOL
 
         except sh.ErrorReturnCode as e:
-            vd.error('git '+' '.join(args), 'error=%s' % e.exit_code)
+            vd.warning('git '+' '.join(map(str, args)), 'error=%s' % e.exit_code)
 
         errlines = err.getvalue().splitlines()
         if errlines:
@@ -88,12 +72,11 @@ class GitContext:
         'Generator of chunks of stdout from given git command, delineated by sep character'
         sh = vd.importExternal('sh')
         err = io.StringIO()
-        git = self.loggit
 
         bufsize = 512
         chunks = []
         try:
-          for data in git('--no-pager',
+          for data in self.git('--no-pager',
                           *self._git_args(),
                           *args,
                           _decode_errors='replace',
@@ -124,8 +107,9 @@ class GitContext:
     @asyncthread
     def modifyGit(self, *args, **kwargs):
         'Run git command that modifies the repo'
-        for line in self.git_lines(*args, **kwargs):
-            vd.status(line)
+        vd.warning('git ' + ' '.join(str(x) for x in args))
+        ret = self.git_all(*args, **kwargs)
+        vd.status(ret)
 
         if isinstance(self.source, GitSheet):
             self.source.reload()
@@ -138,19 +122,49 @@ class GitContext:
             return self.source.gitRootSheet
         return self
 
-    @property
-    def gitPath(self):
-        return Path('.git')  # XXX from git root
-
 
 class GitSheet(GitContext, Sheet):
     def git_exec(self, cmdstr):
         vd.push(TextSheet(cmdstr, source=sheet.git_lines(*cmdstr.split())))
 
 @GitSheet.lazy_property
-def branch(self):
-    return self.git_all('rev-parse', '--abbrev-ref', 'HEAD').strip()
+def gitPath(self):
+    'Return Path of git root (nearest ancestor directory with a .git/)'
+    def _getRepoPath(p):
+        'Return path at p or above which has .git subdir'
+        if p.joinpath('.git').exists():
+            return p
+        if str(p) in ['/','']:
+            return None
+        return _getRepoPath(p.resolve().parent)
 
+    p = _getRepoPath(self.gitRootSheet.source)
+    if p:
+       return p/'.git'
+
+
+@GitSheet.lazy_property
+def branch(self):
+    return self.rogit('rev-parse', '--abbrev-ref', 'HEAD').strip()
+
+
+class GitLinesColumn(Column):
+    def __init__(self, name, cmd, *args, **kwargs):
+        super().__init__(name, cache=True, **kwargs)
+        cmdparts = cmd.split()
+        if cmdparts[0] == 'git':
+            cmdparts = cmdparts[1:]
+        self.gitargs = cmdparts + list(args)
+
+    def calcValue(self, r):
+        gitdir = GitSheet(source=r).gitPath
+        return list(self.sheet.git_lines('--git-dir', gitdir, *self.gitargs))
+
+
+class GitAllColumn(GitLinesColumn):
+    def calcValue(self, r):
+        gitdir = GitSheet(source=r).gitPath
+        return self.sheet.git_all('--git-dir', gitdir, *self.gitargs).strip()
 
 
 GitSheet.options.disp_note_none = ''
