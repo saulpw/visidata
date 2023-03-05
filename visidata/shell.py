@@ -205,7 +205,7 @@ class DirSheet(Sheet):
         f = _walkfiles if self.options.dir_recurse else _listfiles
 
         for p in f(self.source):
-            if not hidden_files and p.name.startswith('.'):
+            if not hidden_files and str(p).startswith('.'):
                 continue
 
             yield p

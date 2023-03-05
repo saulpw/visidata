@@ -35,11 +35,12 @@ class GitStatus(GitSheet):
         # git status
         An overview of the local git checkout.
 
-        - `a` to stage changes in file
-        - `r` to unstage changes in file
-        - `c` to revert all unstaged changes in file
-        - `d` to stage the entire file for deletion
-        - `z Ctrl+S` to commit staged changes
+        - `Enter` to open diff of file
+        - `a` to stage changes in file (git add)
+        - `r` to unstage changes in file (git reset)
+        - `c` to revert all unstaged changes in file (git checkout)
+        - `d` to stage the entire file for deletion (git rm)
+        - `z Ctrl+S` to commit staged changes (git commit)
     '''
     columns = [
         Column('path', width=40, getter=lambda c,r: str(r)),
