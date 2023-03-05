@@ -28,7 +28,9 @@ class GitLinesColumn(Column):
 
     def calcValue(self, r):
         gitdir = GitSheet(source=r).gitPath
-        return list(self.sheet.git_lines('--git-dir', gitdir, *self.gitargs))
+        lines = list(self.sheet.git_lines('--git-dir', gitdir, *self.gitargs))
+        if lines:
+            return lines
 
 
 class GitAllColumn(GitLinesColumn):
