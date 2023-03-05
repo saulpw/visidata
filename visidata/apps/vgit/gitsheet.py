@@ -4,42 +4,34 @@ from visidata import AttrDict, vd, Path, asyncthread, Sheet
 
 
 class GitContext:
-    def _git_args(self):
-        'Return list of extra args to all git commands'
-
-        worktree = self.gitPath
-        if not worktree:
-            return []
-
-        return [
-            '--git-dir', str(worktree.joinpath('.git')),
-            '--work-tree', str(worktree),
-        ]
-
     def git(self, *args, **kwargs):
         'For non-modifying commands; not logged except in debug mode'
         sh = vd.importExternal('sh')
         vd.debug('git ' + ' '.join(str(x) for x in args))
-        return sh.git(*args, **kwargs)
+        return sh.git(*args,
+                      _cwd=self.gitRootPath,
+                      **kwargs)
 
     def loggit(self, *args, **kwargs):
         'Run git command with *args*, and post a status message.'
         import sh
         vd.warning('git ' + ' '.join(str(x) for x in args))
-        return sh.git(*args, **kwargs)
+        return sh.git(*args, 
+                      _cwd=self.gitRootPath,
+                      **kwargs)
 
     def git_all(self, *args, **kwargs):
         'Return entire output of git command.'
         sh = vd.importExternal('sh')
         try:
+            vd.status('git ' + ' '.join(str(x) for x in args))
             cmd = self.git('--no-pager',
-                      *self._git_args(),
                       *args,
                       _decode_errors='replace',
                       **kwargs)
             out = cmd.stdout
         except sh.ErrorReturnCode as e:
-            vd.status('git '+' '.join(args), 'error=%s' % e.exit_code)
+            vd.status('error=%s' % e.exit_code)
             out = e.stdout
 
         out = out.decode('utf-8')
@@ -51,8 +43,8 @@ class GitContext:
         sh = vd.importExternal('sh')
         err = io.StringIO()
         try:
+            vd.status('git ' + ' '.join(str(x) for x in args))
             for line in self.git('--no-pager',
-                            *self._git_args(),
                             *args,
                             _decode_errors='replace',
                             _iter=True,
@@ -68,6 +60,7 @@ class GitContext:
         if errlines:
             vd.warning('git stderr: ' + '\n'.join(errlines))
 
+
     def git_iter(self, *args, sep='\0', **kwargs):
         'Generator of chunks of stdout from given git command, delineated by sep character'
         sh = vd.importExternal('sh')
@@ -76,8 +69,8 @@ class GitContext:
         bufsize = 512
         chunks = []
         try:
+          vd.status('git ' + ' '.join(str(x) for x in args))
           for data in self.git('--no-pager',
-                          *self._git_args(),
                           *args,
                           _decode_errors='replace',
                           _out_bufsize=bufsize,
@@ -127,8 +120,9 @@ class GitSheet(GitContext, Sheet):
     def git_exec(self, cmdstr):
         vd.push(TextSheet(cmdstr, source=sheet.git_lines(*cmdstr.split())))
 
+
 @GitSheet.lazy_property
-def gitPath(self):
+def gitRootPath(self):
     'Return Path of git root (nearest ancestor directory with a .git/)'
     def _getRepoPath(p):
         'Return path at p or above which has .git subdir'
@@ -140,7 +134,7 @@ def gitPath(self):
 
     p = _getRepoPath(self.gitRootSheet.source)
     if p:
-       return p/'.git'
+       return p
 
 
 @GitSheet.lazy_property

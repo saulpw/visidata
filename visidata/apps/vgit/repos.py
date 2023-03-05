@@ -27,16 +27,14 @@ class GitLinesColumn(Column):
         self.gitargs = cmdparts + list(args)
 
     def calcValue(self, r):
-        gitdir = GitSheet(source=r).gitPath
-        lines = list(self.sheet.git_lines('--git-dir', gitdir, *self.gitargs))
+        lines = list(GitSheet(source=r).git_lines(*self.gitargs))
         if lines:
             return lines
 
 
 class GitAllColumn(GitLinesColumn):
     def calcValue(self, r):
-        gitdir = GitSheet(source=r).gitPath
-        return self.sheet.git_all('--git-dir', gitdir, *self.gitargs).strip()
+        return GitSheet(source=r).git_all(*self.gitargs).strip()
 
 
 
@@ -51,9 +49,10 @@ class GitRepos(GitSheet):
     columns = [
         Column('repo', type=str, width=30),
         GitAllColumn('branch', 'git rev-parse --abbrev-ref HEAD', width=8),
+        GitLinesColumn('diffs', 'git diff --no-color', type=vlen, width=8),
+        GitLinesColumn('staged_diffs', 'git diff --cached', type=vlen, width=8),
+        GitLinesColumn('branches', 'git branch --no-color', type=vlen, width=10),
         GitLinesColumn('stashes', 'git stash list', type=vlen, width=8),
-        GitLinesColumn('cached', 'git diff --cached', type=vlen, width=8),
-        GitLinesColumn('branches', 'git branch --no-color', type=vlen, width=8),
         Column('modtime', type=date, getter=lambda c,r: modtime(r)),
     ]
     nKeys = 1
