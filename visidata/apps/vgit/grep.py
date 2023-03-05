@@ -4,8 +4,8 @@ from .gitsheet import GitSheet
 
 
 @VisiData.api
-def git_grep(vd, args):
-    return GitGrep(args[0], regex=args[0], source=Path('.'))
+def git_grep(vd, p, args):
+    return GitGrep(args[0], regex=args[0], source=p)
 
 
 class GitGrep(GitSheet):

@@ -9,12 +9,12 @@ vd.option('color_git_remote_branch', 'cyan', 'color of remote branches on branch
 
 
 @VisiData.api
-def git_branch(vd, args):
+def git_branch(vd, p, args):
     nonListArgs = '--track --no-track --set-upstream-to -u --unset-upstream -m -M -c -C -d -D --edit-description'.split()
     if any(x in args for x in nonListArgs):
         return
 
-    return GitBranch('git-branch-list', source=Path('.'), git_args=args)
+    return GitBranch('git-branch-list', source=p, git_args=args)
 
 
 def _remove_prefix(text, prefix):

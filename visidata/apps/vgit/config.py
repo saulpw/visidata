@@ -8,9 +8,9 @@ from .gitsheet import GitSheet
 CONFIG_CONTEXTS = ('local', 'global', 'system')
 
 @VisiData.api
-def git_config(vd, args):
+def git_config(vd, p, args):
     if not args or '-l' in args:
-        return GitConfig('git-config', source=Path('.'))
+        return GitConfig('git-config', source=p)
 
 vd.git_options = vd.git_config
 

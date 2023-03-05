@@ -4,7 +4,7 @@ from .gitsheet import GitSheet
 
 
 @VisiData.api
-def git_blame(vd, args, **kwargs):
+def git_blame(vd, gitpath, args, **kwargs):
     if args and not args[-1].startswith('-'):
         fn = args[-1]
         return GitBlame('blame', fn, source=Path(fn), **kwargs)

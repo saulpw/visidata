@@ -3,9 +3,9 @@ from visidata import vd, VisiData, ItemColumn, AttrDict, RowColorizer, Path
 from .gitsheet import GitSheet
 
 @VisiData.api
-def git_remote(vd, args=None):
+def git_remote(vd, p, args):
     if not args or 'show' in args:
-        return GitRemotes('remotes', source=Path('.'))
+        return GitRemotes('remotes', source=p)
 
 
 class GitRemotes(GitSheet):
