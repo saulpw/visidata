@@ -3,7 +3,7 @@ import itertools
 from copy import copy, deepcopy
 import textwrap
 
-from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException, setitem
+from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException
 from visidata import (options, Column, namedlist, SettableColumn,
 TypedExceptionWrapper, BaseSheet, UNLOADED,
 clipdraw, ColorAttr, update_attr, colors, undoAttrFunc, vlen)
@@ -911,68 +911,6 @@ class SequenceSheet(Sheet):
             vd.sync(self.sort())
 
 
-class IndexSheet(Sheet):
-    'Base class for tabular sheets with rows that are Sheets.'
-    rowtype = 'sheets'  # rowdef: Sheet
-
-    columns = [
-        Column('name', getter=lambda c,r: r.names[-1], setter=lambda c,r,v: setitem(r.names, -1, v)),
-        ColumnAttr('rows', 'nRows', type=int, width=9),
-        ColumnAttr('cols', 'nCols', type=int),
-        ColumnAttr('keys', 'keyColNames'),
-        ColumnAttr('source'),
-    ]
-    nKeys = 1
-
-    def newRow(self):
-        return Sheet('', columns=[ColumnItem('', 0)], rows=[])
-
-    def openRow(self, row):
-        return row  # rowdef is Sheet
-
-    def getSheet(self, k):
-        for vs in self.rows:
-            if vs.name == k:
-                return vs
-
-    def addRow(self, sheet, **kwargs):
-        super().addRow(sheet, **kwargs)
-        if not self.options.load_lazy and not sheet.options.load_lazy:
-            sheet.ensureLoaded()
-
-    @asyncthread
-    def reloadSheets(self, sheets):
-        for vs in vd.Progress(sheets):
-            vs.reload()
-
-
-class SheetsSheet(IndexSheet):
-    columns = [
-        ColumnAttr('name'),
-        ColumnAttr('type', '__class__.__name__'),
-        ColumnAttr('pane', type=int),
-        Column('shortcut', getter=lambda c,r: getattr(r, 'shortcut'), setter=lambda c,r,v: setattr(r, '_shortcut', v)),
-        ColumnAttr('nRows', type=int),
-        ColumnAttr('nCols', type=int),
-        ColumnAttr('nVisibleCols', type=int),
-        ColumnAttr('cursorDisplay'),
-        ColumnAttr('keyColNames'),
-        ColumnAttr('source'),
-        ColumnAttr('progressPct'),
-#        ColumnAttr('threads', 'currentThreads', type=vlen),
-    ]
-    precious = False
-    nKeys = 1
-    def reload(self):
-        self.rows = self.source
-
-    def sort(self):
-        self.rows[1:] = sorted(self.rows[1:], key=self.sortkey)
-
-class GlobalSheetsSheet(SheetsSheet):  #1620
-    def sort(self):
-        IndexSheet.sort(self)
-
 @VisiData.property
 @drawcache
 def _evalcontexts(vd):
@@ -1025,15 +963,6 @@ def push(vd, vs, pane=0, load=True):
 
     if load:
         vs.ensureLoaded()
-
-
-@VisiData.lazy_property
-def allSheetsSheet(vd):
-    return GlobalSheetsSheet("sheets_all", source=vd.allSheets)
-
-@VisiData.lazy_property
-def sheetsSheet(vd):
-    return SheetsSheet("sheets", source=vd.sheets)
 
 
 @VisiData.api
@@ -1118,8 +1047,6 @@ BaseSheet.init('pane', lambda: 1)
 
 Sheet.init('_ordering', list, copy=True)  # (col:Column, reverse:bool)
 
-globalCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)', 'open Sheets Stack: join or jump between the active sheets on the current stack')
-globalCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)', 'open Sheets Sheet: join or jump between all sheets from current session')
 
 BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); reload(); recalc(); status("reloaded")', 'Reload current sheet'),
 Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line'),
@@ -1141,13 +1068,6 @@ Sheet.addCommand('#', 'type-int', 'cursorCol.type = int', 'set type of current c
 Sheet.addCommand('z#', 'type-len', 'cursorCol.type = vlen', 'set type of current column to len')
 Sheet.addCommand('%', 'type-float', 'cursorCol.type = float', 'set type of current column to float')
 Sheet.addCommand('', 'type-floatlocale', 'cursorCol.type = floatlocale', 'set type of current column to float using system locale set in LC_NUMERIC')
-
-# when diving into a sheet, remove the index unless it is precious
-IndexSheet.addCommand('g^R', 'reload-selected', 'reloadSheets(selectedRows or rows)', 'reload all selected sheets')
-SheetsSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_columns", source=selectedRows))', 'open Columns Sheet with all visible columns from selected sheets')
-SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)', 'abort async thread for current sheet')
-SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)', 'abort async threads for selected sheets')
-SheetsSheet.addCommand(ENTER, 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(openRow(dest))', 'open sheet referenced in current row')
 
 BaseSheet.addCommand('q', 'quit-sheet',  'vd.quit(sheet)', 'quit current sheet')
 BaseSheet.addCommand('Q', 'quit-sheet-free',  'quitAndReleaseMemory()', 'discard current sheet and free memory')
@@ -1191,9 +1111,7 @@ vd.addGlobals(
     LazyComputeRow=LazyComputeRow,
     Sheet=Sheet,
     TableSheet=TableSheet,
-    SequenceSheet=SequenceSheet,
-    IndexSheet=IndexSheet,
-    SheetsSheet=SheetsSheet)
+    SequenceSheet=SequenceSheet)
 
 vd.addMenuItems('''
     File > New > open-new

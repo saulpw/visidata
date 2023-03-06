@@ -339,3 +339,7 @@ vd.addMenuItems('''
     Data > Join > top two sheets > join-sheets-top2
     Data > Join > all sheets > join-sheets-all
 ''')
+
+IndexSheet.help += '''
+    - `&` to join the selected sheets together
+'''

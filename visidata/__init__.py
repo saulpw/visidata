@@ -57,6 +57,7 @@ import visidata.column
 
 import visidata.interface
 import visidata.sheets
+import visidata.indexsheet
 
 import visidata.statusbar
 
