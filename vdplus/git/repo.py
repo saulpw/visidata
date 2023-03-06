@@ -47,63 +47,6 @@ class GitStashes(GitSheet):
         return HunksSheet(row[0]+"_diffs", "stash", "show", "--no-color", "--patch", row[0], source=self)
 
 
-# rowdef: (commit_hash, refnames, author, author_date, body, notes)
-class GitLogSheet(GitSheet):
-    # corresponding to rowdef
-    GIT_LOG_FORMAT = ['%H', '%D', '%an <%ae>', '%ai', '%B', '%N']
-    rowtype = 'commits'
-    defermods = True
-    savesToSource = True
-    columns = [
-            ColumnItem('commitid', 0, width=8),
-            ColumnItem('refnames', 1, width=12),
-            Column('message', height=3, getter=lambda c,r: r[4], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--message', v), width=50),
-            Column('author', getter=lambda c,r: r[2], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--author', v)),
-            Column('author_date', type=date, getter=lambda c,r:r[3], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--date', v)),
-            Column('notes', getter=lambda c,r: r[5], setter=lambda c,r,v: c.sheet.git('notes', 'add', '--force', '--message', v, r[0])),
-    ]
-    colorizers = [
-            RowColorizer(5, 'color_vgit_unpushed', lambda s,c,r,v: r and not s.inRemoteBranch(r[0])),
-    ]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    @functools.lru_cache()
-    def inRemoteBranch(self, commitid):
-        return self.git_all('branch', '-r', '--contains', commitid)
-
-    @asyncthread
-    def reload(self):
-        self.rows = []
-        lines = self.git_iter('log', '--no-color', '-z', '--pretty=format:%s' % '%x1f'.join(self.GIT_LOG_FORMAT), self.ref)
-        for record in Progress(tuple(lines)):
-            self.addRow(record.split('\x1f'))
-
-    def openRow(self, row):
-        'open this commit'
-        return getCommitSheet(row[0][:7], self, row[0])
-
-    @asyncthread
-    def commit(self, path, adds, mods, dels):
-
-        assert not adds
-        assert not dels
-
-        for row, rowmods in mods.values():
-            for col, val in rowmods.values():
-                try:
-                    col.putValue(row, val)
-                except Exception as e:
-                    vd.exceptionCaught(e)
-
-        self.reload()
-        self.resetDeferredCommit()
-
-GitLogSheet.addCommand(None, 'delete-row', 'error("delete is not supported")')
-GitLogSheet.addCommand(None, 'add-row', 'error("commits cannot be added")')
-
-
 @GitStatus.lazy_property
 def gitStashesSheet(self):
     return GitStashes('stashes', source=self)
@@ -118,8 +61,6 @@ BaseSheet.addCommand('R', 'git-remotes', 'vd.push(getRootSheet(sheet).gitRemotes
 Sheet.unbindkey('T')
 Sheet.unbindkey('L')
 #unbindkey('gO')
-
-BaseSheet.addCommand('L', 'git-log', 'vd.push(GitLogSheet(branch+"_log", ref=branch, source=sheet))', 'push log of current branch')
 
 GitStashes.addCommand('a', 'git-stash-apply', 'git("stash", "apply", cursorRow[0])', 'apply this stashed change without removing'),
 GitStashes.addCommand('', 'git-stash-pop-row', 'git("stash", "pop", cursorRow[0])', 'apply this stashed change and drop it'),

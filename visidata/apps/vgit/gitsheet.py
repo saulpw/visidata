@@ -4,17 +4,19 @@ from visidata import AttrDict, vd, Path, asyncthread, Sheet
 
 
 class GitContext:
-    def git(self, *args, **kwargs):
+    def git(self, subcmd, *args, **kwargs):
         'For non-modifying commands; not logged except in debug mode'
         sh = vd.importExternal('sh')
+        args = list(subcmd.split()) + list(args)
         vd.debug('git ' + ' '.join(str(x) for x in args))
         return sh.git(*args,
                       _cwd=self.gitRootPath,
                       **kwargs)
 
-    def loggit(self, *args, **kwargs):
+    def loggit(self, subcmd, *args, **kwargs):
         'Run git command with *args*, and post a status message.'
         import sh
+        args = list(subcmd.split()) + list(args)
         vd.warning('git ' + ' '.join(str(x) for x in args))
         return sh.git(*args,
                       _cwd=self.gitRootPath,
@@ -39,10 +41,11 @@ class GitContext:
 
         return out
 
-    def git_lines(self, *args, **kwargs):
+    def git_lines(self, subcmd, *args, **kwargs):
         'Generator of stdout lines from given git command'
         sh = vd.importExternal('sh')
         err = io.StringIO()
+        args = list(subcmd.split()) + list(args)
         try:
             vd.status('git ' + ' '.join(str(x) for x in args))
             for line in self.git('--no-pager',
@@ -62,11 +65,13 @@ class GitContext:
             vd.warning('git stderr: ' + '\n'.join(errlines))
 
 
-    def git_iter(self, *args, sep='\0', **kwargs):
-        'Generator of chunks of stdout from given git command, delineated by sep character'
+    def git_iter(self, subcmd, *args, sep='\0', **kwargs):
+        'Generator of chunks of stdout from given git command *subcmd*, delineated by sep character.'
         sh = vd.importExternal('sh')
+        import sh
         err = io.StringIO()
 
+        args = list(subcmd.split()) + list(args)
         bufsize = 512
         chunks = []
         try:
@@ -76,6 +81,7 @@ class GitContext:
                           _decode_errors='replace',
                           _out_bufsize=bufsize,
                           _iter=True,
+                          _bg_exc=False,
                           _err=err,
                           **kwargs):
             while True:
@@ -89,7 +95,7 @@ class GitContext:
 
             chunks.append(data)
         except sh.ErrorReturnCode as e:
-            vd.error('git '+' '.join(args), 'error=%s' % e.exit_code)
+            vd.warning('git '+' '.join(args), 'error=%s' % e.exit_code)
 
         if chunks:
             yield ''.join(chunks)
@@ -119,7 +125,7 @@ class GitContext:
 
 class GitSheet(GitContext, Sheet):
     def git_exec(self, cmdstr):
-        vd.push(TextSheet(cmdstr, source=sheet.git_lines(*cmdstr.split())))
+        vd.push(TextSheet(cmdstr, source=sheet.git_lines(cmdstr)))
 
 
 @GitSheet.lazy_property

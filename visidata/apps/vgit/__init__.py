@@ -6,5 +6,6 @@ from visidata.apps.vgit import (
     remote,
     blame,
     status,
+    log,
     repos,
 )

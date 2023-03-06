@@ -1,4 +1,4 @@
-from visidata import vd, Column, VisiData, ItemColumn, Path, AttrDict, BaseSheet
+from visidata import vd, Column, VisiData, ItemColumn, Path, AttrDict, BaseSheet, IndexSheet
 from visidata import RowColorizer, CellColorizer
 from visidata import filesize, modtime, date
 
@@ -35,13 +35,14 @@ class GitStatus(GitSheet):
         # git status
         An overview of the local git checkout.
 
-        - `Enter` to open diff of file
-        - `a` to stage changes in file (git add)
-        - `r` to unstage changes in file (git reset)
-        - `c` to revert all unstaged changes in file (git checkout)
-        - `d` to stage the entire file for deletion (git rm)
-        - `z Ctrl+S` to commit staged changes (git commit)
+        - `Enter` to open diff of file (`git diff`)
+        - `a` to stage changes in file (`git add`)
+        - `r` to unstage changes in file (`git reset`)
+        - `c` to revert all unstaged changes in file (`git checkout`)
+        - `d` to stage the entire file for deletion (`git rm`)
+        - `z Ctrl+S` to commit staged changes (`git commit`)
     '''
+
     columns = [
         Column('path', width=40, getter=lambda c,r: str(r)),
         Column('status', getter=lambda c,r: c.sheet.statusText(c.sheet.git_status(r)), width=8),
@@ -59,7 +60,7 @@ class GitStatus(GitSheet):
         CellColorizer(1, 'color_git_staged_del',     lambda s,c,r,v: r and c and c.name == 'staged' and s.git_status(r).status == 'D '), # staged delete
         RowColorizer(1, 'color_git_staged_add',  lambda s,c,r,v: r and s.git_status(r).status in ['A ', 'M ']), # staged add/mod
         RowColorizer(1, 'color_git_unstaged_del',       lambda s,c,r,v: r and s.git_status(r).status[1] == 'D'), # unstaged delete
-        RowColorizer(1, 'color_git_untracked', lambda s,c,r,v: r and s.git_status(r).status == '!!'),  # ignored
+        RowColorizer(3, 'color_git_untracked', lambda s,c,r,v: r and s.git_status(r).status == '!!'),  # ignored
         RowColorizer(1, 'color_git_untracked', lambda s,c,r,v: r and s.git_status(r).status == '??'),  # untracked
     ]
 
@@ -175,12 +176,11 @@ GitStatus.addCommand('a', 'git-add', 'loggit("add", cursorRow.filename)', 'add t
 GitStatus.addCommand('d', 'git-rm', 'loggit("rm", cursorRow.filename)', 'stage this file for deletion'),
 GitStatus.addCommand('r', 'git-reset', 'loggit("reset", "HEAD", cursorRow.filename)', 'reset/unstage this file'),
 GitStatus.addCommand('c', 'git-checkout', 'loggit("checkout", cursorRow.filename)', 'checkout this file'),
-#GitStatus.addCommand('ga', 'git-add-selected', 'loggit("add", *[r.filename for r in selectedRows])', 'add all selected files to staging'),
-#GitStatus.addCommand('gd', 'git-rm-selected', 'loggit("rm", *[r.filename for r in selectedRows])', 'delete all selected files'),
+GitStatus.addCommand('ga', 'git-add-selected', 'loggit("add", *[r for r in selectedRows])', 'add all selected files to staging'),
+GitStatus.addCommand('gd', 'git-rm-selected', 'loggit("rm", *[r for r in selectedRows])', 'delete all selected files'),
 GitStatus.addCommand(None, 'git-commit', 'loggit("commit", "-m", input("commit message: "))', 'commit changes'),
-#GitStatus.addCommand('V', 'open-file', 'vd.push(TextSheet(cursorRow.filename, source=Path(cursorRow.filename)))', 'open file'),
-#GitStatus.addCommand(None, 'ignore-file', 'open(workdir+"/.gitignore", "a").write(cursorRow.filename+"\\n"); reload()', 'add file to toplevel .gitignore'),
-#GitStatus.addCommand(None, 'ignore-wildcard', 'open(workdir+"/.gitignore", "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore'),
+GitStatus.addCommand(None, 'git-ignore-file', 'open(rootPath/".gitignore", "a").write(cursorRow.filename+"\\n"); reload()', 'add file to toplevel .gitignore'),
+GitStatus.addCommand(None, 'git-ignore-wildcard', 'open(rootPath/.gitignore, "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore'),
 
 
 #GitStatus.addCommand('z^J', 'diff-file-staged', 'vd.push(getStagedHunksSheet(sheet, cursorRow))', 'push staged diffs for this file'),
@@ -200,6 +200,6 @@ vd.addMenuItems('''
     Git > Delete > selected files > git-rm-selected
     Git > Ignore > file > ignore-file
     Git > Ignore > wildcard > ignore-wildcard
-    Git > Commit staged changes > git-checkout
+    Git > Commit staged changes > git-commit
     Git > Revert unstaged changes > current file > git-checkout
 ''')
