@@ -1,6 +1,6 @@
 import functools
 
-from visidata import vd, VisiData, Column, ItemColumn, date, RowColorizer, asyncthread, Progress
+from visidata import vd, VisiData, Column, ItemColumn, date, RowColorizer, asyncthread, Progress, AttrDict
 
 from .gitsheet import GitSheet
 
@@ -12,24 +12,27 @@ def git_log(vd, p, args):
 # rowdef: (commit_hash, refnames, author, author_date, body, notes)
 class GitLogSheet(GitSheet):
     help = '''
+        # git log
+        Commit history for {sheet.gitargs}.
 
+        {sheet.cursorRow.message}
 
+        - `Enter` to show this commit
     '''
-    # corresponding to rowdef
     GIT_LOG_FORMAT = ['%H', '%D', '%an <%ae>', '%ai', '%B', '%N']
-    rowtype = 'commits'
+    rowtype = 'commits'  # rowdef: AttrDict
     defer = True
     savesToSource = True
     columns = [
-            ItemColumn('commitid', 0, width=8),
-            ItemColumn('refnames', 1, width=12),
-            Column('message', getter=lambda c,r: r[4], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--message', v), width=50),
-            Column('author', getter=lambda c,r: r[2], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--author', v)),
-            Column('author_date', type=date, getter=lambda c,r:r[3], setter=lambda c,r,v: c.sheet.git('commit', '--amend', '--no-edit', '--quiet', '--date', v)),
-            Column('notes', getter=lambda c,r: r[5], setter=lambda c,r,v: c.sheet.git('notes', 'add', '--force', '--message', v, r[0])),
+        ItemColumn('commitid', width=8),
+        ItemColumn('refnames', width=12),
+        ItemColumn('message', setter=lambda c,r,v: c.sheet.git('commit --amend --no-edit --quiet --message', v), width=50),
+        ItemColumn('author', setter=lambda c,r,v: c.sheet.git('commit --amend --no-edit --quiet --author', v)),
+        ItemColumn('author_date', type=date, setter=lambda c,r,v: c.sheet.git('commit --amend --no-edit --quiet --date', v)),
+        ItemColumn('notes', setter=lambda c,r,v: c.sheet.git('notes add --force --message', v, r.commitid)),
     ]
     colorizers = [
-            RowColorizer(5, 'color_vgit_unpushed', lambda s,c,r,v: r and not s.inRemoteBranch(r[0])),
+            RowColorizer(5, 'color_vgit_unpushed', lambda s,c,r,v: r and not s.inRemoteBranch(r.commitid)),
     ]
 
     def __init__(self, *args, **kwargs):
@@ -42,7 +45,15 @@ class GitLogSheet(GitSheet):
     def iterload(self):
         lines = self.git_iter('log --no-color -z', '--pretty=format:' + '%x1f'.join(self.GIT_LOG_FORMAT), *self.gitargs)
         for record in Progress(tuple(lines)):
-            yield record.split('\x1f')
+            r = record.split('\x1f')
+            yield AttrDict(
+                commitid=r[0],
+                refnames=r[1],
+                author=r[2],
+                author_date=r[3],
+                message=r[4],
+                notes=r[5],
+            )
 
     def openRow(self, row):
         'open this commit'
