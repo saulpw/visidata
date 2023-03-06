@@ -3,6 +3,7 @@ __pycache__
 .idea/
 .vscode/
 visidata.egg-info/
+*.egg-info/
 *v_env*
 *~
 *.swp
