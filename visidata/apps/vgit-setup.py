@@ -11,7 +11,6 @@ setup(name='vgit',
       description='a sleek terminal user interface for git',
       # long_description=open('README.md').read(),
       install_requires=['sh'], # visidata
-      package_dir={'':'visidata/apps'},
       packages=['vgit'],
       scripts=['bin/vgit'],
       author='Saul Pwanson',
