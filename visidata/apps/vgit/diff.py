@@ -31,7 +31,7 @@ class GitDiffSheet(GitSheet):
     ]
 
     help = '''# {sheet.cursorRow.a_fn}
-{sheet.cursorLines}''' + '\n'*10 + ' '*120 + 'a'
+{sheet.cursorLines}'''
 
     def hunkCount(self, row):
         return f'-{row.a_count}/+{row.b_count}'

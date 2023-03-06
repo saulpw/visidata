@@ -4,6 +4,10 @@ from visidata import AttrDict, vd, Path, asyncthread, Sheet
 
 
 class GitSheet(Sheet):
+    @property
+    def gitargstr(self):
+        return ' '.join(self.gitargs)
+
     def git(self, subcmd, *args, **kwargs):
         'For non-modifying commands; not logged except in debug mode'
         sh = vd.importExternal('sh')
@@ -26,7 +30,7 @@ class GitSheet(Sheet):
         'Return entire output of git command.'
         sh = vd.importExternal('sh')
         try:
-            vd.status('git ' + ' '.join(str(x) for x in args))
+            vd.debug('git ' + ' '.join(str(x) for x in args))
             cmd = self.git('--no-pager',
                       *args,
                       _decode_errors='replace',
@@ -34,7 +38,7 @@ class GitSheet(Sheet):
                       **kwargs)
             out = cmd.stdout
         except sh.ErrorReturnCode as e:
-            vd.status('error=%s' % e.exit_code)
+            vd.warning('git '+' '.join(str(x) for x in args), 'error=%s' % e.exit_code)
             out = e.stdout
 
         out = out.decode('utf-8')
@@ -58,7 +62,7 @@ class GitSheet(Sheet):
                 yield line[:-1]  # remove EOL
 
         except sh.ErrorReturnCode as e:
-            vd.warning('git '+' '.join(map(str, args)), 'error=%s' % e.exit_code)
+            vd.warning('git '+' '.join(str(x) for x in args), 'error=%s' % e.exit_code)
 
         errlines = err.getvalue().splitlines()
         if errlines:
@@ -75,7 +79,7 @@ class GitSheet(Sheet):
         bufsize = 512
         chunks = []
         try:
-          vd.status('git ' + ' '.join(str(x) for x in args))
+          vd.debug('git ' + ' '.join(str(x) for x in args))
           for data in self.git('--no-pager',
                           *args,
                           _decode_errors='replace',
@@ -95,7 +99,7 @@ class GitSheet(Sheet):
 
             chunks.append(data)
         except sh.ErrorReturnCode as e:
-            vd.warning('git '+' '.join(args), 'error=%s' % e.exit_code)
+            vd.warning('git '+' '.join(str(x) for x in args), 'error=%s' % e.exit_code)
 
         if chunks:
             yield ''.join(chunks)

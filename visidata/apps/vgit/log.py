@@ -12,12 +12,8 @@ def git_log(vd, p, args):
 # rowdef: (commit_hash, refnames, author, author_date, body, notes)
 class GitLogSheet(GitSheet):
     help = '''
-        # git log
-        Commit history for {sheet.gitargs}.
-
-        {sheet.cursorRow.message}
-
-        - `Enter` to show this commit
+# git log {sheet.gitargstr}
+{sheet.cursorRow.message}
     '''
     GIT_LOG_FORMAT = ['%H', '%D', '%an <%ae>', '%ai', '%B', '%N']
     rowtype = 'commits'  # rowdef: AttrDict
@@ -26,7 +22,7 @@ class GitLogSheet(GitSheet):
     columns = [
         ItemColumn('commitid', width=8),
         ItemColumn('refnames', width=12),
-        ItemColumn('message', setter=lambda c,r,v: c.sheet.git('commit --amend --no-edit --quiet --message', v), width=50),
+        ItemColumn('message', type=str.strip, setter=lambda c,r,v: c.sheet.git('commit --amend --no-edit --quiet --message', v), width=50),
         ItemColumn('author', setter=lambda c,r,v: c.sheet.git('commit --amend --no-edit --quiet --author', v)),
         ItemColumn('author_date', type=date, setter=lambda c,r,v: c.sheet.git('commit --amend --no-edit --quiet --date', v)),
         ItemColumn('notes', setter=lambda c,r,v: c.sheet.git('notes add --force --message', v, r.commitid)),
@@ -40,7 +36,7 @@ class GitLogSheet(GitSheet):
 
     @functools.lru_cache()
     def inRemoteBranch(self, commitid):
-        return self.git_all('branch -r --contains', commitid)
+        return self.git_all('branch -r --contains', commitid, _ok_code=[0, 1])
 
     def iterload(self):
         lines = self.git_iter('log --no-color -z', '--pretty=format:' + '%x1f'.join(self.GIT_LOG_FORMAT), *self.gitargs)
