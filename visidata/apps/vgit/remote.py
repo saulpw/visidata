@@ -51,3 +51,7 @@ class GitRemotes(GitSheet):
 
 
 vd.addCommand('', 'git-open-remotes', 'vd.push(git_remote())', 'open git remotes sheet')
+
+vd.addMenuItems('''
+    Git > Open > remotes > git-open-remotes
+''')

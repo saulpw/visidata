@@ -97,8 +97,9 @@ f) brag tweet
 
 # 11. vgit diff
 
++ git diff hunks
 - show diff between committed, staged, unstaged
-- add/remove hunks in staged/unstaged
++ add/remove hunks in staged/unstaged
 - diff between two commits
 
 # . wow

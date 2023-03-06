@@ -8,5 +8,6 @@ from visidata.apps.vgit import (
     status,
     log,
     diff,
+    stash,
     repos,
 )
