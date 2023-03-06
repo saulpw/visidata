@@ -129,10 +129,9 @@ class GitStatus(GitSheet):
                 fn = line
                 st = '??'  # untracked file
 
-            p = Path(fn)
-            self._cachedStatus[str(p)] = AttrDict(status=st)
-            if not self.ignored(p):
-                yield p
+            self._cachedStatus[fn] = AttrDict(status=st)
+            if not self.ignored(fn):
+                yield Path(fn)
 
         for line in self.git_iter('diff-files', '--numstat', '-z'):
             if not line: continue
