@@ -7,5 +7,6 @@ from visidata.apps.vgit import (
     blame,
     status,
     log,
+    diff,
     repos,
 )

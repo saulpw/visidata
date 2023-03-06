@@ -3,7 +3,7 @@ import io
 from visidata import AttrDict, vd, Path, asyncthread, Sheet
 
 
-class GitContext:
+class GitSheet(Sheet):
     def git(self, subcmd, *args, **kwargs):
         'For non-modifying commands; not logged except in debug mode'
         sh = vd.importExternal('sh')
@@ -122,10 +122,9 @@ class GitContext:
             return self.source.gitRootSheet
         return self
 
-
-class GitSheet(GitContext, Sheet):
-    def git_exec(self, cmdstr):
-        vd.push(TextSheet(cmdstr, source=sheet.git_lines(cmdstr)))
+    def iterload(self):
+        for line in self.git_lines(*self.gitargs):
+            yield AttrDict(line=line)
 
 
 @GitSheet.lazy_property
@@ -151,7 +150,8 @@ def branch(self):
 
 GitSheet.options.disp_note_none = ''
 GitSheet.options.disp_status_fmt = '{sheet.progressStatus}‹{sheet.branchStatus}› {sheet.name}| '
-GitSheet.addCommand('gi', 'git-exec', 'sheet.git_exec(input("gi", type="git"))')
+
+GitSheet.addCommand('gi', 'git-exec', 'cmdstr=input("gi", type="git"); vd.push(GitSheet(cmdstr, gitargs=cmdstr.split()))', 'execute git command')
 
 GitSheet.addCommand('Alt+g', 'menu-git', 'pressMenu("Git")', '')
 
