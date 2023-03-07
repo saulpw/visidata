@@ -13,6 +13,7 @@ setup(name='vgit',
       install_requires=['sh'], # visidata
       packages=['vgit'],
       scripts=['bin/vgit'],
+      py_modules=['vgit'],
       author='Saul Pwanson',
       author_email='vgit@saul.pw',
       url='https://github.com/saulpw/visidata/vgit',
