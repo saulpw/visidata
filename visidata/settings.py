@@ -460,7 +460,7 @@ def importExternal(vd, modname, pipmodname=''):
         vd.addGlobals({modname:m})
         return m
     except ModuleNotFoundError as e:
-        vd.fail(f'To install support for "{modname}": pip install {pipmodname}')
+        vd.fail(f'External package "{modname}" not installed; run: pip install {pipmodname}')
 
 
 @VisiData.api
