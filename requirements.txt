@@ -44,5 +44,6 @@ beautifulsoup4      # scraper
 praw                # reddit API
 matrix_client       # matrix API
 zulip               # zulip API
+pyairtable          # airtable API
 
 -e git+https://github.com/saulpw/pyxlsb.git@visidata#egg=pyxlsb # xlsb
