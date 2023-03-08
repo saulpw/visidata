@@ -20,21 +20,21 @@ def openurl_http(vd, path, filetype=None):
 
     requests = vd.importExternal('requests')
 
+    # given loader
+    if filetype:
+        return vd.openSource(path, filetype=filetype)
+
+    r = vd.guessFiletype(path)
+    if r:  # loader guesses they know what to do with it
+        return vd.openSource(path, filetype=r['filetype'])
+
+    # fallback to mime-type
     response = requests.get(path.given, stream=True, **vd.options.getall('http_req_'))
     response.raise_for_status()
 
-    if not filetype:
-        # try auto-detect from extension
-        ext = path.suffix[1:].lower()
-        openfunc = getattr(vd, f'open_{ext}', vd.getGlobals().get(f'open_{ext}'))
-
-        if openfunc:
-            filetype = ext
-        else:
-            # if extension unknown, fallback to mime-type
-            contenttype = response.headers['content-type']
-            subtype = contenttype.split(';')[0].split('/')[-1]
-            filetype = content_filetypes.get(subtype, subtype)
+    contenttype = response.headers['content-type']
+    subtype = contenttype.split(';')[0].split('/')[-1]
+    filetype = content_filetypes.get(subtype, subtype)
 
     # If no charset is provided by response headers, use the user-specified
     # encoding option (which defaults to UTF-8) and hope for the best.  The
@@ -67,5 +67,6 @@ def openurl_http(vd, path, filetype=None):
     path.fptext = RepeatFile(_iter_lines())
 
     return vd.openSource(path, filetype=filetype)
+
 
 VisiData.openurl_https = VisiData.openurl_http

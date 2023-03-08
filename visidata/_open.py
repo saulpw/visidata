@@ -48,6 +48,8 @@ def guessFiletype(vd, p):
             filetype = f(p)
             if filetype:
                 filetypes.append(filetype)
+        except FileNotFoundError:
+            pass
         except Exception as e:
             vd.debug(f'{f.__name__}: {e}')
 
@@ -56,10 +58,18 @@ def guessFiletype(vd, p):
 
 
 @VisiData.api
+def guess_extension(vd, path):
+    # try auto-detect from extension
+    ext = path.suffix[1:].lower()
+    openfunc = getattr(vd, f'open_{ext}', vd.getGlobals().get(f'open_{ext}'))
+    return dict(filetype=ext, _likelihood=3)
+
+
+@VisiData.api
 def openPath(vd, p, filetype=None, create=False):
     '''Call ``open_<filetype>(p)`` or ``openurl_<p.scheme>(p, filetype)``.  Return constructed but unloaded sheet of appropriate type.
     If True, *create* will return a new, blank **Sheet** if file does not exist.'''
-    if p.scheme and not p.has_fp():
+    if not filetype and p.scheme and not p.has_fp():
         schemes = p.scheme.split('+')
         openfuncname = 'openurl_' + schemes[-1]
 
