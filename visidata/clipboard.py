@@ -129,6 +129,9 @@ def delete_row(sheet, rowidx):
 
 @Sheet.api
 def paste_after(sheet, rowidx):
+    if not vd.memory.cliprows:  #1793
+        vd.warning('nothing to paste')
+        return
     to_paste = list(deepcopy(r) for r in reversed(vd.memory.cliprows))
     sheet.addRows(to_paste, index=rowidx)
 
