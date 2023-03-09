@@ -1,3 +1,6 @@
+**Note: This code has not been updated to run with the latest VisiData.**
+
+
 # Galactic Conquest in VisiData
 
 Take over the galaxy with your warship fleet!
