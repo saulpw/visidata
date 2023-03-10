@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: MIT
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from pathlib import Path
 
 
-exec(Path('vdsql/__about__.py').read_text())
+exec(Path('__about__.py').read_text())
 
 
 def readme():
@@ -29,9 +29,8 @@ setup(
         author="Saul Pwanson",
         url="https://github.com/visidata/vdsql",
         python_requires=">=3.8",
-        packages=["vdsql"],
-        py_modules=["vdsql"],
-        entry_points={'visidata.plugins': 'vdsql=vdsql',
-                      'console_scripts': ['vdsql = vdsql.__main__:main']},
+        packages=find_packages(exclude=["tests"]),
+        entry_points={'visidata.plugins': 'vdsql=__main__',
+            'console_scripts': ['vdsql = visidata.apps.vdsql.__main__:main']},
         install_requires=requirements(),
 )

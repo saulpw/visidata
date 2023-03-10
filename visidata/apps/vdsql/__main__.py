@@ -6,7 +6,8 @@ def main():
     from visidata import main, vd
 
     import vdsql
-    visidata.__version_info__ = f'vdsql {vdsql.__version__}'
+    from . import __version__
+    visidata.__version_info__ = f'vdsql {__version__}'
 
     for ext in "db ddb duckdb sqlite sqlite3".split():
         setattr(vd, f"open_{ext}", vd.open_vdsql)

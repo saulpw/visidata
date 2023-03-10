@@ -1,4 +1,3 @@
-visidata >= 2.10.2
 clickhouse-driver[numpy] >= 0.2.4
 ibis-framework[sqlite,clickhouse] >= 3.2
 ibis-substrait
