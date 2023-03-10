@@ -1,5 +1,5 @@
-from vgit import abort, statusbar
-from vgit import (
+from . import abort, statusbar
+from . import (
     grep,
     config,
     branch,
