@@ -1,0 +1,5 @@
+#!/usr/bin/env vd -p
+{"longname": "open-file", "input": "tests/business.sqlite", "keystrokes": "o"}
+{"sheet": "business", "col": "", "row": "\u30adproducts", "longname": "open-row", "input": "", "keystrokes": "Enter", "comment": "open sheet with copies of rows referenced in current row"}
+{"sheet": "products", "col": "desc", "row": "", "longname": "select-col-regex", "input": "Auto", "comment": "select rows matching regex in current column"}
+{"sheet": "products", "col": "", "row": "", "longname": "dup-selected", "input": "", "keystrokes": "\"", "comment": "open duplicate sheet with selected rows (default limit)"}

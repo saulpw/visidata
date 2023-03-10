@@ -1,0 +1,25 @@
+#!/usr/bin/env vd -p
+{"longname": "open-file", "input": "tests/business.sqlite", "keystrokes": "o"}
+{"sheet": "business", "col": "", "row": "\u30adorder_items", "longname": "open-row", "input": "", "keystrokes": "Enter", "comment": "open sheet with copies of rows referenced in current row"}
+{"sheet": "order_items", "col": "orderid", "row": "", "longname": "key-col", "input": "", "keystrokes": "!", "comment": "toggle current column as a key column"}
+{"sheet": "order_items", "col": "sku", "row": "", "longname": "key-col", "input": "", "keystrokes": "!", "comment": "toggle current column as a key column"}
+{"sheet": "order_items", "col": "", "row": "\u30ad038385,BB71", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "order_items", "col": "", "row": "\u30ad038385,JA99", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "order_items", "col": "", "row": "\u30ad023041,JA16", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "order_items", "col": "", "row": "\u30ad048629,BB00", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "order_items", "col": "", "row": "\u30ad056953,JA37", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "order_items", "col": "", "row": "\u30ad091022,JA99", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "order_items", "col": "", "row": "\u30ad065473,JA90", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "order_items", "col": "", "row": "\u30ad065473,BB00", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "order_items", "col": "", "row": "\u30ad043182,BB16", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "order_items", "col": "", "row": "\u30ad059776,BB00", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "order_items", "col": "", "row": "\u30ad059776,BB16", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "order_items", "col": "", "row": "\u30ad062266,JA99", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "order_items", "col": "", "row": "\u30ad062266,JA90", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "order_items", "col": "", "row": "\u30ad012921,BB93", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "order_items", "col": "", "row": "\u30ad014345,BB71", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "order_items", "col": "", "row": "\u30ad014345,BB69", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "order_items", "col": "", "row": "\u30ad063457,BB71", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "order_items", "col": "", "row": "\u30ad063457,BB00", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "order_items", "col": "", "row": "", "longname": "stoggle-rows", "input": "", "keystrokes": "gt", "comment": "select rows matching current cell in current column"}
+{"sheet": "order_items", "col": "", "row": "", "longname": "dup-selected", "input": "", "keystrokes": "\"", "comment": "open duplicate sheet with selected rows (default limit)"}

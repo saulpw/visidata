@@ -1,0 +1,6 @@
+#!vd -p
+{"longname": "open-file", "input": "tests/business.sqlite", "keystrokes": "o"}
+{"sheet": "business", "col": "", "row": "\u30adcustomers", "longname": "open-row", "input": "", "keystrokes": "Enter", "comment": "open current row with sheet-specific dive"}
+{"sheet": "customers", "col": "timezone", "row": "", "longname": "select-col-regex", "input": "Europe", "keystrokes": "|", "comment": "select rows matching regex in current column"}
+{"sheet": "customers", "col": "timezone", "row": "", "longname": "unselect-col-regex", "input": "Minsk", "keystrokes": "\\", "comment": "unselect rows matching regex in current column"}
+{"sheet": "customers", "col": "", "row": "", "longname": "dup-selected", "input": "", "keystrokes": "\"", "comment": "open duplicate sheet with selected rows (default limit)"}

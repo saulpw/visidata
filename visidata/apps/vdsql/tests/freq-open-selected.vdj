@@ -1,0 +1,7 @@
+#!/usr/bin/env vd -p
+{"longname": "open-file", "input": "tests/business.sqlite", "keystrokes": "o"}
+{"sheet": "business", "col": "", "row": "\u30adcustomers", "longname": "open-row", "input": "", "keystrokes": "Enter", "comment": "open sheet with copies of rows referenced in current row"}
+{"sheet": "business", "col": "", "row": "\u30adproducts", "longname": "open-row", "input": "", "keystrokes": "Enter", "comment": "open sheet with copies of rows referenced in current row"}
+{"sheet": "business", "col": "", "row": "\u30adorders", "longname": "open-row", "input": "", "keystrokes": "Enter", "comment": "open sheet with copies of rows referenced in current row"}
+{"sheet": "orders", "col": "customerid", "row": "", "longname": "freq-col", "input": "", "keystrokes": "Shift+F", "comment": ""}
+{"sheet": "orders_customerid_freq", "col": "", "row": "\u30ad1004", "longname": "open-row", "input": "", "keystrokes": "Enter", "comment": "open sheet with copies of rows referenced in current row"}
