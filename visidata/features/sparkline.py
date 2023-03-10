@@ -1,11 +1,10 @@
 """
 Generate sparkline column for numeric columns
 """
+
 from visidata import vd, Column, Sheet
 
 __author__ = 'Lucas Messenger @layertwo'
-__version__ = '0.2'
-
 
 vd.option('disp_sparkline', '▁▂▃▄▅▆▇', 'characters to display sparkline')
 
@@ -36,13 +35,14 @@ def sparkline(*values):
 
 
 @Sheet.api
-def sparkline_col(sheet, source):
+def addcol_sparkline(sheet, sourceCols):
     """
     Add sparkline column
     """
     c = Column('sparkline',
-               getter=lambda c,r: sparkline(*tuple(c.getTypedValue(r) for c in source)))
+               sourceCols=sourceCols,
+               getter=lambda c,r: sparkline(*tuple(c.getTypedValue(r) for c in c.sheet.sourceCols)))
     sheet.addColumn(c)
 
 
-Sheet.addCommand(None, 'addcol-sparkline', 'sheet.sparkline_col(numericCols(nonKeyVisibleCols))')
+Sheet.addCommand(None, 'addcol-sparkline', 'addcol_sparkline(numericCols(nonKeyVisibleCols))', 'add sparkline of all numeric columns')
