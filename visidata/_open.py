@@ -47,6 +47,7 @@ def guessFiletype(vd, p):
         try:
             filetype = f(p)
             if filetype:
+                filetype['_guesser'] = f.__name__
                 filetypes.append(filetype)
         except FileNotFoundError:
             pass
@@ -62,7 +63,8 @@ def guess_extension(vd, path):
     # try auto-detect from extension
     ext = path.suffix[1:].lower()
     openfunc = getattr(vd, f'open_{ext}', vd.getGlobals().get(f'open_{ext}'))
-    return dict(filetype=ext, _likelihood=3)
+    if openfunc:
+        return dict(filetype=ext, _likelihood=3)
 
 
 @VisiData.api
@@ -103,8 +105,12 @@ def openPath(vd, p, filetype=None, create=False):
     if not openfunc:
         opts = vd.guessFiletype(p)
         if opts and 'filetype' in opts:
-            openfuncname = 'open_' + opts['filetype']
+            filetype = opts['filetype']
+            openfuncname = 'open_' + filetype
             openfunc = getattr(vd, openfuncname, vd.getGlobals().get(openfuncname))
+            if not openfunc:
+                vd.error(f'guessed {filetype} but no {openfuncname}')
+
             vs = openfunc(p)
             for k, v in opts.items():
                 if k != 'filetype' and not k.startswith('_'):
