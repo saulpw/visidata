@@ -136,6 +136,5 @@ vd.addMenuItems('''
     Git > Branch > delete > git-branch-delete
     Git > Branch > rename > git-branch-rename
     Git > Branch > checkout > git-branch-checkout
-    Git > Branch > checkout > git-branch-checkout
     Git > Open > branches > git-open-branches
 ''')
