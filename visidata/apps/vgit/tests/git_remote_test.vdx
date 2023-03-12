@@ -1,5 +1,7 @@
 # VisiData v2.12dev
 exec-python vd.options.confirm_overwrite=False
+exec-python vd.options.filetype='git'
+open-file .
 git-open-remotes
 
 # remote add
