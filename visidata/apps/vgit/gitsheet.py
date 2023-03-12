@@ -149,7 +149,7 @@ def gitRootPath(self):
 
 @GitSheet.lazy_property
 def branch(self):
-    return self.rogit('rev-parse', '--abbrev-ref', 'HEAD').strip()
+    return self.git('rev-parse', '--abbrev-ref', 'HEAD').strip()
 
 
 GitSheet.options.disp_note_none = ''
