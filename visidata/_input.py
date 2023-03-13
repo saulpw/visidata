@@ -205,8 +205,8 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
             k = 1 if w%2==0 else 0  # odd widths have one character more
             dispval = left_truncchar + dispval[i-w//2+1:i+w//2-k] + right_truncchar
 
-        prew = clipdraw(scr, y, x, dispval[:dispi], attr, w, clear=clear)
-        clipdraw(scr, y, x+prew, dispval[dispi:], attr, w-prew+1, clear=clear)
+        prew = clipdraw(scr, y, x, dispval[:dispi], attr, w, clear=clear, literal=True)
+        clipdraw(scr, y, x+prew, dispval[dispi:], attr, w-prew+1, clear=clear, literal=True)
         if scr: scr.move(y, x+prew)
         ch = vd.getkeystroke(scr)
         if ch == '':                               continue

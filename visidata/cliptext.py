@@ -4,7 +4,7 @@ import re
 import functools
 import textwrap
 
-from visidata import options, drawcache, vd, update_attr, colors
+from visidata import options, drawcache, vd, update_attr, colors, ColorAttr
 
 disp_column_fill = ' '
 
@@ -139,38 +139,63 @@ def clipstr(s, dispw, truncator=None, oddspace=None):
                 modch='',
                 combch='')
 
-def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False, **kwargs):
-    'Draw string `s` at (y,x)-(y,x+w) with curses attr, clipping with ellipsis char.  if rtl, draw inside (x-w, x).  If *clear*, clear whole editing area before displaying. Returns width drawn (max of w).'
+def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False, literal=False, **kwargs):
+    '''Draw string `s` at (y,x)-(y,x+w) with curses attr, clipping with ellipsis char.  
+      If `rtl`, draw inside (x-w, x).
+      If `clear`, clear whole editing area before displaying.
+      If `literal`, do not interpret [:color]codes[:].
+     Return width drawn (max of w).
+    '''
     if scr:
         _, windowWidth = scr.getmaxyx()
     else:
         windowWidth = 80
-    dispw = 0
-    try:
-        if w is None:
-            w = dispwidth(s, maxwidth=windowWidth)
-        w = min(w, (x-1) if rtl else (windowWidth-x-1))
-        if w <= 0:  # no room anyway
-            return 0
-        if not scr:
-            return w
+    totaldispw = 0
 
-        # convert to string just before drawing
-        clipped, dispw = clipstr(s, w, **kwargs)
-        if rtl:
-            # clearing whole area (w) has negative display effects; clearing just dispw area is useless
+    if not isinstance(attr, ColorAttr):
+        cattr = ColorAttr(attr, 0, 0, attr)
+    else:
+        cattr = attr
+
+    origattr = cattr
+
+    try:
+        chunks = [s] if literal else re.split(r'(\[:[a-z_ 0-9]*\])', s)
+        for chunk in chunks:
+            if not literal and chunk.startswith('[:') and chunk.endswith(']'):
+                colorname = chunk[2:-1]
+                if colorname:
+                    cattr = update_attr(cattr, colors.get_color(colorname), 8)
+                else:
+                    cattr = origattr
+            else:
+                if w is None:
+                    w = dispwidth(s, maxwidth=windowWidth)
+                w = min(w, (x-1) if rtl else (windowWidth-x-1))
+                if w <= 0:  # no room anyway
+                    return 0
+                if not scr:
+                    return w
+
+                # convert to string just before drawing
+                clipped, dispw = clipstr(chunk, w-totaldispw, **kwargs)
+                if rtl:
+                    # clearing whole area (w) has negative display effects; clearing just dispw area is useless
 #            scr.addstr(y, x-dispw-1, disp_column_fill*dispw, attr)
-            scr.addstr(y, x-dispw-1, clipped, attr)
-        else:
-            if clear:
-                scr.addstr(y, x, disp_column_fill*w, attr)  # clear whole area before displaying
-            scr.addstr(y, x, clipped, attr)
+                    scr.addstr(y, x-dispw-1, clipped, cattr.attr)
+                else:
+                    if clear:
+                        scr.addstr(y, x, disp_column_fill*w, cattr.attr)  # clear whole area before displaying
+                    scr.addstr(y, x, clipped, cattr.attr)
+
+                x += dispw
+                totaldispw += dispw
     except Exception as e:
         pass
 #        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s clippedlen=%s]' % (e, y, x, dispw, w, len(clipped))
 #                ).with_traceback(sys.exc_info()[2])
 
-    return dispw
+    return totaldispw
 
 
 def iterwraplines(lines, width=80, indent=''):
@@ -236,16 +261,7 @@ def colorpanel(scr, text, maxw, cattr, placementfunc=lambda maxwrapw, nwraplines
                 title = line[1:].strip()
                 continue
 
-        x = 2
-        for chunk in re.split(r'(\[:[a-z_ 0-9]*\])', line):
-            if chunk.startswith('[:') and chunk.endswith(']'):
-                chunk = chunk[2:-1]
-                if chunk:
-                    cattr = update_attr(cattr, colors.get_color(chunk), 8)
-                else:
-                    cattr = origattr
-            else:
-                x += clipdraw(scr, i+1, x, chunk, cattr.attr)
+        x += clipdraw(scr, i+1, 2, line, cattr.attr)
 
         i += 1
 
