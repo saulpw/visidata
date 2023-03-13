@@ -57,6 +57,8 @@ def until_get_wch(scr):
         except curses.error:
             pass
 
+    if isinstance(ret, int):
+        return chr(ret)
     return ret
 
 
