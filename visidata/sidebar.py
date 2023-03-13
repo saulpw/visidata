@@ -27,12 +27,14 @@ def drawSidebar(vd, scr, sheet):
         sidebar = str(e)
 
     scrh, scrw = scr.getmaxyx()
+    maxw = scrw//2
+    maxh = scrh-2
     def _place(maxlinew, nlines):
-        winw = min(scrw//2, maxlinew+4)
-        winh = min(scrh-2, nlines+1)
+        winw = min(maxw, maxlinew+4)
+        winh = min(maxh, nlines+1)
         return (scrw-winw-1, scrh-winh-1, winw, winh)
 
-    colorpanel(scr, sidebar, scrw//2, colors.get_color('color_sidebar'), _place)
+    colorpanel(scr, sidebar, maxw, colors.get_color('color_sidebar'), _place)
 
 
 @BaseSheet.api
