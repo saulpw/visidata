@@ -4,17 +4,9 @@ import json
 
 from visidata import vd, Column, Sheet, asyncthread, Progress, VisiData
 
-__author__ = 'Saul Pwanson <vd@saul.pw>'
-__version__ = '1.2'
-
-vd.option('locale', 'en_US', 'default locale to use for Faker', replay=True)
-vd.option('vfake_extra_providers', None, 'list of additional Provider classes to load via add_provider()', replay=True)
-vd.option('vfake_salt', '', 'Use a non-empty string to enable deterministic fakes')
-
-@VisiData.cached_property
-def fake(vd):
-    import faker
-    return faker
+vd.option('faker_locale', 'en_US', 'default locale to use for Faker', replay=True)
+vd.option('faker_extra_providers', None, 'list of additional Provider classes to load via add_provider()', replay=True)
+vd.option('faker_salt', '', 'Use a non-empty string to enable deterministic fakes')
 
 def addFakerProviders(fake, providers):
     '''
@@ -27,34 +19,34 @@ def addFakerProviders(fake, providers):
     fake: Faker object
     providers: List of provider classes to add
     '''
-    import faker
+    faker = vd.importExternal('faker', 'Faker')
     if isinstance(providers, str):
         providers = [ getattr(faker.providers, p) for p in providers.split() ]
 
     if not isinstance(providers, list):
-        vd.fail('options.vfake_extra_providers must be a list')
+        vd.fail('options.faker_extra_providers must be a list')
 
     for provider in providers:
         if not issubclass(provider, faker.providers.BaseProvider):
-            vd.warning('vfake: "{}" not a Faker Provider'.format(provider.__name__))
+            vd.warning('"{}" not a Faker Provider'.format(provider.__name__))
             continue
         fake.add_provider(provider)
 
 @Column.api
 @asyncthread
 def setValuesFromFaker(col, faketype, rows):
-    import faker
-    fake = faker.Faker(col.sheet.options.locale)
-    if col.sheet.options.vfake_extra_providers:
-        addFakerProviders(fake, col.sheet.options.vfake_extra_providers)
-    fakefunc = getattr(fake, faketype, None) or vd.fail(f'no such faker "{faketype}')
+    faker = vd.importExternal('faker', 'Faker')
+    fake = faker.Faker(col.sheet.options.faker_locale)
+    if col.sheet.options.faker_extra_providers:
+        addFakerProviders(fake, col.sheet.options.faker_extra_providers)
+    fakefunc = getattr(fake, faketype, None) or vd.fail(f'no such faker "{faketype}"')
 
     fakeMap = {}
     fakeMap[None] = None
     fakeMap[col.sheet.options.null_value] = col.sheet.options.null_value
 
     vd.addUndoSetValues([col], rows)
-    salt = col.sheet.options.vfake_salt
+    salt = col.sheet.options.faker_salt
 
     for r in Progress(rows):
         v = col.getValue(r)

@@ -1,0 +1,5 @@
+#!vd -p
+{"row": "faker_salt", "longname": "set-option", "input": "1"}
+{"longname": "open-file", "input": "sample_data/sample.tsv", "keystrokes": "o"}
+{"sheet": "sample", "col": "", "row": "", "longname": "select-rows", "input": "", "keystrokes": "gs", "comment": "select all rows"}
+{"sheet": "sample", "col": "Rep", "row": "", "longname": "setcol-fake", "input": "name", "comment": ""}
