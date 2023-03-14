@@ -6,7 +6,7 @@ import signal
 import threading
 import time
 
-from visidata import vd, VisiData, colors, ESC, options, colorpanel, BaseSheet
+from visidata import vd, VisiData, colors, ESC, options, BaseSheet
 
 __all__ = ['ReturnValue', 'run']
 

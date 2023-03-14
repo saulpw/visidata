@@ -1,9 +1,11 @@
 import textwrap
 
-from visidata import vd, VisiData, BaseSheet, colorpanel, colors, TextSheet
+from visidata import vd, VisiData, BaseSheet, colors, TextSheet, clipdraw, wraptext, dispwidth
 
 
 vd.option('disp_sidebar_fmt', '{help}', 'format string for default sidebar')
+vd.option('disp_sidebar_width', 0, 'max width for sidebar')
+vd.option('disp_sidebar_height', 0, 'max height for sidebar')
 vd.option('color_sidebar', 'black on 114 blue', 'base color of sidebar')
 
 
@@ -18,23 +20,60 @@ def sidebar(sheet):
 
 @VisiData.api
 def drawSidebar(vd, scr, sheet):
+    sidebar_title = ''
+    sidebar = vd.recentStatusMessages
+    bottommsg = ''
+    overflowmsg = '[:reverse] Ctrl+P to view all status messages [:]'
     try:
-        sidebar_title = ''
-        sidebar = vd.recentStatusMessages or sheet.sidebar
+        if not sidebar:
+            sidebar = sheet.sidebar
+            bottommsg = '[:reverse] [:code]b[:] to toggle sidebar [:]'
+            overflowmsg = '[:reverse] (see full sidebar with [:code]gb[:reverse]) [:]'
+
+        lines = sidebar.splitlines()
+        if lines and lines[0].strip().startswith('# '):
+            sidebar_title = lines[0][1:].strip()
+            sidebar = '\n'.join(lines[1:])
     except Exception as e:
         vd.exceptionCaught(e)
         sidebar_title = 'error'
         sidebar = str(e)
 
     scrh, scrw = scr.getmaxyx()
-    maxw = scrw//2
-    maxh = scrh-2
-    def _place(maxlinew, nlines):
-        winw = min(maxw, maxlinew+4)
-        winh = min(maxh, nlines+1)
-        return (scrw-winw-1, scrh-winh-1, winw, winh)
+    maxw = sheet.options.disp_sidebar_width or scrw//2
+    maxh = sheet.options.disp_sidebar_height or scrh-2
 
-    colorpanel(scr, sidebar, maxw, colors.get_color('color_sidebar'), _place)
+    if not sidebar:
+        return
+
+    cattr = colors.get_color('color_sidebar')
+    lines = list(wraptext(sidebar, width=maxw-4))
+    maxlinew = max(dispwidth(textonly, maxwidth=maxw) for line, textonly in lines)
+    maxlinew = max(maxlinew, dispwidth(overflowmsg)+4)
+    maxlinew = max(maxlinew, dispwidth(bottommsg)+4)
+    winw = min(maxw, maxlinew+4)
+    winh = min(maxh, len(lines)+2)
+    x, y, w, h = scrw-winw-1, scrh-winh-1, winw, winh
+
+    sidebarscr = scr.derwin(h, w, y, x)
+
+    sidebarscr.erase()
+    sidebarscr.bkgd(cattr.attr)
+    sidebarscr.border()
+
+    i = 0
+    for line, _ in lines:
+        if i >= h-2:
+            bottommsg = overflowmsg
+            break
+
+        x += clipdraw(sidebarscr, i+1, 2, line, cattr, w=w-2)
+        i += 1
+
+    x = w-len(sidebar_title)-6
+    clipdraw(sidebarscr, 0, x, f"|[:black on yellow] {sidebar_title} [:]|", cattr)
+    if bottommsg:
+        clipdraw(sidebarscr, h-1, winw-dispwidth(bottommsg)-4, '|'+bottommsg+'|[:]', cattr)
 
 
 @BaseSheet.api
