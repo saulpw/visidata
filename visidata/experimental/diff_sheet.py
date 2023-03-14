@@ -2,8 +2,6 @@
 
 from visidata import Sheet, CellColorizer, vd
 
-__version__ = "0.9.1"
-
 vd.option('color_diff', 'red', 'color of values different from --diff source')
 vd.option('color_diff_add', 'yellow', 'color of rows/columns added to --diff source')
 
