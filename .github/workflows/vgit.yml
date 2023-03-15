@@ -34,5 +34,11 @@ jobs:
     - name: Ensure it starts up
       run: vgit --version
 
+    - name: Create visidatarc
+      run: touch ~/.visidatarc
+
+    - name: Import vgit
+      run: echo "import visidata.apps.vgit" >> ~/.visidatarc
+
     - name: Run tests
       run: vd -p visidata/apps/vgit/tests/*.vdx --batch
