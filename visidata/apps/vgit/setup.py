@@ -10,7 +10,7 @@ setup(name='vgit',
       version=__version__,
       description='a sleek terminal user interface for git',
       # long_description=open('README.md').read(),
-      install_requires=['sh'], # visidata
+      install_requires=['sh<2'], # visidata
       packages=find_packages(exclude=["tests"]),
       scripts=['vgit'],
       entry_points={'visidata.plugins': 'vgit=__main__'},
