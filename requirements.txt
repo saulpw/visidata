@@ -41,6 +41,8 @@ numpy               # npy pandas hdf5 arrow
 requests_cache      # scraper
 beautifulsoup4      # scraper
 
+Faker               # fake data generation
+
 praw                # reddit API
 matrix_client       # matrix API
 zulip               # zulip API
