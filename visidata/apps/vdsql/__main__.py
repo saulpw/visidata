@@ -5,7 +5,6 @@ def main():
     import visidata
     from visidata import main, vd
 
-    import vdsql
     from . import __version__
     visidata.__version_info__ = f'vdsql {__version__}'
 
