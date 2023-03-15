@@ -192,7 +192,7 @@ def execAsync(self, func, *args, sheet=None, **kwargs):
 
     return thread
 
-def _toplevelTryFunc(func, *args, status=vd.status, **kwargs):
+def _toplevelTryFunc(func, *args, **kwargs):
   with ThreadProfiler(threading.current_thread()) as prof:
     t = threading.current_thread()
     t.name = func.__name__
@@ -200,8 +200,7 @@ def _toplevelTryFunc(func, *args, status=vd.status, **kwargs):
         t.status = func(*args, **kwargs)
     except EscapeException as e:  # user aborted
         t.status = 'aborted by user'
-        if status:
-            status('%s aborted' % t.name, priority=2)
+        vd.warning(f'{t.name} aborted')
     except Exception as e:
         t.exception = e
         t.status = 'exception'
