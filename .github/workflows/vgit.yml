@@ -1,4 +1,4 @@
-name: vdsql-testing
+name: vgit-testing
 on:
   pull_request:
     branches:
@@ -14,7 +14,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.8, 3.9, "3.10"]
+        python-version: [3.8, 3.9, "3.10", "3.11"]
 
     runs-on: ubuntu-latest
     steps:
@@ -25,11 +25,14 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install vdsql
+    - name: Install VisiData
       run: pip3 install .
 
+    - name: Install vgit
+      run: pip3 install visidata/apps/vgit/
+
     - name: Ensure it starts up
-      run: vdsql --version
+      run: vgit --version
 
     - name: Run tests
-      run: ./test.sh
+      run: vd -p visidata/apps/vgit/tests/*.vdx --batch
