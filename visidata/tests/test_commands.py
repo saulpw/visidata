@@ -75,6 +75,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'searchr-cols': 'bar',
                  'select-cols-regex': '.',
                  'select-expr': 'OrderDate',
+                 'setcol-fake': 'name',
                  'unselect-expr': 'OrderDate',
                  'unselect-cols-regex': '.',
                  'random-rows': '3',
