@@ -13,7 +13,7 @@ setup(name='vgit',
       install_requires=['sh<2'], # visidata
       packages=find_packages(exclude=["tests"]),
       scripts=['vgit'],
-      entry_points={'visidata.plugins': 'vgit=__main__'},
+      entry_points={'visidata.plugins': 'vgit=visidata.apps.vgit'},
       author='Saul Pwanson',
       author_email='vgit@saul.pw',
       url='https://github.com/saulpw/visidata/vgit',
