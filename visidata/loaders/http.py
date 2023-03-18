@@ -20,13 +20,6 @@ def openurl_http(vd, path, filetype=None):
 
     requests = vd.importExternal('requests')
 
-    # given loader
-    if filetype:
-        return vd.openSource(path, filetype=filetype)
-
-    r = vd.guessFiletype(path)
-    if r:  # loader guesses they know what to do with it
-        return vd.openSource(path, filetype=r['filetype'])
 
     # fallback to mime-type
     response = requests.get(path.given, stream=True, **vd.options.getall('http_req_'))
@@ -34,7 +27,7 @@ def openurl_http(vd, path, filetype=None):
 
     contenttype = response.headers['content-type']
     subtype = contenttype.split(';')[0].split('/')[-1]
-    filetype = content_filetypes.get(subtype, subtype)
+    filetype = filetype or content_filetypes.get(subtype, subtype) or vd.guessFiletype(path)['filetype']
 
     # If no charset is provided by response headers, use the user-specified
     # encoding option (which defaults to UTF-8) and hope for the best.  The

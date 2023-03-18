@@ -71,7 +71,7 @@ def guess_extension(vd, path):
 def openPath(vd, p, filetype=None, create=False):
     '''Call ``open_<filetype>(p)`` or ``openurl_<p.scheme>(p, filetype)``.  Return constructed but unloaded sheet of appropriate type.
     If True, *create* will return a new, blank **Sheet** if file does not exist.'''
-    if not filetype and p.scheme and not p.has_fp():
+    if p.scheme and not p.has_fp():
         schemes = p.scheme.split('+')
         openfuncname = 'openurl_' + schemes[-1]
 
