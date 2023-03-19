@@ -4,7 +4,7 @@ import re
 
 'Various helper classes and functions.'
 
-__all__ = ['AlwaysDict', 'AttrDict', 'moveListItem', 'namedlist', 'classproperty', 'cleanName', 'MissingAttrFormatter', 'getitem', 'setitem', 'getitemdef', 'getitemdeep', 'setitemdeep', 'getattrdeep', 'setattrdeep']
+__all__ = ['AlwaysDict', 'AttrDict', 'moveListItem', 'namedlist', 'classproperty', 'cleanName', 'MissingAttrFormatter', 'getitem', 'setitem', 'getitemdef', 'getitemdeep', 'setitemdeep', 'getattrdeep', 'setattrdeep', 'ExplodingMock']
 
 
 class AlwaysDict(dict):
@@ -170,6 +170,19 @@ def namedlist(objname, fieldnames):
                 super().__setattr__(k, v)
 
     return NamedListTemplate
+
+
+class ExplodingMock:
+    'A mock object that raises an exception for everything except conversion to True/False.'
+    def __init__(self, msg):
+        self.__msg = msg
+
+    def __getattr__(self, k):
+        raise Exception(self.__msg)
+
+    def __bool__(self):
+        return False
+
 
 class MissingAttrFormatter(string.Formatter):
     "formats {} fields with `''`, that would normally result in a raised KeyError or AttributeError; intended for user customisable format strings."

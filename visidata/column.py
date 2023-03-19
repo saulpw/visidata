@@ -10,7 +10,7 @@ import json
 from visidata import options, anytype, stacktrace, vd
 from visidata import asyncthread, dispwidth, clipstr, iterchars
 from visidata import wrapply, TypedWrapper, TypedExceptionWrapper
-from visidata import Extensible, AttrDict, undoAttrFunc
+from visidata import Extensible, AttrDict, undoAttrFunc, ExplodingMock
 from visidata import getitem, setitem, getitemdef, getitemdeep, setitemdeep, getattrdeep, setattrdeep
 
 class InProgress(Exception):
@@ -73,7 +73,7 @@ class Column(Extensible):
         - *kwargs*: other attributes to be set on this column.
     '''
     def __init__(self, name=None, *, type=anytype, cache=False, **kwargs):
-        self.sheet = None     # owning Sheet, set in .recalc() via Sheet.addColumn
+        self.sheet = ExplodingMock('use addColumn() on all columns')  # owning Sheet, set in .recalc() via Sheet.addColumn
         if name is None:
             name = next(default_colnames)
         self.name = str(name) # display visible name
