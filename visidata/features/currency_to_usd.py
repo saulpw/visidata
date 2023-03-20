@@ -1,13 +1,13 @@
 '''Provide USD(s) function to convert string like '£300' or '205 AUD' to equivalent US$ as float.
-Uses data from fixer.io
+Uses data from api.apilayer.com/fixer. Requires an API key for apilayer.com.
 '''
 
 from visidata import vd
 import functools
 import json
 
-vd.option('fixer_key', '', 'API Key for fixer.io')
-vd.option('fixer_currency_cache_days', 1, 'Cache days for currency conversions')
+vd.option('fixer_api_key', '', 'API Key for api.apilayer.com/fixer')
+vd.option('fixer_cache_days', 1, 'Cache days for currency conversions')
 
 currency_symbols = {
     '$': 'USD',
@@ -23,8 +23,8 @@ currency_symbols = {
 def currency_rates_json(date='latest', base='USD'):
     url = 'https://api.apilayer.com/fixer/%s?base=%s' % (date, base)
     return vd.urlcache(
-        url, 
-        days=vd.options.fixer_currency_cache_days, 
+        url,
+        days=vd.options.fixer_cache_days,
         headers={
             # First need to set some additional headers as otherwise apilayers will block it with a 403
             # See also https://stackoverflow.com/questions/13303449/urllib2-httperror-http-error-403-forbidden
@@ -36,8 +36,8 @@ def currency_rates_json(date='latest', base='USD'):
             'Connection': 'keep-alive',
 
             # Finally set Apikey
-            'apikey': vd.options.fixer_key
-        } 
+            'apikey': vd.options.fixer_api_key
+        }
     ).read_text()
 
 @functools.lru_cache()
@@ -66,4 +66,5 @@ def USD(s):
     amtstr, currcode = s.split(' ')
     return float(amtstr) * currency_multiplier(currcode, 'USD')
 
-vd.addGlobals(globals())
+
+vd.addGlobals(USD=USD)
