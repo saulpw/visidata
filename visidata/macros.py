@@ -73,7 +73,7 @@ def afterExecSheet(cmdlog, sheet, escaped, err):
 @CommandLogJsonl.api
 def startMacro(cmdlog):
     if vd.macroMode:
-        ks = vd.input('set macro to keybinding: (Ctrl+C to cancel)')
+        ks = vd.input('set macro to keybinding: (Ctrl+C to abort macro recording)')
         while ks in vd.macrobindings:
             ks = vd.input(f'{ks} already in use; set macro to keybinding: ')
         vd.cmdlog.saveMacro(vd.macroMode.rows, ks)
