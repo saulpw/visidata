@@ -73,13 +73,13 @@ def afterExecSheet(cmdlog, sheet, escaped, err):
 @CommandLogJsonl.api
 def startMacro(cmdlog):
     if vd.macroMode:
-        ks = vd.input('set macro to keybinding: ')
+        ks = vd.input('set macro to keybinding: (Ctrl+C to cancel)')
         while ks in vd.macrobindings:
             ks = vd.input(f'{ks} already in use; set macro to keybinding: ')
         vd.cmdlog.saveMacro(vd.macroMode.rows, ks)
         vd.macroMode = None
     else:
-        vd.status("recording macro")
+        vd.status("recording macro; stop recording with `m`")
         vd.macroMode = CommandLogJsonl('current_macro', rows=[])
 
 @VisiData.before
