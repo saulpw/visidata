@@ -1,6 +1,6 @@
 from itertools import chain
 
-from visidata import VisiData, Progress, JsonSheet
+from visidata import VisiData, Progress, JsonSheet, vd
 
 
 @VisiData.api
