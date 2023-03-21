@@ -66,6 +66,7 @@ import visidata.threads
 import visidata.path
 
 import visidata._input
+import visidata.mouse
 import visidata.movement
 
 import visidata.type_date

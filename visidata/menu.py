@@ -417,14 +417,13 @@ def runMenu(vd):
     nEscapes = 0
 
     def _clickedDuringMenu():
-            for keystroke, y, x, winname, winscr in vd.parseMouse(menu=vd.scrMenu, top=vd.winTop, bot=vd.winBottom):
-                if winname == 'menu':
-                    f = vd.getMouse(winscr, x, y, keystroke)
-                    if f:
-                        if f(y, x, keystroke):  # call each function until one returns a true-ish value
-                            return 'doit'
-                    else:
-                        return 'offmenu'
+        r = vd.parseMouse(menu=vd.scrMenu, top=vd.winTop, bot=vd.winBottom)
+        f = vd.getMouse(r.x, r.y, r.keystroke)
+        if f:
+            if f(r.y, r.x, r.keystroke):  # call each function until one returns a true-ish value
+                return 'doit'
+        else:
+            return 'offmenu'
 
     try:
       while True:

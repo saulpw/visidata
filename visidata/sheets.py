@@ -354,16 +354,6 @@ class TableSheet(BaseSheet):
         'List of non-hidden columns in display order.'
         return self.keyCols + [c for c in self.columns if not c.hidden and not c.keycol]
 
-    def visibleColAtX(self, x):
-        for vcolidx, (colx, w) in self._visibleColLayout.items():
-            if colx <= x <= colx+w:
-                return vcolidx
-
-    def visibleRowAtY(self, y):
-        for rowidx, (rowy, h) in self._rowLayout.items():
-            if rowy <= y <= rowy+h-1:
-                return rowidx
-
     @drawcache_property
     def keyCols(self):
         'List of visible key columns.'

@@ -80,10 +80,6 @@ class VisiData(visidata.Extensible):
     def activeStack(self):
         return self.sheetstack() or self.sheetstack(-1)
 
-    @visidata.drawcache_property
-    def mousereg(self):
-        return []
-
     def __copy__(self):
         'Dummy method for Extensible.init()'
         pass
@@ -153,14 +149,6 @@ class VisiData(visidata.Extensible):
                 return k
             k = ord(k)
         return curses.keyname(k).decode('utf-8')
-
-    def onMouse(self, scr, y, x, h, w, **kwargs):
-        self.mousereg.append((scr, y, x, h, w, kwargs))
-
-    def getMouse(self, _scr, _x, _y, button):
-        for scr, y, x, h, w, kwargs in self.mousereg[::-1]:
-            if scr is _scr and x <= _x < x+w and y <= _y < y+h and button in kwargs:
-                return kwargs[button]
 
     @property
     def screenHeight(self):

@@ -150,36 +150,6 @@ def runresult(vd):
 
 
 @VisiData.api
-def parseMouse(vd, **kwargs):
-    'Return list of mouse interactions (clicktype, y, x, name, scr) for curses screens given in kwargs as name:scr.'
-
-    devid, x, y, z, bstate = curses.getmouse()
-
-    clicktype = ''
-    if bstate & curses.BUTTON_CTRL:
-        clicktype += "CTRL-"
-        bstate &= ~curses.BUTTON_CTRL
-    if bstate & curses.BUTTON_ALT:
-        clicktype += "ALT-"
-        bstate &= ~curses.BUTTON_ALT
-    if bstate & curses.BUTTON_SHIFT:
-        clicktype += "SHIFT-"
-        bstate &= ~curses.BUTTON_SHIFT
-
-    keystroke = clicktype + curses.mouseEvents.get(bstate, str(bstate))
-
-    found = []
-    for winname, winscr in kwargs.items():
-        py, px = winscr.getparyx()
-        mh, mw = winscr.getmaxyx()
-        if py <= y < py+mh and px <= x < px+mw:
-            found.append((keystroke, y-py, x-px, winname, winscr))
-#            vd.debug(f'{keystroke} at ({x-px}, {y-py}) in window {winname} {winscr}')
-
-    return found
-
-
-@VisiData.api
 def mainloop(self, scr):
     'Manage execution of keystrokes and subsequent redrawing of screen.'
     nonidle_timeout = vd.curses_timeout
@@ -229,31 +199,7 @@ def mainloop(self, scr):
 
             if keystroke == 'KEY_MOUSE':
                 try:
-                    self.keystrokes = ''
-                    pct = vd.windowConfig['pct']
-                    topPaneActive = ((vd.activePane == 2 and pct < 0)  or (vd.activePane == 1 and pct > 0))
-                    bottomPaneActive = ((vd.activePane == 1 and pct < 0)  or (vd.activePane == 2 and pct > 0))
-
-                    r = vd.parseMouse(top=vd.winTop, bot=vd.winBottom, menu=vd.scrMenu)
-                    for keystroke, y, x, winname, winscr in reversed(r):
-                        if (bottomPaneActive and winname == 'top') or (topPaneActive and winname == 'bot'):
-                            self.activePane = 1 if self.activePane == 2 else 2
-                            sheet = self.activeSheet
-
-                        f = self.getMouse(winscr, x, y, keystroke)
-                        sheet.mouseX, sheet.mouseY = x, y
-                        if f:
-                            if isinstance(f, str):
-                                for cmd in f.split():
-                                    sheet.execCommand(cmd)
-                            else:
-                                f(y, x, keystroke)
-
-                            self.keystrokes = self.prettykeys(keystroke)
-                            keystroke = ''   # already handled
-                            break  # first successful command stops checking
-                except curses.error:
-                    pass
+                    keystroke = vd.handleMouse(sheet)  # if it was handled, don't handle again as a regular keystroke
                 except Exception as e:
                     self.exceptionCaught(e)
 
@@ -296,7 +242,8 @@ def mainloop(self, scr):
         scr.timeout(vd.curses_timeout)
 
 
-def initCurses():
+@VisiData.api
+def initCurses(vd):
     # reduce ESC timeout to 25ms. http://en.chys.info/2009/09/esdelay-ncurses/
     os.putenv('ESCDELAY', '25')
     curses.use_env(True)
@@ -311,25 +258,17 @@ def initCurses():
 
     curses.raw()    # get control keys instead of signals
     curses.meta(1)  # allow "8-bit chars"
-    curses.MOUSE_ALL = 0xffffffff
-    curses.mousemask(curses.MOUSE_ALL if options.mouse_interval else 0)
-    curses.mouseinterval(options.mouse_interval)
-    curses.mouseEvents = {}
 
     scr.keypad(1)
 
     curses.def_prog_mode()
-
-    for k in dir(curses):
-        if k.startswith('BUTTON') or k in ('REPORT_MOUSE_POSITION', '2097152'):
-            curses.mouseEvents[getattr(curses, k)] = k
 
     return scr
 
 
 def wrapper(f, *args, **kwargs):
     try:
-        scr = initCurses()
+        scr = vd.initCurses()
         return f(scr, *args, **kwargs)
     finally:
         curses.endwin()
@@ -345,7 +284,7 @@ def run(vd, *sheetlist):
         for vs in sheetlist:
             vd.push(vs, load=False)
 
-        scr = initCurses()
+        scr = vd.initCurses()
         ret = vd.mainloop(scr)
     except curses.error as e:
         vd.fail(str(e))

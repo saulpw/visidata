@@ -114,8 +114,6 @@ class BaseSheet(DrawablePane):
         self.source = None
         self.rows = UNLOADED      # list of opaque objects
         self._scr = None
-        self.mouseX = 0
-        self.mouseY = 0
         self.hasBeenModified = False
 
         super().__init__(**kwargs)
