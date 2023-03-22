@@ -278,7 +278,6 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
             curses.flushinp()
 
     if display:
-        vd.status('"%s"' % v)
         if record and vd.cmdlog:
             vd.setLastArgs(v)
 
