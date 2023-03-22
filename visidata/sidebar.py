@@ -60,7 +60,7 @@ def drawSidebar(vd, scr, sheet):
     sidebarscr.erase()
     sidebarscr.bkgd(cattr.attr)
     sidebarscr.border()
-    vd.onMouse(sidebarscr, 0, 0, h, w, BUTTON1_RELEASED='nop', BUTTON1_PRESSED='nop')
+    vd.onMouse(sidebarscr, 0, 0, h, w, BUTTON1_RELEASED='no-op', BUTTON1_PRESSED='no-op')
 
     i = 0
     for line, _ in lines:
