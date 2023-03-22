@@ -3,7 +3,7 @@ import curses
 
 import visidata
 
-from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiData
+from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiData, BaseSheet
 from visidata import vd, options, colors
 from visidata import AttrDict
 
@@ -18,11 +18,40 @@ vd.option('input_history', '', 'basename of file to store persistent input histo
 class AcceptInput(Exception):
     '*args[0]* is the input to be accepted'
 
-visidata.vd._nextCommands = []
+visidata.vd._nextCommands = []  # for vd.queueCommand
+
+vd._injectedInput = None  # for vd.injectInput
+
 
 @VisiData.api
 def queueCommand(vd, longname): #, input=None, sheet=None, col=None, row=None):
+    'Add *longname* to queue of next commands to execute.'
     vd._nextCommands.append(longname)
+
+
+@VisiData.api
+def injectInput(vd, x):
+    'Use *x* as input to next command.'
+    assert vd._injectedInput is None, vd._injectedInput
+    vd._injectedInput = x
+
+
+@VisiData.api
+def getCommandInput(vd):
+    if vd._injectedInput is not None:
+        r = vd._injectedInput
+        vd._injectedInput = None
+        return r
+
+    return vd.getLastArgs()
+
+
+@BaseSheet.after
+def execCommand(sheet, longname, *args, **kwargs):
+    if vd._injectedInput is not None:
+        vd.debug(f'{longname} did not consume input "{vd._injectedInput}"')
+        vd._injectedInput = None
+
 
 def acceptThenFunc(*longnames):
     def _acceptthen(v, i):
@@ -265,7 +294,7 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
     'Invoke modal single-line editor at (*y*, *x*) for *w* terminal chars. Use *display* is False for sensitive input like passphrases.  If *record* is True, get input from the cmdlog in batch mode, and save input to the cmdlog if *display* is also True. Return new value as string.'
     v = None
     if record and vd.cmdlog:
-        v = vd.getLastArgs()
+        v = vd.getCommandInput()
 
     if v is None:
         try:
@@ -292,7 +321,7 @@ def inputsingle(vd, prompt, record=True):
 
     v = None
     if record and vd.cmdlog:
-        v = vd.getLastArgs()
+        v = vd.getCommandInput()
 
     if v is not None:
         return v
@@ -329,7 +358,7 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
     sheet = self.activeSheet
     if not vd.cursesEnabled:
         if kwargs.get('record', True) and vd.cmdlog:
-            return vd.getLastArgs()
+            return vd.getCommandInput()
 
         if kwargs.get('display', True):
             import builtins

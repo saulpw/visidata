@@ -176,15 +176,14 @@ class BaseSheet(DrawablePane):
 
         return f'*{self.source}*'
 
-    def execCommand(self, cmd, vdglobals=None, keystrokes=None):
-        if ' ' in cmd:
-            cmd, arg = cmd.split(' ', maxsplit=1)
-            vd.currentReplayRow = AttrDict(longname=cmd, input=arg)
+    def execCommand(self, longname, vdglobals=None, keystrokes=None):
+        if ' ' in longname:
+            cmd, arg = longname.split(' ', maxsplit=1)
+            vd.injectInput(arg)
 
-        cmd = self.getCommand(cmd or keystrokes)
+        cmd = self.getCommand(longname or keystrokes)
         if not cmd:
-            if keystrokes:
-                vd.status('no command for %s' % keystrokes)
+            vd.warning('no command for %s' % (longname or keystrokes))
             return False
 
         escaped = False
