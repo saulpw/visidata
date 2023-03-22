@@ -4,7 +4,7 @@ from visidata import vd, VisiData, BaseSheet, Sheet, AttrDict
 
 
 # registry of mouse events.  cleared before every draw cycle.
-vd.mousereg = []  # list of AttrDict(winname=, winscr=, y=, x=, h=, w=, buttonfuncs=dict)
+vd.mousereg = []  # list of AttrDict(y=, x=, h=, w=, buttonfuncs=dict)
 
 # sheet mouse position for current mouse event
 BaseSheet.init('mouseX', int)
@@ -29,18 +29,18 @@ def clearCaches(vd):
 
 
 @VisiData.api
-def onMouse(self, scr, y, x, h, w, winname='', **kwargs):
+def onMouse(self, scr, y, x, h, w, **kwargs):
     py, px = scr.getparyx()
     if py > 0:
         y += py
         x += px
 
-    e = AttrDict(winname=winname, winscr=scr, y=y, x=x, h=h, w=w, buttonfuncs=kwargs)
+    e = AttrDict(y=y, x=x, h=h, w=w, buttonfuncs=kwargs)
     self.mousereg.append(e)
 
 
 @VisiData.api
-def getMouse(self, _scr, _x, _y, button):
+def getMouse(self, _x, _y, button):
     for reg in self.mousereg[::-1]:
         if reg.x <= _x < reg.x+reg.w and reg.y <= _y < reg.y+reg.h and button in reg.buttonfuncs:
             return reg.buttonfuncs[button]
@@ -88,18 +88,20 @@ def handleMouse(vd, sheet):
             vd.activePane = 1 if vd.activePane == 2 else 2
             sheet = vd.activeSheet
 
-        f = vd.getMouse(r.winscr, r.x, r.y, r.keystroke)
+        f = vd.getMouse(r.x, r.y, r.keystroke)
         sheet.mouseX, sheet.mouseY = r.x, r.y-1
         if f:
             if isinstance(f, str):
-                for cmd in f.split():
-                    sheet.execCommand(cmd)
+                if f.startswith('onclick'):
+                    sheet.execCommand(f[8:])
+                else:
+                    for cmd in f.split():
+                        sheet.execCommand(cmd)
             else:
                 f(r.y, r.x, r.keystroke)
 
             vd.keystrokes = vd.prettykeys(r.keystroke)
             return ''  #  handled
-
     except curses.error:
         pass
 

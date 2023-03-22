@@ -1,7 +1,7 @@
 import os
 
 import visidata
-from visidata import Extensible, VisiData, vd, EscapeException, cleanName, MissingAttrFormatter
+from visidata import Extensible, VisiData, vd, EscapeException, cleanName, MissingAttrFormatter, AttrDict
 
 
 UNLOADED = tuple()  # sentinel for a sheet not yet loaded for the first time
@@ -177,6 +177,10 @@ class BaseSheet(DrawablePane):
         return f'*{self.source}*'
 
     def execCommand(self, cmd, vdglobals=None, keystrokes=None):
+        if ' ' in cmd:
+            cmd, arg = cmd.split(' ', maxsplit=1)
+            vd.currentReplayRow = AttrDict(longname=cmd, input=arg)
+
         cmd = self.getCommand(cmd or keystrokes)
         if not cmd:
             if keystrokes:

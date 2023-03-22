@@ -7,6 +7,7 @@ import textwrap
 from visidata import options, drawcache, vd, update_attr, colors, ColorAttr
 
 disp_column_fill = ' '
+internal_markup_re = r'(\[:[^\]]*?\])'  # [:whatever until the closing bracket] or [:]
 
 ### Curses helpers
 
@@ -53,7 +54,7 @@ def wcwidth(cc, ambig=1):
 
 
 def iterchunks(s, literal=False):
-    chunks = re.split(r'(\[:[a-z_ 0-9]*\])', s)
+    chunks = re.split(internal_markup_re, s)
     for chunk in chunks:
         if not chunk:
             continue
@@ -173,12 +174,20 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False, literal=False, *
     origattr = cattr
     origw = w
     clipped = ''
+    link = ''
 
     try:
         for colorname, chunk in iterchunks(s, literal=literal):
+            if colorname.startswith('onclick'):
+                link = colorname
+                colorname = 'clickable'
+
             if colorname == ':':
+                link = ''
                 cattr = origattr
-            elif colorname:
+                continue
+
+            if colorname:
                 cattr = update_attr(cattr, colors.get_color(colorname), 8)
 
             if not chunk:
@@ -206,13 +215,17 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False, literal=False, *
                     scr.addstr(y, x, disp_column_fill*chunkw, cattr.attr)  # clear whole area before displaying
                 scr.addstr(y, x, clipped, cattr.attr)
 
+            if link:
+                vd.onMouse(scr, y, x, 1, dispw, BUTTON1_RELEASED=link)
+
             x += dispw
             totaldispw += dispw
 
             if chunkw < dispw:
                 break
     except Exception as e:
-        pass
+        if vd.options.debug:
+            raise
 #        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s clippedlen=%s]' % (e, y, x, totaldispw, w, len(clipped))
 #                ).with_traceback(sys.exc_info()[2])
 
@@ -241,7 +254,7 @@ def wraptext(text, width=80, indent=''):
             continue
 
         line = _markdown_to_internal(line)
-        chunks = re.split(r'(\[:[a-z_ 0-9]*\])', line)
+        chunks = re.split(internal_markup_re, line)
         textchunks = [x for x in chunks if not (x.startswith('[:') and x.endswith(']'))]
         for linenum, textline in enumerate(textwrap.wrap(''.join(textchunks), width=width, drop_whitespace=False)):
             txt = textline
