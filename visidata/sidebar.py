@@ -55,7 +55,7 @@ def drawSidebar(vd, scr, sheet):
     winh = min(maxh, len(lines)+2)
     x, y, w, h = scrw-winw-1, scrh-winh-1, winw, winh
 
-    sidebarscr = vd.subwindow(scr, h, w, y, x)
+    sidebarscr = vd.subwindow(scr, x, y, w, h)
 
     sidebarscr.erase()
     sidebarscr.bkgd(cattr.attr)

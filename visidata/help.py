@@ -106,7 +106,7 @@ class HelpPane:
             else:  # x<0
                 xhelp = scr.getmaxyx()[1]-self.amgr.maxWidth-5
 
-            self.scr = vd.subwindow(scr, self.amgr.maxHeight+3, self.amgr.maxWidth+4, yhelp, xhelp)
+            self.scr = vd.subwindow(scr, xhelp, yhelp, self.amgr.maxWidth+4, self.amgr.maxHeight+3)
             self.parentscr = scr
 
         self.scr.erase()
