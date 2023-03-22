@@ -76,12 +76,12 @@ def setWindows(vd, scr, pct=None):
         if not topmenulines:
             vd.scrMenu = None
         elif not vd.scrMenu:
-            vd.scrMenu = scr.derwin(h, w, 0, 0)
+            vd.scrMenu = vd.subwindow(scr, h, w, 0, 0)
             vd.scrMenu.keypad(1)
 
-        vd.winTop = scr.derwin(n, w, topmenulines, 0)
+        vd.winTop = vd.subwindow(scr, n, w, topmenulines, 0)
         vd.winTop.keypad(1)
-        vd.winBottom = scr.derwin(h-n-topmenulines, w, n+topmenulines, 0)
+        vd.winBottom = vd.subwindow(scr, h-n-topmenulines, w, n+topmenulines, 0)
         vd.winBottom.keypad(1)
         if pct == 0 or pct >= 100:  # no second pane
             vd.win1 = vd.winBottom

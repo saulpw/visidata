@@ -29,13 +29,9 @@ def clearCaches(vd):
 
 
 @VisiData.api
-def onMouse(self, scr, y, x, h, w, **kwargs):
-    py, px = scr.getparyx()
-    if py > 0:
-        y += py
-        x += px
-
-    e = AttrDict(y=y, x=x, h=h, w=w, buttonfuncs=kwargs)
+def onMouse(self, scr, x, y, w, h, **kwargs):
+    px, py = self.getrootxy(scr)
+    e = AttrDict(x=x+px, y=y+py, w=w, h=h, buttonfuncs=kwargs)
     self.mousereg.append(e)
 
 
@@ -66,7 +62,7 @@ def parseMouse(vd, **kwargs):
     keystroke = clicktype + curses.mouseEvents.get(bstate, str(bstate))
     ret = AttrDict(keystroke=keystroke, y=y, x=x, found=[])
     for winname, winscr in kwargs.items():
-        py, px = winscr.getparyx()
+        px, py = vd.getrootxy(winscr)
         mh, mw = winscr.getmaxyx()
         if py <= y < py+mh and px <= x < px+mw:
             ret.found.append(winname)
