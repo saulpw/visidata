@@ -23,7 +23,7 @@ class ReturnValue(BaseException):
 
 
 @VisiData.api
-def draw_sheet(self, scr, sheet):
+def drawSheet(self, scr, sheet):
     'Erase *scr* and draw *sheet* on it, including status bars and sidebar.'
 
     sheet.ensureLoaded()
@@ -112,20 +112,20 @@ def draw_all(vd):
     if ss1 and not ss2:
         vd.activePane = 1
         vd.setWindows(vd.scrFull)
-        vd.draw_sheet(vd.win1, ss1[0])
+        vd.drawSheet(vd.win1, ss1[0])
         if vd.win2:
             vd.win2.erase()
     elif not ss1 and ss2:
         vd.activePane = 2
         vd.setWindows(vd.scrFull)
-        vd.draw_sheet(vd.win2, ss2[0])
+        vd.drawSheet(vd.win2, ss2[0])
         if vd.win1:
             vd.win1.erase()
     elif ss1 and ss2 and vd.win2:
-        vd.draw_sheet(vd.win1, ss1[0])
-        vd.draw_sheet(vd.win2, ss2[0])
+        vd.drawSheet(vd.win1, ss1[0])
+        vd.drawSheet(vd.win2, ss2[0])
     elif ss1 and ss2 and not vd.win2:
-        vd.draw_sheet(vd.win1, vd.sheetstack(vd.activePane)[0])
+        vd.drawSheet(vd.win1, vd.sheetstack(vd.activePane)[0])
         vd.setWindows(vd.scrFull)
 
     if vd.scrMenu:
