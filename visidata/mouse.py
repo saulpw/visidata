@@ -29,10 +29,10 @@ def clearCaches(vd):
 
 
 @VisiData.api
-def onMouse(self, scr, x, y, w, h, **kwargs):
-    px, py = self.getrootxy(scr)
+def onMouse(vd, scr, x, y, w, h, **kwargs):
+    px, py = vd.getrootxy(scr)
     e = AttrDict(x=x+px, y=y+py, w=w, h=h, buttonfuncs=kwargs)
-    self.mousereg.append(e)
+    vd.mousereg.append(e)
 
 
 @VisiData.api

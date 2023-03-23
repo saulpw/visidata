@@ -228,7 +228,7 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
         menudraw(scr, y+i, x+2+w, titlenote, attr)
         menudraw(scr, y+i, x+3+w, ls, colors.color_menu)
 
-        vd.onMouse(scr, y+i, x, 1, w+3,
+        vd.onMouse(scr, x, y+i, w+3, 1,
                 BUTTON1_PRESSED=lambda y,x,key,p=sheet.activeMenuItems[:level]+[j]: sheet.pressMenu(*p),
                 BUTTON2_PRESSED=vd.nop,
                 BUTTON3_PRESSED=vd.nop,
@@ -306,7 +306,7 @@ def drawMenu(vd, scr, sheet):
             menudraw(scr, 0, x+j+1, ch, attr | (curses.A_UNDERLINE if ch.isupper() else 0))
         menudraw(scr, 0, x+j+2, ' ', attr)
 
-        vd.onMouse(scr, 0, x, 1, len(item.title)+2,
+        vd.onMouse(scr, x, 0, dispwidth(item.title)+2, 1,
                 BUTTON1_PRESSED=lambda y,x,key,i=i,sheet=sheet: sheet.pressMenu(i),
                 BUTTON2_PRESSED=vd.nop,
                 BUTTON3_PRESSED=vd.nop,
@@ -371,7 +371,7 @@ def drawMenu(vd, scr, sheet):
         menudraw(scr, menuy, helpx+2+len(ks)+3, lsr, helpattr)
     menudraw(scr, menuy, helpx+19, ' '+cmd.longname+' ', helpattr)
 
-    vd.onMouse(scr, menuy, helpx, y-menuy+1, helpw,
+    vd.onMouse(scr, helpx, menuy, helpw, y-menuy+1,
                BUTTON1_PRESSED=_done,
                BUTTON1_CLICKED=_done,
                BUTTON1_RELEASED=vd.nop,

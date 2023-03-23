@@ -131,7 +131,7 @@ def drawLeftStatus(vd, scr, vs):
 
         x = clipdraw(scr, y, 0, lstatus, attr, w=vs.windowWidth-1)
 
-        vd.onMouse(scr, y, 0, 1, x,
+        vd.onMouse(scr, 0, y, x, 1,
                         BUTTON1_PRESSED='sheets-stack',
                         BUTTON1_RELEASED='sheets-stack',
                         BUTTON3_PRESSED='rename-sheet',

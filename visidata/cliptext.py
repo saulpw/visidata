@@ -216,7 +216,7 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False, literal=False, *
                 scr.addstr(y, x, clipped, cattr.attr)
 
             if link:
-                vd.onMouse(scr, y, x, 1, dispw, BUTTON1_RELEASED=link)
+                vd.onMouse(scr, x, y, dispw, 1, BUTTON1_RELEASED=link)
 
             x += dispw
             totaldispw += dispw

@@ -622,7 +622,7 @@ class TableSheet(BaseSheet):
                 hdrcattr = update_attr(hdrcattr, colors.color_bottom_hdr, 5)
 
             clipdraw(scr, y+i, x, name, hdrcattr.attr, colwidth)
-            vd.onMouse(scr, y+i, x, 1, colwidth, BUTTON3_RELEASED='rename-col')
+            vd.onMouse(scr, x, y+i, colwidth, 1, BUTTON3_RELEASED='rename-col')
 
             if C and x+colwidth+len(C) < self.windowWidth and y+i < self.windowWidth:
                 scr.addstr(y+i, x+colwidth, C, sepcattr.attr)
@@ -830,7 +830,7 @@ class TableSheet(BaseSheet):
 
                         pre = disp_truncator if hoffset != 0 else disp_column_fill
                         clipdraw(scr, y, x, (pre if colwidth > 2 else '')+line[hoffset:], cattr.attr, w=colwidth-notewidth)
-                        vd.onMouse(scr, y, x, 1, colwidth, BUTTON3_RELEASED='edit-cell')
+                        vd.onMouse(scr, x, y, colwidth, 1, BUTTON3_RELEASED='edit-cell')
 
                         if x+colwidth+len(sepchars) <= self.windowWidth:
                             scr.addstr(y, x+colwidth, sepchars, sepcattr.attr)
