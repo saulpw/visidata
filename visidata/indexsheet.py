@@ -6,7 +6,7 @@ class IndexSheet(Sheet):
     help = '''
     # Index Sheet
 
-    This /index sheet/ is a list of sheets from `{sheet.source}`.
+    This is a list of sheets from `{sheet.source}`.
 
     - `Enter` to open {sheet.cursorRow}
     - `g Enter` to open all selected sheets
