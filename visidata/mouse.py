@@ -36,8 +36,8 @@ def onMouse(vd, scr, x, y, w, h, **kwargs):
 
 
 @VisiData.api
-def getMouse(self, _x, _y, button):
-    for reg in self.mousereg[::-1]:
+def getMouse(vd, _x, _y, button):
+    for reg in vd.mousereg[::-1]:
         if reg.x <= _x < reg.x+reg.w and reg.y <= _y < reg.y+reg.h and button in reg.buttonfuncs:
             return reg.buttonfuncs[button]
 
@@ -105,17 +105,18 @@ def handleMouse(vd, sheet):
 
 
 @Sheet.api
-def visibleColAtX(self, x):
-    for vcolidx, (colx, w) in self._visibleColLayout.items():
+def visibleColAtX(sheet, x):
+    for vcolidx, (colx, w) in sheet._visibleColLayout.items():
         if colx <= x <= colx+w:
             return vcolidx
 
 
 @Sheet.api
-def visibleRowAtY(self, y):
-    for rowidx, (rowy, h) in self._rowLayout.items():
+def visibleRowAtY(sheet, y):
+    for rowidx, (rowy, h) in sheet._rowLayout.items():
         if rowy <= y <= rowy+h-1:
             return rowidx
+
 
 @Sheet.command('BUTTON1_PRESSED', 'go-mouse', 'set cursor to row and column where mouse was clicked')
 def go_mouse(sheet):
