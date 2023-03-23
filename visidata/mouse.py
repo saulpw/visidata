@@ -85,7 +85,8 @@ def handleMouse(vd, sheet):
             sheet = vd.activeSheet
 
         f = vd.getMouse(r.x, r.y, r.keystroke)
-        sheet.mouseX, sheet.mouseY = r.x, r.y-1
+        winx, winy = vd.getrootxy(sheet._scr)
+        sheet.mouseX, sheet.mouseY = r.x-winx, r.y-winy
         if f:
             if isinstance(f, str):
                 if f.startswith('onclick'):
