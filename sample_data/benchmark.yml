@@ -357,4 +357,8 @@
   quantity: '1'
   sku: REPT217
   unit: $99.95
+- foo: !!python/tuple
+    - 1
+    - 2
+    - 3
 
