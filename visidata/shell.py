@@ -205,7 +205,7 @@ class DirSheet(Sheet):
         f = _walkfiles if self.options.dir_recurse else _listfiles
 
         for p in f(self.source):
-            if not hidden_files and str(p).startswith('.'):
+            if not hidden_files and str(p).startswith('.') and not str(p).startswith('..'):
                 continue
 
             yield p
@@ -244,7 +244,7 @@ def inputShell(vd):
         vd.warning('no $column in command')
     return cmd
 
-DirSheet.addCommand('`', 'open-dir-parent', 'vd.push(openSource(source/".."))', 'open parent directory')
+DirSheet.addCommand('`', 'open-dir-parent', 'vd.push(openSource(source.parent if source.resolve()!=Path(".").resolve() else os.path.dirname(source.resolve())))', 'open parent directory')  #1801
 BaseSheet.addCommand('', 'open-dir-current', 'vd.push(vd.currentDirSheet)', 'open Directory Sheet: browse properties of files in current directory')
 
 Sheet.addCommand('z;', 'addcol-shell', 'cmd=inputShell(); addShellColumns(cmd, sheet)', 'create new column from bash expression, with $columnNames as variables')
