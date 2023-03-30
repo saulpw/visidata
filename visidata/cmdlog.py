@@ -214,7 +214,7 @@ class CommandLogBase:
             return
 
         # remove user-aborted commands and simple movements (unless first command on the sheet, which created the sheet)
-        if not sheet.cmdlog.rows or vd.isLoggableCommand(vd.activeCommand.longname):
+        if not sheet.cmdlog_sheet.rows or vd.isLoggableCommand(vd.activeCommand.longname):
             if isLoggableSheet(sheet):      # don't record actions from cmdlog or other internal sheets on global cmdlog
                 self.addRow(vd.activeCommand)  # add to global cmdlog
             sheet.cmdlog_sheet.addRow(vd.activeCommand)  # add to sheet-specific cmdlog
