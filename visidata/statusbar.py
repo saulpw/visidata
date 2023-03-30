@@ -180,7 +180,7 @@ def drawRightStatus(vd, scr, vs):
     active = vs is vd.activeSheet
 
     if active:
-        statcolors.append((f'{vd.prettykeys(vd.keystrokes)} ' or '', 'color_keystrokes'))
+        statcolors.append((f'{vd.keystrokes} ' or '', 'color_keystrokes'))
 
     if vs.currentThreads:
         statcolors.insert(0, vd.checkMemoryUsage())
