@@ -10,8 +10,15 @@ vd.option('html_title', '<h2>{sheet.name}</h2>', 'table header when saving to ht
 
 @VisiData.api
 def guess_html(vd, p):
-    if next(p.open_text()).startswith('<'):
-        return dict(filetype='html', _likelihood=1)
+    with p.open_text() as fp:
+        r = fp.read(10240)
+        if r.strip().startswith('<'):
+            m = re.search(r, r'charset=(\S+)')
+            if m:
+                encoding = m.group(0)
+            else:
+                encoding = None
+            return dict(filetype='html', _likelihood=1, encoding=encoding)
 
 @VisiData.api
 def open_html(vd, p):

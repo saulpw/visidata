@@ -37,11 +37,12 @@ def _completeFilename(val, state):
     files.sort()
     return files[state%len(files)]
 
+
 @VisiData.api
-def guessFiletype(vd, p):
+def guessFiletype(vd, p, funcprefix='guess_'):
     '''Call all vd.guess_<filetype>(p) functions and return best candidate sheet based on file contents.'''
 
-    guessfuncs = [getattr(vd, x) for x in dir(vd) if x.startswith('guess_')]
+    guessfuncs = [getattr(vd, x) for x in dir(vd) if x.startswith(funcprefix)]
     filetypes = []
     for f in guessfuncs:
         try:
@@ -56,6 +57,8 @@ def guessFiletype(vd, p):
 
     if filetypes:
         return sorted(filetypes, key=lambda r: -r.get('_likelihood', 1))[0]
+
+    return {}
 
 
 @VisiData.api

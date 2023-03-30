@@ -30,6 +30,9 @@ def openurl_http(vd, path, filetype=None):
     contenttype = response.getheader('content-type')
     subtype = contenttype.split(';')[0].split('/')[-1]
 
+    filetype = filetype or vd.guessFiletype(path, funcprefix='guessurl_').get('filetype')
+    filetype = filetype or content_filetypes.get(subtype, subtype)
+    filetype = filetype or vd.guessFiletype(path).get('filetype')
 
     # Automatically paginate if a 'next' URL is given
     def _iter_lines(path=path, response=response, max_next=vd.options.http_max_next):
