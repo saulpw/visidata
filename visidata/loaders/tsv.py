@@ -20,7 +20,7 @@ def open_tsv(vd, p):
 def splitter(fp, delim='\n'):
     'Generates one line/row/record at a time from fp, separated by delim'
 
-    buf = ''
+    buf = type(delim)()
     while True:
         nextbuf = fp.read(65536)
         if not nextbuf:
@@ -30,7 +30,9 @@ def splitter(fp, delim='\n'):
         *rows, buf = buf.split(delim)
         yield from rows
 
-    yield from buf.rstrip(delim).split(delim)
+    buf = buf.rstrip(delim)  # trim empty trailing lines
+    if buf:
+        yield from buf.rstrip(delim).split(delim)
 
 
 # rowdef: list

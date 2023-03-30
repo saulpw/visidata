@@ -350,16 +350,21 @@ class RepeatFile:
         return RepeatFile(self.iter_lines, lines=self.lines)
 
     def read(self, n=None):
-        r = ''
+        r = None
         if n is None:
             n = 10**12  # some too huge number
-        while len(r) < n:
+        while r is None or len(r) < n:
             try:
                 s = next(self.iter)
-                r += s + '\n'
+                if r is None:
+                    r = '' if isinstance(s, str) else b''
+                else:
+                    assert isinstance(r, type(s)), (r, type(s))
+
+                r += s + '\n' if isinstance(s, str) else b'\n'
             except StopIteration:
                 break  # end of file
-        return r
+        return r or ''
 
     def write(self, s):
         return self.iter_lines.write(s)

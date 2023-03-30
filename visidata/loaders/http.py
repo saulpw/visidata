@@ -1,4 +1,5 @@
-from visidata import Path, RepeatFile, options, vd, VisiData
+from visidata import Path, RepeatFile, vd, VisiData
+from visidata.loaders.tsv import splitter
 
 content_filetypes = {
     'tab-separated-values': 'tsv'
@@ -18,33 +19,34 @@ def openurl_http(vd, path, filetype=None):
             vd.fail(f'no vd.openhttp_{sch}')
         return openfunc(Path(schemes[-1]+'://'+path.given.split('://')[1]))
 
-    requests = vd.importExternal('requests')
-
+    import urllib.request
+    import urllib.error
+    import mimetypes
 
     # fallback to mime-type
-    response = requests.get(path.given, stream=True, **vd.options.getall('http_req_'))
-    response.raise_for_status()
+    req = urllib.request.Request(path.given, **vd.options.getall('http_req_'))
+    response = urllib.request.urlopen(req)
 
-    contenttype = response.headers['content-type']
+    contenttype = response.getheader('content-type')
     subtype = contenttype.split(';')[0].split('/')[-1]
-    filetype = filetype or content_filetypes.get(subtype, subtype) or vd.guessFiletype(path)['filetype']
 
-    # If no charset is provided by response headers, use the user-specified
-    # encoding option (which defaults to UTF-8) and hope for the best.  The
-    # alternative is an error because iter_lines() will produce bytes.  We're
-    # streaming so can't use response.apparent_encoding.
-    if not response.encoding:
-        response.encoding = options.encoding
 
     # Automatically paginate if a 'next' URL is given
-    def _iter_lines(path=path, response=response, max_next=options.http_max_next):
+    def _iter_lines(path=path, response=response, max_next=vd.options.http_max_next):
         path.responses = []
         n = 0
         while response:
             path.responses.append(response)
-            yield from response.iter_lines(decode_unicode=True)
+            with response as fp:
+                for line in splitter(response, delim=b'\n'):
+                    yield line.decode(vd.options.encoding)
 
-            src = response.links.get('next', {}).get('url', None)
+            linkhdr = response.getheader('Link')
+            src = None
+            if linkhdr:
+                links = urllib.parse.parse_header(linkhdr)
+                src = links.get('next', {}).get('url', None)
+
             if not src:
                 break
 
