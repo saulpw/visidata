@@ -203,7 +203,7 @@ def mainloop(self, scr):
                 except Exception as e:
                     self.exceptionCaught(e)
 
-            if keystroke and keystroke in self.keystrokes[:-1]:
+            if keystroke and keystroke in vd.allPrefixes and keystroke in vd.keystrokes[:-1]:
                 vd.warning('duplicate prefix: ' + keystroke)
                 self.keystrokes = ''
             else:
