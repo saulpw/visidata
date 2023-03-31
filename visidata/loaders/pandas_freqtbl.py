@@ -11,8 +11,8 @@ class DataFrameRowSliceAdapter:
     by visidata's selectRow implementation.
     """
     def __init__(self, df, mask):
-        import pandas as pd
-        import numpy as np
+        pd = vd.importExternal('pandas')
+        np = vd.importExternal('numpy')
         if not isinstance(df, pd.DataFrame):
             vd.fail('%s is not a dataframe' % type(df).__name__)
         if not isinstance(mask, pd.Series):

@@ -14,7 +14,7 @@ vd.option('npy_allow_pickle', False, 'numpy allow unpickling objects (unsafe)')
 
 class NpySheet(Sheet):
     def iterload(self):
-        import numpy
+        vd.importExternal('numpy')
         if not hasattr(self, 'npy'):
             self.npy = numpy.load(str(self.source), encoding='bytes', **self.options.getall('npy_'))
         self.reloadCols()
@@ -47,12 +47,12 @@ class NpzSheet(vd.ZipSheet):
     ]
 
     def iterload(self):
-        import numpy
+        vd.importExternal('numpy')
         self.npz = numpy.load(str(self.source), encoding='bytes', **self.options.getall('npy_'))
         yield from Progress(self.npz.items())
 
     def openRow(self, row):
-        import numpy
+        vd.importExternal('numpy')
         tablename, tbl = row
         if isinstance(tbl, numpy.ndarray):
             return NpySheet(tablename, npy=tbl)
@@ -62,7 +62,7 @@ class NpzSheet(vd.ZipSheet):
 
 @VisiData.api
 def save_npy(vd, p, sheet):
-    import numpy as np
+    np = vd.importExternal('numpy')
 
     dtype = []
 
