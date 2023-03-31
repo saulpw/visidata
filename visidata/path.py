@@ -9,7 +9,7 @@ from functools import wraps, lru_cache
 
 from visidata import *
 
-vd.option('encoding', 'utf-8', 'encoding passed to codecs.open', replay=True)
+vd.option('encoding', 'utf-8', 'encoding passed to codecs.open when opening a file', replay=True)
 vd.option('encoding_errors', 'surrogateescape', 'encoding_errors passed to codecs.open', replay=True)
 
 @lru_cache()

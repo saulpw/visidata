@@ -42,7 +42,7 @@ class JrnlSheet(TableSheet):
 
 @VisiData.api
 def save_jrnl(vd, p, *vsheets):
-    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
+    with p.open_text(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
         for vs in vsheets:
             for r in vs.iterrows():
                 fp.write(f'[{r.date} {r.time}] {r.title}\n')

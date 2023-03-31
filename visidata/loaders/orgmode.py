@@ -359,7 +359,7 @@ def sysopen_row(sheet, row):
 
 @VisiData.api
 def save_org(vd, p, *vsheets):
-    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
+    with p.open_text(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
         for vs in vsheets:
             if isinstance(vs, OrgSheet):
                 for row in vs.rows:

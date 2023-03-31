@@ -44,7 +44,7 @@ class TsvSheet(SequenceSheet):
         delim = self.delimiter or self.options.delimiter
         rowdelim = self.row_delimiter or self.options.row_delimiter
 
-        with self.source.open_text(encoding=self.options.encoding) as fp:
+        with self.source.open_text(encoding=self.options.save_encoding) as fp:
                 for line in splitter(fp, rowdelim):
                     if not line:
                         continue
@@ -65,7 +65,7 @@ def save_tsv(vd, p, vs, delimiter='', row_delimiter=''):
     rowsep = row_delimiter or vs.options.row_delimiter
     trdict = vs.safe_trdict()
 
-    with p.open_text(mode='w', encoding=vs.options.encoding) as fp:
+    with p.open_text(mode='w', encoding=vs.options.save_encoding) as fp:
         colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + rowsep
         fp.write(colhdr)
 

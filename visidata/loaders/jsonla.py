@@ -66,6 +66,6 @@ def write_jsonla(vs, fp):
 
 @VisiData.api
 def save_jsonla(vd, p, *vsheets):
-    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
+    with p.open_text(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
         for vs in vsheets:
             write_jsonla(vs, fp)

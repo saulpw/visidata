@@ -106,7 +106,7 @@ def encode_json(vd, row, cols, enc=_vjsonEncoder(sort_keys=False)):
 @VisiData.api
 def save_json(vd, p, *vsheets):
     vs = vsheets[0]
-    with p.open_text(mode='w', encoding=vs.options.encoding) as fp:
+    with p.open_text(mode='w', encoding=vs.options.save_encoding) as fp:
         try:
             indent = int(vs.options.json_indent)
         except Exception:
@@ -151,7 +151,7 @@ def write_jsonl(vs, fp):
 
 @VisiData.api
 def save_jsonl(vd, p, *vsheets):
-    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
+    with p.open_text(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
         for vs in vsheets:
             vs.write_jsonl(fp)
 

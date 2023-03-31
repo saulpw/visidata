@@ -6,6 +6,7 @@ from visidata import *
 
 vd.option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 vd.option('safe_error', '#ERR', 'error string to use while saving', replay=True)
+vd.option('save_encoding', 'utf-8', 'encoding passed to codecs.open when saving a file', replay=True)
 
 @Sheet.api
 def safe_trdict(vs):
@@ -170,7 +171,7 @@ def save_zip(vd, p, *vsheets):
 
 @VisiData.api
 def save_txt(vd, p, *vsheets):
-    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
+    with p.open_text(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
         for vs in vsheets:
             unitsep = vs.options.delimiter
             rowsep = vs.options.row_delimiter
