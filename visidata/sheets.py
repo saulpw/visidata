@@ -372,7 +372,10 @@ class TableSheet(BaseSheet):
     @property
     def cursorColIndex(self):
         'Index of current column into `Sheet.columns`. Linear search; prefer `cursorCol` or `cursorVisibleColIndex`.'
-        return self.columns.index(self.cursorCol)
+        try:
+            return self.columns.index(self.cursorCol)
+        except ValueError:
+            return None
 
     @property
     def nonKeyVisibleCols(self):
