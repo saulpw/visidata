@@ -42,27 +42,6 @@ def reddit(vd):
     return praw.Reddit(check_for_updates=False, **vd.options.getall('reddit_'))
 
 
-class RedditGuide(Sheet):
-    help = '''# Authenticate Reddit
-The Reddit API must be configured before use.
-
-1. Login to Reddit and go to [:underline]https://www.reddit.com/prefs/apps[:].
-2. Create a "script" app. (Use "[:underline]http://localhost:8000[:]" for the redirect uri)
-3. Add credentials to visidatarc:
-[:code]
-    options.reddit_client_id = '...'      # below the description in the upper left
-    options.reddit_client_secret = '...'
-[:]
-## Use 'reddit' filetype for subreddits or users
-
-Multiple may be specified, joined with "+".
-[:code]
-    vd r/commandline.reddit
-    vd u/gallowboob.reddit
-    vd r/rust+golang+python.reddit
-    vd u/spez+kn0thing.reddit
-[:]'''
-
 subreddit_hidden_attrs='''
 name #accounts_active accounts_active_is_fuzzed advertiser_category
 all_original_content allow_chat_post_creation allow_discovery
@@ -270,6 +249,27 @@ class RedditComments(Sheet):
     def openRow(self, row):
         return RedditComments(row.id, source=row.replies)
 
+
+class RedditGuide(RedditSubmissions):
+    help = '''# Authenticate Reddit
+The Reddit API must be configured before use.
+
+1. Login to Reddit and go to [:underline]https://www.reddit.com/prefs/apps[:].
+2. Create a "script" app. (Use "[:underline]http://localhost:8000[:]" for the redirect uri)
+3. Add credentials to visidatarc:
+
+    options.reddit_client_id = '...'      # below the description in the upper left
+    options.reddit_client_secret = '...'
+
+## Use [:code]reddit[:] filetype for subreddits or users
+
+Multiple may be specified, joined with "+".
+
+    vd r/commandline.reddit
+    vd u/gallowboob.reddit
+    vd r/rust+golang+python.reddit
+    vd u/spez+kn0thing.reddit
+'''
 
 @SubredditSheet.api
 @asyncthread
