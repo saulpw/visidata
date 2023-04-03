@@ -380,13 +380,14 @@ class Column(Extensible):
         if self.setter:
             return self.setter(self, row, val)
 
-    def setValue(self, row, val):
+    def setValue(self, row, val, setModified=True):
         'Change value for *row* in this column to *val*.  Call ``putValue`` immediately if not a deferred column (added to deferred parent at load-time); otherwise cache until later ``putChanges``.  Caller must add undo function.'
         if self.defer:
             self.cellChanged(row, val)
         else:
             self.putValue(row, val)
-        self.sheet.setModified()
+        if setModified:  #1800
+            self.sheet.setModified()
 
     def setValueSafe(self, row, value):
         'setValue and ignore exceptions.'
