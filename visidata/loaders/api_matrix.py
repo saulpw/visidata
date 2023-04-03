@@ -15,6 +15,7 @@ vd.option('matrix_device_id', 'VisiData', 'device ID associated with matrix logi
 
 vd.matrix_client = None
 
+
 @VisiData.api
 def openhttp_matrix(vd, p):
     vd.importExternal('matrix_client')
@@ -33,6 +34,8 @@ def openhttp_matrix(vd, p):
     vd.timeouts_before_idle = -1
     return MatrixSheet(p.name, source=p)
 
+vd.open_matrix = vd.openhttp_matrix
+
 
 class MatrixRoomsSheet(Sheet):
     def iterload(self):
@@ -42,7 +45,7 @@ class MatrixRoomsSheet(Sheet):
 class MatrixSheet(Sheet):
     help = __doc__
     columns = [
-        Column('room', width=12, getter=lambda c,r: r.room.display_name),
+        Column('room', width=12, getter=lambda c,r: r.room and r.room.display_name),
         ItemColumn('sender', width=0),
         Column('sender', width=10, getter=lambda c,r: r.sender.split(':')[0][1:]),
         Column('timestamp', width=16, type=date, getter=lambda c,r: r and r.origin_server_ts/1000, fmtstr='%Y-%m-%d %H:%m'),
