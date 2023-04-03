@@ -168,6 +168,7 @@ def main_vd():
         with open(resource_filename(__name__, 'man/vd.txt'), 'r') as fp:
             print(fp.read())
         return 0
+    vd.status(__version_info__)
 
     try:
         locale.setlocale(locale.LC_ALL, '')
@@ -366,7 +367,6 @@ def main_vd():
     return 0
 
 def vd_cli():
-    vd.status(__version_info__)
     rc = -1
     try:
         rc = main_vd()
