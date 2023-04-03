@@ -99,7 +99,7 @@ def addUndoSetValues(vd, cols, rows):
     oldvals = [(c, r, c.getValue(r)) for c,r in itertools.product(cols, vd.Progress(rows, gerund='doing'))]
     def _undo():
         for c, r, v in oldvals:
-            c.setValue(r, v)
+            c.setValue(r, v, setModified=False)
     vd.addUndo(_undo)
 
 @VisiData.api
