@@ -373,7 +373,7 @@ def vd_cli():
     except BrokenPipeError:
         os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno()) # handle broken pipe gracefully
     except visidata.ExpectedException as e:
-        print(str(e))
+        pass
     except FileNotFoundError as e:
         print(e)
         if options.debug:
