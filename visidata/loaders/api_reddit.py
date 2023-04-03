@@ -239,7 +239,9 @@ class RedditSubmissions(Sheet):
 
     def iterload(self):
         kind = 'new' # 'top'
-        yield from getattr(self.source, kind)(limit=10000)
+        f = getattr(self.source, kind, None)
+        if f:
+            yield from f(limit=10000)
 
     def openRow(self, row):
         return RedditComments(row.id, source=row.comments.list())
