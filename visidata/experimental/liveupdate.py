@@ -9,7 +9,7 @@ def updateExpr(col, val):
     except SyntaxError:
         col.expr = None
 
-    col.sheet.draw(vd.scr)
+    col.sheet.draw(col.sheet._scr)
 
 
 @Column.api  # expr.setter
@@ -41,5 +41,5 @@ def addcol_expr(sheet):
         raise
 
 
-Sheet.addCommand(None, 'addcol-expr', 'sheet.addcol_expr()')
-Sheet.addCommand(None, 'addcol-new', 'c=addColumnAtIndex(SettableColumn(width=options.default_width)); draw(vd.scr); cursorVisibleColIndex=visibleCols.index(c); c.name=editCell(cursorVisibleColIndex, -1); c.width=None')
+Sheet.addCommand(None, 'addcol-expr', 'sheet.addcol_expr()', "create new column from Python expression, updating the column's calculated values live")
+Sheet.addCommand(None, 'addcol-new', 'c=addColumnAtIndex(SettableColumn(width=options.default_width)); draw(sheet._scr); cursorVisibleColIndex=visibleCols.index(c); c.name=editCell(cursorVisibleColIndex, -1); c.width=None', 'append new column, updating the column name live')
