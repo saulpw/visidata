@@ -574,13 +574,13 @@ def addcol_split(sheet, col, delim):
 
 
 @IbisTableSheet.api
-def addcol_subst(sheet, origcol, regex):
+def addcol_subst(sheet, col, regex):
     before, after = vd.parse_sed_transform(regex)
-    c = Column(origcol.name + "_re",
-               getter=lambda col,row,before=before,after=after: re.sub(before, after, col.origcol.getDisplayValue(row)),
-               origcol=origcol,
-               ibis_name=origcol.name + "_re")
-    sheet.query = sheet.query.mutate(**{c.name:origcol.get_ibis_col(sheet.query).re_replace(before, after)})
+    c = Column(col.name + "_re",
+               getter=lambda col,row,before=before,after=after: re.sub(before, after, col.origCol.getDisplayValue(row)),
+               origCol=col,
+               ibis_name=col.name + "_re")
+    sheet.query = sheet.query.mutate(**{c.name:col.get_ibis_col(sheet.query).re_replace(before, after)})
     return c
 
 
