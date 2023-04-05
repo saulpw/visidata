@@ -6,7 +6,7 @@ import textwrap
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException
 from visidata import (options, Column, namedlist, SettableColumn,
 TypedExceptionWrapper, BaseSheet, UNLOADED,
-clipdraw, ColorAttr, update_attr, colors, undoAttrFunc, vlen)
+clipdraw, clipdraw_chunks, ColorAttr, update_attr, colors, undoAttrFunc, vlen)
 import visidata
 
 
@@ -17,9 +17,8 @@ vd.option('name_joiner', '_', 'string to join sheet or column names')
 vd.option('value_joiner', ' ', 'string to join display values')
 
 
-@VisiData.api
 @drawcache
-def splitcell(sheet, s, width=0):
+def _splitcell(sheet, s, width=0):
     if width <= 0 or not sheet.options.textwrap_cells:
         return [s]
 
@@ -395,7 +394,7 @@ class TableSheet(BaseSheet):
 
     @property
     def cursorDisplay(self):
-        'Displayed value (DisplayWrapper.display) at current row and column.'
+        'Displayed value (DisplayWrapper.text) at current row and column.'
         return self.cursorCol.getDisplayValue(self.cursorRow)
 
     @property
@@ -719,8 +718,8 @@ class TableSheet(BaseSheet):
                         continue
                     col = vcols[vcolidx]
                     cellval = col.getCell(row)
-                    if colwidth > 1 and vd.isNumeric(col):
-                        cellval.display = cellval.display.rjust(colwidth-2)
+
+                    cellval.display = col.display(cellval, colwidth)
 
                     try:
                         if isNull and isNull(cellval.value):
@@ -730,7 +729,7 @@ class TableSheet(BaseSheet):
                         pass
 
                     if col.voffset or col.height > 1:
-                        lines = splitcell(self, cellval.display, width=colwidth-2)
+                        lines = _splitcell(self, cellval.display, width=colwidth-2)
                     else:
                         lines = [cellval.display]
                     displines[vcolidx] = (col, cellval, lines)
@@ -789,7 +788,7 @@ class TableSheet(BaseSheet):
                             # last line should always include as much as possible
                             firstn = sum(len(i)+1 for i in lines[:voffset+height-1])
                             lines = lines[:voffset+height]
-                            lines[-1] = cellval.display[firstn:][:col.width]
+                            lines[-1] = cellval.text[firstn:][:col.width]
 
                     lines = lines[voffset:]
 
@@ -798,7 +797,7 @@ class TableSheet(BaseSheet):
                     elif len(lines) < height:
                         lines.extend(['']*(height-len(lines)))
 
-                    for i, line in enumerate(lines):
+                    for i, chunks in enumerate(lines):
                         y = ybase+i
 
                         if vcolidx == self.rightVisibleColIndex:  # right edge of sheet
@@ -833,7 +832,14 @@ class TableSheet(BaseSheet):
                                     sepchars = midsep
 
                         pre = disp_truncator if hoffset != 0 else disp_column_fill
-                        clipdraw(scr, y, x, (pre if colwidth > 2 else '')+line[hoffset:], cattr.attr, w=colwidth-notewidth)
+                        prechunks = []
+                        if colwidth > 2:
+                            prechunks.append(('', pre))
+
+                        for attr, text in chunks:
+                            prechunks.append((attr, text[hoffset:]))
+
+                        clipdraw_chunks(scr, y, x, prechunks, cattr.attr, w=colwidth-notewidth)
                         vd.onMouse(scr, x, y, colwidth, 1, BUTTON3_RELEASED='edit-cell')
 
                         if x+colwidth+len(sepchars) <= self.windowWidth:

@@ -153,12 +153,26 @@ def clipstr(s, dispw, truncator=None, oddspace=None):
                 modch='',
                 combch='')
 
+
 def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False, literal=False, **kwargs):
-    '''Draw string `s` at (y,x)-(y,x+w) with curses attr, clipping with ellipsis char.  
-      If `rtl`, draw inside (x-w, x).
-      If `clear`, clear whole editing area before displaying.
-      If `literal`, do not interpret [:color]codes[:].
-     Return width drawn (max of w).
+    '''Draw `s`  at (y,x)-(y,x+w) with curses `attr`, clipping with ellipsis char.
+       If `rtl`, draw inside (x-w, x).
+       If `clear`, clear whole editing area before displaying.
+       If `literal`, do not interpret internal color code markup.
+       Return width drawn (max of w).
+    '''
+    if not literal:
+        chunks = iterchunks(s, literal=literal)
+    else:
+        chunks = [('', s)]
+    return clipdraw_chunks(scr, y, x, chunks, attr, w=w, clear=clear, rtl=rtl, **kwargs)
+
+
+def clipdraw_chunks(scr, y, x, chunks, attr, w=None, clear=True, rtl=False, literal=False, **kwargs):
+    '''Draw `chunks` (sequence of (color:str, text:str) as from iterchunks) at (y,x)-(y,x+w) with curses `attr`, clipping with ellipsis char.
+       If `rtl`, draw inside (x-w, x).
+       If `clear`, clear whole editing area before displaying.
+       Return width drawn (max of w).
     '''
     if scr:
         _, windowWidth = scr.getmaxyx()
@@ -177,7 +191,7 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False, literal=False, *
     link = ''
 
     try:
-        for colorname, chunk in iterchunks(s, literal=literal):
+        for colorname, chunk in chunks:
             if colorname.startswith('onclick'):
                 link = colorname
                 colorname = 'clickable'
@@ -295,6 +309,7 @@ def clipbox(scr, lines, attr, title=''):
 
 vd.addGlobals(clipstr=clipstr,
               clipdraw=clipdraw,
+              clipdraw_chunks=clipdraw_chunks,
               clipbox=clipbox,
               dispwidth=dispwidth,
               iterchars=iterchars,

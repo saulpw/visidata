@@ -22,13 +22,15 @@ INPROGRESS = TypedExceptionWrapper(None, exception=InProgress())  # sentinel
 
 vd.option('col_cache_size', 0, 'max number of cache entries in each cached column')
 vd.option('clean_names', False, 'clean column/sheet names to be valid Python identifiers', replay=True)
-vd.option('disp_formatter', 'generic', 'formatter to use for display and saving', replay=True)
+vd.option('disp_formatter', 'generic', 'formatter to create the text in each cell (also used by text savers)', replay=True)
+vd.option('disp_displayer', 'generic', 'displayer to render the text in each cell', replay=False)
 
 
 class DisplayWrapper:
-    def __init__(self, value=None, *, display=None, note=None, notecolor=None, error=None):
+    def __init__(self, value=None, *, typedval=None, text=None, note=None, notecolor=None, error=None):
         self.value = value      # actual value (any type)
-        self.display = display  # displayed string
+        self.typedval = typedval  # consistently typed value (or None)
+        self.text = text  # displayed string
         self.note = note        # single unicode character displayed in cell far right
         self.notecolor = notecolor  # configurable color name (like 'color_warning')
         self.error = error      # list of strings for stacktrace
@@ -88,6 +90,7 @@ class Column(Extensible):
         self.keycol = 0       # keycol index (or 0 if not key column)
         self.expr = None      # Column-type-dependent parameter
         self.formatter = ''
+        self.displayer = ''
         self.defer = False
 
         self.setCache(cache)
@@ -240,6 +243,19 @@ class Column(Extensible):
 
         return vd.getType(self.type).formatter(self.fmtstr, typedval)
 
+    def displayer_generic(self, dw:DisplayWrapper, width=None):
+        '''Fit *dw.text* into *width* charcells.
+           Generate list of (attr:str, text:str) suitable for clipdraw_chunks.
+        '''
+        if width is not None and width > 1 and vd.isNumeric(self):
+            yield ('', dw.text.rjust(width-2))
+        else:
+            yield ('', dw.text)
+
+    def display(self, *args, **kwargs):
+        f = getattr(self, 'displayer_'+(self.displayer or self.sheet.options.disp_displayer), self.displayer_generic)
+        return f(*args, **kwargs)
+
     def hide(self, hide=True):
         if hide:
             self.setWidth(0)
@@ -323,34 +339,35 @@ class Column(Extensible):
                 else:
                     dispval = options.disp_error_val
                 return DisplayWrapper(cellval.val, error=exc.stacktrace,
-                                        display=dispval,
+                                        text=dispval,
                                         note=options.note_getter_exc,
                                         notecolor='color_error')
             elif typedval.val is None:  # early out for strict None
-                return DisplayWrapper(None, display='',  # force empty display for None
+                return DisplayWrapper(None, text='',  # force empty display for None
                                             note=options.disp_note_none,
                                             notecolor='color_note_type')
             elif isinstance(typedval, TypedExceptionWrapper):  # calc succeeded, type failed
-                return DisplayWrapper(typedval.val, display=str(cellval),
+                return DisplayWrapper(typedval.val, text=str(cellval),
                                             error=typedval.stacktrace,
                                             note=options.note_type_exc,
                                             notecolor='color_warning')
             else:
-                return DisplayWrapper(typedval.val, display=str(typedval.val),
+                return DisplayWrapper(typedval.val, text=str(typedval.val),
                                             error='unknown',
                                             note=options.note_type_exc,
                                             notecolor='color_warning')
 
         elif isinstance(typedval, threading.Thread):
             return DisplayWrapper(None,
-                                display=options.disp_pending,
+                                text=options.disp_pending,
                                 note=options.note_pending,
                                 notecolor='color_note_pending')
 
         dw = DisplayWrapper(cellval)
+        dw.typedval = typedval
 
         try:
-            dw.display = self.format(typedval, width=(self.width or 0)*2) or ''
+            dw.text = self.format(typedval, width=(self.width or 0)*2) or ''
 
             # annotate cells with raw value type in anytype columns, except for strings
             if self.type is anytype and type(cellval) is not str:
@@ -363,17 +380,18 @@ class Column(Extensible):
             e.stacktrace = stacktrace()
             dw.error = e.stacktrace
             try:
-                dw.display = str(cellval)
+                dw.text = str(cellval)
             except Exception as e:
-                dw.display = str(e)
+                dw.text = str(e)
             dw.note = options.note_format_exc
             dw.notecolor = 'color_warning'
 
+#        dw.display = self.display(dw)   # set during draw() when colwidth is known
         return dw
 
     def getDisplayValue(self, row):
         'Return string displayed in this column for given *row*.'
-        return self.getCell(row).display
+        return self.getCell(row).text
 
     def putValue(self, row, val):
         'Change value for *row* in this column to *val* immediately.  Does not check the type.  Overridable; by default calls ``.setter(row, val)``.'
