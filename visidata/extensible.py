@@ -101,7 +101,7 @@ class Extensible:
         @property
         @wraps(func)
         def get_if_not(self):
-            if getattr(self, name) is None:
+            if getattr(self, name, None) is None:
                 setattr(self, name, func(self))
             return getattr(self, name)
         setattr(cls, func.__name__, get_if_not)
