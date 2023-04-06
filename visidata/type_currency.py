@@ -21,7 +21,7 @@ def displayer_currency(col, dw, width=None):
     if isinstance(dw.typedval, (int, float)):
         if dw.typedval < 0:
             text = f'({dw.text[1:]})'.rjust(width-1)
-            yield ('currency_negative', '')
+            yield ('currency_neg', '')
         else:
             text = text.rjust(width-2)
 
