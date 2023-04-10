@@ -119,6 +119,7 @@ class TableSheet(BaseSheet):
         ColumnColorizer(1, 'color_key_col', lambda s,c,r,v: c and c.keycol),
         CellColorizer(0, 'color_default', lambda s,c,r,v: True),
         RowColorizer(1, 'color_error', lambda s,c,r,v: isinstance(r, (Exception, TypedExceptionWrapper))),
+        CellColorizer(3, 'color_current_cell', lambda s,c,r,v: c is s.cursorCol and r is s.cursorRow)
     ]
     nKeys = 0  # columns[:nKeys] are key columns
 
