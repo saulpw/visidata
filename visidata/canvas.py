@@ -492,14 +492,16 @@ class Canvas(Plotter):
                 ymax += 1
             self.canvasBox = BoundingBox(float(xmin), float(ymin), float(xmax), float(ymax))
 
+        w = self.calcVisibleBoxWidth()
+        h = self.calcVisibleBoxHeight()
         if not self.visibleBox:
             # initialize minx/miny, but w/h must be set first to center properly
-            self.visibleBox = Box(0, 0, self.plotviewBox.w/self.xScaler, self.plotviewBox.h/self.yScaler)
-            self.visibleBox.xmin = self.canvasBox.xcenter - self.visibleBox.w/2
-            self.visibleBox.ymin = self.canvasBox.ycenter - self.visibleBox.h/2
+            self.visibleBox = Box(0, 0, w, h)
+            self.visibleBox.xmin = self.canvasBox.xmin + (self.canvasBox.w / 2) * (1 - self.xzoomlevel)
+            self.visibleBox.ymin = self.canvasBox.ymin + (self.canvasBox.h / 2) * (1 - self.yzoomlevel)
         else:
-            self.visibleBox.w = self.plotviewBox.w/self.xScaler
-            self.visibleBox.h = self.plotviewBox.h/self.yScaler
+            self.visibleBox.w = w
+            self.visibleBox.h = h
 
         if not self.cursorBox:
             self.cursorBox = Box(self.visibleBox.xmin, self.visibleBox.ymin, self.canvasCharWidth, self.canvasCharHeight)
@@ -542,6 +544,33 @@ class Canvas(Plotter):
         else:
             return yratio
 
+    def calcVisibleBoxWidth(self):
+        w = self.canvasBox.w * self.xzoomlevel
+        if self.aspectRatio:
+            h = self.canvasBox.h * self.yzoomlevel
+            xratio = self.plotviewBox.w / w
+            yratio = self.plotviewBox.h / h
+            if xratio <= yratio:
+                return w / self.aspectRatio
+            else:
+                return self.plotviewBox.w / (self.aspectRatio * yratio)
+        else:
+            return w
+
+    def calcVisibleBoxHeight(self):
+        h = self.canvasBox.h * self.yzoomlevel
+        if self.aspectRatio:
+            w = self.canvasBox.w * self.yzoomlevel
+            xratio = self.plotviewBox.w / w
+            yratio = self.plotviewBox.h / h
+            if xratio < yratio:
+                return self.plotviewBox.h / xratio
+            else:
+                return h
+        else:
+            return h
+
+    #could be called canvas_to_plotterX()
     def scaleX(self, x):
         'returns plotter x coordinate'
         return round(self.plotviewBox.xmin+(x-self.visibleBox.xmin)*self.xScaler)
