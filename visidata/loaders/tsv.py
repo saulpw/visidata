@@ -2,6 +2,8 @@ import os
 import contextlib
 import itertools
 import collections
+import math
+import time
 
 from visidata import vd, asyncthread, options, Progress, ColumnItem, SequenceSheet, Sheet, VisiData
 from visidata import namedlist, filesize
@@ -17,15 +19,45 @@ def open_tsv(vd, p):
     return TsvSheet(p.name, source=p)
 
 
-def splitter(fp, delim='\n'):
-    'Generates one line/row/record at a time from fp, separated by delim'
+def adaptive_bufferer(fp, max_buffer_size=65536):
+    """Loading e.g. tsv files goes faster with a large buffer. But when the input stream
+    is slow (e.g. 1 byte/second) and the buffer size is large, it can take a long time until
+    the buffer is filled. Only when the buffer is filled (or the input stream is finished)
+    you can see the data visiualized in visidata. Thats why we use an adaptive buffer.
+    For fast input streams, the buffer becomes large, for slow input streams, the buffer stays
+    small"""
+    buffer_size = 8
+    processed_buffer_size = 0
+    previous_start_time = time.time()
+    while True:
+        next_chunk = fp.read(max(buffer_size, 1))
+        if not next_chunk:
+            break
+
+        yield next_chunk
+
+        processed_buffer_size += len(next_chunk)
+
+        current_time = time.time()
+        current_delta = current_time - previous_start_time
+
+        if current_delta < 1:
+            # if it takes longer than one second to fill the buffer, double the size of the buffer
+            buffer_size = min(buffer_size * 2, max_buffer_size)
+        else:
+            # if it takes less than one second, increase the buffer size so it takes about
+            # 1 second to fill it
+            previous_start_time = current_time
+            buffer_size = math.ceil(min(processed_buffer_size / current_delta, max_buffer_size))
+            processed_buffer_size = 0
+
+def splitter(stream, delim='\n'):
+    'Generates one line/row/record at a time from stream, separated by delim'
 
     buf = type(delim)()
-    while True:
-        nextbuf = fp.read(65536)
-        if not nextbuf:
-            break
-        buf += nextbuf
+
+    for chunk in stream:
+        buf += chunk
 
         *rows, buf = buf.split(delim)
         yield from rows
@@ -45,7 +77,7 @@ class TsvSheet(SequenceSheet):
         rowdelim = self.row_delimiter or self.options.row_delimiter
 
         with self.source.open_text(encoding=self.options.save_encoding) as fp:
-                for line in splitter(fp, rowdelim):
+                for line in splitter(adaptive_bufferer(fp), rowdelim):
                     if not line:
                         continue
 
