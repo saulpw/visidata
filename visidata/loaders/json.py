@@ -82,7 +82,7 @@ class _vjsonEncoder(json.JSONEncoder):
         return str(obj)
 
 
-def _rowdict(cols, row):
+def _rowdict(cols, row, keep_nulls=False):
     ret = {}
     for col in cols:
         o = wrapply(col.getTypedValue, row)
@@ -92,7 +92,7 @@ def _rowdict(cols, row):
             o = o.val
         elif isinstance(o, date):
             o = col.getDisplayValue(row)
-        if o is not None:
+        if keep_nulls or o is not None:
             ret[col.name] = o
     return ret
 
@@ -137,8 +137,8 @@ def write_jsonl(vs, fp):
         vcols = vs.visibleCols
         jsonenc = _vjsonEncoder()
         with Progress(gerund='saving'):
-            for row in vs.iterrows():
-                rowdict = _rowdict(vcols, row)
+            for i, row in enumerate(vs.iterrows()):
+                rowdict = _rowdict(vcols, row, keep_nulls=(i==0))
                 fp.write(jsonenc.encode(rowdict) + '\n')
 
         if len(vs) == 0:
