@@ -22,7 +22,15 @@ vd.option('color_inactive_status', '8 on black', 'inactive window status bar col
 
 BaseSheet.init('longname', lambda: '')
 
-vd.beforeExecHooks.append(lambda sheet, cmd, args, ks: setattr(sheet, 'longname', cmd.longname))
+@BaseSheet.api
+def _updateStatusBeforeExec(sheet, cmd, args, ks):
+    sheet.longname = cmd.longname
+    if sheet._scr:
+        vd.drawRightStatus(sheet._scr, sheet)  #996 show longname during commands
+        sheet._scr.refresh()
+
+
+vd.beforeExecHooks.append(BaseSheet._updateStatusBeforeExec)
 
 
 @BaseSheet.property
