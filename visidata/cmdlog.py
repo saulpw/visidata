@@ -12,7 +12,7 @@ vd.option('replay_movement', False, 'insert movements during replay', sheettype=
 # prefixes which should not be logged
 nonLogged = '''forget exec-longname undo redo quit
 show error errors statuses options threads jump
-replay cancel save-cmdlog macro cmdlog-sheet menu repeat
+replay cancel save-cmdlog macro cmdlog-sheet menu repeat reload-every
 go- search scroll prev next page start end zoom resize visibility sidebar
 mouse suspend redraw no-op help syscopy sysopen profile toggle'''.split()
 
@@ -34,8 +34,8 @@ VisiData.save_vd = VisiData.save_tsv
 
 @VisiData.api
 def save_vdj(vd, p, *vsheets):
-    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
-        fp.write("#!/usr/bin/env vd -p\n")
+    with p.open_text(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
+        fp.write("#!vd -p\n")
         for vs in vsheets:
             vs.write_jsonl(fp)
 
@@ -147,7 +147,10 @@ def commandCursor(sheet, execstr):
         rowname = keystr(k) if k else sheet.cursorRowIndex
 
     if contains(execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol', 'ColumnAtCursor'):
-        colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
+        if sheet.cursorCol:
+            colname = sheet.cursorCol.name or sheet.visibleCols.index(sheet.cursorCol)
+        else:
+            colname = None
     return colname, rowname
 
 
@@ -185,7 +188,7 @@ class CommandLogBase:
 
             contains = lambda s, *substrs: any((a in s) for a in substrs)
             if contains(cmd.execstr, 'pasteFromClipboard'):
-                args = vd.sysclip_value().strip()
+                args = vd.sysclipValue().strip()
 
 
         comment = vd.currentReplayRow.comment if vd.currentReplayRow else cmd.helpstr
@@ -211,7 +214,7 @@ class CommandLogBase:
             return
 
         # remove user-aborted commands and simple movements (unless first command on the sheet, which created the sheet)
-        if not sheet.cmdlog.rows or vd.isLoggableCommand(vd.activeCommand.longname):
+        if not sheet.cmdlog_sheet.rows or vd.isLoggableCommand(vd.activeCommand.longname):
             if isLoggableSheet(sheet):      # don't record actions from cmdlog or other internal sheets on global cmdlog
                 self.addRow(vd.activeCommand)  # add to global cmdlog
             sheet.cmdlog_sheet.addRow(vd.activeCommand)  # add to sheet-specific cmdlog
@@ -287,11 +290,12 @@ def replay_cancel(vd):
 @VisiData.api
 def moveToReplayContext(vd, r, vs):
         'set the sheet/row/col to the values in the replay row'
+        vd.clearCaches()
         if r.row not in [None, '']:
-            vs.moveToRow(r.row) or vd.error('no "%s" row' % r.row)
+            vs.moveToRow(r.row) or vd.error(f'no {r.row} row on {vs}')
 
         if r.col not in [None, '']:
-            vs.moveToCol(r.col) or vd.error('no "%s" column' % r.col)
+            vs.moveToCol(r.col) or vd.error(f'no {r.col} column on {vs}')
 
 
 @VisiData.api
@@ -350,8 +354,18 @@ def replayOne(vd, r):
 
 
 @VisiData.api
+class DisableAsync:
+    def __enter__(self):
+        vd.execAsync = lambda func, *args, sheet=None, **kwargs: func(*args, **kwargs) # disable async
+
+    def __exit__(self, exc_type, exc_val, tb):
+        vd.execAsync = lambda *args, vd=vd, **kwargs: visidata.VisiData.execAsync(vd, *args, **kwargs)
+
+
+@VisiData.api
 def replay_sync(vd, cmdlog, live=False):
-        'Replay all commands in log.'
+    'Replay all commands in *cmdlog*.'
+    with vd.DisableAsync():
         cmdlog.cursorRowIndex = 0
         vd.currentReplay = cmdlog
         with Progress(total=len(cmdlog.rows)) as prog:
@@ -376,7 +390,7 @@ def replay_sync(vd, cmdlog, live=False):
 
                 if vd.activeSheet:
                     vd.activeSheet.ensureLoaded()
-                vd.sync()
+
                 while not vd.delay():
                     pass
 
@@ -512,3 +526,11 @@ CommandLog.options.encoding = 'utf-8'
 CommandLogJsonl.options.json_sort_keys = False
 
 vd.addGlobals({"CommandLogBase": CommandLogBase})
+
+vd.addMenuItems('''
+            View > Command log > this sheet > cmdlog-sheet
+    View > Command log > this sheet only > cmdlog-sheet-only
+    View > Command log > all commands > cmdlog-all
+    System > Execute longname > exec-longname
+    Help > Version > show-version
+''')

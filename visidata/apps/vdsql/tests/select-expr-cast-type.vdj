@@ -1,0 +1,6 @@
+#!vd -p
+{"longname": "open-file", "input": "tests/business.sqlite", "keystrokes": "o"}
+{"sheet": "business", "col": "", "row": "\u30adorder_items", "longname": "open-row", "input": "", "keystrokes": "Enter", "comment": "open current row with sheet-specific dive"}
+{"sheet": "order_items", "col": "orderid", "row": "", "longname": "type-int", "input": "", "keystrokes": "#", "comment": "set type of current column to int"}
+{"sheet": "order_items", "col": "", "row": "", "longname": "select-expr", "input": "orderid < 30000", "keystrokes": "z|", "comment": "select rows matching Python expression in any visible column"}
+{"sheet": "order_items", "longname": "dup-selected"}

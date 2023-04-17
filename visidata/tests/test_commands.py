@@ -4,6 +4,7 @@ from unittest.mock import Mock
 
 import itertools
 import visidata
+from pathlib import Path
 
 # test separately as needed
 
@@ -13,9 +14,17 @@ import visidata
 nonTested = (
         'syscopy',
         'syspaste',
+        'open-syspaste',
         'macro',
         'mouse',
+        'add-subreddits',
+        'add-submissions',
+        'open-zulip',
         'suspend',
+        'open-memstats',  # TODO add testing support
+        'plot-column-ext',
+        'plot-numerics-ext',
+        'reload-every',
         'breakpoint',
         'redraw',
         'menu',
@@ -41,19 +50,22 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'select-col-regex': '.',
                  'select-cols-regex': '.',
                  'unselect-col-regex': '.',
+                 'exec-python': 'import time',
                  'unselect-cols-regex': '.',
-                 'edit-cell': '',               # no change should not error
-                 'go-col-regex': 'Unit',          # column name in sample
+                 'go-col-regex': 'Units',          # column name in sample
                  'go-col-number': '2',
                  'go-row-number': '5',              # go to row 5
                  'addcol-bulk': '1',
-                 'addcol-expr': 'Unit',          # just copy the column
+                 'addcol-expr': 'Units',          # just copy the column
                  'addcol-incr-step': '2',
                  'setcol-incr-step': '2',
+                 'setcol-iter': 'range(1, 100)',
                  'setcol-format-enum': '1=cat',
                  'split-col': '-',
+                 'setcol-input': '5',
                  'show-expr': 'OrderDate',
                  'setcol-expr': 'OrderDate',
+                 'open-ping': 'localhost',
                  'setcell-expr': 'OrderDate',
                  'setcol-range': 'range(100)',
                  'repeat-input-n': '1',
@@ -63,11 +75,36 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'searchr-cols': 'bar',
                  'select-cols-regex': '.',
                  'select-expr': 'OrderDate',
+                 'setcol-fake': 'name',
                  'unselect-expr': 'OrderDate',
                  'unselect-cols-regex': '.',
                  'random-rows': '3',
                  'import-python': 'math',
                  'pyobj-expr-row': 'Units + "s"',            # open the python object for '4'
+                 'expand-col-depth': '0',
+                 'expand-cols-depth': '0',
+                 'save-cmdlog': 'test_commands.vdj',
+                 'aggregate-col': 'mean',
+                 'memo-aggregate': 'mean',
+                 'addcol-shell': '',
+                 'theme-input': 'light',
+                 'add-rows': '1',
+                 'join-sheets-top2': 'append',
+                 'join-sheets-all': 'append',
+                 'resize-col-input': '10',
+                 'resize-cols-input': '10',
+                 'melt-regex': '(.*)_(.*)',
+                 'addcol-split': '-',
+                 'addcol-capture': '(.*)_(.*)',
+                 'slide-left-n': '2',
+                 'slide-right-n': '1',
+                 'slide-down-n': '1',
+                 'slide-up-n': '1',
+                 'addcol-window': '0 2',
+                 'select-around-n': '1',
+                 'sheet': '',
+                 'col': 'Units',
+                 'row': '5',
               }
 
 @pytest.mark.usefixtures('curses_setup')
@@ -102,6 +139,12 @@ class TestCommands:
         if nerrs > 0:
             assert False
 
+        # cleanup
+        for f in ['flotsam.csv', 'debris.csv', 'jetsam.csv', 'lagan.csv', 'test_commands.vdj']:
+            pf = Path(f)
+            if pf.exists: pf.unlink()
+
+
     def runOneTest(self, mock_screen, longname):
         visidata.vd.clearCaches()  # we want vd to return a new VisiData object for each command
         vd = visidata.vd
@@ -122,4 +165,8 @@ class TestCommands:
         vd.allSheets = [vs]
         vs.mouseX, vs.mouseY = (4, 4)
         vs.draw(mock_screen)
-        vs.execCommand(longname, vdglobals=vars(visidata))
+        if longname in inputLines:
+            vd.currentReplayRow = vd.cmdlog.newRow(longname=longname, input=inputLines[longname])
+        else:
+            vd.currentReplayRow = vd.cmdlog.newRow(longname=longname)
+        vs.execCommand(longname, vdglobals=vd.getGlobals())

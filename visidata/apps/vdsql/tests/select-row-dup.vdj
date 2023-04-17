@@ -1,0 +1,7 @@
+#!/usr/bin/env vd -p
+{"longname": "open-file", "input": "tests/business.sqlite", "keystrokes": "o"}
+{"sheet": "business", "col": "", "row": "\u30adorder_items", "longname": "open-row", "input": "", "keystrokes": "Enter", "comment": "open sheet with copies of rows referenced in current row"}
+{"sheet": "order_items", "col": "orderid", "row": "", "longname": "key-col", "input": "", "keystrokes": "!", "comment": "toggle current column as a key column"}
+{"sheet": "order_items", "col": "", "row": "\u30ad038385", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "order_items", "col": "", "row": "\u30ad038385", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "order_items", "col": "", "row": "", "longname": "dup-selected", "input": "", "keystrokes": "\"", "comment": "open duplicate sheet with selected rows (default limit)"}

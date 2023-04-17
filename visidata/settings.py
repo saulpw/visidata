@@ -98,19 +98,21 @@ class SettingsMgr(collections.OrderedDict):
 
 
 class Command:
-    def __init__(self, longname, execstr, helpstr=''):
+    def __init__(self, longname, execstr, helpstr='', module=''):
         self.longname = longname
         self.execstr = execstr
         self.helpstr = helpstr
+        self.module = module
 
 
 class Option:
-    def __init__(self, name, value, helpstr=''):
+    def __init__(self, name, value, helpstr='', module=''):
         self.name = name
         self.value = value
         self.helpstr = helpstr
         self.replayable = False
         self.sheettype = BaseSheet
+        self.module = module
 
     def __str__(self):
         return str(self.value)
@@ -140,9 +142,10 @@ class OptionsObject:
             self._cache[(k, obj or vd.activeSheet)] = opt
         return opt
 
-    def _set(self, k, v, obj=None, helpstr=''):
+    def _set(self, k, v, obj=None, helpstr='', module=None):
+        opt = self._get(k) or Option(k, v, '', module)
         self._cache.clear()  # invalidate entire cache on any change
-        return self._opts.set(k, Option(k, v, helpstr), obj)
+        return self._opts.set(k, Option(k, v, opt.helpstr or helpstr, opt.module or module), obj)
 
     def is_set(self, k, obj=None):
         d = self._opts.get(k, None)
@@ -175,6 +178,7 @@ class OptionsObject:
     def set(self, optname, value, obj='global'):
         "Override *value* for *optname* in the options context, or in the *obj* context if given."
         opt = self._get(optname)
+        module = None  # keep default
         if opt:
             curval = opt.value
             t = type(curval)
@@ -199,8 +203,9 @@ class OptionsObject:
         else:
             curval = None
             vd.warning('setting unknown option %s' % optname)
+            module = 'unknown'
 
-        return self._set(optname, value, obj)
+        return self._set(optname, value, obj, module=module)
 
     def unset(self, optname, obj=None):
         'Remove setting value for given context.'
@@ -214,8 +219,8 @@ class OptionsObject:
         self._cache.clear()  # invalidate entire cache on any change
         return v
 
-    def setdefault(self, optname, value, helpstr):
-        return self._set(optname, value, 'default', helpstr=helpstr)
+    def setdefault(self, optname, value, helpstr, module):
+        return self._set(optname, value, 'default', helpstr=helpstr, module=module)
 
     def getall(self, prefix=''):
         'Return dictionary of all options beginning with `prefix` (with `prefix` removed from the name).'
@@ -258,7 +263,7 @@ def option(vd, name, default, helpstr, replay=False, sheettype=BaseSheet):
    - `replay`: ``True`` if changes to the option should be stored in the **Command Log**
    - `sheettype`: ``None`` if the option is not sheet-specific, to make it global on CLI
     '''
-    opt = vd.options.setdefault(name, default, helpstr)
+    opt = vd.options.setdefault(name, default, helpstr, vd.importingModule)
     opt.replayable = replay
     opt.sheettype=sheettype
     return opt
@@ -274,7 +279,7 @@ def addCommand(cls, keystrokes, longname, execstr, helpstr='', **kwargs):
     - *execstr*: Python statement to pass to `exec()`'ed when the command is executed.
     - *helpstr*: help string shown in the **Commands Sheet**.
     '''
-    vd.commands.set(longname, Command(longname, execstr, helpstr=helpstr, **kwargs), cls)
+    vd.commands.set(longname, Command(longname, execstr, helpstr=helpstr, module=vd.importingModule, **kwargs), cls)
     if keystrokes:
         vd.bindkeys.set(vd.prettykeys(keystrokes), longname, cls)
     return longname
@@ -332,9 +337,12 @@ def loadConfigFile(vd, fn='', _globals=None):
         try:
             with open(p) as fd:
                 code = compile(fd.read(), str(p), 'exec')
+            vd.importingModule = 'visidatarc'
             exec(code, _globals)
         except Exception as e:
             vd.exceptionCaught(e)
+        finally:
+            vd.importingModule = None
 
     vd.addGlobals(_globals)
 
@@ -372,23 +380,27 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
     sys.path.append(str(visidata.Path(vd.options.visidata_dir)/"plugins-deps"))
 
     # autoload installed plugins first
-    if not args.nothing and args.plugins_autoload and vd.options.plugins_autoload:
+    args_plugins_autoload = args.plugins_autoload if 'plugins_autoload' in args else True
+    if not args.nothing and args_plugins_autoload and vd.options.plugins_autoload:
         from importlib_metadata import entry_points  # a backport which supports < 3.8 https://github.com/pypa/twine/pull/732
         try:
-            eps = entry_points().get('visidata.plugins', [])
-        except TypeError:
-            eps = []
+            eps = entry_points()
+            eps_visidata = eps.select(group='visidata.plugins') if 'visidata.plugins' in eps.groups else []
+        except Exception as e:
+            eps_visidata = []
             vd.warning('plugin autoload failed; see issue #1529')
 
-        for ep in eps:
+        for ep in eps_visidata:
             try:
+                vd.importingModule = ep.name
                 plug = ep.load()
                 sys.modules[f'visidata.plugins.{ep.name}'] = plug
                 vd.debug(f'Plugin {ep.name} loaded')
             except Exception as e:
                 vd.warning(f'Plugin {ep.name} failed to load')
                 vd.exceptionCaught(e)
-                continue
+            finally:
+                vd.importingModule = None
 
         # import plugins from .visidata/plugins before .visidatarc, so plugin options can be overridden
         for modname in (args.imports or vd.options.imports or '').split():
@@ -407,10 +419,84 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
         vd.loadConfigFile(vd.options.config, vd.getGlobals())
 
 
+@VisiData.api
+def importModule(vd, pkgname):
+    'Import the given *pkgname*, setting vd.importingModule to *pkgname* before import and resetting to None after.'
+    modparts = pkgname.split('.')
+    vd.importingModule = modparts[-1]
+    r = importlib.import_module(pkgname)
+    vd.importingModule = None
+    vd.importedModules.append(r)
+    return r
+
+
+@VisiData.api
+def importSubmodules(vd, pkgname):
+    'Import all files below the given *pkgname*'
+    import pkgutil
+    import os.path
+
+    m = vd.importModule(pkgname)
+    for module in pkgutil.walk_packages(m.__path__):
+        vd.importModule(pkgname + '.' + module.name)
+
+
+@VisiData.api
+def importStar(vd, pkgname):
+    'Add all symbols from *pkgname* into visidata globals.'
+    import pkgutil
+    import os.path
+
+    m = vd.importModule(pkgname)
+    vd.addGlobals({pkgname:m})
+    vd.addGlobals({k:v for k, v in m.__dict__.items() if not k.startswith('__')})
+
+
+@VisiData.api
+def importExternal(vd, modname, pipmodname=''):
+    pipmodname = pipmodname or modname
+    try:
+        m = importlib.import_module(modname)
+        vd.addGlobals({modname:m})
+        return m
+    except ModuleNotFoundError as e:
+        vd.fail(f'External package "{modname}" not installed; run: pip install {pipmodname}')
+
+
+@VisiData.api
+def requireOptions(vd, *args, help=''):
+    '''Prompt user to input values for option names in *args* if current values
+    are non-false.  Offer to persist the values to visidatarc.'''
+
+    optvals = {}
+    for optname in args:
+        if not getattr(vd.options, optname):
+            if help:
+                vd.status(help)
+            v = vd.input(f'{optname}: ', record=False, display='password' not in optname)
+            optvals[optname] = v
+
+    vd.setPersistentOptions(**optvals)
+
+
+@VisiData.api
+def setPersistentOptions(vd, **kwargs):
+    '''Set options from *kwargs* and offer to save them to visidatarc.'''
+    for optname, optval in kwargs.items():
+        setattr(vd.options, optname, optval)
+
+    optnames = ' '.join(kwargs.keys())
+    yn = vd.input(f'Save {len(kwargs)} options ({optnames}) to {vd.options.config}? ', record=False)[0:1]
+
+    if yn and yn in 'Yy':
+        with open(str(visidata.Path(vd.options.config)), mode='a') as fp:
+            for optname, optval in kwargs.items():
+                fp.write(f'options.{optname}={repr(optval)}\n')
+
+
 vd.option('visidata_dir', '~/.visidata/', 'directory to load and store additional files', sheettype=None)
 
 BaseSheet.bindkey('^M', '^J')  # for windows ENTER
-BaseSheet.addCommand('gO', 'open-config', 'vd.push(open_txt(Path(options.config)))', 'open options.config as text sheet')
 
 vd.addGlobals({
     'options': vd.options,  # legacy

@@ -2,6 +2,7 @@ from functools import singledispatch
 from typing import Mapping
 import inspect
 import math
+from copy import deepcopy
 
 from visidata import *
 
@@ -208,7 +209,7 @@ def AttrColumns(attrnames):
 
 
 def SheetList(*names, **kwargs):
-    'Creates a Sheet from a list of homogenous dicts or namedtuples.'
+    'Creates a Sheet from a list of homogeneous dicts or namedtuples.'
 
     src = kwargs.get('source', None)
     if not src:
@@ -400,8 +401,8 @@ globalCommand('g^Y', 'pyobj-sheet', 'status(type(sheet)); vd.push(PyobjSheet(she
 
 Sheet.addCommand('(', 'expand-col', 'expand_cols_deep(sheet, [cursorCol], depth=1)', 'expand current column of containers one level')
 Sheet.addCommand('g(', 'expand-cols', 'expand_cols_deep(sheet, visibleCols, depth=1)', 'expand all visible columns of containers one level')
-Sheet.addCommand('z(', 'expand-col-depth', 'expand_cols_deep(sheet, [cursorCol], depth=int(input("expand depth=", value=1)))', 'expand current column of containers to given depth (0=fully)')
-Sheet.addCommand('gz(', 'expand-cols-depth', 'expand_cols_deep(sheet, visibleCols, depth=int(input("expand depth=", value=1)))', 'expand all visible columns of containers to given depth (0=fully)')
+Sheet.addCommand('z(', 'expand-col-depth', 'expand_cols_deep(sheet, [cursorCol], depth=int(input("expand depth=", value=0)))', 'expand current column of containers to given depth (0=fully)')
+Sheet.addCommand('gz(', 'expand-cols-depth', 'expand_cols_deep(sheet, visibleCols, depth=int(input("expand depth=", value=0)))', 'expand all visible columns of containers to given depth (0=fully)')
 
 Sheet.addCommand(')', 'contract-col', 'closeColumn(sheet, cursorCol)', 'unexpand current column; restore original column and remove other columns at this level')
 
@@ -427,3 +428,20 @@ vd.addGlobals({
     'PyobjSheet': PyobjSheet,
     'view': view,
 })
+
+vd.addMenuItems('''
+    Column > Expand > one level > expand-col
+    Column > Expand > to depth > expand-col-depth
+    Column > Expand > all columns one level > expand-cols
+    Column > Expand > all columns to depth > expand-cols-depth
+    Column > Contract > contract-col
+    View > Visibility > Methods and dunder attributes > show > show-hidden
+    View > Visibility > Methods and dunder attributes > hide > hide-hidden
+    Row > Dive into > open-row
+    System > Python > import library > import-python
+    System > Python > current sheet > pyobj-sheet
+    System > Python > current row > pyobj-row
+    System > Python > current cell > pyobj-cell
+    System > Python > expression > pyobj-expr
+    System > Python > exec() > exec-python
+''')

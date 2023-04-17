@@ -3,8 +3,11 @@ import functools
 import collections
 from statistics import mode, stdev
 
-from visidata import Progress, Column
+from visidata import vd, Progress, Column, vlen
 from visidata import *
+
+
+vd.option('null_value', None, 'a value to be counted as null', replay=True)
 
 
 @Column.api
@@ -139,7 +142,7 @@ vd.aggregators['q10'] = quantiles(10, 'deciles (10/20/30/40/50/60/70/80/90th pct
 
 # since bb29b6e, a record of every aggregator
 # is needed in vd.aggregators
-for pct in (10, 20, 25, 30, 33, 40, 50, 60, 67, 70, 75, 80, 90):
+for pct in (10, 20, 25, 30, 33, 40, 50, 60, 67, 70, 75, 80, 90, 95, 99):
     vd.aggregators[f'p{pct}'] = percentile(pct, f'{pct}th percentile')
 
 # returns keys of the row with the max value
@@ -149,7 +152,8 @@ vd.aggregators['keymax'] = _defaggr('keymax', anytype, lambda col, rows: col.she
 ColumnsSheet.columns += [
     Column('aggregators',
            getter=lambda c,r:r.aggstr,
-           setter=lambda c,r,v:setattr(r, 'aggregators', v))
+           setter=lambda c,r,v:setattr(r, 'aggregators', v),
+           help='change the metrics calculated in every Frequency or Pivot derived from the source sheet')
 ]
 
 @Sheet.api
@@ -193,3 +197,7 @@ def aggregator_choices(vd):
 Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregator_choices))', 'Add aggregator to current column')
 Sheet.addCommand('z+', 'memo-aggregate', 'for agg in chooseMany(aggregator_choices): cursorCol.memo_aggregate(aggregators[agg], selectedRows or rows)', 'memo result of aggregator over values in selected rows for current column')
 ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseMany(aggregator_choices))', 'add aggregators to selected source columns')
+
+vd.addMenuItems('''
+    Column > Add aggregator > aggregate-col
+''')

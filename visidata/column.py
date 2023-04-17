@@ -10,7 +10,8 @@ import json
 from visidata import options, anytype, stacktrace, vd
 from visidata import asyncthread, dispwidth, clipstr, iterchars
 from visidata import wrapply, TypedWrapper, TypedExceptionWrapper
-from visidata import Extensible, AttrDict, undoAttrFunc
+from visidata import Extensible, AttrDict, undoAttrFunc, ExplodingMock
+from visidata import getitem, setitem, getitemdef, getitemdeep, setitemdeep, getattrdeep, setattrdeep
 
 class InProgress(Exception):
     @property
@@ -21,23 +22,7 @@ INPROGRESS = TypedExceptionWrapper(None, exception=InProgress())  # sentinel
 
 vd.option('col_cache_size', 0, 'max number of cache entries in each cached column')
 vd.option('clean_names', False, 'clean column/sheet names to be valid Python identifiers', replay=True)
-
-__all__ = [
-    'clean_to_id',
-    'Column',
-    'setitem',
-    'getattrdeep',
-    'setattrdeep',
-    'getitemdef',
-    'ColumnAttr', 'AttrColumn',
-    'ColumnItem', 'ItemColumn',
-    'SettableColumn',
-    'SubColumnFunc',
-    'SubColumnItem',
-    'SubColumnAttr',
-    'ColumnExpr', 'ExprColumn',
-    'DisplayWrapper',
-]
+vd.option('disp_formatter', 'generic', 'formatter to use for display and saving', replay=True)
 
 
 class DisplayWrapper:
@@ -88,14 +73,14 @@ class Column(Extensible):
         - *kwargs*: other attributes to be set on this column.
     '''
     def __init__(self, name=None, *, type=anytype, cache=False, **kwargs):
-        self.sheet = None     # owning Sheet, set in .recalc() via Sheet.addColumn
+        self.sheet = ExplodingMock('use addColumn() on all columns')  # owning Sheet, set in .recalc() via Sheet.addColumn
         if name is None:
             name = next(default_colnames)
         self.name = str(name) # display visible name
         self.fmtstr = ''      # by default, use str()
         self._type = type     # anytype/str/int/float/date/func
         self.getter = lambda col, row: row
-        self.setter = lambda col, row, value: vd.fail(col.name+' column cannot be changed')
+        self.setter = None
         self._width = None    # == 0 if hidden, None if auto-compute next time
         self.hoffset = 0      # starting horizontal (char) offset of displayed column value
         self.voffset = 0      # starting vertical (line) offset of displayed column value
@@ -103,6 +88,7 @@ class Column(Extensible):
         self.keycol = 0       # keycol index (or 0 if not key column)
         self.expr = None      # Column-type-dependent parameter
         self.formatter = ''
+        self.defer = False
 
         self.setCache(cache)
         for k, v in kwargs.items():
@@ -116,6 +102,9 @@ class Column(Extensible):
         if self._cachedValues is not None:
             ret._cachedValues = collections.OrderedDict()  # an unrelated cache for copied columns
         return ret
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}:{self.name}'
 
     def __deepcopy__(self, memo):
         return self.__copy__()  # no separate deepcopy
@@ -296,7 +285,7 @@ class Column(Extensible):
     def getValue(self, row):
         'Return value for *row* in this column, calculating if not cached.'
 
-        if self.sheet.defer:
+        if self.defer:
             try:
                 row, rowmods = self.sheet._deferredMods[self.sheet.rowid(row)]
                 return rowmods[self]
@@ -387,16 +376,18 @@ class Column(Extensible):
         return self.getCell(row).display
 
     def putValue(self, row, val):
-        'Change value for *row* in this column to *val* immediately.  Does not check the type.  Overrideable; by default calls ``.setter(row, val)``.'
-        return self.setter(self, row, val)
+        'Change value for *row* in this column to *val* immediately.  Does not check the type.  Overridable; by default calls ``.setter(row, val)``.'
+        if self.setter:
+            return self.setter(self, row, val)
 
-    def setValue(self, row, val):
-        'Change value for *row* in this column to *val*.  Call ``putValue`` immediately if parent ``sheet.defer`` is False, otherwise cache until later ``putChanges``.  Caller must add undo function.'
-        if self.sheet.defer:
+    def setValue(self, row, val, setModified=True):
+        'Change value for *row* in this column to *val*.  Call ``putValue`` immediately if not a deferred column (added to deferred parent at load-time); otherwise cache until later ``putChanges``.  Caller must add undo function.'
+        if self.defer:
             self.cellChanged(row, val)
         else:
             self.putValue(row, val)
-        self.sheet.setModified()
+        if setModified:  #1800
+            self.sheet.setModified()
 
     def setValueSafe(self, row, value):
         'setValue and ignore exceptions.'
@@ -429,91 +420,46 @@ class Column(Extensible):
         w = 0
         nlen = dispwidth(self.name)
         if len(rows) > 0:
-            w = max(max(dispwidth(self.getDisplayValue(r), maxwidth=self.sheet.windowWidth) for r in rows), nlen)+2
-        return max(w, nlen)
+            w_max = 0
+            for r in rows:
+                row_w = dispwidth(self.getDisplayValue(r), maxwidth=self.sheet.windowWidth)
+                if w_max < row_w:
+                    w_max = row_w
+                if w_max >= self.sheet.windowWidth:
+                    break  #1747  early out to speed up wide columns
+            w = w_max
+        w = max(w, nlen)+2
+        w = min(w, self.sheet.windowWidth)
+        return w
 
 
-# ---- Column makers
 
-def setitem(r, i, v):  # function needed for use in lambda
-    r[i] = v
-    return True
+# ---- basic Columns
 
-
-def getattrdeep(obj, attr, *default, getter=getattr):
-    try:
-        'Return dotted attr (like "a.b.c") from obj, or default if any of the components are missing.'
-        if not isinstance(attr, str):
-            return getter(obj, attr, *default)
-
-        try:  # if attribute exists, return toplevel value, even if dotted
-            if attr in obj:
-                return getter(obj, attr)
-        except Exception as e:
-            pass
-
-        attrs = attr.split('.')
-        for a in attrs[:-1]:
-            obj = getter(obj, a)
-
-        return getter(obj, attrs[-1])
-    except Exception as e:
-        if not default: raise
-        return default[0]
-
-
-def setattrdeep(obj, attr, val, getter=getattr, setter=setattr):
-    'Set dotted attr (like "a.b.c") on obj to val.'
-    if not isinstance(attr, str):
-        return setter(obj, attr, val)
-
-    try:  # if attribute exists, overwrite toplevel value, even if dotted
-        getter(obj, attr)
-        return setter(obj, attr, val)
-    except Exception as e:
-        pass
-
-    attrs = attr.split('.')
-    for a in attrs[:-1]:
-        try:
-            obj = getter(obj, a)
-        except Exception as e:
-            obj = obj[a] = type(obj)()  # assume homogenous nesting
-
-    setter(obj, attrs[-1], val)
-
-
-def getitemdeep(obj, k, *default):
-    return getattrdeep(obj, k, *default, getter=getitem)
-
-def setitemdeep(obj, k, val):
-    return setattrdeep(obj, k, val, getter=getitemdef, setter=setitem)
-
-def AttrColumn(name='', attr=None, **kwargs):
+class AttrColumn(Column):
     'Column using getattr/setattr with *attr*.'
-    return Column(name,
-                  expr=attr if attr is not None else name,
-                  getter=lambda col,row: getattrdeep(row, col.expr),
-                  setter=lambda col,row,val: setattrdeep(row, col.expr, val),
-                  **kwargs)
+    def __init__(self, name=None, expr=None, **kwargs):
+        super().__init__(name,
+            expr=expr if expr is not None else name,
+            getter=lambda col,row: getattrdeep(row, col.expr, None),
+            **kwargs)
 
-def getitem(o, k, default=None):
-    return default if o is None else o[k]
+    def putValue(self, row, val):
+        super().putValue(row, val)
+        setattrdeep(row, self.expr, val)
 
-def getitemdef(o, k, default=None):
-    try:
-        return default if o is None else o[k]
-    except Exception:
-        return default
 
 class ItemColumn(Column):
-    'Column using getitem/setitem with *key*.'
+    'Column using getitem/setitem with *expr*.'
     def __init__(self, name=None, expr=None, **kwargs):
         super().__init__(name,
             expr=expr if expr is not None else name,
             getter=lambda col,row: getitemdeep(row, col.expr, None),
-            setter=lambda col,row,val: setitemdeep(row, col.expr, val),
             **kwargs)
+
+    def putValue(self, row, val):
+        super().putValue(row, val)
+        setitemdeep(row, self.expr, val)
 
 
 class SubColumnFunc(Column):
@@ -572,7 +518,7 @@ class ExprColumn(Column):
         a = self.getDisplayValue(row)
         b = self.format(self.type(val))
         if a != b:
-            vd.warning('%s calced %s not %s' % (self.name, a, b))
+            vd.warning("Cannot change value of calculated column.  Use `'` to freeze column.")
 
     @property
     def expr(self):
@@ -586,10 +532,6 @@ class ExprColumn(Column):
 
 class SettableColumn(Column):
     'Column using rowid to store and retrieve values internally.'
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._store = {}
-
     def putValue(self, row, value):
         self._store[self.sheet.rowid(row)] = value
 
@@ -597,7 +539,27 @@ class SettableColumn(Column):
         return self._store.get(self.sheet.rowid(row), None)
 
 
+SettableColumn.init('_store', dict, copy=True)
+
+
+vd.addGlobals(
+    clean_to_id=clean_to_id,
+    Column=Column,
+    setitem=setitem,
+    getattrdeep=getattrdeep,
+    setattrdeep=setattrdeep,
+    getitemdef=getitemdef,
+    AttrColumn=AttrColumn,
+    ItemColumn=ItemColumn,
+    ExprColumn=ExprColumn,
+    SettableColumn=SettableColumn,
+    SubColumnFunc=SubColumnFunc,
+    SubColumnItem=SubColumnItem,
+    SubColumnAttr=SubColumnAttr,
+
 # synonyms
-ColumnItem = ItemColumn
-ColumnAttr = AttrColumn
-ColumnExpr = ExprColumn
+    ColumnItem=ItemColumn,
+    ColumnAttr=AttrColumn,
+    ColumnExpr=ExprColumn,
+    DisplayWrapper=DisplayWrapper
+)

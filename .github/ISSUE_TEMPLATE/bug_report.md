@@ -15,6 +15,9 @@ assignees: ''
 If you get an unexpected error, please include the full stack trace that you get with `Ctrl-E`.
 
 **Steps to reproduce with sample data and a .vd**
+First try reproducing without any user configuration by using the flag `-N`.
+e.g. `echo "abc" | vd -f txt -N`
+
 Please attach the commandlog (saved with `Ctrl-D`) to show the steps that led to the issue.
 See [here](http://visidata.org/docs/save-restore/) for more details.
 

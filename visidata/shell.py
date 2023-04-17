@@ -10,18 +10,25 @@ except ImportError:
     pass # pwd,grp modules not available on Windows
 
 from visidata import Column, Sheet, LazyComputeRow, asynccache, BaseSheet, vd
-from visidata import Path, ENTER, date, asyncthread, FileExistsError, VisiData
+from visidata import Path, ENTER, asyncthread, VisiData
 from visidata import modtime, filesize, vstat, Progress, TextSheet
+from visidata.type_date import date
 
 
 vd.option('dir_recurse', False, 'walk source path recursively on DirSheet')
 vd.option('dir_hidden', False, 'load hidden files on DirSheet')
 
 
+@VisiData.api
+def guess_dir(vd, p):
+    if p.is_dir():
+        return dict(filetype='dir')
+
+
 @VisiData.lazy_property
 def currentDirSheet(p):
     'Support opening the current DirSheet from the vdmenu'
-    return DirSheet('.', source=Path('.'))
+    return DirSheet(Path('.').absolute().name, source=Path('.'))
 
 @asyncthread
 def exec_shell(*args):
@@ -75,6 +82,20 @@ class ColumnShell(Column):
 
 class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
+    help = '''
+        # Directory Sheet
+        This is a list of files in the {sheet.displaySource} folder.
+
+        - `Enter` to open a file as a separate sheet
+        - `g Enter` to open all selected files, each in a separate sheet
+        - [:bold]`[:] to push the parent folder
+        - `Ctrl+O` to open the current file in your system editor
+
+        ## Options (must reload to take effect)
+
+        - `--dir-recurse` (or `-r`) to include all files in all subfolders
+        - `--dir-hidden` to include hidden dotfiles
+    '''
     rowtype = 'files' # rowdef: Path
     defer = True
     columns = [
@@ -82,7 +103,7 @@ class DirSheet(Sheet):
             getter=lambda col,row: str(row.parent) if str(row.parent) == '.' else str(row.parent) + '/',
             setter=lambda col,row,val: col.sheet.moveFile(row, val)),
         Column('filename',
-            getter=lambda col,row: row.name + ''.join(row.suffixes),
+            getter=lambda col,row: row._path.name,
             setter=lambda col,row,val: col.sheet.renameFile(row, val)),
         Column('abspath', width=0, type=str,
             getter=lambda col,row: row,
@@ -148,7 +169,7 @@ class DirSheet(Sheet):
         else:
             path.unlink()
 
-    def deleteSourceRow(self, r):
+    def commitDeleteRow(self, r):
         self.removeFile(r)
 
     def newRow(self):
@@ -173,7 +194,9 @@ class DirSheet(Sheet):
         def _listfiles(p):
             basepath = str(p)
             for fn in os.listdir(basepath):
-                yield p/fn
+                fn = p/fn
+                fn.name = p.name + "_" + fn.name
+                yield fn
 
 
         basepath = str(self.source)
@@ -182,7 +205,7 @@ class DirSheet(Sheet):
         f = _walkfiles if self.options.dir_recurse else _listfiles
 
         for p in f(self.source):
-            if not hidden_files and p.name.startswith('.'):
+            if not hidden_files and str(p).startswith('.') and not str(p).startswith('..'):
                 continue
 
             yield p
@@ -203,6 +226,9 @@ class DirSheet(Sheet):
         self._deferredDels.clear()
         self.reload()
 
+    def getDefaultSaveName(sheet):
+        return sheet.name + '.' + sheet.options.save_filetype
+
 
 class FileListSheet(DirSheet):
     _ordering = []
@@ -218,11 +244,12 @@ def inputShell(vd):
         vd.warning('no $column in command')
     return cmd
 
+DirSheet.addCommand('`', 'open-dir-parent', 'vd.push(openSource(source.parent if source.resolve()!=Path(".").resolve() else os.path.dirname(source.resolve())))', 'open parent directory')  #1801
 BaseSheet.addCommand('', 'open-dir-current', 'vd.push(vd.currentDirSheet)', 'open Directory Sheet: browse properties of files in current directory')
 
-Sheet.addCommand('z;', 'addcol-sh', 'cmd=inputShell(); addShellColumns(cmd, sheet)', 'create new column from bash expression, with $columnNames as variables')
+Sheet.addCommand('z;', 'addcol-shell', 'cmd=inputShell(); addShellColumns(cmd, sheet)', 'create new column from bash expression, with $columnNames as variables')
 
-DirSheet.addCommand(ENTER, 'open-file-row', 'vd.push(openSource(cursorRow or fail("no row"), filetype="dir" if cursorRow.is_dir() else LazyComputeRow(sheet, cursorRow).ext))', 'open current file as a new sheet')
+DirSheet.addCommand(ENTER, 'open-row-file', 'vd.push(openSource(cursorRow or fail("no row"), filetype="dir" if cursorRow.is_dir() else LazyComputeRow(sheet, cursorRow).ext))', 'open current file as a new sheet')
 DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r))', 'open selected files as new sheets')
 DirSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow)', 'open current file in external $EDITOR')
 DirSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*selectedRows)', 'open selected files in external $EDITOR')
@@ -251,3 +278,7 @@ def copy_files(sheet, paths, dest):
 vd.addGlobals({
     'DirSheet': DirSheet
 })
+
+vd.addMenuItems('''
+    Column > Add column > shell > addcol-shell
+''')

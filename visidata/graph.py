@@ -37,7 +37,7 @@ class GraphSheet(InvertedCanvas):
     def __init__(self, *names, **kwargs):
         super().__init__(*names, **kwargs)
 
-        self.xcols or vd.fail('at least one key col necessary for x-axis')
+        vd.numericCols(self.xcols) or vd.fail('at least one numeric key col necessary for x-axis')
         self.ycols or vd.fail('%s is non-numeric' % '/'.join(yc.name for yc in kwargs.get('ycols')))
 
     @asyncthread
@@ -185,3 +185,8 @@ vd.addGlobals({
     'GraphSheet': GraphSheet,
     'InvertedCanvas': InvertedCanvas,
 })
+
+vd.addMenuItems('''
+    Plot > Graph > current column > plot-column
+    Plot > Graph > all numeric columns > plot-numerics
+''')

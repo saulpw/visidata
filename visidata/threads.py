@@ -5,6 +5,8 @@ import functools
 import cProfile
 import threading
 import collections
+import subprocess
+import curses
 
 from visidata import VisiData, vd, options, globalCommand, Sheet, EscapeException
 from visidata import ColumnAttr, Column
@@ -190,7 +192,7 @@ def execAsync(self, func, *args, sheet=None, **kwargs):
 
     return thread
 
-def _toplevelTryFunc(func, *args, status=vd.status, **kwargs):
+def _toplevelTryFunc(func, *args, **kwargs):
   with ThreadProfiler(threading.current_thread()) as prof:
     t = threading.current_thread()
     t.name = func.__name__
@@ -198,8 +200,7 @@ def _toplevelTryFunc(func, *args, status=vd.status, **kwargs):
         t.status = func(*args, **kwargs)
     except EscapeException as e:  # user aborted
         t.status = 'aborted by user'
-        if status:
-            status('%s aborted' % t.name, priority=2)
+        vd.warning(f'{t.name} aborted')
     except Exception as e:
         t.exception = e
         t.status = 'exception'
@@ -253,6 +254,7 @@ def sync(self, *joiningThreads):
         threads = joiningThreads or set(self.unfinishedThreads)
         threads -= set([threading.current_thread(), getattr(vd, 'drawThread', None)])
         threads -= deads
+        threads -= set([None])
         for t in threads:
             try:
                 if not t.is_alive() or t not in threading.enumerate() or getattr(t, 'noblock', False) is True:
@@ -405,3 +407,8 @@ vd.addGlobals({
     'asynccache': asynccache,
     'asyncsingle': asyncsingle,
 })
+
+vd.addMenuItems('''
+    System > Threads sheet > threads-all
+    System > Toggle profiling > toggle-profile
+''')

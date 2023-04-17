@@ -1,28 +1,57 @@
 from contextlib import suppress
-import collections
 import curses
 
 import visidata
 
-from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiData
+from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiData, BaseSheet
 from visidata import vd, options, colors
-from visidata import suspend, ColumnItem, AttrDict
+from visidata import AttrDict
 
 
 vd.option('color_edit_cell', 'white', 'cell color to use when editing cell')
 vd.option('disp_edit_fill', '_', 'edit field fill character')
 vd.option('disp_unprintable', '·', 'substitute character for unprintables')
+vd.option('mouse_interval', 1, 'max time between press/release for click (ms)', sheettype=None)
 
 vd.option('input_history', '', 'basename of file to store persistent input history')
 
 class AcceptInput(Exception):
     '*args[0]* is the input to be accepted'
 
-visidata.vd._nextCommands = []
+visidata.vd._nextCommands = []  # for vd.queueCommand
+
+vd._injectedInput = None  # for vd.injectInput
+
 
 @VisiData.api
 def queueCommand(vd, longname): #, input=None, sheet=None, col=None, row=None):
+    'Add *longname* to queue of next commands to execute.'
     vd._nextCommands.append(longname)
+
+
+@VisiData.api
+def injectInput(vd, x):
+    'Use *x* as input to next command.'
+    assert vd._injectedInput is None, vd._injectedInput
+    vd._injectedInput = x
+
+
+@VisiData.api
+def getCommandInput(vd):
+    if vd._injectedInput is not None:
+        r = vd._injectedInput
+        vd._injectedInput = None
+        return r
+
+    return vd.getLastArgs()
+
+
+@BaseSheet.after
+def execCommand(sheet, longname, *args, **kwargs):
+    if vd._injectedInput is not None:
+        vd.debug(f'{longname} did not consume input "{vd._injectedInput}"')
+        vd._injectedInput = None
+
 
 def acceptThenFunc(*longnames):
     def _acceptthen(v, i):
@@ -57,10 +86,12 @@ def until_get_wch(scr):
         except curses.error:
             pass
 
+    if isinstance(ret, int):
+        return chr(ret)
     return ret
 
 
-def splice(v, i, s):
+def splice(v:str, i:int, s:str):
     'Insert `s` into string `v` at `i` (such that v[i] == s[0]).'
     return v if i < 0 else v[:i] + s + v[i:]
 
@@ -203,9 +234,9 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
             k = 1 if w%2==0 else 0  # odd widths have one character more
             dispval = left_truncchar + dispval[i-w//2+1:i+w//2-k] + right_truncchar
 
-        prew = clipdraw(scr, y, x, dispval[:dispi], attr, w, clear=clear)
-        clipdraw(scr, y, x+prew, dispval[dispi:], attr, w-prew+1, clear=clear)
-        scr.move(y, x+prew)
+        prew = clipdraw(scr, y, x, dispval[:dispi], attr, w, clear=clear, literal=True)
+        clipdraw(scr, y, x+prew, dispval[dispi:], attr, w-prew+1, clear=clear, literal=True)
+        if scr: scr.move(y, x+prew)
         ch = vd.getkeystroke(scr)
         if ch == '':                               continue
         elif ch == 'KEY_IC':                       insert_mode = not insert_mode
@@ -223,12 +254,12 @@ def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' '
         elif ch == '^K':                           v = v[:i]  # ^Kill to end-of-line
         elif ch == '^O':                           v = vd.launchExternalEditor(v)
         elif ch == '^R':                           v = str(value)  # ^Reload initial value
-        elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1]), i)  # swap chars
+        elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1:i]), i)  # swap chars
         elif ch == '^U':                           v = v[i:]; i = 0  # clear to beginning
         elif ch == '^V':                           v = splice(v, i, until_get_wch(scr)); i += 1  # literal character
         elif ch == '^W':                           j = find_nonword(v, 0, i-1, -1); v = v[:j+1] + v[i:]; i = j+1  # erase word
-        elif ch == '^Y':                           v = splice(v, i, vd.memory.clipval)
-        elif ch == '^Z':                           suspend()
+        elif ch == '^Y':                           v = splice(v, i, str(vd.memory.clipval))
+        elif ch == '^Z':                           vd.suspend()
         # CTRL+arrow
         elif ch == 'kLFT5':                        i = find_nonword(v, 0, i-1, -1)+1; # word left
         elif ch == 'kRIT5':                        i = find_nonword(v, i+1, len(v)-1, +1)+1; # word right
@@ -263,7 +294,7 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
     'Invoke modal single-line editor at (*y*, *x*) for *w* terminal chars. Use *display* is False for sensitive input like passphrases.  If *record* is True, get input from the cmdlog in batch mode, and save input to the cmdlog if *display* is also True. Return new value as string.'
     v = None
     if record and vd.cmdlog:
-        v = vd.getLastArgs()
+        v = vd.getCommandInput()
 
     if v is None:
         try:
@@ -271,12 +302,11 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
         except AcceptInput as e:
             v = e.args[0]
 
-        if vd.scrFull:  # check if curses initialised
+        if vd.cursesEnabled:
             # clear keyboard buffer to neutralize multi-line pastes (issue#585)
             curses.flushinp()
 
     if display:
-        vd.status('"%s"' % v)
         if record and vd.cmdlog:
             vd.setLastArgs(v)
 
@@ -291,7 +321,7 @@ def inputsingle(vd, prompt, record=True):
 
     v = None
     if record and vd.cmdlog:
-        v = vd.getLastArgs()
+        v = vd.getCommandInput()
 
     if v is not None:
         return v
@@ -301,7 +331,9 @@ def inputsingle(vd, prompt, record=True):
     rstatuslen = vd.drawRightStatus(sheet._scr, sheet)
     promptlen = clipdraw(sheet._scr, y, 0, prompt, 0, w=w-rstatuslen-1)
     sheet._scr.move(y, w-promptlen-rstatuslen-2)
-    v = vd.getkeystroke(sheet._scr)
+
+    while not v:
+        v = vd.getkeystroke(sheet._scr)
 
     if record and vd.cmdlog:
         vd.setLastArgs(v)
@@ -323,9 +355,20 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
         - *bindings*: dict of keystroke to func(v, i) that returns updated (v, i)
     '''
 
+    sheet = self.activeSheet
+    if not vd.cursesEnabled:
+        if kwargs.get('record', True) and vd.cmdlog:
+            return vd.getCommandInput()
+
+        if kwargs.get('display', True):
+            import builtins
+            return builtins.input(prompt)
+        else:
+            import getpass
+            return getpass.getpass(prompt)
+
     history = self.lastInputsSheet.history(type)
 
-    sheet = self.activeSheet
     rstatuslen = self.drawRightStatus(sheet._scr, sheet)
     attr = 0
     promptlen = clipdraw(sheet._scr, sheet.windowHeight-1, 0, prompt, attr, w=sheet.windowWidth-rstatuslen-1)
@@ -349,7 +392,7 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
 @VisiData.api
 def confirm(vd, prompt, exc=EscapeException):
     'Display *prompt* on status line and demand input that starts with "Y" or "y" to proceed.  Raise *exc* otherwise.  Return True.'
-    if options.batch:
+    if options.batch and not options.interactive:
         return vd.fail('cannot confirm in batch mode: ' + prompt)
 
     yn = vd.input(prompt, value='no', record=False)[:1]

@@ -1,6 +1,6 @@
 import logging
 
-from visidata import VisiData, Sheet, Progress, ColumnItem, anytype
+from visidata import VisiData, Sheet, Progress, ColumnItem, anytype, vd
 
 SASTypes = {
     'string': str,
@@ -17,7 +17,7 @@ def open_sas7bdat(vd, p):
 
 class XptSheet(Sheet):
     def iterload(self):
-        import xport
+        xport = vd.importExternal('xport')
         with open(self.source, 'rb') as fp:
             self.rdr = xport.Reader(fp)
 
@@ -30,7 +30,7 @@ class XptSheet(Sheet):
 
 class SasSheet(Sheet):
     def iterload(self):
-        import sas7bdat
+        sas7bdat = vd.importExternal('sas7bdat')
         self.dat = sas7bdat.SAS7BDAT(str(self.source), skip_header=True, log_level=logging.CRITICAL)
         self.columns = []
         for col in self.dat.columns:

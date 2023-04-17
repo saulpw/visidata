@@ -1,10 +1,25 @@
 import json
 
-from visidata import vd, date, VisiData, PyobjSheet, deepcopy, AttrDict, stacktrace, TypedExceptionWrapper, options, visidata, ColumnItem, deduceType, wrapply, TypedWrapper, Progress, Sheet, InferColumnsSheet
+from visidata import vd, date, VisiData, PyobjSheet, AttrDict, stacktrace, TypedExceptionWrapper, options, visidata, ColumnItem, wrapply, TypedWrapper, Progress, Sheet, InferColumnsSheet
 
 vd.option('json_indent', None, 'indent to use when saving json')
 vd.option('json_sort_keys', False, 'sort object keys when saving to json')
+vd.option('json_ensure_ascii', True, 'ensure ascii encode when saving json')
 vd.option('default_colname', '', 'column name to use for non-dict rows')
+
+@VisiData.api
+def guess_json(vd, p):
+    with p.open_text(encoding=vd.options.encoding) as fp:
+        line = next(fp)
+
+    line = line.strip()
+
+    if line.startswith('{') and line.endswith('}'):
+        return dict(filetype='jsonl')
+
+    if line.startswith(tuple('[{')):
+        return dict(filetype='json')
+
 
 @VisiData.api
 def open_jsonobj(vd, p):
@@ -15,7 +30,6 @@ def open_jsonl(vd, p):
     return JsonSheet(p.name, source=p)
 
 VisiData.open_ndjson = VisiData.open_ldjson = VisiData.open_json = VisiData.open_jsonl
-
 
 class JsonSheet(InferColumnsSheet):
     def iterload(self):
@@ -92,13 +106,13 @@ def encode_json(vd, row, cols, enc=_vjsonEncoder(sort_keys=False)):
 @VisiData.api
 def save_json(vd, p, *vsheets):
     vs = vsheets[0]
-    with p.open_text(mode='w', encoding=vs.options.encoding) as fp:
+    with p.open_text(mode='w', encoding=vs.options.save_encoding) as fp:
         try:
             indent = int(vs.options.json_indent)
         except Exception:
             indent = vs.options.json_indent
 
-        jsonenc = _vjsonEncoder(indent=indent, sort_keys=vs.options.json_sort_keys)
+        jsonenc = _vjsonEncoder(indent=indent, sort_keys=vs.options.json_sort_keys, ensure_ascii=vs.options.json_ensure_ascii)
 
         if len(vsheets) == 1:
             fp.write('[\n')
@@ -127,10 +141,17 @@ def write_jsonl(vs, fp):
                 rowdict = _rowdict(vcols, row)
                 fp.write(jsonenc.encode(rowdict) + '\n')
 
+        if len(vs) == 0:
+            vd.warning(
+                "Output file is empty - cannot save headers without data for jsonl.\n"
+                "Use `.jsonla` filetype to save as JSONL arrays format "
+                "rather than JSONL dict format to preserve the headers."
+            )
+
 
 @VisiData.api
 def save_jsonl(vd, p, *vsheets):
-    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
+    with p.open_text(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
         for vs in vsheets:
             vs.write_jsonl(fp)
 

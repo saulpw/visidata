@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from visidata import Sheet, VisiData, TypedWrapper, anytype, date, floatsi, currency, vlen, floatlocale, Column, vd
+from visidata import Sheet, VisiData, TypedWrapper, anytype, date, vlen, Column, vd
 
 
 
@@ -17,7 +17,7 @@ def open_arrows(vd, p):
 
 
 def arrow_to_vdtype(t):
-    import pyarrow as pa
+    pa = vd.importExternal('pyarrow')
 
     arrow_to_vd_typemap = {
         pa.lib.Type_BOOL: bool,
@@ -58,7 +58,7 @@ def arrow_to_vdtype(t):
 
 class ArrowSheet(Sheet):
     def iterload(self):
-        import pyarrow as pa
+        pa = vd.importExternal('pyarrow')
 
         try:
             with pa.OSFile(str(self.source), 'rb') as fp:
@@ -81,20 +81,21 @@ class ArrowSheet(Sheet):
 
 @VisiData.api
 def save_arrow(vd, p, sheet, streaming=False):
-    import pyarrow as pa
-    import numpy as np
+    pa = vd.importExternal('pyarrow')
+    np = vd.importExternal('numpy')
 
     typemap = {
         anytype: pa.string(),
         int: pa.int64(),
         vlen: pa.int64(),
         float: pa.float64(),
-        floatlocale: pa.float64(),
-        floatsi: pa.float64(),
-        currency: pa.float64(),
         str: pa.string(),
         date: pa.date64(),
     }
+
+    for t in vd.numericTypes:
+        if t not in typemap:
+            typemap[t] = pa.float64()
 
     databycol = defaultdict(list)   # col -> [values]
 

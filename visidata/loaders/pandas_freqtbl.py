@@ -11,8 +11,8 @@ class DataFrameRowSliceAdapter:
     by visidata's selectRow implementation.
     """
     def __init__(self, df, mask):
-        import pandas as pd
-        import numpy as np
+        pd = vd.importExternal('pandas')
+        np = vd.importExternal('numpy')
         if not isinstance(df, pd.DataFrame):
             vd.fail('%s is not a dataframe' % type(df).__name__)
         if not isinstance(mask, pd.Series):
@@ -62,14 +62,14 @@ class DataFrameRowSliceIter:
         self.index += 1
         return row
 
+def makePandasFreqTable(sheet, *groupByCols):
+    fqcolname = '%s_freq' % '-'.join(col.name for col in groupByCols)
+    return PandasFreqTableSheet(sheet.name, fqcolname, groupByCols=groupByCols, source=sheet)
+
+
 class PandasFreqTableSheet(PivotSheet):
     'Generate frequency-table sheet on currently selected column.'
     rowtype = 'bins'  # rowdef FreqRow(keys, sourcerows)
-
-    def __init__(self, sheet, *groupByCols):
-        fqcolname = '%s_%s_freq' % (sheet.name, '-'.join(col.name for col in groupByCols))
-        super().__init__(fqcolname, groupByCols, [], source=sheet)
-        self.largest = 1
 
     def selectRow(self, row):
         # Select all entries in the bin on the source sheet.
@@ -174,11 +174,10 @@ def expand_source_rows(sheet, row):
         vd.fail("no source rows")
     return PandasSheet(sheet.name, vd.valueNames(row.discrete_keys, row.numeric_key), source=row.sourcerows)
 
-PandasSheet.addCommand('F', 'freq-col', 'vd.push(PandasFreqTableSheet(sheet, cursorCol))', 'open Frequency Table grouped on current column, with aggregations of other columns')
-PandasSheet.addCommand('gF', 'freq-keys', 'vd.push(PandasFreqTableSheet(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on source sheet, with aggregations of other columns')
+PandasSheet.addCommand('F', 'freq-col', 'vd.push(makePandasFreqTable(sheet, cursorCol))', 'open Frequency Table grouped on current column, with aggregations of other columns')
+PandasSheet.addCommand('gF', 'freq-keys', 'vd.push(makePandasFreqTable(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on source sheet, with aggregations of other columns')
 
+PandasFreqTableSheet.init('largest', lambda: 1)
 PandasFreqTableSheet.options.numeric_binning = False
 
-vd.addGlobals({
-        'PandasFreqTableSheet': PandasFreqTableSheet,
-        })
+vd.addGlobals(makePandasFreqTable=makePandasFreqTable)

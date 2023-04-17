@@ -1,6 +1,7 @@
 import json
+from copy import copy
 
-from visidata import VisiData, vd, Sheet, Column, Progress, date, copy, InvertedCanvas, asyncthread
+from visidata import VisiData, vd, Sheet, Column, Progress, date, InvertedCanvas, asyncthread
 
 # requires pyshp
 
@@ -33,7 +34,7 @@ class ShapeSheet(Sheet):
         Column('shapeType', width=0, getter=lambda col,row: row.shape.shapeType)
     ]
     def iterload(self):
-        import shapefile
+        shapefile = vd.importExternal('shapefile', 'pyshp')
         self.sf = shapefile.Reader(str(self.source))
         self.reloadCols()
         for shaperec in Progress(self.sf.iterShapeRecords(), total=self.sf.numRecords):

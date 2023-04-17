@@ -1,0 +1,3 @@
+#!vd -p
+{"longname": "open-file", "input": "sample_data/officials.jsonla", "keystrokes": "o"}
+{"sheet": "officials", "col": "", "row": "", "longname": "columns-sheet", "input": "", "keystrokes": "Shift+C", "comment": "open Columns Sheet: edit column properties for current sheet"}

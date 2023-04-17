@@ -20,7 +20,7 @@ From within VisiData, type `z Ctrl+H` to open the **Commands Sheet**. This is a 
 
 ### Setting/changing keybindings for existing commands
 
-1. Learn the longname for a command. Longnames are usually 2-3 words, seperated by hyphens. The first word is usually a verb, and the second usually a noun. When a command is executed, its longname appears in the lower right status, next to its keystroke. Alternatively, you can `z Ctrl+H` to open the **Commands Sheet** and discover the longname for the command in question.
+1. Learn the longname for a command. Longnames are usually 2-3 words, separated by hyphens. The first word is usually a verb, and the second usually a noun. When a command is executed, its longname appears in the lower right status, next to its keystroke. Alternatively, you can `z Ctrl+H` to open the **Commands Sheet** and discover the longname for the command in question.
 
 ![longname](/docs/assets/longname.png)
 
@@ -90,7 +90,7 @@ vd.aggregator('irr', np.irr, type=float)
 
 Any numeric aggregator can be added!
 
-Supply a space-separated list of aggreagator names to `options.describe_aggr` in your .visidatarc.
+Supply a space-separated list of aggregator names to `options.describe_aggrs` in your .visidatarc.
 
 ```
 options.describe_aggrs = 'mean stdev irr'

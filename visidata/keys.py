@@ -18,6 +18,8 @@ visidata.vd.prettykeys_trdict = {
         'KEY_PPAGE': 'PgUp',
         'KEY_NPAGE': 'PgDn',
 
+        'kUP':       'Shift+Up',
+        'kDN':       'Shift+Down',
         'kUP5':      'Ctrl+Up',
         'kDN5':      'Ctrl+Down',
         'kLFT5':     'Ctrl+Left',

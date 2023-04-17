@@ -1,29 +1,37 @@
-from visidata import *
+from copy import copy
 from functools import wraps
+
+from visidata import *
 
 from visidata.cmdlog import CommandLog, CommandLogJsonl
 
 vd.macroMode = None
 vd.macrobindings = {}
 
+class MacroSheet(IndexSheet):
+
+    def iterload(self):
+        for ks, fn in self.source.rows:
+            fp = Path(fn)
+            if fp.ext == 'vd':
+                vs = vd.loadInternalSheet(CommandLog, fp)
+            elif fp.ext == 'vdj':
+                vs = vd.loadInternalSheet(CommandLogJsonl, fp)
+            else:
+                vd.warning(f'failed to load macro {fn}')
+                continue
+            setMacro(ks, vs)
+            yield vs
+
+
+
 @VisiData.lazy_property
 def macrosheet(vd):
     macrospath = Path(os.path.join(options.visidata_dir, 'macros.tsv'))
-    macrosheet = vd.loadInternalSheet(TsvSheet, macrospath, columns=(ColumnItem('command', 0), ColumnItem('filename', 1))) or vd.error('error loading macros')
+    macrosheet = vd.loadInternalSheet(VisiDataMetaSheet, macrospath, columns=(ColumnItem('command', 0), ColumnItem('filename', 1))) or vd.error('error loading macros')
 
-    real_macrosheet = IndexSheet('user_macros', rows=[], source=macrosheet)
-    for ks, fn in macrosheet.rows:
-        fp = Path(fn)
-        if fp.ext == 'vd':
-            vs = vd.loadInternalSheet(CommandLog, fp)
-        elif fp.ext == 'vdj':
-            vs = vd.loadInternalSheet(CommandLogJsonl, fp)
-        else:
-            vd.warning(f'failed to load macro {fn}')
-            continue
-        vd.status(f"setting {ks}")
-        setMacro(ks, vs)
-        real_macrosheet.addRow(vs)
+    real_macrosheet = MacroSheet('user_macros', rows=[], source=macrosheet)
+    real_macrosheet.reload()
 
     return real_macrosheet
 
@@ -47,12 +55,13 @@ def saveMacro(self, rows, ks):
         vd.save_vdj(macropath, vs)
         setMacro(ks, vs)
         vd.macrosheet.source.append_tsv_row((ks, macropath))
-        vd.macrosheet.addRow(vd.loadInternalSheet(CommandLogJsonl, macropath))
+        vd.sync(vd.macrosheet.source.reload())
+        vd.sync(vd.macrosheet.reload())
 
 @CommandLogJsonl.api
 @wraps(CommandLogJsonl.afterExecSheet)
 def afterExecSheet(cmdlog, sheet, escaped, err):
-    if vd.macroMode and (vd.activeCommand is not None) and (vd.activeCommand is not UNLOADED):
+    if vd.macroMode and (vd.activeCommand is not None) and (vd.activeCommand is not UNLOADED) and (vd.isLoggableCommand(vd.activeCommand.longname)):
         cmd = copy(vd.activeCommand)
         cmd.row = cmd.col = cmd.sheet = ''
         vd.macroMode.addRow(cmd)
@@ -64,11 +73,13 @@ def afterExecSheet(cmdlog, sheet, escaped, err):
 @CommandLogJsonl.api
 def startMacro(cmdlog):
     if vd.macroMode:
-        ks = vd.input('save macro for keystroke: ')
+        ks = vd.input('set macro to keybinding: (Ctrl+C to abort macro recording)')
+        while ks in vd.macrobindings:
+            ks = vd.input(f'{ks} already in use; set macro to keybinding: ')
         vd.cmdlog.saveMacro(vd.macroMode.rows, ks)
         vd.macroMode = None
     else:
-        vd.status("recording macro")
+        vd.status("recording macro; stop recording with `m`")
         vd.macroMode = CommandLogJsonl('current_macro', rows=[])
 
 @VisiData.before
@@ -78,3 +89,7 @@ def run(vd, *args, **kwargs):
 
 Sheet.addCommand('m', 'macro-record', 'vd.cmdlog.startMacro()', 'record macro')
 Sheet.addCommand('gm', 'macro-sheet', 'vd.push(vd.macrosheet)', 'open macros sheet')
+
+vd.addMenuItems('''
+    System > Macros sheet > macro-sheet
+''')

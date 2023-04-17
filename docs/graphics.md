@@ -96,7 +96,7 @@ While the Plotter API requires literal integer values for `x`/`y` and `width`/`h
 
 #### `Canvas` methods
 
-- `Canvas.polyline(vertexes, attr, row=None)` adds a multi-segment line from the list of (x,y) `vertexes`.  One vertex draws a point; two vertexes draws a single line.  Note that the vertexes are *not* Point objects (unlike parameters for other methods).
+- `Canvas.polyline(vertices, attr, row=None)` adds a multi-segment line from the list of (x,y) `vertices`.  One vertex draws a point; two vertices draws a single line.  Note that the vertices are *not* Point objects (unlike parameters for other methods).
 - `Canvas.label(xy, text, attr, row=None)` adds `text` at `xy` (Point in canvas units).
 - `Canvas.fixPoint(xyplotter, xycanvas)` sets the position of the `visibleBox` so that `xycanvas` (Point in Canvas units) is plotted at `xyplotter` (Point in Plotter units).
 - `Canvas.zoomTo(bbox)` sets the visible bounds so the given canvas coordinates will fill the entire Plotter area.  `aspectRatio` will still be obeyed.

@@ -13,7 +13,18 @@ vd.option('safety_first', False, 'sanitize input/output to handle edge cases, wi
 
 csv.field_size_limit(2**31-1) # Windows has max 32-bit
 
-options_num_first_rows = 10
+@VisiData.api
+def guess_csv(vd, p):
+    line = next(p.open_text())
+    if ',' in line:
+        dialect = csv.Sniffer().sniff(line)
+        r = dict(filetype='csv', _likelihood=0)
+
+        for csvopt in dir(dialect):
+            if not csvopt.startswith('_'):
+                r['csv_'+csvopt] = getattr(dialect, csvopt)
+
+        return r
 
 @VisiData.api
 def open_csv(vd, p):
@@ -47,7 +58,7 @@ class CsvSheet(SequenceSheet):
 @VisiData.api
 def save_csv(vd, p, sheet):
     'Save as single CSV file, handling column names as first line.'
-    with p.open_text(mode='w', encoding=sheet.options.encoding, newline='') as fp:
+    with p.open_text(mode='w', encoding=sheet.options.save_encoding, newline='') as fp:
         cw = csv.writer(fp, **options.getall('csv_'))
         colnames = [col.name for col in sheet.visibleCols]
         if ''.join(colnames):

@@ -1,9 +1,17 @@
-from visidata import vd, Sheet, Progress, asyncthread, options, rotateRange, Fanout, undoAttrCopyFunc, copy
+from copy import copy
+from visidata import vd, Sheet, Progress, asyncthread, options, rotateRange, Fanout, undoAttrCopyFunc, RowColorizer
 
 vd.option('bulk_select_clear', False, 'clear selected rows before new bulk selections', replay=True)
 vd.option('some_selected_rows', False, 'if no rows selected, if True, someSelectedRows returns all rows; if False, fails')
 
 Sheet.init('_selectedRows', dict)  # rowid(row) -> row
+
+vd.rowNoters.append(
+        lambda sheet, row: sheet.isSelected(row) and sheet.options.disp_selected_note
+)
+Sheet.colorizers.append( RowColorizer(2, 'color_selected_row', lambda s,c,r,v:
+    r is not None and s.isSelected(r))
+)
 
 @Sheet.api
 def isSelected(self, row):
@@ -44,13 +52,13 @@ def unselect_row(self, row):
 
 @Sheet.api
 def selectRow(self, row):
-    'Add *row* to set of selected rows.  May be called multiple times in one command.  Overrideable.'
+    'Add *row* to set of selected rows.  May be called multiple times in one command.  Overridable.'
     self._selectedRows[self.rowid(row)] = row
 
 
 @Sheet.api
 def unselectRow(self, row):
-    'Remove *row* from set of selected rows.  Return True if row was previously selected.  Overrideable.'
+    'Remove *row* from set of selected rows.  Return True if row was previously selected.  Overridable.'
     if self.rowid(row) in self._selectedRows:
         del self._selectedRows[self.rowid(row)]
         return True
@@ -189,3 +197,24 @@ Sheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); 
 
 Sheet.addCommand(None, 'select-error-col', 'select(gatherBy(lambda r,c=cursorCol: c.isError(r)), progress=False)', 'select rows with errors in current column')
 Sheet.addCommand(None, 'select-error', 'select(gatherBy(lambda r,vcols=visibleCols: isinstance(r, TypedExceptionWrapper) or any([c.isError(r) for c in vcols])), progress=False)', 'select rows with errors in any column')
+
+vd.addMenuItems('''
+    Row > Select > current row > select-row
+    Row > Select > all rows > select-rows
+    Row > Select > from top > select-before
+    Row > Select > to bottom > select-after
+    Row > Select > by Python expr > select-expr
+    Row > Select > equal to current cell > select-equal-cell
+    Row > Select > equal to current row > select-equal-row
+    Row > Select > errors > current column > select-error-col
+    Row > Select > errors > any column > select-error
+    Row > Unselect > current row > unselect-row
+    Row > Unselect > all rows > unselect-rows
+    Row > Unselect > from top > unselect-before
+    Row > Unselect > to bottom > unselect-after
+    Row > Unselect > by Python expr > unselect-expr
+    Row > Toggle select > current row > stoggle-row
+    Row > Toggle select > all rows > stoggle-rows
+    Row > Toggle select > from top > stoggle-before
+    Row > Toggle select > to bottom > stoggle-after
+''')

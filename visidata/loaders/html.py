@@ -1,4 +1,5 @@
 import html
+import urllib.parse
 import copy
 import itertools
 
@@ -6,11 +7,25 @@ from visidata import VisiData, vd, Sheet, options, Column, Progress, IndexSheet,
 
 vd.option('html_title', '<h2>{sheet.name}</h2>', 'table header when saving to html')
 
+
+@VisiData.api
+def guess_html(vd, p):
+    with p.open_text() as fp:
+        r = fp.read(10240)
+        if r.strip().startswith('<'):
+            m = re.search(r, r'charset=(\S+)')
+            if m:
+                encoding = m.group(0)
+            else:
+                encoding = None
+            return dict(filetype='html', _likelihood=1, encoding=encoding)
+
 @VisiData.api
 def open_html(vd, p):
     return HtmlTablesSheet(p.name, source=p)
 
 VisiData.open_htm = VisiData.open_html
+
 
 class HtmlTablesSheet(IndexSheet):
     rowtype = 'sheets'  # rowdef: HtmlTableSheet (sheet.html = lxml.html.HtmlElement)
@@ -20,6 +35,7 @@ class HtmlTablesSheet(IndexSheet):
         Column('classes', getter=lambda col,row: row.html.attrib.get('class')),
     ]
     def iterload(self):
+        lxml = vd.importExternal('lxml')
         from lxml import html
         utf8_parser = html.HTMLParser(encoding='utf-8')
         with self.source.open_text(encoding='utf-8') as fp:
@@ -54,6 +70,7 @@ class HtmlLinksSheet(Sheet):
         ItemColumn('link', 2, width=40),
     ]
     def iterload(self):
+        lxml = vd.importExternal('lxml')
         from lxml.html import iterlinks
         root = self.source.getroot()
         root.make_links_absolute(self.source.docinfo.URL)
@@ -74,7 +91,7 @@ class HtmlElementsSheet(InferColumnsSheet):
             row = copy.copy(r.attrib)
             row['__element__'] = r
             if row.get('href'):
-                row['href'] = canonicalize_url(row.get('href'), self.source.URL)
+                row['href'] = urllib.parse.urljoin(self.source.URL, row.get('href'))
 
             yield row
 
@@ -107,7 +124,7 @@ class HtmlTableSheet(Sheet):
                 colspan = int(cell.attrib.get('colspan', 1))
                 rowspan = int(cell.attrib.get('rowspan', 1))
                 cellval = ' '.join(x.strip() for x in cell.itertext())  # text only without markup
-                links = [x.get('href') for x in cell.iter('a')]
+                links = [urllib.parse.urljoin(self.source.base_url, x.get('href')) for x in cell.iter('a')]
                 maxlinks[colnum] = max(maxlinks.get(colnum, 0), len(links))
 
                 if is_header(cell):

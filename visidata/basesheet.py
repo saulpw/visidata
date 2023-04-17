@@ -1,8 +1,7 @@
 import os
 
 import visidata
-from visidata import Extensible, VisiData, vd, EscapeException, cleanName
-from unittest import mock
+from visidata import Extensible, VisiData, vd, EscapeException, cleanName, MissingAttrFormatter, AttrDict
 
 
 UNLOADED = tuple()  # sentinel for a sheet not yet loaded for the first time
@@ -24,6 +23,11 @@ class LazyChainMap:
 
     def keys(self):
         return list(self.objs.keys())  # sum(set(dir(obj)) for obj in self.objs))
+
+    def get(self, key, default=None):
+        if key in self.locals:
+            return self.locals[key]
+        return self.objs.get(key, default)
 
     def clear(self):
         self.locals.clear()
@@ -93,6 +97,7 @@ class BaseSheet(DrawablePane):
     rowtype = 'objects'  # one word, plural, describing the items
     precious = True      # False for a few discardable metasheets
     defer = False        # False for not deferring changes until save
+    help = ''            # default to show in sidebar
 
     def _obj_options(self):
         return vd.OptionsObject(vd._options, obj=self)
@@ -104,13 +109,11 @@ class BaseSheet(DrawablePane):
 
     def __init__(self, *names, **kwargs):
         self._name = None   # initial cache value necessary for self.options
-        self.names = names
+        self.names = list(names)
         self.name = self.options.name_joiner.join(str(x) for x in self.names if x)
         self.source = None
         self.rows = UNLOADED      # list of opaque objects
-        self._scr = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
-        self.mouseX = 0
-        self.mouseY = 0
+        self._scr = None
         self.hasBeenModified = False
 
         super().__init__(**kwargs)
@@ -160,11 +163,27 @@ class BaseSheet(DrawablePane):
             return vs in self.source
         return False
 
-    def execCommand(self, cmd, vdglobals=None, keystrokes=None):
-        cmd = self.getCommand(cmd or keystrokes)
+    @property
+    def displaySource(self):
+        if isinstance(self.source, BaseSheet):
+            return f'the *{self.source[0]}* sheet'
+
+        if isinstance(self.source, (list, tuple)):
+            if len(self.source) == 1:
+                return f'the *{self.source[0]}* sheet'
+            r = ' '.join(f'*{x}*' for x in self.source)
+            return f'{len(self.source)} sheets ({r})'
+
+        return f'*{self.source}*'
+
+    def execCommand(self, longname, vdglobals=None, keystrokes=None):
+        if ' ' in longname:
+            cmd, arg = longname.split(' ', maxsplit=1)
+            vd.injectInput(arg)
+
+        cmd = self.getCommand(longname or keystrokes)
         if not cmd:
-            if keystrokes:
-                vd.status('no command for %s' % keystrokes)
+            vd.warning('no command for %s' % (longname or keystrokes))
             return False
 
         escaped = False
@@ -178,7 +197,6 @@ class BaseSheet(DrawablePane):
         try:
             for hookfunc in vd.beforeExecHooks:
                 hookfunc(self, cmd, '', keystrokes)
-            vd.debug(cmd.longname)
             escaped = super().execCommand2(cmd, vdglobals=vdglobals)
         except Exception as e:
             vd.debug(cmd.execstr)
@@ -245,11 +263,11 @@ class BaseSheet(DrawablePane):
 
     @property
     def cursorRow(self):
-        'The row object at the row cursor.  Overrideable.'
+        'The row object at the row cursor.  Overridable.'
         return None
 
     def checkCursor(self):
-        'Check cursor and fix if out-of-bounds.  Overrideable.'
+        'Check cursor and fix if out-of-bounds.  Overridable.'
         pass
 
     def checkCursorNoExceptions(self):
@@ -262,20 +280,10 @@ class BaseSheet(DrawablePane):
         'Evaluate Python expression *expr* in the context of *kwargs* (may vary by sheet type).'
         return eval(expr, vd.getGlobals(), None)
 
-    @property
-    def sidebar(self):
-        'Default implementation just returns set value.  Overrideable.'
-        return self._sidebar
+    def formatString(self, fmt):
+        'Return formatted string with *sheet* and *vd* accessible to expressions.  Missing expressions return empty strings instead of error.'
+        return MissingAttrFormatter().format(fmt, sheet=self, vd=vd)
 
-    @sidebar.setter
-    def sidebar(self, v):
-        'Default implementation just sets value.  Overrideable.'
-        self._sidebar = v
-
-    @property
-    def sidebar_title(self):
-        'Default implementation returns fixed value.  Overrideable.'
-        return 'sidebar'
 
 
 @VisiData.api
@@ -283,10 +291,11 @@ def redraw(vd):
     'Clear the terminal screen and let the next draw cycle recreate the windows and redraw everything.'
     for vs in vd.sheets:
         vs._scr = None
-    vd.scrFull.clear()
-    vd.win1.clear()
-    vd.win2.clear()
-    vd.setWindows(vd.scrFull)
+    if vd.win1: vd.win1.clear()
+    if vd.win2: vd.win2.clear()
+    if vd.scrFull:
+        vd.scrFull.clear()
+        vd.setWindows(vd.scrFull)
 
 
 @VisiData.property

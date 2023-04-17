@@ -5,9 +5,6 @@ import functools
 
 from visidata import options, stacktrace, BaseSheet, vd
 
-__all__ = ['forward', 'wrmap', 'wrapply', 'TypedWrapper', 'TypedExceptionWrapper']
-
-vd.option('null_value', None, 'a value to be counted as null', replay=True)
 
 @BaseSheet.api
 def isNullFunc(sheet):
@@ -109,3 +106,12 @@ def wrapply(func, *args, **kwargs):
     except Exception as e:
         e.stacktrace = stacktrace()
         return TypedExceptionWrapper(func, *args, exception=e)
+
+
+vd.addGlobals(
+    forward=forward,
+    wrmap=wrmap,
+    wrapply=wrapply,
+    TypedWrapper=TypedWrapper,
+    TypedExceptionWrapper=TypedExceptionWrapper
+)

@@ -1,7 +1,7 @@
 import math
 import random
 
-from collections import defaultdict, Counter
+from collections import defaultdict, Counter, OrderedDict
 from visidata import *
 from visidata.bezier import bezier
 
@@ -327,7 +327,7 @@ class Canvas(Plotter):
         self.polylines = []   # list of ([(canvas_x, canvas_y), ...], attr, row)
         self.gridlabels = []  # list of (grid_x, grid_y, label, attr, row)
 
-        self.legends = collections.OrderedDict()   # txt: attr  (visible legends only)
+        self.legends = OrderedDict()   # txt: attr  (visible legends only)
         self.plotAttrs = {}   # key: attr  (all keys, for speed)
         self.reset()
 
@@ -482,7 +482,15 @@ class Canvas(Plotter):
                     if ymin is None or y < ymin: ymin = y
                     if xmax is None or x > xmax: xmax = x
                     if ymax is None or y > ymax: ymax = y
-            self.canvasBox = BoundingBox(float(xmin or 0), float(ymin or 0), float(xmax or 1), float(ymax or 1))
+            xmin = xmin or 0
+            xmax = xmax or 0
+            ymin = ymin or 0
+            ymax = ymax or 0
+            if xmin == xmax:
+                xmax += 1
+            if ymin == ymax:
+                ymax += 1
+            self.canvasBox = BoundingBox(float(xmin), float(ymin), float(xmax), float(ymax))
 
         if not self.visibleBox:
             # initialize minx/miny, but w/h must be set first to center properly
@@ -666,7 +674,6 @@ Canvas.addCommand('gu', 'unselect-visible', 'source.unselect(list(rowsWithin(plo
 Canvas.addCommand('g'+ENTER, 'dive-visible', 'vs=copy(source); vs.rows=list(rowsWithin(plotterVisibleBox)); vd.push(vs)', 'open sheet of source rows visible on screen')
 Canvas.addCommand('gd', 'delete-visible', 'deleteSourceRows(rowsWithin(plotterVisibleBox))', 'delete rows on source sheet visible on screen')
 
-
 vd.addGlobals({
     'Canvas': Canvas,
     'Plotter': Plotter,
@@ -674,3 +681,22 @@ vd.addGlobals({
     'Box': Box,
     'Point': Point,
 })
+
+vd.addMenuItems('''
+    Plot > Resize cursor > height > double > resize-cursor-doubleheight
+    Plot > Resize cursor > height > half > resize-cursor-halfheight
+    Plot > Resize cursor > height > shorter > resize-cursor-shorter
+    Plot > Resize cursor > height > taller > resize-cursor-taller
+    Plot > Resize cursor > width > double > resize-cursor-doublewide
+    Plot > Resize cursor > width > half > resize-cursor-halfwide
+    Plot > Resize cursor > width > thinner > resize-cursor-thinner
+    Plot > Resize cursor > width > wider > resize-cursor-wider
+    Plot > Resize graph > X axis > resize-x-input
+    Plot > Resize graph > Y axis > resize-y-input
+    Plot > Resize graph > aspect ratio > set-aspect
+    Plot > Zoom > out > zoomout-cursor
+    Plot > Zoom > in > zoomin-cursor
+    Plot > Zoom > cursor > zoom-all
+    Plot > Dive into cursor > dive-cursor
+    Plot > Delete > under cursor > delete-cursor
+''')

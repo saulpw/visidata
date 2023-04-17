@@ -21,7 +21,7 @@ class CompleteExpr:
 
         varnames = []
         varnames.extend(sorted((base+col.name) for col in self.sheet.columns if col.name.startswith(partial)))
-        varnames.extend(sorted((base+x) for x in globals() if x.startswith(partial)))
+        varnames.extend(sorted((base+x) for x in vd.getGlobals() if x.startswith(partial)))
 
         # Remove duplicate tabbing suggestions
         varnames_dict = {var:None for var in varnames}
@@ -59,3 +59,9 @@ Sheet.addCommand('gz=', 'setcol-iter', 'cursorCol.setValues(someSelectedRows, *l
 Sheet.addCommand(None, 'show-expr', 'status(evalExpr(inputExpr("show expr="), cursorRow))', 'evaluate Python expression on current row and show result on status line')
 
 vd.addGlobals({'CompleteExpr': CompleteExpr})
+
+vd.addMenuItems('''
+    Edit > Modify > current cell > Python expression > setcell-expr
+    Edit > Modify > selected cells > Python sequence > setcol-expr
+    Column > Add column > Python expr > addcol-expr
+''')

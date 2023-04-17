@@ -1,6 +1,6 @@
 from itertools import chain
 
-from visidata import VisiData, Progress, JsonSheet
+from visidata import VisiData, Progress, JsonSheet, vd
 
 
 @VisiData.api
@@ -11,9 +11,19 @@ VisiData.open_yaml = VisiData.open_yml
 
 class YamlSheet(JsonSheet):
     def iterload(self):
-        import yaml
+        yaml = vd.importExternal('yaml', 'PyYAML')
+
+        class PrettySafeLoader(yaml.SafeLoader):
+            def construct_python_tuple(self, node):
+                return tuple(self.construct_sequence(node))
+
+        PrettySafeLoader.add_constructor(
+            u'tag:yaml.org,2002:python/tuple',
+            PrettySafeLoader.construct_python_tuple
+        )
+
         with self.source.open_text() as fp:
-            documents = yaml.safe_load_all(fp)
+            documents = yaml.load_all(fp, PrettySafeLoader)
 
             self.columns = []
             self._knownKeys.clear()

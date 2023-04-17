@@ -5,14 +5,14 @@ import io
 import codecs
 import pathlib
 from urllib.parse import urlparse, urlunparse
-from functools import wraps
+from functools import wraps, lru_cache
 
 from visidata import *
 
-vd.option('encoding', 'utf-8', 'encoding passed to codecs.open', replay=True)
+vd.option('encoding', 'utf-8', 'encoding passed to codecs.open when opening a file', replay=True)
 vd.option('encoding_errors', 'surrogateescape', 'encoding_errors passed to codecs.open', replay=True)
 
-@functools.lru_cache()
+@lru_cache()
 def vstat(path, force=False):
     try:
         return os.stat(path)
@@ -22,7 +22,9 @@ def vstat(path, force=False):
 def filesize(path):
     if hasattr(path, 'filesize') and path.filesize is not None:
         return path.filesize
-    if path.has_fp() or path.is_url():
+    if hasattr(path, 'is_url') and path.is_url():
+        return 0
+    if hasattr(path, 'has_fp') and path.has_fp():
         return 0
     st = path.stat() # vstat(path)
     return st and st.st_size
@@ -74,11 +76,9 @@ class FileProgress:
         # track Progress on original fp
         self.fp_orig_read = self.fp.read
         self.fp_orig_close = self.fp.close
-        # These two lines result in bug #1159, a corrupted save of corruption formats
-        # for now we are reverting by commenting out, and opened #1175 to investigate
-        # Progress bars for compression formats might not work in the meanwhile
-        #self.fp.read = self.read
-        #self.fp.close = self.close
+
+        self.fp.read = self.read
+        self.fp.close = self.close
 
         if self.prog:
             self.prog.__enter__()
@@ -131,7 +131,7 @@ class Path(os.PathLike):
         self.filesize = filesize
         self.rfile = None
 
-    @functools.lru_cache()
+    @lru_cache()
     def stat(self, force=False):
         return self._path.stat()
 
@@ -151,6 +151,8 @@ class Path(os.PathLike):
         self.ext = self.suffix[1:]
         if self.suffix:  #1450  don't make this a oneliner; [:-0] doesn't work
             self.name = self._path.name[:-len(self.suffix)]
+        elif self._given == '.':  #1768
+            self.name = self._path.absolute().name
         else:
             self.name = self._path.name
 
@@ -195,7 +197,7 @@ class Path(os.PathLike):
         # rfile makes a single-access fp reusable
 
         if self.rfile:
-            return self.rfile
+            return self.rfile.reopen()
 
         if self.fp:
             self.fptext = codecs.iterdecode(self.fp,
@@ -245,21 +247,28 @@ class Path(os.PathLike):
             return FileProgress(self, fp=BytesIOWrapper(self.fptext), **kwargs)
 
         path = self
-        binmode = 'wb' if 'w' in kwargs.get('mode', '') else 'rb'
+
         if self.compression == 'gz':
             import gzip
-            return gzip.open(FileProgress(path, fp=open(path, mode=binmode), **kwargs), *args, **kwargs)
+            zopen = gzip.open
         elif self.compression == 'bz2':
             import bz2
-            return bz2.open(FileProgress(path, fp=open(path, mode=binmode), **kwargs), *args, **kwargs)
+            zopen = bz2.open
         elif self.compression in ['xz', 'lzma']:
             import lzma
-            return lzma.open(FileProgress(path, fp=open(path, mode=binmode), **kwargs), *args, **kwargs)
+            zopen = lzma.open
         elif self.compression == 'zst':
-            import zstandard
-            return zstandard.open(FileProgress(path, fp=open(path, mode=binmode), **kwargs), *args, **kwargs)
+            zstandard = vd.importExternal('zstandard')
+            zopen = zstandard.open
         else:
             return FileProgress(path, fp=self._path.open(*args, **kwargs), **kwargs)
+
+        if 'w' in kwargs.get('mode', ''):
+            #1159 FileProgress on the outside to close properly when writing
+            return FileProgress(path, fp=zopen(path, **kwargs), **kwargs)
+
+        #1255 FileProgress on the inside to track uncompressed bytes when reading
+        return zopen(FileProgress(path, fp=open(path, mode='rb'), **kwargs), **kwargs)
 
     def __iter__(self):
         with Progress(total=filesize(self)) as prog:
@@ -289,7 +298,7 @@ class Path(os.PathLike):
         return str(self._path)
 
     @wraps(pathlib.Path.stat)
-    @functools.lru_cache()
+    @lru_cache()
     def stat(self, force=False):
         'Return Path.stat() if relevant.'
         try:
@@ -331,22 +340,31 @@ class RepeatFile:
 
     def __enter__(self):
         '''Returns a new independent file-like object, sharing the same line cache.'''
-        return RepeatFile(self.iter_lines, lines=self.lines)
+        return self.reopen()
 
     def __exit__(self, a,b,c):
         pass
 
+    def reopen(self):
+        'Return copy of file-like with internal iterator reset.'
+        return RepeatFile(self.iter_lines, lines=self.lines)
+
     def read(self, n=None):
-        r = ''
+        r = None
         if n is None:
             n = 10**12  # some too huge number
-        while len(r) < n:
+        while r is None or len(r) < n:
             try:
                 s = next(self.iter)
-                r += s + '\n'
+                if r is None:
+                    r = '' if isinstance(s, str) else b''
+                else:
+                    assert isinstance(r, type(s)), (r, type(s))
+
+                r += s + '\n' if isinstance(s, str) else b'\n'
             except StopIteration:
                 break  # end of file
-        return r
+        return r or ''
 
     def write(self, s):
         return self.iter_lines.write(s)
@@ -401,3 +419,10 @@ class RepeatFileIter:
 
         self.nextIndex += 1
         return r
+
+
+vd.addGlobals(RepeatFile=RepeatFile,
+              Path=Path,
+              modtime=modtime,
+              filesize=filesize,
+              vstat=vstat)

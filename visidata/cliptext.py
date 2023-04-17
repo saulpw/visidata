@@ -1,12 +1,13 @@
 import unicodedata
 import sys
+import re
 import functools
+import textwrap
 
-from visidata import options, drawcache
-
-__all__ = ['clipstr', 'clipdraw', 'clipbox', 'dispwidth', 'iterchars']
+from visidata import options, drawcache, vd, update_attr, colors, ColorAttr
 
 disp_column_fill = ' '
+internal_markup_re = r'(\[:[^\]]*?\])'  # [:whatever until the closing bracket] or [:]
 
 ### Curses helpers
 
@@ -52,16 +53,29 @@ def wcwidth(cc, ambig=1):
         return 0
 
 
+def iterchunks(s, literal=False):
+    chunks = re.split(internal_markup_re, s)
+    for chunk in chunks:
+        if not chunk:
+            continue
+        if not literal and chunk.startswith('[:') and chunk.endswith(']'):
+            yield chunk[2:-1] or ':', ''  # color/attr change
+        else:
+            yield '', chunk
+
+
 @functools.lru_cache(maxsize=100000)
-def dispwidth(ss, maxwidth=None):
+def dispwidth(ss, maxwidth=None, literal=False):
     'Return display width of string, according to unicodedata width and options.disp_ambig_width.'
     disp_ambig_width = options.disp_ambig_width
     w = 0
 
-    for cc in ss:
-        w += wcwidth(cc, disp_ambig_width)
-        if maxwidth and w > maxwidth:
-            break
+    for _, s in iterchunks(ss, literal=literal):
+        for cc in s:
+            if cc:
+                w += wcwidth(cc, disp_ambig_width)
+                if maxwidth and w > maxwidth:
+                    break
     return w
 
 
@@ -71,12 +85,12 @@ def _dispch(c, oddspacech=None, combch=None, modch=None):
     if ccat in ['Mn', 'Sk', 'Lm']:
         if unicodedata.name(c).startswith('MODIFIER'):
             return modch, 1
-    elif c != ' ' and ccat in ('Cc', 'Zs', 'Zl'):  # control char, space, line sep
+    elif c != ' ' and ccat in ('Cc', 'Zs', 'Zl', 'Cs'):  # control char, space, line sep, surrogate
         return oddspacech, 1
     elif c in ZERO_WIDTH_CF:
         return combch, 1
 
-    return c, dispwidth(c)
+    return c, dispwidth(c, literal=True)
 
 
 def iterchars(x):
@@ -139,38 +153,133 @@ def clipstr(s, dispw, truncator=None, oddspace=None):
                 modch='',
                 combch='')
 
-def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False, **kwargs):
-    'Draw string `s` at (y,x)-(y,x+w) with curses attr, clipping with ellipsis char.  if rtl, draw inside (x-w, x).  If *clear*, clear whole editing area before displaying. Returns width drawn (max of w).'
+def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False, literal=False, **kwargs):
+    '''Draw string `s` at (y,x)-(y,x+w) with curses attr, clipping with ellipsis char.  
+      If `rtl`, draw inside (x-w, x).
+      If `clear`, clear whole editing area before displaying.
+      If `literal`, do not interpret [:color]codes[:].
+     Return width drawn (max of w).
+    '''
     if scr:
         _, windowWidth = scr.getmaxyx()
     else:
         windowWidth = 80
-    dispw = 0
-    try:
-        if w is None:
-            w = dispwidth(s, maxwidth=windowWidth)
-        w = min(w, (x-1) if rtl else (windowWidth-x-1))
-        if w <= 0:  # no room anyway
-            return 0
-        if not scr:
-            return w
+    totaldispw = 0
 
-        # convert to string just before drawing
-        clipped, dispw = clipstr(s, w, **kwargs)
-        if rtl:
-            # clearing whole area (w) has negative display effects; clearing just dispw area is useless
-#            scr.addstr(y, x-dispw-1, disp_column_fill*dispw, attr)
-            scr.addstr(y, x-dispw-1, clipped, attr)
-        else:
-            if clear:
-                scr.addstr(y, x, disp_column_fill*w, attr)  # clear whole area before displaying
-            scr.addstr(y, x, clipped, attr)
+    if not isinstance(attr, ColorAttr):
+        cattr = ColorAttr(attr, 0, 0, attr)
+    else:
+        cattr = attr
+
+    origattr = cattr
+    origw = w
+    clipped = ''
+    link = ''
+
+    try:
+        for colorname, chunk in iterchunks(s, literal=literal):
+            if colorname.startswith('onclick'):
+                link = colorname
+                colorname = 'clickable'
+
+            if colorname == ':':
+                link = ''
+                cattr = origattr
+                continue
+
+            if colorname:
+                cattr = update_attr(cattr, colors.get_color(colorname), 8)
+
+            if not chunk:
+                continue
+
+            if origw is None:
+                chunkw = dispwidth(chunk, maxwidth=windowWidth-totaldispw)
+            else:
+                chunkw = origw
+
+            chunkw = min(chunkw, (x-1) if rtl else (windowWidth-x-1))
+            if chunkw <= 0:  # no room anyway
+                return totaldispw
+            if not scr:
+                return totaldispw
+
+            # convert to string just before drawing
+            clipped, dispw = clipstr(chunk, chunkw, **kwargs)
+            if rtl:
+                # clearing whole area (w) has negative display effects; clearing just dispw area is useless
+                # scr.addstr(y, x-dispw-1, disp_column_fill*dispw, attr)
+                scr.addstr(y, x-dispw-1, clipped, cattr.attr)
+            else:
+                if clear:
+                    scr.addstr(y, x, disp_column_fill*chunkw, cattr.attr)  # clear whole area before displaying
+                scr.addstr(y, x, clipped, cattr.attr)
+
+            if link:
+                vd.onMouse(scr, x, y, dispw, 1, BUTTON1_RELEASED=link)
+
+            x += dispw
+            totaldispw += dispw
+
+            if chunkw < dispw:
+                break
     except Exception as e:
-        pass
-#        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s clippedlen=%s]' % (e, y, x, dispw, w, len(clipped))
+        if vd.options.debug:
+            raise
+#        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s clippedlen=%s]' % (e, y, x, totaldispw, w, len(clipped))
 #                ).with_traceback(sys.exc_info()[2])
 
-    return dispw
+    return totaldispw
+
+
+def _markdown_to_internal(text):
+    'Return markdown-formatted `text` converted to internal formatting (like `[:color]text[:]`).'
+    text = re.sub(r'`(.*?)`', r'[:code]\1[:]', text)
+    text = re.sub(r'\*\*(.*?)\*\*', r'[:bold]\1[:]', text)
+    text = re.sub(r'\*(.*?)\*', r'[:italic]\1[:]', text)
+    text = re.sub(r'\b_(.*?)_\b', r'[:underline]\1[:]', text)
+    return text
+
+
+def wraptext(text, width=80, indent=''):
+    '''
+    Word-wrap `text` and yield (formatted_line, textonly_line) for each line of at most `width` characters.
+    Formatting like `[:color]text[:]` is ignored for purposes of computing width, and not included in `textonly_line`.
+    '''
+    import re
+
+    for line in text.splitlines():
+        if not line:
+            yield '', ''
+            continue
+
+        line = _markdown_to_internal(line)
+        chunks = re.split(internal_markup_re, line)
+        textchunks = [x for x in chunks if not (x.startswith('[:') and x.endswith(']'))]
+        for linenum, textline in enumerate(textwrap.wrap(''.join(textchunks), width=width, drop_whitespace=False)):
+            txt = textline
+            r = ''
+            while chunks:
+                c = chunks[0]
+                if len(c) > len(txt):
+                    r += txt
+                    chunks[0] = c[len(txt):]
+                    break
+
+                if len(chunks) == 1:
+                    r += chunks.pop(0)
+                else:
+                    chunks.pop(0)
+                    r += txt[:len(c)] + chunks.pop(0)
+
+                txt = txt[len(c):]
+
+            if linenum > 0:
+                r = indent + r
+            yield r, textline
+
+        for c in chunks:
+            yield c, ''
 
 
 def clipbox(scr, lines, attr, title=''):
@@ -178,6 +287,15 @@ def clipbox(scr, lines, attr, title=''):
     scr.bkgd(attr)
     scr.box()
     h, w = scr.getmaxyx()
-    clipdraw(scr, 0, w-len(title)-6, f"| {title} |", attr)
     for i, line in enumerate(lines):
         clipdraw(scr, i+1, 2, line, attr)
+
+    clipdraw(scr, 0, w-len(title)-6, f"| {title} |", attr)
+
+
+vd.addGlobals(clipstr=clipstr,
+              clipdraw=clipdraw,
+              clipbox=clipbox,
+              dispwidth=dispwidth,
+              iterchars=iterchars,
+              wraptext=wraptext)

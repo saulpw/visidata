@@ -1,0 +1,7 @@
+#!vd -p
+{"longname": "open-file", "input": "sample_data/sample.tsv", "keystrokes": "o"}
+{"sheet": "sample", "col": "Units", "row": "", "longname": "type-int", "input": "", "keystrokes": "#", "comment": "set type of current column to int"}
+{"sheet": "sample", "col": "Unit_Cost", "row": "", "longname": "type-float", "input": "", "keystrokes": "%", "comment": "set type of current column to float"}
+{"sheet": "sample", "col": "Total", "row": "", "longname": "type-float", "input": "", "keystrokes": "%", "comment": "set type of current column to float"}
+{"sheet": "sample", "col": "OrderDate", "row": "", "longname": "type-date", "input": "", "keystrokes": "@", "comment": "set type of current column to date"}
+{"sheet": "sample", "col": "", "row": "", "longname": "save-sheet", "input": "tests/golden/save-jsonla.jsonla", "keystrokes": "Ctrl+S", "comment": "save current sheet to filename in format determined by extension (default .tsv)"}

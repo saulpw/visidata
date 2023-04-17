@@ -1,4 +1,7 @@
-from visidata import *
+import os
+import os.path
+
+from visidata import VisiData, vd, Path, BaseSheet, TableSheet, TextSheet, SettableColumn
 
 
 vd.option('filetype', '', 'specify file type', replay=True)
@@ -36,6 +39,38 @@ def _completeFilename(val, state):
 
 
 @VisiData.api
+def guessFiletype(vd, p, funcprefix='guess_'):
+    '''Call all vd.guess_<filetype>(p) functions and return best candidate sheet based on file contents.'''
+
+    guessfuncs = [getattr(vd, x) for x in dir(vd) if x.startswith(funcprefix)]
+    filetypes = []
+    for f in guessfuncs:
+        try:
+            filetype = f(p)
+            if filetype:
+                filetype['_guesser'] = f.__name__
+                filetypes.append(filetype)
+        except FileNotFoundError:
+            pass
+        except Exception as e:
+            vd.debug(f'{f.__name__}: {e}')
+
+    if filetypes:
+        return sorted(filetypes, key=lambda r: -r.get('_likelihood', 1))[0]
+
+    return {}
+
+
+@VisiData.api
+def guess_extension(vd, path):
+    # try auto-detect from extension
+    ext = path.suffix[1:].lower()
+    openfunc = getattr(vd, f'open_{ext}', vd.getGlobals().get(f'open_{ext}'))
+    if openfunc:
+        return dict(filetype=ext, _likelihood=3)
+
+
+@VisiData.api
 def openPath(vd, p, filetype=None, create=False):
     '''Call ``open_<filetype>(p)`` or ``openurl_<p.scheme>(p, filetype)``.  Return constructed but unloaded sheet of appropriate type.
     If True, *create* will return a new, blank **Sheet** if file does not exist.'''
@@ -53,10 +88,7 @@ def openPath(vd, p, filetype=None, create=False):
         return None
 
     if not filetype:
-        if p.is_dir():
-            filetype = 'dir'
-        else:
-            filetype = p.ext or options.filetype or 'txt'
+        filetype = p.ext or vd.options.filetype
 
     filetype = filetype.lower()
 
@@ -71,9 +103,26 @@ def openPath(vd, p, filetype=None, create=False):
         vd.status('creating blank %s' % (p.given))
         return newfunc(p)
 
-    openfunc = getattr(vd, 'open_' + filetype, vd.getGlobals().get('open_' + filetype))
+    openfuncname = 'open_' + filetype
+    openfunc = getattr(vd, openfuncname, vd.getGlobals().get(openfuncname))
     if not openfunc:
+        opts = vd.guessFiletype(p)
+        if opts and 'filetype' in opts:
+            filetype = opts['filetype']
+            openfuncname = 'open_' + filetype
+            openfunc = getattr(vd, openfuncname, vd.getGlobals().get(openfuncname))
+            if not openfunc:
+                vd.error(f'guessed {filetype} but no {openfuncname}')
+
+            vs = openfunc(p)
+            for k, v in opts.items():
+                if k != 'filetype' and not k.startswith('_'):
+                    setattr(vs.options, k, v)
+            vd.warning('guessed "%s" filetype based on contents' % opts['filetype'])
+            return vs
+
         vd.warning('unknown "%s" filetype' % filetype)
+
         filetype = 'txt'
         openfunc = vd.open_txt
 
@@ -86,8 +135,12 @@ def openPath(vd, p, filetype=None, create=False):
 def openSource(vd, p, filetype=None, create=False, **kwargs):
     '''Return unloaded sheet object for *p* opened as the given *filetype* and with *kwargs* as option overrides. *p* can be a Path or a string (filename, url, or "-" for stdin).
     when true, *create* will return a blank sheet, if file does not exist.'''
-    if not filetype:
-        filetype = options.getonly('filetype', 'global', '')
+
+    if isinstance(p, BaseSheet):
+        return p
+
+    filetype = filetype or vd.options.getonly('filetype', str(p), '')  #1710
+    filetype = filetype or vd.options.getonly('filetype', 'global', '')
 
     vs = None
     if isinstance(p, str):
@@ -110,26 +163,34 @@ def openSource(vd, p, filetype=None, create=False, **kwargs):
 @VisiData.api
 def open_txt(vd, p):
     'Create sheet from `.txt` file at Path `p`, checking whether it is TSV.'
-    with p.open_text(encoding=vd.options.encoding) as fp:
-        try:
-            if options.delimiter in next(fp):    # peek at the first line
-                return vd.open_tsv(p)  # TSV often have .txt extension
-        except StopIteration:
-            return Sheet(p.name, columns=[SettableColumn()], source=p)
-        return TextSheet(p.name, source=p)
+    if p.exists(): #1611
+        with p.open_text(encoding=vd.options.encoding) as fp:
+            delimiter = vd.options.delimiter
+            try:
+                if delimiter and delimiter in next(fp):    # peek at the first line
+                    return vd.open_tsv(p)  # TSV often have .txt extension
+            except StopIteration:
+                return TableSheet(p.name, columns=[SettableColumn()], source=p)
+    return TextSheet(p.name, source=p)
 
 
 @VisiData.api
 def loadInternalSheet(vd, cls, p, **kwargs):
-    'Load internal sheet of given class.  Internal sheets are always tsv.'
+    'Load internal sheet of given class.'
     vs = cls(p.name, source=p, **kwargs)
-    options._set('encoding', 'utf8', vs)
+    vd.options._set('encoding', 'utf8', vs)
     if p.exists():
-        vd.sheets.insert(0, vs)
+#        vd.sheets.insert(0, vs) # broke replay with macros.reload()
         vs.reload.__wrapped__(vs)
-        vd.sheets.pop(0)
+#        vd.sheets.pop(0)
     return vs
 
 
 BaseSheet.addCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: "), create=True))', 'Open file or URL')
-TableSheet.addCommand('zo', 'open-cell-file', 'vd.push(openSource(cursorDisplay))', 'Open file or URL from path in current cell')
+TableSheet.addCommand('zo', 'open-cell-file', 'vd.push(openSource(cursorDisplay) or fail(f"file {cursorDisplay} does not exist"))', 'Open file or URL from path in current cell')
+BaseSheet.addCommand('gU', 'undo-last-quit', 'push(allSheets[-1])', 'reopen most recently closed sheet')
+
+vd.addMenuItems('''
+    File > Open file/url > open-file
+    File > Reopen last closed > undo-last-quit
+''')

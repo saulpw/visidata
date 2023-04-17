@@ -1,0 +1,8 @@
+#!vd -p
+{"sheet": "", "col": "", "row": "", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "", "col": "", "row": "", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "", "col": "", "row": "", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "", "col": "", "row": "", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "", "col": "", "row": "", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "", "col": "", "row": "", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "", "col": "", "row": "", "longname": "dup-selected", "input": "", "keystrokes": "\"", "comment": "open duplicate sheet with only selected rows"}

@@ -1,5 +1,146 @@
 # VisiData version history
 
+# v3.x (dev)
+
+- [reorg] move independent modules into visidata/{features|experimental}
+- [modules] include module name in Option/Command sheets
+
+- [loaders] mailbox formats mbox/maildir/mmdf/babyl/mh loader (as supported by Python mailbox stdlib)
+- [loaders] .jrnl format (jrnl.sh) loader+saver
+- [themes] add options.theme and visidata/themes directory of additional themes (light, ascii8, asciimono)
+- [graph] colorbrewer palette chooser (thanks @er1kb)
+- [graph] add commands to open external graph with matplotlib
+- [open-syspaste] create new table from system clipboard #1680
+- [sidebar] add options.disp_sidebar_fmt as default #1685
+- [freq] add select-first command
+- [tests] call all test_func(vd) defined in modules during pytest
+- [features] procmgr to view/manage processes, memory/cpu stats
+- [features] ping to traceroute a hostip
+
+## experimental features (must be imported manually)
+
+- [mark] mark rows to more easily move cursor to them
+- [rownum] addcol-rownum and addcol-delta
+- [slide-cells] shift cells in cursor row to the right
+- [guide] GuideGuide
+
+## bugfixes
+
+- re-entering a subsheet left using quit-sheet-free should reload the subsheet #1679
+- [paste] add new rows to sheet if necessary
+- [reload-every] do not replay
+- [input-] fix ^T swap on empty string #1684
+- [inputsingle-] loop until keystroke (do not timeout)
+- [curses] allow breakpoint() before initwin
+
+
+## api
+
+- [keys] use prettykeys for allPrefixes #1592
+- [menu] vd.addMenuItems with convenient string syntax
+- [modules] vd.importModule, vd.importSubmodules, vd.importStar
+- [vdx] runvdx() to execute vdx strings
+- [tests] add vd.resetVisiData
+
+# v2.11 (2023-01-15)
+
+- [ci] drop support for Python 3.6 (related to https://github.com/actions/setup-python/issues/543)
+- [ci] add support for Python 3.11 (#1585)
+
+- [dirsheet] add `open-dir-parent` (bound to backtick)
+- [join] add new "concat" jointype to behave similar to "append" but keeps first sheet type and columns (requested by @frosencrantz #1598)
+- [zip] add multisave for `.zip` (save each sheet in options.save_filetype format into given .zip file)
+- [sysedit] add `sysedit-selected` (bound to `g Ctrl+O`) (requested by @Delapouite #1596)
+    - edit cells in multiple rows in `$EDITOR`
+    - only handles cell modifications, not added or deleted rows
+
+
+## Improvements
+
+- [aggregators] add 95 and 99 percentile (p95 and p99)
+- [fill-col] speed up `fill-col` for sheets with many empty cells (PR by @midichef #1657)
+- [loaders hdf5] add support for arrays of scalars (requested by @linwaytin #1602)
+- [graph] fail if no numeric xcols are given
+- [open-cell-file] warn when file or url in cell does not exist (requested by @geekscrapy #1540)
+- [sqlite] add passthrough options (reported by @cwarden #1622)
+- [sqlite] add options.sqlite_onconnect to be executed before running any statement (requested by @cwarden #1622)
+- [xml] add passthrough options for xml_parser; default xml_parser_huge_tree=True (PR by @midichef #1668)
+
+## Bugfixes
+
+- [columns] `dup-sheet` now carries over attributes of columns added by `add-column`
+- [columns] **SettableColumn** should not be deferred (reported by @frosencrantz #1568)
+- [customdate] recognise type-customdate as numeric (requested by @tdussa #1613)
+- [describe] fix custom describe aggregators (reported by @edupont #1574)
+- [dirsheet] fix incorrect filename with multiple extensions (reported by @kunliugithub #1571)
+- [display] show `disp_oddspace` for surrogate escapes (reported by @geekscrapy #1544)
+- [graph] fix div-by-zero with only one y-value (reported by @midichef #1673)
+- [install] ensure setuptools files have appropriate permissions (reported by @icp1994 #1591)
+- [install] update data files in setup.py based on PEP 420 (reported by @Oblomov #1675)
+- [keystrokes] add `kDN` and `kUP` to translation table (reported by @djpohly #1336)
+- [loaders html] fix loading of relative links in html table (reported by @frosencrantz #1599)
+- [loaders xlsx] store `None` as empty string in `save_xlsx` (reported and PR by @dbaynard #1626 #1629)
+- [macros] override CLI parsing options for MacrosSheet (reported by @frosencrantz #1607)
+- [macros] query again for keystroke if used by existing macro (#1658)
+- [macros] do not include `nonLogged` commands in macro (reported by @geekscrapy #1569)
+- [macros] add reload for **MacroSheet** (reported by @geekscrapy #1569)
+- [menu] 2x ESC should exit menu
+- [mouse] fix mouse-clicks on statusbar when splitpane is off (reported by @frosencrantz #1625)
+- [numpy] fix loader
+- [open_txt] fix Exception with `open-config` when no `~/.visidatarc` (reported by @gunchev #1611)
+- [pdb] fix entering of pdb breakpoints for Python 3.9+ (reported by @jasonwirth #1317)
+- [sheets] sort all sheets on global **Sheets Sheet** (reported by @franzhuang #1620)
+- [types] format int/vlen as true int (reported by @xlucn #1674)
+- [unzip-http] fix file extraction (`x`) on remote zip file
+- [unzip-http] handle files smaller than 64K (reported by @frosencrantz #1567)
+- [zsh-completion] fixed (reported by @pigmonkey #1583; PR by @Freed-Wu #1646)
+
+## API
+
+- raise Exception from causes in utils.py (PR by @cool-RR #1633)
+- add `HistogramColumn` to allow overrides (requested by @andycraig #1621)
+- easier external numeric types with `@vd.numericType()` decorator (inspired by @s1291 #1394)
+
+- [frequency table] `dive-rows` renamed to `dive-selected`
+
+# v2.10.2 (2022-10-08)
+
+- add .vdx, a simplified new cmdlog format
+- add `-N`/`--nothing` command to disable loading .visidatarc and plugin addons
+- add `addcol-aggr` to add an aggregator column to the **FreqTable** without needing to
+  regenerate it (requested by @geekscrapy #1541)
+
+## Improvements
+
+- [cli] load commandline file arguments from the start (requested by @reagle #1471)
+- [cli] `--config=''` now does not try to load any config
+- [open] rename `zo` `open-cell` command to `open-cell-file`
+- [loaders whl] load python .whl (reported by @frosencrantz #1539)
+
+## Bugfixes
+
+- [cli] fix for empty arg
+- [DirSheet] fix bug where `Enter` no longer opened a file from the **DirSheet** (reported by @frosencrantz #1527)
+- [input paste] fix pasting via a Path via `Ctrl+Y`  into input (reported by @frosencrantz #1546)
+- [menu] allow VisiData to run without menu
+- [mouse] catch any curses.getmouse() errors (reported by @geekscrapy #1553)
+- [performance] allow vd to be truly idle (reported by WizzardUU #1532)
+- [plugins_autoload] catch error for environment having invalid package metadata (reported by @jsdealy #1529)
+- [plugins_autoload] catch exception if plugin fails to load
+- [plugins-autoload] fix check for if plugins_autoload is set in args
+- [plugins-autoload] update for importlib-metadata 5.0 API (reported by @jkerhin #1550)
+- [pyobj] undo rename of `open-row`/`open-cell` (were renamed to `open-X-pyobj`) (revert of eff9833e6A)
+- [sheets] ensure IndexSheets are precious, and that **SheetsSheet** is not (reported by @frosencrantz #1547)
+- [unzip-http] extracting a file now checks for overwrite (reported by @frosencrantz #1452)
+- [windows clipboard] fix piping to clip command through stdin (thanks @daviewales for the fix; reported by @pshangov #1431)
+
+## API
+
+- expose `CommandLogBase` (was `_CommandLog`)
+- [options] allow FooSheet.options instead of .class_options
+- add seperate non-async `select_row`, `toggle_row`, and `unselect_row` for selection of single rows
+- the before/after decorators now do not fail if api functions they are decorating do not already exist
+
 # v2.10.1 (2022-09-14)
 
 ## Improvements

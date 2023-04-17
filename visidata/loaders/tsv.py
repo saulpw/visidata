@@ -5,7 +5,7 @@ import collections
 import math
 import time
 
-from visidata import vd, asyncthread, options, Progress, ColumnItem, SequenceSheet, Sheet, FileExistsError, getType, VisiData
+from visidata import vd, asyncthread, options, Progress, ColumnItem, SequenceSheet, Sheet, VisiData
 from visidata import namedlist, filesize
 
 vd.option('delimiter', '\t', 'field delimiter to use for tsv/usv filetype', replay=True)
@@ -51,18 +51,20 @@ def adaptive_bufferer(fp, max_buffer_size=65536):
             buffer_size = math.ceil(min(processed_buffer_size / current_delta, max_buffer_size))
             processed_buffer_size = 0
 
-
 def splitter(stream, delim='\n'):
-    'Generates one line/row/record at a time from fp, separated by delim'
+    'Generates one line/row/record at a time from stream, separated by delim'
 
-    buffer = ''
+    buf = type(delim)()
+
     for chunk in stream:
-        buffer += chunk
+        buf += chunk
 
-        *rows, buffer = buffer.split(delim)
+        *rows, buf = buf.split(delim)
         yield from rows
 
-    yield from buffer.rstrip(delim).split(delim)
+    buf = buf.rstrip(delim)  # trim empty trailing lines
+    if buf:
+        yield from buf.rstrip(delim).split(delim)
 
 
 # rowdef: list
@@ -74,7 +76,7 @@ class TsvSheet(SequenceSheet):
         delim = self.delimiter or self.options.delimiter
         rowdelim = self.row_delimiter or self.options.row_delimiter
 
-        with self.source.open_text(encoding=self.options.encoding) as fp:
+        with self.source.open_text(encoding=self.options.save_encoding) as fp:
                 for line in splitter(adaptive_bufferer(fp), rowdelim):
                     if not line:
                         continue
@@ -95,7 +97,7 @@ def save_tsv(vd, p, vs, delimiter='', row_delimiter=''):
     rowsep = row_delimiter or vs.options.row_delimiter
     trdict = vs.safe_trdict()
 
-    with p.open_text(mode='w', encoding=vs.options.encoding) as fp:
+    with p.open_text(mode='w', encoding=vs.options.save_encoding) as fp:
         colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + rowsep
         fp.write(colhdr)
 

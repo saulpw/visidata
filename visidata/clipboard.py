@@ -5,19 +5,24 @@ import io
 import sys
 import tempfile
 import functools
+import os
 
 from visidata import VisiData, vd, asyncthread
 from visidata import Sheet, Path
 
 if sys.platform == 'win32':
-    syscopy_cmd_default = 'clip'
-    syspaste_cmd_default = 'clip'
+    syscopy_cmd_default = 'clip.exe'
+    syspaste_cmd_default = 'clip.exe'
 elif sys.platform == 'darwin':
     syscopy_cmd_default = 'pbcopy w'
     syspaste_cmd_default = 'pbpaste'
 else:
-    syscopy_cmd_default = 'xclip -selection clipboard -filter'  # xsel --clipboard --input
-    syspaste_cmd_default = 'xclip -selection clipboard -o'  # xsel --clipboard
+    if 'WAYLAND_DISPLAY' in os.environ:
+        syscopy_cmd_default = 'wl-copy'
+        syspaste_cmd_default = 'wl-paste'
+    else:
+        syscopy_cmd_default = 'xclip -selection clipboard -filter'  # xsel --clipboard --input
+        syspaste_cmd_default = 'xclip -selection clipboard -o'  # xsel --clipboard
 
 vd.option('clipboard_copy_cmd', syscopy_cmd_default, 'command to copy stdin to system clipboard', sheettype=None)
 vd.option('clipboard_paste_cmd', syspaste_cmd_default, 'command to send contents of system clipboard to stdout', sheettype=None)
@@ -79,7 +84,7 @@ def syscopyCells_async(sheet, cols, rows, filetype):
 
 
 @VisiData.api
-def sysclip_value(vd):
+def sysclipValue(vd):
     cmd = vd.options.clipboard_paste_cmd
     return subprocess.check_output(vd.options.clipboard_paste_cmd.split()).decode('utf-8')
 
@@ -87,11 +92,21 @@ def sysclip_value(vd):
 @VisiData.api
 @asyncthread
 def pasteFromClipboard(vd, cols, rows):
-    text = vd.getLastArgs() or vd.sysclip_value().strip() or vd.fail('system clipboard is empty')
+    text = vd.getLastArgs() or vd.sysclipValue().strip() or vd.fail('system clipboard is empty')
 
     vd.addUndoSetValues(cols, rows)
+    lines = text.split('\n')
+    if not lines:
+        vd.warning('nothing to paste')
+        return
 
-    for line, r in zip(text.split('\n'), rows):
+    vs = cols[0].sheet
+    newrows = [vs.newRow() for i in range(len(lines)-len(rows))]
+    if newrows:
+        rows.extend(newrows)
+        vs.addRows(newrows)
+
+    for line, r in zip(lines, rows):
         for v, c in zip(line.split('\t'), cols):
             c.setValue(r, v)
 
@@ -114,6 +129,9 @@ def delete_row(sheet, rowidx):
 
 @Sheet.api
 def paste_after(sheet, rowidx):
+    if not vd.memory.cliprows:  #1793
+        vd.warning('nothing to paste')
+        return
     to_paste = list(deepcopy(r) for r in reversed(vd.memory.cliprows))
     sheet.addRows(to_paste, index=rowidx)
 
@@ -157,3 +175,27 @@ Sheet.addCommand('gzx', 'cut-cells', 'copyCells(cursorCol, onlySelectedRows); cu
 
 Sheet.bindkey('KEY_DC', 'delete-cell'),
 Sheet.bindkey('gKEY_DC', 'delete-cells'),
+
+vd.addMenuItems('''
+    Edit > Delete > current row > delete-row
+    Edit > Delete > current cell > delete-cell
+    Edit > Delete > selected rows > delete-selected
+    Edit > Delete > selected cells > delete-cells
+    Edit > Copy > current cell > copy-cell
+    Edit > Copy > current row > copy-row
+    Edit > Copy > selected cells > copy-cells
+    Edit > Copy > selected rows > copy-selected
+    Edit > Copy > to system clipboard > current cell > syscopy-cell
+    Edit > Copy > to system clipboard > current row > syscopy-row
+    Edit > Copy > to system clipboard > selected cells > syscopy-cells
+    Edit > Copy > to system clipboard > selected rows > syscopy-selected
+    Edit > Cut > current row > cut-row
+    Edit > Cut > selected cells > cut-selected
+    Edit > Cut > current cell > cut-cell
+    Edit > Paste > row after > paste-after
+    Edit > Paste > row before > paste-before
+    Edit > Paste > into selected cells > setcol-clipboard
+    Edit > Paste > into current cell > paste-cell
+    Edit > Paste > from system clipboard > cells at cursor > syspaste-cells
+    Edit > Paste > from system clipboard > selected cells > syspaste-cells-selected
+''')

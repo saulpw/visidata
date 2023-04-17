@@ -1,5 +1,6 @@
 import string
 import textwrap
+import curses
 
 from visidata import *
 
@@ -75,6 +76,21 @@ def addMenuItem(vd, *args):
 
 
 @VisiData.api
+def addMenuItems(vd, *itemgroups):
+    '''Add any number of commands to menu, separated by lines, with individual menupaths separated by '>' character.  Example:
+        vd.addMenuItems("""
+            Help > About > credits > show-credits
+            Help > About > environment > show-env
+        """)
+    '''
+    for itemgroup in itemgroups:
+        for itemline in itemgroup.splitlines():
+            if not itemline: continue
+            menupath = [x.strip() for x in itemline.split('>')]
+            vd.addMenuItem(*menupath)
+
+
+@VisiData.api
 def addMenu(vd, *args):
     '''Incorporate submenus and commands into hierarchical menu.  Wrap all in Menu() objects.  Example:
 
@@ -93,6 +109,13 @@ def addMenu(vd, *args):
                 obj.menus.append(c)
             obj = c
         obj.longname = item.longname
+        if vd.importingModule == 'menufinal':
+            cmd = vd.getGlobals()['Sheet']().getCommand(item.longname)
+            s = ' > '.join([*menupath, obj.longname])
+            if cmd:
+                open(f'visidata/{cmd.module}.py', mode='a').write(s + '\n')
+            else:
+                print(cmd.module if cmd else '', s)
 
 
 def _intMenuPath(obj, menupath):
@@ -110,370 +133,19 @@ def _intMenuPath(obj, menupath):
 
     return [i] + _intMenuPath(obj.menus[i], menupath[1:])
 
+vd.menus = []
 
-vd.menus = [
-    Menu('File',
-        Menu('New', 'open-new'),
-        Menu('Open file/url', 'open-file'),
-        Menu('Rename', 'rename-sheet'),
-        Menu('Guard', 
-            Menu('on', 'guard-sheet'),
-            Menu('off', 'guard-sheet-off')
-        ),
-        Menu('Duplicate',
-            Menu('selected rows by ref', 'dup-selected'),
-            Menu('all rows by ref', 'dup-rows'),
-            Menu('selected rows deep', 'dup-selected-deep'),
-            Menu('all rows deep', 'dup-rows-deep'),
-        ),
-        Menu('Freeze', 'freeze-sheet'),
-        Menu('Save',
-            Menu('current sheet', 'save-sheet'),
-            Menu('all sheets', 'save-all'),
-            Menu('current column', 'save-col'),
-            Menu('keys and current column', 'save-col-keys'),
-        ),
-        Menu('Commit', 'commit-sheet'),
-        Menu('Reload', 'reload-sheet'),
-        Menu('Options',
-            Menu('all sheets', 'options-global'),
-            Menu('this sheet', 'options-sheet'),
-            Menu('edit config file', 'open-config'),
-        ),
-        Menu('Quit',
-            Menu('top sheet', 'quit-sheet'),
-            Menu('all sheets', 'quit-all'),
-        ),
-    ),
-
-    Menu('Edit',
-        Menu('Undo', 'undo-last'),
-        Menu('Redo', 'redo-last'),
-        Menu('Add rows', 'add-rows'),
-        Menu('Modify',
-            Menu('current cell',
-                Menu('input', 'edit-cell'),
-                Menu('Python expression', 'setcell-expr'),
-            ),
-            Menu('selected cells',
-                Menu('from input', 'setcol-input'),
-                Menu('increment', 'setcol-incr'),
-                Menu('Python sequence', 'setcol-expr'),
-                Menu('regex substitution', 'setcol-subst'),
-            ),
-        ),
-        Menu('Slide',
-            Menu('Row',
-                Menu('up', 'slide-up'),
-                Menu('up N', 'slide-up-n'),
-                Menu('down', 'slide-down'),
-                Menu('down N', 'slide-down-n'),
-                Menu('to top', 'slide-top'),
-                Menu('to bottom', 'slide-bottom'),
-            ),
-            Menu('Column',
-                Menu('left', 'slide-left'),
-                Menu('left N', 'slide-left-n'),
-                Menu('leftmost', 'slide-leftmost'),
-                Menu('right', 'slide-right'),
-                Menu('right N', 'slide-right-n'),
-                Menu('rightmost', 'slide-rightmost'),
-            ),
-        ),
-        Menu('Delete',
-            Menu('current row', 'delete-row'),
-            Menu('current cell', 'delete-cell'),
-            Menu('selected rows', 'delete-selected'),
-            Menu('selected cells', 'delete-cells'),
-            Menu('under cursor', 'delete-cursor'),
-#            Menu('Visible rows ', 'delete-visible'),
-        ),
-        Menu('Copy',
-            Menu('current cell', 'copy-cell'),
-            Menu('current row', 'copy-row'),
-            Menu('selected cells', 'copy-cells'),
-            Menu('selected rows', 'copy-selected'),
-            Menu('to system clipboard',
-                Menu('current cell', 'syscopy-cell'),
-                Menu('current row', 'syscopy-row'),
-                Menu('selected cells', 'syscopy-cells'),
-                Menu('selected rows', 'syscopy-selected'),
-            ),
-        ),
-        Menu('Cut',
-            Menu('current row', 'cut-row'),
-            Menu('selected cells', 'cut-selected'),
-            Menu('current cell', 'cut-cell'),
-        ),
-        Menu('Paste',
-            Menu('row after', 'paste-after'),
-            Menu('row before', 'paste-before'),
-            Menu('into selected cells', 'setcol-clipboard'),
-            Menu('into current cell', 'paste-cell'),
-            Menu('from system clipboard',
-                Menu('cells at cursor', 'syspaste-cells'),
-                Menu('selected cells', 'syspaste-cells-selected'),
-            ),
-        ),
-    ),
-
-    Menu('View',
-        Menu('Statuses', 'open-statuses'),
-        Menu('Plugins', 'open-plugins'),
-        Menu('Other sheet',
-            Menu('previous sheet', 'jump-prev'),
-            Menu('first sheet', 'jump-first'),
-            Menu('source sheet', 'jump-source'),
-        ),
-        Menu('Sheets',
-            Menu('stack', 'sheets-stack'),
-            Menu('all', 'sheets-all'),
-        ),
-        Menu('Command log',
-            Menu('this sheet', 'cmdlog-sheet'),
-            Menu('this sheet only', 'cmdlog-sheet-only'),
-            Menu('all commands', 'cmdlog-all'),
-        ),
-        Menu('Columns',
-            Menu('this sheet', 'columns-sheet'),
-            Menu('all sheets', 'columns-all'),
-        ),
-        Menu('Errors',
-            Menu('recent', 'error-recent'),
-            Menu('all', 'errors-all'),
-            Menu('in cell', 'error-cell'),
-        ),
-        Menu('Search',
-            Menu('current column', 'search-col'),
-            Menu('visible columns', 'search-cols'),
-            Menu('key columns', 'search-keys'),
-            Menu('by Python expr', 'search-expr'),
-            Menu('again', 'search-next'),
-        ),
-        Menu('Search backward',
-            Menu('current column', 'searchr-col'),
-            Menu('visible columns', 'searchr-cols'),
-            Menu('key columns', 'searchr-keys'),
-            Menu('by Python expr', 'searchr-expr'),
-            Menu('again', 'searchr-next'),
-        ),
-        Menu('Split pane',
-            Menu('in half', 'splitwin-half'),
-            Menu('in percent', 'splitwin-input'),
-            Menu('unsplit', 'splitwin-close'),
-            Menu('swap panes', 'splitwin-swap-pane'),
-            Menu('goto other pane', 'splitwin-swap'),
-        ),
-        Menu('Visibility',
-            Menu('Methods and dunder attributes',
-                Menu('show', 'show-hidden'),
-                Menu('hide', 'hide-hidden'),
-            ),
-        ),
-        Menu('Refresh screen', 'redraw'),
-    ),
-    Menu('Column',
-        Menu('Hide', 'hide-col'),
-        Menu('Unhide all', 'unhide-cols'),
-        Menu('Goto',
-            Menu('by number', 'go-col-number'),
-            Menu('by name', 'go-col-regex'),
-        ),
-        Menu('Resize',
-            Menu('half', 'resize-col-half'),
-            Menu('current column to max', 'resize-col-max'),
-            Menu('current column to input', 'resize-col-input'),
-            Menu('all columns max', 'resize-cols-max'),
-        ),
-        Menu('Rename',
-            Menu('current column', 'rename-col'),
-            Menu('from selected cells',
-                Menu('current column', 'rename-col-selected'),
-                Menu('unnamed columns', 'rename-cols-row'),
-                Menu('all columns', 'rename-cols-selected'),
-            ),
-        ),
-        Menu('Type as',
-            Menu('anytype', 'type-any'),
-            Menu('string', 'type-string'),
-            Menu('integer', 'type-int'),
-            Menu('float', 'type-float'),
-            Menu('SI float', 'type-floatsi'),
-            Menu('locale float', 'type-floatlocale'),
-            Menu('dirty float', 'type-currency'),
-            Menu('date', 'type-date'),
-            Menu('custom date format', 'type-customdate'),
-            Menu('length', 'type-len'),
-        ),
-        Menu('Key',
-            Menu('toggle current column', 'key-col'),
-            Menu('unkey current column', 'key-col-off'),
-        ),
-        Menu('Sort by',
-            Menu('current column only',
-                Menu('ascending', 'sort-asc'),
-                Menu('descending', 'sort-desc'),
-            ),
-            Menu('current column too',
-                Menu('ascending', 'sort-asc-add'),
-                Menu('descending', 'sort-desc-add'),
-            ),
-            Menu('key columns',
-                Menu('ascending', 'sort-keys-asc'),
-                Menu('descending', 'sort-keys-desc'),
-            ),
-        ),
-        Menu('Add column',
-            Menu('empty',
-                Menu('one column', 'addcol-new'),
-                Menu('columns', 'addcol-bulk'),
-            ),
-            Menu('capture by regex', 'addcol-capture'),
-            Menu('split by regex', 'addcol-split'),
-            Menu('subst by regex', 'addcol-subst'),
-            Menu('Python expr', 'addcol-expr'),
-            Menu('increment', 'addcol-incr'),
-            Menu('shell', 'addcol-shell'),
-        ),
-        Menu('Expand',
-            Menu('one level', 'expand-col'),
-            Menu('to depth', 'expand-col-depth'),
-            Menu('all columns one level', 'expand-cols'),
-            Menu('all columns to depth', 'expand-cols-depth'),
-        ),
-        Menu('Contract', 'contract-col'),
-        Menu('Split', 'split-col'),
-        Menu('Add aggregator', 'aggregate-col'),
-        Menu('Fill', 'setcol-fill'),
-        Menu('Freeze', 'freeze-col'),
-    ),
-
-    Menu('Row',
-        Menu('Dive into', 'open-row'),
-        Menu('Goto',
-            Menu('top', 'go-top'),
-            Menu('bottom', 'go-bottom'),
-            Menu('previous',
-                Menu('page', 'go-pageup'),
-                Menu('null', 'go-prev-null'),
-                Menu('value', 'go-prev-value'),
-                Menu('selected', 'go-prev-selected'),
-            ),
-            Menu('next',
-                Menu('page', 'go-pagedown'),
-                Menu('null', 'go-next-null'),
-                Menu('value', 'go-next-value'),
-                Menu('selected', 'go-next-selected'),
-            ),
-        ),
-        Menu('Select',
-            Menu('current row', 'select-row'),
-            Menu('all rows', 'select-rows'),
-            Menu('from top', 'select-before'),
-            Menu('to bottom', 'select-after'),
-            Menu('by Python expr', 'select-expr'),
-            Menu('by regex',
-                Menu('current column', 'select-col-regex'),
-                Menu('all columns', 'select-cols-regex'),
-            ),
-            Menu('equal to current cell', 'select-equal-cell'),
-            Menu('equal to current row', 'select-equal-row'),
-            Menu('errors',
-                Menu('current column', 'select-error-col'),
-                Menu('any column', 'select-error'),
-            ),
-        ),
-        Menu('Unselect',
-            Menu('current row', 'unselect-row'),
-            Menu('all rows', 'unselect-rows'),
-            Menu('from top', 'unselect-before'),
-            Menu('to bottom', 'unselect-after'),
-            Menu('by Python expr', 'unselect-expr'),
-            Menu('by regex',
-                Menu('current column', 'unselect-col-regex'),
-                Menu('all columns', 'unselect-cols-regex'),
-            ),
-        ),
-        Menu('Toggle select',
-            Menu('current row', 'stoggle-row'),
-            Menu('all rows', 'stoggle-rows'),
-            Menu('from top', 'stoggle-before'),
-            Menu('to bottom', 'stoggle-after'),
-        ),
-    ),
-
-    Menu('Data',
-        Menu('Transpose', 'transpose'),
-        Menu('Frequency table',
-            Menu('current column', 'freq-col'),
-            Menu('key columns', 'freq-keys'),
-        ),
-        Menu('Statistics', 'describe-sheet'),
-        Menu('Pivot', 'pivot'),
-        Menu('Unfurl column', 'unfurl-col'),
-        Menu('Melt',
-            Menu('nonkey columns', 'melt'),
-            Menu('nonkey columns by regex', 'melt-regex'),
-        ),
-        Menu('Join',
-            Menu('top two sheets', 'join-sheets-top2'),
-            Menu('all sheets', 'join-sheets-all'),
-        ),
-    ),
-
-    Menu('Plot',
-        Menu('Graph',
-            Menu('current column', 'plot-column'),
-            Menu('all numeric columns', 'plot-numerics'),
-        ),
-        Menu('Resize cursor',
-            Menu('height',
-                Menu('double', 'resize-cursor-doubleheight'),
-                Menu('half','resize-cursor-halfheight'),
-                Menu('shorter','resize-cursor-shorter'),
-                Menu('taller','resize-cursor-taller'),
-            ),
-            Menu('width',
-                Menu('double', 'resize-cursor-doublewide'),
-                Menu('half','resize-cursor-halfwide'),
-                Menu('thinner','resize-cursor-thinner'),
-                Menu('wider','resize-cursor-wider'),
-            ),
-        ),
-        Menu('Resize graph',
-            Menu('X axis', 'resize-x-input'),
-            Menu('Y axis', 'resize-y-input'),
-            Menu('aspect ratio', 'set-aspect'),
-        ),
-        Menu('Zoom',
-            Menu('out', 'zoomout-cursor'),
-            Menu('in', 'zoomin-cursor'),
-            Menu('cursor', 'zoom-all'),
-        ),
-        Menu('Dive into cursor', 'dive-cursor'),
-    ),
-    Menu('System',
-        Menu('Macros sheet', 'macro-sheet'),
-        Menu('Threads sheet', 'threads-all'),
-        Menu('Execute longname', 'exec-longname'),
-        Menu('Python',
-            Menu('import library', 'import-python'),
-            Menu('current sheet', 'pyobj-sheet'),
-            Menu('current row', 'pyobj-row'),
-            Menu('current cell', 'pyobj-cell'),
-            Menu('expression', 'pyobj-expr'),
-            Menu('exec()', 'exec-python'),
-        ),
-        Menu('Toggle profiling', 'toggle-profile'),
-        Menu('Suspend to shell', 'suspend'),
-    ),
-]
-
-vd.addMenu(Menu('Help',
-        Menu('Quick reference', 'sysopen-help'),
-        Menu('Command list', 'help-commands'),
-        Menu('Version', 'show-version'),
-    ))
+vd.addMenu(
+    Menu('File'),
+    Menu('Edit'),
+    Menu('View'),
+    Menu('Column'),
+    Menu('Row'),
+    Menu('Data'),
+    Menu('Plot'),
+    Menu('System'),
+    Menu('Help')
+)
 
 
 @BaseSheet.api
@@ -556,7 +228,7 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
         menudraw(scr, y+i, x+2+w, titlenote, attr)
         menudraw(scr, y+i, x+3+w, ls, colors.color_menu)
 
-        vd.onMouse(scr, y+i, x, 1, w+3,
+        vd.onMouse(scr, x, y+i, w+3, 1,
                 BUTTON1_PRESSED=lambda y,x,key,p=sheet.activeMenuItems[:level]+[j]: sheet.pressMenu(*p),
                 BUTTON2_PRESSED=vd.nop,
                 BUTTON3_PRESSED=vd.nop,
@@ -571,6 +243,11 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
 @VisiData.api
 def nop(vd, *args, **kwargs):
     return False
+
+
+def _done(vd, *args, **kwargs):
+    'Accept and execute current menu item (like pressing Enter).'
+    return True
 
 
 @BaseSheet.property
@@ -629,7 +306,7 @@ def drawMenu(vd, scr, sheet):
             menudraw(scr, 0, x+j+1, ch, attr | (curses.A_UNDERLINE if ch.isupper() else 0))
         menudraw(scr, 0, x+j+2, ' ', attr)
 
-        vd.onMouse(scr, 0, x, 1, len(item.title)+2,
+        vd.onMouse(scr, x, 0, dispwidth(item.title)+2, 1,
                 BUTTON1_PRESSED=lambda y,x,key,i=i,sheet=sheet: sheet.pressMenu(i),
                 BUTTON2_PRESSED=vd.nop,
                 BUTTON3_PRESSED=vd.nop,
@@ -638,7 +315,6 @@ def drawMenu(vd, scr, sheet):
                 BUTTON2_RELEASED=vd.nop,
                 BUTTON3_RELEASED=vd.nop)
         x += len(item.title)+2
-
 
     rightdisp = sheet.options.disp_menu_fmt.format(sheet=sheet, vd=vd)
     menudraw(scr, 0, x+4, rightdisp, colors.color_menu)
@@ -695,6 +371,13 @@ def drawMenu(vd, scr, sheet):
         menudraw(scr, menuy, helpx+2+len(ks)+3, lsr, helpattr)
     menudraw(scr, menuy, helpx+19, ' '+cmd.longname+' ', helpattr)
 
+    vd.onMouse(scr, helpx, menuy, helpw, y-menuy+1,
+               BUTTON1_PRESSED=_done,
+               BUTTON1_CLICKED=_done,
+               BUTTON1_RELEASED=vd.nop,
+               BUTTON2_RELEASED=vd.nop,
+               BUTTON3_RELEASED=vd.nop)
+
 
 @BaseSheet.api
 def pressMenu(sheet, *args):
@@ -733,6 +416,15 @@ def runMenu(vd):
     vd.setWindows(vd.scrFull)
     nEscapes = 0
 
+    def _clickedDuringMenu():
+        r = vd.parseMouse(menu=vd.scrMenu, top=vd.winTop, bot=vd.winBottom)
+        f = vd.getMouse(r.x, r.y, r.keystroke)
+        if f:
+            if f(r.y, r.x, r.keystroke):  # call each function until one returns a true-ish value
+                return 'doit'
+        else:
+            return 'offmenu'
+
     try:
       while True:
         if len(sheet.activeMenuItems) < 2:
@@ -742,26 +434,28 @@ def runMenu(vd):
 
         k = vd.getkeystroke(vd.scrMenu, sheet)
 
+        if not k:
+            continue
+
         currentItem = getMenuItem(sheet)
 
         if k == '^[':  # ESC
             nEscapes += 1  #1470
+            if nEscapes > 1:
+                return
+            continue
         else:
             nEscapes = 0
 
-        if nEscapes > 1 or k in ['^C', '^Q', 'q']:
+        if k in ['^C', '^Q', 'q']:
             return
 
         elif k in ['KEY_MOUSE']:
-            keystroke, y, x, winname, winscr = vd.parseMouse(menu=vd.scrMenu, top=vd.winTop, bot=vd.winBottom)
-            if winname != 'menu':  # clicking off the menu is an escape
-                return
-            f = vd.getMouse(winscr, x, y, keystroke)
-            if f:
-                if f(y, x, keystroke):
-                    break
-            else:
-                return
+            r = _clickedDuringMenu()
+            if r == 'offmenu':
+                return  # clicking off the menu is an escape
+            elif r == 'doit':
+                break
 
         elif k in ['KEY_RIGHT', 'l']:
             if currentItem.menus and sheet.activeMenuItems[1] != 0:  # not first item
@@ -790,6 +484,8 @@ def runMenu(vd):
         elif k in main_menu.keys():
             sheet.pressMenu(main_menu[k])
 
+        else:
+            vd.warning(f'unknown keystroke {k}')
 
         sheet.checkMenu()
 
@@ -803,16 +499,16 @@ def runMenu(vd):
 
 main_menu = {'f': 'File', 'e': 'Edit', 'v': 'View', 'c': 'Column', 'r': 'Row', 'd': 'Data', 'p': 'Plot', 's': 'System', 'h': 'Help'}
 
-BaseSheet.addCommand('^[f', 'menu-file', 'pressMenu("File")', '')
-BaseSheet.addCommand('^[e', 'menu-edit', 'pressMenu("Edit")', '')
-BaseSheet.addCommand('^[v', 'menu-view', 'pressMenu("View")', '')
-BaseSheet.addCommand('^[c', 'menu-column', 'pressMenu("Column")', '')
-BaseSheet.addCommand('^[r', 'menu-row', 'pressMenu("Row")', '')
-BaseSheet.addCommand('^[d', 'menu-data', 'pressMenu("Data")', '')
-BaseSheet.addCommand('^[p', 'menu-plot', 'pressMenu("Plot")', '')
-BaseSheet.addCommand('^[s', 'menu-system', 'pressMenu("System")', '')
-BaseSheet.addCommand('^[h', 'menu-help', 'pressMenu("Help")', '')
-BaseSheet.bindkey('^H', 'menu-help')
+BaseSheet.addCommand('Alt+f', 'menu-file', 'pressMenu("File")', '')
+BaseSheet.addCommand('Alt+e', 'menu-edit', 'pressMenu("Edit")', '')
+BaseSheet.addCommand('Alt+v', 'menu-view', 'pressMenu("View")', '')
+BaseSheet.addCommand('Alt+c', 'menu-column', 'pressMenu("Column")', '')
+BaseSheet.addCommand('Alt+r', 'menu-row', 'pressMenu("Row")', '')
+BaseSheet.addCommand('Alt+d', 'menu-data', 'pressMenu("Data")', '')
+BaseSheet.addCommand('Alt+p', 'menu-plot', 'pressMenu("Plot")', '')
+BaseSheet.addCommand('Alt+s', 'menu-system', 'pressMenu("System")', '')
+BaseSheet.addCommand('Alt+h', 'menu-help', 'pressMenu("Help")', '')
+BaseSheet.bindkey('Ctrl+H', 'menu-help')
 BaseSheet.bindkey('KEY_BACKSPACE', 'menu-help')
 
 vd.addGlobals({'Menu': Menu})

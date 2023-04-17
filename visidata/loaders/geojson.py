@@ -1,7 +1,10 @@
 from functools import reduce
+from copy import deepcopy
+
 import json
 
-from visidata import VisiData, vd, Column, asyncthread, Progress, PythonSheet, InvertedCanvas, deepcopy, date, wrapply, TypedExceptionWrapper, TypedWrapper
+from visidata import VisiData, vd, Column, asyncthread, Progress, PythonSheet, InvertedCanvas, date, wrapply, TypedExceptionWrapper, TypedWrapper
+
 
 
 @VisiData.api
@@ -16,12 +19,13 @@ class GeoJSONColumn(Column):
         properties = row.setdefault('properties', {})
         properties[self.expr] = val
 
+
 class GeoJSONSheet(PythonSheet):
     rowtype = 'shapes'
+    columns = [Column('json_row', width=0)]
 
     def iterload(self):
         self.colnames = {}
-        self.columns = [Column('json_row', width=0)]
 
         with self.source.open_text(encoding='utf-8') as fp:
             ret = json.load(fp)

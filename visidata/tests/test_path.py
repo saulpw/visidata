@@ -1,3 +1,4 @@
+import io
 import pytest
 
 from visidata import Path
@@ -24,3 +25,11 @@ class TestVisidataPath:
         assert Path('foo.').name == 'foo.'
         assert Path('.foo').ext == ''
         assert Path('.foo').name == '.foo'
+
+
+    def test_opentwice(self):
+        'fresh iterator for each open_text'
+        p = Path('test', fptext=io.StringIO('<html>'))
+        a = next(p.open_text())
+        b = next(p.open_text())
+        assert a == b

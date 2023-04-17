@@ -1,7 +1,9 @@
 import itertools
 import copy
+import datetime
 
-from visidata import VisiData, vd, Sheet, Column, Progress, IndexSheet, ColumnAttr, SequenceSheet, AttrDict, AttrColumn, date, datetime
+from visidata import VisiData, vd, Sheet, Column, Progress, IndexSheet, ColumnAttr, SequenceSheet, AttrDict, AttrColumn
+from visidata.type_date import date
 
 
 vd.option('xlsx_meta_columns', False, 'include columns for cell objects, font colors, and fill colors', replay=True)
@@ -27,7 +29,7 @@ class XlsxIndexSheet(IndexSheet):
     nKeys = 1
 
     def iterload(self):
-        import openpyxl
+        openpyxl = vd.importExternal('openpyxl')
         self.workbook = openpyxl.load_workbook(str(self.source), data_only=True, read_only=True)
         for sheetname in self.workbook.sheetnames:
             src = self.workbook[sheetname]
@@ -37,6 +39,7 @@ class XlsxIndexSheet(IndexSheet):
 class XlsxSheet(SequenceSheet):
     # rowdef: AttrDict of column_letter to cell
     def setCols(self, headerrows):
+        vd.importExternal('openpyxl')
         from openpyxl.utils.cell import get_column_letter
         self.columns = []
         self._rowtype = AttrDict
@@ -63,6 +66,7 @@ class XlsxSheet(SequenceSheet):
             self.addXlsxMetaColumns(column_letter, column_letter)
 
     def iterload(self):
+        vd.importExternal('openpyxl')
         from openpyxl.utils.cell import get_column_letter
         worksheet = self.source
         for row in Progress(worksheet.iter_rows(), total=worksheet.max_row or 0):
@@ -95,7 +99,7 @@ class XlsIndexSheet(IndexSheet):
     ]
     nKeys = 1
     def iterload(self):
-        import xlrd
+        xlrd = vd.importExternal('xlrd')
         self.workbook = xlrd.open_workbook(str(self.source))
         for sheetname in self.workbook.sheet_names():
             yield XlsSheet(self.name, sheetname, source=self.workbook.sheet_by_name(sheetname))
@@ -121,7 +125,7 @@ def xls_name(vs):
 
 @VisiData.api
 def save_xlsx(vd, p, *sheets):
-    import openpyxl
+    openpyxl = vd.importExternal('openpyxl')
 
     wb = openpyxl.Workbook()
     wb.remove_sheet(wb['Sheet'])
@@ -138,7 +142,9 @@ def save_xlsx(vd, p, *sheets):
 
             row = []
             for col, v in dispvals.items():
-                if col.type == date:
+                if v is None:
+                    v = ""
+                elif col.type == date:
                     v = datetime.datetime.fromtimestamp(int(v.timestamp()))
                 elif not vd.isNumeric(col):
                     v = str(v)
@@ -154,7 +160,7 @@ def save_xlsx(vd, p, *sheets):
 
 @VisiData.api
 def save_xls(vd, p, *sheets):
-    import xlwt
+    xlwt = vd.importExternal('xlwt')
 
     wb = xlwt.Workbook()
 

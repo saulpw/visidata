@@ -1,5 +1,5 @@
 import functools
-from visidata import clipdraw, colors, BaseSheet, VisiData, VisiDataMetaSheet, vd, EscapeException, AttrDict, ENTER
+from visidata import clipdraw, colors, BaseSheet, VisiData, VisiDataMetaSheet, vd, EscapeException, AttrDict, ENTER, dispwidth
 
 
 @VisiData.api
@@ -43,7 +43,7 @@ class FormCanvas(BaseSheet):
             if hasattr(r, 'underline') and r.underline:
                 index = r.text.find(r.underline)
                 clipdraw(scr, y, x+index, r.text[index:len(r.underline)+1], colors[r.color + " underline"])
-            vd.onMouse(scr, y, x, 1, len(r.text), BUTTON1_RELEASED=lambda y,x,key,r=r,sheet=self: sheet.click(r))
+            vd.onMouse(scr, x, y, dispwidth(r.text), 1, BUTTON1_RELEASED=lambda y,x,key,r=r,sheet=self: sheet.click(r))
 
     def run(self, scr):
         vd.setWindows(vd.scrFull)
@@ -74,7 +74,7 @@ class FormCanvas(BaseSheet):
 @VisiData.api
 def confirm(vd, prompt, exc=EscapeException):
     'Display *prompt* on status line and demand input that starts with "Y" or "y" to proceed.  Raise *exc* otherwise.  Return True.'
-    if vd.options.batch:
+    if vd.options.batch and not vd.options.interactive:
         return vd.fail('cannot confirm in batch mode: ' + prompt)
 
     form = FormSheet('confirm', rows=[

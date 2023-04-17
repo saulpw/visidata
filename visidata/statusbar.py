@@ -1,16 +1,19 @@
+import builtins
 import collections
 import curses
+import sys
 
-from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, MissingAttrFormatter
+from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr
 
 
 vd.option('disp_rstatus_fmt', ' {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus} {sheet.options.disp_selected_note}{sheet.nSelectedRows}', 'right-side status format string')
 vd.option('disp_status_fmt', '{sheet.shortcut}› {sheet.name}| ', 'status line prefix')
 vd.option('disp_lstatus_max', 0, 'maximum length of left status line')
-vd.option('disp_status_sep', ' │ ', 'separator between statuses')
+vd.option('disp_status_sep', '│', 'separator between statuses')
 
 vd.option('color_keystrokes', 'bold 233 black on 110 cyan', 'color of input keystrokes on status line')
-vd.option('color_status', 'bold black on 110 cyan', 'status line color')
+vd.option('color_keys', 'bold', 'color of keystrokes in help')
+vd.option('color_status', 'bold on 238', 'status line color')
 vd.option('color_error', 'red', 'error message color')
 vd.option('color_warning', 'yellow', 'warning message color')
 vd.option('color_top_status', 'underline', 'top window status bar color')
@@ -44,6 +47,9 @@ def status(vd, *args, priority=0):
 
     k = (priority, tuple(map(str, args)))
     vd.statuses[k] = vd.statuses.get(k, 0) + 1
+
+    if not vd.cursesEnabled:
+        builtins.print(composeStatus(args), file=sys.stderr)
 
     return vd.addToStatusHistory(*args, priority=priority)
 
@@ -87,7 +93,7 @@ def middleTruncate(s, w):
     return s[:w] + options.disp_truncator + s[-w:]
 
 
-def composeStatus(msgparts, n):
+def composeStatus(msgparts, n=1):
     msg = '; '.join(wrmap(str, msgparts))
     if n > 1:
         msg = '[%sx] %s' % (n, msg)
@@ -97,13 +103,13 @@ def composeStatus(msgparts, n):
 @BaseSheet.api
 def leftStatus(sheet):
     'Return left side of status bar for this sheet. Overridable.'
-    return options.disp_status_fmt.format(sheet=sheet, vd=vd)
+    return sheet.formatString(sheet.options.disp_status_fmt)
 
 
 @VisiData.api
 def drawLeftStatus(vd, scr, vs):
     'Draw left side of status bar.'
-    cattr = colors.get_color('color_status')
+    cattr = colors.get_color('color_active_status')
     active = (vs is vd.activeSheet)
     if active:
         cattr = update_attr(cattr, colors.color_active_status, 1)
@@ -114,9 +120,6 @@ def drawLeftStatus(vd, scr, vs):
         cattr = update_attr(cattr, colors.color_top_status, 1)
 
     attr = cattr.attr
-    error_attr = update_attr(cattr, colors.color_error, 1).attr
-    warn_attr = update_attr(cattr, colors.color_warning, 2).attr
-    sep = options.disp_status_sep
 
     x = 0
     y = vs.windowHeight-1  # status for each window
@@ -128,39 +131,40 @@ def drawLeftStatus(vd, scr, vs):
 
         x = clipdraw(scr, y, 0, lstatus, attr, w=vs.windowWidth-1)
 
-        vd.onMouse(scr, y, 0, 1, x,
-                        BUTTON1_PRESSED='sheets',
+        vd.onMouse(scr, 0, y, x, 1,
+                        BUTTON1_PRESSED='sheets-stack',
+                        BUTTON1_RELEASED='sheets-stack',
                         BUTTON3_PRESSED='rename-sheet',
                         BUTTON3_CLICKED='rename-sheet')
     except Exception as e:
         vd.exceptionCaught(e)
 
-    if not active:
-        return
 
-    one = False
-    for (pri, msgparts), n in sorted(vd.statuses.items(), key=lambda k: -k[0][0]):
-        try:
-            if x > vs.windowWidth:
-                break
-            if one:  # any messages already:
-                x += clipdraw(scr, y, x, sep, attr, w=vs.windowWidth-x)
-            one = True
-            msg = composeStatus(msgparts, n)
+@VisiData.property
+def recentStatusMessages(vd):
+    r = ''
+    for (pri, msgparts), n in vd.statuses.items():
+        msg = '; '.join(wrmap(str, msgparts))
+        msg = f'[{n}x] {msg}' if n > 1 else msg
 
-            if pri == 3: msgattr = error_attr
-            elif pri == 2: msgattr = warn_attr
-            elif pri == 1: msgattr = warn_attr
-            else: msgattr = attr
-            x += clipdraw(scr, y, x, msg, msgattr, w=vs.windowWidth-x)
-        except Exception as e:
-            vd.exceptionCaught(e)
+        if pri == 3: msgattr = '[:error]'
+        elif pri == 2: msgattr = '[:warning]'
+        elif pri == 1: msgattr = '[:warning]'
+        else: msgattr = ''
+
+        if msgattr:
+            msg = ' ' + msg + ' '
+
+        r += f'\n{msgattr}{msg}[:]'
+
+    if r:
+        return '# statuses' + r
 
 
 @VisiData.api
 def rightStatus(vd, sheet):
-    'Return right side of status bar.  Overrideable.'
-    return MissingAttrFormatter().format(sheet.options.disp_rstatus_fmt, sheet=sheet, vd=vd)
+    'Return right side of status bar.  Overridable.'
+    return sheet.formatString(sheet.options.disp_rstatus_fmt)
 
 
 @VisiData.api
@@ -170,13 +174,13 @@ def drawRightStatus(vd, scr, vs):
 
     ret = 0
     statcolors = [
-        (vd.rightStatus(vs), 'color_status'),
+        (vd.rightStatus(vs), 'color_active_status'),
     ]
 
     active = vs is vd.activeSheet
 
     if active:
-        statcolors.append((f'{vd.prettykeys(vd.keystrokes)} ' or '', 'color_keystrokes'))
+        statcolors.append((f'{vd.keystrokes} ' or '', 'color_keystrokes'))
 
     if vs.currentThreads:
         statcolors.insert(0, vd.checkMemoryUsage())
@@ -233,3 +237,7 @@ def statusHistorySheet(vd):
 
 
 BaseSheet.addCommand('^P', 'open-statuses', 'vd.push(vd.statusHistorySheet)', 'open Status History')
+
+vd.addMenuItems('''
+    View > Statuses > open-statuses
+''')

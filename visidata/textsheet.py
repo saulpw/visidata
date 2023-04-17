@@ -91,3 +91,9 @@ TextSheet.addCommand('^O', 'sysopen-sheet', 'sheet.sysopen(sheet.cursorRowIndex)
 TextSheet.options.save_filetype = 'txt'
 
 vd.addGlobals({'TextSheet': TextSheet, 'ErrorSheet': ErrorSheet})
+
+vd.addMenuItems('''
+    View > Errors > recent > error-recent
+    View > Errors > all > errors-all
+    View > Errors > in cell > error-cell
+''')

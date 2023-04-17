@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Terminal=true
+Name=VisiData
+Icon=utilities-terminal
+Exec=bash -i -c 'vd %f'
+Categories=Application;

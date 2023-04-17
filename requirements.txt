@@ -7,8 +7,10 @@ requests            # http
 lxml                # html/xml
 openpyxl>= 2.4      # xlsx
 xlrd                # xls
+xlwt                # xls
 h5py                # hdf5
 psycopg2-binary     # postgres
+boto3               # rds
 pyshp               # shapefiles
 mapbox-vector-tile  # mbtiles
 pypng               # png
@@ -29,6 +31,21 @@ wcwidth             # tabulate saver with unicode
 zstandard           # read .zst files
 odfpy               # odt (OpenDocument)
 urllib3             # .zip over http
-pyarrow             # arrow arrows (Apache Arrow)
+pyarrow             # arrow arrows parquet (Apache Arrow)
+seaborn             # plot via seaborn
+matplotlib          # svg saver
+sh                  # ping
+psutil              # procmgr
+numpy               # npy pandas hdf5 arrow
 
--e git+https://github.com/saulpw/pyxlsb.git@master#egg=pyxlsb # xlsb
+requests_cache      # scraper
+beautifulsoup4      # scraper
+
+Faker               # fake data generation
+
+praw                # reddit API
+matrix_client       # matrix API
+zulip               # zulip API
+pyairtable          # airtable API
+
+-e git+https://github.com/saulpw/pyxlsb.git@visidata#egg=pyxlsb # xlsb

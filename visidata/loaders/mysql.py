@@ -1,6 +1,7 @@
 from contextlib import contextmanager
+from urllib.parse import urlparse
 
-from visidata import VisiData, vd, Sheet, anytype, asyncthread, urlparse, ColumnItem
+from visidata import VisiData, vd, Sheet, anytype, asyncthread, ColumnItem
 
 def codeToType(type_code, colname):
     import MySQLdb as mysql

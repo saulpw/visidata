@@ -26,3 +26,8 @@
 - use "Ctrl+H" (titlecase Ctrl, plus sign, uppercase letter) instead of "^H"
 - for commands, when space is not constrained, indicate the keystroke and add the longname in parens following the keystrokes.
 
+# helpstrings
+
+- `Ctrl+X` to perform action
+
+ where "perform action" is the literal command helpstr.

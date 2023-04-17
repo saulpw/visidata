@@ -1,0 +1,5 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/benchmark.yml	o	
+benchmark			columns-sheet		Shift+C	open Columns Sheet: edit column properties for current sheet
+benchmark_columns	name		sort-asc		[	sort ascending by current column; replace any existing sort criteria
+benchmark		0	select-row		s	select current row

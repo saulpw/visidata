@@ -25,6 +25,17 @@ class ColumnsSheet(Sheet):
     _rowtype = Column
     _coltype = ColumnAttr
     precious = False
+    help = '''# Columns Sheet
+This is a list of {sheet.nCols} columns on the source sheet {sheet.displaySource}.  You can edit values on this sheet to change the column's appearance on the source sheet.
+For example, edit the _{sheet.cursorCol.name}_ column to {sheet.cursorCol.help}.
+
+Some column commands can also be done in bulk here, with the `g` prefix:
+
+- `ge` to bulk set the _{sheet.cursorCol.name}_ for all selected "columns"
+- `g-` to hide selected "columns"
+- `g#` (or any standard type) to set the type of all selected "columns"
+'''
+
     class ValueColumn(Column):
         'passthrough to the value on the source cursorRow'
         def calcValue(self, srcCol):
@@ -34,17 +45,17 @@ class ColumnsSheet(Sheet):
 
     columns = [
             ColumnAttr('sheet', type=str),
-            ColumnAttr('name'),
+            ColumnAttr('name', help='rename the column on the source sheet'),
             ColumnAttr('keycol', type=int, width=0),
-            ColumnAttr('width', type=int),
-            ColumnAttr('height', type=int),
+            ColumnAttr('width', type=int, help='set the column width (`0` to hide completely)'),
+            ColumnAttr('height', type=int, help='set a maximum height for the row, if this column will fill it'),
             ColumnAttr('hoffset', type=int, width=0),
             ColumnAttr('voffset', type=int, width=0),
-            ColumnAttr('type', 'typestr'),
-            ColumnAttr('fmtstr'),
-            ColumnAttr('formatter'),
-            ValueColumn('value'),
-            ColumnAttr('expr'),
+            ColumnAttr('type', 'typestr', help='convert all values to a specific type'),
+            ColumnAttr('fmtstr', help='use a custom format string; use either C-style (`%0.4f`) or Python-style (`{:0.4f}`)'),
+            ColumnAttr('formatter', help='use a custom formatting function (advanced)'),
+            ValueColumn('value', help='change the value of this cell on the source sheet'),
+            ColumnAttr('expr', help='change the main column parameter'),
             ColumnAttr('ncalcs', type=int, width=0, cache=False),
             ColumnAttr('maxtime', type=float, width=0, cache=False),
             ColumnAttr('totaltime', type=float, width=0, cache=False),
@@ -87,6 +98,7 @@ class OptionsSheet(Sheet):
     precious = False
     columns = (
         Column('option', getter=lambda col,row: row.name),
+        Column('module', getter=lambda col,row: row.module),
         Column('value',
             getter=lambda col,row: col.sheet.diffOption(row.name),
             setter=lambda col,row,val: options.set(row.name, val, col.sheet.source),
@@ -96,9 +108,9 @@ class OptionsSheet(Sheet):
         ColumnAttr('replayable'),
     )
     colorizers = [
-        CellColorizer(3, None, lambda s,c,r,v: v.value if r and c in s.columns[1:3] and r.name.startswith('color_') else None),
+        CellColorizer(3, None, lambda s,c,r,v: v.value if r and c in s.columns[2:4] and r.name.startswith('color_') else None),
     ]
-    nKeys = 1
+    nKeys = 2
 
     def diffOption(self, optname):
         return options.getonly(optname, self.source, '')
@@ -109,14 +121,14 @@ class OptionsSheet(Sheet):
         if isinstance(row.value, bool):
             options.set(row.name, not currentValue, self.source)
         else:
-            options.set(row.name, self.editCell(1, value=currentValue), self.source)
+            options.set(row.name, self.editCell(2, value=currentValue), self.source)
 
     def reload(self):
         self.rows = []
         for k in options.keys():
             opt = options._get(k)
             self.addRow(opt)
-        self.columns[1].name = 'global_value' if self.source == 'global' else 'sheet_value'
+        self.columns[2].name = 'global_value' if self.source == 'global' else 'sheet_value'
 
 
 vd._lastInputs = collections.defaultdict(dict)  # [input_type] -> {'input': anything}
@@ -246,3 +258,10 @@ vd.addGlobals({
     'OptionsSheet': OptionsSheet,
     'VisiDataMetaSheet': VisiDataMetaSheet,
 })
+
+vd.addMenuItems('''
+    File > Options > all sheets > options-global
+    File > Options > this sheet > options-sheet
+    View > Columns > this sheet > columns-sheet
+    View > Columns > all sheets > columns-all
+''')

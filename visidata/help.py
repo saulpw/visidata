@@ -1,4 +1,5 @@
-from pkg_resources import resource_filename
+import functools
+import collections
 
 from visidata import *
 
@@ -14,10 +15,11 @@ class HelpSheet(MetaSheet):
 
     columns = [
         ColumnAttr('sheet'),
+        ColumnAttr('module'),
         ColumnAttr('longname'),
         Column('keystrokes', getter=lambda col,row: col.sheet.revbinds.get(row.longname, [None])[0]),
         Column('all_bindings', width=0, getter=lambda col,row: list(set(col.sheet.revbinds.get(row.longname, [])))),
-        Column('description', getter=lambda col,row: col.sheet.cmddict[(row.sheet, row.longname)].helpstr),
+        Column('description', width=40, getter=lambda col,row: col.sheet.cmddict[(row.sheet, row.longname)].helpstr),
         ColumnAttr('execstr', width=0),
         Column('logged', width=0, getter=lambda col,row: vd.isLoggableCommand(row.longname)),
     ]
@@ -104,7 +106,7 @@ class HelpPane:
             else:  # x<0
                 xhelp = scr.getmaxyx()[1]-self.amgr.maxWidth-5
 
-            self.scr = scr.derwin(self.amgr.maxHeight+3, self.amgr.maxWidth+4, yhelp, xhelp)
+            self.scr = vd.subwindow(scr, xhelp, yhelp, self.amgr.maxWidth+4, self.amgr.maxHeight+3)
             self.parentscr = scr
 
         self.scr.erase()
@@ -116,6 +118,7 @@ class HelpPane:
 @VisiData.api
 @functools.lru_cache(maxsize=None)
 def getHelpPane(vd, name, module='vdplus'):
+    from pkg_resources import resource_filename
     ret = HelpPane(name)
     try:
         ret.amgr.load(name, Path(resource_filename(module,'ddw/'+name+'.ddw')).open_text(encoding='utf-8'))
@@ -131,6 +134,7 @@ def getHelpPane(vd, name, module='vdplus'):
 
 @VisiData.api
 def openManPage(vd):
+    from pkg_resources import resource_filename
     import os
     with SuspendCurses():
         if os.system(' '.join(['man', resource_filename(__name__, 'man/vd.1')])) != 0:
@@ -153,3 +157,10 @@ BaseSheet.addCommand(None, 'open-tutorial-visidata', 'launchBrowser("https://jsv
 vd.addMenuItem("Help", "VisiData tutorial", 'open-tutorial-visidata')
 vd.addMenuItem("Help", 'Sheet commands', 'help-commands')
 vd.addMenuItem("Help", 'All commands', 'help-commands-all')
+
+vd.addGlobals(HelpSheet=HelpSheet)
+
+vd.addMenuItems('''
+    Help > Quick reference > sysopen-help
+    Help > Command list > help-commands
+''')

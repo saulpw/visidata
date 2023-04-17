@@ -1,10 +1,22 @@
 import pathlib
 import tarfile
 import zipfile
+import datetime
 from visidata.loaders import unzip_http
 
 from visidata import vd, VisiData, asyncthread, Sheet, Progress, Menu, options
-from visidata import ColumnAttr, Column, date, datetime, Path
+from visidata import ColumnAttr, Column, Path
+from visidata.type_date import date
+
+@VisiData.api
+def guess_zip(vd, p):
+    if not p.is_url() and zipfile.is_zipfile(p.open_bytes()):
+        return dict(filetype='zip')
+
+@VisiData.api
+def guess_tar(vd, p):
+    if tarfile.is_tarfile(p.open_bytes()):
+        return dict(filetype='tar')
 
 @VisiData.api
 def open_zip(vd, p):

@@ -8,7 +8,7 @@ class Extensible:
 
     @classmethod
     def init(cls, membername, initfunc=lambda: None, copy=False):
-        'Append equivalent of ``self.<membername> = initfunc()`` to ``<cls>.__init__``.  If *copy* is True, <membername> will be copied when object is copied.'
+        'Prepend equivalent of ``self.<membername> = initfunc()`` to ``<cls>.__init__``.  If *copy* is True, <membername> will be copied when object is copied.'
 
         def thisclass_hasattr(cls, k):
             return getattr(cls, k, None) is not getattr(cls.__bases__[0], k, None)
@@ -16,12 +16,12 @@ class Extensible:
         # must check hasattr first or else this might be parent's __init__
         oldinit = thisclass_hasattr(cls, '__init__') and getattr(cls, '__init__')
         def newinit(self, *args, **kwargs):
+            if not hasattr(self, membername):  # can be overridden by a subclass
+                setattr(self, membername, initfunc())
             if oldinit:
                 oldinit(self, *args, **kwargs)
             else:
                 super(cls, self).__init__(*args, **kwargs)
-            if not hasattr(self, membername):  # can be overridden by a subclass
-                setattr(self, membername, initfunc())
         cls.__init__ = wraps(oldinit)(newinit) if oldinit else newinit
 
         oldcopy = thisclass_hasattr(cls, '__copy__') and getattr(cls, '__copy__')
@@ -39,6 +39,8 @@ class Extensible:
         oldfunc = getattr(cls, func.__name__, None)
         if oldfunc:
             func = wraps(oldfunc)(func)
+        from visidata import vd
+        func.importingModule = vd.importingModule
         setattr(cls, func.__name__, func)
         return func
 
@@ -94,11 +96,12 @@ class Extensible:
     @classmethod
     def lazy_property(cls, func):
         'Return ``func()`` on first access and cache result; return cached result thereafter.'
+        name = '_' + func.__name__
+        cls.init(name, lambda: None, copy=False)
         @property
         @wraps(func)
         def get_if_not(self):
-            name = '_' + func.__name__
-            if not hasattr(self, name):
+            if getattr(self, name) is None:
                 setattr(self, name, func(self))
             return getattr(self, name)
         setattr(cls, func.__name__, get_if_not)

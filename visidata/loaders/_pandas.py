@@ -20,7 +20,7 @@ for ft in 'feather gbq orc pickle sas stata'.split():
 
 class DataFrameAdapter:
     def __init__(self, df):
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         if not isinstance(df, pd.DataFrame):
             vd.fail('%s is not a dataframe' % type(df).__name__)
 
@@ -57,7 +57,7 @@ class PandasSheet(Sheet):
     '''
 
     def dtype_to_type(self, dtype):
-        import numpy as np
+        np = vd.importExternal('numpy')
         # Find the underlying numpy dtype for any pandas extension dtypes
         dtype = getattr(dtype, 'numpy_dtype', dtype)
         try:
@@ -74,7 +74,7 @@ class PandasSheet(Sheet):
 
     def read_tsv(self, path, **kwargs):
         'Partial function for reading TSV files using pd.read_csv'
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         return pd.read_csv(path, sep='\t', **kwargs)
 
     @property
@@ -111,7 +111,7 @@ class PandasSheet(Sheet):
 
     @asyncthread
     def reload(self):
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         if isinstance(self.source, pd.DataFrame):
             df = self.source
         elif isinstance(self.source, Path):
@@ -169,7 +169,7 @@ class PandasSheet(Sheet):
         self.rows.sort_values(by=by_cols, ascending=ascending, inplace=True)
 
     def _checkSelectedIndex(self):
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         if self._selectedMask.index is not self.df.index:
             # DataFrame was modified inplace, so the selection is no longer valid
             vd.status('pd.DataFrame.index updated, clearing {} selected rows'
@@ -224,7 +224,7 @@ class PandasSheet(Sheet):
             self.unselectRow(row)
 
     def clearSelected(self):
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         self._selectedMask = pd.Series(False, index=self.df.index)
 
     def selectByIndex(self, start=None, end=None):
@@ -251,7 +251,7 @@ class PandasSheet(Sheet):
         matching rows to the selection. If unselect is True, remove from the
         active selection instead.
         '''
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         case_sensitive = 'I' not in vd.options.regex_flags
         masks = pd.DataFrame([
             self.df[col.expr].astype(str).str.contains(pat=regex, case=case_sensitive, regex=True)
@@ -278,13 +278,13 @@ class PandasSheet(Sheet):
         DataFrame's dtypes.
         '''
 
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         return pd.DataFrame({
             col: [None] * n for col in self.df.columns
         }).astype(self.df.dtypes.to_dict(), errors='ignore')
 
     def addRows(self, rows, index=None, undo=True):
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         if index is None:
             self.df = self.df.append(pd.DataFrame(rows))
         else:
@@ -296,7 +296,7 @@ class PandasSheet(Sheet):
             vd.addUndo(self._deleteRows, range(index, index + len(rows)))
 
     def _deleteRows(self, which):
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         self.df.drop(which, inplace=True)
         self.df.index = pd.RangeIndex(self.nRows)
         self._checkSelectedIndex()
@@ -306,7 +306,7 @@ class PandasSheet(Sheet):
         vd.addUndo(self._deleteRows, index or self.nRows - 1)
 
     def delete_row(self, rowidx):
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         oldrow = self.df.iloc[rowidx:rowidx+1]
 
         # Use to_dict() here to work around an edge case when applying undos.
@@ -321,7 +321,7 @@ class PandasSheet(Sheet):
 
     def deleteBy(self, by):
         '''Delete rows for which func(row) is true.  Returns number of deleted rows.'''
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         nRows = self.nRows
         vd.addUndo(setattr, self, 'df', self.df.copy())
         self.df = self.df[~by]

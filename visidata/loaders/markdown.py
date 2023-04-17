@@ -26,7 +26,7 @@ def write_md(p, *vsheets, md_style='orgmode'):
     else:
         delim = '|'
 
-    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
+    with p.open_text(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
         for vs in vsheets:
             if len(vsheets) > 1:
                 fp.write('# %s\n\n' % vs.name)

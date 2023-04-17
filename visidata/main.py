@@ -2,7 +2,7 @@
 # Usage: $0 [<options>] [<input> ...]
 #        $0 [<options>] --play <cmdlog> [--batch] [-w <waitsecs>] [-o <output>] [field=value ...]
 
-__version__ = '2.11dev'
+__version__ = '2.12dev'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
 from copy import copy
@@ -15,8 +15,6 @@ import functools
 import signal
 import warnings
 import builtins  # to override print
-
-from pkg_resources import resource_filename
 
 from visidata import vd, options, run, BaseSheet, AttrDict
 from visidata import Path
@@ -32,6 +30,7 @@ vd.option('output', None, 'save the final visible sheet to output at the end of 
 vd.option('preplay', '', 'longnames to preplay before replay')
 vd.option('imports', 'plugins', 'imports to preload before .visidatarc (command-line only)')
 vd.option('nothing', False, 'no config, no plugins, nothing extra')
+vd.option('interactive', False, 'run interactive mode after batch replay')
 
 # for --play
 def eval_vd(logpath, *args, **kwargs):
@@ -76,6 +75,7 @@ def optalias(abbr, name, val=None):
     option_aliases[abbr] = (name, val)
 
 
+optalias('i', 'interactive')
 optalias('N', 'nothing')
 optalias('f', 'filetype')
 optalias('p', 'play')
@@ -90,15 +90,85 @@ optalias('r', 'dir_recurse')
 optalias('force_valid_colnames', 'clean_names')  # deprecated
 
 
+@visidata.VisiData.api
+def parsePos(vd, arg:str, inputs=None):
+    'Return (startsheets:list, startrow:str, startcol:str) from *arg* like "+sheet:subsheet:col:row".  Empty sheetstr in startsheets means the starting pos applies to all sheets.'
+    startsheets, startrow, startcol = [], None, None
+
+    if ':' not in arg:
+        return (None, arg, None)
+
+    pos = arg.split(':')
+    if len(pos) == 1:
+        startsheet = [Path(inputs[-1]).name] if inputs else None
+        start_pos = (startsheet, pos[0], None)
+    elif len(pos) == 2:
+        startsheet = [Path(inputs[-1]).name] if inputs else None
+        startrow, startcol = pos
+        start_pos = (None, startrow, startcol)
+    else:  # if len(pos) >= 3:
+        startsheets = pos[:-2]
+        startrow, startcol = pos[-2:]
+        start_pos = (startsheets, startrow, startcol)
+
+    # index subsheets need to be loaded *after* the cursor indexing
+    vd.options.set('load_lazy', True, obj=start_pos[0])
+
+    return start_pos
+
+
+@visidata.VisiData.api
+def moveToPos(vd, sources, startsheets, startrow, startcol):
+    sheets = []  # sheets to apply startrow:startcol to
+    if not startsheets:
+        sheets = sources  # apply row/col to all sheets
+    else:
+        startsheet = startsheets[0] or sources[-1]
+        vs = vd.getSheet(startsheet)
+        if not vs:
+            vd.warning(f'no sheet "{startsheet}"')
+            return
+
+        vd.sync(vs.ensureLoaded())
+        vd.clearCaches()
+        for startsheet in startsheets[1:]:
+            rowidx = vs.getRowIndexFromStr(vd.options.rowkey_prefix + startsheet)
+            if rowidx is None:
+                vd.warning(f'{vs.name} has no subsheet "{startsheet}"')
+                vs = None
+                break
+            vs = vs.rows[rowidx]
+            vd.sync(vs.ensureLoaded())
+            vd.clearCaches()
+        if vs:
+            vd.push(vs)
+            sheets = [vs]
+
+    if startrow:
+        for vs in sheets:
+            if vs:
+                vs.moveToRow(startrow) or vd.warning(f'{vs} has no row "{startrow}"')
+
+    if startcol:
+        for vs in sheets:
+            if vs:
+                if not vs.moveToCol(startcol):
+                    if startcol.isdigit():
+                        vs.moveToCol(int(startcol)) # handle indexing by column number
+                    else:
+                        vd.warning(f'{vs} has no column "{startcol}"')
+
 def main_vd():
     'Open the given sources using the VisiData interface.'
     if '-v' in sys.argv or '--version' in sys.argv:
         print(vd.version_info)
         return 0
     if '-h' in sys.argv or '--help' in sys.argv:
+        from pkg_resources import resource_filename
         with open(resource_filename(__name__, 'man/vd.txt'), 'r') as fp:
             print(fp.read())
         return 0
+    vd.status(__version_info__)
 
     try:
         locale.setlocale(locale.LC_ALL, '')
@@ -107,7 +177,6 @@ def main_vd():
 
     warnings.showwarning = vd.warning
     vd.printout = builtins.print
-    vd.printerr = lambda *args, **kwargs: builtins.print(*args, file=sys.stderr)  # ignore kwargs (like priority)
 
     flPipedInput = not sys.stdin.isatty()
     flPipedOutput = not sys.stdout.isatty()
@@ -122,8 +191,7 @@ def main_vd():
     vd.stdinSource = Path('-', fp=None)  # fp filled in below after options parsed for encoding
 
     # parse args, including +sheetname:subsheet:4:3 starting at row:col on sheetname:subsheet[:...]
-    start_positions = []  # (list_of_sheetstr, str, str)  # empty sheetstr means all sheets
-    startsheets, startrow, startcol = [], None, None
+    after_config = []
     fmtargs = []
     fmtkwargs = {}
     inputs = []
@@ -177,24 +245,7 @@ def main_vd():
                 global_args[optname] = optval
 
         elif arg.startswith('+'):  # position cursor at start
-            if ':' in arg:
-                pos = arg[1:].split(':')
-                if len(pos) == 1:
-                    startsheet = [Path(inputs[-1]).name] if inputs else None
-                    start_positions.append((startsheet, pos[0], None))
-                elif len(pos) == 2:
-                    startsheet = [Path(inputs[-1]).name] if inputs else None
-                    startrow, startcol = pos
-                    start_positions.append((None, startrow, startcol))
-                elif len(pos) >= 3:
-                    startsheets = pos[:-2]
-                    startrow, startcol = pos[-2:]
-                    start_positions.append((startsheets, startrow, startcol))
-                if start_positions[-1]:
-                    # index subsheets need to be loaded *after* the cursor indexing
-                    options.set('load_lazy', True, obj=start_positions[-1][0])
-            else:
-                start_positions.append((None, arg[1:], None))
+            after_config.append((vd.moveToPos, *vd.parsePos(arg[1:], inputs=inputs)))
 
         elif current_args.get('play', None) and '=' in arg:
             # parse 'key=value' pairs for formatting cmdlog template in replay mode
@@ -216,6 +267,7 @@ def main_vd():
 
     vd._stdin, vd._stdout = duptty()  # always dup stdin/stdout
     vd.stdinSource.fptext = vd._stdin
+    vd._stdin.close = vd.nop  #1759
 
     # fetch motd and plugins *after* options parsing/setting
     vd.pluginsSheet.ensureLoaded()
@@ -224,7 +276,6 @@ def main_vd():
     if args.batch:
         options.undo = False
         options.quitguard = False
-        vd.status = vd.printerr
         vd.editline = lambda *args, **kwargs: ''
         vd.execAsync = lambda func, *args, sheet=None, **kwargs: func(*args, **kwargs) # disable async
 
@@ -251,7 +302,7 @@ def main_vd():
         sources.append(vs)
 
     for vs in reversed(sources):
-        vd.push(vs)
+        vd.push(vs, load=False) #1471, 1555
 
     if not vd.sheets and not args.play and not args.batch:
         if 'filetype' in current_args:
@@ -275,45 +326,8 @@ def main_vd():
                 vd.push(sources[0])
                 sources[0].reload()
 
-        for startsheets, startrow, startcol in start_positions:
-            sheets = []  # sheets to apply startrow:startcol to
-            if not startsheets:
-                sheets = sources  # apply row/col to all sheets
-            else:
-                startsheet = startsheets[0] or sources[-1]
-                vs = vd.getSheet(startsheet)
-                if not vs:
-                    vd.warning(f'no sheet "{startsheet}"')
-                    continue
-
-                vd.sync(vs.ensureLoaded())
-                vd.clearCaches()
-                for startsheet in startsheets[1:]:
-                    rowidx = vs.getRowIndexFromStr(options.rowkey_prefix + startsheet)
-                    if rowidx is None:
-                        vd.warning(f'{vs.name} has no subsheet "{startsheet}"')
-                        vs = None
-                        break
-                    vs = vs.rows[rowidx]
-                    vd.sync(vs.ensureLoaded())
-                    vd.clearCaches()
-                if vs:
-                    vd.push(vs)
-                    sheets = [vs]
-
-            if startrow:
-                for vs in sheets:
-                    if vs:
-                        vs.moveToRow(startrow) or vd.warning(f'{vs} has no row "{startrow}"')
-
-            if startcol:
-                for vs in sheets:
-                    if vs:
-                        if not vs.moveToCol(startcol):
-                            if startcol.isdigit():
-                                vs.moveToCol(int(startcol)) # handle indexing by column number
-                            else:
-                                vd.warning(f'{vs} has no column "{startcol}"')
+        for (f, *parms) in after_config:
+            f(sources, *parms)
 
         if not args.batch:
             run(vd.sheets[0])
@@ -329,8 +343,13 @@ def main_vd():
         if args.batch:
             if vd.replay_sync(vs):  # error
                 return 1
+
+            if vd.options.interactive:
+                vd.editline = lambda *args, vd=vd, **kwargs: visidata.VisiData.editline(vd, *args, **kwargs)
+                vd.execAsync = lambda *args, vd=vd, **kwargs: visidata.VisiData.execAsync(vd, *args, **kwargs)
+                vd.sheets[0].rows = visidata.UNLOADED
+                run()
         else:
-            vd.currentReplay = vs
             vd.replay(vs)
             run()
 
@@ -348,14 +367,13 @@ def main_vd():
     return 0
 
 def vd_cli():
-    vd.status(__version_info__)
     rc = -1
     try:
         rc = main_vd()
     except BrokenPipeError:
         os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno()) # handle broken pipe gracefully
     except visidata.ExpectedException as e:
-        print('Error: ' + str(e))
+        pass
     except FileNotFoundError as e:
         print(e)
         if options.debug:

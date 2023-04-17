@@ -1,4 +1,4 @@
-from visidata import VisiData, Sheet, Progress, asyncthread, ColumnItem
+from visidata import VisiData, Sheet, Progress, asyncthread, ColumnItem, vd
 
 
 @VisiData.api
@@ -10,7 +10,7 @@ VisiData.open_sav = VisiData.open_spss
 class SpssSheet(Sheet):
     @asyncthread
     def reload(self):
-        import savReaderWriter
+        savReaderWriter = vd.importExternal('savReaderWriter')
         self.rdr = savReaderWriter.SavReader(str(self.source))
         with self.rdr as reader:
             self.columns = []
