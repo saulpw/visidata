@@ -274,8 +274,9 @@ When loading a file, VisiData tries to infer its filetype by peeking at the init
 
 If those structures are not present, the function should return nothing. If they are, the function should return a dictionary with:
 
-* ``filetype`` being the filetype they detect (corresponding to the ``vd.open_<filetype>``)
-* ``_likelihood`` (optional) being a number from 0-10, 10 being most likely and 0 meaning a last ditch effort if nothing else will take it
+- ``filetype`` being the filetype they detect (corresponding to the ``vd.open_<filetype>``)
+- ``_likelihood`` (optional) being a number from 0-10, 10 being most likely and 0 meaning a last ditch effort if nothing else will take it
+- any other key/values will be set as options on the *Sheet* the ``open_<filetype>`` function returns
 
 `Examples of guess_filetype functions <https://github.com/saulpw/visidata/commit/4743f92bb855cf931d896e65845c549ce6027e2f>`
 
@@ -284,8 +285,10 @@ If those structures are not present, the function should return nothing. If they
 
         @VisiData.api
         def guess_foo(vd, p):
+            import foobar
             if p.open_text().read(8).startswith("#Foo"):
-                return dict(filetype='foo')
+                enc = foobar.encoding(p)
+                return dict(filetype='foo', foo_encoding=enc)
 
 
 Savers
