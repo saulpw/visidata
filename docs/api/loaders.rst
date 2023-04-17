@@ -261,6 +261,30 @@ This is a completely functional loader for the ``sas7bdat`` (SAS dataset file) f
             with self.dat as fp:
                 yield from Progress(fp, total=self.dat.properties.row_count)
 
+
+Guessing Filetypes
+==================
+
+When loading a file, VisiData tries to infer its filetype by peeking at the initial lines of the file and guessing from its structure.
+
+``vd.guess_<filetype>(path)`` contains this logic for checking whether a file might be ``<filetype``.
+
+If those structures are not present, the function should return nothing. If they are, the function should return a dictionary with:
+
+* ``filetype`` being the filetype they detect (corresponding to the ``vd.open_<filetype>``)
+* ``_likelihood`` (optional) being a number from 0-10, 10 being most likely and 0 meaning a last ditch effort if nothing else will take it
+
+`Examples of guess_filetype functions <https://github.com/saulpw/visidata/commit/4743f92bb855cf931d896e65845c549ce6027e2f>`
+
+
+::
+
+        @VisiData.api
+        def guess_foo(vd, p):
+            if p.open_text().read(8).startswith("#Foo"):
+                return dict(filetype='foo')
+
+
 Savers
 =======
 
