@@ -107,6 +107,9 @@ Each loader for a tabular sheet should overload ``iterload()``, which uses the S
 
 - If the loader requires a third-party library, import it inside ``iterload()`` or ``reload()`` (or ``open_<filetype>`` if necessary).
   Do not import at the toplevel, or ``vd`` will fail to start when the library is not installed.
+    - preferably, import it using ``modname = importExternal(modname, pythonPackageName``. If the user does not have the package installed, it will output instructions to ``pip3 install pythonPackageName``.
+
+.. autofunction:: visidata.vd.importExternal
 
 By default, a Sheet has one Column which just displays a string representation of the row.
 So the above example is a good starting point for any loader; just get the rows however they come most easily from the source, and launch ``vd`` with a sample dataset in that format.
