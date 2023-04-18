@@ -90,6 +90,11 @@ def warning(vd, *args):
     vd.status(*args, priority=1)
 
 @VisiData.api
+def aside(vd, *args, priority=0):
+    'Add a message to statuses without showing the message proactively.'
+    return vd.addToStatusHistory(*args, priority=priority)
+
+@VisiData.api
 def debug(vd, *args, **kwargs):
     'Display *args* on status if options.debug is set.'
     if options.debug:
