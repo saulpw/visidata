@@ -61,16 +61,25 @@ class GitBranch(GitSheet):
     nKeys = 1
 
     def iterload(self):
-        branches_lines = self.git_lines('branch',
-                                        '--list',
-                                        '-vv',
-                                        '--no-color',
-                                        *self.git_args)
-        for line in branches_lines:
-            if '->' in line:
-                continue
+        branches_lines = self.git_lines(
+            'branch',
+            '--list',
+            '--format',
+            ' '.join((
+                '%(if)%(symref)%(then)yes%(else)no%(end)',
+                '%(HEAD) %(refname:short) %(objectname:short)',
+                '%(if)%(upstream)%(then)[%(upstream:short)',
+                '%(if)%(upstream:track)%(then): %(upstream:track,nobracket)%(end)]',
+                '%(end)',
+                '%(contents:subject)'
+            )),
+            '-vv',
+            '--no-color',
+            *self.git_args)
 
-            m = re.match(r'''(?P<current>\*?)\s+
+        for line in branches_lines:
+            m = re.match(r'''(?P<is_symref>(yes|no)?)
+                             (?P<current>\*?)\s+
                              (?P<localbranch>\S+)\s+
                              (?P<refid>\w+)\s+
                              (?:\[
@@ -78,8 +87,12 @@ class GitBranch(GitSheet):
                                \s*(?P<extra>.*?)
                              \])?
                              \s*(?P<msg>.*)''', line, re.VERBOSE)
-            if m:
-                yield AttrDict(m.groupdict())
+            if not m:
+                continue
+            branch_details = AttrDict(m.groupdict())
+            if branch_details.is_symref == 'yes':
+                continue
+            yield branch_details
 
         branch_stats = self.gitRootSheet.gitBranchStatuses
         for row in Progress(self.rows):
