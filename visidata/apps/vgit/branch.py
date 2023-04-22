@@ -78,7 +78,7 @@ class GitBranch(GitSheet):
             *self.git_args)
 
         for line in branches_lines:
-            m = re.match(r'''(?P<is_symref>(yes|no)?)
+            m = re.match(r'''(?P<is_symref>(yes|no)?)\s+
                              (?P<current>\*?)\s+
                              (?P<localbranch>\S+)\s+
                              (?P<refid>\w+)\s+
@@ -87,6 +87,8 @@ class GitBranch(GitSheet):
                                \s*(?P<extra>.*?)
                              \])?
                              \s*(?P<msg>.*)''', line, re.VERBOSE)
+            vd.status(line)
+            vd.status(m)
             if not m:
                 continue
             branch_details = AttrDict(m.groupdict())
