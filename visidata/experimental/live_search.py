@@ -1,5 +1,3 @@
-__version__ = '0.9'
-
 from copy import copy
 
 from visidata import Sheet, vd, asyncsingle
@@ -13,12 +11,12 @@ def dup_search(sheet, cols='cursorCol'):
     vs.search = ''
 
     @asyncsingle
-    def live_search_async(val):
+    def live_search_async(val, status=False):
         if not val:
             vs.rows = vs.source.rows
         else:
             vs.rows = []
-            for i in vd.searchRegex(vs.source, regex=val, columns=cols):
+            for i in vd.searchRegex(vs.source, regex=val, columns=cols, printStatus=status):
                 vs.addRow(vs.source.rows[i])
 
     def live_search(val):
@@ -35,5 +33,5 @@ def dup_search(sheet, cols='cursorCol'):
     vs.name = vs.source.name+'_'+vs.search
 
 
-Sheet.addCommand('^[s', 'dup-search', 'dup_search("cursorCol")')
-Sheet.addCommand('g^[s', 'dup-search-cols', 'dup_search("visibleCols")')
+Sheet.addCommand('^[s', 'dup-search', 'dup_search("cursorCol")', 'search for regex forwards in current column, creating duplicate sheet with matching rows live')
+Sheet.addCommand('g^[s', 'dup-search-cols', 'dup_search("visibleCols")', 'search for regex forwards in all columns, creating duplicate sheet with matching rows live')

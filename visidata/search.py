@@ -55,7 +55,8 @@ def searchRegex(vd, sheet, moveCursor=False, reverse=False, **kwargs):
                     matchingRowIndexes += 1
                     yield rowidx
 
-        vd.status('%s matches for /%s/' % (matchingRowIndexes, regex.pattern))
+        if kwargs.get('printStatus', True):
+            vd.status('%s matches for /%s/' % (matchingRowIndexes, regex.pattern))
 
 
 @Sheet.api
