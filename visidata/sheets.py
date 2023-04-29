@@ -642,6 +642,8 @@ class TableSheet(BaseSheet):
         try:
             A = ''
             for j, (sortcol, sortdir) in enumerate(self._ordering):
+                if isinstance(sortcol, str):
+                    sortcol = self.column(sortcol)
                 if col is sortcol:
                     A = self.options.disp_sort_desc[j] if sortdir else self.options.disp_sort_asc[j]
                     scr.addstr(y+h-1, x, A, hdrcattr.attr)
