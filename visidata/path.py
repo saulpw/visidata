@@ -281,7 +281,7 @@ class Path(os.PathLike):
         'Open the file pointed by this path and return a file object in binary mode.'
         if 'b' not in mode:
             mode += 'b'
-        return self.open(mode=mode)
+        return self.open_text(mode=mode)  #1880
 
     def read_bytes(self):
         'Return the entire binary contents of the pointed-to file as a bytes object.'
