@@ -15,7 +15,7 @@ def guess_zip(vd, p):
 
 @VisiData.api
 def guess_tar(vd, p):
-    if tarfile.is_tarfile(p.open_bytes()):
+    if tarfile.is_tarfile(p):
         return dict(filetype='tar')
 
 @VisiData.api
