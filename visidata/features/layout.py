@@ -50,5 +50,5 @@ vd.addMenuItems('''
     Column > Resize > current column to max > resize-col-max
     Column > Resize > current column to input > resize-col-input
     Column > Resize > all columns max > resize-cols-max
-    Column > Resize > resize all columns to input > resize-cols-input
+    Column > Resize > all columns to input > resize-cols-input
 ''')
