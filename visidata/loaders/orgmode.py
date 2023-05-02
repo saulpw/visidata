@@ -250,7 +250,7 @@ A list of orgmode sections from _{sheet.source}_.
                 if p.ext in ['org', 'md']:
                     yield self.parse_orgmd(p)
         elif self.filetype == 'forg':
-            for fn in self.source.open_text():
+            for fn in self.source.open():
                 yield self.parse_orgmd(Path(fn.rstrip()))
         elif self.filetype == 'org':
             yield self.parse_orgmd(self.source)
@@ -359,7 +359,7 @@ def sysopen_row(sheet, row):
 
 @VisiData.api
 def save_org(vd, p, *vsheets):
-    with p.open_text(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
+    with p.open(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
         for vs in vsheets:
             if isinstance(vs, OrgSheet):
                 for row in vs.rows:

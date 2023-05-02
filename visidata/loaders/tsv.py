@@ -76,7 +76,7 @@ class TsvSheet(SequenceSheet):
         delim = self.delimiter or self.options.delimiter
         rowdelim = self.row_delimiter or self.options.row_delimiter
 
-        with self.source.open_text(encoding=self.options.save_encoding) as fp:
+        with self.source.open(encoding=self.options.save_encoding) as fp:
                 for line in splitter(adaptive_bufferer(fp), rowdelim):
                     if not line:
                         continue
@@ -97,7 +97,7 @@ def save_tsv(vd, p, vs, delimiter='', row_delimiter=''):
     rowsep = row_delimiter or vs.options.row_delimiter
     trdict = vs.safe_trdict()
 
-    with p.open_text(mode='w', encoding=vs.options.save_encoding) as fp:
+    with p.open(mode='w', encoding=vs.options.save_encoding) as fp:
         colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + rowsep
         fp.write(colhdr)
 
@@ -121,12 +121,12 @@ def append_tsv_row(vs, row):
         trdict = vs.safe_trdict()
         unitsep = options.delimiter
 
-        with vs.source.open_text(mode='w', encoding=vs.options.encoding) as fp:
+        with vs.source.open(mode='w', encoding=vs.options.encoding) as fp:
             colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + vs.options.row_delimiter
             if colhdr.strip():  # is anything but whitespace
                 fp.write(colhdr)
 
-    with vs.source.open_text(mode='a', encoding=vs.options.encoding) as fp:
+    with vs.source.open(mode='a', encoding=vs.options.encoding) as fp:
         fp.write('\t'.join(col.getDisplayValue(row) for col in vs.visibleCols) + '\n')
 
 

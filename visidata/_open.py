@@ -164,7 +164,7 @@ def openSource(vd, p, filetype=None, create=False, **kwargs):
 def open_txt(vd, p):
     'Create sheet from `.txt` file at Path `p`, checking whether it is TSV.'
     if p.exists(): #1611
-        with p.open_text(encoding=vd.options.encoding) as fp:
+        with p.open(encoding=vd.options.encoding) as fp:
             delimiter = vd.options.delimiter
             try:
                 if delimiter and delimiter in next(fp):    # peek at the first line

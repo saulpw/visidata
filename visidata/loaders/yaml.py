@@ -22,7 +22,7 @@ class YamlSheet(JsonSheet):
             PrettySafeLoader.construct_python_tuple
         )
 
-        with self.source.open_text() as fp:
+        with self.source.open() as fp:
             documents = yaml.load_all(fp, PrettySafeLoader)
 
             self.columns = []

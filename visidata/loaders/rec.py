@@ -119,7 +119,7 @@ class RecIndexSheet(IndexSheet):
 
 @VisiData.api
 def save_rec(vd, p, *vsheets):
-    with p.open_text(mode='w') as fp:
+    with p.open(mode='w') as fp:
         for vs in vsheets:
             comments = getattr(vs, 'comments', [])
             if comments:

@@ -10,7 +10,7 @@ vd.option('html_title', '<h2>{sheet.name}</h2>', 'table header when saving to ht
 
 @VisiData.api
 def guess_html(vd, p):
-    with p.open_text() as fp:
+    with p.open() as fp:
         r = fp.read(10240)
         if r.strip().startswith('<'):
             m = re.search(r, r'charset=(\S+)')
@@ -38,7 +38,7 @@ class HtmlTablesSheet(IndexSheet):
         lxml = vd.importExternal('lxml')
         from lxml import html
         utf8_parser = html.HTMLParser(encoding='utf-8')
-        with self.source.open_text(encoding='utf-8') as fp:
+        with self.source.open(encoding='utf-8') as fp:
             doc = html.parse(fp, parser=utf8_parser, base_url=self.source.given)
         self.setKeys([self.column('name')])
         self.column('keys').hide()

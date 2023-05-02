@@ -9,7 +9,7 @@ vd.option('default_colname', '', 'column name to use for non-dict rows')
 
 @VisiData.api
 def guess_json(vd, p):
-    with p.open_text(encoding=vd.options.encoding) as fp:
+    with p.open(encoding=vd.options.encoding) as fp:
         line = next(fp)
 
     line = line.strip()
@@ -33,7 +33,7 @@ VisiData.open_ndjson = VisiData.open_ldjson = VisiData.open_json = VisiData.open
 
 class JsonSheet(InferColumnsSheet):
     def iterload(self):
-        with self.source.open_text(encoding=self.options.encoding) as fp:
+        with self.source.open(encoding=self.options.encoding) as fp:
             for L in fp:
                 try:
                     if L.startswith('#'): # skip commented lines
@@ -51,7 +51,7 @@ class JsonSheet(InferColumnsSheet):
                         e.stacktrace = stacktrace()
                         yield TypedExceptionWrapper(json.loads, L, exception=e)  # an error on one line
                     else:
-                        with self.source.open_text(encoding=self.options.encoding) as fp:
+                        with self.source.open(encoding=self.options.encoding) as fp:
                             ret = json.load(fp)
                             if isinstance(ret, list):
                                 yield from ret
@@ -106,7 +106,7 @@ def encode_json(vd, row, cols, enc=_vjsonEncoder(sort_keys=False)):
 @VisiData.api
 def save_json(vd, p, *vsheets):
     vs = vsheets[0]
-    with p.open_text(mode='w', encoding=vs.options.save_encoding) as fp:
+    with p.open(mode='w', encoding=vs.options.save_encoding) as fp:
         try:
             indent = int(vs.options.json_indent)
         except Exception:
@@ -151,7 +151,7 @@ def write_jsonl(vs, fp):
 
 @VisiData.api
 def save_jsonl(vd, p, *vsheets):
-    with p.open_text(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
+    with p.open(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
         for vs in vsheets:
             vs.write_jsonl(fp)
 

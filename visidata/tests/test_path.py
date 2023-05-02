@@ -28,8 +28,8 @@ class TestVisidataPath:
 
 
     def test_opentwice(self):
-        'fresh iterator for each open_text'
+        'fresh iterator for each open'
         p = Path('test', fptext=io.StringIO('<html>'))
-        a = next(p.open_text())
-        b = next(p.open_text())
+        a = next(p.open())
+        b = next(p.open())
         assert a == b

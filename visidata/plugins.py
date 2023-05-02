@@ -35,7 +35,7 @@ def _plugin_import_name(plugin):
     return "plugins."+plugin.name
 
 def _plugin_in_import_list(plugin):
-    with Path(_plugin_init()).open_text(mode='r', encoding='utf-8') as fprc:
+    with Path(_plugin_init()).open(mode='r', encoding='utf-8') as fprc:
         r = re.compile(r'^{}\W'.format(_plugin_import(plugin)))
         for line in fprc.readlines():
             if r.match(line):
@@ -166,14 +166,14 @@ class PluginsSheet(JsonLinesSheet):
             if p.returncode != 0:
                 vd.fail('pip install failed')
         else:
-            with vd.urlcache(plugin.url, days=0).open_text(encoding='utf-8') as pyfp:
+            with vd.urlcache(plugin.url, days=0).open(encoding='utf-8') as pyfp:
                 contents = pyfp.read()
                 if plugin.sha256:
                     if not _checkHash(contents, plugin.sha256):
                         vd.error('%s plugin SHA256 does not match!' % plugin.name)
                 else:
                     vd.warning('no SHA256 provided for %s plugin, not validating' % plugin.name)
-                with outpath.open_text(mode='w', encoding='utf-8') as outfp:
+                with outpath.open(mode='w', encoding='utf-8') as outfp:
                     outfp.write(contents)
 
         if plugin.pydeps:
@@ -188,7 +188,7 @@ class PluginsSheet(JsonLinesSheet):
 
 
     def _loadPlugin(self, plugin):
-        with Path(_plugin_init()).open_text(mode='a', encoding='utf-8') as fprc:
+        with Path(_plugin_init()).open(mode='a', encoding='utf-8') as fprc:
             print(_plugin_import(plugin), file=fprc)
             importlib.import_module(_plugin_import_name(plugin))
             vd.status('%s plugin loaded' % plugin.name)
@@ -210,7 +210,7 @@ class PluginsSheet(JsonLinesSheet):
             #
             # By matching from the start of a line through a word boundary, we avoid removing commented lines or inadvertently removing
             # plugins with similar names.
-            with oldinitpath.open_text(encoding='utf-8') as old, initpath.open_text(mode='w', encoding='utf-8') as new:
+            with oldinitpath.open(encoding='utf-8') as old, initpath.open(mode='w', encoding='utf-8') as new:
                 r = re.compile(r'^{}\W'.format(_plugin_import(plugin)))
                 new.writelines(line for line in old.readlines() if not r.match(line))
 

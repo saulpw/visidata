@@ -233,7 +233,7 @@ class DirSheet(Sheet):
 class FileListSheet(DirSheet):
     _ordering = []
     def iterload(self):
-        for fn in self.source.open_text():
+        for fn in self.source.open():
             yield Path(fn.rstrip())
 
 
