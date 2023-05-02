@@ -7,7 +7,7 @@ try:
         def save_table(path, *sheets, fmt=fmt):
             import tabulate
 
-            with path.open_text(mode='w', encoding=sheets[0].options.encoding) as fp:
+            with path.open(mode='w', encoding=sheets[0].options.encoding) as fp:
                 for vs in sheets:
                     fp.write(tabulate.tabulate(
                         vs.itervals(*vs.visibleCols, format=True),

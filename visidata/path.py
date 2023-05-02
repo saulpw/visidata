@@ -192,7 +192,7 @@ class Path(os.PathLike):
         'Return True if this is a virtual Path to an already open file.'
         return bool(self.fp or self.fptext)
 
-    def open_text(self, mode='rt', encoding=None, encoding_errors=None, newline=None):
+    def open(self, mode='rt', encoding=None, encoding_errors=None, newline=None):
         'Open path in text mode, using options.encoding and options.encoding_errors.  Return open file-pointer or file-pointer-like.'
         # rfile makes a single-access fp reusable
 
@@ -218,10 +218,10 @@ class Path(os.PathLike):
                 # convert 'a' to 'w' for stdout: https://bugs.python.org/issue27805
                 return open(os.dup(vd._stdout.fileno()), 'wt')
             else:
-                vd.error('invalid mode "%s" for Path.open_text()' % mode)
+                vd.error('invalid mode "%s" for Path.open()' % mode)
                 return sys.stderr
 
-        return self.open(mode=mode, encoding=encoding or vd.options.encoding, errors=vd.options.encoding_errors, newline=newline)
+        return self._open(mode=mode, encoding=encoding or vd.options.encoding, errors=vd.options.encoding_errors, newline=newline)
 
     @wraps(pathlib.Path.read_text)
     def read_text(self, *args, **kwargs):
@@ -239,7 +239,7 @@ class Path(os.PathLike):
             return self._path.read_text(*args, **kwargs)
 
     @wraps(pathlib.Path.open)
-    def open(self, *args, **kwargs):
+    def _open(self, *args, **kwargs):
         if self.fp:
             return FileProgress(self, fp=self.fp, **kwargs)
 
@@ -272,7 +272,7 @@ class Path(os.PathLike):
 
     def __iter__(self):
         with Progress(total=filesize(self)) as prog:
-            with self.open_text(encoding=vd.options.encoding) as fd:
+            with self.open(encoding=vd.options.encoding) as fd:
                 for i, line in enumerate(fd):
                     prog.addProgress(len(line))
                     yield line.rstrip('\n')
@@ -281,7 +281,7 @@ class Path(os.PathLike):
         'Open the file pointed by this path and return a file object in binary mode.'
         if 'b' not in mode:
             mode += 'b'
-        return self.open_text(mode=mode)  #1880
+        return self.open(mode=mode)  #1880
 
     def read_bytes(self):
         'Return the entire binary contents of the pointed-to file as a bytes object.'

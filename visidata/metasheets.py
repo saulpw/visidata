@@ -160,7 +160,7 @@ class LastInputsSheet(JsonLinesSheet):
         self.addRow(row)
 
         if self.source:
-            with self.source.open_text(mode='a', encoding=self.options.encoding) as fp:
+            with self.source.open(mode='a', encoding=self.options.encoding) as fp:
                 import json
                 fp.write(json.dumps(row) + '\n')
 
@@ -197,7 +197,7 @@ def allColumnsSheet(vd):
 
 @VisiData.api
 def save_visidatarc(vd, p, vs):
-    with p.open_text(mode='w') as fp:
+    with p.open(mode='w') as fp:
         for opt in vs.rows:
             rval = repr(opt.value)
             defopt = vd.options._get(opt.name, 'default')

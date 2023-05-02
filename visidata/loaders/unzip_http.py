@@ -227,7 +227,7 @@ class RemoteZipFile:
         else:
             error(f'unknown compression method {method}')
 
-    def open_text(self, fn):
+    def open(self, fn):
         return io.TextIOWrapper(self.open(fn))
 
 

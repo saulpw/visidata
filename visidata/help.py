@@ -121,7 +121,7 @@ def getHelpPane(vd, name, module='vdplus'):
     from pkg_resources import resource_filename
     ret = HelpPane(name)
     try:
-        ret.amgr.load(name, Path(resource_filename(module,'ddw/'+name+'.ddw')).open_text(encoding='utf-8'))
+        ret.amgr.load(name, Path(resource_filename(module,'ddw/'+name+'.ddw')).open(encoding='utf-8'))
         ret.amgr.trigger(name, loop=True)
     except FileNotFoundError as e:
         vd.debug(str(e))

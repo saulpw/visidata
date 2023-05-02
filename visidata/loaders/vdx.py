@@ -22,7 +22,7 @@ class CommandLogSimple(CommandLogBase, Sheet):
 
 @VisiData.api
 def save_vdx(vd, p, *vsheets):
-    with p.open_text(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
+    with p.open(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
         fp.write(f"# {visidata.__version_info__}\n")
         for vs in vsheets:
             prevrow = None

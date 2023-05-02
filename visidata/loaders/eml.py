@@ -16,7 +16,7 @@ class EmailSheet(TableSheet):
     def iterload(self):
         import email
         parser = email.parser.Parser()
-        with self.source.open_text(encoding='utf-8') as fp:
+        with self.source.open(encoding='utf-8') as fp:
             yield from parser.parse(fp).walk()
 
 @EmailSheet.api

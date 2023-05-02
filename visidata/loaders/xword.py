@@ -96,7 +96,7 @@ class PuzSheet(CrosswordSheet):
 
 @VisiData.api
 def save_xd(vd, p, vs):
-    with p.open_text(mode='w', encoding='utf-8') as fp:
+    with p.open(mode='w', encoding='utf-8') as fp:
         fp.write(vs.xd.to_unicode())
 
 

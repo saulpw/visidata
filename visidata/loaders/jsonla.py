@@ -17,7 +17,7 @@ def guess_jsonla(vd, p):
     If no suitable header is found, fall back to generic JSON load.
     '''
 
-    with p.open_text(encoding=vd.options.encoding) as fp:
+    with p.open(encoding=vd.options.encoding) as fp:
         first_line = next(fp)
 
     if first_line.strip().startswith('['):
@@ -34,7 +34,7 @@ def open_jsonla(vd, p):
 class JsonlArraySheet(SequenceSheet):
     rowtype = 'rows'    # rowdef: list of Python objects decoded from JSON
     def iterload(self):
-        with self.source.open_text(encoding=self.options.encoding) as fp:
+        with self.source.open(encoding=self.options.encoding) as fp:
             for L in fp:
                 yield json.loads(L)
 
@@ -66,6 +66,6 @@ def write_jsonla(vs, fp):
 
 @VisiData.api
 def save_jsonla(vd, p, *vsheets):
-    with p.open_text(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
+    with p.open(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
         for vs in vsheets:
             write_jsonla(vs, fp)
