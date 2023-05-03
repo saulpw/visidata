@@ -164,6 +164,7 @@ exceptionCaught = deprecated('2.6', 'vd.exceptionCaught')(vd.exceptionCaught)
 openSource = deprecated('2.6', 'vd.openSource')(vd.openSource)
 globalCommand = visidata.BaseSheet.addCommand
 visidata.Sheet.StaticColumn = deprecated('2.11', 'Sheet.freeze_col')(visidata.Sheet.freeze_col)
+visidata.Path.open_text = deprecated('3.0', 'visidata.Path.open')(visidata.Path.open)
 
 vd.sysclip_value = deprecated('3.0', 'vd.sysclipValue')(vd.sysclipValue)
 
