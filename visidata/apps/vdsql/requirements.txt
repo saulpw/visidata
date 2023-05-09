@@ -1,5 +1,5 @@
 clickhouse-driver[numpy] >= 0.2.4
-ibis-framework[sqlite,clickhouse,bigquery] >= 3.2
+ibis-framework[sqlite,clickhouse,bigquery] >= 4
 ibis-substrait
 sqlparse
 
