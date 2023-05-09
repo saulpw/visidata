@@ -84,8 +84,7 @@ def save_fixed(vd, p, *vsheets):
             widths = {}  # Column -> width:int
             # headers
             for col in Progress(sheet.visibleCols, gerund='sizing'):
-                maxWidth = col.getMaxWidth(sheet.rows)
-                widths[col] = col.width if col.width >= maxWidth else sheet.options.default_width or maxWidth
+                widths[col] = col.getMaxWidth(sheet.rows)  #1849 
                 fp.write(('{0:%s} ' % widths[col]).format(col.name))
             fp.write('\n')
 
