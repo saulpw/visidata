@@ -30,7 +30,7 @@ setup(
         url="https://github.com/visidata/vdsql",
         python_requires=">=3.8",
         packages=find_packages(exclude=["tests"]),
-        entry_points={'visidata.plugins': 'vdsql=visidata.apps.vdsql']},
+        entry_points={'visidata.plugins': 'vdsql=visidata.apps.vdsql'},
         scripts=['vdsql'],
         install_requires=requirements(),
 )
