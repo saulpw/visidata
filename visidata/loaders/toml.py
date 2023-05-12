@@ -7,13 +7,6 @@ from visidata import (
     vd,
 )
 
-try:
-    # Python 3.11+
-    import tomllib
-except ModuleNotFoundError:
-    # Python 3.10 and below
-    tomllib = vd.importExternal("tomli")
-
 
 @VisiData.api
 def open_toml(vd, p):
@@ -37,6 +30,13 @@ class TomlSheet(PythonSheet):
         """
         self.columns = []
         self.rows = []
+
+        try:
+            # Python 3.11+
+            import tomllib
+        except ModuleNotFoundError:
+            # Python 3.10 and below
+            tomllib = vd.importExternal("tomli")
 
         data = tomllib.loads(self.source.read_text())
         for k, v in data.items():
