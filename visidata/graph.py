@@ -1,4 +1,5 @@
 from visidata import *
+import math
 
 vd.option('color_graph_axis', 'bold', 'color for graph axis labels')
 
@@ -31,6 +32,15 @@ class InvertedCanvas(Canvas):
         p.y = self.visibleBox.ymin + (self.plotviewBox.ymax-self.plotterMouse.y)/self.yScaler
         return p
 
+    def calcTopCursorY(self):
+        'ymin for the cursor that will align its top with the top edge of the graph'
+        return self.visibleBox.ymax + self.canvasCharHeight - self.cursorBox.h
+
+    def calcBottomCursorY(self):
+        'ymin for the cursor that will align its bottom with the bottom edge of the graph'
+        # Shift by 1 plotter pixel, like with goTopCursorY for Canvas. But shift in the
+        # opposite direction, because the y-coordinate system is inverted.
+        return self.visibleBox.ymin + self.canvasCharHeight - (1/4 * self.canvasCharHeight) 
 
 # provides axis labels, legend
 class GraphSheet(InvertedCanvas):
@@ -115,12 +125,12 @@ class GraphSheet(InvertedCanvas):
 
         # plot x-axis labels below the plotviewBox.ymax, but within the plotview width-wise
         attr = colors.color_graph_axis
-        xmin = self.plotviewBox.xmin + frac*self.plotviewBox.w
+        x = self.plotviewBox.xmin + frac*self.plotviewBox.w
         if frac == 1.0:
             # shift rightmost label to be readable
-            xmin -= max(len(txt)*2 - self.rightMarginPixels+1, 0)
+            x -= 2*max(len(txt) - math.ceil(self.rightMarginPixels/2), 0)
 
-        self.plotlabel(xmin, self.plotviewBox.ymax+4, txt, attr)
+        self.plotlabel(x, self.plotviewBox.ymax+4, txt, attr)
 
     def createLabels(self):
         self.gridlabels = []
@@ -153,8 +163,8 @@ Sheet.addCommand('g.', 'plot-numerics', 'vd.push(GraphSheet(sheet.name, "graph",
 # swap directions of up/down
 InvertedCanvas.addCommand(None, 'go-up', 'sheet.cursorBox.ymin += cursorBox.h', 'move cursor up by its height')
 InvertedCanvas.addCommand(None, 'go-down', 'sheet.cursorBox.ymin -= cursorBox.h', 'move cursor down by its height')
-InvertedCanvas.addCommand(None, 'go-top', 'sheet.cursorBox.ymin = visibleBox.ymax', 'move cursor to top edge of visible canvas')
-InvertedCanvas.addCommand(None, 'go-bottom', 'sheet.cursorBox.ymin = visibleBox.ymin', 'move cursor to bottom edge of visible canvas')
+InvertedCanvas.addCommand(None, 'go-top',  'sheet.cursorBox.ymin = sheet.calcTopCursorY()', 'move cursor to top edge of visible canvas')
+InvertedCanvas.addCommand(None, 'go-bottom', 'sheet.cursorBox.ymin = sheet.calcBottomCursorY()', 'move cursor to bottom edge of visible canvas')
 InvertedCanvas.addCommand(None, 'go-pagedown', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin -= t; sheet.visibleBox.ymin -= t; sheet.refresh()', 'move cursor down to next visible page')
 InvertedCanvas.addCommand(None, 'go-pageup', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin += t; sheet.visibleBox.ymin += t; sheet.refresh()', 'move cursor up to previous visible page')
 

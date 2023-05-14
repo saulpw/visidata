@@ -209,11 +209,15 @@ class Plotter(BaseSheet):
             self.hiddenAttrs.remove(attr)
         self.plotlegends()
 
-    def rowsWithin(self, bbox):
-        'return list of deduped rows within bbox'
+    def rowsWithin(self, plotter_bbox):
+        'return list of deduped rows within plotter_bbox'
         ret = {}
-        for y in range(bbox.ymin, min(len(self.pixels), bbox.ymax+1)):
-            for x in range(bbox.xmin, min(len(self.pixels[y]), bbox.xmax+1)):
+        x_start = max(0, plotter_bbox.xmin)
+        y_start = max(0, plotter_bbox.ymin)
+        y_end = min(len(self.pixels), plotter_bbox.ymax)
+        for y in range(y_start, y_end):
+            x_end = min(len(self.pixels[y]), plotter_bbox.xmax)
+            for x in range(x_start, x_end):
                 for attr, rows in self.pixels[y][x].items():
                     if attr not in self.hiddenAttrs:
                         for r in rows:
@@ -309,7 +313,7 @@ class Canvas(Plotter):
     rowtype = 'plots'
     leftMarginPixels = 10*2
     rightMarginPixels = 4*2
-    topMarginPixels = 0
+    topMarginPixels = 0*4
     bottomMarginPixels = 1*4  # reserve bottom line for x axis
 
     def __init__(self, *names, **kwargs):
@@ -361,9 +365,22 @@ class Canvas(Plotter):
         return attr
 
     def resetCanvasDimensions(self, windowHeight, windowWidth):
+        old_plotsize = None
+        realign_cursor = False
+        if hasattr(self, 'plotwidth') and hasattr(self, 'plotheight'):
+            old_plotsize = [self.plotheight, self.plotwidth]
+            if hasattr(self, 'cursorBox') and self.cursorBox and self.visibleBox:
+                # if the cursor is at the origin, realign it with the origin after the resize
+                if self.cursorBox.xmin == self.visibleBox.xmin and self.cursorBox.ymin == self.calcBottomCursorY():
+                    realign_cursor = True
         super().resetCanvasDimensions(windowHeight, windowWidth)
         self.plotviewBox = BoundingBox(self.leftMarginPixels, self.topMarginPixels,
-                                       self.plotwidth-self.rightMarginPixels, self.plotheight-self.bottomMarginPixels-1)
+                                       self.plotwidth-self.rightMarginPixels-1, self.plotheight-self.bottomMarginPixels-1)
+        if [self.plotheight, self.plotwidth] != old_plotsize:
+            if hasattr(self, 'cursorBox'):
+                self.setCursorSizeInPlotterPixels(2, 4)
+            if realign_cursor:
+                self.cursorBox.ymin = self.calcBottomCursorY()
 
     @property
     def statusLine(self):
@@ -384,6 +401,10 @@ class Canvas(Plotter):
         self.cursorBox = BoundingBox(self.cursorBox.xmin, self.cursorBox.ymin, p.x, p.y)
         self.cursorBox.w = max(self.cursorBox.w, self.canvasCharWidth)
         self.cursorBox.h = max(self.cursorBox.h, self.canvasCharHeight)
+
+    def setCursorSizeInPlotterPixels(self, w, h):
+        self.setCursorSize(Point(self.cursorBox.xmin + w/2 * self.canvasCharWidth,
+                                 self.cursorBox.ymin + h/4 * self.canvasCharHeight))
 
     def commandCursor(sheet, execstr):
         'Return (col, row) of cursor suitable for cmdlog replay of execstr.'
@@ -504,9 +525,24 @@ class Canvas(Plotter):
             self.visibleBox.h = h
 
         if not self.cursorBox:
-            self.cursorBox = Box(self.visibleBox.xmin, self.visibleBox.ymin, self.canvasCharWidth, self.canvasCharHeight)
+            cb_xmin = self.visibleBox.xmin
+            cb_ymin = self.calcBottomCursorY()
+            self.cursorBox = Box(cb_xmin, cb_ymin, self.canvasCharWidth, self.canvasCharHeight)
 
         self.plotlegends()
+
+    def calcTopCursorY(self):
+        'ymin for the cursor that will align its top with the top edge of the graph'
+        # + (1/4*self.canvasCharHeight) shifts the cursor up by 1 plotter pixel.
+        # That shift makes the cursor contain the top data point.
+        # Otherwise, the top data point would have y == plotterCursorBox.ymax,
+        # which would not be inside plotterCursorBox. Shifting the cursor makes 
+        # plotterCursorBox.ymax > y for that top point.
+        return self.visibleBox.ymax - self.cursorBox.h + (1/4*self.canvasCharHeight)
+
+    def calcBottomCursorY(self):
+        'ymin for the cursor that will align its bottom with the bottom edge of the graph'
+        return self.visibleBox.ymin
 
     def plotlegends(self):
         # display labels
@@ -653,9 +689,9 @@ Canvas.addCommand(None, 'go-right', 'sheet.cursorBox.xmin += cursorBox.w', 'move
 Canvas.addCommand(None, 'go-up', 'sheet.cursorBox.ymin -= cursorBox.h', 'move cursor up by its height')
 Canvas.addCommand(None, 'go-down', 'sheet.cursorBox.ymin += cursorBox.h', 'move cursor down by its height')
 Canvas.addCommand(None, 'go-leftmost', 'sheet.cursorBox.xmin = visibleBox.xmin', 'move cursor to left edge of visible canvas')
-Canvas.addCommand(None, 'go-rightmost', 'sheet.cursorBox.xmin = visibleBox.xmax-cursorBox.w', 'move cursor to right edge of visible canvas')
-Canvas.addCommand(None, 'go-top', 'sheet.cursorBox.ymin = visibleBox.ymin', 'move cursor to top edge of visible canvas')
-Canvas.addCommand(None, 'go-bottom', 'sheet.cursorBox.ymin = visibleBox.ymax', 'move cursor to bottom edge of visible canvas')
+Canvas.addCommand(None, 'go-rightmost', 'sheet.cursorBox.xmin = visibleBox.xmax-cursorBox.w+(1/2*canvasCharWidth)', 'move cursor to right edge of visible canvas')
+Canvas.addCommand(None, 'go-top',    'sheet.cursorBox.ymin = sheet.calcTopCursorY()', 'move cursor to top edge of visible canvas')
+Canvas.addCommand(None, 'go-bottom', 'sheet.cursorBox.ymin = sheet.calcBottomCursorY()', 'move cursor to bottom edge of visible canvas')
 
 Canvas.addCommand(None, 'go-pagedown', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin += t; sheet.visibleBox.ymin += t; refresh()', 'move cursor down to next visible page')
 Canvas.addCommand(None, 'go-pageup', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin -= t; sheet.visibleBox.ymin -= t; refresh()', 'move cursor up to previous visible page')
@@ -678,7 +714,7 @@ Canvas.addCommand('zz', 'zoom-cursor', 'zoomTo(cursorBox)', 'set visible bounds 
 
 Canvas.addCommand('-', 'zoomout-cursor', 'tmp=cursorBox.center; incrZoom(options.zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom out from cursor center')
 Canvas.addCommand('+', 'zoomin-cursor', 'tmp=cursorBox.center; incrZoom(1.0/options.zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom into cursor center')
-Canvas.addCommand('_', 'zoom-all', 'sheet.canvasBox = None; sheet.visibleBox = None; sheet.xzoomlevel=sheet.yzoomlevel=1.0; refresh()', 'zoom to fit full extent')
+Canvas.addCommand('_', 'zoom-all', 'sheet.canvasBox = None; sheet.visibleBox = None; sheet.xzoomlevel=sheet.yzoomlevel=1.0; resetBounds(); refresh()', 'zoom to fit full extent')
 Canvas.addCommand('z_', 'set-aspect', 'sheet.aspectRatio = float(input("aspect ratio=", value=aspectRatio)); refresh()', 'set aspect ratio')
 
 # set cursor box with left click
