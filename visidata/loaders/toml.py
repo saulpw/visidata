@@ -26,8 +26,8 @@ Each cell within this sheet can contain dictionaries (representing TOML key:valu
 
 Some helpful commands when working with cells of lists and dictionaries:
 
-- `zEnter` on a cell with a dictionary will "dive" into the current cell, creating a seperate sheet with keys as **Columns** and values as **Rows**.
 - `(` (`expand-col`) on a column with lists or dictionaries will "expand" the structures in the cells into new columns within the current sheet.
+- `zEnter` on a cell with lists or dictionaries will "dive" into the current cell, expanding its structures into rows and columns in a seperate sheet.
 '''
 
     rowtype = "values"  # rowdef: dict values, possibly nested
