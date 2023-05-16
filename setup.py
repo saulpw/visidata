@@ -23,7 +23,7 @@ setup(name='visidata',
       py_modules=['visidata'],
       install_requires=[
           'python-dateutil',
-          'windows-curses; platform_system == "Windows"',
+          'windows-curses<2.3.1; platform_system == "Windows"',  #1841
           'importlib-metadata >= 3.6',
       ],
       packages=['visidata', 'visidata.loaders', 'visidata.vendor', 'visidata.tests', 'visidata.ddw', 'visidata.man', 'visidata.themes', 'visidata.features', 'visidata.experimental', 'visidata.apps', 'visidata.apps.vgit', 'visidata.apps.vdsql', 'visidata.desktop'],
