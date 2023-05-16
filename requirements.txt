@@ -37,7 +37,7 @@ matplotlib          # svg saver
 sh                  # ping
 psutil              # procmgr
 numpy               # npy pandas hdf5 arrow
-tomli               # toml (Python <3.11 only)
+tomli; python_version < '3.11' # toml
 
 requests_cache      # scraper
 beautifulsoup4      # scraper
