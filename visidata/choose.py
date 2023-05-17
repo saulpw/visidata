@@ -40,7 +40,12 @@ def chooseFancy(vd, choices):
 
 @VisiData.api
 def chooseMany(vd, choices):
-    'Return a list of 1 or more keys from *choices*, which is a list of dicts.  Each element dict must have a unique "key", which must be typed directly by the user in non-fancy mode (therefore no spaces).  All other items in the dicts are also shown in fancy chooser mode.  Use previous choices from the replay input if available.  Add chosen keys (space-separated) to the cmdlog as input for the current command.'''
+    '''Return a list of 1 or more keys from *choices*, which is a list of
+    dicts. Each element dict must have a unique "key", which must be typed
+    directly by the user in non-fancy mode (therefore no spaces).  All other
+    items in the dicts are also shown in fancy chooser mode.  Use previous
+    choices from the replay input if available.  Add chosen keys
+    (space-separated) to the cmdlog as input for the current command.'''
     if vd.cmdlog:
         v = vd.getLastArgs()
         if v is not None:
