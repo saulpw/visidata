@@ -22,4 +22,4 @@ Please attach the commandlog (saved with `Ctrl-D`) to show the steps that led to
 See [here](http://visidata.org/docs/save-restore/) for more details.
 
 **Additional context**
-Please include the version of VisiData.
+Please include the version of VisiData and Python.
