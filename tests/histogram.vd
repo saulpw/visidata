@@ -1,8 +1,9 @@
 sheet	col	row	longname	input	keystrokes	comment
 			open-file	sample_data/benchmark.csv	o	
-		numeric_binning	set-option	True		
+global		numeric_binning	set-option	True		
 benchmark	Quantity		type-int		#	
 benchmark	Quantity		addcol-expr	Quantity > 1	=	
 benchmark	Quantity > 1		select-col-regex	True	|	
 benchmark			dup-selected		"	
 benchmark_selectedref	Quantity		freq-col		F	
+benchmark_selectedref_Quantity_freq	histogram		hide-col		-	Hide current column
