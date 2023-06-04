@@ -1,4 +1,4 @@
-from visidata import vd, Sheet, options, Column, asyncthread, Progress, PivotGroupRow, ENTER
+from visidata import vd, Sheet, options, Column, asyncthread, Progress, PivotGroupRow, ENTER, HistogramColumn
 
 from visidata.loaders._pandas import PandasSheet
 from visidata.pivot import PivotSheet
@@ -141,9 +141,7 @@ class PandasFreqTableSheet(PivotSheet):
                            getter=lambda col,row: len(row.sourcerows)),
                     Column('percent', type=float,
                            getter=lambda col,row: len(row.sourcerows)*100/df.shape[0]),
-                    Column('histogram', type=str,
-                           getter=lambda col,row: options.disp_histogram*(options.disp_histolen*len(row.sourcerows)//value_counts.max()),
-                           width=options.disp_histolen+2),
+                    HistogramColumn('histogram', type=str, width=self.options.default_width*2)
                     ]:
             self.addColumn(c)
 
