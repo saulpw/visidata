@@ -45,15 +45,19 @@ class RangeColumn(Column):
         return formatRange(self.origcol, typedval)
 
 
-def AggrColumn(aggcol, aggregator):
+class AggrColumn(Column):
+    def calcValue(col, row):
+        return col.aggregator(col.origCol, row.sourcerows)
+
+
+def makeAggrColumn(aggcol, aggregator):
     aggname = '%s_%s' % (aggcol.name, aggregator.name)
 
-    return Column(aggname,
+    return AggrColumn(aggname,
                   type=aggregator.type or aggcol.type,
                   fmtstr=aggcol.fmtstr,
-                  getter=lambda col,row,agg=aggregator: agg(col.origCol, row.sourcerows),
                   origCol=aggcol,
-                  )
+                  aggregator=aggregator)
 
 
 class PivotSheet(Sheet):
@@ -130,7 +134,7 @@ class PivotSheet(Sheet):
         if not self.pivotCols:
             for aggcol, aggregatorlist in aggcols.items():
                 for aggregator in aggregatorlist:
-                    c = AggrColumn(aggcol, aggregator)
+                    c = makeAggrColumn(aggcol, aggregator)
                     self.addColumn(c)
 
         # add pivoted columns
@@ -272,7 +276,7 @@ class PivotSheet(Sheet):
 def addcol_aggr(sheet, col):
     hasattr(col, 'origCol') or vd.fail('not an aggregation column')
     for agg in vd.chooseMany(vd.aggregator_choices):
-        sheet.addColumnAtCursor(AggrColumn(col.origCol, vd.aggregators[agg]))
+        sheet.addColumnAtCursor(makeAggrColumn(col.origCol, vd.aggregators[agg]))
 
 
 Sheet.addCommand('W', 'pivot', 'vd.push(makePivot(sheet, keyCols, [cursorCol]))', 'open Pivot Table: group rows by key column and summarize current column')
