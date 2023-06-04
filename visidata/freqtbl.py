@@ -6,7 +6,6 @@ from visidata.pivot import PivotSheet, PivotGroupRow
 
 
 vd.option('disp_histogram', '*', 'histogram element character')
-vd.option('disp_histolen', 50, 'width of histogram column')
 vd.option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
 vd.option('numeric_binning', False, 'bin numeric columns into ranges', replay=True)
 
@@ -22,7 +21,7 @@ def valueNames(vd, discrete_vals, numeric_vals):
 class HistogramColumn(Column):
     def calcValue(col, row):
         histogram = col.sheet.options.disp_histogram
-        histolen = col.sheet.options.disp_histolen
+        histolen = col.width-2
         return histogram*(histolen*len(row.sourcerows)//col.sheet.largest)
 
 
@@ -77,8 +76,8 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
         ]:
             self.addColumn(c)
 
-        if self.options.disp_histolen and self.options.disp_histogram:
-            c = HistogramColumn('histogram', type=str, width=self.options.disp_histolen+2)
+        if self.options.disp_histogram:
+            c = HistogramColumn('histogram', type=str, width=self.options.default_width*2)
             self.addColumn(c)
 
         # two more threads

@@ -264,7 +264,8 @@ class PivotSheet(Sheet):
 
         # automatically add cache to all columns now that everything is binned
         for c in self.nonKeyVisibleCols:
-            c.setCache(True)
+            if isinstance(c, AggrColumn):
+                c.setCache(True)
 
 
 @PivotSheet.api
