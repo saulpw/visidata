@@ -4,3 +4,4 @@ benchmark	Quantity	1	select-equal-cell		,
 benchmark	Quantity		delete-cells		gzd	
 benchmark	Quantity		addcol-expr	Quantity.foo	=	
 benchmark	Quantity.foo		freq-col		F	
+benchmark_Quantity.foo_freq	histogram		hide-col		-	Hide current column
