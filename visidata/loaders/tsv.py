@@ -76,7 +76,7 @@ class TsvSheet(SequenceSheet):
         delim = self.delimiter or self.options.delimiter
         rowdelim = self.row_delimiter or self.options.row_delimiter
 
-        with self.source.open(encoding=self.options.save_encoding) as fp:
+        with self.source.open(encoding=self.options.encoding) as fp:
                 for line in splitter(adaptive_bufferer(fp), rowdelim):
                     if not line:
                         continue
