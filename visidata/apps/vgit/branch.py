@@ -87,8 +87,6 @@ class GitBranch(GitSheet):
                                \s*(?P<extra>.*?)
                              \])?
                              \s*(?P<msg>.*)''', line, re.VERBOSE)
-            vd.status(line)
-            vd.status(m)
             if not m:
                 continue
             branch_details = AttrDict(m.groupdict())

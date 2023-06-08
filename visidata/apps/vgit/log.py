@@ -6,7 +6,7 @@ from .gitsheet import GitSheet
 
 
 @VisiData.api
-def git_log(vd, p, args):
+def git_log(vd, p, *args):
     return GitLogSheet('git-log', source=p, gitargs=args)
 
 # rowdef: (commit_hash, refnames, author, author_date, body, notes)
@@ -77,7 +77,7 @@ GitLogSheet.addCommand(None, 'add-row', 'error("commits cannot be added")')
 #GitLogSheet.addCommand('x', 'git-pick', 'git("cherry-pick", cursorRow.commitid)', 'cherry-pick this commit onto current branch'),
 #GitLogSheet.addCommand('r', 'git-reset-here', 'git("update-ref", "refs/heads/"+source, cursorRow[0])', 'reset this branch to this commit'),
 
-GitSheet.addCommand('', 'git-log', 'vd.push(git_log(self.gitRootPath, branch))', 'push log of current branch')
+GitSheet.addCommand('', 'git-log', 'vd.push(git_log(gitRootPath, branch))', 'push log of current branch')
 
 vd.addMenuItems('''
     Git > Open > log > git-log
