@@ -16,7 +16,7 @@ class ParquetSheet(Sheet):
         pq = vd.importExternal('pyarrow.parquet', 'pyarrow')
         from visidata.loaders.arrow import arrow_to_vdtype
 
-        self.tbl = pq.read_table(self.source)
+        self.tbl = pq.read_table(str(self.source))
         self.columns = []
         for colname, col in zip(self.tbl.column_names, self.tbl.columns):
             c = ParquetColumn(colname,
