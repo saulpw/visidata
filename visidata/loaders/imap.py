@@ -1,11 +1,12 @@
-from visidata import vd, TableSheet, asyncthread, ColumnItem, Column, ColumnAttr, Progress
+from visidata import VisiData, vd, TableSheet, asyncthread, ColumnItem, Column, ColumnAttr, Progress
 from urllib.parse import urlparse
 
 
-def openurl_imap(p, **kwargs):
-    url = urlparse(p.given)
-    password = url.password or vd.error('no password given in url') # vd.input("imap password for %s" % user, display=False))
-    return ImapSheet(url.hostname, source=url, password=password)
+@VisiData.api
+def openurl_imap(vd, url, **kwargs):
+    url_parsed = urlparse(str(url))
+    password = url_parsed.password or vd.error('no password given in url') # vd.input("imap password for %s" % user, display=False))
+    return ImapSheet(url_parsed.hostname, source=url_parsed, password=password)
 
 
 class ImapSheet(TableSheet):
@@ -32,7 +33,7 @@ class ImapSheet(TableSheet):
         m.login(user, self.password)
         typ, folders = m.list()
         for r in Progress(folders, gerund="downloading"):
-            fname = r.decode('utf-8').split()[-1][1:-1]
+            fname = r.decode('utf-8').split()[-1]
             try:
                 m.select(fname)
                 typ, data = m.search(None, 'ALL')

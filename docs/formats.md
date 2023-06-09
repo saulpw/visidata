@@ -16,6 +16,7 @@ eleventyNavigation:
 |xls                 |Excel spreadsheets  |0\.42            |                |0\.42          |1987     |Microsoft           |xlrd                |
 |[fixed](#fixed)|fixed width text    |0\.97            |                |0\.97          |         |                    |                    |
 |[postgres](#postgres)|PostgreSQL database |0\.97            |                |0\.97          |1996     |                    |                    |
+|[imap](#imap)|Internet Message Access Protocol |2\.12            |                |2\.12          |1988     |                    |                    |
 |[vd](#vd)      |VisiData command log|0\.97            |                |0\.97          |2017     |VisiData            |                    |
 |vds           |              |VisiData Sheet      |2\.2             |yes                 |2021     |VisiData            |                    |                    |
 |[mbtiles](#mbtiles)|MapBox Tileset      |0\.98            |                |0\.98          |2011     |MapBox              |mapbox\-vector\-tile|
@@ -101,6 +102,10 @@ eleventyNavigation:
 - loader-specific options
     - `postgres_schema` (default: 'public') the desired schema for the Postgres database
 - `vd postgres://`*username*`:`*password*`@`*hostname*`:`*port*`/`*database* opens a connection to the given postgres database.
+
+## imap {#imap}
+- `vd "imap://user@domain.com:passwordhere@imap-mailserver.com"` opens a connection to the IMAP server
+    - e.g.  `vd "imap://someone@hotmail.com:pass123@imap-mail.outlook.com:993"`
 
 ### using VisiData as a pager within psql
 
