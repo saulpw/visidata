@@ -1,5 +1,5 @@
 from visidata import VisiData, vd, TableSheet, asyncthread, ColumnItem, Column, ColumnAttr, Progress
-import vdplus.api.google
+import visidata.loaders.google
 from urllib.parse import urlparse
 
 
