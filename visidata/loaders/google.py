@@ -1,7 +1,5 @@
 
 from visidata import vd, VisiData, Sheet, IndexSheet, SequenceSheet, ColumnItem, Path, AttrDict, ColumnAttr, asyncthread
-from .gsheets import *
-from .gdrive import *
 
 
 def _google_creds_fn():
