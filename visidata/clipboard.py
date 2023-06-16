@@ -12,7 +12,7 @@ from visidata import Sheet, Path
 
 if sys.platform == 'win32':
     syscopy_cmd_default = 'clip.exe'
-    syspaste_cmd_default = 'clip.exe'
+    syspaste_cmd_default = 'powershell -command Get-Clipboard'
 elif sys.platform == 'darwin':
     syscopy_cmd_default = 'pbcopy w'
     syspaste_cmd_default = 'pbpaste'
