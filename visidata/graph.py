@@ -2,6 +2,7 @@ from visidata import *
 import math
 
 vd.option('color_graph_axis', 'bold', 'color for graph axis labels')
+vd.option('disp_graph_tick_x', '╵', 'character for graph x-axis ticks')
 
 
 @VisiData.api
@@ -149,13 +150,23 @@ class GraphSheet(InvertedCanvas):
 
     def add_x_axis_label(self, frac):
         txt = self.formatXLabel(self.visibleBox.xmin + frac*self.visibleBox.w)
+        tick = vd.options.disp_graph_tick_x or ''
 
         # plot x-axis labels below the plotviewBox.ymax, but within the plotview width-wise
         attr = colors.color_graph_axis
         x = self.plotviewBox.xmin + frac*self.plotviewBox.w
-        if frac == 1.0:
-            # shift rightmost label to be readable
-            x -= 2*max(len(txt) - math.ceil(self.rightMarginPixels/2), 0)
+
+        if frac < 1.0:
+            txt = tick + txt
+        else:
+            if (len(txt)+len(tick))*2 <= self.rightMarginPixels:
+                txt = tick + txt
+            else:
+                # shift rightmost label to be left of its tick
+                x -= len(txt)*2
+                if len(tick) == 0:
+                    x += 1
+                txt = txt + tick
 
         self.plotlabel(x, self.plotviewBox.ymax+4, txt, attr)
 
