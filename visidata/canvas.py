@@ -377,7 +377,7 @@ class Canvas(Plotter):
         self.plotviewBox = BoundingBox(self.leftMarginPixels, self.topMarginPixels,
                                        self.plotwidth-self.rightMarginPixels-1, self.plotheight-self.bottomMarginPixels-1)
         if [self.plotheight, self.plotwidth] != old_plotsize:
-            if hasattr(self, 'cursorBox'):
+            if hasattr(self, 'cursorBox') and self.cursorBox:
                 self.setCursorSizeInPlotterPixels(2, 4)
             if realign_cursor:
                 self.cursorBox.ymin = self.calcBottomCursorY()
