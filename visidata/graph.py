@@ -114,6 +114,26 @@ class GraphSheet(InvertedCanvas):
         srccol = self.ycols[0]
         return srccol.format(srccol.type(amt))
 
+    def formatXLabel(self, amt):
+        if self.xzoomlevel < 1:
+            labels = []
+            for xcol in self.xcols:
+                if vd.isNumeric(xcol):
+                    col_amt = float(amt) if xcol.type is int else xcol.type(amt)
+                else:
+                    continue
+                labels.append(xcol.format(col_amt))
+            return ','.join(labels)
+        else:
+            return self.formatX(amt)
+
+    def formatYLabel(self, amt):
+        srccol = self.ycols[0]
+        if srccol.type is int and self.yzoomlevel < 1:
+            return srccol.format(float(amt))
+        else:
+            return self.formatY(amt)
+
     def parseX(self, txt):
         return self.xcols[0].type(txt)
 
@@ -121,14 +141,14 @@ class GraphSheet(InvertedCanvas):
         return self.ycols[0].type(txt)
 
     def add_y_axis_label(self, frac):
-        txt = self.formatY(self.visibleBox.ymin + frac*self.visibleBox.h)
+        txt = self.formatYLabel(self.visibleBox.ymin + frac*self.visibleBox.h)
 
         # plot y-axis labels on the far left of the canvas, but within the plotview height-wise
         attr = colors.color_graph_axis
         self.plotlabel(0, self.plotviewBox.ymin + (1.0-frac)*self.plotviewBox.h, txt, attr)
 
     def add_x_axis_label(self, frac):
-        txt = self.formatX(self.visibleBox.xmin + frac*self.visibleBox.w)
+        txt = self.formatXLabel(self.visibleBox.xmin + frac*self.visibleBox.w)
 
         # plot x-axis labels below the plotviewBox.ymax, but within the plotview width-wise
         attr = colors.color_graph_axis
