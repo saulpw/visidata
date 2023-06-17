@@ -169,7 +169,8 @@ class Plotter(BaseSheet):
         self.labels.append((x, y, text, attr, row))
 
     def plotlegend(self, i, txt, attr=0, width=15):
-        self.plotlabel(self.plotwidth-width*2, i*4, txt, attr)
+        # move it 1 character to the left b/c the rightmost column can't be drawn to
+        self.plotlabel(self.plotwidth-(width+1)*2, i*4, txt, attr)
 
     @property
     def plotterCursorBox(self):
@@ -374,8 +375,17 @@ class Canvas(Plotter):
                 if self.cursorBox.xmin == self.visibleBox.xmin and self.cursorBox.ymin == self.calcBottomCursorY():
                     realign_cursor = True
         super().resetCanvasDimensions(windowHeight, windowWidth)
+        if hasattr(self, 'legendwidth'):
+            # +4 = 1 empty space after the graph + 2 characters for the legend prefixes of "1:", "2:", etc +
+            #      1 character for the empty rightmost column
+            new_margin = max(self.rightMarginPixels, (self.legendwidth+4)*2)
+            pvbox_w = self.plotwidth-new_margin-1
+            # ensure the graph data takes up at least 3/4 of the width of the screen no matter how wide the legend gets
+            pvbox_w = max(pvbox_w, math.ceil(self.plotwidth * 3/4)//2*2 + 1)
+        else:
+            pvbox_w = self.plotwidth-self.rightMarginPixels-1
         self.plotviewBox = BoundingBox(self.leftMarginPixels, self.topMarginPixels,
-                                       self.plotwidth-self.rightMarginPixels-1, self.plotheight-self.bottomMarginPixels-1)
+                                       pvbox_w, self.plotheight-self.bottomMarginPixels-1)
         if [self.plotheight, self.plotwidth] != old_plotsize:
             if hasattr(self, 'cursorBox') and self.cursorBox:
                 self.setCursorSizeInPlotterPixels(2, 4)
@@ -550,7 +560,8 @@ class Canvas(Plotter):
             self.addCommand(str(i+1), 'toggle-%s'%(i+1), 'hideAttr(%s, %s not in hiddenAttrs)' % (attr, attr), 'toggle display of "%s"' % legend)
             if attr in self.hiddenAttrs:
                 attr = colors.color_graph_hidden
-            self.plotlegend(i, '%s:%s'%(i+1,legend), attr, width=self.legendwidth+4)
+            # add 2 characters to width to account for '1:' '2:' etc
+            self.plotlegend(i, '%s:%s'%(i+1,legend), attr, width=self.legendwidth+2)
 
     def checkCursor(self):
         'override Sheet.checkCursor'
