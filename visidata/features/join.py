@@ -134,7 +134,7 @@ class JoinKeyColumn(Column):
 
 class MergeColumn(Column):
     def calcValue(self, row):
-        for vs, c in self.cols.items():
+        for vs, c in reversed(self.cols.items()):
             if c:
                 v = c.getTypedValue(row[vs])
                 if v and not isinstance(v, TypedWrapper):
