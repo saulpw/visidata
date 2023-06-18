@@ -5,7 +5,7 @@ import re
 import shutil
 import importlib
 import subprocess
-import urllib
+import urllib.error
 
 from visidata import VisiData, vd, Path, CellColorizer, JsonLinesSheet, AttrDict, Column, Progress, ExpectedException, BaseSheet, asyncsingle, asyncthread
 

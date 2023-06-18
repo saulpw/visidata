@@ -20,6 +20,7 @@ def openurl_http(vd, path, filetype=None):
         return openfunc(Path(schemes[-1]+'://'+path.given.split('://')[1]))
 
     import urllib.request
+    import requests.utils
     import urllib.error
     import mimetypes
 
@@ -47,19 +48,24 @@ def openurl_http(vd, path, filetype=None):
             linkhdr = response.getheader('Link')
             src = None
             if linkhdr:
-                links = urllib.parse.parse_header(linkhdr)
-                src = links.get('next', {}).get('url', None)
+                links = requests.utils.parse_header_links(linkhdr)
+                link_data = {}
+                for link in links:
+                    key = link.get('rel') or link.get('url')
+                    link_data[key] = link
+                src = link_data.get('next', {}).get('url', None)
 
             if not src:
                 break
 
             n += 1
             if n > max_next:
-                vd.warning(f'stopping at max {max_next} pages')
+                vd.warning(f'stopping at max next pages: {max_next} pages')
                 break
 
             vd.status(f'fetching next page from {src}')
-            response = requests.get(src, stream=True, **vd.options.getall('http_req_'))
+            req = urllib.request.Request(src, **vd.options.getall('http_req_'))
+            response = urllib.request.urlopen(req)
 
     # add resettable iterator over contents as an already-open fp
     path.fptext = RepeatFile(_iter_lines())
