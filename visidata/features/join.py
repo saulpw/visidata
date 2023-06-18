@@ -74,7 +74,7 @@ vd.jointypes = [{'key': k, 'desc': v} for k, v in {
     'append': 'all rows from all sheets; columns from all sheets',
     'concat': 'all rows from all sheets; columns and type from first sheet',
     'extend': 'only rows from first sheet; type from first sheet; columns from all sheets',
-    'merge': 'merge differences from other sheets into first sheet',
+    'merge': 'merge differences from other sheets into first sheet (including new rows)',
 }.items()]
 
 def joinkey(sheet, row):
