@@ -29,7 +29,7 @@ An example usage follows.
 
 ## How to filter rows
 
-1. Press `s` or `t` on the rows to filter.
+1. Press `s` or `t` on the rows to select them for further filtering.
 
 2. Press
 
