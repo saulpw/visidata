@@ -213,10 +213,10 @@ def SheetList(*names, **kwargs):
 
     src = kwargs.get('source', None)
     if not src:
-        vd.status('no content in %s' % names)
-        return
+        vd.warning('no content in %s' % names)
+        return Sheet(*names, **kwargs)
 
-    if isinstance(src[0], dict):
+    if isinstance(src[0], Mapping):
         return ListOfDictSheet(*names, **kwargs)
     elif isinstance(src[0], tuple):
         if getattr(src[0], '_fields', None):  # looks like a namedtuple
