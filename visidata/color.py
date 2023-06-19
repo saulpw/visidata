@@ -47,7 +47,11 @@ class ColorMaker:
         return {}
 
     def setup(self):
-        curses.use_default_colors()
+        try:
+            curses.use_default_colors()
+        except Exception as e:
+            pass
+
 
     @drawcache_property
     def colors(self):
