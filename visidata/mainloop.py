@@ -297,6 +297,7 @@ def run(vd, *sheetlist):
     if ret:
         builtins.print(ret)
 
+    return ret
 
 @VisiData.api
 def addCommand(vd, *args, **kwargs):
