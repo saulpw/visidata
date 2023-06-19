@@ -1,3 +1,5 @@
+import re
+
 from visidata import Path, RepeatFile, vd, VisiData
 from visidata.loaders.tsv import splitter
 
@@ -20,7 +22,6 @@ def openurl_http(vd, path, filetype=None):
         return openfunc(Path(schemes[-1]+'://'+path.given.split('://')[1]))
 
     import urllib.request
-    import requests.utils
     import urllib.error
     import mimetypes
 
@@ -48,7 +49,7 @@ def openurl_http(vd, path, filetype=None):
             linkhdr = response.getheader('Link')
             src = None
             if linkhdr:
-                links = requests.utils.parse_header_links(linkhdr)
+                links = parse_header_links(linkhdr)
                 link_data = {}
                 for link in links:
                     key = link.get('rel') or link.get('url')
@@ -72,5 +73,35 @@ def openurl_http(vd, path, filetype=None):
 
     return vd.openSource(path, filetype=filetype)
 
+def parse_header_links(link_header):
+    '''Return a list of dictionaries:
+    [{'url': 'https://example.com/content?page=1', 'rel': 'prev'},
+     {'url': 'https://example.com/content?page=3', 'rel': 'next'}]
+    Takes a link header string, of the form
+    '<https://example.com/content?page=1>; rel="prev", <https://example.com/content?page=3>; rel="next"'
+    See https://datatracker.ietf.org/doc/html/rfc8288#section-3
+    '''
+
+    links = []
+    quote_space = ' \'"'
+    link_header = link_header.strip(quote_space)
+    if not link_header: return []
+    for link_value in re.split(', *<', link_header):
+        if ';' in link_value:
+            url, params = link_value.split(';', maxsplit=1)
+        else:
+            url, params = link_value, ''
+        link = {'url': url.strip('<>' + quote_space)}
+
+        for param in params.split(';'):
+            if '=' in param:
+                key, value = param.split('=')
+                key = key.strip(quote_space)
+                value = value.strip(quote_space)
+                link[key] = value
+            else:
+                break
+        links.append(link)
+    return links
 
 VisiData.openurl_https = VisiData.openurl_http
