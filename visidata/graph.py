@@ -10,37 +10,44 @@ def numericCols(vd, cols):
 
 
 class InvertedCanvas(Canvas):
+    @asyncthread
+    def render_async(self):
+        self.plot_elements(invert_y=True)
+
     def zoomTo(self, bbox):
         super().zoomTo(bbox)
-        self.fixPoint(Point(self.plotviewBox.xmin, self.plotviewBox.ymax), bbox.xymin)
-
-    def plotpixel(self, x, y, attr, row=None):
-        y = self.plotviewBox.ymax-y
-        self.pixels[y][x][attr].append(row)
+        self.fixPoint(Point(self.plotviewBox.xmin, self.plotviewBox.ymax),
+                      Point(bbox.xmin, bbox.ymax + 1/4*self.canvasCharHeight))
 
     def scaleY(self, canvasY):
-        'returns plotter y coordinate, with y-axis inverted'
-        plotterY = super().scaleY(canvasY)
-        return (self.plotviewBox.ymax-plotterY+4)
+        'returns a plotter y coordinate for a canvas y coordinate, with the y direction inverted'
+        return self.plotviewBox.ymax-round((canvasY-self.visibleBox.ymin)*self.yScaler)
 
-    def canvasH(self, plotterY):
-        return (self.plotviewBox.ymax-plotterY)/self.yScaler
+    def unscaleY(self, plotterY_inverted):
+        'performs the inverse of scaleY, returns a canvas y coordinate'
+        return (self.plotviewBox.ymax-plotterY_inverted)/self.yScaler + self.visibleBox.ymin
 
     @property
     def canvasMouse(self):
         p = super().canvasMouse
-        p.y = self.visibleBox.ymin + (self.plotviewBox.ymax-self.plotterMouse.y)/self.yScaler
+        p.y = self.unscaleY(self.plotterMouse.y)
         return p
 
     def calcTopCursorY(self):
         'ymin for the cursor that will align its top with the top edge of the graph'
-        return self.visibleBox.ymax + self.canvasCharHeight - self.cursorBox.h
+        return self.visibleBox.ymax - self.cursorBox.h
 
     def calcBottomCursorY(self):
-        'ymin for the cursor that will align its bottom with the bottom edge of the graph'
         # Shift by 1 plotter pixel, like with goTopCursorY for Canvas. But shift in the
         # opposite direction, because the y-coordinate system is inverted.
-        return self.visibleBox.ymin + self.canvasCharHeight - (1/4 * self.canvasCharHeight) 
+        'ymin for the cursor that will align its bottom with the bottom edge of the graph'
+        return self.visibleBox.ymin - (1/4 * self.canvasCharHeight)
+
+    def startCursor(self):
+        super().startCursor()
+        # Since the y coordinates for plotting increase in the opposite
+        # direction from Canvas, the cursor has to be shifted.
+        self.cursorBox.ymin -= self.canvasCharHeight
 
 # provides axis labels, legend
 class GraphSheet(InvertedCanvas):
