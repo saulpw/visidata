@@ -134,14 +134,14 @@ class JoinKeyColumn(Column):
 
 class MergeColumn(Column):
     def calcValue(self, row):
-        for vs, c in reversed(self.cols.items()):
+        for vs, c in reversed(list(self.cols.items())):
             if c:
                 v = c.getTypedValue(row[vs])
                 if v and not isinstance(v, TypedWrapper):
                     return v
 
     def putValue(self, row, value):
-        for vs, c in reversed(self.cols.items()):
+        for vs, c in reversed(list(self.cols.items())):
             c.setValue(row[vs], value)
 
     def isDiff(self, row, value):
