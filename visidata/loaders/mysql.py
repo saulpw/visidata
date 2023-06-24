@@ -1,5 +1,5 @@
 from contextlib import contextmanager
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 
 from visidata import VisiData, vd, Sheet, anytype, asyncthread, ColumnItem
 
@@ -42,7 +42,7 @@ class SQL:
                     database=self.url.path[1:],
                     host=self.url.hostname,
                     port=self.url.port or 3306,
-                    password=self.url.password,
+                    password=unquote(self.url.password),
                     use_unicode=True,
                     charset='utf8',
                     cursorclass=cursors.SSCursor) ## if SSCursor is not used mysql will first fetch ALL data, and only then visualize it
