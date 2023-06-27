@@ -322,10 +322,10 @@ class Path(os.PathLike):
         'Return a sibling Path with *name* as a filename in the same directory.'
         if self.is_url():
             urlparts = list(urlparse(self.given))
-            urlparts[2] = '/'.join(Path(urlparts[2])._parts[1:-1] + [name])
+            urlparts[2] = '/'.join(list(Path(urlparts[2]).parts[1:-1]) + [name])
             return Path(urlunparse(urlparts))
         else:
-            return Path(self._from_parsed_parts(self._drv, self._root, self._parts[:-1] + [name]))
+            return Path(self._from_parsed_parts(self._drv, self._root, list(self.parts[:-1]) + [name]))
 
 
 class RepeatFile:
