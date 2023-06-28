@@ -170,7 +170,18 @@ class HistoryState:
 
 # history: earliest entry first
 @VisiData.api
-def editline(vd, scr, y, x, w, i=0, attr=curses.A_NORMAL, value='', fillchar=' ', truncchar='-', unprintablechar='.', completer=lambda text,idx: None, history=[], display=True, updater=lambda val: None, bindings={}, clear=True):
+def editline(vd, scr, y, x, w, i=0,
+             attr=curses.A_NORMAL,
+             value='',
+             fillchar=' ',
+             truncchar='-',
+             unprintablechar='.',
+             completer=lambda text,idx: None,
+             history=[],
+             display=True,
+             updater=lambda val: None,
+             bindings={},
+             clear=True):
   '''A better curses line editing widget.
   If *clear* is True, clear whole editing area before displaying.
   '''
