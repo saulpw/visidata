@@ -250,6 +250,7 @@ def editline(vd, scr, y, x, w, i=0,
         if scr: scr.move(y, x+prew)
         ch = vd.getkeystroke(scr)
         if ch == '':                               continue
+        elif ch in bindings:                       v, i = bindings[ch](v, i)
         elif ch == 'KEY_IC':                       insert_mode = not insert_mode
         elif ch == '^A' or ch == 'KEY_HOME':       i = 0
         elif ch == '^B' or ch == 'KEY_LEFT':       i -= 1
@@ -278,7 +279,6 @@ def editline(vd, scr, y, x, w, i=0,
         elif ch == 'kDN5':                         pass
         elif history and ch == 'KEY_UP':           v, i = history_state.up(v, i)
         elif history and ch == 'KEY_DOWN':         v, i = history_state.down(v, i)
-        elif ch in bindings:                       v, i = bindings[ch](v, i)
         elif len(ch) > 1:                          pass
         else:
             if first_action:
