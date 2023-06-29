@@ -466,7 +466,7 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
                     truncchar=options.disp_truncator)
 
     editargs.update(kwargs)  # update with user-specified args
-    r = vd.editText(y, x, w, **editargs)
+    r = vd.editText(y, x, w, attr=colors.color_edit_cell, **editargs)
 
     if rowidx >= 0:  # if not header
         r = col.type(r)  # convert input to column type, let exceptions be raised
