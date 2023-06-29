@@ -2,6 +2,7 @@ from visidata import *
 import math
 
 vd.option('color_graph_axis', 'bold', 'color for graph axis labels')
+vd.option('disp_graph_tick_x', '╵', 'character for graph x-axis ticks')
 
 
 @VisiData.api
@@ -114,6 +115,26 @@ class GraphSheet(InvertedCanvas):
         srccol = self.ycols[0]
         return srccol.format(srccol.type(amt))
 
+    def formatXLabel(self, amt):
+        if self.xzoomlevel < 1:
+            labels = []
+            for xcol in self.xcols:
+                if vd.isNumeric(xcol):
+                    col_amt = float(amt) if xcol.type is int else xcol.type(amt)
+                else:
+                    continue
+                labels.append(xcol.format(col_amt))
+            return ','.join(labels)
+        else:
+            return self.formatX(amt)
+
+    def formatYLabel(self, amt):
+        srccol = self.ycols[0]
+        if srccol.type is int and self.yzoomlevel < 1:
+            return srccol.format(float(amt))
+        else:
+            return self.formatY(amt)
+
     def parseX(self, txt):
         return self.xcols[0].type(txt)
 
@@ -121,21 +142,31 @@ class GraphSheet(InvertedCanvas):
         return self.ycols[0].type(txt)
 
     def add_y_axis_label(self, frac):
-        txt = self.formatY(self.visibleBox.ymin + frac*self.visibleBox.h)
+        txt = self.formatYLabel(self.visibleBox.ymin + frac*self.visibleBox.h)
 
         # plot y-axis labels on the far left of the canvas, but within the plotview height-wise
         attr = colors.color_graph_axis
         self.plotlabel(0, self.plotviewBox.ymin + (1.0-frac)*self.plotviewBox.h, txt, attr)
 
     def add_x_axis_label(self, frac):
-        txt = self.formatX(self.visibleBox.xmin + frac*self.visibleBox.w)
+        txt = self.formatXLabel(self.visibleBox.xmin + frac*self.visibleBox.w)
+        tick = vd.options.disp_graph_tick_x or ''
 
         # plot x-axis labels below the plotviewBox.ymax, but within the plotview width-wise
         attr = colors.color_graph_axis
         x = self.plotviewBox.xmin + frac*self.plotviewBox.w
-        if frac == 1.0:
-            # shift rightmost label to be readable
-            x -= 2*max(len(txt) - math.ceil(self.rightMarginPixels/2), 0)
+
+        if frac < 1.0:
+            txt = tick + txt
+        else:
+            if (len(txt)+len(tick))*2 <= self.rightMarginPixels:
+                txt = tick + txt
+            else:
+                # shift rightmost label to be left of its tick
+                x -= len(txt)*2
+                if len(tick) == 0:
+                    x += 1
+                txt = txt + tick
 
         self.plotlabel(x, self.plotviewBox.ymax+4, txt, attr)
 
