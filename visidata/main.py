@@ -70,24 +70,18 @@ def duptty():
 
     return stdin, stdout
 
-option_aliases = {}
-def optalias(abbr, name, val=None):
-    option_aliases[abbr] = (name, val)
-
-
-optalias('i', 'interactive')
-optalias('N', 'nothing')
-optalias('f', 'filetype')
-optalias('p', 'play')
-optalias('b', 'batch')
-optalias('P', 'preplay')
-optalias('y', 'confirm_overwrite', False)
-optalias('o', 'output')
-optalias('w', 'replay_wait')
-optalias('d', 'delimiter')
-optalias('c', 'config')
-optalias('r', 'dir_recurse')
-optalias('force_valid_colnames', 'clean_names')  # deprecated
+vd.optalias('i', 'interactive')
+vd.optalias('N', 'nothing')
+vd.optalias('f', 'filetype')
+vd.optalias('p', 'play')
+vd.optalias('b', 'batch')
+vd.optalias('P', 'preplay')
+vd.optalias('y', 'confirm_overwrite', False)
+vd.optalias('o', 'output')
+vd.optalias('w', 'replay_wait')
+vd.optalias('d', 'delimiter')
+vd.optalias('c', 'config')
+vd.optalias('r', 'dir_recurse')
 
 
 @visidata.VisiData.api
@@ -226,10 +220,10 @@ def main_vd():
                 pass
 
             optname = optname.replace('-', '_')
-            optname, optval = option_aliases.get(optname, (optname, optval))
+            optname, optval = vd._resolve_optalias(optname, optval)
 
-            if optval is None:
-                opt = options._get(optname)
+            if optval is None:  # missing argument, maybe bool?
+                opt = vd.options._get(optname)
                 if opt:
                     if type(opt.value) is bool:
                         optval = True

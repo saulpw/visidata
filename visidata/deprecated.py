@@ -174,4 +174,7 @@ def itemsetter(i):
     return g
 
 
+vd.optalias('force_valid_colnames', 'clean_names')
+
+
 vd.addGlobals(globals())
