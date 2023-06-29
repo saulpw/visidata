@@ -182,10 +182,10 @@ Sheet.addCommand('gzt', 'stoggle-after', 'toggle(rows[cursorRowIndex:])', 'toggl
 Sheet.addCommand('gzs', 'select-after', 'select(rows[cursorRowIndex:])', 'select all rows from cursor to bottom')
 Sheet.addCommand('gzu', 'unselect-after', 'unselect(rows[cursorRowIndex:])', 'unselect all rows from cursor to bottom')
 
-Sheet.addCommand('|', 'select-col-regex', 'selectByIdx(vd.searchRegex(sheet, regex=input("select regex: ", type="regex", defaultLast=True), columns="cursorCol"))', 'select rows matching regex in current column')
-Sheet.addCommand('\\', 'unselect-col-regex', 'unselectByIdx(vd.searchRegex(sheet, regex=input("unselect regex: ", type="regex", defaultLast=True), columns="cursorCol"))', 'unselect rows matching regex in current column')
-Sheet.addCommand('g|', 'select-cols-regex', 'selectByIdx(vd.searchRegex(sheet, regex=input("select regex: ", type="regex", defaultLast=True), columns="visibleCols"))', 'select rows matching regex in any visible column')
-Sheet.addCommand('g\\', 'unselect-cols-regex', 'unselectByIdx(vd.searchRegex(sheet, regex=input("unselect regex: ", type="regex", defaultLast=True), columns="visibleCols"))', 'unselect rows matching regex in any visible column')
+Sheet.addCommand('|', 'select-col-regex', 'selectByIdx(searchInputRegex("select", columns="cursorCol"))', 'select rows matching regex in current column')
+Sheet.addCommand('\\', 'unselect-col-regex', 'unselectByIdx(searchInputRegex("unselect", columns="cursorCol"))', 'unselect rows matching regex in current column')
+Sheet.addCommand('g|', 'select-cols-regex', 'selectByIdx(searchInputRegex("select", columns="visibleCols"))', 'select rows matching regex in any visible column')
+Sheet.addCommand('g\\', 'unselect-cols-regex', 'unselectByIdx(searchInputRegex("unselect", columns="visibleCols"))', 'unselect rows matching regex in any visible column')
 
 Sheet.addCommand(',', 'select-equal-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorDisplay: c.getDisplayValue(r) == v), progress=False)', 'select rows matching current cell in current column')
 Sheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getDisplayValue(r) == c.getDisplayValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')

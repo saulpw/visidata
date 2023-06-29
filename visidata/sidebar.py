@@ -39,15 +39,19 @@ def drawSidebar(vd, scr, sheet):
         sidebar_title = 'error'
         sidebar = str(e)
 
+    return sheet.drawSidebarText(scr, text=sidebar, title=sidebar_title, overflowmsg=overflowmsg, bottommsg=bottommsg)
+
+@BaseSheet.api
+def drawSidebarText(sheet, scr, text:str, title:str='', overflowmsg:str='', bottommsg:str=''):
     scrh, scrw = scr.getmaxyx()
     maxw = sheet.options.disp_sidebar_width or scrw//2
     maxh = sheet.options.disp_sidebar_height or scrh-2
 
-    if not sidebar:
+    if not text:
         return
 
     cattr = colors.get_color('color_sidebar')
-    lines = list(wraptext(sidebar, width=maxw-4))
+    lines = list(wraptext(text, width=maxw-4))
     maxlinew = max(dispwidth(textonly, maxwidth=maxw) for line, textonly in lines)
     maxlinew = max(maxlinew, dispwidth(overflowmsg)+4)
     maxlinew = max(maxlinew, dispwidth(bottommsg)+4)
@@ -71,10 +75,12 @@ def drawSidebar(vd, scr, sheet):
         x += clipdraw(sidebarscr, i+1, 2, line, cattr, w=w-2)
         i += 1
 
-    x = w-len(sidebar_title)-6
-    clipdraw(sidebarscr, 0, x, f"|[:black on yellow] {sidebar_title} [:]|", cattr)
+    x = w-len(title)-6
+    clipdraw(sidebarscr, 0, x, f"|[:black on yellow] {title} [:]|", cattr)
     if bottommsg:
         clipdraw(sidebarscr, h-1, winw-dispwidth(bottommsg)-4, '|'+bottommsg+'|[:]', cattr)
+
+    sidebarscr.refresh()
 
 
 @BaseSheet.api

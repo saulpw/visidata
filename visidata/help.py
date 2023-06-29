@@ -2,8 +2,9 @@ import functools
 import collections
 
 from visidata import *
+from visidata import vd, VisiData, MetaSheet
 
-vd.show_help = False
+vd.option('disp_help', False, 'show help panel during input')
 
 
 @VisiData.api
@@ -81,7 +82,7 @@ class HelpPane:
 
     def draw(self, scr, x=None, y=None):
         if not scr: return
-        if not vd.show_help:
+        if not vd.options.disp_help:
             if self.scr:
                 self.scr.erase()
                 self.scr.refresh()

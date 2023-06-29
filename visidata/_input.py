@@ -224,11 +224,12 @@ def editline(vd, scr, y, x, w, i=0,
 
     while True:
         updater(v)
-        if vd.show_help:
+        if vd.options.disp_help:
             sheet = vd.activeSheet
-    #        vd.getHelpPane('input', module=__name__).draw(scr, y=y)
             if help:
                 sheet.drawSidebarText(scr, help)
+            else:
+                vd.getHelpPane('input', module=__name__).draw(scr, y=y)
 
         if display:
             dispval = clean_printable(v)
