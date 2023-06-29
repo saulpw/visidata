@@ -120,15 +120,6 @@ class PluginsSheet(JsonLinesSheet):
                 vd.addGlobals({funcname: func})
                 setattr(vd, funcname, func)
 
-        # check for plugins with newer versions
-        def is_stale(r):
-            v = _loadedVersion(r)
-            return v and r.latest_ver and v != r.latest_ver
-
-        stale_plugins = list(filter(is_stale, self.rows))
-        if len(stale_plugins) > 0:
-            vd.warning(f'update available for {len(stale_plugins)} plugins')
-
     def installPlugin(self, plugin):
         # pip3 install requirements
         initpath = _plugin_init()
