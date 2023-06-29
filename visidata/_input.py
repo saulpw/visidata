@@ -4,11 +4,12 @@ import curses
 import visidata
 
 from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiData, BaseSheet
-from visidata import vd, options, colors
+from visidata import vd, options, colors, dispwidth
 from visidata import AttrDict
 
 
-vd.option('color_edit_cell', 'white', 'cell color to use when editing cell')
+vd.option('color_edit_unfocused', '238 on 110', 'display color for unfocused input in form')
+vd.option('color_edit_cell', '233 on 110', 'cell color to use when editing cell')
 vd.option('disp_edit_fill', '_', 'edit field fill character')
 vd.option('disp_unprintable', '·', 'substitute character for unprintables')
 vd.option('mouse_interval', 1, 'max time between press/release for click (ms)', sheettype=None)
@@ -181,6 +182,7 @@ def editline(vd, scr, y, x, w, i=0,
              display=True,
              updater=lambda val: None,
              bindings={},
+             help='',
              clear=True):
   '''A better curses line editing widget.
   If *clear* is True, clear whole editing area before displaying.
@@ -222,7 +224,11 @@ def editline(vd, scr, y, x, w, i=0,
 
     while True:
         updater(v)
-        vd.getHelpPane('input', module=__name__).draw(scr, y=y)
+        if vd.show_help:
+            sheet = vd.activeSheet
+    #        vd.getHelpPane('input', module=__name__).draw(scr, y=y)
+            if help:
+                sheet.drawSidebarText(scr, help)
 
         if display:
             dispval = clean_printable(v)
@@ -351,9 +357,58 @@ def inputsingle(vd, prompt, record=True):
 
     return v
 
+@VisiData.api
+def inputMultiple(vd, **kwargs):
+    'A simple form, where each input is an entry in `kwargs`, with the key being the key in the returned dict, and the value being a dictionary of kwargs to the singular input().'
+    sheet = vd.activeSheet
+
+    y = sheet.windowHeight-1
+    maxw = sheet.windowWidth//2
+    attr = colors.color_edit_unfocused
+
+    for i, (k, v) in enumerate(kwargs.items()):
+        v['dy'] = i
+        v['w'] = maxw-dispwidth(v.get('prompt'))
+
+    class ChangeInput(Exception):
+        pass
+
+    def change_input(offset):
+        def _throw(v, i):
+            raise ChangeInput(v, offset)
+        return _throw
+
+    keys = list(kwargs.keys())
+    cur_input_key = keys[0]
+
+    while True:
+        vd.drawSheet(sheet._scr, sheet)
+
+        for k, v in kwargs.items():
+            promptlen = clipdraw(sheet._scr, y-v.get('dy'), 0, v.get('prompt'), attr)
+            promptlen = clipdraw(sheet._scr, y-v.get('dy'), promptlen, v.get('value'), attr, w=sheet.windowWidth-1)
+
+        try:
+            input_kwargs = kwargs[cur_input_key]
+            input_kwargs['value'] = vd.input(**input_kwargs, attr=colors.color_edit_cell, bindings={
+                'KEY_BTAB': change_input(-1),
+                '^I':       change_input(+1),
+                'KEY_SR':   change_input(-1),
+                'KEY_SF':   change_input(+1),
+                'kUP':      change_input(-1),
+                'kDN':      change_input(+1),
+            })
+            break
+        except ChangeInput as e:
+            input_kwargs['value'] = e.args[0]
+            offset = e.args[1]
+            i = keys.index(cur_input_key)
+            cur_input_key = keys[(i+offset)%len(keys)]
+
+    return {k:v.get('value', '') for k,v in kwargs.items()}
 
 @VisiData.api
-def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
+def input(self, prompt, type=None, defaultLast=False, history=[], dy=0, attr=0, **kwargs):
     '''Display *prompt* and return line of user input.
 
         - *type*: string indicating the type of input to use for history.
@@ -364,6 +419,8 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
         - *completer*: ``completer(val, idx)`` is called on TAB to get next completed value.
         - *updater*: ``updater(val)`` is called every keypress or timeout.
         - *bindings*: dict of keystroke to func(v, i) that returns updated (v, i)
+        - *dy*: number of lines from bottom of pane
+        - *attr*: curses attribute for prompt
     '''
 
     sheet = self.activeSheet
@@ -381,9 +438,10 @@ def input(self, prompt, type=None, defaultLast=False, history=[], **kwargs):
     history = self.lastInputsSheet.history(type)
 
     rstatuslen = self.drawRightStatus(sheet._scr, sheet)
-    attr = 0
-    promptlen = clipdraw(sheet._scr, sheet.windowHeight-1, 0, prompt, attr, w=sheet.windowWidth-rstatuslen-1)
-    ret = self.editText(sheet.windowHeight-1, promptlen, sheet.windowWidth-promptlen-rstatuslen-2,
+    y = sheet.windowHeight-dy-1
+    promptlen = clipdraw(sheet._scr, y, 0, prompt, attr, w=sheet.windowWidth-rstatuslen-1)
+    w = kwargs.pop('w', sheet.windowWidth-promptlen-rstatuslen-2)
+    ret = self.editText(y, promptlen, w=w,
                         attr=colors.color_edit_cell,
                         unprintablechar=options.disp_unprintable,
                         truncchar=options.disp_truncator,
