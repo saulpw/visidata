@@ -383,11 +383,12 @@ def inputMultiple(vd, **kwargs):
     cur_input_key = keys[0]
 
     while True:
-        vd.drawSheet(sheet._scr, sheet)
+        if sheet._scr:
+            vd.drawSheet(sheet._scr, sheet)
 
-        for k, v in kwargs.items():
-            promptlen = clipdraw(sheet._scr, y-v.get('dy'), 0, v.get('prompt'), attr)
-            promptlen = clipdraw(sheet._scr, y-v.get('dy'), promptlen, v.get('value'), attr, w=sheet.windowWidth-1)
+            for k, v in kwargs.items():
+                promptlen = clipdraw(sheet._scr, y-v.get('dy'), 0, v.get('prompt'), attr)
+                promptlen = clipdraw(sheet._scr, y-v.get('dy'), promptlen, v.get('value'), attr, w=sheet.windowWidth-1)
 
         try:
             input_kwargs = kwargs[cur_input_key]
