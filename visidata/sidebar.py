@@ -13,7 +13,7 @@ vd.option('color_sidebar', 'black on 114 blue', 'base color of sidebar')
 def sidebar(sheet):
     'Default to format options.disp_sidebar_fmt.  Overridable.'
     fmt = sheet.options.disp_sidebar_fmt
-    if fmt == '{help}':
+    if sheet.options.disp_help and fmt == '{help}':
         fmt = sheet.help
     return textwrap.dedent(sheet.formatString(fmt).strip('\n'))
 
