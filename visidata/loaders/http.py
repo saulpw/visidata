@@ -9,6 +9,7 @@ content_filetypes = {
 
 vd.option('http_max_next', 0, 'max next.url pages to follow in http response') #848
 vd.option('http_req_headers', {}, 'http headers to send to requests')
+vd.option('http_ssl_verify', True, 'verify host and certificates for https')
 
 
 @VisiData.api
@@ -25,16 +26,23 @@ def openurl_http(vd, path, filetype=None):
     import urllib.error
     import mimetypes
 
-    # fallback to mime-type
+    ctx = None
+    if not vd.options.http_ssl_verify:
+        import ssl
+
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+
     req = urllib.request.Request(path.given, **vd.options.getall('http_req_'))
-    response = urllib.request.urlopen(req)
+    response = urllib.request.urlopen(req, context=ctx)
 
     contenttype = response.getheader('content-type')
     subtype = contenttype.split(';')[0].split('/')[-1]
 
-    filetype = filetype or vd.guessFiletype(path, funcprefix='guessurl_').get('filetype')
-    filetype = filetype or content_filetypes.get(subtype, subtype)
-    filetype = filetype or vd.guessFiletype(path).get('filetype')
+    filetype = filetype or vd.guessFiletype(path, funcprefix='guessurl_').get('filetype')  # try guessing by url
+    filetype = filetype or content_filetypes.get(subtype, subtype)  # try mime-type
+    filetype = filetype or vd.guessFiletype(path).get('filetype')  # try guessing by contents
 
     # Automatically paginate if a 'next' URL is given
     def _iter_lines(path=path, response=response, max_next=vd.options.http_max_next):
