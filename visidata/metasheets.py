@@ -131,6 +131,9 @@ class OptionsSheet(Sheet):
             self.addRow(opt)
         self.columns[2].name = 'global_value' if self.source == 'global' else 'sheet_value'
 
+    def newRow(self):
+        vd.fail('adding rows to the options sheet is not supported.')
+
 
 vd._lastInputs = collections.defaultdict(dict)  # [input_type] -> {'input': anything}
 
