@@ -25,6 +25,8 @@ def guess_sqlite(vd, p):
 
 @VisiData.api
 def open_sqlite(vd, p):
+    if p is vd.stdinSource:
+        vd.fail('cannot read a sqlite database from stdin')
     return SqliteIndexSheet(p.name, source=p)
 
 @VisiData.api
