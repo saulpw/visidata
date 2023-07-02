@@ -74,7 +74,7 @@ vd.jointypes = [{'key': k, 'desc': v} for k, v in {
     'append': 'all rows from all sheets; columns from all sheets',
     'concat': 'all rows from all sheets; columns and type from first sheet',
     'extend': 'only rows from first sheet; type from first sheet; columns from all sheets',
-    'merge': 'merge differences from other sheets into first sheet',
+    'merge': 'merge differences from other sheets into first sheet (including new rows)',
 }.items()]
 
 def joinkey(sheet, row):
@@ -134,14 +134,14 @@ class JoinKeyColumn(Column):
 
 class MergeColumn(Column):
     def calcValue(self, row):
-        for vs, c in self.cols.items():
+        for vs, c in reversed(list(self.cols.items())):
             if c:
                 v = c.getTypedValue(row[vs])
                 if v and not isinstance(v, TypedWrapper):
                     return v
 
     def putValue(self, row, value):
-        for vs, c in reversed(self.cols.items()):
+        for vs, c in reversed(list(self.cols.items())):
             c.setValue(row[vs], value)
 
     def isDiff(self, row, value):

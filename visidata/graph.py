@@ -2,6 +2,7 @@ from visidata import *
 import math
 
 vd.option('color_graph_axis', 'bold', 'color for graph axis labels')
+vd.option('disp_graph_tick_x', '╵', 'character for graph x-axis ticks')
 
 
 @VisiData.api
@@ -10,37 +11,44 @@ def numericCols(vd, cols):
 
 
 class InvertedCanvas(Canvas):
+    @asyncthread
+    def render_async(self):
+        self.plot_elements(invert_y=True)
+
     def zoomTo(self, bbox):
         super().zoomTo(bbox)
-        self.fixPoint(Point(self.plotviewBox.xmin, self.plotviewBox.ymax), bbox.xymin)
-
-    def plotpixel(self, x, y, attr, row=None):
-        y = self.plotviewBox.ymax-y
-        self.pixels[y][x][attr].append(row)
+        self.fixPoint(Point(self.plotviewBox.xmin, self.plotviewBox.ymax),
+                      Point(bbox.xmin, bbox.ymax + 1/4*self.canvasCharHeight))
 
     def scaleY(self, canvasY):
-        'returns plotter y coordinate, with y-axis inverted'
-        plotterY = super().scaleY(canvasY)
-        return (self.plotviewBox.ymax-plotterY+4)
+        'returns a plotter y coordinate for a canvas y coordinate, with the y direction inverted'
+        return self.plotviewBox.ymax-round((canvasY-self.visibleBox.ymin)*self.yScaler)
 
-    def canvasH(self, plotterY):
-        return (self.plotviewBox.ymax-plotterY)/self.yScaler
+    def unscaleY(self, plotterY_inverted):
+        'performs the inverse of scaleY, returns a canvas y coordinate'
+        return (self.plotviewBox.ymax-plotterY_inverted)/self.yScaler + self.visibleBox.ymin
 
     @property
     def canvasMouse(self):
         p = super().canvasMouse
-        p.y = self.visibleBox.ymin + (self.plotviewBox.ymax-self.plotterMouse.y)/self.yScaler
+        p.y = self.unscaleY(self.plotterMouse.y)
         return p
 
     def calcTopCursorY(self):
         'ymin for the cursor that will align its top with the top edge of the graph'
-        return self.visibleBox.ymax + self.canvasCharHeight - self.cursorBox.h
+        return self.visibleBox.ymax - self.cursorBox.h
 
     def calcBottomCursorY(self):
-        'ymin for the cursor that will align its bottom with the bottom edge of the graph'
         # Shift by 1 plotter pixel, like with goTopCursorY for Canvas. But shift in the
         # opposite direction, because the y-coordinate system is inverted.
-        return self.visibleBox.ymin + self.canvasCharHeight - (1/4 * self.canvasCharHeight) 
+        'ymin for the cursor that will align its bottom with the bottom edge of the graph'
+        return self.visibleBox.ymin - (1/4 * self.canvasCharHeight)
+
+    def startCursor(self):
+        super().startCursor()
+        # Since the y coordinates for plotting increase in the opposite
+        # direction from Canvas, the cursor has to be shifted.
+        self.cursorBox.ymin -= self.canvasCharHeight
 
 # provides axis labels, legend
 class GraphSheet(InvertedCanvas):
@@ -107,6 +115,26 @@ class GraphSheet(InvertedCanvas):
         srccol = self.ycols[0]
         return srccol.format(srccol.type(amt))
 
+    def formatXLabel(self, amt):
+        if self.xzoomlevel < 1:
+            labels = []
+            for xcol in self.xcols:
+                if vd.isNumeric(xcol):
+                    col_amt = float(amt) if xcol.type is int else xcol.type(amt)
+                else:
+                    continue
+                labels.append(xcol.format(col_amt))
+            return ','.join(labels)
+        else:
+            return self.formatX(amt)
+
+    def formatYLabel(self, amt):
+        srccol = self.ycols[0]
+        if srccol.type is int and self.yzoomlevel < 1:
+            return srccol.format(float(amt))
+        else:
+            return self.formatY(amt)
+
     def parseX(self, txt):
         return self.xcols[0].type(txt)
 
@@ -114,21 +142,31 @@ class GraphSheet(InvertedCanvas):
         return self.ycols[0].type(txt)
 
     def add_y_axis_label(self, frac):
-        txt = self.formatY(self.visibleBox.ymin + frac*self.visibleBox.h)
+        txt = self.formatYLabel(self.visibleBox.ymin + frac*self.visibleBox.h)
 
         # plot y-axis labels on the far left of the canvas, but within the plotview height-wise
         attr = colors.color_graph_axis
         self.plotlabel(0, self.plotviewBox.ymin + (1.0-frac)*self.plotviewBox.h, txt, attr)
 
     def add_x_axis_label(self, frac):
-        txt = self.formatX(self.visibleBox.xmin + frac*self.visibleBox.w)
+        txt = self.formatXLabel(self.visibleBox.xmin + frac*self.visibleBox.w)
+        tick = vd.options.disp_graph_tick_x or ''
 
         # plot x-axis labels below the plotviewBox.ymax, but within the plotview width-wise
         attr = colors.color_graph_axis
         x = self.plotviewBox.xmin + frac*self.plotviewBox.w
-        if frac == 1.0:
-            # shift rightmost label to be readable
-            x -= 2*max(len(txt) - math.ceil(self.rightMarginPixels/2), 0)
+
+        if frac < 1.0:
+            txt = tick + txt
+        else:
+            if (len(txt)+len(tick))*2 <= self.rightMarginPixels:
+                txt = tick + txt
+            else:
+                # shift rightmost label to be left of its tick
+                x -= len(txt)*2
+                if len(tick) == 0:
+                    x += 1
+                txt = txt + tick
 
         self.plotlabel(x, self.plotviewBox.ymax+4, txt, attr)
 

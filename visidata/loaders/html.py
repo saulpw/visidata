@@ -104,6 +104,7 @@ class HtmlTableSheet(Sheet):
     columns = []
 
     def iterload(self):
+        import lxml
         headers = []
 
         maxlinks = {}  # [colnum] -> nlinks:int
@@ -123,6 +124,8 @@ class HtmlTableSheet(Sheet):
             for cell in r.getchildren():
                 colspan = int(cell.attrib.get('colspan', 1))
                 rowspan = int(cell.attrib.get('rowspan', 1))
+                if isinstance(cell, lxml.etree.CommentBase):
+                    continue
                 cellval = ' '.join(x.strip() for x in cell.itertext())  # text only without markup
                 links = [urllib.parse.urljoin(self.source.base_url, x.get('href')) for x in cell.iter('a')]
                 maxlinks[colnum] = max(maxlinks.get(colnum, 0), len(links))

@@ -105,4 +105,6 @@ SheetsSheet.addCommand('z^C', 'cancel-row', 'cancelThread(*cursorRow.currentThre
 SheetsSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)', 'abort async threads for selected sheets')
 SheetsSheet.addCommand('Enter', 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(openRow(dest))', 'open sheet referenced in current row')
 
-vd.addGlobals(IndexSheet=IndexSheet, SheetsSheet=SheetsSheet)
+vd.addGlobals(IndexSheet=IndexSheet,
+              SheetsSheet=SheetsSheet,
+              GlobalSheetsSheet=GlobalSheetsSheet)

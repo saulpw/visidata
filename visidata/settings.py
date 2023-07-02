@@ -143,6 +143,8 @@ class OptionsObject:
         return opt
 
     def _set(self, k, v, obj=None, helpstr='', module=None):
+        k, v = vd._resolve_optalias(k, v)  # to set deprecated and abbreviated options
+
         opt = self._get(k) or Option(k, v, '', module)
         self._cache.clear()  # invalidate entire cache on any change
         return self._opts.set(k, Option(k, v, opt.helpstr or helpstr, opt.module or module), obj)
@@ -251,6 +253,23 @@ vd.bindkeys = SettingsMgr()
 vd._options = SettingsMgr()
 
 vd.options = vd.OptionsObject(vd._options)  # global option settings
+vd.option_aliases = {}
+
+
+@VisiData.api
+def optalias(vd, altname, optname, val=None):
+    'Create an alias `altname` for option `optname`, setting the value to a particular `val` (if not None).'
+    vd.option_aliases[altname] = (optname, val)
+
+
+@VisiData.api
+def _resolve_optalias(vd, optname, optval):
+    while optname in vd.option_aliases:
+        optname, v = vd.option_aliases.get(optname)
+        if v is not None:  # value might be given
+            optval = v
+
+    return optname, optval
 
 
 @VisiData.api

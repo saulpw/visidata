@@ -51,7 +51,7 @@ class GitSheet(Sheet):
         err = io.StringIO()
         args = list(subcmd.split()) + list(args)
         try:
-            vd.status('git ' + ' '.join(str(x) for x in args))
+            vd.debug('git ' + ' '.join(str(x) for x in args))
             for line in self.git('--no-pager',
                             *args,
                             _decode_errors='replace',

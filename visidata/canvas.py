@@ -169,7 +169,8 @@ class Plotter(BaseSheet):
         self.labels.append((x, y, text, attr, row))
 
     def plotlegend(self, i, txt, attr=0, width=15):
-        self.plotlabel(self.plotwidth-width*2, i*4, txt, attr)
+        # move it 1 character to the left b/c the rightmost column can't be drawn to
+        self.plotlabel(self.plotwidth-(width+1)*2, i*4, txt, attr)
 
     @property
     def plotterCursorBox(self):
@@ -374,10 +375,19 @@ class Canvas(Plotter):
                 if self.cursorBox.xmin == self.visibleBox.xmin and self.cursorBox.ymin == self.calcBottomCursorY():
                     realign_cursor = True
         super().resetCanvasDimensions(windowHeight, windowWidth)
+        if hasattr(self, 'legendwidth'):
+            # +4 = 1 empty space after the graph + 2 characters for the legend prefixes of "1:", "2:", etc +
+            #      1 character for the empty rightmost column
+            new_margin = max(self.rightMarginPixels, (self.legendwidth+4)*2)
+            pvbox_w = self.plotwidth-new_margin-1
+            # ensure the graph data takes up at least 3/4 of the width of the screen no matter how wide the legend gets
+            pvbox_w = max(pvbox_w, math.ceil(self.plotwidth * 3/4)//2*2 + 1)
+        else:
+            pvbox_w = self.plotwidth-self.rightMarginPixels-1
         self.plotviewBox = BoundingBox(self.leftMarginPixels, self.topMarginPixels,
-                                       self.plotwidth-self.rightMarginPixels-1, self.plotheight-self.bottomMarginPixels-1)
+                                       pvbox_w, self.plotheight-self.bottomMarginPixels-1)
         if [self.plotheight, self.plotwidth] != old_plotsize:
-            if hasattr(self, 'cursorBox'):
+            if hasattr(self, 'cursorBox') and self.cursorBox:
                 self.setCursorSizeInPlotterPixels(2, 4)
             if realign_cursor:
                 self.cursorBox.ymin = self.calcBottomCursorY()
@@ -388,13 +398,10 @@ class Canvas(Plotter):
 
     @property
     def canvasMouse(self):
-        return self.canvasFromPlotterCoord(self.plotterMouse.x, self.plotterMouse.y)
-
-    def canvasFromPlotterCoord(self, plotter_x, plotter_y):
-        return Point(self.visibleBox.xmin + (plotter_x-self.plotviewBox.xmin)/self.xScaler, self.visibleBox.ymin + (plotter_y-self.plotviewBox.ymin)/self.yScaler)
-
-    def canvasFromTerminalCoord(self, x, y):
-        return self.canvasFromPlotterCoord(*self.plotterFromTerminalCoord(x, y))
+        x = self.plotterMouse.x
+        y = self.plotterMouse.y
+        p = Point(self.unscaleX(x), self.unscaleY(y))
+        return p
 
     def setCursorSize(self, p):
         'sets width based on diagonal corner p'
@@ -445,6 +452,9 @@ class Canvas(Plotter):
                            self.scaleY(self.cursorBox.ymin),
                            self.scaleX(self.cursorBox.xmax),
                            self.scaleY(self.cursorBox.ymax))
+
+    def startCursor(self):
+        self.cursorBox = Box(*self.canvasMouse.xy)
 
     def point(self, x, y, attr=0, row=None):
         self.polylines.append(([(x, y)], attr, row))
@@ -550,7 +560,8 @@ class Canvas(Plotter):
             self.addCommand(str(i+1), 'toggle-%s'%(i+1), 'hideAttr(%s, %s not in hiddenAttrs)' % (attr, attr), 'toggle display of "%s"' % legend)
             if attr in self.hiddenAttrs:
                 attr = colors.color_graph_hidden
-            self.plotlegend(i, '%s:%s'%(i+1,legend), attr, width=self.legendwidth+4)
+            # add 2 characters to width to account for '1:' '2:' etc
+            self.plotlegend(i, '%s:%s'%(i+1,legend), attr, width=self.legendwidth+2)
 
     def checkCursor(self):
         'override Sheet.checkCursor'
@@ -606,14 +617,21 @@ class Canvas(Plotter):
         else:
             return h
 
-    #could be called canvas_to_plotterX()
-    def scaleX(self, x):
-        'returns plotter x coordinate'
-        return round(self.plotviewBox.xmin+(x-self.visibleBox.xmin)*self.xScaler)
+    def scaleX(self, canvasX):
+        'returns a plotter x coordinate'
+        return round(self.plotviewBox.xmin+(canvasX-self.visibleBox.xmin)*self.xScaler)
 
-    def scaleY(self, y):
-        'returns plotter y coordinate'
-        return round(self.plotviewBox.ymin+(y-self.visibleBox.ymin)*self.yScaler)
+    def scaleY(self, canvasY):
+        'returns a plotter y coordinate'
+        return round(self.plotviewBox.ymin+(canvasY-self.visibleBox.ymin)*self.yScaler)
+
+    def unscaleX(self, plotterX):
+        'performs the inverse of scaleX, returns a canvas x coordinate'
+        return (plotterX-self.plotviewBox.xmin)/self.xScaler + self.visibleBox.xmin
+
+    def unscaleY(self, plotterY):
+        'performs the inverse of scaleY, returns a canvas y coordinate'
+        return (plotterY-self.plotviewBox.ymin)/self.yScaler + self.visibleBox.ymin
 
     def canvasW(self, plotter_width):
         'plotter X units to canvas units'
@@ -637,25 +655,33 @@ class Canvas(Plotter):
 
     @asyncthread
     def render_async(self):
-        self.render_sync()
+        self.plot_elements()
 
-    def render_sync(self):
-        'plots points and lines and text onto the Plotter'
+    def plot_elements(self, invert_y=False):
+        'plots points and lines and text onto the plotter'
 
         self.resetBounds()
 
         bb = self.visibleBox
         xmin, ymin, xmax, ymax = bb.xmin, bb.ymin, bb.xmax, bb.ymax
         xfactor, yfactor = self.xScaler, self.yScaler
-        plotxmin, plotymin = self.plotviewBox.xmin, self.plotviewBox.ymin
+        plotxmin = self.plotviewBox.xmin
+        if invert_y:
+            plotymax = self.plotviewBox.ymax
+        else:
+            plotymin = self.plotviewBox.ymin
 
         for vertexes, attr, row in Progress(self.polylines, 'rendering'):
             if len(vertexes) == 1:  # single point
                 x1, y1 = vertexes[0]
                 x1, y1 = float(x1), float(y1)
                 if xmin <= x1 <= xmax and ymin <= y1 <= ymax:
+                    # equivalent to self.scaleX(x1) and self.scaleY(y1), inlined for speed
                     x = plotxmin+(x1-xmin)*xfactor
-                    y = plotymin+(y1-ymin)*yfactor
+                    if invert_y:
+                        y = plotymax-(y1-ymin)*yfactor
+                    else:
+                        y = plotymin+(y1-ymin)*yfactor
                     self.plotpixel(round(x), round(y), attr, row)
                 continue
 
@@ -665,9 +691,13 @@ class Canvas(Plotter):
                 if r:
                     x1, y1, x2, y2 = r
                     x1 = plotxmin+float(x1-xmin)*xfactor
-                    y1 = plotymin+float(y1-ymin)*yfactor
                     x2 = plotxmin+float(x2-xmin)*xfactor
-                    y2 = plotymin+float(y2-ymin)*yfactor
+                    if invert_y:
+                        y1 = plotymax-float(y1-ymin)*yfactor
+                        y2 = plotymax-float(y2-ymin)*yfactor
+                    else:
+                        y1 = plotymin+float(y1-ymin)*yfactor
+                        y2 = plotymin+float(y2-ymin)*yfactor
                     self.plotline(x1, y1, x2, y2, attr, row)
                 prev_x, prev_y = x, y
 
@@ -718,7 +748,7 @@ Canvas.addCommand('_', 'zoom-all', 'sheet.canvasBox = None; sheet.visibleBox = N
 Canvas.addCommand('z_', 'set-aspect', 'sheet.aspectRatio = float(input("aspect ratio=", value=aspectRatio)); refresh()', 'set aspect ratio')
 
 # set cursor box with left click
-Canvas.addCommand('BUTTON1_PRESSED', 'start-cursor', 'sheet.cursorBox = Box(*canvasMouse.xy)', 'start cursor box with left mouse button press')
+Canvas.addCommand('BUTTON1_PRESSED', 'start-cursor', 'startCursor()', 'start cursor box with left mouse button press')
 Canvas.addCommand('BUTTON1_RELEASED', 'end-cursor', 'setCursorSize(canvasMouse)', 'end cursor box with left mouse button release')
 
 Canvas.addCommand('BUTTON3_PRESSED', 'start-move', 'sheet.anchorPoint = canvasMouse', 'mark grid point to move')

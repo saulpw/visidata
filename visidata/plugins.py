@@ -5,7 +5,7 @@ import re
 import shutil
 import importlib
 import subprocess
-import urllib
+import urllib.error
 
 from visidata import VisiData, vd, Path, CellColorizer, JsonLinesSheet, AttrDict, Column, Progress, ExpectedException, BaseSheet, asyncsingle, asyncthread
 
@@ -119,15 +119,6 @@ class PluginsSheet(JsonLinesSheet):
                 func = lambda *args, **kwargs: vd.fail('this requires the %s plugin' % r.name)
                 vd.addGlobals({funcname: func})
                 setattr(vd, funcname, func)
-
-        # check for plugins with newer versions
-        def is_stale(r):
-            v = _loadedVersion(r)
-            return v and r.latest_ver and v != r.latest_ver
-
-        stale_plugins = list(filter(is_stale, self.rows))
-        if len(stale_plugins) > 0:
-            vd.warning(f'update available for {len(stale_plugins)} plugins')
 
     def installPlugin(self, plugin):
         # pip3 install requirements

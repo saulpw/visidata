@@ -11,7 +11,7 @@ def moveRegex(vd, sheet, *args, **kwargs):
 
 # kwargs: regex=None, columns=None, backward=False
 @VisiData.api
-def searchRegex(vd, sheet, moveCursor=False, reverse=False, **kwargs):
+def searchRegex(vd, sheet, moveCursor=False, reverse=False, regex_flags=None, **kwargs):
         'Set row index if moveCursor, otherwise return list of row indexes.'
         def findMatchingColumn(sheet, row, columns, func):
             'Find column for which func matches the displayed value in this row'
@@ -23,8 +23,10 @@ def searchRegex(vd, sheet, moveCursor=False, reverse=False, **kwargs):
 
         regex = kwargs.get("regex")
         if regex:
-            regex_flags = sum(getattr(re, f.upper()) for f in sheet.options.regex_flags)  # regex_flags defined in features.regex
-            vd.searchContext["regex"] = re.compile(regex, regex_flags) or vd.error('invalid regex: %s' % regex)
+            if regex_flags is None:
+                regex_flags = sheet.options.regex_flags  # regex_flags defined in features.regex
+            flagbits = sum(getattr(re, f.upper()) for f in regex_flags)
+            vd.searchContext["regex"] = re.compile(regex, flagbits) or vd.error('invalid regex: %s' % regex)
 
         regex = vd.searchContext.get("regex") or vd.fail("no regex")
 
@@ -59,6 +61,28 @@ def searchRegex(vd, sheet, moveCursor=False, reverse=False, **kwargs):
             vd.status('%s matches for /%s/' % (matchingRowIndexes, regex.pattern))
 
 
+regex_flags_help = '''# regex flags
+
+- `A` (ASCII) ASCII-only matching (not unicode)
+- `I` (IGNORECASE): case-insensitive matching
+- `M` (MULTILINE): `^` and `$` match after/before newlines
+- `S` (DOTALL): `.` match any character at all, including newline
+- `X` (VERBOSE): allow verbose regex
+'''
+@Sheet.api
+def searchInputRegex(sheet, action:str, columns:str='cursorCol'):
+    r = vd.inputMultiple(regex=dict(prompt=f"{action} regex: ", type="regex", defaultLast=True, help='# regex help'),
+                         flags=dict(prompt="regex flags: ", type="regex_flags", value=sheet.options.regex_flags, help=regex_flags_help))
+
+    return vd.searchRegex(sheet, regex=r['regex'], regex_flags=r['flags'], columns=columns)
+
+@Sheet.api
+def moveInputRegex(sheet, action:str, type="regex", **kwargs):
+    r = vd.inputMultiple(regex=dict(prompt=f"{action} regex: ", type=type, defaultLast=True),
+                         flags=dict(prompt="regex flags: ", type="regex_flags", value=sheet.options.regex_flags))
+
+    return vd.moveRegex(sheet, regex=r['regex'], regex_flags=r['flags'], **kwargs)
+
 @Sheet.api
 @asyncthread
 def search_expr(sheet, expr, reverse=False):
@@ -73,14 +97,14 @@ def search_expr(sheet, expr, reverse=False):
     vd.fail(f'no {sheet.rowtype} where {expr}')
 
 
-Sheet.addCommand('r', 'search-keys', 'tmp=cursorVisibleColIndex; vd.moveRegex(sheet, regex=input("row key regex: ", type="regex-row", defaultLast=True), columns=keyCols or [visibleCols[0]]); sheet.cursorVisibleColIndex=tmp', 'go to next row with key matching regex')
-Sheet.addCommand('/', 'search-col', 'vd.moveRegex(sheet, regex=input("/", type="regex", defaultLast=True), columns="cursorCol", backward=False)', 'search for regex forwards in current column'),
-Sheet.addCommand('?', 'searchr-col', 'vd.moveRegex(sheet, regex=input("?", type="regex", defaultLast=True), columns="cursorCol", backward=True)', 'search for regex backwards in current column'),
+Sheet.addCommand('r', 'search-keys', 'tmp=cursorVisibleColIndex; moveInputRegex("row key", type="regex-row", columns=keyCols or [visibleCols[0]]); sheet.cursorVisibleColIndex=tmp', 'go to next row with key matching regex')
+Sheet.addCommand('/', 'search-col', 'moveInputRegex("search", columns="cursorCol", backward=False)', 'search for regex forwards in current column'),
+Sheet.addCommand('?', 'searchr-col', 'moveInputRegex("reverse search", columns="cursorCol", backward=True)', 'search for regex backwards in current column'),
 Sheet.addCommand('n', 'search-next', 'vd.moveRegex(sheet, reverse=False)', 'go to next match from last regex search'),
 Sheet.addCommand('N', 'searchr-next', 'vd.moveRegex(sheet, reverse=True)', 'go to previous match from last regex search'),
 
-Sheet.addCommand('g/', 'search-cols', 'vd.moveRegex(sheet, regex=input("g/", type="regex", defaultLast=True), backward=False, columns="visibleCols")', 'search for regex forwards over all visible columns'),
-Sheet.addCommand('g?', 'searchr-cols', 'vd.moveRegex(sheet, regex=input("g?", type="regex", defaultLast=True), backward=True, columns="visibleCols")', 'search for regex backwards over all visible columns'),
+Sheet.addCommand('g/', 'search-cols', 'moveInputRegex("g/", backward=False, columns="visibleCols")', 'search for regex forwards over all visible columns'),
+Sheet.addCommand('g?', 'searchr-cols', 'moveInputRegex("g?", backward=True, columns="visibleCols")', 'search for regex backwards over all visible columns'),
 Sheet.addCommand('z/', 'search-expr', 'search_expr(inputExpr("search by expr: ") or fail("no expr"))', 'search by Python expression forwards in current column (with column names as variables)')
 Sheet.addCommand('z?', 'searchr-expr', 'search_expr(inputExpr("searchr by expr: ") or fail("no expr"), reverse=True)', 'search by Python expression backwards in current column (with column names as variables)')
 
