@@ -62,7 +62,7 @@ TableSheet.addCommand(
 TableSheet.addCommand(
     None,
     "select-supernets",
-    'cursorCol.selectSupernets(inputExpr("ip or cidr block: "))',
+    'cursorCol.selectSupernets(input("ip or cidr block: "))',
     "select rows where the CIDR block value includes the input address space",
 )
 
