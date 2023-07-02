@@ -30,6 +30,9 @@ def selectSupernets(col, ip):
     Given an IP address (e.g. 10.0.0.0) or network (e.g. 10.0.0.0/8) as input,
     select rows whose network address space completely contains the input network.
     """
+    if not ip:
+        return
+
     sheet = col.sheet
     network = ipaddress.ip_network(ip.strip())
     isNull = sheet.isNullFunc()
@@ -62,3 +65,5 @@ TableSheet.addCommand(
     'cursorCol.selectSupernets(inputExpr("ip or cidr block: "))',
     "select rows where the CIDR block value includes the input address space",
 )
+
+vd.addGlobals({"ipaddress": ipaddress})
