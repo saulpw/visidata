@@ -402,6 +402,7 @@ def inputMultiple(vd, **kwargs):
             })
             break
         except ChangeInput as e:
+            vd.lastInputsSheet.appendRow(AttrDict(type=input_kwargs.get('type', ''), input=e.args[0]))
             input_kwargs['value'] = e.args[0]
             offset = e.args[1]
             i = keys.index(cur_input_key)
