@@ -387,7 +387,7 @@ def inputMultiple(vd, **kwargs):
             vd.drawSheet(sheet._scr, sheet)
 
             for k, v in kwargs.items():
-                promptlen = clipdraw(sheet._scr, y-v.get('dy'), 0, v.get('prompt'), attr)
+                promptlen = clipdraw(sheet._scr, y-v.get('dy'), 0, v.get('prompt'), attr, w=sheet.windowWidth-1)  #1947
                 promptlen = clipdraw(sheet._scr, y-v.get('dy'), promptlen, v.get('value'), attr, w=sheet.windowWidth-1)
 
         try:
