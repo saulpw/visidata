@@ -5,7 +5,7 @@ from visidata import vd, asyncthread, vlen, VisiData, Column, AttrColumn, Sheet,
 from visidata.pivot import PivotSheet, PivotGroupRow
 
 
-vd.option('disp_histogram', '*', 'histogram element character')
+vd.option('disp_histogram', '■', 'histogram element character')
 vd.option('disp_histolen', 50, 'width of histogram column')
 vd.option('histogram_bins', 0, 'number of bins for histogram of numeric columns')
 vd.option('numeric_binning', False, 'bin numeric columns into ranges', replay=True)
