@@ -13,8 +13,8 @@ def main():
 
     for entry_point in ibis.util.backend_entry_points():
         attrname = f"openurl_{entry_point.name}"
-        if not hasattr(vd, attrname):
-            setattr(vd, attrname, vd.open_vdsql)
+        # when running vdsql directly, override visidata builtin loader with vdsql loader #1929
+        setattr(vd, attrname, vd.open_vdsql)
 
     main.vd_cli()
 
