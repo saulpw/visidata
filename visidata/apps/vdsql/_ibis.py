@@ -466,14 +466,14 @@ def get_ibis_col(col, query, typed=False):
     if isinstance(col, ExprColumn):
         r = col.sheet.evalIbisExpr(col.expr)
     elif isinstance(col, ExpandedColumn):
-        r = query.get_column(col.name)
+        r = query[col.name]
     elif not hasattr(col, 'ibis_name'):
         return
     else:
         try:
-            r = query.get_column(col.ibis_name)
+            r = query[col.ibis_name]
         except (ibis.common.exceptions.IbisTypeError, AttributeError):
-            r = query.get_column(col.name)
+            r = query[col.name]
 
     if r is None:
         return r
