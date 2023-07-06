@@ -31,17 +31,14 @@ class GitSheet(Sheet):
         sh = vd.importExternal('sh')
         try:
             vd.debug('git ' + ' '.join(str(x) for x in args))
-            cmd = self.git('--no-pager',
+            out = self.git('--no-pager',
                       *args,
                       _decode_errors='replace',
                       _bg_exc=False,
                       **kwargs)
-            out = cmd.stdout
         except sh.ErrorReturnCode as e:
             vd.warning('git '+' '.join(str(x) for x in args), 'error=%s' % e.exit_code)
             out = e.stdout
-
-        out = out.decode('utf-8')
 
         return out
 
