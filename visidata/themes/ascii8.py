@@ -79,5 +79,6 @@ vd.themes['ascii8'] = dict(
     disp_menu_push='+',
     disp_menu_input='_',
     disp_menu_fmt='7-bit ASCII 3-bit color',
-    plot_colors = 'white'
+    plot_colors = 'white',
+    disp_histogram='*'
 )
