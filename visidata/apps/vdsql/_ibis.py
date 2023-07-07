@@ -406,7 +406,7 @@ class IbisTableSheet(Sheet):
 
             groupq = groupq.mutate(histogram=histogram)
 
-        groupq = groupq.order_by([('count', False)])
+        groupq = groupq.order_by(ibis.desc('count'))
 
         return IbisFreqTable(self.name, *(col.name for col in groupByCols), 'freq',
                              ibis_conpool=self.ibis_conpool,
