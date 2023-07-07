@@ -284,12 +284,19 @@ class IbisTableSheet(Sheet):
 
     @property
     def pending_expr(self):
+        import ibis
         q = self.get_current_expr(typed=True)
         if self.ibis_selection:
             q = q.filter(self.ibis_filter)
 
         if self._ordering:
-            q = q.order_by([(col.get_ibis_col(self.query), not rev) for col, rev in self._ordering])
+            colorder = []
+            for col, rev in self._ordering:
+                ibiscol = col.get_ibis_col(q)  #1856
+                if rev:
+                    ibiscol = ibis.desc(ibiscol)
+                colorder.append(ibiscol)
+            q = q.order_by(colorder)
 
         return q
 
