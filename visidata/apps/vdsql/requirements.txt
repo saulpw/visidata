@@ -1,5 +1,6 @@
-clickhouse-driver[numpy] >= 0.2.4
-ibis-framework[sqlite,clickhouse,bigquery] >= 4
+ibis-framework[sqlite,clickhouse,bigquery] >= 6
 ibis-substrait
 sqlparse
-
+psycopg2-binary
+duckdb-engine
+duckdb
