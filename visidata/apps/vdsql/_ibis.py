@@ -179,7 +179,7 @@ class LazyIbisColMap:
     def __init__(self, sheet, q):
         self._sheet = sheet
         self._query = q
-        self._map = {col.name: col for col in sheet.visibleCols}
+        self._map = {col.name: col for col in sheet.columns}
 
     def __getitem__(self, k):
         col = self._map[k]
