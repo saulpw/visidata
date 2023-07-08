@@ -402,16 +402,16 @@ class IbisTableSheet(Sheet):
         win = ibis.window(order_by=ibis.NA)
         groupq = groupq.mutate(percent=_['count']*100 / _['count'].sum().over(win))
 
-        histolen = self.options.disp_histolen
-        histogram = self.options.disp_histogram
-        if histolen and histogram and len(aggr_cols) == 1:
+        histolen = 40
+        histogram_char = self.options.disp_histogram
+        if histogram_char and len(aggr_cols) == 1:
             groupq = groupq.mutate(maxcount=_['count'].max())
-            hval = ibis.literal(histogram, type=dt.string)
+            hval = ibis.literal(histogram_char, type=dt.string)
 
-            def histogram(t):
+            def _histogram(t):
                 return hval.repeat((histolen*t['count']/t.maxcount).cast(dt.int))
 
-            groupq = groupq.mutate(histogram=histogram)
+            groupq = groupq.mutate(histogram=_histogram)
 
         groupq = groupq.order_by(ibis.desc('count'))
 
@@ -735,6 +735,5 @@ IbisTableIndexSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("SQL query:
 IbisTableIndexSheet.class_options.load_lazy = True
 IbisTableSheet.class_options.clean_names = True
 IbisTableSheet.class_options.regex_flags = ''
-IbisTableSheet.class_options.disp_histolen = 0  # disable histograms by default
 
 vd.addMenuItem('View', 'Sidebar', 'choose', 'sidebar-choose')
