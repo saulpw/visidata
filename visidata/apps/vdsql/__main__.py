@@ -12,6 +12,10 @@ def main():
         setattr(vd, f"open_{ext}", vd.open_vdsql)
 
     for entry_point in ibis.util.backend_entry_points():
+        if entry_point.name in ['bigquery', 'clickhouse', 'snowflake']:
+            # these have their own custom openurl_ funcs already installed
+            continue
+
         attrname = f"openurl_{entry_point.name}"
         # when running vdsql directly, override visidata builtin loader with vdsql loader #1929
         setattr(vd, attrname, vd.open_vdsql)
