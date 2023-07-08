@@ -23,11 +23,6 @@ def configure_bigquery(vd):
         right = t.translate(op.right)
         return f"TIMESTAMP_DIFF({left}, {right}, SECOND)"
 
-    @ibis.bigquery.add_operation(ops.ToIntervalUnit)
-    def bq_to_interval_unit(t, expr):
-        op = expr.op()
-        return t.translate(op.arg)
-
 
 class BigqueryDatabaseIndexSheet(Sheet):
     rowtype = 'databases'  # rowdef: DatasetListItem
