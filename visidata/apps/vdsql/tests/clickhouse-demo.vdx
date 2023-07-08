@@ -1,0 +1,7 @@
+#!vdsql
+open-file clickhouse://play:clickhouse@play.clickhouse.com/?secure=1
+search-keys recipes
+open-row
+col NER
+unfurl-col
+freq-col
