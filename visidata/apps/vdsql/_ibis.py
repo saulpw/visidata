@@ -277,7 +277,7 @@ class IbisTableSheet(Sheet):
     @property
     def ibis_filter(self):
         import ibis
-        selectors = [self.ibisCompileExpr(f, self.ibis_current_expr) for f in self.ibis_selection]
+        selectors = [self.ibisCompileExpr(f, self.get_current_expr(typed=True)) for f in self.ibis_selection]
         if not selectors:
             return ibis.literal(True)
         return functools.reduce(operator.or_, selectors)
@@ -629,7 +629,6 @@ notimpl_cmds = '''
 addcol-capture addcol-incr addcol-incr-step addcol-window capture-col
 contract-col expand-col-depth expand-cols expand-cols-depth melt melt-regex pivot random-rows
 select-error-col select-exact-cell select-exact-row select-rows
-unselect-expr select-expr
 describe-sheet freq-summary
 cache-col cache-cols
 dive-selected-cells
@@ -729,8 +728,8 @@ IbisTableSheet.addCommand('u', 'unselect-row', 'unselect_row(cursorRow); cursorD
 
 IbisTableSheet.addCommand('', 'select-col-regex', 'select_col_regex(cursorCol, input("select regex: ", type="regex", defaultLast=True))', 'select rows matching regex in current column')
 
-#IbisTableSheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: "); select_expr(expr)', 'select rows matching Python expression in any visible column')
-#IbisTableSheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalExpr(expr, r)), progress=False)', 'unselect rows matching Python expression in any visible column')
+IbisTableSheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: "); select_expr(expr)', 'select rows matching Python expression in any visible column')
+IbisTableSheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalExpr(expr, r)), progress=False)', 'unselect rows matching Python expression in any visible column')
 
 IbisFreqTable.addCommand('g'+ENTER, 'open-selected', 'vd.push(openRows(selectedRows))')
 IbisTableIndexSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("SQL query: ")))', 'open sheet with results of raw SQL query')
