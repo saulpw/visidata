@@ -9,11 +9,11 @@ Powered by [Ibis](https://ibis-project.org).
 - query data in VisiData from any supported backend
 - output resulting query in SQL, Substrait, or Python
 
-## Requirements
+## Minimum Requirements
 
-- Python 3.8
-- VisiData 2.10.2
-- Ibis 3.2
+- Python 3.9
+- VisiData develop
+- Ibis 6.0
 
 ### Confirmed supported backends
 
@@ -63,7 +63,7 @@ To minimize dependencies, only the sqlite backend is included by default.
     vdsql mysql://...
     vdsql postgres://...
     vdsql foo.duckdb  # or .ddb
-    vdsql clickhouse://explorer@play.clickhouse.com:9440/?secure=1
+    vdsql clickhouse://play:clickhouse@play.clickhouse.com/?secure=1
     vdsql bigquery:///bigquery-public-data
 
     vdsql <file_or_url>
