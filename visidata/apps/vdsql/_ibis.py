@@ -399,7 +399,10 @@ class IbisTableSheet(Sheet):
 
         q = self.ibis_current_expr
         groupq = q.aggregate(aggr_cols, by=[c.ibis_col for c in groupByCols])
-        win = ibis.window(order_by=ibis.NA)
+        try:
+            win = ibis.window(order_by=ibis.NA)
+        except ibis.common.exceptions.IbisTypeError: # ibis bug: there is not yet a good workaround that covers all backends
+            win = ibis.window(order_by=None)
         groupq = groupq.mutate(percent=_['count']*100 / _['count'].sum().over(win))
 
         histolen = 40
