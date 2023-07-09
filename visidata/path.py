@@ -208,7 +208,7 @@ class Path(os.PathLike):
             self.rfile = RepeatFile(self.fptext)
             return self.rfile
 
-        if 't' not in mode:
+        if 't' not in mode and 'b' not in mode:
             mode += 't'
 
         if self.given == '-':
@@ -221,7 +221,10 @@ class Path(os.PathLike):
                 vd.error('invalid mode "%s" for Path.open()' % mode)
                 return sys.stderr
 
-        return self._open(mode=mode, encoding=encoding or vd.options.encoding, errors=vd.options.encoding_errors, newline=newline)
+        if 'b' in mode:
+            return self._open(mode=mode, newline='')
+        else:
+            return self._open(mode=mode, encoding=encoding or vd.options.encoding, errors=vd.options.encoding_errors, newline=newline)
 
     @wraps(pathlib.Path.read_text)
     def read_text(self, *args, **kwargs):
