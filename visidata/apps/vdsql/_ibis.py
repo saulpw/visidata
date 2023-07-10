@@ -552,7 +552,8 @@ def select_equal_cell(sheet, col, typedval):
     if sheet.isNullFunc()(typedval):
         expr = col.ibis_col.isnull()
     else:
-        ibis_col = col.get_ibis_col(sheet.query, typed=False)
+        q = sheet.get_current_expr(typed=True)
+        ibis_col = col.get_ibis_col(q, typed=True)
         expr = (ibis_col == typedval)
 
     sheet.ibis_selection.append(expr)
