@@ -33,3 +33,6 @@ jobs:
 
     - name: Ensure it starts up
       run: vdsql --version
+
+    - name: Run tests
+      run: cd visidata/apps/vdsql && ./test.sh
