@@ -46,7 +46,9 @@ This will install both:
 
 ## Or install manually as a VisiData plugin (cutting edge development)
 
-    pip install git+https://github.com/visidata/vdsql.git
+    git clone git@github.com:saulpw/visidata.git
+    cd visidata/visidata/apps/vdsql
+    pip3 install .
 
 ### Install Ibis backends
 
