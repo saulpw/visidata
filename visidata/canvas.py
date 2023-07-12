@@ -305,7 +305,7 @@ class Plotter(BaseSheet):
                 for o, fldraw in line:
                     if fldraw:
                         char_x, char_y, txt, attr, row = o
-                        clipdraw(scr, char_y, char_x, txt, attr, len(txt))
+                        clipdraw(scr, char_y, char_x, txt, attr, dispwidth(txt))
 
 
 # - has a cursor, of arbitrary position and width/height (not restricted to current zoom)
@@ -359,7 +359,7 @@ class Canvas(Plotter):
                 del self.legends[lastlegend]
                 legend = '[other]'
 
-            self.legendwidth = max(self.legendwidth, len(legend))
+            self.legendwidth = max(self.legendwidth, dispwidth(legend))
             self.legends[legend] = attr
             self.plotAttrs[k] = attr
             self.plotlegends()
