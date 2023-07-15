@@ -193,7 +193,7 @@ class Path(os.PathLike):
         return bool(self.fp or self.fptext)
 
     def open(self, mode='rt', encoding=None, encoding_errors=None, newline=None):
-        'Open path in text mode, using options.encoding and options.encoding_errors.  Return open file-pointer or file-pointer-like.'
+        'Open path in text or binary mode, using options.encoding and options.encoding_errors.  Return open file-pointer or file-pointer-like.'
         # rfile makes a single-access fp reusable
 
         if self.rfile:
