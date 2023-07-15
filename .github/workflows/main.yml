@@ -66,3 +66,5 @@ jobs:
         sudo apt install aha
         dev/mkman.sh
 
+    - name: Ensure VisiData can create completions
+      run: python -v dev/zsh-completion.py
