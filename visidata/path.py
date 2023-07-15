@@ -222,7 +222,7 @@ class Path(os.PathLike):
                 return sys.stderr
 
         if 'b' in mode:
-            return self._open(mode=mode, newline='')
+            return self._open(mode=mode)
         else:
             return self._open(mode=mode, encoding=encoding or vd.options.encoding, errors=vd.options.encoding_errors, newline=newline)
 
