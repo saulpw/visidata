@@ -114,8 +114,8 @@ TableSheet.addCommand('', 'unselect-marks', 'unselect(gatherBy(lambda r,mark=vd.
 
 TableSheet.addCommand('', 'open-marks', 'vd.push(vd.marks)', '')
 
-TableSheet.addCommand('', 'go-prev-mark', 'moveToNextRow(lambda row,mark=vd.marks.inputmark(): vd.marks.isMarked(row, mark), reverse=True, msg="no previous marked row")', 'go up current column to previous row with given mark'),
-TableSheet.addCommand('', 'go-next-mark', 'moveToNextRow(lambda row,mark=vd.marks.inputmark(): vd.marks.isMarked(row, mark), msg="no next marked row")', 'go down current column to next row with given mark'),
+TableSheet.addCommand('', 'go-prev-mark', 'moveToNextRow(lambda row,mark=vd.marks.inputmark(): vd.marks.isMarked(row, mark), reverse=True, msg="no previous marked row")', 'go up current column to previous row with given mark')
+TableSheet.addCommand('', 'go-next-mark', 'moveToNextRow(lambda row,mark=vd.marks.inputmark(): vd.marks.isMarked(row, mark), msg="no next marked row")', 'go down current column to next row with given mark')
 
 
 vd.addMenuItems('''

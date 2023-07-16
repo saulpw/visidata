@@ -54,10 +54,10 @@ class GitStashes(GitSheet):
 
 GitSheet.addCommand('', 'git-open-stashes', 'vd.push(git_stash(source, ["list"]))', 'push stashes sheet')
 
-GitStashes.addCommand('a', 'git-stash-apply', 'loggit("stash", "apply", cursorRow[0])', 'apply this stashed change without removing'),
-GitStashes.addCommand('', 'git-stash-pop', 'loggit("stash", "pop", cursorRow[0])', 'apply this stashed change and drop it'),
-GitStashes.addCommand('d', 'git-stash-drop', 'loggit("stash", "drop", cursorRow[0])', 'drop this stashed change'),
-GitStashes.addCommand('b', 'git-stash-branch', 'loggit("stash", "branch", input("create branch from stash named: "), cursorRow[0])', 'create branch from stash'),
+GitStashes.addCommand('a', 'git-stash-apply', 'loggit("stash", "apply", cursorRow[0])', 'apply this stashed change without removing')
+GitStashes.addCommand('', 'git-stash-pop', 'loggit("stash", "pop", cursorRow[0])', 'apply this stashed change and drop it')
+GitStashes.addCommand('d', 'git-stash-drop', 'loggit("stash", "drop", cursorRow[0])', 'drop this stashed change')
+GitStashes.addCommand('b', 'git-stash-branch', 'loggit("stash", "branch", input("create branch from stash named: "), cursorRow[0])', 'create branch from stash')
 
 
 vd.addMenuItems('''

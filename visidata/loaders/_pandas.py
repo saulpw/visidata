@@ -387,7 +387,7 @@ PandasSheet.addCommand(None, 'unselect-before', 'unselectByIndex(end=cursorRowIn
 PandasSheet.addCommand(None, 'stoggle-after', 'toggleByIndex(start=cursorRowIndex)', 'toggle selection of rows from cursor to bottom')
 PandasSheet.addCommand(None, 'select-after', 'selectByIndex(start=cursorRowIndex)', 'select all rows from cursor to bottom')
 PandasSheet.addCommand(None, 'unselect-after', 'unselectByIndex(start=cursorRowIndex)', 'unselect all rows from cursor to bottom')
-PandasSheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=DataFrameAdapter(sheet.df.sample(nrows or nRows)); vd.push(vs)', 'open duplicate sheet with a random population subset of N rows'),
+PandasSheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=DataFrameAdapter(sheet.df.sample(nrows or nRows)); vd.push(vs)', 'open duplicate sheet with a random population subset of N rows')
 
 # Handle the regex selection family of commands through a single method,
 # since the core logic is shared
@@ -397,7 +397,7 @@ PandasSheet.addCommand('g|', 'select-cols-regex', 'selectByRegex(regex=input("se
 PandasSheet.addCommand('g\\', 'unselect-cols-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=visibleCols, unselect=True)', 'unselect rows matching regex in any visible column')
 
 # Override with a pandas/dataframe-aware implementation
-PandasSheet.addCommand('"', 'dup-selected', 'vs=PandasSheet(sheet.name, "selectedref", source=selectedRows.df); vd.push(vs)', 'open duplicate sheet with only selected rows'),
+PandasSheet.addCommand('"', 'dup-selected', 'vs=PandasSheet(sheet.name, "selectedref", source=selectedRows.df); vd.push(vs)', 'open duplicate sheet with only selected rows')
 
 vd.addGlobals({
     'PandasSheet': PandasSheet,

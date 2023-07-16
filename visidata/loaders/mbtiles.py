@@ -135,4 +135,4 @@ class PbfCanvas(InvertedCanvas):
 PbfSheet.addCommand('.', 'plot-row', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=[cursorRow], textCol=cursorCol))', 'plot blocks in current row')
 PbfSheet.addCommand('g.', 'plot-rows', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=rows, textCol=cursorCol))', 'plot selected blocks')
 MbtilesSheet.addCommand('.', 'plot-row', 'vd.push(getPlot(cursorRow))', 'plot tiles in current row')
-MbtilesSheet.addCommand('g.', 'plot-selected', 'vd.push(getPlot(*selectedRows))', 'plot selected tiles'),
+MbtilesSheet.addCommand('g.', 'plot-selected', 'vd.push(getPlot(*selectedRows))', 'plot selected tiles')

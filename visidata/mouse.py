@@ -128,7 +128,7 @@ def go_mouse(sheet):
     if cidx is not None:
         sheet.cursorVisibleColIndex = cidx
 
-Sheet.addCommand(None, 'scroll-mouse', 'sheet.topRowIndex=cursorRowIndex-mouseY+1', 'scroll to mouse cursor location'),
+Sheet.addCommand(None, 'scroll-mouse', 'sheet.topRowIndex=cursorRowIndex-mouseY+1', 'scroll to mouse cursor location')
 
-Sheet.addCommand('ScrollwheelUp', 'scroll-up', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr', 'scroll one row up'),
-Sheet.addCommand('ScrollwheelDown', 'scroll-down', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr', 'scroll one row down'),
+Sheet.addCommand('ScrollwheelUp', 'scroll-up', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr', 'scroll one row up')
+Sheet.addCommand('ScrollwheelDown', 'scroll-down', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr', 'scroll one row down')

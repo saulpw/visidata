@@ -137,12 +137,12 @@ class HunkViewer(GitSheet):
                 continue  # header
 
 
-HunkViewer.addCommand('2', 'git-apply-hunk', 'source.git_apply(cursorRow.hunk, "--cached"); reload()', 'apply this hunk to the index and move to the next hunk'),
-HunkViewer.addCommand('1', 'git-remove-hunk', 'source.git_apply(cursorRow.hunk, "--reverse"); reload()', 'remove this hunk from staging'),
-HunkViewer.addCommand('Enter', 'git-skip-hunk', 'hunks.pop(0); reload()', 'move to the next hunk without applying this hunk'),
-HunkViewer.addCommand('d', 'delete-line', 'source[7].pop(cursorRow[3]); reload()', 'delete a line from the patch'),
+HunkViewer.addCommand('2', 'git-apply-hunk', 'source.git_apply(cursorRow.hunk, "--cached"); reload()', 'apply this hunk to the index and move to the next hunk')
+HunkViewer.addCommand('1', 'git-remove-hunk', 'source.git_apply(cursorRow.hunk, "--reverse"); reload()', 'remove this hunk from staging')
+HunkViewer.addCommand('Enter', 'git-skip-hunk', 'hunks.pop(0); reload()', 'move to the next hunk without applying this hunk')
+HunkViewer.addCommand('d', 'delete-line', 'source[7].pop(cursorRow[3]); reload()', 'delete a line from the patch')
 
-#HunksSheet.addCommand('g^J', 'git-diff-selected', 'vd.push(HunkViewer(selectedRows or rows, source=sheet))', 'view the diffs for the selected hunks (or all hunks)'),
+#HunksSheet.addCommand('g^J', 'git-diff-selected', 'vd.push(HunkViewer(selectedRows or rows, source=sheet))', 'view the diffs for the selected hunks (or all hunks)')
 
 @GitDiffSheet.api
 def git_apply(sheet, row, *args):
@@ -153,10 +153,10 @@ def git_apply(sheet, row, *args):
     sheet.reload()
 
 
-#DiffSheet.addCommand('[', '', 'cursorRowIndex = findDiffRow(cursorCol.refnum, cursorRowIndex, -1)', 'go to previous diff'),
-#DiffSheet.addCommand(']', '', 'cursorRowIndex = findDiffRow(cursorCol.refnum, cursorRowIndex, +1)', 'go to next diff'),
+#DiffSheet.addCommand('[', '', 'cursorRowIndex = findDiffRow(cursorCol.refnum, cursorRowIndex, -1)', 'go to previous diff')
+#DiffSheet.addCommand(']', '', 'cursorRowIndex = findDiffRow(cursorCol.refnum, cursorRowIndex, +1)', 'go to next diff')
 
-GitDiffSheet.addCommand('a', 'git-add-hunk', 'git_apply(cursorRow, "--cached")', 'apply this hunk to the index'),
+GitDiffSheet.addCommand('a', 'git-add-hunk', 'git_apply(cursorRow, "--cached")', 'apply this hunk to the index')
 
 vd.addMenuItems('''
     Git > Stage > current hunk > git-add-hunk

@@ -74,8 +74,8 @@ class GitLogSheet(GitSheet):
 
 GitLogSheet.addCommand(None, 'delete-row', 'error("delete is not supported")')
 GitLogSheet.addCommand(None, 'add-row', 'error("commits cannot be added")')
-#GitLogSheet.addCommand('x', 'git-pick', 'git("cherry-pick", cursorRow.commitid)', 'cherry-pick this commit onto current branch'),
-#GitLogSheet.addCommand('r', 'git-reset-here', 'git("update-ref", "refs/heads/"+source, cursorRow[0])', 'reset this branch to this commit'),
+#GitLogSheet.addCommand('x', 'git-pick', 'git("cherry-pick", cursorRow.commitid)', 'cherry-pick this commit onto current branch')
+#GitLogSheet.addCommand('r', 'git-reset-here', 'git("update-ref", "refs/heads/"+source, cursorRow[0])', 'reset this branch to this commit')
 
 GitSheet.addCommand('', 'git-log', 'vd.push(git_log(gitRootPath, branch))', 'push log of current branch')
 

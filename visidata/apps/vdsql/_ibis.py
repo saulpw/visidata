@@ -707,8 +707,8 @@ class IbisFreqTable(IbisTableSheet):
 IbisTableSheet.addCommand('F', 'freq-col', 'vd.push(groupBy([cursorCol]))')
 IbisTableSheet.addCommand('gF', 'freq-keys', 'vd.push(groupBy(keyCols))')
 
-IbisTableSheet.addCommand('"', 'dup-selected', 'vd.push(dup_selected())', 'open duplicate sheet with selected rows (default limit)'),
-IbisTableSheet.addCommand('z"', 'dup-limit', 'vd.push(dup_limit(input("max rows: ", value=options.ibis_limit)))', 'open duplicate sheet with only selected rows (input limit)'),
+IbisTableSheet.addCommand('"', 'dup-selected', 'vd.push(dup_selected())', 'open duplicate sheet with selected rows (default limit)')
+IbisTableSheet.addCommand('z"', 'dup-limit', 'vd.push(dup_limit(input("max rows: ", value=options.ibis_limit)))', 'open duplicate sheet with only selected rows (input limit)')
 IbisTableSheet.addCommand('gz"', 'dup-nolimit', 'vd.push(dup_limit(0))', 'open duplicate sheet with only selected rows (no limit--be careful!)')
 
 IbisTableSheet.addCommand("'", 'addcol-cast', 'addcol_cast(cursorCol)')

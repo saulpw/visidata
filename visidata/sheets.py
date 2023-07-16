@@ -1050,8 +1050,8 @@ BaseSheet.init('pane', lambda: 1)
 Sheet.init('_ordering', list, copy=True)  # (col:Column, reverse:bool)
 
 
-BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); reload(); recalc(); status("reloaded")', 'Reload current sheet'),
-Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line'),
+BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); reload(); recalc(); status("reloaded")', 'Reload current sheet')
+Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line')
 
 Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', 'toggle current column as a key column')
 Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])', 'unset current column as a key column')
@@ -1059,10 +1059,10 @@ Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])', 'unset current c
 Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)) if not (cursorRow is None) else fail("no rows to edit")', 'edit contents of current cell')
 Sheet.addCommand('ge', 'setcol-input', 'cursorCol.setValuesTyped(selectedRows, input("set selected to: ", value=cursorDisplay))', 'set contents of current column for selected rows to same input')
 
-Sheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.reload=lambda vs=vs,rows=selectedRows: setattr(vs, "rows", list(rows)); vd.push(vs)', 'open duplicate sheet with only selected rows'),
-Sheet.addCommand('g"', 'dup-rows', 'vs=copy(sheet); vs.name+="_copy"; vs.rows=list(rows); status("copied "+vs.name); vs.select(selectedRows); vd.push(vs)', 'open duplicate sheet with all rows'),
-Sheet.addCommand('z"', 'dup-selected-deep', 'vs = deepcopy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = vs.async_deepcopy(selectedRows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")', 'open duplicate sheet with deepcopy of selected rows'),
-Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = deepcopy(sheet); vs.name += "_deepcopy"; vs.rows = vs.async_deepcopy(rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")', 'open duplicate sheet with deepcopy of all rows'),
+Sheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.reload=lambda vs=vs,rows=selectedRows: setattr(vs, "rows", list(rows)); vd.push(vs)', 'open duplicate sheet with only selected rows')
+Sheet.addCommand('g"', 'dup-rows', 'vs=copy(sheet); vs.name+="_copy"; vs.rows=list(rows); status("copied "+vs.name); vs.select(selectedRows); vd.push(vs)', 'open duplicate sheet with all rows')
+Sheet.addCommand('z"', 'dup-selected-deep', 'vs = deepcopy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = vs.async_deepcopy(selectedRows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")', 'open duplicate sheet with deepcopy of selected rows')
+Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = deepcopy(sheet); vs.name += "_deepcopy"; vs.rows = vs.async_deepcopy(rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")', 'open duplicate sheet with deepcopy of all rows')
 
 Sheet.addCommand('z~', 'type-any', 'cursorCol.type = anytype', 'set type of current column to anytype')
 Sheet.addCommand('~', 'type-string', 'cursorCol.type = str', 'set type of current column to str')
