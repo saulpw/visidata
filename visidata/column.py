@@ -391,13 +391,14 @@ class Column(Extensible):
         'Change value for *row* in this column to *val* immediately.  Does not check the type.  Overridable; by default calls ``.setter(row, val)``.'
         return self.setter(self, row, val)
 
-    def setValue(self, row, val):
+    def setValue(self, row, val, setModified=True):
         'Change value for *row* in this column to *val*.  Call ``putValue`` immediately if not a deferred column (added to deferred parent at load-time); otherwise cache until later ``putChanges``.  Caller must add undo function.'
         if self.defer:
             self.cellChanged(row, val)
         else:
             self.putValue(row, val)
-        self.sheet.setModified()
+        if setModified:  #1800
+            self.sheet.setModified()
 
     def setValueSafe(self, row, value):
         'setValue and ignore exceptions.'
@@ -430,8 +431,18 @@ class Column(Extensible):
         w = 0
         nlen = dispwidth(self.name)
         if len(rows) > 0:
-            w = max(max(dispwidth(self.getDisplayValue(r), maxwidth=self.sheet.windowWidth) for r in rows), nlen)+2
-        return max(w, nlen)
+            w_max = 0
+            for r in rows:
+                row_w = dispwidth(self.getDisplayValue(r), maxwidth=self.sheet.windowWidth)
+                if w_max < row_w:
+                    w_max = row_w
+                if w_max >= self.sheet.windowWidth:
+                    break
+            w = w_max
+        w = max(w, nlen)+2
+        w = min(w, self.sheet.windowWidth)
+        return w
+
 
 
 # ---- Column makers

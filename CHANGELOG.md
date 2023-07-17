@@ -1,5 +1,35 @@
 # VisiData version history
 
+# v2.11.1 (2023-07-XX)
+
+- [tests] fix tests for Python >=3.11
+- [path] update for Python 3.12 API (reported by @QuLogic #1934)
+
+## Improvements
+
+- [chooser] choose only exactly matching strings in chooser (PR by @daviewales #1902)
+- [columns] speed up `getMaxWidth()` for wide columns, and correct some edge cases (PR by @midichef #1747)
+- [freqtbl] Default `disp_histogram` to U+25A0 BLACK SQUARE (■)) (PR by @daviewales #1949)
+- [loaders fixed] do not truncate wide columns with fixed-width saver (PR by @daviewales #1890)
+
+## Bugfixes
+
+- add missing import `copy`
+- [graph] fix graph ranges for xmax, ymax < 1 (PR by @midichef #1752)
+- [graph] fix data on edges being drawn offscreen (PR by @midichef #1850)
+- [input] fix `Ctrl+T` swap on empty input (reported by @gfrmin #1684)
+- [inputsingle] loop until keystroke (do not timeout)
+- [fill] allow filling with values that are logically false (PR by @midichef #1794)
+- [macos] do not bind empty string to any keybinding
+- [paste] add new rows to sheet if insufficient rows
+- [path Dirsheet] set name to '.' for givenpath of '.' (reported by @geekscrapy #1768)
+- [path] fix progress for compressed files (reported by @bitwisecook #1255 #1175)
+- [replay] clearCaches before moving cursor (reported by @mokalan #1773)
+- [save] handle saving 0 sheets (reported by @reagle #1266 #1720)
+- [settings] clear cache correctly before set
+- [undo] fix so that undo is Sheet-specific on copied sheets (reported by @geekscrapy #1780)
+- [undo] undoing `zd` now removes `[M]` (modification mark) (reported by @Freed-Wu #1800)
+
 # v2.11 (2023-01-15)
 
 - [ci] drop support for Python 3.6 (related to https://github.com/actions/setup-python/issues/543)

@@ -17,7 +17,7 @@ def fillNullValues(vd, col, rows):
             val = e
 
         if isNull(val):
-            if lastval and (id(r) in rowsToFill):
+            if not isNull(lastval) and (id(r) in rowsToFill):
                 oldvals.append((col,r,val))
                 col.setValue(r, lastval)
                 n += 1

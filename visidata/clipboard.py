@@ -90,8 +90,18 @@ def pasteFromClipboard(vd, cols, rows):
     text = vd.getLastArgs() or vd.sysclip_value().strip() or vd.fail('system clipboard is empty')
 
     vd.addUndoSetValues(cols, rows)
+    lines = text.split('\n')
+    if not lines:
+        vd.warning('nothing to paste')
+        return
 
-    for line, r in zip(text.split('\n'), rows):
+    vs = cols[0].sheet
+    newrows = [vs.newRow() for i in range(len(lines)-len(rows))]
+    if newrows:
+        rows.extend(newrows)
+        vs.addRows(newrows)
+
+    for line, r in zip(lines, rows):
         for v, c in zip(line.split('\t'), cols):
             c.setValue(r, v)
 
