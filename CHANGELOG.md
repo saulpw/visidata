@@ -2,6 +2,9 @@
 
 # v2.11.1 (2023-07-XX)
 
+- [tests] fix tests for Python >=3.11
+- [path] update for Python 3.12 API (reported by @QuLogic #1934)
+
 ## Improvements
 
 - [chooser] choose only exactly matching strings in chooser (PR by @daviewales #1902)
@@ -21,11 +24,9 @@
 - [paste] add new rows to sheet if insufficient rows
 - [path Dirsheet] set name to '.' for givenpath of '.' (reported by @geekscrapy #1768)
 - [path] fix progress for compressed files (reported by @bitwisecook #1255 #1175)
-- [path] update for Python 3.12 API (reported by @QuLogic #1934)
 - [replay] clearCaches before moving cursor (reported by @mokalan #1773)
 - [save] handle saving 0 sheets (reported by @reagle #1266 #1720)
 - [settings] clear cache correctly before set
-- [tests] update test goldens for Python 3.11
 - [undo] fix so that undo is Sheet-specific on copied sheets (reported by @geekscrapy #1780)
 - [undo] undoing `zd` now removes `[M]` (modification mark) (reported by @Freed-Wu #1800)
 

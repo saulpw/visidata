@@ -1,5 +1,5 @@
 
-# VisiData v2.11
+# VisiData v2.11.1
 
 [![twitter @VisiData][1.1]][1]
 [![Tests](https://github.com/saulpw/visidata/workflows/visidata-ci-build/badge.svg)](https://github.com/saulpw/visidata/actions/workflows/main.yml)
