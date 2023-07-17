@@ -5,14 +5,12 @@
 - [tests] fix tests for Python >=3.11
 - [path] update for Python 3.12 API (reported by @QuLogic #1934)
 
-## Improvements
+## Improvements and bugfixes
 
 - [chooser] choose only exactly matching strings in chooser (PR by @daviewales #1902)
 - [columns] speed up `getMaxWidth()` for wide columns, and correct some edge cases (PR by @midichef #1747)
 - [freqtbl] Default `disp_histogram` to U+25A0 BLACK SQUARE (■)) (PR by @daviewales #1949)
 - [loaders fixed] do not truncate wide columns with fixed-width saver (PR by @daviewales #1890)
-
-## Bugfixes
 
 - add missing import `copy`
 - [graph] fix graph ranges for xmax, ymax < 1 (PR by @midichef #1752)
