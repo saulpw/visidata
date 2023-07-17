@@ -388,7 +388,7 @@ def inputMultiple(vd, **kwargs):
 
             for k, v in kwargs.items():
                 promptlen = clipdraw(sheet._scr, y-v.get('dy'), 0, v.get('prompt'), attr, w=sheet.windowWidth-1)  #1947
-                promptlen = clipdraw(sheet._scr, y-v.get('dy'), promptlen, v.get('value'), attr, w=sheet.windowWidth-1)
+                promptlen = clipdraw(sheet._scr, y-v.get('dy'), promptlen, v.get('value', ''),  attr, w=sheet.windowWidth-1)
 
         try:
             input_kwargs = kwargs[cur_input_key]
