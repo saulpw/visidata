@@ -98,13 +98,13 @@ def search_expr(sheet, expr, reverse=False):
 
 
 Sheet.addCommand('r', 'search-keys', 'tmp=cursorVisibleColIndex; moveInputRegex("row key", type="regex-row", columns=keyCols or [visibleCols[0]]); sheet.cursorVisibleColIndex=tmp', 'go to next row with key matching regex')
-Sheet.addCommand('/', 'search-col', 'moveInputRegex("search", columns="cursorCol", backward=False)', 'search for regex forwards in current column'),
-Sheet.addCommand('?', 'searchr-col', 'moveInputRegex("reverse search", columns="cursorCol", backward=True)', 'search for regex backwards in current column'),
-Sheet.addCommand('n', 'search-next', 'vd.moveRegex(sheet, reverse=False)', 'go to next match from last regex search'),
-Sheet.addCommand('N', 'searchr-next', 'vd.moveRegex(sheet, reverse=True)', 'go to previous match from last regex search'),
+Sheet.addCommand('/', 'search-col', 'moveInputRegex("search", columns="cursorCol", backward=False)', 'search for regex forwards in current column')
+Sheet.addCommand('?', 'searchr-col', 'moveInputRegex("reverse search", columns="cursorCol", backward=True)', 'search for regex backwards in current column')
+Sheet.addCommand('n', 'search-next', 'vd.moveRegex(sheet, reverse=False)', 'go to next match from last regex search')
+Sheet.addCommand('N', 'searchr-next', 'vd.moveRegex(sheet, reverse=True)', 'go to previous match from last regex search')
 
-Sheet.addCommand('g/', 'search-cols', 'moveInputRegex("g/", backward=False, columns="visibleCols")', 'search for regex forwards over all visible columns'),
-Sheet.addCommand('g?', 'searchr-cols', 'moveInputRegex("g?", backward=True, columns="visibleCols")', 'search for regex backwards over all visible columns'),
+Sheet.addCommand('g/', 'search-cols', 'moveInputRegex("g/", backward=False, columns="visibleCols")', 'search for regex forwards over all visible columns')
+Sheet.addCommand('g?', 'searchr-cols', 'moveInputRegex("g?", backward=True, columns="visibleCols")', 'search for regex backwards over all visible columns')
 Sheet.addCommand('z/', 'search-expr', 'search_expr(inputExpr("search by expr: ") or fail("no expr"))', 'search by Python expression forwards in current column (with column names as variables)')
 Sheet.addCommand('z?', 'searchr-expr', 'search_expr(inputExpr("searchr by expr: ") or fail("no expr"), reverse=True)', 'search by Python expression backwards in current column (with column names as variables)')
 

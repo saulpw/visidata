@@ -170,20 +170,20 @@ def _cachedStatus(self):
     return {}  # [filename] -> AttrDict(status='xx', adds=, dels=)
 
 
-GitStatus.addCommand('a', 'git-add', 'loggit("add", cursorRow.filename)', 'add this new file or modified file to staging'),
-#GitStatus.addCommand('m', 'git-mv', 'loggit("mv", cursorRow.filename, input("rename file to: ", value=cursorRow.filename))', 'rename this file'),
-GitStatus.addCommand('d', 'git-rm', 'loggit("rm", cursorRow.filename)', 'stage this file for deletion'),
-GitStatus.addCommand('r', 'git-reset', 'loggit("reset", "HEAD", cursorRow.filename)', 'reset/unstage this file'),
-GitStatus.addCommand('c', 'git-checkout', 'loggit("checkout", cursorRow.filename)', 'checkout this file'),
-GitStatus.addCommand('ga', 'git-add-selected', 'loggit("add", *[r for r in selectedRows])', 'add all selected files to staging'),
-GitStatus.addCommand('gd', 'git-rm-selected', 'loggit("rm", *[r for r in selectedRows])', 'delete all selected files'),
-GitStatus.addCommand(None, 'git-commit', 'loggit("commit", "-m", input("commit message: "))', 'commit changes'),
-GitStatus.addCommand(None, 'git-ignore-file', 'open(rootPath/".gitignore", "a").write(cursorRow.filename+"\\n"); reload()', 'add file to toplevel .gitignore'),
-GitStatus.addCommand(None, 'git-ignore-wildcard', 'open(rootPath/.gitignore, "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore'),
+GitStatus.addCommand('a', 'git-add', 'loggit("add", cursorRow.filename)', 'add this new file or modified file to staging')
+#GitStatus.addCommand('m', 'git-mv', 'loggit("mv", cursorRow.filename, input("rename file to: ", value=cursorRow.filename))', 'rename this file')
+GitStatus.addCommand('d', 'git-rm', 'loggit("rm", cursorRow.filename)', 'stage this file for deletion')
+GitStatus.addCommand('r', 'git-reset', 'loggit("reset", "HEAD", cursorRow.filename)', 'reset/unstage this file')
+GitStatus.addCommand('c', 'git-checkout', 'loggit("checkout", cursorRow.filename)', 'checkout this file')
+GitStatus.addCommand('ga', 'git-add-selected', 'loggit("add", *[r for r in selectedRows])', 'add all selected files to staging')
+GitStatus.addCommand('gd', 'git-rm-selected', 'loggit("rm", *[r for r in selectedRows])', 'delete all selected files')
+GitStatus.addCommand(None, 'git-commit', 'loggit("commit", "-m", input("commit message: "))', 'commit changes')
+GitStatus.addCommand(None, 'git-ignore-file', 'open(rootPath/".gitignore", "a").write(cursorRow.filename+"\\n"); reload()', 'add file to toplevel .gitignore')
+GitStatus.addCommand(None, 'git-ignore-wildcard', 'open(rootPath/.gitignore, "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore')
 
 
-#GitStatus.addCommand('z^J', 'diff-file-staged', 'vd.push(getStagedHunksSheet(sheet, cursorRow))', 'push staged diffs for this file'),
-#GitStatus.addCommand('gz^J', 'diff-selected-staged', 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files'),
+#GitStatus.addCommand('z^J', 'diff-file-staged', 'vd.push(getStagedHunksSheet(sheet, cursorRow))', 'push staged diffs for this file')
+#GitStatus.addCommand('gz^J', 'diff-selected-staged', 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files')
 #GitStatus.addCommand('^O', 'sysopen-row', 'launchExternalEditorPath(Path(cursorRow.path))', 'open this file in $EDITOR')
 
 

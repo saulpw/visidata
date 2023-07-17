@@ -99,30 +99,30 @@ def visibleWidth(self):
     return self.sheet._visibleColLayout[vcolidx][1]
 
 
-Sheet.addCommand(None, 'go-left',  'cursorRight(-1)', 'go left'),
-Sheet.addCommand(None, 'go-down',  'cursorDown(+1)', 'go down'),
-Sheet.addCommand(None, 'go-up',    'cursorDown(-1)', 'go up'),
-Sheet.addCommand(None, 'go-right', 'cursorRight(+1)', 'go right'),
-Sheet.addCommand(None, 'go-pagedown', 'cursorDown(nScreenRows-1); sheet.topRowIndex = bottomRowIndex', 'scroll one page forward'),
-Sheet.addCommand(None, 'go-pageup', 'cursorDown(-nScreenRows+1); sheet.bottomRowIndex = topRowIndex', 'scroll one page backward'),
+Sheet.addCommand(None, 'go-left',  'cursorRight(-1)', 'go left')
+Sheet.addCommand(None, 'go-down',  'cursorDown(+1)', 'go down')
+Sheet.addCommand(None, 'go-up',    'cursorDown(-1)', 'go up')
+Sheet.addCommand(None, 'go-right', 'cursorRight(+1)', 'go right')
+Sheet.addCommand(None, 'go-pagedown', 'cursorDown(nScreenRows-1); sheet.topRowIndex = bottomRowIndex', 'scroll one page forward')
+Sheet.addCommand(None, 'go-pageup', 'cursorDown(-nScreenRows+1); sheet.bottomRowIndex = topRowIndex', 'scroll one page backward')
 
-Sheet.addCommand(None, 'go-leftmost', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0', 'go all the way to the left of sheet'),
-Sheet.addCommand(None, 'go-top', 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'go all the way to the top of sheet'),
-Sheet.addCommand(None, 'go-bottom', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nScreenRows', 'go all the way to the bottom of sheet'),
-Sheet.addCommand(None, 'go-rightmost', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1', 'go all the way to the right of sheet'),
+Sheet.addCommand(None, 'go-leftmost', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0', 'go all the way to the left of sheet')
+Sheet.addCommand(None, 'go-top', 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'go all the way to the top of sheet')
+Sheet.addCommand(None, 'go-bottom', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nScreenRows', 'go all the way to the bottom of sheet')
+Sheet.addCommand(None, 'go-rightmost', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1', 'go all the way to the right of sheet')
 
 Sheet.addCommand('c', 'go-col-regex', 'sheet.cursorVisibleColIndex=nextColRegex(input("column name regex: ", type="regex-col", defaultLast=True))', 'go to next column with name matching regex')
 Sheet.addCommand('zc', 'go-col-number', 'sheet.cursorVisibleColIndex = int(input("move to column number: "))', 'go to given column number (0-based)')
 Sheet.addCommand('zr', 'go-row-number', 'sheet.cursorRowIndex = int(input("move to row number: "))', 'go to the given row number (0-based)')
 
 
-Sheet.addCommand('<', 'go-prev-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorTypedValue: col.getTypedValue(row) != val, reverse=True, msg="no different value up this column")', 'go up current column to next value'),
-Sheet.addCommand('>', 'go-next-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorTypedValue: col.getTypedValue(row) != val, msg="no different value down this column")', 'go down current column to next value'),
-Sheet.addCommand('{', 'go-prev-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True, msg="no previous selected row")', 'go up current column to previous selected row'),
-Sheet.addCommand('}', 'go-next-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), msg="no next selected row") ', 'go down current column to next selected row'),
+Sheet.addCommand('<', 'go-prev-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorTypedValue: col.getTypedValue(row) != val, reverse=True, msg="no different value up this column")', 'go up current column to next value')
+Sheet.addCommand('>', 'go-next-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorTypedValue: col.getTypedValue(row) != val, msg="no different value down this column")', 'go down current column to next value')
+Sheet.addCommand('{', 'go-prev-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True, msg="no previous selected row")', 'go up current column to previous selected row')
+Sheet.addCommand('}', 'go-next-selected', 'moveToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), msg="no next selected row") ', 'go down current column to next selected row')
 
-Sheet.addCommand('z<', 'go-prev-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), reverse=True, msg="no null up this column")', 'go up current column to next null value'),
-Sheet.addCommand('z>', 'go-next-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), msg="no null down this column")', 'go down current column to next null value'),
+Sheet.addCommand('z<', 'go-prev-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), reverse=True, msg="no null up this column")', 'go up current column to next null value')
+Sheet.addCommand('z>', 'go-next-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), msg="no null down this column")', 'go down current column to next null value')
 
 for i in range(1, 11):
     BaseSheet.addCommand(ALT+str(i)[-1], 'jump-sheet-'+str(i), f'vd.push(*(list(s for s in allSheets if s.shortcut==str({i})) or fail("no sheet")))', f'jump to sheet {i}')

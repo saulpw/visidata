@@ -73,4 +73,4 @@ class GitBlame(GitSheet):
 
 #GitBlame.addCommand(ENTER, 'diff-line', 'openDiff(str(gitfile), cursorRow[0]["sha"]+"^", cursorRow[0]["sha"])', 'open diff of the commit when this line changed')
 
-#GitStatus.addCommand(None, 'git-blame', 'vd.push(GitBlame(cursorRow, source=sheet))', 'push blame for this file'),
+#GitStatus.addCommand(None, 'git-blame', 'vd.push(GitBlame(cursorRow, source=sheet))', 'push blame for this file')
