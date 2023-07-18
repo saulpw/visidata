@@ -1,6 +1,6 @@
 # VisiData version history
 
-# v2.11.1 (2023-07-XX)
+# v2.11.1 (2023-07-16)
 
 - [tests] fix tests for Python >=3.11
 - [path] update for Python 3.12 API (reported by @QuLogic #1934)
