@@ -22,7 +22,7 @@ def floatsi(*args):
     if not args:
         return 0.0
     if not isinstance(args[0], str):
-        return args[0]
+        return float(args[0])
 
     s=args[0].strip()
     for i, p in enumerate(vd.si_prefixes):
