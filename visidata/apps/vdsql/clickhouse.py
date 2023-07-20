@@ -34,13 +34,13 @@ class ClickhouseSheet(IbisTableSheet):
 
                 with Progress(gerund='clickhousing', sheet=self) as prog:
                     settings = {'max_block_size': 10000}
-                    self.query_result = con.con.execute_iter(sqlstr, settings, chunk_size=1000, query_id=qid)
-                    qid = str(time.time())
-                    for row in self.query_result:
-                        prog.total = con.con.last_query.progress.total_rows
-                        prog.made = con.con.last_query.progress.rows
+                    with con.con.query_rows_stream(sqlstr, settings) as stream:
+                        prog.total = int(stream.source.summary['total_rows_to_read'])
+                        prog.made = 0
+                        for row in stream:
+                            prog.made += 1
+                            yield row
                         self.total_rows = prog.total
-                        yield from row
 
             except Exception as e:
                 raise
