@@ -119,10 +119,10 @@ class HelpPane:
 @VisiData.api
 @functools.lru_cache(maxsize=None)
 def getHelpPane(vd, name, module='vdplus'):
-    from pkg_resources import resource_filename
+    import importlib.resources
     ret = HelpPane(name)
     try:
-        ret.amgr.load(name, Path(resource_filename(module,'ddw/'+name+'.ddw')).open(encoding='utf-8'))
+        ret.amgr.load(name, importlib.resources.files(module)/f'ddw/{name}.ddw'.open(encoding='utf-8'))
         ret.amgr.trigger(name, loop=True)
     except FileNotFoundError as e:
         vd.debug(str(e))
