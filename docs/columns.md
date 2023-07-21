@@ -140,6 +140,7 @@ or set in the **Options Sheet**.
 1. Press `Shift+O` to open the **Options Sheet**.
 2. Move the cursor down to the relevant *disp_date_fmt* option.
 3. Type `e` followed by *%m/%d/%Y*.
+
 ---
 
 ###### How to specify a comma decimal separator when typing floating point numbers?
