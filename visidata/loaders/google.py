@@ -1,14 +1,18 @@
 
+
 from visidata import vd, VisiData, Sheet, IndexSheet, SequenceSheet, ColumnItem, Path, AttrDict, ColumnAttr, asyncthread
 
 
 def _google_creds_fn():
-    from pkg_resources import resource_filename
+    import importlib.resources
+
+    filename = 'google_creds.json'
+    google_creds_path = importlib.resources.files('vdplus.api.google') / filename
     import os
-    if not os.path.exists(Path(resource_filename('vdplus.api.google', 'google-creds.json'))):
+    if not os.path.exists(google_creds_path):
         vd.error('google-creds.json file does not exist. create it by following this guide: https://github.com/saulpw/visidata/blob/develop/docs/gmail.md')
     else:
-        return resource_filename('vdplus.api.google', 'google-creds.json')
+        return str(google_creds_path)
 
 
 @VisiData.api
