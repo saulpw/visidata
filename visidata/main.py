@@ -158,8 +158,8 @@ def main_vd():
         print(vd.version_info)
         return 0
     if '-h' in sys.argv or '--help' in sys.argv:
-        import importlib.resources
-        print(importlib.resources.files(visidata) / 'man/vd.txt'.open().read())
+        import importlib_resources
+        print(importlib_resources.files(visidata) / 'man/vd.txt'.open().read())
         return 0
     vd.status(__version_info__)
 

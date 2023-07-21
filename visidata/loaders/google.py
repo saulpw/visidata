@@ -4,10 +4,10 @@ from visidata import vd, VisiData, Sheet, IndexSheet, SequenceSheet, ColumnItem,
 
 
 def _google_creds_fn():
-    import importlib.resources
+    import importlib_resources
 
     filename = 'google_creds.json'
-    google_creds_path = importlib.resources.files('vdplus.api.google') / filename
+    google_creds_path = importlib_resources.files('vdplus.api.google') / filename
     import os
     if not os.path.exists(google_creds_path):
         vd.error(f'{filename} file does not exist in {google_creds_path.parent}\n'
