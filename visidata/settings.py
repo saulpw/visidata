@@ -468,7 +468,7 @@ def importStar(vd, pkgname):
 
     m = vd.importModule(pkgname)
     vd.addGlobals({pkgname:m})
-    vd.addGlobals({k:v for k, v in m.__dict__.items() if not k.startswith('__')})
+    vd.addGlobals(m.__dict__)
 
 
 @VisiData.api
