@@ -135,11 +135,12 @@ def getHelpPane(vd, name, module='vdplus'):
 
 @VisiData.api
 def openManPage(vd):
-    from pkg_resources import resource_filename
+    import importlib.resources
     import os
     with SuspendCurses():
-        if os.system(' '.join(['man', resource_filename(__name__, 'man/vd.1')])) != 0:
-            vd.push(TextSheet('man_vd', source=Path(resource_filename(__name__, 'man/vd.txt'))))
+        module_path = importlib.resources.files(__name__.split('.')[0])
+        if os.system(' '.join(['man', str(module_path/'man/vd.1')])) != 0:
+            vd.push(TextSheet('man_vd', source=module_path/'man/vd.txt'))
 
 
 # in VisiData, g^H refers to the man page
