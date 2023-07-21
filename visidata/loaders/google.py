@@ -10,7 +10,8 @@ def _google_creds_fn():
     google_creds_path = importlib.resources.files('vdplus.api.google') / filename
     import os
     if not os.path.exists(google_creds_path):
-        vd.error('google-creds.json file does not exist. create it by following this guide: https://github.com/saulpw/visidata/blob/develop/docs/gmail.md')
+        vd.error(f'{filename} file does not exist in {google_creds_path.parent}\n'
+                 'Create it by following this guide: https://github.com/saulpw/visidata/blob/develop/docs/gmail.md')
     else:
         return str(google_creds_path)
 
