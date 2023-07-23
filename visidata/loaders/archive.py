@@ -56,7 +56,7 @@ class ZipSheet(Sheet):
             if 'password required' in err.args[0]:
                 pwd = vd.input(f'{args[0].filename} is encrypted, enter password: ', display=False)
                 return fp.open(*args, **kwargs, pwd=pwd.encode('utf-8'))
-            vd.error(err)
+            vd.exceptionCaught(err)
 
     def openRow(self, row):
             fi, zpath = row
