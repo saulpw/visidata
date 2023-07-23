@@ -268,7 +268,7 @@ def copy_files(sheet, paths, dest):
         try:
             destpath = destdir/str(srcpath._path.name)
             if srcpath.is_dir():
-                shutil.copy_tree(srcpath, destpath)
+                shutil.copytree(srcpath, destpath)
             else:
                 shutil.copyfile(srcpath, destpath)
         except Exception as e:
