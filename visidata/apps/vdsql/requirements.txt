@@ -1,4 +1,4 @@
-ibis-framework[sqlite,clickhouse,bigquery] >= 6
+ibis-framework[duckdb,sqlite,clickhouse,bigquery] >= 6
 ibis-substrait
 sqlparse
 psycopg2-binary
