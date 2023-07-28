@@ -205,6 +205,7 @@ Command       Operation
 ` z(`         expand _current_ column to a specific depth (prompt for input)
 `gz(`         expand _all visible_ columns to a specific depth (prompt for input)
 `  )`         contract (unexpand) the current column
+` zM`         expand _current_ column row-wise within that column
 
 The following demo shows `(` commands applied to this data:
 

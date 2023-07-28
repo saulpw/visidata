@@ -115,8 +115,10 @@ Command(s)         Operation
 
 Command(s)         Operation
 -----------------  -------------
- `[`  `]`          sorts ascending/descending by **current** column
-`g[` `g]`          sorts ascending/descending by **all key** columns
+ `[`  `]`          sorts ascending/descending by **current** column; replace any existing sort criteria
+`g[` `g]`          sorts ascending/descending by **all key** columns; replace any existing sort criteria
+`z[` `z]`          sorts ascending/descending by **current** column; add to existing sort criteria
+`gz[` `gz]`        sorts ascending/descending by **all key** column; add to existing sort criteria
 
 ###### How to sort a numerical column from highest number to lowest:
 
@@ -132,6 +134,11 @@ Command(s)         Operation
 
 1. Press `!` on those columns to designate them as key columns.
 2. Press `g[` or `g]` to sort.
+
+**or**
+
+1. Sort the first column with `[` or `]`.
+2. Sort the next column with `z[` or `z]` to add sorting to the existing criteria.
 
 ###### How to increase row height
 
