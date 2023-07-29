@@ -60,17 +60,31 @@ def makePen(*args, **kwargs):
         aspectRatio = 1.0
         def __init__(self, name, **kwargs):
             super().__init__(name, **kwargs)
+            self.path_firstxy = None
             self.lastxy = None
             self.attr = self.plotColor(('glyph',))
 
         def _moveTo(self, xy):
             self.lastxy = xy
+            if self.path_firstxy is None:
+                self.path_firstxy = xy
 
         def _lineTo(self, xy):
             x1, y1 = self.lastxy
             x2, y2 = xy
             self.line(x1, y1, x2, y2, self.attr)
             self._moveTo(xy)
+
+        def _closePath(self):
+            if self.path_firstxy:
+                if (self.path_firstxy != self.lastxy):
+                    self._lineTo(self.path_firstxy)
+                self.path_firstxy = None
+            self.lastxy = None
+
+        def _endPath(self):
+            self.path_firstxy = None
+            self.lastxy = None
 
         def _curveToOne(self, xy1, xy2, xy3):
             vd.error('NotImplemented')
