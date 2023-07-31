@@ -12,6 +12,18 @@ from visidata import *
 vd.option('encoding', 'utf-8', 'encoding passed to codecs.open when opening a file', replay=True)
 vd.option('encoding_errors', 'surrogateescape', 'encoding_errors passed to codecs.open', replay=True)
 
+@VisiData.api
+def pkg_resources_files(vd, package):
+    '''
+    Returns a Traversable object (Path-like), based on the location of the package.
+    importlib.resources.files exists in Python >= 3.9; use importlib_resources for the rest.
+    '''
+    try:
+        from importlib.resources import files
+    except ImportError: #1968
+        from importlib_resources import files
+    return files(package)
+
 @lru_cache()
 def vstat(path, force=False):
     try:

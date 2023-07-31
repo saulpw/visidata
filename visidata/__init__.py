@@ -14,10 +14,13 @@ class EscapeException(BaseException):
 
 def addGlobals(*args, **kwargs):
     '''Update the VisiData globals dict with items from *args* and *kwargs*, which are mappings of names to functions.
-    Importers can call ``addGlobals(globals())`` to have their globals accessible to execstrings.'''
+    Importers can call ``addGlobals(globals())`` to have their globals accessible to execstrings.
+
+    Dunder methods are ignored, to prevent accidentally overwriting housekeeping methods.'''
+    drop_dunder = lambda d: {k: v for k, v in d.items() if not k.startswith("__")}
     for g in args:
-        globals().update(g)
-    globals().update(kwargs)
+        globals().update(drop_dunder(g))
+    globals().update(drop_dunder(kwargs))
 
 
 def getGlobals():

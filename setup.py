@@ -25,6 +25,7 @@ setup(name='visidata',
           'python-dateutil',
           'windows-curses<2.3.1; platform_system == "Windows"',  #1841
           'importlib-metadata >= 3.6',
+          'importlib_resources; python_version<"3.9"'
       ],
       packages=['visidata', 'visidata.loaders', 'visidata.vendor', 'visidata.tests', 'visidata.ddw', 'visidata.man', 'visidata.themes', 'visidata.features', 'visidata.experimental', 'visidata.apps', 'visidata.apps.vgit', 'visidata.apps.vdsql', 'visidata.desktop'],
       data_files=[('share/man/man1', ['visidata/man/vd.1', 'visidata/man/visidata.1']), ('share/applications/', ['visidata/desktop/visidata.desktop'])],
