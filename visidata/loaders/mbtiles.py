@@ -128,7 +128,6 @@ class PbfCanvas(InvertedCanvas):
                     if disptext:
                         self.label(textx, texty, disptext, attr, row)
 
-
         self.refresh()
 
 

@@ -362,7 +362,6 @@ class Canvas(Plotter):
             self.legendwidth = max(self.legendwidth, dispwidth(legend))
             self.legends[legend] = attr
             self.plotAttrs[k] = attr
-            self.plotlegends()
         return attr
 
     def resetCanvasDimensions(self, windowHeight, windowWidth):
@@ -504,7 +503,7 @@ class Canvas(Plotter):
         self.resetBounds()
 
     def resetBounds(self):
-        'create canvasBox and cursorBox if necessary, and set visibleBox w/h according to zoomlevels.  then redisplay labels.'
+        'create canvasBox and cursorBox if necessary, and set visibleBox w/h according to zoomlevels.  then redisplay legends.'
         if not self.canvasBox:
             xmin, ymin, xmax, ymax = None, None, None, None
             for vertexes, attr, row in self.polylines:
