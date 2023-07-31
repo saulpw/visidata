@@ -119,10 +119,9 @@ class HelpPane:
 @VisiData.api
 @functools.lru_cache(maxsize=None)
 def getHelpPane(vd, name, module='vdplus'):
-    import importlib.resources
     ret = HelpPane(name)
     try:
-        ret.amgr.load(name, importlib.resources.files(module)/f'ddw/{name}.ddw'.open(encoding='utf-8'))
+        ret.amgr.load(name, (vd.pkg_resources_files(module)/f'ddw/{name}.ddw').open(encoding='utf-8'))
         ret.amgr.trigger(name, loop=True)
     except FileNotFoundError as e:
         vd.debug(str(e))
@@ -135,10 +134,9 @@ def getHelpPane(vd, name, module='vdplus'):
 
 @VisiData.api
 def openManPage(vd):
-    import importlib.resources
     import os
     with SuspendCurses():
-        module_path = importlib.resources.files(__name__.split('.')[0])
+        module_path = vd.pkg_resources_files(__name__.split('.')[0])
         if os.system(' '.join(['man', str(module_path/'man/vd.1')])) != 0:
             vd.push(TextSheet('man_vd', source=module_path/'man/vd.txt'))
 
