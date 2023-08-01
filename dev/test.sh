@@ -42,6 +42,8 @@ for i in $TESTS ; do
     fi
 done
 
+PYTHONPATH=. bin/vd <(seq 10000) --confirm-overwrite=False --batch --output tests/golden/stdin-guesser.tsv --config tests/.visidatarc --visidata-dir tests/.visidata  #1978
+
 echo '=== git diffs for BUILD FAILURE ==='
 git --no-pager diff --numstat tests/
 git --no-pager diff --exit-code tests/

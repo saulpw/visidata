@@ -209,6 +209,8 @@ class Path(os.PathLike):
         # rfile makes a single-access fp reusable
 
         if self.rfile:
+            if 'b' in mode:
+                raise ValueError('a RepeatFile holds text and cannot be reopened in binary mode')
             return self.rfile.reopen()
 
         if self.fp:
@@ -303,6 +305,11 @@ class Path(os.PathLike):
         with self.open(mode='rb') as fp:
             return fp.read()
 
+    @wraps(pathlib.Path.is_fifo)
+    def is_fifo(self):
+        'Return True if the path is a file.'
+        return self._path.is_fifo()
+
     def is_url(self):
         'Return True if the given path appears to be a URL.'
         return '://' in self.given
@@ -388,9 +395,16 @@ class RepeatFile:
         '''Tells the current position as an opaque line marker.'''
         return self.iter.nextIndex
 
-    def seek(self, n):
+    def seek(self, offset, whence=io.SEEK_SET):
         '''Seek to an already seen opaque line position marker only.'''
-        self.iter.nextIndex = n
+        if whence != io.SEEK_SET and offset != 0:
+            if whence == io.SEEK_CUR:
+                raise io.UnsupportedOperation("can't do nonzero cur-relative seeks")
+            elif whence == io.SEEK_END:
+                raise io.UnsupportedOperation("can't do nonzero end-relative seeks")
+            else:
+                raise ValueError('invalid whence (%s, should be %s, %s or %s)' % (whence, io.SEEK_SET, io.SEEK_CUR, io.SEEK_END))
+        self.iter.nextIndex = offset
 
     def readline(self, size=-1):
         if size != -1:

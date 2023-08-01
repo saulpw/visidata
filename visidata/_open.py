@@ -93,8 +93,6 @@ def openPath(vd, p, filetype=None, create=False):
     filetype = filetype.lower()
 
     if not p.exists():
-        if not create:
-            return None
         newfunc = getattr(vd, 'new_' + filetype, vd.getGlobals().get('new_' + filetype))
         if not newfunc:
             vd.warning('%s does not exist, creating new sheet' % p)
@@ -102,6 +100,10 @@ def openPath(vd, p, filetype=None, create=False):
 
         vd.status('creating blank %s' % (p.given))
         return newfunc(p)
+
+    if p.is_fifo():
+        # read the file as text, into a RepeatFile that can be opened multiple times
+        p = Path(p.given, fp=p.open(mode='rb'))
 
     openfuncname = 'open_' + filetype
     openfunc = getattr(vd, openfuncname, vd.getGlobals().get(openfuncname))
@@ -129,7 +131,6 @@ def openPath(vd, p, filetype=None, create=False):
     vd.status('opening %s as %s' % (p.given, filetype))
 
     return openfunc(p)
-
 
 @VisiData.api
 def openSource(vd, p, filetype=None, create=False, **kwargs):
