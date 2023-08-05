@@ -73,12 +73,12 @@ def parseMouse(vd, **kwargs):
 
 @VisiData.api
 def handleMouse(vd, sheet):
+    vd.keystrokes = ''
+    pct = vd.windowConfig['pct']
+    topPaneActive = ((vd.activePane == 2 and pct < 0)  or (vd.activePane == 1 and pct > 0))
+    bottomPaneActive = ((vd.activePane == 1 and pct < 0)  or (vd.activePane == 2 and pct > 0))
+    r = None
     try:
-        vd.keystrokes = ''
-        pct = vd.windowConfig['pct']
-        topPaneActive = ((vd.activePane == 2 and pct < 0)  or (vd.activePane == 1 and pct > 0))
-        bottomPaneActive = ((vd.activePane == 1 and pct < 0)  or (vd.activePane == 2 and pct > 0))
-
         r = vd.parseMouse(top=vd.winTop, bot=vd.winBottom, menu=vd.scrMenu)
         if (bottomPaneActive and 'top' in r.found) or (topPaneActive and 'bot' in r.found):
             vd.activePane = 1 if vd.activePane == 2 else 2
@@ -102,7 +102,7 @@ def handleMouse(vd, sheet):
     except curses.error:
         pass
 
-    return r.keystroke
+    return r.keystroke if r else ''
 
 
 @Sheet.api
