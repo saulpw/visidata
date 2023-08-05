@@ -31,6 +31,7 @@ class InvertedCanvas(Canvas):
     @property
     def canvasMouse(self):
         p = super().canvasMouse
+        if not p: return None
         p.y = self.unscaleY(self.plotterMouse.y)
         return p
 
@@ -45,7 +46,8 @@ class InvertedCanvas(Canvas):
         return self.visibleBox.ymin - (1/4 * self.canvasCharHeight)
 
     def startCursor(self):
-        super().startCursor()
+        res = super().startCursor()
+        if not res: return None
         # Since the y coordinates for plotting increase in the opposite
         # direction from Canvas, the cursor has to be shifted.
         self.cursorBox.ymin -= self.canvasCharHeight

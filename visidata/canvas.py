@@ -399,11 +399,13 @@ class Canvas(Plotter):
     def canvasMouse(self):
         x = self.plotterMouse.x
         y = self.plotterMouse.y
+        if not self.canvasBox: return None
         p = Point(self.unscaleX(x), self.unscaleY(y))
         return p
 
     def setCursorSize(self, p):
         'sets width based on diagonal corner p'
+        if not p: return
         self.cursorBox = BoundingBox(self.cursorBox.xmin, self.cursorBox.ymin, p.x, p.y)
         self.cursorBox.w = max(self.cursorBox.w, self.canvasCharWidth)
         self.cursorBox.h = max(self.cursorBox.h, self.canvasCharHeight)
@@ -453,7 +455,12 @@ class Canvas(Plotter):
                            self.scaleY(self.cursorBox.ymax))
 
     def startCursor(self):
-        self.cursorBox = Box(*self.canvasMouse.xy)
+        cm = self.canvasMouse
+        if cm:
+            self.cursorBox = Box(*cm.xy)
+            return True
+        else:
+            return None
 
     def point(self, x, y, attr=0, row=None):
         self.polylines.append(([(x, y)], attr, row))
@@ -748,13 +755,20 @@ Canvas.addCommand('z_', 'set-aspect', 'sheet.aspectRatio = float(input("aspect r
 
 # set cursor box with left click
 Canvas.addCommand('BUTTON1_PRESSED', 'start-cursor', 'startCursor()', 'start cursor box with left mouse button press')
-Canvas.addCommand('BUTTON1_RELEASED', 'end-cursor', 'setCursorSize(canvasMouse)', 'end cursor box with left mouse button release')
+Canvas.addCommand('BUTTON1_RELEASED', 'end-cursor', 'cm=canvasMouse; setCursorSize(cm) if cm else None', 'end cursor box with left mouse button release')
+Canvas.addCommand('BUTTON1_CLICKED',        'remake-cursor', 'startCursor(); cm=canvasMouse; setCursorSize(cm) if cm else None', 'end cursor box with left mouse button release')
+Canvas.addCommand('BUTTON1_DOUBLE_CLICKED', 'remake-cursor', 'startCursor(); cm=canvasMouse; setCursorSize(cm) if cm else None', 'end cursor box with left mouse button release')
+Canvas.addCommand('BUTTON1_TRIPLE_CLICKED', 'remake-cursor', 'startCursor(); cm=canvasMouse; setCursorSize(cm) if cm else None', 'end cursor box with left mouse button release')
 
-Canvas.addCommand('BUTTON3_PRESSED', 'start-move', 'sheet.anchorPoint = canvasMouse', 'mark grid point to move')
-Canvas.addCommand('BUTTON3_RELEASED', 'end-move', 'fixPoint(plotterMouse, anchorPoint)', 'mark canvas anchor point')
+Canvas.addCommand('BUTTON3_PRESSED', 'start-move', 'cm=canvasMouse; sheet.anchorPoint = cm if cm else None', 'mark grid point to move')
+Canvas.addCommand('BUTTON3_RELEASED', 'end-move', 'fixPoint(plotterMouse, anchorPoint) if anchorPoint else None', 'mark canvas anchor point')
+# A click does not actually move the canvas, but gives useful UI feedback. It helps users understand that they can do press-drag-release.
+Canvas.addCommand('BUTTON3_CLICKED',        'move-canvas',  '', 'move canvas (in place)')
+Canvas.addCommand('BUTTON3_DOUBLE_CLICKED', 'move-canvas',  '', 'move canvas (in place)')
+Canvas.addCommand('BUTTON3_TRIPLE_CLICKED', 'move-canvas',  '', 'move canvas (in place)')
 
-Canvas.addCommand('ScrollwheelUp', 'zoomin-mouse', 'tmp=canvasMouse; incrZoom(1.0/options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom in with scroll wheel')
-Canvas.addCommand('ScrollwheelDown', 'zoomout-mouse', 'tmp=canvasMouse; incrZoom(options.zoom_incr); fixPoint(plotterMouse, tmp)', 'zoom out with scroll wheel')
+Canvas.addCommand('ScrollwheelUp', 'zoomin-mouse', 'cm=canvasMouse; incrZoom(1.0/options.zoom_incr) if cm else fail("cannot zoom in on unplotted canvas"); fixPoint(plotterMouse, cm)', 'zoom in with scroll wheel')
+Canvas.addCommand('ScrollwheelDown', 'zoomout-mouse', 'cm=canvasMouse; incrZoom(options.zoom_incr) if cm else fail("cannot zoom in on unplotted canvas"); fixPoint(plotterMouse, cm)', 'zoom out with scroll wheel')
 
 Canvas.addCommand('s', 'select-cursor', 'source.select(list(rowsWithin(plotterCursorBox)))', 'select rows on source sheet contained within canvas cursor')
 Canvas.addCommand('t', 'stoggle-cursor', 'source.toggle(list(rowsWithin(plotterCursorBox)))', 'toggle selection of rows on source sheet contained within canvas cursor')
