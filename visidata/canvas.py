@@ -306,6 +306,14 @@ class Plotter(BaseSheet):
                     if fldraw:
                         char_x, char_y, txt, attr, row = o
                         clipdraw(scr, char_y, char_x, txt, attr, dispwidth(txt))
+                        cursorBBox = self.plotterCursorBox
+                        for c in txt:
+                            w = dispwidth(c)
+                            # check if the cursor contains the midpoint of the character box
+                            if cursorBBox.contains(char_x*2+1, char_y*4+2):
+                                char_attr = update_attr(ColorAttr(attr, 0, 0, attr), colors.color_current_row).attr
+                                clipdraw(scr, char_y, char_x, c, char_attr, w)
+                            char_x += w
 
 
 # - has a cursor, of arbitrary position and width/height (not restricted to current zoom)
