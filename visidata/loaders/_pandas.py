@@ -158,6 +158,12 @@ class PandasSheet(Sheet):
                 readfunc = getattr(pd, 'read_'+filetype) or vd.error('no pandas.read_'+filetype)
             # readfunc() handles binary and text open()
             df = readfunc(self.source, **options.getall('pandas_'+filetype+'_'))
+            # some read methods (html, for example) return a list of dataframes
+            if isinstance(df, list):
+                for idx, inner_df in enumerate(df[1:], start=1):
+                    vd.push(PandasSheet(f'{self.name}[{idx}]', source=inner_df))
+                df = df[0]
+                self.name += '[0]'
             if (filetype == 'pickle') and not isinstance(df, pd.DataFrame):
                 vd.fail('pandas loader can only unpickle dataframes')
         else:
