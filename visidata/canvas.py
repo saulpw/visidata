@@ -728,14 +728,14 @@ class Canvas(Plotter):
 
 Plotter.addCommand('v', 'visibility', 'options.show_graph_labels = not options.show_graph_labels', 'toggle show_graph_labels option')
 
-Canvas.addCommand(None, 'go-left', 'sheet.cursorBox.xmin -= cursorBox.w', 'move cursor left by its width')
-Canvas.addCommand(None, 'go-right', 'sheet.cursorBox.xmin += cursorBox.w', 'move cursor right by its width' )
-Canvas.addCommand(None, 'go-up', 'sheet.cursorBox.ymin -= cursorBox.h', 'move cursor up by its height')
-Canvas.addCommand(None, 'go-down', 'sheet.cursorBox.ymin += cursorBox.h', 'move cursor down by its height')
-Canvas.addCommand(None, 'go-leftmost', 'sheet.cursorBox.xmin = visibleBox.xmin', 'move cursor to left edge of visible canvas')
-Canvas.addCommand(None, 'go-rightmost', 'sheet.cursorBox.xmin = visibleBox.xmax-cursorBox.w+(1/2*canvasCharWidth)', 'move cursor to right edge of visible canvas')
-Canvas.addCommand(None, 'go-top',    'sheet.cursorBox.ymin = sheet.calcTopCursorY()', 'move cursor to top edge of visible canvas')
-Canvas.addCommand(None, 'go-bottom', 'sheet.cursorBox.ymin = sheet.calcBottomCursorY()', 'move cursor to bottom edge of visible canvas')
+Canvas.addCommand(None, 'go-left', 'if cursorBox: sheet.cursorBox.xmin -= cursorBox.w', 'move cursor left by its width')
+Canvas.addCommand(None, 'go-right', 'if cursorBox: sheet.cursorBox.xmin += cursorBox.w', 'move cursor right by its width' )
+Canvas.addCommand(None, 'go-up', 'if cursorBox: sheet.cursorBox.ymin -= cursorBox.h', 'move cursor up by its height')
+Canvas.addCommand(None, 'go-down', 'if cursorBox: sheet.cursorBox.ymin += cursorBox.h', 'move cursor down by its height')
+Canvas.addCommand(None, 'go-leftmost', 'if cursorBox: sheet.cursorBox.xmin = visibleBox.xmin', 'move cursor to left edge of visible canvas')
+Canvas.addCommand(None, 'go-rightmost', 'if cursorBox: sheet.cursorBox.xmin = visibleBox.xmax-cursorBox.w+(1/2*canvasCharWidth)', 'move cursor to right edge of visible canvas')
+Canvas.addCommand(None, 'go-top',    'if cursorBox: sheet.cursorBox.ymin = sheet.calcTopCursorY()', 'move cursor to top edge of visible canvas')
+Canvas.addCommand(None, 'go-bottom', 'if cursorBox: sheet.cursorBox.ymin = sheet.calcBottomCursorY()', 'move cursor to bottom edge of visible canvas')
 
 Canvas.addCommand(None, 'go-pagedown', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin += t; sheet.visibleBox.ymin += t; refresh()', 'move cursor down to next visible page')
 Canvas.addCommand(None, 'go-pageup', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin -= t; sheet.visibleBox.ymin -= t; refresh()', 'move cursor up to previous visible page')
