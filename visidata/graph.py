@@ -201,10 +201,10 @@ Sheet.addCommand('.', 'plot-column', 'vd.push(GraphSheet(sheet.name, "graph", so
 Sheet.addCommand('g.', 'plot-numerics', 'vd.push(GraphSheet(sheet.name, "graph", source=sheet, sourceRows=rows, xcols=keyCols, ycols=numericCols(nonKeyVisibleCols)))', 'plot a graph of all visible numeric columns vs key columns')
 
 # swap directions of up/down
-InvertedCanvas.addCommand(None, 'go-up', 'sheet.cursorBox.ymin += cursorBox.h', 'move cursor up by its height')
-InvertedCanvas.addCommand(None, 'go-down', 'sheet.cursorBox.ymin -= cursorBox.h', 'move cursor down by its height')
-InvertedCanvas.addCommand(None, 'go-top',  'sheet.cursorBox.ymin = sheet.calcTopCursorY()', 'move cursor to top edge of visible canvas')
-InvertedCanvas.addCommand(None, 'go-bottom', 'sheet.cursorBox.ymin = sheet.calcBottomCursorY()', 'move cursor to bottom edge of visible canvas')
+InvertedCanvas.addCommand(None, 'go-up', 'if cursorBox: sheet.cursorBox.ymin += cursorBox.h', 'move cursor up by its height')
+InvertedCanvas.addCommand(None, 'go-down', 'if cursorBox: sheet.cursorBox.ymin -= cursorBox.h', 'move cursor down by its height')
+InvertedCanvas.addCommand(None, 'go-top',  'if cursorBox: sheet.cursorBox.ymin = sheet.calcTopCursorY()', 'move cursor to top edge of visible canvas')
+InvertedCanvas.addCommand(None, 'go-bottom', 'if cursorBox: sheet.cursorBox.ymin = sheet.calcBottomCursorY()', 'move cursor to bottom edge of visible canvas')
 InvertedCanvas.addCommand(None, 'go-pagedown', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin -= t; sheet.visibleBox.ymin -= t; sheet.refresh()', 'move cursor down to next visible page')
 InvertedCanvas.addCommand(None, 'go-pageup', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin += t; sheet.visibleBox.ymin += t; sheet.refresh()', 'move cursor up to previous visible page')
 
