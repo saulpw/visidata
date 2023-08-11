@@ -764,16 +764,16 @@ Canvas.addCommand('z_', 'set-aspect', 'sheet.aspectRatio = float(input("aspect r
 # set cursor box with left click
 Canvas.addCommand('BUTTON1_PRESSED', 'start-cursor', 'startCursor()', 'start cursor box with left mouse button press')
 Canvas.addCommand('BUTTON1_RELEASED', 'end-cursor', 'cm=canvasMouse; setCursorSize(cm) if cm else None', 'end cursor box with left mouse button release')
-Canvas.addCommand('BUTTON1_CLICKED',        'remake-cursor', 'startCursor(); cm=canvasMouse; setCursorSize(cm) if cm else None', 'end cursor box with left mouse button release')
-Canvas.addCommand('BUTTON1_DOUBLE_CLICKED', 'remake-cursor', 'startCursor(); cm=canvasMouse; setCursorSize(cm) if cm else None', 'end cursor box with left mouse button release')
-Canvas.addCommand('BUTTON1_TRIPLE_CLICKED', 'remake-cursor', 'startCursor(); cm=canvasMouse; setCursorSize(cm) if cm else None', 'end cursor box with left mouse button release')
+Canvas.addCommand('BUTTON1_CLICKED', 'remake-cursor', 'startCursor(); cm=canvasMouse; setCursorSize(cm) if cm else None', 'end cursor box with left mouse button release')
+Canvas.bindkey('BUTTON1_DOUBLE_CLICKED', 'remake-cursor')
+Canvas.bindkey('BUTTON1_TRIPLE_CLICKED', 'remake-cursor')
 
 Canvas.addCommand('BUTTON3_PRESSED', 'start-move', 'cm=canvasMouse; sheet.anchorPoint = cm if cm else None', 'mark grid point to move')
 Canvas.addCommand('BUTTON3_RELEASED', 'end-move', 'fixPoint(plotterMouse, anchorPoint) if anchorPoint else None', 'mark canvas anchor point')
 # A click does not actually move the canvas, but gives useful UI feedback. It helps users understand that they can do press-drag-release.
-Canvas.addCommand('BUTTON3_CLICKED',        'move-canvas',  '', 'move canvas (in place)')
-Canvas.addCommand('BUTTON3_DOUBLE_CLICKED', 'move-canvas',  '', 'move canvas (in place)')
-Canvas.addCommand('BUTTON3_TRIPLE_CLICKED', 'move-canvas',  '', 'move canvas (in place)')
+Canvas.addCommand('BUTTON3_CLICKED', 'move-canvas',  '', 'move canvas (in place)')
+Canvas.bindkey('BUTTON3_DOUBLE_CLICKED', 'move-canvas')
+Canvas.bindkey('BUTTON3_TRIPLE_CLICKED', 'move-canvas')
 
 Canvas.addCommand('ScrollwheelUp', 'zoomin-mouse', 'cm=canvasMouse; incrZoom(1.0/options.zoom_incr) if cm else fail("cannot zoom in on unplotted canvas"); fixPoint(plotterMouse, cm)', 'zoom in with scroll wheel')
 Canvas.addCommand('ScrollwheelDown', 'zoomout-mouse', 'cm=canvasMouse; incrZoom(options.zoom_incr) if cm else fail("cannot zoom in on unplotted canvas"); fixPoint(plotterMouse, cm)', 'zoom out with scroll wheel')
