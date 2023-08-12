@@ -658,10 +658,7 @@ class TableSheet(BaseSheet):
     def draw(self, scr):
         'Draw entire screen onto the `scr` curses object.'
         if not self.columns:
-            if self.options.debug:
-                self.addColumn(Column())
-            else:
-                return
+            return
 
         drawparams = {
             'isNull': self.isNullFunc(),
