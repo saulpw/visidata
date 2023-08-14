@@ -90,6 +90,9 @@ def mean(vals):
     if vals:
         return float(sum(vals))/len(vals)
 
+def vsum(vals):
+    return sum(vals, start=type(vals[0])())  #1996
+
 # http://code.activestate.com/recipes/511478-finding-the-percentile-of-the-values/
 def _percentile(N, percent, key=lambda x:x):
     """
@@ -125,7 +128,7 @@ vd.aggregator('avg', mean, 'arithmetic mean of values', type=float)
 vd.aggregator('mean', mean, 'arithmetic mean of values', type=float)
 vd.aggregator('median', statistics.median, 'median of values')
 vd.aggregator('mode', statistics.mode, 'mode of values')
-vd.aggregator('sum', sum, 'sum of values')
+vd.aggregator('sum', vsum, 'sum of values')
 vd.aggregator('distinct', set, 'distinct values', type=vlen)
 vd.aggregator('count', lambda values: sum(1 for v in values), 'number of values', type=int)
 vd.aggregator('list', list, 'list of values')
