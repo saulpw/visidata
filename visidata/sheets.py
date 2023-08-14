@@ -869,6 +869,7 @@ class SequenceSheet(Sheet):
     'Sheets with ``ColumnItem`` columns, and rows that are Python sequences (list, namedtuple, etc).'
     def setCols(self, headerrows):
         self.columns = []
+        vd.clearCaches()  #1997
         for i, colnamelines in enumerate(itertools.zip_longest(*headerrows, fillvalue='')):
             colnamelines = ['' if c is None else c for c in colnamelines]
             self.addColumn(ColumnItem(''.join(map(str, colnamelines)), i))
