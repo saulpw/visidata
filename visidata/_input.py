@@ -229,7 +229,7 @@ def editline(vd, scr, y, x, w, i=0,
             if help:
                 sheet.drawSidebarText(scr, help)
             else:
-                vd.getHelpPane('input', module=__name__).draw(scr, y=y)
+                vd.getHelpPane('input', module='visidata').draw(scr, y=y)
 
         if display:
             dispval = clean_printable(v)
@@ -265,7 +265,10 @@ def editline(vd, scr, y, x, w, i=0,
         elif ch == '^D' or ch == 'KEY_DC':         v = delchar(v, i)
         elif ch == '^E' or ch == 'KEY_END':        i = len(v)
         elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1
-        elif ch == '^G':                           vd.options.disp_help = not vd.options.disp_help; continue # not a first keypress
+        elif ch == '^G':
+            vd.options.disp_help = not vd.options.disp_help
+            vd.draw_all()  #1971
+            continue  # not considered a first keypress
         elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1; v = delchar(v, i)
         elif ch == TAB:                            v, i = complete_state.complete(v, i, +1)
         elif ch == 'KEY_BTAB':                     v, i = complete_state.complete(v, i, -1)
