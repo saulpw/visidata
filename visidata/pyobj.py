@@ -348,9 +348,10 @@ class PyobjSheet(PythonSheet):
                 if vislevel <= 2 and r.startswith('__'): continue
                 if vislevel <= 1 and r.startswith('_'): continue
                 if vislevel <= 0 and callable(getattr(self.source, r)): continue
-                self.addRow(r)
             except Exception:
                 pass
+
+            self.addRow(r)
 
     def openRow(self, row):
         'dive further into Python object'
