@@ -96,6 +96,8 @@ def nextColRegex(sheet, colregex):
 def visibleWidth(self):
     'Width of column as is displayed in terminal'
     vcolidx = self.sheet.visibleCols.index(self)
+    if vcolidx not in self.sheet._visibleColLayout:
+        self.sheet.calcSingleColLayout(vcolidx)
     return self.sheet._visibleColLayout[vcolidx][1]
 
 

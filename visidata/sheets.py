@@ -6,7 +6,7 @@ import textwrap
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException
 from visidata import (options, Column, namedlist, SettableColumn,
 TypedExceptionWrapper, BaseSheet, UNLOADED,
-clipdraw, clipdraw_chunks, ColorAttr, update_attr, colors, undoAttrFunc, vlen)
+clipdraw, clipdraw_chunks, ColorAttr, update_attr, colors, undoAttrFunc, vlen, dispwidth)
 import visidata
 
 
@@ -563,13 +563,22 @@ class TableSheet(BaseSheet):
 
     def calcColLayout(self):
         'Set right-most visible column, based on calculation.'
-        minColWidth = len(self.options.disp_more_left)+len(self.options.disp_more_right)+2
-        sepColWidth = len(self.options.disp_column_sep)
+        minColWidth = dispwidth(self.options.disp_more_left)+dispwidth(self.options.disp_more_right)+2
+        sepColWidth = dispwidth(self.options.disp_column_sep)
         winWidth = self.windowWidth
         self._visibleColLayout = {}
         x = 0
         vcolidx = 0
         for vcolidx in range(0, self.nVisibleCols):
+            width = self.calcSingleColLayout(vcolidx, x, minColWidth)
+            if width:
+                x += width+sepColWidth
+            if x > winWidth-1:
+                break
+
+        self.rightVisibleColIndex = vcolidx
+
+    def calcSingleColLayout(self, vcolidx:int, x:int=0, minColWidth:int=4):
             col = self.visibleCols[vcolidx]
             if col.width is None and len(self.visibleRows) > 0:
                 vrows = self.visibleRows if self.nRows > 1000 else self.rows[:1000]  #1964
@@ -581,12 +590,9 @@ class TableSheet(BaseSheet):
             if col in self.keyCols:
                 width = max(width, 1)  # keycols must all be visible
             if col in self.keyCols or vcolidx >= self.leftVisibleColIndex:  # visible columns
-                self._visibleColLayout[vcolidx] = [x, min(width, winWidth-x)]
-                x += width+sepColWidth
-            if x > winWidth-1:
-                break
+                self._visibleColLayout[vcolidx] = [x, min(width, self.windowWidth-x)]
+                return width
 
-        self.rightVisibleColIndex = vcolidx
 
     def drawColHeader(self, scr, y, h, vcolidx):
         'Compose and draw column header for given vcolidx.'
