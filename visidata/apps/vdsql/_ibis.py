@@ -610,10 +610,9 @@ def addcol_cast(sheet, col):
 
 # disable not implemented commands
 
-@BaseSheet.property
+@BaseSheet.api
 def notimpl(sheet):
-    vd.status(f"copy to new non-ibis sheet with g'")
-    vd.fail(f"{vd.activeCommand.longname} not implemented for {type(sheet).__name__}")
+    vd.fail(f"{vd.activeCommand.longname} not implemented for {type(sheet).__name__}; copy to new non-ibis sheet with g'")
 
 
 dml_cmds = '''addcol-bulk addcol-new add-row add-rows
@@ -638,7 +637,7 @@ dup-rows dup-rows-deep dup-selected-deep
 
 for longname in list(notimpl_cmds) + list(neverimpl_cmds) + list(dml_cmds):
     if longname:
-        IbisTableSheet.addCommand('', longname, 'notimpl')
+        IbisTableSheet.addCommand('', longname, 'notimpl()')
 
 @IbisTableSheet.api
 def dup_selected(sheet):
