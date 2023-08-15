@@ -276,7 +276,7 @@ class SheetNamedTuple(PythonSheet):
         self.rows = list(zip(self.source._fields, self.source))
 
     def openRow(self, row):
-        return PyobjSheet(self.name, row[0], source=row[1])
+        return PyobjSheet(f'{self.name}.{row[0]}', source=row[1])
 
 
 # source is dict
@@ -292,7 +292,7 @@ class SheetDict(PythonSheet):
         self.rows = list(self.source.keys())
 
     def openRow(self, row):
-        return PyobjSheet(self.name, row, source=self.source[row])
+        return PyobjSheet(f'{self.name}.{row}', source=self.source[row])
 
 
 class ColumnSourceAttr(Column):
@@ -359,9 +359,13 @@ class PyobjSheet(PythonSheet):
 
 
 @TableSheet.api
-def openRow(sheet, row):
+def openRow(sheet, row, rowidx=None):
     'Return Sheet diving into *row*.'
-    k = sheet.keystr(row) or sheet.cursorRowIndex
+    if rowidx is None:
+        k = sheet.keystr(row) or str(sheet.cursorRowIndex)
+    else:
+        k = rowidx
+
     name = f'{sheet.name}[{k}]'
     return TableSheet(name,
                       rows=sheet.visibleCols,
@@ -373,11 +377,25 @@ def openRow(sheet, row):
                       nKeys=1)
 
 @TableSheet.api
-def openCell(sheet, col, row):
+def openCell(sheet, col, row, rowidx=None):
     'Return Sheet diving into cell at *row* in *col*.'
-    k = sheet.keystr(row) or [str(sheet.cursorRowIndex)]
+    if rowidx is None:
+        k = sheet.keystr(row) or str(sheet.cursorRowIndex)
+    else:
+        k = rowidx
     name = f'{sheet.name}[{k}].{col.name}'
     return PyobjSheet(name, source=col.getTypedValue(row))
+
+@TableSheet.api
+def openRowPyobj(sheet, rowidx):
+    'Return Sheet of raw Python object of row.'
+    return PyobjSheet("%s[%s]" % (sheet.name, rowidx), source=sheet.rows[rowidx])
+
+@TableSheet.api
+def openCellPyobj(sheet, col, rowidx):
+    'Return Sheet of raw Python object of cell.'
+    name = f'{sheet.name}[{rowidx}].{col.name}'
+    return PyobjSheet(name, source=col.getValue(row))
 
 
 @BaseSheet.api
@@ -393,11 +411,11 @@ def pyobj_expr(sheet):
 BaseSheet.addCommand('^X', 'pyobj-expr', 'pyobj_expr()', 'evaluate Python expression and open result as Python object')
 BaseSheet.addCommand('', 'exec-python', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals(), LazyChainMap(sheet, *vd.contexts, locals=vd.getGlobals()))', 'execute Python statement with expression scope')
 BaseSheet.addCommand('g^X', 'import-python', 'modname=input("import: ", type="import_python"); exec("import "+modname, getGlobals())', 'import Python module in the global scope')
-globalCommand('z^X', 'pyobj-expr-row', 'expr = input("eval over current row: ", "expr", completer=CompleteExpr()); vd.push(PyobjSheet(expr, source=evalExpr(expr, row=cursorRow)))', 'evaluate Python expression, in context of current row, and open result as Python object')
+BaseSheet.addCommand('z^X', 'pyobj-expr-row', 'expr = input("eval over current row: ", "expr", completer=CompleteExpr()); vd.push(PyobjSheet(expr, source=evalExpr(expr, row=cursorRow)))', 'evaluate Python expression, in context of current row, and open result as Python object')
 
-Sheet.addCommand('^Y', 'pyobj-row', 'status(type(cursorRow)); vd.push(PyobjSheet("%s[%s]" % (sheet.name, cursorRowIndex), source=cursorRow))', 'open current row as Python object')
-Sheet.addCommand('z^Y', 'pyobj-cell', 'status(type(cursorValue)); vd.push(PyobjSheet("%s[%s].%s" % (sheet.name, cursorRowIndex, cursorCol.name), source=cursorValue))', 'open current cell as Python object')
-globalCommand('g^Y', 'pyobj-sheet', 'status(type(sheet)); vd.push(PyobjSheet(sheet.name+"_sheet", source=sheet))', 'open current sheet as Python object')
+Sheet.addCommand('^Y', 'pyobj-row', 'status(type(cursorRow).__name__); vd.push(openRowPyobj(cursorRowIndex))', 'open current row as Python object')
+Sheet.addCommand('z^Y', 'pyobj-cell', 'status(type(cursorValue).__name__); vd.push(openCellPyobj(cursorCol, cursorRowIndex))', 'open current cell as Python object')
+BaseSheet.addCommand('g^Y', 'pyobj-sheet', 'status(type(sheet).__name__); vd.push(PyobjSheet(sheet.name+"_sheet", source=sheet))', 'open current sheet as Python object')
 
 Sheet.addCommand('(', 'expand-col', 'expand_cols_deep(sheet, [cursorCol], depth=1)', 'expand current column of containers one level')
 Sheet.addCommand('g(', 'expand-cols', 'expand_cols_deep(sheet, visibleCols, depth=1)', 'expand all visible columns of containers one level')
@@ -406,7 +424,7 @@ Sheet.addCommand('gz(', 'expand-cols-depth', 'expand_cols_deep(sheet, visibleCol
 
 Sheet.addCommand(')', 'contract-col', 'closeColumn(sheet, cursorCol)', 'unexpand current column; restore original column and remove other columns at this level')
 
-Sheet.addCommand('', 'open-row-basic', 'vd.push(TableSheet.openRow(sheet, cursorRow))', 'open sheet with open sheet with copies of rows referenced in current row')
+Sheet.addCommand('', 'open-row-basic', 'vd.push(TableSheet.openRow(sheet, cursorRow))', 'dive into current row as basic table (ignoring subsheet dive)')
 Sheet.addCommand(ENTER, 'open-row', 'vd.push(openRow(cursorRow))', 'open current row with sheet-specific dive')
 Sheet.addCommand('z'+ENTER, 'open-cell', 'vd.push(openCell(cursorCol, cursorRow))', 'open sheet with copies of rows referenced in current cell')
 Sheet.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(openRow(r))', 'open sheet with copies of rows referenced in selected rows')
