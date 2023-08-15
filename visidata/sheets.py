@@ -1078,7 +1078,7 @@ BaseSheet.addCommand('^I', 'splitwin-swap', 'vd.activePane = 1 if sheet.pane == 
 BaseSheet.addCommand('g^I', 'splitwin-swap-pane', 'vd.options.disp_splitwin_pct=-vd.options.disp_splitwin_pct', 'swap panes onscreen')
 BaseSheet.addCommand('zZ', 'splitwin-input', 'vd.options.disp_splitwin_pct = input("% height for split window: ", value=vd.options.disp_splitwin_pct)', 'set split pane to specific size')
 
-BaseSheet.addCommand('^L', 'redraw', 'vd.redraw(); sheet.refresh()', 'Refresh screen')
+BaseSheet.addCommand('^L', 'redraw', 'sheet.refresh(); vd.redraw()', 'Refresh screen')
 BaseSheet.addCommand(None, 'guard-sheet', 'options.set("quitguard", True, sheet); status("guarded")', 'Set quitguard on current sheet to confirm before quit')
 BaseSheet.addCommand(None, 'guard-sheet-off', 'options.set("quitguard", False, sheet); status("unguarded")', 'Unset quitguard on current sheet to not confirm before quit')
 BaseSheet.addCommand(None, 'open-source', 'vd.replace(source)', 'jump to the source of this sheet')

@@ -246,10 +246,8 @@ class BaseSheet(DrawablePane):
         pass
 
     def refresh(self):
-        'Clear the terminal screen and let the next draw cycle redraw everything.'
-        if self._scr:
-            self._scr.clear()
-            self._scr.refresh()
+        'Recalculate any internal state needed for `draw()`.  Overrideable.'
+        pass
 
     def ensureLoaded(self):
         'Call ``reload()`` if not already loaded.'
