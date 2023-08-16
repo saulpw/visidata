@@ -18,7 +18,7 @@ eleventyNavigation:
 |[postgres](#postgres)|PostgreSQL database |0\.97            |                |0\.97          |1996     |                    |                    |
 |[imap](#imap)|Internet Message Access Protocol |2\.12            |                |2\.12          |1988     |                    |                    |
 |[vd](#vd)      |VisiData command log|0\.97            |                |0\.97          |2017     |VisiData            |                    |
-|vds           |              |VisiData Sheet      |2\.2             |yes                 |2021     |VisiData            |                    |                    |
+|vds           |VisiData Sheet      |2\.2             |yes                 |2021     |VisiData            |                    |                    |
 |[mbtiles](#mbtiles)|MapBox Tileset      |0\.98            |                |0\.98          |2011     |MapBox              |mapbox\-vector\-tile|
 |pbf                 |Protocolbuffer Binary Format|0\.98            |                |0\.98          |2011     |OpenStreetMap       |                    |
 |[shp](#shp)    |Shapefile geographic data|0\.98            |                |0\.98          |1993     |ESRI                |pyshp               |
@@ -52,9 +52,9 @@ eleventyNavigation:
 |eml           |Multipurpose Internet Mail Extensions \(MIME\)|2\.0             |                |  |1996     |Nathaniel Borenstein and Ned Freed|https://tools\.ietf\.org/html/rfc2045|                    |
 |ods           |OpenDocument Spreadsheet|2\.7             |                |  |2006     |[OASIS](https://en.wikipedia.org/wiki/OASIS_(organization))|https://docs.oasis-open.org/office/v1.1/|odfpy|
 |lsv           |awk-like key-value line-separated values|2\.7             |v2\.7                |  |     |   |   |   |
-|arrow         |              |Arrow IPC file format|2\.9             |                    |2016     |Apache Software Foundation|https://arrow\.apache\.org/docs/format/Columnar\.html|pyarrow             |
-|arrows        |              |Arrow IPC streaming format|2\.9             |                    |2016     |Apache Software Foundation|https://arrow\.apache\.org/docs/format/Columnar\.html|pyarrow             |
-|parquet       |              |Apache Parquet      |1\.3             |                    |2013     |Apache Software Foundation|https://parquet\.apache\.org/|pyarrow or pandas   |
+|arrow         |Arrow IPC file format|2\.9             |                    |2016     |Apache Software Foundation|https://arrow\.apache\.org/docs/format/Columnar\.html|pyarrow             |
+|arrows        |Arrow IPC streaming format|2\.9             |                    |2016     |Apache Software Foundation|https://arrow\.apache\.org/docs/format/Columnar\.html|pyarrow             |
+|parquet       |Apache Parquet      |1\.3             |                    |2013     |Apache Software Foundation|https://parquet\.apache\.org/|pyarrow or pandas   |
 
 
 # Extra notes about formats
