@@ -326,6 +326,7 @@ class Canvas(Plotter):
     bottomMarginPixels = 1*4  # reserve bottom line for x axis
 
     def __init__(self, *names, **kwargs):
+        self.left_margin = self.leftMarginPixels
         super().__init__(*names, **kwargs)
 
         self.canvasBox = None   # bounding box of entire canvas, in canvas units
@@ -351,6 +352,7 @@ class Canvas(Plotter):
     def reset(self):
         'clear everything in preparation for a fresh reload()'
         self.polylines.clear()
+        self.left_margin = self.leftMarginPixels
         self.legends.clear()
         self.legendwidth = 0
         self.plotAttrs.clear()
@@ -386,13 +388,13 @@ class Canvas(Plotter):
             # +4 = 1 empty space after the graph + 2 characters for the legend prefixes of "1:", "2:", etc +
             #      1 character for the empty rightmost column
             new_margin = max(self.rightMarginPixels, (self.legendwidth+4)*2)
-            pvbox_w = self.plotwidth-new_margin-1
+            pvbox_xmax = self.plotwidth-new_margin-1
             # ensure the graph data takes up at least 3/4 of the width of the screen no matter how wide the legend gets
-            pvbox_w = max(pvbox_w, math.ceil(self.plotwidth * 3/4)//2*2 + 1)
+            pvbox_xmax = max(pvbox_xmax, math.ceil(self.plotwidth * 3/4)//2*2 + 1)
         else:
-            pvbox_w = self.plotwidth-self.rightMarginPixels-1
-        self.plotviewBox = BoundingBox(self.leftMarginPixels, self.topMarginPixels,
-                                       pvbox_w, self.plotheight-self.bottomMarginPixels-1)
+            pvbox_xmax = self.plotwidth-self.rightMarginPixels-1
+        self.plotviewBox = BoundingBox(self.left_margin, self.topMarginPixels,
+                                       pvbox_xmax, self.plotheight-self.bottomMarginPixels-1)
         if [self.plotheight, self.plotwidth] != old_plotsize:
             if hasattr(self, 'cursorBox') and self.cursorBox:
                 self.setCursorSizeInPlotterPixels(2, 4)
