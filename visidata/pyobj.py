@@ -396,7 +396,7 @@ def openRowPyobj(sheet, rowidx):
 def openCellPyobj(sheet, col, rowidx):
     'Return Sheet of raw Python object of cell.'
     name = f'{sheet.name}[{rowidx}].{col.name}'
-    return PyobjSheet(name, source=col.getValue(row))
+    return PyobjSheet(name, source=col.getValue(sheet.rows[rowidx]))
 
 
 @BaseSheet.api
