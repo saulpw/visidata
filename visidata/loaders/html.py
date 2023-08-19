@@ -142,7 +142,7 @@ class HtmlTableSheet(Sheet):
                         cellval = ''   # use empty non-None value for subsequent rows in the rowspan
                 else:
                     while colnum >= len(row):
-                        row.append(None)
+                        row.append((None, []))
                     row[colnum] = (cellval, links)
 
                 colnum += colspan
