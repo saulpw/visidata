@@ -91,7 +91,7 @@ def mean(vals):
         return float(sum(vals))/len(vals)
 
 def vsum(vals):
-    return sum(vals, start=type(vals[0])())  #1996
+    return sum(vals, start=type(vals[0] if len(vals) else 0)())  #1996
 
 # http://code.activestate.com/recipes/511478-finding-the-percentile-of-the-values/
 def _percentile(N, percent, key=lambda x:x):
