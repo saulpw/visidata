@@ -1,0 +1,6 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/sample.tsv	o	
+sample	Units		type-int		#	set type of current column to int
+sample	Units		aggregate-col	sum	+	Add aggregator to current column
+sample	Units		freq-col		Shift+F	open Frequency Table grouped on current column, with aggregations of other columns
+sample_Units_freq	Units		sort-asc		[	sort ascending by current column; replace any existing sort criteria
