@@ -113,6 +113,8 @@ def pasteFromClipboard(vd, cols, rows):
 
 @Sheet.api
 def delete_row(sheet, rowidx):
+    if not sheet.rows:
+        vd.fail("no row to delete")
     if not sheet.defer:
         oldrow = sheet.rows.pop(rowidx)
         vd.addUndo(sheet.rows.insert, rowidx, oldrow)
