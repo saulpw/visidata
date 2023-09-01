@@ -124,9 +124,8 @@ class TableSheet(BaseSheet):
     ]
     nKeys = 0  # columns[:nKeys] are key columns
 
-    def __init__(self, *names, **kwargs):
-        super().__init__(*names, **kwargs)
-        self.rows = UNLOADED      # list of opaque row objects (UNLOADED before first reload)
+    def __init__(self, *names, rows=UNLOADED, **kwargs):
+        super().__init__(*names, rows=rows, **kwargs)
         self.cursorRowIndex = 0  # absolute index of cursor into self.rows
         self.cursorVisibleColIndex = 0  # index of cursor into self.visibleCols
 
