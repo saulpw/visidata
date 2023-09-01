@@ -23,8 +23,10 @@ def _splitcell(sheet, s, width=0):
         return [s]
 
     ret = []
-    for L in s.splitlines():
-        ret.extend(textwrap.wrap(L, width=width, break_long_words=False, replace_whitespace=False))
+    for attr, text in s:
+        ret.extend([(attr, line)] for line in textwrap.wrap(
+            text, width=width, break_long_words=False, replace_whitespace=False
+        ))
     return ret
 
 disp_column_fill = ' ' # pad chars after column value
