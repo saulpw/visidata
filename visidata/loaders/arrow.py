@@ -44,7 +44,7 @@ def arrow_to_vdtype(t):
         pa.lib.Type_LARGE_BINARY: vlen,
 #            pa.lib.Type_FIXED_SIZE_BINARY: bytes,
 #            pa.lib.Type_STRING: str,
-        pa.lib.Type_LARGE_STRING: vlen,
+#            pa.lib.Type_LARGE_STRING: vlen,  #2003
 #            pa.lib.Type_LIST: list,
 #            pa.lib.Type_LARGE_LIST: list,
 #            pa.lib.Type_FIXED_SIZE_LIST: list,
