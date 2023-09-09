@@ -107,12 +107,12 @@ class BaseSheet(DrawablePane):
 
     class_options = options = _dualproperty(_obj_options, _class_options)
 
-    def __init__(self, *names, **kwargs):
+    def __init__(self, *names, rows=UNLOADED, **kwargs):
         self._name = None   # initial cache value necessary for self.options
         self.names = list(names)
         self.name = self.options.name_joiner.join(str(x) for x in self.names if x)
         self.source = None
-        self.rows = UNLOADED      # list of opaque objects
+        self.rows = rows      # list of opaque objects
         self._scr = None
         self.hasBeenModified = False
 
@@ -150,6 +150,14 @@ class BaseSheet(DrawablePane):
 
     def __str__(self):
         return self.name
+
+    @property
+    def rows(self):
+        return self._rows
+
+    @rows.setter
+    def rows(self, rows):
+        self._rows = rows
 
     @property
     def nRows(self):

@@ -37,12 +37,13 @@ def undo(vd, sheet):
         vd.fail("options.undo not enabled")
 
     # don't allow undo of first command on a sheet, which is always the command that created the sheet.
-    for cmdlogrow in sheet.cmdlog_sheet.rows[:0:-1]:
+    for i, cmdlogrow in enumerate(sheet.cmdlog_sheet.rows[:0:-1]):
         if cmdlogrow.undofuncs:
             for undofunc, args, kwargs, in cmdlogrow.undofuncs[::-1]:
                 undofunc(*args, **kwargs)
             sheet.undone.append(cmdlogrow)
-            sheet.cmdlog_sheet.rows.remove(cmdlogrow)
+            row_idx = len(sheet.cmdlog_sheet.rows)-1 - i
+            del sheet.cmdlog_sheet.rows[row_idx]
 
             vd.clearCaches()  # undofunc can invalidate the drawcache
 

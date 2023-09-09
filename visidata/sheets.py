@@ -23,8 +23,10 @@ def _splitcell(sheet, s, width=0):
         return [s]
 
     ret = []
-    for L in s.splitlines():
-        ret.extend(textwrap.wrap(L, width=width, break_long_words=False, replace_whitespace=False))
+    for attr, text in s:
+        ret.extend([(attr, line)] for line in textwrap.wrap(
+            text, width=width, break_long_words=False, replace_whitespace=False
+        ))
     return ret
 
 disp_column_fill = ' ' # pad chars after column value
@@ -122,9 +124,8 @@ class TableSheet(BaseSheet):
     ]
     nKeys = 0  # columns[:nKeys] are key columns
 
-    def __init__(self, *names, **kwargs):
-        super().__init__(*names, **kwargs)
-        self.rows = UNLOADED      # list of opaque row objects (UNLOADED before first reload)
+    def __init__(self, *names, rows=UNLOADED, **kwargs):
+        super().__init__(*names, rows=rows, **kwargs)
         self.cursorRowIndex = 0  # absolute index of cursor into self.rows
         self.cursorVisibleColIndex = 0  # index of cursor into self.visibleCols
 

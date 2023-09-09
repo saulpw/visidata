@@ -99,8 +99,8 @@ class DescribeSheet(ColumnsSheet):
                 for func in [min, max, sum, median]:  # use type
                     d[func.__name__] = self.calcStatistic(d, func, vals)
                 for aggrname in vd.options.describe_aggrs.split():
-                    func = vd.getGlobals()[aggrname]
-                    d[func.__name__] = self.calcStatistic(d, func, vals)
+                    aggr = vd.aggregators[aggrname].funcValues
+                    d[aggrname] = self.calcStatistic(d, aggr, vals)
 
     def calcStatistic(self, d, func, *args, **kwargs):
         r = wrapply(func, *args, **kwargs)

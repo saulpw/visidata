@@ -126,6 +126,15 @@ def makeFreqTableSheetSummary(sheet, *groupByCols):
                           source=sheet)
 
 
+@VisiData.api
+class FreqTablePreviewSheet(Sheet):
+    @property
+    def rows(self):
+        return self.source.cursorRow.sourcerows
+
+
+FreqTableSheet.addCommand('', 'open-preview', 'vd.push(FreqTablePreviewSheet(sheet.name, "preview", source=sheet, columns=source.columns), pane=2); vd.options.disp_splitwin_pct=50', 'open split preview of source rows at cursor')
+
 Sheet.addCommand('F', 'freq-col', 'vd.push(makeFreqTable(sheet, cursorCol))', 'open Frequency Table grouped on current column, with aggregations of other columns')
 Sheet.addCommand('gF', 'freq-keys', 'vd.push(makeFreqTable(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on source sheet, with aggregations of other columns')
 Sheet.addCommand('zF', 'freq-summary', 'vd.push(makeFreqTableSheetSummary(sheet, Column("Total", sheet=sheet, getter=lambda col, row: "Total")))', 'open one-line summary for all rows and selected rows')
