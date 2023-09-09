@@ -56,10 +56,11 @@ Column.aggregators = property(aggregators_get, aggregators_set)
 
 
 class Aggregator:
-    def __init__(self, name, type, func, helpstr='foo'):
+    def __init__(self, name, type, funcRows, funcValues=None, helpstr='foo'):
         'Define aggregator `name` that calls func(col, rows)'
         self.type = type
-        self.func = func
+        self.func = funcRows  # funcRows(col, rows)
+        self.funcValues = funcValues  # funcValues(values, *args)
         self.helpstr = helpstr
         self.name = name
 
@@ -69,19 +70,18 @@ class Aggregator:
 _defaggr = Aggregator
 
 @VisiData.api
-def aggregator(vd, name, func, helpstr='', *args, type=None):
-    'Define simple aggregator *name* that calls ``func(values, *args)`` to aggregate *values*.  Use *type* to force the default type of the aggregated column.'
-    def _func(col, rows):  # wrap builtins so they can have a .type
+def aggregator(vd, name, funcValues, helpstr='', *args, type=None):
+    'Define simple aggregator *name* that calls ``funcValues(values, *args)`` to aggregate *values*.  Use *type* to force the default type of the aggregated column.'
+    def _funcRows(col, rows):  # wrap builtins so they can have a .type
         vals = list(col.getValues(rows))
         try:
-            return func(vals, *args)
+            return funcValues(vals, *args)
         except Exception as e:
             if len(vals) == 0:
                 return None
             return e
 
-    vd.aggregators[name] = _defaggr(name, type, _func, helpstr)
-    vd.addGlobals({name: func})
+    vd.aggregators[name] = _defaggr(name, type, _funcRows, funcValues=funcValues, helpstr=helpstr)  # accepts a srccol + list of rows
 
 ## specific aggregator implementations
 
@@ -117,7 +117,7 @@ def _percentile(N, percent, key=lambda x:x):
 
 @functools.lru_cache(100)
 def percentile(pct, helpstr=''):
-    return _defaggr('p%s'%pct, None, lambda col,rows,pct=pct: _percentile(sorted(col.getValues(rows)), pct/100), helpstr)
+    return _defaggr('p%s'%pct, None, lambda col,rows,pct=pct: _percentile(sorted(col.getValues(rows)), pct/100), helpstr=helpstr)
 
 def quantiles(q, helpstr):
     return [percentile(round(100*i/q), helpstr) for i in range(1, q)]
@@ -145,7 +145,7 @@ for pct in (10, 20, 25, 30, 33, 40, 50, 60, 67, 70, 75, 80, 90, 95, 99):
     vd.aggregators[f'p{pct}'] = percentile(pct, f'{pct}th percentile')
 
 # returns keys of the row with the max value
-vd.aggregators['keymax'] = _defaggr('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]), 'key of the maximum value')
+vd.aggregators['keymax'] = _defaggr('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]), helpstr='key of the maximum value')
 
 
 ColumnsSheet.columns += [
