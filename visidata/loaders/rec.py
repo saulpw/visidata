@@ -49,6 +49,7 @@ class RecIndexSheet(IndexSheet):
 
         fp = iter(self.source)
         while next_line is not None:
+          try:
             line, next_line = decode_multiline(next_line, fp)
             line = line.lstrip()
 
@@ -62,6 +63,7 @@ class RecIndexSheet(IndexSheet):
 
             if not sheet or (newRecord and line[0] == '%'):
                 sheet = RecSheet('', columns=[], rows=[], source=self, comments=comments)
+                sheet.columns = []
                 comments = []
                 yield sheet
                 newRecord = False
@@ -81,7 +83,7 @@ class RecIndexSheet(IndexSheet):
                         if colname not in sheet.colnames:
                             sheet.addColumn(ItemColumn(colname, keycol=i+1))
                 elif desc in ['sort']:
-                    sheet.orderBy([sheet.column(colname) for colname in rest.split()])
+                    sheet._ordering = [(colname, False) for colname in rest.split()]
                 elif desc in ['type', 'typedef']:
                     pass
                 elif desc in ['auto']:  # autoincrement columns should be present already
@@ -112,6 +114,8 @@ class RecIndexSheet(IndexSheet):
                     row[name].append(rest)
                 else:
                     row[name] = rest
+          except Exception as e:
+              vd.exceptionCaught(e)
 
         for sheet in Progress(self.rows):
             sheet.sort()
