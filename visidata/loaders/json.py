@@ -35,10 +35,11 @@ class JsonSheet(InferColumnsSheet):
     def iterload(self):
         with self.source.open(encoding=self.options.encoding) as fp:
             for L in fp:
+                L = L.strip()
                 try:
-                    if L.startswith('#'): # skip commented lines
+                    if not L: # skip blank lines
                         continue
-                    elif not L.strip(): # skip blank lines
+                    elif L.startswith(('#', '//')): # skip commented lines
                         continue
                     ret = json.loads(L, object_hook=AttrDict)
                     if isinstance(ret, list):
