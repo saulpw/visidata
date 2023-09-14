@@ -39,7 +39,7 @@ class JsonSheet(InferColumnsSheet):
                 try:
                     if not L: # skip blank lines
                         continue
-                    elif L.startswith('#') or L.startswith('//'): # skip commented lines
+                    elif L.startswith(('#', '//')): # skip commented lines
                         continue
                     ret = json.loads(L, object_hook=AttrDict)
                     if isinstance(ret, list):
