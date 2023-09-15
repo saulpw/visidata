@@ -54,7 +54,11 @@ def openurl_postgres(vd, url, filetype=None):
                 port=url.port,
                 password=url.password)
 
-    return PgTablesSheet(dbname+"_tables", sql=SQL(conn))
+    schema = options.postgres_schema
+    if schema in ("*", "**"):
+        return PgSchemataSheet(dbname, sql=SQL(conn))
+    else:
+        return PgTablesSheet(dbname+"."+schema, sql=SQL(conn))
 
 
 VisiData.openurl_postgresql=VisiData.openurl_postgres
@@ -84,18 +88,61 @@ def postgresGetColumns(vd, cur):
         yield ColumnItem(coldesc.name, i, type=codeToType(coldesc.type_code, coldesc.name))
 
 
+class PgSchemataSheet(Sheet):
+    rowtype = 'schemas'
+
+    def reload(self):
+        if options.postgres_schema == "*":
+            qstr = """
+                SELECT schema_name
+                FROM information_schema.schemata
+                WHERE
+                    (schema_name <> 'information_schema')
+                    AND (schema_name NOT LIKE 'pg_%');
+                """
+        elif options.postgres_schema == "**":
+            qstr = """SELECT schema_name FROM information_schema.schemata;"""
+
+        with self.sql.cur(qstr) as cur:
+            self.nrowsPerTable = {}
+
+            self.rows = []
+            # try to get first row to make cur.description available
+            r = cur.fetchone()
+            if r:
+                self.addRow(r)
+            self.columns = []
+            for c in vd.postgresGetColumns(cur):
+                self.addColumn(c)
+            self.setKeys(self.columns[0:1])  # schema_name is the key
+
+            for r in cur:
+                self.addRow(r)
+
+    def openRow(self, row):
+        return PgTablesSheet(self.name+"."+row[0], source=row[0], sql=self.sql)
+
+
 # rowdef: (table_name, ncols)
 class PgTablesSheet(Sheet):
     rowtype = 'tables'
 
     def reload(self):
-        schema = options.postgres_schema
+        schema = self.source or options.postgres_schema
         qstr = f'''
-            SELECT relname table_name, column_count.ncols, reltuples::bigint est_nrows
-                FROM pg_class, pg_namespace, (
-                    SELECT table_name, COUNT(column_name) AS ncols FROM information_schema.COLUMNS WHERE table_schema = '{schema}' GROUP BY table_name
+            SELECT  relname table_name,
+                    column_count.ncols,
+                    reltuples::bigint est_nrows
+            FROM    pg_class,
+                    pg_namespace,
+                    (   SELECT table_name, COUNT(column_name) AS ncols
+                        FROM information_schema.COLUMNS
+                        WHERE table_schema = '{schema}'
+                        GROUP BY table_name
                     ) AS column_count
-                WHERE  pg_class.relnamespace = pg_namespace.oid AND pg_namespace.nspname = '{schema}' AND column_count.table_name = relname;
+            WHERE   (pg_class.relnamespace = pg_namespace.oid)
+                    AND (pg_namespace.nspname = '{schema}')
+                    AND (column_count.table_name = relname);
         '''
 
         with self.sql.cur(qstr) as cur:
@@ -115,17 +162,19 @@ class PgTablesSheet(Sheet):
                 self.addRow(r)
 
     def openRow(self, row):
-        return PgTable(self.name+"."+row[0], source=row[0], sql=self.sql)
+        return PgTable(
+            self.name+"."+row[0],
+            source=(self.source or options.postgres_schema)+"."+row[0],
+            sql=self.sql
+        )
 
 
 # rowdef: tuple of values as returned by fetchone()
 class PgTable(Sheet):
     @asyncthread
     def reload(self):
-        if self.options.postgres_schema:
-            source = f"{self.options.postgres_schema}.{self.source}"
-        else:
-            source = self.source
+        source = self.source
+
         with self.sql.cur(f"SELECT * FROM {source}") as cur:
             self.rows = []
             r = cur.fetchone()
