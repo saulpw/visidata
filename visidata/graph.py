@@ -55,10 +55,16 @@ class InvertedCanvas(Canvas):
 # provides axis labels, legend
 class GraphSheet(InvertedCanvas):
     def __init__(self, *names, **kwargs):
+        self.ylabel_maxw = 0
         super().__init__(*names, **kwargs)
 
         vd.numericCols(self.xcols) or vd.fail('at least one numeric key col necessary for x-axis')
         self.ycols or vd.fail('%s is non-numeric' % '/'.join(yc.name for yc in kwargs.get('ycols')))
+
+    def resetCanvasDimensions(self, windowHeight, windowWidth):
+        if self.left_margin < self.ylabel_maxw:
+            self.left_margin = self.ylabel_maxw
+        super().resetCanvasDimensions(windowHeight, windowWidth)
 
     @asyncthread
     def reload(self):
@@ -145,6 +151,9 @@ class GraphSheet(InvertedCanvas):
 
     def add_y_axis_label(self, frac):
         txt = self.formatYLabel(self.visibleBox.ymin + frac*self.visibleBox.h)
+        w = (dispwidth(txt)+1)*2
+        if self.ylabel_maxw < w:
+            self.ylabel_maxw = w
 
         # plot y-axis labels on the far left of the canvas, but within the plotview height-wise
         attr = colors.color_graph_axis
@@ -161,7 +170,8 @@ class GraphSheet(InvertedCanvas):
         if frac < 1.0:
             txt = tick + txt
         else:
-            if (len(txt)+len(tick))*2 <= self.rightMarginPixels:
+            right_margin = self.plotwidth - 1 - self.plotviewBox.xmax
+            if (len(txt)+len(tick))*2 <= right_margin:
                 txt = tick + txt
             else:
                 # shift rightmost label to be left of its tick
@@ -174,6 +184,7 @@ class GraphSheet(InvertedCanvas):
 
     def createLabels(self):
         self.gridlabels = []
+        self.ylabel_maxw = self.leftMarginPixels
 
         # y-axis
         self.add_y_axis_label(1.00)
@@ -193,7 +204,7 @@ class GraphSheet(InvertedCanvas):
         # TODO: grid lines corresponding to axis labels
 
         xname = ','.join(xcol.name for xcol in self.xcols if vd.isNumeric(xcol)) or 'row#'
-        xname, _ = clipstr(xname, self.leftMarginPixels//2-2)
+        xname, _ = clipstr(xname, self.left_margin//2-2)
         self.plotlabel(0, self.plotviewBox.ymax+4, xname+'»', colors.color_graph_axis)
 
 
