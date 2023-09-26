@@ -90,7 +90,10 @@ def handleMouse(vd, sheet):
         if f:
             if isinstance(f, str):
                 if f.startswith('onclick'):
-                    sheet.execCommand(f[8:])
+                    if '://' in f:
+                        vd.launchBrowser(f[8:])
+                    else:
+                        sheet.execCommand(f[8:])
                 else:
                     for cmd in f.split():
                         sheet.execCommand(cmd)
