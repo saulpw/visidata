@@ -107,7 +107,7 @@ eleventyNavigation:
 - `vd "imap://user@domain.com:passwordhere@imap-mailserver.com"` opens a connection to the IMAP server
     - e.g.  `vd "imap://someone@hotmail.com:pass123@imap-mail.outlook.com:993"`
     - e.g.  `vd "imap://someone@gmail.com@imap.gmail.com"`
-        - note that you don't specifiy a password for gmail here -- instead, you will be prompted to follow some instructions
+        - note that you don't specify a password for gmail here -- instead, you will be prompted to follow some instructions
 
 ### using VisiData as a pager within psql
 

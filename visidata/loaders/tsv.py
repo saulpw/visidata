@@ -23,7 +23,7 @@ def adaptive_bufferer(fp, max_buffer_size=65536):
     """Loading e.g. tsv files goes faster with a large buffer. But when the input stream
     is slow (e.g. 1 byte/second) and the buffer size is large, it can take a long time until
     the buffer is filled. Only when the buffer is filled (or the input stream is finished)
-    you can see the data visiualized in visidata. Thats why we use an adaptive buffer.
+    you can see the data visiualized in visidata. That's why we use an adaptive buffer.
     For fast input streams, the buffer becomes large, for slow input streams, the buffer stays
     small"""
     buffer_size = 8

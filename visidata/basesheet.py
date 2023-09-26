@@ -254,7 +254,7 @@ class BaseSheet(DrawablePane):
         pass
 
     def refresh(self):
-        'Recalculate any internal state needed for `draw()`.  Overrideable.'
+        'Recalculate any internal state needed for `draw()`.  Overridable.'
         pass
 
     def ensureLoaded(self):
