@@ -2,7 +2,7 @@
 
 import json
 
-from visidata import VisiData, JsonSheet, Progress, IndexSheet, SettableColumn, ItemColumn
+from visidata import VisiData, JsonSheet, Progress, IndexSheet, SettableColumn, ItemColumn, ExprColumn
 
 
 NL='\n'
