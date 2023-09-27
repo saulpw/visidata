@@ -27,6 +27,9 @@ def save_vds(vd, p, *sheets):
                 d = col.__getstate__()
                 if isinstance(col, SettableColumn):
                     d['col'] = 'Column'
+                elif isinstance(col, ItemColumn):
+                    d['col'] = 'Column'
+                    d['expr'] = col.name  #2037  override expr
                 else:
                     d['col'] = type(col).__name__
                 fp.write('#'+json.dumps(d)+NL)
