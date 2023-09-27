@@ -1,8 +1,10 @@
 import builtins
 import collections
 import curses
+import inspect
 import sys
 
+import visidata
 from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr
 
 
@@ -47,6 +49,22 @@ def statuses(vd):
 def statusHistory(vd):
     return list()  # list of [priority, statusmsg, repeats] for all status messages ever
 
+def getStatusSource():
+    stack = inspect.stack()
+    for i, sf in enumerate(stack):
+        if sf.function in 'status aside'.split():
+            if stack[i+1].function in 'error fail warning debug'.split():
+                sf = stack[i+2]
+            else:
+                sf = stack[i+1]
+            break
+
+    fn = sf.filename
+    if fn.startswith(visidata.__path__[0]):
+        fn = visidata.__package__ + fn[len(visidata.__path__[0]):]
+    return f'{fn}:{sf.lineno}:{sf.function}'
+
+
 @VisiData.api
 def status(vd, *args, priority=0):
     'Display *args* on status until next action.'
@@ -56,20 +74,25 @@ def status(vd, *args, priority=0):
     k = (priority, tuple(map(str, args)))
     vd.statuses[k] = vd.statuses.get(k, 0) + 1
 
-    if not vd.cursesEnabled:
-        builtins.print(composeStatus(args), file=sys.stderr)
+    source = getStatusSource()
 
-    return vd.addToStatusHistory(*args, priority=priority)
+    if not vd.cursesEnabled:
+        msg = composeStatus(args)
+        if vd.options.debug:
+            msg += f' [{source}]'
+        builtins.print(msg, file=sys.stderr)
+
+    return vd.addToStatusHistory(*args, priority=priority, source=source)
 
 @VisiData.api
-def addToStatusHistory(vd, *args, priority=0):
+def addToStatusHistory(vd, *args, priority=0, source=None):
     if vd.statusHistory:
-        prevpri, prevargs, prevn = vd.statusHistory[-1]
+        prevpri, prevargs, _, _ = vd.statusHistory[-1]
         if prevpri == priority and prevargs == args:
             vd.statusHistory[-1][2] += 1
             return True
 
-    vd.statusHistory.append([priority, args, 1])
+    vd.statusHistory.append([priority, args, 1, source])
     return True
 
 @VisiData.api
@@ -92,7 +115,7 @@ def warning(vd, *args):
 @VisiData.api
 def aside(vd, *args, priority=0):
     'Add a message to statuses without showing the message proactively.'
-    return vd.addToStatusHistory(*args, priority=priority)
+    return vd.addToStatusHistory(*args, priority=priority, source=getStatusSource())
 
 @VisiData.api
 def debug(vd, *args, **kwargs):
@@ -233,7 +256,8 @@ class StatusSheet(Sheet):
         ColumnItem('priority', 0, type=int, width=0),
         ColumnItem('nrepeats', 2, type=int, width=0),
         ColumnItem('args', 1, width=0),
-        Column('message', getter=lambda col,row: composeStatus(row[1], row[2])),
+        Column('message', width=50, getter=lambda col,row: composeStatus(row[1], row[2])),
+        ColumnItem('source', 3),
     ]
     colorizers = [
         RowColorizer(1, 'color_error', lambda s,c,r,v: r and r[0] == 3),
