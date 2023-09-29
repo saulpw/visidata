@@ -2,7 +2,7 @@
 
 ## Global Commands
 
-- `^S` to stash all uncommited changes (`git stash`)
+- `^S` to stash all uncommitted changes (`git stash`)
 - `^P` to pops the most recent stashed change and drops it (`git stash pop`)
 - `A` to abort the cherry-pick/rebase/merge in-progress action shown on status line
 

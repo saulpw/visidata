@@ -27,7 +27,7 @@
     - `P`ushes the local refs to the currently set remote refs
     - `X` pushes the list of git commands executed
     - `H` pushes the git log sheet (history) for the current branch
-    - `Ctrl-s`tashes uncommited changes
+    - `Ctrl-s`tashes uncommitted changes
     - `Ctrl-p`ops the most recent stashed change and drops it
     - `A`bort the current in-progress action
     - `T` pushes the stashes sheet
