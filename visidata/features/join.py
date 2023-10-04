@@ -148,8 +148,9 @@ class MergeColumn(Column):
         col = list(self.cols.values())[0]
         return col and value != col.getValue(row[col.sheet])
 
+
 #### slicing and dicing
-# rowdef: [sheet1_row, sheet2_row, ...]
+# rowdef: {sheet1:sheet1_row, sheet2:sheet2_row, ...}
 #   if a sheet does not have this key, sheet#_row is None
 class JoinSheet(Sheet):
     'Column-wise join/merge. `jointype` constructor arg should be one of jointypes.'
