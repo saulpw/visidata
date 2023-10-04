@@ -56,13 +56,13 @@ class FormCanvas(BaseSheet):
         self.scrForm = vd.scrFull.derwin(min(h-1, maxh+2), min(w-1, maxw+1), y, x)
         self.scrForm.keypad(1)
         curinput = inputs[0] if inputs else None
+        vd.draw_all()
+
+        self.scrForm.erase()
+        self.scrForm.border()
+        self.draw(self.scrForm)
+
         while True:
-            vd.draw_all()
-
-            self.scrForm.erase()
-            self.scrForm.border()
-            self.draw(self.scrForm)
-
             k = vd.getkeystroke(self.scrForm, self)
             if k in ['^C', '^Q', '^[', 'q']:
                 return {}
