@@ -72,11 +72,12 @@ def drawSidebarText(sheet, scr, text:str, title:str='', overflowmsg:str='', bott
             bottommsg = overflowmsg
             break
 
-        x += clipdraw(sidebarscr, i+1, 2, line, cattr, w=w-2)
+        x += clipdraw(sidebarscr, i+1, 2, line, cattr, w=w-3)
         i += 1
 
-    x = w-len(title)-6
-    clipdraw(sidebarscr, 0, x, f"|[:black on yellow] {title} [:]|", cattr)
+    titlew = dispwidth(title)
+    x = w-titlew-6
+    clipdraw(sidebarscr, 0, x, f"|[:black on yellow] {title} [:]|", cattr, w=titlew+4)
     if bottommsg:
         clipdraw(sidebarscr, h-1, winw-dispwidth(bottommsg)-4, '|'+bottommsg+'|[:]', cattr)
 

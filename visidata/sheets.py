@@ -620,18 +620,17 @@ class TableSheet(BaseSheet):
 
         hdrs = col.name.split('\n')
         for i in range(h):
-            name = ' '  # save room at front for LeftMore or sorted arrow
+            name = ''
+            if colwidth > 2:
+                name = ' '  # save room at front for LeftMore or sorted arrow
 
             if h-i-1 < len(hdrs):
                 name += hdrs[::-1][h-i-1]
 
-            if len(name) > colwidth-1:
-                name = name[:colwidth-len(self.options.disp_truncator)] + self.options.disp_truncator
-
             if i == h-1:
                 hdrcattr = update_attr(hdrcattr, colors.color_bottom_hdr, 5)
 
-            clipdraw(scr, y+i, x, name, hdrcattr.attr, colwidth)
+            clipdraw(scr, y+i, x, name, hdrcattr.attr, w=colwidth)
             vd.onMouse(scr, x, y+i, colwidth, 1, BUTTON3_RELEASED='rename-col')
 
             if C and x+colwidth+len(C) < self.windowWidth and y+i < self.windowWidth:
@@ -787,7 +786,7 @@ class TableSheet(BaseSheet):
                     notewidth = 1 if note else 0
                     if note:
                         notecattr = update_attr(cattr, colors.get_color(cellval.notecolor), 10)
-                        clipdraw(scr, ybase, x+colwidth-notewidth, note, notecattr.attr)
+                        scr.addstr(ybase, x+colwidth-notewidth, note, notecattr.attr)
 
                     if voffset >= 0:
                         if len(lines)-voffset > height:

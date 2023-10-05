@@ -22,7 +22,7 @@ BaseSheet.init('activeMenuItems', list)
 vd.menuRunning = False
 
 def menudraw(*args):
-    return clipdraw(*args, truncator=' ')
+    return clipdraw(*args, truncator='')
 
 
 def Menu(title, *args):

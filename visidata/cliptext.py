@@ -117,23 +117,30 @@ def iterchars(x):
 def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
     '''Return clipped string and width in terminal display characters.
     Note: width may differ from len(s) if East Asian chars are 'fullwidth'.'''
+    if not s:
+        return '', 0
+
+    if dispw == 1:
+        return s[0], 1
+
     w = 0
     ret = ''
 
     trunchlen = dispwidth(trunch)
     for c in s:
         newc, chlen = _dispch(c, oddspacech=oddspacech, combch=combch, modch=modch)
-        if newc:
-            ret += newc
-            w += chlen
-        else:
-            ret += c
-            w += dispwidth(c)
+        if not newc:
+            newc = c
+            chlen = dispwidth(c)
 
-        if dispw and w > dispw-trunchlen+1:
-            ret = ret[:-2] + trunch # replace final char with ellipsis
-            w += trunchlen
+        if dispw and w+chlen > dispw-trunchlen:
+            if trunchlen and dispw > trunchlen:
+                ret = ret[:-1] + trunch  # replace final char with ellipsis
+                w += trunchlen
             break
+
+        w += chlen
+        ret += newc
 
     return ret, w
 
@@ -190,6 +197,9 @@ def clipdraw_chunks(scr, y, x, chunks, attr, w=None, clear=True, rtl=False, lite
     clipped = ''
     link = ''
 
+    if w and clear and not rtl:
+        scr.addstr(y, x, disp_column_fill*w, cattr.attr)  # clear whole area before displaying
+
     try:
         for colorname, chunk in chunks:
             if colorname.startswith('onclick'):
@@ -225,8 +235,6 @@ def clipdraw_chunks(scr, y, x, chunks, attr, w=None, clear=True, rtl=False, lite
                 # scr.addstr(y, x-dispw-1, disp_column_fill*dispw, attr)
                 scr.addstr(y, x-dispw-1, clipped, cattr.attr)
             else:
-                if clear:
-                    scr.addstr(y, x, disp_column_fill*chunkw, cattr.attr)  # clear whole area before displaying
                 scr.addstr(y, x, clipped, cattr.attr)
 
             if link:
