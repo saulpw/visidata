@@ -266,7 +266,8 @@ def editline(vd, scr, y, x, w, i=0,
         elif ch == '^E' or ch == 'KEY_END':        i = len(v)
         elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1
         elif ch == '^G':
-            vd.options.disp_help = not vd.options.disp_help
+            vd.options.set('disp_help', not vd.options.disp_help, 'global')
+            vd.options.set('disp_help', not vd.options.disp_help, sheet)
             vd.draw_all()  #1971
             continue  # not considered a first keypress
         elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1; v = delchar(v, i)
