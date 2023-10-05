@@ -199,7 +199,8 @@ def clipdraw_chunks(scr, y, x, chunks, attr, w=None, clear=True, rtl=False, lite
 
     if w and clear and not rtl:
         actualw = min(w, windowWidth-x-1)
-        scr.addstr(y, x, disp_column_fill*actualw, cattr.attr)  # clear whole area before displaying
+        if scr:
+            scr.addstr(y, x, disp_column_fill*actualw, cattr.attr)  # clear whole area before displaying
 
     try:
         for colorname, chunk in chunks:
