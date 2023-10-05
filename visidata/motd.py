@@ -15,7 +15,7 @@ from visidata import options, asyncsingle, vd, VisiData
 vd.option('motd_url', 'https://visidata.org/motd-'+vd.version, 'source of randomized startup messages', sheettype=None)
 
 
-vd.motd = ''
+vd.motd = 'Support VisiData: https://github.com/sponsors/saulpw'
 
 @VisiData.api
 @asyncsingle
@@ -25,6 +25,6 @@ def domotd(vd):
             p = vd.urlcache(options.motd_url, days=1)
             line = random.choice(list(p))
             vd.motd = line.split('\t')[0]
-            vd.status(vd.motd, priority=-1)
     except Exception:
         pass
+    vd.status(vd.motd, priority=-1)
