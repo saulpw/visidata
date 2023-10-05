@@ -228,7 +228,7 @@ def editline(vd, scr, y, x, w, i=0,
             sheet = vd.activeSheet
             if help:
                 sheet.drawSidebarText(scr, help)
-            else:
+            elif vd.options.disp_help > 1:
                 vd.getHelpPane('input', module='visidata').draw(scr, y=y)
 
         if display:
