@@ -75,7 +75,7 @@ def dispwidth(ss, maxwidth=None, literal=False):
             if cc:
                 w += wcwidth(cc, disp_ambig_width)
                 if maxwidth and w > maxwidth:
-                    break
+                    return maxwidth
     return w
 
 
@@ -133,10 +133,10 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
             newc = c
             chlen = dispwidth(c)
 
-        if dispw and w+chlen > dispw-trunchlen:
+        if dispw and w+chlen > dispw:
             if trunchlen and dispw > trunchlen:
                 ret = ret[:-1] + trunch  # replace final char with ellipsis
-                w += trunchlen
+                w += trunchlen-1
             break
 
         w += chlen
@@ -222,7 +222,7 @@ def clipdraw_chunks(scr, y, x, chunks, attr, w=None, clear=True, rtl=False, lite
             if origw is None:
                 chunkw = dispwidth(chunk, maxwidth=windowWidth-totaldispw)
             else:
-                chunkw = origw
+                chunkw = origw-totaldispw
 
             chunkw = min(chunkw, (x-1) if rtl else (windowWidth-x-1))
             if chunkw <= 0:  # no room anyway
