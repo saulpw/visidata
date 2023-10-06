@@ -27,7 +27,7 @@ def drawSidebar(vd, scr, sheet):
     try:
         if not sidebar:
             sidebar = sheet.sidebar
-            bottommsg = '[:reverse] b to [:onclick sidebar-toggle]toggle sidebar[:]'
+            bottommsg = '[:onclick sidebar-toggle][:reverse] b to toggle sidebar [:]'
             overflowmsg = '[:reverse] (see full sidebar with [:code]gb[:reverse]) [:]'
 
         lines = sidebar.splitlines()
