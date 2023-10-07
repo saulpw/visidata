@@ -3,8 +3,8 @@ import functools
 import collections
 import statistics
 
-from visidata import vd, Progress, Column, vlen
-from visidata import *
+from visidata import Progress, Sheet, Column, ColumnsSheet, VisiData
+from visidata import vd, anytype, vlen, asyncthread, wrapply
 
 
 vd.option('null_value', None, 'a value to be counted as null', replay=True)

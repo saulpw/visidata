@@ -2,7 +2,8 @@ import math
 import random
 
 from collections import defaultdict, Counter, OrderedDict
-from visidata import *
+from visidata import vd, asyncthread, ENTER, colors, update_attr, clipdraw, dispwidth
+from visidata import BaseSheet, Column, Progress, ColorAttr
 from visidata.bezier import bezier
 
 # see www/design/graphics.md
