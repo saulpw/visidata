@@ -243,9 +243,6 @@ class Column(Extensible):
 
         return vd.getType(self.type).formatter(self.fmtstr, typedval)
 
-    def displayer_url(self, dw:DisplayWrapper, width=None):
-        yield ('onclick '+dw.text, dw.text)
-
     def displayer_generic(self, dw:DisplayWrapper, width=None):
         '''Fit *dw.text* into *width* charcells.
            Generate list of (attr:str, text:str) suitable for clipdraw_chunks.
