@@ -269,7 +269,7 @@ def main_vd():
         options.undo = False
         options.quitguard = False
         vd.editline = lambda *args, **kwargs: ''
-        vd.execAsync = lambda func, *args, sheet=None, **kwargs: func(*args, **kwargs) # disable async
+        vd.execAsync = vd.execSync  # disable async
 
     for cmd in (args.preplay or '').split():
         BaseSheet('').execCommand(cmd)

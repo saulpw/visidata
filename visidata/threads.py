@@ -175,14 +175,20 @@ def _annotate_thread(t, endTime=None):
 VisiData.init('threads', lambda: [_annotate_thread(threading.current_thread(), 0)])
 
 @VisiData.api
-def execAsync(self, func, *args, sheet=None, **kwargs):
+def execSync(vd, func, *args, sheet=None, **kwargs):
+    'Execute ``func(*args, **kwargs)`` in this thread (synchronously). A drop-in substitute for vd.execAsync.'
+    func(*args, **kwargs)
+    return threading.Thread()
+
+@VisiData.api
+def execAsync(vd, func, *args, sheet=None, **kwargs):
     'Execute ``func(*args, **kwargs)`` in a separate thread.'
 
     thread = threading.Thread(target=_toplevelTryFunc, daemon=True, args=(func,)+args, kwargs=kwargs)
-    self.threads.append(_annotate_thread(thread))
+    vd.threads.append(_annotate_thread(thread))
 
     if sheet is None:
-        sheet = self.activeSheet
+        sheet = vd.activeSheet
 
     if sheet is not None:
         sheet.currentThreads.append(thread)
