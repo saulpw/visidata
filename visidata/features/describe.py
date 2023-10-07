@@ -54,17 +54,11 @@ class DescribeSheet(ColumnsSheet):
     ]
     nKeys = 2
 
-    @asyncthread
-    def reload(self):
-        super().reload()
+    def loader(self):
+        super().loader()
         self.rows = [c for c in self.rows if not c.hidden]
         self.describeData = { col: {} for col in self.rows }
-
-        self.columns = []
-        for c in type(self).columns:
-            self.addColumn(c)
-
-        self.setKeys(self.columns[:self.nKeys])
+        self.resetCols()
 
         for aggrname in vd.options.describe_aggrs.split():
             self.addColumn(DescribeColumn(aggrname, type=float))

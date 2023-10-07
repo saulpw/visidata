@@ -38,4 +38,3 @@ class VcfSheet(PythonSheet):
                         self.addColumn(Column(k, expr=k, getter=unbox))
                 self.addRow(row.contents)
                 lines = []
-

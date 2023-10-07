@@ -32,8 +32,7 @@ Some helpful commands when working with cells of lists and dictionaries:
 
     rowtype = "values"  # rowdef: dict values, possibly nested
 
-    @asyncthread
-    def reload(self):
+    def loader(self):
         """Loading a TOML file produces a single dict. Use
         its keys as column headings, and populate a single
         row.

@@ -16,17 +16,16 @@ class MeltedSheet(Sheet):
 
     rowtype = 'melted values'
 
-    @asyncthread
-    def reload(self):
+    def resetCols(self):
         self.columns = []
-        isNull = self.isNullFunc()
-
         sheet = self.source
         for c in sheet.keyCols:
             self.addColumn(SubColumnItem(0, c))
         self.setKeys(self.columns)
 
-        colsToMelt = [copy(c) for c in sheet.nonKeyVisibleCols]
+    def loader(self):
+        isNull = self.isNullFunc()
+        colsToMelt = [copy(c) for c in self.source.nonKeyVisibleCols]
 
         # break down Category1_Category2_ColumnName as per regex
         valcols = collections.OrderedDict()  # ('Category1', 'Category2') -> list of tuple('ColumnName', Column)

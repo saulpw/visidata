@@ -16,8 +16,7 @@ vd.option('unfurl_empty', False, 'if unfurl includes rows for empty containers',
 
 class UnfurledSheet(Sheet):
     # rowdef: [row, key, sub_value]
-    @asyncthread
-    def reload(self):
+    def resetCols(self):
         # Copy over base sheet, using SubColumnFunc
         self.columns = []
         for col in self.source.columns:
@@ -29,7 +28,7 @@ class UnfurledSheet(Sheet):
             else:
                 self.addColumn(SubColumnFunc(col.name, col, 0, keycol=col.keycol))
 
-        self.rows = []
+    def iterload(self):
         unfurl_empty = self.options.unfurl_empty
         for row in Progress(self.source.rows):
             try:
@@ -39,7 +38,7 @@ class UnfurledSheet(Sheet):
                 if unfurl_empty:
                     # TypedExceptionWrapper allows the use of z^E to see the stacktrace
                     # the exception on its own lacks clarity
-                    self.addRow([row, TypedExceptionWrapper(None, exception=e), TypedExceptionWrapper(None, exception=e)])
+                    yield [row, TypedExceptionWrapper(None, exception=e), TypedExceptionWrapper(None, exception=e)]
                 else:
                     vd.exceptionCaught(e)
                 continue
@@ -54,12 +53,11 @@ class UnfurledSheet(Sheet):
 
             nadded = 0
             for key, sub_value in gen:
-                new_row = [ row, key, sub_value ]
-                self.addRow(new_row)
+                yield [ row, key, sub_value ]
                 nadded += 1
 
             if unfurl_empty and not nadded:
-                self.addRow([row, None, None])
+                yield [row, None, None]
 
 
 @Sheet.api

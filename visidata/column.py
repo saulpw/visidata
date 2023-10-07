@@ -561,6 +561,7 @@ SettableColumn.init('_store', dict, copy=True)
 
 
 vd.addGlobals(
+    INPROGRESS=INPROGRESS,
     clean_to_id=clean_to_id,
     Column=Column,
     setitem=setitem,

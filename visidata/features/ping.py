@@ -36,7 +36,7 @@ This sheet runs {shellcmd}traceroute{} to generate intermediate hops, then runs 
         Column('max_ms', type=float, fmtstr='%.1f', getter=lambda col,r: max(r.getValues(col.sheet.source.rows))),
         Column('count',  type=int, getter=lambda col,r: len(list(r.getValues(col.sheet.source.rows)))),
     ]
-    def reload(self):
+    def loader(self):
         sheet = self.source
         sheet.ensureLoaded()
 

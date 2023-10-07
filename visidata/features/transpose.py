@@ -3,8 +3,7 @@ from visidata import vd, VisiData, Sheet, asyncthread, Progress, Column
 # rowdef: Column
 @VisiData.api
 class TransposeSheet(Sheet):
-    @asyncthread
-    def reload(self):
+    def beforeLoad(self):
         # key rows become column names
         col = Column('_'.join(c.name for c in self.source.keyCols),
                 getter=lambda c,origcol: origcol.name)
@@ -13,7 +12,7 @@ class TransposeSheet(Sheet):
         self.columns = [col]
         self.setKeys(self.columns)
 
-
+    def loader(self):
         # rows become columns
         for row in Progress(self.source.rows, 'transposing'):
             self.addColumn(Column('_'.join(map(str, self.source.rowkey(row))),

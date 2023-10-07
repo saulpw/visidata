@@ -35,6 +35,7 @@ class StaticSheet(Sheet):
     def __init__(self, source):
         super().__init__(source.name + "'", source=source)
 
+    def resetCols(self):
         self.columns = []
         for i, col in enumerate(self.source.visibleCols):
             colcopy = ColumnItem(col.name)
@@ -44,12 +45,12 @@ class StaticSheet(Sheet):
             if col in self.source.keyCols:
                 self.setKeys([colcopy])
 
-    @asyncthread
-    def reload(self):
-        self.rows = []
+    def iterload(self):
         for r in Progress(self.source.rows, 'calculating'):
             row = []
-            self.addRow(row)
+            yield row
+
+            # now fill out row
             for col in self.source.visibleCols:
                 val = col.getTypedValue(r)
                 if isinstance(val, TypedExceptionWrapper):

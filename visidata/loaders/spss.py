@@ -8,8 +8,7 @@ VisiData.open_sav = VisiData.open_spss
 
 
 class SpssSheet(Sheet):
-    @asyncthread
-    def reload(self):
+    def loader(self):
         savReaderWriter = vd.importExternal('savReaderWriter')
         self.rdr = savReaderWriter.SavReader(str(self.source))
         with self.rdr as reader:

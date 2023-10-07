@@ -109,6 +109,7 @@ class BaseSheet(DrawablePane):
 
     def __init__(self, *names, rows=UNLOADED, **kwargs):
         self._name = None   # initial cache value necessary for self.options
+        self.loading = False
         self.names = list(names)
         self.name = self.options.name_joiner.join(str(x) for x in self.names if x)
         self.source = None

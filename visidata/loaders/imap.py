@@ -23,8 +23,7 @@ class ImapSheet(TableSheet):
     ]
     nKeys = 1
 
-    @asyncthread
-    def reload(self):
+    def iterload(self):
         import imaplib
         import email.parser
 
@@ -55,7 +54,7 @@ class ImapSheet(TableSheet):
 
                     msg = email.message_from_bytes(msgbytes[0][1])
                     msg['folder'] = fname
-                    self.addRow(msg)
+                    yield msg
 
                 m.close()
             except Exception:

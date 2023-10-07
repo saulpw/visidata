@@ -8,15 +8,12 @@ def new_top(vd, p):
 
 class CPUStatsSheet(Sheet):
     rowtype='CPUs'  # rowdef = (count, perfect, times, freq) from psutil (see below)
-    def reload(self):
+    columns = [
+        ColumnItem('cpu', 0, type=int, keycol=0),
+        ColumnItem('cpu_pct', 1, type=float)
+    ]
+    def iterload(self):
         psutil = vd.importExternal('psutil')
-
-        self.columns = []
-        for c in [
-                ColumnItem('cpu', 0, type=int, keycol=0),
-                ColumnItem('cpu_pct', 1, type=float)
-            ]:
-            self.addColumn(c)
 
         for i, k in enumerate(psutil.cpu_times()._fields):
             self.addColumn(SubColumnItem(2, ColumnItem(k+'_s', i, type=float, sheet=self)))
@@ -24,12 +21,11 @@ class CPUStatsSheet(Sheet):
         for i, k in enumerate(psutil.cpu_freq()._fields):
             self.addColumn(SubColumnItem(3, ColumnItem(k+'_MHz', i, type=float, sheet=self)))
 
-        self.rows = list()
         for r in zip(range(psutil.cpu_count()),
                         psutil.cpu_percent(percpu=True),
                         psutil.cpu_times(percpu=True),
                         psutil.cpu_freq(percpu=True)):
-            self.addRow(r)
+            yield r
 
 
 

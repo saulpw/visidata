@@ -1,10 +1,11 @@
+from contextlib import contextmanager
 import operator
 import string
 import re
 
 'Various helper classes and functions.'
 
-__all__ = ['AlwaysDict', 'AttrDict', 'moveListItem', 'namedlist', 'classproperty', 'cleanName', 'MissingAttrFormatter', 'getitem', 'setitem', 'getitemdef', 'getitemdeep', 'setitemdeep', 'getattrdeep', 'setattrdeep', 'ExplodingMock']
+__all__ = ['AlwaysDict', 'AttrDict', 'moveListItem', 'namedlist', 'classproperty', 'cleanName', 'MissingAttrFormatter', 'getitem', 'setitem', 'getitemdef', 'getitemdeep', 'setitemdeep', 'getattrdeep', 'setattrdeep', 'ExplodingMock', 'ScopedSetattr']
 
 
 class AlwaysDict(dict):
@@ -199,3 +200,13 @@ class MissingAttrFormatter(string.Formatter):
         elif not value:
             return str(value)
         return super().format_field(value, format_spec)
+
+
+@contextmanager
+def ScopedSetattr(obj, attrname, val):
+    oldval = getattr(obj, attrname)
+    try:
+        setattr(obj, attrname, val)
+        yield
+    finally:
+        setattr(obj, attrname, oldval)

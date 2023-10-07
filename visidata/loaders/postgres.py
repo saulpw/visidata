@@ -88,7 +88,7 @@ def postgresGetColumns(vd, cur):
 class PgTablesSheet(Sheet):
     rowtype = 'tables'
 
-    def reload(self):
+    def loader(self):
         schema = options.postgres_schema
         qstr = f'''
             SELECT relname table_name, column_count.ncols, reltuples::bigint est_nrows

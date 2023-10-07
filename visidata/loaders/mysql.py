@@ -72,7 +72,7 @@ def cursorToColumns(cur, sheet):
 class MyTablesSheet(Sheet):
     rowtype = 'tables'
 
-    def reload(self):
+    def iterload(self):
         qstr = f'''
             select
                 t.table_name,
@@ -97,16 +97,15 @@ class MyTablesSheet(Sheet):
         '''
 
         with self.sql.cur(qstr) as cur:
-            self.rows = []
             # try to get first row to make cur.description available
             r = cur.fetchone()
             if r:
-                self.addRow(r)
+                yield r
             cursorToColumns(cur, self)
             self.setKeys(self.columns[0:1])  # table_name is the key
 
             for r in cur:
-                self.addRow(r)
+                yield r
 
     def openRow(self, row):
         return MyTable(self.name+"."+row[0], source=row[0], sql=self.sql)
@@ -114,22 +113,20 @@ class MyTablesSheet(Sheet):
 
 # rowdef: tuple of values as returned by fetchone()
 class MyTable(Sheet):
-    @asyncthread
-    def reload(self):
+    def iterload(self):
         with self.sql.cur("SELECT * FROM " + self.source) as cur:
-            self.rows = []
             r = cur.fetchone()
             if r is None:
                 return
-                
-            self.addRow(r)
+
+            yield r
             cursorToColumns(cur, self)
             while True:
                 try:
                     r = cur.fetchone()
                     if r is None:
                         break
-                        
-                    self.addRow(r)
+
+                    yield r
                 except UnicodeDecodeError as e:
                     vd.exceptionCaught(e)

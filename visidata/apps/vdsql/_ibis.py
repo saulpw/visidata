@@ -334,7 +334,7 @@ class IbisTableSheet(Sheet):
             return q.cross_join(q.aggregate(__n__=lambda t: t.count()))
         return q
 
-    def preload(self):
+    def beforeLoad(self):
         self.options.disp_rstatus_fmt = self.options.disp_rstatus_fmt.replace('nRows', 'countRows')
         self.options.disp_rstatus_fmt = self.options.disp_rstatus_fmt.replace('nSelectedRows', 'countSelectedRows')
 
@@ -345,8 +345,6 @@ class IbisTableSheet(Sheet):
         return ibis.table(tbl.schema(), name=con._fully_qualified_name(self.table_name, self.database_name))
 
     def iterload(self):
-        self.preload()
-
         with self.con as con:
             if self.query is None:
                 self.query = self.baseQuery(con)
@@ -360,7 +358,6 @@ class IbisTableSheet(Sheet):
 
     def reloadColumns(self, expr, start=1):
         oldkeycols = {c.name:c for c in self.keyCols}
-        self.columns = []
         self._nrows_col = -1
 
         for i, (colname, dtype) in enumerate(expr.schema().items(), start=start):

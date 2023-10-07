@@ -86,8 +86,7 @@ class PandasFreqTableSheet(PivotSheet):
     def updateLargest(self, grouprow):
         self.largest = max(self.largest, len(grouprow.sourcerows))
 
-    @asyncthread
-    def reload(self):
+    def loader(self):
         'Generate frequency table then reverse-sort by length.'
         import pandas as pd
 
@@ -95,8 +94,6 @@ class PandasFreqTableSheet(PivotSheet):
         # (e.g. as a histogram). We currently don't provide support for this
         # for PandasSheet, although we could implement it with a pd.Grouper
         # that operates similarly to pd.cut.
-        super().initCols()
-
         df = self.source.df.copy()
 
         # Implementation (special case): for one row, this degenerates

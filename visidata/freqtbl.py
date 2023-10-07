@@ -64,10 +64,8 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
     def updateLargest(self, grouprow):
         self.largest = max(self.largest, len(grouprow.sourcerows))
 
-    @asyncthread
-    def reload(self):
-        'Generate frequency table then reverse-sort by length.'
-        super().initCols()
+    def resetCols(self):
+        super().resetCols()
 
         # add default bonus columns
         for c in [
@@ -80,16 +78,21 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
             c = HistogramColumn('histogram', type=str, width=self.options.default_width*2)
             self.addColumn(c)
 
+        # if non-numeric grouping, reverse sort by count at end of load
+        if not any(vd.isNumeric(c) for c in self.groupByCols):
+            self._ordering = [('count', True)]
+
+    def loader(self):
+        'Generate frequency table.'
         # two more threads
         vd.sync(self.addAggregateCols(),
                 self.groupRows(self.updateLargest))
 
+    def afterLoad(self):
+        super().afterLoad()
         if self.nCols > len(self.groupByCols)+3:  # hide percent/histogram if aggregations added
             self.column('percent').hide()
             self.column('histogram').hide()
-
-        if not [c for c in self.groupByCols if vd.isNumeric(c)]:
-            self.orderBy(self.column('count'), reverse=True)
 
     def openRow(self, row):
         'open copy of source sheet with rows that are grouped in current row'
@@ -113,10 +116,9 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
 
 class FreqTableSheetSummary(FreqTableSheet):
     'Append a PivotGroupRow to FreqTableSheet with only selectedRows.'
-    @asyncthread
-    def reload(self):
-        FreqTableSheet.reload.__wrapped__(self)
+    def afterLoad(self):
         self.addRow(PivotGroupRow(['Selected'], (0,0), self.source.selectedRows, {}))
+        super().afterLoad()
 
 
 def makeFreqTableSheetSummary(sheet, *groupByCols):

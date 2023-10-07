@@ -2,7 +2,6 @@ from functools import singledispatch
 from typing import Mapping
 import inspect
 import math
-from copy import deepcopy
 
 from visidata import *
 
@@ -19,23 +18,9 @@ class PythonSheet(Sheet):
 
 class InferColumnsSheet(Sheet):
     _rowtype = dict
-    @asyncthread
-    def reload(self):
-        self.reloadCols()
-
-        self.rows = []
-        for r in self.iterload():
-            self.addRow(r)
-
-        # if an ordering has been specified, sort the sheet
-        if self._ordering:
-            vd.sync(self.sort())
-
-    def reloadCols(self):
-        self.columns = []
-        self._knownKeys.clear()
-        for c in type(self).columns:
-            self.addColumn(deepcopy(c))
+    def resetCols(self):
+        self._knownKeys = set()
+        super().resetCols()
 
     def addColumn(self, *cols, index=None):
         for c in cols:
@@ -227,7 +212,7 @@ def SheetList(*names, **kwargs):
 
 class ListOfPyobjSheet(PythonSheet):
     rowtype = 'python objects'
-    def reload(self):
+    def loader(self):
         self.rows = self.source
         self.columns = []
         self.addColumn(Column(self.name,

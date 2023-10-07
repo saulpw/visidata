@@ -138,15 +138,11 @@ class TableSheet(BaseSheet):
         self._visibleColLayout = {}      # [vcolidx] -> (x, w)
 
         # list of all columns in display order
-        cols = kwargs.pop('columns', None) or self.__class__.columns or [Column('_')]
-        self.columns = []
-        for c in cols:
-            self.addColumn(copy(c))
+        self.initialCols = kwargs.pop('columns', None) or type(self).columns
+        self.resetCols()
 
         self._colorizers = []
         self.recalc()  # set .sheet on columns and start caches
-
-        self.setKeys(self.columns[:self.nKeys])  # initial list of key columns
 
         self.__dict__.update(kwargs)  # also done earlier in BaseSheet.__init__
 
@@ -230,6 +226,27 @@ class TableSheet(BaseSheet):
     @asyncthread
     def reload(self):
         'Load rows and/or columns from ``self.source``.  Async.  Override in subclass.'
+        with visidata.ScopedSetattr(self, 'loading', True):
+            self.resetCols()
+            self.beforeLoad()
+            try:
+                self.loader()
+            finally:
+                self.afterLoad()
+
+    def beforeLoad(self):
+        pass
+
+    def resetCols(self):
+        'Reset columns to class settings'
+        self.columns = []
+        for c in self.initialCols:
+            self.addColumn(deepcopy(c))
+
+        self.setKeys(self.columns[:self.nKeys])
+
+    def loader(self):
+        'Reset rows and sync load ``source`` via iterload.  Overrideable.'
         self.rows = []
         try:
             with vd.Progress(gerund='loading', total=0):
@@ -238,14 +255,16 @@ class TableSheet(BaseSheet):
         except FileNotFoundError:
             return  # let it be a blank sheet without error
 
-        # if an ordering has been specified, sort the sheet
-        if self._ordering:
-            vd.sync(self.sort())
-
     def iterload(self):
         'Generate rows from ``self.source``.  Override in subclass.'
         if False:
             yield vd.fail('no iterload for this loader yet')
+
+    def afterLoad(self):
+        'hook for after loading has finished.  Overrideable (be sure to call super).'
+        # if an ordering has been specified, sort the sheet
+        if self._ordering:
+            vd.sync(self.sort())
 
     def iterrows(self):
         if self.rows is UNLOADED:
@@ -895,8 +914,7 @@ class SequenceSheet(Sheet):
             except StopIteration:
                 break
 
-    @asyncthread
-    def reload(self):
+    def loader(self):
         'Skip first options.skip rows; set columns from next options.header rows.'
 
         itsource = self.iterload()
@@ -911,10 +929,6 @@ class SequenceSheet(Sheet):
         # add the rest of the rows
         for r in vd.Progress(itsource, gerund='loading', total=0):
             self.addRow(r)
-
-        # if an ordering has been specified, sort the sheet
-        if self._ordering:
-            vd.sync(self.sort())
 
 
 @VisiData.property

@@ -158,8 +158,7 @@ class JoinSheet(Sheet):
         CellColorizer(0, 'color_diff', lambda s,c,r,v: c and r and isinstance(c, MergeColumn) and c.isDiff(r, v.value))
     ]
 
-    @asyncthread
-    def reload(self):
+    def loader(self):
         sheets = self.sources
 
         vd.ensureLoaded(sheets)
@@ -300,14 +299,10 @@ class ConcatColumn(Column):
 # rowdef: (srcSheet, srcRow)
 class ConcatSheet(Sheet):
     'combination of multiple sheets by row concatenation. source=list of sheets. '
-    @asyncthread
-    def reload(self):
-        self.columns = []
-        self.addColumn(ColumnItem('origin_sheet', 0, width=0))
-
+    columns = [ColumnItem('origin_sheet', 0, width=0)]
+    def iterload(self):
         # only one column with each name allowed per sheet
         keyedcols = collections.defaultdict(dict)  # name -> { sheet -> col }
-        self.rows = []
 
         with Progress(gerund='joining', sheet=self, total=sum(vs.nRows for vs in self.source)) as prog:
             for sheet in self.source:
@@ -315,7 +310,7 @@ class ConcatSheet(Sheet):
                     vd.sync()
 
                 for r in sheet.rows:
-                    self.addRow((sheet, r))
+                    yield (sheet, r)
                     prog.addProgress(1)
 
                 for idx, col in enumerate(sheet.visibleCols):
@@ -327,7 +322,6 @@ class ConcatSheet(Sheet):
                         self.addColumn(ConcatColumn(col.name, cols=keyedcols[idx], type=col.type))
                     else:
                         keyedcols[col.name][sheet] = col
-
 
 
 IndexSheet.addCommand('&', 'join-selected', 'left, rights = someSelectedRows[0], someSelectedRows[1:]; vd.push(left.openJoin(rights, jointype=chooseOne(jointypes)))', 'merge selected sheets with visible columns from all, keeping rows according to jointype')

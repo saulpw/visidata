@@ -203,8 +203,7 @@ class PlayersSheet(GalconSheet):
         RowColorizer(8, None, lambda s,c,r,v: r and r.color)
     ]
 
-    @asyncthread
-    def reload(self):
+    def loader(self):
         self.rows = []
         for r in vd.g_client.get('/players').json():
             self.addRow(AttrDict(r))

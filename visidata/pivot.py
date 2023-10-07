@@ -1,5 +1,6 @@
 import collections
 from copy import copy
+from visidata import vd, date, ScopedSetattr, Column, Sheet, asyncthread, Progress, forward, wrapply, INPROGRESS
 from visidata import *
 
 
@@ -47,6 +48,8 @@ class RangeColumn(Column):
 
 class AggrColumn(Column):
     def calcValue(col, row):
+        if col.sheet.loading:
+            return visidata.INPROGRESS
         return col.aggregator(col.origCol, row.sourcerows)
 
 
@@ -63,6 +66,7 @@ def makeAggrColumn(aggcol, aggregator):
 class PivotSheet(Sheet):
     'Summarize key columns in pivot table and display as new sheet.'
     rowtype = 'grouped rows'  # rowdef: PivotGroupRow
+
     def __init__(self, *names, groupByCols=[], pivotCols=[], **kwargs):
         super().__init__(*names,
                 pivotCols=pivotCols, # whose values become columns
@@ -72,8 +76,8 @@ class PivotSheet(Sheet):
     def isNumericRange(self, col):
         return vd.isNumeric(col) and self.source.options.numeric_binning
 
-    def initCols(self):
-        self.columns = []
+    def resetCols(self):
+        super().resetCols()
 
         # add key columns (grouped by)
         for colnum, c in enumerate(self.groupByCols):
@@ -107,12 +111,10 @@ class PivotSheet(Sheet):
         vs.rows = row.pivotrows.get(col.aggvalue, [])
         return vs
 
-    def reload(self):
-        self.initCols()
-
+    def loader(self):
         # two different threads for better interactive display
-        self.addAggregateCols()
-        self.groupRows()
+        vd.sync(self.addAggregateCols(),
+                self.groupRows())
 
     @asyncthread
     def addAggregateCols(self):
@@ -181,6 +183,7 @@ class PivotSheet(Sheet):
 
     @asyncthread
     def groupRows(self, rowfunc=None):
+      with ScopedSetattr(self, 'loading', True):
         self.rows = []
 
         discreteCols = [c for c in self.groupByCols if not self.isNumericRange(c)]
@@ -265,6 +268,9 @@ class PivotSheet(Sheet):
 
             if rowfunc:
                 rowfunc(groupRow)
+
+    def afterLoad(self):
+        super().afterLoad()
 
         # automatically add cache to all columns now that everything is binned
         for c in self.nonKeyVisibleCols:

@@ -66,7 +66,7 @@ Some column commands can also be done in bulk here, with the `g` prefix:
         RowColorizer(7, 'color_key_col', lambda s,c,r,v: r and r.keycol),
         RowColorizer(8, 'color_hidden_col', lambda s,c,r,v: r and r.hidden),
     ]
-    def reload(self):
+    def loader(self):
         if len(self.source) == 1:
             self.rows = self.source[0].columns
             self.cursorRowIndex = self.source[0].cursorColIndex
@@ -124,12 +124,13 @@ class OptionsSheet(Sheet):
         else:
             options.set(row.name, self.editCell(2, value=currentValue), self.source)
 
-    def reload(self):
-        self.rows = []
-        for k in options.keys():
-            opt = options._get(k)
-            self.addRow(opt)
+    def beforeLoad(self):
+        super().beforeLoad()
         self.columns[2].name = 'global_value' if self.source == 'global' else 'sheet_value'
+
+    def iterload(self):
+        for k in options.keys():
+            yield options._get(k)
 
     def newRow(self):
         vd.fail('adding rows to the options sheet is not supported.')
