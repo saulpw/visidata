@@ -26,7 +26,7 @@ class ColumnsSheet(Sheet):
     _coltype = ColumnAttr
     precious = False
     help = '''# Columns Sheet
-This is a list of {sheet.nCols} columns on the source sheet {sheet.displaySource}.  You can edit values on this sheet to change the column's appearance on the source sheet.
+This is a list of {sheet.source.nCols} columns on {sheet.displaySource}.  You can edit values on this sheet to change the column's appearance on the source sheet.
 For example, edit the _{sheet.cursorCol.name}_ column to {sheet.cursorCol.help}.
 
 Some column commands can also be done in bulk here, with the `g` prefix:
