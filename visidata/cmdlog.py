@@ -1,6 +1,7 @@
 import threading
 
-from visidata import *
+from visidata import vd, UNLOADED, namedlist, vlen, asyncthread, globalCommand, date
+from visidata import VisiData, BaseSheet, Sheet, ColumnAttr, VisiDataMetaSheet, JsonLinesSheet, TypedWrapper, AttrDict, Progress, OptionsSheet, ErrorSheet, CompleteKey, Path
 import visidata
 
 vd.option('replay_wait', 0.0, 'time to wait between replayed commands, in seconds', sheettype=None)
@@ -74,7 +75,7 @@ def indexMatch(L, func):
             return i
 
 def keystr(k):
-    return  options.rowkey_prefix+','.join(map(str, k))
+    return  vd.options.rowkey_prefix+','.join(map(str, k))
 
 @VisiData.api
 def isLoggableCommand(vd, longname):
@@ -218,11 +219,11 @@ class CommandLogBase:
             if isLoggableSheet(sheet):      # don't record actions from cmdlog or other internal sheets on global cmdlog
                 self.addRow(vd.activeCommand)  # add to global cmdlog
             sheet.cmdlog_sheet.addRow(vd.activeCommand)  # add to sheet-specific cmdlog
-            if options.cmdlog_histfile:
-                name = date().strftime(options.cmdlog_histfile)
+            if vd.options.cmdlog_histfile:
+                name = date().strftime(vd.options.cmdlog_histfile)
                 p = Path(name)
                 if not p.is_absolute():
-                    p = Path(options.visidata_dir)/f'{name}.jsonl'
+                    p = Path(sheet.options.visidata_dir)/f'{name}.jsonl'
                 if not getattr(vd, 'sessionlog', None):
                     vd.sessionlog = vd.loadInternalSheet(CommandLog, p)
                 vd.sessionlog.append_tsv_row(vd.activeCommand)
@@ -301,7 +302,7 @@ def moveToReplayContext(vd, r, vs):
 @VisiData.api
 def delay(vd, factor=1):
         'returns True if delay satisfied'
-        acquired = vd.semaphore.acquire(timeout=options.replay_wait*factor if not vd.paused else None)
+        acquired = vd.semaphore.acquire(timeout=vd.options.replay_wait*factor if not vd.paused else None)
         return acquired or not vd.paused
 
 
@@ -427,7 +428,7 @@ def setLastArgs(vd, args):
 
 @VisiData.property
 def replayStatus(vd):
-        x = options.disp_replay_pause if vd.paused else options.disp_replay_play
+        x = vd.options.disp_replay_pause if vd.paused else vd.options.disp_replay_play
         return ' │ %s %s/%s' % (x, vd.currentReplay.cursorRowIndex, len(vd.currentReplay.rows))
 
 
