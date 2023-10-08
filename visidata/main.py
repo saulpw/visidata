@@ -112,6 +112,19 @@ def parsePos(vd, arg:str, inputs=None):
 
 
 @visidata.VisiData.api
+@visidata.asyncthread
+def outputProgressEvery(vd, sheet, seconds:float=0.5):
+    import time
+    t0 = time.time()
+    while True:
+        time.sleep(seconds)
+        t = time.time()
+        print(f'\r[{t-t0:.1f}s] ', end='', file=sys.stderr)
+        if sheet:
+            print(f'{sheet.progressPct}  ', end='', file=sys.stderr)
+        sys.stderr.flush()
+
+@visidata.VisiData.api
 def moveToPos(vd, sources, startsheets, startrow, startcol):
     sheets = []  # sheets to apply startrow:startcol to
     if not startsheets:
@@ -333,6 +346,7 @@ def main_vd():
         vs = eval_vd(vdfile, *fmtargs, **fmtkwargs)
         vd.sync(vs.reload())
         if args.batch:
+            visidata.VisiData.execAsync(vd, vd.outputProgressEvery, vs, seconds=0.5, sheet=BaseSheet())  #1182
             if vd.replay_sync(vs):  # error
                 return 1
 

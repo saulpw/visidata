@@ -178,7 +178,9 @@ VisiData.init('threads', lambda: [_annotate_thread(threading.current_thread(), 0
 def execSync(vd, func, *args, sheet=None, **kwargs):
     'Execute ``func(*args, **kwargs)`` in this thread (synchronously). A drop-in substitute for vd.execAsync.'
     func(*args, **kwargs)
-    return threading.Thread()
+    t = threading.current_thread()
+    t.sheet = sheet or vd.activeSheet
+    return t
 
 @VisiData.api
 def execAsync(vd, func, *args, sheet=None, **kwargs):

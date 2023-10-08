@@ -77,7 +77,7 @@ def status(vd, *args, priority=0):
     source = getStatusSource()
 
     if not vd.cursesEnabled:
-        msg = composeStatus(args)
+        msg = '\r' + composeStatus(args)
         if vd.options.debug:
             msg += f' [{source}]'
         builtins.print(msg, file=sys.stderr)
