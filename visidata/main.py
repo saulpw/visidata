@@ -346,7 +346,7 @@ def main_vd():
         vs = eval_vd(vdfile, *fmtargs, **fmtkwargs)
         vd.sync(vs.reload())
         if args.batch:
-            visidata.VisiData.execAsync(vd, vd.outputProgressEvery, vs, seconds=0.5, sheet=BaseSheet())  #1182
+            vd.outputProgressThread = visidata.VisiData.execAsync(vd, vd.outputProgressEvery, vs, seconds=0.5, sheet=BaseSheet())  #1182
             if vd.replay_sync(vs):  # error
                 return 1
 
