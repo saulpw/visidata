@@ -184,11 +184,14 @@ def execSync(vd, func, *args, sheet=None, **kwargs):
 def execAsync(vd, func, *args, sheet=None, **kwargs):
     'Execute ``func(*args, **kwargs)`` in a separate thread.'
 
-    thread = threading.Thread(target=_toplevelTryFunc, daemon=True, args=(func,)+args, kwargs=kwargs)
-    vd.threads.append(_annotate_thread(thread))
-
     if sheet is None:
         sheet = vd.activeSheet
+
+    if sheet is not None and (sheet.lastCommandThreads and threading.current_thread() not in sheet.lastCommandThreads):
+        vd.fail(f'still running **{sheet.lastCommandThreads[-1].name}** from previous command')
+
+    thread = threading.Thread(target=_toplevelTryFunc, daemon=True, args=(func,)+args, kwargs=kwargs)
+    vd.threads.append(_annotate_thread(thread))
 
     if sheet is not None:
         sheet.currentThreads.append(thread)

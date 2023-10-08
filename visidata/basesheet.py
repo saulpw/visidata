@@ -222,7 +222,16 @@ class BaseSheet(DrawablePane):
         self.checkCursorNoExceptions()
 
         vd.clearCaches()
+
+        for t in self.currentThreads:
+            if not hasattr(t, 'lastCommand'):
+                t.lastCommand = True
+
         return escaped
+
+    @property
+    def lastCommandThreads(self):
+        return [t for t in self.currentThreads if hasattr(t, 'lastCommand')]
 
     @property
     def names(self):
