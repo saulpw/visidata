@@ -39,6 +39,11 @@
 
 7. Merge `develop` to stable
 
+14. motd
+    a. Upload new motd for new version.
+    b. Test that VisiData downloads motd.
+
+
 8. Merge `stable` back into other branches
 
     a. if the branch works with minimal conflicts, keep the branch
@@ -91,7 +96,6 @@ git push --tags
 
 13. Write up the release notes and add it to `www/releases.md`. Add it to index.md.
 
-14. Upload new motd
 
 15. Update the website by pushing to master. Update with new manpage. Update redirect to point to new manpage.
     - release notes
