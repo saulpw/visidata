@@ -263,7 +263,7 @@ def sync(self, *joiningThreads):
     while True:
         deads = set()  # dead threads
         threads = joiningThreads or set(self.unfinishedThreads)
-        threads -= set([threading.current_thread(), getattr(vd, 'drawThread', None)])
+        threads -= set([threading.current_thread(), getattr(vd, 'drawThread', None), getattr(vd, 'outputProgressThread', None)])
         threads -= deads
         threads -= set([None])
         for t in threads:
