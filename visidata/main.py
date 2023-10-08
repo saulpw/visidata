@@ -56,7 +56,9 @@ def duptty():
     try:
         fin = open('/dev/tty')
         fout = open('/dev/tty', mode='w')
-        stdin = open(os.dup(0), encoding=vd.options.getonly('encoding', 'global', 'utf-8'))
+        stdin = open(os.dup(0),
+                     encoding=vd.options.getonly('encoding', 'global', 'utf-8'),
+                     errors=vd.options.getonly('encoding_errors', 'global', 'surrogateescape'))  #2047
         stdout = open(os.dup(1))  # for dumping to stdout from interface
         os.dup2(fin.fileno(), 0)
         os.dup2(fout.fileno(), 1)
