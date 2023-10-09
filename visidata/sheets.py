@@ -141,7 +141,7 @@ class TableSheet(BaseSheet):
         self.initialCols = kwargs.pop('columns', None) or type(self).columns
         self.resetCols()
 
-        self._colorizers = []
+        self._colorizers = self.classColorizers
         self.recalc()  # set .sheet on columns and start caches
 
         self.__dict__.update(kwargs)  # also done earlier in BaseSheet.__init__
@@ -158,13 +158,15 @@ class TableSheet(BaseSheet):
     def addColorizer(self, c):
         'Add Colorizer *c* to the list of colorizers for this sheet.'
         self._colorizers.append(c)
+        self._colorizers = sorted(self._colorizers, key=lambda x: x.precedence, reverse=True)
 
     def removeColorizer(self, c):
         'Remove Colorizer *c* from the list of colorizers for this sheet.'
         self._colorizers.remove(c)
 
-    @drawcache_property
-    def allColorizers(self):
+    @property
+    def classColorizers(self) -> list:
+        'List of all colorizers from sheet class hierarchy in precedence order (highest precedence first)'
         # all colorizers must be in the same bucket
         # otherwise, precedence does not get applied properly
         _colorizers = set()
@@ -177,14 +179,13 @@ class TableSheet(BaseSheet):
             for c in getattr(b, 'colorizers', []):
                 _colorizers.add(c)
 
-        _colorizers |= set(self._colorizers)
         return sorted(_colorizers, key=lambda x: x.precedence, reverse=True)
 
     def _colorize(self, col, row, value=None) -> ColorAttr:
-        'Returns ColorAttr for the given colorizers/col/row/value'
+        'Return ColorAttr for the given colorizers/col/row/value'
 
         colorstack = []
-        for colorizer in self.allColorizers:
+        for colorizer in self._colorizers:
             try:
                 r = colorizer.func(self, col, row, value)
                 if r:
