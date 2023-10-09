@@ -198,10 +198,7 @@ class OptionsObject:
             if curval != value and self._get(optname, 'default').replayable:
                 if obj != 'default' and type(obj) is not type:  # default and class options set on init aren't recorded
                     if vd.cmdlog:
-                        objname = self._opts.objname(obj)
-                        vd.cmdlog.addRow(vd.cmdlog.newRow(sheet=objname, row=optname,
-                                    keystrokes='', input=str(value),
-                                    longname='set-option', undofuncs=[]))
+                        self.add_option_to_cmdlogs(obj, optname, value, 'set-option')
         else:
             curval = None
             vd.warning('setting unknown option %s' % optname)
@@ -214,12 +211,28 @@ class OptionsObject:
         v = self._opts.unset(optname, obj)
         opt = self._get(optname)
         if vd.cmdlog and opt and opt.replayable:
-            objname = self._opts.objname(obj)
-            vd.cmdlog.addRow(vd.cmdlog.newRow(sheet=objname, row=optname,
-                            keystrokes='', input='',
-                            longname='unset-option'))
+            self.add_option_to_cmdlogs(obj, optname, value='', longname='unset-option')
         self._cache.clear()  # invalidate entire cache on any change
         return v
+
+    def add_option_to_cmdlogs(self, obj, optname, value='', longname='set-option'):
+        'Records option-set on cmdlogs'
+        objname = self._opts.objname(obj)
+        # all options are recorded on global cmdlog
+        vd.cmdlog.addRow(vd.cmdlog.newRow(sheet=objname, row=optname,
+                    keystrokes='', input=str(value),
+                    longname=longname, undofuncs=[]))
+        # global options are recorded on all cmdlog_sheet's
+        if obj == 'global':
+            for vs in vd.sheets:
+                vs.cmdlog_sheet.addRow(vd.cmdlog.newRow(sheet=objname, row=optname,
+                            keystrokes='', input=str(value),
+                            longname=longname, undofuncs=[]))
+        # sheet-specific options are recorded on that sheet
+        elif isinstance(obj, BaseSheet):
+            obj.cmdlog_sheet.addRow(vd.cmdlog.newRow(sheet=objname, row=optname,
+                        keystrokes='', input=str(value),
+                        longname=longname, undofuncs=[]))
 
     def setdefault(self, optname, value, helpstr, module):
         return self._set(optname, value, 'default', helpstr=helpstr, module=module)
