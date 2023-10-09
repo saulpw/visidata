@@ -1,3 +1,4 @@
+import sys
 import math
 import functools
 import collections
@@ -90,8 +91,11 @@ def mean(vals):
     if vals:
         return float(sum(vals))/len(vals)
 
-def vsum(vals):
+def _vsum(vals):
     return sum(vals, start=type(vals[0] if len(vals) else 0)())  #1996
+
+# start parameter in sum() added in Python 3.8
+vsum = _vsum if sys.version_info[:2] >= (3, 8) else sum
 
 # http://code.activestate.com/recipes/511478-finding-the-percentile-of-the-values/
 def _percentile(N, percent, key=lambda x:x):
