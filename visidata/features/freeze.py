@@ -1,5 +1,6 @@
-from visidata import *
 import collections
+from visidata import Column, Sheet, VisiData, ColumnItem, Progress, TypedExceptionWrapper, SettableColumn
+from visidata import asyncthread, vd
 
 
 @Column.api

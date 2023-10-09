@@ -2,8 +2,8 @@ import collections
 import re
 from copy import copy
 
-from visidata import *
-
+from visidata import Sheet, SubColumnItem, ColumnItem, Column, Progress
+from visidata import asyncthread, vd
 
 melt_var_colname = 'Variable' # column name to use for the melted variable name
 melt_value_colname = 'Value'  # column name to use for the melted value
