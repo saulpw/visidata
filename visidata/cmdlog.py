@@ -442,7 +442,12 @@ def cmdlog(sheet):
 
 @BaseSheet.lazy_property
 def cmdlog_sheet(sheet):
-    return CommandLogJsonl(sheet.name+'_cmdlog', source=sheet, rows=[])
+    c = CommandLogJsonl(sheet.name+'_cmdlog', source=sheet, rows=[])
+    # copy over all existing globally set options
+    for r in vd.cmdlog.rows:
+        if r.sheet == 'global' and (r.longname == 'set-option') or (r.longname == 'unset-option'):
+            c.addRow(r)
+    return c
 
 
 @BaseSheet.property
