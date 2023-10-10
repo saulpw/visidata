@@ -808,19 +808,12 @@ class TableSheet(BaseSheet):
                         notecattr = update_attr(cattr, colors.get_color(cellval.notecolor), 10)
                         scr.addstr(ybase, x+colwidth-notewidth, note, notecattr.attr)
 
-                    if voffset >= 0:
-                        if len(lines)-voffset > height:
-                            # last line should always include as much as possible
-                            firstn = sum(len(i)+1 for i in lines[:voffset+height-1])
-                            lines = lines[:voffset+height]
-                            lines[-1] = cellval.text[firstn:][:col.width]
-
                     lines = lines[voffset:]
 
                     if len(lines) > height:
                         lines = lines[:height]
                     elif len(lines) < height:
-                        lines.extend(['']*(height-len(lines)))
+                        lines.extend([[('', '')]]*(height-len(lines)))
 
                     for i, chunks in enumerate(lines):
                         y = ybase+i
