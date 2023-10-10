@@ -209,7 +209,9 @@ def save_visidatarc(vd, p, vs):
             fp.write(f'{leading}options.{opt.name:25s} = {rval:10s}  # {defopt.helpstr}\n')
 
 
-@ColumnsSheet.command('&', 'join-cols', 'add column from concatenating selected source columns')
+ColumnsSheet.addCommand('', 'join-cols', 'sheet.join_cols()', 'add column from concatenating selected source columns')
+
+@ColumnsSheet.api
 def join_cols(sheet):
     cols = sheet.onlySelectedRows
     destSheet = cols[0].sheet
