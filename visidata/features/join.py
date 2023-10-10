@@ -3,7 +3,7 @@ import itertools
 import functools
 from copy import copy
 
-from visidata import vd, VisiData, asyncthread, Sheet, Progress, IndexSheet, Column, CellColorizer, ColumnItem, SubColumnItem, TypedWrapper
+from visidata import vd, VisiData, asyncthread, Sheet, Progress, IndexSheet, Column, CellColorizer, ColumnItem, SubColumnItem, TypedWrapper, ColumnsSheet
 
 @VisiData.api
 def ensureLoaded(vd, sheets):
@@ -26,6 +26,20 @@ def _appendRowsAfterLoading(joinsheet, origsheets):
                 newcol = copy(c)
                 colnames[c.name] = newcol
                 joinsheet.addColumn(newcol)
+
+
+@VisiData.api
+def join_sheets_cols(vd, cols, jointype:str=''):
+    'match joinkeys by cols in order per sheet.'
+    sheetkeys = collections.defaultdict(list)  # [sheet] -> list of keycols on that sheet
+    for c in cols:
+        sheetkeys[c.sheet].append(c)
+
+    sheets = list(sheetkeys.keys())
+    return JoinSheet('+'.join(vs.name for vs in sheets),
+                     sources=sheets,
+                     sheetKeyCols=sheetkeys,
+                     jointype=jointype)
 
 
 @Sheet.api
@@ -60,10 +74,14 @@ def openJoin(sheet, others, jointype=''):
     if jointype == 'extend':
         vs = copy(sheets[0])
         vs.name = '+'.join(vs.name for vs in sheets)
+        vs.sheetKeyCols = {vs:vs.keyCols for vs in sheets}
         vs.reload = functools.partial(ExtendedSheet_reload, vs, sheets)
         return vs
     else:
-        return JoinSheet('+'.join(vs.name for vs in sheets), sources=sheets, jointype=jointype)
+        return JoinSheet('+'.join(vs.name for vs in sheets),
+                         sources=sheets,
+                         jointype=jointype,
+                         sheetKeyCols={s:s.keyCols for s in sheets})
 
 
 vd.jointypes = [{'key': k, 'desc': v} for k, v in {
@@ -77,24 +95,24 @@ vd.jointypes = [{'key': k, 'desc': v} for k, v in {
     'merge': 'merge differences from other sheets into first sheet (including new rows)',
 }.items()]
 
-def joinkey(sheet, row):
-    return tuple(c.getDisplayValue(row) for c in sheet.keyCols)
+def joinkey(sheetKeyCols, row):
+    return tuple(c.getDisplayValue(row) for c in sheetKeyCols)
 
 
-def groupRowsByKey(sheets, rowsBySheetKey, rowsByKey):
+def groupRowsByKey(sheets:dict, rowsBySheetKey, rowsByKey):
     with Progress(gerund='grouping', total=sum(len(vs.rows) for vs in sheets)*2) as prog:
         for vs in sheets:
             # tally rows by keys for each sheet
             rowsBySheetKey[vs] = collections.defaultdict(list)
             for r in vs.rows:
                 prog.addProgress(1)
-                key = joinkey(vs, r)
+                key = joinkey(sheets[vs], r)
                 rowsBySheetKey[vs][key].append(r)
 
         for vs in sheets:
             for r in vs.rows:
                 prog.addProgress(1)
-                key = joinkey(vs, r)
+                key = joinkey(sheets[vs], r)
                 if key not in rowsByKey: # gather for this key has not been done yet
                     # multiplicative for non-unique keys
                     rowsByKey[key] = [
@@ -158,6 +176,8 @@ class JoinSheet(Sheet):
         CellColorizer(0, 'color_diff', lambda s,c,r,v: c and r and isinstance(c, MergeColumn) and c.isDiff(r, v.value))
     ]
 
+    sheetKeyCols = {}  # [sheet] -> list of joinkeycols for that sheet
+
     def loader(self):
         sheets = self.sources
 
@@ -168,30 +188,32 @@ class JoinSheet(Sheet):
         # first columns are the key columns from the first sheet, using its row (0)
         self.columns = []
 
-        for i, cols in enumerate(itertools.zip_longest(*(s.keyCols for s in sheets))):
+        for i, cols in enumerate(itertools.zip_longest(*list(self.sheetKeyCols.values()))):
             self.addColumn(JoinKeyColumn(cols[0].name, keycols=cols)) # ColumnItem(c.name, i, sheet=sheets[0], type=c.type, width=c.width)))
         self.setKeys(self.columns)
 
         allcols = collections.defaultdict(dict) # colname: { sheet: origcol, ... }
         for sheetnum, vs in enumerate(sheets):
-            for c in vs.nonKeyVisibleCols:
-                allcols[c.name][vs] = c
+            for c in vs.visibleCols:
+                if c not in self.sheetKeyCols[vs]:
+                    allcols[c.name][vs] = c
 
         if self.jointype == 'merge':
             for colname, cols in allcols.items():
                 self.addColumn(MergeColumn(colname, cols=cols))
         else:
-          ctr = collections.Counter(c.name for vs in sheets for c in vs.nonKeyVisibleCols)
+          ctr = collections.Counter(c.name for vs in sheets for c in vs.visibleCols if c not in self.sheetKeyCols[vs])
           for sheetnum, vs in enumerate(sheets):
-            # subsequent elements are the rows from each source, in order of the source sheets
-            for c in vs.nonKeyVisibleCols:
-                newname = c.name if ctr[c.name] == 1 else '%s_%s' % (vs.name, c.name)
-                self.addColumn(SubColumnItem(vs, c, name=newname))
+              # subsequent elements are the rows from each source, in order of the source sheets
+              for c in vs.visibleCols:
+                  if c not in self.sheetKeyCols[vs]:
+                      newname = c.name if ctr[c.name] == 1 else '%s_%s' % (vs.name, c.name)
+                      self.addColumn(SubColumnItem(vs, c, name=newname))
 
         rowsBySheetKey = {}   # [sheet] -> { key:list(rows), ... }
         rowsByKey = {}  # [key] -> [{sheet1:row1, sheet2:row1, ... }, ...]
 
-        groupRowsByKey(sheets, rowsBySheetKey, rowsByKey)
+        groupRowsByKey(self.sheetKeyCols, rowsBySheetKey, rowsByKey)
 
         self.rows = []
 
@@ -222,13 +244,13 @@ class JoinSheet(Sheet):
 ## for ExtendedSheet_reload below
 class ExtendedColumn(Column):
     def calcValue(self, row):
-        key = joinkey(self.firstJoinSource, row)
+        key = joinkey(self.firstJoinSource.keyCols, row)
         srcrow = self.rowsBySheetKey[self.srcsheet][key]
         if srcrow:
             return self.sourceCol.calcValue(srcrow[0])
 
     def putValue(self, row, value):
-        key = joinkey(self.firstJoinSource, row)
+        key = joinkey(self.firstJoinSource.keyCols, row)
         srcrow = self.rowsBySheetKey[self.srcsheet][key]
         if len(srcrow) == 1:
             self.sourceCol.putValue(srcrow[0], value)
@@ -249,21 +271,23 @@ def ExtendedSheet_reload(self, sheets):
         self.addColumn(copy(c))
     self.setKeys(self.columns)
 
-    for i, c in enumerate(sheets[0].nonKeyVisibleCols):
-        self.addColumn(copy(c))
+    for i, c in enumerate(sheets[0].visibleCols):
+        if c not in self.sheetKeyCols[c.sheet]:
+            self.addColumn(copy(c))
 
     self.rowsBySheetKey = {}  # [srcSheet][key] -> list(rowobjs from sheets[0])
     rowsByKey = {}  # [key] -> [{sheet1:row1, sheet2:row1, ... }, ...]
 
     for sheetnum, vs in enumerate(sheets[1:]):
         # subsequent elements are the rows from each source, in order of the source sheets
-#        ctr = collections.Counter(c.name for c in vs.nonKeyVisibleCols)
-        for c in vs.nonKeyVisibleCols:
-            newname = '%s_%s' % (vs.name, c.name)
-            newcol = ExtendedColumn(newname, srcsheet=vs, rowsBySheetKey=self.rowsBySheetKey, firstJoinSource=sheets[0], sourceCol=c)
-            self.addColumn(newcol)
+#        ctr = collections.Counter(c.name for c in vs.visibleCols if c not in sheetkeys[vs])
+        for c in vs.visibleCols:
+            if c not in self.sheetKeyCols[c.sheet]:
+                newname = '%s_%s' % (vs.name, c.name)
+                newcol = ExtendedColumn(newname, srcsheet=vs, rowsBySheetKey=self.rowsBySheetKey, firstJoinSource=sheets[0], sourceCol=c)
+                self.addColumn(newcol)
 
-    groupRowsByKey(sheets, self.rowsBySheetKey, rowsByKey)
+    groupRowsByKey(self.sheetKeyCols, self.rowsBySheetKey, rowsByKey)
 
     self.rows = []
 
@@ -328,6 +352,8 @@ IndexSheet.addCommand('&', 'join-selected', 'left, rights = someSelectedRows[0],
 IndexSheet.bindkey('g&', 'join-selected')
 Sheet.addCommand('&', 'join-sheets-top2', 'vd.push(openJoin(vd.sheets[1:2], jointype=chooseOne(jointypes)))', 'concatenate top two sheets in Sheets Stack')
 Sheet.addCommand('g&', 'join-sheets-all', 'vd.push(openJoin(vd.sheets[1:], jointype=chooseOne(jointypes)))', 'concatenate all sheets in Sheets Stack')
+
+ColumnsSheet.addCommand('&', 'join-sheets-cols', 'vd.push(join_sheets_cols(selectedRows, jointype=chooseOne(jointypes)))', '')
 
 vd.addMenuItems('''
     Data > Join > selected sheets > join-selected
