@@ -18,15 +18,20 @@ vd.option('value_joiner', ' ', 'string to join display values')
 
 
 @drawcache
-def _splitcell(sheet, s, width=0):
+def _splitcell(sheet, s, width=0, maxheight=1):
     if width <= 0 or not sheet.options.textwrap_cells:
         return [s]
 
     ret = []
     for attr, text in s:
-        ret.extend([(attr, line)] for line in textwrap.wrap(
+        for line in textwrap.wrap(
             text, width=width, break_long_words=False, replace_whitespace=False
-        ))
+            ):
+            if len(ret) >= maxheight:
+                ret[-1][0][1] += ' ' + line
+                break
+            else:
+                ret.append([[attr, line]])
     return ret
 
 disp_column_fill = ' ' # pad chars after column value
@@ -732,7 +737,7 @@ class TableSheet(BaseSheet):
         if vcolidx+1 < self.nVisibleCols:
             scr.addstr(headerRow, self.windowWidth-2, self.options.disp_more_right, colors.color_column_sep)
 
-    def calc_height(self, row, displines=None, isNull=None):
+    def calc_height(self, row, displines=None, isNull=None, maxheight=1):
             if displines is None:
                 displines = {}  # [vcolidx] -> list of lines in that cell
 
@@ -753,13 +758,13 @@ class TableSheet(BaseSheet):
                     except (TypeError, ValueError):
                         pass
 
-                    if col.voffset or col.height > 1:
-                        lines = _splitcell(self, cellval.display, width=colwidth-2)
+                    if maxheight > 1:
+                        lines = _splitcell(self, cellval.display, width=colwidth-2, maxheight=maxheight)
                     else:
                         lines = [cellval.display]
                     displines[vcolidx] = (col, cellval, lines)
 
-            return self.rowHeight
+            return max(len(lines) for _, _, lines in displines.values())
 
     def drawRow(self, scr, row, rowidx, ybase, rowcattr: ColorAttr, maxheight,
             isNull='',
@@ -789,7 +794,8 @@ class TableSheet(BaseSheet):
                 basecellcattr = rowcattr
 
             displines = {}  # [vcolidx] -> list of lines in that cell
-            height = min(self.calc_height(row, displines), maxheight) or 1  # display even empty rows
+            self.calc_height(row, displines, maxheight=self.rowHeight)
+            height = min(self.rowHeight, maxheight) or 1  # display even empty rows
             self._rowLayout[rowidx] = (ybase, height)
 
             for vcolidx, (col, cellval, lines) in displines.items():
