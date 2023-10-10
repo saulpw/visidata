@@ -7,7 +7,8 @@ import pathlib
 from urllib.parse import urlparse, urlunparse
 from functools import wraps, lru_cache
 
-from visidata import *
+from visidata import vd
+from visidata import VisiData, Progress
 
 vd.option('encoding', 'utf-8', 'encoding passed to codecs.open when opening a file', replay=True)
 vd.option('encoding_errors', 'surrogateescape', 'encoding_errors passed to codecs.open', replay=True)
@@ -52,8 +53,8 @@ class BytesIOWrapper(io.BufferedReader):
 
     def __init__(self, text_io_buffer, encoding=None, errors=None, **kwargs):
         super(BytesIOWrapper, self).__init__(text_io_buffer, **kwargs)
-        self.encoding = encoding or text_io_buffer.encoding or options.encoding
-        self.errors = errors or text_io_buffer.errors or options.encoding_errors
+        self.encoding = encoding or text_io_buffer.encoding or vd.options.encoding
+        self.errors = errors or text_io_buffer.errors or vd.options.encoding_errors
 
     def _encoding_call(self, method_name, *args, **kwargs):
         raw_method = getattr(self.raw, method_name)
@@ -215,8 +216,8 @@ class Path(os.PathLike):
 
         if self.fp:
             self.fptext = codecs.iterdecode(self.fp,
-                                            encoding=encoding or options.encoding,
-                                            errors=encoding_errors or options.encoding_errors)
+                                            encoding=encoding or vd.options.encoding,
+                                            errors=encoding_errors or vd.options.encoding_errors)
 
         if self.fptext:
             self.rfile = RepeatFile(self.fptext)
@@ -244,9 +245,9 @@ class Path(os.PathLike):
     def read_text(self, *args, **kwargs):
         'Open the file in text mode and return its entire decoded contents.'
         if 'encoding' not in kwargs:
-            kwargs['encoding'] = options.encoding
+            kwargs['encoding'] = vd.options.encoding
         if 'errors' not in kwargs:
-            kwargs['errors'] = kwargs.get('encoding_errors', options.encoding_errors)
+            kwargs['errors'] = kwargs.get('encoding_errors', vd.options.encoding_errors)
 
         if self.lines:
             return RepeatFile(self.lines).read()

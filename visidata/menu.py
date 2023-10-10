@@ -2,8 +2,8 @@ import string
 import textwrap
 import curses
 
-from visidata import *
-
+from visidata import vd, drawcache, colors, clipdraw, dispwidth
+from visidata import BaseSheet, VisiData, AttrDict, ENTER
 
 vd.option('disp_menu', True, 'show menu on top line when not active', sheettype=None)
 vd.option('disp_menu_keys', True, 'show keystrokes inline in submenus', sheettype=None)

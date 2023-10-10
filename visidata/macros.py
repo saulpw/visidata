@@ -1,9 +1,10 @@
 from copy import copy
+import os
 from functools import wraps
 
-from visidata import *
-
 from visidata.cmdlog import CommandLog, CommandLogJsonl
+from visidata import vd, UNLOADED
+from visidata import IndexSheet, VisiData, Sheet, Path, VisiDataMetaSheet, ColumnItem, BaseSheet
 
 vd.macroMode = None
 vd.macrobindings = {}
@@ -27,7 +28,7 @@ class MacroSheet(IndexSheet):
 
 @VisiData.lazy_property
 def macrosheet(vd):
-    macrospath = Path(os.path.join(options.visidata_dir, 'macros.tsv'))
+    macrospath = Path(os.path.join(vd.options.visidata_dir, 'macros.tsv'))
     macrosheet = vd.loadInternalSheet(VisiDataMetaSheet, macrospath, columns=(ColumnItem('command', 0), ColumnItem('filename', 1))) or vd.error('error loading macros')
 
     real_macrosheet = MacroSheet('user_macros', rows=[], source=macrosheet)
@@ -51,7 +52,7 @@ def setMacro(ks, vs):
 def saveMacro(self, rows, ks):
         vs = copy(self)
         vs.rows = rows
-        macropath = Path(vd.fnSuffix(options.visidata_dir+"macro"))
+        macropath = Path(vd.fnSuffix(vd.options.visidata_dir+"macro"))
         vd.save_vdj(macropath, vs)
         setMacro(ks, vs)
         vd.macrosheet.source.append_tsv_row((ks, macropath))

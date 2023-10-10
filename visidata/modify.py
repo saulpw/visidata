@@ -1,5 +1,7 @@
 from copy import copy
-from visidata import *
+
+from visidata import vd, asyncthread
+from visidata import Sheet, RowColorizer, CellColorizer, Column, BaseSheet, Progress
 
 vd.option('color_add_pending', 'green', 'color for rows pending add')
 vd.option('color_change_pending', 'reverse yellow', 'color for cells pending modification')

@@ -1,8 +1,8 @@
 import functools
 import collections
 
-from visidata import *
-from visidata import vd, VisiData, MetaSheet
+from visidata import VisiData, MetaSheet, ColumnAttr, Column, BaseSheet, VisiDataMetaSheet, SuspendCurses
+from visidata import vd, asyncthread, ENTER
 
 vd.option('disp_help', False, 'show help panel during input')
 
@@ -75,6 +75,7 @@ def help_search(vd, sheet, regex):
 
 class HelpPane:
     def __init__(self, name):
+        import visidata
         self.name = name
         self.scr = None
         self.parentscr = None
