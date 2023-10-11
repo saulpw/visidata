@@ -92,6 +92,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'join-sheets-all': 'append',
                  'resize-col-input': '10',
                  'resize-cols-input': '10',
+                 'resize-height-input': '10',
                  'melt-regex': '(.*)_(.*)',
                  'addcol-split': '-',
                  'addcol-capture': '(.*)_(.*)',
