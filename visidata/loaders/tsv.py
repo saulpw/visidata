@@ -76,7 +76,7 @@ class TsvSheet(SequenceSheet):
         delim = self.delimiter or self.options.delimiter
         rowdelim = self.row_delimiter or self.options.row_delimiter
 
-        with self.source.open(encoding=self.options.encoding) as fp:
+        with self.open_text_source() as fp:
                 for line in splitter(adaptive_bufferer(fp), rowdelim):
                     if not line:
                         continue
@@ -129,6 +129,8 @@ def append_tsv_row(vs, row):
     with vs.source.open(mode='a', encoding=vs.options.encoding) as fp:
         fp.write('\t'.join(col.getDisplayValue(row) for col in vs.visibleCols) + '\n')
 
+
+TsvSheet.options.regex_skip = '^#.*'
 
 vd.addGlobals({
     'TsvSheet': TsvSheet,

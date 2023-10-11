@@ -31,15 +31,14 @@ def open_jsonl(vd, p):
 
 VisiData.open_ndjson = VisiData.open_ldjson = VisiData.open_json = VisiData.open_jsonl
 
+
 class JsonSheet(InferColumnsSheet):
     def iterload(self):
-        with self.source.open(encoding=self.options.encoding) as fp:
+        with self.open_text_source() as fp:
             for L in fp:
                 L = L.strip()
                 try:
                     if not L: # skip blank lines
-                        continue
-                    elif L.startswith(('#', '//')): # skip commented lines
                         continue
                     ret = json.loads(L, object_hook=AttrDict)
                     if isinstance(ret, list):
@@ -52,7 +51,7 @@ class JsonSheet(InferColumnsSheet):
                         e.stacktrace = stacktrace()
                         yield TypedExceptionWrapper(json.loads, L, exception=e)  # an error on one line
                     else:
-                        with self.source.open(encoding=self.options.encoding) as fp:
+                        with self.open_text_source() as fp:
                             ret = json.load(fp)
                             if isinstance(ret, list):
                                 yield from ret
@@ -158,6 +157,8 @@ def save_jsonl(vd, p, *vsheets):
 
 
 JsonSheet.options.encoding = 'utf-8'
+JsonSheet.options.regex_skip = r'^(//|#).*'
+
 VisiData.save_ndjson = VisiData.save_jsonl
 VisiData.save_ldjson = VisiData.save_jsonl
 

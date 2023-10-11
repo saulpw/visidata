@@ -34,7 +34,7 @@ def open_jsonla(vd, p):
 class JsonlArraySheet(SequenceSheet):
     rowtype = 'rows'    # rowdef: list of Python objects decoded from JSON
     def iterload(self):
-        with self.source.open(encoding=self.options.encoding) as fp:
+        with self.open_text_source() as fp:
             for L in fp:
                 yield json.loads(L)
 
@@ -69,3 +69,6 @@ def save_jsonla(vd, p, *vsheets):
     with p.open(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
         for vs in vsheets:
             write_jsonla(vs, fp)
+
+
+JsonlArraySheet.options.regex_skip = r'^(//|#).*'

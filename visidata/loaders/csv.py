@@ -39,7 +39,7 @@ class CsvSheet(SequenceSheet):
 
     def iterload(self):
         'Convert from CSV, first handling header row specially.'
-        with self.source.open(encoding=self.options.encoding) as fp:
+        with self.open_text_source() as fp:
             if options.safety_first:
                 rdr = csv.reader(removeNulls(fp), **options.getall('csv_'))
             else:
@@ -67,6 +67,8 @@ def save_csv(vd, p, sheet):
         with Progress(gerund='saving'):
             for dispvals in sheet.iterdispvals(format=True):
                 cw.writerow(dispvals.values())
+
+CsvSheet.options.regex_skip = '^#.*'
 
 vd.addGlobals({
     'CsvSheet': CsvSheet

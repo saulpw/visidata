@@ -1,5 +1,7 @@
 import collections
 
+#1179  Line Separated Values for e.g. awk
+
 from visidata import VisiData, Sheet, ItemColumn
 
 
@@ -33,7 +35,7 @@ class LsvSheet(Sheet):
         self._knownCols = set()
         row = collections.defaultdict(str)
         k = ''
-        for line in self.source.open():
+        for line in self.open_text_source():
             line = line.strip()
             if not line:
                 yield row

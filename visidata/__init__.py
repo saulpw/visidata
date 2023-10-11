@@ -77,6 +77,7 @@ import visidata.type_date
 
 import visidata._urlcache
 import visidata.selection
+import visidata.text_source
 import visidata.loaders
 import visidata.loaders.tsv
 import visidata.pyobj

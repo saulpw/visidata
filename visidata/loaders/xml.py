@@ -51,7 +51,7 @@ class XmlSheet(Sheet):
             vd.importExternal('lxml')
             from lxml import etree, objectify
             p = etree.XMLParser(**self.options.getall('xml_parser_'))
-            self.root = etree.parse(self.source.open(encoding=self.options.encoding), parser=p)
+            self.root = etree.parse(self.source.open_text_source(), parser=p)
             objectify.deannotate(self.root, cleanup_namespaces=True)
         else: #        elif isinstance(self.source, XmlElement):
             self.root = self.source
