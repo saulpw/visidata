@@ -1,7 +1,8 @@
 import collections
 from copy import copy
-from visidata import vd, date, ScopedSetattr, Column, Sheet, asyncthread, Progress, forward, wrapply, INPROGRESS
-from visidata import *
+from visidata import ScopedSetattr, Column, Sheet, asyncthread, Progress, forward, wrapply, INPROGRESS
+from visidata import vlen, vd, date
+import visidata
 
 
 # discrete_keys = tuple of formatted discrete keys that group the row

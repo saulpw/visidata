@@ -1,8 +1,8 @@
 import collections
 from copy import copy
 
-from visidata import *
-
+from visidata import vd
+from visidata import Sheet, BaseSheet, VisiData, IndexSheet, Path, Progress, TypedExceptionWrapper
 
 vd.option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 vd.option('safe_error', '#ERR', 'error string to use while saving', replay=True)
@@ -11,7 +11,7 @@ vd.option('save_encoding', 'utf-8', 'encoding passed to codecs.open when saving 
 @Sheet.api
 def safe_trdict(vs):
     'returns string.translate dictionary for replacing tabs and newlines'
-    if options.safety_first:
+    if vs.options.safety_first:
         delim = vs.options.delimiter
         return {
              0: '', #  strip NUL completely
@@ -38,7 +38,7 @@ def iterdispvals(sheet, *cols, format=False):
         if trdict:
             transformers[col].append(lambda v,trdict=trdict: v.translate(trdict))
 
-    options_safe_error = options.safe_error
+    options_safe_error = sheet.options.safe_error
     for r in Progress(sheet.rows):
         dispvals = collections.OrderedDict()  # [col] -> value
         for col, transforms in transformers.items():
@@ -99,7 +99,7 @@ def save_cols(vd, cols):
     else:
         savedcoltxt = '%s columns' % len(cols)
     path = vd.inputPath('save %s to: ' % savedcoltxt, value=vs.getDefaultSaveName())
-    vd.saveSheets(path, vs, confirm_overwrite=options.confirm_overwrite)
+    vd.saveSheets(path, vs, confirm_overwrite=sheet.options.confirm_overwrite)
 
 
 @VisiData.api

@@ -3,7 +3,9 @@ from typing import Mapping
 import inspect
 import math
 
-from visidata import *
+from visidata import vd, asyncthread, ENTER, anytype, getitemdef
+from visidata import Sheet, Column, VisiData, ColumnItem, TableSheet, BaseSheet, Progress, ColumnAttr, SuspendCurses
+import visidata
 
 vd.option('visibility', 0, 'visibility level')
 vd.option('default_sample_size', 100, 'number of rows to sample for regex.split (0=all)', replay=True)

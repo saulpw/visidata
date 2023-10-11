@@ -9,8 +9,7 @@ import subprocess
 import curses
 
 from visidata import VisiData, vd, options, globalCommand, Sheet, EscapeException
-from visidata import ColumnAttr, Column
-from visidata import *
+from visidata import ColumnAttr, Column, BaseSheet, ItemColumn
 
 
 vd.option('profile', False, 'enable profiling on threads')
