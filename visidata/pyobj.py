@@ -4,7 +4,7 @@ import inspect
 import math
 
 from visidata import vd, asyncthread, ENTER, anytype, getitemdef
-from visidata import Sheet, Column, VisiData, ColumnItem, TableSheet, BaseSheet, Progress, ColumnAttr, SuspendCurses
+from visidata import Sheet, Column, VisiData, ColumnItem, TableSheet, BaseSheet, Progress, ColumnAttr, SuspendCurses, TextSheet
 import visidata
 
 vd.option('visibility', 0, 'visibility level')
