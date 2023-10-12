@@ -47,14 +47,14 @@ def iterdispvals(sheet, *cols, format=False):
 
             except Exception as e:
                 vd.exceptionCaught(e)
-                dispval = sheet.options_safe_error or str(e)
+                dispval = options_safe_error or str(e)
 
             try:
                 for t in transforms:
                     if dispval is None:
                         break
                     elif isinstance(dispval, TypedExceptionWrapper):
-                        dispval = sheet.options_safe_error or str(dispval)
+                        dispval = options_safe_error or str(dispval)
                         break
                     else:
                         dispval = t(dispval)
