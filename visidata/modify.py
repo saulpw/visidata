@@ -91,9 +91,9 @@ def addRows(sheet, rows, index=None, undo=True):
     'Add *rows* after row at *index*.'
     addedRows = {}
     if index is None: index=len(sheet.rows)
-    for row in Progress(rows, gerund='adding'):
+    for i, row in enumerate(Progress(rows, gerund='adding')):
         addedRows[sheet.rowid(row)] = row
-        sheet.addRow(row, index=index+1)
+        sheet.addRow(row, index=index+i+1)
 
         if sheet.defer:
             sheet.rowAdded(row)

@@ -7,8 +7,8 @@ import tempfile
 import functools
 import os
 
-from visidata import VisiData, vd, asyncthread
-from visidata import Sheet, Path
+from visidata import VisiData, vd, asyncthread, SettableColumn
+from visidata import Sheet, Path, Column
 
 if sys.platform == 'win32':
     syscopy_cmd_default = 'clip.exe'
@@ -129,14 +129,33 @@ def delete_row(sheet, rowidx):
     sheet.setModified()
     return oldrow
 
+
 @Sheet.api
+@asyncthread
 def paste_after(sheet, rowidx):
+    'Paste rows from *vd.cliprows* at *rowidx*.'
     if not vd.memory.cliprows:  #1793
         vd.warning('nothing to paste')
         return
-    to_paste = list(deepcopy(r) for r in reversed(vd.memory.cliprows))
-    sheet.addRows(to_paste, index=rowidx)
 
+    for col in vd.memory.clipcols[sheet.nVisibleCols:]:
+        newcol = SettableColumn()
+        newcol.__setstate__(col.__getstate__())
+        sheet.addColumn(newcol)
+
+    addedRows = []
+
+    for extrow in vd.memory.cliprows:
+        if isinstance(extrow, Column):
+            newrow = copy(extrow)
+        else:
+            newrow = sheet.newRow()
+            for col, extcol in zip(sheet.visibleCols, vd.memory.clipcols):
+                col.setValue(newrow, extcol.getTypedValue(extrow))
+
+        addedRows.append(newrow)
+
+    sheet.addRows(addedRows, index=rowidx)
 
 
 Sheet.addCommand('y', 'copy-row', 'copyRows([cursorRow])', 'yank (copy) current row to clipboard')
