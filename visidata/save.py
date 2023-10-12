@@ -85,7 +85,7 @@ def getDefaultSaveName(sheet):
             return str(src.with_suffix('')) + '.' + sheet.options.save_filetype
         return str(src)
     else:
-        return sheet.name+'.'+getattr(sheet, 'filetype', options.save_filetype)
+        return sheet.name+'.'+getattr(sheet, 'filetype', sheet.options.save_filetype)
 
 
 @VisiData.api
@@ -110,7 +110,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
         vd.warning('no sheets to save')
         return
 
-    filetype = givenpath.ext or options.save_filetype
+    filetype = givenpath.ext or vd.options.save_filetype
 
     vd.clearCaches()
 
