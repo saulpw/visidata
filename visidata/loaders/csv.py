@@ -1,5 +1,3 @@
-import csv
-
 from visidata import vd, VisiData, SequenceSheet, options, stacktrace
 from visidata import TypedExceptionWrapper, Progress
 
@@ -7,14 +5,15 @@ vd.option('csv_dialect', 'excel', 'dialect passed to csv.reader', replay=True)
 vd.option('csv_delimiter', ',', 'delimiter passed to csv.reader', replay=True)
 vd.option('csv_quotechar', '"', 'quotechar passed to csv.reader', replay=True)
 vd.option('csv_skipinitialspace', True, 'skipinitialspace passed to csv.reader', replay=True)
-vd.option('csv_escapechar', None, 'escapechar passed to csv.reader', replay=True)
+vd.option('csv_escapechar', '', 'escapechar passed to csv.reader', replay=True)
 vd.option('csv_lineterminator', '\r\n', 'lineterminator passed to csv.writer', replay=True)
 vd.option('safety_first', False, 'sanitize input/output to handle edge cases, with a performance cost', replay=True)
 
-csv.field_size_limit(2**31-1) # Windows has max 32-bit
 
 @VisiData.api
 def guess_csv(vd, p):
+    import csv
+    csv.field_size_limit(2**31-1)  #288 Windows has max 32-bit
     line = next(p.open())
     if ',' in line:
         dialect = csv.Sniffer().sniff(line)
@@ -39,6 +38,9 @@ class CsvSheet(SequenceSheet):
 
     def iterload(self):
         'Convert from CSV, first handling header row specially.'
+        import csv
+        csv.field_size_limit(2**31-1)  #288 Windows has max 32-bit
+
         with self.open_text_source() as fp:
             if options.safety_first:
                 rdr = csv.reader(removeNulls(fp), **options.getall('csv_'))
@@ -58,6 +60,9 @@ class CsvSheet(SequenceSheet):
 @VisiData.api
 def save_csv(vd, p, sheet):
     'Save as single CSV file, handling column names as first line.'
+    import csv
+    csv.field_size_limit(2**31-1)  #288 Windows has max 32-bit
+
     with p.open(mode='w', encoding=sheet.options.save_encoding, newline='') as fp:
         cw = csv.writer(fp, **options.getall('csv_'))
         colnames = [col.name for col in sheet.visibleCols]
