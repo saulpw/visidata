@@ -5,7 +5,7 @@ vd.option('csv_dialect', 'excel', 'dialect passed to csv.reader', replay=True)
 vd.option('csv_delimiter', ',', 'delimiter passed to csv.reader', replay=True)
 vd.option('csv_quotechar', '"', 'quotechar passed to csv.reader', replay=True)
 vd.option('csv_skipinitialspace', True, 'skipinitialspace passed to csv.reader', replay=True)
-vd.option('csv_escapechar', '', 'escapechar passed to csv.reader', replay=True)
+vd.option('csv_escapechar', None, 'escapechar passed to csv.reader', replay=True)
 vd.option('csv_lineterminator', '\r\n', 'lineterminator passed to csv.writer', replay=True)
 vd.option('safety_first', False, 'sanitize input/output to handle edge cases, with a performance cost', replay=True)
 
