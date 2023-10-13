@@ -2,8 +2,8 @@
 eleventyNavigation:
   key: Rows
   order: 4
-Update: 2018-12-12
-Version: VisiData 1.5.1
+Update: 2023-10-12
+Version: VisiData 3.0
 ---
 
 
@@ -108,6 +108,12 @@ Command(s)         Operation
 2. Press `gy` to copy all selected rows to the clipboard.
 3. Move the cursor to the desired location.
 3. Press `p`/`Shift+P` to paste those rows after/before current row.
+
+###### Note
+
+ VisiData has a universal paste mechanism: it creates new rows on the target sheet and then fills them with values from the copied rows from the previous sheet.
+
+ This value-filling happens positionally, so if columns are missing or in a different order, the values will be in different columns,
 
 ---
 
