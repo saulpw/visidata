@@ -40,6 +40,7 @@ disp_column_fill = ' ' # pad chars after column value
 # coloropt is the color option name (like 'color_error')
 # func(sheet,col,row,value) should return a true value if coloropt should be applied
 # if coloropt is None, func() should return a coloropt (or None) instead
+Colorizer = collections.namedtuple('Colorizer', 'precedence coloropt func')
 RowColorizer = collections.namedtuple('RowColorizer', 'precedence coloropt func')
 CellColorizer = collections.namedtuple('CellColorizer', 'precedence coloropt func')
 ColumnColorizer = collections.namedtuple('ColumnColorizer', 'precedence coloropt func')
