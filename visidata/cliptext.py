@@ -161,9 +161,8 @@ def clipstr(s, dispw, truncator=None, oddspace=None):
                 combch='')
 
 
-def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False, literal=False, **kwargs):
+def clipdraw(scr, y, x, s, attr, w=None, clear=True, literal=False, **kwargs):
     '''Draw `s`  at (y,x)-(y,x+w) with curses `attr`, clipping with ellipsis char.
-       If `rtl`, draw inside (x-w, x).
        If `clear`, clear whole editing area before displaying.
        If `literal`, do not interpret internal color code markup.
        Return width drawn (max of w).
@@ -172,12 +171,11 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, rtl=False, literal=False, *
         chunks = iterchunks(s, literal=literal)
     else:
         chunks = [('', s)]
-    return clipdraw_chunks(scr, y, x, chunks, attr, w=w, clear=clear, rtl=rtl, **kwargs)
+    return clipdraw_chunks(scr, y, x, chunks, attr, w=w, clear=clear, **kwargs)
 
 
-def clipdraw_chunks(scr, y, x, chunks, attr, w=None, clear=True, rtl=False, literal=False, **kwargs):
+def clipdraw_chunks(scr, y, x, chunks, attr, w=None, clear=True, literal=False, **kwargs):
     '''Draw `chunks` (sequence of (color:str, text:str) as from iterchunks) at (y,x)-(y,x+w) with curses `attr`, clipping with ellipsis char.
-       If `rtl`, draw inside (x-w, x).
        If `clear`, clear whole editing area before displaying.
        Return width drawn (max of w).
     '''
@@ -197,7 +195,7 @@ def clipdraw_chunks(scr, y, x, chunks, attr, w=None, clear=True, rtl=False, lite
     clipped = ''
     link = ''
 
-    if w and clear and not rtl:
+    if w and clear:
         actualw = min(w, windowWidth-x-1)
         if scr:
             scr.addstr(y, x, disp_column_fill*actualw, cattr.attr)  # clear whole area before displaying
@@ -224,7 +222,7 @@ def clipdraw_chunks(scr, y, x, chunks, attr, w=None, clear=True, rtl=False, lite
             else:
                 chunkw = origw-totaldispw
 
-            chunkw = min(chunkw, (x-1) if rtl else (windowWidth-x-1))
+            chunkw = min(chunkw, windowWidth-x-1)
             if chunkw <= 0:  # no room anyway
                 return totaldispw
             if not scr:
@@ -232,12 +230,7 @@ def clipdraw_chunks(scr, y, x, chunks, attr, w=None, clear=True, rtl=False, lite
 
             # convert to string just before drawing
             clipped, dispw = clipstr(chunk, chunkw, **kwargs)
-            if rtl:
-                # clearing whole area (w) has negative display effects; clearing just dispw area is useless
-                # scr.addstr(y, x-dispw-1, disp_column_fill*dispw, attr)
-                scr.addstr(y, x-dispw-1, clipped, cattr.attr)
-            else:
-                scr.addstr(y, x, clipped, cattr.attr)
+            scr.addstr(y, x, clipped, cattr.attr)
 
             if link:
                 vd.onMouse(scr, x, y, dispw, 1, BUTTON1_RELEASED=link)

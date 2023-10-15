@@ -5,10 +5,10 @@ import inspect
 import sys
 
 import visidata
-from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr
+from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, dispwidth, ColorAttr
 
 
-vd.option('disp_rstatus_fmt', ' {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus} {sheet.options.disp_selected_note}{sheet.nSelectedRows}', 'right-side status format string')
+vd.option('disp_rstatus_fmt', '{sheet.keystrokeStatus}   {sheet.longname}  {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus}{vd.replayStatus}{sheet.selectedStatus}{sheet.threadStatus}', 'right-side status format string')
 vd.option('disp_status_fmt', '{sheet.shortcut}› {sheet.name}| ', 'status line prefix')
 vd.option('disp_lstatus_max', 0, 'maximum length of left status line')
 vd.option('disp_status_sep', '│', 'separator between statuses')
@@ -33,11 +33,6 @@ def _updateStatusBeforeExec(sheet, cmd, args, ks):
 
 
 vd.beforeExecHooks.append(BaseSheet._updateStatusBeforeExec)
-
-
-@BaseSheet.property
-def modifiedStatus(sheet):
-    return ' [M]' if sheet.hasBeenModified else ''
 
 
 @VisiData.lazy_property
@@ -201,9 +196,9 @@ def rightStatus(vd, sheet):
     return sheet.formatString(sheet.options.disp_rstatus_fmt)
 
 
-@BaseSheet.property
-def keystrokeStatus(sheet):
-    if sheet is vd.activeSheet:
+@VisiData.property
+def keystrokeStatus(vd):
+    if vs is vd.activeSheet:
         return f'[:keystrokes]{vd.keystrokes}[:]'
 
     return ''
@@ -235,45 +230,20 @@ def drawRightStatus(vd, scr, vs):
     'Draw right side of status bar.  Return length displayed.'
     rightx = vs.windowWidth
 
-    ret = 0
-    statcolors = [
-        (vd.rightStatus(vs), 'color_active_status'),
-    ]
-
-    active = vs is vd.activeSheet
-
-    if active:
-        statcolors.append((f'{vd.keystrokes} ' or '', 'color_keystrokes'))
-
-    if vs.currentThreads:
-        statcolors.insert(0, vd.checkMemoryUsage())
-        gerunds = [p.gerund for p in vs.progresses if p.gerund] or ['processing']
-        statcolors.insert(1, ('  %s %s…' % (vs.progressPct, gerunds[0]), 'color_working'))
-
-    if active and vd.currentReplay:
-        statcolors.insert(0, (vd.replayStatus, 'color_status_replay'))
-
-    for rstatcolor in statcolors:
-        if rstatcolor:
-            try:
-                rstatus, coloropt = rstatcolor
-                rstatus = ' '+rstatus
-                cattr = colors.get_color(coloropt)
-                if scr is vd.winTop:
-                    cattr = update_attr(cattr, colors.color_top_status, 0)
-                if active:
-                    cattr = update_attr(cattr, colors.color_active_status, 0)
-                else:
-                    cattr = update_attr(cattr, colors.color_inactive_status, 0)
-                statuslen = clipdraw(scr, vs.windowHeight-1, rightx, rstatus, cattr.attr, w=vs.windowWidth-1, rtl=True)
-                rightx -= statuslen
-                ret += statuslen
-            except Exception as e:
-                vd.exceptionCaught(e)
-
-    if scr:
-        curses.doupdate()
-    return ret
+    statuslen = 0
+    try:
+        cattr = ColorAttr(0, 0, 0, 0)
+        if scr is vd.winTop:
+            cattr = update_attr(cattr, colors.color_top_status, 0)
+        cattr = update_attr(cattr, colors.color_active_status if vs is vd.activeSheet else colors.color_inactive_status, 0)
+        rstat = vd.rightStatus(vs)
+        statuslen = clipdraw(scr, vs.windowHeight-1, rightx-dispwidth(rstat)-1, rstat, cattr, w=vs.windowWidth-1)
+    except Exception as e:
+        vd.exceptionCaught(e)
+    finally:
+        if scr:
+            curses.doupdate()
+    return statuslen
 
 
 class StatusSheet(Sheet):

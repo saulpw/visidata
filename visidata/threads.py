@@ -116,29 +116,32 @@ def elapsed_s(t):
 
 @VisiData.api
 def checkMemoryUsage(vd):
-    min_mem = options.min_memory_mb
     threads = vd.unfinishedThreads
     if not threads:
-        return None
-    ret = ''
-    attr = 'color_working'
-    if min_mem:
-        try:
-            freestats = subprocess.run('free --total --mega'.split(), check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.strip().splitlines()
-        except FileNotFoundError as e:
-            if options.debug:
-                vd.exceptionCaught(e)
-            options.min_memory_mb = 0
-            vd.warning('disabling min_memory_mb: "free" not installed')
-            return '', attr
-        tot_m, used_m, free_m = map(int, freestats[-1].split()[1:])
-        ret = '[%dMB] ' % free_m + ret
-        if free_m < min_mem:
-            attr = 'color_warning'
-            vd.warning('%dMB free < %dMB minimum, stopping threads' % (free_m, min_mem))
-            vd.cancelThread(*vd.unfinishedThreads)
-            curses.flash()
-    return ret, attr
+        return ''
+
+    min_mem = vd.options.min_memory_mb
+    if not min_mem:
+        return ''
+
+    try:
+        freestats = subprocess.run('free --total --mega'.split(), check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.strip().splitlines()
+    except FileNotFoundError as e:
+        if vd.options.debug:
+            vd.exceptionCaught(e)
+        vd.options.min_memory_mb = 0
+        vd.warning('disabling min_memory_mb: "free" not installed')
+        return ''
+    tot_m, used_m, free_m = map(int, freestats[-1].split()[1:])
+    ret = f'  [{free_m}MB] '
+    if free_m < min_mem:
+        attr = '[:warning]'
+        vd.warning(f'{free_m}MB free < {min_mem}MB minimum, stopping threads')
+        vd.cancelThread(*vd.unfinishedThreads)
+        curses.flash()
+    else:
+        attr = '[:working]'
+    return attr + ret + '[:]'
 
 
 # for progress bar
