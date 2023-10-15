@@ -12,7 +12,7 @@ __all__ = ['ColorAttr', 'colors', 'update_attr', 'ColorMaker']
 ColorAttr = namedtuple('ColorAttr', ('color', 'attributes', 'precedence', 'attr'))
 
 
-def update_attr(oldattr, updattr, updprec=None):
+def update_attr(oldattr:ColorAttr, updattr:'ColorAttr|int', updprec=None):
     if isinstance(updattr, ColorAttr):
         if updprec is None:
             updprec = updattr.precedence
@@ -99,7 +99,7 @@ class ColorMaker:
 
         return fgbgattrs
 
-    def _get_colornum(self, colorname, default=-1):
+    def _get_colornum(self, colorname:str, default:int=-1) -> int:
         'Return terminal color number for colorname.'
         if not colorname: return default
         r = self.color_cache.get(colorname, None)
@@ -124,7 +124,7 @@ class ColorMaker:
             return None
 
     @drawcache
-    def _colornames_to_cattr(self, colornamestr, precedence=0):
+    def _colornames_to_cattr(self, colornamestr, precedence=0) -> ColorAttr:
         fg, bg, attrlist = self.split_colorstr(colornamestr)
         attrs = 0
         for attr in attrlist:
@@ -151,7 +151,7 @@ class ColorMaker:
             color = curses.color_pair(pairnum)
         return ColorAttr(color, attrs, precedence, color | attrs)
 
-    def get_color(self, optname, precedence=0):
+    def get_color(self, optname, precedence=0) -> ColorAttr:
         'colors.color_foo returns colors[options.color_foo]'
         r = self.colorcache.get(optname, None)
         if r is None:
