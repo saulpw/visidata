@@ -201,6 +201,35 @@ def rightStatus(vd, sheet):
     return sheet.formatString(sheet.options.disp_rstatus_fmt)
 
 
+@BaseSheet.property
+def keystrokeStatus(sheet):
+    if sheet is vd.activeSheet:
+        return f'[:keystrokes]{vd.keystrokes}[:]'
+
+    return ''
+
+
+@BaseSheet.property
+def threadStatus(vs) -> str:
+    if vs.currentThreads:
+        ret = str(vd.checkMemoryUsage())
+        gerunds = [p.gerund for p in vs.progresses if p.gerund] or ['processing']
+        ret += f' [:working]{vs.progressPct} {gerunds[0]}…[:]'
+        return ret
+    return ''
+
+
+@BaseSheet.property
+def modifiedStatus(sheet):
+    return ' [M]' if sheet.hasBeenModified else ''
+
+
+@Sheet.property
+def selectedStatus(sheet):
+    if sheet.nSelectedRows:
+        return f' [:selected_row]{sheet.options.disp_selected_note}{sheet.nSelectedRows}[:]'
+
+
 @VisiData.api
 def drawRightStatus(vd, scr, vs):
     'Draw right side of status bar.  Return length displayed.'

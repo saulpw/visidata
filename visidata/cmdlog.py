@@ -6,9 +6,7 @@ import visidata
 
 vd.option('replay_wait', 0.0, 'time to wait between replayed commands, in seconds', sheettype=None)
 vd.option('disp_replay_play', '▶', 'status indicator for active replay')
-vd.option('disp_replay_pause', '‖', 'status indicator for paused replay')
 vd.option('color_status_replay', 'green', 'color of replay status indicator')
-vd.option('replay_movement', False, 'insert movements during replay', sheettype=None)
 
 # prefixes which should not be logged
 nonLogged = '''forget exec-longname undo redo quit
@@ -95,13 +93,7 @@ def moveToRow(vs, rowstr):
     if rowidx is None:
         return False
 
-    if vs.options.replay_movement:
-        while vs.cursorRowIndex != rowidx:
-            vs.cursorRowIndex += 1 if (rowidx - vs.cursorRowIndex) > 0 else -1
-            while not vd.delay(0.5):
-                pass
-    else:
-        vs.cursorRowIndex = rowidx
+    vs.cursorRowIndex = rowidx
 
     return True
 
@@ -127,13 +119,7 @@ def moveToCol(vs, col):
     if vcolidx is None or vcolidx >= vs.nVisibleCols:
         return False
 
-    if vs.options.replay_movement:
-        while vs.cursorVisibleColIndex != vcolidx:
-            vs.cursorVisibleColIndex += 1 if (vcolidx - vs.cursorVisibleColIndex) > 0 else -1
-            while not vd.delay(0.5):
-                pass
-    else:
-        vs.cursorVisibleColIndex = vcolidx
+    vs.cursorVisibleColIndex = vcolidx
 
     return True
 
@@ -260,32 +246,13 @@ class CommandLogJsonl(CommandLogBase, JsonLinesSheet):
 vd.paused = False
 vd.currentReplay = None     # CommandLog replaying currently
 vd.currentReplayRow = None  # must be global, to allow replay
-vd.semaphore = threading.Semaphore(0)
-
-
-@VisiData.api
-def replay_pause(vd):
-        if not vd.currentReplay:
-            vd.fail('no replay to pause')
-        else:
-            if vd.paused:
-                vd.replay_advance()
-            vd.paused = not vd.paused
-            vd.status('paused' if vd.paused else 'resumed')
-
-
-@VisiData.api
-def replay_advance(vd):
-        vd.currentReplay or vd.fail("no replay to advance")
-        vd.semaphore.release()
 
 
 @VisiData.api
 def replay_cancel(vd):
-        vd.currentReplay or vd.fail("no replay to cancel")
-        vd.currentReplayRow = None
-        vd.currentReplay = None
-        vd.semaphore.release()
+    vd.currentReplayRow = None
+    vd.currentReplay = None
+    vd._nextCommands.clear()
 
 
 @VisiData.api
@@ -297,13 +264,6 @@ def moveToReplayContext(vd, r, vs):
 
         if r.col not in [None, '']:
             vs.moveToCol(r.col) or vd.error(f'no {r.col} column on {vs}')
-
-
-@VisiData.api
-def delay(vd, factor=1):
-        'returns True if delay satisfied'
-        acquired = vd.semaphore.acquire(timeout=vd.options.replay_wait*factor if not vd.paused else None)
-        return acquired or not vd.paused
 
 
 @VisiData.api
@@ -343,7 +303,6 @@ def replayOne(vd, r):
             if r.comment:
                 vd.status(r.comment)
 
-            vd.keystrokes = r.keystrokes
             # <=v1.2 used keystrokes in longname column; getCommand fetches both
             escaped = vs.execCommand(longname if longname else r.keystrokes, keystrokes=r.keystrokes)
 
@@ -364,11 +323,12 @@ class DisableAsync:
 
 
 @VisiData.api
-def replay_sync(vd, cmdlog, live=False):
+def replay_sync(vd, cmdlog):
     'Replay all commands in *cmdlog*.'
     with vd.DisableAsync():
         cmdlog.cursorRowIndex = 0
         vd.currentReplay = cmdlog
+
         with Progress(total=len(cmdlog.rows)) as prog:
             while cmdlog.cursorRowIndex < len(cmdlog.rows):
                 if vd.currentReplay is None:
@@ -392,21 +352,15 @@ def replay_sync(vd, cmdlog, live=False):
                 if vd.activeSheet:
                     vd.activeSheet.ensureLoaded()
 
-                while not vd.delay():
-                    pass
-
         vd.status('replay complete')
         vd.currentReplay = None
 
 
 @VisiData.api
-@asyncthread
 def replay(vd, cmdlog):
-        'Inject commands into live execution with interface.'
-        for thread in vd.threads:
-            if thread.name == 'replay':
-                thread.noblock = True
-        vd.replay_sync(cmdlog, live=True)
+    'Inject commands into live execution with interface.'
+    vd.push(cmdlog)
+    vd._nextCommands.extend(cmdlog.rows)
 
 
 @VisiData.api
@@ -428,8 +382,9 @@ def setLastArgs(vd, args):
 
 @VisiData.property
 def replayStatus(vd):
-        x = vd.options.disp_replay_pause if vd.paused else vd.options.disp_replay_play
-        return ' │ %s %s/%s' % (x, vd.currentReplay.cursorRowIndex, len(vd.currentReplay.rows))
+    if vd._nextCommands:
+        return f' | [:status_replay] {len(vd._nextCommands)} {vd.options.disp_replay_play}[:]'
+    return ''
 
 
 @BaseSheet.property
@@ -509,9 +464,8 @@ globalCommand('gD', 'cmdlog-all', 'vd.push(vd.cmdlog)', 'open global CommandLog 
 globalCommand('D', 'cmdlog-sheet', 'vd.push(sheet.cmdlog)', "open current sheet's CommandLog with all other loose ends removed; includes commands from parent sheets")
 globalCommand('zD', 'cmdlog-sheet-only', 'vd.push(sheet.cmdlog_sheet)', 'open CommandLog for current sheet with commands from parent sheets removed')
 globalCommand('^D', 'save-cmdlog', 'saveSheets(inputPath("save cmdlog to: ", value=fnSuffix(name)), vd.cmdlog, confirm_overwrite=options.confirm_overwrite)', 'save CommandLog to filename.vd file')
-globalCommand('^U', 'replay-pause', 'vd.replay_pause()', 'pause/resume replay')
-globalCommand('^N', 'replay-advance', 'vd.replay_advance()', 'execute next row in replaying sheet')
-globalCommand('^K', 'replay-stop', 'vd.replay_cancel()', 'cancel current replay')
+BaseSheet.bindkey('^N', 'no-op')
+BaseSheet.addCommand('^K', 'replay-stop', 'vd.replay_cancel(); vd.warning("replay canceled")', 'cancel current replay')
 
 globalCommand(None, 'show-status', 'status(input("status: "))', 'show given message on status line')
 globalCommand('^V', 'show-version', 'status(__version_info__);', 'Show version and copyright information on status line')
@@ -521,11 +475,9 @@ globalCommand(' ', 'exec-longname', 'exec_longname(inputLongname())', 'execute c
 
 CommandLog.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("replayed one row")', 'replay command in current row')
 CommandLog.addCommand('gx', 'replay-all', 'vd.replay(sheet)', 'replay contents of entire CommandLog')
-CommandLog.addCommand('^C', 'replay-stop', 'sheet.cursorRowIndex = sheet.nRows', 'abort replay')
 
 CommandLogJsonl.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("replayed one row")', 'replay command in current row')
 CommandLogJsonl.addCommand('gx', 'replay-all', 'vd.replay(sheet)', 'replay contents of entire CommandLog')
-CommandLogJsonl.addCommand('^C', 'replay-stop', 'sheet.cursorRowIndex = sheet.nRows', 'abort replay')
 
 CommandLog.options.json_sort_keys = False
 CommandLog.options.encoding = 'utf-8'

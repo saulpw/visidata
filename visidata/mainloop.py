@@ -181,10 +181,6 @@ def mainloop(self, scr):
             self.draw_all()
             self._lastDrawTime = time.time()
 
-        if vd._nextCommands:
-            sheet.execCommand(vd._nextCommands.pop(0), keystrokes=self.keystrokes)
-            continue
-
         keystroke = self.getkeystroke(scr, sheet)
 
         if not keystroke and prefixWaiting and "Alt+" in self.keystrokes:  # timeout ESC
@@ -225,12 +221,27 @@ def mainloop(self, scr):
             vd.status('no command for "%s"' % (self.keystrokes))
             prefixWaiting = False
 
+        # play next queued command
+        if self._nextCommands:
+            cmd = self._nextCommands.pop(0)
+            if isinstance(cmd, dict):
+                if self.replayOne(cmd):
+                    self.replay_cancel()
+            else:
+                sheet.execCommand(cmd, keystrokes=self.keystrokes)
+        else:
+            if self.currentReplay:
+                self.currentReplayRow = None
+                self.currentReplay = None
+
         self.checkForFinishedThreads()
         sheet.checkCursorNoExceptions()
 
         # no idle redraw unless background threads are running
         time.sleep(0)  # yield to other threads which may not have started yet
-        if vd.unfinishedThreads:
+        if vd._nextCommands:
+            vd.curses_timeout = int(vd.options.replay_wait*1000)
+        elif vd.unfinishedThreads:
             vd.curses_timeout = nonidle_timeout
         else:
             numTimeouts += 1
