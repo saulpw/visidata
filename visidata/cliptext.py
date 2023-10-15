@@ -323,4 +323,5 @@ vd.addGlobals(clipstr=clipstr,
               clipbox=clipbox,
               dispwidth=dispwidth,
               iterchars=iterchars,
+              iterchunks=iterchunks,
               wraptext=wraptext)

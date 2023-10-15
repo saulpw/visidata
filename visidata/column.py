@@ -11,7 +11,7 @@ from visidata import options, anytype, stacktrace, vd
 from visidata import asyncthread, dispwidth, clipstr, iterchars
 from visidata import wrapply, TypedWrapper, TypedExceptionWrapper
 from visidata import Extensible, AttrDict, undoAttrFunc, ExplodingMock
-from visidata import getitem, setitem, getitemdef, getitemdeep, setitemdeep, getattrdeep, setattrdeep
+from visidata import getitem, setitem, getitemdef, getitemdeep, setitemdeep, getattrdeep, setattrdeep, iterchunks
 
 class InProgress(Exception):
     @property
@@ -246,11 +246,24 @@ class Column(Extensible):
     def displayer_generic(self, dw:DisplayWrapper, width=None):
         '''Fit *dw.text* into *width* charcells.
            Generate list of (attr:str, text:str) suitable for clipdraw_chunks.
+
+           The 'generic' displayer does not do any formatting.
         '''
         if width is not None and width > 1 and vd.isNumeric(self):
             yield ('', dw.text.rjust(width-2))
         else:
             yield ('', dw.text)
+
+    def displayer_full(self, dw:DisplayWrapper, width=None):
+        '''Fit *dw.text* into *width* charcells.
+           Generate list of (attr:str, text:str) suitable for clipdraw_chunks.
+
+           The 'full' displayer allows formatting like [:color].
+        '''
+        if width is not None and width > 1 and vd.isNumeric(self):
+            yield from iterchunks(text.rjust(width-2))
+        else:
+            yield from iterchunks(dw.text)
 
     def display(self, *args, **kwargs):
         f = getattr(self, 'displayer_'+(self.displayer or self.sheet.options.disp_displayer), self.displayer_generic)
