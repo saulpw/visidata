@@ -158,15 +158,13 @@ class GraphSheet(InvertedCanvas):
             self.ylabel_maxw = w
 
         # plot y-axis labels on the far left of the canvas, but within the plotview height-wise
-        attr = colors.color_graph_axis
-        self.plotlabel(0, self.plotviewBox.ymin + (1.0-frac)*self.plotviewBox.h, txt, attr)
+        self.plotlabel(0, self.plotviewBox.ymin + (1.0-frac)*self.plotviewBox.h, txt, 'graph_axis')
 
     def add_x_axis_label(self, frac):
         txt = self.formatXLabel(self.visibleBox.xmin + frac*self.visibleBox.w)
         tick = vd.options.disp_graph_tick_x or ''
 
         # plot x-axis labels below the plotviewBox.ymax, but within the plotview width-wise
-        attr = colors.color_graph_axis
         x = self.plotviewBox.xmin + frac*self.plotviewBox.w
 
         if frac < 1.0:
@@ -182,7 +180,7 @@ class GraphSheet(InvertedCanvas):
                     x += 1
                 txt = txt + tick
 
-        self.plotlabel(x, self.plotviewBox.ymax+4, txt, attr)
+        self.plotlabel(x, self.plotviewBox.ymax+4, txt, 'graph_axis')
 
     def createLabels(self):
         self.gridlabels = []
@@ -207,7 +205,7 @@ class GraphSheet(InvertedCanvas):
 
         xname = ','.join(xcol.name for xcol in self.xcols if vd.isNumeric(xcol)) or 'row#'
         xname, _ = clipstr(xname, self.left_margin//2-2)
-        self.plotlabel(0, self.plotviewBox.ymax+4, xname+'»', colors.color_graph_axis)
+        self.plotlabel(0, self.plotviewBox.ymax+4, xname+'»', 'graph_axis')
 
 
 Sheet.addCommand('.', 'plot-column', 'vd.push(GraphSheet(sheet.name, "graph", source=sheet, sourceRows=rows, xcols=keyCols, ycols=numericCols([cursorCol])))', 'plot current numeric column vs key columns; numeric key column is used for x-axis, while categorical key columns determine color')

@@ -159,17 +159,17 @@ class Plotter(BaseSheet):
         # pixels[y][x] = { attr: list(rows), ... }
         self.pixels = [[defaultdict(list) for x in range(self.plotwidth)] for y in range(self.plotheight)]
 
-    def plotpixel(self, x, y, attr=0, row=None):
+    def plotpixel(self, x, y, attr:str|ColorAttr='', row=None):
         self.pixels[y][x][attr].append(row)
 
-    def plotline(self, x1, y1, x2, y2, attr=0, row=None):
+    def plotline(self, x1, y1, x2, y2, attr:str|ColorAttr='', row=None):
         for x, y in iterline(x1, y1, x2, y2):
             self.plotpixel(math.ceil(x), math.ceil(y), attr, row)
 
-    def plotlabel(self, x, y, text, attr=0, row=None):
+    def plotlabel(self, x, y, text, attr:str|ColorAttr='', row=None):
         self.labels.append((x, y, text, attr, row))
 
-    def plotlegend(self, i, txt, attr=0, width=15):
+    def plotlegend(self, i, txt, attr:str|ColorAttr='', width=15):
         # move it 1 character to the left b/c the rightmost column can't be drawn to
         self.plotlabel(self.plotwidth-(width+1)*2, i*4, txt, attr)
 
@@ -185,14 +185,14 @@ class Plotter(BaseSheet):
     def plotterFromTerminalCoord(self, x, y):
         return x*2, y*4
 
-    def getPixelAttrRandom(self, x, y):
-        'weighted-random choice of attr at this pixel.'
+    def getPixelAttrRandom(self, x, y) -> str:
+        'weighted-random choice of colornum at this pixel.'
         c = list(attr for attr, rows in self.pixels[y][x].items()
                          for r in rows if attr and attr not in self.hiddenAttrs)
         return random.choice(c) if c else 0
 
-    def getPixelAttrMost(self, x, y):
-        'most common attr at this pixel.'
+    def getPixelAttrMost(self, x, y) -> str:
+        'most common colornum at this pixel.'
         r = self.pixels[y][x]
         if not r:
             return 0
@@ -200,11 +200,9 @@ class Plotter(BaseSheet):
         if not c:
             return 0
         _, attr, rows = max(c)
-        if isinstance(self.source, BaseSheet) and anySelected(self.source, rows):
-            attr = update_attr(ColorAttr(attr, 0, 8, attr), colors.color_graph_selected, 10).attr
         return attr
 
-    def hideAttr(self, attr, hide=True):
+    def hideAttr(self, attr:str, hide=True):
         if hide:
             self.hiddenAttrs.add(attr)
         else:
@@ -259,16 +257,17 @@ class Plotter(BaseSheet):
                         pow2 *= 2
 
                     if braille_num != 0:
-                        attr = Counter(c for c in block_attrs if c).most_common(1)[0][0]
+                        color = Counter(c for c in block_attrs if c).most_common(1)[0][0]
+                        cattr = colors.get_color(color)
                     else:
-                        attr = 0
+                        cattr = ColorAttr()
 
                     if cursorBBox.contains(char_x*2, char_y*4) or \
                        cursorBBox.contains(char_x*2+1, char_y*4+3):
-                        attr = update_attr(ColorAttr(attr, 0, 0, attr), colors.color_current_row).attr
+                        cattr = update_attr(cattr, colors.color_current_row)
 
-                    if attr:
-                        scr.addstr(char_y, char_x, disp_canvas_charset[braille_num], attr)
+                    if cattr.attr:
+                        scr.addstr(char_y, char_x, disp_canvas_charset[braille_num], cattr.attr)
 
         def _mark_overlap_text(labels, textobj):
             def _overlaps(a, b):
@@ -306,13 +305,14 @@ class Plotter(BaseSheet):
                 for o, fldraw in line:
                     if fldraw:
                         char_x, char_y, txt, attr, row = o
-                        clipdraw(scr, char_y, char_x, txt, attr, dispwidth(txt))
+                        cattr = colors.get_color(attr)
+                        clipdraw(scr, char_y, char_x, txt, cattr, dispwidth(txt))
                         cursorBBox = self.plotterCursorBox
                         for c in txt:
                             w = dispwidth(c)
                             # check if the cursor contains the midpoint of the character box
                             if cursorBBox.contains(char_x*2+1, char_y*4+2):
-                                char_attr = update_attr(ColorAttr(attr, 0, 0, attr), colors.color_current_row).attr
+                                char_attr = update_attr(cattr, colors.color_current_row)
                                 clipdraw(scr, char_y, char_x, c, char_attr, w)
                             char_x += w
 
@@ -339,8 +339,8 @@ class Canvas(Plotter):
         self.yzoomlevel = 1.0
         self.needsRefresh = False
 
-        self.polylines = []   # list of ([(canvas_x, canvas_y), ...], attr, row)
-        self.gridlabels = []  # list of (grid_x, grid_y, label, attr, row)
+        self.polylines = []   # list of ([(canvas_x, canvas_y), ...], fgcolornum, row)
+        self.gridlabels = []  # list of (grid_x, grid_y, label, fgcolornum, row)
 
         self.legends = OrderedDict()   # txt: attr  (visible legends only)
         self.plotAttrs = {}   # key: attr  (all keys, for speed)
@@ -357,9 +357,9 @@ class Canvas(Plotter):
         self.legends.clear()
         self.legendwidth = 0
         self.plotAttrs.clear()
-        self.unusedAttrs = list(colors[colorname.translate(str.maketrans('_', ' '))] for colorname in self.options.plot_colors.split())
+        self.unusedAttrs = list(self.options.plot_colors.split())
 
-    def plotColor(self, k):
+    def plotColor(self, k) -> str:
         attr = self.plotAttrs.get(k, None)
         if attr is None:
             if self.unusedAttrs:
@@ -473,21 +473,21 @@ class Canvas(Plotter):
         else:
             return None
 
-    def point(self, x, y, attr=0, row=None):
+    def point(self, x, y, attr:str|ColorAttr='', row=None):
         self.polylines.append(([(x, y)], attr, row))
 
-    def line(self, x1, y1, x2, y2, attr=0, row=None):
+    def line(self, x1, y1, x2, y2, attr:str|ColorAttr='', row=None):
         self.polylines.append(([(x1, y1), (x2, y2)], attr, row))
 
-    def polyline(self, vertexes, attr=0, row=None):
+    def polyline(self, vertexes, attr:str|ColorAttr='', row=None):
         'adds lines for (x,y) vertexes of a polygon'
         self.polylines.append((vertexes, attr, row))
 
-    def polygon(self, vertexes, attr=0, row=None):
+    def polygon(self, vertexes, attr:str|ColorAttr='', row=None):
         'adds lines for (x,y) vertexes of a polygon'
         self.polylines.append((vertexes + [vertexes[0]], attr, row))
 
-    def qcurve(self, vertexes, attr=0, row=None):
+    def qcurve(self, vertexes, attr:str|ColorAttr='', row=None):
         'Draw quadratic curve from vertexes[0] to vertexes[2] with control point at vertexes[1]'
         if len(vertexes) != 3:
             vd.fail('need exactly 3 points for qcurve (got %d)' % len(vertexes))
@@ -499,7 +499,7 @@ class Canvas(Plotter):
         for x, y in bezier(x1, y1, x2, y2, x3, y3):
             self.point(x, y, attr, row)
 
-    def label(self, x, y, text, attr=0, row=None):
+    def label(self, x, y, text, attr:str|ColorAttr='', row=None):
         self.gridlabels.append((x, y, text, attr, row))
 
     def fixPoint(self, plotterPoint, canvasPoint):
@@ -574,9 +574,9 @@ class Canvas(Plotter):
     def plotlegends(self):
         # display labels
         for i, (legend, attr) in enumerate(self.legends.items()):
-            self.addCommand(str(i+1), 'toggle-%s'%(i+1), 'hideAttr(%s, %s not in hiddenAttrs)' % (attr, attr), 'toggle display of "%s"' % legend)
+            self.addCommand(str(i+1), f'toggle-{i+1}', f'hideAttr("{attr}", "{attr}" not in hiddenAttrs)', f'toggle display of "{legend}"')
             if attr in self.hiddenAttrs:
-                attr = colors.color_graph_hidden
+                attr = 'graph_hidden'
             # add 2 characters to width to account for '1:' '2:' etc
             self.plotlegend(i, '%s:%s'%(i+1,legend), attr, width=self.legendwidth+2)
 

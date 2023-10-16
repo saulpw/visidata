@@ -68,7 +68,7 @@ class Animation:
 
     def draw(self, scr, *, t=0, x=0, y=0, loop=False, **kwargs):
         for r, dx, dy, _ in self.iterdeep(self.frames[''].rows):
-            scr.addstr(y+dy, x+dx, r.text, colors[r.color])
+            scr.addstr(y+dy, x+dx, r.text, colors[r.color].attr)
 
         if not self.total_ms:
             return None
@@ -78,7 +78,7 @@ class Animation:
             ms -= int(f.duration_ms or 0)
             if ms < 0:
                 for r, dx, dy, _ in self.iterdeep(f.rows):
-                    scr.addstr(y+dy, x+dx, r.text, colors[r.color])
+                    scr.addstr(y+dy, x+dx, r.text, colors[r.color].attr)
 
                 return -ms/1000
 

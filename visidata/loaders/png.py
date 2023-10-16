@@ -8,18 +8,18 @@ def open_png(vd, p):
     return PNGSheet(p.name, source=p)
 
 @functools.lru_cache(256)
-def rgb_to_attr(r,g,b,a):
-    if a == 0: return 0
-    if r > g and r > b: return colors['red']
-    if g > r and g > b: return colors['green']
-    if b > r and b > g: return colors['blue']
-    if a == 255: return colors['white']
-    return 0
+def rgb_to_attr(r:int,g:int,b:int,a:int) -> str:
+    if a == 0: return ''
+    if r > g and r > b: return 'red'
+    if g > r and g > b: return 'green'
+    if b > r and b > g: return 'blue'
+    if a == 255: return 'white'
+    return ''
 
 class PNGSheet(Sheet):
     rowtype = 'pixels'  # rowdef: list(x, y, r, g, b, a)
     columns = [ColumnItem(name, i, type=int) for i, name in enumerate('x y R G B A'.split())] + [
-        Column('attr', type=int, getter=lambda col,row: rgb_to_attr(*row[2:]))
+        Column('attr', getter=lambda col,row: rgb_to_attr(*row[2:]))
     ]
     nKeys = 2
     def newRow(self):

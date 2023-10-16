@@ -72,11 +72,12 @@ class ColorMaker:
         'not computed until curses color has been initialized'
         return {x[6:]:getattr(curses, x) for x in dir(curses) if x.startswith('COLOR_') and x != 'COLOR_PAIRS'}
 
-    def __getitem__(self, colornamestr):
-        return self._colornames_to_cattr(colornamestr).attr
+    def __getitem__(self, colornamestr) -> ColorAttr:
+        'colors["green"] or colors["foo"] returns parsed ColorAttr.'
+        return self._colornames_to_cattr(colornamestr)
 
-    def __getattr__(self, optname):
-        'colors.color_foo returns colors[options.color_foo]'
+    def __getattr__(self, optname) -> ColorAttr:
+        'colors.color_foo returns parsed ColorAttr.'
         return self.get_color(optname)
 
     @drawcache
@@ -123,8 +124,11 @@ class ColorMaker:
 
         return fgbgattrs
 
-    def _get_colornum(self, colorname:str, default:int=-1) -> int:
+    def _get_colornum(self, colorname:str|int, default:int=-1) -> int:
         'Return terminal color number for colorname.'
+        if isinstance(colorname, int):
+            return colorname
+
         if not colorname:
             return default
 
@@ -164,13 +168,15 @@ class ColorMaker:
                          self._attrnames_to_num(attrlist),
                          precedence, colorname)
 
-    def _get_colorpair(self, fg:int, bg:int, colorname:str) -> int:
+    def _get_colorpair(self, fg:int|None, bg:int|None, colorname:str) -> int:
             pairnum, _ = self.color_pairs.get((fg, bg), (None, ''))
             if pairnum is None:
                 if len(self.color_pairs) > 254:
                     self.color_pairs.clear()  # start over
                     self.color_cache.clear()
                 pairnum = len(self.color_pairs)+1
+                if fg is None: fg = -1
+                if bg is None: bg = -1
                 try:
                     curses.init_pair(pairnum, fg, bg)
                 except curses.error as e:

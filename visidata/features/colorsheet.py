@@ -38,7 +38,7 @@ class ColorSheet(Sheet):
             if r is self.cursorRow:
                 x -= 1
                 s = '[██]'
-            scr.addstr(y, x, s, colors[c])
+            scr.addstr(y, x, s, colors[c].attr)
 
 
 BaseSheet.addCommand(None, 'open-colors', 'vd.push(vd.colorsSheet)', 'open Color Sheet with available terminal colors')
