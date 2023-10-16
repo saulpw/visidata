@@ -2,7 +2,6 @@
 eleventyNavigation:
   key: Quick Reference Guide
   order: 2
-permalink: /man/
 ---
 <section><pre id="manpage" class="whitespace-pre-wrap text-xs">
 vd(1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        Quick Reference Guide                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        vd(1)
