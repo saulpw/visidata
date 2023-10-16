@@ -18,6 +18,15 @@ class ColorAttr:
     precedence:int = 0  # default is lowest priority
     colorname:str = ''
 
+    def __init__(self, fg:int=-1, bg:int=-1, attributes:int=0, precedence:int=0, colorname:str=''):
+        assert fg < 256, fg
+        assert bg < 256, bg
+        self.fg = fg
+        self.bg = bg
+        self.attributes = attributes
+        self.precedence = precedence
+        self.colorname = colorname
+
     def update(self, b:'ColorAttr') -> 'ColorAttr':
         return update_attr(self, b)
 
