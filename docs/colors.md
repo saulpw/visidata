@@ -1,9 +1,9 @@
 ---
 eleventyNavigation:
-    key: Customizing VisiData: Colors
+    key: Customizing VisiData - Colors
     order: 12
-Updated: 2023-10-12
-Version: VisiData v3.0
+update: 2023-10-12
+version: VisiData v3.0
 ---
 
 ## Color Options
