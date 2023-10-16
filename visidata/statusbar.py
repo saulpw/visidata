@@ -150,8 +150,6 @@ def drawLeftStatus(vd, scr, vs):
     if scr is vd.winTop:
         cattr = update_attr(cattr, colors.color_top_status, 1)
 
-    attr = cattr.attr
-
     x = 0
     y = vs.windowHeight-1  # status for each window
     try:
@@ -160,7 +158,7 @@ def drawLeftStatus(vd, scr, vs):
         if maxwidth > 0:
             lstatus = middleTruncate(lstatus, maxwidth//2)
 
-        x = clipdraw(scr, y, 0, lstatus, attr, w=vs.windowWidth-1)
+        x = clipdraw(scr, y, 0, lstatus, cattr, w=vs.windowWidth-1)
 
         vd.onMouse(scr, 0, y, x, 1,
                         BUTTON3_PRESSED='rename-sheet',
@@ -232,7 +230,7 @@ def drawRightStatus(vd, scr, vs):
 
     statuslen = 0
     try:
-        cattr = ColorAttr(0, 0, 0, 0)
+        cattr = ColorAttr()
         if scr is vd.winTop:
             cattr = update_attr(cattr, colors.color_top_status, 0)
         cattr = update_attr(cattr, colors.color_active_status if vs is vd.activeSheet else colors.color_inactive_status, 0)

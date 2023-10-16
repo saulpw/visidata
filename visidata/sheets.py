@@ -656,13 +656,13 @@ class TableSheet(BaseSheet):
             if i == h-1:
                 hdrcattr = update_attr(hdrcattr, colors.color_bottom_hdr, 5)
 
-            clipdraw(scr, y+i, x, name, hdrcattr.attr, w=colwidth)
+            clipdraw(scr, y+i, x, name, hdrcattr, w=colwidth)
             vd.onMouse(scr, x, y+i, colwidth, 1, BUTTON3_RELEASED='rename-col')
 
             if C and x+colwidth+len(C) < self.windowWidth and y+i < self.windowWidth:
                 scr.addstr(y+i, x+colwidth, C, sepcattr.attr)
 
-        clipdraw(scr, y+h-1, x+colwidth-len(T), T, hdrcattr.attr)
+        clipdraw(scr, y+h-1, x+colwidth-len(T), T, hdrcattr)
 
         try:
             if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
@@ -736,7 +736,7 @@ class TableSheet(BaseSheet):
             y += self.drawRow(scr, row, self.topRowIndex+rowidx, y, rowcattr, maxheight=self.windowHeight-y-1, **drawparams)
 
         if vcolidx+1 < self.nVisibleCols:
-            scr.addstr(headerRow, self.windowWidth-2, self.options.disp_more_right, colors.color_column_sep)
+            scr.addstr(headerRow, self.windowWidth-2, self.options.disp_more_right, colors.color_column_sep.attr)
 
     def calc_height(self, row, displines=None, isNull=None, maxheight=1):
             if displines is None:
@@ -864,7 +864,7 @@ class TableSheet(BaseSheet):
                         for attr, text in chunks:
                             prechunks.append((attr, text[hoffset:]))
 
-                        clipdraw_chunks(scr, y, x, prechunks, cattr.attr, w=colwidth-notewidth)
+                        clipdraw_chunks(scr, y, x, prechunks, cattr, w=colwidth-notewidth)
                         vd.onMouse(scr, x, y, colwidth, 1, BUTTON3_RELEASED='edit-cell')
 
                         if x+colwidth+len(sepchars) <= self.windowWidth:

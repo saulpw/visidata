@@ -29,7 +29,7 @@ def drawSheet(self, scr, sheet):
     sheet.ensureLoaded()
 
     scr.erase()  # clear screen before every re-draw
-    scr.bkgd(' ', colors.color_default)
+    scr.bkgd(' ', colors.color_default.attr)
 
     sheet._scr = scr
 

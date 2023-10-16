@@ -289,22 +289,20 @@ def menus(sheet):
 @VisiData.api
 def drawMenu(vd, scr, sheet):
     h, w = scr.getmaxyx()
-    scr.addstr(0, 0, ' '*(w-1), colors.color_menu)
+    scr.addstr(0, 0, ' '*(w-1), colors.color_menu.attr)
     disp_menu_boxchars = sheet.options.disp_menu_boxchars
     x = 1
     ymax = 4
     toplevel = sheet.menus
     for i, item in enumerate(toplevel):
         if sheet.activeMenuItems and i == sheet.activeMenuItems[0]:
-            attr = colors.color_menu_active
+            cattr = colors.color_menu_active
             vd.drawSubmenu(scr, sheet, 1, x, item.menus, 1, disp_menu_boxchars)
         else:
-            attr = colors.color_menu
+            cattr = colors.color_menu
 
-        menudraw(scr, 0, x, ' ', attr)
-        for j, ch in enumerate(item.title):
-            menudraw(scr, 0, x+j+1, ch, attr | (curses.A_UNDERLINE if ch.isupper() else 0))
-        menudraw(scr, 0, x+j+2, ' ', attr)
+        menutitle = ' ' + ''.join(f'[:underline]{ch}[:]' if ch.isupper() else ch for ch in item.title) + ' '
+        menudraw(scr, 0, x, menutitle, cattr)
 
         vd.onMouse(scr, x, 0, dispwidth(item.title)+2, 1,
                 BUTTON1_PRESSED=lambda y,x,key,i=i,sheet=sheet: sheet.pressMenu(i),

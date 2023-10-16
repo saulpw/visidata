@@ -1,26 +1,28 @@
 import curses
-from visidata import VisiData, colors, Sheet, Column, RowColorizer, wrapply, BaseSheet
+from visidata import VisiData, colors, Sheet, Column, ItemColumn, RowColorizer, wrapply, BaseSheet
 
 
 class ColorSheet(Sheet):
-    rowtype = 'colors'  # rowdef: [(fg,bg), (color_attr, colornamestr)]
+    rowtype = 'colors'  # rowdef: [fg, bg, color_attr, colornamestr]
     columns = [
-        Column('color', getter=lambda c,r: r[1][1]),
-        Column('fg', type=int, getter=lambda c,r: r[0][0]),
-        Column('bg', type=int, getter=lambda c,r: r[0][1]),
-        Column('attr', width=0, type=int, getter=lambda c,r: r[1][0]),
-        ]
+        ItemColumn('fg', 0, type=int),
+        ItemColumn('bg', 1, type=int),
+        ItemColumn('pairnum', 2),
+        ItemColumn('name', 3),
+    ]
     colorizers = [
-        RowColorizer(7, None, lambda s,c,r,v: r and r[1][1])
+        RowColorizer(7, None, lambda s,c,r,v: r and r[3])
     ]
 
     def iterload(self):
         self.rows = []
         for k, v in colors.color_pairs.items():
-            yield [k, v]
+            fg, bg = k
+            pairnum, colorname = v
+            yield [fg, bg, pairnum, colorname]
 
         for i in range(0, 256):
-            yield [(i, 0), (None, f'{i}')]
+            yield [i, 0, None, f'{i}']
 
     def draw(self, scr):
         super().draw(scr)
@@ -29,7 +31,7 @@ class ColorSheet(Sheet):
         for i, r in enumerate(self.rows[(self.topRowIndex//6)*6:(self.bottomRowIndex//6+1)*6]):
             y=i//6+1
             x=(i%6)*3+xstart
-            c = r[1][1]
+            c = r[1]
             s = '██'
             if y > self.windowHeight-1:
                 break

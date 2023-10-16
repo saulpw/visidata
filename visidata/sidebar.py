@@ -62,7 +62,7 @@ def drawSidebarText(sheet, scr, text:str, title:str='', overflowmsg:str='', bott
     sidebarscr = vd.subwindow(scr, x, y, w, h)
 
     sidebarscr.erase()
-    sidebarscr.bkgd(cattr.attr)
+    sidebarscr.bkgd(' ', cattr.attr)
     sidebarscr.border()
     vd.onMouse(sidebarscr, 0, 0, w, h, BUTTON1_RELEASED='no-op', BUTTON1_PRESSED='no-op')
 

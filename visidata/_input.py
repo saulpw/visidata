@@ -4,7 +4,7 @@ import curses
 import visidata
 
 from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiData, BaseSheet
-from visidata import vd, options, colors, dispwidth
+from visidata import vd, options, colors, dispwidth, ColorAttr
 from visidata import AttrDict
 
 
@@ -414,7 +414,7 @@ def inputMultiple(vd, **kwargs):
     return {k:v.get('value', '') for k,v in kwargs.items()}
 
 @VisiData.api
-def input(self, prompt, type=None, defaultLast=False, history=[], dy=0, attr=0, **kwargs):
+def input(self, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None, **kwargs):
     '''Display *prompt* and return line of user input.
 
         - *type*: string indicating the type of input to use for history.
@@ -429,6 +429,8 @@ def input(self, prompt, type=None, defaultLast=False, history=[], dy=0, attr=0, 
         - *attr*: curses attribute for prompt
     '''
 
+    if attr is None:
+        attr = ColorAttr()
     sheet = self.activeSheet
     if not vd.cursesEnabled:
         if kwargs.get('record', True) and vd.cmdlog:
