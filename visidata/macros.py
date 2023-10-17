@@ -4,7 +4,7 @@ from functools import wraps
 
 from visidata.cmdlog import CommandLog, CommandLogJsonl
 from visidata import vd, UNLOADED, asyncthread
-from visidata import IndexSheet, VisiData, Sheet, Path, VisiDataMetaSheet, ColumnItem, BaseSheet
+from visidata import IndexSheet, VisiData, Sheet, Path, VisiDataMetaSheet, Column, ItemColumn, BaseSheet
 
 vd.macroMode = None
 vd.macrobindings = {}
@@ -14,8 +14,15 @@ class MacroSheet(IndexSheet):
         # Macros Sheet
         This is a list of user-defined macros.
 
-        `Enter` to open the current macro.
+        - `Enter` to open the current macro.
+        - `d` to mark macro for delete; `z Ctrl+S` to commit.
     '''
+    columns = [
+        Column('longname', getter=lambda c,vs: vs.name),
+        Column('keystrokes', getter=lambda c,vs: vs.keystrokes),
+        Column('num_commands', type=int, getter=lambda c,vs: len(vs)),
+        Column('source', width=0, getter=lambda c,vs: vs.source),
+    ]
     rowtype = 'macros'
     defer = True
     def iterload(self):
@@ -28,6 +35,7 @@ class MacroSheet(IndexSheet):
             else:
                 vd.warning(f'failed to load macro {fn}')
                 continue
+            vs.keystrokes = ks
             setMacro(ks, vs)
             yield vs
 
@@ -49,10 +57,11 @@ class MacroSheet(IndexSheet):
     def newRow(self):
         vd.fail('add macros with `m` instead')
 
+
 @VisiData.lazy_property
 def macrosheet(vd):
     macrospath = Path(os.path.join(vd.options.visidata_dir, 'macros.tsv'))
-    macrosheet = vd.loadInternalSheet(VisiDataMetaSheet, macrospath, columns=(ColumnItem('command', 0), ColumnItem('filename', 1))) or vd.error('error loading macros')
+    macrosheet = vd.loadInternalSheet(VisiDataMetaSheet, macrospath, columns=(ItemColumn('command', 0), ItemColumn('filename', 1))) or vd.error('error loading macros')
 
     real_macrosheet = MacroSheet('user_macros', rows=[], source=macrosheet)
     real_macrosheet.reload()
@@ -64,11 +73,11 @@ def runMacro(vd, macro):
     vd.replay_sync(macro)
 
 def setMacro(ks, vs):
-    vd.macrobindings[ks] = vs
+    vd.macrobindings[vs.name] = vs
     if vd.isLongname(ks):
         BaseSheet.addCommand('', ks, 'runMacro(vd.macrobindings[longname])')
     else:
-        BaseSheet.addCommand(ks, vs.name, 'runMacro(vd.macrobindings[keystrokes])')
+        BaseSheet.addCommand(ks, vs.name, 'runMacro(vd.macrobindings[longname])')
 
 
 @CommandLogJsonl.api
@@ -82,29 +91,38 @@ def saveMacro(self, rows, ks):
         vd.sync(vd.macrosheet.source.reload())
         vd.sync(vd.macrosheet.reload())
 
-@CommandLogJsonl.api
-@wraps(CommandLogJsonl.afterExecSheet)
+
+# needs to happen before, because the original afterExecSheet resets vd.activeCommand to None
+@CommandLogJsonl.before
 def afterExecSheet(cmdlog, sheet, escaped, err):
     if vd.macroMode and (vd.activeCommand is not None) and (vd.activeCommand is not UNLOADED) and (vd.isLoggableCommand(vd.activeCommand.longname)):
         cmd = copy(vd.activeCommand)
-        cmd.row = cmd.col = cmd.sheet = ''
+        cmd.sheet = ''
         vd.macroMode.addRow(cmd)
 
-    # the following needs to happen at the end, bc
-    # once cmdlog.afterExecSheet.__wrapped__ runs, vd.activeCommand resets to None
-    cmdlog.afterExecSheet.__wrapped__(cmdlog, sheet, escaped, err)
 
 @CommandLogJsonl.api
 def startMacro(cmdlog):
     if vd.macroMode:
-        ks = vd.input('set macro to keybinding: (Ctrl+C to abort macro recording)')
-        while ks in vd.macrobindings:
-            ks = vd.input(f'{ks} already in use; set macro to keybinding: ')
-        vd.cmdlog.saveMacro(vd.macroMode.rows, ks)
-        vd.macroMode = None
+        try:
+            ks = vd.input('bind macro to: ', help=f'''
+                # Finish recording macro
+                Type in either a longname like `happy-time` (with at least one hyphen),
+                   or spell out a keybinding (like `Alt+b`) manually.
+
+                - Prefixes allowed with a keybinding: `{'  '.join(vd.allPrefixes)}`
+                - Press `Ctrl+N` and then press another keystroke to spell that keystroke.
+                - Press `Ctrl+C` to cancel the macro recording.
+            ''')
+            while ks in vd.macrobindings:
+                ks = vd.input(f'{ks} already in use; set macro to keybinding: ')
+            vd.cmdlog.saveMacro(vd.macroMode.rows, ks)
+        finally:
+            vd.macroMode = None
     else:
         vd.status("recording macro; stop recording with `m`")
         vd.macroMode = CommandLogJsonl('current_macro', rows=[])
+
 
 @VisiData.before
 def run(vd, *args, **kwargs):
