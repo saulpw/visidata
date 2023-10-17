@@ -9,6 +9,7 @@
     b. manpage;
 
     c. visidata.org; (formats?)
+        - remember to check the tables with prettier: https://github.com/saulpw/visidata/pull/2056
 
 3. Verify that VisiData is up-to-date:
     * help menu
