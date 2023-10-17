@@ -159,17 +159,17 @@ class Plotter(BaseSheet):
         # pixels[y][x] = { attr: list(rows), ... }
         self.pixels = [[defaultdict(list) for x in range(self.plotwidth)] for y in range(self.plotheight)]
 
-    def plotpixel(self, x, y, attr:str|ColorAttr='', row=None):
+    def plotpixel(self, x, y, attr:"str|ColorAttr=''", row=None):
         self.pixels[y][x][attr].append(row)
 
-    def plotline(self, x1, y1, x2, y2, attr:str|ColorAttr='', row=None):
+    def plotline(self, x1, y1, x2, y2, attr:"str|ColorAttr=''", row=None):
         for x, y in iterline(x1, y1, x2, y2):
             self.plotpixel(math.ceil(x), math.ceil(y), attr, row)
 
-    def plotlabel(self, x, y, text, attr:str|ColorAttr='', row=None):
+    def plotlabel(self, x, y, text, attr:"str|ColorAttr=''", row=None):
         self.labels.append((x, y, text, attr, row))
 
-    def plotlegend(self, i, txt, attr:str|ColorAttr='', width=15):
+    def plotlegend(self, i, txt, attr:"str|ColorAttr=''", width=15):
         # move it 1 character to the left b/c the rightmost column can't be drawn to
         self.plotlabel(self.plotwidth-(width+1)*2, i*4, txt, attr)
 
@@ -473,21 +473,21 @@ class Canvas(Plotter):
         else:
             return None
 
-    def point(self, x, y, attr:str|ColorAttr='', row=None):
+    def point(self, x, y, attr:"str|ColorAttr=''", row=None):
         self.polylines.append(([(x, y)], attr, row))
 
-    def line(self, x1, y1, x2, y2, attr:str|ColorAttr='', row=None):
+    def line(self, x1, y1, x2, y2, attr:"str|ColorAttr=''", row=None):
         self.polylines.append(([(x1, y1), (x2, y2)], attr, row))
 
-    def polyline(self, vertexes, attr:str|ColorAttr='', row=None):
+    def polyline(self, vertexes, attr:"str|ColorAttr=''", row=None):
         'adds lines for (x,y) vertexes of a polygon'
         self.polylines.append((vertexes, attr, row))
 
-    def polygon(self, vertexes, attr:str|ColorAttr='', row=None):
+    def polygon(self, vertexes, attr:"str|ColorAttr=''", row=None):
         'adds lines for (x,y) vertexes of a polygon'
         self.polylines.append((vertexes + [vertexes[0]], attr, row))
 
-    def qcurve(self, vertexes, attr:str|ColorAttr='', row=None):
+    def qcurve(self, vertexes, attr:"str|ColorAttr=''", row=None):
         'Draw quadratic curve from vertexes[0] to vertexes[2] with control point at vertexes[1]'
         if len(vertexes) != 3:
             vd.fail('need exactly 3 points for qcurve (got %d)' % len(vertexes))
@@ -499,7 +499,7 @@ class Canvas(Plotter):
         for x, y in bezier(x1, y1, x2, y2, x3, y3):
             self.point(x, y, attr, row)
 
-    def label(self, x, y, text, attr:str|ColorAttr='', row=None):
+    def label(self, x, y, text, attr:"str|ColorAttr=''", row=None):
         self.gridlabels.append((x, y, text, attr, row))
 
     def fixPoint(self, plotterPoint, canvasPoint):
@@ -563,7 +563,7 @@ class Canvas(Plotter):
         # + (1/4*self.canvasCharHeight) shifts the cursor up by 1 plotter pixel.
         # That shift makes the cursor contain the top data point.
         # Otherwise, the top data point would have y == plotterCursorBox.ymax,
-        # which would not be inside plotterCursorBox. Shifting the cursor makes 
+        # which would not be inside plotterCursorBox. Shifting the cursor makes
         # plotterCursorBox.ymax > y for that top point.
         return self.visibleBox.ymax - self.cursorBox.h + (1/4*self.canvasCharHeight)
 

@@ -162,7 +162,7 @@ class ColorMaker:
         except ValueError:  # Python 3.10+  issue #1227
             return None
 
-    def _attrnames_to_num(self, attrnames:list[str]) -> int:
+    def _attrnames_to_num(self, attrnames:'list[str]') -> int:
         attrs = 0
         for attr in attrnames:
             attrs |= getattr(curses, 'A_'+attr.upper())
@@ -177,7 +177,7 @@ class ColorMaker:
                          self._attrnames_to_num(attrlist),
                          precedence, colorname)
 
-    def _get_colorpair(self, fg:int|None, bg:int|None, colorname:str) -> int:
+    def _get_colorpair(self, fg:'int|None', bg:'int|None', colorname:str) -> int:
             pairnum, _ = self.color_pairs.get((fg, bg), (None, ''))
             if pairnum is None:
                 if len(self.color_pairs) > 254:
