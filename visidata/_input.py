@@ -274,6 +274,13 @@ def editline(vd, scr, y, x, w, i=0,
         elif ch == 'KEY_BTAB':                     v, i = complete_state.complete(v, i, -1)
         elif ch in ['^J', '^M']:                   break  # ENTER to accept value
         elif ch == '^K':                           v = v[:i]  # ^Kill to end-of-line
+        elif ch == '^N':
+            c = ''
+            while not c:
+                c = vd.getkeystroke(scr)
+            c = vd.prettykeys(c)
+            i += len(c)
+            v += c
         elif ch == '^O':                           v = vd.launchExternalEditor(v); break
         elif ch == '^R':                           v = str(value)  # ^Reload initial value
         elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1:i]), i)  # swap chars
