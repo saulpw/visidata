@@ -3,14 +3,21 @@ import os
 from functools import wraps
 
 from visidata.cmdlog import CommandLog, CommandLogJsonl
-from visidata import vd, UNLOADED
+from visidata import vd, UNLOADED, asyncthread
 from visidata import IndexSheet, VisiData, Sheet, Path, VisiDataMetaSheet, ColumnItem, BaseSheet
 
 vd.macroMode = None
 vd.macrobindings = {}
 
 class MacroSheet(IndexSheet):
+    help = '''
+        # Macros Sheet
+        This is a list of user-defined macros.
 
+        `Enter` to open the current macro.
+    '''
+    rowtype = 'macros'
+    defer = True
     def iterload(self):
         for ks, fn in self.source.rows:
             fp = Path(fn)
@@ -24,7 +31,23 @@ class MacroSheet(IndexSheet):
             setMacro(ks, vs)
             yield vs
 
+    def commitDeleteRow(self, row):
+        self.source.deleteBy(lambda r: r.filename == str(row.source), commit=True, undo=False)
+        try:
+            row.source.unlink()
+        except Exception as e:
+            vd.exceptionCaught(e)
 
+    @asyncthread
+    def putChanges(self):
+        self.commitDeletes()  #1569
+
+        vd.saveSheets(self.source.source, self.source)
+        self._deferredDels.clear()
+        self.reload()
+
+    def newRow(self):
+        vd.fail('add macros with `m` instead')
 
 @VisiData.lazy_property
 def macrosheet(vd):
@@ -38,7 +61,7 @@ def macrosheet(vd):
 
 @VisiData.api
 def runMacro(vd, macro):
-    vd.replay_sync(macro, live=True)
+    vd.replay_sync(macro)
 
 def setMacro(ks, vs):
     vd.macrobindings[ks] = vs
