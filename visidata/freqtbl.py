@@ -13,7 +13,7 @@ vd.option('numeric_binning', False, 'bin numeric columns into ranges', replay=Tr
 @VisiData.api
 def valueNames(vd, discrete_vals, numeric_vals):
     ret = [ '+'.join(str(x) for x in discrete_vals) ]
-    if numeric_vals != (0, 0):
+    if isinstance(numeric_vals, tuple) and numeric_vals != (0, 0):
         ret.append('%s-%s' % numeric_vals)
 
     return '+'.join(ret)

@@ -26,6 +26,8 @@ def makeErrorKey(col):
 def formatRange(col, numeric_key):
     a, b = numeric_key
     nankey = makeErrorKey(col)
+    if b is None:
+        return a
     if a is nankey and b is nankey:
         return '#ERR'
     elif a == b:
@@ -199,13 +201,16 @@ class PivotSheet(Sheet):
         if numericCols:
             nbins = self.source.options.histogram_bins or int(len(self.source.rows) ** (1./2))
             vals = tuple(numericCols[0].getValues(self.source.rows))
-            minval = min(vals)
-            maxval = max(vals)
+            minval = min(vals) if vals else 0
+            maxval = max(vals) if vals else 0
             width = (maxval - minval)/nbins
 
             if width == 0:
-                # only one value (and maybe errors)
-                numericBins = [(minval, maxval)]
+                if vals:
+                    # only one value
+                    numericBins = [(minval, maxval)]
+                else:
+                    numericBins = []
             elif (numericCols[0].type in (int, vlen) and nbins > (maxval - minval)) or (width == 1):
                 # (more bins than int vals) or (if bins are of width 1), just use the vals as bins
                 degenerateBinning = True
@@ -235,25 +240,29 @@ class PivotSheet(Sheet):
             if numericCols:
                 try:
                     val = numericCols[0].getValue(sourcerow)
-                    if val is not None:
-                        val = numericCols[0].type(val)
-                    if not width:
-                        binidx = 0
-                    elif degenerateBinning:
-                        # in degenerate binning, each val has its own bin
-                        binidx = numericBins.index((val, val))
+                    val = wrapply(numericCols[0].type, val)
+                    if not val:
+                        groupRow = numericGroupRows.get(str(val), None)
                     else:
-                        binidx = int((val-minval)//width)
-                    groupRow = numericGroupRows[formatRange(numericCols[0], numericBins[min(binidx, nbins-1)])]
+                        if not width:
+                            binidx = 0
+                        elif degenerateBinning:
+                            # in degenerate binning, each val has its own bin
+                            binidx = numericBins.index((val, val))
+                        else:
+                            binidx = int((val-minval)//width)
+                        groupRow = numericGroupRows[formatRange(numericCols[0], numericBins[min(binidx, nbins-1)])]
                 except Exception as e:
-                    # leave in main/error bin
-                    pass
+                    vd.exceptionCaught(e)
 
             # add the main bin if no numeric bin (error, or no numeric cols)
             if groupRow is None:
-                nankey = makeErrorKey(numericCols[0]) if numericCols else 0
-                groupRow = PivotGroupRow(discreteKeys, (nankey, nankey), [], {})
-                groups[formattedDiscreteKeys] = (numericGroupRows, groupRow)
+                if numericCols:
+                    groupRow = PivotGroupRow(discreteKeys, val, [], {})
+                    numericGroupRows[str(val)] = groupRow
+                else:
+                    groupRow = PivotGroupRow(discreteKeys, (0, 0), [], {})
+                    groups[formattedDiscreteKeys] = (numericGroupRows, groupRow)
                 self.addRow(groupRow)
 
             # add the sourcerow to its all bin
