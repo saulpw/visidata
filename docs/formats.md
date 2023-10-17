@@ -4,58 +4,57 @@ eleventyNavigation:
     order: 99
 ---
 
-|filetype            |format              |VisiData\_loader |VisiData saver  |version\_added |created  |creator             |PyPI dependencies   |
-|--------------------|--------------------|-----------------|----------------|---------------|---------|--------------------|--------------------|
-|[csv](#csv)    |Comma\-Separated Values|0\.28            |displayed text  |0\.28          |1972     |                    |                    |
-|[json](#json)  |Javascript Object Notation \(JSON\)|0\.28            |typed           |0\.28          |2001     |Douglas Crockford   |                    |
-|[tsv](#tsv)    |Tab\-Separated Values|0\.28            |displayed text  |0\.28          |         |                    |                    |
-|xlsx                |Excel spreadsheets  |0\.28            |                |0\.28          |1987     |Microsoft           |openpyxl            |
-|zip                 |ZIP archive format  |0\.28            |                |0\.28          |1989     |PKWARE              |                    |
-|hdf5                |Hierarchical Data Format|0\.28            |                |0\.28          |199x     |NCSA                |h5py                |
-|[sqlite](#sqlite)|sqlite              |0\.42            |                |0\.42          |2000     |D\. Richard Hipp    |                    |
-|xls                 |Excel spreadsheets  |0\.42            |                |0\.42          |1987     |Microsoft           |xlrd                |
-|[fixed](#fixed)|fixed width text    |0\.97            |                |0\.97          |         |                    |                    |
-|[postgres](#postgres)|PostgreSQL database |0\.97            |                |0\.97          |1996     |                    |                    |
-|[imap](#imap)|Internet Message Access Protocol |2\.12            |                |2\.12          |1988     |                    |                    |
-|[vd](#vd)      |VisiData command log|0\.97            |                |0\.97          |2017     |VisiData            |                    |
-|vds           |VisiData Sheet      |2\.2             |yes                 |2021     |VisiData            |                    |                    |
-|[mbtiles](#mbtiles)|MapBox Tileset      |0\.98            |                |0\.98          |2011     |MapBox              |mapbox\-vector\-tile|
-|pbf                 |Protocolbuffer Binary Format|0\.98            |                |0\.98          |2011     |OpenStreetMap       |                    |
-|[shp](#shp)    |Shapefile geographic data|0\.98            |                |0\.98          |1993     |ESRI                |pyshp               |
-|[html](#html)  |HTML tables         |0\.99            |displayed text  |0\.99          |1996     |Dave Raggett        |lxml                |
-|md                  |markdown table      |                 |displayed text  |1\.1           |2008     |                    |                    |
-|[png](#png)    |Portable Network Graphics \(PNG\) image|1\.1             |from png        |1\.1           |1996     |PNG Development Group|pypng               |
-|[ttf](#ttf)    |TrueType Font       |1\.1             |                |1\.1           |1991     |Apple               |fonttools           |
-|[dot](#pcap)   |Graphviz diagram    |                 |from pcap       |1\.2           |1991     |                    |                    |
-|dta                 |Stata               |1\.2             |                |1\.2           |1985     |StataCorp           |pandas              |
-|[geojson](#shp)       |Geographic JSON     |2\.2             |yes \(from shp and geojson\)|2008     |                    |http://geojson\.org/|                    |
-|sas7bdat            |Statistical Analysis System \(SAS\)|1\.2             |                |1\.2           |1976     |SAS Institute       |sas7bdat            |
-|sav                 |SPSS statistics     |1\.2             |                |1\.2           |1968     |SPSS Inc            |                    |
-|spss                |SPSS statistics     |1\.2             |                |1\.2           |1968     |SPSS Inc            |savReaderWriter     |
-|xpt                 |Statistical Analysis System \(SAS\)|1\.2             |                |1\.2           |1976     |SAS Institute       |xport               |
-|[jsonl](#json) |JSON Lines          |1\.3             |typed           |1\.3           |2013     |Ian Ward            |                    |
-|[pandas](#pandas)|all formats supported by pandas library|1\.3             |                |1\.3           |2008     |Wes McKinney        |pandas              |
-|[pcap](#pcap)  |network packet capture|1\.3             |                |1\.3           |1988     |LBNL                |dpkt dnslib         |
-|pyprof              |Python Profile data |1\.3             |                |1\.3           |         |                    |                    |
-|[xml](#xml)    |eXtensible Markup Language \(XML\)|1\.3             |from xml        |1\.3           |1998     |W3C                 |lxml                |
-|yaml                |YAML Ain't Markup Language \(YAML\)|1\.3             |                |1\.3           |2001     |Clark Evans         |PyYAML              |
-|frictionless        |Frictionless Data   |2\.0             |                |2\.0           |         |OpenKnowledge Institute|datapackage         |
-|jira                |JIRA/Confluence table markup|                 |displayed text  |2\.0           |         |Atlassian           |                    |
-|npy                 |NumPy array format  |2\.0             |typed           |2\.0           |         |                    |numpy               |
-|tar                 |Unix Tape Archive   |2\.0             |                |2\.0           |         |                    |                    |
-|usv                 |Unicode\-Separated Value|2\.0             |displayed text  |2\.0           |1993     |Unicode             |                    |
-|xlsb                |Excel binary format |2\.0             |                |2\.0           |         |Microsoft           |xlrd                |
-|[mysql](#mysql)     |MySQL               |2\.0             |                | |1995     |MySQL AB            |https://github\.com/mysql/mysql\-server|MySQLdb             |
-|pdf           |Portable Document Format|2\.0             |                |    |1993     |Adobe               |https://en\.wikipedia\.org/wiki/PDF|pdfminer\.six       |
-|vcf           |Virtual Contact File \(vCard\)|2\.0             |                |  |1995     |Versit Consortium   |https://tools\.ietf\.org/html/rfc6350|                    |
-|rec           |recutils database file|2\.0             |displayed text  |  |2010     |Jose E\. Marchesi   |https://www\.gnu\.org/software/recutils/|                    |
-|eml           |Multipurpose Internet Mail Extensions \(MIME\)|2\.0             |                |  |1996     |Nathaniel Borenstein and Ned Freed|https://tools\.ietf\.org/html/rfc2045|                    |
-|ods           |OpenDocument Spreadsheet|2\.7             |                |  |2006     |[OASIS](https://en.wikipedia.org/wiki/OASIS_(organization))|https://docs.oasis-open.org/office/v1.1/|odfpy|
-|lsv           |awk-like key-value line-separated values|2\.7             |v2\.7                |  |     |   |   |   |
-|arrow         |Arrow IPC file format|2\.9             |                    |2016     |Apache Software Foundation|https://arrow\.apache\.org/docs/format/Columnar\.html|pyarrow             |
-|arrows        |Arrow IPC streaming format|2\.9             |                    |2016     |Apache Software Foundation|https://arrow\.apache\.org/docs/format/Columnar\.html|pyarrow             |
-|parquet       |Apache Parquet      |1\.3             |                    |2013     |Apache Software Foundation|https://parquet\.apache\.org/|pyarrow or pandas   |
-
+| filetype              | format                                         | VisiData_loader | VisiData saver               | version_added | created | creator                                                       | PyPI dependencies    |
+| --------------------- | ---------------------------------------------- | --------------- | ---------------------------- | ------------- | ------- | ------------------------------------------------------------- | -------------------- |
+| [csv](#csv)           | Comma\-Separated Values                        | 0\.28           | displayed text               | 0\.28         | 1972    |                                                               |                      |
+| [json](#json)         | Javascript Object Notation \(JSON\)            | 0\.28           | typed                        | 0\.28         | 2001    | Douglas Crockford                                             |                      |
+| [tsv](#tsv)           | Tab\-Separated Values                          | 0\.28           | displayed text               | 0\.28         |         |                                                               |                      |
+| xlsx                  | Excel spreadsheets                             | 0\.28           |                              | 0\.28         | 1987    | Microsoft                                                     | openpyxl             |
+| zip                   | ZIP archive format                             | 0\.28           |                              | 0\.28         | 1989    | PKWARE                                                        |                      |
+| hdf5                  | Hierarchical Data Format                       | 0\.28           |                              | 0\.28         | 199x    | NCSA                                                          | h5py                 |
+| [sqlite](#sqlite)     | sqlite                                         | 0\.42           |                              | 0\.42         | 2000    | D\. Richard Hipp                                              |                      |
+| xls                   | Excel spreadsheets                             | 0\.42           |                              | 0\.42         | 1987    | Microsoft                                                     | xlrd                 |
+| [fixed](#fixed)       | fixed width text                               | 0\.97           |                              | 0\.97         |         |                                                               |                      |
+| [postgres](#postgres) | PostgreSQL database                            | 0\.97           |                              | 0\.97         | 1996    |                                                               |                      |
+| [imap](#imap)         | Internet Message Access Protocol               | 2\.12           |                              | 2\.12         | 1988    |                                                               |                      |
+| [vd](#vd)             | VisiData command log                           | 0\.97           |                              | 0\.97         | 2017    | VisiData                                                      |                      |
+| vds                   | VisiData Sheet                                 | 2\.2            | yes                          |               | 2021    | VisiData                                                      |                      |
+| [mbtiles](#mbtiles)   | MapBox Tileset                                 | 0\.98           |                              | 0\.98         | 2011    | MapBox                                                        | mapbox\-vector\-tile |
+| pbf                   | Protocolbuffer Binary Format                   | 0\.98           |                              | 0\.98         | 2011    | OpenStreetMap                                                 |                      |
+| [shp](#shp)           | Shapefile geographic data                      | 0\.98           |                              | 0\.98         | 1993    | ESRI                                                          | pyshp                |
+| [html](#html)         | HTML tables                                    | 0\.99           | displayed text               | 0\.99         | 1996    | Dave Raggett                                                  | lxml                 |
+| md                    | markdown table                                 |                 | displayed text               | 1\.1          | 2008    |                                                               |                      |
+| [png](#png)           | Portable Network Graphics \(PNG\) image        | 1\.1            | from png                     | 1\.1          | 1996    | PNG Development Group                                         | pypng                |
+| [ttf](#ttf)           | TrueType Font                                  | 1\.1            |                              | 1\.1          | 1991    | Apple                                                         | fonttools            |
+| [dot](#pcap)          | Graphviz diagram                               |                 | from pcap                    | 1\.2          | 1991    |                                                               |                      |
+| dta                   | Stata                                          | 1\.2            |                              | 1\.2          | 1985    | StataCorp                                                     | pandas               |
+| [geojson](#shp)       | Geographic JSON                                | 2\.2            | yes \(from shp and geojson\) |               | 2008    | http://geojson\.org/                                          |                      |
+| sas7bdat              | Statistical Analysis System \(SAS\)            | 1\.2            |                              | 1\.2          | 1976    | SAS Institute                                                 | sas7bdat             |
+| sav                   | SPSS statistics                                | 1\.2            |                              | 1\.2          | 1968    | SPSS Inc                                                      |                      |
+| spss                  | SPSS statistics                                | 1\.2            |                              | 1\.2          | 1968    | SPSS Inc                                                      | savReaderWriter      |
+| xpt                   | Statistical Analysis System \(SAS\)            | 1\.2            |                              | 1\.2          | 1976    | SAS Institute                                                 | xport                |
+| [jsonl](#json)        | JSON Lines                                     | 1\.3            | typed                        | 1\.3          | 2013    | Ian Ward                                                      |                      |
+| [pandas](#pandas)     | all formats supported by pandas library        | 1\.3            |                              | 1\.3          | 2008    | Wes McKinney                                                  | pandas               |
+| [pcap](#pcap)         | network packet capture                         | 1\.3            |                              | 1\.3          | 1988    | LBNL                                                          | dpkt dnslib          |
+| pyprof                | Python Profile data                            | 1\.3            |                              | 1\.3          |         |                                                               |                      |
+| [xml](#xml)           | eXtensible Markup Language \(XML\)             | 1\.3            | from xml                     | 1\.3          | 1998    | W3C                                                           | lxml                 |
+| yaml                  | YAML Ain't Markup Language \(YAML\)            | 1\.3            |                              | 1\.3          | 2001    | Clark Evans                                                   | PyYAML               |
+| frictionless          | Frictionless Data                              | 2\.0            |                              | 2\.0          |         | OpenKnowledge Institute                                       | datapackage          |
+| jira                  | JIRA/Confluence table markup                   |                 | displayed text               | 2\.0          |         | Atlassian                                                     |                      |
+| npy                   | NumPy array format                             | 2\.0            | typed                        | 2\.0          |         |                                                               | numpy                |
+| tar                   | Unix Tape Archive                              | 2\.0            |                              | 2\.0          |         |                                                               |                      |
+| usv                   | Unicode\-Separated Value                       | 2\.0            | displayed text               | 2\.0          | 1993    | Unicode                                                       |                      |
+| xlsb                  | Excel binary format                            | 2\.0            |                              | 2\.0          |         | Microsoft                                                     | xlrd                 |
+| [mysql](#mysql)       | MySQL                                          | 2\.0            |                              |               | 1995    | MySQL AB                                                      | MySQLdb              |
+| pdf                   | Portable Document Format                       | 2\.0            |                              |               | 1993    | Adobe                                                         | pdfminer\.six        |
+| vcf                   | Virtual Contact File \(vCard\)                 | 2\.0            |                              |               | 1995    | Versit Consortium                                             |                      |
+| rec                   | recutils database file                         | 2\.0            | displayed text               |               | 2010    | Jose E\. Marchesi                                             |                      |
+| eml                   | Multipurpose Internet Mail Extensions \(MIME\) | 2\.0            |                              |               | 1996    | Nathaniel Borenstein and Ned Freed                            |                      |
+| ods                   | OpenDocument Spreadsheet                       | 2\.7            |                              |               | 2006    | [OASIS](<https://en.wikipedia.org/wiki/OASIS_(organization)>) | odfpy                |
+| lsv                   | awk-like key-value line-separated values       | 2\.7            |                              | v2\.7         |         |                                                               |                      |
+| arrow                 | Arrow IPC file format                          | 2\.9            |                              |               | 2016    | Apache Software Foundation                                    | pyarrow              |
+| arrows                | Arrow IPC streaming format                     | 2\.9            |                              |               | 2016    | Apache Software Foundation                                    | pyarrow              |
+| parquet               | Apache Parquet                                 | 1\.3            |                              |               | 2013    | Apache Software Foundation                                    | pyarrow or pandas    |
 
 # Extra notes about formats
 
