@@ -194,8 +194,8 @@ def rightStatus(vd, sheet):
     return sheet.formatString(sheet.options.disp_rstatus_fmt)
 
 
-@VisiData.property
-def keystrokeStatus(vd):
+@BaseSheet.property
+def keystrokeStatus(vs):
     if vs is vd.activeSheet:
         return f'[:keystrokes]{vd.keystrokes}[:]'
 
