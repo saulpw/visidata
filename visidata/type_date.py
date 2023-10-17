@@ -111,6 +111,7 @@ vd.addGlobals(
 
 
 Sheet.addCommand('@', 'type-date', 'cursorCol.type = date', 'set type of current column to date')
+Sheet.addCommand('', 'type-datetime', 'cursorCol.type=date; cursorCol.fmtstr="%Y-%m-%d %H:%M:%S"', 'set type of current column to datetime')
 
 vd.addMenuItems('''
     Column > Type as > date > type-date
