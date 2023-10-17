@@ -15,7 +15,7 @@ def sidebar(sheet):
     fmt = sheet.options.disp_sidebar_fmt
     if sheet.options.disp_help and fmt == '{help}':
         fmt = sheet.help
-    return textwrap.dedent(sheet.formatString(fmt).strip('\n'))
+    return sheet.formatString(fmt)
 
 
 @VisiData.api
@@ -29,17 +29,11 @@ def drawSidebar(vd, scr, sheet):
             sidebar = sheet.sidebar
             bottommsg = '[:onclick sidebar-toggle][:reverse] b to toggle sidebar [:]'
             overflowmsg = '[:reverse] (see full sidebar with [:code]gb[:reverse]) [:]'
-
-        lines = sidebar.splitlines()
-        if lines and lines[0].strip().startswith('# '):
-            sidebar_title = lines[0][1:].strip()
-            sidebar = '\n'.join(lines[1:])
     except Exception as e:
         vd.exceptionCaught(e)
-        sidebar_title = 'error'
-        sidebar = str(e)
+        sidebar = f'# error\n{e}'
 
-    return sheet.drawSidebarText(scr, text=sidebar, title=sidebar_title, overflowmsg=overflowmsg, bottommsg=bottommsg)
+    return sheet.drawSidebarText(scr, text=sidebar, overflowmsg=overflowmsg, bottommsg=bottommsg)
 
 @BaseSheet.api
 def drawSidebarText(sheet, scr, text:str, title:str='', overflowmsg:str='', bottommsg:str=''):
@@ -49,6 +43,12 @@ def drawSidebarText(sheet, scr, text:str, title:str='', overflowmsg:str='', bott
 
     if not text:
         return
+
+    text = textwrap.dedent(text.strip('\n'))
+    lines = text.splitlines()
+    if not title and lines and lines[0].strip().startswith('# '):
+        title = lines[0][1:].strip()
+        text = '\n'.join(lines[1:])
 
     cattr = colors.get_color('color_sidebar')
     lines = list(wraptext(text, width=maxw-4))
