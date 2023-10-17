@@ -126,8 +126,16 @@ def append_tsv_row(vs, row):
             if colhdr.strip():  # is anything but whitespace
                 fp.write(colhdr)
 
+    newrow = ''
+
+    contents = vs.source.open(mode='r', encoding=vs.options.encoding).read()
+    if not contents.endswith('\n'):  #1569
+        newrow += '\n'
+
+    newrow += '\t'.join(col.getDisplayValue(row) for col in vs.visibleCols) + '\n'
+
     with vs.source.open(mode='a', encoding=vs.options.encoding) as fp:
-        fp.write('\t'.join(col.getDisplayValue(row) for col in vs.visibleCols) + '\n')
+        fp.write(newrow)
 
 
 TsvSheet.options.regex_skip = '^#.*'
