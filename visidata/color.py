@@ -133,7 +133,7 @@ class ColorMaker:
 
         return fgbgattrs
 
-    def _get_colornum(self, colorname:str|int, default:int=-1) -> int:
+    def _get_colornum(self, colorname:'str|int', default:int=-1) -> int:
         'Return terminal color number for colorname.'
         if isinstance(colorname, int):
             return colorname
