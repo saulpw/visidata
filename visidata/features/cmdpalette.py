@@ -25,6 +25,15 @@ def levenshtein(a, b):
             d[i+1][j+1] = min(d[i][j+1]+1, d[i+1][j]+1, d[i][j]+cost)
     return d[m][n]
 
+def format_name(s, letters):
+    out = ""
+    for l in s:
+        if l in letters:
+            out += f"[:bold][:onclick {s}]{l}[:][:]"
+        else:
+            out += f"[:onclick {s}]{l}[:]"
+    return out
+
 
 @BaseSheet.api
 def inputLongname(sheet):
@@ -34,7 +43,7 @@ def inputLongname(sheet):
     longnames = set(k for (k, obj), v in vd.commands.iter(sheet))
     this_sheets_help = HelpSheet("", source=sheet)
     this_sheets_help.ensureLoaded()
-    Match = collections.namedtuple('Match', 'name keystrokes description distance')
+    Match = collections.namedtuple('Match', 'name formatted_name keystrokes description distance')
     bindings = dict()
 
     def longname_executor(name):
@@ -52,7 +61,8 @@ def inputLongname(sheet):
             if letters.issubset(set(row.longname)):
                 description = this_sheets_help.cmddict[(row.sheet, row.longname)].helpstr
                 keystrokes = this_sheets_help.revbinds.get(row.longname, [None])[0]
-                matches.append(Match(row.longname, keystrokes, description, distance))
+                formatted_name = format_name(row.longname, letters)
+                matches.append(Match(row.longname, formatted_name, keystrokes, description, distance))
         matches.sort(key=lambda m: m[3])
 
         # do the drawing
@@ -66,7 +76,7 @@ def inputLongname(sheet):
             else:
                 trigger_key = " "
             buffer = " "*(len(label)-2)
-            match_summary = f"{buffer}{trigger_key} [:onclick {m.name}]{m.name}[:] ({m.keystrokes}) - {m.description}"
+            match_summary = f"{buffer}{trigger_key} {m.formatted_name} ({m.keystrokes}) - {m.description}"
             if vd.options.debug:
                 debug_info = f"[{m.distance}]"
                 match_summary = debug_info + match_summary[len(debug_info):]
