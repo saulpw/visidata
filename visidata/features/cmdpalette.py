@@ -1,5 +1,5 @@
 import collections
-from visidata import BaseSheet, vd, CompleteKey, clipdraw, HelpSheet, colors
+from visidata import BaseSheet, vd, CompleteKey, clipdraw, HelpSheet, colors, EscapeException
 
 vd.option('color_cmdpalette', 'black on 72', 'base color of command palette')
 vd.option('cmdpal_max_matches', 5, 'max number of suggestions for command palette')
@@ -35,6 +35,14 @@ def inputLongname(sheet):
     this_sheets_help = HelpSheet("", source=sheet)
     this_sheets_help.ensureLoaded()
     Match = collections.namedtuple('Match', 'name keystrokes description distance')
+    bindings = dict()
+
+    def longname_executor(name):
+        def _exec(v, i):
+            vd.sheet.exec_longname(name)
+            raise EscapeException('^[')
+        return _exec
+
     def myupdater(value):
         # collect data
         matches = []
@@ -52,7 +60,13 @@ def inputLongname(sheet):
         n = min(len(matches), max_matches)
         for i in range(n):
             m = matches[i]
-            match_summary = " "*len(label) + f"[:onclick {m.name}]{m.name}[:] ({m.keystrokes}) - {m.description}"
+            if i < 9:
+                trigger_key = f"{i+1}"
+                bindings[trigger_key] = longname_executor(m.name)
+            else:
+                trigger_key = " "
+            buffer = " "*(len(label)-2)
+            match_summary = f"{buffer}{trigger_key} [:onclick {m.name}]{m.name}[:] ({m.keystrokes}) - {m.description}"
             if vd.options.debug:
                 debug_info = f"[{m.distance}]"
                 match_summary = debug_info + match_summary[len(debug_info):]
@@ -63,7 +77,7 @@ def inputLongname(sheet):
 
         return None
     return vd.input(label, completer=CompleteKey(sorted(longnames)), type='longname', updater=myupdater,
-                    bindings={"1": lambda v, i: vd.sheet.exec_longname("melt")})
+                    bindings=bindings)
 
 @BaseSheet.api
 def exec_longname(sheet, longname):
