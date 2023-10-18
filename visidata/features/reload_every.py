@@ -30,7 +30,7 @@ def reload_modified(sheet):
 
 
 BaseSheet.addCommand('', 'reload-every', 'sheet.reload_every(input("reload interval (sec): ", value=1))', 'schedule sheet reload every N seconds') #683
-BaseSheet.addCommand('', 'reload-modified', 'sheet.reload_modified()', 'reload sheet when file modified')  #1686
+BaseSheet.addCommand('', 'reload-modified', 'sheet.reload_modified()', 'reload sheet when source file modified')  #1686
 
 vd.addMenuItems('''
     File > Reload > sheet > reload-sheet
