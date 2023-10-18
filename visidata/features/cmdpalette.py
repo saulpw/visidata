@@ -2,6 +2,7 @@ import collections
 from visidata import BaseSheet, vd, CompleteKey, clipdraw, HelpSheet, colors
 
 vd.option('color_cmdpalette', 'black on 72', 'base color of command palette')
+vd.option('cmdpal_max_matches', 5, 'max number of suggestions for command palette')
 def levenshtein(a, b):
     # source: https://en.wikipedia.org/wiki/Levenshtein_distance#Iterative_with_full_matrix
     d = []
@@ -27,6 +28,7 @@ def levenshtein(a, b):
 
 @BaseSheet.api
 def inputLongname(sheet):
+    max_matches = vd.options.cmdpal_max_matches
     # get set of commands possible in the sheet
     longnames = set(k for (k, obj), v in vd.commands.iter(sheet))
     this_sheets_help = HelpSheet("", source=sheet)
@@ -46,12 +48,12 @@ def inputLongname(sheet):
 
         # do the drawing
         h, w = sheet._scr.getmaxyx()
-        n = min(len(matches), 5)
+        n = min(len(matches), max_matches)
         for i in range(n):
             m = matches[i]
             clipdraw(sheet._scr, h-(n+1)+i, 0, f"[{m.distance}] [:onclick {m.name}]{m.name}[:] ({m.keystrokes}) - {m.description}", colors.color_cmdpalette, w=w)
         # add some empty rows for visual appeal and dropping previous (not-anymore-)matches
-        for i in range(5-n):
+        for i in range(max_matches-n):
             clipdraw(sheet._scr, h-6+i, 0, " ", 0, w=w)
 
         return None
