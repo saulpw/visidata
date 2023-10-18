@@ -219,6 +219,9 @@ class SqliteQuerySheet(SqliteSheet):
 @VisiData.api
 def save_sqlite(vd, p, *vsheets):
     import sqlite3
+    import json
+    jsonenc = json.JSONEncoder()  #1589: list/dict values as json
+
     conn = sqlite3.connect(str(p))
     conn.text_factory = lambda s, enc=vsheets[0].options.encoding: s.decode(enc)
     conn.row_factory = sqlite3.Row
@@ -256,6 +259,8 @@ def save_sqlite(vd, p, *vsheets):
                         v = options.safe_error
                     else:
                         v = None
+                elif isinstance(v, (list, tuple, dict)):
+                    v = jsonenc.encode(v)
                 elif not isinstance(v, (int, float, str)):
                     v = col.getDisplayValue(r)
                 sqlvals.append(v)
