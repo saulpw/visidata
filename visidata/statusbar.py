@@ -19,7 +19,7 @@ vd.option('color_status', 'bold on 238', 'status line color')
 vd.option('color_error', '202 1', 'error message color')
 vd.option('color_warning', '166 15', 'warning message color')
 vd.option('color_top_status', 'underline', 'top window status bar color')
-vd.option('color_active_status', 'black on 103 blue', ' active window status bar color')
+vd.option('color_active_status', 'black on 68 blue', ' active window status bar color')
 vd.option('color_inactive_status', '8 on black', 'inactive window status bar color')
 
 BaseSheet.init('longname', lambda: '')

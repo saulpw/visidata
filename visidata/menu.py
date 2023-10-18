@@ -7,10 +7,10 @@ from visidata import BaseSheet, VisiData, AttrDict, ENTER
 
 vd.option('disp_menu', True, 'show menu on top line when not active', sheettype=None)
 vd.option('disp_menu_keys', True, 'show keystrokes inline in submenus', sheettype=None)
-vd.option('color_menu', 'black on 103 blue', 'color of menu items in general')
+vd.option('color_menu', 'black on 68 blue', 'color of menu items in general')
 vd.option('color_menu_active', '223 yellow on black', 'color of active menu items')
 vd.option('color_menu_spec', 'black on 34 green', 'color of sheet-specific menu items')
-vd.option('color_menu_help', 'black italic on 103 blue', 'color of helpbox')
+vd.option('color_menu_help', 'black italic on 68 blue', 'color of helpbox')
 
 vd.option('disp_menu_boxchars', '││──┌┐└┘├┤', 'box characters to use for menus')
 vd.option('disp_menu_more', '»', 'command submenu indicator')
