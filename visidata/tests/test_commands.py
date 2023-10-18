@@ -25,6 +25,7 @@ nonTested = (
         'plot-numerics-ext',
         'reload-every',
         'reload-modified',
+        'reload-rows',
         'breakpoint',
         'redraw',
         'menu',
