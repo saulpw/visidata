@@ -224,7 +224,7 @@ def mainloop(self, scr):
         # play next queued command
         if self._nextCommands:
             cmd = self._nextCommands.pop(0)
-            if isinstance(cmd, dict):
+            if isinstance(cmd, (dict, list)):  # .vd cmdlog rows are NamedListTemplate
                 if self.replayOne(cmd):
                     self.replay_cancel()
             else:
