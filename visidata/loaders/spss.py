@@ -1,4 +1,4 @@
-from visidata import VisiData, Sheet, Progress, asyncthread, ColumnItem, vd
+from visidata import VisiData, Sheet, Progress, asyncthread, ItemColumn, vd
 
 
 @VisiData.api
@@ -15,7 +15,7 @@ class SpssSheet(Sheet):
             self.columns = []
             for i, vname in enumerate(reader.varNames):
                 vtype = float if reader.varTypes[vname] == 0 else str
-                self.addColumn(ColumnItem(vname.decode('utf-8'), i, type=vtype))
+                self.addColumn(ItemColumn(vname.decode('utf-8'), i, type=vtype))
 
             self.rows = []
             for r in Progress(reader, total=reader.shape.nrows):
