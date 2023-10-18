@@ -1,7 +1,7 @@
 import os
 import time
 
-from visidata import vd, BaseSheet, asyncthread, Path
+from visidata import vd, BaseSheet, Sheet, asyncthread, Path, ScopedSetattr
 
 
 @BaseSheet.api
@@ -29,11 +29,27 @@ def reload_modified(sheet):
             sheet.reload()
 
 
+@Sheet.api
+@asyncthread
+def reload_rows(self):
+    'Reload rows from ``self.source``, keeping current columns intact.  Async.'
+    with (ScopedSetattr(self, 'loading', True),
+          ScopedSetattr(self, 'checkCursor', lambda: True),
+          ScopedSetattr(self, 'cursorRowIndex', self.cursorRowIndex)):
+            self.beforeLoad()
+            try:
+                self.loader()
+                vd.status("finished loading rows")
+            finally:
+                self.afterLoad()
+
+
 BaseSheet.addCommand('', 'reload-every', 'sheet.reload_every(input("reload interval (sec): ", value=1))', 'schedule sheet reload every N seconds') #683
 BaseSheet.addCommand('', 'reload-modified', 'sheet.reload_modified()', 'reload sheet when source file modified')  #1686
+BaseSheet.addCommand('z^R', 'reload-rows', 'preloadHook(); reload_rows(); status("reloaded")', 'Reload current sheet')
 
 vd.addMenuItems('''
-    File > Reload > sheet > reload-sheet
+    File > Reload > rows only > reload-rows
     File > Reload > every N seconds > reload-every
     File > Reload > when source modified > reload-modified
 ''')

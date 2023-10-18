@@ -232,14 +232,17 @@ class TableSheet(BaseSheet):
 
     @asyncthread
     def reload(self):
-        'Load rows and/or columns from ``self.source``.  Async.  Override in subclass.'
+        'Load or reload rows and columns from ``self.source``.  Async.  Override resetCols() or loader() in subclass.'
         with visidata.ScopedSetattr(self, 'loading', True):
             self.resetCols()
             self.beforeLoad()
             try:
                 self.loader()
+                vd.status("finished loading")
             finally:
                 self.afterLoad()
+
+        self.recalc()
 
     def beforeLoad(self):
         pass
@@ -1069,7 +1072,7 @@ BaseSheet.init('pane', lambda: 1)
 Sheet.init('_ordering', list, copy=True)  # (col:Column, reverse:bool)
 
 
-BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); reload(); recalc(); status("reloaded")', 'Reload current sheet')
+BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); reload()', 'Reload current sheet')
 Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line')
 
 Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', 'toggle current column as a key column')
@@ -1143,7 +1146,7 @@ vd.addMenuItems('''
     File > Duplicate > all rows by ref > dup-rows
     File > Duplicate > selected rows deep > dup-selected-deep
     File > Duplicate > all rows deep > dup-rows-deep
-    File > Reload > reload-sheet
+    File > Reload > rows and columns > reload-sheet
     File > Quit > top sheet > quit-sheet
     File > Quit > all sheets > quit-all
     Edit > Modify > current cell > input > edit-cell
