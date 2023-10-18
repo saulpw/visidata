@@ -184,14 +184,13 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
     i = 0
     for j, item in enumerate(menus):
         attr = colors.color_menu
-        bindattr = colors.color_keystrokes
 
         if any(foo.obj not in ['BaseSheet', 'TableSheet'] for foo, _ in walkmenu(item)):
-            bindattr = attr = colors.color_menu_spec
+            attr = colors.color_menu_spec
 
         if level < len(sheet.activeMenuItems):
           if j == sheet.activeMenuItems[level]:
-            bindattr = attr = colors.color_menu_active
+            attr = colors.color_menu_active
 
             if level < len(sheet.activeMenuItems):
                 vd.drawSubmenu(scr, sheet, y+i, x+w+4, item.menus, level+1, disp_menu_boxchars=disp_menu_boxchars)
@@ -224,7 +223,7 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
 
         menudraw(scr, y+i, x+1, pretitle+title, attr)
         if maxbinding:
-            menudraw(scr, y+i, x+1+w-maxbinding, '  ' + mainbinding, bindattr)
+            menudraw(scr, y+i, x+1+w-maxbinding, '  ' + mainbinding, attr.update(colors.keystrokes))
         menudraw(scr, y+i, x+2+w, titlenote, attr)
         menudraw(scr, y+i, x+3+w, ls, colors.color_menu)
 

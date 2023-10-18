@@ -27,8 +27,8 @@ class ColorAttr:
         self.precedence = precedence
         self.colorname = colorname
 
-    def update(self, b:'ColorAttr') -> 'ColorAttr':
-        return update_attr(self, b)
+    def update(self, b:'ColorAttr', prec:int=10) -> 'ColorAttr':
+        return update_attr(self, b, prec)
 
     @property
     def attr(self) -> int:
