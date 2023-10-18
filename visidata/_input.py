@@ -172,7 +172,7 @@ class HistoryState:
 # history: earliest entry first
 @VisiData.api
 def editline(vd, scr, y, x, w, i=0,
-             attr=curses.A_NORMAL,
+             attr=ColorAttr(),
              value='',
              fillchar=' ',
              truncchar='-',
