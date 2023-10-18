@@ -33,7 +33,7 @@ class ColorAttr:
     @property
     def attr(self) -> int:
         a = colors._get_colorpair(self.fg, self.bg, self.colorname) | self.attributes
-        assert a > 0, a
+        assert a >= 0, a
         return a
 
 

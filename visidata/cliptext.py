@@ -174,7 +174,7 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, literal=False, **kwargs):
     return clipdraw_chunks(scr, y, x, chunks, attr, w=w, clear=clear, **kwargs)
 
 
-def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr, w=None, clear=True, literal=False, **kwargs):
+def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clear=True, literal=False, **kwargs):
     '''Draw `chunks` (sequence of (color:str, text:str) as from iterchunks) at (y,x)-(y,x+w) with curses `attr`, clipping with ellipsis char.
        If `clear`, clear whole editing area before displaying.
        Return width drawn (max of w).

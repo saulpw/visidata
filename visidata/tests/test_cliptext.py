@@ -30,7 +30,7 @@ class TestClipText:
         ]
         scr = Mock()
         scr.getmaxyx.return_value = (80,25)
-        visidata.clipdraw_chunks(scr, 0, 0, prechunks, 0, w=5)
+        visidata.clipdraw_chunks(scr, 0, 0, prechunks, visidata.ColorAttr(), w=5)
         scr.addstr.assert_has_calls([
                 call(0, 0, 'x', 0),
                 call(0, 1, 'jso…', 0),
