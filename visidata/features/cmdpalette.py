@@ -29,6 +29,7 @@ def levenshtein(a, b):
 @BaseSheet.api
 def inputLongname(sheet):
     max_matches = vd.options.cmdpal_max_matches
+    label = "command name: "
     # get set of commands possible in the sheet
     longnames = set(k for (k, obj), v in vd.commands.iter(sheet))
     this_sheets_help = HelpSheet("", source=sheet)
@@ -51,13 +52,17 @@ def inputLongname(sheet):
         n = min(len(matches), max_matches)
         for i in range(n):
             m = matches[i]
-            clipdraw(sheet._scr, h-(n+1)+i, 0, f"[{m.distance}] [:onclick {m.name}]{m.name}[:] ({m.keystrokes}) - {m.description}", colors.color_cmdpalette, w=w)
+            match_summary = " "*len(label) + f"[:onclick {m.name}]{m.name}[:] ({m.keystrokes}) - {m.description}"
+            if vd.options.debug:
+                debug_info = f"[{m.distance}]"
+                match_summary = debug_info + match_summary[len(debug_info):]
+            clipdraw(sheet._scr, h-(n+1)+i, 0, match_summary, colors.color_cmdpalette, w=w)
         # add some empty rows for visual appeal and dropping previous (not-anymore-)matches
         for i in range(max_matches-n):
-            clipdraw(sheet._scr, h-6+i, 0, " ", 0, w=w)
+            clipdraw(sheet._scr, h-(max_matches+1)+i, 0, " ", colors.color_cmdpalette, w=w)
 
         return None
-    return vd.input("command name: ", completer=CompleteKey(sorted(longnames)), type='longname', updater=myupdater,
+    return vd.input(label, completer=CompleteKey(sorted(longnames)), type='longname', updater=myupdater,
                     bindings={"1": lambda v, i: vd.sheet.exec_longname("melt")})
 
 @BaseSheet.api
