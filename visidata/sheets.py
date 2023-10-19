@@ -238,7 +238,7 @@ class TableSheet(BaseSheet):
             self.beforeLoad()
             try:
                 self.loader()
-                vd.status(f'finished loading {self}')
+                vd.debug(f'finished loading {self}')
             finally:
                 self.afterLoad()
 
