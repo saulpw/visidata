@@ -103,7 +103,7 @@ class ColorMaker:
            Otherwise parse *optname* for colorstring like "bold 34 red on 135 blue".'''
         r = self.colorcache.get(optname, None)
         if r is None:
-            coloropt = vd.options._get(optname) or vd.options._get('color_'+optname)
+            coloropt = vd.options._get(optname) or vd.options._get(f'color_{optname}')
             colornamestr = coloropt.value if coloropt else optname
             r = self.colorcache[optname] = self._colornames_to_cattr(colornamestr, precedence)
         return r

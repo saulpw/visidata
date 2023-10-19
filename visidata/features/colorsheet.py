@@ -29,16 +29,15 @@ class ColorSheet(Sheet):
         rightcol = max(self._visibleColLayout.values())
         xstart = rightcol[0] + rightcol[1] + 4
         for i, r in enumerate(self.rows[(self.topRowIndex//6)*6:(self.bottomRowIndex//6+1)*6]):
+            fg, bg, _, colorstr = r
+            s = f'█▌{fg:3}▐█'
             y=i//6+1
-            x=(i%6)*3+xstart
-            c = r[1]
-            s = '██'
+            x=(i%6)*(len(s)+2)+xstart
             if y > self.windowHeight-1:
                 break
             if r is self.cursorRow:
-                x -= 1
-                s = '[██]'
-            scr.addstr(y, x, s, colors[c].attr)
+                s = f'█[{fg:3}]█'
+            scr.addstr(y, x, s, colors[colorstr].attr)
 
 
 BaseSheet.addCommand(None, 'open-colors', 'vd.push(vd.colorsSheet)', 'open Color Sheet with available terminal colors')
