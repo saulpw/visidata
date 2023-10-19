@@ -2,6 +2,7 @@ import itertools
 import copy
 import datetime
 import re
+from colorsys import rgb_to_hls, hls_to_rgb
 
 from visidata import VisiData, vd, Sheet, Column, Progress, IndexSheet, ColumnAttr, SequenceSheet, AttrDict, AttrColumn
 from visidata import CellColorizer, getattrdeep, rgb_to_attr
