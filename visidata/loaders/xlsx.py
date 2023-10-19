@@ -4,6 +4,7 @@ import datetime
 import re
 
 from visidata import VisiData, vd, Sheet, Column, Progress, IndexSheet, ColumnAttr, SequenceSheet, AttrDict, AttrColumn
+from visidata import CellColorizer, getattrdeep, rgb_to_attr
 from visidata.type_date import date
 
 
@@ -34,11 +35,14 @@ class XlsxIndexSheet(IndexSheet):
         self.workbook = openpyxl.load_workbook(str(self.source), data_only=True, read_only=True)
         for sheetname in self.workbook.sheetnames:
             src = self.workbook[sheetname]
-            yield XlsxSheet(self.name, sheetname, source=src)
+            yield XlsxSheet(self.name, sheetname, source=src, workbook=self.workbook)
 
 
 class XlsxSheet(SequenceSheet):
     # rowdef: AttrDict of column_letter to cell
+    colorizers = [
+        CellColorizer(5, None, lambda s,c,r,v: c and r and s.colorize_xlsx_cell(c,r))
+    ]
     def setCols(self, headerrows):
         vd.importExternal('openpyxl')
         from openpyxl.utils.cell import get_column_letter
@@ -57,7 +61,7 @@ class XlsxSheet(SequenceSheet):
         for i, colnamelines in enumerate(itertools.zip_longest(*headers, fillvalue='')):
             colnamelines = ['' if c is None else c for c in colnamelines]
             column_name = ''.join(map(str, colnamelines))
-            self.addColumn(AttrColumn(column_name, column_letters[i] + '.value'))
+            self.addColumn(AttrColumn(column_name, column_letters[i] + '.value', column_letter=column_letters[i]))
             self.addXlsxMetaColumns(column_letters[i], column_name)
 
     def addRow(self, row, index=None):
@@ -188,3 +192,99 @@ def save_xls(vd, p, *sheets):
 
     wb.save(p)
     vd.status(f'{p} save finished')
+
+
+# from https://stackoverflow.com/a/65426130
+
+RGBMAX = 255
+HLSMAX = 240
+
+@XlsxSheet.api
+def colorize_xlsx_cell(sheet, col, row):
+    fg = getattrdeep(row, col.column_letter+'.font.color')
+    bg = getattrdeep(row, col.column_letter+'.fill.start_color')
+    fg = sheet.xlsx_color_to_xterm256(fg)
+    bg = sheet.xlsx_color_to_xterm256(bg)
+
+    return f'{fg} on {bg}'
+
+@XlsxSheet.api
+def xlsx_color_to_xterm256(sheet, color) -> int:
+    if color.type == 'rgb':
+        s = color.value
+        if isinstance(s, int):
+            return s
+
+        a,r,g,b = s[0:2], s[2:4], s[4:6], s[6:8]
+        return rgb_to_attr(int(r, 16), int(g, 16), int(b, 16), int(a, 16))
+
+    if color.type == 'theme':
+        return sheet.theme_and_tint_to_rgb(color.value, color.tint)
+    else:
+        return color.value
+
+@XlsxSheet.api
+def theme_and_tint_to_rgb(sheet, theme, tint):
+    """Given a workbook, a theme number and a tint return a hex based rgb"""
+    rgb = sheet.theme_colors[theme]
+    h, l, s = rgb_to_ms_hls(rgb)
+    r, g, b = ms_hls_to_rgb(h, tint_luminance(tint, l), s)
+
+    return rgb_to_attr(r*256, g*256, b*256)
+
+@XlsxSheet.lazy_property
+def theme_colors(sheet):
+    """Gets theme colors from the workbook"""
+    # see: https://groups.google.com/forum/#!topic/openpyxl-users/I0k3TfqNLrc
+    from openpyxl.xml.functions import QName, fromstring
+    xlmns = 'http://schemas.openxmlformats.org/drawingml/2006/main'
+    root = fromstring(sheet.workbook.loaded_theme)
+    themeEl = root.find(QName(xlmns, 'themeElements').text)
+    colorSchemes = themeEl.findall(QName(xlmns, 'clrScheme').text)
+    firstColorScheme = colorSchemes[0]
+
+    theme_colors = []
+
+    for c in ['lt1', 'dk1', 'lt2', 'dk2', 'accent1', 'accent2', 'accent3', 'accent4', 'accent5', 'accent6']:
+        accent = firstColorScheme.find(QName(xlmns, c).text)
+        for i in list(accent): # walk all child nodes, rather than assuming [0]
+            if 'window' in i.attrib['val']:
+                theme_colors.append(i.attrib['lastClr'])
+            else:
+                theme_colors.append(i.attrib['val'])
+
+    return theme_colors
+
+def rgb_to_ms_hls(red, green=None, blue=None):
+    """Converts rgb values in range (0,1) or a hex string of the form '[#aa]rrggbb' to HLSMAX based HLS, (alpha values are ignored)"""
+    if green is None:
+        if isinstance(red, str):
+            if len(red) > 6:
+                red = red[-6:]  # Ignore preceding '#' and alpha values
+            blue = int(red[4:], 16) / RGBMAX
+            green = int(red[2:4], 16) / RGBMAX
+            red = int(red[0:2], 16) / RGBMAX
+        else:
+            red, green, blue = red
+    h, l, s = rgb_to_hls(red, green, blue)
+    return (int(round(h * HLSMAX)), int(round(l * HLSMAX)), int(round(s * HLSMAX)))
+
+def ms_hls_to_rgb(hue, lightness=None, saturation=None):
+    """Converts HLSMAX based HLS values to rgb values in the range (0,1)"""
+    if lightness is None:
+        hue, lightness, saturation = hue
+    return hls_to_rgb(hue / HLSMAX, lightness / HLSMAX, saturation / HLSMAX)
+
+def rgb_to_hex(red, green=None, blue=None):
+    """Converts (0,1) based RGB values to a hex string 'rrggbb'"""
+    if green is None:
+        red, green, blue = red
+    return ('%02x%02x%02x' % (int(round(red * RGBMAX)), int(round(green * RGBMAX)), int(round(blue * RGBMAX)))).upper()
+
+def tint_luminance(tint, lum):
+    """Tints a HLSMAX based luminance"""
+    # See: http://ciintelligence.blogspot.co.uk/2012/02/converting-excel-theme-color-and-tint.html
+    if tint < 0:
+        return int(round(lum * (1.0 + tint)))
+    else:
+        return int(round(lum * (1.0 - tint) + (HLSMAX - HLSMAX * (1.0 - tint))))

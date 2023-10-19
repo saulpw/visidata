@@ -1,20 +1,12 @@
 import functools
 
-from visidata import VisiData, Sheet, Column, Progress, colors, ColumnItem, Canvas, asyncthread, vd
+from visidata import VisiData, Sheet, Column, Progress, colors, ColumnItem, Canvas, asyncthread, vd, rgb_to_attr
 
 
 @VisiData.api
 def open_png(vd, p):
     return PNGSheet(p.name, source=p)
 
-@functools.lru_cache(256)
-def rgb_to_attr(r:int,g:int,b:int,a:int) -> str:
-    if a == 0: return ''
-    if r > g and r > b: return 'red'
-    if g > r and g > b: return 'green'
-    if b > r and b > g: return 'blue'
-    if a == 255: return 'white'
-    return ''
 
 class PNGSheet(Sheet):
     rowtype = 'pixels'  # rowdef: list(x, y, r, g, b, a)

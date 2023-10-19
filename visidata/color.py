@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from visidata import vd, options, Extensible, drawcache, drawcache_property, VisiData
 import visidata
 
-__all__ = ['ColorAttr', 'colors', 'update_attr', 'ColorMaker']
+__all__ = ['ColorAttr', 'colors', 'update_attr', 'ColorMaker', 'rgb_to_attr']
 
 
 @dataclass
@@ -199,6 +199,25 @@ class ColorMaker:
 
 
 colors = ColorMaker()
+
+@functools.lru_cache(256)
+def rgb_to_attr(r:int,g:int,b:int,a:int=255) -> int:
+    if a == 0:
+        return -1
+
+    if max(r,g,b) - min(r,g,b) < 8:
+        if r <= 4: return 16
+        elif r <= 8: return 232
+        elif r >= 247: return 231
+        elif r >= 238: return 255
+        else:
+            return int(232 + (r-8)//10)
+    else:
+        r = max(0, r-(95-40)) // 40
+        g = max(0, g-(95-40)) // 40
+        b = max(0, b-(95-40)) // 40
+        return int(16 + r*36 + g*6 + b)
+
 
 import sys
 vd.addGlobals({k:getattr(sys.modules[__name__], k) for k in __all__})
