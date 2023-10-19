@@ -70,8 +70,9 @@ def iterchunks(s, literal=False):
             cattr = attrstack[-1]['cattr']
             link = attrstack[-1]['link']
 
-            if chunk.startswith(':onclick'):
-                attrstack.append(dict(link=chunk[9:], cattr=cattr.update(colors.clickable)))
+            if chunk.startswith('[:onclick '):
+                attrstack.append(dict(link=chunk[10:-1], cattr=cattr.update(colors.clickable)))
+                continue
             elif chunk == '[:]':  # clear stack, keep origattr
                 if len(attrstack) > 1:
                     del attrstack[1:]

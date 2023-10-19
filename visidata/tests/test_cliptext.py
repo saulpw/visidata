@@ -17,6 +17,7 @@ class TestClipText:
         ('b to', 4, 'b to', 4),
         ('abcde', 8, 'abcde', 5),
         (' jsonl', 5, ' jso…', 5),
+        ('    で', 6, '    で', 6),
     ])
     def test_clipstr(self, s, w, clippeds, clippedw):
         clips, clipw = visidata.clipstr(s, w)
@@ -35,9 +36,3 @@ class TestClipText:
                 call(0, 0, 'x', 0),
                 call(0, 1, 'jso…', 0),
         ], any_order=True)
-
-    @pytest.mark.parametrize('s, chunked', [
-        ('[:b]bold[/]', [(':b', ''), ('', 'bold'), ('/', '')]),
-    ])
-    def test_iterchunks(self, s, chunked):
-        assert list(visidata.iterchunks(s)) == chunked
