@@ -41,10 +41,11 @@ def drawSidebarText(sheet, scr, text:str, title:str='', overflowmsg:str='', bott
     maxw = sheet.options.disp_sidebar_width or scrw//2
     maxh = sheet.options.disp_sidebar_height or scrh-2
 
+    text = textwrap.dedent(text.strip('\n'))
+
     if not text:
         return
 
-    text = textwrap.dedent(text.strip('\n'))
     lines = text.splitlines()
     if not title and lines and lines[0].strip().startswith('# '):
         title = lines[0][1:].strip()
