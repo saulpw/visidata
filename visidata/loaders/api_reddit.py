@@ -1,12 +1,12 @@
 '''# RedditSheet
 
-- [:keys]Ctrl+O[:] to open a browser tab to [:code]{sheet.cursorRow.display_name_prefixed}[:]
-- [:keys]g Ctrl+O[:] to open browser windows for {sheet.nSelectedRows} selected subreddits
+- [:keys]Ctrl+O[/] to open a browser tab to [:code]{sheet.cursorRow.display_name_prefixed}[/]
+- [:keys]g Ctrl+O[/] to open browser windows for {sheet.nSelectedRows} selected subreddits
 
-- [:keys]Enter[:] to open sheet with top ~1000 submissions for [:code]{sheet.cursorRow.display_name_prefixed}[:]
-- [:keys]g Enter[:] to open sheet with top ~1000 submissions for {sheet.nSelectedRows} selected subreddits
+- [:keys]Enter[/] to open sheet with top ~1000 submissions for [:code]{sheet.cursorRow.display_name_prefixed}[/]
+- [:keys]g Enter[/] to open sheet with top ~1000 submissions for {sheet.nSelectedRows} selected subreddits
 
-- [:keys]ga[:] to append more subreddits matching input by name or description
+- [:keys]ga[/] to append more subreddits matching input by name or description
 '''
 
 import visidata
@@ -196,8 +196,8 @@ class RedditorsSheet(Sheet):
 class RedditSubmissions(Sheet):
     help = '''# Reddit Submissions
 
-  [:keys]Enter[:] to open sheet with comments for the current post
-  [:keys]ga[:] to add posts in this subreddit matching input'''
+  [:keys]Enter[/] to open sheet with comments for the current post
+  [:keys]ga[/] to add posts in this subreddit matching input'''
 
     # source=ListingGenerator
     rowtype='reddit posts' # rowdef: praw.Submission
@@ -254,14 +254,14 @@ class RedditGuide(RedditSubmissions):
     help = '''# Authenticate Reddit
 The Reddit API must be configured before use.
 
-1. Login to Reddit and go to [:underline]https://www.reddit.com/prefs/apps[:].
-2. Create a "script" app. (Use "[:underline]http://localhost:8000[:]" for the redirect uri)
+1. Login to Reddit and go to [:underline]https://www.reddit.com/prefs/apps[/].
+2. Create a "script" app. (Use "[:underline]http://localhost:8000[/]" for the redirect uri)
 3. Add credentials to visidatarc:
 
     options.reddit_client_id = '...'      # below the description in the upper left
     options.reddit_client_secret = '...'
 
-## Use [:code]reddit[:] filetype for subreddits or users
+## Use [:code]reddit[/] filetype for subreddits or users
 
 Multiple may be specified, joined with "+".
 

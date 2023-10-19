@@ -141,7 +141,7 @@ def checkMemoryUsage(vd):
         curses.flash()
     else:
         attr = '[:working]'
-    return attr + ret + '[:]'
+    return attr + ret + '[/]'
 
 
 # for progress bar

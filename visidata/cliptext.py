@@ -266,18 +266,18 @@ def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clea
 
 
 def _markdown_to_internal(text):
-    'Return markdown-formatted `text` converted to internal formatting (like `[:color]text[:]`).'
-    text = re.sub(r'`(.*?)`', r'[:code]\1[:]', text)
-    text = re.sub(r'\*\*(.*?)\*\*', r'[:bold]\1[:]', text)
-    text = re.sub(r'\*(.*?)\*', r'[:italic]\1[:]', text)
-    text = re.sub(r'\b_(.*?)_\b', r'[:underline]\1[:]', text)
+    'Return markdown-formatted `text` converted to internal formatting (like `[:color]text[/]`).'
+    text = re.sub(r'`(.*?)`', r'[:code]\1[/]', text)
+    text = re.sub(r'\*\*(.*?)\*\*', r'[:bold]\1[/]', text)
+    text = re.sub(r'\*(.*?)\*', r'[:italic]\1[/]', text)
+    text = re.sub(r'\b_(.*?)_\b', r'[:underline]\1[/]', text)
     return text
 
 
 def wraptext(text, width=80, indent=''):
     '''
     Word-wrap `text` and yield (formatted_line, textonly_line) for each line of at most `width` characters.
-    Formatting like `[:color]text[:]` is ignored for purposes of computing width, and not included in `textonly_line`.
+    Formatting like `[:color]text[/]` is ignored for purposes of computing width, and not included in `textonly_line`.
     '''
     import re
 

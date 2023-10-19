@@ -72,20 +72,26 @@ A color option name can also be used instead of a real color; for example, to us
 
     options.disp_menu_fmt = "[:error]{vd.motd}"
 
-Color changes can happen multiple times in a single string.
-Use `[:]` to remove all inline coloring and revert to the base color for that interface element:
+Attribute changes can happen multiple times in a single string.
+Use `[/]` to clear the last inline color change, and `[:]` to clear all inline attributes:
 
-    options.disp_menu_fmt = "[:underline]Note:[:] [:error]{vd.motd}"
+    options.disp_menu_fmt = "[:underline]Note:[/] [:error]{vd.motd}"
+
+What follows the `/` is not checked, so these are all valid:
+
+    [:underline]underlined text[/underline]
+    [:underline]also underlined[/]
+    [:underline]underline ends at end of string
 
 ### onclick
 
 In addition to changing the display attributes, an `onclick` attribute can be given with this inline syntax, which specifies either a VisiData command to run, or a url to open (in `$BROWSER`), when the interface element is clicked:
 
-    options.disp_menu_fmt = "[:onclick https://jsvine.github.io/intro-to-visidata/]Click here to go to the tutorial"
+    options.disp_menu_fmt = "[:onclick https://jsvine.github.io/intro-to-visidata/]Click here to go to the tutorial[/]"
 
 Or if you want a custom VisiData toolbar some of your favorite actions:
 
-    vd --disp_menu_fmt="[:onclick freq-col] freq out [:] | [:onclick quit-sheet] back [:]"
+    vd --disp_menu_fmt="[:onclick freq-col] freq out [/] | [:onclick quit-sheet] back [/]"
 
 Elements with `onclick` are displayed with `color_clickable`, which is by default `underline`, which is commonly understood as a clickable affordance.
 

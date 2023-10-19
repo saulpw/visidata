@@ -300,7 +300,7 @@ def drawMenu(vd, scr, sheet):
         else:
             cattr = colors.color_menu
 
-        menutitle = ' ' + ''.join(f'[:underline]{ch}[:]' if ch.isupper() else ch for ch in item.title) + ' '
+        menutitle = ' ' + ''.join(f'[:underline]{ch}[/]' if ch.isupper() else ch for ch in item.title) + ' '
         menudraw(scr, 0, x, menutitle, cattr)
 
         vd.onMouse(scr, x, 0, dispwidth(item.title)+2, 1,

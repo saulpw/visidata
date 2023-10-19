@@ -41,9 +41,9 @@ class GitDiffSheet(GitSheet):
         r = ''
         for line in self.cursorRow.lines[2:]:
             if line.startswith('-'):
-                line = '[:git_hunk_del]' + line + '[:]'
+                line = '[:git_hunk_del]' + line + '[/]'
             elif line.startswith('+'):
-                line = '[:git_hunk_add]' + line + '[:]'
+                line = '[:git_hunk_add]' + line + '[/]'
 
             r += line + '\n'
         r = r[4:]

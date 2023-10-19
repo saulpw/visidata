@@ -179,7 +179,10 @@ def recentStatusMessages(vd):
         elif pri == 1: msgattr = '[:warning]'
         else: msgattr = ''
 
-        r += f'\n{msgattr}{msg}[/]'
+        if msgattr:
+            r += '\n' + f'{msgattr}{msg}[/]'
+        else:
+            r += '\n' + msg
 
     if r:
         return '# statuses' + r

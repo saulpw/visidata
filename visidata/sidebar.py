@@ -23,7 +23,7 @@ def drawSidebar(vd, scr, sheet):
     sidebar_title = ''
     sidebar = vd.recentStatusMessages
     bottommsg = ''
-    overflowmsg = '[:reverse] Ctrl+P to view all status messages [:]'
+    overflowmsg = '[:reverse] Ctrl+P to view all status messages [/]'
     try:
         if not sidebar:
             sidebar = sheet.sidebar
