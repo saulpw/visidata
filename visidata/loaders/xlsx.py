@@ -210,11 +210,11 @@ def colorize_xlsx_cell(sheet, col, row):
     return f'{fg} on {bg}'
 
 @XlsxSheet.api
-def xlsx_color_to_xterm256(sheet, color) -> int:
+def xlsx_color_to_xterm256(sheet, color) -> str:
     if color.type == 'rgb':
         s = color.value
         if isinstance(s, int):
-            return s
+            return str(s)
 
         a,r,g,b = s[0:2], s[2:4], s[4:6], s[6:8]
         return rgb_to_attr(int(r, 16), int(g, 16), int(b, 16), int(a, 16))
@@ -222,11 +222,11 @@ def xlsx_color_to_xterm256(sheet, color) -> int:
     if color.type == 'theme':
         return sheet.theme_and_tint_to_rgb(color.value, color.tint)
     else:
-        return color.value
+        return str(color.value)
 
 @XlsxSheet.api
-def theme_and_tint_to_rgb(sheet, theme, tint):
-    """Given a workbook, a theme number and a tint return a hex based rgb"""
+def theme_and_tint_to_rgb(sheet, theme, tint) -> str:
+    """Given a workbook, a theme number and a tint return a xterm256 color number"""
     rgb = sheet.theme_colors[theme]
     h, l, s = rgb_to_ms_hls(rgb)
     r, g, b = ms_hls_to_rgb(h, tint_luminance(tint, l), s)

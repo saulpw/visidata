@@ -200,8 +200,7 @@ class ColorMaker:
 
 colors = ColorMaker()
 
-@functools.lru_cache(256)
-def rgb_to_attr(r:int,g:int,b:int,a:int=255) -> int:
+def rgb_to_xterm256(r:int,g:int,b:int,a:int=255) -> int:
     if a == 0:
         return -1
 
@@ -217,6 +216,11 @@ def rgb_to_attr(r:int,g:int,b:int,a:int=255) -> int:
         g = max(0, g-(95-40)) // 40
         b = max(0, b-(95-40)) // 40
         return int(16 + r*36 + g*6 + b)
+
+
+@functools.lru_cache(256)
+def rgb_to_attr(r:int,g:int,b:int,a:int=255) -> str:
+    return str(rgb_to_xterm256(r,g,b,a))
 
 
 import sys
