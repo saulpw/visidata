@@ -86,6 +86,13 @@ Commands:
                 vd.confirm(f'{r.filename} exists, overwrite? ')  #1452
             self.extract_async(row)
 
+    def sysopen_row(self, row):
+        'Extract file in row to tempdir and launch $EDITOR.  Modifications will be discarded.'
+        import tempfile
+        with tempfile.TemporaryDirectory() as tempdir:
+            self.zfp.extract(member=row[0], path=tempdir)
+            vd.launchExternalEditorPath(Path(tempdir)/row[0].filename)
+
     @asyncthread
     def extract_async(self, *rows, path=None):
         'Extract rows to *path*, without confirmation.'
@@ -138,6 +145,7 @@ ZipSheet.addCommand('x', 'extract-file', 'extract(cursorRow)', 'extract current 
 ZipSheet.addCommand('gx', 'extract-selected', 'extract(*onlySelectedRows)', 'extract selected files to current directory')
 ZipSheet.addCommand('zx', 'extract-file-to', 'extract(cursorRow, path=inputPath("extract to: "))', 'extract current file to given pathname')
 ZipSheet.addCommand('gzx', 'extract-selected-to', 'extract(*onlySelectedRows, path=inputPath("extract %d files to: " % nSelectedRows))', 'extract selected files to given directory')
+ZipSheet.addCommand('Ctrl+O', 'sysopen-row', 'sysopen_row(cursorRow)', 'open $EDITOR with current file (modifications will be discarded)')
 
 vd.addMenu(Menu('File', Menu('Extract',
         Menu('current file', 'extract-file'),
