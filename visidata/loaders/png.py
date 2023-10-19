@@ -78,4 +78,18 @@ def save_png(vd, p, vs):
     vd.status('saved')
 
 
+def blockchar(i:int):
+    '''1   8    into   1  2
+       2  16
+       4  32           4  8
+      64 128
+    '''
+    UL = bool(i & 1 or i & 2)
+    UR = bool(i & 8 or i & 16)
+    LL = bool(i & 4 or i & 64)
+    LR = bool(i & 32 or i & 128)
+    return ' ▘▝▀▖▌▞▛▗▚▐▜▄▙▟█'[UL*1+UR*2+LL*4+LR*8]
+
+
+PNGDrawing.options.disp_canvas_charset = ''.join(blockchar(i) for i in range(256))
 PNGSheet.addCommand('.', 'plot-sheet', 'vd.push(PNGDrawing(name+"_plot", source=sheet, sourceRows=rows))', 'plot this png')
