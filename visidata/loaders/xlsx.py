@@ -1,6 +1,7 @@
 import itertools
 import copy
 import datetime
+import re
 
 from visidata import VisiData, vd, Sheet, Column, Progress, IndexSheet, ColumnAttr, SequenceSheet, AttrDict, AttrColumn
 from visidata.type_date import date
@@ -130,6 +131,21 @@ def save_xlsx(vd, p, *sheets):
     wb = openpyxl.Workbook()
     wb.remove_sheet(wb['Sheet'])
 
+    def _convert_save_row(dispvals:dict, replace_illegal=False) -> list:
+        row = []
+        for col, v in dispvals.items():
+            if v is None:
+                v = ""
+            elif col.type == date:
+                v = datetime.datetime.fromtimestamp(int(v.timestamp()))
+            elif not vd.isNumeric(col):
+                v = str(v)
+                if replace_illegal:
+                    v = re.sub(openpyxl.cell.cell.ILLEGAL_CHARACTERS_RE, ' ', v)
+
+            row.append(v)
+        return row
+
     for vs in sheets:
         if vs.xls_name != vs.names[-1]:
             vd.warning(f'saving {vs.name} as {vs.xls_name}')
@@ -139,18 +155,12 @@ def save_xlsx(vd, p, *sheets):
         ws.append(headers)
 
         for dispvals in vs.iterdispvals(format=False):
-
-            row = []
-            for col, v in dispvals.items():
-                if v is None:
-                    v = ""
-                elif col.type == date:
-                    v = datetime.datetime.fromtimestamp(int(v.timestamp()))
-                elif not vd.isNumeric(col):
-                    v = str(v)
-                row.append(v)
-
-            ws.append(row)
+            row = _convert_save_row(dispvals)
+            try:
+                ws.append(row)
+            except openpyxl.utils.exceptions.IllegalCharacterError as e:
+                row = _convert_save_row(dispvals, replace_illegal=True)  #1402
+                ws.append(row)
 
     wb.active = ws
 
