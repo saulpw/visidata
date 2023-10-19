@@ -35,3 +35,9 @@ class TestClipText:
                 call(0, 0, 'x', 0),
                 call(0, 1, 'jso…', 0),
         ], any_order=True)
+
+    @pytest.mark.parametrize('s, chunked', [
+        ('[:b]bold[/]', [(':b', ''), ('', 'bold'), ('/', '')]),
+    ])
+    def test_iterchunks(self, s, chunked):
+        assert list(visidata.iterchunks(s)) == chunked

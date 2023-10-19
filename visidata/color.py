@@ -130,6 +130,8 @@ class ColorMaker:
                 if not fgbgattrs[i]:  # keep first known color
                     if self._get_colornum(x) is not None:   # only set known colors
                         fgbgattrs[i] = x
+                    else:
+                        fgbgattrs[i] = None
 
         return fgbgattrs
 
@@ -171,9 +173,12 @@ class ColorMaker:
     @drawcache
     def _colornames_to_cattr(self, colorname:str, precedence=0) -> ColorAttr:
         fg, bg, attrlist = self._split_colorstr(colorname)
+        if fg is None or bg is None:
+            return None
 
-        return ColorAttr(self._get_colornum(fg),
-                         self._get_colornum(bg),
+        fg = self._get_colornum(fg)
+        bg = self._get_colornum(bg)
+        return ColorAttr(fg, bg,
                          self._attrnames_to_num(attrlist),
                          precedence, colorname)
 

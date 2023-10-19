@@ -27,7 +27,7 @@ class GitGrep(GitSheet):
         tmp = (self.topRowIndex, self.cursorRowIndex)
         for line in self.git_lines('grep', '--no-color', '-z', '--line-number', '--ignore-case', self.regex):
 #            line = line.replace(ESC+'[1;31m', '[:green]')
-#            line = line.replace(ESC+'[m', '[:]')
+#            line = line.replace(ESC+'[m', '[/]')
             yield list(line.split('\0'))
         self.topRowIndex, self.cursorRowIndex = tmp
 

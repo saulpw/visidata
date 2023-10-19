@@ -7,7 +7,7 @@ import textwrap
 from visidata import options, drawcache, vd, update_attr, colors, ColorAttr
 
 disp_column_fill = ' '
-internal_markup_re = r'(\[:[^\]]*?\])'  # [:whatever until the closing bracket] or [:]
+internal_markup_re = r'(\[[:/][^\]]*?\])'  # [:whatever until the closing bracket] or [/whatever] or [:]
 
 ### Curses helpers
 
@@ -53,15 +53,41 @@ def wcwidth(cc, ambig=1):
         return 0
 
 
+def is_vdcode(s:str) -> bool:
+    return (s.startswith('[:') and s.endswith(']')) or \
+           (s.startswith('[/') and s.endswith(']'))
+
+
 def iterchunks(s, literal=False):
+    attrstack = [dict(link='', cattr=ColorAttr())]
+    legitopens = 0
     chunks = re.split(internal_markup_re, s)
     for chunk in chunks:
         if not chunk:
             continue
-        if not literal and chunk.startswith('[:') and chunk.endswith(']'):
-            yield chunk[2:-1] or ':', ''  # color/attr change
-        else:
-            yield '', chunk
+
+        if not literal and is_vdcode(chunk):
+            cattr = attrstack[-1]['cattr']
+            link = attrstack[-1]['link']
+
+            if chunk.startswith(':onclick'):
+                attrstack.append(dict(link=chunk[9:], cattr=cattr.update(colors.clickable)))
+            elif chunk == '[:]':  # clear stack, keep origattr
+                if len(attrstack) > 1:
+                    del attrstack[1:]
+                    continue
+            elif chunk.startswith('[/'):  # pop last attr off stack
+                if len(attrstack) > 1:
+                    attrstack.pop()
+                    continue
+            else:  # push updated color on stack
+                newcolor = colors.get_color(chunk[2:-1])
+                if newcolor:
+                    cattr = update_attr(cattr, newcolor, len(attrstack))
+                    attrstack.append(dict(link=link, cattr=cattr))
+                    continue
+
+        yield attrstack[-1], chunk
 
 
 @functools.lru_cache(maxsize=100000)
@@ -170,7 +196,7 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, literal=False, **kwargs):
     if not literal:
         chunks = iterchunks(s, literal=literal)
     else:
-        chunks = [('', s)]
+        chunks = [(dict(link='', cattr=ColorAttr()), s)]
     return clipdraw_chunks(scr, y, x, chunks, attr, w=w, clear=clear, **kwargs)
 
 
@@ -197,18 +223,12 @@ def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clea
             scr.addstr(y, x, disp_column_fill*actualw, cattr.attr)  # clear whole area before displaying
 
     try:
-        for colorname, chunk in chunks:
-            if colorname.startswith('onclick'):
-                link = colorname
-                colorname = 'clickable'
-
-            if colorname == ':':
-                link = ''
-                cattr = origattr
-                continue
-
-            if colorname:
-                cattr = update_attr(cattr, colors.get_color(colorname), 8)
+        for colorstate, chunk in chunks:
+            if isinstance(colorstate, str):
+                cattr = cattr.update(colors.get_color(colorstate))
+            else:
+                cattr = origattr.update(colorstate['cattr'])
+                link = colorstate['link']
 
             if not chunk:
                 continue
@@ -268,7 +288,7 @@ def wraptext(text, width=80, indent=''):
 
         line = _markdown_to_internal(line)
         chunks = re.split(internal_markup_re, line)
-        textchunks = [x for x in chunks if not (x.startswith('[:') and x.endswith(']'))]
+        textchunks = [x for x in chunks if not is_vdcode(x)]
         for linenum, textline in enumerate(textwrap.wrap(''.join(textchunks), width=width, drop_whitespace=False)):
             txt = textline
             r = ''

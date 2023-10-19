@@ -179,10 +179,7 @@ def recentStatusMessages(vd):
         elif pri == 1: msgattr = '[:warning]'
         else: msgattr = ''
 
-        if msgattr:
-            msg = ' ' + msg + ' '
-
-        r += f'\n{msgattr}{msg}[:]'
+        r += f'\n{msgattr}{msg}[/]'
 
     if r:
         return '# statuses' + r
@@ -197,7 +194,7 @@ def rightStatus(vd, sheet):
 @BaseSheet.property
 def keystrokeStatus(vs):
     if vs is vd.activeSheet:
-        return f'[:keystrokes]{vd.keystrokes}[:]'
+        return f'[:keystrokes]{vd.keystrokes}[/]'
 
     return ''
 
@@ -207,7 +204,7 @@ def threadStatus(vs) -> str:
     if vs.currentThreads:
         ret = str(vd.checkMemoryUsage())
         gerunds = [p.gerund for p in vs.progresses if p.gerund] or ['processing']
-        ret += f' [:working]{vs.progressPct} {gerunds[0]}…[:]'
+        ret += f' [:working]{vs.progressPct} {gerunds[0]}…[/]'
         return ret
     return ''
 
@@ -220,7 +217,7 @@ def modifiedStatus(sheet):
 @Sheet.property
 def selectedStatus(sheet):
     if sheet.nSelectedRows:
-        return f' [:selected_row]{sheet.options.disp_selected_note}{sheet.nSelectedRows}[:]'
+        return f' [:selected_row]{sheet.options.disp_selected_note}{sheet.nSelectedRows}[/]'
 
 
 @VisiData.api
