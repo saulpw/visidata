@@ -47,6 +47,19 @@ class ZipSheet(Sheet):
                getter=lambda col, row: datetime.datetime(*row[0].date_time)),
     ]
     nKeys = 2
+    help = '''# Zip Sheet
+This is a list of files contained in the zipfile {sheet.displaySource}.
+
+Once extracted, files can be loaded with `ENTER`.
+
+Commands:
+
+- `x` to extract current file to current directory
+- `gx` to extract selected files to current directory
+- `zx` to extract current file to a given pathname
+- `gzx`  to extract selected files to given directory
+
+'''
 
     def openZipFile(self, fp, *args, **kwargs):
         '''Use VisiData input to handle password-protected zip files.'''
