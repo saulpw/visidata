@@ -139,8 +139,11 @@ def deleteBy(sheet, func, commit=False, undo=True):
             if r is newCursorRow:
                 sheet.cursorRowIndex = len(sheet.rows)-1
         else:
-            sheet.commitDeleteRow(r)
-            ndeleted += 1
+            try:
+                sheet.commitDeleteRow(r)
+                ndeleted += 1
+            except Exception as e:
+                vd.exceptionCaught(e)
 
     if undo:
         vd.addUndo(setattr, sheet, 'rows', oldrows)

@@ -165,7 +165,10 @@ class DirSheet(Sheet):
 
     def removeFile(self, path):
         if path.is_dir():
-            os.rmdir(path)
+            if self.options.safety_first:
+                os.rmdir(path)
+            else:
+                shutil.rmtree(path)  #1965
         else:
             path.unlink()
 
