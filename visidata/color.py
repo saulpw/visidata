@@ -173,8 +173,6 @@ class ColorMaker:
     @drawcache
     def _colornames_to_cattr(self, colorname:str, precedence=0) -> ColorAttr:
         fg, bg, attrlist = self._split_colorstr(colorname)
-        if fg is None or bg is None:
-            return None
 
         fg = self._get_colornum(fg)
         bg = self._get_colornum(bg)
