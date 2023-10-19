@@ -162,8 +162,12 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
 
         if dispw and w+chlen > dispw:
             if trunchlen and dispw > trunchlen:
-                ret = ret[:-1] + trunch  # replace final char with ellipsis
-                w += trunchlen-1
+                lastchlen = _dispch(ret[-1])[1]
+                if w+trunchlen > dispw:
+                    ret = ret[:-1]
+                    w -= lastchlen
+                ret += trunch  # replace final char with ellipsis
+                w += trunchlen
             break
 
         w += chlen

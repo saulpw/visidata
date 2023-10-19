@@ -17,7 +17,8 @@ class TestClipText:
         ('b to', 4, 'b to', 4),
         ('abcde', 8, 'abcde', 5),
         (' jsonl', 5, ' jso…', 5),
-        ('    で', 6, '    で', 6),
+        ('abcdで', 6, 'abcdで', 6),
+        ('abcdで', 5, 'abcd…', 5),
     ])
     def test_clipstr(self, s, w, clippeds, clippedw):
         clips, clipw = visidata.clipstr(s, w)
