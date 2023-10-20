@@ -1,7 +1,8 @@
 import math
+import os.path
 from functools import singledispatch
 
-from visidata import vd, Sheet, asyncthread, Progress, Column, VisiData, deduceType, anytype, getitemdef
+from visidata import vd, Sheet, asyncthread, Progress, Column, VisiData, deduceType, anytype, getitemdef, ColumnsSheet
 
 
 @Sheet.api
@@ -143,6 +144,33 @@ def expand_cols_deep(sheet, cols, rows=None, depth=0):  # depth == 0 means drill
     return sheet.expandCols(cols, rows=rows, depth=depth)
 
 
+@ColumnsSheet.api
+def contract_source_cols(sheet, cols):
+    prefix = os.path.commonprefix([c.name for c in cols])
+    ret = ColumnGroup(prefix or 'group', prefix=prefix, sourceCols=cols)
+    for c in cols:
+        c.origCol = ret
+    for vs in sheet.source:
+        vd.addUndo(setattr, vs, 'columns', vs.columns)
+        vs.columns[:] = [c for c in vs.columns if c not in cols]
+    return ret
+
+
+class ColumnGroup(Column):
+    def calcValue(self, row):
+        return {c.name[len(self.prefix):]:c.getValue(row) for c in self.sourceCols}
+
+    def expand(self, rows):
+        idx = self.sheet.columns.index(self)
+
+        for i, c in enumerate(self.sourceCols):
+            self.sheet.addColumn(c, index=idx+i+1)
+
+        self.hide()
+
+        return self.sourceCols
+
+
 Sheet.addCommand('(', 'expand-col', 'expand_cols_deep([cursorCol], depth=1)', 'expand current column of containers one level')
 Sheet.addCommand('g(', 'expand-cols', 'expand_cols_deep(visibleCols, depth=1)', 'expand all visible columns of containers one level')
 Sheet.addCommand('z(', 'expand-col-depth', 'expand_cols_deep([cursorCol], depth=int(input("expand depth=", value=0)))', 'expand current column of containers to given depth (0=fully)')
@@ -152,6 +180,8 @@ Sheet.addCommand(')', 'contract-col', 'contract_cols([cursorCol])', 'remove curr
 Sheet.addCommand('g)', 'contract-cols', 'contract_cols(visibleCols)', 'remove all child columns and unhide toplevel parents')
 Sheet.addCommand('z)', 'contract-col-depth', 'contract_cols([cursorCol], depth=int(input("contract depth=", value=0)))', 'remove current column and siblings from sheet columns and unhide parent')
 Sheet.addCommand('gz)', 'contract-cols-depth', 'contract_cols(visibleCols, depth=int(input("contract depth=", value=0)))', 'remove all child columns and unhide toplevel parents')
+
+ColumnsSheet.addCommand(')', 'contract-source-cols', 'source[0].addColumn(contract_source_cols(someSelectedRows), index=cursorRowIndex)', 'contract selected columns into column group')  #1702
 
 
 vd.addMenuItems('''
@@ -163,4 +193,5 @@ vd.addMenuItems('''
     Column > Contract > N levels > contract-col-depth
     Column > Contract > all columns one level > contract-cols
     Column > Contract > all columns N levels > contract-cols-depth
+    Column > Contract > selected columns on source sheet > contract-source-cols
 ''')
