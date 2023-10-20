@@ -41,6 +41,8 @@ class SqliteSheet(Sheet):
     'Provide functionality for importing SQLite databases.'
     savesToSource = True
     defer = True
+    query = ''
+    tableName = ''
 
     def resolve(self):
         'Resolve all the way back to the original source Path.'
@@ -58,13 +60,25 @@ class SqliteSheet(Sheet):
             con.execute(self.options.sqlite_onconnect)
         return con
 
+    def rawSql(self, q:str) -> 'SqliteSheet':
+        return SqliteSheet('query', source=self.source, query=q)
+
+    @property
+    def sidebar(self):
+        if self.query:
+            return '# SQL\n' + self.query
+        else:
+            return super().sidebar
+
     def execute(self, conn, sql, parms=None):
         parms = parms or []
         vd.debug(sql)
         return conn.execute(sql, parms)
 
-    def iterload(self):
-        import sqlite3
+    def iterload_table(self, tblname:str):
+        '''Generate all rows from `tblname` in database at self.source,
+        including type information from table_xinfo(), and getting each rowid
+        if available (for simpler updates).'''
 
         def parse_sqlite_type(t):
             m = re.match(r'(\w+)(\((\d+)(,(\d+))?\))?', t.upper())
@@ -79,7 +93,6 @@ class SqliteSheet(Sheet):
 
         self.rowidColumn = None
         with self.conn() as conn:
-            tblname = self.tableName
             if not isinstance(self, SqliteIndexSheet):
                 self.columns = []
                 for r in self.execute(conn, 'PRAGMA TABLE_XINFO("%s")' % tblname):
@@ -100,6 +113,32 @@ class SqliteSheet(Sheet):
             else:
                 r = self.execute(conn, 'SELECT NULL, * FROM "%s"' % tblname)
             yield from Progress(r, total=r.rowcount-1)
+
+    def iterload_query(self, query:str):
+        '''Generate rows from `query` to database at self.source,
+        including type information from table_xinfo(), and getting each rowid
+        if available (for simpler updates).'''
+
+        with self.conn() as conn:
+            self.columns = []
+            for c in type(self).columns:
+                self.addColumn(copy(c))
+
+            self.result = self.execute(conn, query, parms=getattr(self, 'parms', []))
+
+            for i, desc in enumerate(self.result.description):
+                self.addColumn(ColumnItem(desc[0], i))
+
+            for row in self.result:
+                yield row
+
+    def iterload(self):
+        if self.tableName:
+            yield from self.iterload_table(self.tableName)
+        elif self.query:
+            yield from self.iterload_query(self.query)
+        else:
+            vd.fail('no query or tablename to load')
 
     @asyncthread
     def putChanges(self):
@@ -201,19 +240,6 @@ class SqliteIndexSheet(SqliteSheet, IndexSheet):
         self.preloadHook()
         self.reload()
 
-class SqliteQuerySheet(SqliteSheet):
-    def iterload(self):
-        with self.conn() as conn:
-            self.columns = []
-            for c in type(self).columns:
-                self.addColumn(copy(c))
-            self.result = self.execute(conn, self.query, parms=getattr(self, 'parms', []))
-            for i, desc in enumerate(self.result.description):
-                self.addColumn(ColumnItem(desc[0], i))
-
-            for row in self.result:
-                yield row
-
 
 
 @VisiData.api
@@ -272,13 +298,18 @@ def save_sqlite(vd, p, *vsheets):
     vd.status("%s save finished" % p)
 
 
+SqliteSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("execute SQL: ", type="sql")))', 'execute raw SQL statement')
+
 SqliteIndexSheet.addCommand('a', 'add-table', 'fail("create a new table by saving a sheet to this database file")', 'stub; add table by saving a sheet to the db file instead')
 SqliteIndexSheet.bindkey('ga', 'add-table')
 SqliteSheet.options.header = 0
 VisiData.save_db = VisiData.save_sqlite
 
+vd.addMenuItems('''
+    Data > execute SQL query > exec-sql
+''')
+
 vd.addGlobals({
     'SqliteIndexSheet': SqliteIndexSheet,
     'SqliteSheet': SqliteSheet,
-    'SqliteQuerySheet': SqliteQuerySheet
 })
