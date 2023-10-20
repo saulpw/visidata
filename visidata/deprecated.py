@@ -175,6 +175,7 @@ def itemsetter(i):
 
 
 vd.optalias('force_valid_colnames', 'clean_names')
+vd.optalias('dir_recurse', 'dir_depth', 100000)
 
 
 vd.addGlobals(globals())
