@@ -235,7 +235,8 @@ def drawRightStatus(vd, scr, vs):
             cattr = update_attr(cattr, colors.color_top_status, 0)
         cattr = update_attr(cattr, colors.color_active_status if vs is vd.activeSheet else colors.color_inactive_status, 0)
         rstat = vd.rightStatus(vs)
-        statuslen = clipdraw(scr, vs.windowHeight-1, rightx-dispwidth(rstat)-1, rstat, cattr, w=vs.windowWidth-1)
+        x = max(2, rightx-dispwidth(rstat)-1)
+        statuslen = clipdraw(scr, vs.windowHeight-1, x, rstat, cattr, w=vs.windowWidth-1)
     except Exception as e:
         vd.exceptionCaught(e)
     finally:

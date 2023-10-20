@@ -83,32 +83,37 @@ class HelpPane:
 
     def draw(self, scr, x=None, y=None):
         if not scr: return
-        if not vd.options.disp_help:
-            if self.scr:
-                self.scr.erase()
-                self.scr.refresh()
-                self.scr = None
-            return
+#        if vd.options.disp_help <= 0:
+#            if self.scr:
+#                self.scr.erase()
+#                self.scr.refresh()
+#                self.scr = None
+#            return
         if y is None: y=0  # show at top of screen by default
         if x is None: x=0
+        hneeded = self.amgr.maxHeight+3
+        wneeded = self.amgr.maxWidth+4
+        scrh, scrw = scr.getmaxyx()
         if not self.scr or scr is not self.parentscr:  # (re)allocate help pane scr
             if y >= 0:
-                if y+self.amgr.maxHeight+3 < scr.getmaxyx()[0]:
+                if y+hneeded < scrh:
                     yhelp = y+1
                 else:
-                    yhelp = y-self.amgr.maxHeight-3
+                    hneeded = max(0, min(hneeded, y-1))
+                    yhelp = y-hneeded
             else:  # y<0
-                yhelp = scr.getmaxyx()[0]-self.amgr.maxHeight-4
+                yhelp = max(0, scrh-hneeded-1)
 
             if x >= 0:
-                if x+self.amgr.maxWidth+4 < scr.getmaxyx()[1]:
+                if x+wneeded < scrw:
                     xhelp = x+1
                 else:
-                    xhelp = x-self.amgr.maxWidth-4
+                    wneeded = max(0, min(wneeded, x-1))
+                    xhelp = x-wneeded
             else:  # x<0
-                xhelp = scr.getmaxyx()[1]-self.amgr.maxWidth-5
+                xhelp = max(0, scrh-wneeded-1)
 
-            self.scr = vd.subwindow(scr, xhelp, yhelp, self.amgr.maxWidth+4, self.amgr.maxHeight+3)
+            self.scr = vd.subwindow(scr, xhelp, yhelp, wneeded, hneeded)
             self.parentscr = scr
 
         self.scr.erase()
