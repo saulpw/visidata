@@ -205,8 +205,8 @@ HLSMAX = 240
 
 @XlsxSheet.api
 def colorize_xlsx_cell(sheet, col, row):
-    fg = getattrdeep(row, col.column_letter+'.font.color')
-    bg = getattrdeep(row, col.column_letter+'.fill.start_color')
+    fg = getattrdeep(row, col.column_letter+'.font.color', None)
+    bg = getattrdeep(row, col.column_letter+'.fill.start_color', None)
     fg = sheet.xlsx_color_to_xterm256(fg)
     bg = sheet.xlsx_color_to_xterm256(bg)
 
@@ -217,6 +217,9 @@ def colorize_xlsx_cell(sheet, col, row):
 
 @XlsxSheet.api
 def xlsx_color_to_xterm256(sheet, color) -> str:
+    if not color:
+        return ''
+
     if color.type == 'rgb':
         s = color.value
         if isinstance(s, int):
