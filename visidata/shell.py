@@ -15,7 +15,7 @@ from visidata import modtime, filesize, vstat, Progress, TextSheet
 from visidata.type_date import date
 
 
-vd.option('dir_recurse', False, 'walk source path recursively on DirSheet')
+vd.option('dir_depth', 0, 'folder recursion depth on DirSheet')
 vd.option('dir_hidden', False, 'load hidden files on DirSheet')
 
 
@@ -181,7 +181,7 @@ class DirSheet(Sheet):
     def iterload(self):
         hidden_files = self.options.dir_hidden
 
-        def _walkfiles(p):
+        def _walkfiles(p, dir_depth:int=0):
             basepath = str(p)
             for folder, subdirs, files in os.walk(basepath):
                 subfolder = folder[len(basepath)+1:]
@@ -189,25 +189,22 @@ class DirSheet(Sheet):
                 if subfolder in ['.', '..']: continue
 
                 fpath = Path(folder)
-                yield fpath
+                if str(fpath) != str(p):
+                    yield fpath
 
                 for fn in files:
                     yield fpath/fn
 
-        def _listfiles(p):
-            basepath = str(p)
-            for fn in os.listdir(basepath):
-                fn = p/fn
-                fn.name = p.name + "_" + fn.name
-                yield fn
-
+                if dir_depth < len(fpath.parents)-len(p.parents)+1:
+                    for d in subdirs:
+                        yield fpath/d
+                    subdirs.clear()
 
         basepath = str(self.source)
 
         folders = set()
-        f = _walkfiles if self.options.dir_recurse else _listfiles
 
-        for p in f(self.source):
+        for p in _walkfiles(self.source, self.options.dir_depth):
             if not hidden_files and str(p).startswith('.') and not str(p).startswith('..'):
                 continue
 

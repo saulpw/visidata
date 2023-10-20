@@ -83,7 +83,7 @@ vd.optalias('o', 'output')
 vd.optalias('w', 'replay_wait')
 vd.optalias('d', 'delimiter')
 vd.optalias('c', 'config')
-vd.optalias('r', 'dir_recurse')
+vd.optalias('r', 'dir_depth', 100000)
 
 
 @visidata.VisiData.api
