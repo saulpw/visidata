@@ -56,7 +56,7 @@ def update_attr(oldattr:ColorAttr, updattr:ColorAttr, updprec:int=None) -> Color
     if newbg < 0 or (updbg >= 0 and updprec > newprec):
         newbg = updbg
 
-    newprec = updprec
+    newprec = max(updprec, newprec)
 
     return ColorAttr(newfg, newbg, newattr, newprec)
 
