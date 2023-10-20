@@ -81,13 +81,16 @@ class XlsxSheet(SequenceSheet):
     def addXlsxMetaColumns(self, column_letter, column_name):
         if self.options.xlsx_meta_columns:
             self.addColumn(
-                    AttrColumn(column_name + '_cellPyObj', column_letter))
+                    AttrColumn(column_name + '_cellPyObj', column_letter, column_letter=column_letter))
             self.addColumn(
                     AttrColumn(column_name + '_fontColor',
-                        column_letter + '.font.color.value'))
+                        column_letter + '.font.color.value', column_letter=column_letter))
             self.addColumn(
                     AttrColumn(column_name + '_fillColor', column_letter +
-                        '.fill.start_color.value'))
+                        '.fill.start_color.value', column_letter=column_letter))
+            self.addColumn(Column(column_name + '_colorizer', width=0,
+                           column_letter=column_letter,
+                           getter=lambda c,r: c.sheet.colorize_xlsx_cell(c,r)))
 
     def paste_after(self, rowidx):
         to_paste = list(copy.copy(r) for r in reversed(vd.memory.cliprows))
@@ -206,6 +209,9 @@ def colorize_xlsx_cell(sheet, col, row):
     bg = getattrdeep(row, col.column_letter+'.fill.start_color')
     fg = sheet.xlsx_color_to_xterm256(fg)
     bg = sheet.xlsx_color_to_xterm256(bg)
+
+    if bg == '-1' or fg == '-1':
+        fg, bg = '-1', '-1'
 
     return f'{fg} on {bg}'
 
