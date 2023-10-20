@@ -15,7 +15,7 @@ def reload_every(sheet, seconds:int):
 @BaseSheet.api
 @asyncthread
 def reload_modified(sheet):
-    'Spawn thread to call sheet.reload when sheet.source mtime has changed.'
+    'Spawn thread to call sheet.reload_rows when sheet.source mtime has changed.'
     p = sheet.source
     assert isinstance(p, Path)
     assert not p.is_url()
@@ -26,7 +26,7 @@ def reload_modified(sheet):
         t = os.stat(p).st_mtime
         if t != mtime:
             mtime = t
-            sheet.reload()
+            sheet.reload_rows()
 
 
 @Sheet.api
