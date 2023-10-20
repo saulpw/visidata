@@ -313,7 +313,7 @@ def addCommand(cls, keystrokes, longname, execstr, helpstr='', **kwargs):
     '''
     vd.commands.set(longname, Command(longname, execstr, helpstr=helpstr, module=vd.importingModule, **kwargs), cls)
     if keystrokes:
-        vd.bindkeys.set(vd.prettykeys(keystrokes), longname, cls)
+        vd.bindkeys.set(vd.prettykeys(keystrokes.replace(' ', '')), longname, cls)
     return longname
 
 def _command(cls, binding, longname, helpstr, **kwargs):
