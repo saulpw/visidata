@@ -10,7 +10,7 @@ from functools import wraps, lru_cache
 from visidata import vd
 from visidata import VisiData, Progress
 
-vd.option('encoding', 'utf-8', 'encoding passed to codecs.open when opening a file', replay=True)
+vd.option('encoding', 'utf-8-sig', 'encoding passed to codecs.open when reading a file', replay=True)
 vd.option('encoding_errors', 'surrogateescape', 'encoding_errors passed to codecs.open', replay=True)
 
 @VisiData.api
