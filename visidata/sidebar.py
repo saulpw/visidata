@@ -3,6 +3,7 @@ import textwrap
 from visidata import vd, VisiData, BaseSheet, colors, TextSheet, clipdraw, wraptext, dispwidth
 
 
+vd.option('disp_sidebar', True, 'whether to display sidebar')
 vd.option('disp_sidebar_fmt', '{help}', 'format string for default sidebar')
 vd.option('disp_sidebar_width', 0, 'max width for sidebar')
 vd.option('disp_sidebar_height', 0, 'max height for sidebar')
@@ -13,8 +14,6 @@ vd.option('color_sidebar', 'black on 114 blue', 'base color of sidebar')
 def sidebar(sheet):
     'Default to format options.disp_sidebar_fmt.  Overridable.'
     fmt = sheet.options.disp_sidebar_fmt
-    if sheet.options.disp_help and fmt == '{help}':
-        fmt = sheet.help
     return sheet.formatString(fmt)
 
 
@@ -25,10 +24,17 @@ def drawSidebar(vd, scr, sheet):
     bottommsg = ''
     overflowmsg = '[:reverse] Ctrl+P to view all status messages [/]'
     try:
-        if not sidebar:
+        if not sidebar and sheet.options.disp_sidebar:
             sidebar = sheet.sidebar
-            bottommsg = '[:onclick sidebar-toggle][:reverse] b to toggle sidebar [:]'
-            overflowmsg = '[:reverse] (see full sidebar with [:code]gb[:reverse]) [:]'
+            if not sidebar and sheet.options.disp_help > 0:
+                sidebar = sheet.formatString(sheet.help)
+
+            if sheet.options.disp_help < 0:
+                bottommsg = '[:onclick sidebar-toggle][:reverse][x][:]'
+                overflowmsg = '[:onclick open-sidebar]…↓…[/]'
+            else:
+                bottommsg = '[:onclick sidebar-toggle][:reverse] b to toggle sidebar [:]'
+                overflowmsg = '[:reverse] (see full sidebar with [:code]gb[:reverse]) [:]'
     except Exception as e:
         vd.exceptionCaught(e)
         sidebar = f'# error\n{e}'
@@ -85,13 +91,6 @@ def drawSidebarText(sheet, scr, text:str, title:str='', overflowmsg:str='', bott
     sidebarscr.refresh()
 
 
-@BaseSheet.api
-def sidebar_toggle(sheet):
-    v = sheet.options.disp_sidebar_fmt
-    v = '{help}' if not v else ''
-    sheet.options.disp_sidebar_fmt = v
-
-
 @VisiData.api
 class SidebarSheet(TextSheet):
     help = '''
@@ -103,7 +102,7 @@ class SidebarSheet(TextSheet):
         - `b` to toggle the sidebar on/off for the current sheet
     '''
 
-BaseSheet.addCommand('b', 'sidebar-toggle', 'sidebar_toggle()', 'toggle sidebar on/off')
+BaseSheet.addCommand('b', 'sidebar-toggle', 'sheet.options.disp_sidebar = not sheet.options.disp_sidebar', 'toggle sidebar on/off')
 BaseSheet.addCommand('gb', 'open-sidebar', 'vd.push(SidebarSheet(name, options.disp_sidebar_fmt, source=sidebar.splitlines()))', 'open sidebar in new sheet')
 
 
