@@ -274,6 +274,8 @@ def initCurses(vd):
 
     curses.def_prog_mode()
 
+    curses.flushinp()  #1993
+
     return scr
 
 
