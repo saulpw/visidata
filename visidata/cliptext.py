@@ -80,7 +80,7 @@ def iterchunks(s, literal=False):
             elif chunk.startswith('[/'):  # pop last attr off stack
                 if len(attrstack) > 1:
                     attrstack.pop()
-                    continue
+                continue  # don't display trailing [/foo] ever
             else:  # push updated color on stack
                 newcolor = colors.get_color(chunk[2:-1])
                 if newcolor:
