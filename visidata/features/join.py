@@ -130,14 +130,8 @@ class JoinKeyColumn(Column):
         self.keycols = keycols
 
     def calcValue(self, row):
-        vals = set()
-        for i, c in enumerate(self.keycols):
-            if row[c.sheet] is not None:
-                vals.add(c.getDisplayValue(row[c.sheet]))
-        if len(vals) == 1:
-            return vals.pop()
-        else:
-            raise Exception(f'inconsistent keys: ' + str(vals))
+        c = self.keycols[0]
+        return c.getTypedValue(row[c.sheet])
 
     def putValue(self, row, value):
         for i, c in enumerate(self.keycols):
