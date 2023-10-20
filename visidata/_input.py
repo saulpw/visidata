@@ -221,14 +221,14 @@ def editline(vd, scr, y, x, w, i=0,
                 a += incr
             return min(max(a, 0), len(s))
 
-
+    disp_help = vd.options.disp_help
     while True:
         updater(v)
-        if vd.options.disp_help:
+        if disp_help > 0:
             sheet = vd.activeSheet
             if help:
                 sheet.drawSidebarText(scr, help)
-            elif vd.options.disp_help > 1:
+            elif disp_help > 1:
                 vd.getHelpPane('input', module='visidata').draw(scr, y=y)
 
         if display:
@@ -266,7 +266,7 @@ def editline(vd, scr, y, x, w, i=0,
         elif ch == '^E' or ch == 'KEY_END':        i = len(v)
         elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1
         elif ch == '^G':
-            vd.options.disp_help = not vd.options.disp_help
+            disp_help = 2 if disp_help != 2 else 0
             vd.draw_all()  #1971
             continue  # not considered a first keypress
         elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1; v = delchar(v, i)
