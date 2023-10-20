@@ -1,9 +1,8 @@
-from functools import singledispatch
 from typing import Mapping
 import inspect
 import math
 
-from visidata import vd, asyncthread, ENTER, anytype, getitemdef
+from visidata import vd, asyncthread, ENTER, deduceType
 from visidata import Sheet, Column, VisiData, ColumnItem, TableSheet, BaseSheet, Progress, ColumnAttr, SuspendCurses, TextSheet
 import visidata
 
@@ -40,139 +39,6 @@ class InferColumnsSheet(Sheet):
 
 InferColumnsSheet.init('_knownKeys', set, copy=True)  # set of row keys already seen
 InferColumnsSheet.init('_ordering', list, copy=True)
-
-
-@Sheet.api
-def getSampleRows(sheet):
-    'Return list of sample rows centered around the cursor.'
-    n = sheet.options.default_sample_size
-    if n == 0 or n >= sheet.nRows:
-        return sheet.rows
-
-    vd.warning(f'sampling {n} rows')
-    seq = sheet.rows
-    start = math.ceil(sheet.cursorRowIndex - n / 2) % len(seq)
-    end = (start + n) % len(seq)
-    if start < end:
-        return seq[start:end]
-    return seq[start:] + seq[:end]
-
-
-@asyncthread
-def expand_cols_deep(sheet, cols, rows=None, depth=0):  # depth == 0 means drill all the way
-    'expand all visible columns of containers to the given depth (0=fully)'
-    ret = []
-    if not rows:
-        rows = sheet.getSampleRows()
-
-    for col in cols:
-        newcols = col.expand(rows)
-        if depth != 1:  # countdown not yet complete, or negative (indefinite)
-            ret.extend(expand_cols_deep.__wrapped__(sheet, newcols, rows, depth-1))
-    return ret
-
-@singledispatch
-def _createExpandedColumns(sampleValue, col, rows):
-    '''By default, a column is not expandable. Supported container types for
-    sampleValue trigger alternate, type-specific expansions.'''
-    return []
-
-@_createExpandedColumns.register(dict)
-def _(sampleValue, col, vals):
-    '''Build a set of columns to add, using the first occurrence of each key to
-    determine column type'''
-    newcols = {}
-
-    for val in Progress(vals, 'expanding'):
-        colsToAdd = set(val).difference(newcols)
-        colsToAdd and newcols.update({
-            k: deduceType(v)
-            for k, v in val.items()
-            if k in colsToAdd
-        })
-
-    return [
-        ExpandedColumn(col.sheet.options.fmt_expand_dict % (col.name, k), type=v, origCol=col, expr=k)
-            for k, v in newcols.items()
-    ]
-
-def _createExpandedColumnsNamedTuple(col, val):
-    return [
-        ExpandedColumn(col.sheet.options.fmt_expand_dict % (col.name, k), type=colType, origCol=col, expr=i)
-            for i, (k, colType) in enumerate(zip(val._fields, (deduceType(v) for v in val)))
-    ]
-
-@_createExpandedColumns.register(list)
-@_createExpandedColumns.register(tuple)
-def _(sampleValue, col, vals):
-    '''Use the longest sequence to determine the number of columns we need to
-    create, and their presumed types'''
-    def lenNoExceptions(v):
-        try:
-            return len(v)
-        except Exception as e:
-            return 0
-
-    if hasattr(sampleValue, '_fields'):  # looks like a namedtuple
-        return _createExpandedColumnsNamedTuple(col, vals[0])
-
-    longestSeq = max(vals, key=lenNoExceptions)
-    colTypes = [deduceType(v) for v in longestSeq]
-    return [
-        ExpandedColumn(col.sheet.options.fmt_expand_list % (col.name, k), type=colType, origCol=col, expr=k)
-            for k, colType in enumerate(colTypes)
-    ]
-
-
-@Column.api
-def expand(col, rows):
-    isNull = col.sheet.isNullFunc()
-    nonNulls = [
-        col.getTypedValue(row)
-        for row in rows
-        if not isNull(col.getValue(row))
-    ]
-
-    if not nonNulls:
-        return []
-
-    # The type of the first non-null value for col determines if and how the
-    # column can be expanded.
-    expandedCols = _createExpandedColumns(nonNulls[0], col, nonNulls)
-
-    idx = col.sheet.columns.index(col)
-
-    for i, c in enumerate(expandedCols):
-        col.sheet.addColumn(c, index=idx+i+1)
-    if expandedCols:
-        col.hide()
-    return expandedCols
-
-
-def deduceType(v):
-    if isinstance(v, (float, int)):
-        return type(v)
-    else:
-        return anytype
-
-
-class ExpandedColumn(Column):
-    def calcValue(self, row):
-        return getitemdef(self.origCol.getValue(row), self.expr)
-
-    def setValue(self, row, value):
-        self.origCol.getValue(row)[self.expr] = value
-
-
-def closeColumn(sheet, col):
-    if hasattr(col, 'origCol'):
-        origCol = col.origCol
-    else:
-        vd.fail('column has not been expanded')
-    vd.addUndo(setattr, sheet, 'columns', sheet.columns)
-    origCol.width = options.default_width
-    cols = [c for c in sheet.columns if getattr(c, "origCol", None) is not origCol]
-    sheet.columns = cols
 
 
 #### generic list/dict/object browsing
@@ -405,13 +271,6 @@ Sheet.addCommand('^Y', 'pyobj-row', 'status(type(cursorRow).__name__); vd.push(o
 Sheet.addCommand('z^Y', 'pyobj-cell', 'status(type(cursorValue).__name__); vd.push(openCellPyobj(cursorCol, cursorRowIndex))', 'open current cell as Python object')
 BaseSheet.addCommand('g^Y', 'pyobj-sheet', 'status(type(sheet).__name__); vd.push(PyobjSheet(sheet.name+"_sheet", source=sheet))', 'open current sheet as Python object')
 
-Sheet.addCommand('(', 'expand-col', 'expand_cols_deep(sheet, [cursorCol], depth=1)', 'expand current column of containers one level')
-Sheet.addCommand('g(', 'expand-cols', 'expand_cols_deep(sheet, visibleCols, depth=1)', 'expand all visible columns of containers one level')
-Sheet.addCommand('z(', 'expand-col-depth', 'expand_cols_deep(sheet, [cursorCol], depth=int(input("expand depth=", value=0)))', 'expand current column of containers to given depth (0=fully)')
-Sheet.addCommand('gz(', 'expand-cols-depth', 'expand_cols_deep(sheet, visibleCols, depth=int(input("expand depth=", value=0)))', 'expand all visible columns of containers to given depth (0=fully)')
-
-Sheet.addCommand(')', 'contract-col', 'closeColumn(sheet, cursorCol)', 'unexpand current column; restore original column and remove other columns at this level')
-
 Sheet.addCommand('', 'open-row-basic', 'vd.push(TableSheet.openRow(sheet, cursorRow))', 'dive into current row as basic table (ignoring subsheet dive)')
 Sheet.addCommand(ENTER, 'open-row', 'vd.push(openRow(cursorRow))', 'open current row with sheet-specific dive')
 Sheet.addCommand('z'+ENTER, 'open-cell', 'vd.push(openCell(cursorCol, cursorRow))', 'open sheet with copies of rows referenced in current cell')
@@ -423,11 +282,7 @@ PyobjSheet.addCommand('gv', 'show-hidden', 'sheet.options.visibility = 2; reload
 PyobjSheet.addCommand('zv', 'hide-hidden', 'sheet.options.visibility -= 1; reload()', 'hide methods and hidden properties')
 
 vd.addGlobals({
-    'ExpandedColumn': ExpandedColumn,
     'PythonSheet': PythonSheet,
-    'expand_cols_deep': expand_cols_deep,
-    'deduceType': deduceType,
-    'closeColumn': closeColumn,
     'ListOfDictSheet': ListOfDictSheet,
     'SheetDict': SheetDict,
     'InferColumnsSheet': InferColumnsSheet,
@@ -436,11 +291,6 @@ vd.addGlobals({
 })
 
 vd.addMenuItems('''
-    Column > Expand > one level > expand-col
-    Column > Expand > to depth > expand-col-depth
-    Column > Expand > all columns one level > expand-cols
-    Column > Expand > all columns to depth > expand-cols-depth
-    Column > Contract > contract-col
     View > Visibility > Methods and dunder attributes > show > show-hidden
     View > Visibility > Methods and dunder attributes > hide > hide-hidden
     Row > Dive into > open-row

@@ -5,7 +5,6 @@ import re
 
 from contextlib import contextmanager
 from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace, PyobjSheet, BaseSheet, ExpectedException
-from visidata.pyobj import ExpandedColumn
 from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet, UNLOADED, ExprColumn, undoAttrCopyFunc, ENTER
 
 vd.option('disp_ibis_sidebar', '', 'which sidebar property to display')
@@ -472,7 +471,7 @@ def get_ibis_col(col, query, typed=False):
     r = None
     if isinstance(col, ExprColumn):
         r = col.sheet.evalIbisExpr(col.expr)
-    elif isinstance(col, ExpandedColumn):
+    elif isinstance(col, vd.ExpandedColumn):
         r = query[col.name]
     elif not hasattr(col, 'ibis_name'):
         return

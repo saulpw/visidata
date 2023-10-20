@@ -95,6 +95,11 @@ vdtype(list, '')
 def isNumeric(vd, col):
     return col.type in vd.numericTypes
 
+def deduceType(v):
+    if isinstance(v, (float, int)):
+        return type(v)
+    else:
+        return anytype
 ##
 
 @vd.numericType('%')
@@ -119,4 +124,5 @@ class vlen(int):
 
 
 vd.addGlobals(anytype=anytype,
-              vdtype=vdtype)
+              vdtype=vdtype,
+              deduceType=deduceType)
