@@ -13,7 +13,7 @@ def open_lsv(vd, p):
 @VisiData.api
 def save_lsv(vd, p, *vsheets):
     vs = vsheets[0]
-    with p.open(mode='w', encoding=vs.options.encoding) as fp:
+    with p.open(mode='w', encoding=vs.options.save_encoding) as fp:
         for row in vs.iterrows():
             for col in vs.visibleCols:
                 fp.write('%s: %s\n' % (col.name, col.getDisplayValue(row)))
