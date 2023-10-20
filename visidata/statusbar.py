@@ -168,7 +168,7 @@ def drawLeftStatus(vd, scr, vs):
 
 
 @VisiData.property
-def recentStatusMessages(vd):
+def recentStatusMessages(vd) -> str:
     r = ''
     for (pri, msgparts), n in vd.statuses.items():
         msg = '; '.join(wrmap(str, msgparts))
@@ -186,6 +186,8 @@ def recentStatusMessages(vd):
 
     if r:
         return '# statuses' + r
+
+    return ''
 
 
 @VisiData.api
