@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace, PyobjSheet, BaseSheet, ExpectedException
 from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet, UNLOADED, ExprColumn, undoAttrCopyFunc, ENTER
 
-vd.option('disp_ibis_sidebar', '', 'which sidebar property to display')
+vd.option('disp_ibis_sidebar', 'pending_sql', 'which sidebar property to display')
 vd.option('sql_always_count', False, 'whether to include count of total number of results')
 vd.option('ibis_limit', 500, 'max number of rows to get in query')
 
