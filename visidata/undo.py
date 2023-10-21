@@ -18,7 +18,7 @@ def isUndoableCommand(longname):
 @VisiData.api
 def addUndo(vd, undofunc, *args, **kwargs):
     'On undo of latest command, call ``undofunc(*args, **kwargs)``.'
-    if options.undo:
+    if vd.options.undo:
         # occurs when VisiData is just starting up
         if getattr(vd, 'activeCommand', UNLOADED) is UNLOADED:
             return
@@ -33,7 +33,7 @@ def addUndo(vd, undofunc, *args, **kwargs):
 
 @VisiData.api
 def undo(vd, sheet):
-    if not options.undo:
+    if not vd.options.undo:
         vd.fail("options.undo not enabled")
 
     # don't allow undo of first command on a sheet, which is always the command that created the sheet.
