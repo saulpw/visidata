@@ -327,6 +327,12 @@ class ThreadProfiler:
 
 class ProfileSheet(Sheet):
     rowtype = 'callsites' # rowdef: profiler_entry
+    help = '''
+        # Profile Sheet
+        - `z Ctrl+S` to save as pyprof file
+        - `Ctrl+O` to open current function in $EDITOR
+        - `Enter` to open list of calls from current function
+    '''
     columns = [
         Column('funcname', getter=lambda col,row: codestr(row.code)),
         Column('filename', getter=lambda col,row: os.path.split(row.code.co_filename)[-1] if not isinstance(row.code, str) else ''),
