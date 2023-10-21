@@ -230,7 +230,8 @@ class IbisTableSheet(Sheet):
         sbtype = self.options.disp_ibis_sidebar
         if sbtype:
             txt = str(getattr(self, sbtype, ''))
-            return f'# {sbtype}\n'+txt
+            if txt:
+                return f'# {sbtype}\n'+txt
 
     @property
     def ibis_locals(self):
