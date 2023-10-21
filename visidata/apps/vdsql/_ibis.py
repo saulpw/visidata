@@ -57,14 +57,16 @@ def configure_ibis(vd):
             AttrColumn('ibis_type', type=str)
         ]
 
-    ibis.ddb = ibis.duckdb
-    ibis.sqlite3 = ibis.sqlite
-    ibis.db = ibis.sqlite
-
 
 @VisiData.api
 def open_vdsql(vd, p, filetype=None):
     vd.configure_ibis()
+
+    # on-demand aliasing, so we don't need deps for all backends
+    ext_aliases = dict(db='sqlite', ddb='duckdb', sqlite3='sqlite')
+    if p.ext in ext_aliases:
+        setattr(ibis, p.ext, ext_aliases.get(p.ext))
+
     return IbisTableIndexSheet(p.name, source=p, filetype=None, database_name=None,
                                ibis_conpool=IbisConnectionPool(p), sheet_type=IbisTableSheet)
 
