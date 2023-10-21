@@ -10,7 +10,7 @@ def curses_setup():
     import visidata
 
     curses.curs_set = lambda v: None
-    visidata.options.confirm_overwrite = False
+    visidata.options.overwrite = 'always'
 
 
 @pytest.fixture(scope="function")

@@ -50,7 +50,7 @@ class MacroSheet(IndexSheet):
     def putChanges(self):
         self.commitDeletes()  #1569
 
-        vd.saveSheets(self.source.source, self.source)
+        vd.saveSheets(self.source.source, self.source, confirm_overwrite=False)
         self._deferredDels.clear()
         self.reload()
 

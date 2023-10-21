@@ -4,7 +4,6 @@ from copy import copy
 from visidata import vd
 from visidata import Sheet, BaseSheet, VisiData, IndexSheet, Path, Progress, TypedExceptionWrapper
 
-vd.option('confirm_overwrite', True, 'whether to prompt for overwrite confirmation on save')
 vd.option('safe_error', '#ERR', 'error string to use while saving', replay=True)
 vd.option('save_encoding', 'utf-8', 'encoding passed to codecs.open when saving a file', replay=True)
 
@@ -99,11 +98,11 @@ def save_cols(vd, cols):
     else:
         savedcoltxt = '%s columns' % len(cols)
     path = vd.inputPath('save %s to: ' % savedcoltxt, value=vs.getDefaultSaveName())
-    vd.saveSheets(path, vs, confirm_overwrite=sheet.options.confirm_overwrite)
+    vd.saveSheets(path, vs)
 
 
 @VisiData.api
-def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
+def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=True):
     'Save all *vsheets* to *givenpath*.'
 
     if not vsheets: # blank tuple
@@ -119,8 +118,8 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=False):
     if savefunc is None:
         vd.fail(f'no function to save as {filetype}')
 
-    if givenpath.exists() and confirm_overwrite:
-        vd.confirm("%s already exists. overwrite? " % givenpath.given)
+    if confirm_overwrite:
+        vd.confirmOverwrite(givenpath)
 
     vd.status('saving %s sheets to %s as %s' % (len(vsheets), givenpath.given, filetype))
 
@@ -189,11 +188,12 @@ def rootSheet(sheet):
 
     return r
 
-BaseSheet.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName()), sheet, confirm_overwrite=options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .tsv)')
+
+BaseSheet.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName()), sheet)', 'save current sheet to filename in format determined by extension (default .tsv)')
 BaseSheet.addCommand('', 'save-sheet-really', 'vd.saveSheets(Path(getDefaultSaveName()), sheet, confirm_overwrite=False)', 'save current sheet without asking for filename or confirmation')
-BaseSheet.addCommand('', 'save-source', 'vd.saveSheets(rootSheet().source, rootSheet(), confirm_overwrite=options.confirm_overwrite)', 'save root sheet to its source')
-BaseSheet.addCommand('g^S', 'save-all', 'vd.saveSheets(inputPath("save all sheets to: "), *vd.stackedSheets, confirm_overwrite=options.confirm_overwrite)', 'save all sheets to given file or directory)')
-IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelectedRows, value="_".join(getattr(vs, "name", None) or "blank" for vs in selectedRows)), *selectedRows, confirm_overwrite=options.confirm_overwrite)', 'save all selected sheets to given file or directory')
+BaseSheet.addCommand('', 'save-source', 'vd.saveSheets(rootSheet().source, rootSheet())', 'save root sheet to its source')
+BaseSheet.addCommand('g^S', 'save-all', 'vd.saveSheets(inputPath("save all sheets to: "), *vd.stackedSheets)', 'save all sheets to given file or directory)')
+IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelectedRows, value="_".join(getattr(vs, "name", None) or "blank" for vs in selectedRows)), *selectedRows)', 'save all selected sheets to given file or directory')
 Sheet.addCommand('', 'save-col', 'save_cols([cursorCol])', 'save current column only to filename in format determined by extension (default .tsv)')
 Sheet.addCommand('', 'save-col-keys', 'save_cols(keyCols + [cursorCol])', 'save key columns and current column to filename in format determined by extension (default .tsv)')
 

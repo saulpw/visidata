@@ -9,7 +9,13 @@ vd.option('filetype', '', 'specify file type', replay=True)
 
 @VisiData.api
 def inputFilename(vd, prompt, *args, **kwargs):
-    return vd.input(prompt, type="filename", *args, completer=_completeFilename, **kwargs).strip()
+    completer= _completeFilename
+    if not vd.couldOverwrite():  #1805 don't suggest an existing file
+        completer = None
+        v = kwargs.get('value', '')
+        if v and Path(v).exists():
+            kwargs['value'] = ''
+    return vd.input(prompt, type="filename", *args, completer=completer, **kwargs).strip()
 
 
 @VisiData.api

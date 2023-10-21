@@ -156,7 +156,7 @@ def save_geojson(vd, p, vs):
 
 GeoJSONSheet.addCommand('.', 'plot-row', 'vd.push(GeoJSONMap(name+"_map", sourceRows=[cursorRow], textCol=cursorCol, source=sheet))', 'plot geospatial vector in current row')
 GeoJSONSheet.addCommand('g.', 'plot-rows', 'vd.push(GeoJSONMap(name+"_map", sourceRows=rows, textCol=cursorCol, source=sheet))', 'plot all geospatial vectors in current sheet')
-GeoJSONMap.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .geojson)')
+GeoJSONMap.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet)', 'save current sheet to filename in format determined by extension (default .geojson)')
 
 vd.addGlobals({
     'GeoJSONMap': GeoJSONMap,

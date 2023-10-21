@@ -1,11 +1,36 @@
 from copy import copy
 
-from visidata import vd, asyncthread
+from visidata import vd, VisiData, asyncthread
 from visidata import Sheet, RowColorizer, CellColorizer, Column, BaseSheet, Progress
 
 vd.option('color_add_pending', 'green', 'color for rows pending add')
 vd.option('color_change_pending', 'reverse yellow', 'color for cells pending modification')
 vd.option('color_delete_pending', 'red', 'color for rows pending delete')
+vd.option('overwrite', 'c', 'overwrite existing files {y=yes|c=confirm|n=no}')
+
+vd.optalias('readonly', 'overwrite', 'n')
+vd.optalias('ro', 'overwrite', 'n')
+vd.optalias('y', 'overwrite', 'y')
+
+
+@VisiData.api
+def couldOverwrite(vd) -> bool:
+    'Return True if overwrite might be allowed.'
+    return vd.options.overwrite.startswith(('y','c'))
+
+
+@VisiData.api
+def confirmOverwrite(vd, path, cstr='overwrite'):
+    'Fail if file exists and overwrite not allowed.'
+    if path.exists():
+        ow = vd.options.overwrite
+        if ow.startswith('c'):  # confirm
+            vd.confirm(f"{path.given} already exists. {cstr}? ")
+        elif ow.startswith('y'):  # yes/always
+            pass
+        else: #1805  empty/no/never/readonly
+            vd.fail('overwrite disabled')
+    return True
 
 # deferred cached
 @Sheet.lazy_property
@@ -294,8 +319,7 @@ def commit(sheet, *rows):
     cstr = sheet.changestr(adds, mods, deletes)
     path = sheet.source
 
-    if sheet.options.confirm_overwrite:
-        vd.confirm('really %s? ' % cstr)
+    vd.confirmOverwrite(sheet.source, cstr)
 
     sheet.putChanges()
     sheet.hasBeenModified = False

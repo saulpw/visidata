@@ -104,4 +104,4 @@ def save_geojson(vd, p, vs):
 
 ShapeSheet.addCommand('.', 'plot-row', 'vd.push(ShapeMap(name+"_map", source=sheet, sourceRows=[cursorRow], textCol=cursorCol))', 'plot geospatial vector in current row')
 ShapeSheet.addCommand('g.', 'plot-rows', 'vd.push(ShapeMap(name+"_map", source=sheet, sourceRows=rows, textCol=cursorCol))', 'plot all geospatial vectors in current sheet')
-ShapeMap.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .geojson)')
+ShapeMap.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet)', 'save current sheet to filename in format determined by extension (default .geojson)')

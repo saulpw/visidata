@@ -216,7 +216,10 @@ def threadStatus(vs) -> str:
 
 @BaseSheet.property
 def modifiedStatus(sheet):
-    return ' [M]' if sheet.hasBeenModified else ''
+    ret = ' [M]' if sheet.hasBeenModified else ''
+    if not vd.couldOverwrite():
+        ret += ' [:black on green][RO][/] '
+    return ret
 
 
 @Sheet.property

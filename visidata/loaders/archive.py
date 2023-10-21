@@ -82,8 +82,7 @@ Commands:
         files = []
         for row in rows:
             r, _ = row
-            if (path/r.filename).exists():
-                vd.confirm(f'{r.filename} exists, overwrite? ')  #1452
+            vd.confirmOverwrite(path/r.filename)  #1452
             self.extract_async(row)
 
     def sysopen_row(self, row):
