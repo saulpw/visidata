@@ -103,6 +103,8 @@ class IbisConnectionPool:
 
 
 class IbisTableIndexSheet(IndexSheet):
+    # sheet_type = IbisTableSheet  # set below
+
     @property
     def con(self):
         return self.ibis_conpool.get_conn()
@@ -732,6 +734,7 @@ IbisFreqTable.addCommand('g'+ENTER, 'open-selected', 'vd.push(openRows(selectedR
 IbisTableIndexSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("SQL query: ")))', 'open sheet with results of raw SQL query')
 
 IbisTableIndexSheet.class_options.load_lazy = True
+IbisTableIndexSheet.sheet_type = IbisTableSheet
 IbisTableSheet.class_options.clean_names = True
 IbisTableSheet.class_options.regex_flags = ''
 
