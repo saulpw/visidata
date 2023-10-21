@@ -1,3 +1,4 @@
+from typing import Optional
 import textwrap
 
 from visidata import vd, VisiData, BaseSheet, colors, TextSheet, clipdraw, wraptext, dispwidth
@@ -19,7 +20,6 @@ def sidebar(sheet):
 
 @VisiData.api
 def drawSidebar(vd, scr, sheet):
-    sidebar_title = ''
     sidebar = vd.recentStatusMessages
     bottommsg = ''
     overflowmsg = '[:reverse] Ctrl+P to view all status messages [/]'
@@ -42,11 +42,12 @@ def drawSidebar(vd, scr, sheet):
     return sheet.drawSidebarText(scr, text=sidebar, overflowmsg=overflowmsg, bottommsg=bottommsg)
 
 @BaseSheet.api
-def drawSidebarText(sheet, scr, text:str, title:str='', overflowmsg:str='', bottommsg:str=''):
+def drawSidebarText(sheet, scr, text:Optional[str], title:str='', overflowmsg:str='', bottommsg:str=''):
     scrh, scrw = scr.getmaxyx()
     maxw = sheet.options.disp_sidebar_width or scrw//2
     maxh = sheet.options.disp_sidebar_height or scrh-2
 
+    text = text or ''
     text = textwrap.dedent(text.strip('\n'))
 
     if not text:
@@ -57,9 +58,12 @@ def drawSidebarText(sheet, scr, text:str, title:str='', overflowmsg:str='', bott
         title = lines[0][1:].strip()
         text = '\n'.join(lines[1:])
 
+    titlew = dispwidth(title)
+
     cattr = colors.get_color('color_sidebar')
     lines = list(wraptext(text, width=maxw-4))
-    maxlinew = max(dispwidth(textonly, maxwidth=maxw) for line, textonly in lines)
+    maxlinew = titlew
+    maxlinew = max(titlew, max(dispwidth(textonly, maxwidth=maxw) for line, textonly in lines))
     maxlinew = max(maxlinew, dispwidth(overflowmsg)+4)
     maxlinew = max(maxlinew, dispwidth(bottommsg)+4)
     winw = min(maxw, maxlinew+4)
@@ -82,8 +86,7 @@ def drawSidebarText(sheet, scr, text:str, title:str='', overflowmsg:str='', bott
         x += clipdraw(sidebarscr, i+1, 2, line, cattr, w=w-3)
         i += 1
 
-    titlew = dispwidth(title)
-    x = w-titlew-6
+    x = max(0, w-titlew-6)
     clipdraw(sidebarscr, 0, x, f"|[:black on yellow] {title} [:]|", cattr, w=titlew+4)
     if bottommsg:
         clipdraw(sidebarscr, h-1, winw-dispwidth(bottommsg)-4, '|'+bottommsg+'|[:]', cattr)
