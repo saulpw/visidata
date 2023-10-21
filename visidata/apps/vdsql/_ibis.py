@@ -347,7 +347,13 @@ class IbisTableSheet(Sheet):
         'Return base table for {database_name}.{table_name}'
         import ibis
         tbl = con.table(self.table_name)
-        return ibis.table(tbl.schema(), name=con._fully_qualified_name(self.table_name, self.database_name))
+        return ibis.table(tbl.schema(), name=self.fqtblname(con))
+
+    def fqtblname(self, con) -> str:
+        'Return fully-qualified table name including database/schema, or whatever connection needs to identify this table.'
+        if hasattr(con, '_fully_qualified_name'):
+            return con._fully_qualified_name(self.table_name, self.database_name)
+        return self.table_name
 
     def iterload(self):
         with self.con as con:
