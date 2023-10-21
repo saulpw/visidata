@@ -42,7 +42,6 @@ class SnowflakeSheet(IbisTableSheet):
         self.cursor = None
 
     def iterload(self):
-        self.preload()
         try:
             with self.con as con:
                 if self.query is None:

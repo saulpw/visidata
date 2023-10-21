@@ -22,7 +22,6 @@ class ClickhouseSheet(IbisTableSheet):
         return super().countRows
 
     def iterload(self):
-        self.preload()
         with self.con as con:
             qid = None
             try:
