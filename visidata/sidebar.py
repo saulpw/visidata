@@ -63,7 +63,8 @@ def drawSidebarText(sheet, scr, text:Optional[str], title:str='', overflowmsg:st
     cattr = colors.get_color('color_sidebar')
     lines = list(wraptext(text, width=maxw-4))
     maxlinew = titlew
-    maxlinew = max(titlew, max(dispwidth(textonly, maxwidth=maxw) for line, textonly in lines))
+    if lines:
+        maxlinew = max(titlew, max(dispwidth(textonly, maxwidth=maxw) for line, textonly in lines))
     maxlinew = max(maxlinew, dispwidth(overflowmsg)+4)
     maxlinew = max(maxlinew, dispwidth(bottommsg)+4)
     winw = min(maxw, maxlinew+4)
