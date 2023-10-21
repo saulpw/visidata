@@ -76,25 +76,25 @@ class GitSheet(Sheet):
         bufsize = 512
         chunks = []
         try:
-          vd.debug('git ' + ' '.join(str(x) for x in args))
-          for data in self.git('--no-pager',
-                          *args,
-                          _decode_errors='replace',
-                          _out_bufsize=bufsize,
-                          _iter=True,
-                          _bg_exc=False,
-                          _err=err,
-                          **kwargs):
-            while True:
-                i = data.find(sep)
-                if i < 0:
-                    break
-                chunks.append(data[:i])
-                data = data[i+1:]
-                yield ''.join(chunks)
-                chunks.clear()
+            vd.debug('git ' + ' '.join(str(x) for x in args))
+            for data in self.git('--no-pager',
+                               *args,
+                               _decode_errors='replace',
+                               _out_bufsize=bufsize,
+                               _iter=True,
+                               _bg_exc=False,
+                               _err=err,
+                               **kwargs):
+                while True:
+                    i = data.find(sep)
+                    if i < 0:
+                        break
+                    chunks.append(data[:i])
+                    data = data[i+1:]
+                    yield ''.join(chunks)
+                    chunks.clear()
 
-            chunks.append(data)
+                chunks.append(data)
         except sh.ErrorReturnCode as e:
             vd.warning('git '+' '.join(str(x) for x in args), 'error=%s' % e.exit_code)
 
