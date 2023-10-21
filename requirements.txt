@@ -10,6 +10,7 @@ xlrd                # xls
 xlwt                # xls
 h5py                # hdf5
 psycopg2-binary     # postgres
+mysqlclient         # mysql
 boto3               # rds
 pyshp               # shapefiles
 mapbox-vector-tile  # mbtiles
