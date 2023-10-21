@@ -14,6 +14,9 @@ def readme():
 def requirements():
     return Path("requirements.txt").read_text().splitlines()
 
+def requirements_extra():
+    return Path("requirements-extra.txt").read_text().splitlines()
+
 
 setup(
         name="vdsql",
@@ -33,4 +36,5 @@ setup(
         entry_points={'visidata.plugins': 'vdsql=visidata.apps.vdsql'},
         scripts=['vdsql'],
         install_requires=requirements(),
+        extra_requires=requirements_extra(),
 )
