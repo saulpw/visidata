@@ -263,16 +263,18 @@ class IbisTableSheet(Sheet):
 
     def get_current_expr(self, typed=False):
         q = self.query
-        projections = []
+        extra_cols = {}
         for c in self.visibleCols:
+            if c.name in self.query.columns:
+                continue
             ibis_col = c.get_ibis_col(q, typed=typed)
             if ibis_col is not None:
-                projections.append(ibis_col)
+                extra_cols[c.name] = ibis_col
             else:
                 vd.warning(f'no column {c.name}')
 
-        if projections:
-            q = q.projection(projections)
+        if extra_cols:
+            q = q.mutate(**extra_cols)
 
         return q
 
@@ -468,7 +470,8 @@ def ibis_col(col):
 
 
 @Column.api
-def get_ibis_col(col, query, typed=False):
+def get_ibis_col(col, query:'ibis.Expr', typed=False) -> 'ibis.Expr':
+    'Return ibis.Expr for `col` within context of `query`, cast by VisiData column type if `typed`.'
     import ibis.common.exceptions
 
     r = None
