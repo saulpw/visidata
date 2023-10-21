@@ -224,12 +224,11 @@ class IbisTableSheet(Sheet):
         return sqlparse.format(compiled, reindent=True, keyword_case='upper', wrap_after=40)
 
     @property
-    def sidebar(self):
-        return str(getattr(self, self.options.disp_ibis_sidebar, ''))
-
-    @property
-    def sidebar_title(self):
-        return self.options.disp_ibis_sidebar
+    def sidebar(self) -> str:
+        sbtype = self.options.disp_ibis_sidebar
+        if sbtype:
+            txt = str(getattr(self, sbtype, ''))
+            return f'# {sbtype}\n'+txt
 
     @property
     def ibis_locals(self):
