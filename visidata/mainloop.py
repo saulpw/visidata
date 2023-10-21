@@ -300,6 +300,8 @@ def run(vd, *sheetlist):
         scr = vd.initCurses()
         ret = vd.mainloop(scr)
     except curses.error as e:
+        if vd.options.debug:
+            raise
         vd.fail(str(e))
     finally:
         if scr:

@@ -202,6 +202,10 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, literal=False, **kwargs):
         chunks = iterchunks(s, literal=literal)
     else:
         chunks = [(dict(link='', cattr=ColorAttr()), s)]
+
+    assert x >= 0, x
+    assert y >= 0, y
+
     return clipdraw_chunks(scr, y, x, chunks, attr, w=w, clear=clear, **kwargs)
 
 
