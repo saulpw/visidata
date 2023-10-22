@@ -6,11 +6,8 @@ vd.option('color_cmdpalette', 'black on 72', 'base color of command palette')
 vd.option('disp_cmdpal_max', 5, 'max number of suggestions for command palette')
 
 
-def _format_match(s, positions, onclick=True):
-    # TODO: once inline formatting is a stack, we can make this less gruesome
+def _format_match(s, positions):
     out = list(s)
-    if onclick:
-        out = [f'[:onclick {s}]{l}[/]' for l in out]
     for p in positions:
         out[p] = f'[:bold]{out[p]}[/]'
     return "".join(out)
@@ -58,8 +55,8 @@ def inputLongname(sheet):
             score = longname_score**2 + desc_score**2
             if score > 0:
                 keystrokes = this_sheets_help.revbinds.get(row.longname, [None])[0]
-                formatted_name = _format_match(row.longname, positions_name)
-                formatted_desc = _format_match(description, positions_desc, onclick=False)
+                formatted_name = f'[:onclick {row.longname}]{_format_match(row.longname, positions_name)}[/]'
+                formatted_desc = _format_match(description, positions_desc)
                 matches.append(Match(row.longname, formatted_name, keystrokes, formatted_desc, score))
         matches.sort(key=lambda m: -m.score)
 
