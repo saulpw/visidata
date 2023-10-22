@@ -1,42 +1,15 @@
 import collections
-from visidata import BaseSheet, vd, CompleteKey, clipdraw, HelpSheet, colors, AcceptInput
+from visidata import BaseSheet, vd, CompleteKey, clipdraw, HelpSheet, colors, AcceptInput, fuzzymatch
 
 vd.option('color_cmdpalette', 'black on 72', 'base color of command palette')
 vd.option('cmdpal_max_matches', 5, 'max number of suggestions for command palette')
 
-
-def levenshtein(a, b):
-    # source: https://en.wikipedia.org/wiki/Levenshtein_distance#Iterative_with_full_matrix
-    d = []
-    m, n = len(a), len(b)
-    for _ in range(m+1):
-        row = []
-        for _ in range(n+1):
-            row.append(0)
-        d.append(row)
-    for i in range(1, m+1):
-        d[i][0] = i
-    for j in range(1, n+1):
-        d[0][j] = j
-    for j in range(n):
-        for i in range(m):
-            if a[i] == b[j]:
-                cost = 0
-            else:
-                cost = 1
-            d[i+1][j+1] = min(d[i][j+1]+1, d[i+1][j]+1, d[i][j]+cost)
-    return d[m][n]
-
-
-def _format_name(s, letters):
-    out = ''
-    for l in s:
-        # TODO: once inline formatting is a stack, we can make this less gruesome
-        if l in letters:
-            out += f'[:bold][:onclick {s}]{l}[:][:]'
-        else:
-            out += f'[:onclick {s}]{l}[:]'
-    return out
+def _format_name(s, positions):
+    # TODO: once inline formatting is a stack, we can make this less gruesome
+    out = [f'[:onclick {s}]{l}[:]' for l in s]
+    for p in positions:
+        out[p] = f'[:bold]{out[p]}[:]'
+    return "".join(out)
 
 
 @BaseSheet.api
@@ -47,7 +20,7 @@ def inputLongname(sheet):
     longnames = set(k for (k, obj), v in vd.commands.iter(sheet))
     this_sheets_help = HelpSheet('', source=sheet)
     this_sheets_help.ensureLoaded()
-    Match = collections.namedtuple('Match', 'name formatted_name keystrokes description distance')
+    Match = collections.namedtuple('Match', 'name formatted_name keystrokes description score')
     bindings = dict()
     with open('longname.tsv', 'w') as lnout:
         with open('longname_description.tsv', 'w') as descout:
@@ -65,16 +38,14 @@ def inputLongname(sheet):
     def myupdater(value):
         # collect data
         matches = []
-        letters = set(value)
         for row in this_sheets_help.rows:
-            distance = levenshtein(value, row.longname)
-            if letters.issubset(set(row.longname)):
+            result = fuzzymatch(row.longname, value)
+            if result.score > 0:
                 description = this_sheets_help.cmddict[(row.sheet, row.longname)].helpstr
                 keystrokes = this_sheets_help.revbinds.get(row.longname, [None])[0]
-                formatted_name = _format_name(row.longname, letters)
-                matches.append(Match(row.longname, formatted_name, keystrokes, description, distance))
-        # TODO: sorting seems broken
-        matches.sort(key=lambda m: m[3])
+                formatted_name = _format_name(row.longname, result.positions)
+                matches.append(Match(row.longname, formatted_name, keystrokes, description, result.score))
+        matches.sort(key=lambda m: -m.score)
 
         # do the drawing
         h, w = sheet._scr.getmaxyx()
@@ -94,7 +65,7 @@ def inputLongname(sheet):
             if m.description:
                 match_summary += f' - {m.description}'
             if vd.options.debug:
-                debug_info = f'[{m.distance}]'
+                debug_info = f'[{m.score}]'
                 match_summary = debug_info + match_summary[len(debug_info):]
             clipdraw(sheet._scr, h-(n+1)+i, 0, match_summary, colors.color_cmdpalette, w=120)
         # add some empty rows for visual appeal and dropping previous (not-anymore-)matches

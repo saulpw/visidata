@@ -4,6 +4,8 @@ import collections
 from enum import Enum
 from visidata import vd
 
+DEBUG = False
+
 Result = collections.namedtuple('Result', 'start end score positions')
 
 scoreMatch        = 16
@@ -261,7 +263,8 @@ def fuzzymatch(input_, pattern):
                 maxScore, maxScorePos = score, col
             H[row+f-f0+off] = score
 
-    debugV2(T, pattern, F, lastIdx, H, C)
+    if DEBUG:
+        debugV2(T, pattern, F, lastIdx, H, C)
 
     # Phase 4. (Optional) Backtrace to find character positions
     pos = []
@@ -287,8 +290,6 @@ def fuzzymatch(input_, pattern):
         preferMatch = C[I+j0] > 1 or I+width+j0+1 < len(C) and C[I+width+j0+1] > 0
         j -= 1
 
-    print(pos)
-
     # Start offset we return here is only relevant when begin tiebreak is used.
     # However finding the accurate offset requires backtracking, and we don't
     # want to pay extra cost for the option that has lost its importance.
@@ -313,6 +314,7 @@ if __name__ == '__main__':
     assert charClassOfAscii(' ') == charWhite
     assert charClassOfAscii(',') == charDelimiter
 
+    DEBUG = True
     assert fuzzymatch("hello", "") == Result(0,0,0,[])
     assert fuzzymatch("hello", "nono") == Result(-1,-1,0, None)
     assert fuzzymatch("hello", "l") == Result(2, 3, 16, [2])
