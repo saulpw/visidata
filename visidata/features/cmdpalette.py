@@ -38,13 +38,22 @@ def inputLongname(sheet):
     def myupdater(value):
         # collect data
         matches = []
+        words = value.split()
         for row in this_sheets_help.rows:
-            result = fuzzymatch(row.longname, value)
-            if result.score > 0:
+            score = 0
+            positions = set()
+            for word in words:
+                result = fuzzymatch(row.longname, word)
+                if result.start == -1:
+                    score = 0
+                    break
+                score += result.score
+                positions.update(result.positions)
+            if score > 0:
                 description = this_sheets_help.cmddict[(row.sheet, row.longname)].helpstr
                 keystrokes = this_sheets_help.revbinds.get(row.longname, [None])[0]
-                formatted_name = _format_name(row.longname, result.positions)
-                matches.append(Match(row.longname, formatted_name, keystrokes, description, result.score))
+                formatted_name = _format_name(row.longname, positions)
+                matches.append(Match(row.longname, formatted_name, keystrokes, description, score))
         matches.sort(key=lambda m: -m.score)
 
         # do the drawing
