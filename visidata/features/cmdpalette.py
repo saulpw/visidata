@@ -19,14 +19,14 @@ def _format_match(s, positions):
     return "".join(out)
 
 
-def _fuzzy_match(description, row, words):
+def _fuzzymatch(longname, description, words):
     longname_score, desc_score = 0, 0
     positions_name = set()
     positions_desc = set()
     for word in words:
-        result_name = vd.fuzzymatch(row.longname, word)
+        result_name = vd.fuzzymatch(longname, word)
         result_desc = vd.fuzzymatch(description.lower(), word)
-        # if a word matches neither, we can skip the row
+        # if a word matches neither, we can skip the rest
         if result_name.start == -1 and result_desc.start == -1:
             longname_score, desc_score = 0, 0
             break
@@ -57,7 +57,7 @@ def inputLongname(sheet):
         words = value.lower().split()
         for row in this_sheets_help.rows:
             description = this_sheets_help.cmddict[(row.sheet, row.longname)].helpstr
-            score, positions_desc, positions_name = _fuzzy_match(description, row, words)
+            score, positions_desc, positions_name = _fuzzymatch(row.longname, description, words)
             if score > 0:
                 keystrokes = this_sheets_help.revbinds.get(row.longname, [None])[0]
                 formatted_name = f'[:onclick {row.longname}]{_format_match(row.longname, positions_name)}[/]'
