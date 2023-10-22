@@ -53,7 +53,7 @@ def syscopyValue(sheet, val):
     p = subprocess.run(
         sheet.options.clipboard_copy_cmd.split(),
         input=val,
-        encoding=sheet.options.encoding,
+        encoding='utf-8',
         stdout=subprocess.DEVNULL)
 
     vd.status('copied value to system clipboard')
@@ -79,7 +79,7 @@ def syscopyCells_async(sheet, cols, rows, filetype):
         subprocess.run(
             sheet.options.clipboard_copy_cmd.split(),
             input=buf.getvalue(),
-            encoding=sheet.options.encoding,
+            encoding='utf-8',
             stdout=subprocess.DEVNULL)
 
 
