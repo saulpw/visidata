@@ -1,8 +1,10 @@
 # Assumptions
 # - everything will be ASCII and lowercase
-
+import collections
 from enum import Enum
+from visidata import vd
 
+Result = collections.namedtuple('Result', 'start end score positions')
 
 scoreMatch        = 16
 scoreGapStart     = -3
@@ -138,13 +140,13 @@ def debugV2(T, pattern, F, lastIdx, H, C):
 def fuzzymatch(input_, pattern):
     M = len(pattern)
     if M == 0:
-        return (0,0,0), []
+        return Result(0,0,0,[])
     N = len(input_)
 
     # Phase 1: Optimized search for ASCII string
     idx = ascii_fuzzy_index(input_, pattern)
     if idx < 0:
-        return (-1, -1, 0), None
+        return Result(-1, -1, 0, None)
 
     H0 = [0]*N
     C0 = [0]*N
@@ -198,10 +200,9 @@ def fuzzymatch(input_, pattern):
 
 
     if pidx != M:
-        return (-1, -1, 0), None
+        return Result(-1, -1, 0, None)
     if M == 1:
-        result = (maxScorePos, maxScorePos + 1, maxScore)
-        return result, [maxScorePos]
+        return Result(maxScorePos, maxScorePos + 1, maxScore, [maxScorePos])
 
     # Phase 3: Fill in score matrix (H)
     # do not allow omission.
@@ -291,7 +292,7 @@ def fuzzymatch(input_, pattern):
     # Start offset we return here is only relevant when begin tiebreak is used.
     # However finding the accurate offset requires backtracking, and we don't
     # want to pay extra cost for the option that has lost its importance.
-    return (j, maxScorePos + 1, int(maxScore)), pos
+    return Result(j, maxScorePos + 1, int(maxScore), pos)
 
 
 
@@ -312,9 +313,11 @@ if __name__ == '__main__':
     assert charClassOfAscii(' ') == charWhite
     assert charClassOfAscii(',') == charDelimiter
 
-    assert fuzzymatch("hello", "") == ((0,0,0), [])
-    assert fuzzymatch("hello", "nono") == ((-1,-1,0), None)
-    assert fuzzymatch("hello", "l") == ((2, 3, 16), [2])
-    assert fuzzymatch("hello world", "elo wo") == ((1, 8, 127), [7, 6, 5, 4, 2, 1])
+    assert fuzzymatch("hello", "") == Result(0,0,0,[])
+    assert fuzzymatch("hello", "nono") == Result(-1,-1,0, None)
+    assert fuzzymatch("hello", "l") == Result(2, 3, 16, [2])
+    assert fuzzymatch("hello world", "elo wo") == Result(1, 8, 127, [7, 6, 5, 4, 2, 1])
 
     print("tests ran")
+
+vd.addGlobals({'fuzzymatch': fuzzymatch})
