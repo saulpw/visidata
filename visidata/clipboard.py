@@ -75,7 +75,8 @@ def syscopyCells_async(sheet, cols, rows, filetype):
     vd.status(f'copying {vs.nRows} {vs.rowtype} to system clipboard as {filetype}')
 
     with io.StringIO() as buf:
-        vd.sync(vd.saveSheets(Path(sheet.name+'.'+filetype, fptext=buf), vs))
+      with tempfile.NamedTemporaryFile() as temp:
+        vd.sync(vd.saveSheets(Path(temp.name+'.'+filetype, fptext=buf), vs, confirm_overwrite=False))
         subprocess.run(
             sheet.options.clipboard_copy_cmd.split(),
             input=buf.getvalue(),
