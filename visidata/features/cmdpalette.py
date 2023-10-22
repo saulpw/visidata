@@ -43,7 +43,6 @@ def _fuzzy_match(description, row, words):
 
 @BaseSheet.api
 def inputLongname(sheet):
-    max_matches = vd.options.disp_cmdpal_max
     label = 'command name: '
     # get set of commands possible in the sheet
     longnames = set(k for (k, obj), v in vd.commands.iter(sheet))
@@ -68,37 +67,32 @@ def inputLongname(sheet):
 
         # do the drawing
         h, w = sheet._scr.getmaxyx()
-        n = min(len(matches), max_matches)
+        cmdpal_h = min(h-2, vd.options.disp_cmdpal_max)
+        m_max = min(len(matches), cmdpal_h)
 
-        for i in range(n):
-            m = matches[i]
+        for i, match in enumerate(matches[:m_max]):
             if i < 9:
                 trigger_key = f'{i+1}'
-                bindings[trigger_key] = _longname_executor(m.name)
+                bindings[trigger_key] = _longname_executor(match.name)
             else:
                 trigger_key = ' '
             buffer = ' '*(len(label)-2)
             # TODO: put keystrokes into buffer
-            match_summary = f'{buffer}[:keystrokes]{trigger_key}[/] {m.formatted_name}'
-            if m.keystrokes:
-                match_summary += f' ([:keystrokes]{m.keystrokes}[/])'
-            if m.description:
-                match_summary += f' - {m.description}'
+            match_summary = f'{buffer}[:keystrokes]{trigger_key}[/] {match.formatted_name}'
+            if match.keystrokes:
+                match_summary += f' ([:keystrokes]{match.keystrokes}[/])'
+            if match.description:
+                match_summary += f' - {match.description}'
             if vd.options.debug:
-                debug_info = f'[{m.score}]'
+                debug_info = f'[{match.score}]'
                 match_summary = debug_info + match_summary[len(debug_info):]
-            clipdraw(sheet._scr, h-(n+1)+i, 0, match_summary, colors.color_cmdpalette, w=120)
+            clipdraw(sheet._scr, h-(m_max+1)+i, 0, match_summary, colors.color_cmdpalette, w=120)
 
         # add some empty rows for visual appeal and dropping previous (not-anymore-)matches
-        for i in range(max_matches-n):
-            try:
-                clipdraw(sheet._scr, h-(max_matches+1)+i, 0, ' ', colors.color_cmdpalette, w=120)
-            except Exception as e:
-                breakpoint()
-        # TODO: bug: terminal not high enough => will break.
+        for i in range(cmdpal_h - m_max):
+            clipdraw(sheet._scr, h-(cmdpal_h+1)+i, 0, ' ', colors.color_cmdpalette, w=120)
 
         return None
-
 
     return vd.input(label, completer=CompleteKey(sorted(longnames)), type='longname', updater=cmdpal_matcher,
                     bindings=bindings)
