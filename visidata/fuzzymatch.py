@@ -61,16 +61,24 @@ delimiterChars = '/,:;|'
 
 whiteChars = ' \t\n\v\f\r\x85\xA0'
 
-charWhite, charNonWord, charDelimiter, charLower, charUpper, charLetter, charNumber = range(7)
+(
+    charWhite,
+    charNonWord,
+    charDelimiter,
+    charLower,
+    charUpper,
+    charLetter,
+    charNumber,
+) = range(7)
 initialCharClass = charWhite
 
 
 def asciiFuzzyIndex(target, pattern):
-    ''' Return a fuzzy* starting position of the pattern,
-        or -1, if pattern isn't a fuzzy match.
+    '''Return a fuzzy* starting position of the pattern,
+    or -1, if pattern isn't a fuzzy match.
 
-        *the position is adapted one back, if possible,
-        for bonus determination reasons.
+    *the position is adapted one back, if possible,
+    for bonus determination reasons.
     '''
     first_idx, idx = 0, 0
     for pidx in range(len(pattern)):
@@ -98,7 +106,7 @@ def charClassOfAscii(char):
     return charNonWord
 
 
-def bonusFor(prevClass , class_):
+def bonusFor(prevClass, class_):
     if class_ > charNonWord:
         if prevClass == charWhite:
             # Word boundary after whitespace
@@ -109,8 +117,12 @@ def bonusFor(prevClass , class_):
         elif prevClass == charNonWord:
             # Word boundary
             return bonusBoundary
-    if (prevClass == charLower and class_ == charUpper or
-        prevClass != charNumber and class_ == charNumber):
+    if (
+        prevClass == charLower
+        and class_ == charUpper
+        or prevClass != charNumber
+        and class_ == charNumber
+    ):
         # camelCase letter123
         return bonusCamel123
     elif class_ == charNonWord:
@@ -128,25 +140,26 @@ def debugV2(T, pattern, F, lastIdx, H, C):
         I = i * width
         if i == 0:
             print('  ', end='')
-            for j in range(f, lastIdx+1):
+            for j in range(f, lastIdx + 1):
                 print(f' {T[j]} ', end='')
             print()
         print(pattern[i] + ' ', end='')
         for idx in range(F[0], f):
             print(' 0 ', end='')
-        for idx in range(f, lastIdx+1):
+        for idx in range(f, lastIdx + 1):
             print(f'{int(H[i*width+idx-int(F[0])]):2d} ', end='')
         print()
 
         print('  ', end='')
-        for idx, p in enumerate(C[I : I+width]):
-            if idx+int(F[0]) < int(F[i]):
+        for idx, p in enumerate(C[I : I + width]):
+            if idx + int(F[0]) < int(F[i]):
                 p = 0
             if p > 0:
                 print(f'{p:2d} ', end='')
             else:
                 print('   ', end='')
         print()
+
 
 @dataclass
 class MatchResult:
@@ -159,6 +172,7 @@ class MatchResult:
                Corresponds to every position a letter of the pattern was found
                for this particular alignment.
     '''
+
     start: int
     end: int
     score: int
@@ -166,8 +180,8 @@ class MatchResult:
 
 
 @VisiData.api
-def fuzzymatch(vd, target:str, pattern:str) -> MatchResult:
-    ''' Fuzzy string matching algorithm.
+def fuzzymatch(vd, target: str, pattern: str) -> MatchResult:
+    '''Fuzzy string matching algorithm.
 
     For a target sequence, check whether (and how good) a pattern is matching.
 
@@ -198,9 +212,15 @@ def fuzzymatch(vd, target:str, pattern:str) -> MatchResult:
     T = list(target)
 
     # Phase 2: Calculate bonus for each point
-    maxScore, maxScorePos = 0,0
-    pidx, lastIdx = 0,0
-    pchar0, pchar, prevH0, prevClass, inGap = pattern[0], pattern[0], 0, initialCharClass, False
+    maxScore, maxScorePos = 0, 0
+    pidx, lastIdx = 0, 0
+    pchar0, pchar, prevH0, prevClass, inGap = (
+        pattern[0],
+        pattern[0],
+        0,
+        initialCharClass,
+        False,
+    )
     Tsub = T[idx:]
     H0sub, C0sub, Bsub = H0[idx:], C0[idx:], B[idx:]
 
@@ -218,7 +238,7 @@ def fuzzymatch(vd, target:str, pattern:str) -> MatchResult:
             lastIdx = idx + off
 
         if char == pchar0:
-            score = scoreMatch + bonus*bonusFirstCharMultiplier
+            score = scoreMatch + bonus * bonusFirstCharMultiplier
             H0sub[off] = score
             C0sub[off] = 1
             if patternLength == 1 and (score > maxScore):
@@ -228,9 +248,9 @@ def fuzzymatch(vd, target:str, pattern:str) -> MatchResult:
             inGap = False
         else:
             if inGap:
-                H0sub[off] = max(prevH0+scoreGapExtension, 0)
+                H0sub[off] = max(prevH0 + scoreGapExtension, 0)
             else:
-                H0sub[off] = max(prevH0+scoreGapStart, 0)
+                H0sub[off] = max(prevH0 + scoreGapStart, 0)
             C0sub[off] = 0
             inGap = True
         prevH0 = H0sub[off]
@@ -261,13 +281,13 @@ def fuzzymatch(vd, target:str, pattern:str) -> MatchResult:
         pidx = off + 1
         row = pidx * width
         inGap = False
-        Tsub = T[f : lastIdx+1]
-        Bsub = B[f:][:len(Tsub)]
-        H[row+f-f0-1] = 0
+        Tsub = T[f : lastIdx + 1]
+        Bsub = B[f:][: len(Tsub)]
+        H[row + f - f0 - 1] = 0
         for off, char in enumerate(Tsub):
-            Cdiag = C[row+f-f0-1-width:][:len(Tsub)]
-            Hleft = H[row+f-f0-1:][:len(Tsub)]
-            Hdiag = H[row+f-f0-1-width:][:len(Tsub)]
+            Cdiag = C[row + f - f0 - 1 - width :][: len(Tsub)]
+            Hleft = H[row + f - f0 - 1 :][: len(Tsub)]
+            Hdiag = H[row + f - f0 - 1 - width :][: len(Tsub)]
             col = off + f
             s1, s2, consecutive = 0, 0, 0
 
@@ -281,24 +301,24 @@ def fuzzymatch(vd, target:str, pattern:str) -> MatchResult:
                 b = Bsub[off]
                 consecutive = Cdiag[off] + 1
                 if consecutive > 1:
-                    fb = B[col-consecutive+1]
+                    fb = B[col - consecutive + 1]
                     # Break consecutive chunk
                     if b >= bonusBoundary and b > fb:
                         consecutive = 1
                     else:
                         b = max(b, max(bonusConsecutive, fb))
-                if s1+b < s2:
+                if s1 + b < s2:
                     s1 += Bsub[off]
                     consecutive = 0
                 else:
                     s1 += b
-            C[row+f-f0+off] = consecutive
+            C[row + f - f0 + off] = consecutive
 
             inGap = s1 < s2
             score = max(max(s1, s2), 0)
             if pidx == patternLength - 1 and score > maxScore:
                 maxScore, maxScorePos = score, col
-            H[row+f-f0+off] = score
+            H[row + f - f0 + off] = score
 
     if DEBUG:
         debugV2(T, pattern, F, lastIdx, H, C)
@@ -308,30 +328,31 @@ def fuzzymatch(vd, target:str, pattern:str) -> MatchResult:
     i = patternLength - 1
     j = maxScorePos
     preferMatch = True
-    while(True):
+    while True:
         I = i * width
         j0 = j - f0
-        s = H[I+j0]
+        s = H[I + j0]
 
         s1, s2 = 0, 0
         if i > 0 and j >= int(F[i]):
-            s1 = H[I-width+j0-1]
+            s1 = H[I - width + j0 - 1]
         if j > int(F[i]):
-            s2 = H[I+j0-1]
+            s2 = H[I + j0 - 1]
 
         if s > s1 and (s > s2 or s == s2 and preferMatch):
             pos.append(j)
             if i == 0:
                 break
             i -= 1
-        preferMatch = C[I+j0] > 1 or I+width+j0+1 < len(C) and C[I+width+j0+1] > 0
+        preferMatch = (
+            C[I + j0] > 1 or I + width + j0 + 1 < len(C) and C[I + width + j0 + 1] > 0
+        )
         j -= 1
 
     # Start offset we return here is only relevant when begin tiebreak is used.
     # However finding the accurate offset requires backtracking, and we don't
     # want to pay extra cost for the option that has lost its importance.
     return MatchResult(j, maxScorePos + 1, int(maxScore), pos)
-
 
 
 def test_fuzzymatch():
@@ -351,7 +372,9 @@ def test_fuzzymatch():
     assert charClassOfAscii(' ') == charWhite
     assert charClassOfAscii(',') == charDelimiter
 
-    assert vd.fuzzymatch('hello', '') == MatchResult(0,0,0,[])
-    assert vd.fuzzymatch('hello', 'nono') == MatchResult(-1,-1,0, None)
+    assert vd.fuzzymatch('hello', '') == MatchResult(0, 0, 0, [])
+    assert vd.fuzzymatch('hello', 'nono') == MatchResult(-1, -1, 0, None)
     assert vd.fuzzymatch('hello', 'l') == MatchResult(2, 3, 16, [2])
-    assert vd.fuzzymatch('hello world', 'elo wo') == MatchResult(1, 8, 127, [7, 6, 5, 4, 2, 1])
+    assert vd.fuzzymatch('hello world', 'elo wo') == MatchResult(
+        1, 8, 127, [7, 6, 5, 4, 2, 1]
+    )
