@@ -547,4 +547,4 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
     return r
 
 
-vd.addGlobals({'CompleteKey': CompleteKey})
+vd.addGlobals({'CompleteKey': CompleteKey, 'AcceptInput': AcceptInput})
