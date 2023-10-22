@@ -2,7 +2,7 @@
 # - everything will be ASCII and lowercase
 import collections
 from enum import Enum
-from visidata import vd
+from visidata import VisiData, vd
 
 DEBUG = False
 
@@ -139,7 +139,12 @@ def debugV2(T, pattern, F, lastIdx, H, C):
                 print("   ", end='')
         print()
 
-def fuzzymatch(input_, pattern):
+
+@VisiData.api
+def fuzzymatch(vd, input_:str, pattern:str) -> Result:
+    '''
+    TODO: basic usage
+    '''
     M = len(pattern)
     if M == 0:
         return Result(0,0,0,[])
@@ -297,7 +302,7 @@ def fuzzymatch(input_, pattern):
 
 
 
-if __name__ == '__main__':
+def test_fuzzymatch():
     assert ascii_fuzzy_index("helo", "h") == 0
     assert ascii_fuzzy_index("helo", "hlo") == 0
     assert ascii_fuzzy_index("helo", "e") == 0
@@ -314,12 +319,7 @@ if __name__ == '__main__':
     assert charClassOfAscii(' ') == charWhite
     assert charClassOfAscii(',') == charDelimiter
 
-    DEBUG = True
-    assert fuzzymatch("hello", "") == Result(0,0,0,[])
-    assert fuzzymatch("hello", "nono") == Result(-1,-1,0, None)
-    assert fuzzymatch("hello", "l") == Result(2, 3, 16, [2])
-    assert fuzzymatch("hello world", "elo wo") == Result(1, 8, 127, [7, 6, 5, 4, 2, 1])
-
-    print("tests ran")
-
-vd.addGlobals({'fuzzymatch': fuzzymatch})
+    assert vd.fuzzymatch("hello", "") == Result(0,0,0,[])
+    assert vd.fuzzymatch("hello", "nono") == Result(-1,-1,0, None)
+    assert vd.fuzzymatch("hello", "l") == Result(2, 3, 16, [2])
+    assert vd.fuzzymatch("hello world", "elo wo") == Result(1, 8, 127, [7, 6, 5, 4, 2, 1])
