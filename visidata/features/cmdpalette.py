@@ -4,9 +4,11 @@ from visidata import BaseSheet, vd, CompleteKey, clipdraw, HelpSheet, colors, Ac
 vd.option('color_cmdpalette', 'black on 72', 'base color of command palette')
 vd.option('cmdpal_max_matches', 5, 'max number of suggestions for command palette')
 
-def _format_name(s, positions):
+def _format_match(s, positions, onclick=True):
     # TODO: once inline formatting is a stack, we can make this less gruesome
-    out = [f'[:onclick {s}]{l}[:]' for l in s]
+    out = list(s)
+    if onclick:
+        out = [f'[:onclick {s}]{l}[:]' for l in out]
     for p in positions:
         out[p] = f'[:bold]{out[p]}[:]'
     return "".join(out)
@@ -38,22 +40,31 @@ def inputLongname(sheet):
     def myupdater(value):
         # collect data
         matches = []
-        words = value.split()
+        words = value.lower().split()
         for row in this_sheets_help.rows:
-            score = 0
-            positions = set()
+            description = this_sheets_help.cmddict[(row.sheet, row.longname)].helpstr
+            scores = 0, 0
+            positions_name = set()
+            positions_desc = set()
             for word in words:
-                result = fuzzymatch(row.longname, word)
-                if result.start == -1:
+                result_name = fuzzymatch(row.longname, word)
+                result_desc = fuzzymatch(description.lower(), word)
+                # if a word matches neither, we can skip the row
+                if result_name.start == -1 and result_desc.start == -1:
                     score = 0
                     break
-                score += result.score
-                positions.update(result.positions)
+                scores = scores[0]+result_name.score, scores[1]+result_desc.score
+                if result_name.positions:
+                    positions_name.update(result_name.positions)
+                if result_desc.positions:
+                    positions_desc.update(result_desc.positions)
+            # prefer if match is either fully on longname or on description
+            score = scores[0]**2 + scores[1]**2
             if score > 0:
-                description = this_sheets_help.cmddict[(row.sheet, row.longname)].helpstr
                 keystrokes = this_sheets_help.revbinds.get(row.longname, [None])[0]
-                formatted_name = _format_name(row.longname, positions)
-                matches.append(Match(row.longname, formatted_name, keystrokes, description, score))
+                formatted_name = _format_match(row.longname, positions_name)
+                formatted_desc = _format_match(description, positions_desc, onclick=False)
+                matches.append(Match(row.longname, formatted_name, keystrokes, formatted_desc, score))
         matches.sort(key=lambda m: -m.score)
 
         # do the drawing
