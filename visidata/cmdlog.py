@@ -54,18 +54,6 @@ def fnSuffix(vd, prefix):
 
     return fn
 
-@BaseSheet.api
-def inputLongname(sheet):
-    longnames = set(k for (k, obj), v in vd.commands.iter(sheet))
-    return vd.input("command name: ", completer=CompleteKey(sorted(longnames)), type='longname')
-
-@BaseSheet.api
-def exec_longname(sheet, longname):
-    if not sheet.getCommand(longname):
-        vd.warning(f'no command {longname}')
-        return
-    sheet.execCommand(longname)
-
 def indexMatch(L, func):
     'returns the smallest i for which func(L[i]) is true'
     for i, x in enumerate(L):
@@ -470,8 +458,6 @@ BaseSheet.addCommand('^K', 'replay-stop', 'vd.replay_cancel(); vd.warning("repla
 globalCommand(None, 'show-status', 'status(input("status: "))', 'show given message on status line')
 globalCommand('^V', 'show-version', 'status(__version_info__);', 'Show version and copyright information on status line')
 globalCommand('z^V', 'check-version', 'checkVersion(input("require version: ", value=__version_info__))', 'check VisiData version against given version')
-
-BaseSheet.addCommand('Space', 'exec-longname', 'exec_longname(inputLongname())', 'execute command by its longname')
 
 CommandLog.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("replayed one row")', 'replay command in current row')
 CommandLog.addCommand('gx', 'replay-all', 'vd.replay(sheet)', 'replay contents of entire CommandLog')
