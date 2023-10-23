@@ -1,7 +1,7 @@
 import collections
 from copy import copy
 from visidata import ScopedSetattr, Column, Sheet, asyncthread, Progress, forward, wrapply, INPROGRESS
-from visidata import vlen, vd, date
+from visidata import vlen, vd, date, setitem
 import visidata
 
 
