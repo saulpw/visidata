@@ -50,13 +50,13 @@ def parseMouse(vd, **kwargs):
 
     clicktype = ''
     if bstate & curses.BUTTON_CTRL:
-        clicktype += "CTRL-"
+        clicktype += "Ctrl+"
         bstate &= ~curses.BUTTON_CTRL
     if bstate & curses.BUTTON_ALT:
-        clicktype += "ALT-"
+        clicktype += "Alt+"
         bstate &= ~curses.BUTTON_ALT
     if bstate & curses.BUTTON_SHIFT:
-        clicktype += "SHIFT-"
+        clicktype += "Shift+"
         bstate &= ~curses.BUTTON_SHIFT
 
     keystroke = clicktype + curses.mouseEvents.get(bstate, str(bstate))
@@ -133,5 +133,5 @@ def go_mouse(sheet):
 
 Sheet.addCommand(None, 'scroll-mouse', 'sheet.topRowIndex=cursorRowIndex-mouseY+1', 'scroll to mouse cursor location')
 
-Sheet.addCommand('ScrollwheelUp', 'scroll-up', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr', 'scroll one row up')
-Sheet.addCommand('ScrollwheelDown', 'scroll-down', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr', 'scroll one row down')
+Sheet.addCommand('ScrollUp', 'scroll-up', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr', 'scroll one row up')
+Sheet.addCommand('ScrollDown', 'scroll-down', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr', 'scroll one row down')

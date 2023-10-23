@@ -169,9 +169,8 @@ Sheet.addCommand('gzk', 'scroll-cells-top', 'cursorCol.voffset = 0', 'scroll dis
 Sheet.addCommand(None, 'go-end',  'sheet.cursorRowIndex = len(rows)-1; sheet.cursorVisibleColIndex = len(visibleCols)-1', 'go to last row and last column')
 Sheet.addCommand(None, 'go-home', 'sheet.topRowIndex = sheet.cursorRowIndex = 0; sheet.leftVisibleColIndex = sheet.cursorVisibleColIndex = 0', 'go to first row and first column')
 
-BaseSheet.bindkey('CTRL-BUTTON4_PRESSED', 'scroll-left')
-BaseSheet.bindkey('CTRL-REPORT_MOUSE_POSITION', 'scroll-right')
-BaseSheet.bindkey('CTRL-2097152', 'scroll-right')
+BaseSheet.bindkey('Ctrl+ScrollUp', 'scroll-left')
+BaseSheet.bindkey('Ctrl+ScrollDown', 'scroll-right')
 
 BaseSheet.bindkey('zKEY_UP', 'scroll-up')
 BaseSheet.bindkey('zKEY_DOWN', 'scroll-down')

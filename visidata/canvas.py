@@ -778,8 +778,8 @@ Canvas.addCommand('BUTTON3_CLICKED', 'move-canvas',  '', 'move canvas (in place)
 Canvas.bindkey('BUTTON3_DOUBLE_CLICKED', 'move-canvas')
 Canvas.bindkey('BUTTON3_TRIPLE_CLICKED', 'move-canvas')
 
-Canvas.addCommand('ScrollwheelUp', 'zoomin-mouse', 'cm=canvasMouse; incrZoom(1.0/options.zoom_incr) if cm else fail("cannot zoom in on unplotted canvas"); fixPoint(plotterMouse, cm)', 'zoom in with scroll wheel')
-Canvas.addCommand('ScrollwheelDown', 'zoomout-mouse', 'cm=canvasMouse; incrZoom(options.zoom_incr) if cm else fail("cannot zoom in on unplotted canvas"); fixPoint(plotterMouse, cm)', 'zoom out with scroll wheel')
+Canvas.addCommand('ScrollUp', 'zoomin-mouse', 'cm=canvasMouse; incrZoom(1.0/options.zoom_incr) if cm else fail("cannot zoom in on unplotted canvas"); fixPoint(plotterMouse, cm)', 'zoom in with scroll wheel')
+Canvas.addCommand('ScrollDown', 'zoomout-mouse', 'cm=canvasMouse; incrZoom(options.zoom_incr) if cm else fail("cannot zoom in on unplotted canvas"); fixPoint(plotterMouse, cm)', 'zoom out with scroll wheel')
 
 Canvas.addCommand('s', 'select-cursor', 'source.select(list(rowsWithin(plotterCursorBox)))', 'select rows on source sheet contained within canvas cursor')
 Canvas.addCommand('t', 'stoggle-cursor', 'source.toggle(list(rowsWithin(plotterCursorBox)))', 'toggle selection of rows on source sheet contained within canvas cursor')
