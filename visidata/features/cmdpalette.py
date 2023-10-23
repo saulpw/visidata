@@ -71,16 +71,19 @@ def inputLongname(sheet):
         m_max = min(len(matches), cmdpal_h)
 
         for i, match in enumerate(matches[:m_max]):
+            keystrokes = ' '
+            trigger_key = ' '
+
             if i < 9:
                 trigger_key = f'{i+1}'
                 bindings[trigger_key] = _longname_executor(match.name)
-            else:
-                trigger_key = ' '
-            buffer = ' '*(len(label)-2)
-            # TODO: put keystrokes into buffer
-            match_summary = f'{buffer}[:keystrokes]{trigger_key}[/] {match.formatted_name}'
+
             if match.keystrokes:
-                match_summary += f' ([:keystrokes]{match.keystrokes}[/])'
+                keystrokes = match.keystrokes
+
+            match_summary = f' [:keystrokes]{keystrokes.rjust(len(label)-5)}[/]  '
+
+            match_summary += f'[:keystrokes]{trigger_key}[/] {match.formatted_name}'
             if match.description:
                 match_summary += f' - {match.description}'
             if vd.options.debug:
