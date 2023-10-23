@@ -317,9 +317,8 @@ def commit(sheet, *rows):
 
     adds, mods, deletes = sheet.getDeferredChanges()
     cstr = sheet.changestr(adds, mods, deletes)
-    path = sheet.source
 
-    vd.confirmOverwrite(sheet.source, cstr)
+    vd.confirmOverwrite(sheet.rootSheet().source, cstr)
 
     sheet.putChanges()
     sheet.hasBeenModified = False
