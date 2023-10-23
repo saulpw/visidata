@@ -355,7 +355,7 @@ def fuzzymatch(vd, target: str, pattern: str) -> MatchResult:
     return MatchResult(j, maxScorePos + 1, int(maxScore), pos)
 
 
-def test_fuzzymatch():
+def test_fuzzymatch(vd=vd):
     assert asciiFuzzyIndex('helo', 'h') == 0
     assert asciiFuzzyIndex('helo', 'hlo') == 0
     assert asciiFuzzyIndex('helo', 'e') == 0
