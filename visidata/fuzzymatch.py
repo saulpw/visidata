@@ -176,7 +176,7 @@ class MatchResult:
     start: int
     end: int
     score: int
-    positions: list[int]
+    positions: 'list[int]'
 
 
 @VisiData.api
