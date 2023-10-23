@@ -36,7 +36,7 @@ for i in $TESTS ; do
     if $TEST == true;
     then
         for goldfn in tests/golden/${outbase%.vd*}.*; do
-            PYTHONPATH=. bin/vd --confirm-overwrite=False --play "$i" --batch --output "$goldfn" --config tests/.visidatarc --visidata-dir tests/.visidata
+            PYTHONPATH=. bin/vd --debug --confirm-overwrite=False --play "$i" --batch --output "$goldfn" --config tests/.visidatarc --visidata-dir tests/.visidata
             echo "save: $goldfn"
         done
     fi
