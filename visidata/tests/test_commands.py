@@ -83,6 +83,8 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'import-python': 'math',
                  'pyobj-expr-row': 'Units + "s"',            # open the python object for '4'
                  'expand-col-depth': '0',
+                 'contract-col-depth': '0',
+                 'contract-cols-depth': '0',
                  'expand-cols-depth': '0',
                  'save-cmdlog': 'test_commands.vdj',
                  'aggregate-col': 'mean',
