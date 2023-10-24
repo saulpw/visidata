@@ -26,7 +26,7 @@ class ColumnsSheet(Sheet):
     _coltype = ColumnAttr
     precious = False
     help = '''# Columns Sheet
-This is a list of {sheet.source.nCols} columns on {sheet.displaySource}.  You can edit values on this sheet to change the column's appearance on the source sheet.
+This is a list of {sheet.nSourceCols} columns on {sheet.displaySource}.  You can edit values on this sheet to change the column's appearance on the source sheet.
 For example, edit the _{sheet.cursorCol.name}_ column to {sheet.cursorCol.help}.
 
 Some column commands can also be done in bulk here, with the `g` prefix:
@@ -34,6 +34,7 @@ Some column commands can also be done in bulk here, with the `g` prefix:
 - `ge` to bulk set the _{sheet.cursorCol.name}_ for all selected "columns"
 - `g-` to hide selected "columns"
 - `g#` (or any standard type) to set the type of all selected "columns"
+{sheet.help_columns}
 '''
 
     class ValueColumn(Column):
@@ -66,6 +67,11 @@ Some column commands can also be done in bulk here, with the `g` prefix:
         RowColorizer(7, 'color_key_col', lambda s,c,r,v: r and r.keycol),
         RowColorizer(8, 'color_hidden_col', lambda s,c,r,v: r and r.hidden),
     ]
+
+    @property
+    def nSourceCols(self):
+        return sum(vs.nCols for vs in self.source)
+
     def loader(self):
         if len(self.source) == 1:
             self.rows = self.source[0].columns

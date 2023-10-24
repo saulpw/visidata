@@ -129,7 +129,7 @@ class TableSheet(BaseSheet):
 
     @property
     def help_columns(self):
-        hiddenCols = [c.hidden for c in self.columns]
+        hiddenCols = [c for c in self.columns if c.hidden]
         if hiddenCols:
             return f'- `gv` to unhide {len(hiddenCols)} hidden columns'
         return ''

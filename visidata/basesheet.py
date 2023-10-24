@@ -179,11 +179,10 @@ class BaseSheet(DrawablePane):
 
         if isinstance(self.source, (list, tuple)):
             if len(self.source) == 1:
-                return f'the *{self.source[0]}* sheet'
-            r = ' '.join(f'*{x}*' for x in self.source)
-            return f'{len(self.source)} sheets ({r})'
+                return f'the **{self.source[0]}** sheet'
+            return f'{len(self.source)} sheets'
 
-        return f'*{self.source}*'
+        return f'**{self.source}**'
 
     def execCommand(self, longname, vdglobals=None, keystrokes=None):
         if ' ' in longname:
