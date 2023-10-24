@@ -267,6 +267,8 @@ class TableSheet(BaseSheet):
         self.columns = []
         for c in self.initialCols:
             self.addColumn(deepcopy(c))
+            if self.options.disp_help > c.max_help:
+                c.hide()
 
         self.setKeys(self.columns[:self.nKeys])
 

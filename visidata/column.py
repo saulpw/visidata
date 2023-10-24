@@ -10,7 +10,7 @@ import json
 from visidata import options, anytype, stacktrace, vd
 from visidata import asyncthread, dispwidth, clipstr, iterchars
 from visidata import wrapply, TypedWrapper, TypedExceptionWrapper
-from visidata import Extensible, AttrDict, undoAttrFunc, ExplodingMock
+from visidata import Extensible, AttrDict, undoAttrFunc, ExplodingMock, MissingAttrFormatter
 from visidata import getitem, setitem, getitemdef, getitemdeep, setitemdeep, getattrdeep, setattrdeep, iterchunks
 
 class InProgress(Exception):
@@ -92,6 +92,7 @@ class Column(Extensible):
         self.formatter = ''
         self.displayer = ''
         self.defer = False
+        self.max_help = 10    # auto-hide above this disp_help level
 
         self.setCache(cache)
         for k, v in kwargs.items():
@@ -184,6 +185,20 @@ class Column(Extensible):
             if self.width == 0 or w == 0:  # hide/unhide
                 vd.addUndo(setattr, self, '_width', self.width)
             self._width = w
+
+    @property
+    def formatted_help(self):
+        return MissingAttrFormatter().format(self.help, sheet=self.sheet, col=self, vd=vd)
+
+    @property
+    def help_formatters(self):
+        formatters = [k[10:] for k in dir(self) if k.startswith('formatter_')]
+        return ' '.join(formatters)
+
+    @property
+    def help_displayers(self):
+        displayers = [k[10:] for k in dir(self) if k.startswith('displayer_')]
+        return ' '.join(displayers)
 
     @property
     def _formatdict(col):

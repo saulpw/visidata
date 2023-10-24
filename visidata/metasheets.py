@@ -26,8 +26,9 @@ class ColumnsSheet(Sheet):
     _coltype = ColumnAttr
     precious = False
     help = '''# Columns Sheet
-This is a list of {sheet.nSourceCols} columns on {sheet.displaySource}.  You can edit values on this sheet to change the column's appearance on the source sheet.
-For example, edit the _{sheet.cursorCol.name}_ column to {sheet.cursorCol.help}.
+This is a list of {sheet.nSourceCols} columns on {sheet.displaySource}.
+Edit values on this sheet to change the column's appearance on the source sheet.
+Edit the _{sheet.cursorCol.name}_ column to {sheet.cursorCol.formatted_help}.
 
 Some column commands can also be done in bulk here, with the `g` prefix:
 
@@ -49,15 +50,15 @@ Some column commands can also be done in bulk here, with the `g` prefix:
             ColumnAttr('name', help='rename the column on the source sheet'),
             ColumnAttr('keycol', type=int, width=0),
             ColumnAttr('width', type=int, help='set the column width (`0` to hide completely)'),
-            ColumnAttr('height', type=int, help='set a maximum height for the row, if this column will fill it'),
+            ColumnAttr('height', type=int, max_help=1, help='set a maximum height for the row, if this column will fill it'),
             ColumnAttr('hoffset', type=int, width=0),
             ColumnAttr('voffset', type=int, width=0),
             ColumnAttr('type', 'typestr', help='convert all values to a specific type'),
-            ColumnAttr('fmtstr', help='use a custom format string; use either C-style (`%0.4f`) or Python-style (`{:0.4f}`)'),
-            ColumnAttr('formatter', help='use a custom format function (advanced)'),
-            ColumnAttr('displayer', help='use a custom display function (advanced)'),
+            ColumnAttr('fmtstr', help='use a custom format string, either C-style (`%0.4f`) or Python-style (`{{:0.4f}}`)'),
+            ColumnAttr('formatter', max_help=1, help='use a custom format function (**{col.help_formatters}**)'),
+            ColumnAttr('displayer', max_help=1, help='use a custom display function (**{col.help_displayers}**)'),
             ValueColumn('value', help='change the value of this cell on the source sheet'),
-            ColumnAttr('expr', help='change the main column parameter'),
+            ColumnAttr('expr', max_help=1, help='change the main column parameter'),
             ColumnAttr('ncalcs', type=int, width=0, cache=False),
             ColumnAttr('maxtime', type=float, width=0, cache=False),
             ColumnAttr('totaltime', type=float, width=0, cache=False),

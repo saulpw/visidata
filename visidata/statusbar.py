@@ -258,7 +258,7 @@ class StatusSheet(Sheet):
         ColumnItem('nrepeats', 2, type=int, width=0),
         ColumnItem('args', 1, width=0),
         Column('message', width=50, getter=lambda col,row: composeStatus(row[1], row[2])),
-        ColumnItem('source', 3),
+        ColumnItem('source', 3, max_help=1),
     ]
     colorizers = [
         RowColorizer(1, 'color_error', lambda s,c,r,v: r and r[0] == 3),
