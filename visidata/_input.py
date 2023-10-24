@@ -7,6 +7,23 @@ from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiDa
 from visidata import vd, options, colors, dispwidth, ColorAttr
 from visidata import AttrDict
 
+help_input = '''# Input Help
+Start typing to overwrite the starting value.
+(To edit the starting value, press a movement key first.)
+
+- `Ctrl+O` to open in external $EDITOR
+- `Ctrl+Y` to insert clipboard text at cursor
+- `Ctrl+R` to restore the starting value
+- `Tab`/`Shift+Tab` to next/prev autocomplete
+- `↓`/`↑` next/prev input history
+
+- `Ctrl+C` or `Esc` to cancel input.
+- `Enter` to accept input.
+- `Ctrl+G` to toggle this help sidebar
+
+Other standard readline keybindings apply.
+[:onclick https://visidata.org/help/input]🛈  for all keybindings at visidata.org[:]
+'''
 
 vd.option('color_edit_unfocused', '238 on 110', 'display color for unfocused input in form')
 vd.option('color_edit_cell', '233 on 110', 'cell color to use when editing cell')
@@ -226,10 +243,10 @@ def editline(vd, scr, y, x, w, i=0,
         updater(v)
         if disp_help > 0:
             sheet = vd.activeSheet
-            if help:
+            if disp_help > 1:
+                help = help_input
+            if disp_help > 0 and help:
                 sheet.drawSidebarText(scr, help)
-            elif disp_help > 1:
-                vd.getHelpPane('input', module='visidata').draw(scr, y=y)
 
         if display:
             dispval = clean_printable(v)

@@ -118,6 +118,21 @@ class TableSheet(BaseSheet):
     _coltype = SettableColumn
 
     rowtype = 'rows'
+    help = '# {sheet.help_title}\n{sheet.help_columns}\n'
+
+    @property
+    def help_title(self):
+        if isinstance(self.source, visidata.Path):
+            return 'Source Table'
+        else:
+            return 'Table Sheet'
+
+    @property
+    def help_columns(self):
+        hiddenCols = [c.hidden for c in self.columns]
+        if hiddenCols:
+            return f'- `gv` to unhide {len(hiddenCols)} hidden columns'
+        return ''
 
     columns = []  # list of Column
     colorizers = [ # list of Colorizer

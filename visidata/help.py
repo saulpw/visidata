@@ -4,7 +4,7 @@ import collections
 from visidata import VisiData, MetaSheet, ColumnAttr, Column, BaseSheet, VisiDataMetaSheet, SuspendCurses
 from visidata import vd, asyncthread, ENTER
 
-vd.option('disp_help', 0, 'show help panel during input')
+vd.option('disp_help', 1, '-1=quiet, 0=no help, 1-4=some-all help, 5-10=remove features')
 
 
 @VisiData.api
@@ -83,12 +83,12 @@ class HelpPane:
 
     def draw(self, scr, x=None, y=None):
         if not scr: return
-#        if vd.options.disp_help <= 0:
-#            if self.scr:
-#                self.scr.erase()
-#                self.scr.refresh()
-#                self.scr = None
-#            return
+        if vd.options.disp_help < 2:
+            if self.scr:
+                self.scr.erase()
+                self.scr.refresh()
+                self.scr = None
+            return
         if y is None: y=0  # show at top of screen by default
         if x is None: x=0
         hneeded = self.amgr.maxHeight+3
