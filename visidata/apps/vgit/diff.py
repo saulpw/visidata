@@ -3,9 +3,9 @@ from visidata import vd, VisiData, ItemColumn, RowColorizer, AttrDict, Column
 from .gitsheet import GitSheet
 
 vd.option('git_diff_algo', 'minimal', 'algorithm to use for git diff')
-vd.option('color_git_hunk_add', 'green', 'color for added hunk lines')
-vd.option('color_git_hunk_del', 'red', 'color for deleted hunk lines')
-vd.option('color_git_hunk_diff', 'yellow', 'color for hunk diffs')
+vd.theme_option('color_git_hunk_add', 'green', 'color for added hunk lines')
+vd.theme_option('color_git_hunk_del', 'red', 'color for deleted hunk lines')
+vd.theme_option('color_git_hunk_diff', 'yellow', 'color for hunk diffs')
 
 @VisiData.api
 def git_diff(vd, p, args):

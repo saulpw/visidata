@@ -4,8 +4,8 @@ from visidata import vd, Column, VisiData, ItemColumn, AttrColumn, Path, AttrDic
 
 from .gitsheet import GitSheet
 
-vd.option('color_git_current_branch', 'underline', 'color of current branch on branches sheet')
-vd.option('color_git_remote_branch', 'cyan', 'color of remote branches on branches sheet')
+vd.theme_option('color_git_current_branch', 'underline', 'color of current branch on branches sheet')
+vd.theme_option('color_git_remote_branch', 'cyan', 'color of remote branches on branches sheet')
 
 
 @VisiData.api

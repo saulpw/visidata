@@ -6,7 +6,7 @@ from visidata import vd, Column, Sheet
 
 __author__ = 'Lucas Messenger @layertwo'
 
-vd.option('disp_sparkline', '▁▂▃▄▅▆▇', 'characters to display sparkline')
+vd.theme_option('disp_sparkline', '▁▂▃▄▅▆▇', 'characters to display sparkline')
 
 
 def sparkline(*values):

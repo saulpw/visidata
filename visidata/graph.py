@@ -3,8 +3,8 @@ import math
 from visidata import VisiData, Canvas, Sheet, Progress, BoundingBox, Point
 from visidata import vd, asyncthread, dispwidth, colors, clipstr
 
-vd.option('color_graph_axis', 'bold', 'color for graph axis labels')
-vd.option('disp_graph_tick_x', '╵', 'character for graph x-axis ticks')
+vd.theme_option('color_graph_axis', 'bold', 'color for graph axis labels')
+vd.theme_option('disp_graph_tick_x', '╵', 'character for graph x-axis ticks')
 
 
 @VisiData.api

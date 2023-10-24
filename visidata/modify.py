@@ -3,9 +3,9 @@ from copy import copy
 from visidata import vd, VisiData, asyncthread
 from visidata import Sheet, RowColorizer, CellColorizer, Column, BaseSheet, Progress
 
-vd.option('color_add_pending', 'green', 'color for rows pending add')
-vd.option('color_change_pending', 'reverse yellow', 'color for cells pending modification')
-vd.option('color_delete_pending', 'red', 'color for rows pending delete')
+vd.theme_option('color_add_pending', 'green', 'color for rows pending add')
+vd.theme_option('color_change_pending', 'reverse yellow', 'color for cells pending modification')
+vd.theme_option('color_delete_pending', 'red', 'color for rows pending delete')
 vd.option('overwrite', 'c', 'overwrite existing files {y=yes|c=confirm|n=no}')
 
 vd.optalias('readonly', 'overwrite', 'n')

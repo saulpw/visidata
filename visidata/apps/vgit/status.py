@@ -6,11 +6,11 @@ from .gitsheet import GitSheet
 #from .diff import DifferSheet
 
 vd.option('vgit_show_ignored', False, 'show ignored files on git status')
-vd.option('color_git_staged_mod', 'green', 'color of files staged with modifications')
-vd.option('color_git_staged_add', 'green', 'color of files staged for addition')
-vd.option('color_git_staged_del', 'red', 'color of files staged for deletion')
-vd.option('color_git_unstaged_del', 'on 88', 'color of files deleted but unstaged')
-vd.option('color_git_untracked', '243 blue', 'color of ignored/untracked files')
+vd.theme_option('color_git_staged_mod', 'green', 'color of files staged with modifications')
+vd.theme_option('color_git_staged_add', 'green', 'color of files staged for addition')
+vd.theme_option('color_git_staged_del', 'red', 'color of files staged for deletion')
+vd.theme_option('color_git_unstaged_del', 'on 88', 'color of files deleted but unstaged')
+vd.theme_option('color_git_untracked', '243 blue', 'color of ignored/untracked files')
 
 
 @VisiData.api

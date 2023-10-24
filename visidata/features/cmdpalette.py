@@ -2,8 +2,8 @@ import collections
 from visidata import BaseSheet, vd, CompleteKey, clipdraw, HelpSheet, colors, AcceptInput
 
 
-vd.option('color_cmdpalette', 'black on 72', 'base color of command palette')
-vd.option('disp_cmdpal_max', 5, 'max number of suggestions for command palette')
+vd.theme_option('color_cmdpalette', 'black on 72', 'base color of command palette')
+vd.theme_option('disp_cmdpal_max', 5, 'max number of suggestions for command palette')
 
 
 def _longname_executor(name):
