@@ -3,6 +3,7 @@
 # Usage: test.sh [testname]
 
 set -e
+set -x
 shopt -s failglob
 
 trap "echo aborted; exit;" SIGINT SIGTERM
@@ -35,6 +36,7 @@ for i in $TESTS ; do
     fi
     if $TEST == true;
     then
+        echo $TEST
         for goldfn in tests/golden/${outbase%.vd*}.*; do
             PYTHONPATH=. bin/vd --confirm-overwrite=False --play "$i" --batch --output "$goldfn" --config tests/.visidatarc --visidata-dir tests/.visidata
             echo "save: $goldfn"

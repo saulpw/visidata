@@ -1,5 +1,5 @@
 
-# VisiData v2.11
+# VisiData v2.11.1
 
 [![Tests](https://github.com/saulpw/visidata/workflows/visidata-ci-build/badge.svg)](https://github.com/saulpw/visidata/actions/workflows/main.yml)
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/saulpw/visidata)

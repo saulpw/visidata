@@ -906,6 +906,28 @@ COMMANDLINE OPTIONS
                                              play
      color_status_replay green               color of replay status indicator
      disp_histogram      *                   histogram element character
+     disp_formatter      generic             formatter to use for display and
+                                             saving
+     disp_menu           True                show menu on top line when not
+                                             active
+     disp_menu_keys      True                show keystrokes inline in sub‐
+                                             menus
+     color_menu          black on 110 cyan   color of menu items in general
+     color_menu_active   223 yellow on black
+                                             color of active menu items
+     color_menu_spec     black on 34 green   color of sheet-specific menu
+                                             items
+     color_menu_help     black italic on 110 cyan
+                                             color of helpbox
+     disp_menu_boxchars  ││──┌┐└┘├┤          box characters to use for menus
+     disp_menu_more      »                   command submenu indicator
+     disp_menu_push      ⎘                   indicator if command pushes sheet
+                                             onto sheet stack
+     disp_menu_input     …                   indicator if input required for
+                                             command
+     disp_menu_fmt       Ctrl+H for help menu
+                                             right-side menu format string
+     disp_histogram      ■                   histogram element character
      disp_histolen       50                  width of histogram column
      disp_canvas_charset
                                              ⠀⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿⡀⡁⡂⡃⡄⡅⡆⡇⡈⡉⡊⡋⡌⡍⡎⡏⡐⡑⡒⡓⡔⡕⡖⡗⡘⡙⡚⡛⡜⡝⡞⡟⡠⡡⡢⡣⡤⡥⡦⡧⡨⡩⡪⡫⡬⡭⡮⡯⡰⡱⡲⡳⡴⡵⡶⡷⡸⡹⡺⡻⡼⡽⡾⡿⢀⢁⢂⢃⢄⢅⢆⢇⢈⢉⢊⢋⢌⢍⢎⢏⢐⢑⢒⢓⢔⢕⢖⢗⢘⢙⢚⢛⢜⢝⢞⢟⢠⢡⢢⢣⢤⢥⢦⢧⢨⢩⢪⢫⢬⢭⢮⢯⢰⢱⢲⢳⢴⢵⢶⢷⢸⢹⢺⢻⢼⢽⢾⢿⣀⣁⣂⣃⣄⣅⣆⣇⣈⣉⣊⣋⣌⣍⣎⣏⣐⣑⣒⣓⣔⣕⣖⣗⣘⣙⣚⣛⣜⣝⣞⣟⣠⣡⣢⣣⣤⣥⣦⣧⣨⣩⣪⣫⣬⣭⣮⣯⣰⣱⣲⣳⣴⣵⣶⣷⣸⣹⣺⣻⣼⣽⣾⣿
