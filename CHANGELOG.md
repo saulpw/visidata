@@ -2,45 +2,83 @@
 
 # v3.x (dev)
 
-- [reorg] move independent modules into visidata/{features|experimental}
+- [reorg] move independent modules into visidata/{features|experimental|themes}
 - [modules] include module name in Option/Command sheets
+- [sidebar] add sidebar
+    - will contain a stack list of status messages
+    - color syntax is [:bold]footext[/]
+        - supports `[:code]`, `[:bold]`, `[:italic]`, `[:underline]`
+    - toggle with `b`
+- display sheet and feature help documentation in sidebar
+    - added bundles of help documentation
+- [filetype] add guesser to sniff filetype from data  #130
 
-- [loaders] mailbox formats mbox/maildir/mmdf/babyl/mh loader (as supported by Python mailbox stdlib)
-- [loaders] .jrnl format (jrnl.sh) loader+saver
-- [themes] add options.theme and visidata/themes directory of additional themes (light, ascii8, asciimono)
-- [graph] colorbrewer palette chooser (thanks @er1kb)
-- [graph] add commands to open external graph with matplotlib
-- [open-syspaste] create new table from system clipboard #1680
-- [sidebar] add options.disp_sidebar_fmt as default #1685
-- [freq] add select-first command
-- [tests] call all test_func(vd) defined in modules during pytest
+- [cli] add `-i` to run interactive mode after batch  #1714
 - [features] procmgr to view/manage processes, memory/cpu stats
 - [features] ping to traceroute a hostip
+- [freq] add select-first command
+- [graph] colorbrewer palette chooser (thanks @er1kb)
+- [graph] add commands to open external graph with matplotlib #1056
+- [loaders] mailbox formats mbox/maildir/mmdf/babyl/mh loader (as supported by Python mailbox stdlib)
+- [loaders] .jrnl format (jrnl.sh) loader+saver
+- [loaders] add reddit API loader
+- [loaders] add matrix API loader
+- [loaders] add orgmode loader
+- [loaders] add scraper
+    - table of HTMl elements as parsed by `beautifulsoup4`
+- [loaders] add bit.io loader
+- [loaders] add support for jsonla (JSONL arrays) format (PR by @daviewales #1730)  #1726
+- [loaders] add zulip loader
+- [loaders] add vd.requireOptions to check for presence of loader-relevant API keys
+- [menu] move Edit>Add-rows to Row>Add
+- [open] try using options.filetype for path  #1710
+    - useful for configuring default filetype when reading from stdin
+- [open-syspaste] create new table from system clipboard #1680
+- [open-syspaste] enable filetype selection (PR by @daviewales #1717)
+- [sidebar] add options.disp_sidebar_fmt #1685
+    - default show sheet.help if `disp_sidebar_fmt` not set
+- [sheet] add `select-equal-selected` (unbound) to select rows with values in current column in already selected rows  #1327
+- [sheet] add `clean-names` (unbound) to set options.clean_names on sheet and clean visible column names
+- [tests] call all test_func(vd) defined in modules during pytest
+- [themes] add options.theme and visidata/themes directory of additional themes (light, ascii8, asciimono)  #1682  #1691
+- [windows] change default system clipboard command to clip.exe
 
 ## experimental features (must be imported manually)
 
+- [guide] add GuideGuide toc and open-guide
 - [mark] mark rows to more easily move cursor to them
 - [rownum] addcol-rownum and addcol-delta
 - [slide-cells] shift cells in cursor row to the right
-- [guide] GuideGuide
 
 ## bugfixes
 
-- re-entering a subsheet left using quit-sheet-free should reload the subsheet #1679
+- [columns] speed up getMaxWidth for wide columns (PR by @midichef #1747)  #1728
+- [curses] allow breakpoint() before initwin
+- [curses] use builtins if no curses screen yet
+- [deps] add requests-cache submodule to root visidata  #1748
+- [input] fix ^T swap on empty string #1684
+- [input] use vd.scrFull to detect if curses inited
+- [inputsingle-] loop until keystroke (do not timeout)
+- [join] fail if differing number of keycols  #1678
 - [paste] add new rows to sheet if necessary
 - [reload-every] do not replay
-- [input-] fix ^T swap on empty string #1684
-- [inputsingle-] loop until keystroke (do not timeout)
-- [curses] allow breakpoint() before initwin
+- [replay] turn off confirmQuit dialogs during replay
+- [save] handle saving 0 sheets  #1720
+- [settings] clear cache correctly before set
+- [sheets] fix NameError for mincolidx  #1672
+- [sheets] fix recursion crash of Python >= 3.8, <3.9.10  (PR by #midichef #1722)  #1696
+- [quit-sheet-free] re-entering a subsheet left using quit-sheet-free should reload the subsheet #1679
 
 
 ## api
 
+- [help] add HelpSheet to globals
 - [keys] use prettykeys for allPrefixes #1592
 - [menu] vd.addMenuItems with convenient string syntax
-- [modules] vd.importModule, vd.importSubmodules, vd.importStar
-- [vdx] runvdx() to execute vdx strings
+- [modules] vd.importModule, vd.importSubmodules, vd.importExternal, vd.setPersistentOPtions
+- [pivot freq] re-add FreqTableSheet and PivotSheet to globals  #1731
 - [tests] add vd.resetVisiData
+- [vdx] runvdx() to execute vdx strings
 
 
 # v2.11.1 (2023-07-16)
