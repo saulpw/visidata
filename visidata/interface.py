@@ -47,7 +47,7 @@ vd.option('color_key_col', '81 cyan', 'color of key columns')
 vd.option('color_hidden_col', '8', 'color of hidden columns on metasheets')
 vd.option('color_selected_row', '215 yellow', 'color of selected rows')
 vd.option('color_clickable', 'underline', 'color of internally clickable item')
-vd.option('color_code', 'bold', 'color of code sample')
+vd.option('color_code', 'bold white on 237', 'color of code sample')
 
 
 vd.option('force_256_colors', False, 'use 256 colors even if curses reports fewer')
