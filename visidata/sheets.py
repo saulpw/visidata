@@ -13,8 +13,8 @@ import visidata
 vd.activePane = 1   # pane numbering starts at 1; pane 0 means active pane
 
 
-vd.option('name_joiner', '_', 'string to join sheet or column names')
-vd.option('value_joiner', ' ', 'string to join display values')
+vd.option('name_joiner', '_', 'string to join sheet or column names', max_help=0)
+vd.option('value_joiner', ' ', 'string to join display values', max_help=0)
 
 
 @drawcache

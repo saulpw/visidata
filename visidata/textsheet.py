@@ -6,7 +6,7 @@ from visidata import globalCommand, VisiData
 import visidata
 
 
-vd.option('wrap', False, 'wrap text to fit window width on TextSheet')
+vd.option('wrap', False, 'wrap text to fit window width on TextSheet', max_help=0)
 vd.option('save_filetype', 'tsv', 'specify default file type to save as', replay=True)
 
 

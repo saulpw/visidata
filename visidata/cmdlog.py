@@ -5,8 +5,8 @@ from visidata import VisiData, BaseSheet, Sheet, ColumnAttr, VisiDataMetaSheet, 
 import visidata
 
 vd.option('replay_wait', 0.0, 'time to wait between replayed commands, in seconds', sheettype=None)
-vd.option('disp_replay_play', '▶', 'status indicator for active replay')
-vd.option('color_status_replay', 'green', 'color of replay status indicator')
+vd.theme_option('disp_replay_play', '▶', 'status indicator for active replay')
+vd.theme_option('color_status_replay', 'green', 'color of replay status indicator')
 
 # prefixes which should not be logged
 nonLogged = '''forget exec-longname undo redo quit

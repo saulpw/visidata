@@ -177,6 +177,9 @@ def itemsetter(i):
 vd.optalias('force_valid_colnames', 'clean_names')
 vd.optalias('dir_recurse', 'dir_depth', 100000)
 vd.optalias('confirm_overwrite', 'overwrite', 'confirm')
+vd.optalias('show_graph_labels', 'disp_graph_labels')
+vd.optalias('zoom_incr', 'disp_zoom_incr')
+
 
 
 vd.addGlobals(globals())

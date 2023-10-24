@@ -8,13 +8,13 @@ from visidata.bezier import bezier
 
 # see www/design/graphics.md
 
-vd.option('show_graph_labels', True, 'show axes and legend on graph')
-vd.option('plot_colors', 'green red yellow cyan magenta white 38 136 168', 'list of distinct colors to use for plotting distinct objects')
-vd.option('disp_canvas_charset', ''.join(chr(0x2800+i) for i in range(256)), 'charset to render 2x4 blocks on canvas')
-vd.option('disp_pixel_random', False, 'randomly choose attr from set of pixels instead of most common')
-vd.option('zoom_incr', 2.0, 'amount to multiply current zoomlevel when zooming')
-vd.option('color_graph_hidden', '238 blue', 'color of legend for hidden attribute')
-vd.option('color_graph_selected', 'bold', 'color of selected graph points')
+vd.theme_option('disp_graph_labels', True, 'show axes and legend on graph')
+vd.theme_option('plot_colors', 'green red yellow cyan magenta white 38 136 168', 'list of distinct colors to use for plotting distinct objects')
+vd.theme_option('disp_canvas_charset', ''.join(chr(0x2800+i) for i in range(256)), 'charset to render 2x4 blocks on canvas')
+vd.theme_option('disp_pixel_random', False, 'randomly choose attr from set of pixels instead of most common')
+vd.theme_option('disp_zoom_incr', 2.0, 'amount to multiply current zoomlevel when zooming')
+vd.theme_option('color_graph_hidden', '238 blue', 'color of legend for hidden attribute')
+vd.theme_option('color_graph_selected', 'bold', 'color of selected graph points')
 
 
 class Point:
@@ -288,7 +288,7 @@ class Plotter(BaseSheet):
                     o[1] = False
                     label_fldraw[1] = False
 
-        if self.options.show_graph_labels:
+        if self.options.disp_graph_labels:
             labels_by_line = defaultdict(list) # y -> text labels
 
             for pix_x, pix_y, txt, attr, row in self.labels:
@@ -729,7 +729,7 @@ class Canvas(Plotter):
         self.reload()
 
 
-Plotter.addCommand('v', 'visibility', 'options.show_graph_labels = not options.show_graph_labels', 'toggle show_graph_labels option')
+Plotter.addCommand('v', 'visibility', 'options.disp_graph_labels = not options.disp_graph_labels', 'toggle disp_graph_labels option')
 
 Canvas.addCommand(None, 'go-left', 'if cursorBox: sheet.cursorBox.xmin -= cursorBox.w', 'move cursor left by its width')
 Canvas.addCommand(None, 'go-right', 'if cursorBox: sheet.cursorBox.xmin += cursorBox.w', 'move cursor right by its width' )
@@ -759,8 +759,8 @@ Canvas.addCommand('J', 'resize-cursor-taller', 'sheet.cursorBox.h += canvasCharH
 Canvas.addCommand('K', 'resize-cursor-shorter', 'sheet.cursorBox.h -= canvasCharHeight', 'decrease cursor height by one character')
 Canvas.addCommand('zz', 'zoom-cursor', 'zoomTo(cursorBox)', 'set visible bounds to cursor')
 
-Canvas.addCommand('-', 'zoomout-cursor', 'tmp=cursorBox.center; incrZoom(options.zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom out from cursor center')
-Canvas.addCommand('+', 'zoomin-cursor', 'tmp=cursorBox.center; incrZoom(1.0/options.zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom into cursor center')
+Canvas.addCommand('-', 'zoomout-cursor', 'tmp=cursorBox.center; incrZoom(options.disp_zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom out from cursor center')
+Canvas.addCommand('+', 'zoomin-cursor', 'tmp=cursorBox.center; incrZoom(1.0/options.disp_zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom into cursor center')
 Canvas.addCommand('_', 'zoom-all', 'sheet.canvasBox = None; sheet.visibleBox = None; sheet.xzoomlevel=sheet.yzoomlevel=1.0; resetBounds(); refresh()', 'zoom to fit full extent')
 Canvas.addCommand('z_', 'set-aspect', 'sheet.aspectRatio = float(input("aspect ratio=", value=aspectRatio)); refresh()', 'set aspect ratio')
 
@@ -778,8 +778,8 @@ Canvas.addCommand('BUTTON3_CLICKED', 'move-canvas',  '', 'move canvas (in place)
 Canvas.bindkey('BUTTON3_DOUBLE_CLICKED', 'move-canvas')
 Canvas.bindkey('BUTTON3_TRIPLE_CLICKED', 'move-canvas')
 
-Canvas.addCommand('ScrollUp', 'zoomin-mouse', 'cm=canvasMouse; incrZoom(1.0/options.zoom_incr) if cm else fail("cannot zoom in on unplotted canvas"); fixPoint(plotterMouse, cm)', 'zoom in with scroll wheel')
-Canvas.addCommand('ScrollDown', 'zoomout-mouse', 'cm=canvasMouse; incrZoom(options.zoom_incr) if cm else fail("cannot zoom in on unplotted canvas"); fixPoint(plotterMouse, cm)', 'zoom out with scroll wheel')
+Canvas.addCommand('ScrollUp', 'zoomin-mouse', 'cm=canvasMouse; incrZoom(1.0/options.disp_zoom_incr) if cm else fail("cannot zoom in on unplotted canvas"); fixPoint(plotterMouse, cm)', 'zoom in with scroll wheel')
+Canvas.addCommand('ScrollDown', 'zoomout-mouse', 'cm=canvasMouse; incrZoom(options.disp_zoom_incr) if cm else fail("cannot zoom in on unplotted canvas"); fixPoint(plotterMouse, cm)', 'zoom out with scroll wheel')
 
 Canvas.addCommand('s', 'select-cursor', 'source.select(list(rowsWithin(plotterCursorBox)))', 'select rows on source sheet contained within canvas cursor')
 Canvas.addCommand('t', 'stoggle-cursor', 'source.toggle(list(rowsWithin(plotterCursorBox)))', 'toggle selection of rows on source sheet contained within canvas cursor')

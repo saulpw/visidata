@@ -25,11 +25,11 @@ Other standard readline keybindings apply.
 [:onclick https://visidata.org/help/input]🛈  for all keybindings at visidata.org[:]
 '''
 
-vd.option('color_edit_unfocused', '238 on 110', 'display color for unfocused input in form')
-vd.option('color_edit_cell', '233 on 110', 'cell color to use when editing cell')
-vd.option('disp_edit_fill', '_', 'edit field fill character')
-vd.option('disp_unprintable', '·', 'substitute character for unprintables')
-vd.option('mouse_interval', 1, 'max time between press/release for click (ms)', sheettype=None)
+vd.theme_option('color_edit_unfocused', '238 on 110', 'display color for unfocused input in form')
+vd.theme_option('color_edit_cell', '233 on 110', 'cell color to use when editing cell')
+vd.theme_option('disp_edit_fill', '_', 'edit field fill character')
+vd.theme_option('disp_unprintable', '·', 'substitute character for unprintables')
+vd.theme_option('mouse_interval', 1, 'max time between press/release for click (ms)', sheettype=None)
 
 vd.option('input_history', '', 'basename of file to store persistent input history')
 

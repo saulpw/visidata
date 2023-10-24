@@ -12,10 +12,10 @@ from visidata import VisiData, vd, options, globalCommand, Sheet, EscapeExceptio
 from visidata import ColumnAttr, Column, BaseSheet, ItemColumn
 
 
-vd.option('profile', False, 'enable profiling on threads')
-vd.option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
+vd.option('profile', False, 'enable profiling on threads', max_help=-1)
+vd.option('min_memory_mb', 0, 'minimum memory to continue loading and async processing', max_help=-1)
 
-vd.option('color_working', '118 5', 'color of system running smoothly')
+vd.theme_option('color_working', '118 5', 'color of system running smoothly')
 
 BaseSheet.init('currentThreads', list)
 
