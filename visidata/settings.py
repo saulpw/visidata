@@ -106,13 +106,14 @@ class Command:
 
 
 class Option:
-    def __init__(self, name, value, helpstr='', module=''):
+    def __init__(self, name, value, helpstr='', module='', max_help=10):
         self.name = name
         self.value = value
         self.helpstr = helpstr
         self.replayable = False
         self.sheettype = BaseSheet
         self.module = module
+        self.max_help = max_help
 
     def __str__(self):
         return str(self.value)
@@ -286,7 +287,7 @@ def _resolve_optalias(vd, optname, optval):
 
 
 @VisiData.api
-def option(vd, name, default, helpstr, replay=False, sheettype=BaseSheet):
+def option(vd, name, default, helpstr, replay=False, sheettype=BaseSheet, max_help=10):
     '''Declare a new option.
 
    - `name`: name of option
@@ -298,7 +299,13 @@ def option(vd, name, default, helpstr, replay=False, sheettype=BaseSheet):
     opt = vd.options.setdefault(name, default, helpstr, vd.importingModule)
     opt.replayable = replay
     opt.sheettype=sheettype
+    opt.max_help = max_help
     return opt
+
+
+@VisiData.api
+def theme_option(vd, *args, **kwargs):
+    return vd.option(*args, **kwargs, max_help=-1)
 
 
 @BaseSheet.class_api

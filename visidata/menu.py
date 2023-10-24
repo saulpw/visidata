@@ -6,17 +6,17 @@ from visidata import vd, drawcache, colors, clipdraw, dispwidth
 from visidata import BaseSheet, VisiData, AttrDict, ENTER
 
 vd.option('disp_menu', True, 'show menu on top line when not active', sheettype=None)
-vd.option('disp_menu_keys', True, 'show keystrokes inline in submenus', sheettype=None)
-vd.option('color_menu', 'black on 68 blue', 'color of menu items in general')
-vd.option('color_menu_active', '223 yellow on black', 'color of active menu items')
-vd.option('color_menu_spec', 'black on 34 green', 'color of sheet-specific menu items')
-vd.option('color_menu_help', 'black italic on 68 blue', 'color of helpbox')
+vd.theme_option('disp_menu_keys', True, 'show keystrokes inline in submenus', sheettype=None)
+vd.theme_option('color_menu', 'black on 68 blue', 'color of menu items in general')
+vd.theme_option('color_menu_active', '223 yellow on black', 'color of active menu items')
+vd.theme_option('color_menu_spec', 'black on 34 green', 'color of sheet-specific menu items')
+vd.theme_option('color_menu_help', 'black italic on 68 blue', 'color of helpbox')
 
-vd.option('disp_menu_boxchars', '││──┌┐└┘├┤', 'box characters to use for menus')
-vd.option('disp_menu_more', '»', 'command submenu indicator')
-vd.option('disp_menu_push', '⎘', 'indicator if command pushes sheet onto sheet stack')
-vd.option('disp_menu_input', '…', 'indicator if input required for command')
-vd.option('disp_menu_fmt', 'Ctrl+H for help menu', 'right-side menu format string')
+vd.theme_option('disp_menu_boxchars', '││──┌┐└┘├┤', 'box characters to use for menus')
+vd.theme_option('disp_menu_more', '»', 'command submenu indicator')
+vd.theme_option('disp_menu_push', '⎘', 'indicator if command pushes sheet onto sheet stack')
+vd.theme_option('disp_menu_input', '…', 'indicator if input required for command')
+vd.option('disp_menu_fmt', 'Ctrl+H for help menu', 'right-side menu format string', max_help=0)
 
 BaseSheet.init('activeMenuItems', list)
 vd.menuRunning = False

@@ -2,7 +2,7 @@ import traceback
 
 from visidata import vd, VisiData, options
 
-vd.option('debug', False, 'exit on error and display stacktrace')
+vd.option('debug', False, 'exit on error and display stacktrace', max_help=0)
 
 
 class ExpectedException(Exception):

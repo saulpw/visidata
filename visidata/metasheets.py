@@ -137,7 +137,9 @@ class OptionsSheet(Sheet):
 
     def iterload(self):
         for k in options.keys():
-            yield options._get(k)
+            v = options._get(k)
+            if vd.options.disp_help <= v.max_help:
+                yield v
 
     def newRow(self):
         vd.fail('adding rows to the options sheet is not supported.')

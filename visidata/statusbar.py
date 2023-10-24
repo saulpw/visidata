@@ -10,17 +10,17 @@ from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColo
 
 vd.option('disp_rstatus_fmt', '{sheet.threadStatus} {sheet.keystrokeStatus}   {sheet.longname}  {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}', 'right-side status format string')
 vd.option('disp_status_fmt', '{sheet.shortcut}› {sheet.name}| ', 'status line prefix')
-vd.option('disp_lstatus_max', 0, 'maximum length of left status line')
-vd.option('disp_status_sep', '│', 'separator between statuses')
+vd.theme_option('disp_lstatus_max', 0, 'maximum length of left status line')
+vd.theme_option('disp_status_sep', '│', 'separator between statuses')
 
-vd.option('color_keystrokes', 'bold white on 237', 'color of input keystrokes on status line')
-vd.option('color_keys', 'bold', 'color of keystrokes in help')
-vd.option('color_status', 'bold on 238', 'status line color')
-vd.option('color_error', '202 1', 'error message color')
-vd.option('color_warning', '166 15', 'warning message color')
-vd.option('color_top_status', 'underline', 'top window status bar color')
-vd.option('color_active_status', 'black on 68 blue', ' active window status bar color')
-vd.option('color_inactive_status', '8 on black', 'inactive window status bar color')
+vd.theme_option('color_keystrokes', 'bold white on 237', 'color of input keystrokes on status line')
+vd.theme_option('color_keys', 'bold', 'color of keystrokes in help')
+vd.theme_option('color_status', 'bold on 238', 'status line color')
+vd.theme_option('color_error', '202 1', 'error message color')
+vd.theme_option('color_warning', '166 15', 'warning message color')
+vd.theme_option('color_top_status', 'underline', 'top window status bar color')
+vd.theme_option('color_active_status', 'black on 68 blue', ' active window status bar color')
+vd.theme_option('color_inactive_status', '8 on black', 'inactive window status bar color')
 
 BaseSheet.init('longname', lambda: '')
 
