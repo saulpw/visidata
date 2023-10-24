@@ -347,12 +347,17 @@ class ConcatSheet(Sheet):
                         keyedcols[col.name][sheet] = col
 
 
-IndexSheet.addCommand('&', 'join-selected', 'left, rights = someSelectedRows[0], someSelectedRows[1:]; vd.push(left.openJoin(rights, jointype=chooseOne(jointypes)))', 'merge selected sheets with visible columns from all, keeping rows according to jointype')
-IndexSheet.bindkey('g&', 'join-selected')
-Sheet.addCommand('&', 'join-sheets-top2', 'vd.push(openJoin(vd.sheets[1:2], jointype=chooseOne(jointypes)))', 'concatenate top two sheets in Sheets Stack')
-Sheet.addCommand('g&', 'join-sheets-all', 'vd.push(openJoin(vd.sheets[1:], jointype=chooseOne(jointypes)))', 'concatenate all sheets in Sheets Stack')
+@VisiData.api
+def chooseJointype(vd):
+    return chooseOne(vd.jointypes, type="jointype")
 
-ColumnsSheet.addCommand('&', 'join-sheets-cols', 'vd.push(join_sheets_cols(selectedRows, jointype=chooseOne(jointypes)))', '')
+
+IndexSheet.addCommand('&', 'join-selected', 'left, rights = someSelectedRows[0], someSelectedRows[1:]; vd.push(left.openJoin(rights, jointype=chooseJointype()))', 'merge selected sheets with visible columns from all, keeping rows according to jointype')
+IndexSheet.bindkey('g&', 'join-selected')
+Sheet.addCommand('&', 'join-sheets-top2', 'vd.push(openJoin(vd.sheets[1:2], jointype=chooseJointype()))', 'concatenate top two sheets in Sheets Stack')
+Sheet.addCommand('g&', 'join-sheets-all', 'vd.push(openJoin(vd.sheets[1:], jointype=chooseJointype()))', 'concatenate all sheets in Sheets Stack')
+
+ColumnsSheet.addCommand('&', 'join-sheets-cols', 'vd.push(join_sheets_cols(selectedRows, jointype=chooseJointype()))', '')
 
 vd.addMenuItems('''
     Data > Join > selected sheets > join-selected

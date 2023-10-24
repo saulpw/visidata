@@ -185,7 +185,7 @@ BaseSheet.addCommand('', 'open-processes', 'vd.push(vd.processes)', 'open system
 def chooseSignal(vd):
     import signal
     d = [{'key': attr[3:]} for attr in dir(signal) if attr.startswith('SIG') and not attr.startswith('SIG_')]
-    return getattr(signal, 'SIG'+vd.chooseOne(d))
+    return getattr(signal, 'SIG'+vd.chooseOne(d, type='signal'))
 
 ProcessesSheet.addCommand('d', 'term-process', 'os.kill(cursorRow.pid, signal.SIGTERM)', 'send SIGTERM to process')
 ProcessesSheet.addCommand('gd', 'term-selected', 'for r in someSelectedRows: os.kill(r.pid, signal.SIGTERM)', 'send SIGTERM to selected processes')

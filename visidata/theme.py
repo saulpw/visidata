@@ -37,7 +37,7 @@ def set_theme(obj, theme=''):
         obj.options[k] = v
 
 
-BaseSheet.addCommand('', 'theme-input', 'vd.set_theme(chooseOne([dict(key=k) for k in themes.keys()]))', 'choose from available themes')
+BaseSheet.addCommand('', 'theme-input', 'vd.set_theme(chooseOne([dict(key=k) for k in themes.keys()], type="theme"))', 'choose from available themes')
 BaseSheet.addCommand('', 'theme-default', 'vd.set_theme()', 'reset theme to VisiData defaults')
 
 vd.addMenuItem('View', 'Set theme', 'choose', 'theme-input')

@@ -291,7 +291,7 @@ class PivotSheet(Sheet):
 @PivotSheet.api
 def addcol_aggr(sheet, col):
     hasattr(col, 'origCol') or vd.fail('not an aggregation column')
-    for agg in vd.chooseMany(vd.aggregator_choices):
+    for agg in vd.chooseAggregators():
         sheet.addColumnAtCursor(makeAggrColumn(col.origCol, vd.aggregators[agg]))
 
 
