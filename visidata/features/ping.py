@@ -7,11 +7,9 @@ from statistics import mean
 
 from visidata import vd, VisiData, BaseSheet, Sheet, Column, AttrColumn, Progress
 
-vd.option('ping_count', 3, 'send this many pings to each host')
-vd.option('ping_interval', 0.1, 'wait between ping rounds, in seconds')
-vd.option('color_shellcmd', '21 on 114 green', '')
-vd.option('color_colname', 'underline', '')
-vd.option('color_longname', 'bold 52 on 114 green', '')
+vd.theme_option('color_shellcmd', '21 on 114 green', '')
+vd.theme_option('color_colname', 'underline', '')
+vd.theme_option('color_longname', 'bold 52 on 114 green', '')
 
 
 @VisiData.api
@@ -147,6 +145,9 @@ class PingSheet(Sheet):
 
             time.sleep(self.options.ping_interval)
 
+
+vd.option('ping_count', 3, 'send this many pings to each host', sheettype=PingSheet)
+vd.option('ping_interval', 0.1, 'wait between ping rounds, in seconds', sheettype=PingSheet)
 
 PingSheet.options.null_value = False
 BaseSheet.addCommand('', 'open-ping', 'vd.push(openSource(input("ping: ", type="hostip"), filetype="ping"))')

@@ -139,7 +139,10 @@ class OptionsSheet(Sheet):
         for k in options.keys():
             v = options._get(k)
             if vd.options.disp_help <= v.max_help:
-                yield v
+                if v.sheettype in [None, BaseSheet]:
+                    yield v
+                elif self.source != 'global' and v.sheettype in self.source.superclasses():
+                    yield v
 
     def newRow(self):
         vd.fail('adding rows to the options sheet is not supported.')

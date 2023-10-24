@@ -191,12 +191,8 @@ class TableSheet(BaseSheet):
         # all colorizers must be in the same bucket
         # otherwise, precedence does not get applied properly
         _colorizers = set()
-        def allParents(cls):
-            yield from cls.__bases__
-            for b in cls.__bases__:
-                yield from allParents(b)
 
-        for b in [self] + list(allParents(self.__class__)):
+        for b in [self] + list(type(self).superclasses()):
             for c in getattr(b, 'colorizers', []):
                 _colorizers.add(c)
 

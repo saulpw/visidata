@@ -35,6 +35,14 @@ class Extensible:
         cls.__copy__ = wraps(oldcopy)(newcopy) if oldcopy else newcopy
 
     @classmethod
+    def superclasses(cls):
+        yield cls
+        yield from cls.__bases__
+        for b in cls.__bases__:
+            if hasattr(b, 'superclasses'):
+                yield from b.superclasses()
+
+    @classmethod
     def api(cls, func):
         oldfunc = getattr(cls, func.__name__, None)
         if oldfunc:
