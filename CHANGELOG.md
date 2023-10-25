@@ -5,20 +5,28 @@
 - [reorg] move independent modules into visidata/{features|experimental|themes}
 - [modules] include module name in Option/Command sheets
 - [sidebar] add sidebar
+    - #1733 for full description/discussion
     - will contain a stack list of status messages
     - color syntax is [:bold]footext[/]
         - supports `[:code]`, `[:bold]`, `[:italic]`, `[:underline]`
-    - toggle with `b`
+    - toggle with `sidebar-toggle` (bound to `b`)
 - display sheet and feature help documentation in sidebar
-    - added bundles of help documentation
-- [filetype] add guesser to sniff filetype from data  #130
+    - added bundles of Guide Sheets
+    - open Guide Sheets into a full VisiData sheet with `open-sidebar` (bound to `gb`)
+- [filetype] add guesser to sniff filetype from data  #130 #1759
 
 - [cli] add `-i` to run interactive mode after batch  #1714
+- [columns] add basic repr  #1757
+- [describe] default width=10 for describe columns
+- [dir] set name of '.' to current dir name  #1775
+- [dir] set name relative to previously loaded directory  #1775
+- [dir] get default save name from sheet name  #1775
 - [features] procmgr to view/manage processes, memory/cpu stats
 - [features] ping to traceroute a hostip
 - [freq] add select-first command
 - [graph] colorbrewer palette chooser (thanks @er1kb)
 - [graph] add commands to open external graph with matplotlib #1056
+- [linux] change default system clipboard cmd to wl-copy if the user is using wayland (PR by @rj1 #1763)
 - [loaders] mailbox formats mbox/maildir/mmdf/babyl/mh loader (as supported by Python mailbox stdlib)
 - [loaders] .jrnl format (jrnl.sh) loader+saver
 - [loaders] add reddit API loader
@@ -31,15 +39,21 @@
 - [loaders] add zulip loader
 - [loaders] add vd.requireOptions to check for presence of loader-relevant API keys
 - [menu] move Edit>Add-rows to Row>Add
+- [menu] add `go-row-number` to menu  #1766
+- [menu] move commit-sheet under File>Save
 - [open] try using options.filetype for path  #1710
     - useful for configuring default filetype when reading from stdin
 - [open-syspaste] create new table from system clipboard #1680
 - [open-syspaste] enable filetype selection (PR by @daviewales #1717)
+- [options] add `option.json_ensure_ascii` (default: True) (PR by @joaosousa1 #1776)  #1772
+    - option for non-ASCII characters to be saved to JSON, on False will encode to utf-8
+- [replay] has been refactored to be sync, instead of a seperate async process  #1773 #1714
 - [sidebar] add options.disp_sidebar_fmt #1685
     - default show sheet.help if `disp_sidebar_fmt` not set
 - [sheet] add `select-equal-selected` (unbound) to select rows with values in current column in already selected rows  #1327
 - [sheet] add `clean-names` (unbound) to set options.clean_names on sheet and clean visible column names
 - [tests] call all test_func(vd) defined in modules during pytest
+- [tests] run all unit tests in CI
 - [themes] add options.theme and visidata/themes directory of additional themes (light, ascii8, asciimono)  #1682  #1691
 - [windows] change default system clipboard command to clip.exe
 
@@ -52,31 +66,65 @@
 
 ## bugfixes
 
+- [cmdlog] check for empty cursor column when adding a column (PR by @midichef #1783)
 - [columns] speed up getMaxWidth for wide columns (PR by @midichef #1747)  #1728
 - [curses] allow breakpoint() before initwin
 - [curses] use builtins if no curses screen yet
 - [deps] add requests-cache submodule to root visidata  #1748
+- [expr] more informative 'column not modifiable' error message  #1764
+- [freq] fix names for openRow  #1777
+- [graph] fix graph ranges for xmax, ymax < 1 (PR by @midichef #1752)  #1673 #1697
 - [input] fix ^T swap on empty string #1684
 - [input] use vd.scrFull to detect if curses inited
+- [input] use last arg from cmdlog if no curses
 - [inputsingle-] loop until keystroke (do not timeout)
 - [join] fail if differing number of keycols  #1678
+- [menu] use "Alt+x" keybinding instead of "^[x"
+- [modify] do not call saveSheets on commit
+- [modify] commitMods do not call putValue for changes to added/deleted rows
+    - also fix ItemColumn.putValue and AttrColumn.putValue to call parent Column.putValue before setting the value on the row
+- [modify] always set col.defer
+- [modify] do not fail on Column.putValue if no setter
 - [paste] add new rows to sheet if necessary
+- [path] set name to '.' for givenpath of '.'  #1768
+- [path] fix progress bar for compression formats  #1175 #1255
+- [perf startup] delay import of `urllib.request`, `pkg_resources`, and `dateutil`
+- [perf startup] remove `unittest.mock`
+- [regex] issue warning when no columns to add  #1778
+- [regex] check for regex capture group  #1778
 - [reload-every] do not replay
-- [replay] turn off confirmQuit dialogs during replay
+- [replay] turn off confirm dialogs during replay
+- [replay] clearCaches before moving cursor  #1773
+- [replay] enable confirm in interactive batch mode (PR by @midichef #1751)
 - [save] handle saving 0 sheets  #1720
+- [select-around] convert input arguments to int
 - [settings] clear cache correctly before set
 - [sheets] fix NameError for mincolidx  #1672
+- [sheets] add confirm for `quit-sheet-free` (PR by @midichef #1755)
+- [sheets] make sure addColumn called on all columns
+    - not just dynamically-created columns
+    - addColumn is needed to set .sheet and .defer, among other things
 - [sheets] fix recursion crash of Python >= 3.8, <3.9.10  (PR by #midichef #1722)  #1696
+- [sheets] pop columns kwarg so raw list not set via final update() in constructor
+- [threads] remove spurious None from syncing set
 - [quit-sheet-free] re-entering a subsheet left using quit-sheet-free should reload the subsheet #1679
+- [undo] ensure undo is sheet-specific for duped/copied sheets  #1780
+- [vdx] fix save error
+- [windows] add Alt+ keybindings for powershell  #1630
 
 
 ## api
 
+- [cli] printout gone; use `builtins.print`
 - [help] add HelpSheet to globals
 - [keys] use prettykeys for allPrefixes #1592
 - [menu] vd.addMenuItems with convenient string syntax
+- [modify] Sheet.commitAddRow and Sheet.commitDeleteRow
 - [modules] vd.importModule, vd.importSubmodules, vd.importExternal, vd.setPersistentOPtions
+    - add importExternal for most loaders and features  #1739 #1765
+- [path] filesize can taken any Path-like
 - [pivot freq] re-add FreqTableSheet and PivotSheet to globals  #1731
+- [sheet] add vd.addCommand as alias for BaseSheet.addCommand
 - [tests] add vd.resetVisiData
 - [vdx] runvdx() to execute vdx strings
 
