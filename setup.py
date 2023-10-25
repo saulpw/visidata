@@ -27,9 +27,9 @@ setup(name='visidata',
           'importlib-metadata >= 3.6',
           'importlib_resources; python_version<"3.9"'
       ],
-      packages=['visidata', 'visidata.loaders', 'visidata.vendor', 'visidata.tests', 'visidata.ddw', 'visidata.man', 'visidata.themes', 'visidata.features', 'visidata.experimental', 'visidata.apps', 'visidata.apps.vgit', 'visidata.apps.vdsql', 'visidata.desktop'],
+      packages=['visidata', 'visidata.loaders', 'visidata.vendor', 'visidata.tests', 'visidata.man', 'visidata.themes', 'visidata.features', 'visidata.experimental', 'visidata.apps', 'visidata.apps.vgit', 'visidata.apps.vdsql', 'visidata.desktop'],
       data_files=[('share/man/man1', ['visidata/man/vd.1', 'visidata/man/visidata.1']), ('share/applications/', ['visidata/desktop/visidata.desktop'])],
-      package_data={'visidata.man': ['vd.1', 'vd.txt'], 'visidata.ddw': ['input.ddw'], 'visidata.tests': ['sample.tsv'], 'visidata.desktop': ['visidata.desktop']},
+      package_data={'visidata.man': ['vd.1', 'vd.txt'], 'visidata.tests': ['sample.tsv'], 'visidata.desktop': ['visidata.desktop']},
       license='GPLv3',
       classifiers=[
           'Development Status :: 5 - Production/Stable',
