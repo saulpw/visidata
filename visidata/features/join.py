@@ -349,7 +349,7 @@ class ConcatSheet(Sheet):
 
 @VisiData.api
 def chooseJointype(vd):
-    return chooseOne(vd.jointypes, type="jointype")
+    return vd.chooseOne(vd.jointypes, type="jointype")
 
 
 IndexSheet.addCommand('&', 'join-selected', 'left, rights = someSelectedRows[0], someSelectedRows[1:]; vd.push(left.openJoin(rights, jointype=chooseJointype()))', 'merge selected sheets with visible columns from all, keeping rows according to jointype')
