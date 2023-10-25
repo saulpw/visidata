@@ -88,7 +88,7 @@ class DirSheet(Sheet):
 
         - `Enter` to open a file as a separate sheet
         - `g Enter` to open all selected files, each in a separate sheet
-        - [:bold]`[/] to push the parent folder
+        - [:keystrokes]`[/] to push the parent folder
         - `Ctrl+O` to open the current file in your system editor
 
         ## Options (must reload to take effect)
