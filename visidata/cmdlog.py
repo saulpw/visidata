@@ -1,7 +1,7 @@
 import threading
 
 from visidata import vd, UNLOADED, namedlist, vlen, asyncthread, globalCommand, date
-from visidata import VisiData, BaseSheet, Sheet, ColumnAttr, VisiDataMetaSheet, JsonLinesSheet, TypedWrapper, AttrDict, Progress, OptionsSheet, ErrorSheet, CompleteKey, Path
+from visidata import VisiData, BaseSheet, Sheet, ColumnAttr, VisiDataMetaSheet, JsonLinesSheet, TypedWrapper, AttrDict, Progress, ErrorSheet, CompleteKey, Path
 import visidata
 
 vd.option('replay_wait', 0.0, 'time to wait between replayed commands, in seconds', sheettype=None)
@@ -71,7 +71,7 @@ def isLoggableCommand(vd, longname):
     return True
 
 def isLoggableSheet(sheet):
-    return sheet is not vd.cmdlog and not isinstance(sheet, (OptionsSheet, ErrorSheet))
+    return sheet is not vd.cmdlog and not isinstance(sheet, (vd.OptionsSheet, ErrorSheet))
 
 
 @Sheet.api

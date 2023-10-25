@@ -171,7 +171,7 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
 
     maxbinding = 0
     if vd.options.disp_menu_keys:
-        maxbinding = max(len(item.binding or '') for item in menus)+2
+        maxbinding = max(len(item.binding or '') for item in menus)+1
 
     w = max(len(item.title) for item in menus)+maxbinding+2
 
@@ -203,7 +203,7 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
         if item.menus:
             titlenote = vd.options.disp_menu_more
 
-        mainbinding = ' '*maxbinding
+        mainbinding = ''
         # special notes
         if item.cmd:
             if item.cmd.execstr:
@@ -216,14 +216,13 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
                     revbinds = sheet.revbinds.get(item.cmd.longname, [])
                     if revbinds:
                         mainbinding = vd.prettykeys(revbinds[0])
-                        mainbinding += ' '*(maxbinding-len(mainbinding))
 
         # actually display the menu item
-        title += ' '*(w-len(pretitle)-len(item.title)-maxbinding+1) # padding
+        title += ' '*(w-len(pretitle)-len(item.title)+1) # padding
 
         menudraw(scr, y+i, x+1, pretitle+title, attr)
-        if maxbinding:
-            menudraw(scr, y+i, x+1+w-maxbinding, '  ' + mainbinding, attr.update(colors.keystrokes))
+        if maxbinding and mainbinding:
+            menudraw(scr, y+i, x+1+w-len(mainbinding), mainbinding, attr.update(colors.keystrokes))
         menudraw(scr, y+i, x+2+w, titlenote, attr)
         menudraw(scr, y+i, x+3+w, ls, colors.color_menu)
 

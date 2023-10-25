@@ -88,6 +88,7 @@ import visidata.search
 
 import visidata.expr
 import visidata.metasheets
+import visidata.optionssheet
 import visidata.type_currency
 import visidata.type_floatsi
 import visidata.cmdlog

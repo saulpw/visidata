@@ -11,15 +11,6 @@ vd.option('visibility', 0, 'visibility level (0=low, 1=high)')
 vd_system_sep = '\t'
 
 
-@BaseSheet.lazy_property
-def optionsSheet(sheet):
-    return OptionsSheet(sheet.name+"_options", source=sheet)
-
-@VisiData.lazy_property
-def globalOptionsSheet(vd):
-    return OptionsSheet('global_options', source='global')
-
-
 class ColumnsSheet(Sheet):
     rowtype = 'columns'
     _rowtype = Column
@@ -100,71 +91,6 @@ VisiDataMetaSheet.options.row_delimiter = '\n'
 VisiDataMetaSheet.options.encoding = 'utf-8'
 
 
-class OptionsSheet(Sheet):
-    _rowtype = Option  # rowdef: Option
-    rowtype = 'options'
-    precious = False
-    columns = (
-        Column('option', getter=lambda col,row: row.name),
-        Column('module', getter=lambda col,row: row.module, max_help=1),
-        Column('value',
-            getter=lambda col,row: col.sheet.diffOption(row.name),
-            setter=lambda col,row,val: options.set(row.name, val, col.sheet.source),
-            ),
-        Column('default', getter=lambda col,row: options.getdefault(row.name)),
-        Column('description', width=40, getter=lambda col,row: options._get(row.name, 'default').helpstr),
-        ColumnAttr('replayable', max_help=1),
-    )
-    colorizers = [
-        CellColorizer(3, None, lambda s,c,r,v: v.value if r and c in s.columns[2:4] and r.name.startswith('color_') else None),
-    ]
-    nKeys = 2
-
-    @property
-    def help(self):
-        if self.source == 'global':
-            r = '# Global Options\nThis is a list of global option settings.'
-        else:
-            r = '# Sheet Options\nThis is a list of option settings specifically for the current sheet.'
-
-        r += f'\n\n- `e` to edit/toggle the current option value'
-        r += '\n- `d` to restore option to builtin default'
-        return r
-
-    def diffOption(self, optname):
-        return options.getonly(optname, self.source, '')
-
-    def editOption(self, row):
-        currentValue = options.getobj(row.name, self.source)
-        vd.addUndo(options.set, row.name, currentValue, self.source)
-        if isinstance(row.value, bool):
-            options.set(row.name, not currentValue, self.source)
-        else:
-            helpstr = f'# options.{self.cursorRow.name}\n'
-            helpstr += vd.options._get(self.cursorRow.name, 'default').helpstr
-            valcolidx = self.visibleCols.index(self.column(self.valueColName))
-            v = self.editCell(valcolidx, value=currentValue, help=helpstr)
-            vd.options.set(row.name, v, self.source)
-
-    @property
-    def valueColName(self):
-        return 'global_value' if self.source == 'global' else 'sheet_value'
-
-    def beforeLoad(self):
-        super().beforeLoad()
-        self.columns[2].name = self.valueColName
-
-    def iterload(self):
-        for k in options.keys():
-            v = options._get(k)
-            if vd.options.disp_help <= v.max_help:
-                if v.sheettype in [None, BaseSheet]:
-                    yield v
-                elif self.source != 'global' and v.sheettype in self.source.superclasses():
-                    yield v
-
-    def newRow(self):
-        vd.fail('adding rows to the options sheet is not supported.')
 
 
 vd._lastInputs = collections.defaultdict(dict)  # [input_type] -> {'input': anything}
@@ -259,9 +185,6 @@ def join_cols(sheet):
 
 # copy vd.sheets so that ColumnsSheet itself isn't included (for recalc in addRow)
 globalCommand('gC', 'columns-all', 'vd.push(vd.allColumnsSheet)', 'open Columns Sheet: edit column properties for all visible columns from all sheets on the sheets stack')
-globalCommand('O', 'options-global', 'vd.push(vd.globalOptionsSheet)', 'open Options Sheet: edit global options (apply to all sheets)')
-
-BaseSheet.addCommand('zO', 'options-sheet', 'vd.push(sheet.optionsSheet)', 'open Options Sheet: edit sheet options (apply to current sheet only)')
 BaseSheet.addCommand(None, 'open-inputs', 'vd.push(lastInputsSheet)', '')
 
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))', 'open Columns Sheet: edit column properties for current sheet')
@@ -283,23 +206,16 @@ ColumnsSheet.addCommand('gz~', 'type-any-selected', 'onlySelectedRows.type=anyty
 ColumnsSheet.addCommand('gz%', 'type-floatsi-selected', 'onlySelectedRows.type=floatsi', 'set type of selected columns to floatsi')
 ColumnsSheet.addCommand('', 'type-floatlocale-selected', 'onlySelectedRows.type=floatlocale', 'set type of selected columns to float using system locale')
 
-OptionsSheet.addCommand('d', 'unset-option', 'options.unset(cursorRow.name, str(source))', 'remove option override for this context')
-OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)', 'edit option at current row')
-OptionsSheet.bindkey('e', 'edit-option')
-OptionsSheet.bindkey(ENTER, 'edit-option')
 MetaSheet.options.header = 0
 
 
 vd.addGlobals({
     'ColumnsSheet': ColumnsSheet,
     'MetaSheet': MetaSheet,
-    'OptionsSheet': OptionsSheet,
     'VisiDataMetaSheet': VisiDataMetaSheet,
 })
 
 vd.addMenuItems('''
-    File > Options > all sheets > options-global
-    File > Options > this sheet > options-sheet
     View > Columns > this sheet > columns-sheet
     View > Columns > all sheets > columns-all
 ''')
