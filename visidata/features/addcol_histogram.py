@@ -31,4 +31,4 @@ def calc_histogram_bounds(sheet, col):
 Sheet.addCommand('', 'addcol-histogram', 'addColumnAtCursor(addcol_histogram(cursorCol))', 'add column with histogram of current column')
 
 
-vd.addMenuItems('Column > Add column > histogram')
+vd.addMenuItems('Column > Add column > histogram > addcol-histogram')

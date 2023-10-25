@@ -108,6 +108,7 @@ def addMenu(vd, *args):
                 c = Menu(p)
                 obj.menus.append(c)
             obj = c
+        assert not obj.menus, 'cannot override submenu with longname'
         obj.longname = item.longname
         if vd.importingModule == 'menufinal':
             cmd = vd.getGlobals()['Sheet']().getCommand(item.longname)
