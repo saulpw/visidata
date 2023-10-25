@@ -2,6 +2,7 @@ import string
 import textwrap
 import curses
 
+from typing import Union
 from visidata import vd, drawcache, colors, clipdraw, dispwidth
 from visidata import BaseSheet, VisiData, AttrDict, ENTER
 
@@ -41,7 +42,7 @@ def walkmenu(item, menupath=[]):
         yield item, menupath
 
 
-def _finditem(menus, item):
+def _finditem(menus, item:Union[str,int]):
     if isinstance(item, str):
         for m in menus:
             if item == m.title:
@@ -51,12 +52,13 @@ def _finditem(menus, item):
     return menus[item]
 
 
-def getMenuItem(obj, menupath=None):
-    if menupath is None:
-        menupath = obj.activeMenuItems
+@BaseSheet.api
+def getMenuItem(sheet, menupath:list[str]=None):
+    if not menupath:
+        menupath = sheet.activeMenuItems
 
     try:
-        currentItem = obj
+        currentItem = sheet
         for i in menupath:
             currentItem = _finditem(currentItem.menus, i)
     except IndexError as e:
@@ -312,7 +314,7 @@ def drawMenu(vd, scr, sheet):
     if not sheet.activeMenuItems:
         return
 
-    currentItem = getMenuItem(sheet)
+    currentItem = sheet.getMenuItem()
     cmd = currentItem.cmd
 
     if not cmd:
@@ -333,7 +335,7 @@ def drawMenu(vd, scr, sheet):
 
     # place helpbox just below deepest menu
     menuh = 2+sum(sheet.activeMenuItems[1:-1])
-    menuh += len(getMenuItem(sheet, sheet.activeMenuItems[:-1]).menus)
+    menuh += len(sheet.getMenuItem(sheet.activeMenuItems[:-1]).menus)
     menuy = 16 # min(menuh, h-len(helplines)-3)
 
     y = menuy
@@ -377,7 +379,7 @@ def pressMenu(sheet, *args):
     ret = False
     p = _intMenuPath(sheet, args)
     if p == sheet.activeMenuItems:  # clicking on current menu item
-        if getMenuItem(sheet, p).longname:
+        if sheet.getMenuItem(p).longname:
             ret = True
         else:
             p += [0]
@@ -427,7 +429,7 @@ def runMenu(vd):
         if not k:
             continue
 
-        currentItem = getMenuItem(sheet)
+        currentItem = sheet.getMenuItem()
 
         if k == '^[':  # ESC
             nEscapes += 1  #1470
