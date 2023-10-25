@@ -9,7 +9,7 @@ vd.option('airtable_auth_token', '', 'Airtable API key from https://airtable.com
 airtable_regex = r'^https://airtable.com/(app[A-Za-z0-9]+)/(tbl[A-Za-z0-9]+)/?(viw[A-z0-9]+)?'
 
 @VisiData.api
-def guessurl_airtable(vd, p):
+def guessurl_airtable(vd, p, response):
     m = re.search(airtable_regex, p.given)
     if m:
         return dict(filetype='airtable', _likelihood=10)

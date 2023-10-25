@@ -45,14 +45,14 @@ def _completeFilename(val, state):
 
 
 @VisiData.api
-def guessFiletype(vd, p, funcprefix='guess_'):
+def guessFiletype(vd, p, *args, funcprefix='guess_'):
     '''Call all vd.guess_<filetype>(p) functions and return best candidate sheet based on file contents.'''
 
     guessfuncs = [getattr(vd, x) for x in dir(vd) if x.startswith(funcprefix)]
     filetypes = []
     for f in guessfuncs:
         try:
-            filetype = f(p)
+            filetype = f(p, *args)
             if filetype:
                 filetype['_guesser'] = f.__name__
                 filetypes.append(filetype)
