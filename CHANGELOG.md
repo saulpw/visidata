@@ -8,19 +8,21 @@
     - #1733 for full description/discussion
     - will contain a stack list of status messages
     - color syntax is [:bold]footext[/]
-        - supports `[:code]`, `[:bold]`, `[:italic]`, `[:underline]`
+        - supports `[:code]`, `[:bold]`, `[:italic]`, `[:underline]`, `[:onclick]` (makes a clickable link)
     - toggle with `sidebar-toggle` (bound to `b`)
 - display sheet and feature help documentation in sidebar
     - added bundles of Guide Sheets
     - open Guide Sheets into a full VisiData sheet with `open-sidebar` (bound to `gb`)
 - [filetype] add guesser to sniff filetype from data  #130 #1759
 
+- [build] add a .desktop for VisiData  #1738
 - [cli] add `-i` to run interactive mode after batch  #1714
 - [columns] add basic repr  #1757
 - [describe] default width=10 for describe columns
 - [dir] set name of '.' to current dir name  #1775
 - [dir] set name relative to previously loaded directory  #1775
 - [dir] get default save name from sheet name  #1775
+- [expand] change default depth of expand-col(s)-depth to 0 (PR by @cool-RR #1809)
 - [features] procmgr to view/manage processes, memory/cpu stats
 - [features] ping to traceroute a hostip
 - [freq] add select-first command
@@ -38,53 +40,79 @@
 - [loaders] add support for jsonla (JSONL arrays) format (PR by @daviewales #1730)  #1726
 - [loaders] add zulip loader
 - [loaders] add vd.requireOptions to check for presence of loader-relevant API keys
+- [loaders] add airtable API loader
+- [loaders http] replace requests with urllib  #1808 #1704
 - [menu] move Edit>Add-rows to Row>Add
 - [menu] add `go-row-number` to menu  #1766
 - [menu] move commit-sheet under File>Save
 - [open] try using options.filetype for path  #1710
     - useful for configuring default filetype when reading from stdin
+- [open] add `reopen-last-closed` which reopens the most recently closed sheet (PR by @cool-RR #1813) #1811
 - [open-syspaste] create new table from system clipboard #1680
 - [open-syspaste] enable filetype selection (PR by @daviewales #1717)
 - [options] add `option.json_ensure_ascii` (default: True) (PR by @joaosousa1 #1776)  #1772
     - option for non-ASCII characters to be saved to JSON, on False will encode to utf-8
 - [replay] has been refactored to be sync, instead of a seperate async process  #1773 #1714
+- [save] add `options.save_encoding (default: 'utf-8') to differentiate from `options.encoding` when saving a file  #1708
+- [save] add saver for STATA files (PR by @raffaem #1563)
 - [sidebar] add options.disp_sidebar_fmt #1685
     - default show sheet.help if `disp_sidebar_fmt` not set
 - [sheet] add `select-equal-selected` (unbound) to select rows with values in current column in already selected rows  #1327
 - [sheet] add `clean-names` (unbound) to set options.clean_names on sheet and clean visible column names
+- [setcol-fake] add `setcol-fake` (unbound) adds a column of Faker generated 'faketypes'
+- [sparkline] add `addcol-sparkline` (unbound): adds a sparkline of all numeric columns
 - [tests] call all test_func(vd) defined in modules during pytest
 - [tests] run all unit tests in CI
+- [tests] add test for loading a directory  #1798
 - [themes] add options.theme and visidata/themes directory of additional themes (light, ascii8, asciimono)  #1682  #1691
+- [usd] provide USD(s) function to convert string like '£300' or '205 AUD' to equivalent US$ as float
 - [windows] change default system clipboard command to clip.exe
 
 ## experimental features (must be imported manually)
 
+- [diff] got moved to experimental
 - [guide] add GuideGuide toc and open-guide
+- [inplace] optional replacement commands which update the new Column live as you write the expression
 - [mark] mark rows to more easily move cursor to them
 - [rownum] addcol-rownum and addcol-delta
 - [slide-cells] shift cells in cursor row to the right
 
 ## bugfixes
 
+- [clipboard] warn when pasting before copying (PR by @midichef #1793)
 - [cmdlog] check for empty cursor column when adding a column (PR by @midichef #1783)
 - [columns] speed up getMaxWidth for wide columns (PR by @midichef #1747)  #1728
+- [columns] add ExplodingMock 
 - [curses] allow breakpoint() before initwin
 - [curses] use builtins if no curses screen yet
+- [cursor] cursorColIndex now returns None if empty  #1803
 - [deps] add requests-cache submodule to root visidata  #1748
+- [dir] support '..' and resolve dirname relative to CWD  #1801
+    - if user uses `open-dir-parent` outside of the CWD, switch to absolute paths
+- [errors] do not print ExpectedExceptions twice in batch-mode
 - [expr] more informative 'column not modifiable' error message  #1764
+- [fill] allow filling with values that are logically false (PR by @midichef #1794)
 - [freq] fix names for openRow  #1777
 - [graph] fix graph ranges for xmax, ymax < 1 (PR by @midichef #1752)  #1673 #1697
-- [input] fix ^T swap on empty string #1684
+- [graph] fix data on edges being drawn offscreen (PR by @midichef #1850)
+- [input] fix Ctrl+T swap on empty string #1684
 - [input] use vd.scrFull to detect if curses inited
 - [input] use last arg from cmdlog if no curses
+- [input] fix Ctrl+V with special keystrokes  #1799
 - [inputsingle-] loop until keystroke (do not timeout)
 - [join] fail if differing number of keycols  #1678
+- [keystrokes] only check duplicate prefixes from allPrefixes  #1829
+- [loaders yaml] support tuples in YAML files (PR by @cool-RR #1824)  #1822
+- [macro] add prompt for cancelling macro  #1810 #1812
+- [macro] specify a clearer message  #1810
+- [main] print version string once, not twice (PR by @midichef #1837)
 - [menu] use "Alt+x" keybinding instead of "^[x"
 - [modify] do not call saveSheets on commit
 - [modify] commitMods do not call putValue for changes to added/deleted rows
     - also fix ItemColumn.putValue and AttrColumn.putValue to call parent Column.putValue before setting the value on the row
 - [modify] always set col.defer
 - [modify] do not fail on Column.putValue if no setter
+- [mouse] fix mouse-click on bottom pane
 - [paste] add new rows to sheet if necessary
 - [path] set name to '.' for givenpath of '.'  #1768
 - [path] fix progress bar for compression formats  #1175 #1255
@@ -106,9 +134,13 @@
     - addColumn is needed to set .sheet and .defer, among other things
 - [sheets] fix recursion crash of Python >= 3.8, <3.9.10  (PR by #midichef #1722)  #1696
 - [sheets] pop columns kwarg so raw list not set via final update() in constructor
+- [status] fix Alt+Shift+Shift+X  #1828
 - [threads] remove spurious None from syncing set
+- [threads] allow @AsyncThread funcs to have status kwarg
 - [quit-sheet-free] re-entering a subsheet left using quit-sheet-free should reload the subsheet #1679
 - [undo] ensure undo is sheet-specific for duped/copied sheets  #1780
+- [undo] fix undo for first modification on a sheet-specific HelpSheet  #1820
+- [undo] fix the removal of [M] (modified mark) after undo  #1800
 - [vdx] fix save error
 - [windows] add Alt+ keybindings for powershell  #1630
 
@@ -117,6 +149,7 @@
 
 - [cli] printout gone; use `builtins.print`
 - [help] add HelpSheet to globals
+- [input] add vd.injectInput and vd.getCommandInput
 - [keys] use prettykeys for allPrefixes #1592
 - [menu] vd.addMenuItems with convenient string syntax
 - [modify] Sheet.commitAddRow and Sheet.commitDeleteRow
@@ -127,6 +160,9 @@
 - [sheet] add vd.addCommand as alias for BaseSheet.addCommand
 - [tests] add vd.resetVisiData
 - [vdx] runvdx() to execute vdx strings
+- rename vd.draw_sheet to vd.drawSheet
+- change order of parameters for vd.subwindow to (x,y,w,h)
+- change order of args to onMouse to x,y
 
 
 # v2.11.1 (2023-07-16)
