@@ -274,7 +274,11 @@ def initCurses(vd):
 
     curses.def_prog_mode()
 
-    curses.flushinp()  #1993
+    vd.drainPendingKeys(scr)
+    if '\x1b' in vd.pendingKeys:  #1993
+        # if start of an ANSI escape sequence, might be mangled, discard remaining keystrokes
+        vd.pendingKeys.clear()
+        curses.flushinp()
 
     return scr
 
