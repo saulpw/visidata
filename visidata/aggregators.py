@@ -198,7 +198,7 @@ def aggregator_choices(vd):
 
 
 @VisiData.api
-def chooseAggregators():
+def chooseAggregators(vd):
     return vd.chooseMany(vd.aggregator_choices, type="aggregators")
 
 Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseAggregators())', 'Add aggregator to current column')
