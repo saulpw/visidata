@@ -38,13 +38,13 @@ for i in $TESTS ; do
     then
         echo $TEST
         for goldfn in tests/golden/${outbase%.vd*}.*; do
-            PYTHONPATH=. bin/vd --confirm-overwrite=False --play "$i" --batch --output "$goldfn" --config tests/.visidatarc --visidata-dir tests/.visidata
+            PYTHONPATH=. bin/vd --overwrite=False --play "$i" --batch --output "$goldfn" --config tests/.visidatarc --visidata-dir tests/.visidata
             echo "save: $goldfn"
         done
     fi
 done
 
-PYTHONPATH=. bin/vd <(seq 10000) --confirm-overwrite=False --batch --output tests/golden/stdin-guesser.tsv --config tests/.visidatarc --visidata-dir tests/.visidata  #1978
+PYTHONPATH=. bin/vd <(seq 10000) --overwrite=False --batch --output tests/golden/stdin-guesser.tsv --config tests/.visidatarc --visidata-dir tests/.visidata  #1978
 
 echo '=== git diffs for BUILD FAILURE ==='
 git --no-pager diff --numstat tests/
