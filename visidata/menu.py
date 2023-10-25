@@ -110,13 +110,6 @@ def addMenu(vd, *args):
             obj = c
         assert not obj.menus, 'cannot override submenu with longname'
         obj.longname = item.longname
-        if vd.importingModule == 'menufinal':
-            cmd = vd.getGlobals()['Sheet']().getCommand(item.longname)
-            s = ' > '.join([*menupath, obj.longname])
-            if cmd:
-                open(f'visidata/{cmd.module}.py', mode='a').write(s + '\n')
-            else:
-                print(cmd.module if cmd else '', s)
 
 
 def _intMenuPath(obj, menupath):
