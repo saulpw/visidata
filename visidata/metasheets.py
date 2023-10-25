@@ -106,19 +106,30 @@ class OptionsSheet(Sheet):
     precious = False
     columns = (
         Column('option', getter=lambda col,row: row.name),
-        Column('module', getter=lambda col,row: row.module),
+        Column('module', getter=lambda col,row: row.module, max_help=1),
         Column('value',
             getter=lambda col,row: col.sheet.diffOption(row.name),
             setter=lambda col,row,val: options.set(row.name, val, col.sheet.source),
             ),
         Column('default', getter=lambda col,row: options.getdefault(row.name)),
         Column('description', width=40, getter=lambda col,row: options._get(row.name, 'default').helpstr),
-        ColumnAttr('replayable'),
+        ColumnAttr('replayable', max_help=1),
     )
     colorizers = [
         CellColorizer(3, None, lambda s,c,r,v: v.value if r and c in s.columns[2:4] and r.name.startswith('color_') else None),
     ]
     nKeys = 2
+
+    @property
+    def help(self):
+        if self.source == 'global':
+            r = '# Global Options\nThis is a list of global option settings.'
+        else:
+            r = '# Sheet Options\nThis is a list of option settings specifically for the current sheet.'
+
+        r += f'\n\n- `e` to edit/toggle the current option value'
+        r += '\n- `d` to restore option to builtin default'
+        return r
 
     def diffOption(self, optname):
         return options.getonly(optname, self.source, '')
@@ -129,11 +140,19 @@ class OptionsSheet(Sheet):
         if isinstance(row.value, bool):
             options.set(row.name, not currentValue, self.source)
         else:
-            options.set(row.name, self.editCell(2, value=currentValue), self.source)
+            helpstr = f'# options.{self.cursorRow.name}\n'
+            helpstr += vd.options._get(self.cursorRow.name, 'default').helpstr
+            valcolidx = self.visibleCols.index(self.column(self.valueColName))
+            v = self.editCell(valcolidx, value=currentValue, help=helpstr)
+            vd.options.set(row.name, v, self.source)
+
+    @property
+    def valueColName(self):
+        return 'global_value' if self.source == 'global' else 'sheet_value'
 
     def beforeLoad(self):
         super().beforeLoad()
-        self.columns[2].name = 'global_value' if self.source == 'global' else 'sheet_value'
+        self.columns[2].name = self.valueColName
 
     def iterload(self):
         for k in options.keys():
