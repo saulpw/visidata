@@ -1,26 +1,42 @@
 # requirements: mutagen
 
-__name__ = 'vmutagen'
-__author__ = 'Saul Pwanson <vd@saul.pw>'
-__version__ = '0.1'
-
 import functools
 
-from visidata import *
+from visidata import vd, Column, AttrColumn, DirSheet
+
 
 @functools.lru_cache(None)
-def get_mutagen(path):
-    import mutagen
+def get_mutagen_info(path):
+    mutagen = vd.importExternal('mutagen')
     m = mutagen.File(path)
     return m.info
 
 
-def MutagenColumns():
-    for attr in 'bitrate channels encoder_info encoder_settings frame_offset length mode padding protected sample_rate track_gain'.split():
-        yield Column(attr, getter=lambda c,r,k=attr: getattr(get_mutagen(r), k))
+class MutagenColumn(AttrColumn):
+    def calcValue(self, r):
+        md = get_mutagen_info(r)
+        return getattr(md, self.expr, None)
 
 
-DirSheet.addCommand('^[m', 'addcol-mutagen', 'for c in MutagenColumns(): addColumn(c)')
+@DirSheet.api
+def audiometadata_columns(sheet):
+    return [
+        Column('audio_info', width=0, getter=lambda c,r: get_mutagen_info(r)),
+        MutagenColumn('bitrate'),
+        MutagenColumn('channels'),
+        MutagenColumn('encoder_info'),
+        MutagenColumn('encoder_settings'),
+        MutagenColumn('frame_offset'),
+        MutagenColumn('length'),
+        MutagenColumn('mode'),
+        MutagenColumn('padding'),
+        MutagenColumn('protected'),
+        MutagenColumn('sample_rate'),
+        MutagenColumn('track_gain'),
+    ]
 
 
-vd.addGlobals(globals())
+DirSheet.addCommand('', 'addcol-audiometadata', 'addColumn(*audiometadata_columns())', 'add metadata columns for audio files (MP3, FLAC, Ogg, etc)')
+
+
+vd.addMenuItems('Column > Add column > audio metadata > addcol-audiometadata')
