@@ -180,6 +180,8 @@ vd.optalias('confirm_overwrite', 'overwrite', 'confirm')
 vd.optalias('show_graph_labels', 'disp_graph_labels')
 vd.optalias('zoom_incr', 'disp_zoom_incr')
 
+alias('visibility-sheet', 'toggle-multiline')
+alias('visibility-col', 'toggle-multiline')
 
 
 vd.addGlobals(globals())

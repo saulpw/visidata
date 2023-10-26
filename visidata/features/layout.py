@@ -18,7 +18,7 @@ def toggleWidth(self, width):
 
 
 @Column.api
-def toggleVisibility(self):
+def toggleMultiline(self):
     if self.height == 1:
         self.height = self.sheet.options.default_height
     else:
@@ -43,9 +43,8 @@ Sheet.addCommand('gz_', 'resize-cols-input', 'width = int(input("set width= ", v
 Sheet.addCommand('-', 'hide-col', 'hide_col(cursorCol)', 'Hide current column')
 Sheet.addCommand('z-', 'resize-col-half', 'cursorCol.setWidth(cursorCol.width//2)', 'reduce width of current column by half')
 
-Sheet.addCommand('gv', 'unhide-cols', 'unhide_cols(columns, visibleRows)', 'Show all columns')
-Sheet.addCommand('v', 'visibility-sheet', 'for c in visibleCols: c.toggleVisibility()')
-Sheet.addCommand('', 'visibility-col', 'cursorCol.toggleVisibility()')
+Sheet.addCommand('gv', 'unhide-cols', 'unhide_cols(columns, visibleRows)', 'Unhide all hidden columns')
+Sheet.addCommand('v', 'toggle-multiline', 'for c in visibleCols: c.toggleMultiline()', 'toggle multiline display')
 Sheet.addCommand('zv', 'resize-height-input', 'Fanout(visibleCols).height=int(input("set height for all columns to: ", value=max(c.height for c in sheet.visibleCols)))', 'resize row height to N')
 Sheet.addCommand('gzv', 'resize-height-max', 'h=calc_height(cursorRow, {}, maxheight=windowHeight-1); vd.status(f"set height for all columns to {h}"); Fanout(visibleCols).height=h', 'resize row height to max height needed to see this row')
 
@@ -59,4 +58,5 @@ vd.addMenuItems('''
     Column > Resize > all columns width to N > resize-cols-input
     Row > Resize > height to N > resize-height-input
     Row > Resize > height to max > resize-height-max
+    View > Toggle display > multiline > toggle-multiline
 ''')
