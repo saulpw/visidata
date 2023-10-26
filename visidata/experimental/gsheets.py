@@ -12,16 +12,21 @@ def open_gsheets(vd, p):
 
 vd.open_g = vd.open_gsheets
 
+@VisiData.lazy_property
+def google_discovery(self):
+    googleapiclient = vd.importExternal('googleapiclient', 'google-api-python-client')
+    from googleapiclient import discovery
+    return discovery
+
+
 @VisiData.cached_property
 def _gsheets(vd):
-    from googleapiclient import discovery
-    return discovery.build("sheets", "v4", credentials=vd.google_auth('spreadsheets.readonly')).spreadsheets()
+    return vd.google_discovery.build("sheets", "v4", credentials=vd.google_auth('spreadsheets.readonly')).spreadsheets()
 
 
 @VisiData.cached_property
 def _gsheets_rw(vd):
-    from googleapiclient import discovery
-    return discovery.build("sheets", "v4", credentials=vd.google_auth('spreadsheets')).spreadsheets()
+    return vd.google_discovery.build("sheets", "v4", credentials=vd.google_auth('spreadsheets')).spreadsheets()
 
 
 class GSheetsIndex(Sheet):

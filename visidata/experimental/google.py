@@ -1,10 +1,11 @@
+'''
 # Using VisiData with Google Sheets and Google Drive
 
 ## Setup and Authentication
 
 Add to .visidatarc:
 
-    import vdplus.api.google
+    import visidata.experimental.google
 
 When VisiData attempts to use the Google API, it uses the "web authentication flow", which causes a web page to open asking for permissions to read and/or write your Google Sheets.
 After granting permissions, VisiData caches the auth token in the .visidata directory.  Remove `.visidata/google-*.pickle` to unauthenticate.
@@ -30,3 +31,7 @@ Use the `gdrive` filetype (the path doesn't matter):
 
 - Files can be marked for deletion with `d` and execute those deletions with `z Ctrl+S` (same as on the DirSheet for the local filesystem).
 - Images can be viewed with `Enter` (in browser).
+'''
+
+import visidata.experimental.gdrive
+import visidata.experimental.gsheets

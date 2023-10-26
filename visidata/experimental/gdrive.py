@@ -1,7 +1,7 @@
 import visidata
 from visidata import vd, VisiData, Sheet, IndexSheet, SequenceSheet, ColumnItem, Path, AttrDict, ColumnAttr, asyncthread, Progress, ColumnExpr, date
 
-from vdplus.api.google import GSheetsIndex
+from .gsheets import GSheetsIndex
 
 @VisiData.api
 def open_gdrive(vd, p):
@@ -17,20 +17,18 @@ ownedByMe originalFilename md5Checksum size quotaBytesUsed headRevisionId imageM
 exportLinks contentRestrictions contentHints trashed
 '''.split()
 
+
 @VisiData.cached_property
-def _drivebuild(self):
-    from googleapiclient import discovery
-    return discovery.build("drive", "v3", credentials=vd.google_auth('drive.readonly'))
+def _drivebuild(vd):
+    return vd.google_discovery.build("drive", "v3", credentials=vd.google_auth('drive.readonly'))
 
 @VisiData.cached_property
 def _gdrive(self):
-    from googleapiclient import discovery
-    return discovery.build("drive", "v3", credentials=vd.google_auth('drive.readonly')).files()
+    return vd.google_discovery.build("drive", "v3", credentials=vd.google_auth('drive.readonly')).files()
 
 @VisiData.cached_property
 def _gdrive_rw(self):
-    from googleapiclient import discovery
-    return discovery.build("drive", "v3", credentials=vd.google_auth('drive')).files()
+    return vd.google_discovery.build("drive", "v3", credentials=vd.google_auth('drive')).files()
 
 
 class GDriveSheet(Sheet):
