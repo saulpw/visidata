@@ -20,7 +20,6 @@ values in just those columns.
 """
 
 
-__version__ = "0.2.0"
 __author__ = "Jeremy Singer-Vine <jsvine@gmail.com>"
 
 from copy import copy
@@ -104,8 +103,13 @@ def dedupe_rows(sheet):
 
 
 # Add longname-commands to VisiData to execute these methods
-BaseSheet.addCommand(None, "select-duplicate-rows", "sheet.select_duplicate_rows()")
-BaseSheet.addCommand(None, "dedupe-rows", "sheet.dedupe_rows()")
+BaseSheet.addCommand(None, "select-duplicate-rows", "sheet.select_duplicate_rows()", "select each row that is a duplicate of a prior row")
+BaseSheet.addCommand(None, "dedupe-rows", "sheet.dedupe_rows()", "open new sheet in which only non-duplicate rows in the active sheet are included")
+
+vd.addMenuItems('''
+    Row > Select > duplicate rows > select-duplicate-rows
+    Data > Deduplicate rows > dedupe-rows
+''')
 
 """
 # Changelog

@@ -1,6 +1,5 @@
 """
 Filename: vdfec.py
-Version: 0.0.0
 Last updated: 2019-04-21
 Home: https://github.com/jsvine/visidata-plugins
 Author: Jeremy Singer-Vine

@@ -39,7 +39,6 @@ For instance, a sheet with the following columns names:
 
 """
 
-__version__ = "0.1.0"
 __author__ = "Jeremy Singer-Vine <jsvine@gmail.com>"
 
 from visidata import vd, Sheet, asyncthread, Progress
@@ -116,4 +115,8 @@ def normalize_column_names(sheet):
 
 
 # Add longname-commands to VisiData to execute these methods
-Sheet.addCommand(None, "normalize-col-names", "vd.sheet.normalize_column_names()")
+Sheet.addCommand(None, "normalize-col-names", "vd.sheet.normalize_column_names()", "normalize the names of all non-hidden columns")
+
+vd.addMenuItems('''
+    Column > Rename > normalize all > normalize-col-names
+''')
