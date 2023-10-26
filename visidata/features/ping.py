@@ -150,7 +150,7 @@ vd.option('ping_count', 3, 'send this many pings to each host', sheettype=PingSh
 vd.option('ping_interval', 0.1, 'wait between ping rounds, in seconds', sheettype=PingSheet)
 
 PingSheet.options.null_value = False
-BaseSheet.addCommand('', 'open-ping', 'vd.push(openSource(input("ping: ", type="hostip"), filetype="ping"))')
+BaseSheet.addCommand('', 'open-ping', 'vd.push(openSource(input("ping: ", type="hostip"), filetype="ping"))', 'open sheet to ping input IP Address')
 
 vd.addMenuItems('''
     System > Ping IP/hostname > open-ping

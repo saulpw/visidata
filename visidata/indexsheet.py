@@ -94,8 +94,8 @@ def nextRow(sheet, n=1):
 vd.addCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)', 'open Sheets Stack: join or jump between the active sheets on the current stack')
 vd.addCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)', 'open Sheets Sheet: join or jump between all sheets from current session')
 
-BaseSheet.addCommand('g>', 'open-source-next', 'vd.replace(openSource(source.nextRow())) if isinstance(source, IndexSheet) else fail("parent sheet must be Index Sheet")', '')
-BaseSheet.addCommand('g<', 'open-source-prev', 'vd.replace(openSource(source.nextRow(-1))) if isinstance(source, IndexSheet) else fail("parent sheet must be Index Sheet")', '')
+BaseSheet.addCommand('g>', 'open-source-next', 'vd.replace(openSource(source.nextRow())) if isinstance(source, IndexSheet) else fail("parent sheet must be Index Sheet")', 'open next sheet on parent index sheet')
+BaseSheet.addCommand('g<', 'open-source-prev', 'vd.replace(openSource(source.nextRow(-1))) if isinstance(source, IndexSheet) else fail("parent sheet must be Index Sheet")', 'open prev sheet on parent index sheet')
 
 IndexSheet.addCommand('g^R', 'reload-selected', 'reloadSheets(selectedRows or rows)', 'reload all selected sheets')
 

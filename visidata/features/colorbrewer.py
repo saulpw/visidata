@@ -344,18 +344,20 @@ VisiData.set_palette  = GraphSheet.set_palette
 VisiData.cycle_palette = GraphSheet.cycle_palette
 
 
-BaseSheet.addCommand(None, 'open-palettes', 'vd.push(PalettesSheet("palettes", source=vd))', '')
-BaseSheet.addCommand(None, 'cycle-palette', 'vd.cycle_palette()', '')
-BaseSheet.addCommand(None, 'unset-palette', 'vd.options.unset("plot_colors")', '')
+BaseSheet.addCommand(None, 'open-palettes', 'vd.push(PalettesSheet("palettes", source=vd))', 'open color palettes sheet for graphs')
+BaseSheet.addCommand(None, 'cycle-palette', 'vd.cycle_palette()', 'cycle to next color palette for graphs')
+BaseSheet.addCommand(None, 'unset-palette', 'vd.options.unset("plot_colors")', 'reset to default color palette for graphs')
 
-GraphSheet.addCommand('C', 'open-palettes-sheet', 'vd.push(PalettesSheet("palettes", source=sheet))', 'Press Enter to choose ')
-GraphSheet.addCommand('zc', 'cycle-palette-sheet', 'sheet.cycle_palette()', 'cycle to next color palette for this sheets')
-GraphSheet.addCommand(None, 'unset-palette-sheet', 'sheet.options.unset("plot_colors"); reload()', '')
+GraphSheet.addCommand('C', 'open-palettes-sheet', 'vd.push(PalettesSheet("palettes", source=sheet))', 'open color palettes sheet for this graph')
+GraphSheet.addCommand('zc', 'cycle-palette-sheet', 'sheet.cycle_palette()', 'cycle to next color palette for this graph')
+GraphSheet.addCommand(None, 'unset-palette-sheet', 'sheet.options.unset("plot_colors"); reload()', 'reset to default color palette for this graph')
 
-PalettesSheet.addCommand(ENTER, 'choose-palette', 'source.set_palette(cursorRow[0], cursorRow[1])')
+PalettesSheet.addCommand(ENTER, 'choose-palette', 'source.set_palette(cursorRow[0], cursorRow[1])', 'set current palette for source graph')
 
-vd.addMenuItem(*'Plot > Palette > cycle > cycle-palette-sheet'.split(' > '))
-vd.addMenuItem(*'Plot > Palette > unset > unset-palette-sheet'.split(' > '))
-vd.addMenuItem(*'Plot > Palette > choose > open-palettes'.split(' > '))
+vd.addMenuItems('''
+    Plot > Palette > cycle > cycle-palette-sheet
+    Plot > Palette > unset > unset-palette-sheet
+    Plot > Palette > choose > open-palettes
+''')
 
 vd.addGlobals(PalettesSheet=PalettesSheet)

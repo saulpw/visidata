@@ -62,4 +62,4 @@ def setValuesFromFaker(col, faketype, rows):
         col.setValue(r, newv)
 
 
-Sheet.addCommand(None, 'setcol-fake', 'cursorCol.setValuesFromFaker(input("faketype: ", type="faketype"), selectedRows)')
+Sheet.addCommand(None, 'setcol-fake', 'cursorCol.setValuesFromFaker(input("faketype: ", type="faketype"), selectedRows)', 'replace values in current column for selected rows with fake values')

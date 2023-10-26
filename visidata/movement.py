@@ -195,7 +195,7 @@ BaseSheet.bindkey('gl', 'go-rightmost')
 BaseSheet.addCommand('^^', 'jump-prev', 'vd.activeStack[1:] or fail("no previous sheet"); vd.push(vd.activeStack[1])', 'jump to previous sheet in this pane')
 BaseSheet.addCommand('g^^', 'jump-first', 'vd.push(vd.activeStack[-1])', 'jump to first sheet')
 
-BaseSheet.addCommand('BUTTON1_RELEASED', 'no-op', 'pass')
+BaseSheet.addCommand('BUTTON1_RELEASED', 'no-op', 'pass', 'do nothing')
 
 BaseSheet.addCommand(None, 'mouse-enable', 'mm, _ = curses.mousemask(-1); status("mouse "+("ON" if mm else "OFF"))', 'enable mouse events')
 BaseSheet.addCommand(None, 'mouse-disable', 'mm, _ = curses.mousemask(0); status("mouse "+("ON" if mm else "OFF"))', 'disable mouse events')
