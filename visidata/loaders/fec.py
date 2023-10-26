@@ -35,20 +35,17 @@ Thanks to all who have contributed to those projects.
 
 """
 
+from copy import copy
 from visidata import (
     vd,
     Path,
     Sheet,
     TextSheet,
-    joinSheetnames,
     Column,
     ColumnAttr,
     ColumnItem,
     ENTER,
     asyncthread,
-    copy,
-    status,
-    warning,
     Progress,
     addGlobals,
 )
@@ -112,21 +109,21 @@ class DiveSheet(Sheet):
                     self.addRow(item)
 
                 except Exception as e:
-                    warning("Can't dive on lists with heterogenous item types.")
+                    vd.warning("Can't dive on lists with heterogenous item types.")
                     return False
 
     def dive(self):
         if self.is_keyvalue:
             cell = self.cursorRow["value"]
-            name = joinSheetnames(self.name, self.cursorRow["key"])
+            name = vd.joinSheetnames(self.name, self.cursorRow["key"])
 
             if isinstance(cell, (list, dict)):
                 vs = self.__class__(name, source = cell)
             else:
-                warning("Nothing to dive into.")
+                vd.warning("Nothing to dive into.")
                 return
         else:
-            name = joinSheetnames(self.name, "row")
+            name = vd.joinSheetnames(self.name, "row")
             vs = self.__class__(name, source = self.cursorRow)
 
         success = vs.reload()
@@ -165,7 +162,7 @@ class FECItemizationSheet(Sheet):
             self.addColumn(ColumnItem(name))
     def dive(self):
         vs = DiveSheet(
-            joinSheetnames(self.name, "detail"),
+            vd.joinSheetnames(self.name, "detail"),
             source = self.cursorRow
         )
         vs.reload()
@@ -196,7 +193,7 @@ class FECScheduleSheet(Sheet):
 
         for schedule_name in self.source.keys():
             vs = FECItemizationSheet(
-                joinSheetnames(self.name, schedule_name),
+                vd.joinSheetnames(self.name, schedule_name),
                 schedule_name = schedule_name,
                 source = self.source[schedule_name],
                 size = len(self.source[schedule_name]),
@@ -250,7 +247,7 @@ class FECFiling(Sheet):
                 ] else dict
 
             vs = cls(
-                joinSheetnames(self.name, component_name),
+                vd.joinSheetnames(self.name, component_name),
                 component_name = component_name,
                 source = source_cls(),
                 size = 0,
@@ -295,7 +292,7 @@ class FECFiling(Sheet):
                 if form_type not in sheet_row.source:
                     sheet_row.source[form_type] = [ ] 
                     subsheet = FECItemizationSheet(
-                        joinSheetnames(sheet_row.name, form_type),
+                        vd.joinSheetnames(sheet_row.name, form_type),
                         schedule_name = form_type,
                         source = [ ],
                         size = 0,

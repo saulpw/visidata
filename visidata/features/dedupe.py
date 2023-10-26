@@ -23,7 +23,9 @@ values in just those columns.
 __version__ = "0.2.0"
 __author__ = "Jeremy Singer-Vine <jsvine@gmail.com>"
 
-from visidata import Sheet, BaseSheet, asyncthread, copy, Progress, vd
+from copy import copy
+
+from visidata import Sheet, BaseSheet, asyncthread, Progress, vd
 
 
 def gen_identify_duplicates(sheet):
