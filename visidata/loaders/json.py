@@ -156,6 +156,12 @@ def save_jsonl(vd, p, *vsheets):
             vs.write_jsonl(fp)
 
 
+@VisiData.api
+def JSON(vd, s:str):
+    'Parse `s` as JSON.'
+    return json.loads(s)
+
+
 JsonSheet.options.encoding = 'utf-8'
 JsonSheet.options.regex_skip = r'^(//|#).*'
 

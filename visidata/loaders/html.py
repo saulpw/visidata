@@ -37,9 +37,8 @@ class HtmlTablesSheet(IndexSheet):
     def iterload(self):
         lxml = vd.importExternal('lxml')
         from lxml import html
-        utf8_parser = html.HTMLParser(encoding='utf-8')
         with self.source.open(encoding='utf-8') as fp:
-            doc = html.parse(fp, parser=utf8_parser, base_url=self.source.given)
+            doc = html.parse(fp, parser=vd.utf8_parser, base_url=self.source.given)
         self.setKeys([self.column('name')])
         self.column('keys').hide()
         self.column('source').hide()
@@ -196,6 +195,20 @@ def save_html(vd, p, *vsheets):
 
             fp.write('</table>')
             vd.status('%s save finished' % p)
+
+
+@VisiData.lazy_property
+def utf8_parser(vd):
+    lxml = vd.importExternal('lxml')
+    return lxml.html.HTMLParser(encoding='utf-8')
+#    return lxml.etree.HTMLParser(encoding='utf-8')
+
+
+@VisiData.api
+def HTML(vd, s):
+    lxml = vd.importExternal('lxml')
+    from lxml import html
+    return html.fromstring(s, parser=vd.utf8_parser)
 
 
 VisiData.save_htm = VisiData.save_html
