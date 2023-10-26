@@ -99,12 +99,12 @@ def dedupe_rows(sheet):
                 self.addRow(row)
 
     vs.reload = _reload
-    vd.push(vs)
+    return vs
 
 
 # Add longname-commands to VisiData to execute these methods
 BaseSheet.addCommand(None, "select-duplicate-rows", "sheet.select_duplicate_rows()", "select each row that is a duplicate of a prior row")
-BaseSheet.addCommand(None, "dedupe-rows", "sheet.dedupe_rows()", "open new sheet in which only non-duplicate rows in the active sheet are included")
+BaseSheet.addCommand(None, "dedupe-rows", "vd.push(sheet.dedupe_rows())", "open new sheet in which only non-duplicate rows in the active sheet are included")
 
 vd.addMenuItems('''
     Row > Select > duplicate rows > select-duplicate-rows

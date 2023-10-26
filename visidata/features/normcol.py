@@ -44,9 +44,9 @@ __author__ = "Jeremy Singer-Vine <jsvine@gmail.com>"
 from visidata import vd, Sheet, asyncthread, Progress
 from collections import Counter
 import re
+import string
 
 nonalphanum_pat = re.compile(r"[^a-z0-9]+")
-DIGITS = "0123456789"
 
 
 def normalize_name(name):
@@ -61,7 +61,7 @@ def normalize_name(name):
     stripped = subbed.strip("_")
 
     # To ensure it's a valid Python identifier
-    if (stripped or "_")[0] in DIGITS:
+    if (stripped or "_")[0] in string.digits:
         stripped = "_" + stripped
 
     return stripped
@@ -86,10 +86,6 @@ def gen_normalize_names(names):
         yield norm_name
 
 
-def normalize_names(names):
-    return list()
-
-
 @Sheet.api
 @asyncthread
 def normalize_column_names(sheet):
@@ -97,19 +93,19 @@ def normalize_column_names(sheet):
     Normalize the names of all non-hidden columns on the active sheet.
     """
 
-    init_names = []
+    init_names = {}
     gen = gen_normalize_names(c.name for c in sheet.visibleCols)
     prog = Progress(gen, gerund="normalizing", total=sheet.nVisibleCols)
 
     for i, norm_name in enumerate(prog):
         col = sheet.visibleCols[i]
-        init_names.append(col.name)  # Store for undo
+        init_names[col] = col.name  # Store for undo
         col.name = norm_name
 
     @asyncthread
     def undo():
-        for i, c in enumerate(init_names):
-            sheet.visibleCols[i].name = c
+        for c, oldname in init_names.items():
+            c.name = oldname
 
     vd.addUndo(undo)
 
