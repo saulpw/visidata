@@ -1132,6 +1132,8 @@ Sheet.addCommand('g^', 'rename-cols-row', 'updateColNames(selectedRows or [curso
 Sheet.addCommand('gz^', 'rename-cols-selected', 'updateColNames(selectedRows or [cursorRow], sheet.visibleCols, overwrite=True)', 'rename all visible columns to combined contents of selected rows (or current row)')
 BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to: ", value=sheet.name)', 'Rename current sheet')
 
+Sheet.addCommand('', 'addcol-source', 'source.addColumn(copy(cursorCol))', 'add copy of current column to source sheet')  #988  frosencrantz
+
 
 @Column.api
 def formatter_enum(col, fmtdict):
