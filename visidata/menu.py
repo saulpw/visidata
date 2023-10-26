@@ -2,7 +2,7 @@ import string
 import textwrap
 import curses
 
-from typing import Union
+from typing import List, Union
 from visidata import vd, drawcache, colors, clipdraw, dispwidth
 from visidata import BaseSheet, VisiData, AttrDict, ENTER
 
@@ -53,7 +53,7 @@ def _finditem(menus, item:Union[str,int]):
 
 
 @BaseSheet.api
-def getMenuItem(sheet, menupath:list[str]=None):
+def getMenuItem(sheet, menupath:List[str]=None):
     if not menupath:
         menupath = sheet.activeMenuItems
 
