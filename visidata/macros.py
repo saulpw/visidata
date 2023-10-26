@@ -84,7 +84,7 @@ def setMacro(ks, vs):
 def saveMacro(self, rows, ks):
         vs = copy(self)
         vs.rows = rows
-        macropath = Path(vd.fnSuffix(vd.options.visidata_dir+"macro"))
+        macropath = Path(vd.fnSuffix(str(Path(vd.options.visidata_dir)/ks)))
         vd.save_vdj(macropath, vs)
         setMacro(ks, vs)
         vd.macrosheet.source.append_tsv_row((ks, macropath))

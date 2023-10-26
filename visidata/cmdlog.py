@@ -45,7 +45,7 @@ def checkVersion(vd, desired_version):
         vd.fail("version %s required" % desired_version)
 
 @VisiData.api
-def fnSuffix(vd, prefix):
+def fnSuffix(vd, prefix:str):
     i = 0
     fn = prefix + '.vdj'
     while Path(fn).exists():
