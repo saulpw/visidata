@@ -13,7 +13,8 @@
 - display sheet and feature help documentation in sidebar
     - added bundles of Guide Sheets
     - open Guide Sheets into a full VisiData sheet with `open-sidebar` (bound to `gb`)
-- [filetype] add guesser to sniff filetype from data  #130 #1759
+- [filetype] add guesser to sniff filetype from data  #130 #1759 #1881 #1880 #1883
+- add support for Python 3.12  #1934
 
 - [build] add a .desktop for VisiData  #1738
 - [cli] add `-i` to run interactive mode after batch  #1714
@@ -26,8 +27,12 @@
 - [features] procmgr to view/manage processes, memory/cpu stats
 - [features] ping to traceroute a hostip
 - [freq] add select-first command
+- [freq] base histogram width on column width  #1807
+- [freq] set default disp_histogram to U+25A0 BLACK SQUARE (■)) (PR by @daviewales #1949 #1807)
+    - [themes] ascii8 disp_histogram to *
 - [graph] colorbrewer palette chooser (thanks @er1kb)
 - [graph] add commands to open external graph with matplotlib #1056
+- [input] change `Ctrl+G` to toggle `options.disp_help`
 - [linux] change default system clipboard cmd to wl-copy if the user is using wayland (PR by @rj1 #1763)
 - [loaders] mailbox formats mbox/maildir/mmdf/babyl/mh loader (as supported by Python mailbox stdlib)
 - [loaders] .jrnl format (jrnl.sh) loader+saver
@@ -36,15 +41,20 @@
 - [loaders] add orgmode loader
 - [loaders] add scraper
     - table of HTMl elements as parsed by `beautifulsoup4`
+- [loaders] add s3 loader (built by @ajkerrigan)
+    - open Amazon S3 paths and objects
 - [loaders] add bit.io loader
 - [loaders] add support for jsonla (JSONL arrays) format (PR by @daviewales #1730)  #1726
 - [loaders] add zulip loader
 - [loaders] add vd.requireOptions to check for presence of loader-relevant API keys
 - [loaders] add airtable API loader
 - [loaders http] replace requests with urllib  #1808 #1704
+- [loaders] add a toml loader (PR by @ajkerrigan #1894 #1580 #1587)
+- [loaders xml] ignore comments
 - [menu] move Edit>Add-rows to Row>Add
 - [menu] add `go-row-number` to menu  #1766
 - [menu] move commit-sheet under File>Save
+- [menu] add resize-cols-input to Columns -> Resize (PR by @njthomas #1887)
 - [open] try using options.filetype for path  #1710
     - useful for configuring default filetype when reading from stdin
 - [open] add `reopen-last-closed` which reopens the most recently closed sheet (PR by @cool-RR #1813) #1811
@@ -52,6 +62,7 @@
 - [open-syspaste] enable filetype selection (PR by @daviewales #1717)
 - [options] add `option.json_ensure_ascii` (default: True) (PR by @joaosousa1 #1776)  #1772
     - option for non-ASCII characters to be saved to JSON, on False will encode to utf-8
+- [regex] use inputMultiple to allow changing regex_flags  #1925
 - [replay] has been refactored to be sync, instead of a seperate async process  #1773 #1714
 - [save] add `options.save_encoding (default: 'utf-8') to differentiate from `options.encoding` when saving a file  #1708
 - [save] add saver for STATA files (PR by @raffaem #1563)
@@ -65,6 +76,8 @@
 - [tests] run all unit tests in CI
 - [tests] add test for loading a directory  #1798
 - [themes] add options.theme and visidata/themes directory of additional themes (light, ascii8, asciimono)  #1682  #1691
+- [types] add `ipaddr` and `ipnet` types`. add `type-ipaddr` and `type-ipnet` commands (unbound) (PR by @ajkerrigan #1946 #1782 #1910)
+    - also add `select-supernets` (unbound) which selects rows where the CIDR block value includes the input address space
 - [usd] provide USD(s) function to convert string like '£300' or '205 AUD' to equivalent US$ as float
 - [windows] change default system clipboard command to clip.exe
 
@@ -73,16 +86,20 @@
 - [diff] got moved to experimental
 - [guide] add GuideGuide toc and open-guide
 - [inplace] optional replacement commands which update the new Column live as you write the expression
+- [livesearch] add `dup-search` and `dup-search-cols` which search for regex forwards, creating a duplicate sheet with maching rows live
 - [mark] mark rows to more easily move cursor to them
 - [rownum] addcol-rownum and addcol-delta
 - [slide-cells] shift cells in cursor row to the right
 
 ## bugfixes
 
+- [aggregators] use statistics.median for more correct median  #1914
+- [chooser] choose only exactly matching strings (PR by @daviewales #1902)
 - [clipboard] warn when pasting before copying (PR by @midichef #1793)
 - [cmdlog] check for empty cursor column when adding a column (PR by @midichef #1783)
 - [columns] speed up getMaxWidth for wide columns (PR by @midichef #1747)  #1728
 - [columns] add ExplodingMock 
+- [currency] fix currency_neg option
 - [curses] allow breakpoint() before initwin
 - [curses] use builtins if no curses screen yet
 - [cursor] cursorColIndex now returns None if empty  #1803
@@ -95,14 +112,32 @@
 - [freq] fix names for openRow  #1777
 - [graph] fix graph ranges for xmax, ymax < 1 (PR by @midichef #1752)  #1673 #1697
 - [graph] fix data on edges being drawn offscreen (PR by @midichef #1850)
+- [graph] fixes to various graphing edge cases (PR by @midichef #1896)
+- [graph] fix top margin location and simplify y-coordinate calculation (PR by @midichef #1915)
+- [graph] labels: add tick symbol, int precision, right margin (PR by @midichef #1931)
 - [input] fix Ctrl+T swap on empty string #1684
 - [input] use vd.scrFull to detect if curses inited
+- [input] only draw prompt if scr is set
 - [input] use last arg from cmdlog if no curses
 - [input] fix Ctrl+V with special keystrokes  #1799
+- [input] erase status bar after prompt #1947
+- [input] include history for unfocused items #1947
+- [input] auto-apply changes after sysedit
 - [inputsingle-] loop until keystroke (do not timeout)
 - [join] fail if differing number of keycols  #1678
+- [join] fix join-merge (PR by @yphillip #1923 #1843)
+- [jsonl] include all columns in first row, even if null
 - [keystrokes] only check duplicate prefixes from allPrefixes  #1829
 - [loaders yaml] support tuples in YAML files (PR by @cool-RR #1824)  #1822
+- [loaders fixed] use maxWidth for saving if larger than column width  #1849
+- [loaders fixed] don't truncate wide columns with fixed width saver (PR by @daviewales #1890)
+- [loaders tsv] use options.encoding for reading files
+- [loaders http] add `options.http_ssl_verify` to replace `options.http_req_verify`  #1939
+- [loaders sqlite] prevent creation of ./- file when reading from stdin (PR by @Midichef #1945)
+- [loaders imap] enable imap and fix folder name extraction (PR by @justin2004  #1917)
+- [loaders parquet] stringify source to handle both URLs and local paths (PR by @ajkerrigan #1913)
+- [loaders mysql] unquote password before sending to client (PR by @dufferzafar #1933)
+- [loaders http] fix parsing link header (PR by @Midichef #1924 #1898)
 - [macro] add prompt for cancelling macro  #1810 #1812
 - [macro] specify a clearer message  #1810
 - [main] print version string once, not twice (PR by @midichef #1837)
@@ -113,6 +148,7 @@
 - [modify] always set col.defer
 - [modify] do not fail on Column.putValue if no setter
 - [mouse] fix mouse-click on bottom pane
+- [options] disable adding rows (PR by @midichef #1944)
 - [paste] add new rows to sheet if necessary
 - [path] set name to '.' for givenpath of '.'  #1768
 - [path] fix progress bar for compression formats  #1175 #1255
@@ -135,6 +171,9 @@
 - [sheets] fix recursion crash of Python >= 3.8, <3.9.10  (PR by #midichef #1722)  #1696
 - [sheets] pop columns kwarg so raw list not set via final update() in constructor
 - [status] fix Alt+Shift+Shift+X  #1828
+- [status] update right status before exec  #996
+- [sort] show sort arrow for sort columns described by name (PR by @midichef #1876)
+- [term] allow non-color term like vt102
 - [threads] remove spurious None from syncing set
 - [threads] allow @AsyncThread funcs to have status kwarg
 - [quit-sheet-free] re-entering a subsheet left using quit-sheet-free should reload the subsheet #1679
@@ -143,6 +182,9 @@
 - [undo] fix the removal of [M] (modified mark) after undo  #1800
 - [vdx] fix save error
 - [windows] add Alt+ keybindings for powershell  #1630
+- [windows] limit windows-curses version to 2.3.0 (PR by @bartbroere #1901 #1841)
+    - asottile noticed this was a regression in the last windows-curses release in this issue: zephyrproject-rtos/windows-curses#41
+- [windows] fix syspaste (PR by @midichef #1921 #1920)
 
 
 ## api
@@ -163,6 +205,8 @@
 - rename vd.draw_sheet to vd.drawSheet
 - change order of parameters for vd.subwindow to (x,y,w,h)
 - change order of args to onMouse to x,y
+- add vd.aside for a silent status message
+- add GlobalsSheetsSheet to globals
 
 
 # v2.11.1 (2023-07-16)
