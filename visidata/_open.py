@@ -198,6 +198,6 @@ TableSheet.addCommand('zo', 'open-cell-file', 'vd.push(openSource(cursorDisplay)
 BaseSheet.addCommand('gU', 'undo-last-quit', 'push(allSheets[-1])', 'reopen most recently closed sheet')
 
 vd.addMenuItems('''
-    File > Open file/url > open-file
+    File > Open > input file/url > open-file
     File > Reopen last closed > undo-last-quit
 ''')
