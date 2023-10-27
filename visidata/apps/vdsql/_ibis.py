@@ -266,8 +266,6 @@ class IbisTableSheet(Sheet):
         q = self.query
         extra_cols = {}
         for c in self.visibleCols:
-            if c.name in self.query.columns:
-                continue
             ibis_col = c.get_ibis_col(q, typed=typed)
             if ibis_col is not None:
                 extra_cols[c.name] = ibis_col
