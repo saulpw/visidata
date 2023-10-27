@@ -23,7 +23,7 @@ def save_vds(vd, p, *sheets):
             fp.write('#'+json.dumps(d)+NL)
 
             # class and attrs for each column in vs
-            for col in vs.visibleCols:
+            for col in vs.columns:
                 d = col.__getstate__()
                 if isinstance(col, SettableColumn):
                     d['col'] = 'Column'
