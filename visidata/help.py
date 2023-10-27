@@ -4,7 +4,7 @@ import collections
 from visidata import VisiData, MetaSheet, ColumnAttr, Column, BaseSheet, VisiDataMetaSheet, SuspendCurses
 from visidata import vd, asyncthread, ENTER
 
-vd.option('disp_help', 1, '-1=quiet, 0=no help, 1-4=some-all help, 5-10=remove features')
+vd.option('disp_help', 0, 'show help panel during input')
 
 
 @VisiData.api
@@ -81,14 +81,22 @@ class HelpPane:
         self.parentscr = None
         self.amgr = visidata.AnimationMgr()
 
-    def draw(self, scr, x=None, y=None):
+    @property
+    def width(self):
+        return self.amgr.maxWidth
+
+    @property
+    def height(self):
+        return self.amgr.maxHeight
+
+    def draw(self, scr, x=None, y=None, **kwargs):
         if not scr: return
-        if vd.options.disp_help < 2:
-            if self.scr:
-                self.scr.erase()
-                self.scr.refresh()
-                self.scr = None
-            return
+#        if vd.options.disp_help <= 0:
+#            if self.scr:
+#                self.scr.erase()
+#                self.scr.refresh()
+#                self.scr = None
+#            return
         if y is None: y=0  # show at top of screen by default
         if x is None: x=0
         hneeded = self.amgr.maxHeight+3
@@ -118,13 +126,13 @@ class HelpPane:
 
         self.scr.erase()
         self.scr.box()
-        self.amgr.draw(self.scr, y=1, x=2)
+        self.amgr.draw(self.scr, y=1, x=2, **kwargs)
         self.scr.refresh()
 
 
 @VisiData.api
 @functools.lru_cache(maxsize=None)
-def getHelpPane(vd, name, module='vdplus'):
+def getHelpPane(vd, name, module='visidata') -> HelpPane:
     ret = HelpPane(name)
     try:
         ret.amgr.load(name, (vd.pkg_resources_files(module)/f'ddw/{name}.ddw').open(encoding='utf-8'))

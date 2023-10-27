@@ -1,7 +1,7 @@
 from collections import defaultdict
 import json
 import time
-from visidata import colors, vd, clipdraw
+from visidata import colors, vd, clipdraw, ColorAttr
 
 __all__ = ['Animation', 'AnimationMgr']
 
@@ -66,9 +66,9 @@ class Animation:
                     self.width = max(self.width, x+len(r.text))
                     self.height = max(self.height, y)
 
-    def draw(self, scr, *, t=0, x=0, y=0, loop=False, **kwargs):
+    def draw(self, scr, *, t=0, x=0, y=0, loop=False, attr=ColorAttr(), **kwargs):
         for r, dx, dy, _ in self.iterdeep(self.frames[''].rows):
-            clipdraw(scr, y+dy, x+dx, r.text, colors[r.color])
+            clipdraw(scr, y+dy, x+dx, r.text, attr.update(colors[r.color], 2))
 
         if not self.total_ms:
             return None

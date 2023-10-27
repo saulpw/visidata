@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 import textwrap
 
 from visidata import vd, VisiData, BaseSheet, colors, TextSheet, clipdraw, wraptext, dispwidth
@@ -42,33 +42,42 @@ def drawSidebar(vd, scr, sheet):
     return sheet.drawSidebarText(scr, text=sidebar, overflowmsg=overflowmsg, bottommsg=bottommsg)
 
 @BaseSheet.api
-def drawSidebarText(sheet, scr, text:Optional[str], title:str='', overflowmsg:str='', bottommsg:str=''):
+def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', overflowmsg:str='', bottommsg:str=''):
     scrh, scrw = scr.getmaxyx()
     maxw = sheet.options.disp_sidebar_width or scrw//2
     maxh = sheet.options.disp_sidebar_height or scrh-2
 
+    cattr = colors.get_color('color_sidebar')
+
     text = text or ''
-    text = textwrap.dedent(text.strip('\n'))
 
-    if not text:
-        return
+    if hasattr(text, 'draw'):  # like a HelpPane
+        maxlinew = text.width
+        winh = min(maxh, text.height+2)+1
+    else:
+        text = textwrap.dedent(text.strip('\n'))
 
-    lines = text.splitlines()
-    if not title and lines and lines[0].strip().startswith('# '):
-        title = lines[0][1:].strip()
-        text = '\n'.join(lines[1:])
+        if not text:
+            return
+
+        lines = text.splitlines()
+        if not title and lines and lines[0].strip().startswith('# '):
+            title = lines[0][1:].strip()
+            text = '\n'.join(lines[1:])
+
+
+        lines = list(wraptext(text, width=maxw-4))
+        maxlinew = 0
+        if lines:
+            maxlinew = max(maxlinew, max(dispwidth(textonly, maxwidth=maxw) for line, textonly in lines))
+        winh = min(maxh, len(lines)+2)
 
     titlew = dispwidth(title)
 
-    cattr = colors.get_color('color_sidebar')
-    lines = list(wraptext(text, width=maxw-4))
-    maxlinew = titlew
-    if lines:
-        maxlinew = max(titlew, max(dispwidth(textonly, maxwidth=maxw) for line, textonly in lines))
     maxlinew = max(maxlinew, dispwidth(overflowmsg)+4)
     maxlinew = max(maxlinew, dispwidth(bottommsg)+4)
+    maxlinew = max(maxlinew, titlew)
     winw = min(maxw, maxlinew+4)
-    winh = min(maxh, len(lines)+2)
     x, y, w, h = scrw-winw-1, scrh-winh-1, winw, winh
 
     sidebarscr = vd.subwindow(scr, x, y, w, h)
@@ -78,14 +87,17 @@ def drawSidebarText(sheet, scr, text:Optional[str], title:str='', overflowmsg:st
     sidebarscr.border()
     vd.onMouse(sidebarscr, 0, 0, w, h, BUTTON1_RELEASED='no-op', BUTTON1_PRESSED='no-op')
 
-    i = 0
-    for line, _ in lines:
-        if i >= h-2:
-            bottommsg = overflowmsg
-            break
+    if hasattr(text, 'draw'):  # like a HelpPane
+        text.draw(sidebarscr, attr=cattr)
+    else:
+        i = 0
+        for line, _ in lines:
+            if i >= h-2:
+                bottommsg = overflowmsg
+                break
 
-        x += clipdraw(sidebarscr, i+1, 2, line, cattr, w=w-3)
-        i += 1
+            x += clipdraw(sidebarscr, i+1, 2, line, cattr, w=w-3)
+            i += 1
 
     x = max(0, w-titlew-6)
     clipdraw(sidebarscr, 0, x, f"|[:black on yellow] {title} [:]|", cattr, w=titlew+4)
