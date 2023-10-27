@@ -33,6 +33,7 @@
 - [graph] colorbrewer palette chooser (thanks @er1kb)
 - [graph] add commands to open external graph with matplotlib #1056
 - [input] change `Ctrl+G` to toggle `options.disp_help`
+- [layout] stop errors: hide-col on empty sheet, inputMultiple (PR by @midichef #1963)
 - [linux] change default system clipboard cmd to wl-copy if the user is using wayland (PR by @rj1 #1763)
 - [loaders] mailbox formats mbox/maildir/mmdf/babyl/mh loader (as supported by Python mailbox stdlib)
 - [loaders] .jrnl format (jrnl.sh) loader+saver
@@ -108,6 +109,7 @@
     - if user uses `open-dir-parent` outside of the CWD, switch to absolute paths
 - [errors] do not print ExpectedExceptions twice in batch-mode
 - [expr] more informative 'column not modifiable' error message  #1764
+- [floatsi] must try to convert args to float
 - [fill] allow filling with values that are logically false (PR by @midichef #1794)
 - [freq] fix names for openRow  #1777
 - [graph] fix graph ranges for xmax, ymax < 1 (PR by @midichef #1752)  #1673 #1697
@@ -115,6 +117,7 @@
 - [graph] fixes to various graphing edge cases (PR by @midichef #1896)
 - [graph] fix top margin location and simplify y-coordinate calculation (PR by @midichef #1915)
 - [graph] labels: add tick symbol, int precision, right margin (PR by @midichef #1931)
+- [graph] fix legend display of full-width characters (PR by @midichef #1958)
 - [input] fix Ctrl+T swap on empty string #1684
 - [input] use vd.scrFull to detect if curses inited
 - [input] only draw prompt if scr is set
@@ -138,10 +141,12 @@
 - [loaders parquet] stringify source to handle both URLs and local paths (PR by @ajkerrigan #1913)
 - [loaders mysql] unquote password before sending to client (PR by @dufferzafar #1933)
 - [loaders http] fix parsing link header (PR by @Midichef #1924 #1898)
+- [macos] do not bind empty string to anything
 - [macro] add prompt for cancelling macro  #1810 #1812
 - [macro] specify a clearer message  #1810
 - [main] print version string once, not twice (PR by @midichef #1837)
 - [menu] use "Alt+x" keybinding instead of "^[x"
+- [misc] remove trailing commas from addCommand (PR by @midichef #1962)
 - [modify] do not call saveSheets on commit
 - [modify] commitMods do not call putValue for changes to added/deleted rows
     - also fix ItemColumn.putValue and AttrColumn.putValue to call parent Column.putValue before setting the value on the row
@@ -152,6 +157,8 @@
 - [paste] add new rows to sheet if necessary
 - [path] set name to '.' for givenpath of '.'  #1768
 - [path] fix progress bar for compression formats  #1175 #1255
+- [path] fix open() using both binary and text mode (PR by @midichef #1955)
+- [path] binary mode does not take newline argument
 - [perf startup] delay import of `urllib.request`, `pkg_resources`, and `dateutil`
 - [perf startup] remove `unittest.mock`
 - [regex] issue warning when no columns to add  #1778
@@ -170,6 +177,7 @@
     - addColumn is needed to set .sheet and .defer, among other things
 - [sheets] fix recursion crash of Python >= 3.8, <3.9.10  (PR by #midichef #1722)  #1696
 - [sheets] pop columns kwarg so raw list not set via final update() in constructor
+- [shell] fix copying of a directory  #1970
 - [status] fix Alt+Shift+Shift+X  #1828
 - [status] update right status before exec  #996
 - [sort] show sort arrow for sort columns described by name (PR by @midichef #1876)
@@ -185,6 +193,7 @@
 - [windows] limit windows-curses version to 2.3.0 (PR by @bartbroere #1901 #1841)
     - asottile noticed this was a regression in the last windows-curses release in this issue: zephyrproject-rtos/windows-curses#41
 - [windows] fix syspaste (PR by @midichef #1921 #1920)
+- [zsh] fix zsh completion (PR by @dbaynard #1960 #1959)
 
 
 ## api
