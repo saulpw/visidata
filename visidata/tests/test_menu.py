@@ -1,5 +1,6 @@
 
 from visidata import vd, TableSheet
+import pytest
 
 
 class TestMenu:
@@ -9,6 +10,5 @@ class TestMenu:
         m = TableSheet().getMenuItem(['Column', 'Add column', 'foobar'])
         assert m
 
-        vd.addMenuItems('''Column > Add column > non-command''')
-        m = TableSheet().getMenuItem(['Column', 'Add column'])
-        assert m
+        with pytest.raises(AssertionError):
+            vd.addMenuItems('''Column > Add column > non-command''')
