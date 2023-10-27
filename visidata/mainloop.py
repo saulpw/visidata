@@ -33,7 +33,6 @@ def drawSheet(self, scr, sheet):
 
     sheet._scr = scr
 
-
     try:
         sheet.draw(scr)
     except Exception as e:
@@ -41,10 +40,6 @@ def drawSheet(self, scr, sheet):
 
     self.drawLeftStatus(scr, sheet)
     self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
-
-    self.drawSidebar(scr, sheet)
-
-
 
 
 vd.windowConfig = dict(pct=0, n=0, h=0, w=0)  # n=top line of bottom window; h=height of bottom window; w=width of screen
@@ -130,6 +125,8 @@ def draw_all(vd):
 
     if vd.scrMenu:
         vd.drawMenu(vd.scrMenu, vd.activeSheet)
+
+    vd.drawSidebar(vd.scrFull, vd.activeSheet)
 
     if vd.win1:
         vd.win1.refresh()

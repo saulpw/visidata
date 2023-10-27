@@ -221,7 +221,7 @@ def editline(vd, scr, y, x, w, i=0,
                 a += incr
             return min(max(a, 0), len(s))
 
-    disp_help = vd.options.disp_help
+    max_disp_help = disp_help = vd.options.disp_help
     while True:
         updater(v)
         if disp_help > 0:
@@ -266,7 +266,7 @@ def editline(vd, scr, y, x, w, i=0,
         elif ch == '^E' or ch == 'KEY_END':        i = len(v)
         elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1
         elif ch == '^G':
-            disp_help = 2 if disp_help != 2 else 0
+            disp_help = (disp_help+1)%(max_disp_help+1)
             vd.draw_all()  #1971
             continue  # not considered a first keypress
         elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1; v = delchar(v, i)
@@ -391,6 +391,9 @@ def inputMultiple(vd, **kwargs):
 
     keys = list(kwargs.keys())
     cur_input_key = keys[0]
+
+    if sheet._scr:
+        sheet._scr.erase()
 
     while True:
         if sheet._scr:

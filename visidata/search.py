@@ -61,7 +61,7 @@ def searchRegex(vd, sheet, moveCursor=False, reverse=False, regex_flags=None, **
             vd.status('%s matches for /%s/' % (matchingRowIndexes, regex.pattern))
 
 
-regex_flags_help = '''# regex flags
+help_regex_flags = '''# regex flags
 
 - `A` (ASCII) ASCII-only matching (not unicode)
 - `I` (IGNORECASE): case-insensitive matching
@@ -69,17 +69,20 @@ regex_flags_help = '''# regex flags
 - `S` (DOTALL): `.` match any character at all, including newline
 - `X` (VERBOSE): allow verbose regex
 '''
+
+help_regex = 'regex help goes here'
+
 @Sheet.api
 def searchInputRegex(sheet, action:str, columns:str='cursorCol'):
-    r = vd.inputMultiple(regex=dict(prompt=f"{action} regex: ", type="regex", defaultLast=True, help='# regex help'),
-                         flags=dict(prompt="regex flags: ", type="regex_flags", value=sheet.options.regex_flags, help=regex_flags_help))
+    r = vd.inputMultiple(regex=dict(prompt=f"{action} regex: ", type="regex", defaultLast=True, help=help_regex),
+                         flags=dict(prompt="regex flags: ", type="regex_flags", value=sheet.options.regex_flags, help=help_regex_flags))
 
     return vd.searchRegex(sheet, regex=r['regex'], regex_flags=r['flags'], columns=columns)
 
 @Sheet.api
 def moveInputRegex(sheet, action:str, type="regex", **kwargs):
-    r = vd.inputMultiple(regex=dict(prompt=f"{action} regex: ", type=type, defaultLast=True),
-                         flags=dict(prompt="regex flags: ", type="regex_flags", value=sheet.options.regex_flags))
+    r = vd.inputMultiple(regex=dict(prompt=f"{action} regex: ", type=type, defaultLast=True, help=help_regex),
+                         flags=dict(prompt="regex flags: ", type="regex_flags", value=sheet.options.regex_flags, help=help_regex_flags))
 
     return vd.moveRegex(sheet, regex=r['regex'], regex_flags=r['flags'], **kwargs)
 
