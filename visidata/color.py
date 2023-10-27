@@ -81,12 +81,12 @@ class ColorMaker:
         'not computed until curses color has been initialized'
         return {x[6:]:getattr(curses, x) for x in dir(curses) if x.startswith('COLOR_') and x != 'COLOR_PAIRS'}
 
-    def __getitem__(self, colornamestr) -> ColorAttr:
+    def __getitem__(self, colorname:str) -> ColorAttr:
         'colors["green"] or colors["foo"] returns parsed ColorAttr.'
-        return self._colornames_to_cattr(colornamestr)
+        return self.get_color(colorname)
 
     def __getattr__(self, optname) -> ColorAttr:
-        'colors.color_foo returns parsed ColorAttr.'
+        'colors.color_foo or colors.foo returns parsed ColorAttr.'
         return self.get_color(optname)
 
     @drawcache
