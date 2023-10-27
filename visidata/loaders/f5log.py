@@ -12,9 +12,7 @@ import re
 import traceback
 from typing import Any, Dict, Optional
 
-from visidata import Path, VisiData, Sheet, date, ColumnAttr, vd, theme
-from visidata.column import Column
-from visidata.sheets import CellColorizer, RowColorizer
+from visidata import Path, VisiData, Sheet, date, AttrColumn, vd, Column, CellColorizer, RowColorizer
 
 
 class hexint(int):
@@ -30,22 +28,21 @@ class delta_t(int):
         return super(cls, cls).__new__(cls, value, base=10)
 
 
-vd.addType(ip_address, icon=":", formatter=lambda fmt, ip: str(ip))
 vd.addType(hexint, icon="ⓧ", formatter=lambda fmt, num: str(num))
 vd.addType(
     delta_t,
     icon="⇥",
     formatter=lambda fmt, delta: str(timedelta(seconds=delta)),
 )
-theme("color_f5log_mon_up", "green", "color of f5log monitor status up")
-theme("color_f5log_mon_down", "red", "color of f5log monitor status down")
-theme("color_f5log_mon_unknown", "blue", "color of f5log monitor status unknown")
-theme("color_f5log_mon_checking", "magenta", "color of monitor status checking")
-theme("color_f5log_mon_disabled", "black", "color of monitor status disabled")
-theme("color_f5log_logid_alarm", "red", "color of alarms")
-theme("color_f5log_logid_warn", "yellow", "color of warnings")
-theme("color_f5log_logid_notice", "cyan", "color of notice")
-theme("color_f5log_logid_info", "green", "color of info")
+vd.theme_option("color_f5log_mon_up", "green", "color of f5log monitor status up")
+vd.theme_option("color_f5log_mon_down", "red", "color of f5log monitor status down")
+vd.theme_option("color_f5log_mon_unknown", "blue", "color of f5log monitor status unknown")
+vd.theme_option("color_f5log_mon_checking", "magenta", "color of monitor status checking")
+vd.theme_option("color_f5log_mon_disabled", "black", "color of monitor status disabled")
+vd.theme_option("color_f5log_logid_alarm", "red", "color of alarms")
+vd.theme_option("color_f5log_logid_warn", "yellow", "color of warnings")
+vd.theme_option("color_f5log_logid_notice", "cyan", "color of notice")
+vd.theme_option("color_f5log_logid_info", "green", "color of info")
 vd.option(
     "f5log_object_regex",
     None,
@@ -123,16 +120,16 @@ class F5LogSheet(Sheet):
     rowtype = "logs"
 
     columns = [
-        ColumnAttr("rawmsg", type=str, width=0),
-        ColumnAttr("timestamp", type=date),
-        ColumnAttr("host", type=str),
-        ColumnAttr("level", type=str),
-        ColumnAttr("process", type=str, width=10),
-        ColumnAttr("proc_pid", type=int, width=7),
-        ColumnAttr("logid1", type=hexint),
-        ColumnAttr("logid2", type=hexint),
-        ColumnAttr("message", type=str, width=90),
-        ColumnAttr("object", type=str, width=50),
+        AttrColumn("rawmsg", type=str, width=0),
+        AttrColumn("timestamp", type=date),
+        AttrColumn("host", type=str),
+        AttrColumn("level", type=str),
+        AttrColumn("process", type=str, width=10),
+        AttrColumn("proc_pid", type=int, width=7),
+        AttrColumn("logid1", type=hexint),
+        AttrColumn("logid2", type=hexint),
+        AttrColumn("message", type=str, width=90),
+        AttrColumn("object", type=str, width=50),
     ]
 
     re_f5log = re.compile(
@@ -1157,7 +1154,7 @@ class F5LogSheet(Sheet):
                         kv.update(om.groupdict())
                 for k, v in kv.items():
                     if k not in self.extra_cols:
-                        F5LogSheet.addColumn(self, ColumnAttr(k))
+                        F5LogSheet.addColumn(self, AttrColumn(k))
                         self.extra_cols.add(k)
             elif logid1 is None and m.get("message").startswith("Rule "):
                 for entry in self.split_ltm_rule(m.get("message")):

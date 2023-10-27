@@ -1,10 +1,14 @@
 """
 Column types and utility commands related to IP addresses.
 """
-import ipaddress
+from ipaddress import ip_address, ip_network, _BaseNetwork
 
 from visidata import vd
 from visidata.sheets import Column, TableSheet
+
+
+vd.addType(ip_address, icon=":", formatter=lambda fmt, ip: str(ip))
+vd.addType(ip_network, icon="/", formatter=lambda fmt, ip: str(ip))
 
 
 def isSupernet(cell, network, isNull):
@@ -15,9 +19,9 @@ def isSupernet(cell, network, isNull):
     """
     if isNull(cell):
         return False
-    if not isinstance(cell, ipaddress._BaseNetwork):
+    if not isinstance(cell, _BaseNetwork):
         try:
-            cell = ipaddress.ip_network(str(cell).strip())
+            cell = ip_network(str(cell).strip())
         except ValueError:
             return False
     return cell.supernet_of(network)
@@ -34,7 +38,7 @@ def selectSupernets(col, ip):
         return
 
     sheet = col.sheet
-    network = ipaddress.ip_network(ip.strip())
+    network = ip_network(ip.strip())
     isNull = sheet.isNullFunc()
 
     vd.status(f'selecting rows where {col.name} is a supernet of "{str(network)}"')
@@ -50,13 +54,13 @@ def selectSupernets(col, ip):
 TableSheet.addCommand(
     None,
     "type-ipaddr",
-    "cursorCol.type=ipaddress.ip_address",
+    "cursorCol.type=ip_address",
     "set type of current column to IP address",
 )
 TableSheet.addCommand(
     None,
     "type-ipnet",
-    "cursorCol.type=ipaddress.ip_network",
+    "cursorCol.type=ip_network",
     "set type of current column to IP network",
 )
 TableSheet.addCommand(
@@ -66,4 +70,4 @@ TableSheet.addCommand(
     "select rows where the CIDR block value includes the input address space",
 )
 
-vd.addGlobals({"ipaddress": ipaddress})
+vd.addGlobals(ip_address=ip_address, ip_network=ip_network)
