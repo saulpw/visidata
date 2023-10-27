@@ -38,6 +38,7 @@ sh                  # ping
 psutil              # procmgr
 numpy               # npy pandas hdf5 arrow
 tomli; python_version < '3.11' # toml
+pyconll             # conll/conllu
 
 requests_cache      # scraper
 beautifulsoup4      # scraper

@@ -1,0 +1,2 @@
+#!vd -p
+{"sheet": null, "col": null, "row": null, "longname": "open-file", "input": "sample_data/sample.conllu", "keystrokes": "o", "comment": null}
