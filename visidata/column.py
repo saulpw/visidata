@@ -137,6 +137,9 @@ class Column(Extensible):
 
     @name.setter
     def name(self, name):
+        self.setName(name)
+
+    def setName(self, name):
         if name is None:
             name = ''
         if isinstance(name, str):
