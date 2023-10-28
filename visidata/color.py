@@ -36,6 +36,11 @@ class ColorAttr:
         assert a >= 0, a
         return a
 
+    def as_str(self) -> str:
+        attrnames = [attrname for attrname, attr in colors._attrs.items() if self.attributes & attr]
+        attrnames.append(f'{self.fg} on {self.bg}')
+        return ' '.join(attrnames)
+
 
 def update_attr(oldattr:ColorAttr, updattr:ColorAttr, updprec:int=None) -> ColorAttr:
     assert isinstance(updattr, ColorAttr), updattr
@@ -169,6 +174,10 @@ class ColorMaker:
         for attr in attrnames:
             attrs |= getattr(curses, 'A_'+attr.upper())
         return attrs
+
+    @drawcache_property
+    def _attrs(self):
+        return {k[2:].lower():getattr(curses, k) for k in dir(curses) if k.startswith('A_') and k != 'A_ATTRIBUTES'}
 
     @drawcache
     def _colornames_to_cattr(self, colorname:str, precedence=0) -> ColorAttr:
