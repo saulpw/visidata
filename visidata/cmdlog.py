@@ -19,6 +19,15 @@ vd.option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog', shee
 vd.option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to', sheettype=None)
 
 vd.activeCommand = UNLOADED
+vd._nextCommands = []  # list[str|CommandLogRow] for vd.queueCommand
+
+CommandLogRow = namedlist('CommandLogRow', 'sheet col row longname input keystrokes comment undofuncs'.split())
+
+@VisiData.api
+def queueCommand(vd, longname, input=None, sheet=None, col=None, row=None):
+    'Add command to queue of next commands to execute.'
+    vd._nextCommands.append(CommandLogRow(longname=longname, input=input, sheet=sheet, col=col, row=row))
+
 
 @VisiData.api
 def open_vd(vd, p):
@@ -134,7 +143,7 @@ class CommandLogBase:
     'Log of commands for current session.'
     rowtype = 'logged commands'
     precious = False
-    _rowtype = namedlist('CommandLogRow', 'sheet col row longname input keystrokes comment undofuncs'.split())
+    _rowtype = CommandLogRow
     columns = [
         ColumnAttr('sheet'),
         ColumnAttr('col'),
@@ -469,7 +478,7 @@ CommandLog.options.json_sort_keys = False
 CommandLog.options.encoding = 'utf-8'
 CommandLogJsonl.options.json_sort_keys = False
 
-vd.addGlobals({"CommandLogBase": CommandLogBase})
+vd.addGlobals(CommandLogBase=CommandLogBase, CommandLogRow=CommandLogRow)
 
 vd.addMenuItems('''
             View > Command log > this sheet > cmdlog-sheet

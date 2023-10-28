@@ -19,15 +19,7 @@ vd.option('input_history', '', 'basename of file to store persistent input histo
 class AcceptInput(Exception):
     '*args[0]* is the input to be accepted'
 
-visidata.vd._nextCommands = []  # for vd.queueCommand
-
 vd._injectedInput = None  # for vd.injectInput
-
-
-@VisiData.api
-def queueCommand(vd, longname): #, input=None, sheet=None, col=None, row=None):
-    'Add *longname* to queue of next commands to execute.'
-    vd._nextCommands.append(longname)
 
 
 @VisiData.api
