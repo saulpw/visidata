@@ -23,7 +23,8 @@ def setName(col, newname):
         for c in col.sheet.columns:
             if isinstance(c, ExprColumn):
                 parsed_expr = ast.parse(c.expr)
+                canon_expr = ast.unparse(parsed_expr)
                 new_expr = ast.unparse(Renamer(col.name, newname).visit(parsed_expr))
-                if new_expr != parsed_expr:
+                if new_expr != canon_expr:
                     vd.addUndo(setattr, c, 'expr', c.expr)
                     c.expr = new_expr
