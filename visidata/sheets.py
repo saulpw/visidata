@@ -346,7 +346,7 @@ class TableSheet(BaseSheet):
         return ret
 
     def __repr__(self):
-        return self.name
+        return f'<{type(self).__name__}: {self.name}>'
 
     def evalExpr(self, expr, row=None, col=None):
         if row is not None:
