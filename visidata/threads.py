@@ -185,11 +185,17 @@ def execSync(vd, func, *args, sheet=None, **kwargs):
     return t
 
 @VisiData.api
-def execAsync(vd, func, *args, sheet=None, **kwargs):
-    'Execute ``func(*args, **kwargs)`` in a separate thread.'
+def execAsync(vd, func, *args, **kwargs):
+    '''Execute ``func(*args, **kwargs)`` in a separate thread.  `sheet` is a
+    special kwarg to indicate which sheet the thread should be associated with;
+    by default, uses vd.activeSheet.  If `sheet` explicitly given as None, the thread
+    will be ignored by vd.sync and thread status indicators.
+    '''
 
-    if sheet is None:
+    if 'sheet' not in kwargs:
         sheet = vd.activeSheet
+    else:
+        sheet = kwargs.pop('sheet')
 
     if sheet is not None and (sheet.lastCommandThreads and threading.current_thread() not in sheet.lastCommandThreads):
         vd.fail(f'still running **{sheet.lastCommandThreads[-1].name}** from previous command')
@@ -221,6 +227,18 @@ def _toplevelTryFunc(func, *args, **kwargs):
 
     if t.sheet:
         t.sheet.currentThreads.remove(t)
+
+def asyncignore(func):
+    'Decorator like `@asyncthread` but without attaching to a sheet, so no sheet.threadStatus will show it.'
+    @functools.wraps(func)
+    def _execAsync(*args, **kwargs):
+        @functools.wraps(func)
+        def _func(*args, **kwargs):
+            func(*args, **kwargs)
+
+        return vd.execAsync(_func, *args, **kwargs, sheet=None)
+
+    return _execAsync
 
 def asyncsingle(func):
     '''Function decorator like `@asyncthread` but as a singleton.  When called, `func(...)` spawns a new thread, and cancels any previous thread still running *func*.
@@ -425,6 +443,7 @@ vd.addGlobals({
     'Progress': Progress,
     'asynccache': asynccache,
     'asyncsingle': asyncsingle,
+    'asyncignore': asyncignore,
 })
 
 vd.addMenuItems('''

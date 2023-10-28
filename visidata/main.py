@@ -113,7 +113,6 @@ def parsePos(vd, arg:str, inputs=None):
 
 
 @visidata.VisiData.api
-@visidata.asyncthread
 def outputProgressEvery(vd, sheet, seconds:float=0.5):
     import time
     t0 = time.time()

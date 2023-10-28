@@ -230,7 +230,7 @@ class BaseSheet(DrawablePane):
 
     @property
     def lastCommandThreads(self):
-        return [t for t in self.currentThreads if hasattr(t, 'lastCommand')]
+        return [t for t in self.currentThreads if getattr(t, 'lastCommand', None)]
 
     @property
     def names(self):
