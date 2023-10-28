@@ -314,7 +314,7 @@ def editline(vd, scr, y, x, w, i=0,
         first_action = False
         complete_state.reset()
 
-    return type(value)(v)
+    return v
 
 
 @VisiData.api
@@ -338,8 +338,15 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
         if record and vd.cmdlog:
             vd.setLastArgs(v)
 
-    return v
+    if 'value' in kwargs:
+        starting_value = kwargs['value']
+        if isinstance(starting_value, (int, float)) and v[-1] == '%':  #2082
+            pct = float(v[:-1])
+            v = pct*value/100
 
+        v = type(starting_value)(v)
+
+    return v
 
 @VisiData.api
 def inputsingle(vd, prompt, record=True):
