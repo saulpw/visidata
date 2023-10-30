@@ -39,6 +39,7 @@ psutil              # procmgr
 numpy               # npy pandas hdf5 arrow
 tomli; python_version < '3.11' # toml
 pyconll             # conll/conllu
+backports.zoneinfo; python_version < '3.9' #f5log
 
 requests_cache      # scraper
 beautifulsoup4      # scraper
