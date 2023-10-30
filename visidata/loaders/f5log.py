@@ -4,10 +4,6 @@ __version__ = "1.0.10"
 from datetime import datetime, timedelta
 from ipaddress import ip_address
 
-try:
-    import zoneinfo
-except ImportError:
-    from backports import zoneinfo
 import re
 import traceback
 from typing import Any, Dict, Optional
@@ -1043,6 +1039,10 @@ class F5LogSheet(Sheet):
         super().__init__(*args, **kwargs)
         # the default F5 logs don't have the year so we have to guess from the file ctime
         # TODO: make this overridable
+        try:
+            import zoneinfo
+        except ImportError:
+            from backports import zoneinfo
         self._log_tz = zoneinfo.ZoneInfo("UTC")
         try:
             self._year = int(
