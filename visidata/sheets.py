@@ -345,8 +345,11 @@ class TableSheet(BaseSheet):
         memo[id(self)] = ret
         return ret
 
-    def __repr__(self):
+    def __str__(self):
         return self.name
+
+    def __repr__(self):
+        return f'<{type(self).__name__}: {self.name}>'
 
     def evalExpr(self, expr, row=None, col=None):
         if row is not None:

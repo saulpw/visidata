@@ -107,8 +107,11 @@ class Column(Extensible):
             ret._cachedValues = collections.OrderedDict()  # an unrelated cache for copied columns
         return ret
 
+    def __str__(self):
+        return f'{type(self).__name__}:{self.name}'
+
     def __repr__(self):
-        return f'{self.__class__.__name__}:{self.name}'
+        return f'<{type(self).__name__}: {self.name}>'
 
     def __deepcopy__(self, memo):
         return self.__copy__()  # no separate deepcopy
