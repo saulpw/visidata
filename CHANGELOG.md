@@ -13,9 +13,11 @@
 - display sheet and feature help documentation in sidebar
     - added bundles of Guide Sheets
     - open Guide Sheets into a full VisiData sheet with `open-sidebar` (bound to `gb`)
-- [filetype] add guesser to sniff filetype from data  #130 #1759 #1881 #1880 #1883
+- [filetype] add guesser to sniff filetype from data  #130 #1759 #1881 #1880 #1883 #1978
 - add support for Python 3.12  #1934
+- migrate pkg_resources to importlib_resources (PR by @zormit and @anjakefala #1968 #1911)
 
+- [aggregators] sum uses start value from type of first value for Python 3.8+  #1996
 - [build] add a .desktop for VisiData  #1738
 - [cli] add `-i` to run interactive mode after batch  #1714
 - [columns] add basic repr  #1757
@@ -95,10 +97,13 @@
 ## bugfixes
 
 - [aggregators] use statistics.median for more correct median  #1914
+- [canvas] fix clicks on labels and unplotted canvs (PR by @midichef #1984)
 - [chooser] choose only exactly matching strings (PR by @daviewales #1902)
 - [clipboard] warn when pasting before copying (PR by @midichef #1793)
-- [cmdlog] check for empty cursor column when adding a column (PR by @midichef #1783)
-- [columns] speed up getMaxWidth for wide columns (PR by @midichef #1747)  #1728
+- [cmdlog] check for empty cursor column when adding a column (PR by @midichef
+  #1783)
+- [columns] speed up getMaxWidth for wide columns (PR by @midichef #1747)
+  #1728
 - [columns] add ExplodingMock 
 - [currency] fix currency_neg option
 - [curses] allow breakpoint() before initwin
@@ -106,17 +111,23 @@
 - [cursor] cursorColIndex now returns None if empty  #1803
 - [deps] add requests-cache submodule to root visidata  #1748
 - [dir] support '..' and resolve dirname relative to CWD  #1801
-    - if user uses `open-dir-parent` outside of the CWD, switch to absolute paths
+    - if user uses `open-dir-parent` outside of the CWD, switch to absolute
+      paths
 - [errors] do not print ExpectedExceptions twice in batch-mode
 - [expr] more informative 'column not modifiable' error message  #1764
 - [floatsi] must try to convert args to float
-- [fill] allow filling with values that are logically false (PR by @midichef #1794)
+- [fill] allow filling with values that are logically false (PR by @midichef
+  #1794)
 - [freq] fix names for openRow  #1777
-- [graph] fix graph ranges for xmax, ymax < 1 (PR by @midichef #1752)  #1673 #1697
+- [graph] fix graph ranges for xmax, ymax < 1 (PR by @midichef #1752)  #1673
+  #1697
 - [graph] fix data on edges being drawn offscreen (PR by @midichef #1850)
+- [graph] fix graph legend drawn too early (PR by @midichef #1980)
 - [graph] fixes to various graphing edge cases (PR by @midichef #1896)
-- [graph] fix top margin location and simplify y-coordinate calculation (PR by @midichef #1915)
-- [graph] labels: add tick symbol, int precision, right margin (PR by @midichef #1931)
+- [graph] fix top margin location and simplify y-coordinate calculation (PR by
+  @midichef #1915)
+- [graph] labels: add tick symbol, int precision, right margin (PR by @midichef
+  #1931)
 - [graph] fix legend display of full-width characters (PR by @midichef #1958)
 - [input] fix Ctrl+T swap on empty string #1684
 - [input] use vd.scrFull to detect if curses inited
@@ -124,6 +135,7 @@
 - [input] use last arg from cmdlog if no curses
 - [input] fix Ctrl+V with special keystrokes  #1799
 - [input] erase status bar after prompt #1947
+- [input] fix toggle input help  #1971 #1994
 - [input] include history for unfocused items #1947
 - [input] auto-apply changes after sysedit
 - [inputsingle-] loop until keystroke (do not timeout)
@@ -131,16 +143,30 @@
 - [join] fix join-merge (PR by @yphillip #1923 #1843)
 - [jsonl] include all columns in first row, even if null
 - [keystrokes] only check duplicate prefixes from allPrefixes  #1829
+- [layout] fail if `hide-col` on empty sheet
 - [loaders yaml] support tuples in YAML files (PR by @cool-RR #1824)  #1822
 - [loaders fixed] use maxWidth for saving if larger than column width  #1849
-- [loaders fixed] don't truncate wide columns with fixed width saver (PR by @daviewales #1890)
+- [loaders fixed] don't truncate wide columns with fixed width saver (PR by
+  @daviewales #1890)
 - [loaders tsv] use options.encoding for reading files
-- [loaders http] add `options.http_ssl_verify` to replace `options.http_req_verify`  #1939
-- [loaders sqlite] prevent creation of ./- file when reading from stdin (PR by @Midichef #1945)
-- [loaders imap] enable imap and fix folder name extraction (PR by @justin2004  #1917)
-- [loaders parquet] stringify source to handle both URLs and local paths (PR by @ajkerrigan #1913)
-- [loaders mysql] unquote password before sending to client (PR by @dufferzafar #1933)
+- [loaders http] add `options.http_ssl_verify` to replace
+  `options.http_req_verify`  #1939
+- [loaders sqlite] prevent creation of ./- file when reading from stdin (PR by
+  @Midichef #1945)
+- [loaders imap] enable imap and fix folder name extraction (PR by @justin2004
+  #1917)
+- [loaders pandas] handle read methods that produce a list of dataframes (PR by
+  @ajkerrigan #1990 #1986)
+- [loaders parquet] stringify source to handle both URLs and local paths (PR by
+  @ajkerrigan #1913)
+- [loaders mysql] unquote password before sending to client (PR by @dufferzafar
+  #1933)
+- [loaders ttf] implement `_closePath()` to draw missing lines (PR by @midichef
+  #1979)
 - [loaders http] fix parsing link header (PR by @Midichef #1924 #1898)
+- [loaders zip] show stacktrace on exception
+- [loaders pyobj] similar sheet names for dive-/open- and pyobj- #1988
+- [loaders pyobj] do not skip properties that raise
 - [macos] do not bind empty string to anything
 - [macro] add prompt for cancelling macro  #1810 #1812
 - [macro] specify a clearer message  #1810
@@ -149,7 +175,8 @@
 - [misc] remove trailing commas from addCommand (PR by @midichef #1962)
 - [modify] do not call saveSheets on commit
 - [modify] commitMods do not call putValue for changes to added/deleted rows
-    - also fix ItemColumn.putValue and AttrColumn.putValue to call parent Column.putValue before setting the value on the row
+    - also fix ItemColumn.putValue and AttrColumn.putValue to call parent
+      Column.putValue before setting the value on the row
 - [modify] always set col.defer
 - [modify] do not fail on Column.putValue if no setter
 - [mouse] fix mouse-click on bottom pane
@@ -159,7 +186,8 @@
 - [path] fix progress bar for compression formats  #1175 #1255
 - [path] fix open() using both binary and text mode (PR by @midichef #1955)
 - [path] binary mode does not take newline argument
-- [perf startup] delay import of `urllib.request`, `pkg_resources`, and `dateutil`
+- [perf startup] delay import of `urllib.request`, `pkg_resources`, and
+  `dateutil`
 - [perf startup] remove `unittest.mock`
 - [regex] issue warning when no columns to add  #1778
 - [regex] check for regex capture group  #1778
@@ -168,6 +196,7 @@
 - [replay] clearCaches before moving cursor  #1773
 - [replay] enable confirm in interactive batch mode (PR by @midichef #1751)
 - [save] handle saving 0 sheets  #1720
+- [scroll-cells] do not error scrolling offscreen column  #1908
 - [select-around] convert input arguments to int
 - [settings] clear cache correctly before set
 - [sheets] fix NameError for mincolidx  #1672
@@ -175,23 +204,34 @@
 - [sheets] make sure addColumn called on all columns
     - not just dynamically-created columns
     - addColumn is needed to set .sheet and .defer, among other things
-- [sheets] fix recursion crash of Python >= 3.8, <3.9.10  (PR by #midichef #1722)  #1696
-- [sheets] pop columns kwarg so raw list not set via final update() in constructor
+- [sheets] fix recursion crash of Python >= 3.8, <3.9.10  (PR by #midichef
+  #1722)  #1696
+- [sheets] pop columns kwarg so raw list not set via final update() in
+  constructor
+- [sheets] fix slowness from adding rows during getMaxWidth (PR by @midichef
+  #1982)
+- [sheets] no longer insert column in draw() in debug mode (PR by @midichef
+  #1995)
 - [shell] fix copying of a directory  #1970
 - [status] fix Alt+Shift+Shift+X  #1828
 - [status] update right status before exec  #996
-- [sort] show sort arrow for sort columns described by name (PR by @midichef #1876)
+- [sort] show sort arrow for sort columns described by name (PR by @midichef
+  #1876)
 - [term] allow non-color term like vt102
+- [tui] make BaseSheet.refresh() no-op; Ctrl+L call sheet.refresh() before vd.redraw()
 - [threads] remove spurious None from syncing set
 - [threads] allow @AsyncThread funcs to have status kwarg
-- [quit-sheet-free] re-entering a subsheet left using quit-sheet-free should reload the subsheet #1679
+- [quit-sheet-free] re-entering a subsheet left using quit-sheet-free should
+  reload the subsheet #1679
 - [undo] ensure undo is sheet-specific for duped/copied sheets  #1780
 - [undo] fix undo for first modification on a sheet-specific HelpSheet  #1820
 - [undo] fix the removal of [M] (modified mark) after undo  #1800
 - [vdx] fix save error
 - [windows] add Alt+ keybindings for powershell  #1630
-- [windows] limit windows-curses version to 2.3.0 (PR by @bartbroere #1901 #1841)
-    - asottile noticed this was a regression in the last windows-curses release in this issue: zephyrproject-rtos/windows-curses#41
+- [windows] limit windows-curses version to 2.3.0 (PR by @bartbroere #1901
+  #1841)
+    - asottile noticed this was a regression in the last windows-curses release
+      in this issue: zephyrproject-rtos/windows-curses#41
 - [windows] fix syspaste (PR by @midichef #1921 #1920)
 - [zsh] fix zsh completion (PR by @dbaynard #1960 #1959)
 
