@@ -334,7 +334,7 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
         starting_value = kwargs['value']
         if isinstance(starting_value, (int, float)) and v[-1] == '%':  #2082
             pct = float(v[:-1])
-            v = pct*value/100
+            v = pct*starting_value/100
 
         v = type(starting_value)(v)
 
