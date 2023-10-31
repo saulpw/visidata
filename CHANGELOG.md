@@ -17,7 +17,7 @@
 - add support for Python 3.12  #1934
 - migrate pkg_resources to importlib_resources (PR by @zormit and @anjakefala #1968 #1911)
 
-- [aggregators] sum uses start value from type of first value for Python 3.8+  #1996
+- [aggregators] sum uses start value from type of first value for Python 3.8+  #1996 #1999 #2009
 - [build] add a .desktop for VisiData  #1738
 - [cli] add `-i` to run interactive mode after batch  #1714
 - [columns] add basic repr  #1757
@@ -32,6 +32,7 @@
 - [freq] base histogram width on column width  #1807
 - [freq] set default disp_histogram to U+25A0 BLACK SQUARE (■)) (PR by @daviewales #1949 #1807)
     - [themes] ascii8 disp_histogram to *
+- [freq] add `open-preview` for split pane of soure rows at cursor  #1086
 - [graph] colorbrewer palette chooser (thanks @er1kb)
 - [graph] add commands to open external graph with matplotlib #1056
 - [input] change `Ctrl+G` to toggle `options.disp_help`
@@ -54,10 +55,12 @@
 - [loaders http] replace requests with urllib  #1808 #1704
 - [loaders] add a toml loader (PR by @ajkerrigan #1894 #1580 #1587)
 - [loaders xml] ignore comments
+- [loaders jsonl] allow slash comments (PR by @geekscrapy #2025)
 - [menu] move Edit>Add-rows to Row>Add
 - [menu] add `go-row-number` to menu  #1766
 - [menu] move commit-sheet under File>Save
 - [menu] add resize-cols-input to Columns -> Resize (PR by @njthomas #1887)
+- [mouse] onclick with url launches $BROWSER with url; add `displayer_url`  #2031
 - [open] try using options.filetype for path  #1710
     - useful for configuring default filetype when reading from stdin
 - [open] add `reopen-last-closed` which reopens the most recently closed sheet (PR by @cool-RR #1813) #1811
@@ -100,6 +103,7 @@
 - [canvas] fix clicks on labels and unplotted canvs (PR by @midichef #1984)
 - [chooser] choose only exactly matching strings (PR by @daviewales #1902)
 - [clipboard] warn when pasting before copying (PR by @midichef #1793)
+- [clipboard] improve error when deleting row on empty sheet (PR by @midichef #2006)
 - [cmdlog] check for empty cursor column when adding a column (PR by @midichef
   #1783)
 - [columns] speed up getMaxWidth for wide columns (PR by @midichef #1747)
@@ -129,6 +133,8 @@
 - [graph] labels: add tick symbol, int precision, right margin (PR by @midichef
   #1931)
 - [graph] fix legend display of full-width characters (PR by @midichef #1958)
+- [graph] widen left margin to hold y-axis labels (PR by @midichef #1998)
+- [index] add longname for g< and g>  #2011
 - [input] fix Ctrl+T swap on empty string #1684
 - [input] use vd.scrFull to detect if curses inited
 - [input] only draw prompt if scr is set
@@ -149,6 +155,7 @@
 - [loaders fixed] don't truncate wide columns with fixed width saver (PR by
   @daviewales #1890)
 - [loaders tsv] use options.encoding for reading files
+- [loaders parquet] show string value for Parquet `large_string` (PR by @daviewales #2018 #2003)
 - [loaders http] add `options.http_ssl_verify` to replace
   `options.http_req_verify`  #1939
 - [loaders sqlite] prevent creation of ./- file when reading from stdin (PR by
@@ -161,16 +168,21 @@
   @ajkerrigan #1913)
 - [loaders mysql] unquote password before sending to client (PR by @dufferzafar
   #1933)
-- [loaders ttf] implement `_closePath()` to draw missing lines (PR by @midichef
+- [loaders ttf] implement `closePath()` to draw missing lines (PR by @midichef
   #1979)
 - [loaders http] fix parsing link header (PR by @Midichef #1924 #1898)
+- [loaders html] fix failure from colspan with only td tags (PR by @midichef #2002)
 - [loaders zip] show stacktrace on exception
+- [loaders rec] support %sort; continue loading on exception  #2022
 - [loaders pyobj] similar sheet names for dive-/open- and pyobj- #1988
 - [loaders pyobj] do not skip properties that raise
+- [loaders vds] fix 'keyerror: exprcolumn' for .vds (PR by @pacien #2036 #2045)
+- [loaders vds] fix .csv to .vds conversion  #2037
 - [macos] do not bind empty string to anything
 - [macro] add prompt for cancelling macro  #1810 #1812
 - [macro] specify a clearer message  #1810
 - [main] print version string once, not twice (PR by @midichef #1837)
+- [main] remove forced unload before interactive mode  #1943
 - [menu] use "Alt+x" keybinding instead of "^[x"
 - [misc] remove trailing commas from addCommand (PR by @midichef #1962)
 - [modify] do not call saveSheets on commit
@@ -189,6 +201,7 @@
 - [perf startup] delay import of `urllib.request`, `pkg_resources`, and
   `dateutil`
 - [perf startup] remove `unittest.mock`
+- [pyobj] fix pyobj-cell  #2001
 - [regex] issue warning when no columns to add  #1778
 - [regex] check for regex capture group  #1778
 - [reload-every] do not replay
@@ -204,6 +217,7 @@
 - [sheets] make sure addColumn called on all columns
     - not just dynamically-created columns
     - addColumn is needed to set .sheet and .defer, among other things
+- [sheets] fix reload() for tsv sheets with key columns (PR by @midichef #1997)
 - [sheets] fix recursion crash of Python >= 3.8, <3.9.10  (PR by #midichef
   #1722)  #1696
 - [sheets] pop columns kwarg so raw list not set via final update() in
@@ -212,9 +226,11 @@
   #1982)
 - [sheets] no longer insert column in draw() in debug mode (PR by @midichef
   #1995)
+- [sheets] fix splitcell to handle attribute/text pairs (PR by @ajkerrigan #2020)
 - [shell] fix copying of a directory  #1970
 - [status] fix Alt+Shift+Shift+X  #1828
 - [status] update right status before exec  #996
+- [status] add caller/module to statuses, and print on --debug  #2037
 - [sort] show sort arrow for sort columns described by name (PR by @midichef
   #1876)
 - [term] allow non-color term like vt102
@@ -226,6 +242,7 @@
 - [undo] ensure undo is sheet-specific for duped/copied sheets  #1780
 - [undo] fix undo for first modification on a sheet-specific HelpSheet  #1820
 - [undo] fix the removal of [M] (modified mark) after undo  #1800
+- [undo] remove last matching cmdlog row, instead of first (PR by @midichef #2010)
 - [vdx] fix save error
 - [windows] add Alt+ keybindings for powershell  #1630
 - [windows] limit windows-curses version to 2.3.0 (PR by @bartbroere #1901
