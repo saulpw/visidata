@@ -28,7 +28,7 @@ pip install git+https://github.com/saulpw/visidata.git@branch#subdirectory=visid
 
 ## Running vgit
 
-`vgit [<working_dir>]` automatically opens a git status sheet if the directory has a `.git` subdirectory.
+`vgit [<working_dir>]` automatically opens a git status [sheet](https://www.visidata.org/docs/api/sheets#sheets) if the directory has a `.git` subdirectory.
 
 Further documentation is available [here](vgit-guide.md).
 
