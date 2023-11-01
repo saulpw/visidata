@@ -90,10 +90,10 @@ class GraphSheet(InvertedCanvas):
                     attr = self.plotColor(k)
                     self.point(graph_x, graph_y, attr, row)
                     nplotted += 1
-                except Exception:
+                except Exception as e:
                     nerrors += 1
-                    if options.debug:
-                        raise
+                    if vd.options.debug:
+                        vd.exceptionCaught(e)
 
 
         vd.status('loaded %d points (%d errors)' % (nplotted, nerrors))
