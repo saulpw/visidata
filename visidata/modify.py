@@ -23,7 +23,7 @@ def couldOverwrite(vd) -> bool:
 def confirmOverwrite(vd, path, msg:str=''):
     'Fail if file exists and overwrite not allowed.'
     if path.exists():
-        msg = msg or f'{givenpath} exists. overwrite? '
+        msg = msg or f'{path.given} exists. overwrite? '
         ow = vd.options.overwrite
         if ow.startswith('c'):  # confirm
             vd.confirm(msg)
