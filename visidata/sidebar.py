@@ -12,7 +12,7 @@ vd.theme_option('color_sidebar', 'black on 114 blue', 'base color of sidebar')
 
 
 @BaseSheet.property
-def sidebar(sheet):
+def default_sidebar(sheet):
     'Default to format options.disp_sidebar_fmt.  Overridable.'
     fmt = sheet.options.disp_sidebar_fmt
     return sheet.formatString(fmt)
@@ -25,7 +25,7 @@ def drawSidebar(vd, scr, sheet):
     overflowmsg = '[:reverse] Ctrl+P to view all status messages [/]'
     try:
         if not sidebar and sheet.options.disp_sidebar:
-            sidebar = sheet.sidebar
+            sidebar = sheet.default_sidebar
             if not sidebar and sheet.options.disp_help > 0:
                 sidebar = sheet.formatString(sheet.help)
 
@@ -39,7 +39,9 @@ def drawSidebar(vd, scr, sheet):
         vd.exceptionCaught(e)
         sidebar = f'# error\n{e}'
 
-    return sheet.drawSidebarText(scr, text=sidebar, overflowmsg=overflowmsg, bottommsg=bottommsg)
+    sheet.current_sidebar = sidebar
+
+    return sheet.drawSidebarText(scr, text=sheet.current_sidebar, overflowmsg=overflowmsg, bottommsg=bottommsg)
 
 @BaseSheet.api
 def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', overflowmsg:str='', bottommsg:str=''):
@@ -119,7 +121,7 @@ class SidebarSheet(TextSheet):
     '''
 
 BaseSheet.addCommand('b', 'sidebar-toggle', 'sheet.options.disp_sidebar = not sheet.options.disp_sidebar', 'toggle sidebar on/off')
-BaseSheet.addCommand('gb', 'open-sidebar', 'vd.push(SidebarSheet(name, options.disp_sidebar_fmt, source=sidebar.splitlines()))', 'open sidebar in new sheet')
+BaseSheet.addCommand('gb', 'open-sidebar', 'vd.push(SidebarSheet(name, options.disp_sidebar_fmt, source=sheet.current_sidebar.splitlines()))', 'open sidebar in new sheet')
 
 
 vd.addMenuItems('''
