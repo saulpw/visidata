@@ -121,7 +121,7 @@ class SidebarSheet(TextSheet):
     '''
 
 BaseSheet.addCommand('b', 'sidebar-toggle', 'sheet.options.disp_sidebar = not sheet.options.disp_sidebar', 'toggle sidebar on/off')
-BaseSheet.addCommand('gb', 'open-sidebar', 'vd.push(SidebarSheet(name, options.disp_sidebar_fmt, source=sheet.current_sidebar.splitlines()))', 'open sidebar in new sheet')
+BaseSheet.addCommand('gb', 'open-sidebar', 'sheet.current_sidebar = "" if not hasattr(sheet, "current_sidebar") else sheet.current_sidebar; vd.push(SidebarSheet(name, options.disp_sidebar_fmt, source=sheet.current_sidebar.splitlines()))', 'open sidebar in new sheet')
 
 
 vd.addMenuItems('''
