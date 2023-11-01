@@ -5,7 +5,7 @@ import re
 
 'Various helper classes and functions.'
 
-__all__ = ['AlwaysDict', 'AttrDict', 'moveListItem', 'namedlist', 'classproperty', 'cleanName', 'MissingAttrFormatter', 'getitem', 'setitem', 'getitemdef', 'getitemdeep', 'setitemdeep', 'getattrdeep', 'setattrdeep', 'ExplodingMock', 'ScopedSetattr']
+__all__ = ['AlwaysDict', 'AttrDict', 'DefaultAttrDict', 'moveListItem', 'namedlist', 'classproperty', 'cleanName', 'MissingAttrFormatter', 'getitem', 'setitem', 'getitemdef', 'getitemdeep', 'setitemdeep', 'getattrdeep', 'setattrdeep', 'ExplodingMock', 'ScopedSetattr']
 
 
 class AlwaysDict(dict):
@@ -35,6 +35,24 @@ class AttrDict(dict):
 
     def __dir__(self):
         return self.keys()
+
+
+class DefaultAttrDict(dict):
+    'Augment a dict with more convenient .attr syntax.  not-present keys store new DefaultAttrDict.  like a recursive defaultdict.'
+    def __getattr__(self, k):
+        if k not in self:
+            if k.startswith("__"):
+                raise AttributeError from e
+            self[k] = DefaultAttrDict()
+        return self[k]
+
+    def __setattr__(self, k, v):
+        self[k] = v
+
+    def __dir__(self):
+        return self.keys()
+
+
 
 
 class classproperty(property):
