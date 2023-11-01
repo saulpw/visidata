@@ -226,7 +226,8 @@ def mainloop(self, scr):
                     self.replay_cancel()
             else:
                 sheet.execCommand(cmd, keystrokes=self.keystrokes)
-        else:
+
+        if not self._nextCommands:
             if self.currentReplay:
                 self.currentReplayRow = None
                 self.currentReplay = None
