@@ -20,12 +20,13 @@ def couldOverwrite(vd) -> bool:
 
 
 @VisiData.api
-def confirmOverwrite(vd, path, cstr='overwrite'):
+def confirmOverwrite(vd, path, msg:str=''):
     'Fail if file exists and overwrite not allowed.'
     if path.exists():
+        msg = msg or f'{givenpath} exists. overwrite? '
         ow = vd.options.overwrite
         if ow.startswith('c'):  # confirm
-            vd.confirm(f"{path.given} already exists. {cstr}? ")
+            vd.confirm(msg)
         elif ow.startswith('y'):  # yes/always
             pass
         else: #1805  empty/no/never/readonly
@@ -318,7 +319,7 @@ def commit(sheet, *rows):
     adds, mods, deletes = sheet.getDeferredChanges()
     cstr = sheet.changestr(adds, mods, deletes)
 
-    vd.confirmOverwrite(sheet.rootSheet().source, cstr)
+    vd.confirmOverwrite(sheet.rootSheet().source, 'really ' + cstr + '? ')
 
     sheet.putChanges()
     sheet.hasBeenModified = False

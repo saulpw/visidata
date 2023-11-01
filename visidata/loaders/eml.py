@@ -27,7 +27,7 @@ def extract_part(sheet, givenpath, part):
 @EmailSheet.api
 def extract_parts(sheet, givenpath, *parts):
     'Save all *parts* to Path *givenpath*.'
-    vd.confirmOverwrite(givenpath)
+    vd.confirmOverwrite(givenpath, f'{givenpath} already exists, extract anyway?')
 
     vd.status('saving %s parts to %s' % (len(parts), givenpath.given))
 
