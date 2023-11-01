@@ -1,5 +1,5 @@
-{"id": null, "type": null, "x": 6, "y": 6, "text": "\u2190", "color": "keystrokes", "tags": [], "group": "", "frame": null, "rows": null, "duration_ms": null, "ref": null, "onclick": null}
-{"x": 11, "y": 6, "text": "go to prev/next char", "color": "", "tags": [], "group": ""}
+{"id": null, "type": null, "x": 6, "y": 7, "text": "\u2190", "color": "keystrokes", "tags": [], "group": "", "frame": null, "rows": null, "duration_ms": null, "ref": null, "onclick": null}
+{"x": 11, "y": 7, "text": "go to prev/next char", "color": "", "tags": [], "group": ""}
 {"x": 3, "y": 4, "text": "Ctrl", "color": "keystrokes", "tags": [], "group": ""}
 {"x": 11, "y": 4, "text": "cancel input (abort)", "color": "", "tags": [], "group": ""}
 {"x": 45, "y": 4, "text": "delete one char at cursor", "color": "", "tags": [], "group": ""}
@@ -22,21 +22,21 @@
 {"x": 45, "y": 7, "text": "delete one word before cursor", "color": "", "tags": [], "group": ""}
 {"x": 42, "y": 11, "text": "Y", "color": "keystrokes", "tags": [], "group": ""}
 {"x": 45, "y": 11, "text": "insert clipboard text at cursor", "color": "", "tags": [], "group": ""}
-{"x": 6, "y": 7, "text": "\u2190", "color": "keystrokes", "tags": [], "group": ""}
-{"x": 11, "y": 7, "text": "go to prev/next word", "color": "", "tags": [], "group": ""}
+{"x": 6, "y": 8, "text": "\u2190", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 11, "y": 8, "text": "go to prev/next word", "color": "", "tags": [], "group": ""}
 {"x": 0, "y": 0, "text": "Begin typing to overwrite the starting value.", "color": "", "tags": [], "group": ""}
 {"x": 0, "y": 1, "text": "(To edit the starting value, press a movement key first.)", "color": "", "tags": [], "group": ""}
-{"x": 6, "y": 10, "text": "\u2191", "color": "keystrokes", "tags": [], "group": ""}
-{"x": 1, "y": 8, "text": "Home", "color": "keystrokes", "tags": [], "group": ""}
-{"x": 11, "y": 8, "text": "go to start/end", "color": "", "tags": [], "group": ""}
-{"x": 6, "y": 8, "text": "End", "color": "keystrokes", "tags": [], "group": ""}
-{"x": 8, "y": 6, "text": "\u2192", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 6, "y": 11, "text": "\u2191", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 1, "y": 9, "text": "Home", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 11, "y": 9, "text": "go to start/end", "color": "", "tags": [], "group": ""}
+{"x": 6, "y": 9, "text": "End", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 8, "y": 7, "text": "\u2192", "color": "keystrokes", "tags": [], "group": ""}
 {"x": 37, "y": 4, "text": "Delete", "color": "keystrokes", "tags": [], "group": ""}
 {"x": 34, "y": 5, "text": "Backspace", "color": "keystrokes", "tags": [], "group": ""}
 {"x": 37, "y": 3, "text": "Insert", "color": "keystrokes", "tags": [], "group": ""}
 {"x": 45, "y": 3, "text": "toggle insert mode", "color": "", "tags": [], "group": ""}
 {"x": 6, "y": 12, "text": "Tab", "color": "keystrokes", "tags": [], "group": ""}
-{"x": 1, "y": 7, "text": "Ctrl", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 1, "y": 8, "text": "Ctrl", "color": "keystrokes", "tags": [], "group": ""}
 {"x": 35, "y": 6, "text": "Ctrl", "color": "keystrokes", "tags": [], "group": ""}
 {"x": 37, "y": 8, "text": "Ctrl", "color": "keystrokes", "tags": [], "group": ""}
 {"x": 37, "y": 7, "text": "Ctrl", "color": "keystrokes", "tags": [], "group": ""}
@@ -44,7 +44,7 @@
 {"x": 37, "y": 11, "text": "Ctrl", "color": "keystrokes", "tags": [], "group": ""}
 {"x": 37, "y": 12, "text": "Ctrl", "color": "keystrokes", "tags": [], "group": ""}
 {"x": 37, "y": 13, "text": "Ctrl", "color": "keystrokes", "tags": [], "group": ""}
-{"x": 5, "y": 7, "text": "+", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 5, "y": 8, "text": "+", "color": "keystrokes", "tags": [], "group": ""}
 {"x": 39, "y": 6, "text": "+", "color": "keystrokes", "tags": [], "group": ""}
 {"x": 41, "y": 7, "text": "+", "color": "keystrokes", "tags": [], "group": ""}
 {"x": 41, "y": 8, "text": "+", "color": "keystrokes", "tags": [], "group": ""}
@@ -52,7 +52,7 @@
 {"x": 41, "y": 11, "text": "+", "color": "keystrokes", "tags": [], "group": ""}
 {"x": 41, "y": 12, "text": "+", "color": "keystrokes", "tags": [], "group": ""}
 {"x": 41, "y": 13, "text": "+", "color": "keystrokes", "tags": [], "group": ""}
-{"x": 11, "y": 10, "text": "prev/next in history", "color": "", "tags": [], "group": ""}
+{"x": 11, "y": 11, "text": "prev/next in history", "color": "", "tags": [], "group": ""}
 {"x": 11, "y": 12, "text": "next autocomplete", "color": "", "tags": [], "group": ""}
 {"x": 11, "y": 13, "text": "prev autocomplete", "color": "", "tags": [], "group": ""}
 {"x": 7, "y": 4, "text": "+", "color": "keystrokes", "tags": [], "group": ""}
@@ -70,11 +70,13 @@
 {"x": 32, "y": 11, "text": "\u2502", "color": "", "tags": [], "group": ""}
 {"x": 32, "y": 12, "text": "\u2502", "color": "", "tags": [], "group": ""}
 {"x": 32, "y": 13, "text": "\u2502", "color": "", "tags": [], "group": ""}
-{"x": 7, "y": 6, "text": "/", "color": "", "tags": [], "group": ""}
-{"x": 5, "y": 8, "text": "/", "color": "", "tags": [], "group": ""}
-{"x": 8, "y": 7, "text": "\u2192", "color": "keystrokes", "tags": [], "group": ""}
-{"x": 8, "y": 10, "text": "\u2193", "color": "keystrokes", "tags": [], "group": ""}
-{"x": 41, "y": 6, "text": "/", "color": "", "tags": [], "group": ""}
-{"x": 7, "y": 10, "text": "/", "color": "", "tags": [], "group": ""}
 {"x": 7, "y": 7, "text": "/", "color": "", "tags": [], "group": ""}
+{"x": 5, "y": 9, "text": "/", "color": "", "tags": [], "group": ""}
+{"x": 8, "y": 8, "text": "\u2192", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 8, "y": 11, "text": "\u2193", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 41, "y": 6, "text": "/", "color": "", "tags": [], "group": ""}
+{"x": 7, "y": 11, "text": "/", "color": "", "tags": [], "group": ""}
+{"x": 7, "y": 8, "text": "/", "color": "", "tags": [], "group": ""}
 {"x": 75, "y": 0, "text": "?", "color": "bold 117 cyan", "tags": [], "group": "", "onclick": "https://visidata.org/input"}
+{"x": 3, "y": 5, "text": "Ctrl+G", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 11, "y": 5, "text": "cycle help sidebar", "color": "", "tags": [], "group": ""}
