@@ -759,6 +759,7 @@ class TableSheet(BaseSheet):
             scr.addstr(headerRow, self.windowWidth-2, self.options.disp_more_right, colors.color_column_sep.attr)
 
     def calc_height(self, row, displines=None, isNull=None, maxheight=1):
+            'render cell contents ifor row into displines'
             if displines is None:
                 displines = {}  # [vcolidx] -> list of lines in that cell
 
@@ -814,8 +815,10 @@ class TableSheet(BaseSheet):
             else:
                 basecellcattr = rowcattr
 
+            # calc_height renders cell contents into displines
             displines = {}  # [vcolidx] -> list of lines in that cell
             self.calc_height(row, displines, maxheight=self.rowHeight)
+
             height = min(self.rowHeight, maxheight) or 1  # display even empty rows
             self._rowLayout[rowidx] = (ybase, height)
 
