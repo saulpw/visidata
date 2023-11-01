@@ -1,9 +1,15 @@
+'''
+Specify the billing_project_id as the netloc, and the actual dataset_id as the path:
+
+    vdsql bigquery://<billing_project>/<dataset_id>''
+'''
+
+
 from visidata import vd, VisiData, Sheet, AttrColumn
 from . import IbisTableSheet, IbisTableIndexSheet, IbisConnectionPool
 
 import ibis
 import ibis.expr.operations as ops
-
 
 @VisiData.api
 def openurl_bigquery(vd, p, filetype=None):
@@ -39,8 +45,7 @@ class BigqueryDatabaseIndexSheet(Sheet):
     def con(self):
         if not self.ibis_con:
             import ibis
-            self.ibis_con = ibis.bigquery.connect()
-            self.ibis_con.data_project = self.source.name
+            self.ibis_con = ibis.connect(self.source)
         return self.ibis_con
 
     def iterload(self):
