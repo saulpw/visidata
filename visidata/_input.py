@@ -116,6 +116,8 @@ def drawInputHelp(vd, scr, help:str=''):
         return
 
     sheet = vd.activeSheet
+    if not sheet:
+        return
     vd.drawSheet(scr, sheet)
 
     curhelp = ''
