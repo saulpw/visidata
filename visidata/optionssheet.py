@@ -52,7 +52,9 @@ class OptionsSheet(Sheet):
             vd.options.set(row.name, not currentValue, self.source)
         else:
             helpstr = f'# options.{self.cursorRow.name}\n'
-            helpstr += vd.options._get(self.cursorRow.name, 'default').helpstr
+            opt = vd.options._get(self.cursorRow.name, 'default')
+            helpstr += opt.helpstr
+            helpstr += '\n'+opt.extrahelp
             valcolidx = self.visibleCols.index(self.column(self.valueColName))
             v = self.editCell(valcolidx, value=currentValue, help=helpstr)
             vd.options.set(row.name, v, self.source)

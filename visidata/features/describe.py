@@ -5,7 +5,7 @@ from visidata import vd, Column, ColumnAttr, vlen, RowColorizer, asyncthread, Pr
 from visidata import BaseSheet, TableSheet, ColumnsSheet, SheetsSheet
 
 
-vd.option('describe_aggrs', 'mean stdev', 'numeric aggregators to calculate on Describe sheet')
+vd.option('describe_aggrs', 'mean stdev', 'numeric aggregators to calculate on Describe sheet', help=vd.help_aggrs)
 
 
 @Column.api

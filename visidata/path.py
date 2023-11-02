@@ -10,8 +10,11 @@ from functools import wraps, lru_cache
 from visidata import vd
 from visidata import VisiData, Progress
 
-vd.option('encoding', 'utf-8-sig', 'encoding passed to codecs.open when reading a file', replay=True)
-vd.option('encoding_errors', 'surrogateescape', 'encoding_errors passed to codecs.open', replay=True)
+vd.help_encoding = 'HELPTODO'
+vd.help_encoding_errors = 'HELPTODO'
+
+vd.option('encoding', 'utf-8-sig', 'encoding passed to codecs.open when reading a file', replay=True, help=vd.help_encoding)
+vd.option('encoding_errors', 'surrogateescape', 'encoding_errors passed to codecs.open', replay=True, help=vd.help_encoding_errors)
 
 @VisiData.api
 def pkg_resources_files(vd, package):

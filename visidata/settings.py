@@ -106,10 +106,12 @@ class Command:
 
 
 class Option:
-    def __init__(self, name, value, helpstr='', module='', max_help=10):
+    def __init__(self, name, value, description='', module='', help='', max_help=10):
+        # description gets shows on the manpage and the optionssheet; help is shown on the sidebar while editing
         self.name = name
         self.value = value
-        self.helpstr = helpstr
+        self.helpstr = description
+        self.extrahelp = help
         self.replayable = False
         self.sheettype = BaseSheet
         self.module = module
@@ -287,7 +289,7 @@ def _resolve_optalias(vd, optname, optval):
 
 
 @VisiData.api
-def option(vd, name, default, helpstr, replay=False, sheettype=BaseSheet, max_help=10):
+def option(vd, name, default, description, replay=False, sheettype=BaseSheet, help:str='', max_help=10):
     '''Declare a new option.
 
    - `name`: name of option
@@ -296,16 +298,19 @@ def option(vd, name, default, helpstr, replay=False, sheettype=BaseSheet, max_he
    - `replay`: ``True`` if changes to the option should be stored in the **Command Log**
    - `sheettype`: ``None`` if the option is not sheet-specific, to make it global on CLI
     '''
-    opt = vd.options.setdefault(name, default, helpstr, vd.importingModule)
+    opt = vd.options.setdefault(name, default, description, vd.importingModule)
     opt.replayable = replay
     opt.sheettype=sheettype
+    opt.extrahelp = help
     opt.max_help = max_help
     return opt
 
 
 @VisiData.api
-def theme_option(vd, *args, **kwargs):
-    return vd.option(*args, **kwargs, max_help=-1)
+def theme_option(vd, name, *args, **kwargs):
+    if name.startswith('color_'):
+        kwargs.setdefault('help', vd.help_color)
+    return vd.option(name, *args, **kwargs, max_help=-1)
 
 
 @BaseSheet.class_api

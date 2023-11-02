@@ -5,7 +5,7 @@ from visidata import vd
 from visidata import Sheet, BaseSheet, VisiData, IndexSheet, Path, Progress, TypedExceptionWrapper
 
 vd.option('safe_error', '#ERR', 'error string to use while saving', replay=True)
-vd.option('save_encoding', 'utf-8', 'encoding passed to codecs.open when saving a file', replay=True)
+vd.option('save_encoding', 'utf-8', 'encoding passed to codecs.open when saving a file', replay=True, help=vd.help_encoding)
 
 @Sheet.api
 def safe_trdict(vs):

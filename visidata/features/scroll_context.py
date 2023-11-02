@@ -18,7 +18,7 @@ __version__ = '1.2'
 
 from visidata import vd, Sheet
 
-vd.option('disp_scroll_context', 0, helpstr='minimum number of lines to keep visible above/below cursor when scrolling')
+vd.option('disp_scroll_context', 0, 'minimum number of lines to keep visible above/below cursor when scrolling')
 vd.optalias('disp_scrolloff', 'disp_scroll_context')
 
 @Sheet.after

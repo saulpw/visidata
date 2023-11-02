@@ -2,8 +2,9 @@ import re
 
 from visidata import vd, BaseSheet
 
+vd.help_regex = 'HELPTODO'
 
-vd.option('regex_skip', '', 'regex of lines to skip in text sources')
+vd.option('regex_skip', '', 'regex of lines to skip in text sources', help=vd.help_regex)
 
 class FilterFile:
     def __init__(self, fp, regex:str, regex_flags:int=0):

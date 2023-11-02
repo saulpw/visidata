@@ -1,6 +1,6 @@
 from visidata import vd, Sheet, Column
 
-vd.option('disp_currency_fmt', '%.02f', 'default fmtstr to format for currency values', replay=True)
+vd.option('disp_currency_fmt', '%.02f', 'default fmtstr to format for currency values', replay=True, help=vd.help_float_fmt)
 vd.theme_option('color_currency_neg', 'red', 'color for negative values in currency displayer', replay=True)
 
 
