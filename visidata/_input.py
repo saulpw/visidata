@@ -220,7 +220,8 @@ def editline(vd, scr, y, x, w, i=0,
   If *clear* is True, clear whole editing area before displaying.
   '''
 
-  with (EnableCursor(), HelpCycler() as disp_help):
+  with EnableCursor():
+   with HelpCycler() as disp_help:
     ESC='^['
     TAB='^I'
     history_state = HistoryState(history)
