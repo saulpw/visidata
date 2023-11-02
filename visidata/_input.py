@@ -15,6 +15,7 @@ vd.theme_option('disp_unprintable', '·', 'substitute character for unprintables
 vd.theme_option('mouse_interval', 1, 'max time between press/release for click (ms)', sheettype=None)
 
 vd.option('input_history', '', 'basename of file to store persistent input history')
+vd.disp_help = None  # current level of help shown (up to vd.options.disp_help as maximum)
 
 class AcceptInput(Exception):
     '*args[0]* is the input to be accepted'
@@ -87,6 +88,45 @@ def until_get_wch(scr):
 def splice(v:str, i:int, s:str):
     'Insert `s` into string `v` at `i` (such that v[i] == s[0]).'
     return v if i < 0 else v[:i] + s + v[i:]
+
+
+# vd.options.disp_help is the effective maximum disp_help.  The user can cycle through the various levels of help.
+class HelpCycler:
+    def __init__(self):
+        self.saved = False
+
+    def __enter__(self):
+        if vd.disp_help is None:
+            vd.disp_help = vd.options.disp_help
+            self.saved = True
+        # otherwise someone other HelpCycler is already managing it
+        return self
+
+    def __exit__(self, *args):
+        if self.saved:
+            vd.disp_help = None
+
+    def cycle(self):
+        vd.disp_help = (vd.disp_help-1)%(vd.options.disp_help+1)
+
+
+@VisiData.api
+def drawInputHelp(vd, scr, help:str=''):
+    if not scr:
+        return
+
+    sheet = vd.activeSheet
+    vd.drawSheet(scr, sheet)
+
+    curhelp = ''
+    if vd.disp_help == 0:
+        vd.drawSidebar(scr, sheet)
+    elif vd.disp_help == 1:
+        curhelp = help
+        sheet.drawSidebarText(scr, curhelp)
+    elif vd.disp_help == 2:
+        curhelp = vd.getHelpPane('input', module='visidata')
+        sheet.drawSidebarText(scr, curhelp, title='Input Keystrokes Help')
 
 
 def clean_printable(s):
@@ -179,10 +219,10 @@ def editline(vd, scr, y, x, w, i=0,
   '''A better curses line editing widget.
   If *clear* is True, clear whole editing area before displaying.
   '''
-  with EnableCursor():
+
+  with (EnableCursor(), HelpCycler() as disp_help):
     ESC='^['
     TAB='^I'
-
     history_state = HistoryState(history)
     complete_state = CompleteState(completer)
     insert_mode = True
@@ -213,15 +253,9 @@ def editline(vd, scr, y, x, w, i=0,
                 a += incr
             return min(max(a, 0), len(s))
 
-    max_disp_help = disp_help = vd.options.disp_help
     while True:
+        vd.drawInputHelp(scr, help)
         updater(v)
-        if disp_help > 0:
-            sheet = vd.activeSheet
-            if disp_help > 1:
-                help = vd.getHelpPane('input', module='visidata')
-            if help:
-                sheet.drawSidebarText(scr, help, title="Input Help")
 
         if display:
             dispval = clean_printable(v)
@@ -258,8 +292,7 @@ def editline(vd, scr, y, x, w, i=0,
         elif ch == '^E' or ch == 'KEY_END':        i = len(v)
         elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1
         elif ch == '^G':
-            disp_help = (disp_help+1)%(max_disp_help+1)
-            vd.draw_all()  #1971
+            disp_help.cycle()
             continue  # not considered a first keypress
         elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1; v = delchar(v, i)
         elif ch == TAB:                            v, i = complete_state.complete(v, i, +1)
@@ -368,13 +401,20 @@ def inputsingle(vd, prompt, record=True):
     return v
 
 @VisiData.api
-def inputMultiple(vd, **kwargs):
+def inputMultiple(vd, updater=lambda val: None, **kwargs):
     'A simple form, where each input is an entry in `kwargs`, with the key being the key in the returned dict, and the value being a dictionary of kwargs to the singular input().'
     sheet = vd.activeSheet
+    scr = sheet._scr
 
     y = sheet.windowHeight-1
     maxw = sheet.windowWidth//2
     attr = colors.color_edit_unfocused
+
+    keys = list(kwargs.keys())
+    cur_input_key = keys[0]
+
+    if scr:
+        scr.erase()
 
     for i, (k, v) in enumerate(kwargs.items()):
         v['dy'] = i
@@ -385,26 +425,27 @@ def inputMultiple(vd, **kwargs):
 
     def change_input(offset):
         def _throw(v, i):
+            if scr:
+                scr.erase()
             raise ChangeInput(v, offset)
         return _throw
 
-    keys = list(kwargs.keys())
-    cur_input_key = keys[0]
+    def multi_updater(val):
+        for k, v in kwargs.items():
+            maxw = min(sheet.windowWidth-1, max(dispwidth(v.get('prompt')), dispwidth(str(v.get('value', '')))))
+            promptlen = clipdraw(scr, y-v.get('dy'), 0, v.get('prompt'), attr, w=maxw)  #1947
+            promptlen = clipdraw(scr, y-v.get('dy'), promptlen, v.get('value', ''),  attr, w=maxw)
 
-    if sheet._scr:
-        sheet._scr.erase()
+        return updater(val)
 
-    while True:
-        if sheet._scr:
-            vd.drawSheet(sheet._scr, sheet)
-
-            for k, v in kwargs.items():
-                promptlen = clipdraw(sheet._scr, y-v.get('dy'), 0, v.get('prompt'), attr, w=sheet.windowWidth-1)  #1947
-                promptlen = clipdraw(sheet._scr, y-v.get('dy'), promptlen, v.get('value', ''),  attr, w=sheet.windowWidth-1)
-
+    with HelpCycler() as disp_help:
+      while True:
         try:
             input_kwargs = kwargs[cur_input_key]
-            input_kwargs['value'] = vd.input(**input_kwargs, attr=colors.color_edit_cell, bindings={
+            input_kwargs['value'] = vd.input(**input_kwargs,
+                                             attr=colors.color_edit_cell,
+                                             updater=multi_updater,
+                                             bindings={
                 'KEY_BTAB': change_input(-1),
                 '^I':       change_input(+1),
                 'KEY_SR':   change_input(-1),
