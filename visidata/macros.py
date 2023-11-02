@@ -36,7 +36,7 @@ class MacroSheet(IndexSheet):
                 vd.warning(f'failed to load macro {fn}')
                 continue
             vs.keystrokes = ks
-            setMacro(ks, vs)
+            vd.setMacro(ks, vs)
             yield vs
 
     def commitDeleteRow(self, row):
@@ -69,15 +69,17 @@ def macrosheet(vd):
     return real_macrosheet
 
 @VisiData.api
-def runMacro(vd, macro):
-    vd.replay_sync(macro)
+def runMacro(vd, binding:str):
+    vd.replay_sync(vd.macrobindings[binding])
 
-def setMacro(ks, vs):
-    vd.macrobindings[vs.name] = vs
+@VisiData.api
+def setMacro(vd, ks, vs):
+    'Set *ks* which is either a keystroke or a longname to run the cmdlog in *vs*.'
+    vd.macrobindings[ks] = vs
     if vd.isLongname(ks):
-        BaseSheet.addCommand('', ks, 'runMacro(vd.macrobindings[longname])')
+        BaseSheet.addCommand('', ks, f'runMacro("{ks}")')
     else:
-        BaseSheet.addCommand(ks, vs.name, 'runMacro(vd.macrobindings[longname])')
+        BaseSheet.addCommand(ks, vs.name, f'runMacro("{ks}")')
 
 
 @CommandLogJsonl.api
@@ -86,7 +88,7 @@ def saveMacro(self, rows, ks):
         vs.rows = rows
         macropath = Path(vd.fnSuffix(str(Path(vd.options.visidata_dir)/ks)))
         vd.save_vdj(macropath, vs)
-        setMacro(ks, vs)
+        vd.setMacro(ks, vs)
         vd.macrosheet.source.append_tsv_row((ks, macropath))
         vd.sync(vd.macrosheet.source.reload())
         vd.sync(vd.macrosheet.reload())
