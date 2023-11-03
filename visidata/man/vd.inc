@@ -704,7 +704,7 @@ save selected or all sheets
 .It Sy "\&."
 .Sy extend No "copy first selected sheet, keeping all rows and sheet type, and extend with columns from other sheets"
 .It Sy "\&."
-.Sy merge No " mostly keep all rows from first selected sheet, except prioritise cells with non-null/non-error values"
+.Sy merge No " keep all rows from first sheet, updating any False-y cells with non-False-y values from second sheet; add unique rows from second sheet"
 .El
 .
 .Ss Options Sheet (Shift+O)
