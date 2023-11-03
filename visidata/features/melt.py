@@ -12,23 +12,16 @@ melt_null = False   # whether to melt null values
 
 # rowdef: {0:sourceRow, 1:Category1, ..., N:CategoryN, ColumnName:Column, ...}
 class MeltedSheet(Sheet):
-    "Perform 'melt', the inverse of 'pivot', on input sheet."
+    "Perform 'melt', the inverse of 'pivot', on input `source` sheet.  Pass `regex` to parse column names into additional columns"
 
     rowtype = 'melted values'
 
-    def resetCols(self):
-        self.columns = []
-        sheet = self.source
-        for c in sheet.keyCols:
-            self.addColumn(SubColumnItem(0, c))
-        self.setKeys(self.columns)
-
-    def loader(self):
-        isNull = self.isNullFunc()
+    def getValueCols(self) -> dict:
+        '''Return dict of ('Category1', 'Category2') -> list of tuple('ColumnName', Column)'''
         colsToMelt = [copy(c) for c in self.source.nonKeyVisibleCols]
 
         # break down Category1_Category2_ColumnName as per regex
-        valcols = collections.OrderedDict()  # ('Category1', 'Category2') -> list of tuple('ColumnName', Column)
+        valcols = collections.OrderedDict()
         for c in colsToMelt:
             c.aggregators = [vd.aggregators['max']]
             m = re.match(self.regex, c.name)
@@ -44,11 +37,23 @@ class MeltedSheet(Sheet):
                 valcols[cats].append((valcolname, c))
                 ncats = len(varvals)
             else:
-                vd.status('"%s" column does not match regex, skipping' % c.name)
+                vd.status(f'"{c.name}" column does not match regex, skipping')
                 ncats = 0
 
+        return valcols
+
+    def resetCols(self):
+        self.columns = []
+        sheet = self.source
+        for c in sheet.keyCols:
+            self.addColumn(SubColumnItem(0, c))
+        self.setKeys(self.columns)
+
+        valcols = self.getValueCols()
         othercols = set()
+        ncats = 0
         for colnames, cols in valcols.items():
+            ncats = max(ncats, len(colnames))
             for cname, _ in cols:
                 othercols.add(cname)
 
@@ -56,7 +61,7 @@ class MeltedSheet(Sheet):
             self.addColumn(ColumnItem(melt_var_colname, 1))
         else:
             for i in range(ncats):
-                self.addColumn(ColumnItem('%s%d' % (melt_var_colname, i+1), i+1))
+                self.addColumn(ColumnItem(f'{melt_var_colname}{i+1}', i+1))
 
         for cname in othercols:
             self.addColumn(Column(cname,
@@ -64,7 +69,10 @@ class MeltedSheet(Sheet):
                 setter=lambda col,row,val,cname=cname: row[cname].setValues([row[0]], val),
                 aggregators=[vd.aggregators['max']]))
 
-        self.rows = []
+    def iterload(self):
+        isNull = self.isNullFunc()
+
+        valcols = self.getValueCols()
         for r in Progress(self.source.rows, 'melting'):
             for colnames, cols in valcols.items():
                 meltedrow = {}
@@ -80,7 +88,7 @@ class MeltedSheet(Sheet):
                     for i, colname in enumerate(colnames):
                         meltedrow[i+1] = colname
 
-                    self.addRow(meltedrow)
+                    yield meltedrow
 
 
 @Sheet.api
