@@ -112,7 +112,7 @@ class HelpCycler:
 
 @VisiData.api
 def drawInputHelp(vd, scr, help:str=''):
-    if not scr:
+    if not scr or not vd.cursesEnabled:
         return
 
     sheet = vd.activeSheet
