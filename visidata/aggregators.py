@@ -5,7 +5,7 @@ import collections
 import statistics
 
 from visidata import Progress, Sheet, Column, ColumnsSheet, VisiData
-from visidata import vd, anytype, vlen, asyncthread, wrapply
+from visidata import vd, anytype, vlen, asyncthread, wrapply, AttrDict
 
 vd.help_aggrs = 'HELPTODO'
 
@@ -194,13 +194,38 @@ def memo_aggregate(col, agg, rows):
 @VisiData.property
 def aggregator_choices(vd):
     return [
-       {'key': agg, 'desc': v[0].helpstr if isinstance(v, list) else v.helpstr} for agg, v in vd.aggregators.items()
+       AttrDict(key=agg, desc=v[0].helpstr if isinstance(v, list) else v.helpstr)
+         for agg, v in vd.aggregators.items()
+            if not agg.startswith('p')  # skip all the percentiles, user should use q# instead
     ]
 
 
+
+def _format_match(s, positions):
+    out = list(s)
+    for p in positions:
+        out[p] = f'[:red]{out[p]}[/]'
+    return "".join(out)
+
 @VisiData.api
 def chooseAggregators(vd):
-    return vd.chooseMany(vd.aggregator_choices, type="aggregators")
+    prompt = 'choose aggregators: '
+    def _fmt_aggr_summary(match, row, trigger_key):
+        formatted_aggrname = _format_match(row.key, match.positions.get('key', []))
+        r = ' '*(len(prompt)-3)
+        r += f'[:keystrokes]{trigger_key}[/]  '
+        r += formatted_aggrname
+        if row.desc:
+            r += ' - ' + _format_match(row.desc, match.positions.get('desc', []))
+        return r
+
+    r = vd.activeSheet.inputPalette(prompt,
+            vd.aggregator_choices,
+            value_key='key',
+            formatter=_fmt_aggr_summary,
+            type='aggregators',
+            multiple=True)
+    return r.split()
 
 Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseAggregators())', 'Add aggregator to current column')
 Sheet.addCommand('z+', 'memo-aggregate', 'for agg in chooseAggregators(): cursorCol.memo_aggregate(aggregators[agg], selectedRows or rows)', 'memo result of aggregator over values in selected rows for current column')
