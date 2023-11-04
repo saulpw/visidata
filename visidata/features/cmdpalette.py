@@ -13,20 +13,33 @@ def _format_match(s, positions):
         out[p] = f'[:red]{out[p]}[/]'
     return "".join(out)
 
-def make_acceptor(value):
-    def _exec(v, i):
-        raise AcceptInput(value)
-    return _exec
+def make_acceptor(value, multiple=False):
+    def _acceptor(v, i):
+        if multiple:
+            items = list(v.split())
+            if v.endswith(' '):
+                items.append(value)
+            else:
+                items[-1] = value
+            v = ' '.join(items) + ' '
+            return v, len(v)
+        else:
+            raise AcceptInput(value)
+    return _acceptor
 
 
 @BaseSheet.api
-def inputPalette(sheet, prompt, items, value_key='', formatter=lambda m, item, trigger_key: f'{trigger_key} {item}', **kwargs):
+def inputPalette(sheet, prompt, items,
+                 value_key='key',
+                 formatter=lambda m, item, trigger_key: f'{trigger_key} {item}',
+                 multiple=False,
+                 **kwargs):
     bindings = dict()
 
     def _draw_palette(value):
         words = value.lower().split()
 
-        matches = vd.fuzzymatch(items, words)
+        matches = vd.fuzzymatch(items, [words[-1]] if multiple and words else words)
 
         # do the drawing
         h, w = sheet._scr.getmaxyx()
@@ -38,7 +51,7 @@ def inputPalette(sheet, prompt, items, value_key='', formatter=lambda m, item, t
 
             if i < 9:
                 trigger_key = f'{i+1}'
-                bindings[trigger_key] = make_acceptor(m.match[value_key])
+                bindings[trigger_key] = make_acceptor(m.match[value_key], multiple=multiple)
 
             match_summary = formatter(m, m.match, trigger_key)
 
@@ -61,7 +74,6 @@ def inputPalette(sheet, prompt, items, value_key='', formatter=lambda m, item, t
 def inputLongname(sheet):
     prompt = 'command name: '
     # get set of commands possible in the sheet
-#    longnames = set(k for (k, obj), v in vd.commands.iter(sheet))
     this_sheets_help = HelpSheet('', source=sheet)
     this_sheets_help.ensureLoaded()
     vd.sync()
@@ -75,7 +87,6 @@ def inputLongname(sheet):
     def _fmt_cmdpal_summary(match, row, trigger_key):
         keystrokes = this_sheets_help.revbinds.get(row.longname, [None])[0] or ' '
         formatted_longname = _format_match(row.longname, match.positions.get('longname', []))
-        vd.status(str(match.positions), formatted_longname)
         formatted_name = f'[:onclick {row.longname}]{formatted_longname}[/]'
         r = f' [:keystrokes]{keystrokes.rjust(len(prompt)-5)}[/]  '
         r += f'[:keystrokes]{trigger_key}[/] {formatted_name}'
