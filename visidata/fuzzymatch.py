@@ -179,8 +179,7 @@ class MatchResult:
     positions: 'list[int]'
 
 
-@VisiData.api
-def fuzzymatch(vd, target: str, pattern: str) -> MatchResult:
+def _fuzzymatch(target: str, pattern: str) -> MatchResult:
     '''Fuzzy string matching algorithm.
 
     For a target sequence, check whether (and how good) a pattern is matching.
@@ -355,7 +354,33 @@ def fuzzymatch(vd, target: str, pattern: str) -> MatchResult:
     return MatchResult(j, maxScorePos + 1, int(maxScore), pos)
 
 
-def test_fuzzymatch(vd=vd):
+CombinedMatch = collections.namedtuple('CombinedMatch', 'score positions match')
+
+
+@VisiData.api
+def fuzzymatch(vd, haystack:list[dict[str, str]], needles:list[str]) -> list[CombinedMatch]:
+    'Return sorted list of matching dict values in haystack, augmenting the input dicts with _score:int and _positions:dict[k,set[int]] where k is each non-_ key in the haystack dict.'
+
+    matches = []
+    for h in haystack:
+        match = {}
+        for k, v in h.items():
+            for p in needles:
+                m = _fuzzymatch(v, p)
+                if m.score > 0:
+                    match[k] = m
+
+        if match:
+            m = CombinedMatch(score=sum(mr.score**2 for mr in match.values()),
+                      positions={k:mr.positions for k, mr in match.items()},
+                      match=h)
+            # square to prefer larger scores in a single haystack
+            matches.append(m)
+
+    return sorted(matches, key=lambda m: -m.score)
+
+
+def test_fuzzymatch():
     assert asciiFuzzyIndex('helo', 'h') == 0
     assert asciiFuzzyIndex('helo', 'hlo') == 0
     assert asciiFuzzyIndex('helo', 'e') == 0
@@ -372,9 +397,9 @@ def test_fuzzymatch(vd=vd):
     assert charClassOfAscii(' ') == charWhite
     assert charClassOfAscii(',') == charDelimiter
 
-    assert vd.fuzzymatch('hello', '') == MatchResult(0, 0, 0, [])
-    assert vd.fuzzymatch('hello', 'nono') == MatchResult(-1, -1, 0, None)
-    assert vd.fuzzymatch('hello', 'l') == MatchResult(2, 3, 16, [2])
-    assert vd.fuzzymatch('hello world', 'elo wo') == MatchResult(
+    assert _fuzzymatch('hello', '') == MatchResult(0, 0, 0, [])
+    assert _fuzzymatch('hello', 'nono') == MatchResult(-1, -1, 0, None)
+    assert _fuzzymatch('hello', 'l') == MatchResult(2, 3, 16, [2])
+    assert _fuzzymatch('hello world', 'elo wo') == MatchResult(
         1, 8, 127, [7, 6, 5, 4, 2, 1]
     )
