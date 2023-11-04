@@ -92,14 +92,20 @@ def splice(v:str, i:int, s:str):
 
 # vd.options.disp_help is the effective maximum disp_help.  The user can cycle through the various levels of help.
 class HelpCycler:
-    def __init__(self):
+    def __init__(self, scr=None, help=''):
         self.saved = False
+        self.help = help
+        self.scr = scr
 
     def __enter__(self):
+        if self.scr:
+            vd.drawInputHelp(self.scr, self.help)
+
         if vd.disp_help is None:
             vd.disp_help = vd.options.disp_help
             self.saved = True
-        # otherwise someone other HelpCycler is already managing it
+        # otherwise some other HelpCycler will unset it
+
         return self
 
     def __exit__(self, *args):
@@ -108,6 +114,8 @@ class HelpCycler:
 
     def cycle(self):
         vd.disp_help = (vd.disp_help-1)%(vd.options.disp_help+1)
+        if self.scr:
+            vd.drawInputHelp(self.scr, self.help)
 
 
 @VisiData.api
@@ -221,9 +229,8 @@ def editline(vd, scr, y, x, w, i=0,
   '''A better curses line editing widget.
   If *clear* is True, clear whole editing area before displaying.
   '''
-
   with EnableCursor():
-   with HelpCycler() as disp_help:
+   with HelpCycler(scr, help) as disp_help:
     ESC='^['
     TAB='^I'
     history_state = HistoryState(history)
@@ -257,7 +264,6 @@ def editline(vd, scr, y, x, w, i=0,
             return min(max(a, 0), len(s))
 
     while True:
-        vd.drawInputHelp(scr, help)
         updater(v)
 
         if display:
@@ -380,7 +386,6 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
 def inputsingle(vd, prompt, record=True):
     'Display prompt and return single character of user input.'
     sheet = vd.activeSheet
-    rstatuslen = vd.drawRightStatus(sheet._scr, sheet)
 
     v = None
     if record and vd.cmdlog:
@@ -433,7 +438,7 @@ def inputMultiple(vd, updater=lambda val: None, **kwargs):
             raise ChangeInput(v, offset)
         return _throw
 
-    def multi_updater(val):
+    def _drawPrompt(val):
         for k, v in kwargs.items():
             maxw = min(sheet.windowWidth-1, max(dispwidth(v.get('prompt')), dispwidth(str(v.get('value', '')))))
             promptlen = clipdraw(scr, y-v.get('dy'), 0, v.get('prompt'), attr, w=maxw)  #1947
@@ -447,7 +452,7 @@ def inputMultiple(vd, updater=lambda val: None, **kwargs):
             input_kwargs = kwargs[cur_input_key]
             input_kwargs['value'] = vd.input(**input_kwargs,
                                              attr=colors.color_edit_cell,
-                                             updater=multi_updater,
+                                             updater=_drawPrompt,
                                              bindings={
                 'KEY_BTAB': change_input(-1),
                 '^I':       change_input(+1),
@@ -467,7 +472,7 @@ def inputMultiple(vd, updater=lambda val: None, **kwargs):
     return {k:v.get('value', '') for k,v in kwargs.items()}
 
 @VisiData.api
-def input(self, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None, **kwargs):
+def input(self, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None, updater=lambda v: None, **kwargs):
     '''Display *prompt* and return line of user input.
 
         - *type*: string indicating the type of input to use for history.
@@ -498,15 +503,22 @@ def input(self, prompt, type=None, defaultLast=False, history=[], dy=0, attr=Non
 
     history = self.lastInputsSheet.history(type)
 
-    rstatuslen = self.drawRightStatus(sheet._scr, sheet)
     y = sheet.windowHeight-dy-1
-    promptlen = clipdraw(sheet._scr, y, 0, prompt, attr, w=sheet.windowWidth-rstatuslen-1)
-    w = kwargs.pop('w', sheet.windowWidth-promptlen-rstatuslen-2)
+    promptlen = dispwidth(prompt)
+
+    def _drawPrompt(val=''):
+        rstatuslen = vd.drawRightStatus(sheet._scr, sheet)
+        clipdraw(sheet._scr, y, 0, prompt, attr, w=sheet.windowWidth-rstatuslen-1)
+        updater(val)
+        return sheet.windowWidth-promptlen-rstatuslen-2
+
+    w = kwargs.pop('w', _drawPrompt())
     ret = self.editText(y, promptlen, w=w,
                         attr=colors.color_edit_cell,
                         unprintablechar=options.disp_unprintable,
                         truncchar=options.disp_truncator,
                         history=history,
+                        updater=_drawPrompt,
                         **kwargs)
 
     if ret:
@@ -581,8 +593,8 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
     kwargs['bindings'] = bindings
 
     editargs = dict(value=value,
-                    fillchar=options.disp_edit_fill,
-                    truncchar=options.disp_truncator)
+                    fillchar=self.options.disp_edit_fill,
+                    truncchar=self.options.disp_truncator)
 
     editargs.update(kwargs)  # update with user-specified args
     r = vd.editText(y, x, w, attr=colors.color_edit_cell, **editargs)

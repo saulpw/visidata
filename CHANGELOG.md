@@ -306,7 +306,7 @@
 - [keys] use prettykeys for allPrefixes #1592
 - [menu] vd.addMenuItems with convenient string syntax
 - [modify] Sheet.commitAddRow and Sheet.commitDeleteRow
-- [modules] vd.importModule, vd.importSubmodules, vd.importExternal, vd.setPersistentOPtions
+- [modules] vd.importModule, vd.importSubmodules, vd.importExternal, vd.setPersistentOptions
     - add importExternal for most loaders and features  #1739 #1765
 - [path] filesize can taken any Path-like
 - [pivot freq] re-add FreqTableSheet and PivotSheet to globals  #1731
