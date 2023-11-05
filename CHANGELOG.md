@@ -9,22 +9,41 @@
     - will contain a stack list of status messages
     - color syntax is [:bold]footext[/]
         - supports `[:code]`, `[:bold]`, `[:italic]`, `[:underline]`, `[:onclick]` (makes a clickable link)
+        - [:] at terminal clears; [/] at terminal pops
     - toggle with `sidebar-toggle` (bound to `b`)
+    - make bottom msg entirely clickable
+    - make dedent and header parsing standard
 - display sheet and feature help documentation in sidebar
     - added bundles of Guide Sheets
     - open Guide Sheets into a full VisiData sheet with `open-sidebar` (bound to `gb`)
 - [filetype] add guesser to sniff filetype from data  #130 #1759 #1881 #1880 #1883 #1978
 - add support for Python 3.12  #1934
 - migrate pkg_resources to importlib_resources (PR by @zormit and @anjakefala #1968 #1911)
+- [threads] no new threads while prev cmd still running  #1148
+- [batch] add progress every half second to batch mode  #1182
+- [replay] implemented a single-thread replay mechanism  #1575
+    - much simpler architecturally, but loses the ability to pause/resume, and show 1/N progress (now just shows number of queued commands remaining).
+        - Ctrl+N is now no-op for similar functionality to replay-advance
+            - replay-advance command itself is removed
+        - removed options.replay_movement and its functionality
+
+        - options.replay_wait (-w on CLI) now works by setting the curses timeout, which will affect the display update frequency for all async commands.  previously was hard-coded.  try -w 0.001 while loading a big file to see a very rapid update.
+
+    - replay in general should be more stable and possibly faster.
 
 - [aggregators] sum uses start value from type of first value for Python 3.8+  #1996 #1999 #2009
 - [build] add a .desktop for VisiData  #1738
 - [cli] add `-i` to run interactive mode after batch  #1714
+- [clipboard] implement a more universal paste that uses positional columns  #1377
+- [cliptext] fix double-width char display  #1918
 - [columns] add basic repr  #1757
+- [columns] add `setcol-precision-more` and `-less`  #1609 #1650
+    - works on float, floatsi, currency, date columns
 - [describe] default width=10 for describe columns
 - [dir] set name of '.' to current dir name  #1775
 - [dir] set name relative to previously loaded directory  #1775
 - [dir] get default save name from sheet name  #1775
+- [display] add `setcol-` (`zv`) and `setcols-height-input` (`gzv`)  #1307
 - [expand] change default depth of expand-col(s)-depth to 0 (PR by @cool-RR #1809)
 - [features] procmgr to view/manage processes, memory/cpu stats
 - [features] ping to traceroute a hostip
@@ -36,15 +55,22 @@
 - [graph] colorbrewer palette chooser (thanks @er1kb)
 - [graph] add commands to open external graph with matplotlib #1056
 - [input] change `Ctrl+G` to toggle `options.disp_help`
+- [input] add `Ctrl+N` to insert prettykeys of literal keystroke
+- [join] allow selecting of join columns from all columns sheet  #1224
+    - unbind `&` for **ColumnsSheet** `join-cols`
 - [layout] stop errors: hide-col on empty sheet, inputMultiple (PR by @midichef #1963)
 - [linux] change default system clipboard cmd to wl-copy if the user is using wayland (PR by @rj1 #1763)
 - [loaders] mailbox formats mbox/maildir/mmdf/babyl/mh loader (as supported by Python mailbox stdlib)
+- [loaders] add `options.regex_skip` for text formats to allow e.g. comment skipping  #1559
+    - Added default values for regex_skip to existing source sheets like tsv/csv/lsv/json/jsonla.
+    - Use --regex-skip='' (or otherwise set the option to '') to disable this behavior.
 - [loaders] .jrnl format (jrnl.sh) loader+saver
 - [loaders] add reddit API loader
 - [loaders] add matrix API loader
 - [loaders] add orgmode loader
 - [loaders] add scraper
     - table of HTMl elements as parsed by `beautifulsoup4`
+- [loaders] add Parquet writer (PR by @mr-majkel #2053 #2044)
 - [loaders] add s3 loader (built by @ajkerrigan)
     - open Amazon S3 paths and objects
 - [loaders] add bit.io loader
@@ -54,8 +80,14 @@
 - [loaders] add airtable API loader
 - [loaders http] replace requests with urllib  #1808 #1704
 - [loaders] add a toml loader (PR by @ajkerrigan #1894 #1580 #1587)
+- [loaders shell] allow deleting of directories unless `options.safety_first=True`  #1965
 - [loaders xml] ignore comments
+- [loaders xlsx] add cell colorizers from source  #1718
+- [loaders sqlite] save list/dict as json  #1589
 - [loaders jsonl] allow slash comments (PR by @geekscrapy #2025)
+- [macros] allow deleting of macro with commit on **MacrosSheet**  #1569
+- [macros] add longname/keystrokes to **MacrosSheet**  #1569 #1741
+- [macros] add help sidebar to end macro input  #1569 #1741
 - [menu] move Edit>Add-rows to Row>Add
 - [menu] add `go-row-number` to menu  #1766
 - [menu] move commit-sheet under File>Save
@@ -68,6 +100,8 @@
 - [open-syspaste] enable filetype selection (PR by @daviewales #1717)
 - [options] add `option.json_ensure_ascii` (default: True) (PR by @joaosousa1 #1776)  #1772
     - option for non-ASCII characters to be saved to JSON, on False will encode to utf-8
+- [reload] support tail with `reload-modified`  #1686
+- [reload] add `reload-rows` which preserves existing columns + cursor position  #1655 #1683 #1663
 - [regex] use inputMultiple to allow changing regex_flags  #1925
 - [replay] has been refactored to be sync, instead of a seperate async process  #1773 #1714
 - [save] add `options.save_encoding (default: 'utf-8') to differentiate from `options.encoding` when saving a file  #1708
@@ -76,6 +110,7 @@
     - default show sheet.help if `disp_sidebar_fmt` not set
 - [sheet] add `select-equal-selected` (unbound) to select rows with values in current column in already selected rows  #1327
 - [sheet] add `clean-names` (unbound) to set options.clean_names on sheet and clean visible column names
+- [sheet] remove left-click for sheets-stack  #2030 #1656
 - [setcol-fake] add `setcol-fake` (unbound) adds a column of Faker generated 'faketypes'
 - [sparkline] add `addcol-sparkline` (unbound): adds a sparkline of all numeric columns
 - [tests] call all test_func(vd) defined in modules during pytest
@@ -84,6 +119,9 @@
 - [themes] add options.theme and visidata/themes directory of additional themes (light, ascii8, asciimono)  #1682  #1691
 - [types] add `ipaddr` and `ipnet` types`. add `type-ipaddr` and `type-ipnet` commands (unbound) (PR by @ajkerrigan #1946 #1782 #1910)
     - also add `select-supernets` (unbound) which selects rows where the CIDR block value includes the input address space
+- [types] add `type-url` and `open-url`  #2031
+- [types] add `type-datetime`  #1572 #1380 #397
+- [ui] change menu, status, and other colors to be more visible
 - [usd] provide USD(s) function to convert string like '£300' or '205 AUD' to equivalent US$ as float
 - [windows] change default system clipboard command to clip.exe
 
@@ -100,15 +138,19 @@
 ## bugfixes
 
 - [aggregators] use statistics.median for more correct median  #1914
+- [aggregators] fix cancelling of long-running aggregators  #1036
 - [canvas] fix clicks on labels and unplotted canvs (PR by @midichef #1984)
 - [chooser] choose only exactly matching strings (PR by @daviewales #1902)
+- [cli] support `options.encoding_errors` for stdin  #2047
 - [clipboard] warn when pasting before copying (PR by @midichef #1793)
 - [clipboard] improve error when deleting row on empty sheet (PR by @midichef #2006)
-- [cmdlog] check for empty cursor column when adding a column (PR by @midichef
-  #1783)
+- [cmdlog] check for empty cursor column when adding a column (PR by @midichef #1783)
+- [cmdlog] ensure record of global options in all cmdlogs
+- [colorizers] fix custom colorizers showing in sheet context  #1225
 - [columns] speed up getMaxWidth for wide columns (PR by @midichef #1747)
   #1728
 - [columns] add ExplodingMock 
+- [confirm] remove flicker in alacritty  #2040
 - [currency] fix currency_neg option
 - [curses] allow breakpoint() before initwin
 - [curses] use builtins if no curses screen yet
@@ -117,12 +159,14 @@
 - [dir] support '..' and resolve dirname relative to CWD  #1801
     - if user uses `open-dir-parent` outside of the CWD, switch to absolute
       paths
+- [display] fix visibility with col.height>1
 - [errors] do not print ExpectedExceptions twice in batch-mode
 - [expr] more informative 'column not modifiable' error message  #1764
 - [floatsi] must try to convert args to float
 - [fill] allow filling with values that are logically false (PR by @midichef
   #1794)
 - [freq] fix names for openRow  #1777
+- [freq] correctly group null/error values for `options.numeric_binning`  #1410
 - [graph] fix graph ranges for xmax, ymax < 1 (PR by @midichef #1752)  #1673
   #1697
 - [graph] fix data on edges being drawn offscreen (PR by @midichef #1850)
@@ -158,29 +202,26 @@
 - [loaders parquet] show string value for Parquet `large_string` (PR by @daviewales #2018 #2003)
 - [loaders http] add `options.http_ssl_verify` to replace
   `options.http_req_verify`  #1939
-- [loaders sqlite] prevent creation of ./- file when reading from stdin (PR by
-  @Midichef #1945)
-- [loaders imap] enable imap and fix folder name extraction (PR by @justin2004
-  #1917)
-- [loaders pandas] handle read methods that produce a list of dataframes (PR by
-  @ajkerrigan #1990 #1986)
-- [loaders parquet] stringify source to handle both URLs and local paths (PR by
-  @ajkerrigan #1913)
-- [loaders mysql] unquote password before sending to client (PR by @dufferzafar
-  #1933)
-- [loaders ttf] implement `closePath()` to draw missing lines (PR by @midichef
-  #1979)
+- [loaders sqlite] prevent creation of ./- file when reading from stdin (PR by @Midichef #1945)
+- [loaders imap] enable imap and fix folder name extraction (PR by @justin2004 #1917)
+- [loaders pandas] handle read methods that produce a list of dataframes (PR by @ajkerrigan #1990 #1986)
+- [loaders parquet] stringify source to handle both URLs and local paths (PR by @ajkerrigan #1913)
+- [loaders mysql] unquote password before sending to client (PR by @dufferzafar #1933)
+- [loaders ttf] implement `closePath()` to draw missing lines (PR by @midichef #1979)
 - [loaders http] fix parsing link header (PR by @Midichef #1924 #1898)
+- [loaders xlsx] saver now replaces illegal characters instead of aborting  #1402
 - [loaders html] fix failure from colspan with only td tags (PR by @midichef #2002)
 - [loaders zip] show stacktrace on exception
 - [loaders rec] support %sort; continue loading on exception  #2022
 - [loaders pyobj] similar sheet names for dive-/open- and pyobj- #1988
 - [loaders pyobj] do not skip properties that raise
 - [loaders vds] fix 'keyerror: exprcolumn' for .vds (PR by @pacien #2036 #2045)
+- [loaders sav] use fork of `savReaderWriter` for the sake of Python 3.10+ support  #1867
 - [loaders vds] fix .csv to .vds conversion  #2037
 - [macos] do not bind empty string to anything
-- [macro] add prompt for cancelling macro  #1810 #1812
-- [macro] specify a clearer message  #1810
+- [macros] add prompt for cancelling macro  #1810 #1812
+- [macros] specify a clearer message  #1810
+- [macros] append newline to macros.tsv if necessary  #1569
 - [main] print version string once, not twice (PR by @midichef #1837)
 - [main] remove forced unload before interactive mode  #1943
 - [menu] use "Alt+x" keybinding instead of "^[x"
@@ -256,6 +297,10 @@
 ## api
 
 - [cli] printout gone; use `builtins.print`
+- [color] use `ColorAttr` throughout
+    - seperate out fg/bg
+    - allow bg and fg to take precedence independently
+    - fixes issues with forced bg=black on sidebar for warning, and statusbar for working
 - [help] add HelpSheet to globals
 - [input] add vd.injectInput and vd.getCommandInput
 - [keys] use prettykeys for allPrefixes #1592
