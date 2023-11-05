@@ -15,7 +15,7 @@ vd.theme_option('disp_unprintable', '·', 'substitute character for unprintables
 vd.theme_option('mouse_interval', 1, 'max time between press/release for click (ms)', sheettype=None)
 
 vd.option('input_history', '', 'basename of file to store persistent input history')
-vd.disp_help = None  # current level of help shown (up to vd.options.disp_help as maximum)
+vd.disp_help = 1  # current level of help shown (up to vd.options.disp_help as maximum)
 
 class AcceptInput(Exception):
     '*args[0]* is the input to be accepted'
@@ -93,7 +93,6 @@ def splice(v:str, i:int, s:str):
 # vd.options.disp_help is the effective maximum disp_help.  The user can cycle through the various levels of help.
 class HelpCycler:
     def __init__(self, scr=None, help=''):
-        self.saved = False
         self.help = help
         self.scr = scr
 
@@ -101,16 +100,10 @@ class HelpCycler:
         if self.scr:
             vd.drawInputHelp(self.scr, self.help)
 
-        if vd.disp_help is None:
-            vd.disp_help = vd.options.disp_help
-            self.saved = True
-        # otherwise some other HelpCycler will unset it
-
         return self
 
     def __exit__(self, *args):
-        if self.saved:
-            vd.disp_help = None
+        pass
 
     def cycle(self):
         vd.disp_help = (vd.disp_help-1)%(vd.options.disp_help+1)
@@ -134,7 +127,7 @@ def drawInputHelp(vd, scr, help:str=''):
     elif vd.disp_help == 1:
         curhelp = help
         sheet.drawSidebarText(scr, curhelp)
-    elif vd.disp_help == 2:
+    elif vd.disp_help >= 2:
         curhelp = vd.getHelpPane('input', module='visidata')
         sheet.drawSidebarText(scr, curhelp, title='Input Keystrokes Help')
 
@@ -224,7 +217,7 @@ def editline(vd, scr, y, x, w, i=0,
              display=True,
              updater=lambda val: None,
              bindings={},
-             help='',
+             help='',  # str|HelpPane
              clear=True):
   '''A better curses line editing widget.
   If *clear* is True, clear whole editing area before displaying.
@@ -485,6 +478,7 @@ def input(self, prompt, type=None, defaultLast=False, history=[], dy=0, attr=Non
         - *bindings*: dict of keystroke to func(v, i) that returns updated (v, i)
         - *dy*: number of lines from bottom of pane
         - *attr*: curses attribute for prompt
+        - *help*: string to include in help
     '''
 
     if attr is None:

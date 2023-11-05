@@ -7,7 +7,7 @@ import statistics
 from visidata import Progress, Sheet, Column, ColumnsSheet, VisiData
 from visidata import vd, anytype, vlen, asyncthread, wrapply, AttrDict
 
-vd.help_aggrs = 'HELPTODO'
+vd.help_aggregators = 'HELPTODO'
 
 vd.option('null_value', None, 'a value to be counted as null', replay=True)
 
@@ -200,23 +200,17 @@ def aggregator_choices(vd):
     ]
 
 
-
-def _format_match(s, positions):
-    out = list(s)
-    for p in positions:
-        out[p] = f'[:red]{out[p]}[/]'
-    return "".join(out)
-
 @VisiData.api
 def chooseAggregators(vd):
     prompt = 'choose aggregators: '
     def _fmt_aggr_summary(match, row, trigger_key):
-        formatted_aggrname = _format_match(row.key, match.positions.get('key', []))
+        formatted_aggrname = match.formatted.get('key', row.key) if match else row.key
         r = ' '*(len(prompt)-3)
         r += f'[:keystrokes]{trigger_key}[/]  '
         r += formatted_aggrname
         if row.desc:
-            r += ' - ' + _format_match(row.desc, match.positions.get('desc', []))
+            r += ' - '
+            r += match.formatted.get('desc', row.desc) if match else row.desc
         return r
 
     r = vd.activeSheet.inputPalette(prompt,
@@ -224,8 +218,13 @@ def chooseAggregators(vd):
             value_key='key',
             formatter=_fmt_aggr_summary,
             type='aggregators',
+            help=vd.help_aggregators,
             multiple=True)
-    return r.split()
+
+    aggrs = r.split()
+    for aggr in aggrs:
+        vd.usedInputs[aggr] += 1
+    return aggrs
 
 Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseAggregators())', 'Add aggregator to current column')
 Sheet.addCommand('z+', 'memo-aggregate', 'for agg in chooseAggregators(): cursorCol.memo_aggregate(aggregators[agg], selectedRows or rows)', 'memo result of aggregator over values in selected rows for current column')

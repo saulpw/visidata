@@ -354,7 +354,13 @@ def _fuzzymatch(target: str, pattern: str) -> MatchResult:
     return MatchResult(j, maxScorePos + 1, int(maxScore), pos)
 
 
-CombinedMatch = collections.namedtuple('CombinedMatch', 'score positions match')
+def _format_match(s, positions):
+    out = list(s)
+    for p in positions:
+        out[p] = f'[:red]{out[p]}[/]'
+    return "".join(out)
+
+CombinedMatch = collections.namedtuple('CombinedMatch', 'score formatted match')
 
 
 @VisiData.api
@@ -364,18 +370,18 @@ def fuzzymatch(vd, haystack:list[dict[str, str]], needles:list[str]) -> list[Com
     matches = []
     for h in haystack:
         match = {}
+        formatted_hay = {}
         for k, v in h.items():
             for p in needles:
-                m = _fuzzymatch(v, p)
-                if m.score > 0:
-                    match[k] = m
+                mr = _fuzzymatch(v, p)
+                if mr.score > 0:
+                    match[k] = mr
+                    formatted_hay[k] = _format_match(v, mr.positions)
 
         if match:
-            m = CombinedMatch(score=sum(mr.score**2 for mr in match.values()),
-                      positions={k:mr.positions for k, mr in match.items()},
-                      match=h)
             # square to prefer larger scores in a single haystack
-            matches.append(m)
+            score = sum(mr.score**2 for mr in match.values())
+            matches.append(CombinedMatch(score=score, formatted=formatted_hay, match=h))
 
     return sorted(matches, key=lambda m: -m.score)
 

@@ -1,23 +1,17 @@
 import collections
-from visidata import BaseSheet, vd, CompleteKey, clipdraw, HelpSheet, colors, AcceptInput, AttrDict
+from visidata import DrawablePane, BaseSheet, vd, VisiData, CompleteKey, clipdraw, HelpSheet, colors, AcceptInput, AttrDict
 
 
 vd.theme_option('color_cmdpalette', 'black on 72', 'base color of command palette')
-vd.theme_option('disp_cmdpal_max', 5, 'max number of suggestions for command palette')
+vd.theme_option('disp_cmdpal_max', 10, 'max number of suggestions for command palette')
 
 
-
-def _format_match(s, positions):
-    out = list(s)
-    for p in positions:
-        out[p] = f'[:red]{out[p]}[/]'
-    return "".join(out)
 
 def make_acceptor(value, multiple=False):
     def _acceptor(v, i):
         if multiple:
             items = list(v.split())
-            if v.endswith(' '):
+            if not v or v.endswith(' '):
                 items.append(value)
             else:
                 items[-1] = value
@@ -27,6 +21,14 @@ def make_acceptor(value, multiple=False):
             raise AcceptInput(value)
     return _acceptor
 
+
+@VisiData.lazy_property
+def usedInputs(vd):
+    return collections.defaultdict(int)
+
+@DrawablePane.after
+def execCommand2(sheet, cmd, *args, **kwargs):
+    vd.usedInputs[cmd.longname] += 1
 
 @BaseSheet.api
 def inputPalette(sheet, prompt, items,
@@ -39,27 +41,51 @@ def inputPalette(sheet, prompt, items,
     def _draw_palette(value):
         words = value.lower().split()
 
-        matches = vd.fuzzymatch(items, [words[-1]] if multiple and words else words)
+        if multiple and words:
+            if value.endswith(' '):
+                finished_words = words
+                unfinished_words = []
+            else:
+                finished_words = words[:-1]
+                unfinished_words = [words[-1]]
+        else:
+            unfinished_words = words
+            finished_words = []
 
-        # do the drawing
-        h, w = sheet._scr.getmaxyx()
-        cmdpal_h = min(h-2, sheet.options.disp_cmdpal_max)
-        m_max = min(len(matches), cmdpal_h)
+        unuseditems = [item for item in items if item[value_key] not in finished_words]
 
-        for i, m in enumerate(matches[:m_max]):
+        matches = vd.fuzzymatch(unuseditems, unfinished_words)
+
+        h = sheet.windowHeight
+        w = min(100, sheet.windowWidth)
+        nitems = min(h-1, sheet.options.disp_cmdpal_max)
+
+        useditems = []
+        palrows = []
+
+        for m in matches[:nitems]:
+            useditems.append(m.match)
+            palrows.append((m, m.match))
+
+        favitems = sorted([item for item in unuseditems if item not in useditems],
+                          key=lambda item: -vd.usedInputs.get(item[value_key], 0))
+
+        for item in favitems[:nitems-len(palrows)]:
+            palrows.append((None, item))
+
+        for i in range(nitems-len(palrows)):
+            palrows.append((None, None))
+
+        for i, (m, item) in enumerate(palrows):
             trigger_key = ' '
 
-            if i < 9:
+            if i < 9 and item:
                 trigger_key = f'{i+1}'
-                bindings[trigger_key] = make_acceptor(m.match[value_key], multiple=multiple)
+                bindings[trigger_key] = make_acceptor(item[value_key], multiple=multiple)
 
-            match_summary = formatter(m, m.match, trigger_key)
+            match_summary = formatter(m, item, trigger_key) if item else ' '
 
-            clipdraw(sheet._scr, h-(m_max+1)+i, 0, match_summary, colors.color_cmdpalette, w=120)
-
-        # add some empty rows for visual appeal and dropping previous (not-anymore-)matches
-        for i in range(cmdpal_h - m_max):
-            clipdraw(sheet._scr, h-(cmdpal_h+1)+i, 0, ' ', colors.color_cmdpalette, w=120)
+            clipdraw(sheet._scr, h-nitems-1+i, 0, match_summary, colors.color_cmdpalette, w=w)
 
         return None
 
@@ -86,12 +112,12 @@ def inputLongname(sheet):
 
     def _fmt_cmdpal_summary(match, row, trigger_key):
         keystrokes = this_sheets_help.revbinds.get(row.longname, [None])[0] or ' '
-        formatted_longname = _format_match(row.longname, match.positions.get('longname', []))
+        formatted_longname = match.formatted.get('longname', row.longname) if match else row.longname
         formatted_name = f'[:onclick {row.longname}]{formatted_longname}[/]'
         r = f' [:keystrokes]{keystrokes.rjust(len(prompt)-5)}[/]  '
         r += f'[:keystrokes]{trigger_key}[/] {formatted_name}'
         if row.description:
-            formatted_desc = _format_match(row.description, match.positions.get('description', []))
+            formatted_desc = match.formatted.get('description', row.description) if match else row.description
             r += f' - {formatted_desc}'
         if vd.options.debug:
             debug_info = f'[{m.score}]'

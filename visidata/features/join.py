@@ -3,7 +3,7 @@ import itertools
 import functools
 from copy import copy
 
-from visidata import vd, VisiData, asyncthread, Sheet, Progress, IndexSheet, Column, CellColorizer, ColumnItem, SubColumnItem, TypedWrapper, ColumnsSheet
+from visidata import vd, VisiData, asyncthread, Sheet, Progress, IndexSheet, Column, CellColorizer, ColumnItem, SubColumnItem, TypedWrapper, ColumnsSheet, AttrDict
 
 @VisiData.api
 def ensureLoaded(vd, sheets):
@@ -84,7 +84,7 @@ def openJoin(sheet, others, jointype=''):
                          sheetKeyCols={s:s.keyCols for s in sheets})
 
 
-vd.jointypes = [{'key': k, 'desc': v} for k, v in {
+vd.jointypes = [AttrDict(key=k, desc=v) for k, v in {
     'inner': 'only rows with matching keys on all sheets',
     'outer': 'only rows with matching keys on first selected sheet',
     'full': 'all rows from all sheets (union)',
@@ -349,7 +349,22 @@ class ConcatSheet(Sheet):
 
 @VisiData.api
 def chooseJointype(vd):
-    return vd.chooseOne(vd.jointypes, type="jointype")
+    prompt = 'choose jointype: '
+    def _fmt_aggr_summary(match, row, trigger_key):
+        formatted_jointype = match.formatted.get('key', row.key) if match else row.key
+        r = ' '*(len(prompt)-3)
+        r += f'[:keystrokes]{trigger_key}[/]  '
+        r += formatted_jointype
+        if row.desc:
+            r += ' - '
+            r += match.formatted.get('desc', row.desc) if match else row.desc
+        return r
+
+    return vd.activeSheet.inputPalette(prompt,
+            vd.jointypes,
+            value_key='key',
+            formatter=_fmt_aggr_summary,
+            type='jointype')
 
 
 IndexSheet.addCommand('&', 'join-selected', 'left, rights = someSelectedRows[0], someSelectedRows[1:]; vd.push(left.openJoin(rights, jointype=chooseJointype()))', 'merge selected sheets with visible columns from all, keeping rows according to jointype')
