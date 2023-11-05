@@ -59,6 +59,8 @@ bonusBoundaryDelimiter = bonusBoundary + 1
 
 delimiterChars = '/,:;|'
 
+vd.theme_option('color_match', 'red', 'color for matching chars in palette chooser')
+
 whiteChars = ' \t\n\v\f\r\x85\xA0'
 
 (
@@ -357,7 +359,7 @@ def _fuzzymatch(target: str, pattern: str) -> MatchResult:
 def _format_match(s, positions):
     out = list(s)
     for p in positions:
-        out[p] = f'[:red]{out[p]}[/]'
+        out[p] = f'[:match]{out[p]}[/]'
     return "".join(out)
 
 CombinedMatch = collections.namedtuple('CombinedMatch', 'score formatted match')
