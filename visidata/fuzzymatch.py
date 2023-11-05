@@ -386,7 +386,8 @@ def fuzzymatch(vd, haystack:"list[dict[str, str]]", needles:"list[str]) -> list[
     return sorted(matches, key=lambda m: -m.score)
 
 
-def test_fuzzymatch():
+@VisiData.api
+def test_fuzzymatch(vd):
     assert asciiFuzzyIndex('helo', 'h') == 0
     assert asciiFuzzyIndex('helo', 'hlo') == 0
     assert asciiFuzzyIndex('helo', 'e') == 0
