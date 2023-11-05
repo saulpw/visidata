@@ -5,6 +5,8 @@ from copy import copy
 
 from visidata import vd, VisiData, asyncthread, Sheet, Progress, IndexSheet, Column, CellColorizer, ColumnItem, SubColumnItem, TypedWrapper, ColumnsSheet, AttrDict
 
+vd.help_join = '# Join Help\nHELPTODO'
+
 @VisiData.api
 def ensureLoaded(vd, sheets):
     threads = [vs.ensureLoaded() for vs in sheets]
@@ -364,6 +366,7 @@ def chooseJointype(vd):
             vd.jointypes,
             value_key='key',
             formatter=_fmt_aggr_summary,
+            help=vd.help_join,
             type='jointype')
 
 

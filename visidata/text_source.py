@@ -2,7 +2,7 @@ import re
 
 from visidata import vd, BaseSheet
 
-vd.help_regex = 'HELPTODO'
+vd.help_regex = '# Regex Help\nHELPTODO'
 
 vd.option('regex_skip', '', 'regex of lines to skip in text sources', help=vd.help_regex)
 

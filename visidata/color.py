@@ -9,7 +9,7 @@ import visidata
 
 __all__ = ['ColorAttr', 'colors', 'update_attr', 'ColorMaker', 'rgb_to_attr']
 
-vd.help_color = 'HELPTODO'
+vd.help_color = '# Color Help\nHELPTODO'
 
 
 @dataclass
