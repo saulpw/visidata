@@ -402,9 +402,11 @@ def cmdlog(sheet):
 def cmdlog_sheet(sheet):
     c = CommandLogJsonl(sheet.name+'_cmdlog', source=sheet, rows=[])
     # copy over all existing globally set options
-    for r in vd.cmdlog.rows:
-        if r.sheet == 'global' and (r.longname == 'set-option') or (r.longname == 'unset-option'):
-            c.addRow(r)
+    # you only need to do this for the first BaseSheet in a tree
+    if not isinstance(sheet.source, BaseSheet):
+        for r in vd.cmdlog.rows:
+            if r.sheet == 'global' and (r.longname == 'set-option') or (r.longname == 'unset-option'):
+                c.addRow(r)
     return c
 
 
