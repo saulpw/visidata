@@ -382,7 +382,7 @@ def fuzzymatch(vd, haystack:"list[dict[str, str]]", needles:"list[str]) -> list[
 
         if match:
             # square to prefer larger scores in a single haystack
-            score = sum(mr.score**2 for mr in match.values())
+            score = int(sum(mr.score**2 for mr in match.values()))
             matches.append(CombinedMatch(score=score, formatted=formatted_hay, match=h))
 
     return sorted(matches, key=lambda m: -m.score)

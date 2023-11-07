@@ -114,14 +114,13 @@ def inputLongname(sheet):
         keystrokes = this_sheets_help.revbinds.get(row.longname, [None])[0] or ' '
         formatted_longname = match.formatted.get('longname', row.longname) if match else row.longname
         formatted_name = f'[:onclick {row.longname}]{formatted_longname}[/]'
+        if vd.options.debug and match:
+            keystrokes = f'[{match.score}]'
         r = f' [:keystrokes]{keystrokes.rjust(len(prompt)-5)}[/]  '
         r += f'[:keystrokes]{trigger_key}[/] {formatted_name}'
         if row.description:
             formatted_desc = match.formatted.get('description', row.description) if match else row.description
             r += f' - {formatted_desc}'
-        if vd.options.debug:
-            debug_info = f'[{m.score}]'
-            r = debug_info + r[len(debug_info):]
         return r
 
     return sheet.inputPalette(prompt, this_sheet_commands,
