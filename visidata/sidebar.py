@@ -68,6 +68,8 @@ def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', o
             title = lines[0][1:].strip()
             text = '\n'.join(lines[1:])
 
+        if not text:
+            return
 
         lines = list(wraptext(text, width=maxw-4))
         maxlinew = 0
