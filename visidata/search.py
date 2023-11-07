@@ -3,7 +3,7 @@ from visidata import vd, VisiData, BaseSheet, Sheet, Column, Progress, asyncthre
 
 VisiData.init('searchContext', dict) # [(regex, columns, backward)] -> kwargs from previous search
 
-vd.help_regex_flags = '''# regex flags
+vd.help_regex_flags = '''# Regex Flags Help
 - `A` (ASCII) ASCII-only matching (not unicode)
 - `I` (IGNORECASE): case-insensitive matching
 - `M` (MULTILINE): `^` and `$` match after/before newlines

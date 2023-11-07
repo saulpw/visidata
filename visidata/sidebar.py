@@ -9,6 +9,7 @@ vd.option('disp_sidebar_fmt', '{help}', 'format string for default sidebar')
 vd.theme_option('disp_sidebar_width', 0, 'max width for sidebar')
 vd.theme_option('disp_sidebar_height', 0, 'max height for sidebar')
 vd.theme_option('color_sidebar', 'black on 114 blue', 'base color of sidebar')
+vd.theme_option('color_sidebar_title', 'black on yellow', 'color of sidebar title')
 
 
 @BaseSheet.property
@@ -102,7 +103,7 @@ def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', o
             i += 1
 
     x = max(0, w-titlew-6)
-    clipdraw(sidebarscr, 0, x, f"|[:black on yellow] {title} [:]|", cattr, w=titlew+4)
+    clipdraw(sidebarscr, 0, x, f"|[:sidebar_title] {title} [:]|", cattr, w=titlew+4)
     if bottommsg:
         clipdraw(sidebarscr, h-1, winw-dispwidth(bottommsg)-4, '|'+bottommsg+'|[:]', cattr)
 
