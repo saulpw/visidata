@@ -9,7 +9,7 @@ from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColo
 
 
 vd.option('disp_rstatus_fmt', '{sheet.threadStatus} {sheet.keystrokeStatus}   {sheet.longname}  {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}', 'right-side status format string')
-vd.option('disp_status_fmt', '{sheet.shortcut}› {sheet.name}| ', 'status line prefix')
+vd.option('disp_status_fmt', '[:onclick sheets-stack]{sheet.shortcut}› {sheet.name}[/]| ', 'status line prefix')
 vd.theme_option('disp_lstatus_max', 0, 'maximum length of left status line')
 vd.theme_option('disp_status_sep', '│', 'separator between statuses')
 
