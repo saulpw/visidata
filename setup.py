@@ -3,7 +3,7 @@
 from setuptools import setup
 # tox can't actually run python3 setup.py: https://github.com/tox-dev/tox/issues/96
 #from visidata import __version__
-__version__ = '2.12dev'
+__version__ = '3.0dev'
 
 setup(name='visidata',
       version=__version__,
