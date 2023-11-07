@@ -5,6 +5,11 @@ from visidata import asyncthread, options, vd
 from visidata import VisiData, BaseSheet, Sheet, Column, Progress
 
 
+@VisiData.lazy_property
+def help_regex(vd):
+    return vd.getHelpPane('regex', module='visidata')
+
+
 @Sheet.api
 def setSubst(sheet, cols, rows):
     if not rows:
