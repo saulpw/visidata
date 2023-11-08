@@ -93,8 +93,9 @@ class DirSheet(Sheet):
 
         ## Options (must reload to take effect)
 
-        - `--dir-recurse` (or `-r`) to include all files in all subfolders
-        - `--dir-hidden` to include hidden dotfiles
+        - [:onclick options-sheet dir_depth]`dir_depth`[/] to recurse into folders
+          - [CLI] `-r` to include all files in all subfolders
+        - [:onclick options-sheet dir_hidden]`dir_hidden`[/] to include hidden dotfiles
     '''
     rowtype = 'files' # rowdef: Path
     defer = True
