@@ -51,7 +51,7 @@ def toggle_scrollfix(sheet):
         vd.status("cursor unlocked")
     else:
         sheet.disp_scrollfix = sheet.cursorRowIndex - sheet.topRowIndex
-        vd.status("cursor locked to screen row {sheet.disp_scrollfix}")
+        vd.status(f"cursor locked to screen row {sheet.disp_scrollfix}")
 
 
 Sheet.addCommand('', 'toggle-scrollfix', 'toggle_scrollfix()', helpstr='toggle cursor lock to current screen row')
