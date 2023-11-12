@@ -121,11 +121,11 @@ def save_json(vd, p, *vsheets):
                 for i, row in enumerate(vs.iterrows()):
                     if i > 0:
                         fp.write(',\n')
-                    rd = _rowdict(vs.visibleCols, row)
+                    rd = _rowdict(vs.visibleCols, row, keep_nulls=(i==0))
                     fp.write(jsonenc.encode(rd))
             fp.write('\n]\n')
         else:
-            it = {vs.name: [_rowdict(vs.visibleCols, row) for row in vs.iterrows()] for vs in vsheets}
+            it = {vs.name: [_rowdict(vs.visibleCols, row, keep_nulls=(i==0)) for i, row in enumerate(vs.iterrows())] for vs in vsheets}
 
             with Progress(gerund='saving'):
                 for chunk in jsonenc.iterencode(it):
