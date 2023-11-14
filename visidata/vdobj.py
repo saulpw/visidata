@@ -110,12 +110,21 @@ class VisiData(visidata.Extensible):
         vd.allSheets = []
         return vd
 
+    def get_wch(self, scr):
+        try:
+            return scr.get_wch()
+        except AttributeError:  #192 some packages don't have wide chars
+            k = scr.getch()
+            if k == -1:  # mimic get_wch behavior
+                raise curses.error('no char ready')
+            return k
+
     def drainPendingKeys(self, scr):
         '''Call scr.get_wch() until no more keypresses are available.  Return True if any keypresses are pending.'''
         scr.timeout(0)
         try:
             while True:
-                k = scr.get_wch()
+                k = self.get_wch(scr)
                 if k:
                     self.pendingKeys.append(k)
                 else:
@@ -137,7 +146,7 @@ class VisiData(visidata.Extensible):
             curses.reset_prog_mode()  #1347
             try:
                 scr.refresh()
-                k = scr.get_wch()
+                k = self.get_wch(scr)
                 vs = vs or self.activeSheet
                 if vs:
                     self.drawRightStatus(vs._scr, vs) # continue to display progress %

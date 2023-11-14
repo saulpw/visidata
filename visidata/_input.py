@@ -76,7 +76,7 @@ def until_get_wch(scr):
     ret = None
     while not ret:
         try:
-            ret = scr.get_wch()
+            ret = vd.get_wch(scr)
         except curses.error:
             pass
 
