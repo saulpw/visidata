@@ -4,7 +4,7 @@
 
 - [reorg] move independent modules into visidata/{features|experimental|themes}
 - [modules] include module name in Option/Command sheets
-- [sidebar] add sidebar
+- [sidebar] add sidebar  #2064
     - #1733 for full description/discussion
     - will contain a stack list of status messages
     - color syntax is [:bold]footext[/]
@@ -13,6 +13,7 @@
     - toggle with `sidebar-toggle` (bound to `b`)
     - make bottom msg entirely clickable
     - make dedent and header parsing standard
+    - add `options.disp_sidebar`
 - display sheet and feature help documentation in sidebar
     - added bundles of Guide Sheets
     - open Guide Sheets into a full VisiData sheet with `open-sidebar` (bound to `gb`)
@@ -26,27 +27,58 @@
         - Ctrl+N is now no-op for similar functionality to replay-advance
             - replay-advance command itself is removed
         - removed options.replay_movement and its functionality
-
         - options.replay_wait (-w on CLI) now works by setting the curses timeout, which will affect the display update frequency for all async commands.  previously was hard-coded.  try -w 0.001 while loading a big file to see a very rapid update.
-
     - replay in general should be more stable and possibly faster.
+- added `options.disp_help`, an integer and to set novice/expert mode. When `disp_help` is:
+    - -1: status messages aren't shown
+    - 0: no help is shown
+    - 1: sidebar sheet help is shown
+    - 2: help is shown for the input widget on the sidebar (this was condensed and moved from the former input help panel)
+    - put input help on sidebar; `disp_help` from -1 to 3
+    - mark options to be excluded if `disp_help` greater than `option.max_help`
+- add options.overwrite='n' mode  #1805
+    - replace `options.confirm_overwrite` with `options.overwrite`, which can be
+      'n' (no/never), 'y' (yes/always), 'c' (confirm)
+      - add vd.confirmOverwrite()
+        - inputPath/inputFilename will not suggest the existing value or complete filenames if overwrite not y or c
+        - add --ro/--readonly cli flag (opposite of existing -y)
+        - add [RO] readonly marker on right status after [M] modified
+- add command palette (PR by @moritz #2059 #247)
+    - press Space to exec command by longname and bring up command palette
+    - type to match by longname and/or description
+    - uses fzf's fuzzymatch algo
+    - press 1-9 to immediately execute that command
+    - `options.disp_cmdpal_max` for number of suggestions
+    - `options.color_cmdpalette` for base color
+
 
 - [aggregators] sum uses start value from type of first value for Python 3.8+  #1996 #1999 #2009
 - [build] add a .desktop for VisiData  #1738
+- [choose] add type for join/aggregators history  #2075
 - [cli] add `-i` to run interactive mode after batch  #1714
 - [clipboard] implement a more universal paste that uses positional columns  #1377
 - [cliptext] fix double-width char display  #1918
 - [columns] add basic repr  #1757
 - [columns] add `setcol-precision-more` and `-less`  #1609 #1650
     - works on float, floatsi, currency, date columns
+- [commands] allow space-seperated keystrokes  #2067
+- [confirm] make yes/no buttons clickable  #1740 #2075
 - [describe] default width=10 for describe columns
 - [dir] set name of '.' to current dir name  #1775
 - [dir] set name relative to previously loaded directory  #1775
 - [dir] get default save name from sheet name  #1775
+- [dir] rename `options.dir_recurse:bool` to `options.dir_depth:int`  #1715
 - [display] add `setcol-` (`zv`) and `setcols-height-input` (`gzv`)  #1307
+- [encoding] use `save_encoding` for lsv, geojson, texttable savers
+- [encoding] change default options.encoding to utf-8-sig to detect/remove BOM  #200 #908 #909 #1711
 - [expand] change default depth of expand-col(s)-depth to 0 (PR by @cool-RR #1809)
 - [features] procmgr to view/manage processes, memory/cpu stats
 - [features] ping to traceroute a hostip
+- [features] add `addcol-histogram`  #2052
+    - display a histogram-like column for any column of ints
+- [features] add `contract-cols-depth` etc (bound to `g)`, `z)`, `gz)`  #1695
+- [feature] add contract-source-cols bound to )  #1702
+- [feature] reload-modified calls `reload_rows`, adding support for tail  #1686
 - [freq] add select-first command
 - [freq] base histogram width on column width  #1807
 - [freq] set default disp_histogram to U+25A0 BLACK SQUARE (■)) (PR by @daviewales #1949 #1807)
@@ -58,6 +90,8 @@
 - [input] add `Ctrl+N` to insert prettykeys of literal keystroke
 - [join] allow selecting of join columns from all columns sheet  #1224
     - unbind `&` for **ColumnsSheet** `join-cols`
+- [join] join now works with typed values, not display values  #2015
+- [keys] change ScrollWheelUp to ScrollUp etc
 - [layout] stop errors: hide-col on empty sheet, inputMultiple (PR by @midichef #1963)
 - [linux] change default system clipboard cmd to wl-copy if the user is using wayland (PR by @rj1 #1763)
 - [loaders] mailbox formats mbox/maildir/mmdf/babyl/mh loader (as supported by Python mailbox stdlib)
@@ -66,6 +100,7 @@
     - Use --regex-skip='' (or otherwise set the option to '') to disable this behavior.
 - [loaders] .jrnl format (jrnl.sh) loader+saver
 - [loaders] add reddit API loader
+- [loaders http] guess filetype based on magic bytes  #1760
 - [loaders] add matrix API loader
 - [loaders] add orgmode loader
 - [loaders] add scraper
@@ -75,14 +110,17 @@
     - open Amazon S3 paths and objects
 - [loaders] add bit.io loader
 - [loaders] add support for jsonla (JSONL arrays) format (PR by @daviewales #1730)  #1726
+- [loaders png] use 2x2 unicode blocks instead of braille
 - [loaders] add zulip loader
 - [loaders] add vd.requireOptions to check for presence of loader-relevant API keys
 - [loaders] add airtable API loader
 - [loaders http] replace requests with urllib  #1808 #1704
+- [loaders sqlite] add `exec-sql` command to input query  #1719
 - [loaders] add a toml loader (PR by @ajkerrigan #1894 #1580 #1587)
 - [loaders shell] allow deleting of directories unless `options.safety_first=True`  #1965
 - [loaders xml] ignore comments
 - [loaders xlsx] add cell colorizers from source  #1718
+- [loaders xlsx] add `column_letter` to meta columns
 - [loaders sqlite] save list/dict as json  #1589
 - [loaders jsonl] allow slash comments (PR by @geekscrapy #2025)
 - [macros] allow deleting of macro with commit on **MacrosSheet**  #1569
@@ -92,6 +130,7 @@
 - [menu] add `go-row-number` to menu  #1766
 - [menu] move commit-sheet under File>Save
 - [menu] add resize-cols-input to Columns -> Resize (PR by @njthomas #1887)
+- [motd] default motd is "Support VisiData" instead of blank
 - [mouse] onclick with url launches $BROWSER with url; add `displayer_url`  #2031
 - [open] try using options.filetype for path  #1710
     - useful for configuring default filetype when reading from stdin
@@ -113,17 +152,21 @@
 - [sheet] remove left-click for sheets-stack  #2030 #1656
 - [setcol-fake] add `setcol-fake` (unbound) adds a column of Faker generated 'faketypes'
 - [sparkline] add `addcol-sparkline` (unbound): adds a sparkline of all numeric columns
+- [status] downgrade sheet "finished loading" to debug
 - [tests] call all test_func(vd) defined in modules during pytest
 - [tests] run all unit tests in CI
 - [tests] add test for loading a directory  #1798
 - [themes] add options.theme and visidata/themes directory of additional themes (light, ascii8, asciimono)  #1682  #1691
+- [themes] keystrokes/code now with gray bg
 - [types] add `ipaddr` and `ipnet` types`. add `type-ipaddr` and `type-ipnet` commands (unbound) (PR by @ajkerrigan #1946 #1782 #1910)
     - also add `select-supernets` (unbound) which selects rows where the CIDR block value includes the input address space
 - [types] add `type-url` and `open-url`  #2031
 - [types] add `type-datetime`  #1572 #1380 #397
 - [ui] change menu, status, and other colors to be more visible
+- [undo] options.undo can only be set globally
 - [usd] provide USD(s) function to convert string like '£300' or '205 AUD' to equivalent US$ as float
 - [windows] change default system clipboard command to clip.exe
+- [zip] add `sysopen-row` (`Ctrl+O`) to open file in `$EDITOR`  #1708
 
 ## experimental features (must be imported manually)
 
@@ -144,6 +187,7 @@
 - [cli] support `options.encoding_errors` for stdin  #2047
 - [clipboard] warn when pasting before copying (PR by @midichef #1793)
 - [clipboard] improve error when deleting row on empty sheet (PR by @midichef #2006)
+- [clipboard] save to tempfile, do not confirm
 - [cmdlog] check for empty cursor column when adding a column (PR by @midichef #1783)
 - [cmdlog] ensure record of global options in all cmdlogs
 - [colorizers] fix custom colorizers showing in sheet context  #1225
@@ -153,6 +197,7 @@
 - [confirm] remove flicker in alacritty  #2040
 - [currency] fix currency_neg option
 - [curses] allow breakpoint() before initwin
+- [curses] ignore keys pressed before curses is initialised  #1993
 - [curses] use builtins if no curses screen yet
 - [cursor] cursorColIndex now returns None if empty  #1803
 - [deps] add requests-cache submodule to root visidata  #1748
@@ -215,6 +260,7 @@
 - [loaders rec] support %sort; continue loading on exception  #2022
 - [loaders pyobj] similar sheet names for dive-/open- and pyobj- #1988
 - [loaders pyobj] do not skip properties that raise
+- [loaders png] fix `rgb_to_attr` to return str colornum
 - [loaders vds] fix 'keyerror: exprcolumn' for .vds (PR by @pacien #2036 #2045)
 - [loaders sav] use fork of `savReaderWriter` for the sake of Python 3.10+ support  #1867
 - [loaders vds] fix .csv to .vds conversion  #2037
@@ -225,11 +271,13 @@
 - [main] print version string once, not twice (PR by @midichef #1837)
 - [main] remove forced unload before interactive mode  #1943
 - [menu] use "Alt+x" keybinding instead of "^[x"
+- [metasheets] do not use options.encoding for internal sheet saving
 - [misc] remove trailing commas from addCommand (PR by @midichef #1962)
 - [modify] do not call saveSheets on commit
 - [modify] commitMods do not call putValue for changes to added/deleted rows
     - also fix ItemColumn.putValue and AttrColumn.putValue to call parent
       Column.putValue before setting the value on the row
+- [modify] confirm() overwrite on root sheet source path
 - [modify] always set col.defer
 - [modify] do not fail on Column.putValue if no setter
 - [mouse] fix mouse-click on bottom pane
@@ -272,8 +320,8 @@
 - [status] fix Alt+Shift+Shift+X  #1828
 - [status] update right status before exec  #996
 - [status] add caller/module to statuses, and print on --debug  #2037
-- [sort] show sort arrow for sort columns described by name (PR by @midichef
-  #1876)
+- [sort] show sort arrow for sort columns described by name (PR by @midichef #1876)
+- [syscopy] always copy as utf-8
 - [term] allow non-color term like vt102
 - [tui] make BaseSheet.refresh() no-op; Ctrl+L call sheet.refresh() before vd.redraw()
 - [threads] remove spurious None from syncing set
@@ -297,7 +345,7 @@
 ## api
 
 - [cli] printout gone; use `builtins.print`
-- [color] use `ColorAttr` throughout
+- [color] use `ColorAttr` throughout  #2061 #2017
     - seperate out fg/bg
     - allow bg and fg to take precedence independently
     - fixes issues with forced bg=black on sidebar for warning, and statusbar for working
