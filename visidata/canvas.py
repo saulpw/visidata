@@ -425,6 +425,12 @@ class Canvas(Plotter):
         self.setCursorSize(Point(self.cursorBox.xmin + w/2 * self.canvasCharWidth,
                                  self.cursorBox.ymin + h/4 * self.canvasCharHeight))
 
+    def formatX(self, v):
+        return str(v)
+
+    def formatY(self, v):
+        return str(v)
+
     def commandCursor(sheet, execstr):
         'Return (col, row) of cursor suitable for cmdlog replay of execstr.'
         contains = lambda s, *substrs: any((a in s) for a in substrs)
