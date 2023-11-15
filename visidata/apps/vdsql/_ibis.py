@@ -592,8 +592,7 @@ def addcol_split(sheet, col, delim):
 
 
 @IbisTableSheet.api
-def addcol_subst(sheet, col, regex):
-    before, after = vd.parse_sed_transform(regex)
+def addcol_subst(sheet, col, before='', after=''):
     c = Column(col.name + "_re",
                getter=lambda col,row,before=before,after=after: re.sub(before, after, col.origCol.getDisplayValue(row)),
                origCol=col,
@@ -721,7 +720,7 @@ IbisTableSheet.addCommand("'", 'addcol-cast', 'addcol_cast(cursorCol)')
 
 IbisTableSheet.addCommand('zb', 'sidebar-choose', 'choose_sidebar()', 'choose vdsql sidebar to show')
 IbisTableSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("SQL query: ")))', 'open sheet with results of raw SQL query')
-IbisTableSheet.addCommand('', 'addcol-subst', 'addColumnAtCursor(addcol_subst(cursorCol, input("transform column by regex: ", type="regex-subst")))')
+IbisTableSheet.addCommand('', 'addcol-subst', 'addColumnAtCursor(addcol_subst(cursorCol, **inputRegexSubst("transform column by regex: ")))')
 IbisTableSheet.addCommand('', 'addcol-split', 'addColumnAtCursor(addcol_split(cursorCol, input("split by delimiter: ", type="delim-split")))')
 IbisTableSheet.bindkey('split-col', 'addcol-split')
 IbisTableSheet.addCommand('gt', 'stoggle-rows', 'stoggle_rows()', 'select rows matching current cell in current column')

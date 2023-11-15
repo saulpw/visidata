@@ -124,6 +124,7 @@ def regex_flags(sheet):
 
 @VisiData.api
 def inputRegexSubst(vd, prompt):
+    'Input regex transform via oneliner (separated with `/`).  Return parsed transformer as dict(before=, after=).'
     rex = vd.input(prompt, type='regex-subst')
     before, after = vd.parse_sed_transform(rex)
     return dict(before=before, after=after)
