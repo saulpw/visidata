@@ -10,16 +10,6 @@ def help_regex(vd):
     return vd.getHelpPane('regex', module='visidata')
 
 
-@Sheet.api
-def setSubst(sheet, cols, rows):
-    if not rows:
-        vd.warning('no %s selected' % sheet.rowtype)
-        return
-    modified = 'column' if len(cols) == 1 else 'columns'
-    rex = vd.input("transform %s by regex: " % modified, type="regex-subst")
-    setValuesFromRegex(cols, rows, rex)
-
-
 vd.option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]', replay=True)
 vd.option('regex_maxsplit', 0, 'maxsplit to pass to regex.split', replay=True)
 
@@ -89,8 +79,7 @@ def addRegexColumns(vs, regexMaker, origcol, regexstr):
 
 
 @VisiData.api
-def regexTransform(vd, origcol, instr):
-    before, after = vd.parse_sed_transform(instr)
+def regexTransform(vd, origcol, before='', after=''):
     return lambda col,row,origcol=origcol,before=before,after=after,flags=origcol.sheet.regex_flags(): re.sub(before, after, origcol.getDisplayValue(row), flags=flags)
 
 
@@ -115,9 +104,10 @@ def indexWithEscape(s, char, escape_char='\\'):
     return None
 
 
+@Sheet.api
 @asyncthread
-def setValuesFromRegex(cols, rows, rex):
-    transforms = [vd.regexTransform(col, rex) for col in cols]
+def setValuesFromRegex(sheet, cols, rows, before='', after=''):
+    transforms = [vd.regexTransform(col, before=before, after=after) for col in cols]
     vd.addUndoSetValues(cols, rows)
     for r in Progress(rows, 'replacing'):
         for col, transform in zip(cols, transforms):
@@ -132,13 +122,20 @@ def regex_flags(sheet):
     return sum(getattr(re, f.upper()) for f in sheet.options.regex_flags)
 
 
+@VisiData.api
+def inputRegexSubst(vd, prompt):
+    rex = vd.input(prompt, type='regex-subst')
+    before, after = vd.parse_sed_transform(rex)
+    return dict(before=before, after=after)
+
+
 Sheet.addCommand(':', 'split-col', 'addRegexColumns(makeRegexSplitter, cursorCol, input("split regex: ", type="regex-split"))', 'Add new columns from regex split')
 Sheet.addCommand(';', 'capture-col', 'addRegexColumns(makeRegexMatcher, cursorCol, input("capture regex: ", type="regex-capture"))', 'add new column from capture groups of regex; requires example row')
 Sheet.addCommand('', 'addcol-split', 'addColumnAtCursor(RegexColumn(makeRegexSplitter, cursorCol, input("split regex: ", type="regex-split")))', 'Add column split by regex')
 Sheet.addCommand('', 'addcol-capture', 'addColumnAtCursor(RegexColumn(makeRegexMatcher, cursorCol, input("capture regex: ", type="regex-capture")))', 'Add column captured by regex')
-Sheet.addCommand('*', 'addcol-subst', 'addColumnAtCursor(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, input("transform column by regex: ", type="regex-subst"))))', 'add column derived from current column, replacing regex with subst (may include \1 backrefs)')
-Sheet.addCommand('g*', 'setcol-subst', 'setSubst([cursorCol], someSelectedRows)', 'regex/subst - modify selected rows in current column, replacing regex with subst, (may include backreferences \\1 etc)')
-Sheet.addCommand('gz*', 'setcol-subst-all', 'setSubst(visibleCols, someSelectedRows)', 'modify selected rows in all visible columns, replacing regex with subst (may include \\1 backrefs)')
+Sheet.addCommand('*', 'addcol-subst', 'addColumnAtCursor(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, **inputRegexSubst("transform column by regex: "))))', 'add column derived from current column, replacing regex with subst (may include \1 backrefs)')
+Sheet.addCommand('g*', 'setcol-subst', 'setValuesFromRegex([cursorCol], someSelectedRows, **inputRegexSubst("transform column by regex: "))', 'regex/subst - modify selected rows in current column, replacing regex with subst, (may include backreferences \\1 etc)')
+Sheet.addCommand('gz*', 'setcol-subst-all', 'setValuesFromRegex(visibleCols, someSelectedRows, **inputRegexSubst(f"transform {nVisibleCols} columns by regex: "))', 'modify selected rows in all visible columns, replacing regex with subst (may include \\1 backrefs)')
 
 
 vd.addMenuItems('''
