@@ -34,6 +34,7 @@ odfpy               # odt (OpenDocument)
 urllib3             # .zip over http
 pyarrow>=14.0.1; python_version >= '3.8' # arrow arrows parquet (Apache Arrow)
 pyarrow_hotfix;  python_version <= '3.7' # pyarrow security patch
+pyarrow          python_version <= '3.7'
 seaborn             # plot via seaborn
 matplotlib          # svg saver
 sh                  # ping
