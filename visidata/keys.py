@@ -8,6 +8,7 @@ visidata.vd.prettykeys_trdict = {
         '^J': 'Enter',
         '^M': 'Enter',
         '^I': 'Tab',
+        '^@': 'Ctrl+Space',
         'KEY_UP':    'Up',
         'KEY_DOWN':  'Down',
         'KEY_LEFT':  'Left',
@@ -30,6 +31,8 @@ visidata.vd.prettykeys_trdict = {
         'kNXT5':     'Ctrl+PgDn',
         'KEY_IC5':   'Ctrl+Ins',
         'KEY_DC5':   'Ctrl+Del',
+        'kDC5':      'Ctrl+Del',
+        'KEY_SDC':   'Shift+Del',
 
         'KEY_IC':    'Ins',
         'KEY_DC':    'Del',
@@ -51,19 +54,16 @@ visidata.vd.prettykeys_trdict = {
         'BUTTON5_PRESSED': 'ScrollDown',
         'REPORT_MOUSE_POSITION': 'ScrollDown',
         '2097152': 'ScrollDown',
-        'KEY_F(1)': 'F1',
-        'KEY_F(2)': 'F2',
-        'KEY_F(3)': 'F3',
-        'KEY_F(4)': 'F4',
-        'KEY_F(5)': 'F5',
-        'KEY_F(6)': 'F6',
-        'KEY_F(7)': 'F7',
-        'KEY_F(8)': 'F8',
-        'KEY_F(9)': 'F9',
-        'KEY_F(10)': 'F10',
-        'KEY_F(11)': 'F11',
-        'KEY_F(12)': 'F12',
     }
+
+for i in range(1, 13):
+    d = visidata.vd.prettykeys_trdict
+    d[f'KEY_F({i})'] = f'F{i}'
+    d[f'KEY_F({i+12})'] = f'Shift+F{i}'
+    d[f'KEY_F({i+24})'] = f'Ctrl+F{i}'
+    d[f'KEY_F({i+36})'] = f'Ctrl+Shift+F{i}'
+    d[f'KEY_F({i+48})'] = f'Alt+F{i}'
+    d[f'KEY_F({i+60})'] = f'Alt+Shift+F{i}'
 
 
 @visidata.VisiData.api
