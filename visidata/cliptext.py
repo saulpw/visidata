@@ -321,6 +321,7 @@ def wraptext(text, width=80, indent=''):
 
                 txt = txt[len(c):]
 
+            r = r.strip()
             if linenum > 0:
                 r = indent + r
             yield r, textline
