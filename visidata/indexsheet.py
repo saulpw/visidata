@@ -5,7 +5,6 @@ class IndexSheet(Sheet):
     'Base class for tabular sheets with rows that are Sheets.'
     help = '''
     # Index Sheet
-
     This is a list of sheets from `{sheet.source}`.
 
     - `Enter` to open {sheet.cursorRow}
