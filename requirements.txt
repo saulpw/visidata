@@ -32,7 +32,8 @@ wcwidth             # tabulate saver with unicode
 zstandard           # read .zst files
 odfpy               # odt (OpenDocument)
 urllib3             # .zip over http
-pyarrow>=14.0.1     # arrow arrows parquet (Apache Arrow)
+pyarrow>=14.0.1; python_version >= '3.8' # arrow arrows parquet (Apache Arrow)
+pyarrow_hotfix;  python_version <= '3.7' # pyarrow security patch
 seaborn             # plot via seaborn
 matplotlib          # svg saver
 sh                  # ping
