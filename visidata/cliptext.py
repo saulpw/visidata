@@ -215,9 +215,9 @@ def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clea
        Return width drawn (max of w).
     '''
     if scr:
-        _, windowWidth = scr.getmaxyx()
+        windowHeight, windowWidth = scr.getmaxyx()
     else:
-        windowWidth = 80
+        windowHeight, windowWidth = 25, 80
     totaldispw = 0
 
     assert isinstance(cattr, ColorAttr), cattr
@@ -255,7 +255,12 @@ def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clea
 
             # convert to string just before drawing
             clipped, dispw = clipstr(chunk, chunkw, **kwargs)
-            scr.addstr(y, x, clipped, cattr.attr)
+
+            if y >= 0 and y < windowHeight:
+                scr.addstr(y, x, clipped, cattr.attr)
+            else:
+                if vd.options.debug:
+                    raise Exception(f'addstr(y={y} x={x}) out of bounds')
 
             if link:
                 vd.onMouse(scr, x, y, dispw, 1, BUTTON1_RELEASED=link)

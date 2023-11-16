@@ -81,9 +81,11 @@ class Animation:
                     self.height = max(self.height, y)
 
     def draw(self, scr, *, t=0, x=0, y=0, loop=False, attr=ColorAttr(), **kwargs):
+        windowHeight, windowWidth = scr.getmaxyx()
         for r, dx, dy, _ in self.iterdeep(self.frames[''].rows, **kwargs):
             text = f'[:onclick {r.href}]{r.text}[/]' if r.href else r.text
-            clipdraw(scr, y+dy, x+dx, text, attr.update(colors[r.color], 2))
+            if y+dy < windowHeight:
+                clipdraw(scr, y+dy, x+dx, text, attr.update(colors[r.color], 2))
 
         if not self.total_ms:
             return None
@@ -94,7 +96,8 @@ class Animation:
             if ms < 0:
                 for r, dx, dy, _ in self.iterdeep(f.rows, **kwargs):
                     text = f'[:onclick {r.href}]{r.text}[/]' if r.href else r.text
-                    clipdraw(scr, y+dy, x+dx, text, colors[r.color])
+                    if y+dy < windowHeight:
+                        clipdraw(scr, y+dy, x+dx, text, colors[r.color])
 
                 return -ms/1000
 
