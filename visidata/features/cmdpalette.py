@@ -1,5 +1,5 @@
 import collections
-from visidata import DrawablePane, BaseSheet, vd, VisiData, CompleteKey, clipdraw, HelpSheet, colors, AcceptInput, AttrDict
+from visidata import DrawablePane, BaseSheet, vd, VisiData, CompleteKey, clipdraw, HelpSheet, colors, AcceptInput, AttrDict, drawcache_property
 
 
 vd.theme_option('color_cmdpalette', 'black on 72', 'base color of command palette')
@@ -96,19 +96,22 @@ def inputPalette(sheet, prompt, items,
             bindings=bindings,
             **kwargs)
 
+
+def cmdlist(sheet):
+    return [
+            AttrDict(longname=row.longname,
+                     description=sheet.cmddict[(row.sheet, row.longname)].helpstr)
+        for row in sheet.rows
+    ]
+HelpSheet.cmdlist = drawcache_property(cmdlist)
+
+
 @BaseSheet.api
 def inputLongname(sheet):
     prompt = 'command name: '
     # get set of commands possible in the sheet
     this_sheets_help = HelpSheet('', source=sheet)
     this_sheets_help.ensureLoaded()
-    vd.sync()
-    this_sheet_commands = [
-        AttrDict(longname=row.longname,
-                 description=this_sheets_help.cmddict[(row.sheet, row.longname)].helpstr)
-        for row in this_sheets_help.rows
-    ]
-    assert this_sheet_commands
 
     def _fmt_cmdpal_summary(match, row, trigger_key):
         keystrokes = this_sheets_help.revbinds.get(row.longname, [None])[0] or ' '
@@ -123,7 +126,7 @@ def inputLongname(sheet):
             r += f' - {formatted_desc}'
         return r
 
-    return sheet.inputPalette(prompt, this_sheet_commands,
+    return sheet.inputPalette(prompt, this_sheets_help.cmdlist,
                               value_key='longname',
                               formatter=_fmt_cmdpal_summary,
                               type='longname')
