@@ -1,7 +1,7 @@
 import os
 
 import visidata
-from visidata import Extensible, VisiData, vd, EscapeException, cleanName, MissingAttrFormatter, AttrDict
+from visidata import Extensible, VisiData, vd, EscapeException, MissingAttrFormatter, AttrDict
 
 
 UNLOADED = tuple()  # sentinel for a sheet not yet loaded for the first time
@@ -254,8 +254,7 @@ class BaseSheet(DrawablePane):
         self._name = self.maybeClean(str(name))
 
     def maybeClean(self, s):
-        if self.options.clean_names:
-            s = cleanName(s)
+        'stub'
         return s
 
     def recalc(self):

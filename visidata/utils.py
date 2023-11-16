@@ -5,7 +5,7 @@ import re
 
 'Various helper classes and functions.'
 
-__all__ = ['AlwaysDict', 'AttrDict', 'DefaultAttrDict', 'moveListItem', 'namedlist', 'classproperty', 'cleanName', 'MissingAttrFormatter', 'getitem', 'setitem', 'getitemdef', 'getitemdeep', 'setitemdeep', 'getattrdeep', 'setattrdeep', 'ExplodingMock', 'ScopedSetattr']
+__all__ = ['AlwaysDict', 'AttrDict', 'DefaultAttrDict', 'moveListItem', 'namedlist', 'classproperty', 'MissingAttrFormatter', 'getitem', 'setitem', 'getitemdef', 'getitemdeep', 'setitemdeep', 'getattrdeep', 'setattrdeep', 'ExplodingMock', 'ScopedSetattr']
 
 
 class AlwaysDict(dict):
@@ -67,13 +67,6 @@ def moveListItem(L, fromidx, toidx):
     r = L.pop(fromidx)
     L.insert(toidx, r)
     return toidx
-
-
-def cleanName(s):
-    s = re.sub(r'[^\w\d_]', '_', s)  # replace non-alphanum chars with _
-    s = re.sub(r'_+', '_', s)  # replace runs of _ with a single _
-    s = s.strip('_')
-    return s
 
 
 class OnExit:

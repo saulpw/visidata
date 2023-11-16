@@ -1,7 +1,7 @@
 from copy import copy
 import re
 
-from visidata import VisiData, vd, Sheet, options, Column, Progress, anytype, ColumnItem, asyncthread, TypedExceptionWrapper, TypedWrapper, IndexSheet, clean_to_id, vlen
+from visidata import VisiData, vd, Sheet, options, Column, Progress, anytype, ColumnItem, asyncthread, TypedExceptionWrapper, TypedWrapper, IndexSheet, vlen
 from visidata.type_date import date
 
 vd.option('sqlite_onconnect', '', 'sqlite statement to execute after opening a connection')
@@ -269,7 +269,7 @@ def save_sqlite(vd, p, *vsheets):
     vd.sync()
 
     for vs in vsheets:
-        tblname = clean_to_id(vs.name)
+        tblname = vd.cleanName(vs.name)
         sqlcols = []
         for col in vs.visibleCols:
             sqlcols.append('"%s" %s' % (col.name, sqltypes.get(col.type, 'TEXT')))

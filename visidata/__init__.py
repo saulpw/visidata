@@ -91,6 +91,7 @@ import visidata.metasheets
 import visidata.optionssheet
 import visidata.type_currency
 import visidata.type_floatsi
+import visidata.clean_names
 import visidata.cmdlog
 import visidata.clipboard
 import visidata.choose

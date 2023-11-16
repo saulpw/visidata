@@ -135,11 +135,12 @@ alias('show-aggregate', 'memo-aggregate')
 
 # 2.6
 
-clean_name = visidata.cleanName
+def clean_name(s):
+    return visidata.vd.cleanName(s)
 
 def maybe_clean(s, vs):
     if (vs or visidata.vd).options.clean_names:
-        s = visidata.cleanName(s)
+        s = visidata.vd.cleanName(s)
     return s
 
 def load_tsv(fn):
@@ -183,5 +184,7 @@ vd.optalias('zoom_incr', 'disp_zoom_incr')
 alias('visibility-sheet', 'toggle-multiline')
 alias('visibility-col', 'toggle-multiline')
 
+def clean_to_id(s):
+    return visidata.vd.cleanName(s)
 
 vd.addGlobals(globals())

@@ -21,7 +21,6 @@ class InProgress(Exception):
 INPROGRESS = TypedExceptionWrapper(None, exception=InProgress())  # sentinel
 
 vd.option('col_cache_size', 0, 'max number of cache entries in each cached column', max_help=-1)
-vd.option('clean_names', False, 'clean column/sheet names to be valid Python identifiers', replay=True)
 vd.option('disp_formatter', 'generic', 'formatter to create the text in each cell (also used by text savers)', replay=True, max_help=0)
 vd.option('disp_displayer', 'generic', 'displayer to render the text in each cell', replay=False, max_help=0)
 
@@ -40,11 +39,6 @@ class DisplayWrapper:
 
     def __eq__(self, other):
         return self.value == other
-
-
-def clean_to_id(s):  # [Nas Banov] https://stackoverflow.com/a/3305731
-    return re.sub(r'\W|^(?=\d)', '_', str(s)).strip('_')
-
 
 def _default_colnames():
     'A B C .. Z AA AB .. ZZ AAA .. to infinity'
@@ -594,7 +588,6 @@ SettableColumn.init('_store', dict, copy=True)
 
 vd.addGlobals(
     INPROGRESS=INPROGRESS,
-    clean_to_id=clean_to_id,
     Column=Column,
     setitem=setitem,
     getattrdeep=getattrdeep,

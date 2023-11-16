@@ -7,7 +7,7 @@ Credit to Jeremy Singer-Vine for the idea and original implementation.
 '''
 
 from collections.abc import Iterable, Mapping
-from visidata import vd, Progress, Sheet, Column, ColumnItem, SettableColumn, SubColumnFunc, asyncthread, clean_to_id
+from visidata import vd, Progress, Sheet, Column, ColumnItem, SettableColumn, SubColumnFunc, asyncthread
 from visidata import stacktrace, TypedExceptionWrapper
 
 
@@ -62,7 +62,7 @@ class UnfurledSheet(Sheet):
 
 @Sheet.api
 def unfurl_col(sheet, col):
-    return UnfurledSheet(sheet.name, clean_to_id(col.name), 'unfurled', source=sheet, source_col=col)
+    return UnfurledSheet(sheet.name, vd.cleanName(col.name), 'unfurled', source=sheet, source_col=col)
 
 
 Sheet.addCommand("zM", "unfurl-col", "vd.push(unfurl_col(cursorCol))", "row-wise expand current column of lists (e.g. [2]) or dicts (e.g. {3}) within that column")

@@ -330,7 +330,7 @@ def paste_data_into(sheet, row, sourcerows, cols):
 def combine_rows(sheet, rows):
     newrow = sheet.newRow()
     newrow.date = datetime.datetime.today()
-    orgid = clean_to_id(rows[0].title)
+    orgid = vd.cleanName(rows[0].title)
     newrow.path = Path((orgid or encode_date())+'.org')
     for r in rows:
         hdr = sheet.newRow()
