@@ -1133,10 +1133,6 @@ BaseSheet.bindkey('KEY_RESIZE', 'redraw')
 BaseSheet.addCommand('A', 'open-new', 'vd.push(vd.newSheet("unnamed", 1))', 'Open new empty sheet')
 
 BaseSheet.addCommand('`', 'open-source', 'vd.push(source)', 'open source sheet')
-Sheet.addCommand('^', 'rename-col', 'vd.addUndoColNames([cursorCol]); cursorCol.name = editCell(cursorVisibleColIndex, -1, value=cleanName(cursorCol.name))', 'rename current column')
-Sheet.addCommand('z^', 'rename-col-selected', 'updateColNames(selectedRows or [cursorRow], [sheet.cursorCol], overwrite=True)', 'rename current column to combined contents of current cell in selected rows (or current row)')
-Sheet.addCommand('g^', 'rename-cols-row', 'updateColNames(selectedRows or [cursorRow], sheet.visibleCols)', 'rename all unnamed visible columns to contents of selected rows (or current row)')
-Sheet.addCommand('gz^', 'rename-cols-selected', 'updateColNames(selectedRows or [cursorRow], sheet.visibleCols, overwrite=True)', 'rename all visible columns to combined contents of selected rows (or current row)')
 BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to: ", value=cleanName(sheet.name))', 'Rename current sheet')
 
 Sheet.addCommand('', 'addcol-source', 'source .addColumn(copy(cursorCol)) if isinstance (source, BaseSheet) else error("source must be sheet")', 'add copy of current column to source sheet')  #988  frosencrantz
@@ -1183,10 +1179,6 @@ vd.addMenuItems('''
     View > Split pane > swap panes > splitwin-swap-pane
     View > Split pane > goto other pane > splitwin-swap
     View > Refresh screen > redraw
-    Column > Rename > current column > rename-col
-    Column > Rename > from selected cells > current column > rename-col-selected
-    Column > Rename > from selected cells > unnamed columns > rename-cols-row
-    Column > Rename > from selected cells > all columns > rename-cols-selected
     Column > Type as > anytype > type-any
     Column > Type as > string > type-string
     Column > Type as > integer > type-int

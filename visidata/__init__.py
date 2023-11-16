@@ -60,6 +60,7 @@ import visidata.column
 
 import visidata.interface
 import visidata.sheets
+import visidata.rename_col
 import visidata.indexsheet
 
 import visidata.statusbar

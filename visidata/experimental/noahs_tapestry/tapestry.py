@@ -135,13 +135,6 @@ def noahsTapestry(vd):
     return Tapestry('noahs', 'tapestry')
 
 
-from visidata import Sheet
-from visidata import BaseSheet
-
-@Sheet.api
-def hint_rename_col(sheet):
-    if vd.cleanName(sheet.cursorCol.name) != sheet.cursorCol.name:
-        return 5, f"[:hint]The current column can't be used in an expression because [:code]{sheet.cursorCol.name}[/] is not a valid Python identifier. [:onclick rename-col]Rename the column[/] with `^`.[/]"
 NoahsPuzzle.options.color_default = '178 yellow on 232 black'
 
 vd.addCommand('Shift+B', 'open-noahs-database', 'vd.push(noahsDatabase)', "open database for Noah's Tapestry")
