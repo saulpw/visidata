@@ -1132,6 +1132,7 @@ BaseSheet.bindkey('KEY_RESIZE', 'redraw')
 
 BaseSheet.addCommand('A', 'open-new', 'vd.push(vd.newSheet("unnamed", 1))', 'Open new empty sheet')
 
+BaseSheet.addCommand('`', 'open-source', 'vd.push(source)', 'open source sheet')
 Sheet.addCommand('^', 'rename-col', 'vd.addUndoColNames([cursorCol]); cursorCol.name = editCell(cursorVisibleColIndex, -1, value=cleanName(cursorCol.name))', 'rename current column')
 Sheet.addCommand('z^', 'rename-col-selected', 'updateColNames(selectedRows or [cursorRow], [sheet.cursorCol], overwrite=True)', 'rename current column to combined contents of current cell in selected rows (or current row)')
 Sheet.addCommand('g^', 'rename-cols-row', 'updateColNames(selectedRows or [cursorRow], sheet.visibleCols)', 'rename all unnamed visible columns to contents of selected rows (or current row)')
