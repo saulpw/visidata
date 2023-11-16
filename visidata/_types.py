@@ -133,7 +133,6 @@ class vlen(int):
     def __len__(self):
         return self
 
-
 vd.addGlobals(anytype=anytype,
               vdtype=vdtype,
               deduceType=deduceType)

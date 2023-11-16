@@ -122,6 +122,7 @@ import visidata.plugins
 import visidata.theme
 import visidata.apps
 import visidata.fuzzymatch
+import visidata.hint
 '''.splitlines():
     if not line: continue
     assert line.startswith('import visidata.'), line
