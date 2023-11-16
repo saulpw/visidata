@@ -32,7 +32,7 @@ class TextSheet(Sheet):
                 for i, L in enumerate(textwrap.wrap(str(text), width=winWidth)):
                     yield [startingLine+i+1, L]
             else:
-                yield [startingLine+1, text]
+                yield [startingLine+1, text.strip()]
 
     def sysopen(sheet, linenum=0):
         @asyncthread
