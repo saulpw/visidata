@@ -55,24 +55,6 @@ class HelpSheet(MetaSheet):
         return revbinds
 
 
-@VisiData.api
-@asyncthread
-def help_search(vd, sheet, regex):
-    vs = HelpSheet(source=None)
-    vs.rows = []  # do not trigger push reload
-    vd.push(vs)   # push first, then reload
-    vd.sync(vs.reload())
-
-    # find rows matching regex on original HelpSheet
-    rowidxs = list(vd.searchRegex(vs, regex=regex, columns="visibleCols"))
-
-    # add only matching rows
-    allrows = vs.rows
-    vs.rows = []
-    for rowidx in rowidxs:
-        vs.addRow(allrows[rowidx])
-
-
 class HelpPane:
     def __init__(self, name):
         import visidata
@@ -159,7 +141,6 @@ def openManPage(vd):
 BaseSheet.addCommand('g^H', 'sysopen-help', 'openManPage()', 'Show the UNIX man page for VisiData')
 BaseSheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))', 'list commands and keybindings available on current sheet')
 BaseSheet.addCommand('gz^H', 'help-commands-all', 'vd.push(HelpSheet("all_commands", source=None, revbinds={}))', 'list commands and keybindings for all sheet types')
-BaseSheet.addCommand(None, 'help-search', 'help_search(sheet, input("help: "))', 'search through command longnames with search terms')
 
 BaseSheet.bindkey('KEY_F(1)', 'sysopen-help')
 BaseSheet.bindkey('zKEY_F(1)', 'help-commands')
