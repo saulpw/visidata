@@ -80,6 +80,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'unselect-expr': 'OrderDate',
                  'unselect-cols-regex': '.',
                  'random-rows': '3',
+                 'select-random': '3',
                  'import-python': 'math',
                  'pyobj-expr-row': 'Units + "s"',            # open the python object for '4'
                  'expand-col-depth': '0',
