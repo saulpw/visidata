@@ -14,6 +14,8 @@
     - make bottom msg entirely clickable
     - make dedent and header parsing standard
     - add `options.disp_sidebar`
+    - make sheet name clickable to open **Sheets Stack**
+    - make options clickable
 - display sheet and feature help documentation in sidebar
     - added bundles of Guide Sheets
     - open Guide Sheets into a full VisiData sheet with `open-sidebar` (bound to `gb`)
@@ -22,20 +24,23 @@
 - migrate pkg_resources to importlib_resources (PR by @zormit and @anjakefala #1968 #1911)
 - [threads] no new threads while prev cmd still running  #1148
 - [batch] add progress every half second to batch mode  #1182
-- [replay] implemented a single-thread replay mechanism  #1575
+- [replay] implemented a single-thread replay mechanism  #1575 #2102
     - much simpler architecturally, but loses the ability to pause/resume, and show 1/N progress (now just shows number of queued commands remaining).
         - Ctrl+N is now no-op for similar functionality to replay-advance
             - replay-advance command itself is removed
         - removed options.replay_movement and its functionality
         - options.replay_wait (-w on CLI) now works by setting the curses timeout, which will affect the display update frequency for all async commands.  previously was hard-coded.  try -w 0.001 while loading a big file to see a very rapid update.
     - replay in general should be more stable and possibly faster.
-- added `options.disp_help`, an integer and to set novice/expert mode. When `disp_help` is:
+- added `options.disp_help`, an integer and to set novice/expert mode. (#1961)
+    When `disp_help` is:
     - -1: status messages aren't shown
     - 0: no help is shown
     - 1: sidebar sheet help is shown
-    - 2: help is shown for the input widget on the sidebar (this was condensed and moved from the former input help panel)
+    - 2: help is shown for the input widget on the sidebar (this was condensed and moved from the former input help panel)  #2085 #1961
     - put input help on sidebar; `disp_help` from -1 to 3
     - mark options to be excluded if `disp_help` greater than `option.max_help`
+    - add contextual help while editing options in **OptionsSheet**
+    - `Ctrl+G` cycles input help sidebar
 - add options.overwrite='n' mode  #1805
     - replace `options.confirm_overwrite` with `options.overwrite`, which can be
       'n' (no/never), 'y' (yes/always), 'c' (confirm)
@@ -50,6 +55,8 @@
     - press 1-9 to immediately execute that command
     - `options.disp_cmdpal_max` for number of suggestions
     - `options.color_cmdpalette` for base color
+    - `chooseAggregators` and `jointype` also use palette  #1027
+    - `options.color_match` is color for matching chars in palette chooser
 
 
 - [aggregators] sum uses start value from type of first value for Python 3.8+  #1996 #1999 #2009
@@ -63,6 +70,7 @@
     - works on float, floatsi, currency, date columns
 - [commands] allow space-seperated keystrokes  #2067
 - [confirm] make yes/no buttons clickable  #1740 #2075
+- [cosmetic] standardize `__repr__` for sheets and columns (PR by cool-RR #2091)
 - [describe] default width=10 for describe columns
 - [dir] set name of '.' to current dir name  #1775
 - [dir] set name relative to previously loaded directory  #1775
@@ -77,8 +85,27 @@
 - [features] add `addcol-histogram`  #2052
     - display a histogram-like column for any column of ints
 - [features] add `contract-cols-depth` etc (bound to `g)`, `z)`, `gz)`  #1695
-- [feature] add contract-source-cols bound to )  #1702
-- [feature] reload-modified calls `reload_rows`, adding support for tail  #1686
+- [features] add contract-source-cols bound to )  #1702
+- [features] reload-modified calls `reload_rows`, adding support for tail  #1686
+- [features] add `addcol-audiometadata` from vmutagen plugin
+    - adds metadata column for audio files
+- [features] to **DirSheet** add `sysopen-mailcap`
+    - opens using mailcap entry for current row, guessing mimetype
+- [features] add `addcol-source`
+    - adds copy of current column to source sheet  #988
+- [features] add dedupe by @jsvine
+    - `select-duplicate-rows` selects each row in current sheet that is a duplicate of a prior row
+    - `dedupe-rows` pushes a new sheet with only non-duplicate rows of current sheet
+- [features] add normcol by @jsvine
+    - `normalize-col-names` normalizes the names of all *non-hidden* columns
+- [features] add `options.server_addr` and `options.server_port` for vd server to listen for commands
+    - set the port to start the server
+- [features] add Sheet.knownCols  #1488
+    - this allows the pre-configuring of columns by name
+    ```
+    Sheet.knownCols.timestamp.type = date
+    DirSheet.knownCols.directory.width = 0
+    ```
 - [freq] add select-first command
 - [freq] base histogram width on column width  #1807
 - [freq] set default disp_histogram to U+25A0 BLACK SQUARE (■)) (PR by @daviewales #1949 #1807)
@@ -88,6 +115,7 @@
 - [graph] add commands to open external graph with matplotlib #1056
 - [input] change `Ctrl+G` to toggle `options.disp_help`
 - [input] add `Ctrl+N` to insert prettykeys of literal keystroke
+- [input] allow percentage of starting value for input into commands
 - [join] allow selecting of join columns from all columns sheet  #1224
     - unbind `&` for **ColumnsSheet** `join-cols`
 - [join] join now works with typed values, not display values  #2015
@@ -114,6 +142,8 @@
 - [loaders] add zulip loader
 - [loaders] add vd.requireOptions to check for presence of loader-relevant API keys
 - [loaders] add airtable API loader
+- [loaders] add .fec loader by @jsvine
+- [loaders] add f5log loader by @bitwisecook
 - [loaders http] replace requests with urllib  #1808 #1704
 - [loaders sqlite] add `exec-sql` command to input query  #1719
 - [loaders] add a toml loader (PR by @ajkerrigan #1894 #1580 #1587)
@@ -123,6 +153,7 @@
 - [loaders xlsx] add `column_letter` to meta columns
 - [loaders sqlite] save list/dict as json  #1589
 - [loaders jsonl] allow slash comments (PR by @geekscrapy #2025)
+- [loaders] add .conll loader by @polm
 - [macros] allow deleting of macro with commit on **MacrosSheet**  #1569
 - [macros] add longname/keystrokes to **MacrosSheet**  #1569 #1741
 - [macros] add help sidebar to end macro input  #1569 #1741
@@ -141,7 +172,10 @@
     - option for non-ASCII characters to be saved to JSON, on False will encode to utf-8
 - [reload] support tail with `reload-modified`  #1686
 - [reload] add `reload-rows` which preserves existing columns + cursor position  #1655 #1683 #1663
+    - [melt] refactor to support `reload-rows`  #2101
 - [regex] use inputMultiple to allow changing regex_flags  #1925
+- [rename-col] add `options.rename_cascade`  #2088
+    - if True, columns renames are cascaded into expressions
 - [replay] has been refactored to be sync, instead of a seperate async process  #1773 #1714
 - [save] add `options.save_encoding (default: 'utf-8') to differentiate from `options.encoding` when saving a file  #1708
 - [save] add saver for STATA files (PR by @raffaem #1563)
@@ -163,6 +197,8 @@
 - [types] add `type-url` and `open-url`  #2031
 - [types] add `type-datetime`  #1572 #1380 #397
 - [ui] change menu, status, and other colors to be more visible
+- [ui] add `options.disp_scroll_context` to keep *n* more lines above/below cursor on screen
+- [ui] add version to menu status
 - [undo] options.undo can only be set globally
 - [usd] provide USD(s) function to convert string like '£300' or '205 AUD' to equivalent US$ as float
 - [windows] change default system clipboard command to clip.exe
@@ -177,6 +213,11 @@
 - [mark] mark rows to more easily move cursor to them
 - [rownum] addcol-rownum and addcol-delta
 - [slide-cells] shift cells in cursor row to the right
+- add loaders gdrive and gsheets
+
+# deprecated
+
+- [multiline] rename `visibility-sheet` to `toggle-multiline`
 
 ## bugfixes
 
@@ -190,6 +231,7 @@
 - [clipboard] save to tempfile, do not confirm
 - [cmdlog] check for empty cursor column when adding a column (PR by @midichef #1783)
 - [cmdlog] ensure record of global options in all cmdlogs
+- [cmdlog] do not log undos for non-loggable commands  #1827
 - [colorizers] fix custom colorizers showing in sheet context  #1225
 - [columns] speed up getMaxWidth for wide columns (PR by @midichef #1747)
   #1728
@@ -197,7 +239,7 @@
 - [confirm] remove flicker in alacritty  #2040
 - [currency] fix currency_neg option
 - [curses] allow breakpoint() before initwin
-- [curses] ignore keys pressed before curses is initialised  #1993
+- [curses] ignore early keys pressed before curses is initialised if Esc present  #1993
 - [curses] use builtins if no curses screen yet
 - [cursor] cursorColIndex now returns None if empty  #1803
 - [deps] add requests-cache submodule to root visidata  #1748
@@ -251,12 +293,14 @@
 - [loaders imap] enable imap and fix folder name extraction (PR by @justin2004 #1917)
 - [loaders pandas] handle read methods that produce a list of dataframes (PR by @ajkerrigan #1990 #1986)
 - [loaders parquet] stringify source to handle both URLs and local paths (PR by @ajkerrigan #1913)
+- [loaders json] include null columns in first row, in more cases (PR by @midichef #2109)
 - [loaders mysql] unquote password before sending to client (PR by @dufferzafar #1933)
 - [loaders ttf] implement `closePath()` to draw missing lines (PR by @midichef #1979)
 - [loaders http] fix parsing link header (PR by @Midichef #1924 #1898)
 - [loaders xlsx] saver now replaces illegal characters instead of aborting  #1402
 - [loaders html] fix failure from colspan with only td tags (PR by @midichef #2002)
 - [loaders zip] show stacktrace on exception
+- [loaders vds] save hidden columns also (PR by @pacien #2093 #2089)
 - [loaders rec] support %sort; continue loading on exception  #2022
 - [loaders pyobj] similar sheet names for dive-/open- and pyobj- #1988
 - [loaders pyobj] do not skip properties that raise
@@ -268,6 +312,7 @@
 - [macros] add prompt for cancelling macro  #1810 #1812
 - [macros] specify a clearer message  #1810
 - [macros] append newline to macros.tsv if necessary  #1569
+- [macros] save file as longname/keystroke  #2084
 - [main] print version string once, not twice (PR by @midichef #1837)
 - [main] remove forced unload before interactive mode  #1943
 - [menu] use "Alt+x" keybinding instead of "^[x"
@@ -294,10 +339,12 @@
 - [regex] issue warning when no columns to add  #1778
 - [regex] check for regex capture group  #1778
 - [reload-every] do not replay
+- [rename-col] skip gratuitous rewrites when undoing (PR by @pacien #2092)
 - [replay] turn off confirm dialogs during replay
 - [replay] clearCaches before moving cursor  #1773
 - [replay] enable confirm in interactive batch mode (PR by @midichef #1751)
 - [save] handle saving 0 sheets  #1720
+- [save] fix confirm message on commit #2090
 - [scroll-cells] do not error scrolling offscreen column  #1908
 - [select-around] convert input arguments to int
 - [settings] clear cache correctly before set
@@ -326,19 +373,21 @@
 - [tui] make BaseSheet.refresh() no-op; Ctrl+L call sheet.refresh() before vd.redraw()
 - [threads] remove spurious None from syncing set
 - [threads] allow @AsyncThread funcs to have status kwarg
-- [quit-sheet-free] re-entering a subsheet left using quit-sheet-free should
-  reload the subsheet #1679
+- [quit-sheet-free] re-entering a subsheet left using quit-sheet-free should reload the subsheet #1679
+- [ui] integrate scrollfix from @geekscrapy  #1441
 - [undo] ensure undo is sheet-specific for duped/copied sheets  #1780
 - [undo] fix undo for first modification on a sheet-specific HelpSheet  #1820
 - [undo] fix the removal of [M] (modified mark) after undo  #1800
 - [undo] remove last matching cmdlog row, instead of first (PR by @midichef #2010)
 - [vdx] fix save error
 - [windows] add Alt+ keybindings for powershell  #1630
-- [windows] limit windows-curses version to 2.3.0 (PR by @bartbroere #1901
-  #1841)
+- [windows] limit windows-curses version to 2.3.0 (PR by @bartbroere #1901 #1841)
     - asottile noticed this was a regression in the last windows-curses release
       in this issue: zephyrproject-rtos/windows-curses#41
+- [windows] update windows-curses version to support Python 3.11  #2062
 - [windows] fix syspaste (PR by @midichef #1921 #1920)
+- [windows] fallback to `scr.getch` if no `scr.get_wch` #192
+    - handles `AttributeError: '_curses.curses window' object has no attribute 'get_wch'`
 - [zsh] fix zsh completion (PR by @dbaynard #1960 #1959)
 
 
@@ -366,6 +415,7 @@
 - change order of args to onMouse to x,y
 - add vd.aside for a silent status message
 - add GlobalsSheetsSheet to globals
+- vd.queueCommand can take input,sheet,row,col kwargs  #1681
 
 
 # v2.11.1 (2023-07-16)
