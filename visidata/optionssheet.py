@@ -51,13 +51,13 @@ class OptionsSheet(Sheet):
         if isinstance(row.value, bool):
             vd.options.set(row.name, not currentValue, self.source)
         else:
-            helpstr = f'# options.{self.cursorRow.name}\n'
+            helpstr = f'# options.{self.cursorRow.name}'
             opt = vd.options._get(self.cursorRow.name, 'default')
             if opt.helpstr:
                 x = getattr(vd, 'help_'+opt.helpstr, opt.helpstr or '')
-                helpstr += (x or '')
+                helpstr += (x or '').strip()
             if opt.extrahelp:
-                helpstr += '\n'+opt.extrahelp
+                helpstr += '\n'+opt.extrahelp.strip()
             valcolidx = self.visibleCols.index(self.column(self.valueColName))
             v = self.editCell(valcolidx, value=currentValue, help=helpstr)
             vd.options.set(row.name, v, self.source)
