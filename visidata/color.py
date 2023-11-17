@@ -9,7 +9,14 @@ import visidata
 
 __all__ = ['ColorAttr', 'colors', 'update_attr', 'ColorMaker', 'rgb_to_attr']
 
-vd.help_color = '# Color Help\nHELPTODO'
+vd.help_color = '''Color syntax: `<attribute> <fg-color> on <bg-color>`
+
+- attributes: [:bold]bold[/] [:underline]underline[/] [:italic]italic[/] [:reverse]reverse[/]
+- colors: 0-255 or [:black on 238]black[/] [:red on 238]red[/] [:green on 238]green[/] [:yellow on 238]yellow[/] [:blue on 238]blue[/] [:magenta on 238]magenta[/] [:cyan on 238]cyan[/] [:white on 238]white[/]
+- the second color is used as a fallback if the first color is not available
+
+See [:onclick https://visidata.org/docs/colors]https://visidata.org/docs/colors[/] for more detailed info.
+'''
 
 
 @dataclass
