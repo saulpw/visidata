@@ -10,8 +10,28 @@ from functools import wraps, lru_cache
 from visidata import vd
 from visidata import VisiData, Progress
 
-vd.help_encoding = '# Encoding\nHELPTODO'
-vd.help_encoding_errors = '# Encoding Errors\nHELPTODO'
+vd.help_encoding = '''Common Encodings:
+
+- `utf-8`: Unicode (ASCII compatible, most common)
+- `utf-8-sig`: Unicode as above, but saves/skips leading BOM
+- `ascii`: 7-bit ASCII
+- `latin1`: also known as `iso-8859-1`
+- `cp437`: original IBM PC character set
+- `shift_jis`: Japanese
+
+See [:onclick https://docs.python.org/3/library/codecs.html#standard-encodings]https://docs.python.org/3/library/codecs.html#standard-encodings[/]
+'''
+
+vd.help_encoding_errors = '''Encoding Error Handlers:
+
+- `strict`: raise error
+- `ignore`: discard
+- `replace`: replacement marker
+- `backslashreplace`: use "\\uxxxxxx"
+- `surrogateescape`: use surrogate characters
+
+See [:onclick https://docs.python.org/3/library/codecs.html#error-handlers]https://docs.python.org/3/library/codecs.html#error-handlers[/]
+'''
 
 vd.option('encoding', 'utf-8-sig', 'encoding passed to codecs.open when reading a file', replay=True, help=vd.help_encoding)
 vd.option('encoding_errors', 'surrogateescape', 'encoding_errors passed to codecs.open', replay=True, help=vd.help_encoding_errors)
