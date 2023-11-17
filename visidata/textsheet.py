@@ -44,6 +44,7 @@ class TextSheet(Sheet):
 
         import tempfile
         with tempfile.NamedTemporaryFile() as temp:
+            temp.close()  #2118
             writelines(sheet, temp.name)
             vd.launchEditor(temp.name, '+%s' % linenum)
             sheet.rows = []

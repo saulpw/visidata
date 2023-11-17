@@ -75,13 +75,15 @@ def syscopyCells_async(sheet, cols, rows, filetype):
     vd.status(f'copying {vs.nRows} {vs.rowtype} to system clipboard as {filetype}')
 
     with io.StringIO() as buf:
-      with tempfile.NamedTemporaryFile() as temp:
-        vd.sync(vd.saveSheets(Path(temp.name+'.'+filetype, fptext=buf), vs, confirm_overwrite=False))
-        subprocess.run(
-            sheet.options.clipboard_copy_cmd.split(),
-            input=buf.getvalue(),
-            encoding='utf-8',
-            stdout=subprocess.DEVNULL)
+        with tempfile.NamedTemporaryFile() as temp:
+            temp.close()  #2118
+
+            vd.sync(vd.saveSheets(Path(temp.name, fptext=buf), vs, confirm_overwrite=False))
+            subprocess.run(
+                sheet.options.clipboard_copy_cmd.split(),
+                input=buf.getvalue(),
+                encoding='utf-8',
+                stdout=subprocess.DEVNULL)
 
 
 @VisiData.api
