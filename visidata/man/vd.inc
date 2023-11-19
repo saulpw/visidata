@@ -863,6 +863,9 @@ show/hide methods and hidden properties
 .No preplay Ar longname No before replay or regular launch; limited to Sy Base Sheet No bound commands
 .It Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar col Ns : Ns Ar row
 .No launch vd with Ar subsheet No of Ar toplevel No at top-of-stack, and cursor at Ar col No and Ar row Ns ; all arguments are optional
+.It Cm --overwrite Ns = Ns Ar c
+.No Overwrite with confirmation
+.
 .Pp
 .Lo f filetype filetype
 .No "tsv               "
@@ -874,12 +877,16 @@ instead of file extension
 .No "\(rst                "
 field delimiter to use for tsv/usv filetype
 .
-.Lo y confirm-overwrite F
-.No "True              "
+.Lo y overwrite y
+.No "y                 "
 overwrite existing files without confirmation
 .
+.Lo ro overwrite n
+.No "n                 "
+do not overwrite existing files
+.
 .Lo N nothing T
-.No "False              "
+.No "False             "
 disable loading .visidatarc and plugin addons
 .
 .El
