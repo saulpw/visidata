@@ -1,0 +1,4 @@
+#!vd -p
+{"sheet": null, "col": null, "row": null, "longname": "open-file", "input": "sample_data/sample.tsv", "keystrokes": "o", "comment": null}
+{"sheet": "sample", "col": "Total", "row": "", "longname": "type-currency", "input": "", "keystrokes": "$", "comment": "set type of current column to currency"}
+{"sheet": "sample", "col": "Total", "row": "", "longname": "setcol-precision-more", "input": "", "comment": "show more precision in current column"}
