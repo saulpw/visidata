@@ -131,7 +131,6 @@
 - [loaders] add Parquet writer (PR by @mr-majkel #2053 #2044)
 - [loaders] add s3 loader (built by @ajkerrigan)
     - open Amazon S3 paths and objects
-- [loaders] add bit.io loader
 - [loaders] add support for jsonla (JSONL arrays) format (PR by @daviewales #1730)  #1726
 - [loaders] add zulip API loader
 - [loaders] add airtable API loader
