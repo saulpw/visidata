@@ -786,6 +786,8 @@ class TableSheet(BaseSheet):
                         lines = [cellval.display]
                     displines[vcolidx] = (col, cellval, lines)
 
+            if len(displines) == 0:
+                return 0
             return max(len(lines) for _, _, lines in displines.values())
 
     def drawRow(self, scr, row, rowidx, ybase, rowcattr: ColorAttr, maxheight,
