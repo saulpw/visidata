@@ -6,6 +6,7 @@ from visidata import vd, VisiData, BaseSheet, Sheet, Column, Progress, ALT, asyn
 
 def rotateRange(n, idx, reverse=False):
     'Wraps an iter starting from idx. Yields indices from idx to n and then 0 to idx.'
+    if n == 0: return []
     if reverse:
         rng = range(idx-1, -1, -1)
         rng2 = range(n-1, idx-1, -1)

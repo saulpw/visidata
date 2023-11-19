@@ -35,7 +35,12 @@ def searchRegex(vd, sheet, moveCursor=False, reverse=False, regex_flags=None, **
             if regex_flags is None:
                 regex_flags = sheet.options.regex_flags  # regex_flags defined in features.regex
             flagbits = sum(getattr(re, f.upper()) for f in regex_flags)
-            vd.searchContext["regex"] = re.compile(regex, flagbits) or vd.error('invalid regex: %s' % regex)
+            try:
+                compiled_re = re.compile(regex, flagbits)
+                vd.searchContext["regex"] = compiled_re
+            except re.error as e:
+                vd.searchContext["regex"] = None  # make future calls to search-next fail
+                vd.error('invalid regex: %s' % e.msg)
 
         regex = vd.searchContext.get("regex") or vd.fail("no regex")
 
