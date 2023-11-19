@@ -5,7 +5,7 @@ a motd file from a url.  The file may be text or unheaded TSV, with one message 
 
 Any Exception ends the thread silently.
 
-options.motd_url may be set to another URL, or empty to disable entirely.
+options.motd_url may be set to another URL, or empty string to disable entirely.
 '''
 
 import random

@@ -2,8 +2,8 @@
 eleventyNavigation:
     key: Customizing VisiData
     order: 12
-Updated: 2022-04-05
-Version: VisiData v2.9
+Updated: 2023-11-18
+Version: VisiData v3.0
 ---
 
 For a primer on configuring VisiData through setting options, see [jsvine's tutorial](https://jsvine.github.io/intro-to-visidata/advanced/configuring-visidata/).
@@ -95,3 +95,11 @@ Supply a space-separated list of aggregator names to `options.describe_aggrs` in
 ```
 options.describe_aggrs = 'mean stdev irr'
 ```
+
+### Turning off motd {#motd}
+
+By default, the first time each day that VisiData is used, it downloads a single small file of startup messages.
+
+This network request can be turned off by adding `options.motd_url=''` to your `~/.visidatarc`.
+
+If you do decide to turn it off, we encourage you to [donate](https://www.patreon.com/saulpw/posts) to [support VisiData](https://github.com/sponsors/saulpw).
