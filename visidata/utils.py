@@ -69,23 +69,6 @@ def moveListItem(L, fromidx, toidx):
     return toidx
 
 
-class OnExit:
-    '"with OnExit(func, ...):" calls func(...) when the context is exited'
-    def __init__(self, func, *args, **kwargs):
-        self.func = func
-        self.args = args
-        self.kwargs = kwargs
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_value, exc_traceback):
-        try:
-            self.func(*self.args, **self.kwargs)
-        except Exception as e:
-            vd.exceptionCaught(e)
-
-
 def setitem(r, i, v):  # function needed for use in lambda
     r[i] = v
     return True
