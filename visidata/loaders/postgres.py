@@ -125,7 +125,7 @@ class PgTable(Sheet):
         if self.options.postgres_schema:
             source = f'"{self.options.postgres_schema}"."{self.source}"'
         else:
-            source = self.source
+            source = f'"{self.source}"'
         with self.sql.cur(f"SELECT * FROM {source}") as cur:
             self.rows = []
             r = cur.fetchone()
