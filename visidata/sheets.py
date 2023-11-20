@@ -434,6 +434,13 @@ class TableSheet(BaseSheet):
         'String of key column names, for SheetsSheet convenience.'
         return ' '.join(c.name for c in self.keyCols)
 
+    @keyColNames.setter
+    def keyColNames(self, v):  #2122
+        'Set key columns on this sheet to the space-separated list of column names.'
+        newkeys = [self.column(colname) for colname in v.split()]
+        self.unsetKeys(self.keyCols)
+        self.setKeys(newkeys)
+
     @property
     def cursorCell(self):
         'Displayed value (DisplayWrapper) at current row and column.'
