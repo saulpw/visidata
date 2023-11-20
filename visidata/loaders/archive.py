@@ -64,11 +64,11 @@ Commands:
     def openZipFile(self, fp, *args, **kwargs):
         '''Use VisiData input to handle password-protected zip files.'''
         try:
-            return fp.open(*args, **kwargs)
+            return fp._open(*args, **kwargs)
         except RuntimeError as err:
             if 'password required' in err.args[0]:
                 pwd = vd.input(f'{args[0].filename} is encrypted, enter password: ', display=False)
-                return fp.open(*args, **kwargs, pwd=pwd.encode('utf-8'))
+                return fp._open(*args, **kwargs, pwd=pwd.encode('utf-8'))
             vd.exceptionCaught(err)
 
     def openRow(self, row):

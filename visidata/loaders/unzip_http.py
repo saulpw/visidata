@@ -186,7 +186,7 @@ class RemoteZipFile:
 
             outpath = path/member
             os.makedirs(outpath.parent, exist_ok=True)
-            with self.open(member) as fpin:
+            with self._open(member) as fpin:
                 with open(path/member, mode='wb') as fpout:
                     while True:
                         r = fpin.read(65536)
