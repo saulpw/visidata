@@ -37,35 +37,35 @@ Aggregator      Description
 The follow howtos will have examples of workflows involving grouping of data and statistical aggregation.
 
 ---
+The following examples use the file [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
 
-## How to create a pivot table
+## How to group data (frequency table, pivot table, describe table,)
 
-This example uses the file [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
+## How to make a pivot table frequency table, pivot table, describe table,)
 
 <div class="asciicast">
     <asciinema-player id="player" poster="npt:0:10" rows=27 src="../casts/pivot.cast"></asciinema-player>
     <script type="text/javascript" src="/asciinema-player.js"></script>
 </div>
 
-1. Press `!` on the independent variable to set it as a key column.
-2. Press `+` on a second column to add an *aggregate*. This configures which column is to be composed in relation to others.
-3. Optional: Set the type for the column being aggregated by pressing `~` (string), `#` (int), `%` (float), `$` (currency), or `@` (date).
-4. Press `Shift+W` on the dependent categorical variable to pivot on it.
+1. Move to the column A with the independent variable, and press `!` to mark it as a key column to group by.
+2. Move to a numeric column B, and press `+` to add an *aggregator* to that column, so that the aggregator will be applied to each group of values.
+3. Make sure column B has a numeric type: int (`#`),  float (`%`),  currency (`$`), or date (`@`).
+4. Move to the column C with the dependent categorical variable to be pivoted, and press `Shift+W` (`pivot`)  to pivot on that column.  The pivoted sheet then will have a column for each distinct value in the source column.
 
 ---
 
 ## [How to create a frequency chart](#frequency) {#frequency}
 
-The following examples use the file [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
 
-###### How to make a simple histogram
+### How to make a histogram
 
 **Question** How many of each **Item** were sold?
 
 1. Move the cursor to the **Item** column.
 2. Press `Shift+F` to open the **Frequency table**.
 
-###### How to use the Frequency table to view the results of statistical aggregation
+### How to use the Frequency table to view the results of statistical aggregation
 
 **Question** What was the monthly revenue?
 
@@ -80,15 +80,13 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 
 ---
 
-## How to calculate some descriptive statistics
+### How to calculate some descriptive statistics
 
 1. Press `Shift+I` to open the **Describe sheet**.
 
 ---
 
-## How to filter for grouped or described rows
-
-###### How to filter for grouped rows
+### How to filter for grouped rows
 
 1. Press `Shift+F` to open the **Frequency table**.
 2. Press `s` or `t` on the groups you are interested in to select those entries in the source sheet.
@@ -100,7 +98,7 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 1. Press `Shift+F` to open the **Frequency table**.
 2. Press `Enter` on the grouping you are interested in to open a sheet of the source rows that are part of that group.
 
-###### How to filter for described rows
+### How to filter for described rows
 
 1. Press `Shift+I` to open the **Describe sheet**.
 2. Use `zs` to select rows on source sheet which are being described in the cells of interest.
@@ -112,13 +110,13 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 1. Press `Shift+I` to open the **Describe sheet**.
 2. Press `zEnter` open copy of source sheet with rows being described in the current cell of interest.
 
-###### How to filter for the rows aggregated in a pivot table
+### How to filter for the rows aggregated in a pivot table
 
 `Enter`/`zEnter` can both be used in the **Pivot table** to open a sheet of the source rows which are aggregated in the current pivot row/cell.
 
 ---
 
-## How to combine cells in one for column for matching rows in another
+### How to combine cells in one for column for matching rows in another
 
 This tutorial shows you how to go from this dataset:
 
