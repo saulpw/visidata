@@ -12,7 +12,7 @@ def stored_property(vdcls, f):
     def _save_on_exit():
         if vd.stored_properties[f]:
             p = Path(vd.options.visidata_dir)/(f.__name__ + '.json')
-            with p.open(mode='w') as fp:
+            with p.open(mode='w', encoding='utf-8') as fp:
                 fp.write(json.dumps(vd.stored_properties[f]))
 
     @property
@@ -25,7 +25,7 @@ def stored_property(vdcls, f):
 
         p = Path(vd.options.visidata_dir)/(f.__name__ + '.json')
         if p.exists():
-            value = json.loads(p.open().read())
+            value = json.loads(p.open(encoding='utf-8-sig').read())
 
         if value is None:
             value = f(*args, **kwargs)

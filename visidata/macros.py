@@ -1,13 +1,19 @@
 from copy import copy
-import os
 from functools import wraps
 
 from visidata.cmdlog import CommandLog, CommandLogJsonl
-from visidata import vd, UNLOADED, asyncthread
+from visidata import vd, UNLOADED, asyncthread, vlen
 from visidata import IndexSheet, VisiData, Sheet, Path, VisiDataMetaSheet, Column, ItemColumn, BaseSheet, GuideSheet
+from visidata import IndexSheet, VisiData, Sheet, Path, VisiDataMetaSheet, Column, ItemColumn, AttrColumn, BaseSheet, GuideSheet
 
 vd.macroMode = None
 vd.macrobindings = {}
+
+
+@VisiData.stored_property
+def macros_list(vd):
+    return []
+
 
 class MacroSheet(IndexSheet):
     help = '''
@@ -18,26 +24,14 @@ class MacroSheet(IndexSheet):
         - `d` to mark macro for delete; `z Ctrl+S` to commit.
     '''
     columns = [
-        Column('longname', getter=lambda c,vs: vs.name),
-        Column('keystrokes', getter=lambda c,vs: vs.keystrokes),
-        Column('num_commands', type=int, getter=lambda c,vs: len(vs)),
-        Column('source', width=0, getter=lambda c,vs: vs.source),
+        AttrColumn('binding', 'keystrokes'),
+        Column('num_commands', type=vlen),
+        AttrColumn('source', width=0),
     ]
     rowtype = 'macros'
     defer = True
     def iterload(self):
-        for ks, fn in self.source.rows:
-            fp = Path(fn)
-            if fp.ext == 'vd':
-                vs = vd.loadInternalSheet(CommandLog, fp)
-            elif fp.ext == 'vdj':
-                vs = vd.loadInternalSheet(CommandLogJsonl, fp)
-            else:
-                vd.warning(f'failed to load macro {fn}')
-                continue
-            vs.keystrokes = ks
-            vd.setMacro(ks, vs)
-            yield vs
+        yield from vd.macrobindings.values()
 
     def commitDeleteRow(self, row):
         self.source.deleteBy(lambda r: r.filename == str(row.source), commit=True, undo=False)
@@ -60,21 +54,26 @@ class MacroSheet(IndexSheet):
 
 @VisiData.lazy_property
 def macrosheet(vd):
-    macrospath = Path(os.path.join(vd.options.visidata_dir, 'macros.tsv'))
-    macrosheet = vd.loadInternalSheet(VisiDataMetaSheet, macrospath, columns=(ItemColumn('command', 0), ItemColumn('filename', 1))) or vd.error('error loading macros')
+    return MacroSheet('user_macros', source=vd.macrobindings)
 
-    real_macrosheet = MacroSheet('user_macros', rows=[], source=macrosheet)
-    real_macrosheet.reload()
-
-    return real_macrosheet
+@VisiData.api
+def loadMacro(vd, p:Path):
+    if p.ext == 'vd':
+        return vd.loadInternalSheet(CommandLog, p)
+    elif p.ext == 'vdj':
+        return vd.loadInternalSheet(CommandLogJsonl, p)
+    else:
+        vd.warning(f'failed to load macro {fn}')
 
 @VisiData.api
 def runMacro(vd, binding:str):
     vd.replay_sync(vd.macrobindings[binding])
 
+
 @VisiData.api
 def setMacro(vd, ks, vs):
     'Set *ks* which is either a keystroke or a longname to run the cmdlog in *vs*.'
+    vs.keystrokes = ks
     vd.macrobindings[ks] = vs
     if vd.isLongname(ks):
         BaseSheet.addCommand('', ks, f'runMacro("{ks}")')
@@ -89,7 +88,7 @@ def saveMacro(self, rows, ks):
         macropath = Path(vd.fnSuffix(str(Path(vd.options.visidata_dir)/ks)))
         vd.save_vdj(macropath, vs)
         vd.setMacro(ks, vs)
-        vd.macrosheet.source.append_tsv_row((ks, macropath))
+        vd.macros_list.append(dict(command=ks, filename=macropath))
         vd.sync(vd.macrosheet.source.reload())
         vd.sync(vd.macrosheet.reload())
 
@@ -126,8 +125,14 @@ def startMacro(cmdlog):
         vd.macroMode = CommandLogJsonl('current_macro', rows=[])
 
 @VisiData.before
+@asyncthread
 def run(vd, *args, **kwargs):
-    vd.macrosheet
+    for r in vd.macros_list:
+        ks = r['command']
+        fn = r['filename']
+        p = Path(fn)
+        vd.setMacro(ks, vd.loadMacro(p))
+
 
 class MacrosGuide(GuideSheet):
     guide = '''# Macros
@@ -149,7 +154,6 @@ Use `gm` (`macro-sheet`) to open an index of existing macros.
 Use `d` to mark macros for deletion. Use `z Ctrl+S` to then commit any changes.
 
 `Enter` to open the macro in the current row, and you can view the series of commands composing it.'''
-
 
 Sheet.addCommand('m', 'macro-record', 'vd.cmdlog.startMacro()', 'record macro')
 Sheet.addCommand('gm', 'macro-sheet', 'vd.push(vd.macrosheet)', 'open macros sheet')
