@@ -14,7 +14,6 @@ vd.theme_option('disp_edit_fill', '_', 'edit field fill character')
 vd.theme_option('disp_unprintable', '·', 'substitute character for unprintables')
 vd.theme_option('mouse_interval', 1, 'max time between press/release for click (ms)', sheettype=None)
 
-vd.option('input_history', '', 'basename of file to store persistent input history')
 vd.disp_help = 1  # current level of help shown (up to vd.options.disp_help as maximum)
 
 class AcceptInput(Exception):
@@ -456,7 +455,7 @@ def inputMultiple(vd, updater=lambda val: None, **kwargs):
             })
             break
         except ChangeInput as e:
-            vd.lastInputsSheet.appendRow(AttrDict(type=input_kwargs.get('type', ''), input=e.args[0]))
+            vd.addInputHistory(e.args[0], type=input_kwargs.get('type', ''))
             input_kwargs['value'] = e.args[0]
             offset = e.args[1]
             i = keys.index(cur_input_key)
@@ -465,7 +464,7 @@ def inputMultiple(vd, updater=lambda val: None, **kwargs):
     return {k:v.get('value', '') for k,v in kwargs.items()}
 
 @VisiData.api
-def input(self, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None, updater=lambda v: None, **kwargs):
+def input(vd, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None, updater=lambda v: None, **kwargs):
     '''Display *prompt* and return line of user input.
 
         - *type*: string indicating the type of input to use for history.
@@ -483,7 +482,7 @@ def input(self, prompt, type=None, defaultLast=False, history=[], dy=0, attr=Non
 
     if attr is None:
         attr = ColorAttr()
-    sheet = self.activeSheet
+    sheet = vd.activeSheet
     if not vd.cursesEnabled:
         if kwargs.get('record', True) and vd.cmdlog:
             return vd.getCommandInput()
@@ -495,7 +494,7 @@ def input(self, prompt, type=None, defaultLast=False, history=[], dy=0, attr=Non
             import getpass
             return getpass.getpass(prompt)
 
-    history = self.lastInputsSheet.history(type)
+    history = list(vd.inputHistory.setdefault(type, {}).keys())
 
     y = sheet.windowHeight-dy-1
     promptlen = dispwidth(prompt)
@@ -507,7 +506,7 @@ def input(self, prompt, type=None, defaultLast=False, history=[], dy=0, attr=Non
         return sheet.windowWidth-promptlen-rstatuslen-2
 
     w = kwargs.pop('w', _drawPrompt())
-    ret = self.editText(y, promptlen, w=w,
+    ret = vd.editText(y, promptlen, w=w,
                         attr=colors.color_edit_cell,
                         unprintablechar=options.disp_unprintable,
                         truncchar=options.disp_truncator,
@@ -516,7 +515,7 @@ def input(self, prompt, type=None, defaultLast=False, history=[], dy=0, attr=Non
                         **kwargs)
 
     if ret:
-        self.lastInputsSheet.appendRow(AttrDict(type=type, input=ret))
+        vd.addInputHistory(ret, type=type)
 
     elif defaultLast:
         history or vd.fail("no previous input")

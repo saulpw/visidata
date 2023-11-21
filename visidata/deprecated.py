@@ -204,5 +204,6 @@ class OnExit:
         except Exception as e:
             vd.exceptionCaught(e)
 
+alias('open-inputs', 'open-input-history')
 
 vd.addGlobals(globals())

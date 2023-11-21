@@ -2,7 +2,7 @@ import collections
 
 from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENTER, asyncthread, Sheet, IndexSheet
 from visidata import CellColorizer, RowColorizer, JsonLinesSheet, AttrDict
-from visidata import ColumnAttr, ColumnItem
+from visidata import ColumnAttr, ItemColumn
 from visidata import TsvSheet, Path, Option
 from visidata import undoAttrFunc, VisiData, vlen
 
@@ -92,69 +92,44 @@ VisiDataMetaSheet.options.encoding = 'utf-8'
 
 
 
+@VisiData.stored_property
+def inputHistory(vd):
+    return {}  # [input_type][input] -> anything
 
-vd._lastInputs = collections.defaultdict(dict)  # [input_type] -> {'input': anything}
+@VisiData.api
+def addInputHistory(vd, input:str, type:str=''):
+    hist = list(vd.inputHistory.setdefault(type, {}).keys())
+    if hist and hist[-1] == input:
+        return
+    if input in vd.inputHistory[type]:
+        n = vd.inputHistory[type][input]['n']  # make it the most recent entry
+    else:
+        n = 0
+    vd.inputHistory[type][input] = dict(type=type, input=input, n=n+1)
 
-class LastInputsSheet(JsonLinesSheet):
+
+class InputHistorySheet(Sheet):
+    # rowdef: dict(type=, input=, n=)
+    # .source=vd.inputHistory
     columns = [
-        ColumnItem('type'),
-        ColumnItem('input'),
+        ItemColumn('type'),
+        ItemColumn('input'),
     ]
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.colnames = {col.name:col for col in self.columns}
-
-    def addRow(self, row, **kwargs):
-        'Update lastInputs before adding row.'
-        row = AttrDict(row)
-        if row.input in vd._lastInputs[row.type]:
-            del vd._lastInputs[row.type][row.input]  # so will be added as last entry
-        vd._lastInputs[row.type][row.input] = 1
-        return super().addRow(row, **kwargs)
-
-    def appendRow(self, row):
-        'Append *row* (AttrDict with *type* and *input*) directly to source.'
-        hist = self.history(row.type)
-        if hist and hist[-1] == row.input:
-            return
-
-        self.addRow(row)
-
-        if self.source:
-            with self.source.open(mode='a') as fp:
-                import json
-                fp.write(json.dumps(row) + '\n')
-
-    def history(self, t):
-        'Return list of inputs in category *t*, with last element being the most recently added.'
-        return list(vd._lastInputs[t].keys())
+    def iterload(self):
+        for type, inputs in vd.inputHistory.items():
+            for v in inputs.values():
+                yield v
 
 
-@VisiData.lazy_property
-def lastInputsSheet(vd):
-    name = options.input_history
-
-    if not name:
-        return LastInputsSheet('last_inputs', source=None, rows=[])
-
-    p = Path(name)
-    if not p.is_absolute():
-        p = Path(options.visidata_dir)/f'{name}.jsonl'
-
-    vs = LastInputsSheet(name, source=p)
-    try:
-        vs.reload.__wrapped__(vs)
-    except FileNotFoundError:
-        pass
-    except Exception as e:
-        vd.exceptionCaught(e)
-
-    return vs
+@VisiData.property
+def inputHistorySheet(vd):
+    return InputHistorySheet('input_history', source=vd.inputHistory)
 
 
 @VisiData.property
 def allColumnsSheet(vd):
     return ColumnsSheet("all_columns", source=vd.stackedSheets)
+
 
 @VisiData.api
 def save_visidatarc(vd, p, vs):
@@ -185,7 +160,7 @@ def join_cols(sheet):
 
 # copy vd.sheets so that ColumnsSheet itself isn't included (for recalc in addRow)
 globalCommand('gC', 'columns-all', 'vd.push(vd.allColumnsSheet)', 'open Columns Sheet: edit column properties for all visible columns from all sheets on the sheets stack')
-BaseSheet.addCommand(None, 'open-inputs', 'vd.push(lastInputsSheet)', '')
+BaseSheet.addCommand(None, 'open-input-history', 'vd.push(inputHistorySheet)', 'open sheet with previous inputs')
 
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))', 'open Columns Sheet: edit column properties for current sheet')
 
