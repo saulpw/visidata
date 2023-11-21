@@ -85,6 +85,14 @@ class Extensible:
 
     @classmethod
     def class_api(cls, func):
+        '''`@Class.class_api` works much like `@Class.api`, but for class methods. This method is used internally but may not be all that useful for plugin and module authors. Note that `@classmethod` must still be provided, and **the order of multiple decorators is crucial**, in that `@<class>.class_api` must come before `@classmethod`:
+
+::
+        @Sheet.class_api
+        @classmethod
+        def addCommand(cls, ...):
+        '''
+
         name = func.__get__(None, dict).__func__.__name__
         oldfunc = getattr(cls, name, None)
         if oldfunc:
