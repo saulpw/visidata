@@ -294,7 +294,8 @@ def replayOne(vd, r):
         else:
             vs = vs or vd.activeSheet
             if vs:
-                vd.push(vs)
+                if vs in vd.sheets:  # if already on sheet stack, push to top
+                    vd.push(vs)
             else:
                 vs = vd.cmdlog
 
