@@ -1,6 +1,6 @@
 import json
 
-from visidata import vd, date, VisiData, PyobjSheet, AttrDict, stacktrace, TypedExceptionWrapper, options, visidata, ColumnItem, wrapply, TypedWrapper, Progress, Sheet, InferColumnsSheet
+from visidata import vd, date, anytype, VisiData, PyobjSheet, AttrDict, stacktrace, TypedExceptionWrapper, AlwaysDict, ItemColumn, wrapply, TypedWrapper, Progress, Sheet
 
 vd.option('json_indent', None, 'indent to use when saving json')
 vd.option('json_sort_keys', False, 'sort object keys when saving to json')
@@ -32,7 +32,12 @@ def open_jsonl(vd, p):
 VisiData.open_ndjson = VisiData.open_ldjson = VisiData.open_json = VisiData.open_jsonl
 
 
-class JsonSheet(InferColumnsSheet):
+class JsonSheet(Sheet):
+    _rowtype = AttrDict
+    def resetCols(self):
+        self._knownKeys = set()
+        super().resetCols()
+
     def iterload(self):
         with self.open_text_source() as fp:
             for L in fp:
@@ -59,21 +64,35 @@ class JsonSheet(InferColumnsSheet):
                                 yield ret
                         break
 
+    def addColumn(self, *cols, index=None):
+        for c in cols:
+            self._knownKeys.add(c.expr or c.name)
+        return super().addColumn(*cols, index=index)
+
     def addRow(self, row, index=None):
         # Wrap non-dict rows in a dummy object with a predictable key name.
         # This allows for more consistent handling of rows containing scalars
         # or lists.
         if not isinstance(row, dict):
-            v = {options.default_colname: row}
-            row = visidata.AlwaysDict(row, **v)
+            v = {self.options.default_colname: row}
+            row = AlwaysDict(row, **v)
 
-        return super().addRow(row, index=index)
+        ret = super().addRow(row, index=index)
+
+        for k in row:
+            if k not in self._knownKeys:
+                c = ItemColumn(k, type=float if isinstance(row[k], (float, int)) else anytype)
+                self.addColumn(c)
+
+        return ret
 
     def newRow(self, **fields):
-        return fields
+        return AttrDict(fields)
 
     def openRow(self, row):
         return PyobjSheet("%s[%s]" % (self.name, self.keystr(row)), source=row)
+
+JsonSheet.init('_knownKeys', set, copy=True)  # set of row keys already seen
 
 ## saving json and jsonl
 

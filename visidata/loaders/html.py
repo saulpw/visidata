@@ -3,7 +3,7 @@ import urllib.parse
 import copy
 import itertools
 
-from visidata import VisiData, vd, Sheet, options, Column, Progress, IndexSheet, ItemColumn, InferColumnsSheet
+from visidata import VisiData, vd, Sheet, options, Column, Progress, IndexSheet, ItemColumn
 
 vd.option('html_title', '<h2>{sheet.name}</h2>', 'table header when saving to html')
 
@@ -78,7 +78,7 @@ class HtmlLinksSheet(Sheet):
     def openRow(self, row):
         return vd.openSource(row[2])
 
-class HtmlElementsSheet(InferColumnsSheet):
+class HtmlElementsSheet(Sheet):
     rowtype = 'links'  #  dict
     columns = [
         ItemColumn('__element__', width=0),

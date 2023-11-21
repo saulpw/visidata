@@ -17,30 +17,6 @@ class PythonSheet(Sheet):
         return PyobjSheet("%s[%s]" % (self.name, self.keystr(row)), source=row)
 
 
-class InferColumnsSheet(Sheet):
-    _rowtype = dict
-    def resetCols(self):
-        self._knownKeys = set()
-        super().resetCols()
-
-    def addColumn(self, *cols, index=None):
-        for c in cols:
-            self._knownKeys.add(c.expr or c.name)
-        return super().addColumn(*cols, index=index)
-
-    def addRow(self, row, index=None):
-        ret = super().addRow(row, index=index)
-        for k in row:
-            if k not in self._knownKeys:
-                self.addColumn(ColumnItem(k, type=deduceType(row[k])))
-
-        return ret
-
-
-InferColumnsSheet.init('_knownKeys', set, copy=True)  # set of row keys already seen
-InferColumnsSheet.init('_ordering', list, copy=True)
-
-
 #### generic list/dict/object browsing
 @VisiData.global_api
 def view(vd, obj):
@@ -285,7 +261,6 @@ vd.addGlobals({
     'PythonSheet': PythonSheet,
     'ListOfDictSheet': ListOfDictSheet,
     'SheetDict': SheetDict,
-    'InferColumnsSheet': InferColumnsSheet,
     'PyobjSheet': PyobjSheet,
     'view': view,
 })

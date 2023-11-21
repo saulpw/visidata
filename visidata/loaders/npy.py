@@ -1,4 +1,4 @@
-from visidata import VisiData, vd, Sheet, date, anytype, options, Column, Progress, ColumnItem, vlen, PyobjSheet, TypedWrapper, InferColumnsSheet
+from visidata import VisiData, vd, Sheet, date, anytype, options, Column, Progress, ColumnItem, vlen, PyobjSheet, TypedWrapper
 
 'Loaders for .npy and .npz.  Save to .npy.  Depends on the zip loader.'
 
