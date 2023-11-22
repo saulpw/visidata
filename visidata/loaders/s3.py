@@ -61,13 +61,10 @@ class S3Path(Path):
     def fs(self, val):
         self._fs = val
 
-    def open(self, *args, **kwargs):
+    def open(self, mode='r', **kwargs):
         """Open the current S3 path, decompressing along the way if needed."""
 
-        # Default to text mode unless we have a compressed file
-        mode = "rb" if self.compression else "r"
-
-        fp = self.fs.open(self.given, mode=mode, version_id=self.version_id)
+        fp = self.fs.open(self.given, mode="rb" if self.compression else mode, version_id=self.version_id)
 
         # Workaround for https://github.com/ajkerrigan/visidata-plugins/issues/12
         if hasattr(fp, "cache") and fp.cache.size != fp.size:
@@ -79,17 +76,17 @@ class S3Path(Path):
         if self.compression == "gz":
             import gzip
 
-            return gzip.open(fp, *args, **kwargs)
+            return gzip.open(fp, mode, **kwargs)
 
         if self.compression == "bz2":
             import bz2
 
-            return bz2.open(fp, *args, **kwargs)
+            return bz2.open(fp, mode, **kwargs)
 
         if self.compression == "xz":
             import lzma
 
-            return lzma.open(fp, *args, **kwargs)
+            return lzma.open(fp, mode, **kwargs)
 
         return fp
 
