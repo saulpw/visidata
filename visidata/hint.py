@@ -36,4 +36,4 @@ def getHint(sheet, *args, **kwargs) -> str:
         return sorted(results, reverse=True)[0][1]
 
 
-vd.addCommand('Ctrl+H', 'help-hint', 'status(getHint() or "no hint available")', 'get context-dependent hint on what to do next')
+vd.addCommand('Ctrl+H', 'help-hint', 'status(getHint() or pressMenu("Help"))', 'get context-dependent hint on what to do next')

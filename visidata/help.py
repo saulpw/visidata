@@ -6,6 +6,10 @@ from visidata import vd, asyncthread, ENTER, drawcache_property, AttrDict
 
 vd.option('disp_help', 0, 'show help panel during input')
 
+@BaseSheet.api
+def hint_basichelp(sheet):
+    return 0, '`Alt+[:underline]H[/]` to open the [:underline]H[/]elp menu'
+
 
 @VisiData.api
 class HelpSheet(MetaSheet):
