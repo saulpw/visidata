@@ -68,6 +68,7 @@ import visidata.statusbar
 import visidata.textsheet
 import visidata.threads
 import visidata.path
+import visidata.experimental.guide
 
 import visidata._input
 import visidata.tuiwin
