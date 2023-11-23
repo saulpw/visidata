@@ -1,27 +1,37 @@
 '''
 # A Guide to VisiData Guides
-Each guide shows you how to use a particular feature in VisiData.
+Each guide shows you how to use a particular feature in VisiData. Gray guides have not been written yet. We love contributions: [:onclick https://visidata.org/docs/guides]https://visidata.org/docs/guides[/].
 
-  [:keys]Up/Down[/] to move the row cursor
-  [:keys]Enter[/] to view a topic
-  [:keys]Backspace[/] to come back to this list of guides
+- [:keystrokes]Up/Down[/] to move the row cursor
+- [:keystrokes]Enter[/] to view a topic
+- [:keystrokes]Backspace[/] to come back to this list of guides
 '''
 
 import re
 
-from visidata import vd, BaseSheet, Sheet, ItemColumn, Column, VisiData
+from visidata import vd, BaseSheet, Sheet, ItemColumn, Column, VisiData, ENTER, RowColorizer
+from visidata import wraptext
 
+vd.guides = {}  # name -> guidecls
+
+@VisiData.api
+def addGuide(vd, name, guidecls):
+    vd.guides[name] = guidecls
 
 @VisiData.api
 class GuideGuide(Sheet):
     help = __doc__
+    rowtype = 'guides' # rowdef: list(guide number, guide name, topic description, points, max_points)
     columns = [
         ItemColumn('n', 0, type=int),
-        ItemColumn('sheetname', 1, width=0),
+        ItemColumn('name', 1, width=0),
         ItemColumn('topic', 2, width=60),
         Column('points', type=int, getter=lambda c,r: 0),
         Column('max_points', type=int, getter=lambda c,r: 100),
     ]
+    colorizers = [
+            RowColorizer(7, 'color_guide_unwritten', lambda s,c,r,v: r and r[1] not in vd.guides)
+            ]
     def iterload(self):
         i = 0
         for line in '''
@@ -86,4 +96,42 @@ InputEditorGuide ("Using the builtin line editor")
                 yield [i] + list(m.groups())
                 i += 1
 
-BaseSheet.addCommand('', 'open-guide', 'vd.push(GuideGuide("VisiData_Guide"))')
+    def openRow(self, row):
+        name = row[1]
+        return vd.getGuide(name)
+
+class GuideSheet(Sheet):
+    rowtype = 'lines'
+    filetype = 'guide'
+    columns = [
+            ItemColumn('linenum', 0, type=int, width=0),
+            ItemColumn('guide', 1, width=80, displayer='full'),
+            ]
+    precious = False
+    guide = ''
+
+    def iterload(self):
+        winWidth = 78
+        for startingLine, text in enumerate(self.guide.splitlines()):
+            text = text.strip()
+            if text:
+                for i, (L, _) in enumerate(wraptext(str(text), width=winWidth)):
+                    yield [startingLine+i+1, L]
+            else:
+                yield [startingLine+1, text]
+
+
+
+@VisiData.api
+def getGuide(vd, name): # -> GuideSheet()
+    if name in vd.guides:
+        return vd.guides[name]()
+    vd.warning(f'no guide named {name}')
+
+BaseSheet.addCommand('', 'open-guide-index', 'vd.push(GuideGuide("VisiData_Guide"))', 'open VisiData guides table of contents')
+
+vd.addMenuItems('''
+        Help > VisiData Feature Guides > open-guide-index
+''')
+
+vd.addGlobals({'GuideSheet':GuideSheet})
