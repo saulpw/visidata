@@ -4,7 +4,7 @@ from functools import wraps
 
 from visidata.cmdlog import CommandLog, CommandLogJsonl
 from visidata import vd, UNLOADED, asyncthread
-from visidata import IndexSheet, VisiData, Sheet, Path, VisiDataMetaSheet, Column, ItemColumn, BaseSheet
+from visidata import IndexSheet, VisiData, Sheet, Path, VisiDataMetaSheet, Column, ItemColumn, BaseSheet, TextSheet
 
 vd.macroMode = None
 vd.macrobindings = {}
@@ -125,10 +125,12 @@ def startMacro(cmdlog):
         vd.status("recording macro; stop recording with `m`")
         vd.macroMode = CommandLogJsonl('current_macro', rows=[])
 
-
 @VisiData.before
 def run(vd, *args, **kwargs):
     vd.macrosheet
+
+class MacrosGuide(TextSheet):
+    pass
 
 
 Sheet.addCommand('m', 'macro-record', 'vd.cmdlog.startMacro()', 'record macro')
@@ -137,3 +139,24 @@ Sheet.addCommand('gm', 'macro-sheet', 'vd.push(vd.macrosheet)', 'open macros she
 vd.addMenuItems('''
     System > Macros sheet > macro-sheet
 ''')
+
+vd.addGuide('MacrosSheet', MacrosGuide(source = '''# Macros
+Macros allow you to bind a series of commands to a key and then replay those commands within a session by using that keystroke.
+
+The basic usage is:
+    1. Press `m` (macro-record) to begin recording the macro.
+    2. Go through the commands you wish to record.
+    3. Then type `m` again to complete the recording, and prompt for the keystroke or longname to bind it to.
+
+The macro will then be executed everytime the provided keystroke is used. Note: the Alt+keys and the function keys are left unbound; overridding other keys may conflict with existing bindings, now or in the future.
+
+Executing a macro will the series of commands starting on the current row and column on the current sheet.
+
+# The Macros Sheet
+
+Use `gm` (`open-macros-or-whatever`) to open an index existing macros.
+
+Macros can be marked for deletion (with `d`). Changes can then be committed with `z Ctrl+S`.
+
+`Enter` will open the macro in the current row, and you can view the series of commands composing it.'''.splitlines()
+) )
