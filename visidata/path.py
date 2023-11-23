@@ -238,9 +238,10 @@ class Path(os.PathLike):
             return self.rfile.reopen()
 
         if self.fp:
-            self.fptext = codecs.iterdecode(self.fp,
-                                            encoding=encoding or vd.options.encoding,
-                                            errors=encoding_errors or vd.options.encoding_errors)
+            if 'b' not in mode:
+                self.fptext = codecs.iterdecode(self.fp,
+                                                encoding=encoding or vd.options.encoding,
+                                                errors=encoding_errors or vd.options.encoding_errors)
 
         if self.fptext:
             self.rfile = RepeatFile(self.fptext)
