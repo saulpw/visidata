@@ -4,7 +4,7 @@ from functools import wraps
 
 from visidata.cmdlog import CommandLog, CommandLogJsonl
 from visidata import vd, UNLOADED, asyncthread
-from visidata import IndexSheet, VisiData, Sheet, Path, VisiDataMetaSheet, Column, ItemColumn, BaseSheet, TextSheet
+from visidata import IndexSheet, VisiData, Sheet, Path, VisiDataMetaSheet, Column, ItemColumn, BaseSheet, GuideSheet
 
 vd.macroMode = None
 vd.macrobindings = {}
@@ -129,18 +129,8 @@ def startMacro(cmdlog):
 def run(vd, *args, **kwargs):
     vd.macrosheet
 
-class MacrosGuide(TextSheet):
-    pass
-
-
-Sheet.addCommand('m', 'macro-record', 'vd.cmdlog.startMacro()', 'record macro')
-Sheet.addCommand('gm', 'macro-sheet', 'vd.push(vd.macrosheet)', 'open macros sheet')
-
-vd.addMenuItems('''
-    System > Macros sheet > macro-sheet
-''')
-
-vd.addGuide('MacrosSheet', MacrosGuide(source = '''# Macros
+class MacrosGuide(GuideSheet):
+    guide = '''# Macros
 Macros allow you to bind a series of commands to a key and then replay those commands within a session by using that keystroke.
 
 The basic usage is:
@@ -154,9 +144,18 @@ Executing a macro will the series of commands starting on the current row and co
 
 # The Macros Sheet
 
-Use `gm` (`open-macros-or-whatever`) to open an index existing macros.
+Use `gm` (`macro-sheet`) to open an index existing macros.
 
 Macros can be marked for deletion (with `d`). Changes can then be committed with `z Ctrl+S`.
 
-`Enter` will open the macro in the current row, and you can view the series of commands composing it.'''.splitlines()
-) )
+`Enter` will open the macro in the current row, and you can view the series of commands composing it.'''
+
+
+Sheet.addCommand('m', 'macro-record', 'vd.cmdlog.startMacro()', 'record macro')
+Sheet.addCommand('gm', 'macro-sheet', 'vd.push(vd.macrosheet)', 'open macros sheet')
+
+vd.addMenuItems('''
+    System > Macros sheet > macro-sheet
+''')
+
+vd.addGuide('MacrosSheet', MacrosGuide())

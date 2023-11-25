@@ -10,6 +10,7 @@ Each guide shows you how to use a particular feature in VisiData.
 import re
 
 from visidata import vd, BaseSheet, Sheet, ItemColumn, Column, VisiData, ENTER
+from visidata import wraptext
 
 vd.guides = {}  # guidename -> guideobj
 
@@ -91,6 +92,32 @@ InputEditorGuide ("Using the builtin line editor")
                 yield [i] + list(m.groups())
                 i += 1
 
+    def openRow(self, row):
+        guidename = row[1]
+        return vd.getGuide(guidename)
+
+class GuideSheet(Sheet):
+    rowtype = 'lines'
+    filetype = 'guide'
+    columns = [
+            ItemColumn('linenum', 0, type=int, width=0),
+            ItemColumn('guide', 1, width=80, displayer='full'),
+            ]
+    precious = False
+    guide = ''
+
+    def iterload(self):
+        winWidth = 78
+        for startingLine, text in enumerate(self.guide.splitlines()):
+            text = text.strip()
+            if text:
+                for i, (L, _) in enumerate(wraptext(str(text), width=winWidth)):
+                    yield [startingLine+i+1, L]
+            else:
+                yield [startingLine+1, text]
+
+
+
 @VisiData.api
 def getGuide(vd, guidename):
     if guidename in vd.guides:
@@ -98,8 +125,9 @@ def getGuide(vd, guidename):
     vd.warning(f'there is no guide: {guidename}')
 
 BaseSheet.addCommand('', 'open-guide', 'vd.push(GuideGuide("VisiData_Guide"))', 'opens guide to features in VisiData')
-GuideGuide.addCommand(ENTER, 'open-guide-row', 'vd.push(vd.getGuide(cursorRow[1]))')
 
 vd.addMenuItems('''
         Help > Guide > open-guide
 ''')
+
+vd.addGlobals({'GuideSheet':GuideSheet})
