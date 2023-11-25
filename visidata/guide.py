@@ -1,15 +1,15 @@
 '''
 # A Guide to VisiData Guides
-Each guide shows you how to use a particular feature in VisiData.
+Each guide shows you how to use a particular feature in VisiData. Gray guides have not been written yet. Why not contribute one?
 
-  [:keys]Up/Down[/] to move the row cursor
-  [:keys]Enter[/] to view a topic
-  [:keys]Backspace[/] to come back to this list of guides
+- [:keystrokes]Up/Down[/] to move the row cursor
+- [:keystrokes]Enter[/] to view a topic
+- [:keystrokes]Backspace[/] to come back to this list of guides
 '''
 
 import re
 
-from visidata import vd, BaseSheet, Sheet, ItemColumn, Column, VisiData, ENTER
+from visidata import vd, BaseSheet, Sheet, ItemColumn, Column, VisiData, ENTER, RowColorizer
 from visidata import wraptext
 
 vd.guides = {}  # guidename -> guideobj
@@ -28,6 +28,9 @@ class GuideGuide(Sheet):
         Column('points', type=int, getter=lambda c,r: 0),
         Column('max_points', type=int, getter=lambda c,r: 100),
     ]
+    colorizers = [
+            RowColorizer(7, 'color_guide_dne', lambda s,c,r,v: r and r[1] not in vd.guides)
+            ]
     def iterload(self):
         i = 0
         for line in '''
