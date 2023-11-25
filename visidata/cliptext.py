@@ -282,6 +282,7 @@ def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clea
 def _markdown_to_internal(text):
     'Return markdown-formatted `text` converted to internal formatting (like `[:color]text[/]`).'
     text = re.sub(r'`(.*?)`', r'[:code]\1[/]', text)
+    text = re.sub(r'(#.*?)$', r'[:h1]\1[/]', text)
     text = re.sub(r'\*\*(.*?)\*\*', r'[:bold]\1[/]', text)
     text = re.sub(r'\*(.*?)\*', r'[:italic]\1[/]', text)
     text = re.sub(r'\b_(.*?)_\b', r'[:underline]\1[/]', text)
