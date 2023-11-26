@@ -12,11 +12,11 @@ import re
 from visidata import vd, BaseSheet, Sheet, ItemColumn, Column, VisiData, ENTER, RowColorizer
 from visidata import wraptext
 
-vd.guides = {}  # name -> guideobj
+vd.guides = {}  # name -> guidecls
 
 @VisiData.api
-def addGuide(vd, name, guideobj):
-    vd.guides[name] = guideobj
+def addGuide(vd, name, guidecls):
+    vd.guides[name] = guidecls
 
 @VisiData.api
 class GuideGuide(Sheet):
@@ -123,9 +123,9 @@ class GuideSheet(Sheet):
 
 
 @VisiData.api
-def getGuide(vd, name):
+def getGuide(vd, name): # -> GuideSheet()
     if name in vd.guides:
-        return vd.guides[name]
+        return vd.guides[name]()
     vd.warning(f'no guide named {name}')
 
 BaseSheet.addCommand('', 'open-guide-index', 'vd.push(GuideGuide("VisiData_Guide"))', 'open VisiData guides table of contents')

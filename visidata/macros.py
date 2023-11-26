@@ -158,4 +158,4 @@ vd.addMenuItems('''
     System > Macros sheet > macro-sheet
 ''')
 
-vd.addGuide('MacrosSheet', MacrosGuide())
+vd.addGuide('MacrosSheet', MacrosGuide)
