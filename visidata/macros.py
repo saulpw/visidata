@@ -131,24 +131,24 @@ def run(vd, *args, **kwargs):
 
 class MacrosGuide(GuideSheet):
     guide = '''# Macros
-Macros allow you to bind a series of commands to a key and then replay those commands within a session by using that keystroke.
+Macros allow you to bind a command sequence to a keystroke or longname, to replay when that keystroke is pressed or the command is executed by longname.
 
 The basic usage is:
     1. Press `m` (macro-record) to begin recording the macro.
     2. Go through the commands you wish to record.
     3. Then type `m` again to complete the recording, and prompt for the keystroke or longname to bind it to.
 
-The macro will then be executed everytime the provided keystroke is used. Note: the Alt+keys and the function keys are left unbound; overridding other keys may conflict with existing bindings, now or in the future.
+The macro will then be executed everytime the provided keystroke or longname are used. Note: the Alt+keys and the function keys are left unbound; overriding other keys may conflict with existing bindings, now or in the future.
 
 Executing a macro will the series of commands starting on the current row and column on the current sheet.
 
 # The Macros Sheet
 
-Use `gm` (`macro-sheet`) to open an index existing macros.
+Use `gm` (`macro-sheet`) to open an index of existing macros.
 
-Macros can be marked for deletion (with `d`). Changes can then be committed with `z Ctrl+S`.
+Use `d` to mark macros for deletion. Use `z Ctrl+S` to then commit any changes.
 
-`Enter` will open the macro in the current row, and you can view the series of commands composing it.'''
+`Enter` to open the macro in the current row, and you can view the series of commands composing it.'''
 
 
 Sheet.addCommand('m', 'macro-record', 'vd.cmdlog.startMacro()', 'record macro')
