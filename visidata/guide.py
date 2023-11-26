@@ -29,7 +29,7 @@ class GuideGuide(Sheet):
         Column('max_points', type=int, getter=lambda c,r: 100),
     ]
     colorizers = [
-            RowColorizer(7, 'color_guide_dne', lambda s,c,r,v: r and r[1] not in vd.guides)
+            RowColorizer(7, 'color_guide_unwritten', lambda s,c,r,v: r and r[1] not in vd.guides)
             ]
     def iterload(self):
         i = 0
