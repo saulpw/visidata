@@ -74,7 +74,7 @@
 - [dir] get default save name from sheet name  #1775
 - [dir] rename `options.dir_recurse:bool` to `options.dir_depth:int`  #1715
 - [display] add `setcol-` (`zv`) and `setcols-height-input` (`gzv`)  #1307
-- [encoding] use `save_encoding` for lsv, geojson, texttable savers
+- [encoding] use `options.save_encoding` for lsv, geojson, texttable savers
 - [encoding] change default options.encoding to utf-8-sig to detect/remove BOM  #200 #908 #909 #1711
 - [expand] change default depth of expand-col(s)-depth to 0 (PR by @cool-RR #1809)
 - [features] procmgr to view/manage processes, memory/cpu stats
@@ -88,17 +88,14 @@
     - adds metadata column for audio files
 - [features] to **DirSheet** add `sysopen-mailcap`
     - opens using mailcap entry for current row, guessing mimetype
-- [features] add `addcol-source`
-    - adds copy of current column to source sheet  #988
-- [features] add dedupe by @jsvine
+- [features] add `addcol-source` to add current column to source sheet  #988
+- [features] incorporate dedupe plugin by @jsvine
     - `select-duplicate-rows` selects each row in current sheet that is a duplicate of a prior row
     - `dedupe-rows` pushes a new sheet with only non-duplicate rows of current sheet
-- [features] add normcol by @jsvine
+- [features] incorporate normcol (by @jsvine)
     - `normalize-col-names` normalizes the names of all *non-hidden* columns
-- [features] add `options.server_addr` and `options.server_port` for vd server to listen for commands
-    - set the port to start the server
-- [features] add Sheet.knownCols  #1488
-    - this allows the pre-configuring of columns by name
+- [features] add server to listen for commands on `options.server_addr` and `options.server_port` (if set)
+- [features] add Sheet.knownCols to preconfigure of columns by name #1488
     ```
     Sheet.knownCols.timestamp.type = date
     DirSheet.knownCols.directory.width = 0
@@ -127,7 +124,7 @@
 - [loaders] add matrix API loader
 - [loaders] add orgmode loader
 - [loaders] add scraper
-    - table of HTMl elements as parsed by `beautifulsoup4`
+    - table of HTML elements as parsed by `beautifulsoup4`
 - [loaders] add Parquet writer (PR by @mr-majkel #2053 #2044)
 - [loaders] add s3 loader (built by @ajkerrigan)
     - open Amazon S3 paths and objects
