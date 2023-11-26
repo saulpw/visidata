@@ -1,6 +1,6 @@
 '''
 # A Guide to VisiData Guides
-Each guide shows you how to use a particular feature in VisiData. Gray guides have not been written yet. Why not contribute one?
+Each guide shows you how to use a particular feature in VisiData. Gray guides have not been written yet. We love contributions: [:onclick https://visidata.org/docs/guides]https://visidata.org/docs/guides[/].
 
 - [:keystrokes]Up/Down[/] to move the row cursor
 - [:keystrokes]Enter[/] to view a topic
@@ -12,18 +12,19 @@ import re
 from visidata import vd, BaseSheet, Sheet, ItemColumn, Column, VisiData, ENTER, RowColorizer
 from visidata import wraptext
 
-vd.guides = {}  # guidename -> guideobj
+vd.guides = {}  # name -> guideobj
 
 @VisiData.api
-def addGuide(vd, guidename, guideobj):
-    vd.guides[guidename] = guideobj
+def addGuide(vd, name, guideobj):
+    vd.guides[name] = guideobj
 
 @VisiData.api
 class GuideGuide(Sheet):
     help = __doc__
+    rowtype = 'guides' # rowdef: list(guide number, guide name, topic description, points, max_points)
     columns = [
         ItemColumn('n', 0, type=int),
-        ItemColumn('guidename', 1, width=0),
+        ItemColumn('name', 1, width=0),
         ItemColumn('topic', 2, width=60),
         Column('points', type=int, getter=lambda c,r: 0),
         Column('max_points', type=int, getter=lambda c,r: 100),
@@ -96,8 +97,8 @@ InputEditorGuide ("Using the builtin line editor")
                 i += 1
 
     def openRow(self, row):
-        guidename = row[1]
-        return vd.getGuide(guidename)
+        name = row[1]
+        return vd.getGuide(name)
 
 class GuideSheet(Sheet):
     rowtype = 'lines'
@@ -122,15 +123,15 @@ class GuideSheet(Sheet):
 
 
 @VisiData.api
-def getGuide(vd, guidename):
-    if guidename in vd.guides:
-        return vd.guides[guidename]
-    vd.warning(f'there is no guide: {guidename}')
+def getGuide(vd, name):
+    if name in vd.guides:
+        return vd.guides[name]
+    vd.warning(f'no guide named {name}')
 
-BaseSheet.addCommand('', 'open-guide', 'vd.push(GuideGuide("VisiData_Guide"))', 'opens guide to features in VisiData')
+BaseSheet.addCommand('', 'open-guide-index', 'vd.push(GuideGuide("VisiData_Guide"))', 'open VisiData guides table of contents')
 
 vd.addMenuItems('''
-        Help > Guide > open-guide
+        Help > VisiData Feature Guides > open-guide-index
 ''')
 
 vd.addGlobals({'GuideSheet':GuideSheet})
