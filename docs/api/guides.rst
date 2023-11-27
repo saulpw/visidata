@@ -1,15 +1,14 @@
 Guides
 =======
 
-Guides in VisiData are longer form writings on feature-sets that are readable from within VisiData.
+A VisiData Guide is a more verbose writeup of a particular set of features that explains how the features work together.  Guides are readable from within VisiData itself.
 
-Sometimes knowing that a command exists is not sufficient for understanding how it all ties together
+The Guide Index is accessible with ``Space open-guide-index``.
 
-The Guide Table of Contents is accessible by ``Space`` *open-guide-index*. Gray guides have not been written yet, and we really appreciate PR submissions. We also welcome proposals for guides you wish were part of the ToC, even if you had not written them.
 
-The following document outlines the steps for adding a guide, and our writing style preferences.
+TODO NOTE: Guides that have not been written yet are grayed out.  We love to get help with documentation, please get in touch if you want to write one or have other suggestions!
 
-The steps to add a Guide are:
+Here's an outline for adding a guide, with our writing style preferences:
 
 1. Launch **GuideGuide** and find the ``name`` of the guide
 2. ``GuideSheet`` subclass
@@ -19,22 +18,21 @@ The steps to add a Guide are:
 Hello Guide
 ------------
 
-Here's a step-by-line breakdown of a basic guide.
-This same general structure and process should work for all guides.
+This same general structure and process should work for most guides.
 
 Step 1. Launch **GuideGuide** and find the ``name`` of the guide
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# Screenshot of GuideGuide in VisiData
+TODO Add Screenshot of GuideGuide in VisiData
 
-With VisiData type ``Space`` *open-guide-index* , and you can see the Table of Contents. Any of the gray guides are unwritten.
+Within VisiData, ``Space open-guide-index``, and you can see the Table of Contents.
 
 Press ``gv`` to show the **name** column, and note down the **name** of the guide you want to document. For example: **FooGuide**.
 
 ::
 
 Step 2. Create a GuideSheet subclass
--------------------------------
+------------------------------------
 
 ::
 
@@ -58,37 +56,37 @@ Next fill out the text for your guide in the ``guide`` variable:
 
     class FooGuideCls(GuideSheet):
         guide='''# FooGuide
-    Foo is a view which displays your data as a tree. Trees differ in their branch numbers based on the [:onclick https://example.com/]branch algorithm[/].
+    Foo is a view which displays data as a foo. Foo differ in their branch numbers based on the [:onclick https://example.com/]foo-branch algorithm[/].
 
     The basic usage is:
-        1. Press `5F` (`open-foo`) to open the **FooSheet**.
+        1. `Shift+X` (`open-foo`) to open the **FooSheet**.
         2. ???
         3. Profit.
 
     # The Foo Sheet
 
-    Use `5b` (`bar-baz`) to bar baz your displayed tree.
-
-    `Enter` to open the branch in the current row.
+    - `zb` (`bar-baz`) to bar baz the displayed foo.
+    - `Enter` to open the foo in the current row.
     '''
 
 Some stylings of note:
 
 - `Basic markdown <https://www.markdownguide.org/basic-syntax/`_ will work. VisiData supports '# Headings', \*\*bold\*\*, \*italics\*, \`code snippets\`, and \_underscore\_.
-- VisiData has its `own display attribute syntax </docs/colors/>`_. For e.g., '[:onclick url]text[/] will format ``text`` into a clickable url that will open in ``$BROWSER``.
-- For listing relevant commands, the general pattern should be 'Use \`keystroke\` (\`longname\`) to {helpstring}'.
+- VisiData has its `own display attribute syntax </docs/colors/>`_. For e.g., '[:onclick url]text[/]' will format ``text`` into a clickable url that will open in ``$BROWSER``.
+- For listing relevant commands, the general pattern should be '- \`keystroke\` (\`longname\`) to {helpstring}'.  The keystroke should immediately follow the bullet; do not say "Press" or "Use" within VisiData docs and helpstrings.
+- Generally, the second person perspective ("you", "yours") is not used outside of tutorials.
 
 Step 4. Let VisiData know about the guide
 -----------------------------------------
 
-At the bottom of the file, add ``vd.addGuide('GuideName', GuideCls)``.
+At the bottom of the file, add ``vd.addGuide('GuideName', GuideClass)``.
 
 Finishing off our example:
 
 ::
         vd.addGuide('FooGuide', FooGuideCls)
 
-``vd.getGuide`` will now be able to locate your guide!
+``vd.getGuide`` will now be able to locate the guide!
 
 .. autofunction:: visidata.vd.addGuide
 .. autofunction:: visidata.vd.getGuide
