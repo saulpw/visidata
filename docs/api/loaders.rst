@@ -278,7 +278,7 @@ If those structures are not present, the function should return nothing. If they
 - ``_likelihood`` (optional) being a number from 0-10, 10 being most likely and 0 meaning a last ditch effort if nothing else will take it
 - any other key/values will be set as options on the *Sheet* the ``open_<filetype>`` function returns
 
-`Examples of guess_filetype functions <https://github.com/saulpw/visidata/commit/4743f92bb855cf931d896e65845c549ce6027e2f>`
+`Examples of guess_filetype functions <https://github.com/saulpw/visidata/commit/4743f92bb855cf931d896e65845c549ce6027e2f>`_
 
 
 ::
