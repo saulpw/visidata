@@ -51,7 +51,7 @@ def command_server(vd, conn):
         line = line.decode().strip()
         if line == 'draw':
             r = '\n'.join(json.dumps(d) for d in vd.sheet.capture_draw_object())
-            conn.send(r.encode('utf-8'))
+            conn.send(r.encode('utf-8')+'\n')
         elif line.startswith('{'):
             cmd = json.loads(line)
             vd.queueCommand(**cmd)
