@@ -274,8 +274,7 @@ def main_vd():
     vd.stdinSource.fptext = vd._stdin
     vd._stdin.close = vd.nop  #1759
 
-    # fetch motd and plugins *after* options parsing/setting
-    vd.pluginsSheet.ensureLoaded()
+    # fetch motd *after* options parsing/setting
     vd.domotd()
 
     if args.batch:

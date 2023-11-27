@@ -207,3 +207,4 @@ class OnExit:
 alias('open-inputs', 'open-input-history')
 
 vd.addGlobals(globals())
+#vd.option('plugins_url', 'https://visidata.org/plugins/plugins.jsonl', 'source of plugins sheet')
