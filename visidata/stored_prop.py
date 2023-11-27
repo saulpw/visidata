@@ -10,7 +10,7 @@ vd.stored_properties = {}
 @classmethod
 def stored_property(vdcls, f):
     def _save_on_exit():
-        if vd.stored_properties[f]:
+        if vd.stored_properties.get(f, None):
             p = Path(vd.options.visidata_dir)/(f.__name__ + '.json')
             with p.open(mode='w', encoding='utf-8') as fp:
                 fp.write(json.dumps(vd.stored_properties[f]))
