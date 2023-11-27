@@ -298,6 +298,9 @@ def wraptext(text, width=80, indent=''):
     '''
     import re
 
+    if width <= 0:
+        return
+
     for line in text.splitlines():
         if not line:
             yield '', ''
