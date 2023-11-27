@@ -17,6 +17,12 @@ class InvertedCanvas(Canvas):
     def render_async(self):
         self.plot_elements(invert_y=True)
 
+    def fixPoint(self, plotterPoint, canvasPoint):
+        'adjust visibleBox.xymin so that canvasPoint is plotted at plotterPoint'
+        self.visibleBox.xmin = canvasPoint.x - self.canvasW(plotterPoint.x-self.plotviewBox.xmin)
+        self.visibleBox.ymin = canvasPoint.y - self.canvasH(self.plotviewBox.ymax-plotterPoint.y)
+        self.refresh()
+
     def zoomTo(self, bbox):
         super().zoomTo(bbox)
         self.fixPoint(Point(self.plotviewBox.xmin, self.plotviewBox.ymax),
