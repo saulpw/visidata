@@ -203,6 +203,8 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, literal=False, **kwargs):
     else:
         chunks = [(dict(link='', cattr=ColorAttr()), s)]
 
+    x = max(0, x)
+    y = max(0, y)
     assert x >= 0, x
     assert y >= 0, y
 
