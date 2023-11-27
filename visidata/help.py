@@ -2,13 +2,34 @@ import functools
 import collections
 
 from visidata import VisiData, MetaSheet, ColumnAttr, Column, BaseSheet, VisiDataMetaSheet, SuspendCurses
-from visidata import vd, asyncthread, ENTER, drawcache_property, AttrDict
+from visidata import vd, asyncthread, ENTER, drawcache, AttrDict
 
 vd.option('disp_help', 0, 'show help panel during input')
 
 @BaseSheet.api
 def hint_basichelp(sheet):
     return 0, '`Alt+[:underline]H[/]` to open the [:underline]H[/]elp menu'
+
+
+@VisiData.api
+def iterMenuPaths(vd, item=None, menupath=[]):
+    'Generate (longname, menupath).'
+    if item is None:
+        item = vd.menus
+
+    if isinstance(item, (list, tuple)):
+        for m in item:
+            yield from vd.itercommands(m, menupath)
+    elif item.longname:
+        yield item.longname, ' > '.join(menupath+[item.title])
+    else:
+        yield from vd.itercommands(item.menus, menupath+[item.title])
+
+
+@VisiData.property
+@drawcache
+def menuPathsByLongname(vd):
+    return dict(vd.itercommands())
 
 
 @VisiData.api
@@ -22,6 +43,7 @@ class HelpSheet(MetaSheet):
         ColumnAttr('sheet'),
         ColumnAttr('module'),
         ColumnAttr('longname'),
+        Column('menupath', width=0, getter=lambda col,row: ' > '.join(vd.menuPathsByLongname[row.longname])),
         Column('keystrokes', getter=lambda col,row: col.sheet.revbinds.get(row.longname, [None])[0]),
         Column('all_bindings', width=0, getter=lambda col,row: list(set(col.sheet.revbinds.get(row.longname, [])))),
         Column('description', width=40, getter=lambda col,row: col.sheet.cmddict[(row.sheet, row.longname)].helpstr),
