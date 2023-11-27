@@ -154,8 +154,11 @@ class HtmlTableSheet(Sheet):
         if headers:
             it = itertools.zip_longest(*headers, fillvalue='')
         else:
-            it = list(list(x) for x in self.rows.pop(0))
-            it += [''] * (ncols-len(it))
+            if len(self.rows) > 0:
+                it = list(list(x) for x in self.rows.pop(0))
+                it += [''] * (ncols-len(it))
+            else:
+                it = []
 
         for colnum, names in enumerate(it):
             name = '_'.join(str(x) for x in names if x)
