@@ -78,7 +78,7 @@ def syscopyCells_async(sheet, cols, rows, filetype):
         with tempfile.NamedTemporaryFile() as temp:
             temp.close()  #2118
 
-            vd.sync(vd.saveSheets(Path(temp.name, fptext=buf), vs, confirm_overwrite=False))
+            vd.sync(vd.saveSheets(Path(f'{temp.name}.{filetype}', fptext=buf), vs, confirm_overwrite=False))
             subprocess.run(
                 sheet.options.clipboard_copy_cmd.split(),
                 input=buf.getvalue(),
