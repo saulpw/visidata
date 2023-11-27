@@ -265,7 +265,7 @@ def asyncsingle(func):
 @VisiData.property
 def unfinishedThreads(self):
     'A list of unfinished threads (those without a recorded `endTime`).'
-    return [t for t in self.threads if getattr(t, 'endTime', None) is None]
+    return [t for t in self.threads if getattr(t, 'endTime', None) is None and getattr(t, 'sheet', None) is not None]
 
 @VisiData.api
 def checkForFinishedThreads(self):
