@@ -7,7 +7,7 @@ from visidata import asyncthread, vd
 
 melt_var_colname = 'Variable' # column name to use for the melted variable name
 melt_value_colname = 'Value'  # column name to use for the melted value
-melt_null = False   # whether to melt null values
+melt_null = False   # whether to include rows for null values during melt
 
 
 # rowdef: {0:sourceRow, 1:Category1, ..., N:CategoryN, ColumnName:Column, ...}
