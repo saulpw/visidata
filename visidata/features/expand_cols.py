@@ -1,4 +1,5 @@
 import math
+import random
 import os.path
 from functools import singledispatch
 
@@ -7,18 +8,18 @@ from visidata import vd, Sheet, asyncthread, Progress, Column, VisiData, deduceT
 
 @Sheet.api
 def getSampleRows(sheet):
-    'Return list of sample rows centered around the cursor.'
-    n = sheet.options.default_sample_size
-    if n == 0 or n >= sheet.nRows:
-        return sheet.rows
+    'Return list of sample rows, including the cursor row as the first row.'
 
-    vd.warning(f'sampling {n} rows')
-    seq = sheet.rows
-    start = math.ceil(sheet.cursorRowIndex - n / 2) % len(seq)
-    end = (start + n) % len(seq)
-    if start < end:
-        return seq[start:end]
-    return seq[start:] + seq[:end]
+    # do not include cursorRow in sample
+    ret = sheet.rows[:sheet.cursorRowIndex] + sheet.rows[sheet.cursorRowIndex+1:]
+
+    n = sheet.options.default_sample_size
+    if n != 0 and n < sheet.nRows:
+        vd.aside(f'sampling {n} rows')
+        ret = random.sample(ret, n)
+
+    return [sheet.cursorRow] + ret
+
 
 @Sheet.api
 def expandCols(sheet, cols, rows=None, depth=0):
