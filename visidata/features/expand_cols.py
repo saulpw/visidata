@@ -47,6 +47,8 @@ def _(sampleValue, col, vals):
     newcols = {}
 
     for val in Progress(vals, 'expanding'):
+        if not isinstance(val, dict):  # allow mixed-use columns
+            continue
         colsToAdd = set(val).difference(newcols)
         colsToAdd and newcols.update({
             k: deduceType(v)
@@ -69,9 +71,11 @@ def _createExpandedColumnsNamedTuple(col, val):
 @_createExpandedColumns.register(tuple)
 def _(sampleValue, col, vals):
     '''Use the longest sequence to determine the number of columns we need to
-    create, and their presumed types'''
+    create, and their presumed types.  Ignore strings and exceptions. '''
     def lenNoExceptions(v):
         try:
+            if isinstance(v, str):
+                return 0
             return len(v)
         except Exception as e:
             return 0
