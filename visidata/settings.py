@@ -1,4 +1,5 @@
 import collections
+import functools
 import sys
 import inspect
 import argparse
@@ -15,6 +16,12 @@ class SettingsMgr(collections.OrderedDict):
     def __init__(self):
         super().__init__()
         self.allobjs = {}
+
+    def __hash__(self):
+        return hash(id(self))
+
+    def __eq__(self, other):
+        return self is other
 
     def objname(self, obj):
         if isinstance(obj, str):
@@ -51,6 +58,7 @@ class SettingsMgr(collections.OrderedDict):
     def setdefault(self, k, v):
         return self.set(k, v, 'default')
 
+    @functools.lru_cache()
     def _mappings(self, obj):
         '''Return list of contexts in order to resolve settings. ordering is, from lowest to highest precedence:
 
