@@ -138,7 +138,7 @@ class JoinKeyColumn(Column):
                 vals.add(c.getTypedValue(row[c.sheet]))
         if len(vals) != 1:
             keycolnames = ', '.join([f'{col.sheet.name}:{col.name}' for col in self.keycols])
-            vd.warning(f"The source key columns ({keycolnames}) have different types. Type the source columns before joining.")
+            vd.warning(f"source key columns ({keycolnames}) have different types")
         return vals.pop()
 
     def putValue(self, row, value):
