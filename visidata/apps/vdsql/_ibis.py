@@ -720,7 +720,8 @@ IbisTableSheet.addCommand("'", 'addcol-cast', 'addcol_cast(cursorCol)')
 
 IbisTableSheet.addCommand('zb', 'sidebar-choose', 'choose_sidebar()', 'choose vdsql sidebar to show')
 IbisTableSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("SQL query: ")))', 'open sheet with results of raw SQL query')
-IbisTableSheet.addCommand('', 'addcol-subst', 'addColumnAtCursor(addcol_subst(cursorCol, **inputRegexSubstOld("transform column by regex: ")))')
+IbisTableSheet.addCommand('', 'addcol-subst', 'addColumnAtCursor(addcol_subst(cursorCol, **inputRegexSubstOld("transform column by regex: ")))') # deprecated
+IbisTableSheet.addCommand('', 'addcol-regex-subst', 'addColumnAtCursor(addcol_subst(cursorCol, **inputRegexSubst("transform column by regex: ")))')
 IbisTableSheet.addCommand('', 'addcol-split', 'addColumnAtCursor(addcol_split(cursorCol, input("split by delimiter: ", type="delim-split")))')
 IbisTableSheet.bindkey('split-col', 'addcol-split')
 IbisTableSheet.addCommand('gt', 'stoggle-rows', 'stoggle_rows()', 'select rows matching current cell in current column')
