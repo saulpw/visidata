@@ -137,7 +137,8 @@ class JoinKeyColumn(Column):
             if row[c.sheet] is not None:
                 vals.add(c.getTypedValue(row[c.sheet]))
         if len(vals) != 1:
-            vd.warning(f'inconsistent keys: ' + str(vals))
+            keycolnames = ', '.join([f'{col.sheet.name}:{col.name}' for col in self.keycols])
+            vd.warning(f"source key columns ({keycolnames}) have different types")
         return vals.pop()
 
     def putValue(self, row, value):
