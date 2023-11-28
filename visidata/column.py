@@ -255,7 +255,8 @@ class Column(Extensible):
         if isinstance(typedval, bytes):
             typedval = typedval.decode(options.encoding, options.encoding_errors)
 
-        return vd.getType(self.type).formatter(self.fmtstr, typedval)
+        gt = vd.getType(self._type)
+        return gt.formatter(self._fmtstr or gt.fmtstr, typedval)
 
     def displayer_generic(self, dw:DisplayWrapper, width=None):
         '''Fit *dw.text* into *width* charcells.
