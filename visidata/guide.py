@@ -12,29 +12,7 @@ import re
 from visidata import vd, BaseSheet, Sheet, ItemColumn, Column, VisiData, ENTER, RowColorizer
 from visidata import wraptext
 
-vd.guides = {}  # name -> guidecls
-
-@VisiData.api
-def addGuide(vd, name, guidecls):
-    vd.guides[name] = guidecls
-
-@VisiData.api
-class GuideGuide(Sheet):
-    help = __doc__
-    rowtype = 'guides' # rowdef: list(guide number, guide name, topic description, points, max_points)
-    columns = [
-        ItemColumn('n', 0, type=int),
-        ItemColumn('name', 1, width=0),
-        ItemColumn('topic', 2, width=60),
-        Column('points', type=int, getter=lambda c,r: 0),
-        Column('max_points', type=int, getter=lambda c,r: 100),
-    ]
-    colorizers = [
-            RowColorizer(7, 'color_guide_unwritten', lambda s,c,r,v: r and r[1] not in vd.guides)
-            ]
-    def iterload(self):
-        i = 0
-        for line in '''
+guides_list = '''
 GuideGuide ("A Guide to VisiData Guides (you are here)")
 HelpGuide ("Where to Start and How to Quit")  # manpage; ask for patreon
 MenuGuide ("The VisiData Menu System")
@@ -64,7 +42,7 @@ SlideGuide ("Sliding rows and columns around")
 ExprGuide ("Compute Python over every row")
 JoinGuide ("Joining multiple sheets together")
 DescribeSheet ("Basic Statistics (min/max/mode/median/mean)")
-AggregatorsSheet ("Aggregations like sum, mean, and ")
+AggregatorsSheet ("Aggregations like sum, mean, and distinct")
 FrequencyTable ("Frequency Tables are how you GROUP BY")
 PivotGuide ("Pivot Tables are just Frequency Tables with more columns")
 MeltGuide ("Melt is just Unpivot")
@@ -90,7 +68,31 @@ PyobjSheet ("Inspecting internal Python objects")
 #  appendices
 
 InputEditorGuide ("Using the builtin line editor")
-        '''.splitlines():
+'''
+
+vd.guides = {}  # name -> guidecls
+
+@VisiData.api
+def addGuide(vd, name, guidecls):
+    vd.guides[name] = guidecls
+
+@VisiData.api
+class GuideGuide(Sheet):
+    help = __doc__
+    rowtype = 'guides' # rowdef: list(guide number, guide name, topic description, points, max_points)
+    columns = [
+        ItemColumn('n', 0, type=int),
+        ItemColumn('name', 1, width=0),
+        ItemColumn('topic', 2, width=60),
+        Column('points', type=int, getter=lambda c,r: 0),
+        Column('max_points', type=int, getter=lambda c,r: 100),
+    ]
+    colorizers = [
+            RowColorizer(7, 'color_guide_unwritten', lambda s,c,r,v: r and r[1] not in vd.guides)
+            ]
+    def iterload(self):
+        i = 0
+        for line in guides_list.splitlines():
             m = re.search(r'(\w+?) \("(.*)"\)', line)
             if m:
                 yield [i] + list(m.groups())
@@ -99,6 +101,7 @@ InputEditorGuide ("Using the builtin line editor")
     def openRow(self, row):
         name = row[1]
         return vd.getGuide(name)
+
 
 class GuideSheet(Sheet):
     rowtype = 'lines'
