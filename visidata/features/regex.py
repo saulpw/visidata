@@ -135,10 +135,8 @@ def inputRegexSubst(vd, prompt):
                             after=dict(type='regex-replace', prompt='replace: ', help=prompt))
 
 
-Sheet.addCommand(':', 'split-col', 'addRegexColumns(makeRegexSplitter, cursorCol, inputRegex("split regex: ", type="regex-split"))', 'Add new columns from regex split')
-Sheet.addCommand(';', 'capture-col', 'addRegexColumns(makeRegexMatcher, cursorCol, inputRegex("capture regex: ", type="regex-capture"))', 'add new column from capture groups of regex; requires example row')
-Sheet.addCommand('', 'addcol-split', 'addColumnAtCursor(RegexColumn(makeRegexSplitter, cursorCol, inputRegex("split regex: ", type="regex-split")))', 'Add column split by regex')
-Sheet.addCommand('', 'addcol-capture', 'addColumnAtCursor(RegexColumn(makeRegexMatcher, cursorCol, inputRegex("capture regex: ", type="regex-capture")))', 'Add column captured by regex')
+Sheet.addCommand(':', 'addcol-split', 'addColumnAtCursor(RegexColumn(makeRegexSplitter, cursorCol, inputRegex("split regex: ", type="regex-split")))', 'Add column split by regex')
+Sheet.addCommand(';', 'addcol-capture', 'addColumnAtCursor(RegexColumn(makeRegexMatcher, cursorCol, inputRegex("capture regex: ", type="regex-capture")))', 'Add column captured by regex')
 
 Sheet.addCommand('*', 'addcol-regex-subst', 'addColumnAtCursor(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, **inputRegexSubst("regex transform column"))))', 'add column derived from current column, replacing regex with subst (may include \1 backrefs)')
 Sheet.addCommand('g*', 'setcol-regex-subst', 'setValuesFromRegex([cursorCol], someSelectedRows, **inputRegexSubst("regex transform column"))', 'regex/subst - modify selected rows in current column, replacing regex with subst, (may include backreferences \\1 etc)')
@@ -150,7 +148,6 @@ vd.addMenuItems('''
     Column > Add column > capture by regex > addcol-capture
     Column > Add column > split by regex > addcol-split
     Column > Add column > subst by regex > addcol-regex-subst
-    Column > Split > split-col
     Row > Select > by regex > current column > select-col-regex
     Row > Select > by regex > all columns > select-cols-regex
     Row > Unselect > by regex > current column > unselect-col-regex

@@ -632,7 +632,7 @@ select-after select-around-n select-before select-equal-row select-error stoggle
 '''.split()
 
 notimpl_cmds = '''
-addcol-capture addcol-incr addcol-incr-step addcol-window capture-col
+addcol-capture addcol-incr addcol-incr-step addcol-window
 contract-col expand-col-depth expand-cols expand-cols-depth melt melt-regex pivot random-rows
 select-error-col select-exact-cell select-exact-row select-rows
 describe-sheet freq-summary
@@ -723,7 +723,6 @@ IbisTableSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("SQL query: ")))
 IbisTableSheet.addCommand('', 'addcol-subst', 'addColumnAtCursor(addcol_subst(cursorCol, **inputRegexSubstOld("transform column by regex: ")))') # deprecated
 IbisTableSheet.addCommand('', 'addcol-regex-subst', 'addColumnAtCursor(addcol_subst(cursorCol, **inputRegexSubst("transform column by regex: ")))')
 IbisTableSheet.addCommand('', 'addcol-split', 'addColumnAtCursor(addcol_split(cursorCol, input("split by delimiter: ", type="delim-split")))')
-IbisTableSheet.bindkey('split-col', 'addcol-split')
 IbisTableSheet.addCommand('gt', 'stoggle-rows', 'stoggle_rows()', 'select rows matching current cell in current column')
 IbisTableSheet.addCommand(',', 'select-equal-cell', 'select_equal_cell(cursorCol, cursorTypedValue)', 'select rows matching current cell in current column')
 IbisTableSheet.addCommand('t', 'stoggle-row', 'stoggle_row(cursorRow); cursorDown(1)', 'toggle selection of current row')
