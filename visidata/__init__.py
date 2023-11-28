@@ -91,6 +91,7 @@ import visidata.search
 
 import visidata.expr
 import visidata.metasheets
+import visidata.input_history
 import visidata.optionssheet
 import visidata.type_currency
 import visidata.type_floatsi

@@ -91,41 +91,6 @@ VisiDataMetaSheet.options.row_delimiter = '\n'
 VisiDataMetaSheet.options.encoding = 'utf-8'
 
 
-
-@VisiData.stored_property
-def inputHistory(vd):
-    return {}  # [input_type][input] -> anything
-
-@VisiData.api
-def addInputHistory(vd, input:str, type:str=''):
-    hist = list(vd.inputHistory.setdefault(type, {}).keys())
-    if hist and hist[-1] == input:
-        return
-    if input in vd.inputHistory[type]:
-        n = vd.inputHistory[type][input]['n']  # make it the most recent entry
-    else:
-        n = 0
-    vd.inputHistory[type][input] = dict(type=type, input=input, n=n+1)
-
-
-class InputHistorySheet(Sheet):
-    # rowdef: dict(type=, input=, n=)
-    # .source=vd.inputHistory
-    columns = [
-        ItemColumn('type'),
-        ItemColumn('input'),
-    ]
-    def iterload(self):
-        for type, inputs in vd.inputHistory.items():
-            for v in inputs.values():
-                yield v
-
-
-@VisiData.property
-def inputHistorySheet(vd):
-    return InputHistorySheet('input_history', source=vd.inputHistory)
-
-
 @VisiData.property
 def allColumnsSheet(vd):
     return ColumnsSheet("all_columns", source=vd.stackedSheets)
@@ -160,7 +125,6 @@ def join_cols(sheet):
 
 # copy vd.sheets so that ColumnsSheet itself isn't included (for recalc in addRow)
 globalCommand('gC', 'columns-all', 'vd.push(vd.allColumnsSheet)', 'open Columns Sheet: edit column properties for all visible columns from all sheets on the sheets stack')
-BaseSheet.addCommand(None, 'open-input-history', 'vd.push(inputHistorySheet)', 'open sheet with previous inputs')
 
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))', 'open Columns Sheet: edit column properties for current sheet')
 
