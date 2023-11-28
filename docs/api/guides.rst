@@ -25,7 +25,7 @@ This same general structure and process should work for most guides.
 Step 1. Launch **GuideGuide** and find the ``name`` of the guide
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. image:: docs/assets/guide.png
+.. image:: /docs/assets/guide.png
     :width: 400
 
 Within VisiData, ``Space open-guide-index``, and you can see the Table of Contents.
