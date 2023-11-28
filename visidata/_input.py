@@ -406,9 +406,21 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
     sheet = vd.activeSheet
     scr = sheet._scr
 
-    v = vd.getCommandInput()
-    if v is not None:
-        return v
+    previnput = vd.getCommandInput()
+    if previnput is not None:
+        if isinstance(previnput, str):
+            if previnput.startswith('{'):
+                return json.loads(previnput)
+            else:
+                ret = {k:v.get('value', '') for k,v in kwargs.items()}
+                primekey = list(ret.keys())[0]
+                ret[primekey] = previnput
+                return ret
+
+        if isinstance(previnput, dict):
+            return previnput
+
+        assert False, type(previnput)
 
     y = sheet.windowHeight-1
     maxw = sheet.windowWidth//2
