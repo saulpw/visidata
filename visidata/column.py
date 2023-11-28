@@ -7,7 +7,7 @@ import re
 import time
 import json
 
-from visidata import options, anytype, stacktrace, vd
+from visidata import options, anytype, stacktrace, vd, drawcache
 from visidata import asyncthread, dispwidth, clipstr, iterchars
 from visidata import wrapply, TypedWrapper, TypedExceptionWrapper
 from visidata import Extensible, AttrDict, undoAttrFunc, ExplodingMock, MissingAttrFormatter
@@ -233,6 +233,7 @@ class Column(Extensible):
     def formatter_python(self, fmtstr):
         return lambda v,*args,**kwargs: str(v)
 
+    @drawcache
     def make_formatter(self):
         'Return function for format(v) from the current formatter and fmtstr'
         _formatMaker = getattr(self, 'formatter_'+(self.formatter or self.sheet.options.disp_formatter))
