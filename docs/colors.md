@@ -59,7 +59,7 @@ After these are the numeric colors; note that colors 0-7 correspond to the named
 Colors 16-231 form a regular color cube with a wide variety of gradations covering the color space.
 Colors 232-255 are gradiants of white, with 232 being the darkest possible gray (almost indistinguishable from the black of 0 and 16), and 255 being almost the brightest white (though 15 is brighter).
 
-## Changing Display Attributes within a string
+## [Changing Display Attributes within a string](#attrs) {#attrs}
 
 In many interface elements, it's possible to change the display attributes inline, within a single string.
 For example, the menu bar has a message displayed in the upper right (which by default shows "Ctrl+H for help menu"), and is configurable with `options.disp_menu_fmt`.
