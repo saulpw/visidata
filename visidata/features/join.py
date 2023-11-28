@@ -12,7 +12,7 @@ def ensureLoaded(vd, sheets):
     threads = [vs.ensureLoaded() for vs in sheets]
     threads = [t for t in threads if t]
     if threads:
-        vd.status('finishing loading %d source sheets' % len(threads))
+        vd.status('loading %d source sheets' % len(threads))
     return threads
 
 
