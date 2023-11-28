@@ -11,7 +11,8 @@ vd.help_join = '# Join Help\nHELPTODO'
 def ensureLoaded(vd, sheets):
     threads = [vs.ensureLoaded() for vs in sheets]
     threads = [t for t in threads if t]
-    vd.status('loading %d sheets' % len(threads))
+    if threads:
+        vd.status('loading %d source sheets' % len(threads))
     return threads
 
 
