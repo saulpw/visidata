@@ -98,11 +98,12 @@ class SettingsMgr(collections.OrderedDict):
 
 
 class Command:
-    def __init__(self, longname, execstr, helpstr='', module=''):
+    def __init__(self, longname, execstr, helpstr='', module='', deprecated=False):
         self.longname = longname
         self.execstr = execstr
         self.helpstr = helpstr
         self.module = module
+        self.deprecated = deprecated
 
 
 class Option:

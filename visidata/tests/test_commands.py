@@ -127,6 +127,9 @@ class TestCommands:
         nerrs = 0
         ntotal = 0
         for longname in cmdlist.keys():
+            cmd = vs.getCommand(longname)
+            if cmd and cmd.deprecated:
+                continue
             if not isTestableCommand(longname, cmdlist):
                 continue
             ntotal += 1
