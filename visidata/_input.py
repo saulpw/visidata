@@ -401,10 +401,14 @@ def inputsingle(vd, prompt, record=True):
     return v
 
 @VisiData.api
-def inputMultiple(vd, updater=lambda val: None, **kwargs):
+def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
     'A simple form, where each input is an entry in `kwargs`, with the key being the key in the returned dict, and the value being a dictionary of kwargs to the singular input().'
     sheet = vd.activeSheet
     scr = sheet._scr
+
+    v = vd.getCommandInput()
+    if v is not None:
+        return v
 
     y = sheet.windowHeight-1
     maxw = sheet.windowWidth//2
@@ -445,6 +449,7 @@ def inputMultiple(vd, updater=lambda val: None, **kwargs):
             input_kwargs['value'] = vd.input(**input_kwargs,
                                              attr=colors.color_edit_cell,
                                              updater=_drawPrompt,
+                                             record=False,
                                              bindings={
                 'KEY_BTAB': change_input(-1),
                 '^I':       change_input(+1),
@@ -460,6 +465,10 @@ def inputMultiple(vd, updater=lambda val: None, **kwargs):
             offset = e.args[1]
             i = keys.index(cur_input_key)
             cur_input_key = keys[(i+offset)%len(keys)]
+
+    lastargs = {k:v.get('value', '') for k,v in kwargs.items() if record and v.get('display', True)}
+    if vd.cmdlog and lastargs:
+        vd.setLastArgs(lastargs)
 
     return {k:v.get('value', '') for k,v in kwargs.items()}
 
