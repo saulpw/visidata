@@ -46,6 +46,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'save-col-keys': 'debris.csv',
                 'pyobj-expr': '2+2',            # open the python object for '4'
                 'edit-cell': '3',
+                 'search-keys': 'foo',
                  'search-col': 'foo',
                  'searchr-col': 'bar',
                  'select-col-regex': '.',
@@ -69,8 +70,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'setcell-expr': 'OrderDate',
                  'setcol-range': 'range(100)',
                  'repeat-input-n': '1',
-                 'capture-col': '(.)(.*)',
-                 'addcol-subst': r'Units/(\w)/\1', # the first character
+                 'addcol-regex-subst': dict(before=r'Units/(\w)', after=r'\1'), # the first character
                  'search-cols': 'foo',
                  'searchr-cols': 'bar',
                  'select-cols-regex': '.',
