@@ -11,6 +11,7 @@ from pathlib import Path
 # commands that require curses, and are not
 # replayable
 nonTested = (
+        'toggle-profile',
         'syscopy',
         'syspaste',
         'open-syspaste',
