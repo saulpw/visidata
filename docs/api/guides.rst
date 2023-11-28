@@ -6,7 +6,9 @@ A VisiData Guide is a more verbose writeup of a particular set of features that 
 The Guide Index is accessible with ``Space open-guide-index``.
 
 
-TODO NOTE: Guides that have not been written yet are grayed out.  We love to get help with documentation, please get in touch if you want to write one or have other suggestions!
+.. note::
+
+    Guides that have not been written yet are grayed out.  We love to get help with documentation, please get in touch if you want to write one or have other suggestions!
 
 Here's an outline for adding a guide, with our writing style preferences:
 
@@ -23,7 +25,8 @@ This same general structure and process should work for most guides.
 Step 1. Launch **GuideGuide** and find the ``name`` of the guide
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-TODO Add Screenshot of GuideGuide in VisiData
+.. image:: docs/assets/guide.png
+    :width: 400
 
 Within VisiData, ``Space open-guide-index``, and you can see the Table of Contents.
 
@@ -72,7 +75,7 @@ Next fill out the text for your guide in the ``guide`` variable:
 Some stylings of note:
 
 - `Basic markdown <https://www.markdownguide.org/basic-syntax/`_ will work. VisiData supports '# Headings', \*\*bold\*\*, \*italics\*, \`code snippets\`, and \_underscore\_.
-- VisiData has its `own display attribute syntax </docs/colors/>`_. For e.g., '[:onclick url]text[/]' will format ``text`` into a clickable url that will open in ``$BROWSER``.
+- VisiData has its `own display attribute syntax </docs/colors#attrs>`_. For e.g., '[:onclick url]text[/]' will format ``text`` into a clickable url that will open in ``$BROWSER``.
 - For listing relevant commands, the general pattern should be '- \`keystroke\` (\`longname\`) to {helpstring}'.  The keystroke should immediately follow the bullet; do not say "Press" or "Use" within VisiData docs and helpstrings.
 - Generally, the second person perspective ("you", "yours") is not used outside of tutorials.
 
