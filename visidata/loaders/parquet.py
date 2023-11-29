@@ -9,20 +9,29 @@ def open_parquet(vd, p):
 
 class ParquetColumn(Column):
     def calcValue(self, row):
-        return self.source[row["__rownum__"]].as_py()
+        val = self.source[row["__rownum__"]]
+        if val.type == 'large_string':
+            return memoryview(val.as_buffer())[:2**20].tobytes().decode('utf-8')
+        else:
+            return val.as_py()
 
 
 class ParquetSheet(Sheet):
     # rowdef: {'__rownum__':int, parquet_col:overridden_value, ...}
     def iterload(self):
+        pa = vd.importExternal("pyarrow", "pyarrow")
         pq = vd.importExternal("pyarrow.parquet", "pyarrow")
         from visidata.loaders.arrow import arrow_to_vdtype
 
         with self.source.open('rb') as f:
             self.tbl = pq.read_table(f)
+
         self.columns = []
         for colname, col in zip(self.tbl.column_names, self.tbl.columns):
-            c = ParquetColumn(colname, type=arrow_to_vdtype(col.type), source=col)
+            c = ParquetColumn(colname,
+                              type=arrow_to_vdtype(col.type),
+                              source=col,
+                              cache=(col.type.id == pa.lib.Type_LARGE_STRING))
             self.addColumn(c)
 
         for i in range(self.tbl.num_rows):
