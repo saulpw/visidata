@@ -14,7 +14,8 @@ The actual code in either case should be identical.
 
 .. note::
 
-    At startup, all .py files placed in the ``$HOME/.visidata/`` directory or Python code added to a ``~/.visidatarc`` will be auto-imported into VisiData.
+    To quickly install a personal plugin, place the plugin in the ``$HOME/.visidata/plugins/`` directory, and add an ``import`` statement to ``$HOME/.visidata/plugins/__init__.py``.
+    At startup, VisiData will automatically import this ``plugins`` package and all the included plugins.
 
 To publish a plugin, create a public repo with a .py file. To package it within VisiData, `open a PR on the VisiData repo <https://github.com/saulpw/visidata/pulls>`_, placing the code in the `the experimental folder <https://github.com/saulpw/visidata/tree/develop/visidata/experimental>`_.
 
@@ -31,21 +32,16 @@ hello.py
     Press ``0`` to show display options.disp_hello on the status line.'''
 
     __author__ = 'Jo Baz <jobaz@example.com>'
-    __version__ = '1.0'
 
     vd.option('disp_hello', 'Hello world!', 'string to display for hello-world command')
 
     BaseSheet.addCommand('0', 'hello-world', 'status(options.disp_hello)')
-
-If planning to open a PR on the VisiData repo, make sure the plugin contains:
-
-* a ``__version__`` of the current release
 
 .. note::
 
 Notes:
 
 - There should be a searchable docstring description of the core features.
-- Include at least the author and version metadata elements.
+- Optionally include author metadata.
 - Options at the top, commands at the bottom.
 - Avoid toplevel imports of non-stdlib Python extensions.
