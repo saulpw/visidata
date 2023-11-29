@@ -1,6 +1,6 @@
 '''
 # A Guide to VisiData Guides
-Each guide shows you how to use a particular feature in VisiData. Gray guides have not been written yet. We love contributions: [:onclick https://visidata.org/docs/guides]https://visidata.org/docs/guides[/].
+Each guide shows you how to use a particular feature in VisiData. Gray guides have not been written yet. We love contributions: [:onclick https://visidata.org/docs/guides]https://visidata.org/docs/api/guides[/].
 
 - [:keystrokes]Up/Down[/] to move the row cursor
 - [:keystrokes]Enter[/] to view a topic
