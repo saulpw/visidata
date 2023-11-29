@@ -223,4 +223,6 @@ visidata.Sheet.addCommand('', 'setcol-subst-all', 'setValuesFromRegex(visibleCol
 visidata.Sheet.addCommand('', 'split-col', 'addRegexColumns(makeRegexSplitter, cursorCol, inputRegex("split regex: ", type="regex-split"))', 'Add new columns from regex split', deprecated=True)
 visidata.Sheet.addCommand('', 'capture-col', 'addRegexColumns(makeRegexMatcher, cursorCol, inputRegex("capture regex: ", type="regex-capture"))', 'add new column from capture groups of regex; requires example row', deprecated=True)
 
+#vd.option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to', sheettype=None)
+
 vd.addGlobals(globals())
