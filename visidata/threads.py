@@ -341,6 +341,9 @@ class ThreadProfiler:
             # remove very-short-lived async actions
             if elapsed_s(self.thread) < min_thread_time_s:
                 vd.threads.remove(self.thread)
+            else:
+                if vd.options.profile:
+                    self.thread.profile.dump_stats(f'{self.thread.name}.pyprof')
 
 
 class ProfileSheet(Sheet):
