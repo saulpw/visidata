@@ -3,7 +3,7 @@ Guides
 
 A VisiData Guide is a more verbose writeup of a particular set of features that explains how the features work together.  Guides are readable from within VisiData itself.
 
-The Guide Index is accessible with ``Space open-guide-index``.
+The Guide Index is accessible with ``Space open-guide-index`` within VisiData or ``vd -P open-guide-index`` from the CLI.
 
 
 .. note::
@@ -28,9 +28,9 @@ Step 1. Launch **GuideGuide** and find the ``name`` of the guide
 .. image:: ../assets/guide.png
     :width: 1000
 
-Within VisiData, ``Space open-guide-index``, and you can see the Table of Contents.
+Within VisiData, ``Space open-guide-index`` to see the Table of Contents.
 
-Press ``gv`` to show the **name** column, and note down the **name** of the guide you want to document. For example: **FooGuide**.
+``gv`` will show the **name** column. Choose a guide to work on, and note down its **name**. For example: **MacrosSheet**.
 
 ::
 
@@ -39,12 +39,12 @@ Step 2. Create a GuideSheet subclass
 
 ::
 
-    class FooGuideCls(GuideSheet):
+    class MacrosGuide(GuideSheet):
         guide = ''
 
 -  The Guide should be the final class declaration in the Python file
    where the bulk of the code for that feature exists. In this case,
-   we would add it to ``visidata/foobar.py``.
+   we would add it to ``visidata/macros.py``.
 
 -  All Guides inherit from ``GuideSheet``.
 
@@ -55,23 +55,25 @@ Step 2. Create a GuideSheet subclass
 Step 3. Add docstring to the ``guide`` variable
 ----------------------------------------------
 
-Next fill out the text for your guide in the ``guide`` variable:
+Next fill out the text for the guide in the ``guide`` variable:
 
 ::
 
-    class FooGuideCls(GuideSheet):
-        guide='''# FooGuide
-    Foo is a view which displays data as a foo. Foo differ in their branch numbers based on the [:onclick https://example.com/]foo-branch algorithm[/].
+    class MacrosGuide(GuideSheet):
+        guide='''# Macros
+    Macros allow you to bind a command sequence to a keystroke or longname, to replay when that keystroke is pressed or the command is executed by longname.
 
     The basic usage is:
-        1. `Shift+X` (`open-foo`) to open the **FooSheet**.
-        2. ???
-        3. Profit.
+        1. `m` (`macro-record`) to begin recording the macro.
+        2. Execute a series of commands.
+        3. `m` again to complete the recording, and prompt for the keystroke or longname to bind it to.
 
-    # The Foo Sheet
+    # The Macros Sheet
 
-    - `zb` (`bar-baz`) to bar baz the displayed foo.
-    - `Enter` to open the foo in the current row.
+    - `gm` (`macro-sheet`) to open an index of existing macros.
+
+    - `d` (`delete-row`) to mark macros for deletion.
+    - `z Ctrl+S` (`commit-sheet`) to then commit any changes.
     '''
 
 Some stylings of note:
@@ -90,7 +92,7 @@ Finishing off our example:
 
 ::
 
-        vd.addGuide('FooGuide', FooGuideCls)
+        vd.addGuide('MacrosSheet', MacrosGuide)
 
 ``vd.getGuide`` will now be able to locate the guide!
 
