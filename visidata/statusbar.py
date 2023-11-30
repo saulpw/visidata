@@ -1,7 +1,6 @@
 import builtins
 import collections
 import curses
-import inspect
 import sys
 
 import visidata
@@ -45,20 +44,9 @@ def statuses(vd):
 def statusHistory(vd):
     return list()  # list of [priority, statusmsg, repeats] for all status messages ever
 
-def getStatusSource():
-    stack = inspect.stack()
-    for i, sf in enumerate(stack):
-        if sf.function in 'status aside'.split():
-            if stack[i+1].function in 'error fail warning debug'.split():
-                sf = stack[i+2]
-            else:
-                sf = stack[i+1]
-            break
-
-    fn = sf.filename
-    if fn.startswith(visidata.__path__[0]):
-        fn = visidata.__package__ + fn[len(visidata.__path__[0]):]
-    return f'{fn}:{sf.lineno}:{sf.function}'
+@VisiData.api
+def getStatusSource(vd):
+    return None
 
 
 @VisiData.api
@@ -70,7 +58,7 @@ def status(vd, *args, priority=0):
     k = (priority, tuple(map(str, args)))
     vd.statuses[k] = vd.statuses.get(k, 0) + 1
 
-    source = getStatusSource()
+    source = vd.getStatusSource()
 
     if not vd.cursesEnabled:
         msg = '\r' + composeStatus(args)
@@ -111,7 +99,7 @@ def warning(vd, *args):
 @VisiData.api
 def aside(vd, *args, priority=0):
     'Add a message to statuses without showing the message proactively.'
-    return vd.addToStatusHistory(*args, priority=priority, source=getStatusSource())
+    return vd.addToStatusHistory(*args, priority=priority, source=vd.getStatusSource())
 
 @VisiData.api
 def debug(vd, *args, **kwargs):
