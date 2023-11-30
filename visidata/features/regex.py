@@ -10,7 +10,6 @@ def help_regex(vd):
     return vd.getHelpPane('regex', module='visidata')
 
 
-vd.option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]', replay=True)
 vd.option('regex_maxsplit', 0, 'maxsplit to pass to regex.split', replay=True)
 
 @VisiData.api
@@ -114,12 +113,6 @@ def setValuesFromRegex(sheet, cols, rows, before='', after=''):
             col.setValueSafe(r, transform(col, r))
     for col in cols:
         col.recalc()
-
-
-@BaseSheet.api
-def regex_flags(sheet):
-    'Return flags to pass to regex functions from options'
-    return sum(getattr(re, f.upper()) for f in sheet.options.regex_flags)
 
 
 @VisiData.api

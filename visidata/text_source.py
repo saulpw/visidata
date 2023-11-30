@@ -3,6 +3,13 @@ import re
 from visidata import vd, BaseSheet
 
 vd.option('regex_skip', '', 'regex of lines to skip in text sources', help='regex')
+vd.option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]', replay=True)
+
+@BaseSheet.api
+def regex_flags(sheet):
+    'Return flags to pass to regex functions from options'
+    return sum(getattr(re, f.upper()) for f in sheet.options.regex_flags)
+
 
 class FilterFile:
     def __init__(self, fp, regex:str, regex_flags:int=0):
