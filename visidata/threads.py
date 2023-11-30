@@ -174,7 +174,7 @@ def _annotate_thread(t, endTime=None):
     return t
 
 # all long-running threads, including main and finished
-VisiData.init('threads', lambda: [_annotate_thread(threading.current_thread(), 0)])
+vd.threads = [_annotate_thread(threading.current_thread(), 0)]
 
 @VisiData.api
 def execSync(vd, func, *args, sheet=None, **kwargs):
