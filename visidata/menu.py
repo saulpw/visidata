@@ -17,7 +17,7 @@ vd.theme_option('disp_menu_boxchars', '││──┌┐└┘├┤', 'box cha
 vd.theme_option('disp_menu_more', '»', 'command submenu indicator')
 vd.theme_option('disp_menu_push', '⎘', 'indicator if command pushes sheet onto sheet stack')
 vd.theme_option('disp_menu_input', '…', 'indicator if input required for command')
-vd.option('disp_menu_fmt', '| VisiData {vd.version} | Ctrl+H for helpful tip', 'right-side menu format string', max_help=0)
+vd.option('disp_menu_fmt', '| VisiData {vd.version} | Alt+H for help menu', 'right-side menu format string', max_help=0)
 
 BaseSheet.init('activeMenuItems', list)
 vd.menuRunning = False
