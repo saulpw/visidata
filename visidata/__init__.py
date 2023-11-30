@@ -136,6 +136,7 @@ for line in core_imports.splitlines():
 
 vd.importSubmodules('visidata.loaders')
 
+@asyncsingle
 def importFeatures():
     vd.importSubmodules('visidata.features')
     vd.importSubmodules('visidata.themes')
