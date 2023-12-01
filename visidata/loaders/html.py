@@ -35,7 +35,7 @@ class HtmlTablesSheet(IndexSheet):
         Column('classes', getter=lambda col,row: row.html.attrib.get('class')),
         Column('title', getter=lambda col,row: row.html.attrib.get('title')),
         Column('aria_label', getter=lambda col,row: row.html.attrib.get('aria-label')),
-        Column('caption', getter=lambda col,row: row.html.xpath('normalize-space(./caption)') if row.html.xpath('./caption') else None),
+        Column('caption', getter=lambda col,row: row.html.xpath('normalize-space(./caption)') if row.html.xpath('./caption') else None, cache=True),
         Column('summary', getter=lambda col,row: row.html.attrib.get('summary')),
     ]
     def iterload(self):
