@@ -16,7 +16,6 @@ go- search scroll prev next page start end zoom resize visibility sidebar
 mouse suspend redraw no-op help syscopy sysopen profile toggle'''.split()
 
 vd.option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog', sheettype=None)
-vd.option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to', sheettype=None)
 
 vd.activeCommand = UNLOADED
 vd._nextCommands = []  # list[str|CommandLogRow] for vd.queueCommand
@@ -202,14 +201,6 @@ class CommandLogBase:
             if isLoggableSheet(sheet):      # don't record actions from cmdlog or other internal sheets on global cmdlog
                 self.addRow(vd.activeCommand)  # add to global cmdlog
             sheet.cmdlog_sheet.addRow(vd.activeCommand)  # add to sheet-specific cmdlog
-            if vd.options.cmdlog_histfile:
-                name = date().strftime(vd.options.cmdlog_histfile)
-                p = Path(name)
-                if not p.is_absolute():
-                    p = Path(sheet.options.visidata_dir)/f'{name}.jsonl'
-                if not getattr(vd, 'sessionlog', None):
-                    vd.sessionlog = vd.loadInternalSheet(CommandLog, p)
-                vd.sessionlog.append_tsv_row(vd.activeCommand)
 
         vd.activeCommand = None
 

@@ -206,5 +206,24 @@ class OnExit:
 
 alias('open-inputs', 'open-input-history')
 
-vd.addGlobals(globals())
 #vd.option('plugins_url', 'https://visidata.org/plugins/plugins.jsonl', 'source of plugins sheet')
+
+@visidata.VisiData.api
+def inputRegexSubstOld(vd, prompt):
+    'Input regex transform via oneliner (separated with `/`).  Return parsed transformer as dict(before=, after=).'
+    rex = vd.inputRegex(prompt, type='regex-subst')
+    before, after = vd.parse_sed_transform(rex)
+    return dict(before=before, after=after)
+
+
+visidata.Sheet.addCommand('', 'addcol-subst', 'addColumnAtCursor(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, **inputRegexSubstOld("transform column by regex: "))))', 'add column derived from current column, replacing regex with subst (may include \1 backrefs)', deprecated=True)
+visidata.Sheet.addCommand('', 'setcol-subst', 'setValuesFromRegex([cursorCol], someSelectedRows, **inputRegexSubstOld("transform column by regex: "))', 'regex/subst - modify selected rows in current column, replacing regex with subst, (may include backreferences \\1 etc)', deprecated=True)
+visidata.Sheet.addCommand('', 'setcol-subst-all', 'setValuesFromRegex(visibleCols, someSelectedRows, **inputRegexSubstOld(f"transform {nVisibleCols} columns by regex: "))', 'modify selected rows in all visible columns, replacing regex with subst (may include \\1 backrefs)', deprecated=True)
+
+visidata.Sheet.addCommand('', 'split-col', 'addRegexColumns(makeRegexSplitter, cursorCol, inputRegex("split regex: ", type="regex-split"))', 'Add new columns from regex split', deprecated=True)
+visidata.Sheet.addCommand('', 'capture-col', 'addRegexColumns(makeRegexMatcher, cursorCol, inputRegex("capture regex: ", type="regex-capture"))', 'add new column from capture groups of regex; requires example row', deprecated=True)
+
+#vd.option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to', sheettype=None)
+#BaseSheet.bindkey('KEY_BACKSPACE', 'menu-help')
+
+vd.addGlobals(globals())

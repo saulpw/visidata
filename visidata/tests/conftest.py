@@ -18,8 +18,8 @@ def mock_screen():
     """Set up and return a mock curses screen object."""
 
     scr = Mock()
-    scr.addstr = Mock()
-    scr.move = Mock()
+    scr.addstr = lambda *args, **kwargs: None
+    scr.move = lambda *args, **kwargs: None
     scr.getmaxyx = lambda: (25, 80)
 
     return scr

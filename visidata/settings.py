@@ -1,4 +1,5 @@
 import collections
+import functools
 import sys
 import inspect
 import argparse
@@ -15,6 +16,12 @@ class SettingsMgr(collections.OrderedDict):
     def __init__(self):
         super().__init__()
         self.allobjs = {}
+
+    def __hash__(self):
+        return hash(id(self))
+
+    def __eq__(self, other):
+        return self is other
 
     def objname(self, obj):
         if isinstance(obj, str):
@@ -51,6 +58,7 @@ class SettingsMgr(collections.OrderedDict):
     def setdefault(self, k, v):
         return self.set(k, v, 'default')
 
+    @functools.lru_cache()
     def _mappings(self, obj):
         '''Return list of contexts in order to resolve settings. ordering is, from lowest to highest precedence:
 
@@ -65,7 +73,7 @@ class SettingsMgr(collections.OrderedDict):
         '''
         mappings = []
         if obj:
-            mappings += [self.objname(obj)]
+            mappings += [obj]
             mappings += [self.objname(cls) for cls in inspect.getmro(type(obj))]
 
         mappings += ['global', 'default']
@@ -75,7 +83,7 @@ class SettingsMgr(collections.OrderedDict):
         d = self.get(key, None)
         if d:
             for m in self._mappings(obj or vd.activeSheet):
-                v = d.get(m)
+                v = d.get(self.objname(m))
                 if v:
                     return v
 
@@ -85,6 +93,7 @@ class SettingsMgr(collections.OrderedDict):
             obj = vd.activeSheet
 
         for o in self._mappings(obj):
+            o = self.objname(o)
             for k in self.keys():
                 for o2 in self[k]:
                     if o == o2:
@@ -98,11 +107,12 @@ class SettingsMgr(collections.OrderedDict):
 
 
 class Command:
-    def __init__(self, longname, execstr, helpstr='', module=''):
+    def __init__(self, longname, execstr, helpstr='', module='', deprecated=False):
         self.longname = longname
         self.execstr = execstr
         self.helpstr = helpstr
         self.module = module
+        self.deprecated = deprecated
 
 
 class Option:

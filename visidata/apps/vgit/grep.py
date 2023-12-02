@@ -32,6 +32,6 @@ class GitGrep(GitSheet):
         self.topRowIndex, self.cursorRowIndex = tmp
 
 
-GitSheet.addCommand('g/', 'git-grep', 'rex=input("git grep: "); vd.push(GitGrep(rex, regex=rex, source=sheet))', 'find in all files in this repo')
+GitSheet.addCommand('g/', 'git-grep', 'rex=inputRegex("git grep: "); vd.push(GitGrep(rex, regex=rex, source=sheet))', 'find in all files in this repo')
 GitGrep.addCommand('Ctrl+O', 'sysopen-row', 'launchExternalEditorPath(Path(cursorRow[0]), linenum=cursorRow[1]); reload()', 'open this file in $EDITOR')
 GitGrep.bindkey('Enter', 'sysopen-row')

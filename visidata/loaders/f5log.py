@@ -43,7 +43,7 @@ vd.option(
     "f5log_object_regex",
     None,
     "A regex to perform on the object name, useful where object names have a structure to extract. Use the (?P<foo>...) named groups form to get column names.",
-    help=vd.help_regex
+    help='regex'
 )
 vd.option(
     "f5log_log_year",

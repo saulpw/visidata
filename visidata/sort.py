@@ -36,7 +36,7 @@ class Reversor:
 
 
 @Sheet.api
-def sortkey(self, r, prog=None):
+def sortkey(self, r):
     ret = []
     for col, reverse in self._ordering:
         if isinstance(col, str):
@@ -44,8 +44,6 @@ def sortkey(self, r, prog=None):
         val = col.getTypedValue(r)
         ret.append(Reversor(val) if reverse else val)
 
-    if prog:
-        prog.addProgress(1)
 
     return ret
 
@@ -58,7 +56,7 @@ def sort(self):
     try:
         with Progress(gerund='sorting', total=self.nRows) as prog:
             # must not reassign self.rows: use .sort() instead of sorted()
-            self.rows.sort(key=lambda r,self=self,prog=prog: self.sortkey(r, prog=prog))
+            self.rows.sort(key=lambda r,self=self,prog=prog: (prog.addProgress(1), self.sortkey(r))[1])
     except TypeError as e:
         vd.warning('sort incomplete due to TypeError; change column type')
         vd.exceptionCaught(e, status=False)

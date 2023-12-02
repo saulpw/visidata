@@ -45,7 +45,7 @@ from .basesheet import *
 import visidata.settings
 
 # importModule tracks where commands/options/etc are coming from (via vd.importingModule)
-for line in '''
+core_imports = '''
 import visidata.errors
 import visidata.editor
 import visidata.color
@@ -91,6 +91,7 @@ import visidata.search
 
 import visidata.expr
 import visidata.metasheets
+import visidata.input_history
 import visidata.optionssheet
 import visidata.type_currency
 import visidata.type_floatsi
@@ -126,27 +127,31 @@ import visidata.theme
 import visidata.apps
 import visidata.fuzzymatch
 import visidata.hint
-'''.splitlines():
-    if not line: continue
-    assert line.startswith('import visidata.'), line
-    module = line[len('import visidata.'):]
-    vd.importModule('visidata.' + module)
+'''
 
-vd.importSubmodules('visidata.features')
-vd.importSubmodules('visidata.themes')
+for line in core_imports.splitlines():
+    if not line: continue
+    module = line[len('import '):]
+    vd.importModule(module)
 
 vd.importSubmodules('visidata.loaders')
 
-vd.importStar('visidata.deprecated')
+def importFeatures():
+    vd.importSubmodules('visidata.features')
+    vd.importSubmodules('visidata.themes')
 
-vd.importStar('builtins')
-vd.importStar('copy')
-vd.importStar('math')
-vd.importStar('random')
-vd.importStar('itertools')
+    vd.importStar('visidata.deprecated')
 
-import visidata.experimental  # import nothing by default but make package accessible
+    vd.importStar('builtins')
+    vd.importStar('copy')
+    vd.importStar('math')
+    vd.importStar('random')
+    vd.importStar('itertools')
+
+    import visidata.experimental  # import nothing by default but make package accessible
 
 vd.finalInit()  # call all VisiData.init() from modules
+
+importFeatures()
 
 vd.addGlobals(globals())

@@ -6,6 +6,7 @@ __version__ = '3.0dev'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
 from copy import copy
+import atexit
 import os
 import io
 import sys
@@ -384,6 +385,9 @@ def vd_cli():
         print(e)
         if options.debug:
             raise
+    finally:
+        atexit._run_exitfuncs()  # save stored_property objects
+
     sys.stderr.flush()
     sys.stdout.flush()
     os._exit(rc)  # cleanup can be expensive with large datasets

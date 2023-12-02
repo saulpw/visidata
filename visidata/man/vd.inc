@@ -86,7 +86,7 @@ quit current sheet and free associated memory
 .It Ic " gq"
 quit all sheets (clean exit)
 .Pp
-.It Ic " ^H"
+.It Ic "Alt+H"
 .No activate help menu ( Ns Sy Enter Ns / Ns Sy left-mouse No to expand submenu or execute command)
 .It Ic "g^H"
 view this man page

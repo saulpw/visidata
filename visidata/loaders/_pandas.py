@@ -397,10 +397,10 @@ PandasSheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to s
 
 # Handle the regex selection family of commands through a single method,
 # since the core logic is shared
-PandasSheet.addCommand('|', 'select-col-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=[cursorCol])', 'select rows matching regex in current column')
-PandasSheet.addCommand('\\', 'unselect-col-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=[cursorCol], unselect=True)', 'unselect rows matching regex in current column')
-PandasSheet.addCommand('g|', 'select-cols-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=visibleCols)', 'select rows matching regex in any visible column')
-PandasSheet.addCommand('g\\', 'unselect-cols-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=visibleCols, unselect=True)', 'unselect rows matching regex in any visible column')
+PandasSheet.addCommand('|', 'select-col-regex', 'selectByRegex(regex=inputRegex("select regex: ", defaultLast=True), columns=[cursorCol])', 'select rows matching regex in current column')
+PandasSheet.addCommand('\\', 'unselect-col-regex', 'selectByRegex(regex=inputRegex("select regex: ", defaultLast=True), columns=[cursorCol], unselect=True)', 'unselect rows matching regex in current column')
+PandasSheet.addCommand('g|', 'select-cols-regex', 'selectByRegex(regex=inputRegex("select regex: ", defaultLast=True), columns=visibleCols)', 'select rows matching regex in any visible column')
+PandasSheet.addCommand('g\\', 'unselect-cols-regex', 'selectByRegex(regex=inputRegex("select regex: ", defaultLast=True), columns=visibleCols, unselect=True)', 'unselect rows matching regex in any visible column')
 
 # Override with a pandas/dataframe-aware implementation
 PandasSheet.addCommand('"', 'dup-selected', 'vs=PandasSheet(sheet.name, "selectedref", source=selectedRows.df); vd.push(vs)', 'open duplicate sheet with only selected rows')

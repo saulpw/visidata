@@ -219,10 +219,14 @@ def mainloop(self, scr):
             prefixWaiting = False
 
         # play next queued command
-        if self._nextCommands:
+        if self._nextCommands and not vd.unfinishedThreads:
             cmd = self._nextCommands.pop(0)
             if isinstance(cmd, (dict, list)):  # .vd cmdlog rows are NamedListTemplate
-                if self.replayOne(cmd):
+                try:
+                    if self.replayOne(cmd):
+                        self.replay_cancel()
+                except Exception as e:
+                    vd.exceptionCaught(e)
                     self.replay_cancel()
             else:
                 sheet.execCommand(cmd, keystrokes=self.keystrokes)
