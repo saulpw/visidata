@@ -130,7 +130,10 @@ def setattrdeep(obj, attr, val, getter=getattr, setter=setattr):
 
 def getitemdeep(obj, k, *default):
     if not isinstance(k, str):
-        return obj[k]
+        try:
+            return obj[k]
+        except IndexError:
+            pass
     return getattrdeep(obj, k, *default, getter=getitem)
 
 def setitemdeep(obj, k, val):
