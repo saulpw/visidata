@@ -73,7 +73,7 @@ class SettingsMgr(collections.OrderedDict):
         '''
         mappings = []
         if obj:
-            mappings += [self.objname(obj)]
+            mappings += [obj]
             mappings += [self.objname(cls) for cls in inspect.getmro(type(obj))]
 
         mappings += ['global', 'default']
@@ -83,7 +83,7 @@ class SettingsMgr(collections.OrderedDict):
         d = self.get(key, None)
         if d:
             for m in self._mappings(obj or vd.activeSheet):
-                v = d.get(m)
+                v = d.get(self.objname(m))
                 if v:
                     return v
 
@@ -93,6 +93,7 @@ class SettingsMgr(collections.OrderedDict):
             obj = vd.activeSheet
 
         for o in self._mappings(obj):
+            o = self.objname(o)
             for k in self.keys():
                 for o2 in self[k]:
                     if o == o2:
