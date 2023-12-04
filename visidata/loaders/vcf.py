@@ -26,15 +26,16 @@ class VcfSheet(PythonSheet):
 
         addedCols = set()
         lines = []
-        for line in self.open_text_source():
-            lines.append(line)
-            if line.startswith('END:'):
-                row = vobject.readOne('\n'.join(lines))
-                for k, v in row.contents.items():
-                    if v and str(v[0].value).startswith('(None)'):
-                        continue
-                    if not k in addedCols:
-                        addedCols.add(k)
-                        self.addColumn(Column(k, expr=k, getter=unbox))
-                self.addRow(row.contents)
-                lines = []
+        with self.open_text_source() as fp:
+            for line in fp:
+                lines.append(line)
+                if line.startswith('END:'):
+                    row = vobject.readOne('\n'.join(lines))
+                    for k, v in row.contents.items():
+                        if v and str(v[0].value).startswith('(None)'):
+                            continue
+                        if not k in addedCols:
+                            addedCols.add(k)
+                            self.addColumn(Column(k, expr=k, getter=unbox))
+                    self.addRow(row.contents)
+                    lines = []

@@ -25,7 +25,8 @@ def stored_property(vdcls, f):
 
         p = Path(vd.options.visidata_dir)/(f.__name__ + '.json')
         if p.exists():
-            value = json.loads(p.open(encoding='utf-8-sig').read())
+            with p.open(encoding='utf-8-sig') as fp:
+                value = json.loads(fp.read())
 
         if value is None:
             value = f(*args, **kwargs)
