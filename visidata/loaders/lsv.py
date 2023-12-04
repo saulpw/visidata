@@ -35,17 +35,19 @@ class LsvSheet(Sheet):
         self._knownCols = set()
         row = collections.defaultdict(str)
         k = ''
-        for line in self.open_text_source():
-            line = line.strip()
-            if not line:
-                yield row
-                row = collections.defaultdict(str)
 
-            if ':' in line:
-                k, line = line.split(':', maxsplit=1)
-            # else append to previous k
+        with self.open_text_source() as fp:
+            for line in fp:
+                line = line.strip()
+                if not line:
+                    yield row
+                    row = collections.defaultdict(str)
 
-            row[k.strip()] += line.strip()
+                if ':' in line:
+                    k, line = line.split(':', maxsplit=1)
+                # else append to previous k
+
+                row[k.strip()] += line.strip()
 
         if row:
             yield row
