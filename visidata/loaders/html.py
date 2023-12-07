@@ -33,6 +33,11 @@ class HtmlTablesSheet(IndexSheet):
         Column('tag', width=0, getter=lambda col,row: row.html.tag),
         Column('id', getter=lambda col,row: row.html.attrib.get('id')),
         Column('classes', getter=lambda col,row: row.html.attrib.get('class')),
+        Column('title', getter=lambda col,row: row.html.attrib.get('title')),
+        Column('aria_label', getter=lambda col,row: row.html.attrib.get('aria-label')),
+        Column('caption', getter=lambda col,row: row.html.xpath('normalize-space(./caption)') if row.html.xpath('./caption') else None, cache=True),
+        Column('summary', getter=lambda col,row: row.html.attrib.get('summary')),
+        Column('heading', getter=lambda col,row: row.html.xpath('normalize-space(./preceding-sibling::*[self::h1 or self::h2 or self::h3 or self::h4 or self::h5 or self::h6][1])') or None, cache=True),
     ]
     def iterload(self):
         lxml = vd.importExternal('lxml')
