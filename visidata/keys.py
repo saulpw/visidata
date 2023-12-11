@@ -8,6 +8,7 @@ visidata.vd.prettykeys_trdict = {
         '^J': 'Enter',
         '^M': 'Enter',
         '^I': 'Tab',
+        'KEY_BTAB': 'Shift+Tab',
         '^@': 'Ctrl+Space',
         'KEY_UP':    'Up',
         'KEY_DOWN':  'Down',
