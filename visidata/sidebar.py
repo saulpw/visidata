@@ -35,7 +35,7 @@ def drawSidebar(vd, scr, sheet):
                 overflowmsg = '[:onclick open-sidebar]…↓…[/]'
             else:
                 bottommsg = '[:onclick sidebar-toggle][:reverse] b to toggle sidebar [:]'
-                overflowmsg = '[:reverse] (see full sidebar with [:code]gb[:reverse]) [:]'
+                overflowmsg = '[:reverse] see full sidebar with [:code]gb[/] [:]'
     except Exception as e:
         vd.exceptionCaught(e)
         sidebar = f'# error\n{e}'
