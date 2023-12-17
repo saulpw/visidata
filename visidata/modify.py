@@ -22,7 +22,7 @@ def couldOverwrite(vd) -> bool:
 @VisiData.api
 def confirmOverwrite(vd, path, msg:str=''):
     'Fail if file exists and overwrite not allowed.'
-    if path.exists():
+    if path is None or path.exists():
         msg = msg or f'{path.given} exists. overwrite? '
         ow = vd.options.overwrite
         if ow.startswith('c'):  # confirm
