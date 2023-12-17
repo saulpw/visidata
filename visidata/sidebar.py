@@ -65,7 +65,7 @@ def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', o
 
         lines = text.splitlines()
         if not title and lines and lines[0].strip().startswith('# '):
-            title = lines[0][1:].strip()
+            title = lines[0].strip()[2:]
             text = '\n'.join(lines[1:])
 
         if not text:
