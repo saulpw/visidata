@@ -121,7 +121,18 @@ class CommandHelpGetter:
     def __getattr__(self, k):
         longname = k.replace('_', '-')
         binding = self.helpsheet.revbinds.get(longname, [None])[0]
-        helpstr = self.helpsheet.cmddict[(self.cls.__name__, longname)].helpstr
+        cmd = self.helpsheet.cmddict[(self.cls.__name__, longname)]
+        if 'input' in cmd.execstr.lower():
+            vd.status(cmd.execstr)
+            inputtype = 'input'
+            m = re.search(r'type="(\w*)"', cmd.execstr, re.IGNORECASE)
+            if not m:
+                m = re.search(r'input(\w*)\("', cmd.execstr, re.IGNORECASE)
+            if m:
+                inputtype = m.groups()[0].lower()
+                binding += f'[:45] {inputtype}[/]'
+
+        helpstr = cmd.helpstr
         return f'`{binding}` (`{longname}`) to {helpstr}'
 
 
