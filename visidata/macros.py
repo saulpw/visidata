@@ -3,7 +3,6 @@ from functools import wraps
 
 from visidata.cmdlog import CommandLog, CommandLogJsonl
 from visidata import vd, UNLOADED, asyncthread, vlen
-from visidata import IndexSheet, VisiData, Sheet, Path, VisiDataMetaSheet, Column, ItemColumn, BaseSheet, GuideSheet
 from visidata import IndexSheet, VisiData, Sheet, Path, VisiDataMetaSheet, Column, ItemColumn, AttrColumn, BaseSheet, GuideSheet
 
 vd.macroMode = None
@@ -139,7 +138,7 @@ class MacrosGuide(GuideSheet):
 Macros allow you to bind a command sequence to a keystroke or longname, to replay when that keystroke is pressed or the command is executed by longname.
 
 The basic usage is:
-    1. `m` (`macro-record`) to begin recording the macro.
+    1. {help.commands.macro_record},
     2. Execute a series of commands.
     3. `m` again to complete the recording, and prompt for the keystroke or longname to bind it to.
 
@@ -149,15 +148,15 @@ Executing a macro will the series of commands starting on the current row and co
 
 # The Macros Sheet
 
-- `gm` (`macro-sheet`) to open an index of existing macros.
+- {help.commands.macro_sheet}
 
-- `d` to mark macros for deletion.
-- `z Ctrl+S` to then commit any changes.
-- `Enter` to open the macro in the current row, and view the series of commands composing it.'''
+- `d` (`delete-row`) to mark macros for deletion
+- {help.commands.commit_sheet}
+- `Enter` (`open-row`) to open the macro in the current row, and view the series of commands composing it'''
 
 
 Sheet.addCommand('m', 'macro-record', 'vd.cmdlog.startMacro()', 'record macro')
-Sheet.addCommand('gm', 'macro-sheet', 'vd.push(vd.macrosheet)', 'open macros sheet')
+Sheet.addCommand('gm', 'macro-sheet', 'vd.push(vd.macrosheet)', 'open an index of existing macros')
 
 vd.addMenuItems('''
     System > Macros sheet > macro-sheet

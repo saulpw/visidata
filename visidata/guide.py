@@ -9,7 +9,7 @@ Each guide shows you how to use a particular feature in VisiData. Gray guides ha
 
 import re
 
-from visidata import vd, BaseSheet, Sheet, ItemColumn, Column, VisiData, ENTER, RowColorizer
+from visidata import vd, BaseSheet, Sheet, ItemColumn, Column, VisiData, ENTER, RowColorizer, AttrDict, MissingAttrFormatter
 from visidata import wraptext
 
 guides_list = '''
@@ -102,6 +102,26 @@ class GuideGuide(Sheet):
         name = row[1]
         return vd.getGuide(name)
 
+class OptionHelpGetter:
+    'For easy and consistent formatting in sidebars and helpstrings, use {vd.options.help.opt_name}.'
+    def __getattr__(self, optname):
+        opt = vd.options._get(optname, 'default')
+        return f'[:onclick options-sheet {optname}]`{optname}`[/]: to {opt.helpstr} (default: {opt.value})'
+
+
+class CommandHelpGetter:
+    'For easy and consistent formatting in sidebars and helpstrings, use {vd.commands.help.long_name}.'
+    def __init__(self, cls):
+        self.cls = cls
+        self.helpsheet = vd.HelpSheet()
+        self.helpsheet.ensureLoaded()
+
+    def __getattr__(self, k):
+        longname = k.replace('_', '-')
+        binding = self.helpsheet.revbinds.get(longname, [None])[0]
+        helpstr = self.helpsheet.cmddict[(self.cls.__name__, longname)].helpstr
+        return f'`{binding}` (`{longname}`) to {helpstr}'
+
 
 class GuideSheet(Sheet):
     rowtype = 'lines'
@@ -112,10 +132,14 @@ class GuideSheet(Sheet):
             ]
     precious = False
     guide = ''
+    sheettype = Sheet
 
     def iterload(self):
         winWidth = 78
-        for startingLine, text in enumerate(self.guide.splitlines()):
+        helper = AttrDict(commands=CommandHelpGetter(self.sheettype),
+                          options=OptionHelpGetter())
+        guidetext = MissingAttrFormatter().format(self.guide, help=helper, vd=vd)
+        for startingLine, text in enumerate(guidetext.splitlines()):
             text = text.strip()
             if text:
                 for i, (L, _) in enumerate(wraptext(str(text), width=winWidth)):
