@@ -31,7 +31,7 @@ SheetsSheet  ("The Sheet Stack")
 ColumnsSheet ("Columns: the only way to fly")
 StatusesSheet ("Revisit old status messages")
 SidebarSheet ("Dive into the sidebar")
-SaversGuide ("Saving Data")
+SaversGuide ("Saving Data")  # talk about options.overwrite + ro here
 
 ErrorsSheet ("What was that error?")
 ModifyGuide ("Adding, Editing, Deleting Rows")
