@@ -25,8 +25,8 @@ def guess_sqlite(vd, p):
 
 @VisiData.api
 def open_sqlite(vd, p):
-    if p is vd.stdinSource:
-        vd.fail('cannot read a sqlite database from stdin')
+    if not p.is_local():
+        vd.fail('sqlite requires an uncompressed, local file')
     return SqliteIndexSheet(p.name, source=p)
 
 @VisiData.api
@@ -44,14 +44,11 @@ class SqliteSheet(Sheet):
     query = ''
     tableName = ''
 
-    def resolve(self):
-        'Resolve all the way back to the original source Path.'
-        return self.source.resolve()
-
     def conn(self):
         import sqlite3
-        pathname = str(self.resolve())
-        url = pathname if '://' in pathname else f'file:{pathname}'
+        localpath = self.rootSheet().source
+
+        url = localpath if localpath.is_url() else f'file:{localpath.resolve()}'
         url = requery(url, **self.options.getall('sqlite_param_'))
 
         con = sqlite3.connect(url, uri=True, **self.options.getall('sqlite_connect_'))

@@ -335,6 +335,10 @@ class Path(os.PathLike):
         'Return True if the path is a file.'
         return self._path.is_fifo()
 
+    def is_local(self):
+        'Return True if self.filename refers to a file on the local disk.'
+        return not bool(self.fp) and not bool(self.fptext)
+
     def is_url(self):
         'Return True if the given path appears to be a URL.'
         return '://' in self.given
