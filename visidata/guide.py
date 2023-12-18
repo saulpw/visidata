@@ -49,12 +49,14 @@ MeltGuide ("Melt is just Unpivot")
 JsonGuide ("Some special features for JSON") # with expand/contract, unfurl
 RegexGuide ("Matching and Transforming Strings with Regex")
 GraphSheet ("Basic scatterplots and other graphs")
+WindowFunctionGuide ("Perform operations on groups of rows")
 
 # for the frequent user
 OptionsSheet ("Options and Settings")
 ClipboardGuide ("Copy and Paste Data via the Clipboard")
 DirSheet ("Browsing the local filesystem")
 FormatsSheet ("What can you open with VisiData?")
+SplitpaneGuide ("Split VisiData into two panes")
 ThemesSheet ("Change Interface Theme")
 ColorSheet ("See available colors")
 MacrosSheet ("Recording macros")
