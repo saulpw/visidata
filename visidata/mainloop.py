@@ -23,7 +23,7 @@ class ReturnValue(BaseException):
 
 
 @VisiData.api
-def drawSheet(self, scr, sheet):
+def drawSheet(vd, scr, sheet):
     'Erase *scr* and draw *sheet* on it, including status bars and sidebar.'
 
     sheet.ensureLoaded()
@@ -36,10 +36,10 @@ def drawSheet(self, scr, sheet):
     try:
         sheet.draw(scr)
     except Exception as e:
-        self.exceptionCaught(e)
+        vd.exceptionCaught(e)
 
-    self.drawLeftStatus(scr, sheet)
-    self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
+    vd.drawLeftStatus(scr, sheet)
+    vd.drawRightStatus(scr, sheet)  # visible during this getkeystroke
 
 
 vd.windowConfig = dict(pct=0, n=0, h=0, w=0)  # n=top line of bottom window; h=height of bottom window; w=width of screen
@@ -147,7 +147,7 @@ def runresult(vd):
 
 
 @VisiData.api
-def mainloop(self, scr):
+def mainloop(vd, scr):
     'Manage execution of keystrokes and subsequent redrawing of screen.'
     nonidle_timeout = vd.curses_timeout
 
@@ -159,12 +159,12 @@ def mainloop(self, scr):
     prefixWaiting = False
     vd.scrFull = scr
 
-    self.keystrokes = ''
+    vd.keystrokes = ''
     while True:
-        if not self.stackedSheets and self.currentReplay is None:
+        if not vd.stackedSheets and vd.currentReplay is None:
             return
 
-        sheet = self.activeSheet
+        sheet = vd.activeSheet
 
         if not sheet:
             continue  # waiting for replay to push sheet
@@ -174,69 +174,69 @@ def mainloop(self, scr):
 
         vd.setWindows(vd.scrFull)
 
-        if not self.drainPendingKeys(scr) or time.time() - self._lastDrawTime > self.min_draw_ms/1000:  #1459
-            self.draw_all()
-            self._lastDrawTime = time.time()
+        if not vd.drainPendingKeys(scr) or time.time() - vd._lastDrawTime > vd.min_draw_ms/1000:  #1459
+            vd.draw_all()
+            vd._lastDrawTime = time.time()
 
-        keystroke = self.getkeystroke(scr, sheet)
+        keystroke = vd.getkeystroke(scr, sheet)
 
-        if not keystroke and prefixWaiting and "Alt+" in self.keystrokes:  # timeout ESC
-            self.keystrokes = ''
+        if not keystroke and prefixWaiting and "Alt+" in vd.keystrokes:  # timeout ESC
+            vd.keystrokes = ''
 
         if keystroke:  # wait until next keystroke to clear statuses and previous keystrokes
             numTimeouts = 0
             if not prefixWaiting:
-                self.keystrokes = ''
+                vd.keystrokes = ''
 
-            self.statuses.clear()
+            vd.statuses.clear()
 
             if keystroke == 'KEY_MOUSE':
                 try:
                     keystroke = vd.handleMouse(sheet)  # if it was handled, don't handle again as a regular keystroke
                 except Exception as e:
-                    self.exceptionCaught(e)
+                    vd.exceptionCaught(e)
 
             if keystroke and keystroke in vd.allPrefixes and keystroke in vd.keystrokes[:-1]:
                 vd.warning('duplicate prefix: ' + keystroke)
-                self.keystrokes = ''
+                vd.keystrokes = ''
             else:
-                keystroke = self.prettykeys(keystroke)
-                self.keystrokes += keystroke
+                keystroke = vd.prettykeys(keystroke)
+                vd.keystrokes += keystroke
 
-        self.drawRightStatus(sheet._scr, sheet)  # visible for commands that wait for input
+        vd.drawRightStatus(sheet._scr, sheet)  # visible for commands that wait for input
 
         if not keystroke:  # timeout instead of keypress
             pass
         elif keystroke == 'Ctrl+Q':
-            return self.lastErrors and '\n'.join(self.lastErrors[-1])
-        elif vd.bindkeys._get(self.keystrokes):
-            sheet.execCommand(self.keystrokes, keystrokes=self.keystrokes)
+            return vd.lastErrors and '\n'.join(vd.lastErrors[-1])
+        elif vd.bindkeys._get(vd.keystrokes):
+            sheet.execCommand(vd.keystrokes, keystrokes=vd.keystrokes)
             prefixWaiting = False
-        elif keystroke in self.allPrefixes:
+        elif keystroke in vd.allPrefixes:
             prefixWaiting = True
         else:
-            vd.status('no command for "%s"' % (self.keystrokes))
+            vd.status('no command for "%s"' % (vd.keystrokes))
             prefixWaiting = False
 
         # play next queued command
-        if self._nextCommands and not vd.unfinishedThreads:
-            cmd = self._nextCommands.pop(0)
+        if vd._nextCommands and not vd.unfinishedThreads:
+            cmd = vd._nextCommands.pop(0)
             if isinstance(cmd, (dict, list)):  # .vd cmdlog rows are NamedListTemplate
                 try:
-                    if self.replayOne(cmd):
-                        self.replay_cancel()
+                    if vd.replayOne(cmd):
+                        vd.replay_cancel()
                 except Exception as e:
                     vd.exceptionCaught(e)
-                    self.replay_cancel()
+                    vd.replay_cancel()
             else:
-                sheet.execCommand(cmd, keystrokes=self.keystrokes)
+                sheet.execCommand(cmd, keystrokes=vd.keystrokes)
 
-        if not self._nextCommands:
-            if self.currentReplay:
-                self.currentReplayRow = None
-                self.currentReplay = None
+        if not vd._nextCommands:
+            if vd.currentReplay:
+                vd.currentReplayRow = None
+                vd.currentReplay = None
 
-        self.checkForFinishedThreads()
+        vd.checkForFinishedThreads()
         sheet.checkCursorNoExceptions()
 
         # no idle redraw unless background threads are running
