@@ -1,7 +1,7 @@
 from typing import Optional, Union
 import textwrap
 
-from visidata import vd, VisiData, BaseSheet, colors, TextSheet, clipdraw, wraptext, dispwidth, AttrDict
+from visidata import vd, VisiData, BaseSheet, colors, TextSheet, clipdraw, wraptext, dispwidth, AttrDict, wrmap
 from visidata import CommandHelpGetter, OptionHelpGetter
 
 
@@ -23,6 +23,29 @@ def default_sidebar(sheet):
     'Default to format options.disp_sidebar_fmt.  Overridable.'
     fmt = sheet.options.disp_sidebar_fmt
     return sheet.formatString(fmt, help=sheet.formatter_helpstr)
+
+
+@VisiData.property
+def recentStatusMessages(vd) -> str:
+    r = ''
+    for (pri, msgparts), n in vd.statuses.items():
+        msg = '; '.join(wrmap(str, msgparts))
+        msg = f'[{n}x] {msg}' if n > 1 else msg
+
+        if pri == 3: msgattr = '[:error]'
+        elif pri == 2: msgattr = '[:warning]'
+        elif pri == 1: msgattr = '[:warning]'
+        else: msgattr = ''
+
+        if msgattr:
+            r += '\n' + f'{msgattr}{msg}[/]'
+        else:
+            r += '\n' + msg
+
+    if r:
+        return '# statuses' + r
+
+    return ''
 
 
 @VisiData.api

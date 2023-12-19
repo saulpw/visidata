@@ -1,3 +1,7 @@
+'''
+Status messages get added with vd.{debug/aside/status/warning/fail/error}(), and cleared in mainloop
+'''
+
 import builtins
 import collections
 import curses
@@ -154,29 +158,6 @@ def drawLeftStatus(vd, scr, vs):
                         BUTTON3_CLICKED='rename-sheet')
     except Exception as e:
         vd.exceptionCaught(e)
-
-
-@VisiData.property
-def recentStatusMessages(vd) -> str:
-    r = ''
-    for (pri, msgparts), n in vd.statuses.items():
-        msg = '; '.join(wrmap(str, msgparts))
-        msg = f'[{n}x] {msg}' if n > 1 else msg
-
-        if pri == 3: msgattr = '[:error]'
-        elif pri == 2: msgattr = '[:warning]'
-        elif pri == 1: msgattr = '[:warning]'
-        else: msgattr = ''
-
-        if msgattr:
-            r += '\n' + f'{msgattr}{msg}[/]'
-        else:
-            r += '\n' + msg
-
-    if r:
-        return '# statuses' + r
-
-    return ''
 
 
 @VisiData.api
