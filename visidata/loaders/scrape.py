@@ -75,7 +75,7 @@ def prev_header(r):
 
 # one row per element
 class HtmlElementsSheet(TableSheet):
-    help = '''# HTMLElements
+    guide = '''# HTMLElements
 
 This is a list of HTML elements from _{sheet.source}_ as parsed by `beautifulsoup4`.
 

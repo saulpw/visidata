@@ -20,7 +20,7 @@ class FormatColumn(Column):
 # source = GitSheet; .gitfile=GitFile
 class GitBlame(GitSheet):
     rowtype = 'lines'
-    help = '''
+    guide = '''
         # git blame
     '''
     columns = [

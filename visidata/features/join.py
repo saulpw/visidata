@@ -385,6 +385,6 @@ vd.addMenuItems('''
     Data > Join > all sheets > join-sheets-all
 ''')
 
-IndexSheet.help += '''
+IndexSheet.guide += '''
     - `&` to join the selected sheets together
 '''

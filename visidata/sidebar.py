@@ -1,22 +1,28 @@
 from typing import Optional, Union
 import textwrap
 
-from visidata import vd, VisiData, BaseSheet, colors, TextSheet, clipdraw, wraptext, dispwidth
+from visidata import vd, VisiData, BaseSheet, colors, TextSheet, clipdraw, wraptext, dispwidth, AttrDict
+from visidata import CommandHelpGetter, OptionHelpGetter
 
 
 vd.option('disp_sidebar', True, 'whether to display sidebar')
-vd.option('disp_sidebar_fmt', '{help}', 'format string for default sidebar')
+vd.option('disp_sidebar_fmt', '{guide}', 'format string for default sidebar')
 vd.theme_option('disp_sidebar_width', 0, 'max width for sidebar')
 vd.theme_option('disp_sidebar_height', 0, 'max height for sidebar')
 vd.theme_option('color_sidebar', 'black on 114 blue', 'base color of sidebar')
 vd.theme_option('color_sidebar_title', 'black on yellow', 'color of sidebar title')
+
+@BaseSheet.property
+def formatter_helpstr(sheet):
+    return AttrDict(commands=CommandHelpGetter(type(sheet)),
+                    options=OptionHelpGetter())
 
 
 @BaseSheet.property
 def default_sidebar(sheet):
     'Default to format options.disp_sidebar_fmt.  Overridable.'
     fmt = sheet.options.disp_sidebar_fmt
-    return sheet.formatString(fmt)
+    return sheet.formatString(fmt, help=sheet.formatter_helpstr)
 
 
 @VisiData.api
@@ -28,7 +34,7 @@ def drawSidebar(vd, scr, sheet):
         if not sidebar and sheet.options.disp_sidebar:
             sidebar = sheet.default_sidebar
             if not sidebar and sheet.options.disp_help > 0:
-                sidebar = sheet.formatString(sheet.help)
+                sidebar = sheet.formatString(sheet.guide, help=sheet.formatter_helpstr)
 
             if sheet.options.disp_help < 0:
                 bottommsg = '[:onclick sidebar-toggle][:reverse][x][:]'
@@ -114,7 +120,7 @@ def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', o
 
 @VisiData.api
 class SidebarSheet(TextSheet):
-    help = '''
+    guide = '''
         # Sidebar Guide
         The sidebar provides additional information about the current sheet, defaulting to a basic guide to the current sheet type.
         It can be configured to show many useful attributes via `options.disp_sidebar_fmt`.

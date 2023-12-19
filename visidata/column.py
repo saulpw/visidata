@@ -186,7 +186,7 @@ class Column(Extensible):
 
     @property
     def formatted_help(self):
-        return MissingAttrFormatter().format(self.help, sheet=self.sheet, col=self, vd=vd)
+        return MissingAttrFormatter().format(self.guide, sheet=self.sheet, col=self, vd=vd)
 
     @property
     def help_formatters(self):

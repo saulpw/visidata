@@ -9,7 +9,7 @@ def git_remote(vd, p, args):
 
 
 class GitRemotes(GitSheet):
-    help = '''
+    guide = '''
         # git remote
         Manage the set of repositories ("remotes") whose branches you track.
 

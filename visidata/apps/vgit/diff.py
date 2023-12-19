@@ -30,7 +30,7 @@ class GitDiffSheet(GitSheet):
         ItemColumn('lines', type=''.join),
     ]
 
-    help = '''# {sheet.cursorRow.a_fn}
+    guide = '''# {sheet.cursorRow.a_fn}
 {sheet.cursorLines}'''
 
     def hunkCount(self, row):

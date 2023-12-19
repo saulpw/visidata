@@ -39,7 +39,7 @@ class GitAllColumn(GitLinesColumn):
 
 
 class GitRepos(GitSheet):
-    help = '''
+    guide = '''
         # git repos
         A list of git repositories under `{sheet.source}`
 

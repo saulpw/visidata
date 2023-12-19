@@ -144,14 +144,14 @@ class GuideSheet(Sheet):
             ItemColumn('guide', 1, width=80, displayer='full'),
             ]
     precious = False
-    guide = ''
+    guide_text = ''
     sheettype = Sheet
 
     def iterload(self):
         winWidth = 78
         helper = AttrDict(commands=CommandHelpGetter(self.sheettype),
                           options=OptionHelpGetter())
-        guidetext = MissingAttrFormatter().format(self.guide, help=helper, vd=vd)
+        guidetext = MissingAttrFormatter().format(self.guide_text, help=helper, vd=vd)
         for startingLine, text in enumerate(guidetext.splitlines()):
             text = text.strip()
             if text:
@@ -174,4 +174,4 @@ vd.addMenuItems('''
         Help > VisiData Feature Guides > open-guide-index
 ''')
 
-vd.addGlobals({'GuideSheet':GuideSheet})
+vd.addGlobals({'GuideSheet':GuideSheet, "CommandHelpGetter": CommandHelpGetter, "OptionHelpGetter": OptionHelpGetter})

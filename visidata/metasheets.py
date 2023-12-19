@@ -16,7 +16,7 @@ class ColumnsSheet(Sheet):
     _rowtype = Column
     _coltype = ColumnAttr
     precious = False
-    help = '''# Columns Sheet
+    guide = '''# Columns Sheet
 This is a list of {sheet.nSourceCols} columns on {sheet.displaySource}.
 Edit values on this sheet to change the column's appearance on the source sheet.
 Edit the _{sheet.cursorCol.name}_ column to {sheet.cursorCol.formatted_help}.

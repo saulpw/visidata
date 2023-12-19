@@ -15,7 +15,7 @@ def macros_list(vd):
 
 
 class MacroSheet(IndexSheet):
-    help = '''
+    guide= '''
         # Macros Sheet
         This is a list of user-defined macros.
 
@@ -134,7 +134,7 @@ def run(vd, *args, **kwargs):
 
 
 class MacrosGuide(GuideSheet):
-    guide = '''# Macros
+    guide_text = '''# Macros
 Macros allow you to bind a command sequence to a keystroke or longname, to replay when that keystroke is pressed or the command is executed by longname.
 
 The basic usage is:

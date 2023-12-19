@@ -10,7 +10,7 @@ def git_grep(vd, p, args):
 
 class GitGrep(GitSheet):
     rowtype = 'results' # rowdef: list(file, line, line_contents)
-    help = '''
+    guide = '''
         # vgit grep
         Each row on this sheet is a line matching the regex pattern `{sheet.regex}` in the tracked files of the current directory.
 

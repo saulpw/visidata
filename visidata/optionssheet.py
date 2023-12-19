@@ -32,7 +32,7 @@ class OptionsSheet(Sheet):
     nKeys = 2
 
     @property
-    def help(self):
+    def guide(self):
         if self.source == 'global':
             r = '# Global Options\nThis is a list of global option settings.'
         else:

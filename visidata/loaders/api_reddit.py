@@ -130,7 +130,7 @@ def hiddenCols(hidden_attrs):
 
 
 class SubredditSheet(Sheet):
-    help = __doc__
+    guide = __doc__
     # source is a text list of subreddits
     rowtype = 'subreddits'  # rowdef: praw.Subreddit
     nKeys=1
@@ -194,7 +194,7 @@ class RedditorsSheet(Sheet):
 
 
 class RedditSubmissions(Sheet):
-    help = '''# Reddit Submissions
+    guide = '''# Reddit Submissions
 
   [:keys]Enter[/] to open sheet with comments for the current post
   [:keys]ga[/] to add posts in this subreddit matching input'''
@@ -251,7 +251,7 @@ class RedditComments(Sheet):
 
 
 class RedditGuide(RedditSubmissions):
-    help = '''# Authenticate Reddit
+    guide = '''# Authenticate Reddit
 The Reddit API must be configured before use.
 
 1. Login to Reddit and go to [:underline]https://www.reddit.com/prefs/apps[/].

@@ -37,7 +37,7 @@ class GitConfigColumn(Column):
 
 
 class GitConfig(GitSheet):
-    help = '''
+    guide = '''
         # git config
         Add, edit, or delete git config options.
 

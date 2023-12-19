@@ -82,20 +82,20 @@ class ColumnShell(Column):
 
 class DirSheet(Sheet):
     'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
-    help = '''
+    guide = '''
         # Directory Sheet
         This is a list of files in the {sheet.displaySource} folder.
 
-        - `Enter` to open a file as a separate sheet
-        - `g Enter` to open all selected files, each in a separate sheet
-        - [:keystrokes]`[/] to push the parent folder
-        - `Ctrl+O` to open the current file in your system editor
+        - {help.commands.open_row_file}
+        - {help.commands.open_rows}
+        - (`open-dir-parent`) to open parent directory
+        - {help.commands.sysopen_row}
 
         ## Options (must reload to take effect)
 
-        - [:onclick options-sheet dir_depth]`dir_depth`[/] to recurse into folders
-          - [CLI] `-r` to include all files in all subfolders
-        - [:onclick options-sheet dir_hidden]`dir_hidden`[/] to include hidden dotfiles
+        - {help.options.dir_depth}
+            - [CLI] `-r` to include all files in all subfolders
+        - {help.options.dir_hidden}
     '''
     rowtype = 'files' # rowdef: Path
     defer = True
