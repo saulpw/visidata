@@ -170,6 +170,9 @@ def save_zip(vd, p, *vsheets):
 
 @VisiData.api
 def save_txt(vd, p, *vsheets):
+    if len(vsheets) == 1 and vs.nVisibleCols > 1:  #2173
+        return vd.save_tsv(p, vsheets[0])
+
     with p.open(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
         for vs in vsheets:
             unitsep = vs.options.delimiter
