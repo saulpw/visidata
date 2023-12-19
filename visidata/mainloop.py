@@ -21,6 +21,14 @@ class ReturnValue(BaseException):
     pass
 
 
+@VisiData.api
+def callNoExceptions(vd, func, *args, **kwargs):
+    'Catch and log any raised exceptions.  Reraise when options.debug.'
+    try:
+        return func(*args, **kwargs)
+    except Exception as e:
+        vd.exceptionCaught(e)
+
 
 @VisiData.api
 def drawSheet(vd, scr, sheet):
@@ -33,13 +41,9 @@ def drawSheet(vd, scr, sheet):
 
     sheet._scr = scr
 
-    try:
-        sheet.draw(scr)
-    except Exception as e:
-        vd.exceptionCaught(e)
-
-    vd.drawLeftStatus(scr, sheet)
-    vd.drawRightStatus(scr, sheet)  # visible during this getkeystroke
+    vd.callNoExceptions(sheet.draw, scr)
+    vd.callNoExceptions(vd.drawLeftStatus, scr, sheet)
+    vd.callNoExceptions(vd.drawRightStatus, scr, sheet)  # visible during this getkeystroke
 
 
 vd.windowConfig = dict(pct=0, n=0, h=0, w=0)  # n=top line of bottom window; h=height of bottom window; w=width of screen
@@ -124,9 +128,9 @@ def draw_all(vd):
         vd.setWindows(vd.scrFull)
 
     if vd.scrMenu:
-        vd.drawMenu(vd.scrMenu, vd.activeSheet)
+        vd.callNoExceptions(vd.drawMenu, vd.scrMenu, vd.activeSheet)
 
-    vd.drawSidebar(vd.scrFull, vd.activeSheet)
+    vd.callNoExceptions(vd.drawSidebar, vd.scrFull, vd.activeSheet)
 
     if vd.win1:
         vd.win1.refresh()
