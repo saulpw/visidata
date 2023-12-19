@@ -211,14 +211,11 @@ class BaseSheet(DrawablePane):
             err = vd.exceptionCaught(e)
             escaped = True
 
-        try:
-            if vd.cmdlog:
-                # sheet may have changed
-                vd.cmdlog.afterExecSheet(vd.activeSheet, escaped, err)
-        except Exception as e:
-            vd.exceptionCaught(e)
+        if vd.cmdlog:
+            # sheet may have changed
+            vd.callNoExceptions(vd.cmdlog.afterExecSheet, vd.activeSheet, escaped, err)
 
-        self.checkCursorNoExceptions()
+        vd.callNoExceptions(self.checkCursor)
 
         vd.clearCaches()
 
@@ -283,12 +280,6 @@ class BaseSheet(DrawablePane):
     def checkCursor(self):
         'Check cursor and fix if out-of-bounds.  Overridable.'
         pass
-
-    def checkCursorNoExceptions(self):
-        try:
-            return self.checkCursor()
-        except Exception as e:
-            vd.exceptionCaught(e)
 
     def evalExpr(self, expr, **kwargs):
         'Evaluate Python expression *expr* in the context of *kwargs* (may vary by sheet type).'

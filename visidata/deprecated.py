@@ -226,4 +226,15 @@ visidata.Sheet.addCommand('', 'capture-col', 'addRegexColumns(makeRegexMatcher, 
 #vd.option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to', sheettype=None)
 #BaseSheet.bindkey('KEY_BACKSPACE', 'menu-help')
 
+@deprecated('3.0', 'vd.callNoExceptions(col.setValue, row, value)')
+@visidata.Column.api
+def setValueSafe(self, row, value):
+    'setValue and ignore exceptions.'
+    return vd.callNoExceptions(self.setValue, row, value)
+
+@deprecated('3.0', 'vd.callNoExceptions(sheet.checkCursor)')
+@visidata.BaseSheet.api
+def checkCursorNoExceptions(sheet):
+    return vd.callNoExceptions(sheet.checkCursor)
+
 vd.addGlobals(globals())

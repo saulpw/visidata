@@ -98,7 +98,6 @@ class MatrixSheet(Sheet):
 
     @asyncthread
     def get_room_messages(self, room):
-        try:
             while room.prev_batch:
                 ret = vd.matrix_client.api.get_room_messages(room.room_id, room.prev_batch, direction='b', limit=100)
                 for r in ret['chunk']:
@@ -108,8 +107,6 @@ class MatrixSheet(Sheet):
                 if 'end' not in ret or ret['end'] == room.prev_batch:
                     break
                 room.prev_batch = ret['end']
-        except Exception as e:
-            vd.exceptionCaught(e)
 
     def addRow(self, r, **kwargs):
         r = AttrDict(r)

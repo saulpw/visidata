@@ -145,19 +145,16 @@ def drawLeftStatus(vd, scr, vs):
 
     x = 0
     y = vs.windowHeight-1  # status for each window
-    try:
-        lstatus = vs.leftStatus()
-        maxwidth = options.disp_lstatus_max
-        if maxwidth > 0:
-            lstatus = middleTruncate(lstatus, maxwidth//2)
+    lstatus = vs.leftStatus()
+    maxwidth = options.disp_lstatus_max
+    if maxwidth > 0:
+        lstatus = middleTruncate(lstatus, maxwidth//2)
 
-        x = clipdraw(scr, y, 0, lstatus, cattr, w=vs.windowWidth-1)
+    x = clipdraw(scr, y, 0, lstatus, cattr, w=vs.windowWidth-1)
 
-        vd.onMouse(scr, 0, y, x, 1,
-                        BUTTON3_PRESSED='rename-sheet',
-                        BUTTON3_CLICKED='rename-sheet')
-    except Exception as e:
-        vd.exceptionCaught(e)
+    vd.onMouse(scr, 0, y, x, 1,
+                    BUTTON3_PRESSED='rename-sheet',
+                    BUTTON3_CLICKED='rename-sheet')
 
 
 @VisiData.api
@@ -211,8 +208,6 @@ def drawRightStatus(vd, scr, vs):
         rstat = vd.rightStatus(vs)
         x = max(2, rightx-dispwidth(rstat)-1)
         statuslen = clipdraw(scr, vs.windowHeight-1, x, rstat, cattr, w=vs.windowWidth-1)
-    except Exception as e:
-        vd.exceptionCaught(e)
     finally:
         if scr:
             curses.doupdate()

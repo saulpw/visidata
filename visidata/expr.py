@@ -38,10 +38,8 @@ def setValuesFromExpr(self, rows, expr):
     for row in Progress(rows, 'setting'):
         # Note: expressions that are only calculated once, do not need to pass column identity
         # they can reference their "previous selves" once without causing a recursive problem
-        try:
-            self.setValueSafe(row, self.sheet.evalExpr(compiledExpr, row))
-        except Exception as e:
-            vd.exceptionCaught(e)
+        v = vd.callNoExceptions(self.sheet.evalExpr, compiledExpr, row)
+        vd.callNoExceptions(self.setValue, v)
     self.recalc()
     vd.status('set %d values = %s' % (len(rows), expr))
 

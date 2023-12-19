@@ -241,7 +241,7 @@ def mainloop(vd, scr):
                 vd.currentReplay = None
 
         vd.checkForFinishedThreads()
-        sheet.checkCursorNoExceptions()
+        vd.callNoExceptions(sheet.checkCursor)
 
         # no idle redraw unless background threads are running
         time.sleep(0)  # yield to other threads which may not have started yet

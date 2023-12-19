@@ -63,10 +63,7 @@ class GitLogSheet(GitSheet):
 
         for row, rowmods in mods.values():
             for col, val in rowmods.values():
-                try:
-                    col.putValue(row, val)
-                except Exception as e:
-                    vd.exceptionCaught(e)
+                vd.callNoExceptions(col.putValue, row, val)
 
         self.reload()
         self.resetDeferredCommit()

@@ -435,19 +435,14 @@ class Column(Extensible):
         if setModified:  #1800
             self.sheet.setModified()
 
-    def setValueSafe(self, row, value):
-        'setValue and ignore exceptions.'
-        try:
-            return self.setValue(row, value)
-        except Exception as e:
-            vd.exceptionCaught(e)
-
     @asyncthread
     def setValues(self, rows, *values):
         'Set values in this column for *rows* to *values*, recycling values as needed to fill *rows*.'
         vd.addUndoSetValues([self], rows)
+
         for r, v in zip(rows, itertools.cycle(values)):
-            self.setValueSafe(r, v)
+            vd.callNoExceptions(self.setValue, r, v)
+
         self.recalc()
         return vd.status('set %d cells to %d values' % (len(rows), len(values)))
 
@@ -455,7 +450,7 @@ class Column(Extensible):
         'Set values on this column for *rows* to *values*, coerced to column type, recycling values as needed to fill *rows*.  Abort on type exception.'
         vd.addUndoSetValues([self], rows)
         for r, v in zip(rows, itertools.cycle(self.type(val) for val in values)):
-            self.setValueSafe(r, v)
+            vd.callNoExceptions(self.setValue, r, v)
 
         self.recalc()
 

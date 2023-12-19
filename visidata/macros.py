@@ -34,10 +34,7 @@ class MacroSheet(IndexSheet):
 
     def commitDeleteRow(self, row):
         self.source.deleteBy(lambda r: r.filename == str(row.source), commit=True, undo=False)
-        try:
-            row.source.unlink()
-        except Exception as e:
-            vd.exceptionCaught(e)
+        vd.callNoExceptions(row.source.unlink)
 
     @asyncthread
     def putChanges(self):

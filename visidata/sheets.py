@@ -752,7 +752,7 @@ class TableSheet(BaseSheet):
         y = headerRow + numHeaderRows
 
         rows = self.rows[self.topRowIndex:min(self.topRowIndex+self.nScreenRows+1, self.nRows)]
-        self.checkCursorNoExceptions()
+        vd.callNoExceptions(self.checkCursor)
 
         for rowidx, row in enumerate(rows):
             if y >= self.windowHeight-1:

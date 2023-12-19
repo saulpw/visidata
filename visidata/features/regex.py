@@ -48,12 +48,9 @@ def addRegexColumns(vs, regexMaker, origcol, regexstr):
     cols = {}
     ncols = 0  # number of new columns added already
     for r in Progress(vs.getSampleRows()):
-        try:
-            m = func(r)
-            if not m:
-                continue
-        except Exception as e:
-            vd.exceptionCaught(e)
+        m = vd.callNoExceptions(func, r)
+        if not m:
+            continue
 
         if isinstance(m, dict):
             for name in m:
@@ -110,7 +107,8 @@ def setValuesFromRegex(sheet, cols, rows, before='', after=''):
     vd.addUndoSetValues(cols, rows)
     for r in Progress(rows, 'replacing'):
         for col, transform in zip(cols, transforms):
-            col.setValueSafe(r, transform(col, r))
+            vd.callNoExceptions(col.setValue, r, transform(col, r))
+
     for col in cols:
         col.recalc()
 

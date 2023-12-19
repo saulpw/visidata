@@ -156,11 +156,7 @@ class HtmlDocsSheet(TableSheet):
 
     def addRow(self, row, index=None):
         super().addRow(row, index=index)
-        try:
-            row.soup = vd.soup(row.text)
-        except Exception as e:
-            vd.exceptionCaught(e)
-            row.soup = None
+        row.soup = vd.callNoExceptions(vd.soup, row.text)
 
     def openRow(self, row):
         return HtmlElementsSheet(row.url, source=self, elements=[row.soup])

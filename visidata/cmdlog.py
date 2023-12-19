@@ -311,7 +311,7 @@ def replayOne(vd, r):
 @VisiData.api
 class DisableAsync:
     def __enter__(self):
-        vd.execAsync = lambda func, *args, sheet=None, **kwargs: func(*args, **kwargs) # disable async
+        vd.execAsync = vd.execSync
 
     def __exit__(self, exc_type, exc_val, tb):
         vd.execAsync = lambda *args, vd=vd, **kwargs: visidata.VisiData.execAsync(vd, *args, **kwargs)
