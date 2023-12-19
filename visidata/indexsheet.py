@@ -3,7 +3,7 @@ from visidata import vd, VisiData, BaseSheet, Sheet, Column, AttrColumn, ItemCol
 
 class IndexSheet(Sheet):
     'Base class for tabular sheets with rows that are Sheets.'
-    help = '''
+    guide = '''
     # Index Sheet
     This is a list of sheets from `{sheet.source}`.
 

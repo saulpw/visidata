@@ -93,7 +93,7 @@ class ZulipAPISheet(Sheet):
 
 
 class ZulipStreamsSheet(ZulipAPISheet):
-    help = '''# Zulip Streams
+    guide = '''# Zulip Streams
 
 - `Enter` to open recent messages from the stream
 - `z Enter` to open list of topics from the stream
@@ -119,7 +119,7 @@ class ZulipTopicsSheet(ZulipAPISheet):
 
 
 class ZulipMembersSheet(ZulipAPISheet):
-    help = '''# Zulip Members
+    guide = '''# Zulip Members
 - `Enter` to open list of messages from this member
 '''
     rowtype = 'members'  # rowdef: dict of member from server
@@ -129,7 +129,7 @@ class ZulipMembersSheet(ZulipAPISheet):
 
 
 class ZulipMessagesSheet(Sheet):
-    help = '''# Zulip Messages Sheet
+    guide = '''# Zulip Messages Sheet
 Loads continuously starting with most recent, until all messages have been read.
 
 - `Ctrl+C` to cancel loading.

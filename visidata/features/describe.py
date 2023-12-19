@@ -29,7 +29,7 @@ class DescribeColumn(Column):
 # rowdef: Column from source sheet
 class DescribeSheet(ColumnsSheet):
 #    rowtype = 'columns'
-    help = '''
+    guide = '''
         # Describe Sheet
         This `Describe Sheet` shows a few basic metrics over data in {sheet.displaySource}, with each column represented by a row.
 

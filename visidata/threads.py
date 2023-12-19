@@ -348,7 +348,7 @@ class ThreadProfiler:
 
 class ProfileSheet(Sheet):
     rowtype = 'callsites' # rowdef: profiler_entry
-    help = '''
+    guide = '''
         # Profile Sheet
         - `z Ctrl+S` to save as pyprof file
         - `Ctrl+O` to open current function in $EDITOR

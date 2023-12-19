@@ -47,7 +47,7 @@ class ZipSheet(Sheet):
                getter=lambda col, row: datetime.datetime(*row[0].date_time)),
     ]
     nKeys = 2
-    help = '''# Zip Sheet
+    guide = '''# Zip Sheet
 This is a list of files contained in the zipfile {sheet.displaySource}.
 
 Once extracted, files can be loaded with `ENTER`.

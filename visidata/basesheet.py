@@ -97,7 +97,7 @@ class BaseSheet(DrawablePane):
     rowtype = 'objects'  # one word, plural, describing the items
     precious = True      # False for a few discardable metasheets
     defer = False        # False for not deferring changes until save
-    help = ''            # default to show in sidebar
+    guide = ''           # default to show in sidebar
 
     def _obj_options(self):
         return vd.OptionsObject(vd._options, obj=self)
@@ -294,9 +294,9 @@ class BaseSheet(DrawablePane):
         'Evaluate Python expression *expr* in the context of *kwargs* (may vary by sheet type).'
         return eval(expr, vd.getGlobals(), None)
 
-    def formatString(self, fmt):
+    def formatString(self, fmt, **kwargs):
         'Return formatted string with *sheet* and *vd* accessible to expressions.  Missing expressions return empty strings instead of error.'
-        return MissingAttrFormatter().format(fmt, sheet=self, vd=vd)
+        return MissingAttrFormatter().format(fmt, sheet=self, vd=vd, **kwargs)
 
 
 

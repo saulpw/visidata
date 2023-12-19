@@ -31,7 +31,7 @@ class GitFile:
 
 class GitStatus(GitSheet):
     rowtype = 'files'  # rowdef: GitFile
-    help = '''
+    guide = '''
         # git status
         An overview of the local git checkout.
 

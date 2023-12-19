@@ -19,7 +19,7 @@ class TomlSheet(PythonSheet):
     This is an intentionally minimal loader with cues taken from
     VisiData built-in JSON and Python object sheet types.
     """
-    help = '''# Toml Sheet
+    guide = '''# Toml Sheet
 This sheet represents the top level of {sheet.source.name}.{sheet.source.ext}.
 
 Each cell within this sheet can contain dictionaries (representing TOML key:value pairs), lists (representing TOML arrays), or scalars.

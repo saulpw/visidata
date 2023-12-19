@@ -11,7 +11,7 @@ def git_log(vd, p, *args):
 
 # rowdef: (commit_hash, refnames, author, author_date, body, notes)
 class GitLogSheet(GitSheet):
-    help = '''
+    guide = '''
 # git log {sheet.gitargstr}
 {sheet.cursorRow.message}
     '''

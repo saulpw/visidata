@@ -32,7 +32,7 @@ class GitBranchNameColumn(Column):
 
 
 class GitBranch(GitSheet):
-    help = '''
+    guide = '''
         # git branch
         List of all branches, including relevant metadata.
 

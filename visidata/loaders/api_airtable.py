@@ -36,7 +36,7 @@ def open_airtable(vd, p):
 
 
 class AirtableSheet(Sheet):
-    help = '''
+    guide = '''
         # Airtable
         This sheet is a read-only download of all records in a table at _airtable.com_.
     '''

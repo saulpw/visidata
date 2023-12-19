@@ -22,7 +22,7 @@ def noahsDatabase(vd):
     return vd.open_sqlite(vd.getNoahsPath('noahs.sqlite'))
 
 class NoahsPuzzle(Sheet):
-    help = '''
+    guide = '''
         # Puzzle {sheet.puznum}
         - `Shift+A` to input a solution to the puzzle
         - `Shift+Y` to attempt the current cell as the solution
@@ -67,7 +67,7 @@ def solve_puzzle(vd, answer):
 
 class Tapestry(Canvas):
     @property
-    def help(self):
+    def guide(self):
         ret = ''
         if vd.screenWidth < 120 or vd.screenHeight < 50:
             ret = f'''

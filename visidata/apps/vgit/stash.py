@@ -12,7 +12,7 @@ def git_stash(vd, p, args):
 
 
 class GitStashes(GitSheet):
-    help = '''
+    guide = '''
         # git stash
         This is the list of changes that have been stashed previously.
 

@@ -163,7 +163,7 @@ def orgmode_parse_title(line):
 
 
 class OrgSheet(Sheet):
-    help = '''# Orgmode Sheet (experimental)
+    guide = '''# Orgmode Sheet (experimental)
 A list of orgmode sections from _{sheet.source}_.
 
 - `Enter` to expand current section

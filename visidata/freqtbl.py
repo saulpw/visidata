@@ -34,7 +34,7 @@ def makeFreqTable(sheet, *groupByCols):
 
 class FreqTableSheet(PivotSheet):
     'Generate frequency-table sheet on currently selected column.'
-    help = '''# Frequency Table
+    guide = '''# Frequency Table
 This is a *frequency analysis* of _{sheet.groupByColsName}_ from the *{sheet.groupByCols[0].sheet}* sheet.
 
 Each row on this sheet corresponds to a *bin* of rows on the source sheet that have a distinct value.  The _count_ and _percent_ columns show how many rows on the source sheet are in this bin.
