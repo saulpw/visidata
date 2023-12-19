@@ -105,8 +105,6 @@ def save_tsv(vd, p, vs, delimiter='', row_delimiter=''):
             fp.write(unitsep.join(dispvals.values()))
             fp.write(rowsep)
 
-    vd.status('%s save finished' % p)
-
 
 @Sheet.api
 def append_tsv_row(vs, row):

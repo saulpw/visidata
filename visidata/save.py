@@ -148,6 +148,9 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=True):
             p = Path((givenpath / vs.name).with_suffix('.'+filetype))
             savefunc(p, vs)
             vs.hasBeenModified = False
+
+        vd.status(f'{givenpath} save finished')  #2157
+
     return vd.execAsync(_savefiles, vsheets, givenpath, savefunc, filetype)
 
 
@@ -165,7 +168,6 @@ def save_zip(vd, p, *vsheets):
                 savefunc = getattr(vs, 'save_' + filetype, None) or getattr(vd, 'save_' + filetype, None)
                 savefunc(tmpp, vs)
                 zfp.write(tmpp, f'{vs.name}.{vs.options.save_filetype}')
-    vd.status('%s save finished' % p)
 
 
 @VisiData.api
@@ -180,7 +182,6 @@ def save_txt(vd, p, *vsheets):
             for dispvals in vs.iterdispvals(*vs.visibleCols, format=True):
                 fp.write(unitsep.join(dispvals.values()))
                 fp.write(rowsep)
-    vd.status('%s save finished' % p)
 
 
 @BaseSheet.api

@@ -292,8 +292,6 @@ def save_sqlite(vd, p, *vsheets):
 
     conn.commit()
 
-    vd.status("%s save finished" % p)
-
 
 SqliteSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("execute SQL: ", type="sql")))', 'execute raw SQL statement')
 

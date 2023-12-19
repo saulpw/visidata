@@ -94,5 +94,3 @@ def save_fixed(vd, p, *vsheets):
                     for col, val in dispvals.items():
                         fp.write(('{0:%s%s.%s} ' % ('>' if vd.isNumeric(col) else '<', widths[col], widths[col])).format(val))
                     fp.write('\n')
-
-            vd.status('%s save finished' % p)

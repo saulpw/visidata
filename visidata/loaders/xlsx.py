@@ -173,7 +173,6 @@ def save_xlsx(vd, p, *sheets):
     wb.active = ws
 
     wb.save(filename=p)
-    vd.status(f'{p} save finished')
 
 
 @VisiData.api
@@ -195,7 +194,6 @@ def save_xls(vd, p, *sheets):
                 ws1.write(r_i, c_i, v)
 
     wb.save(p)
-    vd.status(f'{p} save finished')
 
 
 # from https://stackoverflow.com/a/65426130

@@ -202,7 +202,6 @@ def save_html(vd, p, *vsheets):
                     fp.write('</tr>\n')
 
             fp.write('</table>')
-            vd.status('%s save finished' % p)
 
 
 @VisiData.lazy_property

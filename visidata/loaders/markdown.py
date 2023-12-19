@@ -44,8 +44,6 @@ def write_md(p, *vsheets, md_style='orgmode'):
                     fp.write(s)
             fp.write('\n')
 
-    vd.status('%s save finished' % p)
-
 
 @VisiData.api
 def save_md(vd, p, *sheets):
