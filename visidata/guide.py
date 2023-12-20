@@ -121,7 +121,14 @@ class CommandHelpGetter:
     def __getattr__(self, k):
         longname = k.replace('_', '-')
         binding = self.helpsheet.revbinds.get(longname, [None])[0]
-        cmd = self.helpsheet.cmddict[(self.cls.__name__, longname)]
+        # cmddict has a SheetClass associated with each command
+        # go through all the parents of the Sheet type, to look for the command
+        for cls in self.cls.superclasses():
+            cmd = self.helpsheet.cmddict.get((cls.__name__, longname), None):
+            if cmd:
+                break
+        if not cmd:
+            return ''
         if 'input' in cmd.execstr.lower():
             vd.status(cmd.execstr)
             inputtype = 'input'
