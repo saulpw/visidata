@@ -124,7 +124,7 @@ class CommandHelpGetter:
         # cmddict has a SheetClass associated with each command
         # go through all the parents of the Sheet type, to look for the command
         for cls in self.cls.superclasses():
-            cmd = self.helpsheet.cmddict.get((cls.__name__, longname), None):
+            cmd = self.helpsheet.cmddict.get((cls.__name__, longname), None)
             if cmd:
                 break
         if not cmd:
