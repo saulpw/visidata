@@ -36,7 +36,7 @@ class InputHistorySheet(Sheet):
         ItemColumn('input'),
     ]
     def iterload(self):
-        self.rows = vd._inputHistoryList
+        yield from vd._inputHistoryList
 
 
 @VisiData.before
