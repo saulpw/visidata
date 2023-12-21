@@ -472,17 +472,27 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
             })
             break
         except ChangeInput as e:
-            vd.addInputHistory(e.args[0], type=input_kwargs.get('type', ''))
             input_kwargs['value'] = e.args[0]
             offset = e.args[1]
             i = keys.index(cur_input_key)
             cur_input_key = keys[(i+offset)%len(keys)]
 
-    lastargs = {k:v.get('value', '') for k,v in kwargs.items() if record and v.get('display', True)}
-    if vd.cmdlog and lastargs:
-        vd.setLastArgs(lastargs)
+    retargs = {}
+    if record:
+        lastargs = {}
+        for k, input_kwargs in kwargs.items():
+            v = input_kwargs.get('value', '')
+            retargs[k] = v
 
-    return {k:v.get('value', '') for k,v in kwargs.items()}
+            if input_kwargs.get('display', True):
+                lastargs[k] = v
+                vd.addInputHistory(v, input_kwargs.get('type', ''))
+
+        if vd.cmdlog and lastargs:
+            vd.setLastArgs(lastargs)
+
+    return retargs
+
 
 @VisiData.api
 def input(vd, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None, updater=lambda v: None, **kwargs):

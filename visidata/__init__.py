@@ -70,7 +70,7 @@ import visidata.threads
 import visidata.path
 import visidata.guide
 
-import visidata.stored_prop
+import visidata.stored_list
 import visidata._input
 import visidata.tuiwin
 import visidata.mouse

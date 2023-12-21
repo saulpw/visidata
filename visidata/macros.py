@@ -9,9 +9,7 @@ vd.macroMode = None
 vd.macrobindings = {}
 
 
-@VisiData.stored_property
-def macros_list(vd):
-    return []
+vd.macros = vd.StoredList(name='macros')
 
 
 class MacroSheet(IndexSheet):
@@ -23,24 +21,26 @@ class MacroSheet(IndexSheet):
         - `d` to mark macro for delete; `z Ctrl+S` to commit.
     '''
     columns = [
-        AttrColumn('binding', 'keystrokes'),
-        Column('num_commands', type=vlen),
-        AttrColumn('source', width=0),
+        AttrColumn('binding'),
+        Column('num_commands', type=vlen, width=0),
+        AttrColumn('source'),
     ]
-    rowtype = 'macros'
+    rowtype = 'macros'  # rowdef: CommandLogJsonl
     defer = True
+    nKeys = 1
+
     def iterload(self):
         yield from vd.macrobindings.values()
 
     def commitDeleteRow(self, row):
-        self.source.deleteBy(lambda r: r.filename == str(row.source), commit=True, undo=False)
-        vd.callNoExceptions(row.source.unlink)
+        del vd.macrobindings[row.binding]
+        vd.callNoExceptions(Path(row.source).unlink)
 
     @asyncthread
     def putChanges(self):
-        self.commitDeletes()  #1569
+        self.commitDeletes()  #1569  apply deletes early for saveSheets below
 
-        vd.saveSheets(self.source.source, self.source, confirm_overwrite=False)
+        vd.saveSheets(self.source, self, confirm_overwrite=False)
         self._deferredDels.clear()
         self.reload()
 
@@ -50,7 +50,7 @@ class MacroSheet(IndexSheet):
 
 @VisiData.lazy_property
 def macrosheet(vd):
-    return MacroSheet('user_macros', source=vd.macrobindings)
+    return MacroSheet('user_macros', source=vd.macros.path)
 
 @VisiData.api
 def loadMacro(vd, p:Path):
@@ -59,7 +59,8 @@ def loadMacro(vd, p:Path):
     elif p.ext == 'vdj':
         return vd.loadInternalSheet(CommandLogJsonl, p)
     else:
-        vd.warning(f'failed to load macro {fn}')
+        vd.warning(f'failed to load macro [:keys]{p}[/]')
+
 
 @VisiData.api
 def runMacro(vd, binding:str):
@@ -67,14 +68,14 @@ def runMacro(vd, binding:str):
 
 
 @VisiData.api
-def setMacro(vd, ks, vs):
+def setMacro(vd, ks:str, vs):
     'Set *ks* which is either a keystroke or a longname to run the cmdlog in *vs*.'
-    vs.keystrokes = ks
+    vs.binding = ks
     vd.macrobindings[ks] = vs
     if vd.isLongname(ks):
         BaseSheet.addCommand('', ks, f'runMacro("{ks}")')
     else:
-        BaseSheet.addCommand(ks, vs.name, f'runMacro("{ks}")')
+        BaseSheet.addCommand(ks, f'exec-{vs.name}', f'runMacro("{ks}")')
 
 
 @CommandLogJsonl.api
@@ -83,13 +84,14 @@ def saveMacro(self, rows, ks):
         vs.rows = rows
         macropath = Path(vd.fnSuffix(str(Path(vd.options.visidata_dir)/ks)))
         vd.save_vdj(macropath, vs)
+        vd.status(f'{ks} saved to {macropath}')
         vd.setMacro(ks, vs)
-        vd.macros_list.append(dict(command=ks, filename=macropath))
-        vd.sync(vd.macrosheet.source.reload())
-        vd.sync(vd.macrosheet.reload())
+        vd.macros.append(dict(binding=ks, source=str(macropath)))
+        vd.reloadMacros()
+        vd.macrosheet.reload()
 
 
-# needs to happen before, because the original afterExecSheet resets vd.activeCommand to None
+# needs to happen before, because the original afterexecsheet resets vd.activecommand to None
 @CommandLogJsonl.before
 def afterExecSheet(cmdlog, sheet, escaped, err):
     if vd.macroMode and (vd.activeCommand is not None) and (vd.activeCommand is not UNLOADED) and (vd.isLoggableCommand(vd.activeCommand.longname)):
@@ -120,14 +122,20 @@ def startMacro(cmdlog):
         vd.status("recording macro; stop recording with `m`")
         vd.macroMode = CommandLogJsonl('current_macro', rows=[])
 
+
 @VisiData.before
 @asyncthread
 def run(vd, *args, **kwargs):
-    for r in vd.macros_list:
-        ks = r['command']
-        fn = r['filename']
-        p = Path(fn)
-        vd.setMacro(ks, vd.loadMacro(p))
+    vd.reloadMacros()
+
+
+@VisiData.api
+def reloadMacros(vd):
+    vd.macros.reload()
+    for r in vd.macros:
+        vs = vd.loadMacro(Path(r.source))
+        if vs:
+            vd.setMacro(r.binding, vs)
 
 
 class MacrosGuide(GuideSheet):
