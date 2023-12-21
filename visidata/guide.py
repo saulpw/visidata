@@ -130,7 +130,6 @@ class CommandHelpGetter:
         if not cmd:
             return ''
         if 'input' in cmd.execstr.lower():
-            vd.status(cmd.execstr)
             inputtype = 'input'
             m = re.search(r'type="(\w*)"', cmd.execstr, re.IGNORECASE)
             if not m:
