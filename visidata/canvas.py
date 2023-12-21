@@ -394,6 +394,7 @@ class Canvas(Plotter):
             pvbox_xmax = max(pvbox_xmax, math.ceil(self.plotwidth * 3/4)//2*2 + 1)
         else:
             pvbox_xmax = self.plotwidth-self.rightMarginPixels-1
+        self.left_margin = min(self.left_margin, math.ceil(self.plotwidth * 1/3)//2*2)
         self.plotviewBox = BoundingBox(self.left_margin, self.topMarginPixels,
                                        pvbox_xmax, self.plotheight-self.bottomMarginPixels-1)
         if [self.plotheight, self.plotwidth] != old_plotsize:
