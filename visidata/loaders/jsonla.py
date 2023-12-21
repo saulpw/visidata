@@ -45,7 +45,7 @@ class JsonlArraySheet(SequenceSheet):
 
 def get_jsonla_rows(sheet, cols):
     for row in Progress(sheet.rows):
-        yield [col.getTypedValue(row) for col in cols]
+        yield [vd.get_json_value(col, row) for col in cols]
 
 
 class _vjsonEncoder(json.JSONEncoder):

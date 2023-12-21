@@ -101,16 +101,22 @@ class _vjsonEncoder(json.JSONEncoder):
         return str(obj)
 
 
+@VisiData.api
+def get_json_value(vd, col, row):
+    o = wrapply(col.getTypedValue, row)
+    if isinstance(o, TypedExceptionWrapper):
+        o = col.sheet.options.safe_error or str(o.exception)
+    elif isinstance(o, TypedWrapper):
+        o = o.val
+    elif isinstance(o, date):
+        o = col.getDisplayValue(row)
+    return o
+
+
 def _rowdict(cols, row, keep_nulls=False):
     ret = {}
     for col in cols:
-        o = wrapply(col.getTypedValue, row)
-        if isinstance(o, TypedExceptionWrapper):
-            o = col.sheet.options.safe_error or str(o.exception)
-        elif isinstance(o, TypedWrapper):
-            o = o.val
-        elif isinstance(o, date):
-            o = col.getDisplayValue(row)
+        o = vd.get_json_value(col, row)
         if keep_nulls or o is not None:
             ret[col.name] = o
     return ret
