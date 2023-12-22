@@ -38,6 +38,12 @@ def inputPalette(sheet, prompt, items,
                  **kwargs):
     bindings = dict()
 
+    tabitem = -1
+
+    def tab(n, nitems):
+        nonlocal tabitem
+        tabitem = (tabitem + n) % nitems
+
     def _draw_palette(value):
         words = value.lower().split()
 
@@ -73,19 +79,32 @@ def inputPalette(sheet, prompt, items,
         for item in favitems[:nitems-len(palrows)]:
             palrows.append((None, item))
 
+        navailitems = min(len(palrows), nitems)
+
+        bindings['^I'] = lambda *args: tab(1, navailitems) or args
+        bindings['KEY_BTAB'] = lambda *args: tab(-1, navailitems) or args
+
         for i in range(nitems-len(palrows)):
             palrows.append((None, None))
 
         for i, (m, item) in enumerate(palrows):
             trigger_key = ' '
-
-            if i < 9 and item:
-                trigger_key = f'{i+1}'
+            if tabitem >= 0 and item:
+                trigger_key = f'{i+1}'[-1]
                 bindings[trigger_key] = make_acceptor(item[value_key], multiple=multiple)
+
+            attr = colors.color_cmdpalette
+
+            if tabitem < 0 and palrows:
+                _ , topitem = palrows[0]
+                bindings['^J'] = make_acceptor(topitem[value_key], multiple=multiple)
+            elif item and i == tabitem:
+                bindings['^J'] = make_acceptor(item[value_key], multiple=multiple)
+                attr = colors.color_menu_spec
 
             match_summary = formatter(m, item, trigger_key) if item else ' '
 
-            clipdraw(sheet._scr, h-nitems-1+i, 0, match_summary, colors.color_cmdpalette, w=w)
+            clipdraw(sheet._scr, h-nitems-1+i, 0, match_summary, attr, w=w)
 
         return None
 
