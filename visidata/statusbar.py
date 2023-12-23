@@ -191,7 +191,7 @@ def modifiedStatus(sheet):
 @Sheet.property
 def selectedStatus(sheet):
     if sheet.nSelectedRows:
-        return f' [:selected_row]{sheet.options.disp_selected_note}{sheet.nSelectedRows}[/]'
+        return f' [:selected_row][:onclick dup-selected]{sheet.options.disp_selected_note}{sheet.nSelectedRows}[/][/] '
 
 
 @VisiData.api
