@@ -73,11 +73,12 @@ class OptionsSheet(Sheet):
     def iterload(self):
         for k in vd.options.keys():
             v = vd.options._get(k)
-            if vd.options.disp_help <= v.max_help:
-                if v.sheettype in [None, BaseSheet]:
-                    yield v
-                elif self.source != 'global' and v.sheettype in self.source.superclasses():
-                    yield v
+#            if vd.options.disp_help > v.max_help:
+#                continue
+            if v.sheettype in [None, BaseSheet]:
+                yield v
+            elif self.source != 'global' and v.sheettype in self.source.superclasses():
+                yield v
 
     def newRow(self):
         vd.fail('adding rows to the options sheet is not supported.')
