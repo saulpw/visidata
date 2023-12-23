@@ -19,17 +19,17 @@ def iterMenuPaths(vd, item=None, menupath=[]):
 
     if isinstance(item, (list, tuple)):
         for m in item:
-            yield from vd.itercommands(m, menupath)
+            yield from vd.iterMenuPaths(m, menupath)
     elif item.longname:
         yield item.longname, ' > '.join(menupath+[item.title])
     else:
-        yield from vd.itercommands(item.menus, menupath+[item.title])
+        yield from vd.iterMenuPaths(item.menus, menupath+[item.title])
 
 
 @VisiData.property
 @drawcache
 def menuPathsByLongname(vd):
-    return dict(vd.itercommands())
+    return dict(vd.iterMenuPaths())
 
 
 @VisiData.api
@@ -43,9 +43,9 @@ class HelpSheet(MetaSheet):
         ColumnAttr('sheet'),
         ColumnAttr('module'),
         ColumnAttr('longname'),
-        Column('menupath', width=0, getter=lambda col,row: ' > '.join(vd.menuPathsByLongname[row.longname])),
+        Column('menupath', width=0, cache=True, getter=lambda col,row: vd.menuPathsByLongname[row.longname]),
         Column('keystrokes', getter=lambda col,row: col.sheet.revbinds.get(row.longname, [None])[0]),
-        Column('all_bindings', width=0, getter=lambda col,row: list(set(col.sheet.revbinds.get(row.longname, [])))),
+        Column('all_bindings', width=0, cache=True, getter=lambda col,row: list(set(col.sheet.revbinds.get(row.longname, [])))),
         Column('description', width=40, getter=lambda col,row: col.sheet.cmddict[(row.sheet, row.longname)].helpstr),
         ColumnAttr('execstr', width=0),
         Column('logged', width=0, getter=lambda col,row: vd.isLoggableCommand(row.longname)),
