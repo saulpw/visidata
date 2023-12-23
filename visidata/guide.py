@@ -86,8 +86,6 @@ class GuideGuide(Sheet):
         ItemColumn('n', 0, type=int),
         ItemColumn('name', 1, width=0),
         ItemColumn('topic', 2, width=60),
-        Column('points', type=int, getter=lambda c,r: 0),
-        Column('max_points', type=int, getter=lambda c,r: 100),
     ]
     colorizers = [
             RowColorizer(7, 'color_guide_unwritten', lambda s,c,r,v: r and r[1] not in vd.guides)
