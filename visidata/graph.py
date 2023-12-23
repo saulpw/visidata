@@ -25,7 +25,7 @@ class InvertedCanvas(Canvas):
 
     def zoomTo(self, bbox):
         super().zoomTo(bbox)
-        self.fixPoint(Point(self.plotviewBox.xmin, self.plotviewBox.ymax),
+        self.fixPoint(Point(self.plotviewBox.xmin, self.plotviewBox.ymin),
                       Point(bbox.xmin, bbox.ymax + 1/4*self.canvasCharHeight))
 
     def scaleY(self, canvasY):
