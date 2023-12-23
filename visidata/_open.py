@@ -181,18 +181,6 @@ def open_txt(vd, p):
     return TextSheet(p.name, source=p)
 
 
-@VisiData.api
-def loadInternalSheet(vd, cls, p, **kwargs):
-    'Load internal sheet of given class.'
-    vs = cls(p.name, source=p, **kwargs)
-    vd.options._set('encoding', 'utf8', vs)
-    if p.exists():
-#        vd.sheets.insert(0, vs) # broke replay with macros.reload()
-        vs.reload.__wrapped__(vs)
-#        vd.sheets.pop(0)
-    return vs
-
-
 BaseSheet.addCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: "), create=True))', 'Open file or URL')
 TableSheet.addCommand('zo', 'open-cell-file', 'vd.push(openSource(cursorDisplay) or fail(f"file {cursorDisplay} does not exist"))', 'Open file or URL from path in current cell')
 BaseSheet.addCommand('gU', 'undo-last-quit', 'push(allSheets[-1])', 'reopen most recently closed sheet')

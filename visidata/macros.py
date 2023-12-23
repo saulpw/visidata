@@ -52,14 +52,20 @@ class MacroSheet(IndexSheet):
 def macrosheet(vd):
     return MacroSheet('user_macros', source=vd.macros.path)
 
+
 @VisiData.api
 def loadMacro(vd, p:Path):
-    if p.ext == 'vd':
-        return vd.loadInternalSheet(CommandLog, p)
-    elif p.ext == 'vdj':
-        return vd.loadInternalSheet(CommandLogJsonl, p)
-    else:
-        vd.warning(f'failed to load macro [:keys]{p}[/]')
+    if p.exists():
+        if p.ext == 'vd':
+            vs = CommandLog(p.name, source=p)
+            vs.ensureLoaded()
+            return vs
+        elif p.ext == 'vdj':
+            vs = CommandLogJsonl(p.name, source=p)
+            vs.ensureLoaded()
+            return vs
+
+    vd.warning(f'failed to load macro {p}')
 
 
 @VisiData.api
