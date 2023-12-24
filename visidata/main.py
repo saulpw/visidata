@@ -95,10 +95,10 @@ def parsePos(vd, arg:str, inputs=None):
 
     pos = arg.split(':')
     if len(pos) == 1:
-        startsheet = [Path(inputs[-1]).name] if inputs else None
+        startsheet = [Path(inputs[-1]).base_stem] if inputs else None
         start_pos = (startsheet, pos[0], None)
     elif len(pos) == 2:
-        startsheet = [Path(inputs[-1]).name] if inputs else None
+        startsheet = [Path(inputs[-1]).base_stem] if inputs else None
         startrow, startcol = pos
         start_pos = (None, startrow, startcol)
     else:  # if len(pos) >= 3:
