@@ -8,7 +8,7 @@ from visidata import VisiData, TableSheet, ItemColumn, AttrDict
 
 @VisiData.api
 def open_jrnl(vd, p):
-    return JrnlSheet(p.name, source=p)
+    return JrnlSheet(p.base_stem, source=p)
 
 
 class JrnlSheet(TableSheet):

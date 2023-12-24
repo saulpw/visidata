@@ -9,7 +9,7 @@ NL='\n'
 
 @VisiData.api
 def open_vds(vd, p):
-    return VdsIndexSheet(p.name, source=p)
+    return VdsIndexSheet(p.base_stem, source=p)
 
 
 @VisiData.api

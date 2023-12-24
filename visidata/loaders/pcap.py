@@ -17,7 +17,7 @@ services = {}  # [('tcp', 25)] -> 'smtp'
 
 @VisiData.api
 def open_pcap(vd, p):
-    return PcapSheet(p.name, source=p)
+    return PcapSheet(p.base_stem, source=p)
 
 open_cap = open_pcap
 open_pcapng = open_pcap

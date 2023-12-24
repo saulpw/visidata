@@ -57,11 +57,11 @@ def macrosheet(vd):
 def loadMacro(vd, p:Path):
     if p.exists():
         if p.ext == 'vd':
-            vs = CommandLog(p.name, source=p)
+            vs = CommandLog(p.base_stem, source=p)
             vs.ensureLoaded()
             return vs
         elif p.ext == 'vdj':
-            vs = CommandLogJsonl(p.name, source=p)
+            vs = CommandLogJsonl(p.base_stem, source=p)
             vs.ensureLoaded()
             return vs
 

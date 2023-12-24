@@ -7,13 +7,13 @@ from visidata import Sheet, VisiData, TypedWrapper, anytype, date, vlen, Column,
 @VisiData.api
 def open_arrow(vd, p):
     'Apache Arrow IPC file format'
-    return ArrowSheet(p.name, source=p)
+    return ArrowSheet(p.base_stem, source=p)
 
 
 @VisiData.api
 def open_arrows(vd, p):
     'Apache Arrow IPC streaming format'
-    return ArrowSheet(p.name, source=p)
+    return ArrowSheet(p.base_stem, source=p)
 
 
 def arrow_to_vdtype(t):

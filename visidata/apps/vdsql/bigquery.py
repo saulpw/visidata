@@ -15,7 +15,7 @@ import ibis.expr.operations as ops
 def openurl_bigquery(vd, p, filetype=None):
     vd.configure_ibis()
     vd.configure_bigquery()
-    return BigqueryDatabaseIndexSheet(p.name, source=p, ibis_con=None)
+    return BigqueryDatabaseIndexSheet(p.base_stem, source=p, ibis_con=None)
 
 vd.openurl_bq = vd.openurl_bigquery
 

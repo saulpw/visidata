@@ -5,7 +5,7 @@ from visidata import VisiData, Sheet, Column, Progress, colors, ColumnItem, Canv
 
 @VisiData.api
 def open_png(vd, p):
-    return PNGSheet(p.name, source=p)
+    return PNGSheet(p.base_stem, source=p)
 
 
 class PNGSheet(Sheet):

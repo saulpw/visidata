@@ -4,18 +4,18 @@ from visidata import VisiData, vd, Sheet, date, anytype, Path, options, Column, 
 
 @VisiData.api
 def open_pandas(vd, p):
-    return PandasSheet(p.name, source=p)
+    return PandasSheet(p.base_stem, source=p)
 
 @VisiData.api
 def open_dta(vd, p):
-    return PandasSheet(p.name, source=p, filetype='stata')
+    return PandasSheet(p.base_stem, source=p, filetype='stata')
 
 VisiData.open_stata = VisiData.open_pandas
 
 for ft in 'feather gbq orc pickle sas stata'.split():
     funcname ='open_'+ft
     if not getattr(VisiData, funcname, None):
-        setattr(VisiData, funcname, lambda vd,p,ft=ft: PandasSheet(p.name, source=p, filetype=ft))
+        setattr(VisiData, funcname, lambda vd,p,ft=ft: PandasSheet(p.base_stem, source=p, filetype=ft))
 
 @VisiData.api
 @asyncthread

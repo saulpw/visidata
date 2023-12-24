@@ -4,11 +4,11 @@ from visidata import VisiData, vd, Sheet, date, anytype, options, Column, Progre
 
 @VisiData.api
 def open_npy(vd, p):
-    return NpySheet(p.name, source=p)
+    return NpySheet(p.base_stem, source=p)
 
 @VisiData.api
 def open_npz(vd, p):
-    return NpzSheet(p.name, source=p)
+    return NpzSheet(p.base_stem, source=p)
 
 vd.option('npy_allow_pickle', False, 'numpy allow unpickling objects (unsafe)')
 

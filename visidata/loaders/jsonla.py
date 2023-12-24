@@ -28,7 +28,7 @@ def guess_jsonla(vd, p):
 
 @VisiData.api
 def open_jsonla(vd, p):
-    return JsonlArraySheet(p.name, source=p)
+    return JsonlArraySheet(p.base_stem, source=p)
 
 
 class JsonlArraySheet(SequenceSheet):

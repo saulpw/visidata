@@ -7,7 +7,7 @@ vd.option('fixed_maxcols', 0, 'max number of fixed-width columns to create (0 is
 
 @VisiData.api
 def open_fixed(vd, p):
-    return FixedWidthColumnsSheet(p.name, source=p, headerlines=[])
+    return FixedWidthColumnsSheet(p.base_stem, source=p, headerlines=[])
 
 class FixedWidthColumn(Column):
     def __init__(self, name, i, j, **kwargs):

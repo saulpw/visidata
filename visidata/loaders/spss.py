@@ -3,7 +3,7 @@ from visidata import VisiData, Sheet, Progress, asyncthread, ItemColumn, vd
 
 @VisiData.api
 def open_spss(vd, p):
-    return SpssSheet(p.name, source=p)
+    return SpssSheet(p.base_stem, source=p)
 VisiData.open_sav = VisiData.open_spss
 
 

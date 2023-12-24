@@ -13,11 +13,11 @@ vd.option('xlsx_meta_columns', False, 'include columns for cell objects, font co
 
 @VisiData.api
 def open_xls(vd, p):
-    return XlsIndexSheet(p.name, source=p)
+    return XlsIndexSheet(p.base_stem, source=p)
 
 @VisiData.api
 def open_xlsx(vd, p):
-    return XlsxIndexSheet(p.name, source=p)
+    return XlsxIndexSheet(p.base_stem, source=p)
 
 class XlsxIndexSheet(IndexSheet):
     'Load XLSX file (in Excel Open XML format).'

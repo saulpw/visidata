@@ -16,7 +16,7 @@ vd.option('tsv_safe_tab', '\u001f', 'replacement for tab character when saving t
 
 @VisiData.api
 def open_tsv(vd, p):
-    return TsvSheet(p.name, source=p)
+    return TsvSheet(p.base_stem, source=p)
 
 
 def adaptive_bufferer(fp, max_buffer_size=65536):

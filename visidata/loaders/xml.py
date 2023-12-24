@@ -6,7 +6,7 @@ vd.option('xml_parser_huge_tree', True, 'allow very deep trees and very long tex
 
 @VisiData.api
 def open_xml(vd, p):
-    return XmlSheet(p.name, source=p)
+    return XmlSheet(p.base_stem, source=p)
 
 VisiData.open_svg = VisiData.open_xml
 

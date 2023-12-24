@@ -10,7 +10,7 @@ from visidata import (
 
 @VisiData.api
 def open_toml(vd, p):
-    return TomlSheet(p.name, source=p)
+    return TomlSheet(p.base_stem, source=p)
 
 
 class TomlSheet(PythonSheet):

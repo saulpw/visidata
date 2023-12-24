@@ -239,7 +239,7 @@ def openurl_s3(vd, p, filetype):
         p.fs.connect()
 
     if not p.fs.isfile(str(p.given)):
-        return S3DirSheet(p.name, source=p, version_aware=p.version_aware)
+        return S3DirSheet(p.base_stem, source=p, version_aware=p.version_aware)
 
     if not filetype:
         filetype = p.ext or "txt"

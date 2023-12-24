@@ -305,7 +305,7 @@ min_thread_time_s = 0.10 # only keep threads that take longer than this number o
 @VisiData.api
 def open_pyprof(vd, p):
     import pstats
-    return ProfileStatsSheet(p.name, source=pstats.Stats(p.given).stats)
+    return ProfileStatsSheet(p.base_stem, source=pstats.Stats(p.given).stats)
 
 
 @VisiData.api

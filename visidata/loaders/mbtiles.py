@@ -5,11 +5,11 @@ import sqlite3
 
 @VisiData.api
 def open_pbf(vd, p):
-    return PbfSheet(p.name, source=p)
+    return PbfSheet(p.base_stem, source=p)
 
 @VisiData.api
 def open_mbtiles(vd, p):
-    return MbtilesSheet(p.name, source=p)
+    return MbtilesSheet(p.base_stem, source=p)
 
 def getListDepth(L):
     if not isinstance(L, list):

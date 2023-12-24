@@ -9,11 +9,11 @@ SASTypes = {
 
 @VisiData.api
 def open_xpt(vd, p):
-    return XptSheet(p.name, source=p)
+    return XptSheet(p.base_stem, source=p)
 
 @VisiData.api
 def open_sas7bdat(vd, p):
-    return SasSheet(p.name, source=p)
+    return SasSheet(p.base_stem, source=p)
 
 class XptSheet(Sheet):
     def iterload(self):

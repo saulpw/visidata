@@ -317,7 +317,7 @@ FECFiling.addCommand(
 )
 
 def open_fec(p):
-    return FECFiling(p.name, source=p)
+    return FECFiling(p.base_stem, source=p)
 
 addGlobals({
     "open_fec": open_fec,

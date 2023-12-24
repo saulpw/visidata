@@ -9,7 +9,7 @@ from visidata import VisiData, vd, Column, asyncthread, Progress, PythonSheet, I
 
 @VisiData.api
 def open_geojson(vd, p):
-    return GeoJSONSheet(p.name, source=p)
+    return GeoJSONSheet(p.base_stem, source=p)
 
 class GeoJSONColumn(Column):
     def calcValue(self, row):

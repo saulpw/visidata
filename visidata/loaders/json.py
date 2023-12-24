@@ -23,11 +23,11 @@ def guess_json(vd, p):
 
 @VisiData.api
 def open_jsonobj(vd, p):
-    return JsonSheet(p.name, source=p)
+    return JsonSheet(p.base_stem, source=p)
 
 @VisiData.api
 def open_jsonl(vd, p):
-    return JsonSheet(p.name, source=p)
+    return JsonSheet(p.base_stem, source=p)
 
 VisiData.open_ndjson = VisiData.open_ldjson = VisiData.open_json = VisiData.open_jsonl
 

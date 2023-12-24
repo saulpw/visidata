@@ -31,17 +31,17 @@ from visidata import vd, VisiData, Column, Sheet, ItemColumn, vlen, asyncthread,
 
 @VisiData.api
 def open_org(vd, p):
-    return OrgSheet(p.name, source=p, filetype='org')
+    return OrgSheet(p.base_stem, source=p, filetype='org')
 
 
 @VisiData.api
 def open_forg(vd, p):
-    return OrgSheet(p.name, source=p, filetype='forg')
+    return OrgSheet(p.base_stem, source=p, filetype='forg')
 
 
 @VisiData.api
 def open_orgdir(vd, p):
-    return OrgSheet(p.name, source=p, filetype='orgdir')
+    return OrgSheet(p.base_stem, source=p, filetype='orgdir')
 
 
 def encode_date(dt=None):
@@ -246,7 +246,7 @@ A list of orgmode sections from _{sheet.source}_.
         if self.filetype == 'orgdir':
             basepath = str(self.source)
             for p in _walkfiles(self.source):
-                if p.name.startswith('.'): continue
+                if p.base_stem.startswith('.'): continue
                 if p.ext in ['org', 'md']:
                     yield self.parse_orgmd(p)
         elif self.filetype == 'forg':

@@ -5,7 +5,7 @@ from visidata import VisiData, Progress, JsonSheet, vd
 
 @VisiData.api
 def open_yml(vd, p):
-    return YamlSheet(p.name, source=p)
+    return YamlSheet(p.base_stem, source=p)
 
 VisiData.open_yaml = VisiData.open_yml
 

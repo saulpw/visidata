@@ -20,11 +20,11 @@ def guess_tar(vd, p):
 
 @VisiData.api
 def open_zip(vd, p):
-    return vd.ZipSheet(p.name, source=p)
+    return vd.ZipSheet(p.base_stem, source=p)
 
 @VisiData.api
 def open_tar(vd, p):
-    return TarSheet(p.name, source=p)
+    return TarSheet(p.base_stem, source=p)
 
 VisiData.open_tgz = VisiData.open_tar
 VisiData.open_txz = VisiData.open_tar

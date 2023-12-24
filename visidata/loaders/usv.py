@@ -4,7 +4,7 @@ from visidata import Sheet, TsvSheet, options, vd, VisiData
 
 @VisiData.api
 def open_usv(vd, p):
-    return TsvSheet(p.name, source=p, delimiter='\u241f', row_delimiter='\u241e')
+    return TsvSheet(p.base_stem, source=p, delimiter='\u241f', row_delimiter='\u241e')
 
 @VisiData.api
 def save_usv(vd, p, vs):

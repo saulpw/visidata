@@ -32,7 +32,7 @@ def openhttp_matrix(vd, p):
         vd.setPersistentOptions(matrix_user_id=username, matrix_token=matrix_token)
 
     vd.timeouts_before_idle = -1
-    return MatrixSheet(p.name, source=p)
+    return MatrixSheet(p.base_stem, source=p)
 
 vd.open_matrix = vd.openhttp_matrix
 

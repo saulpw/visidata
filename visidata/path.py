@@ -186,17 +186,17 @@ class Path(os.PathLike):
 
         self.ext = self.suffix[1:]
         if self.suffix:  #1450  don't make this a oneliner; [:-0] doesn't work
-            self.name = self._path.name[:-len(self.suffix)]
+            self.base_stem = self._path.name[:-len(self.suffix)]
         elif self._given == '.':  #1768
-            self.name = self._path.absolute().name
+            self.base_stem = self._path.absolute().name
         else:
-            self.name = self._path.name
+            self.base_stem = self._path.name
 
         # check if file is compressed
         if self.suffix in ['.gz', '.bz2', '.xz', '.lzma', '.zst']:
             self.compression = self.ext
             uncompressedpath = Path(self.given[:-len(self.suffix)])  # strip suffix
-            self.name = uncompressedpath.name
+            self.base_stem = uncompressedpath.base_stem
             self.ext = uncompressedpath.ext
         else:
             self.compression = None

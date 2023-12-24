@@ -8,7 +8,7 @@ from visidata import VisiData, vd, Sheet, Column, Progress, date, InvertedCanvas
 
 @VisiData.api
 def open_shp(vd, p):
-    return ShapeSheet(p.name, source=p)
+    return ShapeSheet(p.base_stem, source=p)
 
 VisiData.open_dbf = VisiData.open_shp
 

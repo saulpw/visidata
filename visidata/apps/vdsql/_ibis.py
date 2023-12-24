@@ -67,7 +67,7 @@ def open_vdsql(vd, p, filetype=None):
     if p.ext in ext_aliases:
         setattr(ibis, p.ext, ext_aliases.get(p.ext))
 
-    return IbisTableIndexSheet(p.name, source=p, filetype=None, database_name=None,
+    return IbisTableIndexSheet(p.base_stem, source=p, filetype=None, database_name=None,
                                ibis_conpool=IbisConnectionPool(p), sheet_type=IbisTableSheet)
 
 vd.open_ibis = vd.open_vdsql

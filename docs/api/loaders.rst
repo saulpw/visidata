@@ -25,7 +25,7 @@ Step 1. ``open_<filetype>`` boilerplate
 
     @VisiData.api
     def open_readme(vd, p):
-        return ReadmeSheet(p.name, source=p)
+        return ReadmeSheet(p.base_stem, source=p)
 
 This is used for filetype ``readme``, which is used for files with extension ``.readme``, or when specified manually with the ``filetype`` option like ``--filetype=readme`` or ``-f readme`` on the command line.
 
@@ -244,7 +244,7 @@ This is a completely functional loader for the ``sas7bdat`` (SAS dataset file) f
 
     @VisiData.api
     def open_sas7bdat(vd, p):
-        return SasSheet(p.name, source=p)
+        return SasSheet(p.base_stem, source=p)
 
     class SasSheet(Sheet):
         def iterload(self):

@@ -1175,6 +1175,6 @@ class F5LogSheet(Sheet):
 
 @VisiData.api
 def open_f5log(vd: VisiData, p: Path) -> Sheet:
-    sheet = F5LogSheet(p.name, source=p)
+    sheet = F5LogSheet(p.base_stem, source=p)
     sheet.options["disp_date_fmt"] = "%Y-%m-%d %H:%M:%S"
     return sheet

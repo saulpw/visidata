@@ -4,7 +4,7 @@ from collections import defaultdict
 
 @VisiData.api
 def open_parquet(vd, p):
-    return ParquetSheet(p.name, source=p)
+    return ParquetSheet(p.base_stem, source=p)
 
 
 class ParquetColumn(Column):

@@ -4,12 +4,12 @@ from visidata import vd, VisiData, TableSheet, ItemColumn
 
 @VisiData.api
 def open_conll(vd, p):
-    return ConllSheet(p.name, source=p)
+    return ConllSheet(p.base_stem, source=p)
 
 
 @VisiData.api
 def open_conllu(vd, p):
-    return ConllSheet(p.name, source=p)
+    return ConllSheet(p.base_stem, source=p)
 
 
 class ConllSheet(TableSheet):

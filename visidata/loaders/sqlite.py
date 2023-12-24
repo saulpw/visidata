@@ -27,11 +27,11 @@ def guess_sqlite(vd, p):
 def open_sqlite(vd, p):
     if not p.is_local():
         vd.fail('sqlite requires an uncompressed, local file')
-    return SqliteIndexSheet(p.name, source=p)
+    return SqliteIndexSheet(p.base_stem, source=p)
 
 @VisiData.api
 def openurl_sqlite(vd, p, filetype=None):
-    return SqliteIndexSheet(p.name, source=p)
+    return SqliteIndexSheet(p.base_stem, source=p)
 
 VisiData.open_sqlite3 = VisiData.open_sqlite
 VisiData.open_db = VisiData.open_sqlite

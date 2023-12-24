@@ -10,7 +10,7 @@ def guess_xls(vd, p):
 
 @VisiData.api
 def open_xlsb(vd, p):
-    return XlsbIndex(p.name, source=p)
+    return XlsbIndex(p.base_stem, source=p)
 
 
 class XlsbIndex(IndexSheet):

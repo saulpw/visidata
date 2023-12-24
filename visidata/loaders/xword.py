@@ -8,13 +8,13 @@ vd.option('color_xword_active', 'green', 'color of active clue')
 
 @VisiData.api
 def open_puz(vd, p):
-    return PuzSheet(p.name, source=p)
+    return PuzSheet(p.base_stem, source=p)
 
 @VisiData.api
 def open_xd(vd, p):
     if p.is_dir():
-        return CrosswordsSheet(p.name, source=p)
-    return CrosswordSheet(p.name, source=p)
+        return CrosswordsSheet(p.base_stem, source=p)
+    return CrosswordSheet(p.base_stem, source=p)
 
 
 @VisiData.api

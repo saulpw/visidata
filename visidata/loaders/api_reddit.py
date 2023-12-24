@@ -27,12 +27,12 @@ def open_reddit(vd, p):
         return RedditGuide('reddit_guide')
 
     if p.given.startswith('r/') or p.given.startswith('/r/'):
-        return SubredditSheet(p.name, source=p.name.split('+'), search=(p.given[0]=='/'))
+        return SubredditSheet(p.base_stem, source=p.base_stem.split('+'), search=(p.given[0]=='/'))
 
     if p.given.startswith('u/') or p.given.startswith('/u/'):
-        return RedditorsSheet(p.name, source=p.name.split('+'), search=(p.given[0]=='/'))
+        return RedditorsSheet(p.base_stem, source=p.base_stem.split('+'), search=(p.given[0]=='/'))
 
-    return SubredditSheet(p.name, source=p)
+    return SubredditSheet(p.base_stem, source=p)
 
 vd.new_reddit = vd.open_reddit
 

@@ -5,7 +5,7 @@ from .gsheets import GSheetsIndex
 
 @VisiData.api
 def open_gdrive(vd, p):
-    return GDriveSheet(p.name)
+    return GDriveSheet(p.base_stem)
 
 
 FILES_FIELDS_VISIBLE='''name size modifiedTime mimeType description'''.split()

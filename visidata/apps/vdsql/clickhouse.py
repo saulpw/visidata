@@ -8,7 +8,7 @@ from ._ibis import IbisTableSheet, IbisTableIndexSheet, IbisConnectionPool
 @VisiData.api
 def openurl_clickhouse(vd, p, filetype=None):
     vd.configure_ibis()
-    return IbisTableIndexSheet(p.name, source=p, filetype=None, database_name=None,
+    return IbisTableIndexSheet(p.base_stem, source=p, filetype=None, database_name=None,
                                ibis_conpool=IbisConnectionPool(p), sheet_type=ClickhouseSheet)
 
 vd.openurl_clickhouses = vd.openurl_clickhouse

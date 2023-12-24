@@ -30,11 +30,11 @@ def queueCommand(vd, longname, input=None, sheet=None, col=None, row=None):
 
 @VisiData.api
 def open_vd(vd, p):
-    return CommandLog(p.name, source=p, precious=True)
+    return CommandLog(p.base_stem, source=p, precious=True)
 
 @VisiData.api
 def open_vdj(vd, p):
-    return CommandLogJsonl(p.name, source=p, precious=True)
+    return CommandLogJsonl(p.base_stem, source=p, precious=True)
 
 VisiData.save_vd = VisiData.save_tsv
 

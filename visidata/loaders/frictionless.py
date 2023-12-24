@@ -2,7 +2,7 @@ from visidata import VisiData, vd, Progress, IndexSheet
 
 @VisiData.api
 def open_frictionless(vd, p):
-    return FrictionlessIndexSheet(p.name, source=p)
+    return FrictionlessIndexSheet(p.base_stem, source=p)
 
 class FrictionlessIndexSheet(IndexSheet):
     def iterload(self):

@@ -15,7 +15,7 @@ def open_git(vd, p):
 
 @VisiData.api
 def git_repos(vd, p, args):
-    return GitRepos(p.name, source=p)
+    return GitRepos(p.base_stem, source=p)
 
 
 class GitLinesColumn(Column):

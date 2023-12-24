@@ -2,7 +2,7 @@ from visidata import VisiData, vd, Sheet, Path, Column, ItemColumn, BaseSheet
 
 @VisiData.api
 def open_h5(vd, p):
-    return Hdf5ObjSheet(p.name, source=p)
+    return Hdf5ObjSheet(p.base_stem, source=p)
 
 VisiData.open_hdf5 = VisiData.open_h5
 

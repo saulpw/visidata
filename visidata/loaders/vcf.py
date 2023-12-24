@@ -5,7 +5,7 @@ from visidata import VisiData, Column, getitemdef, PythonSheet, asyncthread, vd
 
 @VisiData.api
 def open_vcf(vd, p):
-    return VcfSheet(p.name, source=p)
+    return VcfSheet(p.base_stem, source=p)
 
 def unbox(col, row):
     v = getitemdef(row, col.expr)

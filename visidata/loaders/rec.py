@@ -5,7 +5,7 @@ from visidata import VisiData, vd, Progress, TableSheet, IndexSheet, ItemColumn,
 
 @VisiData.api
 def open_rec(vd, p):
-    return RecIndexSheet(p.name, source=p)
+    return RecIndexSheet(p.base_stem, source=p)
 
 def decode_multiline(line, fp):
     'Parse *line* and lookahead into *fp* as iterator for continuing lines.  Return (multiline, next_line) where *multiline* can contain newlines and *next_line is the line after the combined *multiline*.  Handle "\\" at end and "+" at beginning of lines.  *next_line* will be None iff iterator is exhausted.'

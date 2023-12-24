@@ -7,7 +7,7 @@ from ._ibis import IbisTableSheet, IbisConnectionPool, IbisTableIndexSheet
 
 @VisiData.api
 def openurl_snowflake(vd, p, filetype=None):
-    return IbisTableIndexSheet(p.name, source=p, filetype=None, database_name=None,
+    return IbisTableIndexSheet(p.base_stem, source=p, filetype=None, database_name=None,
                                ibis_conpool=IbisConnectionPool(p),
                                sheet_type=SnowflakeSheet)
 

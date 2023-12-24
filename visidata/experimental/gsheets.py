@@ -8,7 +8,7 @@ SHEET_FIELDS='merges conditionalFormats filterViews protectedRanges basicFilter 
 def open_gsheets(vd, p):
     m = re.search(r'([A-z0-9_]{44})', p.given)
     if m:
-        return GSheetsIndex(p.name, source=m.groups()[0])
+        return GSheetsIndex(p.base_stem, source=m.groups()[0])
 
 vd.open_g = vd.open_gsheets
 
@@ -57,7 +57,7 @@ class GSheet(SequenceSheet):
 @VisiData.api
 def save_gsheets(vd, p, *sheets):
     gsheet = vd._gsheets_rw.create(body={
-        'properties': { 'title': p.name },
+        'properties': { 'title': p.base_stem },
         'sheets': list({'properties': { 'title': vs.name }} for vs in sheets),
     }, fields='spreadsheetId').execute()
 

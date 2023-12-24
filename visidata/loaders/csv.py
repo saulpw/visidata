@@ -27,7 +27,7 @@ def guess_csv(vd, p):
 
 @VisiData.api
 def open_csv(vd, p):
-    return CsvSheet(p.name, source=p)
+    return CsvSheet(p.base_stem, source=p)
 
 def removeNulls(fp):
     for line in fp:

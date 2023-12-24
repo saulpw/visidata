@@ -6,7 +6,7 @@ from visidata import VisiData, CommandLogBase, BaseSheet, Sheet, AttrDict, Progr
 
 @VisiData.api
 def open_vdx(vd, p):
-    return CommandLogSimple(p.name, source=p, precious=True)
+    return CommandLogSimple(p.base_stem, source=p, precious=True)
 
 
 class CommandLogSimple(CommandLogBase, Sheet):

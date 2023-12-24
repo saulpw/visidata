@@ -3,7 +3,7 @@ from visidata import VisiData, vd, Sheet, Column, Progress, ColumnAttr, ColumnIt
 
 @VisiData.api
 def open_ttf(vd, p):
-    return TTFTablesSheet(p.name, source=p)
+    return TTFTablesSheet(p.base_stem, source=p)
 
 vd.open_otf = vd.open_ttf
 

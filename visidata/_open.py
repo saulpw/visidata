@@ -102,7 +102,7 @@ def openPath(vd, p, filetype=None, create=False):
         newfunc = getattr(vd, 'new_' + filetype, vd.getGlobals().get('new_' + filetype))
         if not newfunc:
             vd.warning('%s does not exist, creating new sheet' % p)
-            return vd.newSheet(p.name, 1, source=p)
+            return vd.newSheet(p.base_stem, 1, source=p)
 
         vd.status('creating blank %s' % (p.given))
         return newfunc(p)
@@ -177,8 +177,8 @@ def open_txt(vd, p):
                 if delimiter and delimiter in next(fp):    # peek at the first line
                     return vd.open_tsv(p)  # TSV often have .txt extension
             except StopIteration:
-                return TableSheet(p.name, columns=[SettableColumn()], source=p)
-    return TextSheet(p.name, source=p)
+                return TableSheet(p.base_stem, columns=[SettableColumn()], source=p)
+    return TextSheet(p.base_stem, source=p)
 
 
 BaseSheet.addCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: "), create=True))', 'Open file or URL')

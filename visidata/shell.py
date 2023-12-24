@@ -41,11 +41,11 @@ def exec_shell(*args):
 
 @VisiData.api
 def open_dir(vd, p):
-    return DirSheet(p.name, source=p)
+    return DirSheet(p.base_stem, source=p)
 
 @VisiData.api
 def open_fdir(vd, p):
-    return FileListSheet(p.name, source=p)
+    return FileListSheet(p.base_stem, source=p)
 
 @VisiData.api
 def addShellColumns(vd, cmd, sheet):

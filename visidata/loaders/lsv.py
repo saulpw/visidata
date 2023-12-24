@@ -7,7 +7,7 @@ from visidata import VisiData, Sheet, ItemColumn
 
 @VisiData.api
 def open_lsv(vd, p):
-    return LsvSheet(p.name, source=p)
+    return LsvSheet(p.base_stem, source=p)
 
 
 @VisiData.api

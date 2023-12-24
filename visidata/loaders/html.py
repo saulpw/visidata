@@ -22,7 +22,7 @@ def guess_html(vd, p):
 
 @VisiData.api
 def open_html(vd, p):
-    return HtmlTablesSheet(p.name, source=p)
+    return HtmlTablesSheet(p.base_stem, source=p)
 
 VisiData.open_htm = VisiData.open_html
 

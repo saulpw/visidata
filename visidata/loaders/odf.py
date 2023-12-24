@@ -3,7 +3,7 @@ from visidata import vd, VisiData, Sheet, IndexSheet, SequenceSheet
 
 @VisiData.api
 def open_ods(vd, p):
-    return OdsIndexSheet(p.name, source=p)
+    return OdsIndexSheet(p.base_stem, source=p)
 
 
 class OdsIndexSheet(IndexSheet):

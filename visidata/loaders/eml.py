@@ -4,7 +4,7 @@ from visidata import VisiData, vd, Column, TableSheet, vlen
 
 @VisiData.api
 def open_eml(vd, p):
-    return EmailSheet(p.name, source=p)
+    return EmailSheet(p.base_stem, source=p)
 
 class EmailSheet(TableSheet):
     rowtype = 'parts'  # rowdef: sub-Messages

@@ -8,8 +8,8 @@ vd.option('pdf_tables', False, 'parse PDF for tables instead of pages of text', 
 @VisiData.api
 def open_pdf(vd, p):
     if vd.options.pdf_tables:
-        return TabulaSheet(p.name, source=p)
-    return PdfMinerSheet(p.name, source=p)
+        return TabulaSheet(p.base_stem, source=p)
+    return PdfMinerSheet(p.base_stem, source=p)
 
 
 class PdfMinerSheet(TableSheet):

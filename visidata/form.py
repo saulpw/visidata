@@ -4,7 +4,7 @@ from visidata import clipdraw, colors, BaseSheet, VisiData, VisiDataMetaSheet, v
 
 @VisiData.api
 def open_mnu(vd, p):
-    return FormSheet(p.name, source=p)
+    return FormSheet(p.base_stem, source=p)
 
 
 vd.save_mnu=vd.save_tsv

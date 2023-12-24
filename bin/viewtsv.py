@@ -7,7 +7,7 @@ from visidata import Sheet, ColumnItem, asyncthread, options
 
 @VisiData.api
 def open_tsv(vd, p):
-    return MinimalTsvSheet(p.name, source=p)
+    return MinimalTsvSheet(p.base_stem, source=p)
 
 
 class MinimalTsvSheet(Sheet):

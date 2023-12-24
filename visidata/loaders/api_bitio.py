@@ -7,7 +7,7 @@ vd.option('bitio_api_key', '', 'API key')
 def new_bitio(vd, p):
     vd.importExternal('bitdotio')
     vd.requireOptions('bitio_api_key', help='https://docs.bit.io/docs/connecting-via-the-api')
-    return BitioReposSheet(p.name, source=p)
+    return BitioReposSheet(p.base_stem, source=p)
 
 vd.openhttp_bitio = vd.new_bitio
 

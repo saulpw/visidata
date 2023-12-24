@@ -24,9 +24,9 @@ def open_scrape(vd, p):
 
     vd.enable_requests_cache()
     if p.is_url():
-        return HtmlDocsSheet(p.name, source=p, urls=[p.given])
+        return HtmlDocsSheet(p.base_stem, source=p, urls=[p.given])
     else:
-        return HtmlElementsSheet(p.name, source=p, elements=None)
+        return HtmlElementsSheet(p.base_stem, source=p, elements=None)
 
 VisiData.openhttp_scrape = VisiData.open_scrape
 

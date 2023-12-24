@@ -73,7 +73,7 @@ visidata.Sheet.exec_command = deprecated('2.0')(visidata.Sheet.execCommand)
 @VisiData.api
 def filetype(vd, ext, constructor):
     'Add constructor to handle the given file type/extension.'
-    globals().setdefault('open_'+ext, lambda p,ext=ext: constructor(p.name, source=p, filetype=ext))
+    globals().setdefault('open_'+ext, lambda p,ext=ext: constructor(p.base_stem, source=p, filetype=ext))
 
 @deprecated('2.0', 'Sheet(namepart1, namepart2, ...)')
 @VisiData.global_api

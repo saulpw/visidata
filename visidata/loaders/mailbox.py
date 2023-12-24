@@ -3,23 +3,23 @@ from visidata import VisiData, Sheet, ItemColumn, date, Column
 
 @VisiData.api
 def open_mbox(vd, p):
-    return MboxSheet(p.name, source=p, format='mbox')
+    return MboxSheet(p.base_stem, source=p, format='mbox')
 
 @VisiData.api
 def open_maildir(vd, p):
-    return MboxSheet(p.name, source=p, format='Maildir')
+    return MboxSheet(p.base_stem, source=p, format='Maildir')
 
 @VisiData.api
 def open_mmdf(vd, p):
-    return MboxSheet(p.name, source=p, format='MMDF')
+    return MboxSheet(p.base_stem, source=p, format='MMDF')
 
 @VisiData.api
 def open_babyl(vd, p):
-    return MboxSheet(p.name, source=p, format='Babyl')
+    return MboxSheet(p.base_stem, source=p, format='Babyl')
 
 @VisiData.api
 def open_mh(vd, p):
-    return MboxSheet(p.name, source=p, format='MH')
+    return MboxSheet(p.base_stem, source=p, format='MH')
 
 
 class MboxSheet(Sheet):
