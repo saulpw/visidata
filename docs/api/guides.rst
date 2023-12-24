@@ -23,7 +23,7 @@ Hello Guide
 
 This same general structure and process should work for most guides.
 
-Step 1. Launch **GuideGuide** and find the ``name`` of the guide
+Step 1. Launch **GuideIndex** and find the ``name`` of the guide
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. image:: ../assets/guide.png
@@ -36,8 +36,8 @@ For example: **MacrosSheet**.
 
 ::
 
-Step 2. Create a GuideSheet subclass
-------------------------------------
+Step 2. Make a subclass of ``GuideSheet`` in the primary module
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -60,8 +60,8 @@ Step 2. Create a GuideSheet subclass
 
 .. autoclass:: visidata.GuideSheet
 
-Step 3. Set ``guide_text`` to a multi-line string.
-----------------------------------------------
+Step 3. Set ``guide_text`` to a multi-line string
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Next, fill out the text for the guide in the ``guide_text`` variable:
 
@@ -86,7 +86,8 @@ Next, fill out the text for the guide in the ``guide_text`` variable:
     - `Enter` (`open-row`) to open the macro in the current row, and view the series of commands composing it.
     '''
 
-## Some stylings of note:
+Some stylings of note:
+**********************
 
 - VisiData supports `basic markdown <https://www.markdownguide.org/basic-syntax/>`_
   like # Headings, \*\*bold\*\*, \*italics\*, \`code snippets\`, and \_underscore\_.
@@ -111,15 +112,14 @@ Next, fill out the text for the guide in the ``guide_text`` variable:
 
 - In general, do not use the second person perspective ("you", "yours") outside of tutorials.
 
-Step 4. Let VisiData know about the guide
------------------------------------------
+Step 4. Call ``vd.addGuide`` to register the Guide with VisiData
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 At the bottom of the file, add ``vd.addGuide('GuideName', GuideClass)``.
 
 Finish off the example:
 
 ::
-
         vd.addGuide('MacrosSheet', MacrosGuide)
 
 ``vd.getGuide`` will now be able to locate the guide!
