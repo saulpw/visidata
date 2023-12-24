@@ -314,14 +314,21 @@ class TableSheet(BaseSheet):
         ret.rows = UNLOADED
 
         ret.columns = []
-        for c in self.keyCols:
-            ret.addColumn(copy(c))
 
-        ret.setKeys(ret.columns)
-
+        col_mapping = {}
         for c in self.columns:
-            if c not in self.keyCols:
-                ret.addColumn(copy(c))
+            new_col = copy(c)
+            col_mapping[c] = new_col
+            ret.addColumn(new_col)
+
+        ret.setKeys([col_mapping[c] for c in self.columns if c.keycol])
+
+        ret._ordering = []
+        for sortcol,reverse in self._ordering:
+            if isinstance(sortcol, str):
+                ret._ordering.append((sortcol,reverse))
+            else:
+                ret._ordering.append((col_mapping[sortcol],reverse))
 
         ret.topRowIndex = ret.cursorRowIndex = 0
         return ret
@@ -1098,7 +1105,7 @@ def async_deepcopy(sheet, rowlist):
 
 BaseSheet.init('pane', lambda: 1)
 
-Sheet.init('_ordering', list, copy=True)  # (col:Column, reverse:bool)
+Sheet.init('_ordering', list, copy=False)  # (col:Column, reverse:bool)
 
 
 BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); reload()', 'Reload current sheet')
