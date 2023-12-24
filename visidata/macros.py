@@ -108,6 +108,8 @@ def afterExecSheet(cmdlog, sheet, escaped, err):
 
 @CommandLogJsonl.api
 def startMacro(cmdlog):
+    if not Path(vd.options.visidata_dir).is_dir():
+        vd.fail(f'create {vd.options.visidata_dir} to save macros')
     if vd.macroMode:
         try:
             ks = vd.input('bind macro to: ', help=f'''
