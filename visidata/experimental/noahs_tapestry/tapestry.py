@@ -11,7 +11,7 @@ vd.theme_option('color_hint', 'black on yellow', '')
 
 @VisiData.api
 def getNoahsPath(vd, name):
-    return vd.pkg_resources_files('visidata')/f'experimental/noahs_tapestry/{name}'
+    return Path(vd.pkg_resources_files('visidata')/f'experimental/noahs_tapestry/{name}')
 
 @VisiData.api
 def openNoahsText(vd, name):
