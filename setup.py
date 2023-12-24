@@ -29,7 +29,7 @@ setup(name='visidata',
       ],
       packages=['visidata', 'visidata.loaders', 'visidata.vendor', 'visidata.tests', 'visidata.ddw', 'visidata.man', 'visidata.themes', 'visidata.features', 'visidata.experimental', 'visidata.apps', 'visidata.apps.vgit', 'visidata.apps.vdsql', 'visidata.desktop'],
       data_files=[('share/man/man1', ['visidata/man/vd.1', 'visidata/man/visidata.1']), ('share/applications', ['visidata/desktop/visidata.desktop'])],
-      package_data={'visidata.man': ['vd.1', 'vd.txt'], 'visidata.ddw': ['input.ddw', 'regex.ddw'], 'visidata.tests': ['sample.tsv'], 'visidata.desktop': ['visidata.desktop']},
+      package_data={'visidata.man': ['vd.1', 'vd.txt'], 'visidata.ddw': ['input.ddw', 'regex.ddw'], 'visidata.tests': ['sample.tsv'], 'visidata.desktop': ['visidata.desktop'], 'visidata.experimental.noahs_tapestry': ['clues.json', 'flame.ddw', 'menorah.ddw', 'noahs.sqlite', 'puzzle0.md', 'puzzle1.md', 'puzzle2.md', 'puzzle3.md', 'puzzle4.md', 'puzzle5.md', 'puzzle6.md', 'puzzle7.md', 'puzzle8.md', 'solutions.json', 'tapestry.ddw']},
       license='GPLv3',
       classifiers=[
           'Development Status :: 5 - Production/Stable',

@@ -7,3 +7,4 @@ include visidata/ddw/input.ddw
 include visidata/ddw/regex.ddw
 include visidata/tests/sample.tsv
 include visidata/desktop/visidata.desktop
+include visidata/experimental/noahs_tapestry/*
