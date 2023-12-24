@@ -167,6 +167,11 @@ class Path(os.PathLike):
         self.filesize = filesize
         self.rfile = None
 
+    @property
+    def name(self):
+        'Filename without any extensions.  Not the same as pathlib.Path.'
+        return self.base_stem
+
     @lru_cache()
     def stat(self, force=False):
         return self._path.stat()
