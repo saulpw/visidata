@@ -149,7 +149,7 @@ class MacrosGuide(GuideSheet):
 Macros allow you to bind a command sequence to a keystroke or longname, to replay when that keystroke is pressed or the command is executed by longname.
 
 The basic usage is:
-    1. {help.commands.macro_record},
+    1. {help.commands.macro_record}.
     2. Execute a series of commands.
     3. `m` again to complete the recording, and prompt for the keystroke or longname to bind it to.
 
