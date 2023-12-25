@@ -30,7 +30,14 @@ class Extensible:
                 ret = oldcopy(self, *args, **kwargs)
             else:
                 ret = super(cls, self).__copy__(*args, **kwargs)
-            setattr(ret, membername, getattr(self, membername) if copy and hasattr(self, membername) else initfunc())
+
+            if not hasattr(ret, membername):
+                if copy and hasattr(self, membername):
+                    v = getattr(self, membername)
+                else:
+                    v = initfunc()
+                setattr(ret, membername, v)
+
             return ret
         cls.__copy__ = wraps(oldcopy)(newcopy) if oldcopy else newcopy
 
