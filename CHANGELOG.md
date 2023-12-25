@@ -28,6 +28,8 @@
     - mark options to be excluded if `disp_help` greater than `option.max_help`
     - add contextual help while editing options in **OptionsSheet**
     - `Ctrl+G` cycles input help sidebar
+- [guide] add GuideIndex toc and open-guide-index
+    - add guides for macros, selection, errors
 - [filetype] add guesser to sniff filetype from data  #130 #1759 #1881 #1880 #1883 #1978
 - add support for Python 3.12  #1934
 - migrate pkg_resources to importlib_resources (PR by @zormit and @anjakefala #1968 #1911)
@@ -51,11 +53,21 @@
     - press Space to exec command by longname and bring up command palette
     - type to match by longname and/or description
     - uses fzf's fuzzymatch algo
-    - press 1-9 to immediately execute that command
+    - press Tab/Shift+Tab to enter completion mode  #2154
+        - Enter to execute current command
+        - 1-9 to execute adjacent command
     - `options.disp_cmdpal_max` for number of suggestions
     - `options.color_cmdpalette` for base color
     - `chooseAggregators` and `jointype` also use palette  #1027
     - `options.color_match` is color for matching chars in palette chooser
+- rename lastInputs.jsonl to input_history.jsonl  #2142
+    - remove `options.input_history`
+    - uses new `@visidata.stored_property`
+    - requires existence of `options.visidata_dir` to record input history
+- convert macros to `@visidata.stored_property`  #2142
+    - macros are now tracked in `options.visidata_dir`/macros.jsonl'
+    - add port-macros.vdj: https://github.com/saulpw/visidata/blob/develop/dev/port-macros.vdj to help port old macros tracker (macros.tsv) to new one
+    - will fail, if `options.visidata_dir` does not exist
 
 
 - [aggregators] sum uses start value from type of first value for Python 3.8+  #1996 #1999 #2009
@@ -77,6 +89,8 @@
 - [encoding] use `options.save_encoding` for lsv, geojson, texttable savers
 - [encoding] change default options.encoding to utf-8-sig to detect/remove BOM  #200 #908 #909 #1711
 - [expand] change default depth of expand-col(s)-depth to 0 (PR by @cool-RR #1809)
+- [expand] change sampling warning to aside  #1054 #2066
+- [expand] ignore non-cursor types in mixed-type columns
 - [features] procmgr to view/manage processes, memory/cpu stats
 - [features] ping to traceroute a hostip
 - [features] add `addcol-histogram`  #2052
@@ -107,12 +121,19 @@
 - [freq] add `open-preview` for split pane of soure rows at cursor  #1086
 - [graph] colorbrewer palette chooser (thanks @er1kb)
 - [graph] add commands to open external graph with matplotlib #1056
+- [help] remove `Enter` binding for **HelpSheet** to `exec-command`
+- [history] remove cmdlog_histfile
 - [input] change `Ctrl+G` to toggle `options.disp_help`
 - [input] add `Ctrl+N` to insert prettykeys of literal keystroke
 - [input] allow percentage of starting value for input into commands
+- [input] `inputMultiple` saves/remembers dict input
+- [input] `Tab`/`Shift+Tab` move left/right in edit-mode like excel  #2169
 - [join] allow selecting of join columns from all columns sheet  #1224
     - unbind `&` for **ColumnsSheet** `join-cols`
 - [join] join now works with typed values, not display values  #2015
+- [join] improve warning for typing source key columns before joining  #2117
+- [join] clarify ensureLoaded status message  #2137
+- [keys] add shifted function prettykeys (Ctrl+Shift+F1 etc)
 - [layout] stop errors: hide-col on empty sheet, inputMultiple (PR by @midichef #1963)
 - [linux] change default system clipboard cmd to wl-copy if the user is using wayland (PR by @rj1 #1763)
 - [loaders] add `options.regex_skip` for text formats to allow e.g. comment skipping  #1559
@@ -135,9 +156,11 @@
 - [loaders] add f5log loader by @bitwisecook
 - [loaders] add a toml loader (PR by @ajkerrigan #1894 #1580 #1587)
 - [loaders] add .conll loader by @polm
+- [loaders html] display title/aria-label/caption/summary (PR by @midichef #2146)
 - [loaders http] replace requests with urllib  #1808 #1704
 - [loaders http] guess filetype based on magic bytes  #1760
 - [loaders jsonl] allow slash comments (PR by @geekscrapy #2025)
+- [loaders jsonl] deduce numeric column as float, not int  #2131 #1698
 - [loaders png] use 2x2 unicode blocks instead of braille
 - [loaders shell] allow deleting of directories unless `options.safety_first=True`  #1965
 - [loaders sqlite] save list/dict as json  #1589
@@ -162,18 +185,28 @@
 - [open-syspaste] enable filetype selection (PR by @daviewales #1717)
 - [options] add `option.json_ensure_ascii` (default: True) (PR by @joaosousa1 #1776)  #1772
     - option for non-ASCII characters to be saved to JSON, on False will encode to utf-8
+- [path] change most uses of Path.name to Path.base_stem  #2188
+    - Path.name is the same as .base_stem for now
+- [plugins] remove external Plugins Sheet; only show installed plugins
+- [profile] dump profile to cwd when profiling enabled
+- [forms] provide help text for color, encoding, encoding errors, and regex  #1961
 - [reload] support tail with `reload-modified`  #1686
 - [reload] add `reload-rows` which preserves existing columns + cursor position  #1655 #1683 #1663
     - [melt] refactor to support `reload-rows`  #2101
 - [regex] use inputMultiple to allow changing regex_flags  #1925
+- [regex] use `inputRegex` (which has regex help) for all regex commands
 - [rename-col] add `options.rename_cascade`  #2088
     - if True, columns renames are cascaded into expressions
 - [replay] has been refactored to be sync, instead of a seperate async process  #1773 #1714
 - [save] add `options.save_encoding (default: 'utf-8') to differentiate from `options.encoding` when saving a file  #1708
 - [save] add saver for STATA files (PR by @raffaem #1563)
+- [save] keep headers in txt as tsv if only one sheet and more than a single column  #2173
+- [save] add status when save finished  #2157
+- [selected] add `onclick` to "selection status" to quickly `dup-selected`
 - [sheet] add `select-equal-selected` (unbound) to select rows with values in current column in already selected rows  #1327
 - [sheet] add `clean-names` (unbound) to set options.clean_names on sheet and clean visible column names
 - [sheet] remove left-click for sheets-stack  #2030 #1656
+- [sheet] add `open-source` (bound to backtick) to open source sheet
 - [setcol-fake] add `setcol-fake` (unbound) adds a column of Faker generated 'faketypes'
 - [sparkline] add `addcol-sparkline` (unbound): adds a sparkline of all numeric columns
 - [status] downgrade sheet "finished loading" to debug
@@ -197,36 +230,47 @@
 ## experimental features (must be imported manually)
 
 - [diff] got moved to experimental
-- [guide] add GuideGuide toc and open-guide
 - [inplace] optional replacement commands which update the new Column live as you write the expression
 - [livesearch] add `dup-search` and `dup-search-cols` which search for regex forwards, creating a duplicate sheet with maching rows live
 - [mark] mark rows to more easily move cursor to them
+- [noahs] add basic structure for Noah's Tapestry data game
 - [rownum] addcol-rownum and addcol-delta
 - [slide-cells] shift cells in cursor row to the right
 - add loaders gdrive and gsheets
 
 # deprecated
 
-- [multiline] rename `visibility-sheet` to `toggle-multiline`
+- [dev] deprecate `col.setValueSafe` and `sheet.checkCursorNoExceptions`
+- [regex] deprecate `addcol-subst` and `setcol-subst`
+    - `addcol-regex-subst` and `setcol-regex-subst` use new `inputRegexSubst` which uses `inputMultiple, instead of more fragile search/replace one-line input
+- [regex] deprecate `split-col` and `capture-col`
 - [keys] change ScrollWheelUp to ScrollUp etc
+- [multiline] rename `visibility-sheet` to `toggle-multiline`
+- [utils] deprecate `onExit` context manager
 
 ## bugfixes
 
 - [aggregators] use statistics.median for more correct median  #1914
 - [aggregators] fix cancelling of long-running aggregators  #1036
 - [canvas] fix clicks on labels and unplotted canvs (PR by @midichef #1984)
+- [canvas] put a max limit on y-axis label width (PR by @midichef #2177)
 - [chooser] choose only exactly matching strings (PR by @daviewales #1902)
 - [cli] support `options.encoding_errors` for stdin  #2047
 - [clipboard] warn when pasting before copying (PR by @midichef #1793)
 - [clipboard] improve error when deleting row on empty sheet (PR by @midichef #2006)
 - [clipboard] save to tempfile, do not confirm
+- [clipboard] save as given filetype
 - [cliptext] fix double-width char display  #1918
+- [cliptext] do not crash wtih x<0  #2138
+- [cliptext] do not crash with miniscule widths  #2138
 - [cmdlog] check for empty cursor column when adding a column (PR by @midichef #1783)
 - [cmdlog] ensure record of global options in all cmdlogs
 - [cmdlog] do not log undos for non-loggable commands  #1827
 - [colorizers] fix custom colorizers showing in sheet context  #1225
 - [columns] speed up getMaxWidth for wide columns (PR by @midichef #1747) #1728
+- [columns] fix allColumnsSheet to ignore non-TableSheet
 - [confirm] remove flicker in alacritty  #2040
+- [confirm] commit on sheet without source should always confirm
 - [currency] fix currency_neg option
 - [curses] ignore early keys pressed before curses is initialised if Esc present  #1993
 - [cursor] cursorColIndex now returns None if empty  #1803
@@ -235,6 +279,7 @@
     - if user uses `open-dir-parent` outside of the CWD, switch to absolute paths
 - [display] fix visibility with col.height>1
 - [expr] more informative 'column not modifiable' error message  #1764
+- [extensible] do not copy over existing attribute  #2190
 - [fill] allow filling with values that are logically false (PR by @midichef #1794)
 - [freq] fix names for openRow  #1777
 - [freq] correctly group null/error values for `options.numeric_binning`  #1410
@@ -246,6 +291,7 @@
 - [graph] labels: add tick symbol, int precision, right margin (PR by @midichef #1931)
 - [graph] fix legend display of full-width characters (PR by @midichef #1958)
 - [graph] widen left margin to hold y-axis labels (PR by @midichef #1998)
+- [graph] update fixPoint() to use inverted-y coordinates (PR by @midichef #2139 #2111)
 - [index] add longname for g< and g>  #2011
 - [input] fix Ctrl+T swap on empty string #1684
 - [input] fix Ctrl+V with special keystrokes  #1799
@@ -257,31 +303,42 @@
 - [join] fix join-merge (PR by @yphillip #1923 #1843)
 - [jsonl] include all columns in first row, even if null
 - [keystrokes] only check duplicate prefixes from allPrefixes  #1829
+- [keys] add `Shift+Tab`
 - [layout] fail if `hide-col` on empty sheet
 - [loaders fixed] use maxWidth for saving if larger than column width  #1849
 - [loaders fixed] don't truncate wide columns with fixed width saver (PR by @daviewales #1890)
 - [loaders http] add `options.http_ssl_verify` to replace `options.http_req_verify`  #1939
 - [loaders http] fix parsing link header (PR by @Midichef #1924 #1898)
 - [loaders html] fix failure from colspan with only td tags (PR by @midichef #2002)
+- [loaders html] prevent error when parsing an empty table (PR by @midichef #2140)
 - [loaders imap] enable imap and fix folder name extraction (PR by @justin2004 #1917)
 - [loaders json] include null columns in first row, in more cases (PR by @midichef #2109)
+- [loaders jsonl] save None as null  #2183
 - [loaders mysql] unquote password before sending to client (PR by @dufferzafar #1933)
 - [loaders pandas] handle read methods that produce a list of dataframes (PR by @ajkerrigan #1990 #1986)
 - [loaders parquet] stringify source to handle both URLs and local paths (PR by @ajkerrigan #1913)
 - [loaders parquet] show string value for Parquet `large_string` (PR by @daviewales #2018 #2003)
+- [loaders parquet] fix parquet reading from zip or s3 (PR by @takacsd #2133)
+- [loaders parquet] handle parquet directories (PR by @mr-majkel #2160  #2159)
+- [loaders pivot] fix missing anytype import
+- [loaders postgres] quote schema and table name (PR by @isosphere #2129)
 - [loaders pyobj] similar sheet names for dive-/open- and pyobj- #1988
 - [loaders pyobj] do not skip properties that raise
 - [loaders png] fix `rgb_to_attr` to return str colornum
 - [loaders rec] support %sort; continue loading on exception  #2022
 - [loaders sav] use fork of `savReaderWriter` for the sake of Python 3.10+ support  #1867
 - [loaders sqlite] prevent creation of ./- file when reading from stdin (PR by @midichef #1945)
+- [loaders sqlite] explicitly fail when file is not on disk
 - [loaders tsv] use options.encoding for reading files
 - [loaders ttf] implement `closePath()` to draw missing lines (PR by @midichef #1979)
 - [loaders vds] save hidden columns also (PR by @pacien #2093 #2089)
 - [loaders vds] fix 'keyerror: exprcolumn' for .vds (PR by @pacien #2036 #2045)
 - [loaders vds] fix .csv to .vds conversion  #2037
 - [loaders xlsx] saver now replaces illegal characters instead of aborting  #1402
+- [loaders xml] silence FutureWarning from lxml (PR by @midichef #2149)
+- [loaders xml] fix file loading (PR by @midichef #2148)
 - [loaders yaml] support tuples in YAML files (PR by @cool-RR #1824)  #1822
+- [loaders zip] fix loading and extracting files locally + remotely  #2127
 - [macos] do not bind empty string to anything
 - [macros] add prompt for cancelling macro  #1810 #1812
 - [macros] specify a clearer message  #1810
@@ -300,15 +357,15 @@
 - [modify] always set col.defer
 - [modify] do not fail on Column.putValue if no setter
 - [mouse] fix mouse-click on bottom pane
+- [open] silence ResourceWarnings for unclosed files (PR by @midichef #2152)
 - [options] disable adding rows (PR by @midichef #1944)
+- [options] fix option editing
+- [options] fix helpstr display when editing
 - [paste] add new rows to sheet if necessary
 - [path] set name to '.' for givenpath of '.'  #1768
 - [path] fix progress bar for compression formats  #1175 #1255
 - [path] fix open() using both binary and text mode (PR by @midichef #1955)
 - [path] binary mode does not take newline argument
-- [perf startup] delay import of `urllib.request`, `pkg_resources`, and
-  `dateutil`
-- [perf startup] remove `unittest.mock`
 - [pyobj] fix pyobj-cell  #2001
 - [regex] issue warning when no columns to add  #1778
 - [regex] check for regex capture group  #1778
@@ -316,9 +373,11 @@
 - [replay] turn off confirm dialogs during replay
 - [replay] clearCaches before moving cursor  #1773
 - [replay] enable confirm in interactive batch mode (PR by @midichef #1751)
+- [replay] do not push sheet if not already pushed  #1681
 - [save] handle saving 0 sheets  #1720
 - [save] fix confirm message on commit #2090
 - [scroll-cells] do not error scrolling offscreen column  #1908
+- [search] handle no rows and invalid regex  (PR by @midichef #2125)
 - [settings] clear cache correctly before set
 - [sheets] fix NameError for mincolidx  #1672
 - [sheets] add confirm for `quit-sheet-free` (PR by @midichef #1755)
@@ -334,21 +393,25 @@
   #1982)
 - [sheets] no longer insert column in draw() in debug mode (PR by @midichef
   #1995)
+- [sheets] fix errors on sheets with no columns (PR by @midichef #2124)
 - [sheets] fix splitcell to handle attribute/text pairs (PR by @ajkerrigan #2020)
 - [shell] fix copying of a directory  #1970
 - [status] fix Alt+Shift+Shift+X  #1828
 - [status] update right status before exec  #996
 - [status] add caller/module to statuses, and print on --debug  #2037
+- [status] catch all exceptions during drawing  #2174
 - [sort] show sort arrow for sort columns described by name (PR by @midichef #1876)
 - [syscopy] always copy as utf-8
 - [term] allow non-color term like vt102
 - [threads] allow @AsyncThread funcs to have status kwarg
+- [threads] remove non-sheet threads from unfinishedThreads (do not sync on them)
 - [quit-sheet-free] re-entering a subsheet left using quit-sheet-free should reload the subsheet #1679
 - [ui] integrate scrollfix from @geekscrapy  #1441
 - [undo] ensure undo is sheet-specific for duped/copied sheets  #1780
 - [undo] fix undo for first modification on a sheet-specific HelpSheet  #1820
 - [undo] fix the removal of [M] (modified mark) after undo  #1800
 - [undo] remove last matching cmdlog row, instead of first (PR by @midichef #2010)
+- [unzip-http] fix recursion error when fetching remote zipfile (PR by @midichef #2116 #2110)
 - [vdx] fix save error
 - [windows] add Alt+ keybindings for powershell  #1630
 - [windows] limit windows-curses version to 2.3.0 (PR by @bartbroere #1901 #1841)
@@ -358,7 +421,24 @@
 - [windows] fix syspaste (PR by @midichef #1921 #1920)
 - [windows] fallback to `scr.getch` if no `scr.get_wch` #192
     - handles `AttributeError: '_curses.curses window' object has no attribute 'get_wch'`
+- [windows] tempfiles must be closed before reopening  #2118
 - [zsh] fix zsh completion (PR by @dbaynard #1960 #1959)
+
+## performance
+
+- [startup] delay import of `urllib.request`, `pkg_resources`, and
+  `dateutil`
+- [startup] remove `unittest.mock`
+- [draw] `drawcache` make_formatter
+- [test] use lambda instead of Mock for addstr
+- [] `Column.formatValue` inline fmtstr
+- [settings] `@lru_cache` sheet obj in `SettingsMgr._mappings`
+- fastpath getitemdeep
+    - fallback to getattrdeep if len(row) < index
+- [sort] move `addProgress` outside of sortkey
+- [parquet] cache large strings and cap at 1MB  #2003 #1068
+- [modify] check col/row before isChanged
+- [status] move getStatusSource into features to improve startup perf
 
 
 ## api
@@ -368,7 +448,12 @@
     - seperate out fg/bg
     - allow bg and fg to take precedence independently
     - fixes issues with forced bg=black on sidebar for warning, and statusbar for working
+- [guides] add API for getting and adding guides
+    - add vd,getGuide and vd.addGuide
+    - add Helpers for formatting commands and options
 - [help] add HelpSheet to globals
+- [hint] add hint mechanism to find best `Sheet.hint_function`
+    - add hints for types
 - [input] add vd.injectInput and vd.getCommandInput
 - [keys] use prettykeys for allPrefixes #1592
 - [menu] vd.addMenuItems with convenient string syntax
@@ -386,6 +471,7 @@
 - add vd.aside for a silent status message
 - add GlobalsSheetsSheet to globals
 - vd.queueCommand can take input,sheet,row,col kwargs  #1681
+- add `@visidata.stored_property` to persist property
 
 
 # v2.11.1 (2023-07-16)
