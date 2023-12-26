@@ -1,0 +1,7 @@
+#!vd -p
+{"sheet": "", "col": "", "row": "", "longname": "open-file", "input": "sample_data/sample.tsv", "keystrokes": "o", "comment": ""}
+{"sheet": "sample", "col": "Rep", "row": "", "longname": "key-col", "input": "", "keystrokes": "!", "comment": ""}
+{"sheet": "sample", "col": "Units", "row": "", "longname": "type-int", "input": "", "keystrokes": "#", "comment": ""}
+{"sheet": "sample", "col": "Units", "row": "", "longname": "aggregate-col", "input": "sum", "keystrokes": "+", "comment": ""}
+{"sheet": "sample", "col": "Units", "row": "", "longname": "aggregate-col", "input": "mean", "keystrokes": "+", "comment": ""}
+{"sheet": "sample", "col": "Item", "row": "", "longname": "pivot", "input": "", "keystrokes": "W", "comment": ""}

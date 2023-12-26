@@ -17,8 +17,7 @@ eleventyNavigation:
 | [fixed](#fixed)       | fixed width text                               | 0\.97           |                              | 0\.97         |         |                                                               |                      |
 | [postgres](#postgres) | PostgreSQL database                            | 0\.97           |                              | 0\.97         | 1996    |                                                               |                      |
 | [imap](#imap)         | Internet Message Access Protocol               | 2\.12           |                              | 2\.12         | 1988    |                                                               |                      |
-| [vd](#vd)             | VisiData command log                           | 0\.97           |                              | 0\.97         | 2017    | VisiData                                                      |                      |
-| vds                   | VisiData Sheet                                 | 2\.2            | yes                          |               | 2021    | VisiData                                                      |                      |
+| [vd](#vd)             | VisiData command log (TSV)                     | 0\.97           | yes                          | 0\.97         | 2017    | VisiData                                                      |                      |
 | [mbtiles](#mbtiles)   | MapBox Tileset                                 | 0\.98           |                              | 0\.98         | 2011    | MapBox                                                        | mapbox\-vector\-tile |
 | pbf                   | Protocolbuffer Binary Format                   | 0\.98           |                              | 0\.98         | 2011    | OpenStreetMap                                                 |                      |
 | [shp](#shp)           | Shapefile geographic data                      | 0\.98           |                              | 0\.98         | 1993    | ESRI                                                          | pyshp                |
@@ -35,6 +34,7 @@ eleventyNavigation:
 | xpt                   | Statistical Analysis System \(SAS\)            | 1\.2            |                              | 1\.2          | 1976    | SAS Institute                                                 | xport                |
 | [jsonl](#json)        | JSON Lines                                     | 1\.3            | typed                        | 1\.3          | 2013    | Ian Ward                                                      |                      |
 | [pandas](#pandas)     | all formats supported by pandas library        | 1\.3            |                              | 1\.3          | 2008    | Wes McKinney                                                  | pandas               |
+| parquet               | Apache Parquet                                 | 1\.3            |                              |               | 2013    | Apache Software Foundation                                    | pyarrow or pandas    |
 | [pcap](#pcap)         | network packet capture                         | 1\.3            |                              | 1\.3          | 1988    | LBNL                                                          | dpkt dnslib          |
 | pyprof                | Python Profile data                            | 1\.3            |                              | 1\.3          |         |                                                               |                      |
 | [xml](#xml)           | eXtensible Markup Language \(XML\)             | 1\.3            | from xml                     | 1\.3          | 1998    | W3C                                                           | lxml                 |
@@ -45,16 +45,18 @@ eleventyNavigation:
 | tar                   | Unix Tape Archive                              | 2\.0            |                              | 2\.0          |         |                                                               |                      |
 | usv                   | Unicode\-Separated Value                       | 2\.0            | displayed text               | 2\.0          | 1993    | Unicode                                                       |                      |
 | xlsb                  | Excel binary format                            | 2\.0            |                              | 2\.0          |         | Microsoft                                                     | xlrd                 |
+| [vdj](#vd)            | VisiData command log (JSON)                    | 2\.0            | yes                          | 2\.0          | 2020    | VisiData                                                      |                      |
 | [mysql](#mysql)       | MySQL                                          | 2\.0            |                              |               | 1995    | MySQL AB                                                      | MySQLdb              |
 | pdf                   | Portable Document Format                       | 2\.0            |                              |               | 1993    | Adobe                                                         | pdfminer\.six        |
 | vcf                   | Virtual Contact File \(vCard\)                 | 2\.0            |                              |               | 1995    | Versit Consortium                                             |                      |
 | rec                   | recutils database file                         | 2\.0            | displayed text               |               | 2010    | Jose E\. Marchesi                                             |                      |
 | eml                   | Multipurpose Internet Mail Extensions \(MIME\) | 2\.0            |                              |               | 1996    | Nathaniel Borenstein and Ned Freed                            |                      |
+| [vds](#vd)            | VisiData Sheet                                 | 2\.2            | yes                          | 2\.2          | 2021    | VisiData                                                      |                      |
 | ods                   | OpenDocument Spreadsheet                       | 2\.7            |                              |               | 2006    | [OASIS](<https://en.wikipedia.org/wiki/OASIS_(organization)>) | odfpy                |
 | lsv                   | awk-like key-value line-separated values       | 2\.7            |                              | v2\.7         |         |                                                               |                      |
 | arrow                 | Arrow IPC file format                          | 2\.9            |                              |               | 2016    | Apache Software Foundation                                    | pyarrow              |
 | arrows                | Arrow IPC streaming format                     | 2\.9            |                              |               | 2016    | Apache Software Foundation                                    | pyarrow              |
-| parquet               | Apache Parquet                                 | 1\.3            |                              |               | 2013    | Apache Software Foundation                                    | pyarrow or pandas    |
+| [vdx](#vd)            | VisiData command log (text)                    | 2\.11           | yes                          | 2\.11         | 2022    | VisiData                                                      |                      |
 
 # Extra notes about formats
 
@@ -174,6 +176,7 @@ vd data.parquet -f pandas
 
 This should similarly work for any format that has a `pandas.read_format()` function.
 
-## vd {#vd}
-- Command history log format for a VisiData session.
-- `Ctrl+D` to save the current session's CommandLog.
+## [VisiData Internal Formats](../internal_formats) (.vd, .vdj, .vdx, .vds) {#vd}
+
+- .vd/vdj/.vdx are command log formats suitable for VisiData scripts and macros
+- .vds is a multisheet save format that includes some sheet and column metadata

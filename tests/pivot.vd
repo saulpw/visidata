@@ -1,7 +1,0 @@
-sheet	col	row	longname	input	keystrokes	comment
-			open-file	sample_data/sample.tsv	o	
-sample	Rep		key-col		!	
-sample	Units		type-int		#	
-sample	Units		aggregate-col	sum	+	
-sample	Units		aggregate-col	mean	+	
-sample	Item		pivot		W	

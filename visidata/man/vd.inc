@@ -926,8 +926,8 @@ disable loading .visidatarc and plugin addons
 .Dl Nm vd Cm postgres:// Ns Ar username Ns Sy "\&:" Ns Ar password Ns Sy @ Ns Ar hostname Ns Sy  "\&:" Ns Ar port Ns Sy / Ns Ar database
 .No open a connection to the given postgres database
 .Pp
-.Dl Nm vd Cm --play tests/pivot.vd --replay-wait 1 --output tests/pivot.tsv
-.No replay tests/pivot.vd, waiting 1 second between commands, and output the final sheet to test/pivot.tsv
+.Dl Nm vd Cm --play tests/pivot.vdj --replay-wait 1 --output tests/pivot.tsv
+.No replay tests/pivot.vdj, waiting 1 second between commands, and output the final sheet to test/pivot.tsv
 .Pp
 .Dl Ic ls -l | Nm vd Cm -f fixed --skip 1 --header 0
 .No parse the output of ls -l into usable data
