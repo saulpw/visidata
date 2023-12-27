@@ -13,6 +13,7 @@ vd.theme_option('color_edit_cell', '233 on 110', 'cell color to use when editing
 vd.theme_option('disp_edit_fill', '_', 'edit field fill character')
 vd.theme_option('disp_unprintable', '·', 'substitute character for unprintables')
 vd.theme_option('mouse_interval', 1, 'max time between press/release for click (ms)', sheettype=None)
+vd.option('edit_accept_keybindings', {}, 'mapping of keystrokes to vd functions to run after accepting edit input')
 
 vd.disp_help = 1  # current level of help shown (up to vd.options.disp_help as maximum)
 
@@ -285,6 +286,7 @@ def editline(vd, scr, y, x, w, i=0,
         ch = vd.getkeystroke(scr)
         if ch == '':                               continue
         elif ch in bindings:                       v, i = bindings[ch](v, i)
+        elif vd.prettykeys(ch) in bindings:        v, i = bindings[vd.prettykeys(ch)](v, i)
         elif ch == 'KEY_IC':                       insert_mode = not insert_mode
         elif ch == '^A' or ch == 'KEY_HOME':       i = 0
         elif ch == '^B' or ch == 'KEY_LEFT':       i -= 1
@@ -623,6 +625,7 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
 
     # update local bindings with kwargs.bindings instead of the inverse, to preserve kwargs.bindings for caller
     bindings.update(kwargs.get('bindings', {}))
+    bindings.update({k: acceptThenFunc(*v) for k, v in options.edit_accept_keybindings.items()})
     kwargs['bindings'] = bindings
 
     editargs = dict(value=value,
