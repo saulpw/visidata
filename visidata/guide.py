@@ -4,7 +4,6 @@ Each guide shows you how to use a particular feature in VisiData. Gray guides ha
 
 - [:keystrokes]Up/Down[/] to move the row cursor
 - [:keystrokes]Enter[/] to view a topic
-- [:keystrokes]Backspace[/] to come back to this list of guides
 '''
 import re
 
