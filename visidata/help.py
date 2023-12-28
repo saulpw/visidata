@@ -4,7 +4,7 @@ import collections
 from visidata import VisiData, MetaSheet, ColumnAttr, Column, BaseSheet, VisiDataMetaSheet, SuspendCurses
 from visidata import vd, asyncthread, ENTER, drawcache, AttrDict
 
-vd.option('disp_help', 0, 'show help panel during input')
+vd.option('disp_help', 2, 'show help panel during input')
 
 @BaseSheet.api
 def hint_basichelp(sheet):
