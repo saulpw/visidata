@@ -171,6 +171,7 @@ BaseSheet.addCommand('gz^H', 'help-commands-all', 'vd.push(HelpSheet("all_comman
 BaseSheet.bindkey('KEY_F(1)', 'sysopen-help')
 BaseSheet.bindkey('zKEY_F(1)', 'help-commands')
 BaseSheet.bindkey('zKEY_BACKSPACE', 'help-commands')
+BaseSheet.bindkey('gKEY_BACKSPACE', 'sysopen-help')
 
 HelpSheet.addCommand(None, 'exec-command', 'quit(sheet); draw_all(); activeStack[0].execCommand(cursorRow.longname)', 'execute command on undersheet')
 BaseSheet.addCommand(None, 'open-tutorial-visidata', 'launchBrowser("https://jsvine.github.io/intro-to-visidata/")', 'open https://jsvine.github.io/intro-to-visidata/')
