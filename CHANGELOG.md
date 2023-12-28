@@ -15,10 +15,11 @@
     - add `options.disp_sidebar`
     - make sheet name clickable to open **Sheets Stack**
     - make options clickable
+    - add `open-sidebar` (bound to `gb`) to open sidebar in new sheet
 - display sheet and feature help documentation in sidebar
     - added bundles of Guide Sheets
-    - open Guide Sheets into a full VisiData sheet with `open-sidebar` (bound to `gb`)
-- added `options.disp_help`, an integer and to set novice/expert mode. (#1961)
+    - open Guide Sheets into a full VisiData sheet with `Enter`
+- added `options.disp_help` (default: 2), an integer and to set novice/expert mode. (#1961)
     When `disp_help` is:
     - -1: status messages aren't shown
     - 0: no help is shown
@@ -55,7 +56,7 @@
     - uses fzf's fuzzymatch algo
     - press Tab/Shift+Tab to enter completion mode  #2154
         - Enter to execute current command
-        - 1-9 to execute adjacent command
+        - 0-9 to execute adjacent command
     - `options.disp_cmdpal_max` for number of suggestions
     - `options.color_cmdpalette` for base color
     - `chooseAggregators` and `jointype` also use palette  #1027
@@ -85,7 +86,7 @@
 - [dir] set name relative to previously loaded directory  #1775
 - [dir] get default save name from sheet name  #1775
 - [dir] rename `options.dir_recurse:bool` to `options.dir_depth:int`  #1715
-- [display] add `setcol-` (`zv`) and `setcols-height-input` (`gzv`)  #1307
+- [display] add `resize-height-input` (`zv`) and `resize-height-max` (`gzv`)  #1307
 - [encoding] use `options.save_encoding` for lsv, geojson, texttable savers
 - [encoding] change default options.encoding to utf-8-sig to detect/remove BOM  #200 #908 #909 #1711
 - [expand] change default depth of expand-col(s)-depth to 0 (PR by @cool-RR #1809)

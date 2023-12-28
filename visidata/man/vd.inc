@@ -26,6 +26,7 @@
 .Cm --play Ar cmdlog
 .Op Cm -w Ar waitsecs
 .Op Cm --batch
+.Op Cm -i
 .Op Cm -o Ar output
 .Op Ar field Ns Cm = Ns Ar value
 .
@@ -48,22 +49,18 @@ Rows can be selected, filtered, and grouped; columns can be rearranged, transfor
 .
 .Lf b batch
 replay in batch mode (with no interface)
+.Lf i interactive
+launch VisiData in interactive mode after batch
 .
 .Lo o output file
 .No save final visible sheet to Ar file No as .tsv
 .
-.It Sy --replay-movement
-.No toggle Sy --play No to move cursor cell-by-cell
 .It Ar field Ns Cm = Ns Ar value
 .No replace \&"{ Ns Ar field Ns }\&" in Ar cmdlog No contents with Ar value
 .El
 .
 .Ss Commands During Replay
 .Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact -offset XXX
-.It Sy ^U
-pause/resume replay
-.It Sy ^N
-execute next row in replaying sheet
 .It Sy ^K
 cancel current replay
 .El
@@ -92,13 +89,28 @@ quit all sheets (clean exit)
 view this man page
 .It Ic "z^H"
 view sheet of command longnames and keybindings for current sheet
-.It Ic "Space" Ar longname
-.No execute command by its Ar longname
+.Pp
+.It Ic " gb"
+open sidebar in a new sheet
+.It Ic "  b"
+toggle sidebar
 .Pp
 .It Ic "  U"
 .No undo the most recent modification ( requires enabled Sy options.undo Ns )
 .It Ic "  R"
 .No redo the most recent undo ( requires enabled Sy options.undo Ns )
+.Pp
+.It Ic "Space" Ar longname
+.No open command palette; execute command by its Ar longname
+.El
+.Ss "  Command Palette"
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic "Tab"
+.No Move to command palette, and scroll through
+.It Ic "0-9"
+.No Execute adjacent command
+.It Ic "Enter"
+.No Execute current command
 .El
 .Ss "Cursor Movement"
 .
@@ -186,6 +198,8 @@ unhide all columns
 toggle/unset current column as a key column
 .It Ic "~  #  %  $  @  z#"
 set type of current column to str/int/float/currency/date/len
+.It Ic "Alt++  Alt+-"
+show more/less precision in current numerical column
 .It Ic "  ^"
 rename current column
 .It Ic " g^"
@@ -237,8 +251,10 @@ add/reset cache for current/all visible column(s)
 .No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) one level
 .It Ic "z(  gz(" Ar depth
 .No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) to given Ar depth ( Ar 0 Ns = fully)
-.It Ic " )"
-unexpand current column; restore original column and remove other columns at this level
+.It Ic " )   g("
+unexpand current/all visible column(s); restore original column and remove other columns at this level
+.It Ic "z)  gz)" Ar depth
+.No contract current/all visible column(s) of former lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) to given Ar depth ( Ar 0 Ns = fully)
 .It Ic "zM"
 .No row-wise expand current column of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) within that column
 .El
@@ -365,7 +381,7 @@ toggle insert mode
 .It Ic "Up  Down"
 set contents to previous/next in history
 .It Ic "Tab  Shift+Tab"
-autocomplete input (when available)
+.No move cursor left/right and re-enter edit mode
 .It Ic "Shift+Arrow"
 .No move cursor in direction of Sy Arrow No and re-enter edit mode
 .
@@ -521,9 +537,9 @@ open current row/cell/sheet as Python object
 .It Sy " \&."
 .Sy Directory Sheet No "            browse properties of files in a directory"
 .It Sy " \&."
-.Sy Plugins Sheet No "              browse, install, and (de)activate plugins"
+.Sy Guide Index No "                read documentation from within VisiData"
 .It Sy " \&."
-.Sy Memory Sheet No (Alt+Shift+M) "       browse saved values, including clipboard"
+.Sy Memory Sheet No (Alt+Shift+M) " browse saved values, including clipboard"
 .It " "
 .It Sy Metasheets
 .It Sy " \&."
@@ -585,25 +601,23 @@ open parent directory
 commit changes to file system
 .El
 .
-.Ss Plugins Sheet
+.Ss Guide Index
 .Bl -inset -compact
-.It Browse through a list of available plugins. VisiData needs to be restarted before plugin activation takes effect. Installation may require internet access.
+.It Browse through a list of available guides. Each guide shows you how to use a particular feature. Gray guides have not been written yet.
 .El
 .Bl -inset -compact
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic Space Ar open-plugins
-.No open the Sy Plugins Sheet
+.It Ic Space Ar open-guide-index
+.No open the Sy Guide Index
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic "a"
-install and activate current plugin
-.It Ic "d"
-deactivate current plugin
+.It Ic "Enter"
+open a guide
 .El
 .
 .Ss Memory Sheet
