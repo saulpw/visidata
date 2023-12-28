@@ -1,19 +1,18 @@
 '''
 # A Guide to VisiData Guides
-Each guide shows you how to use a particular feature in VisiData. Gray guides have not been written yet. We love contributions: [:onclick https://visidata.org/docs/guides]https://visidata.org/docs/api/guides[/].
+Each guide shows you how to use a particular feature in VisiData. Gray guides have not been written yet. We love contributions: [:onclick https://visidata.org/docs/api/guides]https://visidata.org/docs/api/guides[/].
 
 - [:keystrokes]Up/Down[/] to move the row cursor
 - [:keystrokes]Enter[/] to view a topic
 - [:keystrokes]Backspace[/] to come back to this list of guides
 '''
-
 import re
 
 from visidata import vd, BaseSheet, Sheet, ItemColumn, Column, VisiData, ENTER, RowColorizer, AttrDict, MissingAttrFormatter
 from visidata import wraptext
 
 guides_list = '''
-GuideGuide ("A Guide to VisiData Guides (you are here)")
+GuideIndex ("A Guide to VisiData Guides (you are here)")
 HelpGuide ("Where to Start and How to Quit")  # manpage; ask for patreon
 MenuGuide ("The VisiData Menu System")
 CommandsSheet ("How to find the command you want run")
@@ -79,8 +78,9 @@ def addGuide(vd, name, guidecls):
     vd.guides[name] = guidecls
 
 @VisiData.api
-class GuideGuide(Sheet):
-    help = __doc__
+class GuideIndex(Sheet):
+    guide = __doc__
+
     rowtype = 'guides' # rowdef: list(guide number, guide name, topic description, points, max_points)
     columns = [
         ItemColumn('n', 0, type=int),
@@ -172,7 +172,7 @@ def getGuide(vd, name): # -> GuideSheet()
         return vd.guides[name]()
     vd.warning(f'no guide named {name}')
 
-BaseSheet.addCommand('', 'open-guide-index', 'vd.push(GuideGuide("VisiData_Guide"))', 'open VisiData guides table of contents')
+BaseSheet.addCommand('', 'open-guide-index', 'vd.push(GuideIndex("VisiData_Guide"))', 'open VisiData guides table of contents')
 
 vd.addMenuItems('''
         Help > VisiData Feature Guides > open-guide-index
