@@ -54,22 +54,21 @@
     - press Space to exec command by longname and bring up command palette
     - type to match by longname and/or description
     - uses fzf's fuzzymatch algo
-    - press Tab/Shift+Tab to enter completion mode  #2154
-        - Enter to execute current command
-        - 0-9 to execute adjacent command
+    - press Tab/Shift+Tab to cycle through commands  #2154
+        - Enter to execute highlighted command
+        - 0-9 to execute numbered command
     - `options.disp_cmdpal_max` for number of suggestions
     - `options.color_cmdpalette` for base color
     - `chooseAggregators` and `jointype` also use palette  #1027
     - `options.color_match` is color for matching chars in palette chooser
-- rename lastInputs.jsonl to input_history.jsonl  #2142
+- convert input history to use StoredList  #2142
+    - rename lastInputs.jsonl to input_history.jsonl  #2142
     - remove `options.input_history`
-    - uses new `@visidata.stored_property`
-    - requires existence of `options.visidata_dir` to record input history
-- convert macros to `@visidata.stored_property`  #2142
-    - macros are now tracked in `options.visidata_dir`/macros.jsonl'
-    - add port-macros.vdj: https://github.com/saulpw/visidata/blob/develop/dev/port-macros.vdj to help port old macros tracker (macros.tsv) to new one
-    - will fail, if `options.visidata_dir` does not exist
-
+       - will automatically record if `options.visidata_dir` exists
+- convert macros to use StoredList  #2142
+    - cannot save macros if `options.visidata_dir` does not exist
+    - rename `options.visidata_dir`/macros.tsv' to `options.visidata_dir`/macros.jsonl'
+    - add port-macros.vdj: https://github.com/saulpw/visidata/blob/develop/dev/port-macros.vdj to convert old macros tracker (macros.tsv) to new one
 
 - [aggregators] sum uses start value from type of first value for Python 3.8+  #1996 #1999 #2009
 - [build] add a .desktop for VisiData  #1738
@@ -243,7 +242,7 @@
 
 - [dev] deprecate `col.setValueSafe` and `sheet.checkCursorNoExceptions`
 - [regex] deprecate `addcol-subst` and `setcol-subst`
-    - `addcol-regex-subst` and `setcol-regex-subst` use new `inputRegexSubst` which uses `inputMultiple, instead of more fragile search/replace one-line input
+    - `addcol-regex-subst` and `setcol-regex-subst` use inputMultiple, instead of more fragile search/replace one-line input
 - [regex] deprecate `split-col` and `capture-col`
 - [keys] change ScrollWheelUp to ScrollUp etc
 - [multiline] rename `visibility-sheet` to `toggle-multiline`
@@ -262,7 +261,7 @@
 - [clipboard] save to tempfile, do not confirm
 - [clipboard] save as given filetype
 - [cliptext] fix double-width char display  #1918
-- [cliptext] do not crash wtih x<0  #2138
+- [cliptext] do not crash with x<0  #2138
 - [cliptext] do not crash with miniscule widths  #2138
 - [cmdlog] check for empty cursor column when adding a column (PR by @midichef #1783)
 - [cmdlog] ensure record of global options in all cmdlogs
