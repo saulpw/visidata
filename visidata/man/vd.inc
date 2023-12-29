@@ -106,11 +106,11 @@ toggle sidebar
 .Ss "  Command Palette"
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic "Tab"
-.No Move to command palette, and scroll through
+.No Move to command palette, and cycle through commands
 .It Ic "0-9"
-.No Execute adjacent command
+.No Execute numbered command
 .It Ic "Enter"
-.No Execute current command
+.No Execute highlighted command
 .El
 .Ss "Cursor Movement"
 .
