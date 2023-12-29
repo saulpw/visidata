@@ -18,14 +18,20 @@ class ColumnsSheet(Sheet):
     precious = False
     guide = '''# Columns Sheet
 This is a list of {sheet.nSourceCols} columns on {sheet.displaySource}.
-Edit values on this sheet to change the column's appearance on the source sheet.
-Edit the _{sheet.cursorCol.name}_ column to {sheet.cursorCol.formatted_help}.
+Edit values on this sheet to change the appearance of the source sheet.
+For example, edit the _{sheet.cursorCol.name}_ column to **{sheet.cursorCol.formatted_help}**.
 
-Some column commands can also be done in bulk here, with the `g` prefix:
+Some new commands on this sheet operate on all selected columns on the source sheet:
 
-- `ge` to bulk set the _{sheet.cursorCol.name}_ for all selected "columns"
-- `g-` to hide selected "columns"
-- `g#` (or any standard type) to set the type of all selected "columns"
+- {help.commands.hide_selected}
+- {help.commands.key_selected}
+- {help.commands.key_off_selected}
+- {help.commands.type_int_selected}
+- or `g` with any standard type to set type of selected source columns to that type
+
+## As usual
+
+- {help.commands.setcol_input}
 {sheet.help_columns}
 '''
 
@@ -129,21 +135,21 @@ globalCommand('gC', 'columns-all', 'vd.push(vd.allColumnsSheet)', 'open Columns 
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))', 'open Columns Sheet: edit column properties for current sheet')
 
 # used ColumnsSheet, affecting the 'row' (source column)
-ColumnsSheet.addCommand('g!', 'key-selected', 'for c in onlySelectedRows: c.sheet.setKeys([c])', 'toggle selected rows as key columns on source sheet')
-ColumnsSheet.addCommand('gz!', 'key-off-selected', 'for c in onlySelectedRows: c.sheet.unsetKeys([c])', 'unset selected rows as key columns on source sheet')
+ColumnsSheet.addCommand('g!', 'key-selected', 'for c in onlySelectedRows: c.sheet.setKeys([c])', 'toggle selected source columns as key columns')
+ColumnsSheet.addCommand('gz!', 'key-off-selected', 'for c in onlySelectedRows: c.sheet.unsetKeys([c])', 'unset selected source columns as key columns')
 
-ColumnsSheet.addCommand('g-', 'hide-selected', 'onlySelectedRows.hide()', 'hide selected columns on source sheet')
+ColumnsSheet.addCommand('g-', 'hide-selected', 'onlySelectedRows.hide()', 'hide selected source columns')
 ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.setWidth(c.getMaxWidth(c.sheet.visibleRows))', 'adjust widths of selected source columns')
 
-ColumnsSheet.addCommand('g%', 'type-float-selected', 'onlySelectedRows.type=float', 'set type of selected columns to float')
-ColumnsSheet.addCommand('g#', 'type-int-selected', 'onlySelectedRows.type=int', 'set type of selected columns to int')
-ColumnsSheet.addCommand('gz#', 'type-len-selected', 'onlySelectedRows.type=vlen', 'set type of selected columns to len')
-ColumnsSheet.addCommand('g@', 'type-date-selected', 'onlySelectedRows.type=date', 'set type of selected columns to date')
-ColumnsSheet.addCommand('g$', 'type-currency-selected', 'onlySelectedRows.type=currency', 'set type of selected columns to currency')
-ColumnsSheet.addCommand('g~', 'type-string-selected', 'onlySelectedRows.type=str', 'set type of selected columns to str')
-ColumnsSheet.addCommand('gz~', 'type-any-selected', 'onlySelectedRows.type=anytype', 'set type of selected columns to anytype')
-ColumnsSheet.addCommand('gz%', 'type-floatsi-selected', 'onlySelectedRows.type=floatsi', 'set type of selected columns to floatsi')
-ColumnsSheet.addCommand('', 'type-floatlocale-selected', 'onlySelectedRows.type=floatlocale', 'set type of selected columns to float using system locale')
+ColumnsSheet.addCommand('g%', 'type-float-selected', 'onlySelectedRows.type=float', 'set type of selected source columns to float')
+ColumnsSheet.addCommand('g#', 'type-int-selected', 'onlySelectedRows.type=int', 'set type of selected source columns to int')
+ColumnsSheet.addCommand('gz#', 'type-len-selected', 'onlySelectedRows.type=vlen', 'set type of selected source columns to len')
+ColumnsSheet.addCommand('g@', 'type-date-selected', 'onlySelectedRows.type=date', 'set type of selected source columns to date')
+ColumnsSheet.addCommand('g$', 'type-currency-selected', 'onlySelectedRows.type=currency', 'set type of selected source columns to currency')
+ColumnsSheet.addCommand('g~', 'type-string-selected', 'onlySelectedRows.type=str', 'set type of selected source columns to str')
+ColumnsSheet.addCommand('gz~', 'type-any-selected', 'onlySelectedRows.type=anytype', 'set type of selected source columns to anytype')
+ColumnsSheet.addCommand('gz%', 'type-floatsi-selected', 'onlySelectedRows.type=floatsi', 'set type of selected source columns to floatsi')
+ColumnsSheet.addCommand('', 'type-floatlocale-selected', 'onlySelectedRows.type=floatlocale', 'set type of selected source columns to float using system locale')
 
 MetaSheet.options.header = 0
 
