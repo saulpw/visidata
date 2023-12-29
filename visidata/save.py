@@ -1,4 +1,5 @@
 import collections
+import os
 from copy import copy
 
 from visidata import vd
@@ -120,7 +121,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=True):
             break
 
     if savefunc is None:
-        vd.fail(f'no function to save as {givenpath.ext or vd.options.save_filetype}')
+        vd.fail(f'no function to save as {filetype}')
 
     if confirm_overwrite:
         vd.confirmOverwrite(givenpath)
