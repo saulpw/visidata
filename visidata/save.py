@@ -109,11 +109,15 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=True):
         vd.warning('no sheets to save')
         return
 
-    filetype = givenpath.ext or vd.options.save_filetype
+    filetypes = [givenpath.ext, vd.options.save_filetype]
 
     vd.clearCaches()
 
-    savefunc = getattr(vsheets[0], 'save_' + filetype, None) or getattr(vd, 'save_' + filetype, None)
+    for ft in filetypes:
+        savefunc = getattr(vsheets[0], 'save_' + ft, None) or getattr(vd, 'save_' + ft, None)
+        if savefunc:
+            filetype = ft
+            break
 
     if savefunc is None:
         vd.fail(f'no function to save as {filetype}')
