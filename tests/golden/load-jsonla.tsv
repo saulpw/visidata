@@ -1,4 +1,4 @@
-name	width	height	type	fmtstr	formatter	displayer	value	expr	aggregators
-Name		1					Daniel	0	
-Number		1	int				1	1	
-Exile		1	bool				True	2	
+name	width	type	fmtstr	value	aggregators
+Name				Daniel	
+Number		int		1	
+Exile		bool		True	
