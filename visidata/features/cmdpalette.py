@@ -97,9 +97,13 @@ def inputPalette(sheet, prompt, items,
 
             if tabitem < 0 and palrows:
                 _ , topitem = palrows[0]
-                bindings['^J'] = make_acceptor(topitem[value_key], multiple=multiple)
+                bindings['^J'] = make_acceptor(topitem[value_key])
+                if multiple:
+                    bindings[' '] = make_acceptor(topitem[value_key], multiple=multiple)
             elif item and i == tabitem:
-                bindings['^J'] = make_acceptor(item[value_key], multiple=multiple)
+                bindings['^J'] = make_acceptor(item[value_key])
+                if multiple:
+                    bindings[' '] = make_acceptor(item[value_key], multiple=multiple)
                 attr = colors.color_menu_spec
 
             match_summary = formatter(m, item, trigger_key) if item else ' '
