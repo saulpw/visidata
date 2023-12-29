@@ -1,25 +1,23 @@
 import collections
+from functools import partial
 from visidata import DrawablePane, BaseSheet, vd, VisiData, CompleteKey, clipdraw, HelpSheet, colors, AcceptInput, AttrDict, drawcache_property
 
 
 vd.theme_option('color_cmdpalette', 'black on 72', 'base color of command palette')
 vd.theme_option('disp_cmdpal_max', 10, 'max number of suggestions for command palette')
 
+def add_to_input(v, i, value=''):
+    items = list(v.split())
+    if not v or v.endswith(' '):
+        items.append(value)
+    else:
+        items[-1] = value
+    v = ' '.join(items) + ' '
+    return v, len(v)
 
 
-def make_acceptor(value, multiple=False):
-    def _acceptor(v, i):
-        if multiple:
-            items = list(v.split())
-            if not v or v.endswith(' '):
-                items.append(value)
-            else:
-                items[-1] = value
-            v = ' '.join(items) + ' '
-            return v, len(v)
-        else:
-            raise AcceptInput(value)
-    return _acceptor
+def accept_input(v, i, value=None):
+    raise AcceptInput(v if value is None else value)
 
 
 @VisiData.lazy_property
@@ -91,19 +89,19 @@ def inputPalette(sheet, prompt, items,
             trigger_key = ' '
             if tabitem >= 0 and item:
                 trigger_key = f'{i+1}'[-1]
-                bindings[trigger_key] = make_acceptor(item[value_key], multiple=multiple)
+                bindings[trigger_key] = partial(add_to_input if multiple else accept_input, value=item[value_key])
 
             attr = colors.color_cmdpalette
 
             if tabitem < 0 and palrows:
                 _ , topitem = palrows[0]
-                bindings['^J'] = make_acceptor(topitem[value_key])
+                bindings['^J'] = partial(accept_input, value=None)
                 if multiple:
-                    bindings[' '] = make_acceptor(topitem[value_key], multiple=multiple)
+                    bindings[' '] = partial(add_to_input, value=topitem[value_key])
             elif item and i == tabitem:
-                bindings['^J'] = make_acceptor(item[value_key])
+                bindings['^J'] = partial(accept_input, value=None)
                 if multiple:
-                    bindings[' '] = make_acceptor(item[value_key], multiple=multiple)
+                    bindings[' '] = partial(add_to_input, value=item[value_key])
                 attr = colors.color_menu_spec
 
             match_summary = formatter(m, item, trigger_key) if item else ' '
