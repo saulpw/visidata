@@ -1,0 +1,17 @@
+# VisiData v2.12dev
+exec-python vd.options.overwrite='y'
+exec-python vd.options.filetype='git'
+open-file .
+git-open-branches
+git-branch-create test_branch
+commit-sheet
+reload-sheet
+col branch
+row キtest_branch
+edit-cell test_branch2
+commit-sheet
+reload-sheet
+row キtest_branch2
+delete-row
+commit-sheet
+reload-sheet

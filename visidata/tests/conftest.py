@@ -10,7 +10,7 @@ def curses_setup():
     import visidata
 
     curses.curs_set = lambda v: None
-    visidata.options.confirm_overwrite = False
+    visidata.options.overwrite = 'always'
 
 
 @pytest.fixture(scope="function")
@@ -18,8 +18,8 @@ def mock_screen():
     """Set up and return a mock curses screen object."""
 
     scr = Mock()
-    scr.addstr = Mock()
-    scr.move = Mock()
+    scr.addstr = lambda *args, **kwargs: None
+    scr.move = lambda *args, **kwargs: None
     scr.getmaxyx = lambda: (25, 80)
 
     return scr

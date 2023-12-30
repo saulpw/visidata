@@ -1,0 +1,5 @@
+#!vd -p
+{"sheet": "global", "col": null, "row": "numeric_binning", "longname": "set-option", "input": "True", "keystrokes": "", "comment": null}
+{"longname": "open-file", "input": "sample_data/y77d-th95.json.gz", "keystrokes": "o"}
+{"sheet": "y77d-th95", "col": "geolocation", "row": "", "longname": "type-len", "input": "", "keystrokes": "z#", "comment": "set type of current column to len"}
+{"sheet": "y77d-th95", "col": "geolocation", "row": "", "longname": "freq-col", "input": "", "keystrokes": "Shift+F", "comment": "open Frequency Table grouped on current column, with aggregations of other columns"}

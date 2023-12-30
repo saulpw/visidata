@@ -38,10 +38,8 @@ def setValuesFromExpr(self, rows, expr):
     for row in Progress(rows, 'setting'):
         # Note: expressions that are only calculated once, do not need to pass column identity
         # they can reference their "previous selves" once without causing a recursive problem
-        try:
-            self.setValueSafe(row, self.sheet.evalExpr(compiledExpr, row))
-        except Exception as e:
-            vd.exceptionCaught(e)
+        v = vd.callNoExceptions(self.sheet.evalExpr, compiledExpr, row)
+        vd.callNoExceptions(self.setValue, row, v)
     self.recalc()
     vd.status('set %d values = %s' % (len(rows), expr))
 
@@ -59,3 +57,9 @@ Sheet.addCommand('gz=', 'setcol-iter', 'cursorCol.setValues(someSelectedRows, *l
 Sheet.addCommand(None, 'show-expr', 'status(evalExpr(inputExpr("show expr="), cursorRow))', 'evaluate Python expression on current row and show result on status line')
 
 vd.addGlobals({'CompleteExpr': CompleteExpr})
+
+vd.addMenuItems('''
+    Edit > Modify > current cell > Python expression > setcell-expr
+    Edit > Modify > selected cells > Python sequence > setcol-expr
+    Column > Add column > Python expr > addcol-expr
+''')

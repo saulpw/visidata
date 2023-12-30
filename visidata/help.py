@@ -1,10 +1,35 @@
 import functools
 import collections
-from pkg_resources import resource_filename
 
-from visidata import *
+from visidata import VisiData, MetaSheet, ColumnAttr, Column, BaseSheet, VisiDataMetaSheet, SuspendCurses
+from visidata import vd, asyncthread, ENTER, drawcache, AttrDict
 
-vd.show_help = False
+vd.option('disp_help', 2, 'show help panel during input')
+
+@BaseSheet.api
+def hint_basichelp(sheet):
+    return 0, '`Alt+[:underline]H[/]` to open the [:underline]H[/]elp menu'
+
+
+@VisiData.api
+def iterMenuPaths(vd, item=None, menupath=[]):
+    'Generate (longname, menupath).'
+    if item is None:
+        item = vd.menus
+
+    if isinstance(item, (list, tuple)):
+        for m in item:
+            yield from vd.iterMenuPaths(m, menupath)
+    elif item.longname:
+        yield item.longname, ' > '.join(menupath+[item.title])
+    else:
+        yield from vd.iterMenuPaths(item.menus, menupath+[item.title])
+
+
+@VisiData.property
+@drawcache
+def menuPathsByLongname(vd):
+    return dict(vd.iterMenuPaths())
 
 
 @VisiData.api
@@ -16,10 +41,12 @@ class HelpSheet(MetaSheet):
 
     columns = [
         ColumnAttr('sheet'),
+        ColumnAttr('module'),
         ColumnAttr('longname'),
+        Column('menupath', width=0, cache=True, getter=lambda col,row: vd.menuPathsByLongname[row.longname]),
         Column('keystrokes', getter=lambda col,row: col.sheet.revbinds.get(row.longname, [None])[0]),
-        Column('all_bindings', width=0, getter=lambda col,row: list(set(col.sheet.revbinds.get(row.longname, [])))),
-        Column('description', getter=lambda col,row: col.sheet.cmddict[(row.sheet, row.longname)].helpstr),
+        Column('all_bindings', width=0, cache=True, getter=lambda col,row: list(set(col.sheet.revbinds.get(row.longname, [])))),
+        Column('description', width=40, getter=lambda col,row: col.sheet.cmddict[(row.sheet, row.longname)].helpstr),
         ColumnAttr('execstr', width=0),
         Column('logged', width=0, getter=lambda col,row: vd.isLoggableCommand(row.longname)),
     ]
@@ -54,73 +81,69 @@ class HelpSheet(MetaSheet):
         return revbinds
 
 
-@VisiData.api
-@asyncthread
-def help_search(vd, sheet, regex):
-    vs = HelpSheet(source=None)
-    vs.rows = []  # do not trigger push reload
-    vd.push(vs)   # push first, then reload
-    vd.sync(vs.reload())
-
-    # find rows matching regex on original HelpSheet
-    rowidxs = list(vd.searchRegex(vs, regex=regex, columns="visibleCols"))
-
-    # add only matching rows
-    allrows = vs.rows
-    vs.rows = []
-    for rowidx in rowidxs:
-        vs.addRow(allrows[rowidx])
-
-
 class HelpPane:
     def __init__(self, name):
+        import visidata
         self.name = name
         self.scr = None
         self.parentscr = None
         self.amgr = visidata.AnimationMgr()
 
-    def draw(self, scr, x=None, y=None):
+    @property
+    def width(self):
+        return self.amgr.maxWidth
+
+    @property
+    def height(self):
+        return self.amgr.maxHeight
+
+    def draw(self, scr, x=None, y=None, **kwargs):
         if not scr: return
-        if not vd.show_help:
-            if self.scr:
-                self.scr.erase()
-                self.scr.refresh()
-                self.scr = None
-            return
+#        if vd.options.disp_help <= 0:
+#            if self.scr:
+#                self.scr.erase()
+#                self.scr.refresh()
+#                self.scr = None
+#            return
         if y is None: y=0  # show at top of screen by default
         if x is None: x=0
+        hneeded = self.amgr.maxHeight+3
+        wneeded = self.amgr.maxWidth+4
+        scrh, scrw = scr.getmaxyx()
         if not self.scr or scr is not self.parentscr:  # (re)allocate help pane scr
             if y >= 0:
-                if y+self.amgr.maxHeight+3 < scr.getmaxyx()[0]:
+                if y+hneeded < scrh:
                     yhelp = y+1
                 else:
-                    yhelp = y-self.amgr.maxHeight-3
+                    hneeded = max(0, min(hneeded, y-1))
+                    yhelp = y-hneeded
             else:  # y<0
-                yhelp = scr.getmaxyx()[0]-self.amgr.maxHeight-4
+                yhelp = max(0, scrh-hneeded-1)
 
             if x >= 0:
-                if x+self.amgr.maxWidth+4 < scr.getmaxyx()[1]:
+                if x+wneeded < scrw:
                     xhelp = x+1
                 else:
-                    xhelp = x-self.amgr.maxWidth-4
+                    wneeded = max(0, min(wneeded, x-1))
+                    xhelp = x-wneeded
             else:  # x<0
-                xhelp = scr.getmaxyx()[1]-self.amgr.maxWidth-5
+                xhelp = max(0, scrh-wneeded-1)
 
-            self.scr = scr.derwin(self.amgr.maxHeight+3, self.amgr.maxWidth+4, yhelp, xhelp)
+            self.scr = vd.subwindow(scr, xhelp, yhelp, wneeded, hneeded)
             self.parentscr = scr
 
         self.scr.erase()
         self.scr.box()
-        self.amgr.draw(self.scr, y=1, x=2)
+        self.amgr.draw(self.scr, y=1, x=2, **kwargs)
         self.scr.refresh()
 
 
 @VisiData.api
 @functools.lru_cache(maxsize=None)
-def getHelpPane(vd, name, module='vdplus'):
+def getHelpPane(vd, name, module='visidata') -> HelpPane:
     ret = HelpPane(name)
     try:
-        ret.amgr.load(name, Path(resource_filename(module,'ddw/'+name+'.ddw')).open_text(encoding='utf-8'))
+        ret.amgr.load(name, (vd.pkg_resources_files(module)/f'ddw/{name}.ddw').open(encoding='utf-8'))
         ret.amgr.trigger(name, loop=True)
     except FileNotFoundError as e:
         vd.debug(str(e))
@@ -135,23 +158,31 @@ def getHelpPane(vd, name, module='vdplus'):
 def openManPage(vd):
     import os
     with SuspendCurses():
-        if os.system(' '.join(['man', resource_filename(__name__, 'man/vd.1')])) != 0:
-            vd.push(TextSheet('man_vd', source=Path(resource_filename(__name__, 'man/vd.txt'))))
+        module_path = vd.pkg_resources_files(__name__.split('.')[0])
+        if os.system(' '.join(['man', str(module_path/'man/vd.1')])) != 0:
+            vd.push(TextSheet('man_vd', source=module_path/'man/vd.txt'))
 
 
 # in VisiData, g^H refers to the man page
 BaseSheet.addCommand('g^H', 'sysopen-help', 'openManPage()', 'Show the UNIX man page for VisiData')
 BaseSheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))', 'list commands and keybindings available on current sheet')
 BaseSheet.addCommand('gz^H', 'help-commands-all', 'vd.push(HelpSheet("all_commands", source=None, revbinds={}))', 'list commands and keybindings for all sheet types')
-BaseSheet.addCommand(None, 'help-search', 'help_search(sheet, input("help: "))', 'search through command longnames with search terms')
 
 BaseSheet.bindkey('KEY_F(1)', 'sysopen-help')
 BaseSheet.bindkey('zKEY_F(1)', 'help-commands')
 BaseSheet.bindkey('zKEY_BACKSPACE', 'help-commands')
+BaseSheet.bindkey('gKEY_BACKSPACE', 'sysopen-help')
 
-HelpSheet.addCommand(ENTER, 'exec-command', 'quit(sheet); draw_all(); activeStack[0].execCommand(cursorRow.longname)', 'execute command on undersheet')
+HelpSheet.addCommand(None, 'exec-command', 'quit(sheet); draw_all(); activeStack[0].execCommand(cursorRow.longname)', 'execute command on undersheet')
 BaseSheet.addCommand(None, 'open-tutorial-visidata', 'launchBrowser("https://jsvine.github.io/intro-to-visidata/")', 'open https://jsvine.github.io/intro-to-visidata/')
 
 vd.addMenuItem("Help", "VisiData tutorial", 'open-tutorial-visidata')
 vd.addMenuItem("Help", 'Sheet commands', 'help-commands')
 vd.addMenuItem("Help", 'All commands', 'help-commands-all')
+
+vd.addGlobals(HelpSheet=HelpSheet)
+
+vd.addMenuItems('''
+    Help > Quick reference > sysopen-help
+    Help > Command list > help-commands
+''')

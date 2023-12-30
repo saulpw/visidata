@@ -16,15 +16,13 @@ Additions to pathlib.Path:
     - adds 'b' to the mode before passing to _open()
 - vd.Path.__iter__()
     - incorporates Progress() tracking into file reading
+- `.base_stem`: filename *without* any extensions
 
 Differences from pathlib.Path:
-- `.name`: filename *without* extension
-   - TODO: change uses of Path.name to Path.stem
 - visidata.Path.iterdir returns a list and pathlib.Path.iterdir returns a generator
 - `visidata.Path._open()`
     - handles uncompressing before passing to pathlib.Path.open()
 
 TODO:
-- pathlib.Path has a property suffixes which has a list of the path's file extensions
 - change DirSheet owner/group to Path.owner()/group()
 - move __iter__ off visidata.Path into global function

@@ -1,0 +1,8 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/freshwater-mammals.toml	o	
+freshwater-mammals	muskrat	0	open-cell		zEnter	open sheet with copies of rows referenced in current cell
+freshwater-mammals[0].muskrat	value	キvariants	open-cell		zEnter	open sheet with copies of rows referenced in current cell
+freshwater-mammals[0].muskrat[variants].value	value	キround-tailed	open-cell		zEnter	open sheet with copies of rows referenced in current cell
+freshwater-mammals	capybara	0	open-cell		zEnter	open sheet with copies of rows referenced in current cell
+freshwater-mammals[0].capybara	value	キsightings	open-cell		zEnter	open sheet with copies of rows referenced in current cell
+freshwater-mammals[0].capybara[sightings].value		0	open-row		Enter	open current row with sheet-specific dive

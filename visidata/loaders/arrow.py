@@ -7,17 +7,17 @@ from visidata import Sheet, VisiData, TypedWrapper, anytype, date, vlen, Column,
 @VisiData.api
 def open_arrow(vd, p):
     'Apache Arrow IPC file format'
-    return ArrowSheet(p.name, source=p)
+    return ArrowSheet(p.base_stem, source=p)
 
 
 @VisiData.api
 def open_arrows(vd, p):
     'Apache Arrow IPC streaming format'
-    return ArrowSheet(p.name, source=p)
+    return ArrowSheet(p.base_stem, source=p)
 
 
 def arrow_to_vdtype(t):
-    import pyarrow as pa
+    pa = vd.importExternal('pyarrow')
 
     arrow_to_vd_typemap = {
         pa.lib.Type_BOOL: bool,
@@ -44,7 +44,7 @@ def arrow_to_vdtype(t):
         pa.lib.Type_LARGE_BINARY: vlen,
 #            pa.lib.Type_FIXED_SIZE_BINARY: bytes,
 #            pa.lib.Type_STRING: str,
-        pa.lib.Type_LARGE_STRING: vlen,
+#            pa.lib.Type_LARGE_STRING: vlen,  #2003
 #            pa.lib.Type_LIST: list,
 #            pa.lib.Type_LARGE_LIST: list,
 #            pa.lib.Type_FIXED_SIZE_LIST: list,
@@ -58,7 +58,7 @@ def arrow_to_vdtype(t):
 
 class ArrowSheet(Sheet):
     def iterload(self):
-        import pyarrow as pa
+        pa = vd.importExternal('pyarrow')
 
         try:
             with pa.OSFile(str(self.source), 'rb') as fp:
@@ -81,8 +81,8 @@ class ArrowSheet(Sheet):
 
 @VisiData.api
 def save_arrow(vd, p, sheet, streaming=False):
-    import pyarrow as pa
-    import numpy as np
+    pa = vd.importExternal('pyarrow')
+    np = vd.importExternal('numpy')
 
     typemap = {
         anytype: pa.string(),

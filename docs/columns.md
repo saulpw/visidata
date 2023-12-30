@@ -121,6 +121,13 @@ The default for currency uses `locale.format_string()`. The default for int/floa
 3. Move to the row referencing the column whose display you wish to format. Move the cursor to the fmtstr column.
 4. Type `e` followed by *{:,.0f}* for an `int` type and *{:,.02f}* for a floating point type.
 
+###### How to quickly adjust the precision of a float or date?
+
+1. Ensure the column is either typed as a float (`%`), floatsi, currency (`$`), or date (`@`).
+2. Press `SPACE` and type the longnames `setcol-precision-more` or `setcol-precision-less` to adjust the precision in the current column.
+
+[Bind the longnames to keys](https://www.visidata.org/docs/customize/), if using these commands frequently.
+
 ###### How to set all date columns to be **month/day/year**.
 
 The default can be set in a `~/.visidatarc`.
@@ -140,6 +147,7 @@ or set in the **Options Sheet**.
 1. Press `Shift+O` to open the **Options Sheet**.
 2. Move the cursor down to the relevant *disp_date_fmt* option.
 3. Type `e` followed by *%m/%d/%Y*.
+
 ---
 
 ###### How to specify a comma decimal separator when typing floating point numbers?

@@ -1,10 +1,11 @@
+from contextlib import contextmanager
 import operator
 import string
 import re
 
 'Various helper classes and functions.'
 
-__all__ = ['AlwaysDict', 'AttrDict', 'moveListItem', 'namedlist', 'classproperty', 'cleanName', 'MissingAttrFormatter']
+__all__ = ['AlwaysDict', 'AttrDict', 'DefaultAttrDict', 'moveListItem', 'namedlist', 'classproperty', 'MissingAttrFormatter', 'getitem', 'setitem', 'getitemdef', 'getitemdeep', 'setitemdeep', 'getattrdeep', 'setattrdeep', 'ExplodingMock', 'ScopedSetattr']
 
 
 class AlwaysDict(dict):
@@ -36,6 +37,24 @@ class AttrDict(dict):
         return self.keys()
 
 
+class DefaultAttrDict(dict):
+    'Augment a dict with more convenient .attr syntax.  not-present keys store new DefaultAttrDict.  like a recursive defaultdict.'
+    def __getattr__(self, k):
+        if k not in self:
+            if k.startswith("__"):
+                raise AttributeError from e
+            self[k] = DefaultAttrDict()
+        return self[k]
+
+    def __setattr__(self, k, v):
+        self[k] = v
+
+    def __dir__(self):
+        return self.keys()
+
+
+
+
 class classproperty(property):
     def __get__(self, cls, obj):
         return classmethod(self.fget).__get__(None, obj or cls)()
@@ -50,34 +69,75 @@ def moveListItem(L, fromidx, toidx):
     return toidx
 
 
-def cleanName(s):
-    s = re.sub(r'[^\w\d_]', '_', s)  # replace non-alphanum chars with _
-    s = re.sub(r'_+', '_', s)  # replace runs of _ with a single _
-    s = s.strip('_')
-    return s
+def setitem(r, i, v):  # function needed for use in lambda
+    r[i] = v
+    return True
+
+def getitem(o, k, default=None):
+    return default if o is None else o[k]
+
+def getitemdef(o, k, default=None):
+    try:
+        return default if o is None else o[k]
+    except Exception:
+        return default
 
 
-class OnExit:
-    '"with OnExit(func, ...):" calls func(...) when the context is exited'
-    def __init__(self, func, *args, **kwargs):
-        self.func = func
-        self.args = args
-        self.kwargs = kwargs
+def getattrdeep(obj, attr, *default, getter=getattr):
+    try:
+        'Return dotted attr (like "a.b.c") from obj, or default if any of the components are missing.'
+        if not isinstance(attr, str):
+            return getter(obj, attr, *default)
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_value, exc_traceback):
-        try:
-            self.func(*self.args, **self.kwargs)
+        try:  # if attribute exists, return toplevel value, even if dotted
+            if attr in obj:
+                return getter(obj, attr)
+        except RecursionError:  #1696
+            raise
         except Exception as e:
-            vd.exceptionCaught(e)
+            pass
+
+        attrs = attr.split('.')
+        for a in attrs[:-1]:
+            obj = getter(obj, a)
+
+        return getter(obj, attrs[-1])
+    except Exception as e:
+        if not default: raise
+        return default[0]
 
 
-def itemsetter(i):
-    def g(obj, v):
-        obj[i] = v
-    return g
+def setattrdeep(obj, attr, val, getter=getattr, setter=setattr):
+    'Set dotted attr (like "a.b.c") on obj to val.'
+    if not isinstance(attr, str):
+        return setter(obj, attr, val)
+
+    try:  # if attribute exists, overwrite toplevel value, even if dotted
+        getter(obj, attr)
+        return setter(obj, attr, val)
+    except Exception as e:
+        pass
+
+    attrs = attr.split('.')
+    for a in attrs[:-1]:
+        try:
+            obj = getter(obj, a)
+        except Exception as e:
+            obj = obj[a] = type(obj)()  # assume homogeneous nesting
+
+    setter(obj, attrs[-1], val)
+
+
+def getitemdeep(obj, k, *default):
+    if not isinstance(k, str):
+        try:
+            return obj[k]
+        except IndexError:
+            pass
+    return getattrdeep(obj, k, *default, getter=getitem)
+
+def setitemdeep(obj, k, val):
+    return setattrdeep(obj, k, val, getter=getitemdef, setter=setitem)
 
 
 def namedlist(objname, fieldnames):
@@ -111,11 +171,24 @@ def namedlist(objname, fieldnames):
 
     return NamedListTemplate
 
+
+class ExplodingMock:
+    'A mock object that raises an exception for everything except conversion to True/False.'
+    def __init__(self, msg):
+        self.__msg = msg
+
+    def __getattr__(self, k):
+        raise Exception(self.__msg)
+
+    def __bool__(self):
+        return False
+
+
 class MissingAttrFormatter(string.Formatter):
     "formats {} fields with `''`, that would normally result in a raised KeyError or AttributeError; intended for user customisable format strings."
-    def get_field(self, field_name, *args, **kwargs):
+    def get_field(self, field_name, args, kwargs):
         try:
-            return super().get_field(field_name, *args, **kwargs)
+            return super().get_field(field_name, args, kwargs)
         except (KeyError, AttributeError):
             return (None, field_name)
 
@@ -126,3 +199,13 @@ class MissingAttrFormatter(string.Formatter):
         elif not value:
             return str(value)
         return super().format_field(value, format_spec)
+
+
+@contextmanager
+def ScopedSetattr(obj, attrname, val):
+    oldval = getattr(obj, attrname)
+    try:
+        setattr(obj, attrname, val)
+        yield
+    finally:
+        setattr(obj, attrname, oldval)

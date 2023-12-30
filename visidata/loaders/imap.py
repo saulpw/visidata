@@ -1,11 +1,12 @@
-from visidata import vd, TableSheet, asyncthread, ColumnItem, Column, ColumnAttr, Progress
+from visidata import VisiData, vd, TableSheet, asyncthread, ColumnItem, Column, ColumnAttr, Progress
+import visidata.loaders.google
 from urllib.parse import urlparse
 
 
-def openurl_imap(p, **kwargs):
-    url = urlparse(p.given)
-    password = url.password or vd.error('no password given in url') # vd.input("imap password for %s" % user, display=False))
-    return ImapSheet(url.hostname, source=url, password=password)
+@VisiData.api
+def openurl_imap(vd, url, **kwargs):
+    url_parsed = urlparse(str(url))
+    return ImapSheet(url_parsed.hostname, source=url_parsed, password=url_parsed.password)
 
 
 class ImapSheet(TableSheet):
@@ -22,17 +23,26 @@ class ImapSheet(TableSheet):
     ]
     nKeys = 1
 
-    @asyncthread
-    def reload(self):
+    def iterload(self):
         import imaplib
         import email.parser
 
         m = imaplib.IMAP4_SSL(host=self.source.hostname)
+        # m.debug=4
         user = self.source.username
-        m.login(user, self.password)
+
+        if self.source.hostname == 'imap.gmail.com':
+            credentials=vd.google_auth(scopes='https://mail.google.com/')
+            header_template = 'user=%s\1auth=Bearer %s\1\1'
+            m.authenticate('XOAUTH2', lambda x: header_template % (user, credentials.token))
+        else:
+            if self.password is None:
+                vd.error('no password given in url') # vd.input("imap password for %s" % user, display=False))
+            m.login(user, self.source.password)
+
         typ, folders = m.list()
         for r in Progress(folders, gerund="downloading"):
-            fname = r.decode('utf-8').split()[-1][1:-1]
+            fname = r.decode('utf-8').split()[-1]
             try:
                 m.select(fname)
                 typ, data = m.search(None, 'ALL')
@@ -44,7 +54,7 @@ class ImapSheet(TableSheet):
 
                     msg = email.message_from_bytes(msgbytes[0][1])
                     msg['folder'] = fname
-                    self.addRow(msg)
+                    yield msg
 
                 m.close()
             except Exception:

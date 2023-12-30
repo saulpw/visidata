@@ -1,0 +1,32 @@
+# Adapted lovingly but hackily from:
+# https://blog.nature.org/2021/04/12/beaver-otter-muskrat-a-field-guide-to-freshwater-mammals/
+
+[beaver]
+tail = "flat"
+weight_class = 50
+catch_phrase = "dam"
+
+[muskrat]
+tail = "rat-like"
+weight_class = 4
+variants = {"round-tailed" = {"rare" = true} }
+
+[nutria]
+tail = "rat-like"
+weight_class = 35
+
+[capybara]
+weight_class = 100
+should_be_in_florida = false
+is_in_florida_anyway = true
+
+[[capybara.sightings]]
+where = "florida"
+when = 2016-08-16
+
+[[capybara.sightings]]  
+where = "los angeles"
+when = 2011-08-08
+
+[american-mink]
+body = "weasel-like"

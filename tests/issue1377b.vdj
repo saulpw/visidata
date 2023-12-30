@@ -1,0 +1,10 @@
+#!vd -p
+{"sheet": null, "col": null, "row": null, "longname": "open-file", "input": "sample_data/sample-sales-reps.xlsx", "keystrokes": "o", "comment": null}
+{"sheet": "sample-sales-reps", "col": "", "row": "\u30adsample-salesv4", "longname": "open-row", "input": "", "keystrokes": "Enter", "comment": "open current row with sheet-specific dive"}
+{"sheet": "sample-sales-reps_sample-salesv4", "col": "", "row": "0", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "sample-sales-reps_sample-salesv4", "col": "", "row": "1", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "sample-sales-reps_sample-salesv4", "col": "", "row": "2", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "sample-sales-reps_sample-salesv4", "col": "", "row": "", "longname": "copy-selected", "input": "", "keystrokes": "gy", "comment": "yank (copy) selected rows to clipboard"}
+{"col": "", "row": "", "longname": "open-new", "input": "", "keystrokes": "Shift+A", "comment": "Open new empty sheet"}
+{"col": "", "row": "", "longname": "paste-after", "input": "", "keystrokes": "p", "comment": "paste clipboard rows after current row"}
+{"col": "", "row": "1", "longname": "paste-before", "input": "", "keystrokes": "Shift+P", "comment": "paste clipboard rows before current row"}

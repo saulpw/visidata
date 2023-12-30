@@ -1,0 +1,17 @@
+#!vd -p
+{"sheet": null, "col": null, "row": null, "longname": "open-file", "input": "tests/data1.tsv", "keystrokes": "o", "comment": null}
+{"longname": "open-file", "input": "tests/data2.tsv", "keystrokes": "o"}
+{"sheet": "data1", "col": "", "row": "", "longname": "sheets-stack", "input": "", "keystrokes": "Shift+S", "comment": "open Sheets Stack: join or jump between the active sheets on the current stack"}
+{"sheet": "sheets", "col": "", "row": "", "longname": "reload-selected", "input": "", "keystrokes": "gCtrl+R", "comment": "reload all selected sheets"}
+{"sheet": "data1", "col": "", "row": "", "longname": "columns-all", "input": "", "keystrokes": "gShift+C", "comment": "open Columns Sheet: edit column properties for all visible columns from all sheets on the sheets stack"}
+{"sheet": "all_columns", "col": "", "row": "\u30addata2,Key", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "all_columns", "col": "", "row": "\u30addata1,Key", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "all_columns", "col": "", "row": "", "longname": "key-selected", "input": "", "keystrokes": "g!", "comment": "toggle selected rows as key columns on source sheet"}
+{"sheet": "all_columns", "col": "", "row": "", "longname": "sheets-stack", "input": "", "keystrokes": "Shift+S", "comment": "open Sheets Stack: join or jump between the active sheets on the current stack"}
+{"sheet": "sheets", "col": "", "row": "\u30addata2", "longname": "slide-up", "input": "", "keystrokes": "Shift+K", "comment": "slide current row up"}
+{"sheet": "sheets", "col": "", "row": "\u30addata2", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "sheets", "col": "", "row": "\u30addata1", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "sheets", "col": "", "row": "", "longname": "join-selected", "input": "diff", "keystrokes": "&", "comment": "merge selected sheets with visible columns from all, keeping rows according to jointype"}
+{"sheet": "data2+data1", "col": "A", "row": "", "longname": "key-col", "input": "", "keystrokes": "!", "comment": "toggle current column as a key column"}
+{"sheet": "data2+data1", "col": "", "row": "", "longname": "sort-keys-asc", "input": "", "keystrokes": "g[", "comment": "sort ascending by all key columns; replace any existing sort criteria"}
+{"sheet": "data2+data1", "col": "A", "row": "", "longname": "key-col", "input": "", "keystrokes": "!", "comment": "toggle current column as a key column"}

@@ -3,10 +3,19 @@
 import locale
 from visidata import options, TypedWrapper, vd, VisiData
 
-#__all__ = ['anytype', 'vdtype', ]
+vd.help_float_fmt = '''
+- fmt starting with `'%'` (like `%0.2f`) will use [:onclick https://docs.python.org/3.6/library/locale.html#locale.format_string]locale.format_string[/]
+- other fmt (like `{:.02f}` is passed to Python [:onclick https://docs.python.org/3/library/string.html#custom-string-formatting)]string.format][/]
+'''
 
-vd.option('disp_float_fmt', '{:.02f}', 'default fmtstr to format for float values', replay=True)
-vd.option('disp_int_fmt', '{:d}', 'default fmtstr to format for int values', replay=True)
+vd.help_int_fmt = '''
+- fmt starting with `'%'` (like `%04d`) will use [:onclick https://docs.python.org/3.6/library/locale.html#locale.format_string]locale.format_string[/]
+- other fmt (like `{:4d}` is passed to Python [:onclick https://docs.python.org/3/library/string.html#custom-string-formatting)]string.format[/]
+'''
+
+vd.option('disp_float_fmt', '{:.02f}', 'default fmtstr to format float values', replay=True, help=vd.help_float_fmt)
+vd.option('disp_int_fmt', '{:d}', 'default fmtstr to format int values', replay=True, help=vd.help_int_fmt)
+
 
 vd.numericTypes = [int,float]
 
@@ -97,6 +106,11 @@ vdtype(list, '')
 def isNumeric(vd, col):
     return col.type in vd.numericTypes
 
+def deduceType(v):
+    if isinstance(v, (float, int)):
+        return type(v)
+    else:
+        return anytype
 ##
 
 @vd.numericType('%')
@@ -118,3 +132,7 @@ class vlen(int):
 
     def __len__(self):
         return self
+
+vd.addGlobals(anytype=anytype,
+              vdtype=vdtype,
+              deduceType=deduceType)

@@ -1,0 +1,6 @@
+#!vd -p
+{"sheet": null, "col": null, "row": null, "longname": "open-file", "input": "sample_data/sample.tsv", "keystrokes": "o", "comment": null}
+{"sheet": "sample", "col": "Units", "row": "", "longname": "type-int", "input": "", "keystrokes": "#", "comment": "set type of current column to int"}
+{"sheet": "sample", "col": "Unit_Cost", "row": "", "longname": "type-float", "input": "", "keystrokes": "%", "comment": "set type of current column to float"}
+{"sheet": "sample", "col": "Total", "row": "", "longname": "type-float", "input": "", "keystrokes": "%", "comment": "set type of current column to float"}
+{"sheet": "sample", "col": "OrderDate", "row": "", "longname": "type-date", "input": "", "keystrokes": "@", "comment": "set type of current column to date"}

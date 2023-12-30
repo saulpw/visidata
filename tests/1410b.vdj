@@ -1,0 +1,5 @@
+#!vd -p
+{"sheet": "global", "col": null, "row": "numeric_binning", "longname": "set-option", "input": "True", "keystrokes": "", "comment": null}
+{"longname": "open-file", "input": "sample_data/test.jsonl", "keystrokes": "o"}
+{"sheet": "test", "col": "key1", "row": "", "longname": "freq-col", "input": "", "keystrokes": "Shift+F", "comment": "open Frequency Table grouped on current column, with aggregations of other columns"}
+{"sheet": "test_key1_freq", "col": "key1", "row": "", "longname": "sort-asc", "input": "", "keystrokes": "[", "comment": "sort ascending by current column; replace any existing sort criteria"}

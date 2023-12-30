@@ -1,12 +1,12 @@
+import builtins
 import contextlib
 import os
 import curses
 import signal
 import threading
 import time
-from unittest import mock
 
-from visidata import vd, VisiData, colors, ESC, options, clipbox
+from visidata import vd, VisiData, colors, ESC, options, BaseSheet, AttrDict
 
 __all__ = ['ReturnValue', 'run']
 
@@ -15,73 +15,43 @@ vd.timeouts_before_idle = 10
 vd.min_draw_ms = 100  # draw_all at least this often, even if keystrokes are pending
 vd._lastDrawTime = 0  # last time drawn (from time.time())
 
-vd.option('disp_splitwin_pct', 0, 'height of second sheet on screen')
-vd.option('mouse_interval', 1, 'max time between press/release for click (ms)', sheettype=None)
-vd.option('color_sidebar', 'black on 114 blue', 'color of sidebar')
-
 
 class ReturnValue(BaseException):
     'raise ReturnValue(ret) to exit from an inner runresult() with its result.'
     pass
 
 
+@VisiData.api
+def callNoExceptions(vd, func, *args, **kwargs):
+    'Catch and log any raised exceptions.  Reraise when options.debug.'
+    try:
+        return func(*args, **kwargs)
+    except Exception as e:
+        vd.exceptionCaught(e)
+
 
 @VisiData.api
-def draw_sheet(self, scr, sheet):
+def drawSheet(vd, scr, sheet):
     'Erase *scr* and draw *sheet* on it, including status bars and sidebar.'
 
     sheet.ensureLoaded()
 
     scr.erase()  # clear screen before every re-draw
-    scr.bkgd(' ', colors.color_default)
+    scr.bkgd(' ', colors.color_default.attr)
 
     sheet._scr = scr
 
-    self.drawLeftStatus(scr, sheet)
-    self.drawRightStatus(scr, sheet)  # visible during this getkeystroke
-
-    try:
-        sheet.draw(scr)
-    except Exception as e:
-        self.exceptionCaught(e)
-
-    try:
-        sidebar = sheet.sidebar
-        sidebar_title = sheet.sidebar_title
-    except Exception as e:
-        vd.exceptionCaught(e)
-        sidebar = str(e)
-        sidebar_title = 'error'
-
-    vd.drawSidebar(scr, sidebar, title=sidebar_title)
-
-
-def iterwraplines(lines, width=80):
-    import textwrap
-    for line in lines:
-        yield from textwrap.wrap(line, width=width, subsequent_indent='  ')
-
-
-@VisiData.api
-def drawSidebar(vd, scr, text, title='sidebar'):
-    if not text:
-        return
-
-    h, w = scr.getmaxyx()
-    maxh, maxw = 0, 0
-
-    lines = list(iterwraplines(text.splitlines(), width=w//2-2))
-
-    maxh = min(h-2, len(lines)+2)
-    maxw = min(w//2, max(map(len, lines))+4)
-
-    sidebar_scr = scr.derwin(maxh, maxw, h-maxh-1, w-maxw-1)
-    clipbox(sidebar_scr, lines, colors.color_sidebar, title=title)
+    vd.callNoExceptions(sheet.draw, scr)
+    vd.callNoExceptions(vd.drawLeftStatus, scr, sheet)
+    vd.callNoExceptions(vd.drawRightStatus, scr, sheet)  # visible during this getkeystroke
 
 
 vd.windowConfig = dict(pct=0, n=0, h=0, w=0)  # n=top line of bottom window; h=height of bottom window; w=width of screen
-vd.winTop = mock.MagicMock(__bool__=mock.Mock(return_value=False))
-vd.scrMenu = mock.MagicMock(__bool__=mock.Mock(return_value=False))
+
+vd.winTop = None
+vd.scrMenu = None
+vd.scrFull = None
+
 
 @VisiData.api
 def setWindows(vd, scr, pct=None):
@@ -105,17 +75,17 @@ def setWindows(vd, scr, pct=None):
         if not topmenulines:
             vd.scrMenu = None
         elif not vd.scrMenu:
-            vd.scrMenu = scr.derwin(h, w, 0, 0)
+            vd.scrMenu = vd.subwindow(scr, 0, 0, w, h)
             vd.scrMenu.keypad(1)
 
-        vd.winTop = scr.derwin(n, w, topmenulines, 0)
+        vd.winTop = vd.subwindow(scr, 0, topmenulines, w, n)
         vd.winTop.keypad(1)
-        vd.winBottom = scr.derwin(h-n-topmenulines, w, n+topmenulines, 0)
+        vd.winBottom = vd.subwindow(scr, 0, n+topmenulines, w, h-n-topmenulines)
         vd.winBottom.keypad(1)
         if pct == 0 or pct >= 100:  # no second pane
             vd.win1 = vd.winBottom
             # drawing to 0-line window causes problems
-            vd.win2 = mock.MagicMock(__bool__=mock.Mock(return_value=False))
+            vd.win2 = None
         elif pct > 0: # pane 2 from line n to bottom
             vd.win1 = vd.winTop
             vd.win2 = vd.winBottom
@@ -141,24 +111,26 @@ def draw_all(vd):
     if ss1 and not ss2:
         vd.activePane = 1
         vd.setWindows(vd.scrFull)
-        vd.draw_sheet(vd.win1, ss1[0])
+        vd.drawSheet(vd.win1, ss1[0])
         if vd.win2:
             vd.win2.erase()
     elif not ss1 and ss2:
         vd.activePane = 2
         vd.setWindows(vd.scrFull)
-        vd.draw_sheet(vd.win2, ss2[0])
+        vd.drawSheet(vd.win2, ss2[0])
         if vd.win1:
             vd.win1.erase()
     elif ss1 and ss2 and vd.win2:
-        vd.draw_sheet(vd.win1, ss1[0])
-        vd.draw_sheet(vd.win2, ss2[0])
+        vd.drawSheet(vd.win1, ss1[0])
+        vd.drawSheet(vd.win2, ss2[0])
     elif ss1 and ss2 and not vd.win2:
-        vd.draw_sheet(vd.win1, vd.sheetstack(vd.activePane)[0])
+        vd.drawSheet(vd.win1, vd.sheetstack(vd.activePane)[0])
         vd.setWindows(vd.scrFull)
 
     if vd.scrMenu:
-        vd.drawMenu(vd.scrMenu, vd.activeSheet)
+        vd.callNoExceptions(vd.drawMenu, vd.scrMenu, vd.activeSheet)
+
+    vd.callNoExceptions(vd.drawSidebar, vd.scrFull, vd.activeSheet)
 
     if vd.win1:
         vd.win1.refresh()
@@ -179,37 +151,7 @@ def runresult(vd):
 
 
 @VisiData.api
-def parseMouse(vd, **kwargs):
-    'Return list of mouse interactions (clicktype, y, x, name, scr) for curses screens given in kwargs as name:scr.'
-
-    devid, x, y, z, bstate = curses.getmouse()
-
-    clicktype = ''
-    if bstate & curses.BUTTON_CTRL:
-        clicktype += "CTRL-"
-        bstate &= ~curses.BUTTON_CTRL
-    if bstate & curses.BUTTON_ALT:
-        clicktype += "ALT-"
-        bstate &= ~curses.BUTTON_ALT
-    if bstate & curses.BUTTON_SHIFT:
-        clicktype += "SHIFT-"
-        bstate &= ~curses.BUTTON_SHIFT
-
-    keystroke = clicktype + curses.mouseEvents.get(bstate, str(bstate))
-
-    found = []
-    for winname, winscr in kwargs.items():
-        py, px = winscr.getparyx()
-        mh, mw = winscr.getmaxyx()
-        if py <= y < py+mh and px <= x < px+mw:
-            found.append((keystroke, y-py, x-px, winname, winscr))
-#            vd.debug(f'{keystroke} at ({x-px}, {y-py}) in window {winname} {winscr}')
-
-    return found
-
-
-@VisiData.api
-def mainloop(self, scr):
+def mainloop(vd, scr):
     'Manage execution of keystrokes and subsequent redrawing of screen.'
     nonidle_timeout = vd.curses_timeout
 
@@ -221,12 +163,12 @@ def mainloop(self, scr):
     prefixWaiting = False
     vd.scrFull = scr
 
-    self.keystrokes = ''
+    vd.keystrokes = ''
     while True:
-        if not self.stackedSheets and self.currentReplay is None:
+        if not vd.stackedSheets and vd.currentReplay is None:
             return
 
-        sheet = self.activeSheet
+        sheet = vd.activeSheet
 
         if not sheet:
             continue  # waiting for replay to push sheet
@@ -236,83 +178,76 @@ def mainloop(self, scr):
 
         vd.setWindows(vd.scrFull)
 
-        if not self.drainPendingKeys(scr) or time.time() - self._lastDrawTime > self.min_draw_ms/1000:  #1459
-            self.draw_all()
-            self._lastDrawTime = time.time()
+        if not vd.drainPendingKeys(scr) or time.time() - vd._lastDrawTime > vd.min_draw_ms/1000:  #1459
+            vd.draw_all()
+            vd._lastDrawTime = time.time()
 
-        if vd._nextCommands:
-            sheet.execCommand(vd._nextCommands.pop(0), keystrokes=self.keystrokes)
-            continue
+        keystroke = vd.getkeystroke(scr, sheet)
 
-        keystroke = self.getkeystroke(scr, sheet)
-
-        if not keystroke and prefixWaiting and "Alt+" in self.keystrokes:  # timeout ESC
-            self.keystrokes = ''
+        if not keystroke and prefixWaiting and "Alt+" in vd.keystrokes:  # timeout ESC
+            vd.keystrokes = ''
 
         if keystroke:  # wait until next keystroke to clear statuses and previous keystrokes
             numTimeouts = 0
             if not prefixWaiting:
-                self.keystrokes = ''
+                vd.keystrokes = ''
 
-            self.statuses.clear()
+            vd.statuses.clear()
 
             if keystroke == 'KEY_MOUSE':
                 try:
-                    self.keystrokes = ''
-                    pct = vd.windowConfig['pct']
-                    topPaneActive = ((vd.activePane == 2 and pct < 0)  or (vd.activePane == 1 and pct > 0))
-                    bottomPaneActive = ((vd.activePane == 1 and pct < 0)  or (vd.activePane == 2 and pct > 0))
-
-                    r = vd.parseMouse(top=vd.winTop, bot=vd.winBottom, menu=vd.scrMenu)
-                    for keystroke, y, x, winname, winscr in reversed(r):
-                        if (bottomPaneActive and winname == 'top') or (topPaneActive and winname == 'bot'):
-                            self.activePane = 1 if self.activePane == 2 else 2
-                            sheet = self.activeSheet
-
-                        f = self.getMouse(winscr, x, y, keystroke)
-                        sheet.mouseX, sheet.mouseY = x, y
-                        if f:
-                            if isinstance(f, str):
-                                for cmd in f.split():
-                                    sheet.execCommand(cmd)
-                            else:
-                                f(y, x, keystroke)
-
-                            self.keystrokes = self.prettykeys(keystroke)
-                            keystroke = ''   # already handled
-                            break  # first successful command stops checking
-                except curses.error:
-                    pass
+                    keystroke = vd.handleMouse(sheet)  # if it was handled, don't handle again as a regular keystroke
                 except Exception as e:
-                    self.exceptionCaught(e)
+                    vd.exceptionCaught(e)
 
-            if keystroke and keystroke in self.keystrokes[:-1]:
+            if keystroke and keystroke in vd.allPrefixes and keystroke in vd.keystrokes[:-1]:
                 vd.warning('duplicate prefix: ' + keystroke)
-                self.keystrokes = ''
+                vd.keystrokes = ''
             else:
-                self.keystrokes += self.prettykeys(keystroke)
+                keystroke = vd.prettykeys(keystroke)
+                vd.keystrokes += keystroke
 
-        self.drawRightStatus(sheet._scr, sheet)  # visible for commands that wait for input
+        vd.drawRightStatus(sheet._scr, sheet)  # visible for commands that wait for input
 
         if not keystroke:  # timeout instead of keypress
             pass
-        elif keystroke == '^Q':
-            return self.lastErrors and '\n'.join(self.lastErrors[-1])
-        elif vd.bindkeys._get(self.keystrokes):
-            sheet.execCommand(self.keystrokes, keystrokes=self.keystrokes)
+        elif keystroke == 'Ctrl+Q':
+            return vd.lastErrors and '\n'.join(vd.lastErrors[-1])
+        elif vd.bindkeys._get(vd.keystrokes):
+            sheet.execCommand(vd.keystrokes, keystrokes=vd.keystrokes)
             prefixWaiting = False
-        elif keystroke in self.allPrefixes:
+        elif keystroke in vd.allPrefixes:
             prefixWaiting = True
         else:
-            vd.status('no command for "%s"' % (self.keystrokes))
+            vd.status('no command for "%s"' % (vd.keystrokes))
             prefixWaiting = False
 
-        self.checkForFinishedThreads()
-        sheet.checkCursorNoExceptions()
+        # play next queued command
+        if vd._nextCommands and not vd.unfinishedThreads:
+            cmd = vd._nextCommands.pop(0)
+            if isinstance(cmd, (dict, list)):  # .vd cmdlog rows are NamedListTemplate
+                try:
+                    if vd.replayOne(cmd):
+                        vd.replay_cancel()
+                except Exception as e:
+                    vd.exceptionCaught(e)
+                    vd.replay_cancel()
+            else:
+                sheet.execCommand(cmd, keystrokes=vd.keystrokes)
+
+        if not vd._nextCommands:
+            if vd.currentReplay:
+                vd.currentReplayRow = None
+                vd.currentReplay = None
+
+        vd.checkForFinishedThreads()
+        vd.callNoExceptions(sheet.checkCursor)
 
         # no idle redraw unless background threads are running
         time.sleep(0)  # yield to other threads which may not have started yet
-        if vd.unfinishedThreads:
+        if vd._nextCommands:
+            vd.curses_timeout = int(vd.options.replay_wait*1000)
+        elif vd.unfinishedThreads:
             vd.curses_timeout = nonidle_timeout
         else:
             numTimeouts += 1
@@ -324,7 +259,8 @@ def mainloop(self, scr):
         scr.timeout(vd.curses_timeout)
 
 
-def initCurses():
+@VisiData.api
+def initCurses(vd):
     # reduce ESC timeout to 25ms. http://en.chys.info/2009/09/esdelay-ncurses/
     os.putenv('ESCDELAY', '25')
     curses.use_env(True)
@@ -339,25 +275,23 @@ def initCurses():
 
     curses.raw()    # get control keys instead of signals
     curses.meta(1)  # allow "8-bit chars"
-    curses.MOUSE_ALL = 0xffffffff
-    curses.mousemask(curses.MOUSE_ALL if options.mouse_interval else 0)
-    curses.mouseinterval(options.mouse_interval)
-    curses.mouseEvents = {}
 
     scr.keypad(1)
 
     curses.def_prog_mode()
 
-    for k in dir(curses):
-        if k.startswith('BUTTON') or k in ('REPORT_MOUSE_POSITION', '2097152'):
-            curses.mouseEvents[getattr(curses, k)] = k
+    vd.drainPendingKeys(scr)
+    if '\x1b' in vd.pendingKeys:  #1993
+        # if start of an ANSI escape sequence, might be mangled, discard remaining keystrokes
+        vd.pendingKeys.clear()
+        curses.flushinp()
 
     return scr
 
 
 def wrapper(f, *args, **kwargs):
     try:
-        scr = initCurses()
+        scr = vd.initCurses()
         return f(scr, *args, **kwargs)
     finally:
         curses.endwin()
@@ -373,9 +307,11 @@ def run(vd, *sheetlist):
         for vs in sheetlist:
             vd.push(vs, load=False)
 
-        scr = initCurses()
+        scr = vd.initCurses()
         ret = vd.mainloop(scr)
     except curses.error as e:
+        if vd.options.debug:
+            raise
         vd.fail(str(e))
     finally:
         if scr:
@@ -384,4 +320,14 @@ def run(vd, *sheetlist):
     vd.cancelThread(*[t for t in vd.unfinishedThreads if not t.name.startswith('save_')])
 
     if ret:
-        vd.printout(ret)
+        builtins.print(ret)
+
+    return ret
+
+@VisiData.api
+def addCommand(vd, *args, **kwargs):
+    return BaseSheet.addCommand(*args, **kwargs)
+
+
+import sys
+vd.addGlobals({k:getattr(sys.modules[__name__], k) for k in __all__})

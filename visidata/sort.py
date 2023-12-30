@@ -36,7 +36,7 @@ class Reversor:
 
 
 @Sheet.api
-def sortkey(self, r, prog=None):
+def sortkey(self, r):
     ret = []
     for col, reverse in self._ordering:
         if isinstance(col, str):
@@ -44,8 +44,6 @@ def sortkey(self, r, prog=None):
         val = col.getTypedValue(r)
         ret.append(Reversor(val) if reverse else val)
 
-    if prog:
-        prog.addProgress(1)
 
     return ret
 
@@ -58,7 +56,7 @@ def sort(self):
     try:
         with Progress(gerund='sorting', total=self.nRows) as prog:
             # must not reassign self.rows: use .sort() instead of sorted()
-            self.rows.sort(key=lambda r,self=self,prog=prog: self.sortkey(r, prog=prog))
+            self.rows.sort(key=lambda r,self=self,prog=prog: (prog.addProgress(1), self.sortkey(r))[1])
     except TypeError as e:
         vd.warning('sort incomplete due to TypeError; change column type')
         vd.exceptionCaught(e, status=False)
@@ -75,3 +73,12 @@ Sheet.addCommand('z[', 'sort-asc-add', 'orderBy(cursorCol)', 'sort ascending by 
 Sheet.addCommand('z]', 'sort-desc-add', 'orderBy(cursorCol, reverse=True)', 'sort descending by current column; add to existing sort criteria')
 Sheet.addCommand('gz[', 'sort-keys-asc-add', 'orderBy(*keyCols)', 'sort ascending by all key columns; add to existing sort criteria')
 Sheet.addCommand('gz]', 'sort-keys-desc-add', 'orderBy(*keyCols, reverse=True)', 'sort descending by all key columns; add to existing sort criteria')
+
+vd.addMenuItems('''
+    Column > Sort by > current column only > ascending > sort-asc
+    Column > Sort by > current column only > descending > sort-desc
+    Column > Sort by > current column also > ascending > sort-asc-add
+    Column > Sort by > current column also > descending > sort-desc-add
+    Column > Sort by > key columns > ascending > sort-keys-asc
+    Column > Sort by > key columns > descending > sort-keys-desc
+''')

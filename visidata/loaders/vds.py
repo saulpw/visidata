@@ -2,37 +2,40 @@
 
 import json
 
-from visidata import VisiData, JsonSheet, Progress, IndexSheet, SettableColumn, ItemColumn
+from visidata import VisiData, JsonSheet, Progress, IndexSheet, SettableColumn, ItemColumn, ExprColumn
 
 
 NL='\n'
 
 @VisiData.api
 def open_vds(vd, p):
-    return VdsIndexSheet(p.name, source=p)
+    return VdsIndexSheet(p.base_stem, source=p)
 
 
 @VisiData.api
 def save_vds(vd, p, *sheets):
     'Save in custom VisiData format, preserving columns and their attributes.'
 
-    with p.open_text(mode='w', encoding='utf-8') as fp:
+    with p.open(mode='w', encoding='utf-8') as fp:
         for vs in sheets:
             # class and attrs for vs
             d = { 'name': vs.name, }
             fp.write('#'+json.dumps(d)+NL)
 
             # class and attrs for each column in vs
-            for col in vs.visibleCols:
+            for col in vs.columns:
                 d = col.__getstate__()
                 if isinstance(col, SettableColumn):
                     d['col'] = 'Column'
+                elif isinstance(col, ItemColumn):
+                    d['col'] = 'Column'
+                    d['expr'] = col.name  #2037  override expr
                 else:
                     d['col'] = type(col).__name__
                 fp.write('#'+json.dumps(d)+NL)
 
             with Progress(gerund='saving'):
-                for row in vs.iterdispvals(*vs.visibleCols, format=False):
+                for row in vs.iterdispvals(*vs.columns, format=False):
                     d = {col.name:val for col, val in row.items()}
                     fp.write(json.dumps(d, default=str)+NL)
 
@@ -40,7 +43,7 @@ def save_vds(vd, p, *sheets):
 class VdsIndexSheet(IndexSheet):
     def iterload(self):
         vs = None
-        with self.source.open_text(encoding='utf-8') as fp:
+        with self.source.open(encoding='utf-8') as fp:
             line = fp.readline()
             while line:
                 if line.startswith('#{'):
@@ -59,7 +62,7 @@ class VdsSheet(JsonSheet):
         self.colnames = {}
         self.columns = []
 
-        with self.source.open_text(encoding='utf-8') as fp:
+        with self.source.open(encoding='utf-8') as fp:
             fp.seek(self.source_fpos)
 
             # consume all metadata, create columns

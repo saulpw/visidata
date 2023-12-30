@@ -17,7 +17,7 @@ services = {}  # [('tcp', 25)] -> 'smtp'
 
 @VisiData.api
 def open_pcap(vd, p):
-    return PcapSheet(p.name, source=p)
+    return PcapSheet(p.base_stem, source=p)
 
 open_cap = open_pcap
 open_pcapng = open_pcap
@@ -83,8 +83,8 @@ def init_pcap():
         return
 
     global dpkt, dnslib
-    import dpkt
-    import dnslib
+    dpkt = vd.importExternal('dpkt')
+    dnslib = vd.importExternal('dnslib')
 
     load_consts(protocols['ethernet'], dpkt.ethernet, 'ETH_TYPE_')
     load_consts(protocols['ip'], dpkt.ip, 'IP_PROTO_')

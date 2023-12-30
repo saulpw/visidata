@@ -1,0 +1,27 @@
+# VisiData v2.12dev
+exec-python vd.options.overwrite='y'
+exec-python vd.options.filetype='git'
+open-file .
+git-open-remotes
+
+# remote add
+add-row
+col remote
+edit-cell test_remote
+col url
+edit-cell git@github.com:test/test.git
+commit-sheet
+reload-sheet
+
+# remote rename
+col remote
+row キtest_remote
+edit-cell test_remote2
+commit-sheet
+reload-sheet
+
+# remote remove
+row キtest_remote2
+delete-row
+commit-sheet
+reload-sheet

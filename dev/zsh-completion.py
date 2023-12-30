@@ -8,7 +8,6 @@ import re
 
 sys.path.insert(0, dirn(dirn((os.path.abspath(__file__)))))
 from visidata import vd
-from visidata.main import option_aliases
 
 ZSH_COMPLETION_FILE = "_visidata"
 ZSH_COMPLETION_TEMPLATE = "dev/zsh-completion.in"
@@ -18,7 +17,9 @@ pat_select = re.compile("^\([^)]*\)")
 
 def generate_completion(opt):
     prefix = "--" + opt.name
-    shortnames = [key for key, value in option_aliases.items() if value[0] == opt.name]
+    shortnames = [
+        key for key, value in vd.option_aliases.items() if value[0] == opt.name
+    ]
     if len(shortnames):
         if len(shortnames[0]) == 1:
             shortname = "-" + shortnames[0]

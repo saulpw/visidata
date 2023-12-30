@@ -1,10 +1,15 @@
+import sys
 import math
 import functools
 import collections
-from statistics import mode, stdev
+import statistics
 
-from visidata import Progress, Column
-from visidata import *
+from visidata import Progress, Sheet, Column, ColumnsSheet, VisiData
+from visidata import vd, anytype, vlen, asyncthread, wrapply, AttrDict
+
+vd.help_aggregators = '# Aggregators Help\nHELPTODO'
+
+vd.option('null_value', None, 'a value to be counted as null', replay=True)
 
 
 @Column.api
@@ -53,10 +58,11 @@ Column.aggregators = property(aggregators_get, aggregators_set)
 
 
 class Aggregator:
-    def __init__(self, name, type, func, helpstr='foo'):
+    def __init__(self, name, type, funcRows, funcValues=None, helpstr='foo'):
         'Define aggregator `name` that calls func(col, rows)'
         self.type = type
-        self.func = func
+        self.func = funcRows  # funcRows(col, rows)
+        self.funcValues = funcValues  # funcValues(values, *args)
         self.helpstr = helpstr
         self.name = name
 
@@ -66,19 +72,18 @@ class Aggregator:
 _defaggr = Aggregator
 
 @VisiData.api
-def aggregator(vd, name, func, helpstr='', *args, type=None):
-    'Define simple aggregator *name* that calls ``func(values, *args)`` to aggregate *values*.  Use *type* to force the default type of the aggregated column.'
-    def _func(col, rows):  # wrap builtins so they can have a .type
+def aggregator(vd, name, funcValues, helpstr='', *args, type=None):
+    'Define simple aggregator *name* that calls ``funcValues(values, *args)`` to aggregate *values*.  Use *type* to force the default type of the aggregated column.'
+    def _funcRows(col, rows):  # wrap builtins so they can have a .type
         vals = list(col.getValues(rows))
         try:
-            return func(vals, *args)
+            return funcValues(vals, *args)
         except Exception as e:
             if len(vals) == 0:
                 return None
             return e
 
-    vd.aggregators[name] = _defaggr(name, type, _func, helpstr)
-    vd.addGlobals({name: func})
+    vd.aggregators[name] = _defaggr(name, type, _funcRows, funcValues=funcValues, helpstr=helpstr)  # accepts a srccol + list of rows
 
 ## specific aggregator implementations
 
@@ -87,9 +92,11 @@ def mean(vals):
     if vals:
         return float(sum(vals))/len(vals)
 
-def median(values):
-    L = sorted(values)
-    return L[len(L)//2]
+def _vsum(vals):
+    return sum(vals, start=type(vals[0] if len(vals) else 0)())  #1996
+
+# start parameter in sum() added in Python 3.8
+vsum = _vsum if sys.version_info[:2] >= (3, 8) else sum
 
 # http://code.activestate.com/recipes/511478-finding-the-percentile-of-the-values/
 def _percentile(N, percent, key=lambda x:x):
@@ -115,7 +122,7 @@ def _percentile(N, percent, key=lambda x:x):
 
 @functools.lru_cache(100)
 def percentile(pct, helpstr=''):
-    return _defaggr('p%s'%pct, None, lambda col,rows,pct=pct: _percentile(sorted(col.getValues(rows)), pct/100), helpstr)
+    return _defaggr('p%s'%pct, None, lambda col,rows,pct=pct: _percentile(sorted(col.getValues(rows)), pct/100), helpstr=helpstr)
 
 def quantiles(q, helpstr):
     return [percentile(round(100*i/q), helpstr) for i in range(1, q)]
@@ -124,13 +131,13 @@ vd.aggregator('min', min, 'minimum value')
 vd.aggregator('max', max, 'maximum value')
 vd.aggregator('avg', mean, 'arithmetic mean of values', type=float)
 vd.aggregator('mean', mean, 'arithmetic mean of values', type=float)
-vd.aggregator('median', median, 'median of values')
-vd.aggregator('mode', mode, 'mode of values')
-vd.aggregator('sum', sum, 'sum of values')
+vd.aggregator('median', statistics.median, 'median of values')
+vd.aggregator('mode', statistics.mode, 'mode of values')
+vd.aggregator('sum', vsum, 'sum of values')
 vd.aggregator('distinct', set, 'distinct values', type=vlen)
 vd.aggregator('count', lambda values: sum(1 for v in values), 'number of values', type=int)
 vd.aggregator('list', list, 'list of values')
-vd.aggregator('stdev', stdev, 'standard deviation of values', type=float)
+vd.aggregator('stdev', statistics.stdev, 'standard deviation of values', type=float)
 
 vd.aggregators['q3'] = quantiles(3, 'tertiles (33/66th pctile)')
 vd.aggregators['q4'] = quantiles(4, 'quartiles (25/50/75th pctile)')
@@ -143,13 +150,14 @@ for pct in (10, 20, 25, 30, 33, 40, 50, 60, 67, 70, 75, 80, 90, 95, 99):
     vd.aggregators[f'p{pct}'] = percentile(pct, f'{pct}th percentile')
 
 # returns keys of the row with the max value
-vd.aggregators['keymax'] = _defaggr('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]), 'key of the maximum value')
+vd.aggregators['keymax'] = _defaggr('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]), helpstr='key of the maximum value')
 
 
 ColumnsSheet.columns += [
     Column('aggregators',
            getter=lambda c,r:r.aggstr,
-           setter=lambda c,r,v:setattr(r, 'aggregators', v))
+           setter=lambda c,r,v:setattr(r, 'aggregators', v),
+           help='change the metrics calculated in every Frequency or Pivot derived from the source sheet')
 ]
 
 @Sheet.api
@@ -186,10 +194,42 @@ def memo_aggregate(col, agg, rows):
 @VisiData.property
 def aggregator_choices(vd):
     return [
-       {'key': agg, 'desc': v[0].helpstr if isinstance(v, list) else v.helpstr} for agg, v in vd.aggregators.items()
+       AttrDict(key=agg, desc=v[0].helpstr if isinstance(v, list) else v.helpstr)
+         for agg, v in vd.aggregators.items()
+            if not agg.startswith('p')  # skip all the percentiles, user should use q# instead
     ]
 
 
-Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseMany(aggregator_choices))', 'Add aggregator to current column')
-Sheet.addCommand('z+', 'memo-aggregate', 'for agg in chooseMany(aggregator_choices): cursorCol.memo_aggregate(aggregators[agg], selectedRows or rows)', 'memo result of aggregator over values in selected rows for current column')
-ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseMany(aggregator_choices))', 'add aggregators to selected source columns')
+@VisiData.api
+def chooseAggregators(vd):
+    prompt = 'choose aggregators: '
+    def _fmt_aggr_summary(match, row, trigger_key):
+        formatted_aggrname = match.formatted.get('key', row.key) if match else row.key
+        r = ' '*(len(prompt)-3)
+        r += f'[:keystrokes]{trigger_key}[/]  '
+        r += formatted_aggrname
+        if row.desc:
+            r += ' - '
+            r += match.formatted.get('desc', row.desc) if match else row.desc
+        return r
+
+    r = vd.activeSheet.inputPalette(prompt,
+            vd.aggregator_choices,
+            value_key='key',
+            formatter=_fmt_aggr_summary,
+            type='aggregators',
+            help=vd.help_aggregators,
+            multiple=True)
+
+    aggrs = r.split()
+    for aggr in aggrs:
+        vd.usedInputs[aggr] += 1
+    return aggrs
+
+Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseAggregators())', 'Add aggregator to current column')
+Sheet.addCommand('z+', 'memo-aggregate', 'for agg in chooseAggregators(): cursorCol.memo_aggregate(aggregators[agg], selectedRows or rows)', 'memo result of aggregator over values in selected rows for current column')
+ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseAggregators())', 'add aggregators to selected source columns')
+
+vd.addMenuItems('''
+    Column > Add aggregator > aggregate-col
+''')

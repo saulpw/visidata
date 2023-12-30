@@ -1,0 +1,10 @@
+#!/usr/bin/env vd -p
+{"longname": "open-file", "input": "tests/business.sqlite", "keystrokes": "o"}
+{"sheet": "business", "col": "", "row": "\u30adcustomers", "longname": "open-row", "input": "", "keystrokes": "Enter", "comment": "open sheet with copies of rows referenced in current row"}
+{"sheet": "customers", "col": "customerid", "row": "", "longname": "key-col", "input": "", "keystrokes": "!", "comment": "toggle current column as a key column"}
+{"sheet": "customers", "col": "", "row": "\u30ad1002", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "customers", "col": "", "row": "\u30ad1003", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "customers", "col": "", "row": "\u30ad1004", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "customers", "col": "", "row": "\u30ad1006", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "customers", "col": "", "row": "\u30ad1007", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "customers", "col": "", "row": "", "longname": "dup-limit", "input": 2, "comment": "open duplicate sheet with only selected rows (input limit)"}

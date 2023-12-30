@@ -1,0 +1,4 @@
+name	width	type	fmtstr	value	aggregators
+Name				Daniel	
+Number		int		1	
+Exile		bool		True	

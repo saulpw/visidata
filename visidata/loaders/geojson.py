@@ -1,12 +1,15 @@
 from functools import reduce
+from copy import deepcopy
+
 import json
 
-from visidata import VisiData, vd, Column, asyncthread, Progress, PythonSheet, InvertedCanvas, deepcopy, date, wrapply, TypedExceptionWrapper, TypedWrapper
+from visidata import VisiData, vd, Column, asyncthread, Progress, PythonSheet, InvertedCanvas, date, wrapply, TypedExceptionWrapper, TypedWrapper
+
 
 
 @VisiData.api
 def open_geojson(vd, p):
-    return GeoJSONSheet(p.name, source=p)
+    return GeoJSONSheet(p.base_stem, source=p)
 
 class GeoJSONColumn(Column):
     def calcValue(self, row):
@@ -24,7 +27,7 @@ class GeoJSONSheet(PythonSheet):
     def iterload(self):
         self.colnames = {}
 
-        with self.source.open_text(encoding='utf-8') as fp:
+        with self.source.open(encoding='utf-8') as fp:
             ret = json.load(fp)
 
             if ret['type'] == 'FeatureCollection':
@@ -146,14 +149,14 @@ def save_geojson(vd, p, vs):
     except Exception:
         indent = vs.options.json_indent
 
-    with p.open_text(mode='w', encoding='utf-8') as fp:
+    with p.open(mode='w', encoding='utf-8') as fp:
         encoder = json.JSONEncoder(indent=indent, sort_keys=vs.options.json_sort_keys)
         for chunk in encoder.iterencode(featcoll):
             fp.write(chunk)
 
 GeoJSONSheet.addCommand('.', 'plot-row', 'vd.push(GeoJSONMap(name+"_map", sourceRows=[cursorRow], textCol=cursorCol, source=sheet))', 'plot geospatial vector in current row')
 GeoJSONSheet.addCommand('g.', 'plot-rows', 'vd.push(GeoJSONMap(name+"_map", sourceRows=rows, textCol=cursorCol, source=sheet))', 'plot all geospatial vectors in current sheet')
-GeoJSONMap.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .geojson)')
+GeoJSONMap.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet)', 'save current sheet to filename in format determined by extension (default .geojson)')
 
 vd.addGlobals({
     'GeoJSONMap': GeoJSONMap,

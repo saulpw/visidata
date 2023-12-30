@@ -1,15 +1,17 @@
 import os
 import os.path
 import time
-from urllib.request import Request, urlopen
-import urllib.parse
 
-from visidata import vd, VisiData, Path, options, modtime
+from visidata import vd, VisiData, Path, modtime
 from visidata.settings import _get_cache_dir
+
 
 @VisiData.global_api
 def urlcache(vd, url, days=1, text=True, headers={}):
     'Return Path object to local cache of url contents.'
+    from urllib.request import Request, urlopen
+    import urllib.parse
+
     cache_dir = _get_cache_dir()
     os.makedirs(cache_dir, exist_ok=True)
 
@@ -27,13 +29,24 @@ def urlcache(vd, url, days=1, text=True, headers={}):
         ret = fp.read()
         if text:
             ret = ret.decode('utf-8').strip()
-            with p.open_text(mode='w', encoding='utf-8') as fpout:
+            with p.open(mode='w', encoding='utf-8') as fpout:
                 fpout.write(ret)
         else:
             with p.open_bytes(mode='w') as fpout:
                 fpout.write(ret)
 
     return p
+
+
+@VisiData.api
+def enable_requests_cache(vd):
+    try:
+        import requests
+        import requests_cache
+
+        requests_cache.install_cache(str(Path(os.path.join(vd.options.visidata_dir, 'httpcache'))), backend='sqlite', expire_after=24*60*60)
+    except ModuleNotFoundError:
+        vd.warning('install requests_cache for less intrusive scraping')
 
 
 vd.addGlobals({'urlcache': urlcache})

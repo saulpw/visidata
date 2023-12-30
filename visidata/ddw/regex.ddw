@@ -1,0 +1,57 @@
+{"id": null, "type": null, "x": 5, "y": 1, "text": ".", "color": "keystrokes", "tags": [], "group": "", "frame": null, "rows": null, "duration_ms": null, "ref": null, "href": null}
+{"x": 5, "y": 2, "text": "^", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 5, "y": 3, "text": "$", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 38, "y": 1, "text": "*", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 38, "y": 2, "text": "+", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 38, "y": 3, "text": "?", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 34, "y": 5, "text": "{m,n}", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 8, "y": 1, "text": "any char except newline", "color": "", "tags": [], "group": ""}
+{"x": 8, "y": 2, "text": "start of string", "color": "", "tags": [], "group": ""}
+{"x": 8, "y": 3, "text": "end of string", "color": "", "tags": [], "group": ""}
+{"x": 42, "y": 1, "text": "0 or more", "color": "", "tags": [], "group": ""}
+{"x": 42, "y": 2, "text": "1 or more", "color": "", "tags": [], "group": ""}
+{"x": 42, "y": 3, "text": "0 or 1", "color": "", "tags": [], "group": ""}
+{"x": 42, "y": 5, "text": "between m and n", "color": "", "tags": [], "group": ""}
+{"x": 1, "y": 11, "text": "[abc]", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 0, "y": 12, "text": "[^abc]", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 4, "y": 4, "text": "\\d", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 4, "y": 6, "text": "\\s", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 4, "y": 8, "text": "\\w", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 8, "y": 4, "text": "digit char", "color": "", "tags": [], "group": ""}
+{"x": 8, "y": 6, "text": "whitespace char", "color": "", "tags": [], "group": ""}
+{"x": 4, "y": 10, "text": "\\b", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 8, "y": 10, "text": "word boundary", "color": "", "tags": [], "group": ""}
+{"x": 8, "y": 8, "text": "word char", "color": "", "tags": [], "group": ""}
+{"x": 18, "y": 8, "text": "[a-zA-Z0-9_]", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 36, "y": 7, "text": "(\u2026)", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 34, "y": 8, "text": "(?:\u2026)", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 8, "y": 11, "text": "any of", "color": "", "tags": [], "group": ""}
+{"x": 15, "y": 11, "text": "a", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 17, "y": 11, "text": "or", "color": "", "tags": [], "group": ""}
+{"x": 20, "y": 11, "text": "b", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 22, "y": 11, "text": "or", "color": "", "tags": [], "group": ""}
+{"x": 25, "y": 11, "text": "c", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 19, "y": 4, "text": "[0-9]", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 42, "y": 7, "text": "capturing group", "color": "", "tags": [], "group": ""}
+{"x": 42, "y": 8, "text": "non-capturing group", "color": "", "tags": [], "group": ""}
+{"x": 9, "y": 12, "text": "", "color": "", "tags": [], "group": ""}
+{"x": 8, "y": 12, "text": "not", "color": "", "tags": [], "group": ""}
+{"x": 12, "y": 12, "text": "a", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 14, "y": 12, "text": "or", "color": "", "tags": [], "group": ""}
+{"x": 17, "y": 12, "text": "b", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 19, "y": 12, "text": "or", "color": "", "tags": [], "group": ""}
+{"x": 22, "y": 12, "text": "c", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 38, "y": 10, "text": "|", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 42, "y": 10, "text": "logical OR", "color": "", "tags": [], "group": ""}
+{"x": 4, "y": 5, "text": "\\D", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 4, "y": 7, "text": "\\S", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 4, "y": 9, "text": "\\W", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 8, "y": 5, "text": "non-digit char", "color": "", "tags": [], "group": ""}
+{"x": 8, "y": 7, "text": "non-whitespace char", "color": "", "tags": [], "group": ""}
+{"x": 8, "y": 9, "text": "non-word char", "color": "", "tags": [], "group": ""}
+{"x": 36, "y": 4, "text": "{m}", "color": "keystrokes", "tags": [], "group": ""}
+{"x": 42, "y": 4, "text": "exactly m", "color": "", "tags": [], "group": ""}
+{"x": 4, "y": 0, "text": "Character classes", "color": "bold underline", "tags": [], "group": ""}
+{"x": 35, "y": 0, "text": "Repetition", "color": "bold underline", "tags": [], "group": ""}
+{"x": 2, "y": 14, "text": "For full documentation on Python regular expressions, see", "color": "", "tags": [], "group": ""}
+{"x": 6, "y": 15, "text": "https://docs.python.org/3/library/re.html", "color": "underline", "tags": [], "group": "", "href": "https://docs.python.org/3/library/re.html"}

@@ -1,0 +1,5 @@
+#!/usr/bin/env vd -p
+{"longname": "open-file", "input": "tests/business.sqlite", "keystrokes": "o"}
+{"sheet": "business", "col": "", "row": "\u30adorder_items", "longname": "open-row", "input": "", "keystrokes": "Enter", "comment": "open sheet with copies of rows referenced in current row"}
+{"sheet": "order_items", "col": "qty", "row": "0", "longname": "select-equal-cell", "input": "", "keystrokes": ",", "comment": "select rows matching current cell in current column"}
+{"sheet": "order_items", "col": "", "row": "", "longname": "dup-selected", "input": "", "keystrokes": "\"", "comment": "open duplicate sheet with selected rows (default limit)"}

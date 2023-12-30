@@ -1,0 +1,6 @@
+sheet	col	row	longname	input	keystrokes	comment
+global		filetype	set-option	dir		
+			open-file	bin	o	
+bin	filename		sort-asc		[	sort ascending by current column; replace any existing sort criteria
+bin	modtime		hide-col		-	Hide current column
+bin	size		hide-col		-	Hide current column

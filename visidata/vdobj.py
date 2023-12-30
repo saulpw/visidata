@@ -1,5 +1,4 @@
 from functools import wraps
-from unittest import mock
 import curses
 
 import visidata
@@ -25,7 +24,7 @@ def asyncthread(func):
 
 
 class VisiData(visidata.Extensible):
-    allPrefixes = ['g', 'z', ESC]  # embig'g'en, 'z'mallify, ESC=Alt/Meta
+    allPrefixes = ['g', 'z', 'Alt+']  # embig'g'en, 'z'mallify, Alt/Esc=User
 
     @classmethod
     def global_api(cls, func):
@@ -42,9 +41,16 @@ class VisiData(visidata.Extensible):
         self.lastErrors = []
         self.pendingKeys = []
         self.keystrokes = ''
-        self.scrFull = mock.MagicMock(__bool__=mock.Mock(return_value=False))  # disable curses in batch mode
+        self.scrFull = None
         self._cmdlog = None
+        self.currentReplay = None
         self.contexts = [self]  # objects whose attributes are in the fallback context for eval/exec.
+        self.importingModule = None
+        self.importedModules = []
+
+    @property
+    def cursesEnabled(self):
+        return bool(self.scrFull)
 
     def sheetstack(self, pane=0):
         'Return list of sheets in given *pane*. pane=0 is the active pane.  pane=-1 is the inactive pane.'
@@ -74,10 +80,6 @@ class VisiData(visidata.Extensible):
     def activeStack(self):
         return self.sheetstack() or self.sheetstack(-1)
 
-    @visidata.drawcache_property
-    def mousereg(self):
-        return []
-
     def __copy__(self):
         'Dummy method for Extensible.init()'
         pass
@@ -100,12 +102,29 @@ class VisiData(visidata.Extensible):
         'Invalidate internal caches between command inputs.'
         visidata.Extensible.clear_all_caches()
 
+    def resetVisiData(self):
+        self.clearCaches()  # we want vd to return a new VisiData object for each command
+        vd = visidata.vd  # get the new vd
+        vd.cmdlog.rows = []
+        vd.sheets = []
+        vd.allSheets = []
+        return vd
+
+    def get_wch(self, scr):
+        try:
+            return scr.get_wch()
+        except AttributeError:  #192 some packages don't have wide chars
+            k = scr.getch()
+            if k == -1:  # mimic get_wch behavior
+                raise curses.error('no char ready')
+            return k
+
     def drainPendingKeys(self, scr):
         '''Call scr.get_wch() until no more keypresses are available.  Return True if any keypresses are pending.'''
         scr.timeout(0)
         try:
             while True:
-                k = scr.get_wch()
+                k = self.get_wch(scr)
                 if k:
                     self.pendingKeys.append(k)
                 else:
@@ -127,7 +146,7 @@ class VisiData(visidata.Extensible):
             curses.reset_prog_mode()  #1347
             try:
                 scr.refresh()
-                k = scr.get_wch()
+                k = self.get_wch(scr)
                 vs = vs or self.activeSheet
                 if vs:
                     self.drawRightStatus(vs._scr, vs) # continue to display progress %
@@ -139,14 +158,6 @@ class VisiData(visidata.Extensible):
                 return k
             k = ord(k)
         return curses.keyname(k).decode('utf-8')
-
-    def onMouse(self, scr, y, x, h, w, **kwargs):
-        self.mousereg.append((scr, y, x, h, w, kwargs))
-
-    def getMouse(self, _scr, _x, _y, button):
-        for scr, y, x, h, w, kwargs in self.mousereg[::-1]:
-            if scr is _scr and x <= _x < x+w and y <= _y < y+h and button in kwargs:
-                return kwargs[button]
 
     @property
     def screenHeight(self):

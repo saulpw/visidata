@@ -11,7 +11,7 @@ eleventyNavigation:
 - (call out no number prefix?)
 - '/' and '?' search for regex, 'n' and 'N' continue.  These should work just like in vim but only within a single column.
   - 'g' searches across all columns
-- 'gr'/'gc' go to a specific row or column by number
+- 'zr'/'zc' go to a specific row or column by number
 - 'r' and 'c' go by row key or column name
 
 i

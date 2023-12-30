@@ -1,7 +1,7 @@
-[submodule "deps/dateutil"]
-	path = deps/dateutil
-	url = https://github.com/dateutil/dateutil.git
 [submodule "deps/pyxlsb"]
 	path = deps/pyxlsb
 	url = https://github.com/saulpw/pyxlsb.git
 
+[submodule "deps/requests-cache"]
+	path = deps/requests-cache
+	url = https://github.com/saulpw/requests-cache.git

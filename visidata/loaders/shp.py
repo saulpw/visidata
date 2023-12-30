@@ -1,13 +1,14 @@
 import json
+from copy import copy
 
-from visidata import VisiData, vd, Sheet, Column, Progress, date, copy, InvertedCanvas, asyncthread
+from visidata import VisiData, vd, Sheet, Column, Progress, date, InvertedCanvas, asyncthread
 
 # requires pyshp
 
 
 @VisiData.api
 def open_shp(vd, p):
-    return ShapeSheet(p.name, source=p)
+    return ShapeSheet(p.base_stem, source=p)
 
 VisiData.open_dbf = VisiData.open_shp
 
@@ -33,7 +34,7 @@ class ShapeSheet(Sheet):
         Column('shapeType', width=0, getter=lambda col,row: row.shape.shapeType)
     ]
     def iterload(self):
-        import shapefile
+        shapefile = vd.importExternal('shapefile', 'pyshp')
         self.sf = shapefile.Reader(str(self.source))
         self.reloadCols()
         for shaperec in Progress(self.sf.iterShapeRecords(), total=self.sf.numRecords):
@@ -97,10 +98,10 @@ def save_geojson(vd, p, vs):
         'type': 'FeatureCollection',
         'features': features,
     }
-    with p.open_text(mode='w', encoding=vs.options.encoding) as fp:
+    with p.open(mode='w', encoding=vs.options.save_encoding) as fp:
         for chunk in json.JSONEncoder().iterencode(featcoll):
             fp.write(chunk)
 
 ShapeSheet.addCommand('.', 'plot-row', 'vd.push(ShapeMap(name+"_map", source=sheet, sourceRows=[cursorRow], textCol=cursorCol))', 'plot geospatial vector in current row')
 ShapeSheet.addCommand('g.', 'plot-rows', 'vd.push(ShapeMap(name+"_map", source=sheet, sourceRows=rows, textCol=cursorCol))', 'plot all geospatial vectors in current sheet')
-ShapeMap.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet, confirm_overwrite=options.confirm_overwrite)', 'save current sheet to filename in format determined by extension (default .geojson)')
+ShapeMap.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet)', 'save current sheet to filename in format determined by extension (default .geojson)')

@@ -7,7 +7,7 @@ vd.option('fixed_maxcols', 0, 'max number of fixed-width columns to create (0 is
 
 @VisiData.api
 def open_fixed(vd, p):
-    return FixedWidthColumnsSheet(p.name, source=p, headerlines=[])
+    return FixedWidthColumnsSheet(p.base_stem, source=p, headerlines=[])
 
 class FixedWidthColumn(Column):
     def __init__(self, name, i, j, **kwargs):
@@ -76,7 +76,7 @@ class FixedWidthColumnsSheet(SequenceSheet):
 
 @VisiData.api
 def save_fixed(vd, p, *vsheets):
-    with p.open_text(mode='w', encoding=vsheets[0].options.encoding) as fp:
+    with p.open(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
         for sheet in vsheets:
             if len(vsheets) > 1:
                 fp.write('%s\n\n' % sheet.name)
@@ -94,5 +94,3 @@ def save_fixed(vd, p, *vsheets):
                     for col, val in dispvals.items():
                         fp.write(('{0:%s%s.%s} ' % ('>' if vd.isNumeric(col) else '<', widths[col], widths[col])).format(val))
                     fp.write('\n')
-
-            vd.status('%s save finished' % p)

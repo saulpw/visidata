@@ -18,13 +18,14 @@ def isUndoableCommand(longname):
 @VisiData.api
 def addUndo(vd, undofunc, *args, **kwargs):
     'On undo of latest command, call ``undofunc(*args, **kwargs)``.'
-    if options.undo:
+    if vd.options.undo:
         # occurs when VisiData is just starting up
         if getattr(vd, 'activeCommand', UNLOADED) is UNLOADED:
             return
         r = vd.modifyCommand
         # some special commands, like open-file, do not have an undofuncs set
-        if not r or not isUndoableCommand(r.longname):
+        # do not set undofuncs for non-logged commands
+        if not r or not isUndoableCommand(r.longname) or not vd.activeCommand or not vd.isLoggableCommand(vd.activeCommand.longname):
             return
         if not r.undofuncs:
             r.undofuncs = []
@@ -33,16 +34,17 @@ def addUndo(vd, undofunc, *args, **kwargs):
 
 @VisiData.api
 def undo(vd, sheet):
-    if not options.undo:
+    if not vd.options.undo:
         vd.fail("options.undo not enabled")
 
     # don't allow undo of first command on a sheet, which is always the command that created the sheet.
-    for cmdlogrow in sheet.cmdlog_sheet.rows[:0:-1]:
+    for i, cmdlogrow in enumerate(sheet.cmdlog_sheet.rows[:0:-1]):
         if cmdlogrow.undofuncs:
             for undofunc, args, kwargs, in cmdlogrow.undofuncs[::-1]:
                 undofunc(*args, **kwargs)
             sheet.undone.append(cmdlogrow)
-            sheet.cmdlog_sheet.rows.remove(cmdlogrow)
+            row_idx = len(sheet.cmdlog_sheet.rows)-1 - i
+            del sheet.cmdlog_sheet.rows[row_idx]
 
             vd.clearCaches()  # undofunc can invalidate the drawcache
 
@@ -113,3 +115,13 @@ def addUndoColNames(vd, cols):
 
 BaseSheet.addCommand('U', 'undo-last', 'vd.undo(sheet)', 'Undo the most recent change (options.undo must be enabled)')
 BaseSheet.addCommand('R', 'redo-last', 'vd.redo(sheet)', 'Redo the most recent undo (options.undo must be enabled)')
+
+vd.addGlobals(
+    undoAttrFunc=undoAttrFunc,
+    Fanout=Fanout,
+    undoAttrCopyFunc=undoAttrCopyFunc)
+
+vd.addMenuItems('''
+    Edit > Undo > undo-last
+    Edit > Redo > redo-last
+''')

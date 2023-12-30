@@ -1,4 +1,4 @@
-.Dd January 11, 2023
+.Dd December 29, 2023
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -26,6 +26,7 @@
 .Cm --play Ar cmdlog
 .Op Cm -w Ar waitsecs
 .Op Cm --batch
+.Op Cm -i
 .Op Cm -o Ar output
 .Op Ar field Ns Cm = Ns Ar value
 .
@@ -48,22 +49,18 @@ Rows can be selected, filtered, and grouped; columns can be rearranged, transfor
 .
 .Lf b batch
 replay in batch mode (with no interface)
+.Lf i interactive
+launch VisiData in interactive mode after batch
 .
 .Lo o output file
 .No save final visible sheet to Ar file No as .tsv
 .
-.It Sy --replay-movement
-.No toggle Sy --play No to move cursor cell-by-cell
 .It Ar field Ns Cm = Ns Ar value
 .No replace \&"{ Ns Ar field Ns }\&" in Ar cmdlog No contents with Ar value
 .El
 .
 .Ss Commands During Replay
 .Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact -offset XXX
-.It Sy ^U
-pause/resume replay
-.It Sy ^N
-execute next row in replaying sheet
 .It Sy ^K
 cancel current replay
 .El
@@ -86,19 +83,34 @@ quit current sheet and free associated memory
 .It Ic " gq"
 quit all sheets (clean exit)
 .Pp
-.It Ic " ^H"
+.It Ic "Alt+H"
 .No activate help menu ( Ns Sy Enter Ns / Ns Sy left-mouse No to expand submenu or execute command)
 .It Ic "g^H"
 view this man page
 .It Ic "z^H"
 view sheet of command longnames and keybindings for current sheet
-.It Ic "Space" Ar longname
-.No execute command by its Ar longname
+.Pp
+.It Ic " gb"
+open sidebar in a new sheet
+.It Ic "  b"
+toggle sidebar
 .Pp
 .It Ic "  U"
 .No undo the most recent modification ( requires enabled Sy options.undo Ns )
 .It Ic "  R"
 .No redo the most recent undo ( requires enabled Sy options.undo Ns )
+.Pp
+.It Ic "Space" Ar longname
+.No open command palette; execute command by its Ar longname
+.El
+.Ss "  Command Palette"
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic "Tab"
+.No Move to command palette, and cycle through commands
+.It Ic "0-9"
+.No Execute numbered command
+.It Ic "Enter"
+.No Execute highlighted command
 .El
 .Ss "Cursor Movement"
 .
@@ -186,6 +198,8 @@ unhide all columns
 toggle/unset current column as a key column
 .It Ic "~  #  %  $  @  z#"
 set type of current column to str/int/float/currency/date/len
+.It Ic "Alt++  Alt+-"
+show more/less precision in current numerical column
 .It Ic "  ^"
 rename current column
 .It Ic " g^"
@@ -237,8 +251,10 @@ add/reset cache for current/all visible column(s)
 .No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) one level
 .It Ic "z(  gz(" Ar depth
 .No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) to given Ar depth ( Ar 0 Ns = fully)
-.It Ic " )"
-unexpand current column; restore original column and remove other columns at this level
+.It Ic " )   g("
+unexpand current/all visible column(s); restore original column and remove other columns at this level
+.It Ic "z)  gz)" Ar depth
+.No contract current/all visible column(s) of former lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) to given Ar depth ( Ar 0 Ns = fully)
 .It Ic "zM"
 .No row-wise expand current column of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) within that column
 .El
@@ -365,7 +381,7 @@ toggle insert mode
 .It Ic "Up  Down"
 set contents to previous/next in history
 .It Ic "Tab  Shift+Tab"
-autocomplete input (when available)
+.No move cursor left/right and re-enter edit mode
 .It Ic "Shift+Arrow"
 .No move cursor in direction of Sy Arrow No and re-enter edit mode
 .
@@ -521,9 +537,9 @@ open current row/cell/sheet as Python object
 .It Sy " \&."
 .Sy Directory Sheet No "            browse properties of files in a directory"
 .It Sy " \&."
-.Sy Plugins Sheet No "              browse, install, and (de)activate plugins"
+.Sy Guide Index No "                read documentation from within VisiData"
 .It Sy " \&."
-.Sy Memory Sheet No (Alt+Shift+M) "       browse saved values, including clipboard"
+.Sy Memory Sheet No (Alt+Shift+M) " browse saved values, including clipboard"
 .It " "
 .It Sy Metasheets
 .It Sy " \&."
@@ -585,25 +601,23 @@ open parent directory
 commit changes to file system
 .El
 .
-.Ss Plugins Sheet
+.Ss Guide Index
 .Bl -inset -compact
-.It Browse through a list of available plugins. VisiData needs to be restarted before plugin activation takes effect. Installation may require internet access.
+.It Browse through a list of available guides. Each guide shows you how to use a particular feature. Gray guides have not been written yet.
 .El
 .Bl -inset -compact
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic Space Ar open-plugins
-.No open the Sy Plugins Sheet
+.It Ic Space Ar open-guide-index
+.No open the Sy Guide Index
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic "a"
-install and activate current plugin
-.It Ic "d"
-deactivate current plugin
+.It Ic "Enter"
+open a guide
 .El
 .
 .Ss Memory Sheet
@@ -704,7 +718,7 @@ save selected or all sheets
 .It Sy "\&."
 .Sy extend No "copy first selected sheet, keeping all rows and sheet type, and extend with columns from other sheets"
 .It Sy "\&."
-.Sy merge No " mostly keep all rows from first selected sheet, except prioritise cells with non-null/non-error values"
+.Sy merge No " keep all rows from first sheet, updating any False-y cells with non-False-y values from second sheet; add unique rows from second sheet"
 .El
 .
 .Ss Options Sheet (Shift+O)
@@ -863,6 +877,9 @@ show/hide methods and hidden properties
 .No preplay Ar longname No before replay or regular launch; limited to Sy Base Sheet No bound commands
 .It Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar col Ns : Ns Ar row
 .No launch vd with Ar subsheet No of Ar toplevel No at top-of-stack, and cursor at Ar col No and Ar row Ns ; all arguments are optional
+.It Cm --overwrite Ns = Ns Ar c
+.No Overwrite with confirmation
+.
 .Pp
 .Lo f filetype filetype
 .No "tsv               "
@@ -874,12 +891,16 @@ instead of file extension
 .No "\(rst                "
 field delimiter to use for tsv/usv filetype
 .
-.Lo y confirm-overwrite F
-.No "True              "
+.Lo y overwrite y
+.No "y                 "
 overwrite existing files without confirmation
 .
+.Lo ro overwrite n
+.No "n                 "
+do not overwrite existing files
+.
 .Lo N nothing T
-.No "False              "
+.No "False             "
 disable loading .visidatarc and plugin addons
 .
 .El
@@ -919,8 +940,8 @@ disable loading .visidatarc and plugin addons
 .Dl Nm vd Cm postgres:// Ns Ar username Ns Sy "\&:" Ns Ar password Ns Sy @ Ns Ar hostname Ns Sy  "\&:" Ns Ar port Ns Sy / Ns Ar database
 .No open a connection to the given postgres database
 .Pp
-.Dl Nm vd Cm --play tests/pivot.vd --replay-wait 1 --output tests/pivot.tsv
-.No replay tests/pivot.vd, waiting 1 second between commands, and output the final sheet to test/pivot.tsv
+.Dl Nm vd Cm --play tests/pivot.vdj --replay-wait 1 --output tests/pivot.tsv
+.No replay tests/pivot.vdj, waiting 1 second between commands, and output the final sheet to test/pivot.tsv
 .Pp
 .Dl Ic ls -l | Nm vd Cm -f fixed --skip 1 --header 0
 .No parse the output of ls -l into usable data

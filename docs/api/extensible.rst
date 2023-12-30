@@ -63,18 +63,6 @@ override existing members. To call the original function, use
 
 .. autofunction:: visidata.Extensible.class_api
 
-``@class_api`` works much like ``@api``, but for class methods:
-
-::
-
-        @Sheet.class_api
-        @classmethod
-        def addCommand(cls, ...):
-
-This method is used internally but may not be all that useful for plugin and module authors.
-Note that ``@classmethod`` must still be provided, and **the order of multiple decorators is crucial**: ``@<class>.api``
-must come before ``@classmethod``.
-
 .. autofunction:: visidata.Extensible.property
 
 This acts just like the ``@property`` decorator, if it were defined inline to the class.

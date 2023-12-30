@@ -4,6 +4,8 @@ y77d-th95			columns-sheet		C	open Columns Sheet: edit column properties for curr
 y77d-th95_columns		キgeolocation	copy-row		y	yank (copy) current row to clipboard
 y77d-th95_columns		キgeolocation	paste-after		p	paste clipboard rows after current row
 y77d-th95_columns	name	2	edit-cell	geolocation.type	e	edit contents of current cell
+y77d-th95_columns			unhide-cols		gv	
+y77d-th95_columns	sheet		hide-col		-	
 y77d-th95_columns	expr	キgeolocation.type	edit-cell	geolocation.type	e	
 y77d-th95_columns		1	delete-row		d	delete (cut) current row and move it to clipboard
 y77d-th95_columns	name		sort-asc		[	sort ascending by current column; replace any existing sort criteria

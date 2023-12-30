@@ -9,6 +9,7 @@
     b. manpage;
 
     c. visidata.org; (formats?)
+        - remember to check the tables with prettier: https://github.com/saulpw/visidata/pull/2056
 
 3. Verify that VisiData is up-to-date:
     * help menu
@@ -38,6 +39,11 @@
     - Run ./mkmanhtml.sh, and move that to visidata.org:site/docs/man, and to visidata:docs/man.md
 
 7. Merge `develop` to stable
+
+14. motd
+    a. Upload new motd for new version.
+    b. Test that VisiData downloads motd.
+
 
 8. Merge `stable` back into other branches
 
@@ -91,7 +97,6 @@ git push --tags
 
 13. Write up the release notes and add it to `www/releases.md`. Add it to index.md.
 
-14. Upload new motd
 
 15. Update the website by pushing to master. Update with new manpage. Update redirect to point to new manpage.
     - release notes
@@ -135,7 +140,7 @@ Registry: https://github.com/saulpw/homebrew-vd
 2. tar -xzmf visidata.tar.gz
 3. cp visidata.ver.tar.gz visidata_ver.orig.tar.gz
 4. cd visidata-ver/
-5. Place there the contents of the debian directory from github.com/saulpw/visidata/dev/debian/
+5. Place there the contents of the debian directory from git@salsa.debian.org:anjakefala/visidata.git
 6. Update changelog
 ```
 dch -v new_version

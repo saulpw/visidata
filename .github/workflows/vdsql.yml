@@ -1,0 +1,38 @@
+name: vdsql-testing
+on:
+  pull_request:
+    branches:
+      - stable
+      - develop
+  push:
+    branches:
+      - stable
+      - develop
+
+jobs:
+  run-tests:
+
+    strategy:
+      matrix:
+        python-version: [3.9, "3.10", "3.11"]
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.pythonversion }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install VisiData
+      run: pip3 install .
+
+    - name: Install vdsql
+      run: pip3 install visidata/apps/vdsql/
+
+    - name: Ensure it starts up
+      run: vdsql --version
+
+    - name: Run tests
+      run: cd visidata/apps/vdsql && ./test.sh

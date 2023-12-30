@@ -2,20 +2,23 @@ python-dateutil     # date type
 importlib_metadata>=3.6 # plugin groups backported for python <3.8
 
 # optional dependencies
-pandas>=1.0.5       # dta (Stata)
+pandas>=1.5.3; python_version >= '3.11' # dta (Stata)
+pandas>=1.0.5; python_version < '3.11'  # dta (Stata)
 requests            # http
 lxml                # html/xml
 openpyxl>= 2.4      # xlsx
 xlrd                # xls
+xlwt                # xls
 h5py                # hdf5
 psycopg2-binary     # postgres
+mysqlclient         # mysql
+boto3               # rds
 pyshp               # shapefiles
 mapbox-vector-tile  # mbtiles
 pypng               # png
 fonttools           # ttf/otf
 sas7bdat            # sas7bdat (SAS)
 xport               # xpt (SAS)
-savReaderWriter     # sav (SPSS)
 PyYAML>=5.1         # yaml/yml
 dpkt                # pcap
 dnslib              # pcap
@@ -29,6 +32,27 @@ wcwidth             # tabulate saver with unicode
 zstandard           # read .zst files
 odfpy               # odt (OpenDocument)
 urllib3             # .zip over http
-pyarrow             # arrow arrows (Apache Arrow)
+pyarrow>=14.0.1; python_version >= '3.8' # arrow arrows parquet (Apache Arrow)
+pyarrow_hotfix; python_version <= '3.7' # pyarrow security patch
+pyarrow; python_version <= '3.7'
+seaborn             # plot via seaborn
+matplotlib          # svg saver
+sh                  # ping
+psutil              # procmgr
+numpy               # npy pandas hdf5 arrow
+tomli; python_version < '3.11' # toml
+pyconll             # conll/conllu
+backports.zoneinfo; python_version < '3.9' #f5log
 
--e git+https://github.com/saulpw/pyxlsb.git@master#egg=pyxlsb # xlsb
+requests_cache      # scraper
+beautifulsoup4      # scraper
+
+Faker               # fake data generation
+
+praw                # reddit API
+matrix_client       # matrix API
+zulip               # zulip API
+pyairtable          # airtable API
+
+-e git+https://github.com/saulpw/pyxlsb.git@visidata#egg=pyxlsb                 # xlsb
+-e git+https://github.com/anjakefala/savReaderWriter#egg=savReaderWriter        # sav (SPSS)

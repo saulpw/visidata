@@ -1,5 +1,3 @@
-import csv
-
 from visidata import vd, VisiData, SequenceSheet, options, stacktrace
 from visidata import TypedExceptionWrapper, Progress
 
@@ -11,13 +9,25 @@ vd.option('csv_escapechar', None, 'escapechar passed to csv.reader', replay=True
 vd.option('csv_lineterminator', '\r\n', 'lineterminator passed to csv.writer', replay=True)
 vd.option('safety_first', False, 'sanitize input/output to handle edge cases, with a performance cost', replay=True)
 
-csv.field_size_limit(2**31-1) # Windows has max 32-bit
 
-options_num_first_rows = 10
+@VisiData.api
+def guess_csv(vd, p):
+    import csv
+    csv.field_size_limit(2**31-1)  #288 Windows has max 32-bit
+    line = next(p.open())
+    if ',' in line:
+        dialect = csv.Sniffer().sniff(line)
+        r = dict(filetype='csv', _likelihood=0)
+
+        for csvopt in dir(dialect):
+            if not csvopt.startswith('_'):
+                r['csv_'+csvopt] = getattr(dialect, csvopt)
+
+        return r
 
 @VisiData.api
 def open_csv(vd, p):
-    return CsvSheet(p.name, source=p)
+    return CsvSheet(p.base_stem, source=p)
 
 def removeNulls(fp):
     for line in fp:
@@ -28,7 +38,10 @@ class CsvSheet(SequenceSheet):
 
     def iterload(self):
         'Convert from CSV, first handling header row specially.'
-        with self.source.open_text(encoding=self.options.encoding) as fp:
+        import csv
+        csv.field_size_limit(2**31-1)  #288 Windows has max 32-bit
+
+        with self.open_text_source() as fp:
             if options.safety_first:
                 rdr = csv.reader(removeNulls(fp), **options.getall('csv_'))
             else:
@@ -47,7 +60,10 @@ class CsvSheet(SequenceSheet):
 @VisiData.api
 def save_csv(vd, p, sheet):
     'Save as single CSV file, handling column names as first line.'
-    with p.open_text(mode='w', encoding=sheet.options.encoding, newline='') as fp:
+    import csv
+    csv.field_size_limit(2**31-1)  #288 Windows has max 32-bit
+
+    with p.open(mode='w', encoding=sheet.options.save_encoding, newline='') as fp:
         cw = csv.writer(fp, **options.getall('csv_'))
         colnames = [col.name for col in sheet.visibleCols]
         if ''.join(colnames):
@@ -56,6 +72,8 @@ def save_csv(vd, p, sheet):
         with Progress(gerund='saving'):
             for dispvals in sheet.iterdispvals(format=True):
                 cw.writerow(dispvals.values())
+
+CsvSheet.options.regex_skip = '^#.*'
 
 vd.addGlobals({
     'CsvSheet': CsvSheet

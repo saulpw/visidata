@@ -22,7 +22,7 @@ def floatsi(*args):
     if not args:
         return 0.0
     if not isinstance(args[0], str):
-        return args[0]
+        return float(args[0])
 
     s=args[0].strip()
     for i, p in enumerate(vd.si_prefixes):
@@ -33,3 +33,7 @@ def floatsi(*args):
 
 
 Sheet.addCommand('z%', 'type-floatsi', 'cursorCol.type = floatsi', 'set type of current column to SI float')
+
+vd.addMenuItems('''
+    Column > Type as > SI float > type-floatsi
+''')

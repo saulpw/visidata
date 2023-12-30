@@ -1,0 +1,4 @@
+directory	filename	ext
+bin/	filter-doc.py	py
+bin/	vd	
+bin/	viewtsv.py	py

@@ -25,7 +25,7 @@ Step 1. ``open_<filetype>`` boilerplate
 
     @VisiData.api
     def open_readme(vd, p):
-        return ReadmeSheet(p.name, source=p)
+        return ReadmeSheet(p.base_stem, source=p)
 
 This is used for filetype ``readme``, which is used for files with extension ``.readme``, or when specified manually with the ``filetype`` option like ``--filetype=readme`` or ``-f readme`` on the command line.
 
@@ -107,6 +107,9 @@ Each loader for a tabular sheet should overload ``iterload()``, which uses the S
 
 - If the loader requires a third-party library, import it inside ``iterload()`` or ``reload()`` (or ``open_<filetype>`` if necessary).
   Do not import at the toplevel, or ``vd`` will fail to start when the library is not installed.
+    - preferably, import it using ``modname = importExternal(modname, pythonPackageName``. If the user does not have the package installed, it will output instructions to ``pip3 install pythonPackageName``.
+
+.. autofunction:: visidata.vd.importExternal
 
 By default, a Sheet has one Column which just displays a string representation of the row.
 So the above example is a good starting point for any loader; just get the rows however they come most easily from the source, and launch ``vd`` with a sample dataset in that format.
@@ -241,7 +244,7 @@ This is a completely functional loader for the ``sas7bdat`` (SAS dataset file) f
 
     @VisiData.api
     def open_sas7bdat(vd, p):
-        return SasSheet(p.name, source=p)
+        return SasSheet(p.base_stem, source=p)
 
     class SasSheet(Sheet):
         def iterload(self):
@@ -260,6 +263,33 @@ This is a completely functional loader for the ``sas7bdat`` (SAS dataset file) f
 
             with self.dat as fp:
                 yield from Progress(fp, total=self.dat.properties.row_count)
+
+
+Guessing Filetypes
+==================
+
+When loading a file, VisiData tries to infer its filetype by peeking at the initial lines of the file and guessing from its structure.
+
+``vd.guess_<filetype>(path)`` contains this logic for checking whether a file might be ``<filetype``.
+
+If those structures are not present, the function should return nothing. If they are, the function should return a dictionary with:
+
+- ``filetype`` being the filetype they detect (corresponding to the ``vd.open_<filetype>``)
+- ``_likelihood`` (optional) being a number from 0-10, 10 being most likely and 0 meaning a last ditch effort if nothing else will take it
+- any other key/values will be set as options on the *Sheet* the ``open_<filetype>`` function returns
+
+`Examples of guess_filetype functions <https://github.com/saulpw/visidata/commit/4743f92bb855cf931d896e65845c549ce6027e2f>`_
+
+
+::
+
+        @VisiData.api
+        def guess_foo(vd, p):
+            import foobar
+            if p.open_text().read(8).startswith("#Foo"):
+                enc = foobar.encoding(p)
+                return dict(filetype='foo', foo_encoding=enc)
+
 
 Savers
 =======

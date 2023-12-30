@@ -1,13 +1,14 @@
 import random
+from urllib.parse import urlparse
 
-from visidata import VisiData, vd, Sheet, options, anytype, urlparse, asyncthread, ColumnItem
+from visidata import VisiData, vd, Sheet, options, anytype, asyncthread, ColumnItem
 
 __all__ = ['openurl_postgres', 'openurl_postgresql', 'openurl_rds', 'PgTable', 'PgTablesSheet']
 
 vd.option('postgres_schema', 'public', 'The desired schema for the Postgres database')
 
 def codeToType(type_code, colname):
-    import psycopg2
+    psycopg2 = vd.importExternal('psycopg2', 'psycopg2-binary')
     try:
         tname = psycopg2._psycopg.string_types[type_code].name
         if 'INTEGER' in tname:
@@ -21,8 +22,8 @@ def codeToType(type_code, colname):
 
 @VisiData.api
 def openurl_rds(vd, url, filetype=None):
-    import boto3
-    import psycopg2
+    boto3 = vd.importExternal('boto3')
+    psycopg2 = vd.importExternal('psycopg2', 'psycopg2-binary')
 
     rds = boto3.client('rds')
     url = urlparse(url.given)
@@ -42,7 +43,7 @@ def openurl_rds(vd, url, filetype=None):
 
 @VisiData.api
 def openurl_postgres(vd, url, filetype=None):
-    import psycopg2
+    psycopg2 = vd.importExternal('psycopg2', 'psycopg2-binary')
 
     url = urlparse(url.given)
     dbname = url.path[1:]
@@ -87,7 +88,7 @@ def postgresGetColumns(vd, cur):
 class PgTablesSheet(Sheet):
     rowtype = 'tables'
 
-    def reload(self):
+    def loader(self):
         schema = options.postgres_schema
         qstr = f'''
             SELECT relname table_name, column_count.ncols, reltuples::bigint est_nrows
@@ -122,9 +123,9 @@ class PgTable(Sheet):
     @asyncthread
     def reload(self):
         if self.options.postgres_schema:
-            source = f"{self.options.postgres_schema}.{self.source}"
+            source = f'"{self.options.postgres_schema}"."{self.source}"'
         else:
-            source = self.source
+            source = f'"{self.source}"'
         with self.sql.cur(f"SELECT * FROM {source}") as cur:
             self.rows = []
             r = cur.fetchone()

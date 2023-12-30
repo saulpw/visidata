@@ -73,7 +73,7 @@ visidata.Sheet.exec_command = deprecated('2.0')(visidata.Sheet.execCommand)
 @VisiData.api
 def filetype(vd, ext, constructor):
     'Add constructor to handle the given file type/extension.'
-    globals().setdefault('open_'+ext, lambda p,ext=ext: constructor(p.name, source=p, filetype=ext))
+    globals().setdefault('open_'+ext, lambda p,ext=ext: constructor(p.base_stem, source=p, filetype=ext))
 
 @deprecated('2.0', 'Sheet(namepart1, namepart2, ...)')
 @VisiData.global_api
@@ -135,11 +135,12 @@ alias('show-aggregate', 'memo-aggregate')
 
 # 2.6
 
-clean_name = visidata.cleanName
+def clean_name(s):
+    return visidata.vd.cleanName(s)
 
 def maybe_clean(s, vs):
     if (vs or visidata.vd).options.clean_names:
-        s = visidata.cleanName(s)
+        s = visidata.vd.cleanName(s)
     return s
 
 def load_tsv(fn):
@@ -164,3 +165,76 @@ exceptionCaught = deprecated('2.6', 'vd.exceptionCaught')(vd.exceptionCaught)
 openSource = deprecated('2.6', 'vd.openSource')(vd.openSource)
 globalCommand = visidata.BaseSheet.addCommand
 visidata.Sheet.StaticColumn = deprecated('2.11', 'Sheet.freeze_col')(visidata.Sheet.freeze_col)
+visidata.Path.open_text = deprecated('3.0', 'visidata.Path.open')(visidata.Path.open)
+
+vd.sysclip_value = deprecated('3.0', 'vd.sysclipValue')(vd.sysclipValue)
+
+def itemsetter(i):
+    def g(obj, v):
+        obj[i] = v
+    return g
+
+
+vd.optalias('force_valid_colnames', 'clean_names')
+vd.optalias('dir_recurse', 'dir_depth', 100000)
+vd.optalias('confirm_overwrite', 'overwrite', 'confirm')
+vd.optalias('show_graph_labels', 'disp_graph_labels')
+vd.optalias('zoom_incr', 'disp_zoom_incr')
+
+alias('visibility-sheet', 'toggle-multiline')
+alias('visibility-col', 'toggle-multiline')
+
+def clean_to_id(s):
+    return visidata.vd.cleanName(s)
+
+@deprecated('3.0', 'use try/finally')
+class OnExit:
+    '"with OnExit(func, ...):" calls func(...) when the context is exited'
+    def __init__(self, func, *args, **kwargs):
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        try:
+            self.func(*self.args, **self.kwargs)
+        except Exception as e:
+            vd.exceptionCaught(e)
+
+alias('open-inputs', 'open-input-history')
+
+#vd.option('plugins_url', 'https://visidata.org/plugins/plugins.jsonl', 'source of plugins sheet')
+
+@visidata.VisiData.api
+def inputRegexSubstOld(vd, prompt):
+    'Input regex transform via oneliner (separated with `/`).  Return parsed transformer as dict(before=, after=).'
+    rex = vd.inputRegex(prompt, type='regex-subst')
+    before, after = vd.parse_sed_transform(rex)
+    return dict(before=before, after=after)
+
+
+visidata.Sheet.addCommand('', 'addcol-subst', 'addColumnAtCursor(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, **inputRegexSubstOld("transform column by regex: "))))', 'add column derived from current column, replacing regex with subst (may include \1 backrefs)', deprecated=True)
+visidata.Sheet.addCommand('', 'setcol-subst', 'setValuesFromRegex([cursorCol], someSelectedRows, **inputRegexSubstOld("transform column by regex: "))', 'regex/subst - modify selected rows in current column, replacing regex with subst, (may include backreferences \\1 etc)', deprecated=True)
+visidata.Sheet.addCommand('', 'setcol-subst-all', 'setValuesFromRegex(visibleCols, someSelectedRows, **inputRegexSubstOld(f"transform {nVisibleCols} columns by regex: "))', 'modify selected rows in all visible columns, replacing regex with subst (may include \\1 backrefs)', deprecated=True)
+
+visidata.Sheet.addCommand('', 'split-col', 'addRegexColumns(makeRegexSplitter, cursorCol, inputRegex("split regex: ", type="regex-split"))', 'Add new columns from regex split', deprecated=True)
+visidata.Sheet.addCommand('', 'capture-col', 'addRegexColumns(makeRegexMatcher, cursorCol, inputRegex("capture regex: ", type="regex-capture"))', 'add new column from capture groups of regex; requires example row', deprecated=True)
+
+#vd.option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to', sheettype=None)
+#BaseSheet.bindkey('KEY_BACKSPACE', 'menu-help')
+
+@deprecated('3.0', 'vd.callNoExceptions(col.setValue, row, value)')
+@visidata.Column.api
+def setValueSafe(self, row, value):
+    'setValue and ignore exceptions.'
+    return vd.callNoExceptions(self.setValue, row, value)
+
+@deprecated('3.0', 'vd.callNoExceptions(sheet.checkCursor)')
+@visidata.BaseSheet.api
+def checkCursorNoExceptions(sheet):
+    return vd.callNoExceptions(sheet.checkCursor)
+
+vd.addGlobals(globals())

@@ -24,6 +24,7 @@
 {"sheet": "unnamed_columns", "col": "", "row": "\u30ad1", "longname": "paste-after", "input": "", "keystrokes": "p", "comment": "paste clipboard rows after current row"}
 {"sheet": "unnamed_columns", "col": "", "row": "\u30ad1", "longname": "paste-after", "input": "", "keystrokes": "p", "comment": "paste clipboard rows after current row"}
 {"sheet": "unnamed_columns", "col": "name", "row": "\u30ad1", "longname": "select-equal-cell", "input": "", "keystrokes": ",", "comment": "select rows matching current cell in current column"}
+{"sheet": "unnamed_columns", "longname": "unhide-cols", "keystrokes": "gv"}
 {"sheet": "unnamed_columns", "col": "name", "row": "", "longname": "setcol-iter", "input": "('count_%s' % i for i in range(10))", "keystrokes": "gz=", "comment": "set selected rows in this column to the values in the given Python sequence expression"}
 {"sheet": "unnamed_columns", "col": "expr", "row": "", "longname": "setcol-iter", "input": "('str(y).count(\"%s\")' % i for i in range(10))", "keystrokes": "gz=", "comment": "set selected rows in this column to the values in the given Python sequence expression"}
 {"sheet": "unnamed_columns", "col": "", "row": "", "longname": "type-int-selected", "input": "", "keystrokes": "g#", "comment": "set type of selected columns to int"}

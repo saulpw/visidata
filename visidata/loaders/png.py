@@ -1,32 +1,24 @@
 import functools
 
-from visidata import VisiData, Sheet, Column, Progress, colors, ColumnItem, Canvas, asyncthread
+from visidata import VisiData, Sheet, Column, Progress, colors, ColumnItem, Canvas, asyncthread, vd, rgb_to_attr
 
 
 @VisiData.api
 def open_png(vd, p):
-    return PNGSheet(p.name, source=p)
+    return PNGSheet(p.base_stem, source=p)
 
-@functools.lru_cache(256)
-def rgb_to_attr(r,g,b,a):
-    if a == 0: return 0
-    if r > g and r > b: return colors['red']
-    if g > r and g > b: return colors['green']
-    if b > r and b > g: return colors['blue']
-    if a == 255: return colors['white']
-    return 0
 
 class PNGSheet(Sheet):
     rowtype = 'pixels'  # rowdef: list(x, y, r, g, b, a)
     columns = [ColumnItem(name, i, type=int) for i, name in enumerate('x y R G B A'.split())] + [
-        Column('attr', type=int, getter=lambda col,row: rgb_to_attr(*row[2:]))
+        Column('attr', getter=lambda col,row: rgb_to_attr(*row[2:]))
     ]
     nKeys = 2
     def newRow(self):
         return list((None, None, 0, 0, 0, 0))
 
     def iterload(self):
-        import png
+        png = vd.importExternal('png', 'pypng')
         self.png = png.Reader(bytes=self.source.read_bytes())
         self.width, self.height, pixels, md = self.png.asRGBA()
         for y, row in enumerate(pixels):
@@ -78,7 +70,7 @@ def save_png(vd, p, vs):
 
     vd.status('saving %sx%s' % (vs.width, vs.height))
 
-    import png
+    vd.importExternal('png', 'pypng')
     img = png.from_array(pixels, mode='RGBA')
     with open(p, 'wb') as fp:
         img.write(fp)
@@ -86,4 +78,18 @@ def save_png(vd, p, vs):
     vd.status('saved')
 
 
+def blockchar(i:int):
+    '''1   8    into   1  2
+       2  16
+       4  32           4  8
+      64 128
+    '''
+    UL = bool(i & 1 or i & 2)
+    UR = bool(i & 8 or i & 16)
+    LL = bool(i & 4 or i & 64)
+    LR = bool(i & 32 or i & 128)
+    return ' ▘▝▀▖▌▞▛▗▚▐▜▄▙▟█'[UL*1+UR*2+LL*4+LR*8]
+
+
+PNGDrawing.options.disp_canvas_charset = ''.join(blockchar(i) for i in range(256))
 PNGSheet.addCommand('.', 'plot-sheet', 'vd.push(PNGDrawing(name+"_plot", source=sheet, sourceRows=rows))', 'plot this png')

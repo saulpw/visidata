@@ -1,16 +1,33 @@
 import datetime
 
-from visidata import vd, Sheet
+from visidata import VisiData, vd, Sheet
 
-try:
-    from dateutil.parser import parse as date_parse
-except ImportError:
-    def date_parse(r=''):
+@VisiData.lazy_property
+def date_parse(vd):
+    try:
+        from dateutil.parser import parse
+        return parse
+    except ImportError:
         vd.warning('install python-dateutil for date type')
-        return r
+        return str
 
+vd.help_date = '''
+- RFC3339: `%Y-%m-%d %H:%M:%S.%f %z`
+- `%A`  Weekday as locale’s full name.
+- `%w`  Weekday as a decimal number, where 0 is Sunday and 6 is Saturday.
+- `%d`  Day of the month as a zero-padded decimal number.
+- `%b`  Month as locale’s abbreviated name.
+- `%B`  Month as locale’s full name.
+- `%p`  Locale’s equivalent of either AM or PM.
+- `%c`  Locale’s appropriate date and time representation.
+- `%x`  Locale’s appropriate date representation.
+- `%X`  Locale’s appropriate time representation.
+- `%Z`  Time zone name (empty string if the object is naive).
 
-vd.option('disp_date_fmt','%Y-%m-%d', 'default fmtstr to strftime for date values', replay=True)
+See [:onclick https://strftime.org]Python strftime()[/] for a full list of format codes.
+'''
+
+vd.option('disp_date_fmt','%Y-%m-%d', 'default fmtstr passed to strftime for date values', replay=True, help=vd.help_date)
 
 
 @vd.numericType('@', '', formatter=lambda fmtstr,val: val.strftime(fmtstr or vd.options.disp_date_fmt))
@@ -28,7 +45,7 @@ class date(datetime.datetime):
         if isinstance(s, int) or isinstance(s, float):
             r = datetime.datetime.fromtimestamp(s)
         elif isinstance(s, str):
-            r = date_parse(s)
+            r = vd.date_parse(s)
         elif isinstance(s, (datetime.datetime, datetime.date)):
             r = s
         else:
@@ -109,3 +126,8 @@ vd.addGlobals(
 
 
 Sheet.addCommand('@', 'type-date', 'cursorCol.type = date', 'set type of current column to date')
+Sheet.addCommand('', 'type-datetime', 'cursorCol.type=date; cursorCol.fmtstr="%Y-%m-%d %H:%M:%S"', 'set type of current column to datetime')
+
+vd.addMenuItems('''
+    Column > Type as > date > type-date
+''')

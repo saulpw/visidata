@@ -1,0 +1,6 @@
+#!vd -p
+{"sheet": null, "col": null, "row": null, "longname": "open-file", "input": "tests/business.sqlite", "keystrokes": "o", "comment": null}
+{"sheet": "business", "col": "", "row": "\u30adorder_items", "longname": "open-row", "input": "", "keystrokes": "Enter", "comment": "open sheet with copies of rows referenced in current row"}
+{"sheet": "order_items", "col": "sku", "row": "", "longname": "freq-col", "input": "", "keystrokes": "Shift+F", "comment": ""}
+{"sheet": "order_items_sku_freq", "col": "sku", "row": "", "longname": "sort-asc", "input": "", "comment": "sort ascending by current column; replace any existing sort criteria"}
+{"sheet": "order_items_sku_freq", "col": "histogram", "longname": "hide-col", "keystrokes": "-"}

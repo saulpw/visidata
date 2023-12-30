@@ -1,0 +1,8 @@
+#!vd -p
+{"sheet": null, "col": null, "row": null, "longname": "open-file", "input": "sample_data/sample.tsv", "keystrokes": "o", "comment": null}
+{"sheet": "sample", "col": "Region", "row": "", "longname": "sort-asc", "input": "", "keystrokes": "[", "comment": "sort ascending by current column; replace any existing sort criteria"}
+{"sheet": "sample", "col": "Rep", "row": "", "longname": "sort-asc-add", "input": "", "keystrokes": "z[", "comment": "sort ascending by current column; add to existing sort criteria"}
+{"sheet": "sample", "col": "Item", "row": "", "longname": "sort-desc-add", "input": "", "keystrokes": "z]", "comment": "sort descending by current column; add to existing sort criteria"}
+{"sheet": "sample", "col": "", "row": "", "longname": "select-rows", "input": "", "keystrokes": "gs", "comment": "select all rows"}
+{"sheet": "sample", "col": "", "row": "", "longname": "dup-selected", "input": "", "keystrokes": "\"", "comment": "open a duplicate sheet with only the selected rows"}
+{"sheet": "sample_selectedref", "col": "", "row": "", "longname": "unselect-rows", "input": "", "keystrokes": "gu", "comment": "unselect all rows"}

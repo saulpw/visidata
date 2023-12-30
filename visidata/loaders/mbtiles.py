@@ -5,11 +5,11 @@ import sqlite3
 
 @VisiData.api
 def open_pbf(vd, p):
-    return PbfSheet(p.name, source=p)
+    return PbfSheet(p.base_stem, source=p)
 
 @VisiData.api
 def open_mbtiles(vd, p):
-    return MbtilesSheet(p.name, source=p)
+    return MbtilesSheet(p.base_stem, source=p)
 
 def getListDepth(L):
     if not isinstance(L, list):
@@ -36,7 +36,7 @@ class MbtilesSheet(Sheet):
     ]
 
     def getTile(self, zoom_level, tile_col, tile_row):
-        import mapbox_vector_tile
+        mapbox_vector_tile = vd.importExternal('mapbox_vector_tile', 'mapbox-vector-tile')
 
         con = sqlite3.connect(str(self.source))
         tile_data = con.execute('''
@@ -128,11 +128,10 @@ class PbfCanvas(InvertedCanvas):
                     if disptext:
                         self.label(textx, texty, disptext, attr, row)
 
-
         self.refresh()
 
 
 PbfSheet.addCommand('.', 'plot-row', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=[cursorRow], textCol=cursorCol))', 'plot blocks in current row')
 PbfSheet.addCommand('g.', 'plot-rows', 'vd.push(PbfCanvas(name+"_map", source=sheet, sourceRows=rows, textCol=cursorCol))', 'plot selected blocks')
 MbtilesSheet.addCommand('.', 'plot-row', 'vd.push(getPlot(cursorRow))', 'plot tiles in current row')
-MbtilesSheet.addCommand('g.', 'plot-selected', 'vd.push(getPlot(*selectedRows))', 'plot selected tiles'),
+MbtilesSheet.addCommand('g.', 'plot-selected', 'vd.push(getPlot(*selectedRows))', 'plot selected tiles')

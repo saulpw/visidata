@@ -1,0 +1,37 @@
+#!vd -p
+{"sheet": null, "col": null, "row": null, "longname": "open-file", "input": ".", "keystrokes": "o", "comment": null}
+{"col": "", "row": "", "longname": "open-new", "input": "", "keystrokes": "Shift+A", "comment": "Open new empty sheet"}
+{"sheet": "unnamed", "col": "A", "row": "", "longname": "rename-col", "input": "id", "keystrokes": "^", "comment": "rename current column"}
+{"sheet": "unnamed", "col": "", "row": "", "longname": "add-row", "input": "", "keystrokes": "a", "comment": "append a blank row"}
+{"sheet": "unnamed", "col": "id", "row": "0", "longname": "edit-cell", "input": "1", "keystrokes": "e", "comment": "edit contents of current cell"}
+{"sheet": "unnamed", "col": "", "row": "0", "longname": "add-row", "input": "", "keystrokes": "a", "comment": "append a blank row"}
+{"sheet": "unnamed", "col": "id", "row": "1", "longname": "edit-cell", "input": "2003", "keystrokes": "e", "comment": "edit contents of current cell"}
+{"sheet": "unnamed", "col": "id", "row": "", "longname": "addcol-new", "input": "name", "keystrokes": "za", "comment": "append an empty column"}
+{"sheet": "unnamed", "col": "name", "row": "0", "longname": "edit-cell", "input": "andy", "keystrokes": "e", "comment": "edit contents of current cell"}
+{"sheet": "unnamed", "col": "name", "row": "1", "longname": "edit-cell", "input": "bandy", "keystrokes": "e", "comment": "edit contents of current cell"}
+{"sheet": "unnamed", "col": "", "row": "", "longname": "sheets-stack", "input": "", "keystrokes": "Shift+S", "comment": "open Sheets Stack: join or jump between the active sheets on the current stack"}
+{"sheet": "sheets", "col": "name", "row": "\u30adunnamed", "longname": "edit-cell", "input": "a", "keystrokes": "e", "comment": "edit contents of current cell"}
+{"col": "", "row": "", "longname": "open-new", "input": "", "keystrokes": "Shift+A", "comment": "Open new empty sheet"}
+{"sheet": "unnamed", "col": "B", "row": "", "longname": "rename-col", "input": "id", "keystrokes": "^", "comment": "rename current column"}
+{"sheet": "unnamed", "col": "", "row": "", "longname": "add-row", "input": "", "keystrokes": "a", "comment": "append a blank row"}
+{"sheet": "unnamed", "col": "id", "row": "0", "longname": "edit-cell", "input": "1", "keystrokes": "e", "comment": "edit contents of current cell"}
+{"sheet": "unnamed", "col": "", "row": "0", "longname": "add-row", "input": "", "keystrokes": "a", "comment": "append a blank row"}
+{"sheet": "unnamed", "col": "id", "row": "1", "longname": "edit-cell", "input": "2003", "keystrokes": "e", "comment": "edit contents of current cell"}
+{"sheet": "unnamed", "col": "id", "row": "", "longname": "addcol-new", "input": "color", "keystrokes": "za", "comment": "append an empty column"}
+{"sheet": "unnamed", "col": "color", "row": "0", "longname": "edit-cell", "input": "yellow", "keystrokes": "e", "comment": "edit contents of current cell"}
+{"sheet": "unnamed", "col": "color", "row": "1", "longname": "edit-cell", "input": "orange", "keystrokes": "e", "comment": "edit contents of current cell"}
+{"sheet": "unnamed", "col": "", "row": "", "longname": "sheets-stack", "input": "", "keystrokes": "Shift+S", "comment": "open Sheets Stack: join or jump between the active sheets on the current stack"}
+{"sheet": "sheets", "col": "name", "row": "\u30adunnamed", "longname": "edit-cell", "input": "b", "keystrokes": "e", "comment": "edit contents of current cell"}
+{"sheet": "global", "row": "disp_int_fmt", "longname": "set-option", "input": "{:,}", "keystrokes": ""}
+{"sheet": "b", "col": "id", "row": "", "longname": "type-int", "input": "", "keystrokes": "#", "comment": "set type of current column to int"}
+{"sheet": "b", "col": "", "row": "", "longname": "sheets-stack", "input": "", "keystrokes": "Shift+S", "comment": "open Sheets Stack: join or jump between the active sheets on the current stack"}
+{"sheet": "sheets", "col": "", "row": "\u30ada", "longname": "open-row", "input": "", "keystrokes": "Enter", "comment": "open sheet referenced in current row"}
+{"sheet": "a", "col": "id", "row": "", "longname": "type-int", "input": "", "keystrokes": "#", "comment": "set type of current column to int"}
+{"sheet": "a", "col": "", "row": "", "longname": "sheets-stack", "input": "", "keystrokes": "Shift+S", "comment": "open Sheets Stack: join or jump between the active sheets on the current stack"}
+{"sheet": "sheets", "col": "", "row": "\u30ada", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "sheets", "col": "", "row": "\u30adb", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "sheets", "col": "", "row": "", "longname": "columns-selected", "input": "", "keystrokes": "gShift+C", "comment": "open Columns Sheet with all visible columns from selected sheets"}
+{"sheet": "all_columns", "col": "", "row": "\u30ada,id", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "all_columns", "col": "", "row": "\u30adb,id", "longname": "select-row", "input": "", "keystrokes": "s", "comment": "select current row"}
+{"sheet": "all_columns", "col": "", "row": "", "longname": "key-selected", "input": "", "keystrokes": "g!", "comment": "toggle selected rows as key columns on source sheet"}
+{"sheet": "sheets", "col": "", "row": "", "longname": "join-selected", "input": "inner", "keystrokes": "&", "comment": "merge selected sheets with visible columns from all, keeping rows according to jointype"}

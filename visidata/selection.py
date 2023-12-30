@@ -1,9 +1,65 @@
-from visidata import vd, Sheet, Progress, asyncthread, options, rotateRange, Fanout, undoAttrCopyFunc, copy
+from copy import copy
+from visidata import vd, Sheet, Progress, asyncthread, options, rotateRange, Fanout, undoAttrCopyFunc, RowColorizer, GuideSheet
 
 vd.option('bulk_select_clear', False, 'clear selected rows before new bulk selections', replay=True)
 vd.option('some_selected_rows', False, 'if no rows selected, if True, someSelectedRows returns all rows; if False, fails')
 
 Sheet.init('_selectedRows', dict)  # rowid(row) -> row
+
+vd.rowNoters.append(
+        lambda sheet, row: sheet.isSelected(row) and sheet.options.disp_selected_note
+)
+Sheet.colorizers.append( RowColorizer(2, 'color_selected_row', lambda s,c,r,v:
+    r is not None and s.isSelected(r))
+)
+
+class SelectionGuide(GuideSheet):
+    sheettype = Sheet
+    guide_text ='''# Selecting and filtering
+
+Some commands operate only on "selected rows".  For instance, a common command to filter is {help.commands.dup_selected}.
+
+Many g-prefixed commands are like this. For example, use {help.commands.edit_cell}, but use {help.commands.setcol_input}.  Search for "selected rows" in the [:onclick help-commands-all]commands list[/] or the [:onclick sysopen-help]manpage[/] for a full list.
+
+Rows on the **Frequency Table** or **Pivot Table** reference a group of rows from the source sheet.  Selecting a row on those sheets also selects the referenced rows on the underlying source sheet.
+
+Select and unselect rows with these commands:
+
+## One row at a time
+
+- {help.commands.select_row}
+- {help.commands.unselect_row}
+- {help.commands.stoggle_row}
+
+## All rows at the same time
+
+- {help.commands.select_rows}
+- {help.commands.unselect_rows}
+- {help.commands.stoggle_rows}
+
+## By matching patterns
+
+- {help.commands.select_col_regex}
+- {help.commands.unselect_col_regex}
+- {help.commands.select_cols_regex}
+- {help.commands.unselect_cols_regex}
+
+- {help.commands.select_equal_cell}
+- {help.commands.select_equal_row}
+
+## Select by Python expression
+
+Python expressions can use a column value by the column name, if the
+column name is a valid Python identifier (with only letters, digits, and underscores).
+
+- {help.commands.select_expr}
+- {help.commands.unselect_expr}
+
+## Options
+
+- {help.options.bulk_select_clear}
+- {help.options.some_selected_rows}
+'''
 
 @Sheet.api
 def isSelected(self, row):
@@ -174,10 +230,10 @@ Sheet.addCommand('gzt', 'stoggle-after', 'toggle(rows[cursorRowIndex:])', 'toggl
 Sheet.addCommand('gzs', 'select-after', 'select(rows[cursorRowIndex:])', 'select all rows from cursor to bottom')
 Sheet.addCommand('gzu', 'unselect-after', 'unselect(rows[cursorRowIndex:])', 'unselect all rows from cursor to bottom')
 
-Sheet.addCommand('|', 'select-col-regex', 'selectByIdx(vd.searchRegex(sheet, regex=input("select regex: ", type="regex", defaultLast=True), columns="cursorCol"))', 'select rows matching regex in current column')
-Sheet.addCommand('\\', 'unselect-col-regex', 'unselectByIdx(vd.searchRegex(sheet, regex=input("unselect regex: ", type="regex", defaultLast=True), columns="cursorCol"))', 'unselect rows matching regex in current column')
-Sheet.addCommand('g|', 'select-cols-regex', 'selectByIdx(vd.searchRegex(sheet, regex=input("select regex: ", type="regex", defaultLast=True), columns="visibleCols"))', 'select rows matching regex in any visible column')
-Sheet.addCommand('g\\', 'unselect-cols-regex', 'unselectByIdx(vd.searchRegex(sheet, regex=input("unselect regex: ", type="regex", defaultLast=True), columns="visibleCols"))', 'unselect rows matching regex in any visible column')
+Sheet.addCommand('|', 'select-col-regex', 'selectByIdx(searchInputRegex("select", columns="cursorCol"))', 'select rows matching regex in current column')
+Sheet.addCommand('\\', 'unselect-col-regex', 'unselectByIdx(searchInputRegex("unselect", columns="cursorCol"))', 'unselect rows matching regex in current column')
+Sheet.addCommand('g|', 'select-cols-regex', 'selectByIdx(searchInputRegex("select", columns="visibleCols"))', 'select rows matching regex in any visible column')
+Sheet.addCommand('g\\', 'unselect-cols-regex', 'unselectByIdx(searchInputRegex("unselect", columns="visibleCols"))', 'unselect rows matching regex in any visible column')
 
 Sheet.addCommand(',', 'select-equal-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorDisplay: c.getDisplayValue(r) == v), progress=False)', 'select rows matching current cell in current column')
 Sheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getDisplayValue(r) == c.getDisplayValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
@@ -189,3 +245,26 @@ Sheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); 
 
 Sheet.addCommand(None, 'select-error-col', 'select(gatherBy(lambda r,c=cursorCol: c.isError(r)), progress=False)', 'select rows with errors in current column')
 Sheet.addCommand(None, 'select-error', 'select(gatherBy(lambda r,vcols=visibleCols: isinstance(r, TypedExceptionWrapper) or any([c.isError(r) for c in vcols])), progress=False)', 'select rows with errors in any column')
+
+vd.addMenuItems('''
+    Row > Select > current row > select-row
+    Row > Select > all rows > select-rows
+    Row > Select > from top > select-before
+    Row > Select > to bottom > select-after
+    Row > Select > by Python expr > select-expr
+    Row > Select > equal to current cell > select-equal-cell
+    Row > Select > equal to current row > select-equal-row
+    Row > Select > errors > current column > select-error-col
+    Row > Select > errors > any column > select-error
+    Row > Unselect > current row > unselect-row
+    Row > Unselect > all rows > unselect-rows
+    Row > Unselect > from top > unselect-before
+    Row > Unselect > to bottom > unselect-after
+    Row > Unselect > by Python expr > unselect-expr
+    Row > Toggle select > current row > stoggle-row
+    Row > Toggle select > all rows > stoggle-rows
+    Row > Toggle select > from top > stoggle-before
+    Row > Toggle select > to bottom > stoggle-after
+''')
+
+vd.addGuide('SelectionGuide', SelectionGuide)

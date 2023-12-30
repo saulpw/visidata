@@ -1,0 +1,4 @@
+#!vd -p
+{"longname": "open-file", "input": "tests/fill-zero.json", "keystrokes": "o"}
+{"sheet": "fill-zero", "col": "", "row": "", "longname": "select-rows", "input": "", "keystrokes": "gs", "comment": "select all rows"}
+{"sheet": "fill-zero", "col": "val", "row": "", "longname": "setcol-fill", "input": "", "keystrokes": "f", "comment": "fills null cells in selected rows of current column with contents of non-null cells up the current column"}

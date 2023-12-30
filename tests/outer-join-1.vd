@@ -1,13 +1,13 @@
 sheet	col	row	longname	input	keystrokes	comment
 			open-file	tests/data1.tsv	o	
 			open-file	tests/data2.tsv	o	
-data1	Key		key-col		!	
-data2	Key		key-col		!	
-data2			sheets-stack		S	
-sheets		キdata2	select-row		s	
-sheets		キdata1	select-row		s	
-sheets		キdata2	slide-down		J	
-sheets			join-sheets	outer	&	
-data1+data2	A		key-col		!	
-data1+data2			sort-keys-asc		g[	
-data1+data2	A		key-col		!	
+data1			sheets-stack		Shift+S	open Sheets Stack: join or jump between the active sheets on the current stack
+sheets			reload-selected		gCtrl+R	reload all selected sheets
+data1			columns-all		gShift+C	open Columns Sheet: edit column properties for all visible columns from all sheets on the sheets stack
+all_columns		キdata1,Key	select-row		s	select current row
+all_columns		キdata2,Key	select-row		s	select current row
+all_columns			key-selected		g!	toggle selected rows as key columns on source sheet
+all_columns			join-sheets-cols	outer	&	
+data1+data2	A		key-col		!	toggle current column as a key column
+data1+data2			sort-keys-asc		g[	sort ascending by all key columns; replace any existing sort criteria
+data1+data2	A		key-col		!	toggle current column as a key column

@@ -17,6 +17,7 @@ jobs:
         python-version: [3.7, 3.8, 3.9, "3.10", "3.11"]
 
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
     - uses: actions/checkout@v2
 
@@ -36,14 +37,20 @@ jobs:
     - name: Ensure VisiData works with Base Dependencies
       run: vd --version
 
+    - name: Ensure VisiData can load a dir
+      run: vd . --batch
+
+    - name: Install lxml dependencies
+      run: sudo apt install -y libxml2-dev libxslt-dev
+
     - name: Install optional dependencies
       run: |
         pip3 install -r requirements.txt
         pip3 install pytest
 
-    - name: Run test_commands
+    - name: Run unit tests
       run: |
-        pytest -sv visidata/tests/test_commands.py
+        pytest -sv visidata/tests/
 
     - name: Run Cmdlog Tests
       run: dev/test.sh
@@ -62,3 +69,5 @@ jobs:
         sudo apt install aha
         dev/mkman.sh
 
+    - name: Ensure VisiData can create completions
+      run: python -v dev/zsh-completion.py

@@ -3,7 +3,7 @@
     - logging of options
     - logging of rows and columns
     - if empty sheet, row or column on cmdlog, executes command on current sheet, row, column
-    - pause, continue, abort
+    - abort
     - test batch mode
         - bin/vd -b -p tests/append.vd
         - bin/vd -p tests/append.vd -b
@@ -85,10 +85,12 @@
 19. Save to a non-existent format.
     - Saves to save-filetype by default
     - If save-filetype is a non-existent format, blocks
-    - Save to it a second time, asks for confirmation, if confirm_overwrite=True
+    - test overwrite=y,n,c
 20. Save multiple sheets to a single non-embeddable format
     - save name makes sense
     - fails if not offered a directory
     - succeeds if offered a directory
 21. Test macro-record.
 22. Test `open-row` on an html link: https://hls.gsfc.nasa.gov/data/
+23. That DirSheet requires a commit-sheet before changes on filesystem
+24. Test adding multiple aggregators via palette (+)

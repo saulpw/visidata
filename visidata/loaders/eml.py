@@ -4,7 +4,7 @@ from visidata import VisiData, vd, Column, TableSheet, vlen
 
 @VisiData.api
 def open_eml(vd, p):
-    return EmailSheet(p.name, source=p)
+    return EmailSheet(p.base_stem, source=p)
 
 class EmailSheet(TableSheet):
     rowtype = 'parts'  # rowdef: sub-Messages
@@ -16,7 +16,7 @@ class EmailSheet(TableSheet):
     def iterload(self):
         import email
         parser = email.parser.Parser()
-        with self.source.open_text(encoding='utf-8') as fp:
+        with self.source.open(encoding='utf-8') as fp:
             yield from parser.parse(fp).walk()
 
 @EmailSheet.api
@@ -27,8 +27,7 @@ def extract_part(sheet, givenpath, part):
 @EmailSheet.api
 def extract_parts(sheet, givenpath, *parts):
     'Save all *parts* to Path *givenpath*.'
-    if givenpath.exists() and sheet.options.confirm_overwrite:
-        vd.confirm("%s already exists. overwrite? " % givenpath.given)
+    vd.confirmOverwrite(givenpath, f'{givenpath} already exists, extract anyway?')
 
     vd.status('saving %s parts to %s' % (len(parts), givenpath.given))
 

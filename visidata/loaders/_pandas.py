@@ -4,23 +4,57 @@ from visidata import VisiData, vd, Sheet, date, anytype, Path, options, Column, 
 
 @VisiData.api
 def open_pandas(vd, p):
-    return PandasSheet(p.name, source=p)
+    return PandasSheet(p.base_stem, source=p)
 
 @VisiData.api
 def open_dta(vd, p):
-    return PandasSheet(p.name, source=p, filetype='stata')
+    return PandasSheet(p.base_stem, source=p, filetype='stata')
 
 VisiData.open_stata = VisiData.open_pandas
 
 for ft in 'feather gbq orc pickle sas stata'.split():
     funcname ='open_'+ft
     if not getattr(VisiData, funcname, None):
-        setattr(VisiData, funcname, lambda vd,p,ft=ft: PandasSheet(p.name, source=p, filetype=ft))
+        setattr(VisiData, funcname, lambda vd,p,ft=ft: PandasSheet(p.base_stem, source=p, filetype=ft))
 
+@VisiData.api
+@asyncthread
+def save_dta(vd, p, *sheets):
+    import pandas as pd
+    import numpy as np
+
+    # STATA is a one-sheet software
+    # Save only the first sheet
+    vs = sheets[0]
+
+    columns = [col.name for col in vs.visibleCols]
+    
+    # Get data types
+    types = list()
+    dispvals = next(vs.iterdispvals(format=True))
+    for col,_ in dispvals.items():
+        if col.type in [bool, int, float]:
+            types.append(col.type)
+        elif vd.isNumeric(col):
+            types.append(float)
+        else:
+            types.append(str)
+
+    # Populate numpy array
+    data = np.empty((vs.nRows, len(columns)), dtype=object)
+    for r_i, dispvals in enumerate(vs.iterdispvals(format=True)):
+        for c_i, v in enumerate(dispvals.values()):
+            data[r_i, c_i] = v
+
+    # Convert to pandas DataFrame and save
+    dtype = {col:t for col,t in zip(columns, types)}
+    df = pd.DataFrame(data, columns=columns)
+    df = df.astype(dtype)
+    df.to_stata(p, version=118, write_index=False)
 
 class DataFrameAdapter:
     def __init__(self, df):
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         if not isinstance(df, pd.DataFrame):
             vd.fail('%s is not a dataframe' % type(df).__name__)
 
@@ -57,7 +91,7 @@ class PandasSheet(Sheet):
     '''
 
     def dtype_to_type(self, dtype):
-        import numpy as np
+        np = vd.importExternal('numpy')
         # Find the underlying numpy dtype for any pandas extension dtypes
         dtype = getattr(dtype, 'numpy_dtype', dtype)
         try:
@@ -74,7 +108,7 @@ class PandasSheet(Sheet):
 
     def read_tsv(self, path, **kwargs):
         'Partial function for reading TSV files using pd.read_csv'
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         return pd.read_csv(path, sep='\t', **kwargs)
 
     @property
@@ -111,7 +145,7 @@ class PandasSheet(Sheet):
 
     @asyncthread
     def reload(self):
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         if isinstance(self.source, pd.DataFrame):
             df = self.source
         elif isinstance(self.source, Path):
@@ -124,6 +158,12 @@ class PandasSheet(Sheet):
                 readfunc = getattr(pd, 'read_'+filetype) or vd.error('no pandas.read_'+filetype)
             # readfunc() handles binary and text open()
             df = readfunc(self.source, **options.getall('pandas_'+filetype+'_'))
+            # some read methods (html, for example) return a list of dataframes
+            if isinstance(df, list):
+                for idx, inner_df in enumerate(df[1:], start=1):
+                    vd.push(PandasSheet(f'{self.name}[{idx}]', source=inner_df))
+                df = df[0]
+                self.name += '[0]'
             if (filetype == 'pickle') and not isinstance(df, pd.DataFrame):
                 vd.fail('pandas loader can only unpickle dataframes')
         else:
@@ -169,7 +209,7 @@ class PandasSheet(Sheet):
         self.rows.sort_values(by=by_cols, ascending=ascending, inplace=True)
 
     def _checkSelectedIndex(self):
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         if self._selectedMask.index is not self.df.index:
             # DataFrame was modified inplace, so the selection is no longer valid
             vd.status('pd.DataFrame.index updated, clearing {} selected rows'
@@ -224,7 +264,7 @@ class PandasSheet(Sheet):
             self.unselectRow(row)
 
     def clearSelected(self):
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         self._selectedMask = pd.Series(False, index=self.df.index)
 
     def selectByIndex(self, start=None, end=None):
@@ -251,7 +291,7 @@ class PandasSheet(Sheet):
         matching rows to the selection. If unselect is True, remove from the
         active selection instead.
         '''
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         case_sensitive = 'I' not in vd.options.regex_flags
         masks = pd.DataFrame([
             self.df[col.expr].astype(str).str.contains(pat=regex, case=case_sensitive, regex=True)
@@ -278,13 +318,13 @@ class PandasSheet(Sheet):
         DataFrame's dtypes.
         '''
 
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         return pd.DataFrame({
             col: [None] * n for col in self.df.columns
         }).astype(self.df.dtypes.to_dict(), errors='ignore')
 
     def addRows(self, rows, index=None, undo=True):
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         if index is None:
             self.df = self.df.append(pd.DataFrame(rows))
         else:
@@ -296,7 +336,7 @@ class PandasSheet(Sheet):
             vd.addUndo(self._deleteRows, range(index, index + len(rows)))
 
     def _deleteRows(self, which):
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         self.df.drop(which, inplace=True)
         self.df.index = pd.RangeIndex(self.nRows)
         self._checkSelectedIndex()
@@ -306,7 +346,7 @@ class PandasSheet(Sheet):
         vd.addUndo(self._deleteRows, index or self.nRows - 1)
 
     def delete_row(self, rowidx):
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         oldrow = self.df.iloc[rowidx:rowidx+1]
 
         # Use to_dict() here to work around an edge case when applying undos.
@@ -321,7 +361,7 @@ class PandasSheet(Sheet):
 
     def deleteBy(self, by):
         '''Delete rows for which func(row) is true.  Returns number of deleted rows.'''
-        import pandas as pd
+        pd = vd.importExternal('pandas')
         nRows = self.nRows
         vd.addUndo(setattr, self, 'df', self.df.copy())
         self.df = self.df[~by]
@@ -353,17 +393,17 @@ PandasSheet.addCommand(None, 'unselect-before', 'unselectByIndex(end=cursorRowIn
 PandasSheet.addCommand(None, 'stoggle-after', 'toggleByIndex(start=cursorRowIndex)', 'toggle selection of rows from cursor to bottom')
 PandasSheet.addCommand(None, 'select-after', 'selectByIndex(start=cursorRowIndex)', 'select all rows from cursor to bottom')
 PandasSheet.addCommand(None, 'unselect-after', 'unselectByIndex(start=cursorRowIndex)', 'unselect all rows from cursor to bottom')
-PandasSheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=DataFrameAdapter(sheet.df.sample(nrows or nRows)); vd.push(vs)', 'open duplicate sheet with a random population subset of N rows'),
+PandasSheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=DataFrameAdapter(sheet.df.sample(nrows or nRows)); vd.push(vs)', 'open duplicate sheet with a random population subset of N rows')
 
 # Handle the regex selection family of commands through a single method,
 # since the core logic is shared
-PandasSheet.addCommand('|', 'select-col-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=[cursorCol])', 'select rows matching regex in current column')
-PandasSheet.addCommand('\\', 'unselect-col-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=[cursorCol], unselect=True)', 'unselect rows matching regex in current column')
-PandasSheet.addCommand('g|', 'select-cols-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=visibleCols)', 'select rows matching regex in any visible column')
-PandasSheet.addCommand('g\\', 'unselect-cols-regex', 'selectByRegex(regex=input("select regex: ", type="regex", defaultLast=True), columns=visibleCols, unselect=True)', 'unselect rows matching regex in any visible column')
+PandasSheet.addCommand('|', 'select-col-regex', 'selectByRegex(regex=inputRegex("select regex: ", defaultLast=True), columns=[cursorCol])', 'select rows matching regex in current column')
+PandasSheet.addCommand('\\', 'unselect-col-regex', 'selectByRegex(regex=inputRegex("select regex: ", defaultLast=True), columns=[cursorCol], unselect=True)', 'unselect rows matching regex in current column')
+PandasSheet.addCommand('g|', 'select-cols-regex', 'selectByRegex(regex=inputRegex("select regex: ", defaultLast=True), columns=visibleCols)', 'select rows matching regex in any visible column')
+PandasSheet.addCommand('g\\', 'unselect-cols-regex', 'selectByRegex(regex=inputRegex("select regex: ", defaultLast=True), columns=visibleCols, unselect=True)', 'unselect rows matching regex in any visible column')
 
 # Override with a pandas/dataframe-aware implementation
-PandasSheet.addCommand('"', 'dup-selected', 'vs=PandasSheet(sheet.name, "selectedref", source=selectedRows.df); vd.push(vs)', 'open duplicate sheet with only selected rows'),
+PandasSheet.addCommand('"', 'dup-selected', 'vs=PandasSheet(sheet.name, "selectedref", source=selectedRows.df); vd.push(vs)', 'open duplicate sheet with only selected rows')
 
 vd.addGlobals({
     'PandasSheet': PandasSheet,

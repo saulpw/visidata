@@ -1,0 +1,76 @@
+Oct 28 03:06:07 gtm1.site1.company.com err gtmd[18556]: 011ae0fa:3: iqmgmt_ssl_connect: SSL error: SSL connect (5)
+Oct 28 03:06:07 gtm1.site1.company.com err gtmd[18556]: 011ae114:3: iqmgmt_ssl_connect: SSL error: Success (0) from connection 172.17.2.62
+Oct 28 03:06:07 gtm1.site1.company.com notice gtmd[18556]: 011ae01c:5: Connection complete to 172.17.2.62. Starting SSL handshake
+Oct 28 03:06:08 gtm1.site1.company.com alert gtmd[18556]: 011a1005:1: SNMP_TRAP: Pool /Common/qfdwx4.site1.gtm.company.com-pool state change green --> red (No enabled pool members available)
+Oct 28 03:06:08 gtm1.site1.company.com alert gtmd[18556]: 011a3004:1: SNMP_TRAP: Wide IP /Common/qfdwx4.site1.gtm.company.com state change green --> red (No enabled pools available)
+Oct 28 03:06:08 gtm1.site1.company.com alert gtmd[18556]: 011a4003:1: SNMP_TRAP: Pool /Common/qfdwx4.site1.gtm.company.com-pool member qfdwx4.site1.gtm.company.com-proxy-22.147.39.12-80 (ip:port=22.147.39.12:80) state change green --> red ( Monitor /Common/qfdwx4.site1.gtm.company.com-22.147.39.12-80-http-monitor : state: timeout)
+Oct 28 03:06:08 gtm1.site1.company.com alert gtmd[18556]: 011a6006:1: SNMP_TRAP: VS qfdwx4.site1.gtm.company.com-proxy-22.147.39.12-80 (ip:port=22.147.39.12:80) (Server /Common/server-22.147.39.12) state change green --> red ( Monitor /Common/qfdwx4.site1.gtm.company.com-22.147.39.12-80-http-monitor : state: timeout)
+Oct 28 03:06:08 gtm1.site1.company.com alert gtmd[18556]: 011ae0f2:1: Monitor instance /Common/qfdwx4.site1.gtm.company.com-22.147.39.12-80-http-monitor 22.147.39.12:80 UP --> DOWN from 203.16.49.32 (state: timeout)
+Oct 28 03:06:13 gtm1.site1.company.com alert gtmd[18556]: 011a4002:1: SNMP_TRAP: Pool /Common/qfvzvo.site1.gtm.company.com-pool member qfvzvo.site1.gtm.company.com-proxy-22.147.100.243-443 (ip:port=22.147.100.243:443) state change red --> green
+Oct 28 03:06:13 gtm1.site1.company.com alert gtmd[18556]: 011a6005:1: SNMP_TRAP: VS qfvzvo.site1.gtm.company.com-proxy-22.147.100.243-443 (ip:port=22.147.100.243:443) (Server /Common/server-22.147.100.243) state change red --> green
+Oct 28 03:06:13 gtm1.site1.company.com alert gtmd[18556]: 011ae0f2:1: Monitor instance /Common/qfvzvo.site1.gtm.company.com-22.147.100.243-443-https-monitor 22.147.100.243:443 DOWN --> UP from 2207:71ff:ee:5::6ba2:620 (state success)
+Oct 28 03:06:16 gtm1.site1.company.com alert gtmd[18556]: 011a5003:1: SNMP_TRAP: Server /Common/server-22.147.150.214 (ip=22.147.150.214) state change red --> green
+Oct 28 03:06:24 gtm1.site1.company.com alert gtmd[18556]: 011a1004:1: SNMP_TRAP: Pool /Common/qfdwx4.site1.gtm.company.com-pool state change red --> green
+Oct 28 03:06:24 gtm1.site1.company.com alert gtmd[18556]: 011a3003:1: SNMP_TRAP: Wide IP /Common/qfdwx4.site1.gtm.company.com state change red --> green
+Oct 28 03:06:29 gtm1.site1.company.com alert gtmd[18556]: 011a4003:1: SNMP_TRAP: Pool /Common/qfdwx4.site1.gtm.company.com-pool member qfdwx4.site1.gtm.company.com-proxy-22.147.39.12-80 (ip:port=22.147.39.12:80) state change green --> red ( Monitor /Common/qfdwx4.site1.gtm.company.com-22.147.39.12-80-http-monitor : state: protocol mismatch)
+Oct 28 03:06:29 gtm1.site1.company.com alert gtmd[18556]: 011a6006:1: SNMP_TRAP: VS qfdwx4.site1.gtm.company.com-proxy-22.147.39.12-80 (ip:port=22.147.39.12:80) (Server /Common/server-22.147.39.12) state change green --> red ( Monitor /Common/qfdwx4.site1.gtm.company.com-22.147.39.12-80-http-monitor : state: protocol mismatch)
+Oct 28 03:06:43 gtm1.site1.company.com alert gtmd[18556]: 011a5004:1: SNMP_TRAP: Server /Common/server-22.147.85.127 (ip=22.147.85.127) state change green --> red (No enabled VS available)
+Oct 28 03:11:42 gtm1.site1.company.com notice gtmd[18556]: 011ae01a:5: SSL handshake complete to 2207:71ff:ee:5::6ba2:3120
+Oct 28 03:34:16 gtm1.site1.company.com alert gtmd[18556]: 011a1005:1: SNMP_TRAP: Pool /Common/qfgye6.site1.gtm.company.com-pool state change blue --> red (No enabled pool members available)
+Oct 28 03:34:16 gtm1.site1.company.com alert gtmd[18556]: 011a3004:1: SNMP_TRAP: Wide IP /Common/qfgye6.site1.gtm.company.com state change blue --> red (No enabled pools available)
+Oct 28 03:36:30 gtm1 Saving running configuration...
+Oct 28 03:36:32 gtm1.site1.company.com notice gtmd[18556]: 011a0059:5: hookOnChild: tmsh config save exited with status == 0.(success)
+Oct 28 04:13:04 gtm1.site1.company.com err big3d[8854]: 012b200a:3: Failed to send xml message: Unhandled SSL Error
+Oct 28 07:38:29 gtm1.site1.company.com notice gtmd[18556]: 011ae01d:5: ERROR - sendto: Success
+Oct 28 08:05:52 gtm1.site1.company.com alert gtmd[18556]: 011a6005:1: SNMP_TRAP: VS qfdq9e.site1.gtm.company.com-proxy-22.147.120.192-80 (ip:port=22.147.120.192:80) (Server /Common/server-22.147.120.192) state change blue --> green
+Oct 28 08:05:52 gtm1.site1.company.com alert gtmd[18556]: 011ae0f2:1: Monitor instance /Common/qfdq9e.site1.gtm.company.com-22.147.120.192-80-http-monitor 22.147.120.192:80 CHECKING --> UP from 2207:71ff:ee:5::6ba2:520 (state: success)
+Oct 28 08:05:55 gtm1.site1.company.com alert gtmd[18556]: 011a5003:1: SNMP_TRAP: Server /Common/server-22.147.254.182 (ip=22.147.254.182) state change blue --> green
+Oct 28 08:07:47 gtm1.site1.company.com alert gtmd[18556]: 011a4002:1: SNMP_TRAP: Pool /Common/qfdq9e.site1.gtm.company.com-pool member qfdq9e.site1.gtm.company.com-proxy-22.147.120.192-443 (ip:port=22.147.120.192:443) state change blue --> green
+Oct 28 17:01:54 gtm1.site1.company.com alert gtmd[18556]: 011a3004:1: SNMP_TRAP: Wide IP /Common/qfdjgq.site1.gtm.company.com state change red --> blue (Checking)
+Oct 29 09:25:07 gtm1.site1.company.com alert gtmd[18556]: 011a1005:1: SNMP_TRAP: Pool /Common/qfjzxo.site1.gtm.company.com-pool state change red --> blue (Checking)
+Oct 29 09:25:09 gtm1.site1.company.com alert gtmd[18556]: 011a1004:1: SNMP_TRAP: Pool /Common/qfjzxo.site1.gtm.company.com-pool state change blue --> green
+Oct 29 09:25:09 gtm1.site1.company.com alert gtmd[18556]: 011a3003:1: SNMP_TRAP: Wide IP /Common/qfjzxo.site1.gtm.company.com state change blue --> green
+Oct 29 09:25:20 gtm1.site1.company.com alert gtmd[18556]: 011a4003:1: SNMP_TRAP: Pool /Common/qfjzxo.site1.gtm.company.com-pool member qfjzxo.site1.gtm.company.com-proxy-22.147.9.162-80 (ip:port=22.147.9.162:80) state change blue --> red ( Monitor /Common/qfjzxo.site1.gtm.company.com-22.147.9.162-80-http-monitor : no reply from big3d: timed out)
+Oct 29 09:25:20 gtm1.site1.company.com alert gtmd[18556]: 011a6006:1: SNMP_TRAP: VS qfjzxo.site1.gtm.company.com-proxy-22.147.9.162-80 (ip:port=22.147.9.162:80) (Server /Common/server-22.147.9.162) state change blue --> red ( Monitor /Common/qfjzxo.site1.gtm.company.com-22.147.9.162-80-http-monitor : no reply from big3d: timed out)
+Oct 29 09:25:20 gtm1.site1.company.com alert gtmd[18556]: 011ae0f2:1: Monitor instance /Common/qfjzxo.site1.gtm.company.com-22.147.9.162-80-http-monitor 22.147.9.162:80 CHECKING --> DOWN from /Common/gtm1.site4.company.com (no reply from big3d: timed out)
+Oct 29 13:19:31 gtm1.site1.company.com err big3d[8854]: 012b3003:3: SSL error during shutdown: SSL SSL_ERROR_SSL
+Nov  1 17:06:46 gtm1.site1.company.com alert gtmd[18556]: 011a5004:1: SNMP_TRAP: Server /Common/server-22.147.159.198 (ip=22.147.159.198) state change red --> blue (Checking)
+Nov  1 17:13:08 gtm1.site1.company.com err gtmd[18556]: 011ae044:3: Could not find monitor object 22.147.113.92:80 on server:vs /Common/server-22.147.113.92:qf51m0.site.gtm.company.com-proxy-22.147.113.92-80
+Nov  1 18:00:59 gtm1.site1.company.com alert gtmd[18556]: 011a5004:1: SNMP_TRAP: Server /Common/server-22.147.89.225 (ip=22.147.89.225) state change green --> blue (Checking)
+Nov  1 20:15:23 gtm1.site1.company.com notice gtmd[18556]: 011a001c:5: SYNC bigip_gtm.conf from 2207:71ff:ee:5::6ba2:620 skipped. Reason: iqsyncer currently running from 203.16.6.32
+Nov  1 20:15:23 gtm1.site1.company.com notice gtmd[18556]: 011a001d:5: SYNC loading GTM config from: 203.16.6.32
+Nov  1 20:15:24 gtm1.site1.company.com notice gtmd[18556]: 011a0006:5: hookOnChild: SYNC syncer exited with status == 0.(success)
+Nov  2 04:25:37 gtm1.site1.company.com notice gtmd[18556]: 011a0046:5: SYNC_ZONES attempting to sync from 2207:71ff:ee:5::6ba2:620.
+Nov  2 04:25:37 gtm1.site1.company.com notice zrd[18894]: 01150a42:5: Sync Zones starting from ip '2207:71ff:ee:5::6ba2:620' with timeout '300'.
+Nov  2 04:25:40 gtm1.site1.company.com notice gtmd[18556]: 011a0047:5: SYNC_ZONES completed from 2207:71ff:ee:5::6ba2:620.
+Nov  2 04:25:40 gtm1.site1.company.com notice zrd[18894]: 01150a33:5: Sync Zones exited with status == 0. (success)
+Nov  2 06:20:03 gtm1.site1.company.com alert gtmd[18556]: 011a6006:1: SNMP_TRAP: VS /Common/gtm_1cea_udp (ip:port=2207:71ff:ee::ffff:6ba2:8dea.53) (Server /Common/gtm1.site1.company.com) state change green --> red ( Monitor /Common/bigip : no reply from big3d: timed out)
+Nov  2 06:20:03 gtm1.site1.company.com alert gtmd[18556]: 011ae0f2:1: Monitor instance /Common/bigip 2207:71ff:ee::ffff:6ba2:8dea:53 UP --> DOWN from /Common/gtm1.site1.company.com (no reply from big3d: timed out)
+Nov  2 06:28:39 gtm1.site1.company.com alert gtmd[18556]: 011a5009:1: SNMP_TRAP: BIG-IP GTM /Common/gtm1.site1.company.com (203.16.49.32) left sync group syncgroup-1
+Nov  2 06:28:40 gtm1.site1.company.com alert gtmd[18556]: 011ab004:1: SNMP_TRAP: Data center /Common/SITE state change green --> red (No enabled servers available)
+Nov  2 06:29:47 gtm1.site1.company.com notice big3d[8854]: 012b0001:5: big3d exiting ===============================
+Nov  2 06:30:02 gtm1.site1.company.com notice zrd[18894]: 0115120a:5: zrd[18894] stopping.
+Nov  2 09:39:05 gtm1 alert tmm4[22559]: 011a4004:1: SNMP_TRAP: Pool (/Common/site1.gtm.company.com) member (10.17.4.88:3345) disabled
+Nov  2 09:39:13 gtm1.site1.company.com notice big3d[8169]: 012b0000:5: big3d Version 16.1.0.0.47.19 started ===============================
+Nov  2 09:39:13 gtm1.site1.company.com notice big3d[8169]: 012b0014:5: Current executable path is /usr/sbin/big3d. Checking for existence of /shared/bin/big3d.
+Nov  2 09:39:13 gtm1.site1.company.com notice big3d[8169]: 012b0018:5: Respawning to run /shared/bin/big3d.
+Nov  2 09:39:13 gtm1.site1.company.com notice big3d[8169]: 012b001f:5: Modification time(1631155098) is Thu Sep  9 02:38:18 2021 for executable '/usr/sbin/big3d'.
+Nov  2 09:39:13 gtm1.site1.company.com notice big3d[8169]: 012b0020:5: Executable /shared/bin/big3d timestamp is newer than (or the same as) /usr/sbin/big3d.
+Nov  2 09:39:13 gtm1.site1.company.com notice big3d[8169]: 012b0021:5: Executable /usr/sbin/big3d version 'big3d Version 16.1.0.0.47.19'.
+Nov  2 09:39:13 gtm1.site1.company.com notice big3d[8169]: 012b3007:5: SSL Context created using minimum TLS version tlsv1, SSL cipher list 'AESGCM:AES:!ADH:!AECDH:!PSK:!aECDH:!DSS:!ECDSA:!AES128:-SHA1:AES256-SHA'.
+Nov  2 09:39:13 gtm1.site1.company.com notice big3d[8169]: 012b3008:5: SSL Context Cipher list set to: AESGCM:AES:!ADH:!AECDH:!PSK:!aECDH:!DSS:!ECDSA:!AES128:-SHA1:AES256-SHA.
+Nov  2 09:39:13 gtm1.site1.company.com notice big3d[8169]: 012b700b:5: Route Domain support detected.
+Nov  2 09:39:13 gtm1.site1.company.com notice gtmd[16672]: 011a0007:5: /usr/sbin/gtmd started ===============================
+Nov  2 09:39:13 gtm1.site1.company.com notice gtmd[16672]: 011ae05f:5: SSL Context created with cipher list 'AESGCM:AES:!ADH:!AECDH:!PSK:!aECDH:!DSS:!ECDSA:!AES128:-SHA1:AES256-SHA' and minimum TLS version 'TLSv1'.
+Nov  2 09:39:16 gtm1.site1.company.com notice zrd[16957]: 01151209:5: zrd[16957] starting.
+Nov  2 09:39:22 gtm1.site1.company.com alert gtmd[16672]: 011a1102:1: SNMP_TRAP: Prober Pool /Common/syncgroup state change blue --> red (No enabled pool members available)
+Nov  2 09:41:24 gtm1.site1.company.com alert gtmd[16672]: 011a5004:1: SNMP_TRAP: Server /Common/bigigp10.site1.company.com (ip=172.17.2.61) state change blue --> red (No enabled VS available)
+Nov  2 09:41:24 gtm1.site1.company.com alert gtmd[16672]: 011a6006:1: SNMP_TRAP: VS /Common/gtm_1cea_udp (ip:port=2207:71ff:ee::ffff:6ba2:8dea.53) (Server /Common/gtm1.site1.company.com) state change blue --> red ( Monitor /Common/bigip : no reply from big3d: timed out)
+Nov  2 09:41:24 gtm1.site1.company.com alert gtmd[16672]: 011ae0f2:1: Monitor instance /Common/bigip 2207:71ff:ee::ffff:6ba2:8dea:53 CHECKING --> DOWN from /Common/gtm1.site1.company.com (no reply from big3d: timed out)
+Nov  2 09:45:39 gtm1.site1.company.com alert gtmd[16672]: 011ab003:1: SNMP_TRAP: Data center /Common/sitey state change red --> green
+Nov  2 09:48:21 gtm1.site1.company.com alert gtmd[16672]: 011a6005:1: SNMP_TRAP: VS /Common/gtm_8dea_tcp (ip:port=2207:71ff:ee::ffff:6ba2:8dea.53) (Server /Common/gtm1.site1.company.com) state change red --> green
+Nov  2 09:48:21 gtm1.site1.company.com alert gtmd[16672]: 011ae0f2:1: Monitor instance /Common/bigip 2207:71ff:ee::ffff:6ba2:8dea:53 DOWN --> UP from 203.16.5.32 (UP)
+Nov  5 07:07:04 gtm1.site1.company.com alert gtmd[16672]: 011a4101:1: SNMP_TRAP: Prober Pool /Common/syncgroup member /Common/gtm1.site3.company.com state change red --> green
+Nov  5 07:07:04 gtm1.site1.company.com alert gtmd[16672]: 011a500b:1: SNMP_TRAP: Box 203.16.4.32 state change red --> green
+Nov  5 07:07:14 gtm1.site1.company.com alert gtmd[16672]: 011a5008:1: SNMP_TRAP: BIG-IP GTM /Common/gtm1.site3.company.com (203.16.4.32) joined sync group syncgroup-1
+Nov  5 08:03:09 gtm1.site1.company.com err zrd[16957]: 01150a39:3: Sync Zones pid:15513 exited with error 255

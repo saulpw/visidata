@@ -1,8 +1,8 @@
-name	width	height	type	fmtstr	formatter	value	expr	aggregators
-OrderDate	12	1				2016-01-06	0	
-Region	9	1				East	1	
-Rep	10	1				Jones	2	
-Item	9	1				Pencil	3	
-Units	7	1	int			95	4	sum
-Unit_Cost	11	1				1.99	5	
-Total	9	1				189.05	6	
+name	width	type	fmtstr	value	aggregators
+OrderDate	12			2016-01-06	
+Region	9			East	
+Rep	10			Jones	
+Item	9			Pencil	
+Units	7	int		95	sum
+Unit_Cost	11			1.99	
+Total	9			189.05	

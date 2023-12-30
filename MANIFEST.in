@@ -4,4 +4,10 @@ include visidata/man/vd.1
 include visidata/man/vd.txt
 include visidata/man/visidata.1
 include visidata/ddw/input.ddw
+include visidata/ddw/regex.ddw
 include visidata/tests/sample.tsv
+include visidata/desktop/visidata.desktop
+include visidata/experimental/noahs_tapestry/*.json
+include visidata/experimental/noahs_tapestry/*.md
+include visidata/experimental/noahs_tapestry/*.ddw
+include visidata/experimental/noahs_tapestry/*.sqlite

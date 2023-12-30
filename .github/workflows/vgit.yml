@@ -1,0 +1,44 @@
+name: vgit-testing
+on:
+  pull_request:
+    branches:
+      - stable
+      - develop
+  push:
+    branches:
+      - stable
+      - develop
+
+jobs:
+  run-tests:
+
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, "3.10", "3.11"]
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.pythonversion }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install VisiData
+      run: pip3 install .
+
+    - name: Install vgit
+      run: pip3 install visidata/apps/vgit/
+
+    - name: Ensure it starts up
+      run: vgit --version
+
+    - name: Create visidatarc
+      run: touch ~/.visidatarc
+
+    - name: Import vgit
+      run: echo "import visidata.apps.vgit" >> ~/.visidatarc
+
+    - name: Run tests
+      run: vd -p visidata/apps/vgit/tests/*.vdx --batch

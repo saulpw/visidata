@@ -1,3 +1,4 @@
+import io
 import pytest
 
 from visidata import Path
@@ -16,11 +17,19 @@ class TestVisidataPath:
         assert "https://visidata.org/hello/b.tsv" == str(url_path.with_name('b.tsv')), '{} should be https://visidata.org/hello/b.tsv'.format(url_path.with_name('b.tsv'))
         assert "https://visidata.org/hello/a/b.tsv" == str(url_path.with_name('a/b.tsv')), '{} should be https://visidata.org/hello/a/b.tsv'.format(url_path.with_name('a/b.tsv'))
 
-        assert Path('foo.a.b').name == 'foo.a'
+        assert Path('foo.a.b').base_stem == 'foo.a'
         assert Path('foo.a.b').ext == 'b'
         assert Path('foo').ext == ''
-        assert Path('foo').name == 'foo'
+        assert Path('foo').base_stem == 'foo'
         assert Path('foo.').ext == ''
-        assert Path('foo.').name == 'foo.'
+        assert Path('foo.').base_stem == 'foo.'
         assert Path('.foo').ext == ''
-        assert Path('.foo').name == '.foo'
+        assert Path('.foo').base_stem == '.foo'
+
+
+    def test_opentwice(self):
+        'fresh iterator for each open'
+        p = Path('test', fptext=io.StringIO('<html>'))
+        a = next(p.open())
+        b = next(p.open())
+        assert a == b
