@@ -40,16 +40,15 @@
 
 7. Merge `develop` to stable
 
-14. motd
-    a. Upload new motd for new version.
-    b. Test that VisiData downloads motd.
-
 
 8. Merge `stable` back into other branches
 
-    a. if the branch works with minimal conflicts, keep the branch
+9. On develop, create the dev version in setup.py, visidata/__init__.py and visidata/main.py
 
-    b. otherwise, clean out the branch
+
+14. motd
+    a. Upload new motd for new version and dev version
+    b. Test that VisiData downloads motd.
 
 
 9. Push code to stable
