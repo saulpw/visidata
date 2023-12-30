@@ -34,7 +34,7 @@ eleventyNavigation:
 | xpt                   | Statistical Analysis System \(SAS\)            | 1\.2            |                              | 1\.2          | 1976    | SAS Institute                                                 | xport                |
 | [jsonl](#json)        | JSON Lines                                     | 1\.3            | typed                        | 1\.3          | 2013    | Ian Ward                                                      |                      |
 | [pandas](#pandas)     | all formats supported by pandas library        | 1\.3            |                              | 1\.3          | 2008    | Wes McKinney                                                  | pandas               |
-| parquet               | Apache Parquet                                 | 1\.3            |                              |               | 2013    | Apache Software Foundation                                    | pyarrow or pandas    |
+| parquet               | Apache Parquet                                 | 1\.3            | yes                          | 3\.0          | 2013    | Apache Software Foundation                                    | pyarrow or pandas    |
 | [pcap](#pcap)         | network packet capture                         | 1\.3            |                              | 1\.3          | 1988    | LBNL                                                          | dpkt dnslib          |
 | pyprof                | Python Profile data                            | 1\.3            |                              | 1\.3          |         |                                                               |                      |
 | [xml](#xml)           | eXtensible Markup Language \(XML\)             | 1\.3            | from xml                     | 1\.3          | 1998    | W3C                                                           | lxml                 |
@@ -57,6 +57,18 @@ eleventyNavigation:
 | arrow                 | Arrow IPC file format                          | 2\.9            |                              |               | 2016    | Apache Software Foundation                                    | pyarrow              |
 | arrows                | Arrow IPC streaming format                     | 2\.9            |                              |               | 2016    | Apache Software Foundation                                    | pyarrow              |
 | [vdx](#vd)            | VisiData command log (text)                    | 2\.11           | yes                          | 2\.11         | 2022    | VisiData                                                      |                      |
+| mailbox               | All formats supported by mailbox               | 3\.0            |                              |               | 1974    |                                                               | mailbox              |
+| jrnl                  | CLI journal                                    | 3\.0            | yes                          | 3\.0          | 2012    | Micah Jerome Ellison                                          |                      |
+| [reddit](#api)        | Reddit API                                     | 3\.0            |                              |               | 2005    |                                                               | praw                 |
+| [matrix](#api)        | Matrix API                                     | 3\.0            |                              |               | 2014    | The Matrix.org Foundation                                     | matrix\_client        |
+| [zulip](#api)         | Zulip API                                      | 3\.0            |                              |               | 2012    | Kandra Labs, Inc                                              | zulip                |
+| [airtable](#api)      | Airtable API                                   | 3\.0            |                              |               | 2012    |                                                               | pyairtable           |
+| orgmode               | Emacs Orgmode format                           | 3\.0            | yes                          | 3\.0          | 2003    | Carsten Dominik                                               |                      |
+| s3                    | Amazon S3 paths and objects                    | 3\.0            |                              |               | 2006    | Amazon                                                        | s3fs                 |
+| fec                   | Federal Election Commission                    | 3\.0            |                              |               |         | Federal Election Commission                                   | fecfile              |
+| f5log                 | Parser for f5 logs                             | 3\.0            |                              |               |         | f5                                                            |                      |
+| toml                  | Tom's Obvious Minimal Language                 | 3\.0            |                              |               |         | Tom Preston-Werner                                            | tomllib              |
+| conll                 | CoNLL annotation scheme                        | 3\.0            |                              |               |         | Conference on Natural Language Learning                       | pyconll              |
 
 # Extra notes about formats
 
@@ -90,6 +102,7 @@ eleventyNavigation:
     - `default_colname` (default: '') column name to use for non-dict rows
 - Cells containing lists (e.g. `[3]`) or dicts (e.g. `{3}`) can be expanded into new columns with `(` and unexpanded with `)`.
 - All expanded subcolumns must be closed (with `)`) to retain the same structure.
+- Support for jsonla was added in 3.0.
 
 ## xml {#xml}
 - `v` show only columns in current row attributes
@@ -180,3 +193,8 @@ This should similarly work for any format that has a `pandas.read_format()` func
 
 - .vd/vdj/.vdx are command log formats suitable for VisiData scripts and macros
 - .vds is a multisheet save format that includes some sheet and column metadata
+
+## API (reddit, matrix, zulip, airtable) {#api}
+- loader-specific requirements
+    - require setting authentication information in `~/.visidatarc` or on the CLI
+    - launch the loader with `-f loadername` for steps to obtain and configure authentication credentials
