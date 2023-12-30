@@ -1,6 +1,6 @@
 # VisiData version history
 
-# v3.x (dev)
+# v3.0 (2023-12-29)
 
 - [reorg] move independent modules into visidata/{features|experimental|themes}
 - [sidebar] add sidebar  #2064
