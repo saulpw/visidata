@@ -1,5 +1,0 @@
-#!vd -p
-{"sheet": null, "col": null, "row": null, "longname": "open-file", "input": "~/.visidata/macros.tsv", "keystrokes": "o", "comment": null}
-{"sheet": "macros", "col": "command", "row": "", "longname": "rename-col", "input": "binding", "keystrokes": "^", "comment": "rename current column"}
-{"sheet": "macros", "col": "filename", "row": "", "longname": "rename-col", "input": "source", "keystrokes": "^", "comment": "rename current column"}
-{"sheet": "macros", "col": "", "row": "", "longname": "save-sheet", "input": "~/.visidata/macros.jsonl", "keystrokes": "Ctrl+S", "comment": "save current sheet to filename in format determined by extension (default .tsv)"}

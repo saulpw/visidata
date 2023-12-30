@@ -1,0 +1,9 @@
+#!/usr/bin/env -S vd -p
+# VisiData v3.0dev
+open-file ~/.visidata/macros.tsv
+col command
+rename-col binding
+col filename
+rename-col source
+save-sheet ~/.visidata/macros.jsonl
+quit-all
