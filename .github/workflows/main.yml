@@ -40,6 +40,9 @@ jobs:
     - name: Ensure VisiData can load a dir
       run: vd . --batch
 
+    - name: Install lxml dependencies
+      run: sudo apt install -y libxml2-dev libxslt-dev
+
     - name: Install optional dependencies
       run: |
         pip3 install -r requirements.txt
