@@ -1,4 +1,4 @@
-.Dd January 11, 2023
+.Dd December 29, 2023
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -26,6 +26,7 @@
 .Cm --play Ar cmdlog
 .Op Cm -w Ar waitsecs
 .Op Cm --batch
+.Op Cm -i
 .Op Cm -o Ar output
 .Op Ar field Ns Cm = Ns Ar value
 .
@@ -48,22 +49,18 @@ Rows can be selected, filtered, and grouped; columns can be rearranged, transfor
 .
 .Lf b batch
 replay in batch mode (with no interface)
+.Lf i interactive
+launch VisiData in interactive mode after batch
 .
 .Lo o output file
 .No save final visible sheet to Ar file No as .tsv
 .
-.It Sy --replay-movement
-.No toggle Sy --play No to move cursor cell-by-cell
 .It Ar field Ns Cm = Ns Ar value
 .No replace \&"{ Ns Ar field Ns }\&" in Ar cmdlog No contents with Ar value
 .El
 .
 .Ss Commands During Replay
 .Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact -offset XXX
-.It Sy ^U
-pause/resume replay
-.It Sy ^N
-execute next row in replaying sheet
 .It Sy ^K
 cancel current replay
 .El
@@ -86,19 +83,34 @@ quit current sheet and free associated memory
 .It Ic " gq"
 quit all sheets (clean exit)
 .Pp
-.It Ic " ^H"
+.It Ic "Alt+H"
 .No activate help menu ( Ns Sy Enter Ns / Ns Sy left-mouse No to expand submenu or execute command)
 .It Ic "g^H"
 view this man page
 .It Ic "z^H"
 view sheet of command longnames and keybindings for current sheet
-.It Ic "Space" Ar longname
-.No execute command by its Ar longname
+.Pp
+.It Ic " gb"
+open sidebar in a new sheet
+.It Ic "  b"
+toggle sidebar
 .Pp
 .It Ic "  U"
 .No undo the most recent modification ( requires enabled Sy options.undo Ns )
 .It Ic "  R"
 .No redo the most recent undo ( requires enabled Sy options.undo Ns )
+.Pp
+.It Ic "Space" Ar longname
+.No open command palette; execute command by its Ar longname
+.El
+.Ss "  Command Palette"
+.Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
+.It Ic "Tab"
+.No Move to command palette, and cycle through commands
+.It Ic "0-9"
+.No Execute numbered command
+.It Ic "Enter"
+.No Execute highlighted command
 .El
 .Ss "Cursor Movement"
 .
@@ -186,6 +198,8 @@ unhide all columns
 toggle/unset current column as a key column
 .It Ic "~  #  %  $  @  z#"
 set type of current column to str/int/float/currency/date/len
+.It Ic "Alt++  Alt+-"
+show more/less precision in current numerical column
 .It Ic "  ^"
 rename current column
 .It Ic " g^"
@@ -237,8 +251,10 @@ add/reset cache for current/all visible column(s)
 .No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) one level
 .It Ic "z(  gz(" Ar depth
 .No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) to given Ar depth ( Ar 0 Ns = fully)
-.It Ic " )"
-unexpand current column; restore original column and remove other columns at this level
+.It Ic " )   g("
+unexpand current/all visible column(s); restore original column and remove other columns at this level
+.It Ic "z)  gz)" Ar depth
+.No contract current/all visible column(s) of former lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) to given Ar depth ( Ar 0 Ns = fully)
 .It Ic "zM"
 .No row-wise expand current column of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) within that column
 .El
@@ -365,7 +381,7 @@ toggle insert mode
 .It Ic "Up  Down"
 set contents to previous/next in history
 .It Ic "Tab  Shift+Tab"
-autocomplete input (when available)
+.No move cursor left/right and re-enter edit mode
 .It Ic "Shift+Arrow"
 .No move cursor in direction of Sy Arrow No and re-enter edit mode
 .
@@ -521,9 +537,9 @@ open current row/cell/sheet as Python object
 .It Sy " \&."
 .Sy Directory Sheet No "            browse properties of files in a directory"
 .It Sy " \&."
-.Sy Plugins Sheet No "              browse, install, and (de)activate plugins"
+.Sy Guide Index No "                read documentation from within VisiData"
 .It Sy " \&."
-.Sy Memory Sheet No (Alt+Shift+M) "       browse saved values, including clipboard"
+.Sy Memory Sheet No (Alt+Shift+M) " browse saved values, including clipboard"
 .It " "
 .It Sy Metasheets
 .It Sy " \&."
@@ -585,25 +601,23 @@ open parent directory
 commit changes to file system
 .El
 .
-.Ss Plugins Sheet
+.Ss Guide Index
 .Bl -inset -compact
-.It Browse through a list of available plugins. VisiData needs to be restarted before plugin activation takes effect. Installation may require internet access.
+.It Browse through a list of available guides. Each guide shows you how to use a particular feature. Gray guides have not been written yet.
 .El
 .Bl -inset -compact
 .It (global commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic Space Ar open-plugins
-.No open the Sy Plugins Sheet
+.It Ic Space Ar open-guide-index
+.No open the Sy Guide Index
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
-.It Ic "a"
-install and activate current plugin
-.It Ic "d"
-deactivate current plugin
+.It Ic "Enter"
+open a guide
 .El
 .
 .Ss Memory Sheet
@@ -704,7 +718,7 @@ save selected or all sheets
 .It Sy "\&."
 .Sy extend No "copy first selected sheet, keeping all rows and sheet type, and extend with columns from other sheets"
 .It Sy "\&."
-.Sy merge No " mostly keep all rows from first selected sheet, except prioritise cells with non-null/non-error values"
+.Sy merge No " keep all rows from first sheet, updating any False-y cells with non-False-y values from second sheet; add unique rows from second sheet"
 .El
 .
 .Ss Options Sheet (Shift+O)
@@ -863,6 +877,9 @@ show/hide methods and hidden properties
 .No preplay Ar longname No before replay or regular launch; limited to Sy Base Sheet No bound commands
 .It Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar col Ns : Ns Ar row
 .No launch vd with Ar subsheet No of Ar toplevel No at top-of-stack, and cursor at Ar col No and Ar row Ns ; all arguments are optional
+.It Cm --overwrite Ns = Ns Ar c
+.No Overwrite with confirmation
+.
 .Pp
 .Lo f filetype filetype
 .No "tsv               "
@@ -874,12 +891,16 @@ instead of file extension
 .No "\(rst                "
 field delimiter to use for tsv/usv filetype
 .
-.Lo y confirm-overwrite F
-.No "True              "
+.Lo y overwrite y
+.No "y                 "
 overwrite existing files without confirmation
 .
+.Lo ro overwrite n
+.No "n                 "
+do not overwrite existing files
+.
 .Lo N nothing T
-.No "False              "
+.No "False             "
 disable loading .visidatarc and plugin addons
 .
 .El
@@ -892,8 +913,6 @@ exit on error and display stacktrace
 enable undo/redo
 .It Sy --col-cache-size Ns = Ns Ar "int        " No "0"
 max number of cache entries in each cached column
-.It Sy --clean-names No "               False"
-clean column/sheet names to be valid Python identifiers
 .It Sy --note-pending Ns = Ns Ar "str          " No "\[u231B]"
 note to display for pending cells
 .It Sy --note-format-exc Ns = Ns Ar "str       " No "?"
@@ -926,18 +945,20 @@ specify default file type to save as
 enable profiling on threads
 .It Sy --min-memory-mb Ns = Ns Ar "int         " No "0"
 minimum memory to continue loading and async processing
-.It Sy --encoding Ns = Ns Ar "str              " No "utf-8"
-encoding passed to codecs.open
+.It Sy --encoding Ns = Ns Ar "str              " No "utf-8-sig"
+encoding passed to codecs.open when reading a file
 .It Sy --encoding-errors Ns = Ns Ar "str       " No "surrogateescape"
 encoding_errors passed to codecs.open
 .It Sy --mouse-interval Ns = Ns Ar "int        " No "1"
 max time between press/release for click (ms)
-.It Sy --input-history Ns = Ns Ar "str         " No ""
-basename of file to store persistent input history
 .It Sy --bulk-select-clear No "         False"
 clear selected rows before new bulk selections
 .It Sy --some-selected-rows No "        False"
 if no rows selected, if True, someSelectedRows returns all rows; if False, fails
+.It Sy --regex-skip Ns = Ns Ar "str            " No ""
+regex of lines to skip in text sources
+.It Sy --regex-flags Ns = Ns Ar "str           " No "I"
+flags to pass to re.compile() [AILMSUX]
 .It Sy --load-lazy No "                 False"
 load subsheets always (False) or lazily (True)
 .It Sy --skip Ns = Ns Ar "int                  " No "0"
@@ -965,22 +986,22 @@ format str to use for names of columns expanded from list (colname, index)
 indent to use when saving json
 .It Sy --json-sort-keys No "            False"
 sort object keys when saving to json
+.It Sy --json-ensure-ascii Ns = Ns Ar "bool    " No "True"
+ensure ascii encode when saving json
 .It Sy --default-colname Ns = Ns Ar "str       " No ""
 column name to use for non-dict rows
 .It Sy --filetype Ns = Ns Ar "str              " No ""
 specify file type
-.It Sy --confirm-overwrite Ns = Ns Ar "bool    " No "True"
-whether to prompt for overwrite confirmation on save
 .It Sy --safe-error Ns = Ns Ar "str            " No "#ERR"
 error string to use while saving
+.It Sy --save-encoding Ns = Ns Ar "str         " No "utf-8"
+encoding passed to codecs.open when saving a file
+.It Sy --clean-names No "               False"
+clean column/sheet names to be valid Python identifiers
 .It Sy --replay-wait Ns = Ns Ar "float         " No "0.0"
 time to wait between replayed commands, in seconds
-.It Sy --replay-movement No "           False"
-insert movements during replay
 .It Sy --rowkey-prefix Ns = Ns Ar "str         " No "\[u30AD]"
 string prefix for rowkey in the cmdlog
-.It Sy --cmdlog-histfile Ns = Ns Ar "str       " No ""
-file to autorecord each cmdlog action to
 .It Sy --clipboard-copy-cmd Ns = Ns Ar "str    " No "xclip -selection clipboard -filter"
 command to copy stdin to system clipboard
 .It Sy --clipboard-paste-cmd Ns = Ns Ar "str   " No "xclip -selection clipboard -o"
@@ -993,22 +1014,18 @@ a value to be counted as null
 number of bins for histogram of numeric columns
 .It Sy --numeric-binning No "           False"
 bin numeric columns into ranges
-.It Sy --show-graph-labels Ns = Ns Ar "bool    " No "True"
-show axes and legend on graph
 .It Sy --plot-colors Ns = Ns Ar "str           " No ""
 list of distinct colors to use for plotting distinct objects
-.It Sy --zoom-incr Ns = Ns Ar "float           " No "2.0"
-amount to multiply current zoomlevel when zooming
 .It Sy --motd-url Ns = Ns Ar "str              " No ""
 source of randomized startup messages
-.It Sy --dir-recurse No "               False"
-walk source path recursively on DirSheet
+.It Sy --dir-depth Ns = Ns Ar "int             " No "0"
+folder recursion depth on DirSheet
 .It Sy --dir-hidden No "                False"
 load hidden files on DirSheet
-.It Sy --config Ns = Ns Ar "Path               " No "/home/anja/.visidatarc"
+.It Sy --config Ns = Ns Ar "Path               " No "~/.visidatarc"
 config file to exec in Python
 .It Sy --play Ns = Ns Ar "str                  " No ""
-file.vd to replay
+file.vdj to replay
 .It Sy --batch No "                     False"
 replay in batch mode (with no interface and all status sent to stdout)
 .It Sy --output Ns = Ns Ar "NoneType           " No "None"
@@ -1019,30 +1036,38 @@ longnames to preplay before replay
 imports to preload before .visidatarc (command-line only)
 .It Sy --nothing No "                   False"
 no config, no plugins, nothing extra
-.It Sy --plugins-url Ns = Ns Ar "str           " No "https://visidata.org/plugins/plugins.jsonl"
-source of plugins sheet
+.It Sy --interactive No "               False"
+run interactive mode after batch replay
+.It Sy --overwrite Ns = Ns Ar "str             " No "c"
+overwrite existing files {y=yes|c=confirm|n=no}
 .It Sy --plugins-autoload Ns = Ns Ar "bool     " No "True"
 do not autoload plugins if False
 .It Sy --theme Ns = Ns Ar "str                 " No ""
 display/color theme to use
-.It Sy --plt-marker Ns = Ns Ar "str            " No "."
-matplotlib.markers
-.It Sy --plot-palette Ns = Ns Ar "str          " No "Set3"
-colorbrewer palette to use
-.It Sy --describe-aggrs Ns = Ns Ar "str        " No "mean stdev"
-numeric aggregators to calculate on Describe sheet
-.It Sy --incr-base Ns = Ns Ar "float           " No "1.0"
-start value for column increments
-.It Sy --ping-count Ns = Ns Ar "int            " No "3"
-send this many pings to each host
-.It Sy --ping-interval Ns = Ns Ar "float       " No "0.1"
-wait between ping rounds, in seconds
-.It Sy --regex-flags Ns = Ns Ar "str           " No "I"
-flags to pass to re.compile() [AILMSUX]
-.It Sy --regex-maxsplit Ns = Ns Ar "int        " No "0"
-maxsplit to pass to regex.split
-.It Sy --unfurl-empty No "              False"
-if unfurl includes rows for empty containers
+.It Sy --airtable-auth-token Ns = Ns Ar "str   " No ""
+Airtable API key from https://airtable.com/account
+.It Sy --matrix-token Ns = Ns Ar "str          " No ""
+matrix API token
+.It Sy --matrix-user-id Ns = Ns Ar "str        " No ""
+matrix user ID associated with token
+.It Sy --matrix-device-id Ns = Ns Ar "str      " No "VisiData"
+device ID associated with matrix login
+.It Sy --reddit-client-id Ns = Ns Ar "str      " No ""
+client_id for reddit api
+.It Sy --reddit-client-secret Ns = Ns Ar "str  " No ""
+client_secret for reddit api
+.It Sy --reddit-user-agent Ns = Ns Ar "str     " No "3.0"
+user_agent for reddit api
+.It Sy --zulip-batch-size Ns = Ns Ar "int      " No "-100"
+number of messages to fetch per call (<0 to fetch before anchor)
+.It Sy --zulip-anchor Ns = Ns Ar "int          " No "1000000000"
+message id to start fetching from
+.It Sy --zulip-delay-s Ns = Ns Ar "float       " No "1e-05"
+seconds to wait between calls (0 to stop after first)
+.It Sy --zulip-api-key Ns = Ns Ar "str         " No ""
+Zulip API key
+.It Sy --zulip-email Ns = Ns Ar "str           " No ""
+Email for use with Zulip API key
 .It Sy --csv-dialect Ns = Ns Ar "str           " No "excel"
 dialect passed to csv.reader
 .It Sy --csv-delimiter Ns = Ns Ar "str         " No ","
@@ -1058,6 +1083,12 @@ escapechar passed to csv.reader
 lineterminator passed to csv.writer
 .It Sy --safety-first No "              False"
 sanitize input/output to handle edge cases, with a performance cost
+.It Sy --f5log-object-regex Ns = Ns Ar "NoneType" No "None"
+A regex to perform on the object name, useful where object names have a structure to extract. Use the (?P<foo>...) named groups form to get column names.
+.It Sy --f5log-log-year Ns = Ns Ar "NoneType   " No "None"
+Override the default year used for log parsing. Use all four digits of the year (e.g., 2022). By default (None) use the year from the ctime of the file, or failing that the current year.
+.It Sy --f5log-log-timezone Ns = Ns Ar "str    " No "UTC"
+The timezone the source file is in, by default UTC.
 .It Sy --fixed-rows Ns = Ns Ar "int            " No "1000"
 number of rows to check for fixed width columns
 .It Sy --fixed-maxcols Ns = Ns Ar "int         " No "0"
@@ -1070,6 +1101,8 @@ table header when saving to html
 max next.url pages to follow in http response
 .It Sy --http-req-headers Ns = Ns Ar "dict     " No "{}"
 http headers to send to requests
+.It Sy --http-ssl-verify Ns = Ns Ar "bool      " No "True"
+verify host and certificates for https
 .It Sy --npy-allow-pickle No "          False"
 numpy allow unpickling objects (unsafe)
 .It Sy --pcap-internet Ns = Ns Ar "str         " No "n"
@@ -1078,12 +1111,54 @@ numpy allow unpickling objects (unsafe)
 parse PDF for tables instead of pages of text
 .It Sy --postgres-schema Ns = Ns Ar "str       " No "public"
 The desired schema for the Postgres database
+.It Sy --s3-endpoint Ns = Ns Ar "str           " No ""
+alternate S3 endpoint, used for local testing or alternative S3-compatible services
+.It Sy --s3-glob Ns = Ns Ar "bool              " No "True"
+enable glob-matching for S3 paths
+.It Sy --s3-version-aware No "          False"
+show all object versions in a versioned bucket
 .It Sy --sqlite-onconnect Ns = Ns Ar "str      " No ""
 sqlite statement to execute after opening a connection
 .It Sy --xlsx-meta-columns No "         False"
 include columns for cell objects, font colors, and fill colors
 .It Sy --xml-parser-huge-tree Ns = Ns Ar "bool " No "True"
 allow very deep trees and very long text content
+.It Sy --plt-marker Ns = Ns Ar "str            " No "."
+matplotlib.markers
+.It Sy --plot-palette Ns = Ns Ar "str          " No "Set3"
+colorbrewer palette to use
+.It Sy --server-addr Ns = Ns Ar "str           " No "127.0.0.1"
+IP address to listen for commands
+.It Sy --server-port Ns = Ns Ar "int           " No "0"
+port to listen for commands
+.It Sy --fixer-api-key Ns = Ns Ar "str         " No ""
+API Key for api.apilayer.com/fixer
+.It Sy --fixer-cache-days Ns = Ns Ar "int      " No "1"
+Cache days for currency conversions
+.It Sy --describe-aggrs Ns = Ns Ar "str        " No "mean stdev"
+numeric aggregators to calculate on Describe sheet
+.It Sy --hello-world Ns = Ns Ar "str           " No "\[u00A1]Hola mundo!"
+shown by the hello-world command
+.It Sy --incr-base Ns = Ns Ar "float           " No "1.0"
+start value for column increments
+.It Sy --ping-count Ns = Ns Ar "int            " No "3"
+send this many pings to each host
+.It Sy --ping-interval Ns = Ns Ar "float       " No "0.1"
+wait between ping rounds, in seconds
+.It Sy --regex-maxsplit Ns = Ns Ar "int        " No "0"
+maxsplit to pass to regex.split
+.It Sy --rename-cascade No "            False"
+cascade column renames into expressions
+.It Sy --faker-locale Ns = Ns Ar "str          " No "en_US"
+default locale to use for Faker
+.It Sy --faker-extra-providers Ns = Ns Ar "NoneType" No "None"
+list of additional Provider classes to load via add_provider()
+.It Sy --faker-salt Ns = Ns Ar "str            " No ""
+Use a non-empty string to enable deterministic fakes
+.It Sy --mailcap-mimetype Ns = Ns Ar "str      " No ""
+force mimetype for sysopen-mailcap
+.It Sy --unfurl-empty No "              False"
+if unfurl includes rows for empty containers
 .El
 .
 .Ss DISPLAY OPTIONS
@@ -1095,13 +1170,13 @@ allow very deep trees and very long text content
 show menu on top line when not active
 .It Sy "disp_menu_keys     " No "True"
 show keystrokes inline in submenus
-.It Sy "color_menu         " No "black on 110 cyan"
+.It Sy "color_menu         " No "black on 68 blue"
 color of menu items in general
 .It Sy "color_menu_active  " No "223 yellow on black"
 color of active menu items
 .It Sy "color_menu_spec    " No "black on 34 green"
 color of sheet-specific menu items
-.It Sy "color_menu_help    " No "black italic on 110 cyan"
+.It Sy "color_menu_help    " No "black italic on 68 blue"
 color of helpbox
 .It Sy "disp_menu_boxchars " No "\[u2502]\[u2502]\[u2500]\[u2500]\[u250C]\[u2510]\[u2514]\[u2518]\[u251C]\[u2524]"
 box characters to use for menus
@@ -1111,18 +1186,18 @@ command submenu indicator
 indicator if command pushes sheet onto sheet stack
 .It Sy "disp_menu_input    " No "\[u2026]"
 indicator if input required for command
-.It Sy "disp_menu_fmt      " No "Ctrl+H for help menu"
+.It Sy "disp_menu_fmt      " No "| VisiData {vd.version} | Alt+H for help menu"
 right-side menu format string
 .It Sy "disp_float_fmt     " No "{:.02f}"
-default fmtstr to format for float values
+default fmtstr to format float values
 .It Sy "disp_int_fmt       " No "{:d}"
-default fmtstr to format for int values
+default fmtstr to format int values
 .It Sy "disp_formatter     " No "generic"
-formatter to use for display and saving
+formatter to create the text in each cell (also used by text savers)
+.It Sy "disp_displayer     " No "generic"
+displayer to render the text in each cell
 .It Sy "disp_splitwin_pct  " No "0"
 height of second sheet on screen
-.It Sy "disp_sidebar_fmt   " No ""
-format string for default sidebar
 .It Sy "disp_note_none     " No "\[u2300]"
 visible contents of a cell whose value is None
 .It Sy "disp_truncator     " No "\[u2026]"
@@ -1185,6 +1260,8 @@ color of the bottom header row
 color of the cursor row
 .It Sy "color_current_col  " No "bold"
 color of the cursor column
+.It Sy "color_current_cell " No ""
+color of current cell, if different from color_current_row+color_current_col
 .It Sy "color_current_hdr  " No "bold reverse"
 color of the header for the cursor column
 .It Sy "color_column_sep   " No "246 blue"
@@ -1195,101 +1272,134 @@ color of key columns
 color of hidden columns on metasheets
 .It Sy "color_selected_row " No "215 yellow"
 color of selected rows
-.It Sy "color_sidebar      " No "black on 114 blue"
-color of sidebar
-.It Sy "disp_rstatus_fmt   " No " {sheet.longname} {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus} {sheet.options.disp_selected_note}{sheet.nSelectedRows}"
+.It Sy "color_clickable    " No "underline"
+color of internally clickable item
+.It Sy "color_code         " No "bold white on 237"
+color of code sample
+.It Sy "color_heading      " No "bold 200"
+color of header
+.It Sy "color_guide_unwritten" No "243 on black"
+color of unwritten guides in GuideGuide
+.It Sy "disp_rstatus_fmt   " No "{sheet.threadStatus} {sheet.keystrokeStatus}   {sheet.longname}  {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}"
 right-side status format string
-.It Sy "disp_status_fmt    " No "{sheet.shortcut}\[u203A] | "
+.It Sy "disp_status_fmt    " No "[:onclick sheets-stack]{sheet.shortcut}\[u203A] {sheet.name}[/]| "
 status line prefix
 .It Sy "disp_lstatus_max   " No "0"
 maximum length of left status line
 .It Sy "disp_status_sep    " No "\[u2502]"
 separator between statuses
-.It Sy "color_keystrokes   " No "bold 233 black on 110 cyan"
+.It Sy "color_keystrokes   " No "bold white on 237"
 color of input keystrokes on status line
+.It Sy "color_keys         " No "bold"
+color of keystrokes in help
 .It Sy "color_status       " No "bold on 238"
 status line color
-.It Sy "color_error        " No "red"
+.It Sy "color_error        " No "202 1"
 error message color
-.It Sy "color_warning      " No "yellow"
+.It Sy "color_warning      " No "166 15"
 warning message color
 .It Sy "color_top_status   " No "underline"
 top window status bar color
-.It Sy "color_active_status" No "black on 110 cyan"
+.It Sy "color_active_status" No "black on 68 blue"
  active window status bar color
 .It Sy "color_inactive_status" No "8 on black"
 inactive window status bar color
-.It Sy "color_working      " No "green"
+.It Sy "color_highlight_status" No "black on green"
+color of highlighted elements in statusbar
+.It Sy "color_working      " No "118 5"
 color of system running smoothly
-.It Sy "color_edit_cell    " No "white"
+.It Sy "color_edit_unfocused" No "238 on 110"
+display color for unfocused input in form
+.It Sy "color_edit_cell    " No "233 on 110"
 cell color to use when editing cell
 .It Sy "disp_edit_fill     " No "_"
 edit field fill character
 .It Sy "disp_unprintable   " No "\[u00B7]"
 substitute character for unprintables
 .It Sy "disp_date_fmt      " No "%Y-%m-%d"
-default fmtstr to strftime for date values
+default fmtstr passed to strftime for date values
 .It Sy "disp_currency_fmt  " No "%.02f"
 default fmtstr to format for currency values
+.It Sy "color_currency_neg " No "red"
+color for negative values in currency displayer
 .It Sy "disp_replay_play   " No "\[u25B6]"
 status indicator for active replay
-.It Sy "disp_replay_pause  " No "\[u2016]"
-status indicator for paused replay
 .It Sy "color_status_replay" No "green"
 color of replay status indicator
-.It Sy "disp_histogram     " No "*"
-.It Sy "disp_formatter     " No "generic"
-formatter to use for display and saving
-.It Sy "disp_menu          " No "True"
-show menu on top line when not active
-.It Sy "disp_menu_keys     " No "True"
-show keystrokes inline in submenus
-.It Sy "color_menu         " No "black on 110 cyan"
-color of menu items in general
-.It Sy "color_menu_active  " No "223 yellow on black"
-color of active menu items
-.It Sy "color_menu_spec    " No "black on 34 green"
-color of sheet-specific menu items
-.It Sy "color_menu_help    " No "black italic on 110 cyan"
-color of helpbox
-.It Sy "disp_menu_boxchars " No "\[u2502]\[u2502]\[u2500]\[u2500]\[u250C]\[u2510]\[u2514]\[u2518]\[u251C]\[u2524]"
-box characters to use for menus
-.It Sy "disp_menu_more     " No "\[u00BB]"
-command submenu indicator
-.It Sy "disp_menu_push     " No "\[u2398]"
-indicator if command pushes sheet onto sheet stack
-.It Sy "disp_menu_input    " No "\[u2026]"
-indicator if input required for command
-.It Sy "disp_menu_fmt      " No "Ctrl+H for help menu"
-right-side menu format string
 .It Sy "disp_histogram     " No "\[u25A0]"
 histogram element character
-.It Sy "disp_histolen      " No "50"
-width of histogram column
+.It Sy "disp_graph_labels  " No "True"
+show axes and legend on graph
 .It Sy "disp_canvas_charset" No "\[u2800]\[u2801]\[u2802]\[u2803]\[u2804]\[u2805]\[u2806]\[u2807]\[u2808]\[u2809]\[u280A]\[u280B]\[u280C]\[u280D]\[u280E]\[u280F]\[u2810]\[u2811]\[u2812]\[u2813]\[u2814]\[u2815]\[u2816]\[u2817]\[u2818]\[u2819]\[u281A]\[u281B]\[u281C]\[u281D]\[u281E]\[u281F]\[u2820]\[u2821]\[u2822]\[u2823]\[u2824]\[u2825]\[u2826]\[u2827]\[u2828]\[u2829]\[u282A]\[u282B]\[u282C]\[u282D]\[u282E]\[u282F]\[u2830]\[u2831]\[u2832]\[u2833]\[u2834]\[u2835]\[u2836]\[u2837]\[u2838]\[u2839]\[u283A]\[u283B]\[u283C]\[u283D]\[u283E]\[u283F]\[u2840]\[u2841]\[u2842]\[u2843]\[u2844]\[u2845]\[u2846]\[u2847]\[u2848]\[u2849]\[u284A]\[u284B]\[u284C]\[u284D]\[u284E]\[u284F]\[u2850]\[u2851]\[u2852]\[u2853]\[u2854]\[u2855]\[u2856]\[u2857]\[u2858]\[u2859]\[u285A]\[u285B]\[u285C]\[u285D]\[u285E]\[u285F]\[u2860]\[u2861]\[u2862]\[u2863]\[u2864]\[u2865]\[u2866]\[u2867]\[u2868]\[u2869]\[u286A]\[u286B]\[u286C]\[u286D]\[u286E]\[u286F]\[u2870]\[u2871]\[u2872]\[u2873]\[u2874]\[u2875]\[u2876]\[u2877]\[u2878]\[u2879]\[u287A]\[u287B]\[u287C]\[u287D]\[u287E]\[u287F]\[u2880]\[u2881]\[u2882]\[u2883]\[u2884]\[u2885]\[u2886]\[u2887]\[u2888]\[u2889]\[u288A]\[u288B]\[u288C]\[u288D]\[u288E]\[u288F]\[u2890]\[u2891]\[u2892]\[u2893]\[u2894]\[u2895]\[u2896]\[u2897]\[u2898]\[u2899]\[u289A]\[u289B]\[u289C]\[u289D]\[u289E]\[u289F]\[u28A0]\[u28A1]\[u28A2]\[u28A3]\[u28A4]\[u28A5]\[u28A6]\[u28A7]\[u28A8]\[u28A9]\[u28AA]\[u28AB]\[u28AC]\[u28AD]\[u28AE]\[u28AF]\[u28B0]\[u28B1]\[u28B2]\[u28B3]\[u28B4]\[u28B5]\[u28B6]\[u28B7]\[u28B8]\[u28B9]\[u28BA]\[u28BB]\[u28BC]\[u28BD]\[u28BE]\[u28BF]\[u28C0]\[u28C1]\[u28C2]\[u28C3]\[u28C4]\[u28C5]\[u28C6]\[u28C7]\[u28C8]\[u28C9]\[u28CA]\[u28CB]\[u28CC]\[u28CD]\[u28CE]\[u28CF]\[u28D0]\[u28D1]\[u28D2]\[u28D3]\[u28D4]\[u28D5]\[u28D6]\[u28D7]\[u28D8]\[u28D9]\[u28DA]\[u28DB]\[u28DC]\[u28DD]\[u28DE]\[u28DF]\[u28E0]\[u28E1]\[u28E2]\[u28E3]\[u28E4]\[u28E5]\[u28E6]\[u28E7]\[u28E8]\[u28E9]\[u28EA]\[u28EB]\[u28EC]\[u28ED]\[u28EE]\[u28EF]\[u28F0]\[u28F1]\[u28F2]\[u28F3]\[u28F4]\[u28F5]\[u28F6]\[u28F7]\[u28F8]\[u28F9]\[u28FA]\[u28FB]\[u28FC]\[u28FD]\[u28FE]\[u28FF]"
 charset to render 2x4 blocks on canvas
 .It Sy "disp_pixel_random  " No "False"
 randomly choose attr from set of pixels instead of most common
+.It Sy "disp_zoom_incr     " No "2.0"
+amount to multiply current zoomlevel when zooming
 .It Sy "color_graph_hidden " No "238 blue"
 color of legend for hidden attribute
 .It Sy "color_graph_selected" No "bold"
 color of selected graph points
 .It Sy "color_graph_axis   " No "bold"
 color for graph axis labels
+.It Sy "disp_graph_tick_x  " No "\[u2575]"
+character for graph x-axis ticks
+.It Sy "disp_help          " No "2"
+show help panel during input
 .It Sy "color_add_pending  " No "green"
 color for rows pending add
 .It Sy "color_change_pending" No "reverse yellow"
 color for cells pending modification
 .It Sy "color_delete_pending" No "red"
 color for rows pending delete
+.It Sy "disp_sidebar       " No "True"
+whether to display sidebar
+.It Sy "disp_sidebar_fmt   " No "{guide}"
+format string for default sidebar
+.It Sy "disp_sidebar_width " No "0"
+max width for sidebar
+.It Sy "disp_sidebar_height" No "0"
+max height for sidebar
+.It Sy "color_sidebar      " No "black on 114 blue"
+base color of sidebar
+.It Sy "color_sidebar_title" No "black on yellow"
+color of sidebar title
+.It Sy "color_match        " No "red"
+color for matching chars in palette chooser
+.It Sy "color_f5log_mon_up " No "green"
+color of f5log monitor status up
+.It Sy "color_f5log_mon_down" No "red"
+color of f5log monitor status down
+.It Sy "color_f5log_mon_unknown" No "blue"
+color of f5log monitor status unknown
+.It Sy "color_f5log_mon_checking" No "magenta"
+color of monitor status checking
+.It Sy "color_f5log_mon_disabled" No "black"
+color of monitor status disabled
+.It Sy "color_f5log_logid_alarm" No "red"
+color of alarms
+.It Sy "color_f5log_logid_warn" No "yellow"
+color of warnings
+.It Sy "color_f5log_logid_notice" No "cyan"
+color of notice
+.It Sy "color_f5log_logid_info" No "green"
+color of info
+.It Sy "color_xword_active " No "green"
+color of active clue
+.It Sy "color_cmdpalette   " No "black on 72"
+base color of command palette
+.It Sy "disp_cmdpal_max    " No "10"
+max number of suggestions for command palette
 .It Sy "color_shellcmd     " No "21 on 114 green"
 
 .It Sy "color_colname      " No "underline"
 
 .It Sy "color_longname     " No "bold 52 on 114 green"
 
-.It Sy "color_xword_active " No "green"
-color of active clue
+.It Sy "disp_scroll_context" No "0"
+minimum number of lines to keep visible above/below cursor when scrolling
+.It Sy "disp_sparkline     " No "\[u2581]\[u2582]\[u2583]\[u2584]\[u2585]\[u2586]\[u2587]"
+characters to display sparkline
 .El
 .
 .Sh EXAMPLES
@@ -1320,8 +1430,8 @@ color of active clue
 .Dl Nm vd Cm postgres:// Ns Ar username Ns Sy "\&:" Ns Ar password Ns Sy @ Ns Ar hostname Ns Sy  "\&:" Ns Ar port Ns Sy / Ns Ar database
 .No open a connection to the given postgres database
 .Pp
-.Dl Nm vd Cm --play tests/pivot.vd --replay-wait 1 --output tests/pivot.tsv
-.No replay tests/pivot.vd, waiting 1 second between commands, and output the final sheet to test/pivot.tsv
+.Dl Nm vd Cm --play tests/pivot.vdj --replay-wait 1 --output tests/pivot.tsv
+.No replay tests/pivot.vdj, waiting 1 second between commands, and output the final sheet to test/pivot.tsv
 .Pp
 .Dl Ic ls -l | Nm vd Cm -f fixed --skip 1 --header 0
 .No parse the output of ls -l into usable data

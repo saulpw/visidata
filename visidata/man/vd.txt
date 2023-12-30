@@ -5,7 +5,7 @@ NAME
 
 SYNOPSIS
      vd [options] [input ...]
-     vd [options] --play cmdlog [-w waitsecs] [--batch] [-o output]
+     vd [options] --play cmdlog [-w waitsecs] [--batch] [-i] [-o output]
         [field=value]
      vd [options] [input ...] +toplevel:subsheet:col:row
 
@@ -20,13 +20,11 @@ DESCRIPTION
      -w, --replay-wait=seconds
                              wait seconds between commands
      -b, --batch             replay in batch mode (with no interface)
+     -i, --interactive       launch VisiData in interactive mode after batch
      -o, --output=file       save final visible sheet to file as .tsv
-     --replay-movement       toggle --play to move cursor cell-by-cell
      field=value             replace "{field}" in cmdlog contents with value
 
    Commands During Replay
-        ^U                   pause/resume replay
-        ^N                   execute next row in replaying sheet
         ^K                   cancel current replay
 
    GLOBAL COMMANDS
@@ -41,17 +39,26 @@ DESCRIPTION
        Q              quit current sheet and free associated memory
       gq              quit all sheets (clean exit)
 
-      ^H              activate help menu (Enter/left-mouse to expand submenu
+     Alt+H            activate help menu (Enter/left-mouse to expand submenu
                       or execute command)
      g^H              view this man page
      z^H              view sheet of command longnames and keybindings for cur‐
                       rent sheet
-     Space longname   execute command by its longname
+
+      gb              open sidebar in a new sheet
+       b              toggle sidebar
 
        U              undo the most recent modification (requires enabled
                       options.undo)
        R              redo the most recent undo (requires enabled
                       options.undo)
+
+     Space longname   open command palette; execute command by its longname
+
+     Command Palette
+        Tab              Move to command palette, and cycle through commands
+        0-9              Execute numbered command
+        Enter            Execute highlighted command
 
    Cursor Movement
      Arrow PgUp       go as expected
@@ -105,6 +112,7 @@ DESCRIPTION
      ~  #  %  $  @  z#
                       set type of current column to str/int/float/cur‐
                       rency/date/len
+     Alt++  Alt+-     show more/less precision in current numerical column
        ^              rename current column
       g^              rename all unnamed visible columns to contents of se‐
                       lected rows (or current row)
@@ -150,8 +158,10 @@ DESCRIPTION
                       or dicts (e.g. {3}) one level
      z(  gz( depth    expand current/all visible column(s) of lists (e.g. [3])
                       or dicts (e.g. {3}) to given depth (0= fully)
-      )               unexpand current column; restore original column and re‐
-                      move other columns at this level
+      )   g(          unexpand current/all visible column(s); restore original
+                      column and remove other columns at this level
+     z)  gz) depth    contract current/all visible column(s) of former lists
+                      (e.g. [3]) or dicts (e.g. {3}) to given depth (0= fully)
      zM               row-wise expand current column of lists (e.g. [3]) or
                       dicts (e.g. {3}) within that column
 
@@ -235,7 +245,7 @@ DESCRIPTION
         Backspace  Del   delete previous/current character
         Insert           toggle insert mode
         Up  Down         set contents to previous/next in history
-        Tab  Shift+Tab   autocomplete input (when available)
+        Tab  Shift+Tab   move cursor left/right and re-enter edit mode
         Shift+Arrow      move cursor in direction of Arrow and re-enter edit
                          mode
 
@@ -342,9 +352,8 @@ DESCRIPTION
 
    Internal Sheets List
       .  Directory Sheet             browse properties of files in a directory
-      .  Plugins Sheet               browse, install, and (de)activate plugins
-      .  Memory Sheet (Alt+Shift+M)        browse saved values, including
-         clipboard
+      .  Guide Index                 read documentation from within VisiData
+      .  Memory Sheet (Alt+Shift+M)  browse saved values, including clipboard
 
      Metasheets
       .  Columns Sheet (Shift+C)     edit column properties
@@ -385,16 +394,14 @@ DESCRIPTION
           ` (backtick)   open parent directory
         z^S              commit changes to file system
 
-   Plugins Sheet
-     Browse through a list of available plugins. VisiData needs to be
-     restarted before plugin activation takes effect. Installation may require
-     internet access.
+   Guide Index
+     Browse through a list of available guides. Each guide shows you how to
+     use a particular feature. Gray guides have not been written yet.
      (global commands)
-        Space open-plugins
-                         open the Plugins Sheet
+        Space open-guide-index
+                         open the Guide Index
      (sheet-specific commands)
-        a                install and activate current plugin
-        d                deactivate current plugin
+        Enter            open a guide
 
    Memory Sheet
      Browse through a list of stored values, referanceable in expressions
@@ -457,9 +464,9 @@ DESCRIPTION
                          .  extend copy first selected sheet, keeping all rows
                             and sheet type, and extend with columns from other
                             sheets
-                         .  merge  mostly keep all rows from first selected
-                            sheet, except prioritise cells with non-null/non-
-                            error values
+                         .  merge  keep all rows from first sheet, updating
+                            any False-y cells with non-False-y values from
+                            second sheet; add unique rows from second sheet
 
    Options Sheet (Shift+O)
      (global commands)
@@ -558,14 +565,17 @@ COMMANDLINE OPTIONS
      +toplevel:subsheet:col:row   launch vd with subsheet of toplevel at
                                   top-of-stack, and cursor at col and row; all
                                   arguments are optional
+     --overwrite=c                Overwrite with confirmation
 
      -f, --filetype=filetype      tsv                set loader to use for
                                   filetype instead of file extension
      -d, --delimiter=delimiter    \t                 field delimiter to use
                                   for tsv/usv filetype
-     -y, --confirm-overwrite=F    True               overwrite existing files
+     -y, --overwrite=y            y                  overwrite existing files
                                   without confirmation
-     -N, --nothing=T              False               disable loading
+     -ro, --overwrite=n           n                  do not overwrite existing
+                                  files
+     -N, --nothing=T              False              disable loading
                                   .visidatarc and plugin addons
      --visidata-dir=str           ~/.visidata/       directory to load and
                                                      store additional files
@@ -575,9 +585,6 @@ COMMANDLINE OPTIONS
      --col-cache-size=int         0                  max number of cache en‐
                                                      tries in each cached col‐
                                                      umn
-     --clean-names                False              clean column/sheet names
-                                                     to be valid Python iden‐
-                                                     tifiers
      --note-pending=str           ⌛                 note to display for pend‐
                                                      ing cells
      --note-format-exc=str        ?                  cell note for an excep‐
@@ -610,21 +617,24 @@ COMMANDLINE OPTIONS
      --min-memory-mb=int          0                  minimum memory to con‐
                                                      tinue loading and async
                                                      processing
-     --encoding=str               utf-8              encoding passed to
-                                                     codecs.open
+     --encoding=str               utf-8-sig          encoding passed to
+                                                     codecs.open when reading
+                                                     a file
      --encoding-errors=str        surrogateescape    encoding_errors passed to
                                                      codecs.open
      --mouse-interval=int         1                  max time between
                                                      press/release for click
                                                      (ms)
-     --input-history=str                             basename of file to store
-                                                     persistent input history
      --bulk-select-clear          False              clear selected rows be‐
                                                      fore new bulk selections
      --some-selected-rows         False              if no rows selected, if
                                                      True, someSelectedRows
                                                      returns all rows; if
                                                      False, fails
+     --regex-skip=str                                regex of lines to skip in
+                                                     text sources
+     --regex-flags=str            I                  flags to pass to re.com‐
+                                                     pile() [AILMSUX]
      --load-lazy                  False              load subsheets always
                                                      (False) or lazily (True)
      --skip=int                   0                  skip N rows before header
@@ -653,23 +663,24 @@ COMMANDLINE OPTIONS
                                                      json
      --json-sort-keys             False              sort object keys when
                                                      saving to json
+     --json-ensure-ascii=bool     True               ensure ascii encode when
+                                                     saving json
      --default-colname=str                           column name to use for
                                                      non-dict rows
      --filetype=str                                  specify file type
-     --confirm-overwrite=bool     True               whether to prompt for
-                                                     overwrite confirmation on
-                                                     save
      --safe-error=str             #ERR               error string to use while
                                                      saving
+     --save-encoding=str          utf-8              encoding passed to
+                                                     codecs.open when saving a
+                                                     file
+     --clean-names                False              clean column/sheet names
+                                                     to be valid Python iden‐
+                                                     tifiers
      --replay-wait=float          0.0                time to wait between re‐
                                                      played commands, in sec‐
                                                      onds
-     --replay-movement            False              insert movements during
-                                                     replay
      --rowkey-prefix=str          キ                 string prefix for rowkey
                                                      in the cmdlog
-     --cmdlog-histfile=str                           file to autorecord each
-                                                     cmdlog action to
      --clipboard-copy-cmd=str     xclip -selection clipboard -filter
                                                      command to copy stdin to
                                                      system clipboard
@@ -686,24 +697,19 @@ COMMANDLINE OPTIONS
                                                      togram of numeric columns
      --numeric-binning            False              bin numeric columns into
                                                      ranges
-     --show-graph-labels=bool     True               show axes and legend on
-                                                     graph
      --plot-colors=str                               list of distinct colors
                                                      to use for plotting dis‐
                                                      tinct objects
-     --zoom-incr=float            2.0                amount to multiply cur‐
-                                                     rent zoomlevel when zoom‐
-                                                     ing
      --motd-url=str                                  source of randomized
                                                      startup messages
-     --dir-recurse                False              walk source path recur‐
-                                                     sively on DirSheet
+     --dir-depth=int              0                  folder recursion depth on
+                                                     DirSheet
      --dir-hidden                 False              load hidden files on
                                                      DirSheet
-     --config=Path                /home/anja/.visidatarc
+     --config=Path                ~/.visidatarc
                                                      config file to exec in
                                                      Python
-     --play=str                                      file.vd to replay
+     --play=str                                      file.vdj to replay
      --batch                      False              replay in batch mode
                                                      (with no interface and
                                                      all status sent to std‐
@@ -718,30 +724,37 @@ COMMANDLINE OPTIONS
                                                      only)
      --nothing                    False              no config, no plugins,
                                                      nothing extra
-     --plugins-url=str            https://visidata.org/plugins/plugins.jsonl
-                                                     source of plugins sheet
+     --interactive                False              run interactive mode af‐
+                                                     ter batch replay
+     --overwrite=str              c                  overwrite existing files
+                                                     {y=yes|c=confirm|n=no}
      --plugins-autoload=bool      True               do not autoload plugins
                                                      if False
      --theme=str                                     display/color theme to
                                                      use
-     --plt-marker=str             .                  matplotlib.markers
-     --plot-palette=str           Set3               colorbrewer palette to
-                                                     use
-     --describe-aggrs=str         mean stdev         numeric aggregators to
-                                                     calculate on Describe
-                                                     sheet
-     --incr-base=float            1.0                start value for column
-                                                     increments
-     --ping-count=int             3                  send this many pings to
-                                                     each host
-     --ping-interval=float        0.1                wait between ping rounds,
-                                                     in seconds
-     --regex-flags=str            I                  flags to pass to re.com‐
-                                                     pile() [AILMSUX]
-     --regex-maxsplit=int         0                  maxsplit to pass to
-                                                     regex.split
-     --unfurl-empty               False              if unfurl includes rows
-                                                     for empty containers
+     --airtable-auth-token=str                       Airtable API key from
+                                                     https://airtable.com/ac‐
+                                                     count
+     --matrix-token=str                              matrix API token
+     --matrix-user-id=str                            matrix user ID associated
+                                                     with token
+     --matrix-device-id=str       VisiData           device ID associated with
+                                                     matrix login
+     --reddit-client-id=str                          client_id for reddit api
+     --reddit-client-secret=str                      client_secret for reddit
+                                                     api
+     --reddit-user-agent=str      3.0                user_agent for reddit api
+     --zulip-batch-size=int       -100               number of messages to
+                                                     fetch per call (<0 to
+                                                     fetch before anchor)
+     --zulip-anchor=int           1000000000         message id to start
+                                                     fetching from
+     --zulip-delay-s=float        1e-05              seconds to wait between
+                                                     calls (0 to stop after
+                                                     first)
+     --zulip-api-key=str                             Zulip API key
+     --zulip-email=str                               Email for use with Zulip
+                                                     API key
      --csv-dialect=str            excel              dialect passed to
                                                      csv.reader
      --csv-delimiter=str          ,                  delimiter passed to
@@ -757,6 +770,24 @@ COMMANDLINE OPTIONS
      --safety-first               False              sanitize input/output to
                                                      handle edge cases, with a
                                                      performance cost
+     --f5log-object-regex=NoneType None              A regex to perform on the
+                                                     object name, useful where
+                                                     object names have a
+                                                     structure to extract. Use
+                                                     the (?P<foo>...) named
+                                                     groups form to get column
+                                                     names.
+     --f5log-log-year=NoneType    None               Override the default year
+                                                     used for log parsing. Use
+                                                     all four digits of the
+                                                     year (e.g., 2022). By de‐
+                                                     fault (None) use the year
+                                                     from the ctime of the
+                                                     file, or failing that the
+                                                     current year.
+     --f5log-log-timezone=str     UTC                The timezone the source
+                                                     file is in, by default
+                                                     UTC.
      --fixed-rows=int             1000               number of rows to check
                                                      for fixed width columns
      --fixed-maxcols=int          0                  max number of fixed-width
@@ -772,6 +803,8 @@ COMMANDLINE OPTIONS
                                                      follow in http response
      --http-req-headers=dict      {}                 http headers to send to
                                                      requests
+     --http-ssl-verify=bool       True               verify host and certifi‐
+                                                     cates for https
      --npy-allow-pickle           False              numpy allow unpickling
                                                      objects (unsafe)
      --pcap-internet=str          n                  (y/s/n) if save_dot in‐
@@ -783,6 +816,14 @@ COMMANDLINE OPTIONS
                                                      stead of pages of text
      --postgres-schema=str        public             The desired schema for
                                                      the Postgres database
+     --s3-endpoint=str                               alternate S3 endpoint,
+                                                     used for local testing or
+                                                     alternative S3-compatible
+                                                     services
+     --s3-glob=bool               True               enable glob-matching for
+                                                     S3 paths
+     --s3-version-aware           False              show all object versions
+                                                     in a versioned bucket
      --sqlite-onconnect=str                          sqlite statement to exe‐
                                                      cute after opening a con‐
                                                      nection
@@ -791,6 +832,44 @@ COMMANDLINE OPTIONS
                                                      fill colors
      --xml-parser-huge-tree=bool  True               allow very deep trees and
                                                      very long text content
+     --plt-marker=str             .                  matplotlib.markers
+     --plot-palette=str           Set3               colorbrewer palette to
+                                                     use
+     --server-addr=str            127.0.0.1          IP address to listen for
+                                                     commands
+     --server-port=int            0                  port to listen for com‐
+                                                     mands
+     --fixer-api-key=str                             API Key for api.api‐
+                                                     layer.com/fixer
+     --fixer-cache-days=int       1                  Cache days for currency
+                                                     conversions
+     --describe-aggrs=str         mean stdev         numeric aggregators to
+                                                     calculate on Describe
+                                                     sheet
+     --hello-world=str            ¡Hola mundo!       shown by the hello-world
+                                                     command
+     --incr-base=float            1.0                start value for column
+                                                     increments
+     --ping-count=int             3                  send this many pings to
+                                                     each host
+     --ping-interval=float        0.1                wait between ping rounds,
+                                                     in seconds
+     --regex-maxsplit=int         0                  maxsplit to pass to
+                                                     regex.split
+     --rename-cascade             False              cascade column renames
+                                                     into expressions
+     --faker-locale=str           en_US              default locale to use for
+                                                     Faker
+     --faker-extra-providers=NoneType None           list of additional
+                                                     Provider classes to load
+                                                     via add_provider()
+     --faker-salt=str                                Use a non-empty string to
+                                                     enable deterministic
+                                                     fakes
+     --mailcap-mimetype=str                          force mimetype for
+                                                     sysopen-mailcap
+     --unfurl-empty               False              if unfurl includes rows
+                                                     for empty containers
 
    DISPLAY OPTIONS
      Display options can only be set via the Options Sheet or a .visidatarc
@@ -800,12 +879,12 @@ COMMANDLINE OPTIONS
                                              active
      disp_menu_keys      True                show keystrokes inline in sub‐
                                              menus
-     color_menu          black on 110 cyan   color of menu items in general
+     color_menu          black on 68 blue    color of menu items in general
      color_menu_active   223 yellow on black
                                              color of active menu items
      color_menu_spec     black on 34 green   color of sheet-specific menu
                                              items
-     color_menu_help     black italic on 110 cyan
+     color_menu_help     black italic on 68 blue
                                              color of helpbox
      disp_menu_boxchars  ││──┌┐└┘├┤          box characters to use for menus
      disp_menu_more      »                   command submenu indicator
@@ -813,16 +892,18 @@ COMMANDLINE OPTIONS
                                              onto sheet stack
      disp_menu_input     …                   indicator if input required for
                                              command
-     disp_menu_fmt       Ctrl+H for help menu
+     disp_menu_fmt       | VisiData {vd.version} | Alt+H for help menu
                                              right-side menu format string
-     disp_float_fmt      {:.02f}             default fmtstr to format for
-                                             float values
-     disp_int_fmt        {:d}                default fmtstr to format for int
+     disp_float_fmt      {:.02f}             default fmtstr to format float
                                              values
-     disp_formatter      generic             formatter to use for display and
-                                             saving
+     disp_int_fmt        {:d}                default fmtstr to format int val‐
+                                             ues
+     disp_formatter      generic             formatter to create the text in
+                                             each cell (also used by text
+                                             savers)
+     disp_displayer      generic             displayer to render the text in
+                                             each cell
      disp_splitwin_pct   0                   height of second sheet on screen
-     disp_sidebar_fmt                        format string for default sidebar
      disp_note_none      ⌀                   visible contents of a cell whose
                                              value is None
      disp_truncator      …                   indicator that the contents are
@@ -864,6 +945,9 @@ COMMANDLINE OPTIONS
      color_bottom_hdr    underline           color of the bottom header row
      color_current_row   reverse             color of the cursor row
      color_current_col   bold                color of the cursor column
+     color_current_cell                      color of current cell, if differ‐
+                                             ent from color_cur‐
+                                             rent_row+color_current_col
      color_current_hdr   bold reverse        color of the header for the cur‐
                                              sor column
      color_column_sep    246 blue            color of column separators
@@ -871,83 +955,102 @@ COMMANDLINE OPTIONS
      color_hidden_col    8                   color of hidden columns on
                                              metasheets
      color_selected_row  215 yellow          color of selected rows
-     color_sidebar       black on 114 blue   color of sidebar
-     disp_rstatus_fmt     {sheet.longname} {sheet.nRows:9d} {sheet.rowtype}
-                                             {sheet.modifiedStatus}
-                                             {sheet.options.disp_selected_note}{sheet.nSelectedRows}
+     color_clickable     underline           color of internally clickable
+                                             item
+     color_code          bold white on 237   color of code sample
+     color_heading       bold 200            color of header
+     color_guide_unwritten 243 on black      color of unwritten guides in
+                                             GuideGuide
+     disp_rstatus_fmt    {sheet.threadStatus} {sheet.keystrokeStatus}
+                                             {sheet.longname}
+                                             {sheet.nRows:9d} {sheet.rowtype}
+                                             {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}
                                              right-side status format string
-     disp_status_fmt     {sheet.shortcut}› |
+     disp_status_fmt     [:onclick sheets-stack]{sheet.shortcut}›
+                                             {sheet.name}[/]|
                                              status line prefix
      disp_lstatus_max    0                   maximum length of left status
                                              line
      disp_status_sep     │                   separator between statuses
-     color_keystrokes    bold 233 black on 110 cyan
-                                             color of input keystrokes on sta‐
+     color_keystrokes    bold white on 237   color of input keystrokes on sta‐
                                              tus line
+     color_keys          bold                color of keystrokes in help
      color_status        bold on 238         status line color
-     color_error         red                 error message color
-     color_warning       yellow              warning message color
+     color_error         202 1               error message color
+     color_warning       166 15              warning message color
      color_top_status    underline           top window status bar color
-     color_active_status black on 110 cyan    active window status bar color
+     color_active_status black on 68 blue     active window status bar color
      color_inactive_status 8 on black        inactive window status bar color
-     color_working       green               color of system running smoothly
-     color_edit_cell     white               cell color to use when editing
+     color_highlight_status black on green   color of highlighted elements in
+                                             statusbar
+     color_working       118 5               color of system running smoothly
+     color_edit_unfocused 238 on 110         display color for unfocused input
+                                             in form
+     color_edit_cell     233 on 110          cell color to use when editing
                                              cell
      disp_edit_fill      _                   edit field fill character
      disp_unprintable    ·                   substitute character for unprint‐
                                              ables
-     disp_date_fmt       %Y-%m-%d            default fmtstr to strftime for
-                                             date values
+     disp_date_fmt       %Y-%m-%d            default fmtstr passed to strftime
+                                             for date values
      disp_currency_fmt   %.02f               default fmtstr to format for cur‐
                                              rency values
+     color_currency_neg  red                 color for negative values in cur‐
+                                             rency displayer
      disp_replay_play    ▶                   status indicator for active re‐
                                              play
-     disp_replay_pause   ‖                   status indicator for paused re‐
-                                             play
      color_status_replay green               color of replay status indicator
-     disp_histogram      *                   histogram element character
-     disp_formatter      generic             formatter to use for display and
-                                             saving
-     disp_menu           True                show menu on top line when not
-                                             active
-     disp_menu_keys      True                show keystrokes inline in sub‐
-                                             menus
-     color_menu          black on 110 cyan   color of menu items in general
-     color_menu_active   223 yellow on black
-                                             color of active menu items
-     color_menu_spec     black on 34 green   color of sheet-specific menu
-                                             items
-     color_menu_help     black italic on 110 cyan
-                                             color of helpbox
-     disp_menu_boxchars  ││──┌┐└┘├┤          box characters to use for menus
-     disp_menu_more      »                   command submenu indicator
-     disp_menu_push      ⎘                   indicator if command pushes sheet
-                                             onto sheet stack
-     disp_menu_input     …                   indicator if input required for
-                                             command
-     disp_menu_fmt       Ctrl+H for help menu
-                                             right-side menu format string
      disp_histogram      ■                   histogram element character
-     disp_histolen       50                  width of histogram column
+     disp_graph_labels   True                show axes and legend on graph
      disp_canvas_charset
                                              ⠀⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿⡀⡁⡂⡃⡄⡅⡆⡇⡈⡉⡊⡋⡌⡍⡎⡏⡐⡑⡒⡓⡔⡕⡖⡗⡘⡙⡚⡛⡜⡝⡞⡟⡠⡡⡢⡣⡤⡥⡦⡧⡨⡩⡪⡫⡬⡭⡮⡯⡰⡱⡲⡳⡴⡵⡶⡷⡸⡹⡺⡻⡼⡽⡾⡿⢀⢁⢂⢃⢄⢅⢆⢇⢈⢉⢊⢋⢌⢍⢎⢏⢐⢑⢒⢓⢔⢕⢖⢗⢘⢙⢚⢛⢜⢝⢞⢟⢠⢡⢢⢣⢤⢥⢦⢧⢨⢩⢪⢫⢬⢭⢮⢯⢰⢱⢲⢳⢴⢵⢶⢷⢸⢹⢺⢻⢼⢽⢾⢿⣀⣁⣂⣃⣄⣅⣆⣇⣈⣉⣊⣋⣌⣍⣎⣏⣐⣑⣒⣓⣔⣕⣖⣗⣘⣙⣚⣛⣜⣝⣞⣟⣠⣡⣢⣣⣤⣥⣦⣧⣨⣩⣪⣫⣬⣭⣮⣯⣰⣱⣲⣳⣴⣵⣶⣷⣸⣹⣺⣻⣼⣽⣾⣿
                                              charset to render 2x4 blocks on
                                              canvas
      disp_pixel_random   False               randomly choose attr from set of
                                              pixels instead of most common
+     disp_zoom_incr      2.0                 amount to multiply current zoom‐
+                                             level when zooming
      color_graph_hidden  238 blue            color of legend for hidden attri‐
                                              bute
      color_graph_selected bold               color of selected graph points
      color_graph_axis    bold                color for graph axis labels
+     disp_graph_tick_x   ╵                   character for graph x-axis ticks
+     disp_help           2                   show help panel during input
      color_add_pending   green               color for rows pending add
      color_change_pending reverse yellow     color for cells pending modifica‐
                                              tion
      color_delete_pending red                color for rows pending delete
+     disp_sidebar        True                whether to display sidebar
+     disp_sidebar_fmt    {guide}             format string for default sidebar
+     disp_sidebar_width  0                   max width for sidebar
+     disp_sidebar_height 0                   max height for sidebar
+     color_sidebar       black on 114 blue   base color of sidebar
+     color_sidebar_title black on yellow     color of sidebar title
+     color_match         red                 color for matching chars in pal‐
+                                             ette chooser
+     color_f5log_mon_up  green               color of f5log monitor status up
+     color_f5log_mon_down red                color of f5log monitor status
+                                             down
+     color_f5log_mon_unknown blue            color of f5log monitor status un‐
+                                             known
+     color_f5log_mon_checking magenta        color of monitor status checking
+     color_f5log_mon_disabled black          color of monitor status disabled
+     color_f5log_logid_alarm red             color of alarms
+     color_f5log_logid_warn yellow           color of warnings
+     color_f5log_logid_notice cyan           color of notice
+     color_f5log_logid_info green            color of info
+     color_xword_active  green               color of active clue
+     color_cmdpalette    black on 72         base color of command palette
+     disp_cmdpal_max     10                  max number of suggestions for
+                                             command palette
      color_shellcmd      21 on 114 green
      color_colname       underline
      color_longname      bold 52 on 114 green
 
-     color_xword_active  green               color of active clue
+     disp_scroll_context 0                   minimum number of lines to keep
+                                             visible above/below cursor when
+                                             scrolling
+     disp_sparkline      ▁▂▃▄▅▆▇             characters to display sparkline
 
 EXAMPLES
            vd
@@ -978,8 +1081,8 @@ EXAMPLES
            vd postgres://username:password@hostname:port/database
      open a connection to the given postgres database
 
-           vd --play tests/pivot.vd --replay-wait 1 --output tests/pivot.tsv
-     replay tests/pivot.vd, waiting 1 second between commands, and output the
+           vd --play tests/pivot.vdj --replay-wait 1 --output tests/pivot.tsv
+     replay tests/pivot.vdj, waiting 1 second between commands, and output the
      final sheet to test/pivot.tsv
 
            ls -l | vd -f fixed --skip 1 --header 0
@@ -1054,4 +1157,4 @@ SUPPORTED SOURCES
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                    January 11, 2023                    Linux/MacOS
+Linux/MacOS                    December 29, 2023                   Linux/MacOS
