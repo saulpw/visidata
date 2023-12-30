@@ -7,8 +7,9 @@
     - #1733 for full description/discussion
     - will contain a stack list of status messages
     - color syntax is [:bold]footext[/]
-        - supports `[:code]`, `[:bold]`, `[:italic]`, `[:underline]`, `[:onclick]` (makes a clickable link)
+        - supports `[:code]`, `[:bold]`, `[:italic]`, `[:underline]`, `[:onclick]` (makes a clickable link), `[heading]`
         - [:] at terminal clears; [/] at terminal pops
+        - supports basic markdown for colouring
     - toggle with `sidebar-toggle` (bound to `b`)
     - make bottom msg entirely clickable
     - make dedent and header parsing standard
@@ -59,7 +60,8 @@
         - 0-9 to execute numbered command
     - `options.disp_cmdpal_max` for number of suggestions
     - `options.color_cmdpalette` for base color
-    - `chooseAggregators` and `jointype` also use palette  #1027
+    - `chooseAggregators` and `jointype` also use palette  #1027 #2195
+        - chooseAggregators still allows selection of multiple aggregators
     - `options.color_match` is color for matching chars in palette chooser
 - convert input history to use StoredList  #2142
     - rename lastInputs.jsonl to input_history.jsonl  #2142
@@ -395,6 +397,7 @@
   #1995)
 - [sheets] fix errors on sheets with no columns (PR by @midichef #2124)
 - [sheets] fix splitcell to handle attribute/text pairs (PR by @ajkerrigan #2020)
+- [sheets] recreate sort columns for copied sheet (PR by @midichef #2192 #2190)
 - [shell] fix copying of a directory  #1970
 - [status] fix Alt+Shift+Shift+X  #1828
 - [status] update right status before exec  #996
