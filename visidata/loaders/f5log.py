@@ -1,3 +1,27 @@
+'''
+This plugin supports the default log format for:
+
+        /var/log/ltm*
+        /var/log/gtm*
+        /var/log/apm*
+        /var/log/audit*
+
+It extracts common log entries, particularly around monitoring, iRules and configuration change audits. It tries to extract data into common fields to assist rapid filtering.
+
+f5log_object_regex provides a simple way to perform a regex on an object name extracted by a splitter and get extra columns out of it. This is very useful when objectnames have a structure. Simply use named groups in your regex to get named columns out.
+
+Regex: (?:/Common/)(?P<site>[^-]+)-(?P<vstype>[^-]+)-(?P<application>[^-]+)
+
+/Common/newyork-www-banking1
+
+... | site    | vstype | appliction | ...
+... | newyork | www    | banking1   | ...
+
+Adding to .visidatarc
+
+echo 'visidata.vd.options.set("f5log_object_regex", r"(?:/Common/)(?P<site>[^-]+)-(?P<vstype>[^-]+)-(?P<application>[^-]+)", obj="global")' > ~/.visidatarc
+'''
+
 __author__ = "James Deucker <me@bitwisecook.org>"
 __version__ = "1.0.10"
 
