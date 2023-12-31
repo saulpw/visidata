@@ -2,7 +2,7 @@
 
 # v3.x
 
-# v3.0 (2023-12-29)
+# v3.0 (2023-12-30)
 
 - [reorg] move independent modules into visidata/{features|experimental|themes}
 - [sidebar] add sidebar  #2064
@@ -72,7 +72,7 @@
 - convert macros to use StoredList  #2142
     - cannot save macros if `options.visidata_dir` does not exist
     - rename `options.visidata_dir`/macros.tsv' to `options.visidata_dir`/macros.jsonl'
-    - add port-macros.vdj: https://github.com/saulpw/visidata/blob/develop/dev/port-macros.vdj to convert old macros tracker (macros.tsv) to new one
+    - add vd2to3.vdx script to port from 2.x macros to 3.x macros
 
 - [aggregators] sum uses start value from type of first value for Python 3.8+  #1996 #1999 #2009
 - [build] add a .desktop for VisiData  #1738
