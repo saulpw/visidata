@@ -86,7 +86,7 @@ def inputPalette(sheet, prompt, items,
             palrows.append((None, None))
 
         for i, (m, item) in enumerate(palrows):
-            trigger_key = ' '
+            trigger_key = ''
             if tabitem >= 0 and item:
                 trigger_key = f'{i+1}'[-1]
                 bindings[trigger_key] = partial(add_to_input if multiple else accept_input, value=item[value_key])
@@ -137,11 +137,16 @@ def inputLongname(sheet):
     def _fmt_cmdpal_summary(match, row, trigger_key):
         keystrokes = this_sheets_help.revbinds.get(row.longname, [None])[0] or ' '
         formatted_longname = match.formatted.get('longname', row.longname) if match else row.longname
-        formatted_name = f'[:onclick {row.longname}]{formatted_longname}[/]'
+        formatted_name = f'[:longname][:onclick {row.longname}]{formatted_longname}[/][/]'
         if vd.options.debug and match:
             keystrokes = f'[{match.score}]'
         r = f' [:keystrokes]{keystrokes.rjust(len(prompt)-5)}[/]  '
-        r += f'[:keystrokes]{trigger_key}[/] {formatted_name}'
+        if trigger_key:
+            r += f'[:keystrokes]{trigger_key}[/]'
+        else:
+            r += ' '
+
+        r += f' {formatted_name}'
         if row.description:
             formatted_desc = match.formatted.get('description', row.description) if match else row.description
             r += f' - {formatted_desc}'
