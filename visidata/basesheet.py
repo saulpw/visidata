@@ -283,7 +283,7 @@ class BaseSheet(DrawablePane):
 
     def evalExpr(self, expr, **kwargs):
         'Evaluate Python expression *expr* in the context of *kwargs* (may vary by sheet type).'
-        return eval(expr, vd.getGlobals(), None)
+        return eval(expr, vd.getGlobals(), dict(sheet=self))
 
     def formatString(self, fmt, **kwargs):
         'Return formatted string with *sheet* and *vd* accessible to expressions.  Missing expressions return empty strings instead of error.'

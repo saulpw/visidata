@@ -363,7 +363,7 @@ class TableSheet(BaseSheet):
             # contexts are cached by sheet/rowid for duration of drawcycle
             contexts = vd._evalcontexts.setdefault((self, self.rowid(row), col), LazyComputeRow(self, row, col=col))
         else:
-            contexts = None
+            contexts = dict(sheet=self)
 
         return eval(expr, vd.getGlobals(), contexts)
 
