@@ -41,6 +41,10 @@ for i in $TESTS ; do
             PYTHONPATH=. bin/vd --overwrite=False --play "$i" --batch --output "$goldfn" --config tests/.visidatarc --visidata-dir tests/.visidata
             echo "save: $goldfn"
         done
+    else
+        echo $TEST
+        PYTHONPATH=. bin/vd --play "$i" --batch --config tests/.visidatarc --visidata-dir tests/.visidata
+        echo "done"
     fi
 done
 
