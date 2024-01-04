@@ -1,0 +1,52 @@
+Date,Customer,SKU,Item,Quantity,Unit,Paid
+7/3/2018 1:47p,Robert Armstrong,FOOD213,BFF Oh My Gravy! Beef & Salmon 2.8oz,4,$12.95,$51.8
+7/3/2018 3:32p,Kyle Kennedy,FOOD121,"Food, Adult Cat - 3.5 oz",1,$4.22,$4.22
+7/5/2018 4:15p,"Douglas ""Dougie"" Powers",FOOD121,"Food, Adult Cat 3.5 oz",1,$4.22,$4.22
+7/6/2018 12:15p,桜 高橋 (Sakura Takahashi),FOOD122,"Food, Senior Wet Cat - 3 oz",12,$1.29,157¥
+7/10/2018 10:28a,David Attenborough,NSCT201,"Food, Salamander",30,$.05,$1.5
+7/10/2018 5:23p,Susan Ashworth,CAT060,"Cat, Korat (Felis catus)",1,$720.42,$720.42
+7/10/2018 5:23p,Susan Ashworth,FOOD130,"Food, Kitten 3kg",1,$14.94,$14.94
+7/13/2018 10:26a,Wil Wheaton,NSCT523,"Monster, Rust (Monstrus gygaxus)",1,$39.95,$39.95
+7/13/2018 3:49p,Robert Armstrong,FOOD216,BFF Oh My Gravy! Chicken & Shrimp 2.8oz,4,$12.95,$51.8
+7/17/2018 9:01a,Robert Armstrong,FOOD217,BFF Oh My Gravy! Duck & Tuna 2.8oz,4,$12.95,$51.8
+7/17/2018 11:30a,Helen Halestorm,LAGO342,Rabbit (Oryctolagus cuniculus),2,$32.94,$65.88
+7/18/2018 12:16p,桜 高橋 (Sakura Takahashi),FOOD122,"Food, Senior Wet Cat - 3 oz",6,$1.29,157¥
+7/19/2018 10:28a,Rubeus Hagrid,FOOD170,"Food, Dog - 5kg",5,$44.95,$224.75
+7/20/2018 2:13p,Jon Arbuckle,FOOD167,"Food, Premium Wet Cat - 3.5 oz",50,$3.95,$197.5
+7/23/2018 1:41p,Robert Armstrong,FOOD215,BFF Oh My Gravy! Lamb & Tuna 2.8oz,4,$12.95,$51.8
+7/23/2018 4:23p,"Douglas ""Dougie"" Powers",TOY235,Laser Pointer,1,$16.12,$16.12
+7/24/2018 12:16p,桜 高橋 (Sakura Takahashi),FOOD122,"Food, Senior Wet Cat - 3 oz",3,$1.29,157¥
+7/26/2018 4:39p,"Douglas ""Dougie"" Powers",FOOD420,"Food, Shark - 10 kg",1,$15.70,$15.7
+7/27/2018 12:16p,桜 高橋 (Sakura Takahashi),FOOD122,"Food, Senior Wet Cat - 3 oz",3,$1.29,157¥
+7/30/2018 12:17p,桜 高橋 (Sakura Takahashi),RETURN,"Food, Senior Wet Cat - 3 oz",1,$1.29,157¥
+7/31/2018 5:42p,Rubeus Hagrid,CAT060,"Food, Dragon - 50kg",5,$720.42,$3602.1
+8/1/2018 2:44p,David Attenborough,FOOD360,"Food, Rhinocerous - 50kg",4,$5.72,$22.88
+8/2/2018 5:12p,Susan Ashworth,CAT110,"Cat, Maine Coon (Felix catus)",1,"$1,309.68",$1309.68
+8/2/2018 5:12p,Susan Ashworth,FOOD130,"Food, Kitten 3kg",3,$14.94,$44.82
+8/6/2018 10:21a,Robert Armstrong,FOOD212,BFF Oh My Gravy! Beef & Chicken 2.8oz,4,$12.95,$51.8
+8/7/2018 4:12p,Juan Johnson,REPT082,"Kingsnake, California (Lampropeltis getula)",1,$89.95,$89.95
+8/7/2018 4:12p,Juan Johnson,RDNT443,"Mouse, Pinky (Mus musculus)",1,$1.49,$1.49
+8/10/2018 4:31p,Robert Armstrong,FOOD211,BFF Oh My Gravy! Chicken & Turkey 2.8oz,4,$12.95,$51.8
+8/13/2018 2:07p,Monica Johnson,RDNT443,"Mouse, Pinky (Mus musculus)",1,$1.49,$1.49
+8/13/2018 2:08p,María Fernández,FOOD146,Forti Diet Prohealth Mouse/Rat 3lbs,2,$2.00,$4.0
+8/15/2018 11:57a,Mr. Praline,RETURN,"Parrot, Norwegian Blue (Mopsitta tanta)",1,$2300.00,-$2300.0
+8/15/2018 3:48p,Kyle Kennedy,FOOD121,"Food, Adult Cat - 3.5 oz",2,$4.22,$8.44
+8/16/2018 11:50a,Helen Halestorm,RETURN,Rabbit (Oryctolagus cuniculus),6,$0,$0.0
+8/16/2018 4:00p,Kyle Kennedy,DOG010,"Dog, Golden Retriever (Canis lupus familiaris)",1,"$2,495.99",$2495.99
+8/16/2018 5:15p,Michael Smith,BIRD160,"Parakeet, Blue (Melopsittacus undulatus)",1,29.95,$31.85
+8/17/2018 9:26a,Rubeus Hagrid,NSCT201,"Food, Spider",5,$.05,$0.25
+8/20/2018 9:36a,Kyle Kennedy,RETURN,"Dog, Golden Retriever (Canis lupus familiaris)",1,"$1,247.99",-$1247.99
+8/20/2018 1:47p,מרוסיה ניסנהולץ אבולעפיה,GOAT224,"Goat, American Pygmy (Capra hircus)",1,₪499,$160.51
+8/20/2018 3:31p,Monica Johnson,NSCT201,"Crickets, Adult Live (Gryllus assimilis)",30,$.05,$1.5
+8/20/2018 5:12p,David Attenborough,NSCT084,"Food, Pangolin",30,$.17,$5.10
+8/21/2018 12:13p,Robert Armstrong,FOOD214,BFF Oh My Gravy! Duck & Salmon 2.8oz,4,$12.95,$51.8
+8/22/2018 9:38a,David Attenborough,BIRD160,"Food, Quoll",1,29.95,$29.95
+8/22/2018 2:13p,Jon Arbuckle,FOOD170,"Food, Adult Dog - 5kg",1,$44.95,$44.95
+8/22/2018 5:49p,מרוסיה ניסנהולץ,SFTY052,"Fire Extinguisher, kitchen-rated",1,$61.70,$61.70
+8/24/2018 11:42a,Robert Armstrong,FOOD218,BFF Oh My Gravy! Chicken & Salmon 2.8oz,4,$12.95,$51.8
+8/27/2018 3:05p,Monica Johnson,NSCT443,"Mealworms, Large (Tenebrio molitor) 100ct",1,$1.99,$1.99
+8/28/2018 5:32p,Susan Ashworth,CAT020,"Cat, Scottish Fold (Felis catus)",1,"$1,964.53",$1964.53
+8/28/2018 5:32p,Susan Ashworth,FOOD130,"Food, Kitten 3kg",2,$14.94,$29.88
+8/29/2018 10:07a,Robert Armstrong,FOOD219,BFF Oh My Gravy! Chicken & Pumpkin 2.8oz,4,$12.95,$51.8
+8/31/2018 12:00a,Robert Armstrong,FOOD219,BFF Oh My Gravy! Chicken & Pumpkin 2.8oz,144,$12.95,$1864.8
+8/31/2018 5:57p,Juan Johnson,REPT217,"Lizard, Spinytail (Uromastyx ornatus)",1,$99.95,$99.95
