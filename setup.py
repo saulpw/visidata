@@ -51,7 +51,7 @@ setup(
     package_data={
         "visidata.man": ["vd.1", "vd.txt"],
         "visidata.ddw": ["input.ddw", "regex.ddw"],
-        "visidata.tests": ["sample.tsv"],
+        "visidata.tests": ["sample.tsv", "benchmark.csv"],
         "visidata.desktop": ["visidata.desktop"],
         "visidata.experimenta.noahs_tapestry": [
             "clues.json",
