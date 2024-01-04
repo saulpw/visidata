@@ -165,6 +165,8 @@ class TableSheet(BaseSheet):
         self._colorizers = self.classColorizers
         self.recalc()  # set .sheet on columns and start caches
 
+        self._ordering = []  # list of (col:Column, reverse:bool)
+
         self.__dict__.update(kwargs)  # also done earlier in BaseSheet.__init__
 
     @property
@@ -1104,8 +1106,6 @@ def async_deepcopy(sheet, rowlist):
 
 
 BaseSheet.init('pane', lambda: 1)
-
-Sheet.init('_ordering', list, copy=False)  # (col:Column, reverse:bool)
 
 
 BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); reload()', 'Reload current sheet')

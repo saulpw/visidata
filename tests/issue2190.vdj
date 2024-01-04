@@ -6,3 +6,4 @@
 {"sheet": "sample", "col": "", "row": "", "longname": "select-rows", "input": "", "keystrokes": "gs", "comment": "select all rows"}
 {"sheet": "sample", "col": "", "row": "", "longname": "dup-selected", "input": "", "keystrokes": "\"", "comment": "open a duplicate sheet with only the selected rows"}
 {"sheet": "sample_selectedref", "col": "", "row": "", "longname": "unselect-rows", "input": "", "keystrokes": "gu", "comment": "unselect all rows"}
+{"longname": "assert-expr", "input": "sheet._ordering[0][0] is sheet.column(\"Region\")"}
