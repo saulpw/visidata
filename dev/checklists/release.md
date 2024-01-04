@@ -40,20 +40,21 @@
 
 7. Merge `develop` to stable
 
+14. motd
+    a. Upload new motd for new version.
+    b. Test that VisiData downloads motd.
+
 
 8. Merge `stable` back into other branches
 
-9. On develop, create the dev version in setup.py, visidata/__init__.py and visidata/main.py
+    a. if the branch works with minimal conflicts, keep the branch
 
-
-14. motd
-    a. Upload new motd for new version and dev version
-    b. Test that VisiData downloads motd.
+    b. otherwise, clean out the branch
 
 
 9. Push code to stable
 
-10. Push `develop` to pypi
+10. Push `stable` to pypi
 
     a. set up a ~/.pypirc
 
@@ -76,8 +77,10 @@
 
   Push to pypi
     ```
+    rm -rf dist/
     python3 setup.py sdist bdist_wheel
-    chmod -R a+rX .
+    chmod -R a+rX dist
+    ls dist/
     twine upload dist/*
     ```
 
