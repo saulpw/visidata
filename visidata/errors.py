@@ -1,6 +1,6 @@
 import traceback
 
-from visidata import vd, VisiData, options
+from visidata import vd, VisiData
 
 vd.option('debug', False, 'exit on error and display stacktrace', max_help=0)
 
