@@ -77,7 +77,7 @@ class HtmlLinksSheet(Sheet):
         lxml = vd.importExternal('lxml')
         from lxml.html import iterlinks
         root = self.source.getroot()
-        root.make_links_absolute(self.source.docinfo.URL)
+        root.make_links_absolute(self.source.docinfo.URL, handle_failures='ignore')
         yield from iterlinks(root)
 
     def openRow(self, row):
@@ -131,7 +131,11 @@ class HtmlTableSheet(Sheet):
                 if isinstance(cell, lxml.etree.CommentBase):
                     continue
                 cellval = ' '.join(x.strip() for x in cell.itertext())  # text only without markup
-                links = [urllib.parse.urljoin(self.source.base_url, x.get('href')) for x in cell.iter('a')]
+                links = [
+                    vd.callNoExceptions(urllib.parse.urljoin, self.source.base_url, x.get('href')) or x.get('href')
+                        for x in cell.iter('a')
+                ]
+
                 maxlinks[colnum] = max(maxlinks.get(colnum, 0), len(links))
 
                 if is_header(cell):
