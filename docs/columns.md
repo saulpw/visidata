@@ -185,6 +185,18 @@ uses the commands for column splitting and transformation with [xd/puzzles.tsv](
 - `;` adds new columns derived from pulling the contents of the current column which match the *regex within capture groups*. The new columns are named using the capture group index, or if named capture groups are used, the capture group names. This command uses the `options.default_sample_size` (default:100) rows around the cursor as sample rows.
 - `*` followed by *regex*`/`*substring* replaces the text which matches the capture groups in *regex* with the contents of *substring*. *substring* may include backreferences (*\1* etc).
 
+### Changes in visidata 3.0
+
+- The behavior of the `split` command has changed in version 3. Instead of splitting columns, it now creates a new column with the format: `[N] first_value ; second_value`, where N is a number representing the field count. All the fields are contained in the first (and only) field.
+- To expand the list into multiple columns like in previous versions, use `(`.
+- The previous `split-col` command still exists but is deprecated. Previous `cmdlogs` should still work with it. You can also unbind/rebind `:` to that previous command.
+- If you have rebound to the older command, please let us know so we can un-deprecate it.
+
+### Stale Information
+
+- The documentation does not mention the change in behavior of the `split` command in version 3.
+- The documentation does not mention the existence of the `split-col` command, which is deprecated in version 3.
+- The documentation does not provide information on how to expand the list into multiple columns like in previous versions.
 ## [How do I substitute text in my column]
 
 The `*` command can be used to do content transformations of cells. The `g*` variant transforms in-place, instead of creating a new column.
