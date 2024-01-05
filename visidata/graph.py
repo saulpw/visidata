@@ -23,6 +23,9 @@ class InvertedCanvas(Canvas):
         self.visibleBox.ymin = canvasPoint.y - self.canvasH(self.plotviewBox.ymax-plotterPoint.y)
         self.refresh()
 
+    def rowsWithin(self, plotter_bbox):
+        return super().rowsWithin(plotter_bbox, invert_y=True)
+
     def zoomTo(self, bbox):
         super().zoomTo(bbox)
         self.fixPoint(Point(self.plotviewBox.xmin, self.plotviewBox.ymin),
@@ -80,6 +83,7 @@ class GraphSheet(InvertedCanvas):
         nplotted = 0
 
         self.reset()
+        self.row_order = {}
 
         vd.status('loading data points')
         catcols = [c for c in self.xcols if not vd.isNumeric(c)]
@@ -95,6 +99,7 @@ class GraphSheet(InvertedCanvas):
 
                     attr = self.plotColor(k)
                     self.point(graph_x, graph_y, attr, row)
+                    self.row_order[self.source.rowid(row)] = rownum
                     nplotted += 1
                 except Exception as e:
                     nerrors += 1
@@ -212,6 +217,11 @@ class GraphSheet(InvertedCanvas):
         xname = ','.join(xcol.name for xcol in self.xcols if vd.isNumeric(xcol)) or 'row#'
         xname, _ = clipstr(xname, self.left_margin//2-2)
         self.plotlabel(0, self.plotviewBox.ymax+4, xname+'»', 'graph_axis')
+
+    def rowsWithin(self, plotter_bbox):
+        'return list of deduped rows within plotter_bbox'
+        rows = super().rowsWithin(plotter_bbox)
+        return sorted(rows, key=lambda r: self.row_order[self.source.rowid(r)])
 
 
 Sheet.addCommand('.', 'plot-column', 'vd.push(GraphSheet(sheet.name, "graph", source=sheet, sourceRows=rows, xcols=keyCols, ycols=numericCols([cursorCol])))', 'plot current numeric column vs key columns; numeric key column is used for x-axis, while categorical key columns determine color')
