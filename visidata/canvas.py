@@ -209,15 +209,23 @@ class Plotter(BaseSheet):
             self.hiddenAttrs.remove(attr)
         self.plotlegends()
 
-    def rowsWithin(self, plotter_bbox):
+    def rowsWithin(self, plotter_bbox, invert_y=False):
         'return list of deduped rows within plotter_bbox'
         ret = {}
+
         x_start = max(0, plotter_bbox.xmin)
+        if len(self.pixels) == 0: return []
+        x_end = min(len(self.pixels[0]), plotter_bbox.xmax)
+
         y_start = max(0, plotter_bbox.ymin)
         y_end = min(len(self.pixels), plotter_bbox.ymax)
-        for y in range(y_start, y_end):
-            x_end = min(len(self.pixels[y]), plotter_bbox.xmax)
-            for x in range(x_start, x_end):
+        if invert_y:
+            y_range = range(y_end-1, y_start-1, -1)
+        else:
+            y_range = range(y_start, y_end)
+
+        for x in range(x_start, x_end):
+            for y in y_range:
                 for attr, rows in self.pixels[y][x].items():
                     if attr not in self.hiddenAttrs:
                         for r in rows:
