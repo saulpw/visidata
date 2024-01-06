@@ -19,6 +19,17 @@ def add_to_input(v, i, value=''):
 def accept_input(v, i, value=None):
     raise AcceptInput(v if value is None else value)
 
+def accept_input_if_subset(v, i, value=''):
+    # if no input, accept value under cmd palette cursor
+    if not v:
+        raise AcceptInput(value)
+
+    # if the last item is a partial match, replace it with the full value
+    parts = v.split()
+    if value and value.startswith(parts[-1]):
+        v = ' '.join(parts[:-1] + [value])
+
+    raise AcceptInput(v)
 
 @VisiData.lazy_property
 def usedInputs(vd):
@@ -95,13 +106,17 @@ def inputPalette(sheet, prompt, items,
 
             if tabitem < 0 and palrows:
                 _ , topitem = palrows[0]
-                bindings['^J'] = partial(accept_input, value=None)
                 if multiple:
                     bindings[' '] = partial(add_to_input, value=topitem[value_key])
+                    bindings['^J'] = partial(accept_input_if_subset, value=topitem[value_key])
+                else:
+                    bindings['^J'] = partial(accept_input, value=topitem[value_key])
             elif item and i == tabitem:
-                bindings['^J'] = partial(accept_input, value=None)
                 if multiple:
+                    bindings['^J'] = partial(accept_input_if_subset, value=item[value_key])
                     bindings[' '] = partial(add_to_input, value=item[value_key])
+                else:
+                    bindings['^J'] = partial(accept_input, value=item[value_key])
                 attr = colors.color_menu_spec
 
             match_summary = formatter(m, item, trigger_key) if item else ' '
