@@ -18,6 +18,7 @@ CommandsSheet ("How to find the command you want run")
 
 #  real barebones basics
 MovementGuide ("Movement and Search")
+InputGuide ("Input keystrokes")
 SortGuide ("Sorting")
 TypesSheet ("The basic type system")
 CommandLog  ("Undo and Replay")
