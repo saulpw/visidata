@@ -101,7 +101,7 @@ toggle sidebar
 .No redo the most recent undo ( requires enabled Sy options.undo Ns )
 .Pp
 .It Ic "Space" Ar longname
-.No open command palette; execute command by its Ar longname
+.No open command palette; execute top command by its Ar longname
 .El
 .Ss "  Command Palette"
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX

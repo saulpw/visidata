@@ -6,6 +6,19 @@ from visidata import DrawablePane, BaseSheet, vd, VisiData, CompleteKey, clipdra
 vd.theme_option('color_cmdpalette', 'black on 72', 'base color of command palette')
 vd.theme_option('disp_cmdpal_max', 10, 'max number of suggestions for command palette')
 
+vd.help_longname = '''# Choose Command
+Start typing a command longname or keyword in its helpstring.
+
+- `Enter` to execute top command.
+- `Tab` to highlight top command.
+
+## When Command Highlighted
+
+- `Tab`/`Shift+Tab` to cycle highlighted command.
+- `Enter` to execute highlighted command.
+- `0-9` to execute numbered command.
+'''
+
 def add_to_input(v, i, value=''):
     items = list(v.split())
     if not v or v.endswith(' '):
@@ -170,6 +183,7 @@ def inputLongname(sheet):
     return sheet.inputPalette(prompt, this_sheets_help.cmdlist,
                               value_key='longname',
                               formatter=_fmt_cmdpal_summary,
+                              help=vd.help_longname,
                               type='longname')
 
 

@@ -7,7 +7,20 @@ import statistics
 from visidata import Progress, Sheet, Column, ColumnsSheet, VisiData
 from visidata import vd, anytype, vlen, asyncthread, wrapply, AttrDict
 
-vd.help_aggregators = '# Aggregators Help\nHELPTODO'
+vd.help_aggregators = '''# Choose Aggregators
+Start typing an aggregator name or description.
+Multiple aggregators can be added by separating spaces.
+
+- `Enter` to select top aggregator.
+- `Tab` to highlight top aggregator.
+
+## When Aggregator Highlighted
+
+- `Tab`/`Shift+Tab` to cycle highlighted aggregator.
+- `Enter` to select aggregators.
+- `Space` to add highlighted aggregator.
+- `0-9` to add numbered aggregator.
+'''
 
 vd.option('null_value', None, 'a value to be counted as null', replay=True)
 
