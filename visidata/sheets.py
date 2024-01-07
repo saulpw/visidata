@@ -866,7 +866,7 @@ class TableSheet(BaseSheet):
                     for i, chunks in enumerate(lines):
                         y = ybase+i
 
-                        if vcolidx == self.rightVisibleColIndex:  # right edge of sheet
+                        if vcolidx == self.nVisibleCols-1:  # right edge of sheet
                             if len(lines) == 1:
                                 sepchars = endsep
                             else:
