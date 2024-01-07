@@ -3,7 +3,9 @@ from visidata import TypedExceptionWrapper, Progress
 
 vd.option('csv_dialect', 'excel', 'dialect passed to csv.reader', replay=True)
 vd.option('csv_delimiter', ',', 'delimiter passed to csv.reader', replay=True)
+vd.option('csv_doublequote', True, 'quote-doubling setting passed to csv.reader', replay=True)
 vd.option('csv_quotechar', '"', 'quotechar passed to csv.reader', replay=True)
+vd.option('csv_quoting', 0, 'quoting style passed to csv.reader and csv.writer', replay=True)
 vd.option('csv_skipinitialspace', True, 'skipinitialspace passed to csv.reader', replay=True)
 vd.option('csv_escapechar', None, 'escapechar passed to csv.reader', replay=True)
 vd.option('csv_lineterminator', '\r\n', 'lineterminator passed to csv.writer', replay=True)
