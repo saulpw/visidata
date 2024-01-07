@@ -18,6 +18,9 @@ class LazyChainMap:
                 if k not in self.objs:
                     self.objs[k] = obj
 
+    def __iter__(self):
+        return iter(self.objs)
+
     def __contains__(self, k):
         return k in self.objs
 

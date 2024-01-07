@@ -65,8 +65,15 @@ class LazyComputeRow:
             lcmobj._lcm = LazyChainMap(self.sheet, self.col, *vd.contexts)
         return lcmobj._lcm
 
+    def __iter__(self):
+        yield from self.sheet._ordered_colnames
+        yield from self._lcm.keys()
+        yield 'row'
+        yield 'sheet'
+        yield 'col'
+
     def keys(self):
-        return self.sheet._ordered_colnames + self._lcm.keys() + ['row', 'sheet', 'col']
+        return list(self.__iter__())
 
     def __str__(self):
         return str(self.as_dict())
