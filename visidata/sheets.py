@@ -65,8 +65,15 @@ class LazyComputeRow:
             lcmobj._lcm = LazyChainMap(self.sheet, self.col, *vd.contexts)
         return lcmobj._lcm
 
+    def __iter__(self):
+        yield from self.sheet._ordered_colnames
+        yield from self._lcm.keys()
+        yield 'row'
+        yield 'sheet'
+        yield 'col'
+
     def keys(self):
-        return self.sheet._ordered_colnames + self._lcm.keys() + ['row', 'sheet', 'col']
+        return list(self.__iter__())
 
     def __str__(self):
         return str(self.as_dict())
@@ -164,6 +171,8 @@ class TableSheet(BaseSheet):
 
         self._colorizers = self.classColorizers
         self.recalc()  # set .sheet on columns and start caches
+
+        self._ordering = []  # list of (col:Column, reverse:bool)
 
         self.__dict__.update(kwargs)  # also done earlier in BaseSheet.__init__
 
@@ -363,7 +372,7 @@ class TableSheet(BaseSheet):
             # contexts are cached by sheet/rowid for duration of drawcycle
             contexts = vd._evalcontexts.setdefault((self, self.rowid(row), col), LazyComputeRow(self, row, col=col))
         else:
-            contexts = None
+            contexts = dict(sheet=self)
 
         return eval(expr, vd.getGlobals(), contexts)
 
@@ -864,7 +873,7 @@ class TableSheet(BaseSheet):
                     for i, chunks in enumerate(lines):
                         y = ybase+i
 
-                        if vcolidx == self.rightVisibleColIndex:  # right edge of sheet
+                        if vcolidx == self.nVisibleCols-1:  # right edge of sheet
                             if len(lines) == 1:
                                 sepchars = endsep
                             else:
@@ -1104,8 +1113,6 @@ def async_deepcopy(sheet, rowlist):
 
 
 BaseSheet.init('pane', lambda: 1)
-
-Sheet.init('_ordering', list, copy=False)  # (col:Column, reverse:bool)
 
 
 BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); reload()', 'Reload current sheet')

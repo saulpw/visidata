@@ -13,7 +13,6 @@
 
 3. Verify that VisiData is up-to-date:
     * help menu
-    * plugins.jsonl
 
 3. Ensure `develop` automated tests run correctly with dev/test.sh
 
@@ -54,7 +53,7 @@
 
 9. Push code to stable
 
-10. Push `develop` to pypi
+10. Push `stable` to pypi
 
     a. set up a ~/.pypirc
 
@@ -77,8 +76,10 @@
 
   Push to pypi
     ```
+    rm -rf dist/
     python3 setup.py sdist bdist_wheel
-    chmod -R a+rX .
+    chmod -R a+rX dist
+    ls dist/
     twine upload dist/*
     ```
 

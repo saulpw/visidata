@@ -18,6 +18,7 @@ CommandsSheet ("How to find the command you want run")
 
 #  real barebones basics
 MovementGuide ("Movement and Search")
+InputGuide ("Input keystrokes")
 SortGuide ("Sorting")
 TypesSheet ("The basic type system")
 CommandLog  ("Undo and Replay")
@@ -116,6 +117,9 @@ class CommandHelpGetter:
         self.helpsheet.ensureLoaded()
 
     def __getattr__(self, k):
+        return self.__getitem__(k)
+
+    def __getitem__(self, k):
         longname = k.replace('_', '-')
         binding = self.helpsheet.revbinds.get(longname, [None])[0]
         # cmddict has a SheetClass associated with each command
@@ -172,6 +176,22 @@ def getGuide(vd, name): # -> GuideSheet()
     vd.warning(f'no guide named {name}')
 
 BaseSheet.addCommand('', 'open-guide-index', 'vd.push(GuideIndex("VisiData_Guide"))', 'open VisiData guides table of contents')
+
+@VisiData.api
+def inputKeys(vd, prompt):
+    return vd.input(prompt, help=f'''
+                # Input Keystrokes
+                - Press `Ctrl+N` and then press another keystroke to spell out that keystroke.
+                - Press `Ctrl+C` to cancel the input.
+                - Press `Enter` to accept the input.
+            ''')
+
+@BaseSheet.api
+def getCommandInfo(sheet, keys):
+    cmd = sheet.getCommand(keys)
+    return CommandHelpGetter(type(sheet))[cmd.longname]
+
+vd.addCommand('', 'show-command-info', 'status(getCommandInfo(inputKeys("get command for keystrokes: ")))', 'show longname and helpstring for keybinding')
 
 vd.addMenuItems('''
         Help > VisiData Feature Guides > open-guide-index

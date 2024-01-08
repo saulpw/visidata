@@ -53,7 +53,8 @@ DESCRIPTION
        R              redo the most recent undo (requires enabled
                       options.undo)
 
-     Space longname   open command palette; execute command by its longname
+     Space longname   open command palette; Enter to execute top command by
+                      its longname
 
      Command Palette
         Tab              Move to command palette, and cycle through commands
@@ -743,7 +744,7 @@ COMMANDLINE OPTIONS
      --reddit-client-id=str                          client_id for reddit api
      --reddit-client-secret=str                      client_secret for reddit
                                                      api
-     --reddit-user-agent=str      3.0                user_agent for reddit api
+     --reddit-user-agent=str      3.0.1              user_agent for reddit api
      --zulip-batch-size=int       -100               number of messages to
                                                      fetch per call (<0 to
                                                      fetch before anchor)
@@ -962,7 +963,7 @@ COMMANDLINE OPTIONS
      color_guide_unwritten 243 on black      color of unwritten guides in
                                              GuideGuide
      disp_rstatus_fmt    {sheet.threadStatus} {sheet.keystrokeStatus}
-                                             {sheet.longname}
+                                             [:longname]{sheet.longname}[/]
                                              {sheet.nRows:9d} {sheet.rowtype}
                                              {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}
                                              right-side status format string
@@ -972,8 +973,9 @@ COMMANDLINE OPTIONS
      disp_lstatus_max    0                   maximum length of left status
                                              line
      disp_status_sep     │                   separator between statuses
-     color_keystrokes    bold white on 237   color of input keystrokes on sta‐
-                                             tus line
+     color_keystrokes    bold white on 237   color of input keystrokes
+     color_longname      bold 52 on 114 green
+                                             color of command longnames
      color_keys          bold                color of keystrokes in help
      color_status        bold on 238         status line color
      color_error         202 1               error message color
@@ -1045,8 +1047,6 @@ COMMANDLINE OPTIONS
                                              command palette
      color_shellcmd      21 on 114 green
      color_colname       underline
-     color_longname      bold 52 on 114 green
-
      disp_scroll_context 0                   minimum number of lines to keep
                                              visible above/below cursor when
                                              scrolling
@@ -1157,4 +1157,4 @@ SUPPORTED SOURCES
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                    December 29, 2023                   Linux/MacOS
+Linux/MacOS                     January 7, 2024                    Linux/MacOS

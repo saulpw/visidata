@@ -86,7 +86,8 @@ def Progress(vd, iterable=None, gerund="", total=None, sheet=None):
 def cancelThread(vd, *threads, exception=EscapeException):
     'Raise *exception* in one or more *threads*.'
     for t in threads:
-        ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(t.ident), ctypes.py_object(exception))
+        if t.ident is not None:
+            ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(t.ident), ctypes.py_object(exception))
 
 
 # each row is an augmented threading.Thread object

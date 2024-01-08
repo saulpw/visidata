@@ -94,3 +94,14 @@
 22. Test `open-row` on an html link: https://hls.gsfc.nasa.gov/data/
 23. That DirSheet requires a commit-sheet before changes on filesystem
 24. Test adding multiple aggregators via palette (+)
+25. cmdpalette
+    - longname
+        - Enter executes top recommended
+        - Tab + Enter cycles through + executes
+        - 0-9 executes numbered
+    - aggregators
+        - Enter executes top
+        - Tab cycles through
+        - Space adds aggreqators
+        - Enter submits aggregators. without adding (except if no aggregators)
+        - 0-9 adds a number

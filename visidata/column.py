@@ -111,7 +111,7 @@ class Column(Extensible):
         return self.__copy__()  # no separate deepcopy
 
     def __getstate__(self):
-        return {k:getattr(self, k) for k in 'name typestr width height expr keycol formatter fmtstr voffset hoffset aggstr'.split() if hasattr(self, k)}
+        return {k:getattr(self, k) for k in 'name typestr width height expr keycol formatter displayer fmtstr voffset hoffset aggstr'.split() if hasattr(self, k)}
 
     def __setstate__(self, d):
         for attr, v in d.items():

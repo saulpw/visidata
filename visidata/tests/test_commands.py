@@ -60,6 +60,9 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'go-row-number': '5',              # go to row 5
                  'addcol-bulk': '1',
                  'addcol-expr': 'Units',          # just copy the column
+                 'assert-expr': 'sheet.column(\"Units\")',
+                 'show-command-info': 'select-row',
+                 'assert-expr-row': 'Units',
                  'addcol-incr-step': '2',
                  'setcol-incr-step': '2',
                  'setcol-iter': 'range(1, 100)',

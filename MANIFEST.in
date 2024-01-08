@@ -6,6 +6,7 @@ include visidata/man/visidata.1
 include visidata/ddw/input.ddw
 include visidata/ddw/regex.ddw
 include visidata/tests/sample.tsv
+include visidata/tests/benchmark.csv
 include visidata/desktop/visidata.desktop
 include visidata/experimental/noahs_tapestry/*.json
 include visidata/experimental/noahs_tapestry/*.md

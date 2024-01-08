@@ -4,7 +4,7 @@ from setuptools import setup
 
 # tox can't actually run python3 setup.py: https://github.com/tox-dev/tox/issues/96
 # from visidata import __version__
-__version__ = "3.0"
+__version__ = "3.0.1"
 
 setup(
     name="visidata",
@@ -51,7 +51,7 @@ setup(
     package_data={
         "visidata.man": ["vd.1", "vd.txt"],
         "visidata.ddw": ["input.ddw", "regex.ddw"],
-        "visidata.tests": ["sample.tsv"],
+        "visidata.tests": ["sample.tsv", "benchmark.csv"],
         "visidata.desktop": ["visidata.desktop"],
         "visidata.experimenta.noahs_tapestry": [
             "clues.json",

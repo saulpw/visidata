@@ -1,0 +1,3 @@
+select-row
+dup-selected
+assert-expr sheet.nSelectedRows == 0

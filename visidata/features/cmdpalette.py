@@ -6,6 +6,19 @@ from visidata import DrawablePane, BaseSheet, vd, VisiData, CompleteKey, clipdra
 vd.theme_option('color_cmdpalette', 'black on 72', 'base color of command palette')
 vd.theme_option('disp_cmdpal_max', 10, 'max number of suggestions for command palette')
 
+vd.help_longname = '''# Choose Command
+Start typing a command longname or keyword in its helpstring.
+
+- `Enter` to execute top command.
+- `Tab` to highlight top command.
+
+## When Command Highlighted
+
+- `Tab`/`Shift+Tab` to cycle highlighted command.
+- `Enter` to execute highlighted command.
+- `0-9` to execute numbered command.
+'''
+
 def add_to_input(v, i, value=''):
     items = list(v.split())
     if not v or v.endswith(' '):
@@ -19,6 +32,17 @@ def add_to_input(v, i, value=''):
 def accept_input(v, i, value=None):
     raise AcceptInput(v if value is None else value)
 
+def accept_input_if_subset(v, i, value=''):
+    # if no input, accept value under cmd palette cursor
+    if not v:
+        raise AcceptInput(value)
+
+    # if the last item is a partial match, replace it with the full value
+    parts = v.split()
+    if value and value.startswith(parts[-1]):
+        v = ' '.join(parts[:-1] + [value])
+
+    raise AcceptInput(v)
 
 @VisiData.lazy_property
 def usedInputs(vd):
@@ -86,7 +110,7 @@ def inputPalette(sheet, prompt, items,
             palrows.append((None, None))
 
         for i, (m, item) in enumerate(palrows):
-            trigger_key = ' '
+            trigger_key = ''
             if tabitem >= 0 and item:
                 trigger_key = f'{i+1}'[-1]
                 bindings[trigger_key] = partial(add_to_input if multiple else accept_input, value=item[value_key])
@@ -95,13 +119,17 @@ def inputPalette(sheet, prompt, items,
 
             if tabitem < 0 and palrows:
                 _ , topitem = palrows[0]
-                bindings['^J'] = partial(accept_input, value=None)
                 if multiple:
                     bindings[' '] = partial(add_to_input, value=topitem[value_key])
+                    bindings['^J'] = partial(accept_input_if_subset, value=topitem[value_key])
+                else:
+                    bindings['^J'] = partial(accept_input, value=topitem[value_key])
             elif item and i == tabitem:
-                bindings['^J'] = partial(accept_input, value=None)
                 if multiple:
+                    bindings['^J'] = partial(accept_input_if_subset, value=item[value_key])
                     bindings[' '] = partial(add_to_input, value=item[value_key])
+                else:
+                    bindings['^J'] = partial(accept_input, value=item[value_key])
                 attr = colors.color_menu_spec
 
             match_summary = formatter(m, item, trigger_key) if item else ' '
@@ -137,11 +165,16 @@ def inputLongname(sheet):
     def _fmt_cmdpal_summary(match, row, trigger_key):
         keystrokes = this_sheets_help.revbinds.get(row.longname, [None])[0] or ' '
         formatted_longname = match.formatted.get('longname', row.longname) if match else row.longname
-        formatted_name = f'[:onclick {row.longname}]{formatted_longname}[/]'
+        formatted_name = f'[:longname][:onclick {row.longname}]{formatted_longname}[/][/]'
         if vd.options.debug and match:
             keystrokes = f'[{match.score}]'
         r = f' [:keystrokes]{keystrokes.rjust(len(prompt)-5)}[/]  '
-        r += f'[:keystrokes]{trigger_key}[/] {formatted_name}'
+        if trigger_key:
+            r += f'[:keystrokes]{trigger_key}[/]'
+        else:
+            r += ' '
+
+        r += f' {formatted_name}'
         if row.description:
             formatted_desc = match.formatted.get('description', row.description) if match else row.description
             r += f' - {formatted_desc}'
@@ -150,6 +183,7 @@ def inputLongname(sheet):
     return sheet.inputPalette(prompt, this_sheets_help.cmdlist,
                               value_key='longname',
                               formatter=_fmt_cmdpal_summary,
+                              help=vd.help_longname,
                               type='longname')
 
 

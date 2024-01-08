@@ -1,12 +1,12 @@
 '''# RedditSheet
 
-- [:keys]Ctrl+O[/] to open a browser tab to [:code]{sheet.cursorRow.display_name_prefixed}[/]
-- [:keys]g Ctrl+O[/] to open browser windows for {sheet.nSelectedRows} selected subreddits
+- [:keystrokes]Ctrl+O[/] to open a browser tab to [:code]{sheet.cursorRow.display_name_prefixed}[/]
+- [:keystrokes]g Ctrl+O[/] to open browser windows for {sheet.nSelectedRows} selected subreddits
 
-- [:keys]Enter[/] to open sheet with top ~1000 submissions for [:code]{sheet.cursorRow.display_name_prefixed}[/]
-- [:keys]g Enter[/] to open sheet with top ~1000 submissions for {sheet.nSelectedRows} selected subreddits
+- [:keystrokes]Enter[/] to open sheet with top ~1000 submissions for [:code]{sheet.cursorRow.display_name_prefixed}[/]
+- [:keystrokes]g Enter[/] to open sheet with top ~1000 submissions for {sheet.nSelectedRows} selected subreddits
 
-- [:keys]ga[/] to append more subreddits matching input by name or description
+- [:keystrokes]ga[/] to append more subreddits matching input by name or description
 '''
 
 import visidata

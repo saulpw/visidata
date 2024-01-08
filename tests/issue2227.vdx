@@ -1,0 +1,3 @@
+# VisiData v3.0
+open-file tests/issue2227.html
+open-row

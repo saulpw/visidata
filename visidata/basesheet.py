@@ -18,6 +18,9 @@ class LazyChainMap:
                 if k not in self.objs:
                     self.objs[k] = obj
 
+    def __iter__(self):
+        return iter(self.objs)
+
     def __contains__(self, k):
         return k in self.objs
 
@@ -175,7 +178,7 @@ class BaseSheet(DrawablePane):
     @property
     def displaySource(self):
         if isinstance(self.source, BaseSheet):
-            return f'the *{self.source[0]}* sheet'
+            return f'the *{self.source}* sheet'
 
         if isinstance(self.source, (list, tuple)):
             if len(self.source) == 1:
@@ -283,7 +286,7 @@ class BaseSheet(DrawablePane):
 
     def evalExpr(self, expr, **kwargs):
         'Evaluate Python expression *expr* in the context of *kwargs* (may vary by sheet type).'
-        return eval(expr, vd.getGlobals(), None)
+        return eval(expr, vd.getGlobals(), dict(sheet=self))
 
     def formatString(self, fmt, **kwargs):
         'Return formatted string with *sheet* and *vd* accessible to expressions.  Missing expressions return empty strings instead of error.'

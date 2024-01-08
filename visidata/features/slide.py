@@ -100,6 +100,8 @@ vd.addMenuItems('''
 
 ## tests
 
+sample_path = vd.pkg_resources_files(visidata) / 'tests/sample.tsv'
+benchmark_path = vd.pkg_resources_files(visidata) / 'tests/benchmark.csv'
 
 def make_tester(setup_vdx):
     def t(vdx, golden):
@@ -114,8 +116,8 @@ def make_tester(setup_vdx):
     return t
 
 def test_slide_keycol_1(vd):
-    t = make_tester('''
-            open-file sample_data/sample.tsv
+    t = make_tester(f'''
+            open-file {sample_path}
             +::OrderDate key-col
             +::Region key-col
             +::Rep key-col
@@ -139,12 +141,12 @@ def test_slide_keycol_1(vd):
 
 
 def test_slide_leftmost(vd):
-    t = make_tester('''open-file sample_data/benchmark.csv''')
+    t = make_tester(f'''open-file {benchmark_path}''')
 
     t('+::Paid slide-leftmost', 'Paid Date Customer SKU Item Quantity Unit')
 
-    t = make_tester('''
-         open-file sample_data/benchmark.csv
+    t = make_tester(f'''
+         open-file {benchmark_path}
          +::Date key-col
     ''')
 
