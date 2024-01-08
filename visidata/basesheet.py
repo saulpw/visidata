@@ -178,7 +178,7 @@ class BaseSheet(DrawablePane):
     @property
     def displaySource(self):
         if isinstance(self.source, BaseSheet):
-            return f'the *{self.source[0]}* sheet'
+            return f'the *{self.source}* sheet'
 
         if isinstance(self.source, (list, tuple)):
             if len(self.source) == 1:
