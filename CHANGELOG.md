@@ -1,6 +1,27 @@
 # VisiData version history
 
-# v3.x
+# v3.0.1 (2024-01-XX)
+
+- [color] add `color_longname` to use instead of `color_keystrokes`  #2219
+- [column] add displayer to column state
+- [cmdpalette] Enter executes first row, if partially typed out  #2219
+- [cmdpalette] add sidebar for longname and aggregator palette  #2219
+- [guide] add `show-command-info` to display command info for a keystroke  #2228
+- [keys] add `*BtnUp` pretty keys for `BUTTON#_RELEASED`  #2219
+- [tests] add `assert-expr` and `assert-expr-row` to evaluate Python expressions, and assert result is truthy
+- [tests] parametrize feature tests (PR by @ajkerrigan #2230)
+
+## bugfixes
+
+- [dup-selected] dup-selected should unselect all rows in resulting sheet  #2225
+- [expr] fix KeyError crash with invalid inputs in `expr` for Python 3.12  #2179
+- [help] fix columns sheet sidebar
+- [loaders html] ignore parsing exceptions on invalid urls  #2227
+- [sheets] limit end separators to rightmost visible column of sheet (PR by @midichef #2237)
+- [sidebar] fix fmtstr for case where source is BaseSheet  #2239
+- [sort] maintain ordering on sheet copies  #2190
+- [test] update unit tests to use packaged sample.tsv and benchmark.csv  #2218
+- [threads] fix HelpSheet thread causing an Exception  #2235
 
 # v3.0 (2023-12-30)
 
