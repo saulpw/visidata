@@ -1,4 +1,4 @@
-.Dd December 29, 2023
+.Dd January 7, 2024
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -101,7 +101,7 @@ toggle sidebar
 .No redo the most recent undo ( requires enabled Sy options.undo Ns )
 .Pp
 .It Ic "Space" Ar longname
-.No open command palette; execute top command by its Ar longname
+.No open command palette; Sy Enter No to execute top command by its Ar longname
 .El
 .Ss "  Command Palette"
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX

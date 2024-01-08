@@ -16,7 +16,7 @@
 - [help] fix columns sheet sidebar
 - [loaders html] ignore parsing exceptions on invalid urls  #2227
 - [sheets] limit end separators to rightmost visible column of sheet (PR by @midichef #2237)
-- [sidebar] fix fmtstr for case where source is BaseSheet  #2239
+- [sidebar] fix fmtstr on DirSheet sidebar for case where source is BaseSheet  #2239
 - [sort] maintain ordering on sheet copies  #2190
 - [test] update unit tests to use packaged sample.tsv and benchmark.csv  #2218
 - [threads] do not try to cancel already finished thread #2235

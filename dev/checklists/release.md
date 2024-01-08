@@ -13,7 +13,6 @@
 
 3. Verify that VisiData is up-to-date:
     * help menu
-    * plugins.jsonl
 
 3. Ensure `develop` automated tests run correctly with dev/test.sh
 

@@ -1,4 +1,4 @@
-.Dd December 29, 2023
+.Dd January 7, 2024
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -101,7 +101,7 @@ toggle sidebar
 .No redo the most recent undo ( requires enabled Sy options.undo Ns )
 .Pp
 .It Ic "Space" Ar longname
-.No open command palette; execute command by its Ar longname
+.No open command palette; Sy Enter No to execute top command by its Ar longname
 .El
 .Ss "  Command Palette"
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
@@ -1056,7 +1056,7 @@ device ID associated with matrix login
 client_id for reddit api
 .It Sy --reddit-client-secret Ns = Ns Ar "str  " No ""
 client_secret for reddit api
-.It Sy --reddit-user-agent Ns = Ns Ar "str     " No "3.0"
+.It Sy --reddit-user-agent Ns = Ns Ar "str     " No "3.0.1"
 user_agent for reddit api
 .It Sy --zulip-batch-size Ns = Ns Ar "int      " No "-100"
 number of messages to fetch per call (<0 to fetch before anchor)
@@ -1280,7 +1280,7 @@ color of code sample
 color of header
 .It Sy "color_guide_unwritten" No "243 on black"
 color of unwritten guides in GuideGuide
-.It Sy "disp_rstatus_fmt   " No "{sheet.threadStatus} {sheet.keystrokeStatus}   {sheet.longname}  {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}"
+.It Sy "disp_rstatus_fmt   " No "{sheet.threadStatus} {sheet.keystrokeStatus}   [:longname]{sheet.longname}[/]  {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}"
 right-side status format string
 .It Sy "disp_status_fmt    " No "[:onclick sheets-stack]{sheet.shortcut}\[u203A] {sheet.name}[/]| "
 status line prefix
@@ -1289,7 +1289,9 @@ maximum length of left status line
 .It Sy "disp_status_sep    " No "\[u2502]"
 separator between statuses
 .It Sy "color_keystrokes   " No "bold white on 237"
-color of input keystrokes on status line
+color of input keystrokes
+.It Sy "color_longname     " No "bold 52 on 114 green"
+color of command longnames
 .It Sy "color_keys         " No "bold"
 color of keystrokes in help
 .It Sy "color_status       " No "bold on 238"
@@ -1393,8 +1395,6 @@ max number of suggestions for command palette
 .It Sy "color_shellcmd     " No "21 on 114 green"
 
 .It Sy "color_colname      " No "underline"
-
-.It Sy "color_longname     " No "bold 52 on 114 green"
 
 .It Sy "disp_scroll_context" No "0"
 minimum number of lines to keep visible above/below cursor when scrolling

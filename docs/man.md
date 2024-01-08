@@ -51,7 +51,7 @@ vd(1)                                                                           
        <span style="font-weight:bold;">U</span>              undo the most recent modification (requires enabled <span style="font-weight:bold;">options.undo</span>)
        <span style="font-weight:bold;">R</span>              redo the most recent undo (requires enabled <span style="font-weight:bold;">options.undo</span>)
 
-     <span style="font-weight:bold;">Space</span> <span style="text-decoration:underline;">longname</span>   open command palette; execute command by its <span style="text-decoration:underline;">longname</span>
+     <span style="font-weight:bold;">Space</span> <span style="text-decoration:underline;">longname</span>   open command palette; <span style="font-weight:bold;">Enter</span> to execute top command by its <span style="text-decoration:underline;">longname</span>
 
      <span style="font-weight:bold;">Command</span> <span style="font-weight:bold;">Palette</span>
         <span style="font-weight:bold;">Tab</span>              Move to command palette, and cycle through commands
@@ -516,7 +516,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--matrix-device-id</span>=<span style="text-decoration:underline;">str</span>       VisiData           device ID associated with matrix login
      <span style="font-weight:bold;">--reddit-client-id</span>=<span style="text-decoration:underline;">str</span>                          client_id for reddit api
      <span style="font-weight:bold;">--reddit-client-secret</span>=<span style="text-decoration:underline;">str</span>                      client_secret for reddit api
-     <span style="font-weight:bold;">--reddit-user-agent</span>=<span style="text-decoration:underline;">str</span>      3.0                user_agent for reddit api
+     <span style="font-weight:bold;">--reddit-user-agent</span>=<span style="text-decoration:underline;">str</span>      3.0.1              user_agent for reddit api
      <span style="font-weight:bold;">--zulip-batch-size</span>=<span style="text-decoration:underline;">int</span>       -100               number of messages to fetch per call (&lt;0 to fetch before anchor)
      <span style="font-weight:bold;">--zulip-anchor</span>=<span style="text-decoration:underline;">int</span>           1000000000         message id to start fetching from
      <span style="font-weight:bold;">--zulip-delay-s</span>=<span style="text-decoration:underline;">float</span>        1e-05              seconds to wait between calls (0 to stop after first)
@@ -632,13 +632,15 @@ vd(1)                                                                           
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">code</span>          bold white on 237   color of code sample
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">heading</span>       bold 200            color of header
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">guide</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">unwritten</span> 243 on black      color of unwritten guides in GuideGuide
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">rstatus</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>    {sheet.threadStatus} {sheet.keystrokeStatus}   {sheet.longname}  {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">rstatus</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>    {sheet.threadStatus} {sheet.keystrokeStatus}   [:longname]{sheet.longname}[/]  {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}
                                              right-side status format string
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">status</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>     [:onclick sheets-stack]{sheet.shortcut}› {sheet.name}[/]|
                                              status line prefix
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">lstatus</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">max</span>    0                   maximum length of left status line
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">status</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">sep</span>     │                   separator between statuses
-     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">keystrokes</span>    bold white on 237   color of input keystrokes on status line
+     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">keystrokes</span>    bold white on 237   color of input keystrokes
+     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">longname</span>      bold 52 on 114 green
+                                             color of command longnames
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">keys</span>          bold                color of keystrokes in help
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">status</span>        bold on 238         status line color
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">error</span>         202 1               error message color
@@ -692,8 +694,6 @@ vd(1)                                                                           
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">cmdpal</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">max</span>     10                  max number of suggestions for command palette
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">shellcmd</span>      21 on 114 green
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">colname</span>       underline
-     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">longname</span>      bold 52 on 114 green
-
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">scroll</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">context</span> 0                   minimum number of lines to keep visible above/below cursor when scrolling
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">sparkline</span>      ▁▂▃▄▅▆▇             characters to display sparkline
 
@@ -788,5 +788,5 @@ vd(1)                                                                           
 <span style="font-weight:bold;">AUTHOR</span>
      <span style="font-weight:bold;">VisiData</span> was made by Saul Pwanson &lt;<span style="text-decoration:underline;">vd@saul.pw</span>&gt;.
 
-Linux/MacOS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    December 29, 2023                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    Linux/MacOS
+Linux/MacOS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     January 7, 2024                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     Linux/MacOS
 </pre></section>
