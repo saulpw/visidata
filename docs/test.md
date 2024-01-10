@@ -11,6 +11,8 @@ The `tests` folder contains functional tests in the form of `.vd` scripts, each 
 
 `dev/test.sh` (run from the git root) will execute all tests.  The final sheet of each test is saved as .tsv and compared to the respective expected output checked into the `tests/golden` directory.
 
+As of January 2024, to pass all the tests you may need to install packages: `pip install Faker h5py odfpy openpyxl pandas tomli`
+
 To show each step of a test with a delay of 1 second between commands:
 
     $ bin/vd -p tests/foo.vd -w 1
