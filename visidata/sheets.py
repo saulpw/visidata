@@ -151,6 +151,7 @@ class TableSheet(BaseSheet):
         CellColorizer(3, 'color_current_cell', lambda s,c,r,v: c is s.cursorCol and r is s.cursorRow)
     ]
     nKeys = 0  # columns[:nKeys] are key columns
+    _ordering = []  # list of (col:Column|str, reverse:bool)
 
     def __init__(self, *names, rows=UNLOADED, **kwargs):
         super().__init__(*names, rows=rows, **kwargs)
@@ -171,8 +172,6 @@ class TableSheet(BaseSheet):
 
         self._colorizers = self.classColorizers
         self.recalc()  # set .sheet on columns and start caches
-
-        self._ordering = []  # list of (col:Column, reverse:bool)
 
         self.__dict__.update(kwargs)  # also done earlier in BaseSheet.__init__
 
