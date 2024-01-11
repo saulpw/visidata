@@ -48,6 +48,9 @@ setup(
         ("share/man/man1", ["visidata/man/vd.1", "visidata/man/visidata.1"]),
         ("share/applications", ["visidata/desktop/visidata.desktop"]),
     ],
+    extras_require={
+        "test": ["Faker", "h5py", "odfpy", "openpyxl", "pandas", "pytest", "tomli"]
+    },
     package_data={
         "visidata.man": ["vd.1", "vd.txt"],
         "visidata.ddw": ["input.ddw", "regex.ddw"],
