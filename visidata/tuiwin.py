@@ -20,3 +20,7 @@ def getrootxy(vd, scr):  # like scr.getparyx() but for all ancestor scrs
         if dx > 0: px += dx
         scr = vd._parentscrs[scr]
     return px, py
+
+
+BaseSheet.bindkey('FocusIn', 'no-op')
+BaseSheet.bindkey('FocusOut', 'no-op')

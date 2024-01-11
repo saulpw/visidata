@@ -47,6 +47,9 @@ visidata.vd.prettykeys_trdict = {
         'KEY_SPREVIOUS': 'Shift+PgUp',
         'KEY_SNEXT': 'Shift+PgDn',
 
+        'kxIN': 'FocusIn',
+        'kxOUT': 'FocusOut',
+
         'KEY_BACKSPACE': 'Bksp',
         'BUTTON1_RELEASED': 'LeftBtnUp',
         'BUTTON2_RELEASED': 'MiddleBtnUp',

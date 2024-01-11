@@ -84,7 +84,7 @@ class SettingsMgr(collections.OrderedDict):
         if d:
             for m in self._mappings(obj or vd.activeSheet):
                 v = d.get(self.objname(m))
-                if v:
+                if v is not None:
                     return v
 
     def iter(self, obj=None):
@@ -376,7 +376,7 @@ def getCommand(sheet, cmd):
         return cmd
 
     longname = cmd
-    while vd.bindkeys._get(longname, obj=sheet):
+    while vd.bindkeys._get(longname, obj=sheet) is not None:
         longname = vd.bindkeys._get(longname, obj=sheet)
 
     return vd.commands._get(longname, obj=sheet)

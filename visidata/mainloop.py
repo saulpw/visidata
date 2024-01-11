@@ -213,7 +213,7 @@ def mainloop(vd, scr):
             pass
         elif keystroke == 'Ctrl+Q':
             return vd.lastErrors and '\n'.join(vd.lastErrors[-1])
-        elif vd.bindkeys._get(vd.keystrokes):
+        elif vd.bindkeys._get(vd.keystrokes) is not None:
             sheet.execCommand(vd.keystrokes, keystrokes=vd.keystrokes)
             prefixWaiting = False
         elif keystroke in vd.allPrefixes:
