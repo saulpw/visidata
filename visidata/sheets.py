@@ -669,7 +669,7 @@ class TableSheet(BaseSheet):
 
         # hdrattr highlights whole column header
         # sepattr is for header separators and indicators
-        sepcattr = colors.get_color('color_column_sep')
+        sepcattr = update_attr(colors.color_default, colors.get_color('color_column_sep'), 2)
 
         hdrcattr = self._colorize(col, None)
         if vcolidx == self.cursorVisibleColIndex:
