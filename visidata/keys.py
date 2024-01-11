@@ -75,7 +75,7 @@ for i in range(1, 13):
 
 @visidata.VisiData.api
 def prettykeys(vd, key):
-    if not key:
+    if not key or '+' in key[:-1]:
         return key
 
     for k, v in vd.prettykeys_trdict.items():
