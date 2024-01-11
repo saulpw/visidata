@@ -1,4 +1,4 @@
-from visidata import VisiData, vd
+from visidata import VisiData, vd, BaseSheet
 
 vd._parentscrs = {}  # scr -> parentscr
 
@@ -22,5 +22,5 @@ def getrootxy(vd, scr):  # like scr.getparyx() but for all ancestor scrs
     return px, py
 
 
-BaseSheet.bindkey('FocusIn', 'no-op')
-BaseSheet.bindkey('FocusOut', 'no-op')
+vd.bindkey('Alt+[Shift+I', 'no-op')  #2247 focus-in
+vd.bindkey('Alt+[Shift+O', 'no-op')  # focus-out
