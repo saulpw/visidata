@@ -216,7 +216,7 @@ def mainloop(vd, scr):
         elif vd.bindkeys._get(vd.keystrokes) is not None:
             sheet.execCommand(vd.keystrokes, keystrokes=vd.keystrokes)
             prefixWaiting = False
-        elif keystroke in vd.allPrefixes:
+        elif vd.keystrokes in vd.allPrefixes:
             prefixWaiting = True
         else:
             vd.status('no command for "%s"' % (vd.keystrokes))
