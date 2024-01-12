@@ -49,7 +49,17 @@ setup(
         ("share/applications", ["visidata/desktop/visidata.desktop"]),
     ],
     extras_require={
-        "test": ["Faker", "h5py", "odfpy", "openpyxl", "pandas", "pytest", "tomli"]
+        "test": [
+            "Faker",
+            "h5py",
+            "odfpy",
+            "openpyxl",
+            "pandas",
+            "pytest",
+            "tomli",
+            "tabulate",
+            "wcwidth",
+        ]
     },
     package_data={
         "visidata.man": ["vd.1", "vd.txt"],
