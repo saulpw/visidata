@@ -1080,13 +1080,6 @@ def quitAndReleaseMemory(vs):
         vd.allSheets.remove(vs)
 
 
-@Sheet.api
-def updateColNames(sheet, rows, cols, overwrite=False):
-    vd.addUndoColNames(cols)
-    for c in cols:
-        if not c._name or overwrite:
-            c.name = "\n".join(c.getDisplayValue(r) for r in rows)
-
 @BaseSheet.api
 def splitPane(sheet, pct=None):
     if vd.activeStack[1:]:
