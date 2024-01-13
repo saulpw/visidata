@@ -58,30 +58,28 @@ def moveVisibleCol(sheet, fromVisColIdx, toVisColIdx):
         return fromVisColIdx
 
 
-Sheet.addCommand('H', 'slide-left', 'sheet.cursorVisibleColIndex = slide_col(cursorVisibleColIndex, cursorVisibleColIndex-1) if not cursorCol.keycol else slide_keycol(cursorCol.keycol, cursorCol.keycol-1)', 'slide current column left')
-Sheet.addCommand('L', 'slide-right', 'sheet.cursorVisibleColIndex = slide_col(cursorVisibleColIndex, cursorVisibleColIndex+1) if not cursorCol.keycol else slide_keycol(cursorCol.keycol, cursorCol.keycol+1)', 'slide current column right')
+Sheet.addCommand('H', 'slide-left', 'sheet.cursorVisibleColIndex = slide_col(cursorVisibleColIndex, cursorVisibleColIndex-1) if not cursorCol.keycol else slide_keycol(cursorCol.keycol, cursorCol.keycol-1)', 'slide the current column left **one position**')
+Sheet.addCommand('L', 'slide-right', 'sheet.cursorVisibleColIndex = slide_col(cursorVisibleColIndex, cursorVisibleColIndex+1) if not cursorCol.keycol else slide_keycol(cursorCol.keycol, cursorCol.keycol+1)', 'slide the current column right **one position**')
 Sheet.addCommand('J', 'slide-down', 'sheet.cursorRowIndex = slide_row(cursorRowIndex, cursorRowIndex+1)', 'slide current row down')
 Sheet.addCommand('K', 'slide-up', 'sheet.cursorRowIndex = slide_row(cursorRowIndex, cursorRowIndex-1)', 'slide current row up')
-Sheet.addCommand('gH', 'slide-leftmost', 'slide_col(cursorVisibleColIndex, len(keyCols) + 0) if not cursorCol.keycol else slide_keycol(cursorCol.keycol, 1)', 'slide current column all the way to the left of sheet')
-Sheet.addCommand('gL', 'slide-rightmost', 'slide_col(cursorVisibleColIndex, nVisibleCols-1) if not cursorCol.keycol else slide_keycol(cursorCol.keycol, len(keyCols))', 'slide current column all the way to the right of sheet')
+Sheet.addCommand('gH', 'slide-leftmost', 'slide_col(cursorVisibleColIndex, len(keyCols) + 0) if not cursorCol.keycol else slide_keycol(cursorCol.keycol, 1)', 'slide the current column **all the way** to the left of its section')
+Sheet.addCommand('gL', 'slide-rightmost', 'slide_col(cursorVisibleColIndex, nVisibleCols-1) if not cursorCol.keycol else slide_keycol(cursorCol.keycol, len(keyCols))', 'slide the current column **all the way** to the right of its section')
 Sheet.addCommand('gJ', 'slide-bottom', 'slide_row(cursorRowIndex, nRows)', 'slide current row all the way to the bottom of sheet')
 Sheet.addCommand('gK', 'slide-top', 'slide_row(cursorRowIndex, 0)', 'slide current row to top of sheet')
-Sheet.addCommand('zH', 'slide-left-n', 'slide_col(cursorVisibleColIndex, cursorVisibleColIndex-int(input("slide col left n=", value=1)))', 'slide current column N positions to the left')
-Sheet.addCommand('zL', 'slide-right-n', 'slide_col(cursorVisibleColIndex, cursorVisibleColIndex+int(input("slide col left n=", value=1)))', 'slide current column N positions to the right')
+Sheet.addCommand('zH', 'slide-left-n', 'slide_col(cursorVisibleColIndex, cursorVisibleColIndex-int(input("slide col left n=", value=1)))', 'slide current column **N positions** to the left')
+Sheet.addCommand('zL', 'slide-right-n', 'slide_col(cursorVisibleColIndex, cursorVisibleColIndex+int(input("slide col left n=", value=1)))', 'slide current column **N positions** to the right')
 Sheet.addCommand('zJ', 'slide-down-n', 'slide_row(cursorRowIndex, cursorRowIndex+int(input("slide row down n=", value=1)))', 'slide current row N positions down')
 Sheet.addCommand('zK', 'slide-up-n', 'slide_row(cursorRowIndex, cursorRowIndex-int(input("slide row up n=", value=1)))', 'slide current row N positions up')
 
-Sheet.bindkey('KEY_SLEFT', 'slide-left')
-Sheet.bindkey('KEY_SR', 'slide-up')
-Sheet.bindkey('kDN', 'slide-down')
-Sheet.bindkey('kUP', 'slide-up')
-Sheet.bindkey('KEY_SRIGHT', 'slide-right')
-Sheet.bindkey('KEY_SF', 'slide-down')
+Sheet.bindkey('Shift+Left', 'slide-left')
+Sheet.bindkey('Shift+Up', 'slide-up')
+Sheet.bindkey('Shift+Down', 'slide-down')
+Sheet.bindkey('Shift+Right', 'slide-right')
 
-Sheet.bindkey('gKEY_SLEFT', 'slide-leftmost')
-Sheet.bindkey('gkDN', 'slide-bottom')
-Sheet.bindkey('gkUP', 'slide-top')
-Sheet.bindkey('gKEY_SRIGHT', 'slide-rightmost')
+Sheet.bindkey('g Shift+Left', 'slide-leftmost')
+Sheet.bindkey('g Shift+Down', 'slide-bottom')
+Sheet.bindkey('g Shift+Up', 'slide-top')
+Sheet.bindkey('g Shift+Right', 'slide-rightmost')
 
 vd.addMenuItems('''
     Edit > Slide > Row > up > slide-up
