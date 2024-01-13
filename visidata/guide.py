@@ -17,10 +17,11 @@ MenuGuide ("The VisiData Menu System")
 CommandsSheet ("How to find the command you want run")
 
 #  real barebones basics
-MovementGuide ("Movement and Search")
+MovementGuide ("Movement and search")
 InputGuide ("Input keystrokes")
 SortGuide ("Sorting")
-TypesSheet ("The basic type system")
+ColumnsGuide ("Rename, hide, and resize columns")
+TypesSheet ("Column types")
 CommandLog  ("Undo and Replay")
 
 #  rev this thing up

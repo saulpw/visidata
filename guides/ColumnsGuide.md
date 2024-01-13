@@ -13,36 +13,19 @@ TODO
 - {help.commands.slide_left_n}
 - {help.commands.slide_right_n}
 
+## Hide and unhide columns
 
----
+- {help.commands.hide_col}
+- {help.commands.unhide_cols}
 
-## How to hide (remove) and unhide (return) columns
+### via the Columns Sheet
 
-###### How to hide columns
+1. {help.commands.columns_sheet}.
+1. {help.commands.go_right} to the `width` column.
+1. {help.commands.go_down} to the source column.
+4. {help.commands.edit_cell} the width to `0` to hide the column; or any positive number to set the width.
+5. {help.commands.quit_sheet} and return to the source sheet.
 
-- Press `-` (hyphen) to hide the current column.
-
-**or**
-
-1. Press `Shift+C` on the source sheet to open its **Columns sheet**.
-2. Move the cursor right to the **width** column.
-3. Move the cursor down to the row which represents the column you wish to hide.
-4. Press `e` followed by `0` to set the width for that column to **0**.
-5. Press `q` to return to the source sheet.
-
-###### How to unhide columns
-
-1. Press `gv` to unhide all columns on current sheet.
-
-**or**
-
-1. Press `Shift+C` on the source sheet to open its **Columns sheet**.
-2. Move the cursor right to the **width** column.
-3. Move the cursor down to the row which represents the column you wish to unhide. Currently, that cell should contain the value **0**.
-4. Press `e` followed by a *positive number* to set the width.
-5. Press `q` to return to the source sheet.
-
----
 
 ## How to specify column types
 
