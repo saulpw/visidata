@@ -31,5 +31,5 @@ def memosSheet(vd):
     return MemorySheet('memos')
 
 
-Sheet.addCommand(ESC+'M', 'open-memos', 'vd.push(vd.memosSheet)', 'open the Memory Sheet')
-Sheet.addCommand(ESC+'m', 'memo-cell', 'vd.memory[input("assign "+cursorCol.getDisplayValue(cursorRow)+" to: ")] = cursorCol.getTypedValue(cursorRow)', 'store value in current cell in Memory Sheet')
+Sheet.addCommand('Alt+Shift+M', 'open-memos', 'vd.push(vd.memosSheet)', 'open the Memory Sheet')
+Sheet.addCommand('Alt+m', 'memo-cell', r'vd.memory[input("assign \""+cursorCol.getDisplayValue(cursorRow)+"\" to: ")] = cursorCol.getTypedValue(cursorRow)', 'store value in current cell in Memory Sheet')
