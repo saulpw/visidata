@@ -198,4 +198,6 @@ vd.addMenuItems('''
         Help > VisiData Feature Guides > open-guide-index
 ''')
 
+vd.optalias('guides', 'preplay', 'open-guide-index')
+
 vd.addGlobals({'GuideSheet':GuideSheet, "CommandHelpGetter": CommandHelpGetter, "OptionHelpGetter": OptionHelpGetter})
