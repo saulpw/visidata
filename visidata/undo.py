@@ -104,14 +104,6 @@ def addUndoSetValues(vd, cols, rows):
             c.setValue(r, v, setModified=False)
     vd.addUndo(_undo)
 
-@VisiData.api
-def addUndoColNames(vd, cols):
-    oldnames = [(c, c.name) for c in cols]
-    def _undo():
-        for c, name in oldnames:
-            c.name = name
-    vd.addUndo(_undo)
-
 
 BaseSheet.addCommand('U', 'undo-last', 'vd.undo(sheet)', 'Undo the most recent change (options.undo must be enabled)')
 BaseSheet.addCommand('R', 'redo-last', 'vd.redo(sheet)', 'Redo the most recent undo (options.undo must be enabled)')
