@@ -1,9 +1,26 @@
-from visidata import vd, Sheet
+from visidata import vd, VisiData, Sheet
 
 @Sheet.api
 def hint_rename_col(sheet):
     if vd.cleanName(sheet.cursorCol.name) != sheet.cursorCol.name:
         return 5, f"[:hint]The current column can't be used in an expression because [:code]{sheet.cursorCol.name}[/] is not a valid Python identifier. [:onclick rename-col]Rename the column[/] with `^`.[/]"
+
+
+@VisiData.api
+def addUndoColNames(vd, cols):
+    oldnames = [(c, c.name) for c in cols]
+    def _undo():
+        for c, name in oldnames:
+            c.name = name
+    vd.addUndo(_undo)
+
+
+@Sheet.api
+def updateColNames(sheet, rows, cols, overwrite=False):
+    vd.addUndoColNames(cols)
+    for c in cols:
+        if not c._name or overwrite:
+            c.name = "\n".join(c.getDisplayValue(r) for r in rows)
 
 
 Sheet.addCommand('^', 'rename-col', 'vd.addUndoColNames([cursorCol]); cursorCol.name = editCell(cursorVisibleColIndex, -1, value=cleanName(cursorCol.name))', 'rename current column')
