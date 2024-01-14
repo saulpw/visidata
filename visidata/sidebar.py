@@ -63,7 +63,7 @@ def drawSidebar(vd, scr, sheet):
                 bottommsg = '[:onclick sidebar-toggle][:reverse][x][:]'
                 overflowmsg = '[:onclick open-sidebar]…↓…[/]'
             else:
-                bottommsg = '[:onclick sidebar-toggle][:reverse] b to toggle sidebar [:]'
+                bottommsg = sheet.formatString('[:onclick sidebar-toggle][:reverse] {help.commands.sidebar_toggle} [:]', help=sheet.formatter_helpstr)
                 overflowmsg = '[:reverse] see full sidebar with [:code]gb[/] [:]'
     except Exception as e:
         vd.exceptionCaught(e)
@@ -152,7 +152,7 @@ class SidebarSheet(TextSheet):
         - `b` to toggle the sidebar on/off for the current sheet
     '''
 
-BaseSheet.addCommand('b', 'sidebar-toggle', 'sheet.options.disp_sidebar = not sheet.options.disp_sidebar', 'toggle sidebar on/off')
+BaseSheet.addCommand('b', 'sidebar-toggle', 'sheet.options.disp_sidebar = not sheet.options.disp_sidebar', 'toggle sidebar')
 BaseSheet.addCommand('gb', 'open-sidebar', 'sheet.current_sidebar = "" if not hasattr(sheet, "current_sidebar") else sheet.current_sidebar; vd.push(SidebarSheet(name, options.disp_sidebar_fmt, source=sheet.current_sidebar.splitlines()))', 'open sidebar in new sheet')
 
 
