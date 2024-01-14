@@ -116,13 +116,13 @@ def parsePos(vd, arg:str, inputs=None):
 def outputProgressEvery(vd, sheet, seconds:float=0.5):
     import time
     t0 = time.time()
-    while True:
-        time.sleep(seconds)
+    while vd.currentReplay:
         t = time.time()
         print(f'\r[{t-t0:.1f}s] ', end='', file=sys.stderr)
         if sheet:
             print(f'{sheet.progressPct}  ', end='', file=sys.stderr)
         sys.stderr.flush()
+        time.sleep(seconds)
 
 @visidata.VisiData.api
 def moveToPos(vd, sources, startsheets, startrow, startcol):
