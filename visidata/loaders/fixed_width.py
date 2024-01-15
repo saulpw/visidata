@@ -1,5 +1,5 @@
 
-from visidata import VisiData, vd, Sheet, Column, Progress, SequenceSheet
+from visidata import VisiData, vd, Sheet, Column, Progress, SequenceSheet, Column, dispwidth
 
 
 vd.option('fixed_rows', 1000, 'number of rows to check for fixed width columns')
@@ -8,6 +8,22 @@ vd.option('fixed_maxcols', 0, 'max number of fixed-width columns to create (0 is
 @VisiData.api
 def open_fixed(vd, p):
     return FixedWidthColumnsSheet(p.base_stem, source=p, headerlines=[])
+
+@Column.api
+def getMaxDataWidth(col, rows):  #2255 need real max width for fixed width saver
+    '''Return the maximum length of any cell in column or its header,
+    even if wider than window. (Slow for large cells!)'''
+
+    w = 0
+    nlen = dispwidth(col.name)
+    if len(rows) > 0:
+        w_max = 0
+        for r in rows:
+            row_w = dispwidth(col.getDisplayValue(r))
+            if w_max < row_w:
+                w_max = row_w
+        w = w_max
+    return max(w, nlen)
 
 class FixedWidthColumn(Column):
     def __init__(self, name, i, j, **kwargs):
@@ -84,7 +100,7 @@ def save_fixed(vd, p, *vsheets):
             widths = {}  # Column -> width:int
             # headers
             for col in Progress(sheet.visibleCols, gerund='sizing'):
-                widths[col] = col.getMaxWidth(sheet.rows)  #1849
+                widths[col] = col.getMaxDataWidth(sheet.rows)  #1849 #2255
                 fp.write(('{0:%s} ' % widths[col]).format(col.name))
             fp.write('\n')
 
