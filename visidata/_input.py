@@ -96,8 +96,7 @@ class HelpCycler:
         self.scr = scr
 
     def __enter__(self):
-        if self.scr:
-            vd.drawInputHelp(self.scr, self.help)
+        self.draw()
 
         return self
 
@@ -106,6 +105,9 @@ class HelpCycler:
 
     def cycle(self):
         vd.disp_help = (vd.disp_help-1)%(vd.options.disp_help+1)
+        self.draw()
+
+    def draw(self):
         if self.scr:
             vd.drawInputHelp(self.scr, self.help)
 
@@ -118,7 +120,6 @@ def drawInputHelp(vd, scr, help:str=''):
     sheet = vd.activeSheet
     if not sheet:
         return
-    vd.drawSheet(scr, sheet)
 
     curhelp = ''
     if vd.disp_help == 0:
@@ -256,7 +257,9 @@ def editline(vd, scr, y, x, w, i=0,
             return min(max(a, 0), len(s))
 
     while True:
+        vd.drawSheet(scr, vd.activeSheet)
         updater(v)
+        disp_help.draw()
 
         if display:
             dispval = clean_printable(v)
