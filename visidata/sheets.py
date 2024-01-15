@@ -170,6 +170,7 @@ class TableSheet(BaseSheet):
         self.initialCols = kwargs.pop('columns', None) or type(self).columns
         self.resetCols()
 
+        self._ordering = list(type(self)._ordering)  #2254
         self._colorizers = self.classColorizers
         self.recalc()  # set .sheet on columns and start caches
 
