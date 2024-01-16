@@ -109,11 +109,15 @@ def inputPalette(sheet, prompt, items,
         for i in range(nitems-len(palrows)):
             palrows.append((None, None))
 
+        used_triggers = set()
         for i, (m, item) in enumerate(palrows):
             trigger_key = ''
             if tabitem >= 0 and item:
-                trigger_key = f'{i+1}'[-1]
-                bindings[trigger_key] = partial(add_to_input if multiple else accept_input, value=item[value_key])
+                tkey = f'{i+1}'[-1]
+                if tkey not in used_triggers:
+                    trigger_key = tkey
+                    bindings[trigger_key] = partial(add_to_input if multiple else accept_input, value=item[value_key])
+                    used_triggers.add(trigger_key)
 
             attr = colors.color_cmdpalette
 

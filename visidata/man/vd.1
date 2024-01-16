@@ -1,4 +1,4 @@
-.Dd January 7, 2024
+.Dd January 15, 2024
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -879,6 +879,8 @@ show/hide methods and hidden properties
 .No launch vd with Ar subsheet No of Ar toplevel No at top-of-stack, and cursor at Ar col No and Ar row Ns ; all arguments are optional
 .It Cm --overwrite Ns = Ns Ar c
 .No Overwrite with confirmation
+.It Cm --guides
+.No open Guide Index
 .
 .Pp
 .Lo f filetype filetype
@@ -1056,7 +1058,7 @@ device ID associated with matrix login
 client_id for reddit api
 .It Sy --reddit-client-secret Ns = Ns Ar "str  " No ""
 client_secret for reddit api
-.It Sy --reddit-user-agent Ns = Ns Ar "str     " No "3.0.1"
+.It Sy --reddit-user-agent Ns = Ns Ar "str     " No "3.0.2"
 user_agent for reddit api
 .It Sy --zulip-batch-size Ns = Ns Ar "int      " No "-100"
 number of messages to fetch per call (<0 to fetch before anchor)

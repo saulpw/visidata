@@ -60,6 +60,8 @@ def configure_ibis(vd):
 
 @VisiData.api
 def open_vdsql(vd, p, filetype=None):
+    import ibis
+
     vd.configure_ibis()
 
     # on-demand aliasing, so we don't need deps for all backends

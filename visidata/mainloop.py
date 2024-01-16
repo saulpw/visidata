@@ -36,6 +36,9 @@ def drawSheet(vd, scr, sheet):
 
     sheet.ensureLoaded()
 
+    if not scr:
+        return
+
     scr.erase()  # clear screen before every re-draw
     scr.bkgd(' ', colors.color_default.attr)
 

@@ -151,6 +151,7 @@ class TableSheet(BaseSheet):
         CellColorizer(3, 'color_current_cell', lambda s,c,r,v: c is s.cursorCol and r is s.cursorRow)
     ]
     nKeys = 0  # columns[:nKeys] are key columns
+    _ordering = []  # list of (col:Column|str, reverse:bool)
 
     def __init__(self, *names, rows=UNLOADED, **kwargs):
         super().__init__(*names, rows=rows, **kwargs)
@@ -169,10 +170,9 @@ class TableSheet(BaseSheet):
         self.initialCols = kwargs.pop('columns', None) or type(self).columns
         self.resetCols()
 
+        self._ordering = list(type(self)._ordering)  #2254
         self._colorizers = self.classColorizers
         self.recalc()  # set .sheet on columns and start caches
-
-        self._ordering = []  # list of (col:Column, reverse:bool)
 
         self.__dict__.update(kwargs)  # also done earlier in BaseSheet.__init__
 
@@ -670,7 +670,7 @@ class TableSheet(BaseSheet):
 
         # hdrattr highlights whole column header
         # sepattr is for header separators and indicators
-        sepcattr = colors.get_color('color_column_sep')
+        sepcattr = update_attr(colors.color_default, colors.get_color('color_column_sep'), 2)
 
         hdrcattr = self._colorize(col, None)
         if vcolidx == self.cursorVisibleColIndex:
@@ -1080,13 +1080,6 @@ def quitAndReleaseMemory(vs):
         vd.remove(vs)
         vd.allSheets.remove(vs)
 
-
-@Sheet.api
-def updateColNames(sheet, rows, cols, overwrite=False):
-    vd.addUndoColNames(cols)
-    for c in cols:
-        if not c._name or overwrite:
-            c.name = "\n".join(c.getDisplayValue(r) for r in rows)
 
 @BaseSheet.api
 def splitPane(sheet, pct=None):

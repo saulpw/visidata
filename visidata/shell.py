@@ -88,13 +88,12 @@ class DirSheet(Sheet):
 
         - {help.commands.open_row_file}
         - {help.commands.open_rows}
-        - (`open-dir-parent`) to open parent directory
+        - {help.commands.open_dir_parent}
         - {help.commands.sysopen_row}
 
         ## Options (must reload to take effect)
 
         - {help.options.dir_depth}
-            - [CLI] `-r` to include all files in all subfolders
         - {help.options.dir_hidden}
     '''
     rowtype = 'files' # rowdef: Path

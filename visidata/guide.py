@@ -17,10 +17,11 @@ MenuGuide ("The VisiData Menu System")
 CommandsSheet ("How to find the command you want run")
 
 #  real barebones basics
-MovementGuide ("Movement and Search")
+MovementGuide ("Movement and search")
 InputGuide ("Input keystrokes")
 SortGuide ("Sorting")
-TypesSheet ("The basic type system")
+ColumnsGuide ("Rename, hide, and resize columns")
+TypesSheet ("Column types")
 CommandLog  ("Undo and Replay")
 
 #  rev this thing up
@@ -106,7 +107,7 @@ class OptionHelpGetter:
     'For easy and consistent formatting in sidebars and helpstrings, use {vd.options.help.opt_name}.'
     def __getattr__(self, optname):
         opt = vd.options._get(optname, 'default')
-        return f'[:onclick options-sheet {optname}]`{optname}`[/]: to {opt.helpstr} (default: {opt.value})'
+        return f'[:onclick options-sheet {optname}][:longname]{optname}[/][/]: to {opt.helpstr} (default: {opt.value})'
 
 
 class CommandHelpGetter:
@@ -140,7 +141,7 @@ class CommandHelpGetter:
                 binding += f'[:45] {inputtype}[/]'
 
         helpstr = cmd.helpstr
-        return f'`{binding}` (`{longname}`) to {helpstr}'
+        return f'[:keys]{binding}[/] ([:longname]{longname}[/]) to {helpstr}'
 
 
 class GuideSheet(Sheet):
@@ -196,5 +197,7 @@ vd.addCommand('', 'show-command-info', 'status(getCommandInfo(inputKeys("get com
 vd.addMenuItems('''
         Help > VisiData Feature Guides > open-guide-index
 ''')
+
+vd.optalias('guides', 'preplay', 'open-guide-index')
 
 vd.addGlobals({'GuideSheet':GuideSheet, "CommandHelpGetter": CommandHelpGetter, "OptionHelpGetter": OptionHelpGetter})

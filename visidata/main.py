@@ -2,7 +2,7 @@
 # Usage: $0 [<options>] [<input> ...]
 #        $0 [<options>] --play <cmdlog> [--batch] [-w <waitsecs>] [-o <output>] [field=value ...]
 
-__version__ = '3.0.1'
+__version__ = '3.0.2'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
 from copy import copy
@@ -116,13 +116,17 @@ def parsePos(vd, arg:str, inputs=None):
 def outputProgressEvery(vd, sheet, seconds:float=0.5):
     import time
     t0 = time.time()
-    while True:
-        time.sleep(seconds)
+
+    while not vd.currentReplay:
+        time.sleep(.1)
+
+    while vd.currentReplay:
         t = time.time()
         print(f'\r[{t-t0:.1f}s] ', end='', file=sys.stderr)
         if sheet:
             print(f'{sheet.progressPct}  ', end='', file=sys.stderr)
         sys.stderr.flush()
+        time.sleep(seconds)
 
 @visidata.VisiData.api
 def moveToPos(vd, sources, startsheets, startrow, startcol):

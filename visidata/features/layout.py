@@ -40,10 +40,10 @@ Sheet.addCommand('z_', 'resize-col-input', 'width = int(input("set width= ", val
 Sheet.addCommand('g_', 'resize-cols-max', 'for c in visibleCols: c.setWidth(c.getMaxWidth(visibleRows))', 'toggle widths of all visible columns between full and default width')
 Sheet.addCommand('gz_', 'resize-cols-input', 'width = int(input("set width= ", value=cursorCol.width)); Fanout(visibleCols).setWidth(width)', 'adjust widths of all visible columns to N')
 
-Sheet.addCommand('-', 'hide-col', 'hide_col(cursorCol)', 'Hide current column')
+Sheet.addCommand('-', 'hide-col', 'hide_col(cursorCol)', 'hide the current column')
 Sheet.addCommand('z-', 'resize-col-half', 'cursorCol.setWidth(cursorCol.width//2)', 'reduce width of current column by half')
 
-Sheet.addCommand('gv', 'unhide-cols', 'unhide_cols(columns, visibleRows)', 'Unhide all hidden columns')
+Sheet.addCommand('gv', 'unhide-cols', 'unhide_cols(columns, visibleRows)', 'unhide all hidden columns on current sheet')
 Sheet.addCommand('v', 'toggle-multiline', 'for c in visibleCols: c.toggleMultiline()', 'toggle multiline display')
 Sheet.addCommand('zv', 'resize-height-input', 'Fanout(visibleCols).height=int(input("set height for all columns to: ", value=max(c.height for c in sheet.visibleCols)))', 'resize row height to N')
 Sheet.addCommand('gzv', 'resize-height-max', 'h=calc_height(cursorRow, {}, maxheight=windowHeight-1); vd.status(f"set height for all columns to {h}"); Fanout(visibleCols).height=h', 'resize row height to max height needed to see this row')
