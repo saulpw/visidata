@@ -567,6 +567,7 @@ COMMANDLINE OPTIONS
                                   top-of-stack, and cursor at col and row; all
                                   arguments are optional
      --overwrite=c                Overwrite with confirmation
+     --guides                     open Guide Index
 
      -f, --filetype=filetype      tsv                set loader to use for
                                   filetype instead of file extension
@@ -744,7 +745,7 @@ COMMANDLINE OPTIONS
      --reddit-client-id=str                          client_id for reddit api
      --reddit-client-secret=str                      client_secret for reddit
                                                      api
-     --reddit-user-agent=str      3.0.1              user_agent for reddit api
+     --reddit-user-agent=str      3.0.2              user_agent for reddit api
      --zulip-batch-size=int       -100               number of messages to
                                                      fetch per call (<0 to
                                                      fetch before anchor)
@@ -1157,4 +1158,4 @@ SUPPORTED SOURCES
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                     January 7, 2024                    Linux/MacOS
+Linux/MacOS                    January 15, 2024                    Linux/MacOS

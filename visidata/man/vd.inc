@@ -1,4 +1,4 @@
-.Dd January 7, 2024
+.Dd January 15, 2024
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
