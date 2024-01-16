@@ -879,6 +879,8 @@ show/hide methods and hidden properties
 .No launch vd with Ar subsheet No of Ar toplevel No at top-of-stack, and cursor at Ar col No and Ar row Ns ; all arguments are optional
 .It Cm --overwrite Ns = Ns Ar c
 .No Overwrite with confirmation
+.It Cm --guides
+.No open Guide Index
 .
 .Pp
 .Lo f filetype filetype
