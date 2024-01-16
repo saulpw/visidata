@@ -1,5 +1,21 @@
 # VisiData version history
 
+# v3.0.2 (2024-01-15)
+
+### Fixes and minor improvements
+
+- [cli] add `--guides` to open the guide index
+- [cmdpalette] only first 10 suggestions should have shortcut keys  #2242
+- [draw] use default bg on col hdr sep
+- [input] draw help sidebar on top of sheet/updater  #2241
+- [graph] sort by x and y columns when diving (PR by @midichef #2226)
+- [guides] improve formatting of command and options in sidebar + guides
+- [replay] stop stderr batch progress when entering interactive mode  #2251
+- [shell] clean up DirSheet sidebar
+- [sidebar] grab user's keystroke of sidebar-toggle for helpstring  #2250
+- [sort] a better fix for maintaining sort ordering on sheet copies  #2190 #2254
+- [tests] add "test" extras for installing PyPI packages needed to run tests
+
 # v3.0.1 (2024-01-07)
 
 ### Fixes and minor improvements
