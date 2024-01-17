@@ -54,7 +54,7 @@ def columnize(rows):
     # collapse fields
     for i in allNonspaces:
         if i > prev+1:
-            yield colstart, i
+            yield colstart, prev+1 #2255
             colstart = i
         prev = i
 
