@@ -50,14 +50,21 @@ setup(
     ],
     extras_require={
         "test": [
+            "dnslib",
+            "dpkt",
             "Faker",
             "h5py",
+            "lxml",
             "odfpy",
             "openpyxl",
             "pandas",
+            "pyarrow",
+            "pyconll",
+            "pypng",
             "pytest",
-            "tomli",
+            "savReaderWriter @ git+https://github.com/anjakefala/savReaderWriter#egg=savReaderWriter"
             "tabulate",
+            "tomli",
             "wcwidth",
         ]
     },
