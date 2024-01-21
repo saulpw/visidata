@@ -126,7 +126,7 @@ class CommandHelpGetter:
 
     def __getitem__(self, k):
         longname = k.replace('_', '-')
-        binding = self.helpsheet.revbinds.get(longname, [None])[0]
+        binding = self.helpsheet.revbinds.get(longname, [None])[0] or '<unbound>'
         # cmddict has a SheetClass associated with each command
         # go through all the parents of the Sheet type, to look for the command
         for cls in self.cls.superclasses():
