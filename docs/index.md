@@ -17,7 +17,7 @@ eleventyNavigation:
 
 ## References
 
-* [quick reference guide for 2.0](/docs/man)
+* [quick reference guide](/man)
     * all available commands and options
     * also available as a manpage via `man vd` and from inside VisiData with `Ctrl+H`
 * [VisiData Cheat Sheet](https://jsvine.github.io/visidata-cheat-sheet/en/)
