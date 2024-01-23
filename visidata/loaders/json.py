@@ -1,6 +1,6 @@
 import json
 
-from visidata import vd, date, anytype, VisiData, PyobjSheet, AttrDict, stacktrace, TypedExceptionWrapper, AlwaysDict, ItemColumn, wrapply, TypedWrapper, Progress, Sheet
+from visidata import vd, date, anytype, VisiData, PyobjSheet, AttrDict, stacktrace, TypedExceptionWrapper, AlwaysDict, ItemColumn, wrapply, TypedWrapper, Progress, Sheet, GuideSheet
 
 vd.option('json_indent', None, 'indent to use when saving json')
 vd.option('json_sort_keys', False, 'sort object keys when saving to json')
@@ -187,6 +187,74 @@ def JSON(vd, s:str):
     return json.loads(s)
 
 
+class JsonGuide(GuideSheet):
+    guide_text = '''# Some special features for JSON
+
+## Working with nested data
+
+[:note_type]Expanding[/] unpacks nested data column-wise, often useful for nested objects:
+
+- {help.commands.expand-col}
+- {help.commands.expand-col-depth}
+- {help.commands.expand-cols}
+- {help.commands.expand-cols-depth}
+
+To revert earlier `expand-` operations:
+
+- {help.commands.contract-col}
+- {help.commands.contract-col-depth}
+- {help.commands.contract-cols}
+- {help.commands.contract-cols-depth}
+
+[:note_type]Unfurling[/] unpacks nested data row-wise, often useful for nested arrays:
+
+- {help.commands.unfurl-col}
+
+Note that `unfurl-col` creates a new sheet with `_unfurled` appended to the name. There is no command to revert an unfurl; instead, close the unfurled sheet.
+
+For particularly deep or complex nested data, it can be helpful to open an individual cell as a new sheet:
+
+- {help.commands.open-cell}
+
+## Options to control JSON save behavior
+
+- {help.options.json_indent}
+- {help.options.json_sort_keys}
+- {help.options.json_ensure_ascii}
+
+## Visual cues
+
+VisiData provides visual cues to help identify and preview nested JSON data. Given the following data:
+
+`[`
+`  {{`
+`    "geolocation": {{`
+`        "type":"Point",`
+`        "coordinates": [6.08333,50.775]`
+`    }},`
+`  }},`
+`  {{`
+`    "geolocation": {{`
+`        "type":"Point",`
+`        "coordinates": [2.08,30.77]`
+`    }}`
+`  }}`
+`]`
+
+VisiData displays:
+
+`[:underline]geolocation[/]`
+`{{2}} type=Point coordinates=[2] 6.08333; 50.775`
+`{{2}} type=Point coordinates=[2] 2.08; 30.77`
+
+Where:
+
+- `{{2}}` indicates that the cell contains a [:note_type]nested object[/] with 2 keys
+- `type=Point coordinates=[2] 6.08333; 50.775` is a preview of that nested object
+- `coordinates=[2]` indicates a [:note_type]nested array[/] with 2 elements
+'''
+
+
 JsonSheet.options.encoding = 'utf-8'
 JsonSheet.options.regex_skip = r'^(//|#).*'
 
@@ -197,3 +265,4 @@ vd.addGlobals({
     'JsonSheet': JsonSheet,
     'JsonLinesSheet': JsonSheet,
 })
+vd.addGuide('JsonSheet', JsonGuide)

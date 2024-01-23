@@ -46,7 +46,7 @@ AggregatorsSheet ("Aggregations like sum, mean, and distinct")
 FrequencyTable ("Frequency Tables are how you GROUP BY")
 PivotGuide ("Pivot Tables are just Frequency Tables with more columns")
 MeltGuide ("Melt is just Unpivot")
-JsonGuide ("Some special features for JSON") # with expand/contract, unfurl
+JsonSheet ("Some special features for JSON") # with expand/contract, unfurl
 RegexGuide ("Matching and Transforming Strings with Regex")
 GraphSheet ("Basic scatterplots and other graphs")
 WindowFunctionGuide ("Perform operations on groups of rows")
