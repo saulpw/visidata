@@ -37,8 +37,11 @@ def undo(vd, sheet):
     if not vd.options.undo:
         vd.fail("options.undo not enabled")
 
-    # don't allow undo of first command on a sheet, which is always the command that created the sheet.
-    for i, cmdlogrow in enumerate(sheet.cmdlog_sheet.rows[:0:-1]):
+    cmdlogrows = itertools.filterfalse(lambda r: r.longname == 'set-option', sheet.cmdlog_sheet.rows)
+    # exclude the first remaining command from undo,
+    # because it is always the one that created the sheet
+    cmdlogrows = itertools.islice(cmdlogrows, 1, None)
+    for i, cmdlogrow in enumerate(reversed(list(cmdlogrows))):
         if cmdlogrow.undofuncs:
             for undofunc, args, kwargs, in cmdlogrow.undofuncs[::-1]:
                 undofunc(*args, **kwargs)
