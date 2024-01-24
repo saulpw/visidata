@@ -20,7 +20,7 @@ class OptionsSheet(Sheet):
         Column('module', getter=lambda col,row: row.module, max_help=1),
         Column('value',
             getter=lambda col,row: col.sheet.diffOption(row.name),
-            setter=lambda col,row,val: col.sheet.source.options.set(row.name, val)
+            setter=lambda col,row,val: vd.options.set(row.name, val, col.sheet.source)
             ),
         Column('default', getter=lambda col,row: vd.options.getdefault(row.name)),
         Column('description', width=40, getter=lambda col,row: vd.options._get(row.name, 'default').helpstr),
