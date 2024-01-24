@@ -110,7 +110,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=True):
         vd.warning('no sheets to save')
         return
 
-    filetypes = [givenpath.ext, vd.options.save_filetype]
+    filetypes = [givenpath.ext.lower(), vd.options.save_filetype.lower()]
 
     vd.clearCaches()
 
