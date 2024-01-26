@@ -108,14 +108,14 @@ class GuideIndex(Sheet):
         return vd.getGuide(name)
 
 class OptionHelpGetter:
-    'For easy and consistent formatting in sidebars and helpstrings, use {vd.options.help.opt_name}.'
+    'For easy and consistent formatting in sidebars and helpstrings, use {help.options.opt_name}.'
     def __getattr__(self, optname):
         opt = vd.options._get(optname, 'default')
-        return f'[:onclick options-sheet {optname}][:longname]{optname}[/][/]: to {opt.helpstr} (default: {opt.value})'
+        return f'[:onclick options-sheet {optname}][:longname]{optname}[/][/]: {opt.helpstr} (default: {opt.value})'
 
 
 class CommandHelpGetter:
-    'For easy and consistent formatting in sidebars and helpstrings, use {vd.commands.help.long_name}.'
+    'For easy and consistent formatting in sidebars and helpstrings, use {help.commands.long_name}.'
     def __init__(self, cls):
         self.cls = cls
         self.helpsheet = vd.HelpSheet()
