@@ -72,23 +72,7 @@ eleventyNavigation:
 
 # Extra notes about formats
 
-## tsv {#tsv}
-- loader-specific options
-    - `delimiter` (default: '\t') field delimiter to use for tsv/usv filetype
-    - `row_delimiter` (default: '\n') row delimiter to use for tsv/usv filetype
-    - `tsv_safe_newline` (default: '\u001e') replacement for newline character when saving to tsv
-    - `tsv_safe_tab` (default: '\u001f') replacement for tab character when saving to tsv
-
-## csv {#csv}
-- loader-specific options
-    - `csv_dialect` (default: 'excel') dialect passed to csv.reader
-        - Accepted dialects are *excel-tab*, *unix*, and *excel*.
-    - `csv_delimiter` (default: ',') delimiter passed to csv.reader
-    - `csv_quotechar` (default: '"') quotechar passed to csv.reader
-    - `csv_skipinitialspace` (default: True) skipinitialspace passed to csv.reader
-    - `csv_escapechar` (default: None) escapechar passed to csv.reader
-    - `csv_lineterminator` (default: '\r\n') lineterminator passed to csv.writer
-    - `safety_first` (default: False) sanitize input/output to handle edge cases, with a performance cost
+[[GUIDE XsvGuide]]
 
 ## fixed {#fixed}
 - loader-specific options
