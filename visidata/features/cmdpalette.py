@@ -171,7 +171,7 @@ def inputLongname(sheet):
     def _fmt_cmdpal_summary(match, row, trigger_key):
         keystrokes = this_sheets_help.revbinds.get(row.longname, [None])[0] or ' '
         formatted_longname = match.formatted.get('longname', row.longname) if match else row.longname
-        formatted_name = f'[:longname][:onclick {row.longname}]{formatted_longname}[/][/]'
+        formatted_name = f'[:bold][:onclick {row.longname}]{formatted_longname}[/][/]'
         if vd.options.debug and match:
             keystrokes = f'[{match.score}]'
         r = f' [:keystrokes]{keystrokes.rjust(len(prompt)-5)}[/]  '

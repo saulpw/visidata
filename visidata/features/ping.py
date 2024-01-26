@@ -7,11 +7,6 @@ from statistics import mean
 
 from visidata import vd, VisiData, BaseSheet, Sheet, Column, AttrColumn, Progress
 
-vd.theme_option('color_shellcmd', '21 on 114 green', '')
-vd.theme_option('color_colname', 'underline', '')
-vd.theme_option('color_longname', 'bold 52 on 114 green', '')
-
-
 @VisiData.api
 def new_ping(vd, p):
     'Open a sheet with the round-trip time for each hop along the path to the given host.'
@@ -21,9 +16,9 @@ def new_ping(vd, p):
 
 class PingStatsSheet(Sheet):
     help='''# ping/traceroute
-This sheet runs {shellcmd}traceroute{} to generate intermediate hops, then runs {shellcmd}ping{} against each hop N times to get the {colname}avg_ms{} and {colname}max_ms{} ping time.
+This sheet runs `traceroute` to generate intermediate hops, then runs `ping` against each hop N times to get the `avg_ms` and `max_ms` ping time.
 
-{longname}open-source{} to open the raw ping data.
+- {help.commands.open_source} (for raw ping data)
 '''
     rowtype='hosts' # rowdef: PingColumn
     columns = [
