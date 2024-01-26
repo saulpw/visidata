@@ -62,6 +62,10 @@ ColorSheet ("See available colors")
 MacrosSheet ("Recording macros")
 MemorySheet ("Making note of certain values")
 
+# Specific use cases
+
+XsvGuide ("CSV/TSV and other text-delimited formats")
+
 # advanced usage and developers
 
 ThreadsSheet ("Threads past and present")
