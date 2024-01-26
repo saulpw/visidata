@@ -123,12 +123,14 @@ def inputPalette(sheet, prompt, items,
 
             if tabitem < 0 and palrows:
                 _ , topitem = palrows[0]
+                if not topitem: return
                 if multiple:
                     bindings[' '] = partial(add_to_input, value=topitem[value_key])
                     bindings['^J'] = partial(accept_input_if_subset, value=topitem[value_key])
                 else:
                     bindings['^J'] = partial(accept_input, value=topitem[value_key])
             elif item and i == tabitem:
+                if not item: return
                 if multiple:
                     bindings['^J'] = partial(accept_input_if_subset, value=item[value_key])
                     bindings[' '] = partial(add_to_input, value=item[value_key])
