@@ -192,6 +192,11 @@ class JsonGuide(GuideSheet):
 
 ## Working with nested data
 
+VisiData uses these conventions to display nested data:
+
+- {{2}} indicates a nested object with 2 keys
+- [3] indicates a nested array with 3 elements
+
 [:note_type]Expanding[/] unpacks nested data column-wise, often useful for nested objects:
 
 - {help.commands.expand-col}
@@ -210,7 +215,7 @@ To revert earlier `expand-` operations:
 
 - {help.commands.unfurl-col}
 
-Note that `unfurl-col` creates a new sheet with `_unfurled` appended to the name. There is no command to revert an unfurl; instead, close the unfurled sheet.
+Note that `unfurl-col` creates a new sheet with `_unfurled` appended to the name. There is no command to revert an unfurl; instead, quit the unfurled sheet.
 
 For particularly deep or complex nested data, it can be helpful to open an individual cell as a new sheet:
 
@@ -221,37 +226,6 @@ For particularly deep or complex nested data, it can be helpful to open an indiv
 - {help.options.json_indent}
 - {help.options.json_sort_keys}
 - {help.options.json_ensure_ascii}
-
-## Visual cues
-
-VisiData provides visual cues to help identify and preview nested JSON data. Given the following data:
-
-`[`
-`  {{`
-`    "geolocation": {{`
-`        "type":"Point",`
-`        "coordinates": [6.08333,50.775]`
-`    }},`
-`  }},`
-`  {{`
-`    "geolocation": {{`
-`        "type":"Point",`
-`        "coordinates": [2.08,30.77]`
-`    }}`
-`  }}`
-`]`
-
-VisiData displays:
-
-`[:underline]geolocation[/]`
-`{{2}} type=Point coordinates=[2] 6.08333; 50.775`
-`{{2}} type=Point coordinates=[2] 2.08; 30.77`
-
-Where:
-
-- `{{2}}` indicates that the cell contains a [:note_type]nested object[/] with 2 keys
-- `type=Point coordinates=[2] 6.08333; 50.775` is a preview of that nested object
-- `coordinates=[2]` indicates a [:note_type]nested array[/] with 2 elements
 '''
 
 
