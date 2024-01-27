@@ -44,4 +44,4 @@ BaseSheet.addCommand(None, 'open-colors', 'vd.push(vd.colorsSheet)', 'open Color
 
 @VisiData.lazy_property
 def colorsSheet(vd):
-    return ColorSheet()
+    return ColorSheet('colors')

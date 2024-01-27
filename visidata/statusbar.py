@@ -29,6 +29,40 @@ vd.theme_option('color_highlight_status', 'black on green', 'color of highlighte
 
 BaseSheet.init('longname', lambda: '')
 
+def fitWithin(s, n=10):
+    if len(s) > n:
+        return s[:n//2-1] + '…' + s[-n//2+1:]
+    return s
+
+@BaseSheet.property
+def ancestors(sheet):
+    if isinstance(sheet.source, BaseSheet):
+        return sheet.source.ancestors + [sheet.source]
+    else:
+        return []
+
+@VisiData.property
+def sheetlist(vd):
+    sheets = []
+    for vs in vd.allSheets:
+        if vs in vd.sheets:
+            if sheets and sheets[-1] is vs.source and sheets[-1] is not vd.sheet and vs is not vd.sheet:
+                sheets[-1] = f'{vs.shortcut}'
+            else:
+                sheets.append(vs)
+
+    sheetnames = []
+    for vs in sheets:
+        if isinstance(vs, BaseSheet):
+            if vs is vd.sheet:
+                sheetnames.append(f'[:red]{vs.shortcut}›{vs.name}[:]')
+            else:
+                sheetnames.append(f'[:onclick jump-sheet-{vs.shortcut}]' + fitWithin(f'{vs.shortcut}›{vs.name}', 10) + '[:]')
+        else:
+            sheetnames.append(vs)
+
+    return ' | '.join(sheetnames)
+
 @BaseSheet.api
 def _updateStatusBeforeExec(sheet, cmd, args, ks):
     sheet.longname = cmd.longname
