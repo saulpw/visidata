@@ -78,7 +78,7 @@ class TsvSheet(SequenceSheet):
 
         with self.open_text_source() as fp:
                 for line in splitter(adaptive_bufferer(fp), rowdelim):
-                    if not line:
+                    if not line or fp._regex_skip.match(line):
                         continue
 
                     row = list(line.split(delim))

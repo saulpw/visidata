@@ -1,7 +1,7 @@
 sheet	col	row	longname	input	keystrokes	comment
 global		filetype	set-option	pandas		
-			open-file	sample_data/sample.tsv	o	
-sample		0	select-row		s	select current row
-sample		1	select-row		s	select current row
-sample		2	select-row		s	select current row
-sample			dup-selected		"	open duplicate sheet with only selected rows
+			open-file	sample_data/benchmarks.csv	o	
+benchmarks		0	select-row		s	select current row
+benchmarks		1	select-row		s	select current row
+benchmarks		2	select-row		s	select current row
+benchmarks			dup-selected		"	open duplicate sheet with only selected rows
