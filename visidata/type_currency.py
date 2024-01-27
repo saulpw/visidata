@@ -27,8 +27,7 @@ def displayer_currency(col, dw, width=None):
 
     yield ('', text)
 
-
-Sheet.addCommand('$', 'type-currency', 'cursorCol.type=currency', 'set type of current column to currency')
+Sheet.addCommand('$', 'type-currency', 'cursorCol.type=currency; cursorCol.displayer="currency"', 'set type of current column to currency')
 
 vd.addMenuItems('''
     Column > Type as > dirty float > type-currency
