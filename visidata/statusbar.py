@@ -12,7 +12,7 @@ from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColo
 
 
 vd.option('disp_rstatus_fmt', '{sheet.threadStatus} {sheet.keystrokeStatus}   [:longname]{sheet.longname}[/]  {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}', 'right-side status format string')
-vd.option('disp_status_fmt', '[:onclick sheets-stack]{sheet.shortcut}› {sheet.name}[/]| ', 'status line prefix')
+vd.option('disp_status_fmt', '{sheet.sheetlist}| ', 'left-side status format string')
 vd.theme_option('disp_lstatus_max', 0, 'maximum length of left status line')
 vd.theme_option('disp_status_sep', '│', 'separator between statuses')
 
@@ -41,23 +41,24 @@ def ancestors(sheet):
     else:
         return []
 
-@VisiData.property
-def sheetlist(vd):
-    sheets = []
-    for vs in vd.allSheets:
-        if vs in vd.sheets:
-            if sheets and sheets[-1] is vs.source and sheets[-1] is not vd.sheet and vs is not vd.sheet:
-                sheets[-1] = f'{vs.shortcut}'
-            else:
-                sheets.append(vs)
+@BaseSheet.property
+def sheetlist(sheet):
+    leafsheets = []
+    parents = set()
+
+    sheetstack = vd.sheetstack(sheet.pane)
+    sheets = [x for x in vd.allSheets if x in sheetstack]+ [x for x in sheetstack if x not in vd.allSheets]
 
     sheetnames = []
     for vs in sheets:
         if isinstance(vs, BaseSheet):
+            shortcut = ' '
+            if len(vs.shortcut) == 1:
+                shortcut = vs.shortcut + '›'
             if vs is vd.sheet:
-                sheetnames.append(f'[:red]{vs.shortcut}›{vs.name}[:]')
+                sheetnames.append(f'[:menu_active]{shortcut}{vs.name}[:]')
             else:
-                sheetnames.append(f'[:onclick jump-sheet-{vs.shortcut}]' + fitWithin(f'{vs.shortcut}›{vs.name}', 10) + '[:]')
+                sheetnames.append(f'[:onclick jump-sheet-{vs.shortcut}]' + fitWithin(f'{shortcut}{vs.name}', 20) + '[:]')
         else:
             sheetnames.append(vs)
 
