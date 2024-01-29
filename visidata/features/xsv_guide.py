@@ -13,6 +13,8 @@ class XsvGuide(GuideSheet):
 
     Use `-f usv` for Unicode separators U+241F and U+241E.
     Use `-f lsv` for awk-like records.
+    Use `--delimiter=` (an empty string) to make '\0' the value separator.
+    Use `--row-delimiter=` to make '\0' the row separator.
 
     ## `csv` (Comma Separated Values) for maximum computibility
 

@@ -75,6 +75,10 @@ class TsvSheet(SequenceSheet):
     def iterload(self):
         delim = self.delimiter or self.options.delimiter
         rowdelim = self.row_delimiter or self.options.row_delimiter
+        if delim == '': delim = '\x00'  #2272
+        if rowdelim == '': rowdelim = '\x00'
+        if delim == rowdelim:
+            vd.fail('field delimiter and row delimiter cannot be the same')
 
         with self.open_text_source() as fp:
                 for line in splitter(adaptive_bufferer(fp), rowdelim):
