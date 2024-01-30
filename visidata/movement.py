@@ -1,11 +1,10 @@
 import itertools
-import re
 
-from visidata import vd, VisiData, BaseSheet, Sheet, Column, Progress, ALT, asyncthread
+from visidata import vd, BaseSheet, Sheet, Column, Progress, ALT, asyncthread
 
 
 def rotateRange(n, idx, reverse=False):
-    'Wraps an iter starting from idx. Yields indices from idx to n and then 0 to idx.'
+    'Wraps an iter starting from idx. Yields indices from idx+1 to n and then 0 to idx, or from idx-1 to 0 and n-1 to idx.'
     if n == 0: return []
     if reverse:
         rng = range(idx-1, -1, -1)
@@ -81,18 +80,6 @@ def moveToNextRow(vs, func, reverse=False, msg='no different value up this colum
         vd.status(msg)
 
 
-@Sheet.api
-def nextColRegex(sheet, colregex):
-    'Go to first visible column after the cursor matching `colregex`.'
-    pivot = sheet.cursorVisibleColIndex
-    for i in itertools.chain(range(pivot+1, len(sheet.visibleCols)), range(0, pivot+1)):
-        c = sheet.visibleCols[i]
-        if re.search(colregex, c.name, sheet.regex_flags()):
-            return i
-
-    vd.fail('no column name matches /%s/' % colregex)
-
-
 @Column.property
 def visibleWidth(self):
     'Width of column as is displayed in terminal'
@@ -114,8 +101,6 @@ Sheet.addCommand(None, 'go-top', 'sheet.cursorRowIndex = sheet.topRowIndex = 0',
 Sheet.addCommand(None, 'go-bottom', 'sheet.cursorRowIndex = len(rows); sheet.topRowIndex = cursorRowIndex-nScreenRows', 'go all the way to the bottom of sheet')
 Sheet.addCommand(None, 'go-rightmost', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1', 'go all the way to the right of sheet')
 
-Sheet.addCommand('c', 'go-col-regex', 'sheet.cursorVisibleColIndex=nextColRegex(inputRegex("column name regex: ", type="regex-col", defaultLast=True))', 'go to next column with name matching regex')
-Sheet.addCommand('zc', 'go-col-number', 'sheet.cursorVisibleColIndex = int(input("move to column number: "))', 'go to given column number (0-based)')
 Sheet.addCommand('zr', 'go-row-number', 'sheet.cursorRowIndex = int(input("move to row number: "))', 'go to the given row number (0-based)')
 
 
@@ -207,8 +192,6 @@ vd.addGlobals({'rotateRange': rotateRange})
 vd.addMenuItems('''
     View > Other sheet > previous sheet > jump-prev
     View > Other sheet > first sheet > jump-first
-    Column > Goto > by number > go-col-number
-    Column > Goto > by name > go-col-regex
     Row > Goto > top > go-top
     Row > Goto > bottom > go-bottom
     Row > Goto > previous > page > go-pageup
