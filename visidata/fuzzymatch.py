@@ -374,6 +374,7 @@ def fuzzymatch(vd, haystack:"list[dict[str, str]]", needles:"list[str]) -> list[
         match = {}
         formatted_hay = {}
         for k, v in h.items():
+            if k[0] == '_': continue
             for p in needles:
                 mr = _fuzzymatch(v, p)
                 if mr.score > 0:
