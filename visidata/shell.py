@@ -100,7 +100,7 @@ class DirSheet(Sheet):
     defer = True
     columns = [
         Column('directory',
-            getter=lambda col,row: str(row.parent) if str(row.parent) == '.' else str(row.parent) + '/',
+            getter=lambda col,row: str(row.parent) if str(row.parent) in ('.', '/') else str(row.parent) + '/',
             setter=lambda col,row,val: col.sheet.moveFile(row, val)),
         Column('filename',
             getter=lambda col,row: row._path.name,
