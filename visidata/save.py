@@ -89,7 +89,7 @@ def getDefaultSaveName(sheet):
 
 
 @VisiData.api
-def save_cols(vd, cols):
+def saveCols(vd, cols):
     sheet = cols[0].sheet
     vs = copy(sheet)
     vs.columns = list(cols)
@@ -203,8 +203,8 @@ BaseSheet.addCommand('', 'save-sheet-really', 'vd.saveSheets(Path(getDefaultSave
 BaseSheet.addCommand('', 'save-source', 'vd.saveSheets(rootSheet().source, rootSheet())', 'save root sheet to its source')
 BaseSheet.addCommand('g^S', 'save-all', 'vd.saveSheets(inputPath("save all sheets to: "), *vd.stackedSheets)', 'save all sheets to given file or directory)')
 IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelectedRows, value="_".join(getattr(vs, "name", None) or "blank" for vs in selectedRows)), *selectedRows)', 'save all selected sheets to given file or directory')
-Sheet.addCommand('', 'save-col', 'save_cols([cursorCol])', 'save current column only to filename in format determined by extension (default .tsv)')
-Sheet.addCommand('', 'save-col-keys', 'save_cols(keyCols + [cursorCol])', 'save key columns and current column to filename in format determined by extension (default .tsv)')
+Sheet.addCommand('', 'save-col', 'saveCols([cursorCol])', 'save current column only to filename in format determined by extension (default .tsv)')
+Sheet.addCommand('', 'save-col-keys', 'saveCols(keyCols + [cursorCol])', 'save key columns and current column to filename in format determined by extension (default .tsv)')
 
 vd.addMenuItems('''
     File > Save > current sheet > save-sheet
