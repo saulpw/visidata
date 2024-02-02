@@ -3,5 +3,5 @@ Type=Application
 Terminal=true
 Name=VisiData
 Icon=utilities-terminal
-Exec=bash -i -c 'vd %f'
-Categories=Application;
+Exec="bash -i -c 'vd %f'"
+Categories=Utility;TextTools
