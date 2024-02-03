@@ -75,8 +75,12 @@ class TsvSheet(SequenceSheet):
     def iterload(self):
         delim = self.delimiter or self.options.delimiter
         rowdelim = self.row_delimiter or self.options.row_delimiter
-        if delim == '': delim = '\x00'  #2272
-        if rowdelim == '': rowdelim = '\x00'
+        if delim == '':
+            vd.warning("using '\\x00' as field delimiter")
+            delim = '\x00'  #2272
+        if rowdelim == '':
+            vd.warning("using '\\x00' as row delimiter")
+            rowdelim = '\x00'
         if delim == rowdelim:
             vd.fail('field delimiter and row delimiter cannot be the same')
 
@@ -99,8 +103,12 @@ def save_tsv(vd, p, vs, delimiter='', row_delimiter=''):
     'Write sheet to file `fn` as TSV.'
     unitsep = delimiter or vs.options.delimiter
     rowsep = row_delimiter or vs.options.row_delimiter
-    if unitsep == '': unitsep = '\x00'
-    if rowsep == '': rowsep = '\x00'
+    if unitsep == '':
+        vd.warning("saving with '\\x00' as field delimiter")
+        unitsep = '\x00'
+    if rowsep == '':
+        vd.warning("saving with '\\x00' as row delimiter")
+        rowsep = '\x00'
     if unitsep == rowsep:
         vd.fail('field delimiter and row delimiter cannot be the same')
     trdict = vs.safe_trdict()
