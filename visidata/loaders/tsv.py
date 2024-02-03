@@ -99,6 +99,10 @@ def save_tsv(vd, p, vs, delimiter='', row_delimiter=''):
     'Write sheet to file `fn` as TSV.'
     unitsep = delimiter or vs.options.delimiter
     rowsep = row_delimiter or vs.options.row_delimiter
+    if unitsep == '': unitsep = '\x00'
+    if rowsep == '': rowsep = '\x00'
+    if unitsep == rowsep:
+        vd.fail('field delimiter and row delimiter cannot be the same')
     trdict = vs.safe_trdict()
 
     with p.open(mode='w', encoding=vs.options.save_encoding) as fp:
