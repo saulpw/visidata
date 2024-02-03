@@ -337,7 +337,7 @@ class Path(os.PathLike):
 
     @wraps(pathlib.Path.is_fifo)
     def is_fifo(self):
-        'Return True if the path is a file.'
+        'Return True if the path is a fifo.'
         return self._path.is_fifo()
 
     def is_local(self):

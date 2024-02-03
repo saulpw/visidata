@@ -34,7 +34,7 @@ def _splitcell(sheet, s, width=0, maxheight=1):
                 ret.append([[attr, line]])
     return ret
 
-disp_column_fill = ' ' # pad chars after column value
+disp_column_fill = ' ' # pad chars before column value
 
 # higher precedence color overrides lower; all non-color attributes combine
 # coloropt is the color option name (like 'color_error')

@@ -42,10 +42,10 @@ def adaptive_bufferer(fp, max_buffer_size=65536):
         current_delta = current_time - previous_start_time
 
         if current_delta < 1:
-            # if it takes longer than one second to fill the buffer, double the size of the buffer
+            # if it takes less than one second to fill the buffer, double the size of the buffer
             buffer_size = min(buffer_size * 2, max_buffer_size)
         else:
-            # if it takes less than one second, increase the buffer size so it takes about
+            # if it takes longer than one second, increase the buffer size so it takes about
             # 1 second to fill it
             previous_start_time = current_time
             buffer_size = math.ceil(min(processed_buffer_size / current_delta, max_buffer_size))
