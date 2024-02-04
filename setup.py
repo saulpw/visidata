@@ -33,6 +33,7 @@ setup(
         "visidata.loaders",
         "visidata.vendor",
         "visidata.tests",
+        "visidata.guides",
         "visidata.ddw",
         "visidata.man",
         "visidata.themes",
@@ -71,6 +72,7 @@ setup(
     package_data={
         "visidata.man": ["vd.1", "vd.txt"],
         "visidata.ddw": ["input.ddw", "regex.ddw"],
+        "visidata.guides": ["visidata/*.md"],
         "visidata.tests": ["sample.tsv", "benchmark.csv"],
         "visidata.desktop": ["visidata.desktop"],
         "visidata.experimenta.noahs_tapestry": [

@@ -12,3 +12,4 @@ include visidata/experimental/noahs_tapestry/*.json
 include visidata/experimental/noahs_tapestry/*.md
 include visidata/experimental/noahs_tapestry/*.ddw
 include visidata/experimental/noahs_tapestry/*.sqlite
+include visidata/guides/*.md

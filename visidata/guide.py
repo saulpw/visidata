@@ -8,7 +8,7 @@ Each guide shows you how to use a particular feature in VisiData. Gray guides ha
 import re
 
 from visidata import vd, BaseSheet, Sheet, ItemColumn, Column, VisiData, ENTER, RowColorizer, AttrDict, MissingAttrFormatter
-from visidata import wraptext
+from visidata import wraptext, Path
 
 guides_list = '''
 GuideIndex ("A Guide to VisiData Guides (you are here)")
@@ -69,7 +69,7 @@ XsvGuide ("CSV/TSV and other text-delimited formats")
 # advanced usage and developers
 
 ThreadsSheet ("Threads past and present")
-PyobjSheet ("Inspecting internal Python objects")
+DeveloperGuide ("Inspecting internal Python objects")
 
 #  appendices
 
@@ -79,8 +79,10 @@ InputEditorGuide ("Using the builtin line editor")
 vd.guides = {}  # name -> guidecls
 
 @VisiData.api
-def addGuide(vd, name, guidecls):
-    vd.guides[name] = guidecls
+def addGuide(vd, name):
+    guideSource = Path(vd.pkg_resources_files('visidata')/f'guides/{name}.md')
+    if guideSource.exists():
+        vd.guides[name] = GuideSheet(name, source=guideSource)
 
 @VisiData.api
 class GuideIndex(Sheet):
@@ -100,7 +102,9 @@ class GuideIndex(Sheet):
         for line in guides_list.splitlines():
             m = re.search(r'(\w+?) \("(.*)"\)', line)
             if m:
-                yield [i] + list(m.groups())
+                guidename, description = list(m.groups())
+                vd.addGuide(guidename)
+                yield [i, guidename, description]
                 i += 1
 
     def openRow(self, row):
@@ -156,15 +160,28 @@ class GuideSheet(Sheet):
             ItemColumn('guide', 1, width=80, displayer='full'),
             ]
     precious = False
-    guide_text = ''
-    sheettype = Sheet
+    sheettype = 'Sheet'
 
     def iterload(self):
+        text = self.source.open(mode='r').read()
         winWidth = 78
-        helper = AttrDict(commands=CommandHelpGetter(self.sheettype),
+        helper = AttrDict(commands=CommandHelpGetter(globals()[self.sheettype]),
                           options=OptionHelpGetter())
-        guidetext = MissingAttrFormatter().format(self.guide_text, help=helper, vd=vd)
-        for startingLine, text in enumerate(guidetext.splitlines()):
+        guidetext = MissingAttrFormatter().format(text, help=helper, vd=vd)
+
+        # parsing front matter
+        sections = guidetext.split('---\n', maxsplit=2)
+        d = {}
+        for section in sections[:-1]:
+            for config in section.splitlines():
+                config = config.strip()
+                if config:
+                    key, val = config.split(': ', maxsplit=1)
+                    d[key] = val
+        self.__dict__.update(d)
+
+        # parsing guide
+        for startingLine, text in enumerate(sections[-1].splitlines()):
             text = text.strip()
             if text:
                 for i, (L, _) in enumerate(wraptext(str(text), width=winWidth)):
@@ -173,11 +190,10 @@ class GuideSheet(Sheet):
                 yield [startingLine+1, text]
 
 
-
 @VisiData.api
 def getGuide(vd, name): # -> GuideSheet()
     if name in vd.guides:
-        return vd.guides[name]()
+        return vd.guides[name]
     vd.warning(f'no guide named {name}')
 
 BaseSheet.addCommand('', 'open-guide-index', 'vd.push(GuideIndex("VisiData_Guide"))', 'open VisiData guides table of contents')
@@ -204,4 +220,4 @@ vd.addMenuItems('''
 
 vd.optalias('guides', 'preplay', 'open-guide-index')
 
-vd.addGlobals({'GuideSheet':GuideSheet, "CommandHelpGetter": CommandHelpGetter, "OptionHelpGetter": OptionHelpGetter})
+vd.addGlobals({"CommandHelpGetter": CommandHelpGetter, "OptionHelpGetter": OptionHelpGetter})
