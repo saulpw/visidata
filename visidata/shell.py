@@ -41,6 +41,12 @@ def exec_shell(*args):
 
 @VisiData.api
 def open_dir(vd, p):
+    if p.is_dir():
+        return DirSheet(p.base_stem, source=p)
+    if p.is_file():
+        vd.status(f'opening {p.given} as txt')
+        return vd.open_txt(p)
+    vd.warning(f'could not determine file type for {p.given}')
     return DirSheet(p.base_stem, source=p)
 
 @VisiData.api
