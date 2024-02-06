@@ -26,28 +26,27 @@ def adaptive_bufferer(fp, max_buffer_size=65536):
     small"""
     buffer_size = 8
     processed_buffer_size = 0
-    previous_start_time = time.time()
+    t_read = 0
+    t_fill_target = 1   #in seconds
     while True:
-        next_chunk = fp.read(max(buffer_size, 1))
+        t_preread = time.time()
+        next_chunk = fp.read(buffer_size)
+        t_postread = time.time()
         if not next_chunk:
             break
-
         yield next_chunk
-
+        t_read += t_postread - t_preread
         processed_buffer_size += len(next_chunk)
 
-        current_time = time.time()
-        current_delta = current_time - previous_start_time
-
-        if current_delta < 1:
-            # if it takes less than one second to fill the buffer, double the size of the buffer
+        speed_ratio = t_read / t_fill_target
+        if speed_ratio <= 0.5:
+            # if filling the buffer takes less than half the ideal time, double the size of the buffer.
             buffer_size = min(buffer_size * 2, max_buffer_size)
         else:
-            # if it takes longer than one second, decrease the buffer size so it takes about
-            # 1 second to fill it
-            previous_start_time = current_time
-            buffer_size = math.ceil(min(processed_buffer_size / current_delta, max_buffer_size))
+            # adjust the buffer size proportionately to how long it took to fill
+            buffer_size = math.ceil(min(processed_buffer_size / speed_ratio, max_buffer_size))
             processed_buffer_size = 0
+            t_read = 0
 
 def splitter(stream, delim='\n'):
     'Generates one line/row/record at a time from stream, separated by delim'
