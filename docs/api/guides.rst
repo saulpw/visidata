@@ -46,14 +46,14 @@ At the top of the file, optionally place template front matter, using YAML synta
 ::
 
     ---
-    sheettype = 'Sheet'
+    sheettype: Sheet
     ---
 
 This front matter will override the default configuration for guides.
 
 At the moment, the main configurable option is ``sheettype``. ``sheettype`` is a string for the type of sheet that the guide involves. VisiData uses this to auto-complete command + options patterns (see "stylings of note").
 
-Its default value is ``'Sheet'`` (aka TableSheet), the base class for every table sheet.
+Its default value is ``Sheet`` (aka TableSheet), the base class for every table sheet.
 
 .. note::
 
@@ -71,7 +71,7 @@ Next, fill out the text for the guide:
 ::
 
     ---
-    sheettype: 'Sheet'
+    sheettype: Sheet
     ---
     # Macros
     Macros allow you to bind a command sequence to a keystroke or longname, to replay when that
