@@ -85,8 +85,9 @@ class TsvSheet(SequenceSheet):
             vd.fail('field delimiter and row delimiter cannot be the same')
 
         with self.open_text_source() as fp:
+                regex_skip = getattr(fp, '_regex_skip', None)
                 for line in splitter(adaptive_bufferer(fp), rowdelim):
-                    if not line or fp._regex_skip.match(line):
+                    if not line or (regex_skip and regex_skip.match(line)):
                         continue
 
                     row = list(line.split(delim))
