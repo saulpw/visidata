@@ -486,7 +486,7 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
         v = input_kwargs.get('value', '')
         retargs[k] = v
 
-        if record:
+        if input_kwargs.get('record', record):
             if input_kwargs.get('display', True):
                 lastargs[k] = v
                 vd.addInputHistory(v, input_kwargs.get('type', ''))
