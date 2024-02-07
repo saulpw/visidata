@@ -165,21 +165,26 @@ class GuideSheet(Sheet):
         self.metadata = AttrDict(sheettype='Sheet')
         text = self.source.open(mode='r').read()
         winWidth = 78
-        helper = AttrDict(commands=CommandHelpGetter(globals()[self.metadata.sheettype]),
-                          options=OptionHelpGetter())
-        guidetext = MissingAttrFormatter().format(text, help=helper, vd=vd)
 
         # parsing front matter
-        sections = guidetext.split('---\n', maxsplit=2)
+        sections = text.split('---\n', maxsplit=2)
         for section in sections[:-1]:
             for config in section.splitlines():
                 config = config.strip()
                 if config:
-                    key, val = config.split(': ', maxsplit=1)
+                    try:
+                        key, val = config.split(': ', maxsplit=1)
+                    except ValueError:
+                        vd.fail('incorrect front matter syntax')
                     self.metadata[key] = val
 
+        # formatting text
+        helper = AttrDict(commands=CommandHelpGetter(vd.getGlobals()[self.metadata.sheettype]),
+                          options=OptionHelpGetter())
+        guidetext = MissingAttrFormatter().format(sections[-1], help=helper, vd=vd)
+
         # parsing guide
-        for startingLine, text in enumerate(sections[-1].splitlines()):
+        for startingLine, text in enumerate(guidetext.splitlines()):
             text = text.strip()
             if text:
                 for i, (L, _) in enumerate(wraptext(str(text), width=winWidth)):
