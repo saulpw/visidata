@@ -160,25 +160,23 @@ class GuideSheet(Sheet):
             ItemColumn('guide', 1, width=80, displayer='full'),
             ]
     precious = False
-    sheettype = 'Sheet'
 
     def iterload(self):
+        self.metadata = AttrDict(sheettype='Sheet')
         text = self.source.open(mode='r').read()
         winWidth = 78
-        helper = AttrDict(commands=CommandHelpGetter(globals()[self.sheettype]),
+        helper = AttrDict(commands=CommandHelpGetter(globals()[self.metadata.sheettype]),
                           options=OptionHelpGetter())
         guidetext = MissingAttrFormatter().format(text, help=helper, vd=vd)
 
         # parsing front matter
         sections = guidetext.split('---\n', maxsplit=2)
-        d = {}
         for section in sections[:-1]:
             for config in section.splitlines():
                 config = config.strip()
                 if config:
                     key, val = config.split(': ', maxsplit=1)
-                    d[key] = val
-        self.__dict__.update(d)
+                    self.metadata[key] = val
 
         # parsing guide
         for startingLine, text in enumerate(sections[-1].splitlines()):
