@@ -1,7 +1,4 @@
-from visidata import GuideSheet, vd
-
-class ErrorsGuide(GuideSheet):
-    guide_text='''# What was that error?
+# What was that error?
 
 Status messages include [:warning]warnings[/] and [:error]errors[/].
 
@@ -18,9 +15,3 @@ If a Python Exception like [:error]RuntimeError[/] appears in the sidebar:
 If [:note_type]{vd.options.note_format_exc}[/] or [:error]{vd.options.note_getter_exc}[/] appear inside a cell, it indicates an error happened during calculation, type-conversion, or formatting.  When the cursor is on an error cell:
 
 - {help.commands.error_cell}
-'''
-
-
-
-vd.addGuide('ErrorsSheet', ErrorsGuide)
-

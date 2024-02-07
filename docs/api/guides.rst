@@ -14,9 +14,9 @@ Open the Guide Index with ``Space open-guide-index`` within VisiData or ``vd -P 
 Here's an outline for adding a guide, with our writing style preferences:
 
 1. Launch **GuideIndex** and find the ``name`` of the guide.
-2. Make a subclass of ``GuideSheet`` in the primary module.
-3. Set ``guide_text`` to a multi-line string.
-4. Call ``vd.addGuide`` to register the Guide with VisiData.
+2. Create a markdown file ``visidata/guides/{name}.md``.
+3. Write the guide.
+
 
 Hello Guide
 ------------
@@ -36,39 +36,44 @@ For example: **MacrosSheet**.
 
 ::
 
-Step 2. Make a subclass of ``GuideSheet`` in the primary module
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Step 2. Create a markdown file ``visidata/guides/{name}.md``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In this example, we would create a ``visidata/guides/MacrosSheet.md``.
+
+At the top of the file, optionally place template front matter, using YAML syntax:
 
 ::
 
-    class MacrosGuide(GuideSheet):
-        guide_text = ''         # str
-        sheettype = Sheet       # Sheet type
+    ---
+    sheettype: Sheet
+    ---
 
--  Put the Guide in the Python file
-   where the bulk of the code for that feature exists, as the final class declaration. In this example,
-   we added it to ``visidata/macros.py``. If the ``GuideSheet`` class cannot be imported into that file,
-   create a new file like ``visidata/features/macros_guide.py``.
+This front matter will override the default configuration for guides.
 
--  All Guides inherit from ``GuideSheet``.
+At the moment, the main configurable option is ``sheettype``. ``sheettype`` is a string for the type of sheet that the guide involves. VisiData uses this to auto-complete command + options patterns (see "stylings of note").
 
-- Set ``sheettype`` to the type of sheet that the guide involves
-    - VisiData uses this to auto-complete command + options patterns (see "stylings of note").
-    - Its default value is ``Sheet`` (aka TableSheet), the base class for every table sheet.
-    - Feel free to ask us if you are unsure which sheet type to use.
+Its default value is ``Sheet`` (aka TableSheet), the base class for every table sheet.
+
+.. note::
+
+    The vast majority of guides will not need to set the front matter or change the default sheet type. Only set it if command + option patterns are failing to auto-complete.
+
+    Feel free to ask us if unsure which sheet type to use.
 
 
-.. autoclass:: visidata.GuideSheet
 
-Step 3. Set ``guide_text`` to a multi-line string
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Step 3. Write the guide
+~~~~~~~~~~~~~~~~~~~~~~~
 
-Next, fill out the text for the guide in the ``guide_text`` variable:
+Next, fill out the text for the guide:
 
 ::
 
-    class MacrosGuide(GuideSheet):
-        guide_text ='''# Macros
+    ---
+    sheettype: Sheet
+    ---
+    # Macros
     Macros allow you to bind a command sequence to a keystroke or longname, to replay when that
     keystroke is pressed or the command is executed by longname.
 
@@ -111,18 +116,6 @@ Some stylings of note:
     - Similarly, use ``{help.options.option-name}`` to expand into the above, and prefer to modify the helpstring instead of writing it out manually.
 
 - In general, do not use the second person perspective ("you", "yours") outside of tutorials.
-
-Step 4. Call ``vd.addGuide`` to register the Guide with VisiData
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-At the bottom of the file, add ``vd.addGuide('GuideName', GuideClass)``.
-
-Finish off the example:
-
-::
-        vd.addGuide('MacrosSheet', MacrosGuide)
-
-``vd.getGuide`` will now be able to locate the guide!
 
 .. autofunction:: visidata.vd.addGuide
 .. autofunction:: visidata.vd.getGuide
