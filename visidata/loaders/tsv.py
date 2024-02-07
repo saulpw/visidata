@@ -78,9 +78,11 @@ class TsvSheet(SequenceSheet):
         if delim == '':
             vd.warning("using '\\x00' as field delimiter")
             delim = '\x00'  #2272
+            self.options.regex_skip = ''
         if rowdelim == '':
             vd.warning("using '\\x00' as row delimiter")
             rowdelim = '\x00'
+            self.options.regex_skip = ''
         if delim == rowdelim:
             vd.fail('field delimiter and row delimiter cannot be the same')
 
