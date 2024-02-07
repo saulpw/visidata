@@ -72,7 +72,9 @@ def open_vdsql(vd, p, filetype=None):
     return IbisTableIndexSheet(p.base_stem, source=p, filetype=None, database_name=None,
                                ibis_conpool=IbisConnectionPool(p), sheet_type=IbisTableSheet)
 
+
 vd.open_ibis = vd.open_vdsql
+vd.openurl_sqlite = vd.open_vdsql
 
 
 class IbisConnectionPool:
@@ -212,9 +214,9 @@ class IbisTableSheet(Sheet):
     def curcol_sql(self):
         expr = self.cursorCol.get_ibis_col(self.ibis_current_expr)
         if expr is not None:
-            return self.ibis_to_sql(expr, fragment=True)
+            return self.ibis_expr_to_sql(expr, fragment=True)
 
-    def ibis_to_sql(self, expr, fragment=False):
+    def ibis_expr_to_sql(self, expr, fragment=False):
         import sqlparse
         with self.con as con:
             context = con.compiler.make_context()
@@ -325,7 +327,7 @@ class IbisTableSheet(Sheet):
     def sqlize(self, expr):
         if vd.options.debug:
             expr = self.withRowcount(expr)
-        return self.ibis_to_sql(expr)
+        return self.ibis_expr_to_sql(expr)
 
     @property
     def substrait(self):

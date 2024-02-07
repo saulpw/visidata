@@ -45,7 +45,7 @@ class ClickhouseSheet(IbisTableSheet):
                 raise
             except BaseException:
                 if qid:
-                    con.con.cancel(qid)
+                    con._client.cancel(qid)
 
 
 ClickhouseSheet.init('total_rows', lambda: None)
