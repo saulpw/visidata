@@ -203,6 +203,8 @@ HLSMAX = 240
 
 @XlsxSheet.api
 def colorize_xlsx_cell(sheet, col, row):
+    if not hasattr(col, 'column_letter'):
+        return ''
     fg = getattrdeep(row, col.column_letter+'.font.color', None)
     bg = getattrdeep(row, col.column_letter+'.fill.start_color', None)
     fg = sheet.xlsx_color_to_xterm256(fg)
