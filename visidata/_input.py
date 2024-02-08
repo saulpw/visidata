@@ -481,16 +481,16 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
             cur_input_key = keys[(i+offset)%len(keys)]
 
     retargs = {}
-    if record:
-        lastargs = {}
-        for k, input_kwargs in kwargs.items():
-            v = input_kwargs.get('value', '')
-            retargs[k] = v
+    lastargs = {}
+    for k, input_kwargs in kwargs.items():
+        v = input_kwargs.get('value', '')
+        retargs[k] = v
 
+        if input_kwargs.get('record', record):
             if input_kwargs.get('display', True):
                 lastargs[k] = v
                 vd.addInputHistory(v, input_kwargs.get('type', ''))
-
+    if record:
         if vd.cmdlog and lastargs:
             vd.setLastArgs(lastargs)
 
