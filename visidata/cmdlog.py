@@ -262,7 +262,7 @@ def replayOne(vd, r):
         'Replay the command in one given row.'
         vd.currentReplayRow = r
         longname = getattr(r, 'longname', None)
-        if longname is None and (hasattr(r, 'keystrokes') and not r.keystrokes):
+        if longname is None and getattr(r, 'keystrokes', None) is None:
             vd.fail('failed to find command to replay')
 
         if r.sheet and longname not in ['set-option', 'unset-option']:
