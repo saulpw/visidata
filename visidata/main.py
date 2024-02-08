@@ -220,7 +220,10 @@ def main_vd():
         elif arg in ['--']:
             optsdone = True
         elif arg == '-':
-            inputs.append((vd.stdinSource, copy(current_args)))
+            if flPipedInput:
+                inputs.append((vd.stdinSource, copy(current_args)))
+            else:
+                vd.fail('to use stdin as a data source, data must be piped into it')
         elif arg in ['-g', '--global']:
             flGlobal = True
         elif arg in ['-n', '--nonglobal']:
