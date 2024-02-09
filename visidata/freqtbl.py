@@ -26,6 +26,8 @@ class HistogramColumn(Column):
 
 
 def makeFreqTable(sheet, *groupByCols):
+    if not any(groupByCols):
+        vd.fail('FreqTableSheet requires at least 1 column for grouping')
     return FreqTableSheet(sheet.name,
                           '%s_freq' % '-'.join(col.name for col in groupByCols),
                           groupByCols=groupByCols,
