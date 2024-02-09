@@ -277,6 +277,7 @@ class OptionsObject:
 vd.commands = SettingsMgr()
 vd.bindkeys = SettingsMgr()
 vd._options = SettingsMgr()
+vd.command_keys = {}
 
 vd.options = vd.OptionsObject(vd._options)  # global option settings
 vd.option_aliases = {}
@@ -334,6 +335,7 @@ def addCommand(cls, keystrokes, longname, execstr, helpstr='', **kwargs):
     - *helpstr*: help string shown in the **Commands Sheet**.
     '''
     vd.commands.set(longname, Command(longname, execstr, helpstr=helpstr, module=vd.importingModule, **kwargs), cls)
+    vd.command_keys[longname] = keystrokes
     if keystrokes:
         vd.bindkey(keystrokes, longname, cls)
     return longname

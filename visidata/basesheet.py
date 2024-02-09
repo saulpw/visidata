@@ -204,6 +204,9 @@ class BaseSheet(DrawablePane):
             vdglobals = vd.getGlobals()
 
         vd.cmdlog  # make sure cmdlog has been created for first command
+        if keystrokes is None and longname:
+            #command was triggered with no keys, like from menu/palette/guide
+            keystrokes = vd.command_keys.get(longname, None)
 
         try:
             for hookfunc in vd.beforeExecHooks:
