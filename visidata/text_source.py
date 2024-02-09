@@ -2,7 +2,7 @@ import re
 
 from visidata import vd, BaseSheet
 
-vd.option('regex_skip', '', 'regex of lines to skip in text sources', help='regex')
+vd.option('regex_skip', '', 'regex of lines to skip in text sources', help='regex', replay=True)
 vd.option('regex_flags', 'I', 'flags to pass to re.compile() [AILMSUX]', replay=True)
 
 @BaseSheet.api
