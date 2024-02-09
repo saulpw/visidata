@@ -78,15 +78,18 @@ class TsvSheet(SequenceSheet):
         if delim == '':
             vd.warning("using '\\x00' as field delimiter")
             delim = '\x00'  #2272
+            self.options.regex_skip = ''
         if rowdelim == '':
             vd.warning("using '\\x00' as row delimiter")
             rowdelim = '\x00'
+            self.options.regex_skip = ''
         if delim == rowdelim:
             vd.fail('field delimiter and row delimiter cannot be the same')
 
         with self.open_text_source() as fp:
+                regex_skip = getattr(fp, '_regex_skip', None)
                 for line in splitter(adaptive_bufferer(fp), rowdelim):
-                    if not line or fp._regex_skip.match(line):
+                    if not line or (regex_skip and regex_skip.match(line)):
                         continue
 
                     row = list(line.split(delim))

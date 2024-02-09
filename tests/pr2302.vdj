@@ -1,0 +1,4 @@
+#!vd -p
+{"sheet": null, "col": null, "row": null, "longname": "open-file", "input": "sample_data/sample.tsv", "keystrokes": "o", "comment": null}
+{"sheet": "sample", "row": "regex_skip", "longname": "set-option", "input": ""}
+{"sheet": "sample", "longname": "reload-sheet"}
