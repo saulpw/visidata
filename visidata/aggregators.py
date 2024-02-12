@@ -5,7 +5,7 @@ import collections
 import statistics
 
 from visidata import Progress, Sheet, Column, ColumnsSheet, VisiData
-from visidata import vd, anytype, vlen, asyncthread, wrapply, AttrDict
+from visidata import vd, anytype, vlen, asyncthread, wrapply, AttrDict, date
 
 vd.help_aggregators = '''# Choose Aggregators
 Start typing an aggregator name or description.
@@ -51,7 +51,11 @@ Column.init('aggstr', str, copy=True)
 
 def aggregators_get(col):
     'A space-separated names of aggregators on this column.'
-    return list(vd.aggregators[k] for k in (col.aggstr or '').split())
+    aggs = []
+    for k in (col.aggstr or '').split():
+        agg = vd.aggregators[k]
+        aggs += agg if isinstance(agg, list) else [agg]
+    return aggs
 
 def aggregators_set(col, aggs):
     if isinstance(aggs, str):
@@ -135,7 +139,9 @@ def _percentile(N, percent, key=lambda x:x):
 
 @functools.lru_cache(100)
 def percentile(pct, helpstr=''):
-    return _defaggr('p%s'%pct, None, lambda col,rows,pct=pct: _percentile(sorted(col.getValues(rows)), pct/100), helpstr=helpstr)
+    return _defaggr('p%s'%pct, None,
+                    lambda col,rows,pct=pct: _percentile(sorted(col.getValues(rows)), pct/100,
+                                                         key=(lambda d: d.timestamp()) if col.type is date else lambda x:x), helpstr=helpstr)
 
 def quantiles(q, helpstr):
     return [percentile(round(100*i/q), helpstr) for i in range(1, q)]
@@ -149,7 +155,7 @@ vd.aggregator('mode', statistics.mode, 'mode of values')
 vd.aggregator('sum', vsum, 'sum of values')
 vd.aggregator('distinct', set, 'distinct values', type=vlen)
 vd.aggregator('count', lambda values: sum(1 for v in values), 'number of values', type=int)
-vd.aggregator('list', list, 'list of values')
+vd.aggregator('list', list, 'list of values', type=anytype)
 vd.aggregator('stdev', statistics.stdev, 'standard deviation of values', type=float)
 
 vd.aggregators['q3'] = quantiles(3, 'tertiles (33/66th pctile)')
@@ -162,8 +168,24 @@ vd.aggregators['q10'] = quantiles(10, 'deciles (10/20/30/40/50/60/70/80/90th pct
 for pct in (10, 20, 25, 30, 33, 40, 50, 60, 67, 70, 75, 80, 90, 95, 99):
     vd.aggregators[f'p{pct}'] = percentile(pct, f'{pct}th percentile')
 
-# returns keys of the row with the max value
-vd.aggregators['keymax'] = _defaggr('keymax', anytype, lambda col, rows: col.sheet.rowkey(max(col.getValueRows(rows))[1]), helpstr='key of the maximum value')
+def keyfunc(aggr_func):
+    '''Return the key of the row that results from applying *aggr_func* to *rows*.
+        Return None if *rows* is an empty list.
+        *aggr_func* takes a list of (value, row) tuples, one for each row in the column,
+        excluding rows where the column holds null and error values.
+        *aggr_func* must also take the parameters *default* and *key*, as max() does:
+        https://docs.python.org/3/library/functions.html#max'''
+    def key_aggr_func(col, rows):
+        if not col.sheet.keyCols:
+            vd.error('key aggregator function requires one or more key columns')
+            return None
+        # convert dicts to lists because functions like max() can't compare dicts
+        sortkey = lambda t: (t[0], sorted(t[1].items())) if isinstance(t[1], dict) else t
+        row = aggr_func(col.getValueRows(rows), default=(None, None), key=sortkey)[1]
+        return col.sheet.rowkey(row) if row else None
+    return key_aggr_func
+vd.aggregators['keymax'] = _defaggr('keymax', anytype, keyfunc(max), helpstr='key of the maximum value')
+vd.aggregators['keymin'] = _defaggr('keymin', anytype, keyfunc(min), helpstr='key of the minimum value')
 
 
 ColumnsSheet.columns += [
@@ -175,7 +197,7 @@ ColumnsSheet.columns += [
 
 @Sheet.api
 def addAggregators(sheet, cols, aggrnames):
-    'Add each aggregator in list of *aggrnames* to each of *cols*.'
+    'Add each aggregator in list of *aggrnames* to each of *cols*. Ignores names that are not valid.'
     for aggrname in aggrnames:
         aggrs = vd.aggregators.get(aggrname)
         aggrs = aggrs if isinstance(aggrs, list) else [aggrs]
@@ -194,14 +216,19 @@ def aggname(col, agg):
 
 @Column.api
 @asyncthread
-def memo_aggregate(col, agg, rows):
+def memo_aggregate(col, agg_choices, rows):
     'Show aggregated value in status, and add to memory.'
-    aggval = agg(col, rows)
-    typedval = wrapply(agg.type or col.type, aggval)
-    dispval = col.format(typedval)
-    k = col.name+'_'+agg.name
-    vd.status(f'{k}={dispval}')
-    vd.memory[k] = typedval
+    for agg_choice in agg_choices:
+        agg = vd.aggregators.get(agg_choice)
+        if not agg: continue
+        aggs = agg if isinstance(agg, list) else [agg]
+        for agg in aggs:
+            aggval = agg(col, rows)
+            typedval = wrapply(agg.type or col.type, aggval)
+            dispval = col.format(typedval)
+            k = col.name+'_'+agg.name
+            vd.status(f'{k}={dispval}')
+            vd.memory[k] = typedval
 
 
 @VisiData.property
@@ -215,6 +242,7 @@ def aggregator_choices(vd):
 
 @VisiData.api
 def chooseAggregators(vd):
+    '''Return a list of aggregator name strings chosen or entered by the user. User-entered names may be invalid.'''
     prompt = 'choose aggregators: '
     def _fmt_aggr_summary(match, row, trigger_key):
         formatted_aggrname = match.formatted.get('key', row.key) if match else row.key
@@ -235,12 +263,15 @@ def chooseAggregators(vd):
             multiple=True)
 
     aggrs = r.split()
+    valid_choices = vd.aggregators.keys()
     for aggr in aggrs:
         vd.usedInputs[aggr] += 1
+        if aggr not in valid_choices:
+            vd.warning(f'aggregator does not exist: {aggr}')
     return aggrs
 
 Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseAggregators())', 'Add aggregator to current column')
-Sheet.addCommand('z+', 'memo-aggregate', 'for agg in chooseAggregators(): cursorCol.memo_aggregate(aggregators[agg], selectedRows or rows)', 'memo result of aggregator over values in selected rows for current column')
+Sheet.addCommand('z+', 'memo-aggregate', 'cursorCol.memo_aggregate(chooseAggregators(), selectedRows or rows)', 'memo result of aggregator over values in selected rows for current column')
 ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseAggregators())', 'add aggregators to selected source columns')
 
 vd.addMenuItems('''
