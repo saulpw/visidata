@@ -414,7 +414,7 @@ def shortcut(self):
         pass
 
     try:
-        return self.cmdlog_sheet.rows[0].keystrokes
+        return self.cmdlog_sheet.rows[0].keystrokes or ''  #2293
     except Exception:
         pass
 
