@@ -56,6 +56,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'exec-python': 'import time',
                  'unselect-cols-regex': '.',
                  'go-col-regex': 'Units',          # column name in sample
+                 'go-col-name': 'Units',           # column name in sample
                  'go-col-number': '2',
                  'go-row-number': '5',              # go to row 5
                  'addcol-bulk': '1',

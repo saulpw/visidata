@@ -64,6 +64,7 @@ def inputPalette(sheet, prompt, items,
 
     def tab(n, nitems):
         nonlocal tabitem
+        if not nitems: return None
         tabitem = (tabitem + n) % nitems
 
     def _draw_palette(value):
