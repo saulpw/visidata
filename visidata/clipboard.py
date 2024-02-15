@@ -62,7 +62,7 @@ def syscopyValue(sheet, val):
 @Sheet.api
 def setColClipboard(sheet):
     if not vd.memory.clipcells:
-        vd.warning("nothing to paste")
+        vd.warning("nothing to paste from clipcells")
         return
     for r, v in zip(sheet.onlySelectedRows, itertools.cycle(vd.memory.clipcells or [None])):
         sheet.cursorCol.setValuesTyped([r], v)
@@ -103,12 +103,12 @@ def sysclipValue(vd):
 @VisiData.api
 @asyncthread
 def pasteFromClipboard(vd, cols, rows):
-    text = vd.getLastArgs() or vd.sysclipValue().strip() or vd.fail('system clipboard is empty')
+    text = vd.getLastArgs() or vd.sysclipValue().strip() or vd.fail('nothing to paste from system clipboard')
 
     vd.addUndoSetValues(cols, rows)
     lines = text.split('\n')
     if not lines:
-        vd.warning('nothing to paste')
+        vd.warning('nothing to paste from system clipboard')
         return
 
     vs = cols[0].sheet
@@ -146,7 +146,7 @@ def delete_row(sheet, rowidx):
 def paste_after(sheet, rowidx):
     'Paste rows from *vd.cliprows* at *rowidx*.'
     if not vd.memory.cliprows:  #1793
-        vd.warning('nothing to paste')
+        vd.warning('nothing to paste from cliprows')
         return
 
     for col in vd.memory.clipcols[sheet.nVisibleCols:]:
@@ -177,7 +177,7 @@ Sheet.addCommand('P', 'paste-before', 'paste_after(cursorRowIndex-1)', 'paste cl
 Sheet.addCommand('gy', 'copy-selected', 'copyRows(onlySelectedRows)', 'yank (copy) selected rows to clipboard')
 
 Sheet.addCommand('zy', 'copy-cell', 'copyCells(cursorCol, [cursorRow]); vd.memo("clipval", cursorCol, cursorRow)', 'yank (copy) current cell to clipboard')
-Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.memory.clipval) if vd.memory.clipval else vd.warning("nothing to paste")', 'set contents of current cell to last clipboard value')
+Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.memory.clipval) if vd.memory.clipval else vd.warning("nothing to paste from clipval")', 'set contents of current cell to last clipboard value')
 
 Sheet.addCommand('d', 'delete-row', 'delete_row(cursorRowIndex); defer and cursorDown(1)', 'delete current row')
 Sheet.addCommand('gd', 'delete-selected', 'deleteSelected()', 'delete selected rows')
