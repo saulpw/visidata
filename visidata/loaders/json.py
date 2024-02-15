@@ -1,4 +1,5 @@
 import json
+from collections import Counter
 
 from visidata import vd, date, anytype, VisiData, PyobjSheet, AttrDict, stacktrace, TypedExceptionWrapper, AlwaysDict, ItemColumn, wrapply, TypedWrapper, Progress, Sheet
 
@@ -139,6 +140,13 @@ def save_json(vd, p, *vsheets):
 
         jsonenc = _vjsonEncoder(indent=indent, sort_keys=vs.options.json_sort_keys, ensure_ascii=vs.options.json_ensure_ascii)
 
+        dupnames = find_duplicates([vs.name for vs in vsheets])
+        for name in dupnames:
+            vd.warning('json cannot save sheet with duplicated name: ' + name)
+        for vs in vsheets:
+            dupnames = find_duplicates([c.name for c in vs.visibleCols])
+            for name in dupnames:
+                vd.warning('json cannot save column with duplicated name: ' + name)
         if len(vsheets) == 1:
             fp.write('[\n')
             vs = vsheets[0]
@@ -161,6 +169,9 @@ def save_json(vd, p, *vsheets):
 def write_jsonl(vs, fp):
         vcols = vs.visibleCols
         jsonenc = _vjsonEncoder()
+        dupnames = find_duplicates([c.name for c in vcols])
+        for name in dupnames:
+            vd.warning('json cannot save column with duplicated name: ' + name)
         with Progress(gerund='saving'):
             for i, row in enumerate(vs.iterrows()):
                 rowdict = _rowdict(vcols, row, keep_nulls=(i==0))
@@ -177,6 +188,8 @@ def write_jsonl(vs, fp):
 @VisiData.api
 def save_jsonl(vd, p, *vsheets):
     with p.open(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
+        if len(vsheets) > 1:
+            vd.warning('jsonl cannot separate sheets yet. Concatenating all rows.')
         for vs in vsheets:
             vs.write_jsonl(fp)
 
@@ -186,6 +199,8 @@ def JSON(vd, s:str):
     'Parse `s` as JSON.'
     return json.loads(s)
 
+def find_duplicates(names):
+    return list(colname for colname,count in Counter(names).items() if count > 1)
 
 JsonSheet.options.encoding = 'utf-8'
 JsonSheet.options.regex_skip = r'^(//|#).*'
