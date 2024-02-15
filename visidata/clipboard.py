@@ -6,6 +6,7 @@ import sys
 import tempfile
 import functools
 import os
+import itertools
 
 from visidata import VisiData, vd, asyncthread, SettableColumn
 from visidata import Sheet, Path, Column
@@ -58,6 +59,13 @@ def syscopyValue(sheet, val):
 
     vd.status('copied value to system clipboard')
 
+@Sheet.api
+def setColClipboard(sheet):
+    if not vd.memory.clipcells:
+        vd.warning("nothing to paste")
+        return
+    for r, v in zip(sheet.onlySelectedRows, itertools.cycle(vd.memory.clipcells or [None])):
+        sheet.cursorCol.setValuesTyped([r], v)
 
 @Sheet.api
 def syscopyCells(sheet, cols, rows, filetype=None):
@@ -169,7 +177,7 @@ Sheet.addCommand('P', 'paste-before', 'paste_after(cursorRowIndex-1)', 'paste cl
 Sheet.addCommand('gy', 'copy-selected', 'copyRows(onlySelectedRows)', 'yank (copy) selected rows to clipboard')
 
 Sheet.addCommand('zy', 'copy-cell', 'copyCells(cursorCol, [cursorRow]); vd.memo("clipval", cursorCol, cursorRow)', 'yank (copy) current cell to clipboard')
-Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.memory.clipval)', 'set contents of current cell to last clipboard value')
+Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.memory.clipval) if vd.memory.clipval else vd.warning("nothing to paste")', 'set contents of current cell to last clipboard value')
 
 Sheet.addCommand('d', 'delete-row', 'delete_row(cursorRowIndex); defer and cursorDown(1)', 'delete current row')
 Sheet.addCommand('gd', 'delete-selected', 'deleteSelected()', 'delete selected rows')
@@ -183,7 +191,7 @@ Sheet.bindkey('zP', 'syspaste-cells')
 Sheet.addCommand('gzP', 'syspaste-cells-selected', 'pasteFromClipboard(visibleCols[cursorVisibleColIndex:], someSelectedRows)', 'paste from system clipboard to selected cells')
 
 Sheet.addCommand('gzy', 'copy-cells', 'copyCells(cursorCol, onlySelectedRows)', 'yank (copy) contents of current column for selected rows to clipboard')
-Sheet.addCommand('gzp', 'setcol-clipboard', 'for r, v in zip(onlySelectedRows, itertools.cycle(vd.memory.clipcells or [None])): cursorCol.setValuesTyped([r], v)', 'set cells of current column for selected rows to last clipboard value')
+Sheet.addCommand('gzp', 'setcol-clipboard', 'setColClipboard()', 'set cells of current column for selected rows to last clipboard value')
 
 Sheet.addCommand('Y', 'syscopy-row', 'syscopyCells(visibleCols, [cursorRow])', 'yank (copy) current row to system clipboard (using options.clipboard_copy_cmd)')
 
