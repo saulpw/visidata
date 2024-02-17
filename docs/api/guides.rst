@@ -91,31 +91,4 @@ Next, fill out the text for the guide:
     - `Enter` (`open-row`) to open the macro in the current row, and view the series of commands composing it.
     '''
 
-Some stylings of note:
-**********************
-
-- VisiData supports `basic markdown <https://www.markdownguide.org/basic-syntax/>`_
-  like # Headings, \*\*bold\*\*, \*italics\*, \`code snippets\`, and \_underscore\_.
-
-- VisiData has its `own display attribute syntax </docs/colors#attrs>`_. For e.g.:
-    - ``[:onclick <url>]<text>[/]`` formats ``<text>`` into a clickable url that will open in ``$BROWSER``.
-    - ``[:red on black]<sentence>[/]`` changes the colour of ``<sentence>`` to be red text
-      on black background. Any color option can be used after ``:``,
-      like ``[:warning]``, ``[:error]``, ``[:menu]``.
-    - VisiData replaces ``{vd.options.disp_selected_note}`` with ``+``,
-      the value that ``vd.options.disp_selected_note`` is set to.
-      Reference any option value with ``{vd.options.optname}``. This is a great way to ensure
-      that the appropriate option is displayed, even if the user changed the option value.
-
-- List relevant commands with the general pattern ``- `<keystroke>` (`<longname>`) to <command helpstring>``.
-  Follow the keystroke immediately after the bullet; do not say "Press" or "Use" within VisiData docs and helpstrings.
-    - Use ``{help.commands.longname}`` to get the **GuideSheet** to replace it with the properly formatted string above.  You can write it out manually if it's clearer, but it's much preferred to change the docstring to make this pattern work.
-
-- List relevant options with
-  ``[:onclick options-sheet <option name>]`<option name>`[/] to <option helpstring> (default: <option default value>)``.
-    - Similarly, use ``{help.options.option-name}`` to expand into the above, and prefer to modify the helpstring instead of writing it out manually.
-
-- In general, do not use the second person perspective ("you", "yours") outside of tutorials.
-
-.. autofunction:: visidata.vd.addGuide
-.. autofunction:: visidata.vd.getGuide
+Read the `style guide </docs/api/style>`_ for an overview of the stylings and markup.
