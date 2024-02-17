@@ -58,7 +58,7 @@ class JsonSheet(Sheet):
                         yield TypedExceptionWrapper(json.loads, L, exception=e)  # an error on one line
                     else:
                         with self.open_text_source() as fp:
-                            ret = json.load(fp)
+                            ret = json.load(fp, object_hook=AttrDict)
                             if isinstance(ret, list):
                                 yield from ret
                             else:
