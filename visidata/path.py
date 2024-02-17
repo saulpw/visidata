@@ -111,6 +111,7 @@ class FileProgress:
 
         # track Progress on original fp
         self.fp_orig_read = self.fp.read
+        self.fp_orig_readline = self.fp.readline
         self.fp_orig_close = self.fp.close
 
         self.fp.read = self.read
@@ -130,6 +131,12 @@ class FileProgress:
         if self.prog:
             if r:
                 self.prog.addProgress(len(r))
+        return r
+
+    def readline(self, size=-1):
+        r = self.fp_orig_readline(size)
+        if self.prog:
+            self.prog.addProgress(len(r))
         return r
 
     def __getattr__(self, k):

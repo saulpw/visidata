@@ -71,9 +71,10 @@ def save_csv(vd, p, sheet):
         if ''.join(colnames):
             cw.writerow(colnames)
 
-        with Progress(gerund='saving'):
+        with Progress(gerund='saving', total=sheet.nRows) as prog:
             for dispvals in sheet.iterdispvals(format=True):
                 cw.writerow(dispvals.values())
+                prog.addProgress(1)
 
 CsvSheet.options.regex_skip = '^#.*'
 
