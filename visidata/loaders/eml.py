@@ -14,7 +14,7 @@ class EmailSheet(TableSheet):
         Column('payload', type=vlen, getter=lambda c,r: r.get_payload(decode=False)),
     ]
     def iterload(self):
-        import email
+        import email.parser
         parser = email.parser.Parser()
         with self.source.open(encoding='utf-8') as fp:
             yield from parser.parse(fp).walk()
