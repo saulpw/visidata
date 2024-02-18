@@ -162,7 +162,7 @@ class PyobjSheet(PythonSheet):
         elif isinstance(pyobj, str):
             return TextSheet(*names, source=pyobj.splitlines())
         elif isinstance(pyobj, bytes):
-            return TextSheet(*names, source=pyobj.decode(options.encoding).splitlines())
+            return TextSheet(*names, source=pyobj.decode(cls.options.encoding).splitlines())
         elif isinstance(pyobj, object):
             obj = super().__new__(cls)  #, *names, **kwargs)
             return obj
