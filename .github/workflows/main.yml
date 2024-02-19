@@ -71,3 +71,10 @@ jobs:
 
     - name: Ensure VisiData can create completions
       run: python -v dev/zsh-completion.py
+
+    - name: Ensure VisiData does not drop lines from RepeatFiles
+      run: |
+        NUMLINES=$(seq 10000 | vd -b | wc -l)
+        if ! [[ $NUMLINES -eq 10000 ]]; then
+            exit 1
+        fi
