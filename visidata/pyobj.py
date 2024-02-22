@@ -1,6 +1,7 @@
 from typing import Mapping
 import inspect
 import math
+import numbers
 
 from visidata import vd, asyncthread, ENTER, deduceType
 from visidata import Sheet, Column, VisiData, ColumnItem, TableSheet, BaseSheet, Progress, ColumnAttr, SuspendCurses, TextSheet
@@ -16,6 +17,28 @@ class PythonSheet(Sheet):
     def openRow(self, row):
         return PyobjSheet("%s[%s]" % (self.name, self.keystr(row)), source=row)
 
+class PythonAtomSheet(PythonSheet):
+    '''a sheet to display one Python object that does not offer deeper inspection,
+        like None, a bool, or an int/float'''
+    rowtype = 'object'  #singular, because it should only ever hold one
+    columns = [
+        Column('value', getter=lambda col,row: row,
+                        setter=lambda c,r,v: None)
+    ]
+    def loader(self):
+        self.rows = [self.source]
+        self.column('value').type = deduceType(self.source)
+
+    def openRow(self, row):
+        vd.fail('cannot dive deeper on this object')
+    def openCell(self, col, row, rowidx=None):
+        vd.fail('cannot dive deeper on this object')
+    def openRowPyobj(self, rowidx):
+        vd.fail('cannot dive deeper on this object')
+    def openCellPyobj(self, col, rowidx):
+        vd.fail('cannot dive deeper on this object')
+    def newRow(self):
+        vd.fail('adding rows to this sheet is not supported')
 
 #### generic list/dict/object browsing
 @VisiData.global_api
@@ -152,11 +175,15 @@ class PyobjSheet(PythonSheet):
     def __new__(cls, *names, **kwargs):
         'Return Sheet object of appropriate type for given sources in `args`.'
         pyobj=kwargs.get('source', object())
-        if isinstance(pyobj, list) or isinstance(pyobj, tuple):
+        if pyobj in (None, '', b'') or isinstance(pyobj, numbers.Number):
+            return PythonAtomSheet(*names, source=pyobj)
+        elif isinstance(pyobj, (list, tuple)):
             if getattr(pyobj, '_fields', None):  # list of namedtuple
                 return SheetNamedTuple(*names, **kwargs)
             else:
                 return SheetList(*names, **kwargs)
+        elif isinstance(pyobj, set):
+            return ListOfPyobjSheet(*names, source=list(pyobj))
         elif isinstance(pyobj, Mapping):
             return SheetDict(*names, **kwargs)
         elif isinstance(pyobj, str):
