@@ -35,17 +35,26 @@ class Reversor:
         return other.obj < self.obj
 
 
-@Sheet.api
-def sortkey(self, r):
+
+@Sheet.cached_property
+def ordering(sheet) -> 'list[tuple[Column, bool]]':
     ret = []
     for col, reverse in self._ordering:
         if isinstance(col, str):
             col = self.column(col)
+        ret.append((col, reverse))
+    return ret
+
+
+@Sheet.api
+def sortkey(sheet, r, ordering:'list[tuple[Column, bool]]'=[]):
+    ret = []
+    for col, reverse in (ordering or self.ordering):
         val = col.getTypedValue(r)
         ret.append(Reversor(val) if reverse else val)
 
-
     return ret
+
 
 @Sheet.api
 @asyncthread
@@ -55,8 +64,13 @@ def sort(self):
         return
     try:
         with Progress(gerund='sorting', total=self.nRows) as prog:
+            ordering = self.ordering
+            def _sortkey(r):
+                prog.addProgress(1)
+                return self.sortkey(r, ordering=ordering)
+
             # must not reassign self.rows: use .sort() instead of sorted()
-            self.rows.sort(key=lambda r,self=self,prog=prog: (prog.addProgress(1), self.sortkey(r))[1])
+            self.rows.sort(key=_sortkey)
     except TypeError as e:
         vd.warning('sort incomplete due to TypeError; change column type')
         vd.exceptionCaught(e, status=False)
