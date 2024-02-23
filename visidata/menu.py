@@ -499,7 +499,7 @@ BaseSheet.addCommand('Alt+r', 'menu-row', 'pressMenu("Row")', '')
 BaseSheet.addCommand('Alt+d', 'menu-data', 'pressMenu("Data")', '')
 BaseSheet.addCommand('Alt+p', 'menu-plot', 'pressMenu("Plot")', '')
 BaseSheet.addCommand('Alt+s', 'menu-system', 'pressMenu("System")', '')
-BaseSheet.addCommand('Alt+h', 'menu-help', 'pressMenu("Help")', '')
+BaseSheet.addCommand('Alt+h', 'menu-help', 'pressMenu("Help")', 'open the Help menu')
 BaseSheet.bindkey('Ctrl+H', 'menu-help')
 BaseSheet.bindkey('KEY_BACKSPACE', 'menu-help')
 
