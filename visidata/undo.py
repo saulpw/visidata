@@ -23,9 +23,11 @@ def addUndo(vd, undofunc, *args, **kwargs):
         if getattr(vd, 'activeCommand', UNLOADED) is UNLOADED:
             return
         r = vd.modifyCommand
+        if not r or not isUndoableCommand(r.longname) or not vd.activeCommand:
+            return
         # some special commands, like open-file, do not have an undofuncs set
         # do not set undofuncs for non-logged commands
-        if not r or not isUndoableCommand(r.longname) or not vd.activeCommand or not vd.isLoggableCommand(vd.activeCommand.longname):
+        if not vd.isLoggableCommand(vd.activeCommand.longname):
             return
         if not r.undofuncs:
             r.undofuncs = []
