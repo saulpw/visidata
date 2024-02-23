@@ -39,9 +39,9 @@ class Reversor:
 @Sheet.cached_property
 def ordering(sheet) -> 'list[tuple[Column, bool]]':
     ret = []
-    for col, reverse in self._ordering:
+    for col, reverse in sheet._ordering:
         if isinstance(col, str):
-            col = self.column(col)
+            col = sheet.column(col)
         ret.append((col, reverse))
     return ret
 
@@ -49,7 +49,7 @@ def ordering(sheet) -> 'list[tuple[Column, bool]]':
 @Sheet.api
 def sortkey(sheet, r, ordering:'list[tuple[Column, bool]]'=[]):
     ret = []
-    for col, reverse in (ordering or self.ordering):
+    for col, reverse in (ordering or sheet.ordering):
         val = col.getTypedValue(r)
         ret.append(Reversor(val) if reverse else val)
 
