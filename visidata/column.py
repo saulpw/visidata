@@ -381,7 +381,7 @@ class Column(Extensible):
                                             notecolor='color_warning')
             else:
                 return DisplayWrapper(typedval.val, text=str(typedval.val),
-                                            error='unknown',
+                                            error=['unknown'],
                                             note=options.note_type_exc,
                                             notecolor='color_warning')
 
