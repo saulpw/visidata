@@ -98,7 +98,7 @@ def aggregator(vd, name, funcValues, helpstr='', *args, type=None):
         except Exception as e:
             if len(vals) == 0:
                 return None
-            return e
+            raise e
 
     vd.aggregators[name] = _defaggr(name, type, _funcRows, funcValues=funcValues, helpstr=helpstr)  # accepts a srccol + list of rows
 
