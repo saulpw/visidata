@@ -3,6 +3,7 @@ import math
 import functools
 import collections
 import statistics
+import datetime
 
 from visidata import Progress, Sheet, Column, ColumnsSheet, VisiData
 from visidata import vd, anytype, vlen, asyncthread, wrapply, AttrDict, date
@@ -107,13 +108,33 @@ def aggregator(vd, name, funcValues, helpstr='', *args, type=None):
 def mean(vals):
     vals = list(vals)
     if vals:
-        return float(sum(vals))/len(vals)
+        if type(vals[0]) is date:
+            vals = [d.timestamp() for d in vals]
+            ans = float(sum(vals))/len(vals)
+            return datetime.date.fromtimestamp(ans)
+        elif isinstance(vals[0], datetime.timedelta):
+            return datetime.timedelta(seconds=vsum(vals)/datetime.timedelta(seconds=len(vals)))
+        else:
+            return float(sum(vals))/len(vals)
 
 def _vsum(vals):
     return sum(vals, start=type(vals[0] if len(vals) else 0)())  #1996
 
 # start parameter in sum() added in Python 3.8
 vsum = _vsum if sys.version_info[:2] >= (3, 8) else sum
+
+def stdev(vals):
+    if vals and len(vals) >= 2:
+        if type(vals[0]) is date:
+            vals = [d.timestamp() for d in vals]
+            return datetime.timedelta(seconds=statistics.stdev(vals))
+        elif isinstance(vals[0], datetime.timedelta):
+            vals = [d.total_seconds() for d in vals]
+            return datetime.timedelta(seconds=statistics.stdev(vals))
+        return statistics.stdev(vals)
+    else:
+        vd.error('stdev requires at least two data points')
+        return None
 
 # http://code.activestate.com/recipes/511478-finding-the-percentile-of-the-values/
 def _percentile(N, percent, key=lambda x:x):
@@ -148,15 +169,15 @@ def quantiles(q, helpstr):
 
 vd.aggregator('min', min, 'minimum value')
 vd.aggregator('max', max, 'maximum value')
-vd.aggregator('avg', mean, 'arithmetic mean of values', type=float)
-vd.aggregator('mean', mean, 'arithmetic mean of values', type=float)
+vd.aggregator('avg', mean, 'arithmetic mean of values', type=anytype)
+vd.aggregator('mean', mean, 'arithmetic mean of values', type=anytype)
 vd.aggregator('median', statistics.median, 'median of values')
 vd.aggregator('mode', statistics.mode, 'mode of values')
 vd.aggregator('sum', vsum, 'sum of values')
 vd.aggregator('distinct', set, 'distinct values', type=vlen)
 vd.aggregator('count', lambda values: sum(1 for v in values), 'number of values', type=int)
 vd.aggregator('list', list, 'list of values', type=anytype)
-vd.aggregator('stdev', statistics.stdev, 'standard deviation of values', type=float)
+vd.aggregator('stdev', stdev, 'standard deviation of values', type=anytype)
 
 vd.aggregators['q3'] = quantiles(3, 'tertiles (33/66th pctile)')
 vd.aggregators['q4'] = quantiles(4, 'quartiles (25/50/75th pctile)')
@@ -225,7 +246,11 @@ def memo_aggregate(col, agg_choices, rows):
         for agg in aggs:
             aggval = agg(col, rows)
             typedval = wrapply(agg.type or col.type, aggval)
-            dispval = col.format(typedval)
+            if agg.name == 'stdev' and (col.type is date):
+                # col type is a date, but typedval is a timedelta
+                dispval = str(typedval)
+            else:
+                dispval = col.format(typedval)
             k = col.name+'_'+agg.name
             vd.status(f'{k}={dispval}')
             vd.memory[k] = typedval
