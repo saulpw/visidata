@@ -114,6 +114,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'sheet': '',
                  'col': 'Units',
                  'row': '5',
+                 'memo-cell': 'rise',
               }
 
 @pytest.mark.usefixtures('curses_setup')
