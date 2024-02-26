@@ -404,8 +404,12 @@ def inputsingle(vd, prompt, record=True):
     return v
 
 @VisiData.api
-def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
-    'A simple form, where each input is an entry in `kwargs`, with the key being the key in the returned dict, and the value being a dictionary of kwargs to the singular input().'
+def inputMultiple(vd, updater=lambda val: None, record=True, readonly_keys = (), **kwargs):
+    '''A simple form, where each input is an entry in `kwargs`, with
+    the key being the key in the returned dict, and the value being a
+    dictionary of kwargs to the singular input(). *readonly_keys* is
+    a tuple of keys in `kwargs`; for each key, its corresponding value
+    will be displayed as a field that cannot be tabbed into or edited.'''
     sheet = vd.activeSheet
     scr = sheet._scr
 
@@ -429,8 +433,8 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
     maxw = sheet.windowWidth//2
     attr = colors.color_edit_unfocused
 
-    keys = list(kwargs.keys())
-    cur_input_key = keys[0]
+    editable_keys = [k for k in kwargs.keys() if k not in readonly_keys]
+    cur_input_key = editable_keys[0]
 
     if scr:
         scr.erase()
@@ -477,8 +481,8 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
         except ChangeInput as e:
             input_kwargs['value'] = e.args[0]
             offset = e.args[1]
-            i = keys.index(cur_input_key)
-            cur_input_key = keys[(i+offset)%len(keys)]
+            i = editable_keys.index(cur_input_key)
+            cur_input_key = editable_keys[(i+offset)%len(editable_keys)]
 
     retargs = {}
     lastargs = {}
