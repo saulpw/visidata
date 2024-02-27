@@ -157,9 +157,11 @@ def moveToPos(vd, sources, startsheets, startcol, startrow):
             rowidx = vs.getRowIndexFromStr(vd.options.rowkey_prefix + subsheet)
             if rowidx is None:
                 vd.warning(f'{vs.name} has no subsheet "{subsheet}"')
-                vs = None
-                break
+                return
             vs = vs.rows[rowidx]
+            if not isinstance(vs, BaseSheet):
+                vd.warning(f'row {subsheet} for subsheet is not a sheet')
+                return
             vd.sync(vs.ensureLoaded())
             vd.clearCaches()
         if vs:
