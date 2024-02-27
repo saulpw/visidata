@@ -133,6 +133,9 @@ def moveToPos(vd, sources, startsheets, startrow, startcol):
     sheets = []  # sheets to apply startrow:startcol to
     if not startsheets:
         sheets = sources  # apply row/col to all sheets
+        for vs in sheets:
+            vd.sync(vs.ensureLoaded())
+            vd.clearCaches()
     else:
         startsheet = startsheets[0] or sources[-1]
         vs = vd.getSheet(startsheet)
