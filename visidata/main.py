@@ -15,9 +15,10 @@ import functools
 import signal
 import warnings
 import builtins  # to override print
+import time
 
 from visidata import vd, options, run, BaseSheet, AttrDict, stacktrace
-from visidata import Path
+from visidata import Path, asyncthread
 import visidata
 
 vd.version_info = __version_info__
@@ -101,6 +102,7 @@ def parsePos(vd, arg:str, inputs:'list[tuple[str, dict]]'=None):
     Returns None for *startsheets* when the position expression did not specify a sheet.
     *inputs* is a list of (path, options) tuples.
     '''
+    if arg == '': return None
     startsheets, startcol, startrow = None, None, None
 
     pos = arg.split(':')
@@ -140,60 +142,110 @@ def outputProgressEvery(vd, sheet, seconds:float=0.5):
         time.sleep(seconds)
 
 @visidata.VisiData.api
-def moveToPos(vd, sources, startsheets, startcol, startrow):
-    sheets = []  # sheets to apply startcol:startrow to
-    if not startsheets:
-        sheets = sources  # apply row/col to all sheets
+def moveToPos(vd, sources, sheet_desc, startcol, startrow):
+    if sheet_desc == []:
+        # the moves list must have each of move refer only 1 specific sheet,
+        # so expand an "all sheets" descriptor into individual sheet descriptors
+        sheet_descs = [[str(i)] for i in range(len(sources))]
     else:
-        startsheet = startsheets[0] or sources[-1]
-        vs = vd.getSheet(startsheet)
-        # Prevent the sheet from doing automatic ensureLoaded() on its subsheets when it
-        # loads, so that we can call ensureLoaded() ourselves and sync() on it.
-        vd.options.set('load_lazy', True, obj=vs)
-        if not vs:
-            vd.warning(f'no sheet "{startsheet}"')
-            return
+        sheet_descs = [sheet_desc]
+    # for each sheet, attempt column moves first, then rows
+    if startcol is not None or startrow is not None:
+        moves = [(d, startcol, None) for d in sheet_descs] + \
+                [(d, None, startrow) for d in sheet_descs]
+    else:
+        moves = [(d, None, None) for d in sheet_descs]
+    # start a thread to keep attempting the moves till they all succeed, for sheets that are slow to load
+    retry_move_to_pos(vd, sources, moves)
 
-        vd.sync(vs.ensureLoaded())
-        vd.clearCaches()
-        # descend the tree of subsheets
-        for subsheet in startsheets[1:]:
+def sheet_from_description(vd, sources, sheet_desc):
+    '''Return a Sheet to apply col/row to, given a list *sheet_desc* that refers to one specific sheet.
+        The *sheet_desc* is either a Sheet, or a list of strings similar to the return value of parsePos(),
+        with the difference that *sheet_desc* will not ever be the empty list that denotes "all sheets".
+        Return None if no matching sheet was found; if sheets are loading, a subsequent call may return
+        a matching sheet.
+        Raise ValueError to indicate that a move failed, and should not be retried.'''
+    if isinstance(sheet_desc, BaseSheet):
+        vd.push(sheet_desc)
+        return sheet_desc
+
+    # descend the tree of subsheets
+    for desc_lvl, subsheet in enumerate(sheet_desc):
+        if desc_lvl == 0:
+            vs = None
+            #try subsheets as numbers first, then as names
+            if subsheet.isdigit():
+                try:
+                    vs = sources[int(subsheet)]
+                except IndexError:
+                    pass
+            else:
+                vs = vd.getSheet(subsheet)
+            if not vs:
+                raise ValueError(f'no sheet "{subsheet}"')
+        else:
             if subsheet and subsheet.isdigit():
                 rowidx = int(subsheet)
             else:
                 rowidx = vs.getRowIndexFromStr(vd.options.rowkey_prefix + subsheet)
-                if rowidx is None:
-                    vd.warning(f'{vs.name} has no subsheet "{subsheet}"')
-                    return
             try:
-                vs = vs.rows[rowidx]
+                if rowidx is None: raise IndexError
+                vs_subsheet = vs.rows[rowidx]
             except IndexError:
-                vd.warning(f'{vs.name} has no subsheet "{rowidx}"')
-                return
-            if not isinstance(vs, BaseSheet):
-                vd.warning(f'row {subsheet} for subsheet is not a sheet')
-                return
+                vd.warning(f'sheet {vs.name} has no subsheet "{subsheet}"')
+                return None
+            if not isinstance(vs_subsheet, BaseSheet):
+                raise ValueError(f'row "{subsheet}" is not a sheet in {vs.name}')
+            vs = vs_subsheet
+        # if we have any more levels of subsheets to look at, load the current sheet fully
+        if desc_lvl < len(sheet_desc) - 1:
+            # Prevent the sheet from doing automatic ensureLoaded() on its subsheets when it
+            # loads, so that we can call ensureLoaded() ourselves and sync() on it.
             vd.options.set('load_lazy', True, obj=vs)
             vd.sync(vs.ensureLoaded())
             vd.clearCaches()
-        if vs:
-            vd.push(vs)
-            sheets = [vs]
+    vd.push(vs)
+    return vs
 
-    if startrow:
-        for vs in sheets:
-            if vs:
-                if startrow.isdigit():  # treat strings that look like integers as indices, never row keys
-                    startrow = int(startrow)
-                vs.moveToRow(startrow) or vd.warning(f'{vs} has no row "{startrow}"')
+@asyncthread
+def retry_move_to_pos(vd, sources, moves, retry_interval=0.1):
+    while moves:
+        unmoved = []
+        for move in moves:
+            try:
+                move_succeeded = attempt_move_to_pos(vd, sources, *move)
+            except ValueError as e:
+                # skip failed moves if they can't ever succeed
+                vd.warning(e)
+                continue
+            if not move_succeeded:
+                unmoved.append(move)
+        moves = unmoved
+        if moves:
+            time.sleep(retry_interval)
 
-    if startcol:
-        for vs in sheets:
-            if vs:
-                if startcol.isdigit():  # treat strings that look like integers as indices, never column names
-                    startcol = int(startcol)
-                if not vs.moveToCol(startcol):
-                    vd.warning(f'{vs} has no column "{startcol}"')
+def attempt_move_to_pos(vd, sources, sheet_desc, startcol, startrow):
+    '''Return True if the move succeeded in moving to the row and column, on the described sheet.'''
+    vs = sheet_from_description(vd, sources, sheet_desc)
+    if not vs:
+        return False
+    success = True
+    if startrow is not None:
+        if startrow.isdigit():  # treat strings that look like integers as indices, never row keys
+            startrow = int(startrow)
+        if not vs.moveToRow(startrow):
+            if vs.nRows > 0:    # avoid uninformative warnings early in startup
+                vd.warning(f'{vs} has no row {startrow}:  nRows={len(vs.rows)}"')
+            success = False
+
+    if startcol is not None:
+        if startcol.isdigit():  # treat strings that look like integers as indices, never column names
+            startcol = int(startcol)
+        if not vs.moveToCol(startcol):
+            if vs.nRows > 0:
+                vd.warning(f'{vs} has no column {startcol}')
+            success = False
+    return success
 
 def main_vd():
     'Open the given sources using the VisiData interface.'
@@ -289,7 +341,9 @@ def main_vd():
             if flGlobal:
                 global_args[optname] = optval
         elif arg.startswith('+'):  # position cursor at start
-            after_config.append((vd.moveToPos, *vd.parsePos(arg[1:], inputs=inputs)))
+            parsed_pos = vd.parsePos(arg[1:], inputs=inputs)
+            if parsed_pos:
+                after_config.append((vd.moveToPos, *parsed_pos))
         elif current_args.get('play', None) and '=' in arg:
             # parse 'key=value' pairs for formatting cmdlog template in replay mode
             k, v = arg.split('=', maxsplit=1)
