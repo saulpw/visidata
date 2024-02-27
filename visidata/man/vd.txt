@@ -572,8 +572,8 @@ COMMANDLINE OPTIONS
 
      -P=longname                  preplay longname before replay or regular
                                   launch; limited to Base Sheet bound commands
-     +toplevel:subsheet:row:col   launch vd with subsheet of toplevel at
-                                  top-of-stack, and cursor at row and col; all
+     +toplevel:subsheet:col:row   launch vd with subsheet of toplevel at
+                                  top-of-stack, and cursor at col and row; all
                                   arguments are optional
      --overwrite=c                Overwrite with confirmation
      --guides                     open Guide Index
