@@ -33,7 +33,7 @@
 .Nm vd
 .Op Ar options
 .Op Ar input No ...
-.Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar row Ns : Ns Ar col
+.Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar col Ns : Ns Ar row
 .
 .Sh DESCRIPTION
 .Nm VisiData No is an easy-to-use multipurpose tool to explore, clean, edit, and restructure data.
@@ -875,8 +875,8 @@ show/hide methods and hidden properties
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Cm -P Ns = Ns Ar longname
 .No preplay Ar longname No before replay or regular launch; limited to Sy Base Sheet No bound commands
-.It Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar row Ns : Ns Ar col
-.No launch vd with Ar subsheet No of Ar toplevel No at top-of-stack, and cursor at Ar row No and Ar col Ns ; all arguments are optional
+.It Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar col Ns : Ns Ar row
+.No launch vd with Ar subsheet No of Ar toplevel No at top-of-stack, and cursor at Ar col No and Ar row Ns ; all arguments are optional
 .It Cm --overwrite Ns = Ns Ar c
 .No Overwrite with confirmation
 .It Cm --guides
