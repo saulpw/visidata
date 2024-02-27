@@ -202,7 +202,7 @@ class PyobjSheet(PythonSheet):
         for r in dir(self.source):
             # reading these attributes can cause distracting fail() messages
             if r in ('onlySelectedRows', 'someSelectedRows'):
-                vd.warning('skipping attribute: {r}')
+                vd.warning(f'skipping attribute: {r}')
                 continue
             try:
                 if vislevel <= 2 and r.startswith('__'): continue
