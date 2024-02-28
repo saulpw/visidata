@@ -705,7 +705,7 @@ class TableSheet(BaseSheet):
             if C and x+colwidth+len(C) < self.windowWidth and y+i < self.windowWidth:
                 scr.addstr(y+i, x+colwidth, C, sepcattr.attr)
 
-        clipdraw(scr, y+h-1, x+colwidth-len(T), T, hdrcattr)
+        clipdraw(scr, y+h-1, min(x+colwidth, self.windowWidth-1)-dispwidth(T), T, hdrcattr)
 
         try:
             if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
