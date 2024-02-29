@@ -203,6 +203,7 @@ def sortSelected(self, ordering):
         except TypeError as e:
             vd.warning('sort incomplete due to TypeError; change column type')
             vd.exceptionCaught(e, status=False)
+            return
         for selected_idx, r in zip(selected_indices, sorted_selected, strict=True):
             self.rows[selected_idx] = r
 
