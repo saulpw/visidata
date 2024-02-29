@@ -198,8 +198,10 @@ def sortSelected(self, ordering):
             if len(selected_rowids) == 0:
                 break
         try:
-            sorted_selected = sorted(selected,
-                                     key=lambda r, self=self, prog=prog: (prog.addProgress(1), self.sortkey(r, ordering))[1])
+            def _sortkey(r):
+                prog.addProgress(1)
+                return self.sortkey(r, ordering=ordering)
+            sorted_selected = sorted(selected, key=_sortkey)
         except TypeError as e:
             vd.warning('sort incomplete due to TypeError; change column type')
             vd.exceptionCaught(e, status=False)
