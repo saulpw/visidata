@@ -177,7 +177,7 @@ def open_txt(vd, p):
                 if delimiter and delimiter in next(fp):    # peek at the first line
                     return vd.open_tsv(p)  # TSV often have .txt extension
             except StopIteration:
-                return TableSheet(p.base_stem, columns=[SettableColumn()], source=p)
+                return TableSheet(p.base_stem, columns=[SettableColumn(width=vd.options.default_width)], source=p)
     return TextSheet(p.base_stem, source=p)
 
 

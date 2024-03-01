@@ -1064,7 +1064,7 @@ def preloadHook(sheet):
 
 @VisiData.api
 def newSheet(vd, name, ncols, **kwargs):
-    return Sheet(name, columns=[SettableColumn() for i in range(ncols)], **kwargs)
+    return Sheet(name, columns=[SettableColumn(width=vd.options.default_width) for i in range(ncols)], **kwargs)
 
 
 @BaseSheet.api
