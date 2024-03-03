@@ -325,11 +325,9 @@ class Path(os.PathLike):
         return zopen(FileProgress(path, fp=open(path, mode='rb'), **kwargs), **kwargs)
 
     def __iter__(self):
-        with Progress(total=filesize(self)) as prog:
-            with self.open(encoding=vd.options.encoding) as fd:
-                for i, line in enumerate(fd):
-                    prog.addProgress(len(line))
-                    yield line.rstrip('\n')
+        with self.open(encoding=vd.options.encoding) as fd:
+            for line in fd:
+                yield line.rstrip('\n')
 
     def open_bytes(self, mode='rb'):
         'Open the file pointed by this path and return a file object in binary mode.'
