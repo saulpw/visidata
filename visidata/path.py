@@ -95,14 +95,15 @@ class BytesIOWrapper(io.BufferedReader):
 
 
 class FileProgress:
-    'Open file in binary mode and track read() progress.'
+    'Open file as text or binary, then track read() progress.'
     def __init__(self, path, fp, mode='r', **kwargs):
         self.path = path
         self.fp = fp
         self.prog = None
         if 'r' in mode:
             gerund = 'reading'
-            self.prog = Progress(gerund=gerund, total=filesize(path))
+            self.total = filesize(path)
+            self.prog = Progress(gerund=gerund, total=self.total)
         elif 'w' in mode:
             gerund = 'writing'
             self.prog = Progress(gerund=gerund)
@@ -117,6 +118,14 @@ class FileProgress:
         self.fp.read = self.read
         self.fp.close = self.close
 
+        self.est_charbytes = 0
+        self.sampled = ''
+        self.est_ctr = 0
+        self.est_interval = 1000
+        self.est_total = 0
+
+        self.readline_chunks = []
+
         if self.prog:
             self.prog.__enter__()
 
@@ -126,17 +135,46 @@ class FileProgress:
             self.prog = None
         return self.fp_orig_close(*args, **kwargs)
 
+    def update_progress(self, r):
+        if not self.prog: return
+        if isinstance(r, bytes):
+            r_bytes = len(r)
+            self.prog.addProgress(r_bytes)
+        else:
+            self.update_estimate(r)
+            r_bytes = len(r) * self.est_charbytes
+            self.est_total += r_bytes
+            if self.est_total <= self.total:
+                self.prog.addProgress(r_bytes)
+
+    def update_progress_line(self, line):
+        # updating progress for each line is slow, so do it in batches
+        self.readline_chunks.append(line)
+        if len(self.readline_chunks) == 1000:
+            joiner = b'\n' if isinstance(line, bytes) else '\n'
+            batched = joiner.join(self.readline_chunks)
+            self.update_progress(batched)
+            self.readline_chunks = []
+
+    def update_estimate(self, r):
+        # A short string can cause charbytes to be overestimated by 30%,
+        # due to the Byte Order Marker in encodings like utf-8-sig.
+        # Combining short strings into one big one lowers that error to < 1%.
+        if self.est_ctr % self.est_interval == 0 or len(self.sampled) < 1000:
+            sample = r[:100]
+            self.sampled += sample
+            self.est_charbytes = len(self.sampled.encode(self.encoding)) / len(self.sampled)
+        self.est_ctr += 1
+
     def read(self, size=-1):
         r = self.fp_orig_read(size)
-        if self.prog:
-            if r:
-                self.prog.addProgress(len(r))
+        if r:
+            self.update_progress(r)
         return r
 
     def readline(self, size=-1):
         r = self.fp_orig_readline(size)
-        if self.prog:
-            self.prog.addProgress(len(r))
+        self.update_progress_line(r)
         return r
 
     def __getattr__(self, k):
@@ -148,7 +186,7 @@ class FileProgress:
 
     def __next__(self):
         r = next(self.fp)
-        self.prog.addProgress(len(r))
+        self.update_progress(r)
         return r
 
     def __iter__(self):
@@ -156,7 +194,7 @@ class FileProgress:
             yield from self.fp
         else:
             for line in self.fp:
-                self.prog.addProgress(len(line))
+                self.update_progress_line(line)
                 yield line
 
     def __exit__(self, type, value, tb):
