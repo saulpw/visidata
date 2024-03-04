@@ -167,7 +167,7 @@ def inputLongname(sheet):
     prompt = 'command name: '
     # get set of commands possible in the sheet
     this_sheets_help = HelpSheet('', source=sheet)
-    this_sheets_help.ensureLoaded()
+    vd.sync(this_sheets_help.ensureLoaded())
 
     def _fmt_cmdpal_summary(match, row, trigger_key):
         keystrokes = this_sheets_help.revbinds.get(row.longname, [None])[0] or ' '
