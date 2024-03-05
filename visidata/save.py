@@ -3,7 +3,7 @@ import os
 from copy import copy
 
 from visidata import vd
-from visidata import Sheet, BaseSheet, VisiData, IndexSheet, Path, Progress, TypedExceptionWrapper
+from visidata import Sheet, BaseSheet, VisiData, IndexSheet, Path, Progress, TypedExceptionWrapper, UNLOADED
 
 vd.option('safe_error', '#ERR', 'error string to use while saving', replay=True)
 vd.option('save_encoding', 'utf-8', 'encoding passed to codecs.open when saving a file', replay=True, help=vd.help_encoding)
@@ -109,6 +109,8 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=True):
     if not vsheets: # blank tuple
         vd.warning('no sheets to save')
         return
+    unloaded = [ vs for vs in vsheets if vs.rows is UNLOADED ]
+    vd.sync(*vd.ensureLoaded(unloaded))
 
     filetypes = [givenpath.ext.lower(), vd.options.save_filetype.lower()]
 
