@@ -23,7 +23,7 @@ def adaptive_bufferer(fp, max_buffer_size=65536):
     """Loading e.g. tsv files goes faster with a large buffer. But when the input stream
     is slow (e.g. 1 byte/second) and the buffer size is large, it can take a long time until
     the buffer is filled. Only when the buffer is filled (or the input stream is finished)
-    you can see the data visiualized in visidata. That's why we use an adaptive buffer.
+    you can see the data visualized in visidata. That's why we use an adaptive buffer.
     For fast input streams, the buffer becomes large, for slow input streams, the buffer stays
     small"""
     buffer_size = 8
@@ -45,7 +45,7 @@ def adaptive_bufferer(fp, max_buffer_size=65536):
             # if it takes less than one second to fill the buffer, double the size of the buffer
             buffer_size = min(buffer_size * 2, max_buffer_size)
         else:
-            # if it takes longer than one second, increase the buffer size so it takes about
+            # if it takes longer than one second, decrease the buffer size so it takes about
             # 1 second to fill it
             previous_start_time = current_time
             buffer_size = math.ceil(min(processed_buffer_size / current_delta, max_buffer_size))
@@ -92,7 +92,7 @@ class TsvSheet(SequenceSheet):
                     if not line or (regex_skip and regex_skip.match(line)):
                         continue
 
-                    row = list(line.split(delim))
+                    row = line.split(delim)
 
                     if len(row) < self.nVisibleCols:
                         # extend rows that are missing entries
