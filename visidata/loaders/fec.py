@@ -37,6 +37,7 @@ Thanks to all who have contributed to those projects.
 from copy import copy
 from visidata import (
     vd,
+    VisiData,
     Path,
     Sheet,
     TextSheet,
@@ -316,10 +317,10 @@ FECFiling.addCommand(
     'vd.push(cursorRow)'
 )
 
-def open_fec(p):
+@VisiData.api
+def open_fec(vd, p):
     return FECFiling(p.base_stem, source=p)
 
 addGlobals({
-    "open_fec": open_fec,
     "DiveSheet": DiveSheet
 })
