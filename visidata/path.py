@@ -413,6 +413,7 @@ class RepeatFile:
         return RepeatFile(self.iter_lines, lines=self.lines)
 
     def read(self, n=None):
+        '''Returns a string or bytes object. Unlike the standard read() function, when *n* is given, more than *n* characters/bytes can be returned, and often will.'''
         r = None
         if n is None:
             n = 10**12  # some too huge number
