@@ -200,6 +200,10 @@ class PyobjSheet(PythonSheet):
         self.rows = []
         vislevel = self.options.visibility
         for r in dir(self.source):
+            # reading these attributes can cause distracting fail() messages
+            if r in ('onlySelectedRows', 'someSelectedRows'):
+                vd.warning('skipping attribute: {r}')
+                continue
             try:
                 if vislevel <= 2 and r.startswith('__'): continue
                 if vislevel <= 1 and r.startswith('_'): continue
