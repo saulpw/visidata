@@ -17,7 +17,6 @@ mouse suspend redraw no-op help syscopy sysopen profile toggle'''.split()
 
 vd.option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog', sheettype=None)
 
-vd.activeCommand = UNLOADED
 vd._nextCommands = []  # list[str|CommandLogRow] for vd.queueCommand
 
 CommandLogRow = namedlist('CommandLogRow', 'sheet col row longname input keystrokes comment undofuncs'.split())

@@ -20,7 +20,7 @@ def addUndo(vd, undofunc, *args, **kwargs):
     'On undo of latest command, call ``undofunc(*args, **kwargs)``.'
     if vd.options.undo:
         # occurs when VisiData is just starting up
-        if getattr(vd, 'activeCommand', UNLOADED) is UNLOADED:
+        if getattr(vd, 'activeCommand') in (UNLOADED, None):
             return
         r = vd.modifyCommand
         if not r or not isUndoableCommand(r.longname) or not vd.activeCommand:
