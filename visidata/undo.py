@@ -19,11 +19,12 @@ def isUndoableCommand(longname):
 def addUndo(vd, undofunc, *args, **kwargs):
     'On undo of latest command, call ``undofunc(*args, **kwargs)``.'
     if vd.options.undo:
-        # occurs when VisiData is just starting up
-        if getattr(vd, 'activeCommand') in (UNLOADED, None):
+        # occurs when VisiData is just starting up.
+        # very early in startup, modifyCommand does not yet exist
+        if not vd.activeCommand:
             return
         r = vd.modifyCommand
-        if not r or not isUndoableCommand(r.longname) or not vd.activeCommand:
+        if not r or not isUndoableCommand(r.longname):
             return
         # some special commands, like open-file, do not have an undofuncs set
         # do not set undofuncs for non-logged commands

@@ -172,12 +172,8 @@ class VisiData(visidata.Extensible):
     @property
     def activeCommand(self):
         '''Returns the active command for the current thread.
-            Returns UNLOADED, None, or a CommandLogRow.
+            Returns a CommandLogRow, or None.
             Returns None when no command has ever been stored for the current thread.'''
-        if not self.activeCommands:
-            # this tuple is the same as UNLOADED, but we can't use the name
-            # here, because importing it fails
-            return tuple()
         tid = threading.get_ident()
         if tid not in self.activeCommands:
             return None

@@ -371,7 +371,7 @@ def getLastArgs(vd):
 def setLastArgs(vd, args):
         'Set user input on last command, if not already set.'
         # only set if not already set (second input usually confirmation)
-        if (vd.activeCommand is not None) and (vd.activeCommand is not UNLOADED):
+        if vd.activeCommand:
             if not vd.activeCommand.input:
                 vd.activeCommand.input = args
 
@@ -430,7 +430,7 @@ def cmdlog(vd):
 
 @VisiData.property
 def modifyCommand(vd):
-    if vd.activeCommand is not None and vd.isLoggableCommand(vd.activeCommand.longname):
+    if vd.activeCommand and vd.isLoggableCommand(vd.activeCommand.longname):
         return vd.activeCommand
     if not vd.cmdlog.rows:
         return None
