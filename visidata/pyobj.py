@@ -1,6 +1,7 @@
 from typing import Mapping
 import inspect
 import math
+import numbers
 
 from visidata import vd, asyncthread, ENTER, deduceType
 from visidata import Sheet, Column, VisiData, ColumnItem, TableSheet, BaseSheet, Progress, ColumnAttr, SuspendCurses, TextSheet
@@ -16,6 +17,28 @@ class PythonSheet(Sheet):
     def openRow(self, row):
         return PyobjSheet("%s[%s]" % (self.name, self.keystr(row)), source=row)
 
+class PythonAtomSheet(PythonSheet):
+    '''a sheet to display one Python object that does not offer deeper inspection,
+        like None, a bool, or an int/float'''
+    rowtype = 'object'  #singular, because it should only ever hold one
+    columns = [
+        Column('value', getter=lambda col,row: row,
+                        setter=lambda c,r,v: None)
+    ]
+    def loader(self):
+        self.rows = [self.source]
+        self.column('value').type = deduceType(self.source)
+
+    def openRow(self, row):
+        vd.fail('cannot dive deeper on this object')
+    def openCell(self, col, row, rowidx=None):
+        vd.fail('cannot dive deeper on this object')
+    def openRowPyobj(self, rowidx):
+        vd.fail('cannot dive deeper on this object')
+    def openCellPyobj(self, col, rowidx):
+        vd.fail('cannot dive deeper on this object')
+    def newRow(self):
+        vd.fail('adding rows to this sheet is not supported')
 
 #### generic list/dict/object browsing
 @VisiData.global_api
@@ -152,11 +175,15 @@ class PyobjSheet(PythonSheet):
     def __new__(cls, *names, **kwargs):
         'Return Sheet object of appropriate type for given sources in `args`.'
         pyobj=kwargs.get('source', object())
-        if isinstance(pyobj, list) or isinstance(pyobj, tuple):
+        if pyobj in (None, '', b'') or isinstance(pyobj, numbers.Number):
+            return PythonAtomSheet(*names, source=pyobj)
+        elif isinstance(pyobj, (list, tuple)):
             if getattr(pyobj, '_fields', None):  # list of namedtuple
                 return SheetNamedTuple(*names, **kwargs)
             else:
                 return SheetList(*names, **kwargs)
+        elif isinstance(pyobj, set):
+            return ListOfPyobjSheet(*names, source=list(pyobj))
         elif isinstance(pyobj, Mapping):
             return SheetDict(*names, **kwargs)
         elif isinstance(pyobj, str):
@@ -173,6 +200,10 @@ class PyobjSheet(PythonSheet):
         self.rows = []
         vislevel = self.options.visibility
         for r in dir(self.source):
+            # reading these attributes can cause distracting fail() messages
+            if r in ('onlySelectedRows', 'someSelectedRows'):
+                vd.warning('skipping attribute: {r}')
+                continue
             try:
                 if vislevel <= 2 and r.startswith('__'): continue
                 if vislevel <= 1 and r.startswith('_'): continue
@@ -191,6 +222,7 @@ class PyobjSheet(PythonSheet):
 @TableSheet.api
 def openRow(sheet, row, rowidx=None):
     'Return Sheet diving into *row*.'
+    if row is None or sheet.nRows == 0: vd.fail('no row to dive into')
     if rowidx is None:
         k = sheet.keystr(row) or str(sheet.cursorRowIndex)
     else:
@@ -209,6 +241,7 @@ def openRow(sheet, row, rowidx=None):
 @TableSheet.api
 def openCell(sheet, col, row, rowidx=None):
     'Return Sheet diving into cell at *row* in *col*.'
+    if col is None or row is None or sheet.nRows == 0: vd.fail('no cell to dive into')
     if rowidx is None:
         k = sheet.keystr(row) or str(sheet.cursorRowIndex)
     else:
@@ -219,11 +252,13 @@ def openCell(sheet, col, row, rowidx=None):
 @TableSheet.api
 def openRowPyobj(sheet, rowidx):
     'Return Sheet of raw Python object of row.'
+    if sheet.nRows == 0: vd.fail('no row to dive into')
     return PyobjSheet("%s[%s]" % (sheet.name, rowidx), source=sheet.rows[rowidx])
 
 @TableSheet.api
 def openCellPyobj(sheet, col, rowidx):
     'Return Sheet of raw Python object of cell.'
+    if col is None or sheet.nRows == 0: vd.fail('no cell to dive into')
     name = f'{sheet.name}[{rowidx}].{col.name}'
     return PyobjSheet(name, source=col.getValue(sheet.rows[rowidx]))
 
@@ -249,7 +284,7 @@ Sheet.addCommand('z^Y', 'pyobj-cell', 'status(type(cursorValue).__name__); vd.pu
 BaseSheet.addCommand('g^Y', 'pyobj-sheet', 'status(type(sheet).__name__); vd.push(PyobjSheet(sheet.name+"_sheet", source=sheet))', 'open current sheet as Python object')
 
 Sheet.addCommand('', 'open-row-basic', 'vd.push(TableSheet.openRow(sheet, cursorRow))', 'dive into current row as basic table (ignoring subsheet dive)')
-Sheet.addCommand(ENTER, 'open-row', 'vd.push(openRow(cursorRow))', 'open current row with sheet-specific dive')
+Sheet.addCommand(ENTER, 'open-row', 'vd.push(openRow(cursorRow)) if cursorRow else vd.fail("no row to open")', 'open current row with sheet-specific dive')
 Sheet.addCommand('z'+ENTER, 'open-cell', 'vd.push(openCell(cursorCol, cursorRow))', 'open sheet with copies of rows referenced in current cell')
 Sheet.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(openRow(r))', 'open sheet with copies of rows referenced in selected rows')
 Sheet.addCommand('gz'+ENTER, 'dive-selected-cells', 'for r in selectedRows: vd.push(openCell(cursorCol, r))', 'open sheet with copies of rows referenced in selected rows')
