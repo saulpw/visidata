@@ -188,9 +188,6 @@ class CommandLogBase:
         if not vd.activeCommand:  # nothing to record
             return
 
-        if err:
-            vd.activeCommand[-1] += ' [%s]' % err
-
         if escaped:
             vd.activeCommand = None
             return
