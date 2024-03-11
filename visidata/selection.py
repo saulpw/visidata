@@ -24,7 +24,9 @@ def toggle(self, rows):
     'Toggle selection of given *rows*.  Async.'
     self.addUndoSelection()
     for r in Progress(rows, 'toggling', total=len(rows)):
-        if not self.unselectRow(r):
+        if self.isSelected(r):  #1671
+            self.unselectRow(r)
+        else:
             self.selectRow(r)
 
 
@@ -39,7 +41,9 @@ def select_row(self, row):
 def toggle_row(self, row):
     'Toggle selection of given *row*.'
     self.addUndoSelection()
-    if not self.unselectRow(row):
+    if self.isSelected(row):
+        self.unselectRow(row)
+    else:
         self.selectRow(row)
 
 
