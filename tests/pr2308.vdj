@@ -1,0 +1,5 @@
+#!vd -p
+{"sheet": null, "col": null, "row": null, "longname": "open-file", "input": "tests/small.json", "keystrokes": "o", "comment": null}
+{"sheet": "small", "col": "id", "row": "", "longname": "key-col", "input": "", "keystrokes": "!", "comment": "toggle current column as a key column"}
+{"sheet": "small", "col": "A", "row": "", "longname": "aggregate-col", "input": "keymax", "keystrokes": "+", "comment": "Add aggregator to current column"}
+{"sheet": "small", "col": "", "row": "", "longname": "freq-summary", "input": "", "keystrokes": "zShift+F", "comment": "open one-line summary for all rows and selected rows"}
