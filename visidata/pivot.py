@@ -291,8 +291,11 @@ class PivotSheet(Sheet):
 @PivotSheet.api
 def addcol_aggr(sheet, col):
     hasattr(col, 'origCol') or vd.fail('not an aggregation column')
-    for agg in vd.chooseAggregators():
-        sheet.addColumnAtCursor(makeAggrColumn(col.origCol, vd.aggregators[agg]))
+    for agg_choice in vd.chooseAggregators():
+        agg_or_list = vd.aggregators[agg_choice]
+        aggs = agg_or_list if isinstance(agg_or_list, list) else [agg_or_list]
+        for agg in aggs:
+            sheet.addColumnAtCursor(makeAggrColumn(col.origCol, vd.aggregators[agg]))
 
 
 Sheet.addCommand('W', 'pivot', 'vd.push(makePivot(sheet, keyCols, [cursorCol]))', 'open Pivot Table: group rows by key column and summarize current column')
