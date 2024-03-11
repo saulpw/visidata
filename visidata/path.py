@@ -413,21 +413,24 @@ class RepeatFile:
         return RepeatFile(self.iter_lines, lines=self.lines)
 
     def read(self, n=None):
-        r = None
+        '''Returns a string or bytes object. Unlike the standard read() function, when *n* is given, more than *n* characters/bytes can be returned, and often will.'''
         if n is None:
             n = 10**12  # some too huge number
-        while r is None or len(r) < n:
+        r = []
+        size = 0
+        output_type = str; eol = '\n'; joiner = ''
+        while not r or size < n:
             try:
                 s = next(self.iter)
-                if r is None:
-                    r = '' if isinstance(s, str) else b''
-                else:
-                    assert isinstance(r, type(s)), (r, type(s))
-
-                r += s + '\n' if isinstance(s, str) else b'\n'
+                if not r and isinstance(s, bytes):
+                    output_type = bytes; eol = b'\n'; joiner = b''
+                assert isinstance(s, output_type), (s, output_type)
+                r.append(s)
+                r.append(eol)
+                size += len(s) + len(eol)
             except StopIteration:
                 break  # end of file
-        return r or ''
+        return joiner.join(r)
 
     def write(self, s):
         return self.iter_lines.write(s)
