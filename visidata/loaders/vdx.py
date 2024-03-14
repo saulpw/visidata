@@ -46,7 +46,7 @@ def save_vdx(vd, p, *vsheets):
 def runvdx(vd, vdx:str):
     for line in Progress(vdx.splitlines()):
         vs = vd.sheet or Sheet()
-        vs.ensureLoaded()
+        vd.sync(vs.ensureLoaded())
         line = line.strip()
         if not line or line[0] == '#':
             continue
