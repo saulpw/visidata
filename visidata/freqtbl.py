@@ -70,8 +70,9 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
         super().resetCols()
 
         # add default bonus columns
+        countCol = AttrColumn('count', 'sourcerows', type=vlen)
         for c in [
-            AttrColumn('count', 'sourcerows', type=vlen),
+            countCol,
             Column('percent', type=float, getter=lambda col,row: len(row.sourcerows)*100/col.sheet.source.nRows),
         ]:
             self.addColumn(c)
@@ -82,7 +83,7 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
 
         # if non-numeric grouping, reverse sort by count at end of load
         if not any(vd.isNumeric(c) for c in self.groupByCols):
-            self._ordering = [('count', True)]
+            self._ordering = [(countCol, True)]
 
     def loader(self):
         'Generate frequency table.'
