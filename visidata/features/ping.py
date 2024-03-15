@@ -10,9 +10,14 @@ from visidata import vd, VisiData, BaseSheet, Sheet, Column, AttrColumn, Progres
 @VisiData.api
 def new_ping(vd, p):
     'Open a sheet with the round-trip time for each hop along the path to the given host.'
-    pingsheet = PingSheet(p.given, source=p.given)
-    return PingStatsSheet("traceroute_"+pingsheet.name, source=pingsheet)
+    return makePingStats(p.given)
 
+# open_ping() is called when a local file exists matching the path p, otherwise new_ping() is called
+vd.open_ping = vd.new_ping
+
+def makePingStats(ip):
+    pingsheet = PingSheet(ip, source=ip)
+    return PingStatsSheet("traceroute_"+pingsheet.name, source=pingsheet)
 
 class PingStatsSheet(Sheet):
     help='''# ping/traceroute
@@ -71,7 +76,7 @@ class PingSheet(Sheet):
     def ping_error(self, ip, data):
         if ip in self.sources:
             self.sources.remove(ip)
-            vd.warning("%s removed: %s" % (ip, data))
+            vd.warning("%s removed: %s" % (ip, data.rstrip()))
 
     def update_traces(self, row, ip):
         rtes = self.routes.get(ip)
@@ -145,7 +150,11 @@ vd.option('ping_count', 3, 'send this many pings to each host', sheettype=PingSh
 vd.option('ping_interval', 0.1, 'wait between ping rounds, in seconds', sheettype=PingSheet)
 
 PingSheet.options.null_value = False
-BaseSheet.addCommand('', 'open-ping', 'vd.push(openSource(input("ping: ", type="hostip"), filetype="ping"))', 'open sheet to ping input IP Address')
+BaseSheet.addCommand('', 'open-ping', 'vd.push(makePingStats(vd.input("ping: ", type="hostip")))', 'open sheet to ping input IP Address')
+
+vd.addGlobals(
+    makePingStats=makePingStats,
+)
 
 vd.addMenuItems('''
     System > Ping IP/hostname > open-ping

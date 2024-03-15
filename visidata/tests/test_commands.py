@@ -32,6 +32,7 @@ nonTested = (
         'menu',
         'sysopen',
         'open-memusage',
+        'open-ping',
         )
 
 def isTestableCommand(longname, cmdlist):
