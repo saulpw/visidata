@@ -36,7 +36,7 @@ This sheet runs `traceroute` to generate intermediate hops, then runs `ping` aga
     ]
     def loader(self):
         sheet = self.source
-        sheet.ensureLoaded()
+        vd.sync(sheet.ensureLoaded())
 
         self.rows = sheet.columns
 
