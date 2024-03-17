@@ -32,7 +32,6 @@ nonTested = (
         'menu',
         'sysopen',
         'open-memusage',
-        'open-ping',
         )
 
 def isTestableCommand(longname, cmdlist):
@@ -69,6 +68,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'setcol-incr-step': '2',
                  'setcol-iter': 'range(1, 100)',
                  'setcol-format-enum': '1=cat',
+                 'open-ping': 'github.com',
                  'setcol-input': '5',
                  'show-expr': 'OrderDate',
                  'setcol-expr': 'OrderDate',

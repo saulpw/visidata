@@ -43,6 +43,9 @@ jobs:
     - name: Install lxml dependencies
       run: sudo apt install -y libxml2-dev libxslt-dev
 
+    - name: Install ping dependencies
+      run: sudo apt install -y traceroute
+
     - name: Install optional dependencies
       run: |
         pip3 install -r requirements.txt
