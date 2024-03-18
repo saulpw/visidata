@@ -18,8 +18,8 @@ def ensureLoaded(vd, sheets):
 
 @asyncthread
 def _appendRowsAfterLoading(joinsheet, origsheets):
-    if vd.ensureLoaded(origsheets):
-        vd.sync()
+    vd.ensureLoaded(origsheets)
+    vd.sync()
 
     colnames = {c.name:c for c in joinsheet.visibleCols}
     for vs in origsheets:
@@ -331,9 +331,8 @@ class ConcatSheet(Sheet):
         # only one column with each name allowed per sheet
         keyedcols = collections.defaultdict(dict)  # name -> { sheet -> col }
 
-        for sheet in self.source:
-            if sheet.ensureLoaded():
-                vd.sync()
+        vd.ensureLoaded(self.source)
+        vd.sync()
         with Progress(gerund='joining', sheet=self, total=sum(vs.nRows for vs in self.source)) as prog:
             for sheet in self.source:
                 for r in sheet.rows:
