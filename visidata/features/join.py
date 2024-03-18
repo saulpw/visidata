@@ -331,11 +331,11 @@ class ConcatSheet(Sheet):
         # only one column with each name allowed per sheet
         keyedcols = collections.defaultdict(dict)  # name -> { sheet -> col }
 
+        for sheet in self.source:
+            if sheet.ensureLoaded():
+                vd.sync()
         with Progress(gerund='joining', sheet=self, total=sum(vs.nRows for vs in self.source)) as prog:
             for sheet in self.source:
-                if sheet.ensureLoaded():
-                    vd.sync()
-
                 for r in sheet.rows:
                     yield (sheet, r)
                     prog.addProgress(1)
