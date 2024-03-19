@@ -96,13 +96,16 @@ def parsePos(vd, arg:str, inputs:'list[tuple[str, dict]]'=None):
 
     pos = arg.split(':')
     if len(pos) == 1:
+        startsheets = [Path(inputs[-1][0]).base_stem] if inputs else None
         startrow = arg
     elif len(pos) == 2:
+        startsheets = [Path(inputs[-1][0]).base_stem] if inputs else None
         startcol, startrow = pos
     else:
         # the first element of pos is the startsheet,
         # the later elements (if present) describe the branch to a subsheet
         startsheets = pos[:-2]
+        if startsheets == ['']: startsheets = []
         startcol, startrow = pos[-2:]
     if startcol == '':  startcol = None
     if startrow == '':  startrow = None
