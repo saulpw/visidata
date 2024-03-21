@@ -58,11 +58,11 @@ def loadMacro(vd, p:Path):
     if p.exists():
         if p.ext == 'vd':
             vs = CommandLog(p.base_stem, source=p)
-            vd.sync(vs.ensureLoaded())
+            vs.ensureLoaded()
             return vs
         elif p.ext == 'vdj':
             vs = CommandLogJsonl(p.base_stem, source=p)
-            vd.sync(vs.ensureLoaded())
+            vs.ensureLoaded()
             return vs
 
     vd.warning(f'failed to load macro {p}')
