@@ -17,7 +17,6 @@ mouse suspend redraw no-op help syscopy sysopen profile toggle'''.split()
 
 vd.option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog', sheettype=None)
 
-vd.activeCommand = UNLOADED
 vd._nextCommands = []  # list[str|CommandLogRow] for vd.queueCommand
 
 CommandLogRow = namedlist('CommandLogRow', 'sheet col row longname input keystrokes comment undofuncs'.split())
@@ -188,9 +187,6 @@ class CommandLogBase:
         'Records vd.activeCommand'
         if not vd.activeCommand:  # nothing to record
             return
-
-        if err:
-            vd.activeCommand[-1] += ' [%s]' % err
 
         if escaped:
             vd.activeCommand = None
@@ -372,7 +368,7 @@ def getLastArgs(vd):
 def setLastArgs(vd, args):
         'Set user input on last command, if not already set.'
         # only set if not already set (second input usually confirmation)
-        if (vd.activeCommand is not None) and (vd.activeCommand is not UNLOADED):
+        if vd.activeCommand:
             if not vd.activeCommand.input:
                 vd.activeCommand.input = args
 
@@ -431,7 +427,7 @@ def cmdlog(vd):
 
 @VisiData.property
 def modifyCommand(vd):
-    if vd.activeCommand is not None and vd.isLoggableCommand(vd.activeCommand.longname):
+    if vd.activeCommand and vd.isLoggableCommand(vd.activeCommand.longname):
         return vd.activeCommand
     if not vd.cmdlog.rows:
         return None

@@ -9,6 +9,7 @@ __all__ = ['ENTER', 'ALT', 'ESC', 'asyncthread', 'VisiData']
 ENTER='Enter'
 ALT=ESC='^['
 
+import threading
 
 # define @asyncthread for potentially long-running functions
 #   when function is called, instead launches a thread
@@ -47,6 +48,7 @@ class VisiData(visidata.Extensible):
         self.contexts = [self]  # objects whose attributes are in the fallback context for eval/exec.
         self.importingModule = None
         self.importedModules = []
+        self.activeCommands = {}  # dict of thread ident -> CommandLogRow
 
     @property
     def cursesEnabled(self):
@@ -166,3 +168,21 @@ class VisiData(visidata.Extensible):
     @property
     def screenWidth(self):
         return self.scrFull.getmaxyx()[1] if self.scrFull else 80
+
+    @property
+    def activeCommand(self):
+        '''Returns the active command for the current thread.
+            Returns a CommandLogRow, or None.
+            Returns None when no command has ever been stored for the current thread.'''
+        tid = threading.get_ident()
+        if tid not in self.activeCommands:
+            return None
+        return self.activeCommands[tid]
+
+    @activeCommand.setter
+    def activeCommand(self, value):
+        tid = threading.current_thread().ident
+        if value is None and (tid in self.activeCommands):
+            del self.activeCommands[tid]
+        else:
+            self.activeCommands[tid] = value

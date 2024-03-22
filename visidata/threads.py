@@ -201,7 +201,14 @@ def execAsync(vd, func, *args, **kwargs):
     if sheet is not None and (sheet.lastCommandThreads and threading.current_thread() not in sheet.lastCommandThreads):
         vd.fail(f'still running **{sheet.lastCommandThreads[-1].name}** from previous command')
 
-    thread = threading.Thread(target=_toplevelTryFunc, daemon=True, args=(func,)+args, kwargs=kwargs)
+    # the current thread's activeCommand
+    cmd = vd.activeCommand
+    # the newly started thread is assigned the same activeCommand
+    def _with_active_cmd(func, *args, **kwargs):
+        if cmd: vd.activeCommand = cmd
+        _toplevelTryFunc(func, *args, **kwargs)
+        if cmd: vd.activeCommand = None
+    thread = threading.Thread(target=_with_active_cmd, daemon=True, args=(func,)+args, kwargs=kwargs)
     vd.threads.append(_annotate_thread(thread))
 
     if sheet is not None:

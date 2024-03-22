@@ -100,7 +100,9 @@ def saveMacro(self, rows, ks):
 # needs to happen before, because the original afterexecsheet resets vd.activecommand to None
 @CommandLogJsonl.before
 def afterExecSheet(cmdlog, sheet, escaped, err):
-    if vd.macroMode and (vd.activeCommand is not None) and (vd.activeCommand is not UNLOADED) and (vd.isLoggableCommand(vd.activeCommand.longname)):
+    if not vd.macroMode: return
+    if not vd.activeCommand: return
+    if vd.isLoggableCommand(vd.activeCommand.longname):
         cmd = copy(vd.activeCommand)
         cmd.sheet = ''
         vd.macroMode.addRow(cmd)
