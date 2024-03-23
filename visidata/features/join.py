@@ -18,7 +18,8 @@ def ensureLoaded(vd, sheets):
 
 @asyncthread
 def _appendRowsAfterLoading(joinsheet, origsheets):
-    if vd.ensureLoaded(origsheets):
+    with Progress(gerund='loading'):
+        vd.ensureLoaded(origsheets)
         vd.sync()
 
     colnames = {c.name:c for c in joinsheet.visibleCols}
@@ -184,8 +185,9 @@ class JoinSheet(Sheet):
     def loader(self):
         sheets = self.sources
 
-        vd.ensureLoaded(sheets)
-        vd.sync()
+        with Progress(gerund='loading'):
+            vd.ensureLoaded(sheets)
+            vd.sync()
 
         # first item in joined row is the key tuple from the first sheet.
         # first columns are the key columns from the first sheet, using its row (0)
@@ -266,8 +268,9 @@ def ExtendedSheet_reload(self, sheets):
     # first item in joined row is the key tuple from the first sheet.
     # first columns are the key columns from the first sheet, using its row (0)
 
-    vd.ensureLoaded(sheets)
-    vd.sync()
+    with Progress(gerund='loading'):
+        vd.ensureLoaded(sheets)
+        vd.sync()
 
     self.columns = []
     for i, c in enumerate(sheets[0].keyCols):
@@ -331,11 +334,11 @@ class ConcatSheet(Sheet):
         # only one column with each name allowed per sheet
         keyedcols = collections.defaultdict(dict)  # name -> { sheet -> col }
 
+        with Progress(gerund='loading'):
+            vd.ensureLoaded(self.source)
+            vd.sync()
         with Progress(gerund='joining', sheet=self, total=sum(vs.nRows for vs in self.source)) as prog:
             for sheet in self.source:
-                if sheet.ensureLoaded():
-                    vd.sync()
-
                 for r in sheet.rows:
                     yield (sheet, r)
                     prog.addProgress(1)
