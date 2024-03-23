@@ -106,9 +106,6 @@ def parsePos(vd, arg:str, inputs=None):
         startrow, startcol = pos[-2:]
         start_pos = (startsheets, startrow, startcol)
 
-    # index subsheets need to be loaded *after* the cursor indexing
-    vd.options.set('load_lazy', True, obj=start_pos[0])
-
     return start_pos
 
 
@@ -139,6 +136,9 @@ def moveToPos(vd, sources, startsheets, startrow, startcol):
     else:
         startsheet = startsheets[0] or sources[-1]
         vs = vd.getSheet(startsheet)
+        # Prevent the sheet from doing automatic ensureLoaded() on its subsheets when it
+        # loads, so that we can call ensureLoaded() ourselves and sync() on it.
+        vd.options.set('load_lazy', True, obj=vs)
         if not vs:
             vd.warning(f'no sheet "{startsheet}"')
             return
@@ -152,6 +152,7 @@ def moveToPos(vd, sources, startsheets, startrow, startcol):
                 vs = None
                 break
             vs = vs.rows[rowidx]
+            vd.options.set('load_lazy', True, obj=vs)
             vd.sync(vs.ensureLoaded())
             vd.clearCaches()
         if vs:
