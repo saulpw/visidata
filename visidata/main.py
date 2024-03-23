@@ -94,8 +94,9 @@ vd.optalias('r', 'dir_depth', 100000)
 def parsePos(vd, arg:str, inputs:'list[tuple[str, dict]]'=None):
     '''Return (startsheets:list, startcol:str, startrow:str) from *arg* like "+sheet:subsheet:col:row".
     The elements of *startsheets* are identifiers that pick out a sheet, either
-    a) a string that is a sheet name, or
-    b) a list of strings that are sheet names or numbers (for row indices). For example ['1', 'sales', '3'].
+    a) a string that is the name of a sheet or subsheet
+    b) a string that is numbers (which are indices of a row).
+    For example ['1', 'sales', '3'].
     Returns an empty list for *startsheets* when the starting pos applies to all sheets.
     Returns None for *startsheets* when the position expression did not specify a sheet.
     *inputs* is a list of (path, options) tuples.
@@ -118,9 +119,6 @@ def parsePos(vd, arg:str, inputs:'list[tuple[str, dict]]'=None):
     if startcol == '':  startcol = None
     if startrow == '':  startrow = None
     start_pos = (startsheets, startcol, startrow)
-
-    # index subsheets need to be loaded *after* the cursor indexing
-    vd.options.set('load_lazy', True, obj=start_pos[0])
 
     return start_pos
 
@@ -149,6 +147,9 @@ def moveToPos(vd, sources, startsheets, startcol, startrow):
     else:
         startsheet = startsheets[0] or sources[-1]
         vs = vd.getSheet(startsheet)
+        # Prevent the sheet from doing automatic ensureLoaded() on its subsheets when it
+        # loads, so that we can call ensureLoaded() ourselves and sync() on it.
+        vd.options.set('load_lazy', True, obj=vs)
         if not vs:
             vd.warning(f'no sheet "{startsheet}"')
             return
@@ -172,6 +173,7 @@ def moveToPos(vd, sources, startsheets, startcol, startrow):
             if not isinstance(vs, BaseSheet):
                 vd.warning(f'row {subsheet} for subsheet is not a sheet')
                 return
+            vd.options.set('load_lazy', True, obj=vs)
             vd.sync(vs.ensureLoaded())
             vd.clearCaches()
         if vs:
