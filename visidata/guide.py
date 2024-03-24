@@ -123,7 +123,7 @@ class CommandHelpGetter:
     def __init__(self, cls):
         self.cls = cls
         self.helpsheet = vd.HelpSheet()
-        self.helpsheet.ensureLoaded()
+        vd.sync(self.helpsheet.ensureLoaded())
 
     def __getattr__(self, k):
         return self.__getitem__(k)

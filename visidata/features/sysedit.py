@@ -30,7 +30,7 @@ def syseditCells_async(sheet, cols, rows, filetype=None):
         vd.sync(tempvs.ensureLoaded())
 
         while isinstance(tempvs, IndexSheet):
-            tempvs.ensureLoaded()
+            vd.sync(tempvs.ensureLoaded())
             tempvs = tempvs.rows[0]
 
         for col in sheet.visibleCols:
