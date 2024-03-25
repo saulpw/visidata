@@ -49,7 +49,12 @@ def openurl_http(vd, path, filetype=None):
         ctx.verify_mode = ssl.CERT_NONE
 
     req = urllib.request.Request(path.given, **vd.options.getall('http_req_'))
-    response = urllib.request.urlopen(req, context=ctx)
+    try:
+        response = urllib.request.urlopen(req, context=ctx)
+    except urllib.error.HTTPError as e:
+        vd.fail(f'cannot open URL: HTTP Error {e.code}: {e.reason}')
+    except urllib.error.URLError as e:
+        vd.fail(f'cannot open URL: {e.reason}')
 
     filetype = filetype or vd.guessFiletype(path, response, funcprefix='guessurl_').get('filetype')  # try guessing by url
     filetype = filetype or vd.guessFiletype(path, funcprefix='guess_').get('filetype')  # try guessing by contents
