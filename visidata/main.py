@@ -334,7 +334,6 @@ def main_vd():
         if args.batch:
             if sources:
                 vd.push(sources[0])
-                sources[0].reload()
 
         for (f, *parms) in after_config:
             f(sources, *parms)
