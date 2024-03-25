@@ -9,6 +9,19 @@ def memo(vd, name, col, row):
     vd.memory[name] = col.getTypedValue(row)
     vd.status('memo %s=%s' % (name, col.getDisplayValue(row)))
 
+@Sheet.api
+def memo_cell(sheet):
+    if not sheet.cursorCol or not sheet.cursorRow: return
+    value_params = dict(prompt='assign value: ', value=sheet.cursorDisplay)
+    name_params = dict(prompt='to memo name: ')
+    # edits to memo_value are blocked, to preserve its type  #2287
+    inputs = vd.inputMultiple(memo_name=name_params,
+                              memo_value=value_params,
+                              readonly_keys=('memo_value',))
+    if not inputs['memo_name']:
+        vd.fail('memo name cannot be blank')
+    vd.memory[inputs['memo_name']] = sheet.cursorTypedValue
+    vd.status(f'memo {inputs["memo_name"]}={sheet.cursorDisplay}')
 
 class MemorySheet(Sheet):
     rowtype = 'memos' # rowdef: keys into vd.memory
@@ -32,4 +45,4 @@ def memosSheet(vd):
 
 
 Sheet.addCommand('Alt+Shift+M', 'open-memos', 'vd.push(vd.memosSheet)', 'open the Memory Sheet')
-Sheet.addCommand('Alt+m', 'memo-cell', r'vd.memory[input("assign \""+cursorCol.getDisplayValue(cursorRow)+"\" to: ")] = cursorCol.getTypedValue(cursorRow)', 'store value in current cell in Memory Sheet')
+Sheet.addCommand('Alt+m', 'memo-cell', 'memo_cell()', 'store value in current cell in Memory Sheet')
