@@ -7,7 +7,7 @@ vd.option('some_selected_rows', False, 'if no rows selected, if True, someSelect
 Sheet.init('_selectedRows', dict)  # rowid(row) -> row
 
 vd.rowNoters.append(
-        lambda sheet, row: sheet.isSelected(row) and sheet.options.disp_selected_note
+        lambda sheet, row: sheet.isSelected(row) and sheet.nVisibleCols > 0 and sheet.options.disp_selected_note
 )
 Sheet.colorizers.append( RowColorizer(2, 'color_selected_row', lambda s,c,r,v:
     r is not None and s.isSelected(r))
