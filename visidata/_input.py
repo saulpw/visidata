@@ -4,7 +4,7 @@ import curses
 import visidata
 
 from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiData, BaseSheet
-from visidata import vd, options, colors, dispwidth, ColorAttr
+from visidata import vd, colors, dispwidth, ColorAttr
 from visidata import AttrDict
 
 
@@ -64,7 +64,7 @@ class EnableCursor:
     def __exit__(self, exc_type, exc_val, tb):
         with suppress(curses.error):
             curses.curs_set(0)
-            if options.mouse_interval:
+            if vd.options.mouse_interval:
                 curses.mousemask(curses.MOUSE_ALL if hasattr(curses, "MOUSE_ALL") else 0xffffffff)
             else:
                 curses.mousemask(0)
@@ -134,7 +134,7 @@ def drawInputHelp(vd, scr, help:str=''):
 
 def clean_printable(s):
     'Escape unprintable characters.'
-    return ''.join(c if c.isprintable() else options.disp_unprintable for c in str(s))
+    return ''.join(c if c.isprintable() else vd.options.disp_unprintable for c in str(s))
 
 
 def delchar(s, i, remove=1):
@@ -543,8 +543,8 @@ def input(vd, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None,
     w = kwargs.pop('w', _drawPrompt())
     ret = vd.editText(y, promptlen, w=w,
                         attr=colors.color_edit_cell,
-                        unprintablechar=options.disp_unprintable,
-                        truncchar=options.disp_truncator,
+                        unprintablechar=vd.options.disp_unprintable,
+                        truncchar=vd.options.disp_truncator,
                         history=history,
                         updater=_drawPrompt,
                         **kwargs)
@@ -562,7 +562,7 @@ def input(vd, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None,
 @VisiData.api
 def confirm(vd, prompt, exc=EscapeException):
     'Display *prompt* on status line and demand input that starts with "Y" or "y" to proceed.  Raise *exc* otherwise.  Return True.'
-    if options.batch and not options.interactive:
+    if vd.options.batch and not vd.options.interactive:
         return vd.fail('cannot confirm in batch mode: ' + prompt)
 
     yn = vd.input(prompt, value='no', record=False)[:1]
