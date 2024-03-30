@@ -250,7 +250,10 @@ def mainloop(vd, scr):
         # no idle redraw unless background threads are running
         time.sleep(0)  # yield to other threads which may not have started yet
         if vd._nextCommands:
-            vd.curses_timeout = int(vd.options.replay_wait*1000)
+            if vd.options.replay_wait > 0:
+                vd.curses_timeout = int(vd.options.replay_wait*1000)
+            else:
+                vd.curses_timeout = nonidle_timeout
         elif vd.unfinishedThreads:
             vd.curses_timeout = nonidle_timeout
         else:
