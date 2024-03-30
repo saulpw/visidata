@@ -168,6 +168,7 @@ def mainloop(vd, scr):
     vd.disp_help = vd.options.disp_help
 
     vd.keystrokes = ''
+    vd.drawThread = threading.current_thread()
     while True:
         if not vd.stackedSheets and vd.currentReplay is None:
             return
@@ -178,7 +179,6 @@ def mainloop(vd, scr):
             continue  # waiting for replay to push sheet
 
         threading.current_thread().sheet = sheet
-        vd.drawThread = threading.current_thread()
 
         vd.setWindows(vd.scrFull)
 
