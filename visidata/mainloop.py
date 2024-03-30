@@ -258,7 +258,7 @@ def mainloop(vd, scr):
             vd.curses_timeout = nonidle_timeout
         else:
             numTimeouts += 1
-            if vd.timeouts_before_idle >= 0 and numTimeouts > vd.timeouts_before_idle:
+            if vd.timeouts_before_idle >= 0 and numTimeouts >= vd.timeouts_before_idle:
                 vd.curses_timeout = -1
             else:
                 vd.curses_timeout = nonidle_timeout
