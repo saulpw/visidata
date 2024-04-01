@@ -64,8 +64,7 @@ def setColClipboard(sheet):
     if not vd.memory.clipcells:
         vd.warning("nothing to paste from clipcells")
         return
-    for r, v in zip(sheet.onlySelectedRows, itertools.cycle(vd.memory.clipcells or [None])):
-        sheet.cursorCol.setValuesTyped([r], v)
+    sheet.cursorCol.setValuesTyped(sheet.onlySelectedRows, *vd.memory.clipcells)
 
 @Sheet.api
 def syscopyCells(sheet, cols, rows, filetype=None):
