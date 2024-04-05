@@ -136,7 +136,7 @@ def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', o
     x = max(0, w-titlew-6)
     clipdraw(sidebarscr, 0, x, f"|[:sidebar_title] {title} [:]|", cattr, w=titlew+4)
     if bottommsg:
-        clipdraw(sidebarscr, h-1, winw-dispwidth(bottommsg)-4, '|'+bottommsg+'|[:]', cattr)
+        clipdraw(sidebarscr, h-1, winw-dispwidth(bottommsg)-4, '|'+bottommsg+'|', cattr)
 
     sidebarscr.refresh()
 
