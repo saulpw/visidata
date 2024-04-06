@@ -68,7 +68,7 @@ vd.themes['ascii8'] = dict(
     color_top_status='underline',
     color_active_status='black on cyan',
     color_inactive_status='8 on black',
-    color_working='green',
+    color_working='bold white',
 
     color_menu='black on cyan',
     color_menu_active='yellow on black',
