@@ -11,13 +11,14 @@ import visidata
 from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, dispwidth, ColorAttr
 
 
-vd.option('disp_rstatus_fmt', '{sheet.threadStatus} {sheet.keystrokeStatus}   [:longname]{sheet.longname}[/]  {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}', 'right-side status format string')
+vd.option('disp_rstatus_fmt', '{sheet.threadStatus} {sheet.keystrokeStatus}   [:longname_status]{sheet.longname}[/]  {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}', 'right-side status format string')
 vd.option('disp_status_fmt', '{sheet.sheetlist}| ', 'left-side status format string')
 vd.theme_option('disp_lstatus_max', 0, 'maximum length of left status line')
 vd.theme_option('disp_status_sep', '│', 'separator between statuses')
 
 vd.theme_option('color_keystrokes', 'bold white on 237', 'color of input keystrokes')
-vd.theme_option('color_longname', '6', 'color of command longnames')
+vd.theme_option('color_longname_guide', '6', 'color of command longnames')
+vd.theme_option('color_longname_status', 'white', 'color of command longnames')
 vd.theme_option('color_keys', 'bold', 'color of keystrokes in help')
 vd.theme_option('color_status', 'bold on 238', 'status line color')
 vd.theme_option('color_error', '202 1', 'error message color')
