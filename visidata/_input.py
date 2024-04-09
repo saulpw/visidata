@@ -354,6 +354,8 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
         v = vd.getCommandInput()
 
     if v is None:
+        if vd.activeSheet._scr is None:
+            raise Exception('active sheet does not have a screen')
         try:
             v = vd.editline(vd.activeSheet._scr, y, x, w, display=display, **kwargs)
         except AcceptInput as e:
