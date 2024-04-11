@@ -1,7 +1,7 @@
 from copy import copy
 from statistics import mode, median, mean, stdev
 
-from visidata import vd, Column, ColumnAttr, vlen, RowColorizer, asyncthread, Progress, wrapply
+from visidata import vd, Column, ColumnAttr, vlen, RowColorizer, asyncthread, Progress, wrapply, anytype
 from visidata import BaseSheet, TableSheet, ColumnsSheet, SheetsSheet
 
 
@@ -61,7 +61,8 @@ class DescribeSheet(ColumnsSheet):
         self.resetCols()
 
         for aggrname in vd.options.describe_aggrs.split():
-            self.addColumn(DescribeColumn(aggrname, type=float))
+            aggrtype = vd.aggregators[aggrname].type
+            self.addColumn(DescribeColumn(aggrname, type=aggrtype))
 
         for srccol in Progress(self.rows, 'categorizing'):
             if not srccol.hidden:
