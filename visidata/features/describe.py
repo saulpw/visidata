@@ -1,11 +1,11 @@
 from copy import copy
-from statistics import mode, median, mean, stdev
+from statistics import mode
 
 from visidata import vd, Column, ColumnAttr, vlen, RowColorizer, asyncthread, Progress, wrapply, anytype
 from visidata import BaseSheet, TableSheet, ColumnsSheet, SheetsSheet
 
 
-vd.option('describe_aggrs', 'mean stdev', 'numeric aggregators to calculate on Describe sheet', help=vd.help_aggregators)
+vd.option('describe_aggrs', 'min max sum median mean stdev', 'numeric aggregators to calculate on Describe sheet', help=vd.help_aggregators)
 
 
 @Column.api
@@ -44,10 +44,6 @@ class DescribeSheet(ColumnsSheet):
             DescribeColumn('nulls',  type=vlen),
             DescribeColumn('distinct',type=vlen),
             DescribeColumn('mode',   type=str),
-            DescribeColumn('min',    type=str),
-            DescribeColumn('max',    type=str),
-            DescribeColumn('sum'),
-            DescribeColumn('median', type=str),
     ]
     colorizers = [
         RowColorizer(7, 'color_key_col', lambda s,c,r,v: r and r in r.sheet.keyCols),
@@ -91,8 +87,6 @@ class DescribeSheet(ColumnsSheet):
 
             d['mode'] = self.calcStatistic(d, mode, vals)
             if vd.isNumeric(srccol):
-                for func in [min, max, sum, median]:  # use type
-                    d[func.__name__] = self.calcStatistic(d, func, vals)
                 for aggrname in vd.options.describe_aggrs.split():
                     aggr = vd.aggregators[aggrname].funcValues
                     d[aggrname] = self.calcStatistic(d, aggr, vals)
