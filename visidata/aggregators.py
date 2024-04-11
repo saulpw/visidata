@@ -116,7 +116,13 @@ def mean(vals):
             return float(sum(vals))/len(vals)
 
 def vsum(vals):
-    return sum(vals, start=type(vals[0] if len(vals) else 0)())  #1996
+    if vals:
+        if type(vals[0]) is date:
+            vd.error('dates cannot be summed')
+            return None
+        return sum(vals, start=type(vals[0])())  #1996
+    else:
+        return 0
 
 def median(vals):
     if not vals:
