@@ -118,7 +118,13 @@ def mean(vals):
             return float(sum(vals))/len(vals)
 
 def _vsum(vals):
-    return sum(vals, start=type(vals[0] if len(vals) else 0)())  #1996
+    if vals:
+        if type(vals[0]) is date:
+            vd.error('dates cannot be summed')
+            return None
+        return sum(vals, start=type(vals[0])())  #1996
+    else:
+        return 0
 
 # start parameter in sum() added in Python 3.8
 vsum = _vsum if sys.version_info[:2] >= (3, 8) else sum
