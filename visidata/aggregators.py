@@ -182,11 +182,11 @@ def percentile(pct, helpstr=''):
 def quantiles(q, helpstr):
     return [percentile(round(100*i/q), helpstr) for i in range(1, q)]
 
-vd.aggregator('min', min, 'minimum value')
-vd.aggregator('max', max, 'maximum value')
+vd.aggregator('min', min, 'minimum value', type=anytype)
+vd.aggregator('max', max, 'maximum value', type=anytype)
 vd.aggregator('avg', mean, 'arithmetic mean of values', type=anytype)
 vd.aggregator('mean', mean, 'arithmetic mean of values', type=anytype)
-vd.aggregator('median', median, 'median of values')
+vd.aggregator('median', median, 'median of values', type=anytype)
 vd.aggregator('mode', statistics.mode, 'mode of values')
 vd.aggregator('sum', vsum, 'sum of values', type=anytype)
 vd.aggregator('distinct', set, 'distinct values', type=vlen)
