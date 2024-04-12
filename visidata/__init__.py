@@ -147,6 +147,7 @@ def importFeatures():
     vd.importStar('math')
     vd.importStar('random')
     vd.importStar('itertools')
+    vd.importStar('curses')
 
     import visidata.experimental  # import nothing by default but make package accessible
 
