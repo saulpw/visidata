@@ -254,6 +254,8 @@ def aggname(col, agg):
 @asyncthread
 def memo_aggregate(col, agg_choices, rows):
     'Show aggregated value in status, and add to memory.'
+    if not rows:
+        vd.fail('no rows to aggregate')
     for agg_choice in agg_choices:
         agg = vd.aggregators.get(agg_choice)
         if not agg: continue
