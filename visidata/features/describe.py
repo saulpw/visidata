@@ -1,7 +1,8 @@
 from copy import copy
 from statistics import mode
+import datetime
 
-from visidata import vd, Column, ColumnAttr, vlen, RowColorizer, asyncthread, Progress, wrapply, anytype
+from visidata import vd, Column, ColumnAttr, vlen, RowColorizer, asyncthread, Progress, wrapply, anytype, date
 from visidata import BaseSheet, TableSheet, ColumnsSheet, SheetsSheet
 
 
@@ -84,10 +85,15 @@ class DescribeSheet(ColumnsSheet):
                     d['distinct'].add(v)
                 except Exception as e:
                     d['errors'].append(sr)
+            if not vals:
+                return
 
             d['mode'] = self.calcStatistic(d, mode, vals)
-            if vd.isNumeric(srccol):
+            if vd.isNumeric(srccol) or \
+               isinstance(vals[0], (datetime.timedelta, datetime.date)):
                 for aggrname in vd.options.describe_aggrs.split():
+                    if aggrname == 'sum' and (srccol.type is date or isinstance(vals[0], datetime.date)):
+                        continue
                     aggr = vd.aggregators[aggrname].funcValues
                     d[aggrname] = self.calcStatistic(d, aggr, vals)
 
