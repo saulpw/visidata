@@ -55,7 +55,22 @@ class TextSheet(Sheet):
 # .source is list of source text lines to 'load'
 # .sourceSheet is Sheet error came from
 class ErrorSheet(TextSheet):
+    columns = [
+        ColumnItem('linenum', 0, type=int, width=0),
+        ColumnItem('error', 1),
+    ]
+    guide = '''# Error Sheet'''
     precious = False
+
+class ErrorCellSheet(ErrorSheet):
+    columns = [
+        ColumnItem('linenum', 0, type=int, width=0),
+        ColumnItem('cell_error', 1),
+    ]
+    guide = '''# Error Cell Sheet
+This sheet shows the error that occurred when calculating a cell.
+- `q` to quit this error sheet.
+'''
 
 
 class ErrorsSheet(Sheet):
@@ -83,15 +98,14 @@ def recentErrorsSheet(self):
 BaseSheet.addCommand('^E', 'error-recent', 'vd.lastErrors and vd.push(recentErrorsSheet) or status("no error")', 'view traceback for most recent error')
 BaseSheet.addCommand('g^E', 'errors-all', 'vd.push(vd.allErrorsSheet)', 'view traceback for most recent errors')
 
-Sheet.addCommand(None, 'view-cell', 'vd.push(ErrorSheet("%s[%s].%s" % (name, cursorRowIndex, cursorCol.name), sourceSheet=sheet, source=cursorDisplay.splitlines()))', 'view contents of current cell in a new sheet')
-Sheet.addCommand('z^E', 'error-cell', 'vd.push(ErrorSheet(sheet.name+"_cell_error", sourceSheet=sheet, source=getattr(cursorCell, "error", None) or fail("no error this cell")))', 'view traceback for error in current cell')
+Sheet.addCommand('z^E', 'error-cell', 'vd.push(ErrorCellSheet(sheet.name+"_cell_error", sourceSheet=sheet, source=getattr(cursorCell, "error", None) or fail("no error this cell")))', 'view traceback for error in current cell')
 
 TextSheet.addCommand('^O', 'sysopen-sheet', 'sheet.sysopen(sheet.cursorRowIndex)', 'open copy of text sheet in $EDITOR and reload on exit')
 
 
 TextSheet.options.save_filetype = 'txt'
 
-vd.addGlobals({'TextSheet': TextSheet, 'ErrorSheet': ErrorSheet})
+vd.addGlobals({'TextSheet': TextSheet, 'ErrorSheet': ErrorSheet, 'ErrorCellSheet': ErrorCellSheet})
 
 vd.addMenuItems('''
     View > Errors > recent > error-recent
