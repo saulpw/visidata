@@ -122,6 +122,15 @@ def _vsum(vals):
 
 # start parameter in sum() added in Python 3.8
 vsum = _vsum if sys.version_info[:2] >= (3, 8) else sum
+def median(vals):
+    if not vals:
+        return None
+    if type(vals[0]) is date:
+        # when the length is even, statistics.median needs to add
+        # two midpoints to average them, so convert to timestamps
+        vals = [d.timestamp() for d in vals]
+        return datetime.date.fromtimestamp(statistics.median(vals))
+    return statistics.median(vals)
 
 def stdev(vals):
     if vals and len(vals) >= 2:
@@ -171,7 +180,7 @@ vd.aggregator('min', min, 'minimum value')
 vd.aggregator('max', max, 'maximum value')
 vd.aggregator('avg', mean, 'arithmetic mean of values', type=anytype)
 vd.aggregator('mean', mean, 'arithmetic mean of values', type=anytype)
-vd.aggregator('median', statistics.median, 'median of values')
+vd.aggregator('median', median, 'median of values')
 vd.aggregator('mode', statistics.mode, 'mode of values')
 vd.aggregator('sum', vsum, 'sum of values')
 vd.aggregator('distinct', set, 'distinct values', type=vlen)
