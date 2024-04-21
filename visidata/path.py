@@ -179,10 +179,6 @@ class Path(os.PathLike):
         'Filename without any extensions.  Not the same as pathlib.Path.'
         return self.base_stem
 
-    @lru_cache()
-    def stat(self, force=False):
-        return self._path.stat()
-
     @property
     def given(self):
         'The path as given to the constructor.'
