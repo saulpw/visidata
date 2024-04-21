@@ -2,6 +2,7 @@ import html
 import urllib.parse
 import copy
 import itertools
+import re
 
 from visidata import VisiData, vd, Sheet, options, Column, Progress, IndexSheet, ItemColumn
 
