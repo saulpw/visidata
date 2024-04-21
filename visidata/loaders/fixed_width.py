@@ -1,5 +1,5 @@
 
-from visidata import VisiData, vd, Sheet, Column, Progress, SequenceSheet, Column, dispwidth
+from visidata import VisiData, vd, Sheet, Column, Progress, SequenceSheet, dispwidth
 
 
 vd.option('fixed_rows', 1000, 'number of rows to check for fixed width columns')
