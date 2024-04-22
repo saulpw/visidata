@@ -276,7 +276,7 @@ class Column(Extensible):
            The 'full' displayer allows formatting like [:color].
         '''
         if width is not None and width > 1 and vd.isNumeric(self):
-            yield from iterchunks(text.rjust(width-2))
+            yield from iterchunks(dw.text.rjust(width-2))
         else:
             yield from iterchunks(dw.text)
 
