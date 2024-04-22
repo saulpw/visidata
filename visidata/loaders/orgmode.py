@@ -282,7 +282,7 @@ A list of orgmode sections from _{sheet.source}_.
         for r, _ in mods.values():
             saveset[_root(r).path] = _root(r)
 
-        for row in addset.values():
+        for row in saveset.values():
             self.save(row)
 
         self.commitAdds()
