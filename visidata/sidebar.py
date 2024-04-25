@@ -71,7 +71,8 @@ def drawSidebar(vd, scr, sheet):
 
     sheet.current_sidebar = sidebar
 
-    return sheet.drawSidebarText(scr, text=sheet.current_sidebar, overflowmsg=overflowmsg, bottommsg=bottommsg)
+    if sheet.options.disp_sidebar:
+        sheet.drawSidebarText(scr, text=sheet.current_sidebar, overflowmsg=overflowmsg, bottommsg=bottommsg)
 
 @BaseSheet.api
 def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', overflowmsg:str='', bottommsg:str=''):
