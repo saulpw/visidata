@@ -46,7 +46,7 @@ def eval_vd(logpath, *args, **kwargs):
     src = Path(logpath.given, fptext=io.StringIO(log), filesize=len(log))
     vs = vd.openSource(src, filetype=src.ext)
     vs.name += '_vd'
-    vs.reload()
+    vd.sync(vs.reload())
     vs.vd = vd
     return vs
 
@@ -349,7 +349,6 @@ def main_vd():
             vdfile = Path(args.play)
 
         vs = eval_vd(vdfile, *fmtargs, **fmtkwargs)
-        vd.sync(vs.reload())
         if args.batch:
             if not args.debug:
                 vd.outputProgressThread = visidata.VisiData.execAsync(vd, vd.outputProgressEvery, vs, seconds=0.5, sheet=BaseSheet())  #1182
