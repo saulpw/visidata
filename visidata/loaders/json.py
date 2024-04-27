@@ -11,7 +11,10 @@ vd.option('default_colname', '', 'column name to use for non-dict rows')
 @VisiData.api
 def guess_json(vd, p):
     with p.open(encoding=vd.options.encoding) as fp:
-        line = next(fp)
+        try:
+            line = next(fp)
+        except StopIteration:
+            return
 
     line = line.strip()
 

@@ -16,7 +16,10 @@ vd.option('safety_first', False, 'sanitize input/output to handle edge cases, wi
 def guess_csv(vd, p):
     import csv
     csv.field_size_limit(2**31-1)  #288 Windows has max 32-bit
-    line = next(p.open())
+    try:
+        line = next(p.open())
+    except StopIteration:
+        return
     if ',' in line:
         dialect = csv.Sniffer().sniff(line)
         r = dict(filetype='csv', _likelihood=0)
