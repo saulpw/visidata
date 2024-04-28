@@ -24,6 +24,8 @@ For example, edit the _{sheet.cursorCol.name}_ column to **{sheet.cursorCol.form
 Some new commands on this sheet operate on all selected columns on the source sheet:
 
 - {help.commands.hide_selected}
+- {help.commands.hide_current}
+- {help.commands.show_current}
 - {help.commands.key_selected}
 - {help.commands.key_off_selected}
 - {help.commands.type_int_selected}
@@ -138,7 +140,10 @@ Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", so
 ColumnsSheet.addCommand('g!', 'key-selected', 'for c in onlySelectedRows: c.sheet.setKeys([c])', 'toggle selected source columns as key columns')
 ColumnsSheet.addCommand('gz!', 'key-off-selected', 'for c in onlySelectedRows: c.sheet.unsetKeys([c])', 'unset selected source columns as key columns')
 
-ColumnsSheet.addCommand('g-', 'hide-selected', 'onlySelectedRows.hide()', 'hide selected source columns')
+ColumnsSheet.addCommand('g-', 'hide-selected', 'onlySelectedRows.hide(True)', 'hide selected source columns')
+ColumnsSheet.addCommand('-', 'hide-current', 'cursorRow.hide(True); cursorDown(1)', 'hide current source column')
+ColumnsSheet.addCommand('+', 'show-current', 'cursorRow.hide(False); cursorDown(1)', 'show current source column')
+
 ColumnsSheet.addCommand(None, 'resize-source-rows-max', 'for c in selectedRows or [cursorRow]: c.setWidth(c.getMaxWidth(c.sheet.visibleRows))', 'adjust widths of selected source columns')
 
 ColumnsSheet.addCommand('g%', 'type-float-selected', 'onlySelectedRows.type=float', 'set type of selected source columns to float')
