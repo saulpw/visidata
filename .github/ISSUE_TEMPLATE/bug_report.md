@@ -23,3 +23,4 @@ See [here](http://visidata.org/docs/save-restore/) for more details.
 
 **Additional context**
 Please include the version of VisiData and Python.
+Can you reproduce your bug in the latest version of VisiData, which is v3.0.2?
