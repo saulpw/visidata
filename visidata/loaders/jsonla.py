@@ -24,7 +24,10 @@ def guess_jsonla(vd, p):
             return
 
     if first_line.strip().startswith('['):
-        ret = json.loads(first_line)
+        try:
+            ret = json.loads(first_line)
+        except json.decoder.JSONDecodeError:
+            return
         if isinstance(ret, list) and all(isinstance(v, str) for v in ret):
             return dict(filetype='jsonla')
 
