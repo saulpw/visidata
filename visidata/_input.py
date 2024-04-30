@@ -528,7 +528,8 @@ def input(vd, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None,
             import getpass
             return getpass.getpass(prompt)
 
-    history = list(vd.inputHistory.setdefault(type, {}).keys())
+    if not history:
+        history = list(vd.inputHistory.setdefault(type, {}).keys())
 
     y = sheet.windowHeight-dy-1
     promptlen = dispwidth(prompt)
