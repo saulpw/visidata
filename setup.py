@@ -63,7 +63,7 @@ setup(
             "pyconll",
             "pypng",
             "pytest",
-            "savReaderWriter @ git+https://github.com/anjakefala/savReaderWriter#egg=savReaderWriter"
+            "savReaderWriter @ git+https://github.com/anjakefala/savReaderWriter#egg=savReaderWriter",
             "tabulate",
             "tomli",
             "wcwidth",
