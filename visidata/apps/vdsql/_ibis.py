@@ -89,14 +89,8 @@ class IbisConnectionPool:
     @contextmanager
     def get_conn(self):
         if not self.pool:
-            import sqlalchemy
-            try:
-                import ibis
-                r = ibis.connect(str(self.source))
-            except sqlalchemy.exc.NoSuchModuleError as e:
-                dialect = str(e).split(':')[-1]
-                vd.warning(f'{dialect} not installed')
-                vd.fail(f'pip install ibis-framework[{dialect}]')
+            import ibis
+            r = ibis.connect(str(self.source))
         else:
             r = self.pool.pop(0)
 

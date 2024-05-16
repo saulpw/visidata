@@ -18,3 +18,5 @@ try:
             setattr(vd, 'save_'+fmt, save_table)
 except ModuleNotFoundError:
     pass
+except Exception as e:
+    vd.exceptionCaught(e)
