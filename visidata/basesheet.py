@@ -252,6 +252,7 @@ class BaseSheet(DrawablePane):
         if self._names:
             vd.addUndo(setattr, self, '_names', self._names)
         self._name = self.maybeClean(str(name))
+        self._names = self._name.split(self.options.name_joiner)
 
     def maybeClean(self, s):
         'stub'
