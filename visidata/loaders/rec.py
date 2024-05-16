@@ -129,7 +129,6 @@ def save_rec(vd, p, *vsheets):
             if comments:
                 fp.write('# ' + '\n# '.join(comments) + '\n')
             fp.write('%rec: ' + vs.name + '\n')
-            fp.write('\n')
             for col in vs.visibleCols:
                 if col.keycol:
                     fp.write('%key: ' + col.name + '\n')
