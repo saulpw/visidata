@@ -1,5 +1,5 @@
 from copy import copy
-from visidata import vd, Sheet, Progress, asyncthread, options, rotateRange, Fanout, undoAttrCopyFunc, RowColorizer, UNLOADED
+from visidata import vd, Sheet, Progress, asyncthread, options, rotateRange, Fanout, undoAttrCopyFunc, RowColorizer
 
 vd.option('bulk_select_clear', False, 'clear selected rows before new bulk selections', replay=True)
 vd.option('some_selected_rows', False, 'if no rows selected, if True, someSelectedRows returns all rows; if False, fails')
@@ -165,6 +165,7 @@ def deleteSelected(self):
 @Sheet.api
 def addUndoSelection(sheet):
     vd.addUndo(undoAttrCopyFunc([sheet], '_selectedRows'))
+
 
 Sheet.addCommand('t', 'stoggle-row', 'toggle_row(cursorRow); cursorDown(1)', 'toggle selection of current row')
 Sheet.addCommand('s', 'select-row', 'select_row(cursorRow); cursorDown(1)', 'select current row')
