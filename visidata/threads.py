@@ -62,8 +62,10 @@ class Progress:
             self.sheet.progresses.insert(0, self)
         return self
 
-    def addProgress(self, n):
+    def addProgress(self, n:'int|str|bytes'):
         'Increase the progress count by *n*.'
+        if isinstance(n, (str, bytes)):
+            n = len(n)
         self.made += n
         return True
 
@@ -83,9 +85,13 @@ class TextProgress(Progress):
         super().__init__(**kwargs)
         self.est_sample = ''
         self.est_charbytes = 1
+        self.encoding = encoding
 
-    def addProgress(self, n:int):
+    def addProgress(self, n:'int|str|bytes'):
         if self.made < self.total:
+            if isinstance(n, (str, bytes)):
+                self.addSample(n)
+                n = len(n)
             return super().addProgress(n * self.est_charbytes)
 
     def addSample(self, s:str):

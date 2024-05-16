@@ -134,13 +134,13 @@ class FileProgress:
         r = self.fp_orig_read(size)
         if self.prog:
             if r:
-                self.prog.addProgress(len(r))
+                self.prog.addProgress(r)
         return r
 
     def readline(self, size=-1):
         r = self.fp_orig_readline(size)
         if self.prog:
-            self.prog.addProgress(len(r))
+            self.prog.addProgress(r)
         return r
 
     def __getattr__(self, k):
@@ -152,7 +152,7 @@ class FileProgress:
 
     def __next__(self):
         r = next(self.fp)
-        self.prog.addProgress(len(r))
+        self.prog.addProgress(r)
         return r
 
     def __iter__(self):
@@ -160,7 +160,7 @@ class FileProgress:
             yield from self.fp
         else:
             for line in self.fp:
-                self.prog.addProgress(len(line))
+                self.prog.addProgress(line)
                 yield line
 
     def __exit__(self, type, value, tb):
@@ -332,7 +332,7 @@ class Path(os.PathLike):
         with Progress(total=filesize(self)) as prog:
             with self.open(encoding=vd.options.encoding) as fd:
                 for i, line in enumerate(fd):
-                    prog.addProgress(len(line))
+                    prog.addProgress(line)
                     yield line.rstrip('\n')
 
     def open_bytes(self, mode='rb'):
