@@ -5,9 +5,9 @@ vd.contexts += [vd.memory]
 
 
 @VisiData.api
-def memo(vd, name, col, row):
-    vd.memory[name] = col.getTypedValue(row)
-    vd.status('memo %s=%s' % (name, col.getDisplayValue(row)))
+def memoValue(vd, name, value, dispvalue):
+    vd.memory[name] = value
+    vd.status(f'memo {name}={dispvalue}')
 
 
 class MemorySheet(Sheet):
@@ -31,5 +31,16 @@ def memosSheet(vd):
     return MemorySheet('memos')
 
 
+@VisiData.api
+def inputMemoName(vd, value):
+    value_params = dict(prompt="assign value: ", value=value)
+    name_params = dict(prompt="to memo name: ")
+    r = vd.inputMultiple(memo_name=name_params, memo_value=value_params)
+    name = r['memo_name']
+    if not name:
+        vd.fail('memo name cannot be blank')
+    return name
+
+
 Sheet.addCommand('Alt+Shift+M', 'open-memos', 'vd.push(vd.memosSheet)', 'open the Memory Sheet')
-Sheet.addCommand('Alt+m', 'memo-cell', r'vd.memory[input("assign \""+cursorCol.getDisplayValue(cursorRow)+"\" to: ")] = cursorCol.getTypedValue(cursorRow)', 'store value in current cell in Memory Sheet')
+Sheet.addCommand('Alt+m', 'memo-cell', 'vd.memoValue(inputMemoName(cursorDisplay), cursorTypedValue, cursorDisplay)', 'store value in current cell to Memory Sheet')

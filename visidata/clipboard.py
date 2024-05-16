@@ -176,7 +176,7 @@ Sheet.addCommand('P', 'paste-before', 'paste_after(cursorRowIndex-1)', 'paste cl
 
 Sheet.addCommand('gy', 'copy-selected', 'copyRows(onlySelectedRows)', 'yank (copy) selected rows to clipboard')
 
-Sheet.addCommand('zy', 'copy-cell', 'copyCells(cursorCol, [cursorRow]); vd.memo("clipval", cursorCol, cursorRow)', 'yank (copy) current cell to clipboard')
+Sheet.addCommand('zy', 'copy-cell', 'copyCells(cursorCol, [cursorRow]); vd.memoValue("clipval", cursorTypedValue, cursorDisplay)', 'yank (copy) current cell to clipboard')
 Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.memory.clipval) if vd.memory.clipval else vd.warning("nothing to paste from clipval")', 'set contents of current cell to last clipboard value')
 
 Sheet.addCommand('d', 'delete-row', 'delete_row(cursorRowIndex); defer and cursorDown(1)', 'delete current row')

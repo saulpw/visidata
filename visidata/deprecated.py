@@ -237,4 +237,10 @@ def setValueSafe(self, row, value):
 def checkCursorNoExceptions(sheet):
     return vd.callNoExceptions(sheet.checkCursor)
 
+@deprecated('3.1', 'vd.memoValue(name, value, displayvalue)')
+@VisiData.api
+def memo(vd, name, col, row):
+    return vd.memoValue(name, col.getTypedValue(row), col.getDisplayValue(row))
+
+
 vd.addGlobals(globals())

@@ -95,6 +95,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'save-cmdlog': 'test_commands.vdj',
                  'aggregate-col': 'mean',
                  'memo-aggregate': 'count',
+                 'memo-cell': 'memoname',
                  'addcol-shell': '',
                  'theme-input': 'light',
                  'add-rows': '1',
