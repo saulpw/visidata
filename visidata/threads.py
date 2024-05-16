@@ -36,7 +36,14 @@ def asynccache(key=lambda *args, **kwargs: str(args)+str(kwargs)):
     return _decorator
 
 
-class _Progress:
+class Progress:
+    '''Maintain progress count as either an iterable wrapper, or a context manager.
+
+        - *iterable*: wrapped iterable if used as an iterator.
+        - *gerund*: status text shown while this Progress is active.
+        - *total*: total count expected.
+        - *sheet*: specific sheet to associate this progress with.  Default is sheet from current thread.
+        '''
     def __init__(self, iterable=None, gerund="", total=None, sheet=None):
         self.iterable = iterable
         if total is None:
@@ -70,16 +77,28 @@ class _Progress:
                 yield item
                 self.made += 1
 
-@VisiData.global_api
-def Progress(vd, iterable=None, gerund="", total=None, sheet=None):
-    '''Maintain progress count as either an iterable wrapper, or a context manager.
 
-        - *iterable*: wrapped iterable if used as an iterator.
-        - *gerund*: status text shown while this Progress is active.
-        - *total*: total count expected.
-        - *sheet*: specific sheet to associate this progress with.  Default is sheet from current thread.
-        '''
-    return _Progress(iterable=iterable, gerund=gerund, total=total, sheet=sheet)
+class TextProgress(Progress):
+    def __init__(self, encoding='utf-8', **kwargs):
+        super().__init__(**kwargs)
+        self.est_sample = ''
+        self.est_charbytes = 1
+
+    def addProgress(self, n:int):
+        if self.made < self.total:
+            return super().addProgress(n * self.est_charbytes)
+
+    def addSample(self, s:str):
+        # A short string can cause charbytes to be overestimated by 30%,
+        # due to the Byte Order Marker in encodings like utf-8-sig.
+        # Combining short strings into one big one lowers that error to < 1%.
+        if len(self.est_sample) < self.made/1000:
+            self.est_sample += s[:100]
+            self.est_charbytes = len(self.est_sample.encode(self.encoding)) / len(self.est_sample)
+
+
+vd.Progress = Progress
+vd.TextProgress = TextProgress
 
 
 @VisiData.api
@@ -452,6 +471,7 @@ BaseSheet.addCommand('z^T', 'threads-sheet', 'vd.push(ThreadsSheet("threads", so
 vd.addGlobals({
     'ThreadsSheet': ThreadsSheet,
     'Progress': Progress,
+    'TextProgress': TextProgress,
     'asynccache': asynccache,
     'asyncsingle': asyncsingle,
     'asyncignore': asyncignore,

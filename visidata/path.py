@@ -8,7 +8,7 @@ from urllib.parse import urlparse, urlunparse
 from functools import wraps, lru_cache
 
 from visidata import vd
-from visidata import VisiData, Progress
+from visidata import VisiData, Progress, TextProgress
 
 vd.help_encoding = '''Common Encodings:
 
@@ -97,12 +97,16 @@ class BytesIOWrapper(io.BufferedReader):
 class FileProgress:
     'Open file in binary mode and track read() progress.'
     def __init__(self, path, fp, mode='r', **kwargs):
+        'kwargs has all open() kwargs'
         self.path = path
         self.fp = fp
         self.prog = None
         if 'r' in mode:
             gerund = 'reading'
-            self.prog = Progress(gerund=gerund, total=filesize(path))
+            if 'b' in mode:
+                self.prog = Progress(gerund=gerund, total=filesize(path))
+            else:
+                self.prog = TextProgress(gerund=gerund, total=filesize(path), encoding=kwargs.get('encoding'))
         elif 'w' in mode:
             gerund = 'writing'
             self.prog = Progress(gerund=gerund)
