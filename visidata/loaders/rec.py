@@ -128,13 +128,16 @@ def save_rec(vd, p, *vsheets):
             comments = getattr(vs, 'comments', [])
             if comments:
                 fp.write('# ' + '\n# '.join(comments) + '\n')
-            fp.write('%rec: ' + vs.name + '\n')
+            fp.write(f'%rec: {vs.name}\n')
             for col in vs.visibleCols:
                 if col.keycol:
-                    fp.write('%key: ' + col.name + '\n')
+                    fp.write(f'%key: {col.name}\n')
             for row in Progress(vs.rows):
                 for col in vs.visibleCols:
-                    fp.write(col.name+': '+encode_multiline(col.getDisplayValue(row))+'\n')
+                    cell = col.getCell(row)
+                    if cell.value is not None:
+                        val = encode_multiline(cell.text)
+                        fp.write(f'{col.name}: {val}\n')
 
                 fp.write('\n')
             fp.write('\n')
