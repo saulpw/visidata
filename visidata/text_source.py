@@ -44,9 +44,12 @@ class FilterFile:
 
 
 @BaseSheet.api
-def open_text_source(sheet):
-    'Open sheet source as text, using sheet options for encoding and regex_skip.'
-    fp = sheet.source.open(encoding=sheet.options.encoding, encoding_errors=sheet.options.encoding_errors)
+def open_text_source(sheet, **kwargs):
+    'Open sheet source as text, passing **kwargs to .open() (default to sheet options for encoding and regex_skip).'
+    openkwargs = dict(encoding=sheet.options.encoding,
+                      encoding_errors=sheet.options.encoding_errors)
+    openkwargs.update(kwargs)
+    fp = sheet.source.open(**openkwargs)
     regex_skip = sheet.options.regex_skip
     if regex_skip:
         return FilterFile(fp, regex_skip, sheet.regex_flags())
