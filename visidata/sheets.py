@@ -415,7 +415,7 @@ class TableSheet(BaseSheet):
     @drawcache_property
     def visibleCols(self):  # non-hidden cols
         'List of non-hidden columns in display order.'
-        return self.keyCols + [c for c in self.columns if not c.hidden and not c.keycol]
+        return (self.keyCols + [c for c in self.columns if not c.hidden and not c.keycol]) or [Column('', sheet=self)]
 
     @drawcache_property
     def keyCols(self):
@@ -438,7 +438,7 @@ class TableSheet(BaseSheet):
         try:
             return self.columns.index(self.cursorCol)
         except ValueError:
-            return None
+            return 0
 
     @property
     def nonKeyVisibleCols(self):
