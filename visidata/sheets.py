@@ -847,9 +847,26 @@ class TableSheet(BaseSheet):
             height = min(self.rowHeight, maxheight) or 1  # display even empty rows
             self._rowLayout[rowidx] = (ybase, height)
 
+            if height > 1:
+                colseps = [topsep] + [midsep]*height + [botsep]
+                endseps = [endtopsep] + [endmidsep]*height + [endbotsep]
+                keyseps = [keytopsep] + [keymidsep]*height + [keybotsep]
+            else:
+                colseps = [colsep]
+                endseps = [endsep]
+                keyseps = [keysep]
+
             for vcolidx, (col, cellval, lines) in displines.items():
                     if vcolidx not in self._visibleColLayout:
                         continue
+
+                    if vcolidx == self.nVisibleCols-1:  # right edge of sheet
+                        seps = endseps
+                    elif (self.keyCols and col is self.keyCols[-1]): # last keycol
+                        seps = keyseps
+                    else:
+                        seps = colseps
+
                     x, colwidth = self._visibleColLayout[vcolidx]
                     hoffset = col.hoffset
                     voffset = col.voffset
@@ -873,36 +890,7 @@ class TableSheet(BaseSheet):
                     for i, chunks in enumerate(lines):
                         y = ybase+i
 
-                        if vcolidx == self.nVisibleCols-1:  # right edge of sheet
-                            if len(lines) == 1:
-                                sepchars = endsep
-                            else:
-                                if i == 0:
-                                    sepchars = endtopsep
-                                elif i == len(lines)-1:
-                                    sepchars = endbotsep
-                                else:
-                                    sepchars = endmidsep
-                        elif (self.keyCols and col is self.keyCols[-1]): # last keycol
-                            if len(lines) == 1:
-                                sepchars = keysep
-                            else:
-                                if i == 0:
-                                    sepchars = keytopsep
-                                elif i == len(lines)-1:
-                                    sepchars = keybotsep
-                                else:
-                                    sepchars = keymidsep
-                        else:
-                            if len(lines) == 1:
-                                sepchars = colsep
-                            else:
-                                if i == 0:
-                                    sepchars = topsep
-                                elif i == len(lines)-1:
-                                    sepchars = botsep
-                                else:
-                                    sepchars = midsep
+                        sepchars = seps[i]
 
                         pre = disp_truncator if hoffset != 0 else disp_column_fill
                         prechunks = []
