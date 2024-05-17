@@ -903,7 +903,7 @@ class TableSheet(BaseSheet):
                         clipdraw_chunks(scr, y, x, prechunks, cattr, w=colwidth-notewidth)
                         vd.onMouse(scr, x, y, colwidth, 1, BUTTON3_RELEASED='edit-cell')
 
-                        if x+colwidth+len(sepchars) <= self.windowWidth:
+                        if x+colwidth+dispwidth(sepchars) <= self.windowWidth:
                             scr.addstr(y, x+colwidth, sepchars, sepcattr.attr)
 
             for notefunc in vd.rowNoters:
