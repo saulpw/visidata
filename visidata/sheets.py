@@ -388,7 +388,7 @@ class TableSheet(BaseSheet):
     @drawcache_property
     def nHeaderRows(self):
         vcols = self.visibleCols
-        return max(len(col.name.split('\n')) for col in vcols) if vcols else 0
+        return max(0, 1, *(len(col.name.split('\n')) for col in vcols))
 
     @property
     def nFooterRows(self):
