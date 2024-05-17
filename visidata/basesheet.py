@@ -112,9 +112,9 @@ class BaseSheet(DrawablePane):
 
     def __init__(self, *names, rows=UNLOADED, **kwargs):
         self._name = None   # initial cache value necessary for self.options
+        self._names = []
         self.loading = False
         self.names = list(names)
-        self.name = self.options.name_joiner.join(str(x) for x in self.names if x)
         self.source = None
         self.rows = rows      # list of opaque objects
         self._scr = None
@@ -238,8 +238,10 @@ class BaseSheet(DrawablePane):
 
     @names.setter
     def names(self, names):
+        if self._names:
+            vd.addUndo(setattr, self, 'names', self._names)
         self._names = names
-        self.name = self.options.name_joiner.join(self.maybeClean(str(x)) for x in self._names)
+        self._name = self.options.name_joiner.join(self.maybeClean(str(x)) for x in self._names)
 
     @property
     def name(self):
@@ -250,9 +252,9 @@ class BaseSheet(DrawablePane):
     def name(self, name):
         'Set name without spaces.'
         if self._names:
-            vd.addUndo(setattr, self, '_names', self._names)
+            vd.addUndo(setattr, self, 'names', self._names)
         self._name = self.maybeClean(str(name))
-        self._names = self._name.split(self.options.name_joiner)
+        self._names = [self._name]
 
     def maybeClean(self, s):
         'stub'
