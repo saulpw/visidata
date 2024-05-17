@@ -1,0 +1,7 @@
+#!vd -p
+{"sheet": "global", "col": null, "row": "disp_formatter", "longname": "set-option", "input": "python", "keystrokes": "", "comment": null}
+{"longname": "open-file", "input": "tests/pr2372.tsv", "keystrokes": "o"}
+{"sheet": "pr2372", "col": "", "row": "", "longname": "select-rows", "input": "", "keystrokes": "gs", "comment": "select all rows"}
+{"sheet": "pr2372", "col": "text", "row": "", "longname": "copy-cells", "input": "", "keystrokes": "gzy", "comment": "yank (copy) contents of current column for selected rows to clipboard"}
+{"sheet": "pr2372", "col": "text", "row": "", "longname": "addcol-new", "input": "newcol", "keystrokes": "za", "comment": "append an empty column"}
+{"sheet": "pr2372", "col": "", "row": "", "longname": "setcol-clipboard", "input": "", "keystrokes": "gzp", "comment": "set cells of current column for selected rows to last clipboard value"}

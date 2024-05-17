@@ -446,6 +446,7 @@ class Column(Extensible):
         self.recalc()
         return vd.status('set %d cells to %d values' % (len(rows), len(values)))
 
+    @asyncthread
     def setValuesTyped(self, rows, *values):
         'Set values on this column for *rows* to *values*, coerced to column type, recycling values as needed to fill *rows*.  Abort on type exception.'
         vd.addUndoSetValues([self], rows)
