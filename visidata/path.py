@@ -118,13 +118,9 @@ class FileProgress:
         self.fp.read = self.read
         self.fp.close = self.close
 
-        self.est_charbytes = 0
-        self.sampled = ''
-        self.est_ctr = 0
-        self.est_interval = 1000
+        self.est_charbytes = 1
+        self.est_sample = ''
         self.est_total = 0
-
-        self.readline_chunks = []
 
         if self.prog:
             self.prog.__enter__()
@@ -147,24 +143,10 @@ class FileProgress:
             if self.est_total <= self.total:
                 self.prog.addProgress(r_bytes)
 
-    def update_progress_line(self, line):
-        # updating progress for each line is slow, so do it in batches
-        self.readline_chunks.append(line)
-        if len(self.readline_chunks) == 1000:
-            joiner = b'\n' if isinstance(line, bytes) else '\n'
-            batched = joiner.join(self.readline_chunks)
-            self.update_progress(batched)
-            self.readline_chunks = []
-
     def update_estimate(self, r):
-        # A short string can cause charbytes to be overestimated by 30%,
-        # due to the Byte Order Marker in encodings like utf-8-sig.
-        # Combining short strings into one big one lowers that error to < 1%.
-        if self.est_ctr % self.est_interval == 0 or len(self.sampled) < 1000:
-            sample = r[:100]
-            self.sampled += sample
-            self.est_charbytes = len(self.sampled.encode(self.encoding)) / len(self.sampled)
-        self.est_ctr += 1
+        if len(self.est_sample) < self.prog.made/10000:
+            self.est_sample += r[:100]
+            self.est_charbytes = max(1, len(self.est_sample.encode(self.encoding)) / len(self.est_sample))
 
     def read(self, size=-1):
         r = self.fp_orig_read(size)
@@ -174,7 +156,7 @@ class FileProgress:
 
     def readline(self, size=-1):
         r = self.fp_orig_readline(size)
-        self.update_progress_line(r)
+        self.update_progress(r)
         return r
 
     def __getattr__(self, k):
@@ -194,7 +176,7 @@ class FileProgress:
             yield from self.fp
         else:
             for line in self.fp:
-                self.update_progress_line(line)
+                self.update_progress(line)
                 yield line
 
     def __exit__(self, type, value, tb):
