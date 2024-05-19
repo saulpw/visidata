@@ -368,7 +368,7 @@ class Column(Extensible):
                     dispval = options.disp_error_val
                 return DisplayWrapper(cellval.val, error=exc.stacktrace,
                                         text=dispval,
-                                        note=options.note_getter_exc,
+                                        note=options.disp_note_getexc,
                                         notecolor='color_error')
             elif typedval.val is None:  # early out for strict None
                 return DisplayWrapper(None, text='',  # force empty display for None
@@ -377,18 +377,18 @@ class Column(Extensible):
             elif isinstance(typedval, TypedExceptionWrapper):  # calc succeeded, type failed
                 return DisplayWrapper(typedval.val, text=str(cellval),
                                             error=typedval.stacktrace,
-                                            note=options.note_type_exc,
+                                            note=options.disp_note_typeexc,
                                             notecolor='color_warning')
             else:
                 return DisplayWrapper(typedval.val, text=str(typedval.val),
                                             error=['unknown'],
-                                            note=options.note_type_exc,
+                                            note=options.disp_note_typeexc,
                                             notecolor='color_warning')
 
         elif isinstance(typedval, threading.Thread):
             return DisplayWrapper(None,
                                 text=options.disp_pending,
-                                note=options.note_pending,
+                                note=options.disp_note_pending,
                                 notecolor='color_note_pending')
 
         dw = DisplayWrapper(cellval)
@@ -411,7 +411,7 @@ class Column(Extensible):
                 dw.text = str(cellval)
             except Exception as e:
                 dw.text = str(e)
-            dw.note = options.note_format_exc
+            dw.note = options.disp_note_fmtexc
             dw.notecolor = 'color_warning'
 
 #        dw.display = self.display(dw)   # set during draw() when colwidth is known

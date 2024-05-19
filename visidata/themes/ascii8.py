@@ -13,10 +13,10 @@ vd.themes['ascii8'] = dict(
     disp_ambig_width=1,
 
     disp_pending='',
-    note_pending=':',
-    note_format_exc='?',
-    note_getter_exc='!',
-    note_type_exc='!',
+    disp_note_pending=':',
+    disp_note_fmtexc='?',
+    disp_note_getexc='!',
+    disp_note_typeexc='!',
 
     color_note_pending='bold magenta',
     color_note_type='yellow',
