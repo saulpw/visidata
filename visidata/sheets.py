@@ -878,7 +878,7 @@ class TableSheet(BaseSheet):
                     notewidth = 1 if note else 0
                     if note:
                         notecattr = update_attr(cattr, colors.get_color(cellval.notecolor), 10)
-                        scr.addstr(ybase, x+colwidth-notewidth, note, notecattr.attr)
+                        clipdraw(scr, ybase, x+colwidth-notewidth, note, notecattr)
 
                     lines = lines[voffset:]
 
