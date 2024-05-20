@@ -182,7 +182,10 @@ def mainloop(vd, scr):
 
         vd.setWindows(vd.scrFull)
 
-        if not vd.drainPendingKeys(scr) or time.time() - vd._lastDrawTime > vd.min_draw_ms/1000:  #1459
+        # a newly created sheet needs to be drawn once to set its _scr
+        if vd.activeSheet._scr is None or \
+           not vd.drainPendingKeys(scr) or \
+           time.time() - vd._lastDrawTime > vd.min_draw_ms/1000:  #1459
             vd.draw_all()
             vd._lastDrawTime = time.time()
 

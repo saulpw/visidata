@@ -179,6 +179,7 @@ class TestCommands:
         vd.allSheets = [vs]
         vs.mouseX, vs.mouseY = (4, 4)
         vs.draw(mock_screen)
+        vs._scr = mock_screen
         if longname in inputLines:
             vd.currentReplayRow = vd.cmdlog.newRow(longname=longname, input=inputLines[longname])
         else:

@@ -10,6 +10,7 @@ def curses_setup():
     import visidata
 
     curses.curs_set = lambda v: None
+    curses.doupdate = lambda: None
     visidata.options.overwrite = 'always'
 
 
