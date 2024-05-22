@@ -27,6 +27,8 @@ def getGlobals():
     'Return the VisiData globals dict.'
     return globals()
 
+from math import *
+
 from .utils import *
 
 from .extensible import *

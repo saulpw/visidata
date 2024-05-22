@@ -122,7 +122,9 @@ vd.addGlobals(
     hours=1.0/24,
     minutes=1.0/(24*60),
     seconds=1.0/(24*60*60),
-    datedelta=datedelta)
+    datedelta=datedelta,
+    datetime=date,
+    date=date)
 
 
 Sheet.addCommand('@', 'type-date', 'cursorCol.type = date', 'set type of current column to date')
