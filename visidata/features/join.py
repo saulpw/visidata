@@ -167,7 +167,11 @@ class MergeColumn(Column):
 
     def isDiff(self, row, value):
         col = list(self.cols.values())[0]
-        return col and value != col.getValue(row[col.sheet])
+        if not col:
+            return False
+        if row[col.sheet] is None:
+            return True
+        return value != col.getValue(row[col.sheet])
 
 
 #### slicing and dicing
@@ -196,6 +200,7 @@ class JoinSheet(Sheet):
         self.setKeys(self.columns)
 
         allcols = collections.defaultdict(dict) # colname: { sheet: origcol, ... }
+        # MergeColumn relies on allcols having sheets in this specific order
         for sheetnum, vs in enumerate(sheets):
             for c in vs.visibleCols:
                 if c not in self.sheetKeyCols[vs]:
