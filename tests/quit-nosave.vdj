@@ -1,0 +1,3 @@
+#!vd -p
+{"sheet": "", "col": "", "row": "", "longname": "open-file", "input": "sample_data/2m.tsv", "keystrokes": null, "comment": null}
+{"sheet": "", "col": "", "row": "", "longname": "quit-all", "input": ""}
