@@ -94,3 +94,4 @@
 22. Test `open-row` on an html link: https://hls.gsfc.nasa.gov/data/
 23. That DirSheet requires a commit-sheet before changes on filesystem
 24. Test adding multiple aggregators via palette (+)
+25. time vd -p tests/quit-nosave.vdj  - note down the time. compare to PR #2369
