@@ -148,7 +148,8 @@ class TableSheet(BaseSheet):
         ColumnColorizer(1, 'color_key_col', lambda s,c,r,v: c and c.keycol),
         CellColorizer(0, 'color_default', lambda s,c,r,v: True),
         RowColorizer(1, 'color_error', lambda s,c,r,v: isinstance(r, (Exception, TypedExceptionWrapper))),
-        CellColorizer(3, 'color_current_cell', lambda s,c,r,v: c is s.cursorCol and r is s.cursorRow)
+        CellColorizer(3, 'color_current_cell', lambda s,c,r,v: c is s.cursorCol and r is s.cursorRow),
+        ColumnColorizer(1, 'color_hidden_col', lambda s,c,r,v: c and c.hidden),
     ]
     nKeys = 0  # columns[:nKeys] are key columns
     _ordering = []  # list of (col:Column|str, reverse:bool)
@@ -398,7 +399,7 @@ class TableSheet(BaseSheet):
     @property
     def cursorCol(self):
         'Current Column object.'
-        vcols = self.visibleCols
+        vcols = self._ordered_cols
         return vcols[min(self.cursorVisibleColIndex, len(vcols)-1)] if vcols else None
 
     @property
@@ -592,8 +593,8 @@ class TableSheet(BaseSheet):
 
         if self.cursorVisibleColIndex <= 0:
             self.cursorVisibleColIndex = 0
-        elif self.cursorVisibleColIndex >= self.nVisibleCols:
-            self.cursorVisibleColIndex = self.nVisibleCols-1
+        elif self.cursorVisibleColIndex >= len(self._ordered_cols):
+            self.cursorVisibleColIndex = len(self._ordered_cols)-1
 
         if self.topRowIndex < 0:
             self.topRowIndex = 0
@@ -639,8 +640,8 @@ class TableSheet(BaseSheet):
         self._visibleColLayout = {}
         x = 0
         vcolidx = 0
-        for vcolidx in range(0, self.nVisibleCols):
-            width = self.calcSingleColLayout(vcolidx, x, minColWidth)
+        for vcolidx, col in enumerate(self._ordered_cols):
+            width = self.calcSingleColLayout(col, vcolidx, x, minColWidth)
             if width:
                 x += width+sepColWidth
             if x > winWidth-1:
@@ -648,17 +649,21 @@ class TableSheet(BaseSheet):
 
         self.rightVisibleColIndex = vcolidx
 
-    def calcSingleColLayout(self, vcolidx:int, x:int=0, minColWidth:int=4):
-            col = self.visibleCols[vcolidx]
+    def calcSingleColLayout(self, col:Column, vcolidx:int, x:int=0, minColWidth:int=4):
             if col.width is None and len(self.visibleRows) > 0:
                 vrows = self.visibleRows if self.nRows > 1000 else self.rows[:1000]  #1964
                 # handle delayed column width-finding
                 col.width = max(col.getMaxWidth(vrows), minColWidth)
-                if vcolidx != self.nVisibleCols-1:  # let last column fill up the max width
+                if vcolidx < self.nVisibleCols-1:  # let last column fill up the max width
                     col.width = min(col.width, self.options.default_width)
+
             width = col.width if col.width is not None else self.options.default_width
-            if col in self.keyCols:
-                width = max(width, 1)  # keycols must all be visible
+
+            # when cursor showing a hidden column
+            if vcolidx >= self.nVisibleCols and vcolidx == self.cursorVisibleColIndex:
+                width = self.options.default_width
+
+            width = max(width, 1)
             if col in self.keyCols or vcolidx >= self.leftVisibleColIndex:  # visible columns
                 self._visibleColLayout[vcolidx] = [x, min(width, self.windowWidth-x)]
                 return width
@@ -666,7 +671,7 @@ class TableSheet(BaseSheet):
 
     def drawColHeader(self, scr, y, h, vcolidx):
         'Compose and draw column header for given vcolidx.'
-        col = self.visibleCols[vcolidx]
+        col = self._ordered_cols[vcolidx]
 
         # hdrattr highlights whole column header
         # sepattr is for header separators and indicators
@@ -677,7 +682,7 @@ class TableSheet(BaseSheet):
             hdrcattr = update_attr(hdrcattr, colors.color_current_hdr, 2)
 
         C = self.options.disp_column_sep
-        if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.rightVisibleColIndex:
+        if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.nVisibleCols-1:
             C = self.options.disp_keycol_sep
 
         x, colwidth = self._visibleColLayout[vcolidx]
@@ -788,8 +793,8 @@ class TableSheet(BaseSheet):
 
             for vcolidx, (x, colwidth) in sorted(self._visibleColLayout.items()):
                 if x < self.windowWidth:  # only draw inside window
-                    vcols = self.visibleCols
-                    if vcolidx >= len(vcols):
+                    vcols = self._ordered_cols
+                    if vcolidx >= self.nVisibleCols and vcolidx != self.cursorVisibleColIndex:
                         continue
                     col = vcols[vcolidx]
                     cellval = col.getCell(row)

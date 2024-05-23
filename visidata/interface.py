@@ -10,12 +10,12 @@ vd.theme_option('disp_error_val', '', 'displayed contents for computation except
 vd.theme_option('disp_ambig_width', 1, 'width to use for unicode chars marked ambiguous')
 
 vd.theme_option('disp_pending', '', 'string to display in pending cells')
-vd.theme_option('disp_note_pending', '⌛', 'note to display for pending cells')
+vd.theme_option('disp_note_pending', ':', 'note to display for pending cells')
 vd.theme_option('disp_note_fmtexc', '?', 'cell note for an exception during formatting')
 vd.theme_option('disp_note_getexc', '!', 'cell note for an exception during computation')
 vd.theme_option('disp_note_typeexc', '!', 'cell note for an exception during type conversion')
 
-vd.theme_option('color_note_pending', 'bold magenta', 'color of note in pending cells')
+vd.theme_option('color_note_pending', 'bold green', 'color of note in pending cells')
 vd.theme_option('color_note_type', '226 yellow', 'color of cell note for non-str types in anytype columns')
 vd.theme_option('color_note_row', '220 yellow', 'color of row note on left edge')
 vd.option('scroll_incr', -3, 'amount to scroll with scrollwheel')

@@ -12,7 +12,7 @@ vd.theme_option('color_status_replay', 'green', 'color of replay status indicato
 nonLogged = '''forget exec-longname undo redo quit
 show error errors statuses options threads jump
 replay cancel save-cmdlog macro cmdlog-sheet menu repeat reload-every
-go- search scroll prev next page start end zoom resize visibility sidebar
+go- search scroll prev next page start end zoom visibility sidebar
 mouse suspend redraw no-op help syscopy sysopen profile toggle'''.split()
 
 vd.option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog', sheettype=None)
