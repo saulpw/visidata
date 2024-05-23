@@ -75,32 +75,28 @@ Column.aggregators = property(aggregators_get, aggregators_set)
 
 
 class Aggregator:
-    def __init__(self, name, type, funcRows, funcValues=None, helpstr='foo'):
-        'Define aggregator `name` that calls func(col, rows)'
+    def __init__(self, name, type, funcValues=None, helpstr='foo'):
+        'Define aggregator `name` that calls funcValues(values)'
         self.type = type
-        self.func = funcRows  # funcRows(col, rows)
-        self.funcValues = funcValues  # funcValues(values, *args)
+        self.funcValues = funcValues  # funcValues(values)
         self.helpstr = helpstr
         self.name = name
 
-    def __call__(self, *args, **kwargs):
-        return self.func(*args, **kwargs)
-
-_defaggr = Aggregator
-
-@VisiData.api
-def aggregator(vd, name, funcValues, helpstr='', *args, type=None):
-    'Define simple aggregator *name* that calls ``funcValues(values, *args)`` to aggregate *values*.  Use *type* to force the default type of the aggregated column.'
-    def _funcRows(col, rows):  # wrap builtins so they can have a .type
+    def aggregate(self, col, rows):  # wrap builtins so they can have a .type
         vals = list(col.getValues(rows))
         try:
-            return funcValues(vals, *args)
+            return self.funcValues(vals)
         except Exception as e:
             if len(vals) == 0:
                 return None
             raise e
 
-    vd.aggregators[name] = _defaggr(name, type, _funcRows, funcValues=funcValues, helpstr=helpstr)  # accepts a srccol + list of rows
+
+@VisiData.api
+def aggregator(vd, name, funcValues, helpstr='', *, type=None):
+    '''Define simple aggregator *name* that calls ``funcValues(values)`` to aggregate *values*.
+       Use *type* to force type of aggregated column (default to use type of source column).'''
+    vd.aggregators[name] = Aggregator(name, type, funcValues=funcValues, helpstr=helpstr)
 
 ## specific aggregator implementations
 
@@ -138,13 +134,18 @@ def _percentile(N, percent, key=lambda x:x):
     return d0+d1
 
 @functools.lru_cache(100)
-def percentile(pct, helpstr=''):
-    return _defaggr('p%s'%pct, None,
-                    lambda col,rows,pct=pct: _percentile(sorted(col.getValues(rows)), pct/100,
-                                                         key=(lambda d: d.timestamp()) if col.type is date else lambda x:x), helpstr=helpstr)
+class PercentileAggregator(Aggregator):
+    def __init__(self, pct, helpstr=''):
+        super().__init__('p%s'%pct, None, helpstr=helpstr)
+        self.pct = pct
+
+    def aggregate(self, col, rows):
+        return _percentile(sorted(col.getValues(rows)), self.pct/100, key=float)
+
 
 def quantiles(q, helpstr):
-    return [percentile(round(100*i/q), helpstr) for i in range(1, q)]
+    return [PercentileAggregator(round(100*i/q), helpstr) for i in range(1, q)]
+
 
 vd.aggregator('min', min, 'minimum value')
 vd.aggregator('max', max, 'maximum value')
@@ -166,26 +167,31 @@ vd.aggregators['q10'] = quantiles(10, 'deciles (10/20/30/40/50/60/70/80/90th pct
 # since bb29b6e, a record of every aggregator
 # is needed in vd.aggregators
 for pct in (10, 20, 25, 30, 33, 40, 50, 60, 67, 70, 75, 80, 90, 95, 99):
-    vd.aggregators[f'p{pct}'] = percentile(pct, f'{pct}th percentile')
+    vd.aggregators[f'p{pct}'] = PercentileAggregator(pct, f'{pct}th percentile')
 
-def keyfunc(aggr_func):
+class KeyFindingAggregator(Aggregator):
     '''Return the key of the row that results from applying *aggr_func* to *rows*.
         Return None if *rows* is an empty list.
         *aggr_func* takes a list of (value, row) tuples, one for each row in the column,
         excluding rows where the column holds null and error values.
         *aggr_func* must also take the parameters *default* and *key*, as max() does:
         https://docs.python.org/3/library/functions.html#max'''
-    def key_aggr_func(col, rows):
+
+    def __init__(self, aggr_func, *args, **kwargs):
+        self.aggr_func = aggr_func
+        super().__init__(*args, **kwargs)
+
+    def aggregate(self, col, rows):
         if not col.sheet.keyCols:
             vd.error('key aggregator function requires one or more key columns')
             return None
         # convert dicts to lists because functions like max() can't compare dicts
         sortkey = lambda t: (t[0], sorted(t[1].items())) if isinstance(t[1], dict) else t
-        row = aggr_func(col.getValueRows(rows), default=(None, None), key=sortkey)[1]
+        row = self.aggr_func(col.getValueRows(rows), default=(None, None), key=sortkey)[1]
         return col.sheet.rowkey(row) if row else None
-    return key_aggr_func
-vd.aggregators['keymax'] = _defaggr('keymax', anytype, keyfunc(max), helpstr='key of the maximum value')
-vd.aggregators['keymin'] = _defaggr('keymin', anytype, keyfunc(min), helpstr='key of the minimum value')
+
+vd.aggregators['keymin'] = KeyFindingAggregator(min, 'keymin', anytype, helpstr='key of the minimum value')
+vd.aggregators['keymax'] = KeyFindingAggregator(max, 'keymax', anytype, helpstr='key of the maximum value')
 
 
 ColumnsSheet.columns += [
@@ -223,7 +229,7 @@ def memo_aggregate(col, agg_choices, rows):
         if not agg: continue
         aggs = agg if isinstance(agg, list) else [agg]
         for agg in aggs:
-            aggval = agg(col, rows)
+            aggval = agg.aggregate(col, rows)
             typedval = wrapply(agg.type or col.type, aggval)
             dispval = col.format(typedval)
             k = col.name+'_'+agg.name

@@ -53,7 +53,7 @@ class AggrColumn(Column):
     def calcValue(col, row):
         if col.sheet.loading:
             return visidata.INPROGRESS
-        return col.aggregator(col.origCol, row.sourcerows)
+        return col.aggregator.aggregate(col.origCol, row.sourcerows)
 
 
 def makeAggrColumn(aggcol, aggregator):
@@ -175,13 +175,13 @@ class PivotSheet(Sheet):
                         c = Column(colname,
                                     type=aggregator.type or aggcol.type,
                                     aggvalue=value,
-                                    getter=lambda col,row,aggcol=aggcol,agg=aggregator: agg(aggcol, row.pivotrows.get(col.aggvalue, [])))
+                                    getter=lambda col,row,aggcol=aggcol,agg=aggregator: agg.aggregate(aggcol, row.pivotrows.get(col.aggvalue, [])))
                         self.addColumn(c)
 
 #                    if aggregator.name != 'count':  # already have count above
 #                        c = Column('Total_' + aggcol.name,
 #                                    type=aggregator.type or aggcol.type,
-#                                    getter=lambda col,row,aggcol=aggcol,agg=aggregator: agg(aggcol, row.sourcerows))
+#                                    getter=lambda col,row,aggcol=aggcol,agg=aggregator: agg.aggregate(aggcol, row.sourcerows))
 #                        self.addColumn(c)
 
     @asyncthread
