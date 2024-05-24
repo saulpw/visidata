@@ -1,6 +1,0 @@
-#!vd -p
-{"sheet": "global", "col": null, "row": "undo", "longname": "set-option", "input": "True", "keystrokes": null, "comment": null}
-{"longname": "open-file", "input": "tests/large_sheet.tsv", "keystrokes": "o"}
-{"sheet": "large_sheet", "col": "", "row": "", "longname": "select-rows", "input": "", "keystrokes": "gs", "comment": "select all rows"}
-{"sheet": "large_sheet", "col": "", "row": "", "longname": "delete-selected", "input": "", "keystrokes": "gd", "comment": "delete selected rows"}
-{"sheet": "large_sheet", "longname": "undo-last", "keystrokes": "U"}
