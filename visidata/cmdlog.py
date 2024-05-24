@@ -319,6 +319,7 @@ class DisableAsync:
 def replay_sync(vd, cmdlog):
     'Replay all commands in *cmdlog*.'
     with vd.DisableAsync():
+        vd.sync()  #2352 let cmdlog finish loading
         cmdlog.cursorRowIndex = 0
         vd.currentReplay = cmdlog
 
