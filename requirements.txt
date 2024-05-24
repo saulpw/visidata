@@ -18,7 +18,7 @@ mapbox-vector-tile  # mbtiles
 pypng               # png
 fonttools           # ttf/otf
 sas7bdat            # sas7bdat (SAS)
-xport               # xpt (SAS)
+xport==2.0.2        # xpt (SAS)
 PyYAML>=5.1         # yaml/yml
 dpkt                # pcap
 dnslib              # pcap
