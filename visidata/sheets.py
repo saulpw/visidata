@@ -531,7 +531,13 @@ class TableSheet(BaseSheet):
             idx = len(self.columns) if index is None else index
             col.recalc(self)
             self.columns.insert(idx+i, col)
-            Sheet.visibleCols.fget.cache_clear()
+
+        # statements after addColumn in the same command may want to use these cached properties
+        Sheet.keyCols.fget.cache_clear()
+        Sheet.visibleCols.fget.cache_clear()
+        Sheet.availCols.fget.cache_clear()
+        Sheet.availColnames.fget.cache_clear()
+        Sheet.colsByName.fget.cache_clear()
 
         return cols[0]
 
