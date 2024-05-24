@@ -13,8 +13,11 @@ class StoredList(list):
     @property
     def path(self):
         vdpath = Path(vd.options.visidata_dir)
-        if vdpath.exists():
-            return vdpath/(self.name + '.jsonl')
+        if not vdpath.exists():
+            if vd.options.nothing:
+                return
+            vdpath.mkdir(parents=True)
+        return vdpath/(self.name + '.jsonl')
 
     def reload(self):
         p = self.path
