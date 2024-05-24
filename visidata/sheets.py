@@ -36,14 +36,29 @@ def _splitcell(sheet, s, width=0, maxheight=1):
 
 disp_column_fill = ' ' # pad chars before column value
 
-# higher precedence color overrides lower; all non-color attributes combine
-# coloropt is the color option name (like 'color_error')
-# func(sheet,col,row,value) should return a true value if coloropt should be applied
-# if coloropt is None, func() should return a coloropt (or None) instead
-Colorizer = collections.namedtuple('Colorizer', 'precedence coloropt func')
-RowColorizer = collections.namedtuple('RowColorizer', 'precedence coloropt func')
-CellColorizer = collections.namedtuple('CellColorizer', 'precedence coloropt func')
-ColumnColorizer = collections.namedtuple('ColumnColorizer', 'precedence coloropt func')
+class Colorizer:
+    '''higher precedence color overrides lower; all non-color attributes combine.
+       coloropt is the color option name (like 'color_error').
+       func(sheet,col,row,value) should return a true value if coloropt should be applied
+       If coloropt is None, func() should return a coloropt (or None) instead'''
+
+    def __init__(self, precedence:int, coloropt:str, func=lambda s,c,r,v: None):
+        self.precedence = precedence
+        self.coloropt = coloropt
+        self._func = func
+
+class RowColorizer(Colorizer):
+    def func(self, s, c, r, v):
+        return r is not None and self._func(s,c,r,v)
+
+class ColumnColorizer(Colorizer):
+    def func(self, s, c, r, v):
+        return c is not None and self._func(s,c,r,v)
+
+class CellColorizer(Colorizer):
+    def func(self, s, c, r, v):
+        return r is not None and c is not None and self._func(s,c,r,v)
+
 
 class RecursiveExprException(Exception):
     pass
