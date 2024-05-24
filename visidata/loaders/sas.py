@@ -25,7 +25,9 @@ class XptSheet(Sheet):
             for i, var in enumerate(self.rdr._variables):
                 self.addColumn(ColumnItem(var.name, i, type=float if var.numeric else str))
 
-            yield from self.rdr
+            # a visidata row must not be a tuple, so convert each tuple to a list
+            for t in self.rdr:
+                yield list(t)
 
 
 class SasSheet(Sheet):
