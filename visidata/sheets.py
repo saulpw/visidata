@@ -1046,6 +1046,8 @@ def push(vd, vs, pane=0, load=True):
 
     if load:
         vs.ensureLoaded()
+    if vd.activeCommand:
+        vs.longname = vd.activeCommand.longname
 
 
 @VisiData.api
@@ -1056,6 +1058,8 @@ def quit(vd, *sheets):
         vs.confirmQuit('quit')
         vs.pane = 0
         vd.remove(vs)
+    if vd.activeCommand:
+        vd.activeSheet.longname = vd.activeCommand.longname
 
 
 @BaseSheet.api
