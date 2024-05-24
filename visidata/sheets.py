@@ -66,7 +66,7 @@ class LazyComputeRow:
         return lcmobj._lcm
 
     def __iter__(self):
-        yield from self.sheet._ordered_colnames
+        yield from self.sheet.availColnames
         yield from self._lcm.keys()
         yield 'row'
         yield 'sheet'
@@ -86,11 +86,11 @@ class LazyComputeRow:
 
     def __getitem__(self, colid):
         try:
-            i = self.sheet._ordered_colnames.index(colid)
-            c = self.sheet._ordered_cols[i]
+            i = self.sheet.availColnames.index(colid)
+            c = self.sheet.availCols[i]
             if c is self.col:  # ignore current column
-                j = self.sheet._ordered_colnames[i+1:].index(colid)
-                c = self.sheet._ordered_cols[i+j+1]
+                j = self.sheet.availColnames[i+1:].index(colid)
+                c = self.sheet.availCols[i+j+1]
 
         except ValueError:
             try:
@@ -399,7 +399,7 @@ class TableSheet(BaseSheet):
     @property
     def cursorCol(self):
         'Current Column object.'
-        vcols = self._ordered_cols
+        vcols = self.availCols
         return vcols[min(self.cursorVisibleColIndex, len(vcols)-1)] if vcols else None
 
     @property
@@ -424,14 +424,14 @@ class TableSheet(BaseSheet):
         return sorted([c for c in self.columns if c.keycol and not c.hidden], key=lambda c:c.keycol)
 
     @drawcache_property
-    def _ordered_cols(self):
-        'List of all columns, visible columns first.'
+    def availCols(self):
+        'List of all available columns, visible columns first.'
         return self.visibleCols + [c for c in self.columns if c.hidden]
 
     @drawcache_property
-    def _ordered_colnames(self):
-        'List of all column names, visible columns first.'
-        return [c.name for c in self._ordered_cols]
+    def availColnames(self):
+        'List of all available column names, visible columns first.'
+        return [c.name for c in self.availCols]
 
     @property
     def cursorColIndex(self):
@@ -593,8 +593,8 @@ class TableSheet(BaseSheet):
 
         if self.cursorVisibleColIndex <= 0:
             self.cursorVisibleColIndex = 0
-        elif self.cursorVisibleColIndex >= len(self._ordered_cols):
-            self.cursorVisibleColIndex = len(self._ordered_cols)-1
+        elif self.cursorVisibleColIndex >= len(self.availCols):
+            self.cursorVisibleColIndex = len(self.availCols)-1
 
         if self.topRowIndex < 0:
             self.topRowIndex = 0
@@ -640,7 +640,7 @@ class TableSheet(BaseSheet):
         self._visibleColLayout = {}
         x = 0
         vcolidx = 0
-        for vcolidx, col in enumerate(self._ordered_cols):
+        for vcolidx, col in enumerate(self.availCols):
             width = self.calcSingleColLayout(col, vcolidx, x, minColWidth)
             if width:
                 x += width+sepColWidth
@@ -671,7 +671,7 @@ class TableSheet(BaseSheet):
 
     def drawColHeader(self, scr, y, h, vcolidx):
         'Compose and draw column header for given vcolidx.'
-        col = self._ordered_cols[vcolidx]
+        col = self.availCols[vcolidx]
 
         # hdrattr highlights whole column header
         # sepattr is for header separators and indicators
@@ -793,7 +793,7 @@ class TableSheet(BaseSheet):
 
             for vcolidx, (x, colwidth) in sorted(self._visibleColLayout.items()):
                 if x < self.windowWidth:  # only draw inside window
-                    vcols = self._ordered_cols
+                    vcols = self.availCols
                     if vcolidx >= self.nVisibleCols and vcolidx != self.cursorVisibleColIndex:
                         continue
                     col = vcols[vcolidx]
