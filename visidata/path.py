@@ -305,6 +305,8 @@ class Path(os.PathLike):
             return RepeatFile(self.lines).read()
         elif self.fp:
             return self.fp.read()
+        elif self.fptext:
+            return self.fptext.read()
         else:
             return self._path.read_text(*args, **kwargs)
 

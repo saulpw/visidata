@@ -37,14 +37,17 @@ def eval_vd(logpath, *args, **kwargs):
     'Instantiate logpath with args/kwargs replaced and replay all commands.'
     log = logpath.read_text()
     if args or kwargs:
-        if logpath.ext in ['vdj', 'json', 'jsonl']:
+        if logpath.ext in ['vdj', 'json', 'jsonl'] or logpath is vd.stdinSource:
             from string import Template
             log = Template(log).safe_substitute(**kwargs)
         else:
             log = log.format(*args, **kwargs)
 
     src = Path(logpath.given, fptext=io.StringIO(log), filesize=len(log))
-    vs = vd.openSource(src, filetype=src.ext)
+    if logpath is vd.stdinSource:
+        vs = vd.openSource(src, filetype='vdj')
+    else:
+        vs = vd.openSource(src, filetype=src.ext)
     vs.name += '_vd'
     vd.sync(vs.reload())
     vs.vd = vd
@@ -343,7 +346,6 @@ def main_vd():
     else:
         if args.play == '-':
             vdfile = vd.stdinSource
-            vdfile.name = 'stdin.vd'
         else:
             vdfile = Path(args.play)
 
