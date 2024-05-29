@@ -152,11 +152,18 @@ def moveToPos(vd, sources, startsheets, startcol, startrow):
         vd.clearCaches()
         # descend the tree of subsheets
         for subsheet in startsheets[1:]:
-            rowidx = vs.getRowIndexFromStr(vd.options.rowkey_prefix + subsheet)
-            if rowidx is None:
-                vd.warning(f'{vs.name} has no subsheet "{subsheet}"')
+            if subsheet and subsheet.isdigit():
+                rowidx = int(subsheet)
+            else:
+                rowidx = vs.getRowIndexFromStr(vd.options.rowkey_prefix + subsheet)
+                if rowidx is None:
+                    vd.warning(f'{vs.name} has no subsheet "{subsheet}"')
+                    return
+            try:
+                vs = vs.rows[rowidx]
+            except IndexError:
+                vd.warning(f'{vs.name} has no subsheet "{rowidx}"')
                 return
-            vs = vs.rows[rowidx]
             if not isinstance(vs, BaseSheet):
                 vd.warning(f'row {subsheet} for subsheet is not a sheet')
                 return
