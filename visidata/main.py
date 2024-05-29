@@ -93,6 +93,9 @@ vd.optalias('r', 'dir_depth', 100000)
 @visidata.VisiData.api
 def parsePos(vd, arg:str, inputs:'list[tuple[str, dict]]'=None):
     '''Return (startsheets:list, startcol:str, startrow:str) from *arg* like "+sheet:subsheet:col:row".
+    The elements of *startsheets* are identifiers that pick out a sheet, either
+    a) a string that is a sheet name, or
+    b) a list of strings that are sheet names or numbers (for row indices). For example ['1', 'sales', '3'].
     Returns an empty list for *startsheets* when the starting pos applies to all sheets.
     Returns None for *startsheets* when the position expression did not specify a sheet.
     *inputs* is a list of (path, options) tuples.
@@ -154,11 +157,18 @@ def moveToPos(vd, sources, startsheets, startcol, startrow):
         vd.clearCaches()
         # descend the tree of subsheets
         for subsheet in startsheets[1:]:
-            rowidx = vs.getRowIndexFromStr(vd.options.rowkey_prefix + subsheet)
-            if rowidx is None:
-                vd.warning(f'{vs.name} has no subsheet "{subsheet}"')
+            if subsheet and subsheet.isdigit():
+                rowidx = int(subsheet)
+            else:
+                rowidx = vs.getRowIndexFromStr(vd.options.rowkey_prefix + subsheet)
+                if rowidx is None:
+                    vd.warning(f'{vs.name} has no subsheet "{subsheet}"')
+                    return
+            try:
+                vs = vs.rows[rowidx]
+            except IndexError:
+                vd.warning(f'{vs.name} has no subsheet "{rowidx}"')
                 return
-            vs = vs.rows[rowidx]
             if not isinstance(vs, BaseSheet):
                 vd.warning(f'row {subsheet} for subsheet is not a sheet')
                 return
@@ -171,16 +181,17 @@ def moveToPos(vd, sources, startsheets, startcol, startrow):
     if startrow:
         for vs in sheets:
             if vs:
+                if startrow.isdigit():  # treat strings that look like integers as indices, never row keys
+                    startrow = int(startrow)
                 vs.moveToRow(startrow) or vd.warning(f'{vs} has no row "{startrow}"')
 
     if startcol:
         for vs in sheets:
             if vs:
+                if startcol.isdigit():  # treat strings that look like integers as indices, never column names
+                    startcol = int(startcol)
                 if not vs.moveToCol(startcol):
-                    if startcol.isdigit():
-                        vs.moveToCol(int(startcol)) # handle indexing by column number
-                    else:
-                        vd.warning(f'{vs} has no column "{startcol}"')
+                    vd.warning(f'{vs} has no column "{startcol}"')
 
 def main_vd():
     'Open the given sources using the VisiData interface.'
