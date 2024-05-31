@@ -243,7 +243,8 @@ def memo_aggregate(col, agg_choices, rows):
         for agg in aggs:
             aggval = agg.aggregate(col, rows)
             typedval = wrapply(agg.type or col.type, aggval)
-            dispval = col.format(typedval)
+            # limit width to limit formatting time when typedval is a long list
+            dispval = col.format(typedval, width=1000)
             k = col.name+'_'+agg.name
             vd.status(f'{k}={dispval}')
             vd.memory[k] = typedval
