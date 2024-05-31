@@ -116,6 +116,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'sheet': '',
                  'col': 'Units',
                  'row': '5',
+                 'addcol-aggregate': 'max',
               }
 
 @pytest.mark.usefixtures('curses_setup')

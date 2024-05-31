@@ -3,8 +3,9 @@ import math
 import functools
 import collections
 import statistics
+import itertools
 
-from visidata import Progress, Sheet, Column, ColumnsSheet, VisiData
+from visidata import Progress, Sheet, Column, ColumnsSheet, VisiData, SettableColumn
 from visidata import vd, anytype, vlen, asyncthread, wrapply, AttrDict, date, INPROGRESS, stacktrace, TypedExceptionWrapper
 
 vd.help_aggregators = '''# Choose Aggregators
@@ -76,7 +77,7 @@ Column.aggregators = property(aggregators_get, aggregators_set)
 
 
 class Aggregator:
-    def __init__(self, name, type, funcValues=None, helpstr='foo'):
+    def __init__(self, name, type, funcValues=None, helpstr=''):
         'Define aggregator `name` that calls funcValues(values)'
         self.type = type
         self.funcValues = funcValues  # funcValues(values)
@@ -92,12 +93,47 @@ class Aggregator:
                 return None
             raise e
 
+class ListAggregator(Aggregator):
+    '''A list aggregator is an aggregator that returns a list of values, generally
+    one value per input row, unlike ordinary aggregators that operate on rows
+    and return only a single value.
+    To implement a new list aggregator, subclass ListAggregator,
+    and override aggregate() and aggregate_list().'''
+    def __init__(self, name, type, helpstr='', listtype=None):
+        '''*listtype* determines the type of the column created by addcol_aggregate()
+        for list aggrs. If it is None, then the new column will match the type of the input column'''
+        super().__init__(name, type, helpstr=helpstr)
+        self.listtype = listtype
+
+    def aggregate(self, col, rows) -> list:
+        '''Return a list, which can be shorter than *rows*, because it filters out nulls and errors.
+        Override in subclass.'''
+        vals = self.aggregate_list(col, rows)
+        # filter out nulls and errors
+        vals = [ v for v in vals if not col.sheet.isNullFunc()(v) ]
+        return vals
+
+    def aggregate_list(self, col, row_group) -> list:
+        '''Return a list of results, which will be one result per input row.
+        *row_group* is an iterable that holds a "group" of rows to run the aggregator on.
+        rows in *row_group* are not necessarily in the same order they are in the sheet.
+        Override in subclass.'''
+        vals = [ col.getTypedValue(r) for r in row_group ]
+        return vals
 
 @VisiData.api
 def aggregator(vd, name, funcValues, helpstr='', *, type=None):
     '''Define simple aggregator *name* that calls ``funcValues(values)`` to aggregate *values*.
        Use *type* to force type of aggregated column (default to use type of source column).'''
     vd.aggregators[name] = Aggregator(name, type, funcValues=funcValues, helpstr=helpstr)
+
+@VisiData.api
+def aggregator_list(vd, name, helpstr='', type=anytype, listtype=anytype):
+    '''Define simple aggregator *name* that calls ``funcValues(values)`` to aggregate *values*.
+       Use *type* to force type of aggregated column (default to use type of source column).
+       Use *listtype* to force the type of the new column created by addcol-aggregate.
+       If *listtype* is None, it will match the type of the source column.'''
+    vd.aggregators[name] = ListAggregator(name, type, helpstr=helpstr, listtype=listtype)
 
 ## specific aggregator implementations
 
@@ -147,10 +183,49 @@ class PercentileAggregator(Aggregator):
     def aggregate(self, col, rows):
         return _percentile(sorted(col.getValues(rows)), self.pct/100, key=float)
 
-
 def quantiles(q, helpstr):
     return [PercentileAggregator(round(100*i/q), helpstr) for i in range(1, q)]
 
+def aggregate_groups(sheet, col, rows, aggr) -> list:
+    '''Returns a list, containing the result of the aggregator applied to each row.
+    *col* is a column whose values determine each row's rank within a group.
+    *rows* is a list of visidata rows.
+    *aggr* is an Aggregator object.
+    Rows are grouped by their key columns. Null key column cells are considered equal,
+    so nulls are grouped together. Cells with exceptions do not group together.
+    Each exception cell is grouped by itself, with only one row in the group.
+    '''
+    def _key_progress(prog):
+        def identity(val):
+            prog.addProgress(1)
+            return val
+        return identity
+
+    with Progress(gerund='ranking', total=4*sheet.nRows) as prog:
+        p = _key_progress(prog) # increment progress every time p() is called
+        # compile row data, for each row a list of tuples: (group_key, rank_key, rownum)
+        rowdata = [(sheet.rowkey(r), col.getTypedValue(r), p(rownum)) for rownum, r in enumerate(rows)]
+        # sort by row key and column value to prepare for grouping
+        try:
+            rowdata.sort(key=p)
+        except TypeError as e:
+            vd.fail(f'elements in a ranking column must be comparable: {e.args[0]}')
+        rowvals = []
+        #group by row key
+        for _, group in itertools.groupby(rowdata, key=lambda v: v[0]):
+            # within a group, the rows have already been sorted by col_val
+            group = list(group)
+            if isinstance(aggr, ListAggregator): # for list aggregators, each row gets its own value
+                aggr_vals = aggr.aggregate_list(col, [rows[rownum] for _, _, rownum in group])
+                rowvals += [(rownum, v) for (_, _, rownum), v in zip(group, aggr_vals)]
+            else:             # for normal aggregators, each row in the group gets the same value
+                aggr_val = aggr.aggregate(col, [rows[rownum] for _, _, rownum in group])
+                rowvals += [(rownum, aggr_val) for _, _, rownum in group]
+            prog.addProgress(len(group))
+        # sort by unique rownum, to make rank results match the original row order
+        rowvals.sort(key=p)
+        rowvals = [ v for rownum, v in rowvals ]
+        return rowvals
 
 vd.aggregator('min', min, 'minimum value')
 vd.aggregator('max', max, 'maximum value')
@@ -161,8 +236,8 @@ vd.aggregator('mode', statistics.mode, 'mode of values')
 vd.aggregator('sum', vsum, 'sum of values')
 vd.aggregator('distinct', set, 'distinct values', type=vlen)
 vd.aggregator('count', lambda values: sum(1 for v in values), 'number of values', type=int)
-vd.aggregator('list', list, 'list of values', type=anytype)
-vd.aggregator('stdev', stdev, 'standard deviation of values', type=float)
+vd.aggregator_list('list', 'list of values', type=anytype, listtype=None)
+vd.aggregator('stdev', statistics.stdev, 'standard deviation of values', type=float)
 
 vd.aggregators['q3'] = quantiles(3, 'tertiles (33/66th pctile)')
 vd.aggregators['q4'] = quantiles(4, 'quartiles (25/50/75th pctile)')
@@ -267,9 +342,8 @@ def aggregator_choices(vd):
 
 
 @VisiData.api
-def chooseAggregators(vd):
+def chooseAggregators(vd, prompt = 'choose aggregators: '):
     '''Return a list of aggregator name strings chosen or entered by the user. User-entered names may be invalid.'''
-    prompt = 'choose aggregators: '
     def _fmt_aggr_summary(match, row, trigger_key):
         formatted_aggrname = match.formatted.get('key', row.key) if match else row.key
         r = ' '*(len(prompt)-3)
@@ -296,10 +370,34 @@ def chooseAggregators(vd):
             vd.warning(f'aggregator does not exist: {aggr}')
     return aggrs
 
-Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseAggregators())', 'add aggregator to current column')
+@Sheet.api
+@asyncthread
+def addcol_aggregate(sheet, col, aggrnames):
+    for aggrname in aggrnames:
+        aggrs = vd.aggregators.get(aggrname)
+        aggrs = aggrs if isinstance(aggrs, list) else [aggrs]
+        if not aggrs: continue
+        for aggr in aggrs:
+            rows = aggregate_groups(sheet, col, sheet.rows, aggr)
+            if isinstance(aggr, ListAggregator):
+                t = aggr.listtype or col.type
+            else:
+                t = aggr.type or col.type
+            c = SettableColumn(name=f'{col.name}_{aggr.name}', type=t)
+            sheet.addColumnAtCursor(c)
+            c.setValues(sheet.rows, *rows)
+
+Sheet.addCommand('+', 'aggregate-col', 'addAggregators([cursorCol], chooseAggregators())', 'Add aggregator to current column')
 Sheet.addCommand('z+', 'memo-aggregate', 'cursorCol.memo_aggregate(chooseAggregators(), selectedRows or rows)', 'memo result of aggregator over values in selected rows for current column')
 ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or source[0].nonKeyVisibleCols, chooseAggregators())', 'add aggregators to selected source columns')
+Sheet.addCommand('', 'addcol-aggregate', 'addcol_aggregate(cursorCol, chooseAggregators(prompt="aggregator for groups: "))', 'add column(s) with aggregator of rows grouped by key columns')
+
+vd.addGlobals(
+    ListAggregator=ListAggregator
+)
 
 vd.addMenuItems('''
     Column > Add aggregator > aggregate-col
+    Column > Add column > aggregate > addcol-aggregate
 ''')
+
