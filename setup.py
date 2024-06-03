@@ -13,7 +13,7 @@ setup(
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     author="Saul Pwanson",
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     author_email="visidata@saul.pw",
     url="https://visidata.org",
     download_url="https://github.com/saulpw/visidata/tarball/" + __version__,
