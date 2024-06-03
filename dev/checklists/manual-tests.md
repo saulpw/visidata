@@ -95,3 +95,4 @@
 23. That DirSheet requires a commit-sheet before changes on filesystem
 24. Test adding multiple aggregators via palette (+)
 25. time vd -p tests/quit-nosave.vdj  - note down the time. compare to PR #2369
+26. Use the z; command. Then type in a command line like echo "| Ceci n'est pas une pipe"
