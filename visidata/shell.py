@@ -79,7 +79,7 @@ class ColumnShell(Column):
                 else:
                     args.append(arg)
 
-            p = subprocess.Popen([os.getenv('SHELL', 'bash'), '-c', ' '.join(args)],
+            p = subprocess.Popen([os.getenv('SHELL', 'bash'), '-c', shlex.join(args)],
                     stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             return p.communicate()
         except Exception as e:
