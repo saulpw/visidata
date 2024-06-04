@@ -25,6 +25,7 @@ class UnfurledSheet(Sheet):
                 self.cursorVisibleColIndex = len(self.columns)-1
                 self.addColumn(ColumnItem(col.name + "_key", 1))
                 self.addColumn(ColumnItem(col.name + "_value", 2))
+                self.cursorVisibleColIndex = len(self.columns)-1
             else:
                 self.addColumn(SubColumnFunc(col.name, col, 0, keycol=col.keycol))
 
