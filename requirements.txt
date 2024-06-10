@@ -43,8 +43,8 @@ numpy               # npy pandas hdf5 arrow
 tomli; python_version < '3.11' # toml
 pyconll             # conll/conllu
 backports.zoneinfo; python_version < '3.9' #f5log
-msgpack				# msgpack
-brotli 				# msgpackz
+msgpack             # msgpack
+brotli              # msgpackz
 
 requests_cache      # scraper
 beautifulsoup4      # scraper
