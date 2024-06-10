@@ -13,7 +13,7 @@ class MsgpackSheet(JsonSheet):
     def iterload(self):
         msgpack = vd.importModule('msgpack')
         data = self.source.read_bytes()
-        if self.source.suffix == '.msgpackz':
+        if self.options.filetype == 'msgpackz':
             brotli = vd.importModule('brotli')
             data = brotli.decompress(data)
         yield from msgpack.unpackb(data, raw=False)
