@@ -1,6 +1,6 @@
 import math
 
-from visidata import VisiData, Canvas, Sheet, Progress, BoundingBox, Point
+from visidata import VisiData, Canvas, Sheet, Progress, BoundingBox, Point, ColumnsSheet
 from visidata import vd, asyncthread, dispwidth, colors, clipstr
 
 vd.theme_option('color_graph_axis', 'bold', 'color for graph axis labels')
@@ -226,6 +226,7 @@ class GraphSheet(InvertedCanvas):
 
 Sheet.addCommand('.', 'plot-column', 'vd.push(GraphSheet(sheet.name, "graph", source=sheet, sourceRows=rows, xcols=keyCols, ycols=numericCols([cursorCol])))', 'plot current numeric column vs key columns; numeric key column is used for x-axis, while categorical key columns determine color')
 Sheet.addCommand('g.', 'plot-numerics', 'vd.push(GraphSheet(sheet.name, "graph", source=sheet, sourceRows=rows, xcols=keyCols, ycols=numericCols(nonKeyVisibleCols)))', 'plot a graph of all visible numeric columns vs key columns')
+ColumnsSheet.addCommand('g.', 'plot-source-selected', 'vd.push(GraphSheet(sheet.source[0].name, "graph", source=source[0], sourceRows=source[0].rows, xcols=source[0].keyCols, ycols=numericCols(selectedRows)))', 'plot a graph of all selected columns vs key columns on source sheet')
 
 # swap directions of up/down
 InvertedCanvas.addCommand(None, 'go-up', 'if cursorBox: sheet.cursorBox.ymin += cursorBox.h', 'move cursor up by its height')
