@@ -18,10 +18,16 @@ def guess_jsonla(vd, p):
     '''
 
     with p.open(encoding=vd.options.encoding) as fp:
-        first_line = next(fp)
+        try:
+            first_line = next(fp)
+        except StopIteration:
+            return
 
     if first_line.strip().startswith('['):
-        ret = json.loads(first_line)
+        try:
+            ret = json.loads(first_line)
+        except json.decoder.JSONDecodeError:
+            return
         if isinstance(ret, list) and all(isinstance(v, str) for v in ret):
             return dict(filetype='jsonla')
 
