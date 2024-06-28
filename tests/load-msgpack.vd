@@ -1,0 +1,6 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/test.msgpack	o	open input in VisiData
+test		0	expand-cols-depth	0	gz(	expand all visible columns of containers to given depth (0=fully)
+test			columns-sheet		C	open Columns Sheet
+test_columns	name		sort-asc		[	sort ascending by current column
+test_columns			quit-sheet		q	quit current sheet
