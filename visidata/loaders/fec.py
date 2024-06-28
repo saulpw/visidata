@@ -41,10 +41,8 @@ from visidata import (
     Path,
     Sheet,
     TextSheet,
-    Column,
     ColumnAttr,
     ColumnItem,
-    ENTER,
     asyncthread,
     Progress,
     addGlobals,
@@ -112,10 +110,10 @@ class DiveSheet(Sheet):
                     vd.warning("Can't dive on lists with heterogenous item types.")
                     return False
 
-    def dive(self):
+    def openRow(self, row):
         if self.is_keyvalue:
-            cell = self.cursorRow["value"]
-            name = vd.joinSheetnames(self.name, self.cursorRow["key"])
+            cell = row["value"]
+            name = vd.joinSheetnames(self.name, row["key"])
 
             if isinstance(cell, (list, dict)):
                 vs = self.__class__(name, source = cell)
@@ -124,19 +122,13 @@ class DiveSheet(Sheet):
                 return
         else:
             name = vd.joinSheetnames(self.name, "row")
-            vs = self.__class__(name, source = self.cursorRow)
+            vs = self.__class__(name, source = self.row)
 
         success = vs.reload()
         if success == False:
-            return
+            vd.fail('could not reload new sheet')
+        return vs
 
-        vd.push(vs)
-
-DiveSheet.addCommand(
-    ENTER,
-    'dive-row',
-    'vd.sheet.dive()'
-)
 
 class FECItemizationSheet(Sheet):
     "A sheet to display a list of FEC itemizations from a given form/schedule."
@@ -160,19 +152,9 @@ class FECItemizationSheet(Sheet):
         self.columns.clear()
         for i, name in enumerate(row.keys()):
             self.addColumn(ColumnItem(name))
-    def dive(self):
-        vs = DiveSheet(
-            vd.joinSheetnames(self.name, "detail"),
-            source = self.cursorRow
-        )
-        vs.reload()
-        vd.push(vs)
 
-FECItemizationSheet.addCommand(
-    ENTER,
-    'dive-row',
-    'vd.sheet.dive()'
-)
+    def openRow(self, row):
+        return row
 
 class FECScheduleSheet(Sheet):
     "A sheet to display the list of itemized schedules in a filing."
@@ -200,11 +182,8 @@ class FECScheduleSheet(Sheet):
             )
             self.addRow(vs)
 
-FECScheduleSheet.addCommand(
-    ENTER,
-    'dive-row',
-    'vd.push(cursorRow)'
-)
+    def openRow(self, row):
+        return row
 
 COMPONENT_SHEET_CLASSES = {
     "header": DiveSheet,
@@ -231,7 +210,7 @@ class FECFiling(Sheet):
     @asyncthread
     def reload(self):
         from fecfile import fecparser
-        self.rows = []
+        self.rows = []  # rowdef:  Sheet, of a type from COMPONENT_SHEET_CLASSES.values()
 
         row_dict = { }
         itemization_subsheets = {}
@@ -311,11 +290,8 @@ class FECFiling(Sheet):
                 sheet_row.source[form_type].append(item.data)
                 sheet_row.size += 1
 
-FECFiling.addCommand(
-    ENTER,
-    'dive-row',
-    'vd.push(cursorRow)'
-)
+    def openRow(self, row):
+        return row
 
 @VisiData.api
 def open_fec(vd, p):
