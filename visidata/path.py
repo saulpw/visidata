@@ -244,15 +244,15 @@ class Path(os.PathLike):
         if 'b' in mode:
             return self.open_bytes(mode)
 
-        if 't' not in mode:
-            mode += 't'
-
         return self.open_text(mode=mode, encoding=encoding, encoding_errors=encoding_errors, newline=newline)
 
     def open_bytes(self, mode='rb'):
         'Open the file pointed by this path and return a file object in binary mode.'
         if self.rfile:
             raise ValueError('a RepeatFile holds text and cannot be reopened in binary mode')
+
+        if 'b' not in mode:
+            mode += 'b'
 
         if self.given == '-':
             if 'r' in mode:
@@ -269,6 +269,9 @@ class Path(os.PathLike):
     def open_text(self, mode='rt', encoding=None, encoding_errors=None, newline=None):
         'Open path in text mode, using options.encoding and options.encoding_errors.  Return open file-pointer or file-pointer-like.'
         # rfile makes a single-access fp reusable
+
+        if 't' not in mode:
+            mode += 't'
 
         if self.rfile:
             return self.rfile.reopen()
