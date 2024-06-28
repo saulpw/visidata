@@ -241,26 +241,49 @@ class Path(os.PathLike):
         return bool(self.fp or self.fptext)
 
     def open(self, mode='rt', encoding=None, encoding_errors=None, newline=None):
-        'Open path in text or binary mode, using options.encoding and options.encoding_errors.  Return open file-pointer or file-pointer-like.'
+        if 'b' in mode:
+            return self.open_bytes(mode)
+
+        return self.open_text(mode=mode, encoding=encoding, encoding_errors=encoding_errors, newline=newline)
+
+    def open_bytes(self, mode='rb'):
+        'Open the file pointed by this path and return a file object in binary mode.'
+        if self.rfile:
+            raise ValueError('a RepeatFile holds text and cannot be reopened in binary mode')
+
+        if 'b' not in mode:
+            mode += 'b'
+
+        if self.given == '-':
+            if 'r' in mode:
+                return os.fdopen(vd._stdin.fileno(), 'rb')
+            elif 'w' in mode or 'a' in mode:
+                # convert 'a' to 'w' for stdout: https://bugs.python.org/issue27805
+                return os.dup(vd._stdout.fileno())
+            else:
+                vd.error('invalid mode "%s" for Path.open()' % mode)
+                return sys.stderr
+
+        return self._open(mode=mode)
+
+    def open_text(self, mode='rt', encoding=None, encoding_errors=None, newline=None):
+        'Open path in text mode, using options.encoding and options.encoding_errors.  Return open file-pointer or file-pointer-like.'
         # rfile makes a single-access fp reusable
 
+        if 't' not in mode:
+            mode += 't'
+
         if self.rfile:
-            if 'b' in mode:
-                raise ValueError('a RepeatFile holds text and cannot be reopened in binary mode')
             return self.rfile.reopen()
 
-        if self.fp:
-            if 'b' not in mode:
-                self.fptext = codecs.iterdecode(self.fp,
-                                                encoding=encoding or vd.options.encoding,
-                                                errors=encoding_errors or vd.options.encoding_errors)
+        if self.fp and not self.fptext:
+            self.fptext = codecs.iterdecode(self.fp,
+                                            encoding=encoding or vd.options.encoding,
+                                            errors=encoding_errors or vd.options.encoding_errors)
 
         if self.fptext:
             self.rfile = RepeatFile(self.fptext)
             return self.rfile
-
-        if 't' not in mode and 'b' not in mode:
-            mode += 't'
 
         if self.given == '-':
             if 'r' in mode:
@@ -272,10 +295,7 @@ class Path(os.PathLike):
                 vd.error('invalid mode "%s" for Path.open()' % mode)
                 return sys.stderr
 
-        if 'b' in mode:
-            return self._open(mode=mode)
-        else:
-            return self._open(mode=mode, encoding=encoding or vd.options.encoding, errors=vd.options.encoding_errors, newline=newline)
+        return self._open(mode=mode, encoding=encoding or vd.options.encoding, errors=vd.options.encoding_errors, newline=newline)
 
     @wraps(pathlib.Path.read_text)
     def read_text(self, *args, **kwargs):
@@ -330,12 +350,6 @@ class Path(os.PathLike):
                 for i, line in enumerate(fd):
                     prog.addProgress(len(line))
                     yield line.rstrip('\n')
-
-    def open_bytes(self, mode='rb'):
-        'Open the file pointed by this path and return a file object in binary mode.'
-        if 'b' not in mode:
-            mode += 'b'
-        return self.open(mode=mode)  #1880
 
     def read_bytes(self):
         'Return the entire binary contents of the pointed-to file as a bytes object.'
