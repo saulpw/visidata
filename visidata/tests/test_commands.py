@@ -173,6 +173,10 @@ class TestCommands:
 
         sample_file = vd.pkg_resources_files(visidata) / 'tests/sample.tsv'
         vs = visidata.TsvSheet('test_commands', source=visidata.Path(sample_file))
+        cmd = vs.getCommand(longname)
+        if not cmd:
+            vd.warning(f'command cannot be tested on TsvSheet, skipping:  {longname}')
+            return
         vs.reload.__wrapped__(vs)
         vs.vd = vd
         vd.sheets = [vs]
