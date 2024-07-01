@@ -368,7 +368,7 @@ class Column(Extensible):
                     dispval = options.disp_error_val
                 return DisplayWrapper(cellval.val, error=exc.stacktrace,
                                         text=dispval,
-                                        note=options.disp_note_getexc,
+                                        note=f'[:onclick error-cell]{options.disp_note_getexc}[:]',
                                         notecolor='color_error')
             elif typedval.val is None:  # early out for strict None
                 return DisplayWrapper(None, text='',  # force empty display for None
@@ -377,12 +377,12 @@ class Column(Extensible):
             elif isinstance(typedval, TypedExceptionWrapper):  # calc succeeded, type failed
                 return DisplayWrapper(typedval.val, text=str(cellval),
                                             error=typedval.stacktrace,
-                                            note=options.disp_note_typeexc,
+                                            note=f'[:onclick error-cell]{options.disp_note_typeexc}[:]',
                                             notecolor='color_warning')
             else:
                 return DisplayWrapper(typedval.val, text=str(typedval.val),
                                             error=['unknown'],
-                                            note=options.disp_note_typeexc,
+                                            note=f'[:onclick error-cell]{options.disp_note_typeexc}[:]',
                                             notecolor='color_warning')
 
         elif isinstance(typedval, threading.Thread):

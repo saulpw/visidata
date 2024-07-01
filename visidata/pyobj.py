@@ -279,6 +279,8 @@ BaseSheet.addCommand('z^X', 'pyobj-expr-row', 'expr = input("eval over current r
 BaseSheet.addCommand('', 'assert-expr', 'expr=inputPythonExpr(); assert sheet.evalExpr(expr), f"{expr} not true"', 'eval Python expression and assert result is truthy')
 BaseSheet.addCommand('', 'assert-expr-row', 'expr=inputPythonExpr(); assert sheet.evalExpr(expr, row=cursorRow), f"{expr} not true"', 'eval Python expression in context of current row, and assert result is truthy')
 
+Sheet.addCommand(None, 'view-cell', 'vd.push(openCellPyobj(cursorCol, cursorRowIndex))', 'view contents of current cell in a new sheet')
+
 Sheet.addCommand('^Y', 'pyobj-row', 'status(type(cursorRow).__name__); vd.push(openRowPyobj(cursorRowIndex))', 'open current row as Python object')
 Sheet.addCommand('z^Y', 'pyobj-cell', 'status(type(cursorValue).__name__); vd.push(openCellPyobj(cursorCol, cursorRowIndex))', 'open current cell as Python object')
 BaseSheet.addCommand('g^Y', 'pyobj-sheet', 'status(type(sheet).__name__); vd.push(PyobjSheet(sheet.name+"_sheet", source=sheet))', 'open current sheet as Python object')
