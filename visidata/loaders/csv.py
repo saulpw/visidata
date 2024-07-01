@@ -46,7 +46,7 @@ class CsvSheet(SequenceSheet):
         import csv
         csv.field_size_limit(2**31-1)  #288 Windows has max 32-bit
 
-        with self.open_text_source() as fp:
+        with self.open_text_source(newline='') as fp:
             if options.safety_first:
                 rdr = csv.reader(removeNulls(fp), **options.getall('csv_'))
             else:
