@@ -351,6 +351,7 @@ def main_vd():
         if args.batch:
             if not args.debug:
                 vd.outputProgressThread = visidata.VisiData.execAsync(vd, vd.outputProgressEvery, vs, seconds=0.5, sheet=BaseSheet())  #1182
+            vd.reloadMacros()
             if vd.replay_sync(vs):  # error
                 return 1
 
