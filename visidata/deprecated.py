@@ -242,5 +242,6 @@ def checkCursorNoExceptions(sheet):
 def memo(vd, name, col, row):
     return vd.memoValue(name, col.getTypedValue(row), col.getDisplayValue(row))
 
+alias('view-cell', 'pyobj-cell')
 
 vd.addGlobals(globals())
