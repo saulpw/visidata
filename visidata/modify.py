@@ -65,7 +65,7 @@ def rowAdded(self, row):
     self._deferredAdds[self.rowid(row)] = row
     def _undoRowAdded(sheet, row):
         if sheet.rowid(row) not in sheet._deferredAdds:
-            vd.warning('cannot undo to before commit')
+            vd.warning('cannot undo row addition after a commit')
             return
         del sheet._deferredAdds[sheet.rowid(row)]
     vd.addUndo(_undoRowAdded, self, row)
@@ -87,7 +87,7 @@ def cellChanged(col, row, val):
             if oldval == col.getSourceValue(row):
                 # if we have reached the original value, remove from defermods entirely
                 if col.sheet.rowid(row) not in col.sheet._deferredMods:
-                    vd.warning('cannot undo to before commit')
+                    vd.warning('cannot undo cell change after a commit')
                     return
                 del col.sheet._deferredMods[col.sheet.rowid(row)]
             else:
@@ -105,7 +105,7 @@ def rowDeleted(self, row):
     self.unselectRow(row)
     def _undoRowDeleted(sheet, row):
         if sheet.rowid(row) not in sheet._deferredDels:
-            vd.warning('cannot undo to before commit')
+            vd.warning('cannot undo row deletion after a commit')
             return
         del sheet._deferredDels[sheet.rowid(row)]
     vd.addUndo(_undoRowDeleted, self, row)
@@ -330,7 +330,7 @@ def new_rows(sheet, n):
     return [sheet.newRow() for i in range(n)]
 
 Sheet.addCommand('a', 'add-row', 'addRows([newRow()], index=cursorRowIndex); cursorDown(1)', 'append a blank row')
-Sheet.addCommand('ga', 'add-rows', 'n=int(input("add rows: ", value=1)); addRows(new_rows(n), index=cursorRowIndex); cursorDown(1)', 'append N blank rows')
+Sheet.addCommand('ga', 'add-rows', 'n=int(input("add # rows: ", value=1)); addRows(new_rows(n), index=cursorRowIndex); cursorDown(1)', 'append N blank rows')
 Sheet.addCommand('za', 'addcol-new', 'addColumnAtCursor(SettableColumn(input("column name: ")))', 'append an empty column')
 Sheet.addCommand('gza', 'addcol-bulk', 'addColumnAtCursor(*(SettableColumn() for c in range(int(input("add columns: ")))))', 'append N empty columns')
 

@@ -808,7 +808,7 @@ class TableSheet(BaseSheet):
             scr.addstr(headerRow, self.windowWidth-2, self.options.disp_more_right, colors.color_column_sep.attr)
 
     def calc_height(self, row, displines=None, isNull=None, maxheight=1):
-            'render cell contents ifor row into displines'
+            'render cell contents for row into displines'
             if displines is None:
                 displines = {}  # [vcolidx] -> list of lines in that cell
 
@@ -1169,7 +1169,7 @@ BaseSheet.addCommand('A', 'open-new', 'vd.push(vd.newSheet("unnamed", 1))', 'Ope
 BaseSheet.addCommand('`', 'open-source', 'vd.push(source)', 'open source sheet')
 BaseSheet.addCommand(None, 'rename-sheet', 'sheet.name = input("rename sheet to: ", value=cleanName(sheet.name))', 'Rename current sheet')
 
-Sheet.addCommand('', 'addcol-source', 'source .addColumn(copy(cursorCol)) if isinstance (source, BaseSheet) else error("source must be sheet")', 'add copy of current column to source sheet')  #988  frosencrantz
+Sheet.addCommand('', 'addcol-source', 'source.addColumn(copy(cursorCol)) if isinstance (source, BaseSheet) else error("source must be sheet")', 'add copy of current column to source sheet')  #988  frosencrantz
 
 
 @Column.api
