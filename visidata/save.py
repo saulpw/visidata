@@ -13,12 +13,15 @@ def safe_trdict(vs):
     'returns string.translate dictionary for replacing tabs and newlines'
     if vs.options.safety_first:
         delim = vs.options.delimiter
-        return {
+        trdict = {
              0: '', #  strip NUL completely
-    ord(delim): vs.options.tsv_safe_tab, # \t
             10: vs.options.tsv_safe_newline,  # \n
             13: vs.options.tsv_safe_newline,  # \r
         }
+        if not delim or ord(delim) in trdict:
+            vd.fail(f'cannot use delimiter {repr(delim)} with safety_first')
+        trdict[ord(delim)] = vs.options.tsv_safe_tab # \t
+        return trdict
     return {}
 
 
@@ -29,12 +32,12 @@ def iterdispvals(sheet, *cols, format=False):
         cols = sheet.visibleCols
 
     transformers = collections.OrderedDict()  # list of transformers for each column in order
+    trdict = sheet.safe_trdict()
     for col in cols:
         transformers[col] = [ col.type ]
         if format:
             formatMaker = getattr(col, 'formatter_'+(col.formatter or sheet.options.disp_formatter))
             transformers[col].append(formatMaker(col._formatdict))
-        trdict = sheet.safe_trdict()
         if trdict:
             transformers[col].append(lambda v,trdict=trdict: v.translate(trdict))
 
