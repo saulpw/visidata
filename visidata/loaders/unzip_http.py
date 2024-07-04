@@ -130,7 +130,10 @@ class RemoteZipFile:
             warning(f"{hostname} Accept-Ranges header ('{r}') is not 'bytes'--trying anyway")
 
         self.zip_size = int(resp.headers['Content-Length'])
-        resp = self.get_range(self.zip_size-65536, 65536)
+        resp = self.get_range(
+            max(self.zip_size-65536, 0),
+            65536
+        )
 
         cdir_start = -1
         i = resp.data.rfind(self.magic_eocd64)
@@ -147,7 +150,10 @@ class RemoteZipFile:
         if cdir_start < 0 or cdir_start >= self.zip_size:
             error('cannot find central directory')
 
-        filehdr_index = len(resp.data) - (self.zip_size - cdir_start)
+        if self.zip_size <= 65536:
+            filehdr_index = cdir_start
+        else:
+            filehdr_index = 65536 - (self.zip_size - cdir_start)
 
         if filehdr_index < 0:
             resp = self.get_range(cdir_start, self.zip_size - cdir_start)
