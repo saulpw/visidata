@@ -1,0 +1,16 @@
+benchmark.csv:36:8/16/2018 5:15p,Michael Smith,BIRD160,"Parakeet, Blue (Melopsittacus undulatus)",1,29.95,$31.85
+benchmark.jsonl:36:{"Date": "8/16/2018 5:15p", "Customer": "Michael Smith", "SKU": "BIRD160", "Item": "Parakeet, Blue (Melopsittacus undulatus)", "Quantity": "1", "Unit": "29.95", "Paid": "$31.85"}
+benchmark.lsv:266:Customer: Michael Smith
+benchmark.xml:346:    <Customer>Michael Smith</Customer>
+benchmark.yml:239:- customer: Michael Smith
+numeric-cols.tsv:16:2016-09-01	Central	Smith	Desk	2	125.00	250.00
+numeric-cols.tsv:22:2016-12-12	Central	Smith	Pencil	67	1.29	86.43
+numeric-cols.tsv:25:2017-02-01	Central	Smith	Binder	87	15.00	1305.00
+sample.tsv:17:2016-09-01	Central	Smith	Desk	2	125.00	250.00
+sample.tsv:23:2016-12-12	Central	Smith	Pencil	67	1.29	86.43
+sample.tsv:26:2017-02-01	Central	Smith	Binder	87	15.00	1305.00
+sample.vds:23:{"OrderDate": "2016-09-01", "Region": "Central", "Rep": "Smith", "Item": "Desk", "Units": "2", "Unit_Cost": "125.00", "Total": "250.00"}
+sample.vds:29:{"OrderDate": "2016-12-12", "Region": "Central", "Rep": "Smith", "Item": "Pencil", "Units": "67", "Unit_Cost": "1.29", "Total": "86.43"}
+sample.vds:32:{"OrderDate": "2017-02-01", "Region": "Central", "Rep": "Smith", "Item": "Binder", "Units": "87", "Unit_Cost": "15.00", "Total": "1305.00"}
+sample.vds:94:{"Date": "2018-08-16 17:15", "Customer": "Michael Smith", "SKU": "BIRD160", "Item": "Parakeet, Blue (Melopsittacus undulatus)", "Quantity": "1", "Unit": "29.95", "Paid": "31.85"}
+sunshinelist.html:194:			    			<td>Kevin Smith</td>

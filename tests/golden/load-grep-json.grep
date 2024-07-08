@@ -1,0 +1,16 @@
+{"file": "benchmark.csv", "line_no": 36, "text": "8/16/2018 5:15p,Michael Smith,BIRD160,\"Parakeet, Blue (Melopsittacus undulatus)\",1,29.95,$31.85\r"}
+{"file": "benchmark.jsonl", "line_no": 36, "text": "{\"Date\": \"8/16/2018 5:15p\", \"Customer\": \"Michael Smith\", \"SKU\": \"BIRD160\", \"Item\": \"Parakeet, Blue (Melopsittacus undulatus)\", \"Quantity\": \"1\", \"Unit\": \"29.95\", \"Paid\": \"$31.85\"}"}
+{"file": "benchmark.lsv", "line_no": 266, "text": "Customer: Michael Smith"}
+{"file": "benchmark.xml", "line_no": 346, "text": "    <Customer>Michael Smith</Customer>"}
+{"file": "benchmark.yml", "line_no": 239, "text": "- customer: Michael Smith"}
+{"file": "numeric-cols.tsv", "line_no": 16, "text": "2016-09-01\tCentral\tSmith\tDesk\t2\t125.00\t250.00"}
+{"file": "numeric-cols.tsv", "line_no": 22, "text": "2016-12-12\tCentral\tSmith\tPencil\t67\t1.29\t86.43"}
+{"file": "numeric-cols.tsv", "line_no": 25, "text": "2017-02-01\tCentral\tSmith\tBinder\t87\t15.00\t1305.00"}
+{"file": "sample.tsv", "line_no": 17, "text": "2016-09-01\tCentral\tSmith\tDesk\t2\t125.00\t250.00"}
+{"file": "sample.tsv", "line_no": 23, "text": "2016-12-12\tCentral\tSmith\tPencil\t67\t1.29\t86.43"}
+{"file": "sample.tsv", "line_no": 26, "text": "2017-02-01\tCentral\tSmith\tBinder\t87\t15.00\t1305.00"}
+{"file": "sample.vds", "line_no": 23, "text": "{\"OrderDate\": \"2016-09-01\", \"Region\": \"Central\", \"Rep\": \"Smith\", \"Item\": \"Desk\", \"Units\": \"2\", \"Unit_Cost\": \"125.00\", \"Total\": \"250.00\"}"}
+{"file": "sample.vds", "line_no": 29, "text": "{\"OrderDate\": \"2016-12-12\", \"Region\": \"Central\", \"Rep\": \"Smith\", \"Item\": \"Pencil\", \"Units\": \"67\", \"Unit_Cost\": \"1.29\", \"Total\": \"86.43\"}"}
+{"file": "sample.vds", "line_no": 32, "text": "{\"OrderDate\": \"2017-02-01\", \"Region\": \"Central\", \"Rep\": \"Smith\", \"Item\": \"Binder\", \"Units\": \"87\", \"Unit_Cost\": \"15.00\", \"Total\": \"1305.00\"}"}
+{"file": "sample.vds", "line_no": 94, "text": "{\"Date\": \"2018-08-16 17:15\", \"Customer\": \"Michael Smith\", \"SKU\": \"BIRD160\", \"Item\": \"Parakeet, Blue (Melopsittacus undulatus)\", \"Quantity\": \"1\", \"Unit\": \"29.95\", \"Paid\": \"31.85\"}"}
+{"file": "sunshinelist.html", "line_no": 194, "text": "\t\t\t    \t\t\t<td>Kevin Smith</td>"}
