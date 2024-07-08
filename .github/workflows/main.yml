@@ -62,7 +62,7 @@ jobs:
     - name: Test macros
       run: |
         mkdir -p ~/.visidata
-        cp tests/macros/macro* ~/.visidata/
+        cp tests/macros/macros.jsonl tests/macros/1.vdj ~/.visidata/
         vd --batch -p tests/macros/test_macro.vd --output tests/macros/golden/test_macro.tsv
         git --no-pager diff --numstat tests/
         git --no-pager diff --exit-code tests/
