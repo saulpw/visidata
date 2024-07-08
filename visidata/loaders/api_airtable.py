@@ -1,7 +1,7 @@
 import re
 import os
 
-from visidata import vd, date, asyncthread, VisiData, Progress, Sheet, Column, ItemColumn, deduceType, TypedWrapper, setitem
+from visidata import vd, date, asyncthread, VisiData, Progress, Sheet, Column, ItemColumn, deduceType, TypedWrapper, setitem, AttrDict
 
 
 vd.option('airtable_auth_token', '', 'Airtable API key from https://airtable.com/account')

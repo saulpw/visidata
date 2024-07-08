@@ -13,8 +13,8 @@ class FormSheet(VisiDataMetaSheet):
     rowtype='labels' # rowdef: { .x .y .text .color .command .input .key}
 
 @VisiData.api
-def replayCommand(vd, longname, sheet=None, col='', row=''):
-    vd.replayOne(vd.cmdlog.newRow(sheet=self.name, col=col, row=row, longname=r.command, input=r.input))
+def replayCommand(vd, longname, input=None, sheet=None, col='', row=''):
+    vd.replayOne(vd.cmdlog.newRow(sheet=sheet, col=col, row=row, longname=longname, input=input))
 
 
 class FormCanvas(BaseSheet):

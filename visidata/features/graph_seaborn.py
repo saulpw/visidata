@@ -54,7 +54,7 @@ def ext_plot_seaborn(rows, xcols, ycols):
                 nplotted += 1
             except Exception:
                 nerrors += 1
-                if options.debug:
+                if vd.options.debug:
                     raise
 
     sns.scatterplot(

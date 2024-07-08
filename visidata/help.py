@@ -2,7 +2,7 @@ import functools
 import collections
 
 from visidata import VisiData, MetaSheet, ColumnAttr, Column, BaseSheet, VisiDataMetaSheet, SuspendCurses
-from visidata import vd, asyncthread, ENTER, drawcache, AttrDict
+from visidata import vd, asyncthread, ENTER, drawcache, AttrDict, TextSheet
 
 vd.option('disp_help', 2, 'show help panel during input')
 
