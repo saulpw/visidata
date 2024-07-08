@@ -18,18 +18,44 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+"""
+usage: unzip_http [-h] [-l] [-f] [-o] url [files ...]
+
+Extract individual files from .zip files over http without downloading the
+entire archive. HTTP server must send `Accept-Ranges: bytes` and
+`Content-Length` in headers.
+
+positional arguments:
+  url                   URL of the remote zip file
+  files                 Files to extract. If no filenames given, displays .zip
+                        contents (filenames and sizes). Each filename can be a
+                        wildcard glob.
+
+options:
+  -h, --help            show this help message and exit
+  -l, --list            List files in the remote zip file
+  -f, --full-filepaths  Recreate folder structure from zip file when extracting
+                        (instead of extracting the files to the current
+                        directory)
+  -o, --stdout          Write files to stdout (if multiple files: concatenate
+                        them to stdout, in zipfile order)
+"""
+
 import sys
 import os
 import io
+import math
+import time
 import zlib
 import struct
 import fnmatch
+import argparse
 import pathlib
 import urllib.parse
 from visidata import vd
 
 
-__version__ = '0.5.1'
+__version__ = '0.6'
 
 
 def error(s):
@@ -264,3 +290,95 @@ class RemoteZipStream(io.RawIOBase):
         self._buffer = self._buffer[n:]
 
         return ret
+
+
+ ### script start
+
+class StreamProgress:
+    def __init__(self, fp, name='', total=0):
+        self.name = name
+        self.fp = fp
+        self.total = total
+        self.start_time = time.time()
+        self.last_update = 0
+        self.amtread = 0
+
+    def read(self, n):
+        r = self.fp.read(n)
+        self.amtread += len(r)
+        now = time.time()
+        if now - self.last_update > 0.1:
+            self.last_update = now
+
+            elapsed_s = now - self.start_time
+            sys.stderr.write(f'\r{elapsed_s:.0f}s  {self.amtread/10**6:.02f}/{self.total/10**6:.02f}MB  ({self.amtread/10**6/elapsed_s:.02f} MB/s)  {self.name}')
+
+        if not r:
+            sys.stderr.write('\n')
+
+        return r
+
+
+def list_files(rzf):
+    def safelog(x):
+        return 1 if x == 0 else math.ceil(math.log10(x))
+
+    digits_compr = max(safelog(f.compress_size) for f in rzf.infolist())
+    digits_plain = max(safelog(f.file_size    ) for f in rzf.infolist())
+    fmtstr = f'%{digits_compr}d -> %{digits_plain}d\t%s'
+    for f in rzf.infolist():
+        print(fmtstr % (f.compress_size, f.file_size, f.filename), file=sys.stderr)
+
+
+def extract_one(outfile, rzf, f, ofname):
+    print(f'Extracting {f.filename} to {ofname}...', file=sys.stderr)
+
+    fp = StreamProgress(rzf.open(f), name=f.filename, total=f.compress_size)
+    while r := fp.read(2**18):
+        outfile.write(r)
+
+
+def download_file(f, rzf, args):
+    if not any(fnmatch.fnmatch(f.filename, g) for g in args.files):
+        return
+
+    if args.stdout:
+        extract_one(sys.stdout.buffer, rzf, f, "stdout")
+    else:
+        path = pathlib.Path(f.filename)
+        if args.full_filepaths:
+            path.parent.mkdir(parents=True, exist_ok=True)
+        else:
+            path = path.name
+
+        with open(str(path), 'wb') as of:
+            extract_one(of, rzf, f, str(path))
+
+
+def main():
+    parser = argparse.ArgumentParser(prog='unzip-http', \
+        description="Extract individual files from .zip files over http without downloading the entire archive. HTTP server must send `Accept-Ranges: bytes` and `Content-Length` in headers.")
+
+    parser.add_argument('-l', '--list', action='store_true', default=False,
+                        help="List files in the remote zip file")
+    parser.add_argument('-f', '--full-filepaths', action='store_true', default=False,
+                        help="Recreate folder structure from zip file when extracting (instead of extracting the files to the current directory)")
+    parser.add_argument('-o', '--stdout', action='store_true', default=False,
+                        help="Write files to stdout (if multiple files: concatenate them to stdout, in zipfile order)")
+
+    parser.add_argument("url", nargs=1, help="URL of the remote zip file")
+    parser.add_argument("files", nargs='*', help="Files to extract. If no filenames given, displays .zip contents (filenames and sizes). Each filename can be a wildcard glob.")
+
+    args = parser.parse_args()
+
+    rzf = RemoteZipFile(args.url[0])
+    if args.list or len(args.files) == 0:
+        list_files(rzf)
+    else:
+        for f in rzf.infolist():
+            download_file(f, rzf, args)
+
+
+
+if __name__ == '__main__':
+    main()
