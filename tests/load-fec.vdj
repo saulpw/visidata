@@ -1,0 +1,3 @@
+#!vd -p
+{"sheet": null, "col": null, "row": null, "longname": "open-file", "input": "sample_data/1794685.fec", "keystrokes": "o", "comment": null}
+{"sheet": "1794685", "col": "", "row": "\u30adheader", "longname": "open-row", "input": "", "keystrokes": "Enter", "comment": "open current row with sheet-specific dive"}
