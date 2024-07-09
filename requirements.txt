@@ -45,6 +45,7 @@ pyconll             # conll/conllu
 backports.zoneinfo; python_version < '3.9' #f5log
 msgpack             # msgpack
 brotli              # msgpackz
+fecfile             # fec Federal Election Commission
 
 requests_cache      # scraper
 beautifulsoup4      # scraper
