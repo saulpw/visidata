@@ -263,7 +263,6 @@ DirSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*selectedRows)', 'open 
 DirSheet.addCommand('y', 'copy-row', 'copy_files([cursorRow], inputPath("copy to dest: "))', 'copy file to given directory *path*')
 DirSheet.addCommand('gy', 'copy-selected', 'copy_files(selectedRows, inputPath("copy to dest: ", value=cursorRow.given))', 'copy selected files to given directory *path*')
 
-DirSheet.addCommand('z^C', 'commit-sheet', 'commit()', 'commit all changes to the filesystem (not undoable!)')
 
 @DirSheet.api
 @asyncthread
