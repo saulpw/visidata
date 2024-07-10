@@ -5,6 +5,8 @@ from visidata import VisiData
 
 @VisiData.api
 def getStatusSource(vd):
+    if not vd.options.debug:
+        return ''
     stack = inspect.stack(context=0)  #2370
     for i, sf in enumerate(stack):
         if sf.function in 'status aside'.split():
