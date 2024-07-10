@@ -45,6 +45,7 @@ def eval_vd(logpath, *args, **kwargs):
 
     src = Path(logpath.given, fptext=io.StringIO(log), filesize=len(log))
     if logpath is vd.stdinSource:
+        # replay from stdin only supports .vdj
         vs = vd.openSource(src, filetype='vdj')
     else:
         vs = vd.openSource(src, filetype=src.ext)

@@ -1,5 +1,9 @@
 # VisiData version history
 
+# vX.X.X (XXXX-XX-XX)
+
+- support replay from stdin for .vdj
+
 # v3.0.2 (2024-01-15)
 
 ### Fixes and minor improvements
