@@ -45,9 +45,11 @@ class OdsSheet(SequenceSheet):
         text_s = S().qname
 
         cell_names = [odf.table.CoveredTableCell().qname, odf.table.TableCell().qname]
+        empty_rows = 0
         for odsrow in self.source.getElementsByType(odf.table.TableRow):
             row = []
 
+            empty_cells = 0
             for cell in odsrow.childNodes:
                 if cell.qname not in cell_names: continue
                 value = ''
@@ -66,8 +68,20 @@ class OdsSheet(SequenceSheet):
                     else:
                         value = str(cell)
 
-                for _ in range(int(cell.attributes.get((TABLENS, "number-columns-repeated"), 1))):
-                    row.append(value)
+                column_repeat = int(cell.attributes.get((TABLENS, "number-columns-repeated"), 1))
+                if value is None:
+                    empty_cells += column_repeat
+                else:
+                    row.extend([""] * empty_cells)
+                    empty_cells = 0
+                    row.extend([value]*column_repeat)
 
-            for _ in range(int(odsrow.attributes.get((TABLENS, "number-rows-repeated"), 1))):
-                yield list(row)
+            row_repeat = int(odsrow.attributes.get((TABLENS, "number-rows-repeated"), 1))
+            if len(row) == 0:
+                empty_rows += row_repeat
+            else:
+                for i in range(empty_rows):
+                    yield []
+                empty_rows = 0
+                for i in range(row_repeat):
+                    yield list(row)
