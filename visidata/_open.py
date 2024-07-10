@@ -1,5 +1,6 @@
 import os
 import os.path
+import sys
 
 from visidata import VisiData, vd, Path, BaseSheet, TableSheet, TextSheet, SettableColumn
 
@@ -154,6 +155,8 @@ def openSource(vd, p, filetype=None, create=False, **kwargs):
         if '://' in p:
             vs = vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
         elif p == '-':
+            if sys.stdin.isatty():
+                vd.fail('cannot open stdin when it is a tty')
             vs = vd.openPath(vd.stdinSource, filetype=filetype)
         else:
             vs = vd.openPath(Path(p), filetype=filetype, create=create)  # convert to Path and recurse
