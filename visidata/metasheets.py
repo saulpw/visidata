@@ -29,10 +29,9 @@ Some new commands on this sheet operate on all selected columns on the source sh
 - {help.commands.type_int_selected}
 - or `g` with any standard type to set type of selected source columns to that type
 
-## As usual
+Other commands (not specific to Columns Sheet):
 
 - {help.commands.setcol_input}
-{sheet.help_columns}
 '''
 
     class ValueColumn(Column):

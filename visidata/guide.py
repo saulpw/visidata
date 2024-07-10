@@ -145,11 +145,11 @@ class CommandHelpGetter:
             if not m:
                 m = re.search(r'input(\w*)\("', cmd.execstr, re.IGNORECASE)
             if m:
-                inputtype = m.groups()[0].lower()
-                binding += f'[:45] {inputtype}[/]'
+                inputtype = m.groups()[0].lower() or 'input'
+                binding += f' <{inputtype}>'
 
         helpstr = cmd.helpstr
-        return f'[:keys]{binding}[/] [:longname_guide]{longname}[/] to {helpstr}'
+        return f'[:code]{binding}[/] ([:longname_guide]{longname}[/]) to {helpstr}'
 
 
 class GuideSheet(Sheet):

@@ -149,13 +149,6 @@ class TableSheet(BaseSheet):
         else:
             return 'Table Sheet'
 
-    @property
-    def help_columns(self):
-        hiddenCols = [c for c in self.columns if c.hidden]
-        if hiddenCols:
-            return f'- `gv` to unhide {len(hiddenCols)} hidden columns'
-        return ''
-
     columns = []  # list of Column
     colorizers = [ # list of Colorizer
         CellColorizer(2, 'color_default_hdr', lambda s,c,r,v: r is None),
