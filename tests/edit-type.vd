@@ -7,3 +7,4 @@ benchmark_columns		キPaid	select-row		s
 benchmark_columns	type	キPaid	setcol-input	currency	ge	
 benchmark			describe-sheet		I	
 benchmark_describe	mode		hide-col		-	hide current column
+benchmark_describe	sum		type-float		%	set type of current column to float

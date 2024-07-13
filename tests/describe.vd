@@ -6,3 +6,4 @@ benchmark	Unit		type-currency		$	set type of current column to currency
 benchmark	Paid		type-currency		$	set type of current column to currency
 benchmark			describe-sheet		I	open Describe Sheet with descriptive statistics for all visible columns
 benchmark_describe	mode		hide-col		-	hide current column
+benchmark_describe	sum		type-float		%	set type of current column to float

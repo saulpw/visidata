@@ -6,3 +6,4 @@ test	amt		type-float		%
 test			describe-sheet		I	
 test_describe	column		sort-asc		[	
 test_describe	mode		hide-col		-	hide current column
+test_describe	sum		type-float		%	set type of current column to float
