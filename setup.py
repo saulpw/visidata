@@ -51,11 +51,13 @@ setup(
     ],
     extras_require={
         "test": [
+            "brotli",
             "dnslib",
             "dpkt",
             "Faker",
             "h5py",
             "lxml",
+            "msgpack",
             "odfpy",
             "openpyxl",
             "pandas",
@@ -67,6 +69,7 @@ setup(
             "tabulate",
             "tomli",
             "wcwidth",
+            "xport==2.0.2",
         ]
     },
     package_data={
