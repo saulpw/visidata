@@ -212,8 +212,13 @@ def inputKeys(vd, prompt):
 
 @BaseSheet.api
 def getCommandInfo(sheet, keys):
+    if not keys:
+        return ''
     cmd = sheet.getCommand(keys)
-    return CommandHelpGetter(type(sheet))[cmd.longname]
+    if cmd:
+        return CommandHelpGetter(type(sheet))[cmd.longname]
+    else:
+        vd.warning(f'no command bound to {keys} on {sheet}')
 
 vd.addCommand('', 'show-command-info', 'status(getCommandInfo(inputKeys("get command for keystrokes: ")))', 'show longname and helpstring for keybinding')
 
