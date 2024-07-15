@@ -10,6 +10,7 @@ from visidata.type_date import date
 
 
 vd.option('xlsx_meta_columns', False, 'include columns for cell objects, font colors, and fill colors', replay=True)
+vd.option('xlsx_color_cells', True, 'color cells based on xlsx source')
 
 @VisiData.api
 def open_xls(vd, p):
@@ -203,7 +204,7 @@ HLSMAX = 240
 
 @XlsxSheet.api
 def colorize_xlsx_cell(sheet, col, row):
-    if not hasattr(col, 'column_letter'):
+    if not hasattr(col, 'column_letter') or not sheet.options.xlsx_color_cells:
         return ''
     fg = getattrdeep(row, col.column_letter+'.font.color', None)
     bg = getattrdeep(row, col.column_letter+'.fill.start_color', None)
