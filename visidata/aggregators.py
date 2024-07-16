@@ -5,7 +5,7 @@ import collections
 import statistics
 
 from visidata import Progress, Sheet, Column, ColumnsSheet, VisiData
-from visidata import vd, anytype, vlen, asyncthread, wrapply, AttrDict, date, INPROGRESS
+from visidata import vd, anytype, vlen, asyncthread, wrapply, AttrDict, date, INPROGRESS, stacktrace, TypedExceptionWrapper
 
 vd.help_aggregators = '''# Choose Aggregators
 Start typing an aggregator name or description.
@@ -109,6 +109,13 @@ def mean(vals):
 def vsum(vals):
     return sum(vals, start=type(vals[0] if len(vals) else 0)())  #1996
 
+def stdev(vals):
+    try:
+        return statistics.stdev(vals)
+    except statistics.StatisticsError as e:  #when vals holds only 1 element
+        e.stacktrace = stacktrace()
+        return TypedExceptionWrapper(None, exception=e)
+
 # http://code.activestate.com/recipes/511478-finding-the-percentile-of-the-values/
 def _percentile(N, percent, key=lambda x:x):
     """
@@ -155,7 +162,7 @@ vd.aggregator('sum', vsum, 'sum of values')
 vd.aggregator('distinct', set, 'distinct values', type=vlen)
 vd.aggregator('count', lambda values: sum(1 for v in values), 'number of values', type=int)
 vd.aggregator('list', list, 'list of values', type=anytype)
-vd.aggregator('stdev', statistics.stdev, 'standard deviation of values', type=float)
+vd.aggregator('stdev', stdev, 'standard deviation of values', type=float)
 
 vd.aggregators['q3'] = quantiles(3, 'tertiles (33/66th pctile)')
 vd.aggregators['q4'] = quantiles(4, 'quartiles (25/50/75th pctile)')
