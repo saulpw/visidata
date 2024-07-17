@@ -155,8 +155,6 @@ def append_tsv_row(vs, row):
         fp.write(newrow)
 
 
-TsvSheet.options.regex_skip = '^#.*'
-
 vd.addGlobals({
     'TsvSheet': TsvSheet,
 })

@@ -79,8 +79,6 @@ def save_csv(vd, p, sheet):
                 cw.writerow(dispvals.values())
                 prog.addProgress(1)
 
-CsvSheet.options.regex_skip = '^#.*'
-
 vd.addGlobals({
     'CsvSheet': CsvSheet
 })
