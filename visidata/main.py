@@ -288,8 +288,9 @@ def main_vd():
     vd.domotd()
 
     if args.batch:
-        options.undo = False
-        options.quitguard = False
+        if not vd.options.interactive:
+            options.undo = False
+            options.quitguard = False
         vd.editline = lambda *args, **kwargs: ''
         vd.execAsync = vd.execSync  # disable async
 
