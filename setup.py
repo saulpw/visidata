@@ -54,6 +54,7 @@ setup(
             "brotli",
             "dnslib",
             "dpkt",
+            "fecfile",
             "Faker",
             "h5py",
             "lxml",
