@@ -255,7 +255,7 @@ def aggregator_choices(vd):
     return [
        AttrDict(key=agg, desc=v[0].helpstr if isinstance(v, list) else v.helpstr)
          for agg, v in vd.aggregators.items()
-            if not agg.startswith('p')  # skip all the percentiles, user should use q# instead
+           if not (agg.startswith('p') and agg[1:].isdigit())  # skip all the percentiles like 'p10', user should use q# instead
     ]
 
 
