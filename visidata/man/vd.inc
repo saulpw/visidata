@@ -21,6 +21,10 @@
 .Op Ar options
 .Op Ar input No ...
 .
+.Nm visidata
+.Op Ar options
+.Op Ar input No ...
+.
 .Nm vd
 .Op Ar options
 .Cm --play Ar cmdlog
