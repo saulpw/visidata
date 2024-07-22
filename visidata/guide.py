@@ -8,7 +8,7 @@ Each guide shows you how to use a particular feature in VisiData. Gray guides ha
 import re
 
 from visidata import vd, BaseSheet, Sheet, ItemColumn, Column, VisiData, ENTER, RowColorizer, AttrDict, MissingAttrFormatter
-from visidata import wraptext, Path
+from visidata import wraptext, Path, CellColorizer
 
 guides_list = '''
 GuideIndex ("A Guide to VisiData Guides (you are here)")
@@ -160,6 +160,7 @@ class GuideSheet(Sheet):
             ItemColumn('guide', 1, width=80, displayer='full'),
             ]
     precious = False
+    colorizers = [CellColorizer(4, 'color_sidebar', lambda s,c,r,v: True)]
 
     def iterload(self):
         self.metadata = AttrDict(sheettype='Sheet')
