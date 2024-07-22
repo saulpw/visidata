@@ -221,6 +221,8 @@ def getCommandInfo(sheet, keys):
     else:
         vd.warning(f'no command bound to {keys} on {sheet}')
 
+GuideSheet.options.color_current_row = "underline"
+
 vd.addCommand('', 'show-command-info', 'status(getCommandInfo(inputKeys("get command for keystrokes: ")))', 'show longname and helpstring for keybinding')
 
 vd.addMenuItems('''
