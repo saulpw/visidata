@@ -1,5 +1,11 @@
 from visidata import VisiData, vd, options, Progress
 
+def markdown_link(s, href):
+    if not href:
+        return s
+
+    return f'[{s}]({href})'
+
 def markdown_escape(s, style='orgmode'):
     if style == 'jira':
         return s
@@ -31,17 +37,30 @@ def write_md(p, *vsheets, md_style='orgmode'):
             if len(vsheets) > 1:
                 fp.write('# %s\n\n' % vs.name)
 
-            fp.write(delim + delim.join('%-*s' % (col.width or options.default_width, markdown_escape(col.name, md_style)) for col in vs.visibleCols) + '|\n')
+            hdrs = []
+            for col in vs.visibleCols:
+                if col.name.endswith('_href'):
+                    continue
+                hdrs.append('%-*s' % (col.width or options.default_width, markdown_escape(col.name, md_style)))
+
+            fp.write(delim + delim.join(hdrs) + delim + '\n')
+
             if md_style == 'orgmode':
-                fp.write('|' + '|'.join(markdown_colhdr(col) for col in vs.visibleCols) + '|\n')
+                fp.write('|' + '|'.join(markdown_colhdr(col) for col in vs.visibleCols if not col.name.endswith('_href')) + '|\n')
 
             with Progress(gerund='saving'):
                 for dispvals in vs.iterdispvals(format=True):
-                    s = '|'
+                    vals = []
                     for col, val in dispvals.items():
-                        s += '%-*s|' % (col.width or options.default_width, markdown_escape(val, md_style))
-                    s += '\n'
-                    fp.write(s)
+                        if col.name.endswith('_href'):
+                            continue
+                        val = markdown_escape(val, md_style)
+                        linkcol = vs.colsByName.get(col.name + '_href')
+                        if linkcol:
+                            val = markdown_link(val, dispvals.get(linkcol))
+                        vals.append('%-*s' % (col.width or options.default_width, val))
+                    fp.write('|' + '|'.join(vals) + '|\n')
+
             fp.write('\n')
 
 
