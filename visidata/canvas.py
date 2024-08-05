@@ -649,13 +649,13 @@ class Canvas(Plotter):
         else:
             return h
 
-    def scaleX(self, canvasX):
+    def scaleX(self, canvasX) -> int:
         'returns a plotter x coordinate'
-        return round(self.plotviewBox.xmin+(canvasX-self.visibleBox.xmin)*self.xScaler)
+        return self.plotviewBox.xmin+round((canvasX-self.visibleBox.xmin)*self.xScaler)
 
-    def scaleY(self, canvasY):
+    def scaleY(self, canvasY) -> int:
         'returns a plotter y coordinate'
-        return round(self.plotviewBox.ymin+(canvasY-self.visibleBox.ymin)*self.yScaler)
+        return self.plotviewBox.ymin+round((canvasY-self.visibleBox.ymin)*self.yScaler)
 
     def unscaleX(self, plotterX):
         'performs the inverse of scaleX, returns a canvas x coordinate'
@@ -709,12 +709,12 @@ class Canvas(Plotter):
                 x1, y1 = float(x1), float(y1)
                 if xmin <= x1 <= xmax and ymin <= y1 <= ymax:
                     # equivalent to self.scaleX(x1) and self.scaleY(y1), inlined for speed
-                    x = plotxmin+(x1-xmin)*xfactor
+                    x = plotxmin+round((x1-xmin)*xfactor)
                     if invert_y:
-                        y = plotymax-(y1-ymin)*yfactor
+                        y = plotymax-round((y1-ymin)*yfactor)
                     else:
-                        y = plotymin+(y1-ymin)*yfactor
-                    self.plotpixel(round(x), round(y), attr, row)
+                        y = plotymin+round((y1-ymin)*yfactor)
+                    self.plotpixel(x, y, attr, row)
                 continue
 
             prev_x, prev_y = vertexes[0]

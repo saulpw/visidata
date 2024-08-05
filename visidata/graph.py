@@ -31,7 +31,7 @@ class InvertedCanvas(Canvas):
         self.fixPoint(Point(self.plotviewBox.xmin, self.plotviewBox.ymin),
                       Point(bbox.xmin, bbox.ymax + 1/4*self.canvasCharHeight))
 
-    def scaleY(self, canvasY):
+    def scaleY(self, canvasY) -> int:
         'returns a plotter y coordinate for a canvas y coordinate, with the y direction inverted'
         return self.plotviewBox.ymax-round((canvasY-self.visibleBox.ymin)*self.yScaler)
 
@@ -163,20 +163,23 @@ class GraphSheet(InvertedCanvas):
         return self.ycols[0].type(txt)
 
     def add_y_axis_label(self, frac):
-        txt = self.formatYLabel(self.visibleBox.ymin + frac*self.visibleBox.h)
+        label_data_y = self.visibleBox.ymin + frac*self.visibleBox.h
+        txt = self.formatYLabel(label_data_y)
         w = (dispwidth(txt)+1)*2
         if self.ylabel_maxw < w:
             self.ylabel_maxw = w
+        y = self.scaleY(label_data_y)
 
         # plot y-axis labels on the far left of the canvas, but within the plotview height-wise
-        self.plotlabel(0, self.plotviewBox.ymin + (1.0-frac)*self.plotviewBox.h, txt, 'graph_axis')
+        self.plotlabel(0, y, txt, 'graph_axis')
 
     def add_x_axis_label(self, frac):
-        txt = self.formatXLabel(self.visibleBox.xmin + frac*self.visibleBox.w)
+        label_data_x = self.visibleBox.xmin + frac*self.visibleBox.w
+        txt = self.formatXLabel(label_data_x)
         tick = vd.options.disp_graph_tick_x or ''
 
         # plot x-axis labels below the plotviewBox.ymax, but within the plotview width-wise
-        x = self.plotviewBox.xmin + frac*self.plotviewBox.w
+        x = self.scaleX(label_data_x)
 
         if frac < 1.0:
             txt = tick + txt
