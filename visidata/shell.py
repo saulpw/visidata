@@ -263,6 +263,8 @@ DirSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*selectedRows)', 'open 
 DirSheet.addCommand('y', 'copy-row', 'copy_files([cursorRow], inputPath("copy to dest: "))', 'copy file to given directory *path*')
 DirSheet.addCommand('gy', 'copy-selected', 'copy_files(selectedRows, inputPath("copy to dest: ", value=cursorRow.given))', 'copy selected files to given directory *path*')
 
+DirSheet.addCommand('z'+ENTER, 'open-row-filetype', 'ft = input("filetype: ", type="filetype", value=options.filetype or LazyComputeRow(sheet, cursorRow).ext); vd.push(openSource(cursorRow, filetype=ft) or fail(f"file {cursorDisplay} does not exist"))', 'open file in current row as input filetype')
+
 
 @DirSheet.api
 @asyncthread
@@ -288,4 +290,5 @@ vd.addGlobals({
 
 vd.addMenuItems('''
     Column > Add column > shell > addcol-shell
+    Open > file in row > open-row-filetype
 ''')
