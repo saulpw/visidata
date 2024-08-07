@@ -249,6 +249,22 @@ def openCell(sheet, col, row, rowidx=None):
     name = f'{sheet.name}[{k}].{col.name}'
     return PyobjSheet(name, source=col.getTypedValue(row))
 
+@Sheet.api
+@asyncthread
+def openRows(sheet, rows):
+    for r in Progress(rows):
+        vd.push(sheet.openRow(r))
+
+    vd.sync()
+
+@Sheet.api
+@asyncthread
+def openCells(sheet, col, rows):
+    for r in Progress(rows):
+        vd.push(openCell(col, r))
+
+    vd.sync()
+
 @TableSheet.api
 def openRowPyobj(sheet, rowidx):
     'Return Sheet of raw Python object of row.'
@@ -286,8 +302,9 @@ BaseSheet.addCommand('g^Y', 'pyobj-sheet', 'status(type(sheet).__name__); vd.pus
 Sheet.addCommand('', 'open-row-basic', 'vd.push(TableSheet.openRow(sheet, cursorRow))', 'dive into current row as basic table (ignoring subsheet dive)')
 Sheet.addCommand(ENTER, 'open-row', 'vd.push(openRow(cursorRow)) if cursorRow else vd.fail("no row to open")', 'open current row with sheet-specific dive')
 Sheet.addCommand('z'+ENTER, 'open-cell', 'vd.push(openCell(cursorCol, cursorRow))', 'open sheet with copies of rows referenced in current cell')
-Sheet.addCommand('g'+ENTER, 'dive-selected', 'for r in selectedRows: vd.push(openRow(r))', 'open sheet with copies of rows referenced in selected rows')
-Sheet.addCommand('gz'+ENTER, 'dive-selected-cells', 'for r in selectedRows: vd.push(openCell(cursorCol, r))', 'open sheet with copies of rows referenced in selected rows')
+openRows
+Sheet.addCommand('g'+ENTER, 'dive-selected', 'openRows(selectedRows)', 'open all selected rows')
+Sheet.addCommand('gz'+ENTER, 'dive-selected-cells', 'openCells(cursorCol, selectedRows)', 'open all selected cells')
 
 PyobjSheet.addCommand('v', 'visibility', 'sheet.options.visibility = 0 if sheet.options.visibility else 2; reload()', 'toggle show/hide for methods and hidden properties')
 PyobjSheet.addCommand('gv', 'show-hidden', 'sheet.options.visibility = 2; reload()', 'show methods and hidden properties')
