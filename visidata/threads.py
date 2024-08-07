@@ -350,6 +350,9 @@ class ThreadProfiler:
             if elapsed_s(self.thread) < min_thread_time_s:
                 vd.threads.remove(self.thread)
             else:
+                if self.thread.sheet:
+                    if vd.options.disp_expert or vd.options.profile:
+                        vd.status(f'[:bold]{self.thread.sheet.name[:32]}.{self.thread.name}[/] finished in {elapsed_s(self.thread):.1f}s')
                 if vd.options.profile:
                     self.thread.profile.dump_stats(f'{self.thread.name}.pyprof')
 
