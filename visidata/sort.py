@@ -64,10 +64,11 @@ def sort(self):
         return
     try:
         with Progress(gerund='sorting', total=self.nRows) as prog:
-            ordering = self.ordering
+            # replace ambiguous colname strings with unambiguous Column objects  #2494
+            self._ordering = self.ordering
             def _sortkey(r):
                 prog.addProgress(1)
-                return self.sortkey(r, ordering=ordering)
+                return self.sortkey(r, ordering=self._ordering)
 
             # must not reassign self.rows: use .sort() instead of sorted()
             self.rows.sort(key=_sortkey)
