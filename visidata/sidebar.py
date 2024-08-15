@@ -5,7 +5,7 @@ from visidata import vd, VisiData, BaseSheet, colors, TextSheet, clipdraw, wrapt
 from visidata import CommandHelpGetter, OptionHelpGetter
 
 
-vd.option('disp_sidebar', True, 'whether to display sidebar')
+vd.option('disp_sidebar', True, 'whether to display sidebar')  # Set default to False
 vd.option('disp_sidebar_fmt', '{guide}', 'format string for default sidebar')
 vd.theme_option('disp_sidebar_width', 0, 'max width for sidebar')
 vd.theme_option('disp_sidebar_height', 0, 'max height for sidebar')
@@ -50,6 +50,9 @@ def recentStatusMessages(vd) -> str:
 
 @VisiData.api
 def drawSidebar(vd, scr, sheet):
+    if not sheet.options.disp_sidebar:  # Only draw if disp_sidebar is True
+        return
+
     sidebar = vd.recentStatusMessages
     bottommsg = ''
     overflowmsg = '[:reverse] Ctrl+P to view all status messages [/]'
@@ -75,6 +78,9 @@ def drawSidebar(vd, scr, sheet):
 
 @BaseSheet.api
 def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', overflowmsg:str='', bottommsg:str=''):
+    if not sheet.options.disp_sidebar:  # Only draw if disp_sidebar is True
+        return
+
     scrh, scrw = scr.getmaxyx()
     maxw = sheet.options.disp_sidebar_width or scrw//2
     maxh = sheet.options.disp_sidebar_height or scrh-2
