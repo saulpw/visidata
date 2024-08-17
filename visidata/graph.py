@@ -1,10 +1,16 @@
 import math
 
 from visidata import VisiData, Canvas, Sheet, Progress, BoundingBox, Point, ColumnsSheet
-from visidata import vd, asyncthread, dispwidth, colors, clipstr
+from visidata import vd, asyncthread, dispwidth, colors, clipstr, ColorAttr, update_attr
+from visidata.type_date import date
+from statistics import median
 
 vd.theme_option('color_graph_axis', 'bold', 'color for graph axis labels')
 vd.theme_option('disp_graph_tick_x', '╵', 'character for graph x-axis ticks')
+vd.theme_option('color_graph_refline', '', 'color for graph reference value lines')
+vd.theme_option('disp_graph_reflines_x_charset', '▏││▕', 'charset to render vertical reference lines on graph')
+vd.theme_option('disp_graph_reflines_y_charset', '▔──▁', 'charset to render horizontal reference lines on graph')
+vd.theme_option('disp_graph_multiple_reflines_char', '▒', 'char to render multiple parallel reflines')
 
 
 @VisiData.api
@@ -69,6 +75,11 @@ class GraphSheet(InvertedCanvas):
         self.ylabel_maxw = 0
         super().__init__(*names, **kwargs)
 
+        self.reflines_x = []
+        self.reflines_y = []
+        self.reflines_char_x = {}    # { x value in character coordinates -> character to use to draw that vertical line }
+        self.reflines_char_y = {}    # { y value in character coordinates -> character to use to draw that horizontal line }
+
         vd.numericCols(self.xcols) or vd.fail('at least one numeric key col necessary for x-axis')
         self.ycols or vd.fail('%s is non-numeric' % '/'.join(yc.name for yc in kwargs.get('ycols')))
 
@@ -113,6 +124,39 @@ class GraphSheet(InvertedCanvas):
         self.resetBounds()
         self.refresh()
 
+    def draw(self, scr):
+        windowHeight, windowWidth = scr.getmaxyx()
+        if self.needsRefresh:
+            self.render(windowHeight, windowWidth)
+
+        # required because we use clear_empty_squares=False for draw_pixels()
+        self.draw_empty(scr)
+        # draw reflines first so pixels draw over them
+        self.draw_reflines(scr)
+        # use clear_empty_squares to keep reflines
+        self.draw_pixels(scr, clear_empty_squares=False)
+        self.draw_labels(scr)
+
+    def draw_reflines(self, scr):
+        cursorBBox = self.plotterCursorBox
+        # draws only on character cells that have reflines, leaves other cells unaffected
+        for char_y in range(0, self.plotheight//4):
+            has_y_line = char_y in self.reflines_char_y.keys()
+            for char_x in range(0, self.plotwidth//2):
+                has_x_line = char_x in self.reflines_char_x.keys()
+                if has_x_line or has_y_line:
+                    cattr = colors.color_refline
+                    if has_x_line:
+                        ch = self.reflines_char_x[char_x]
+                        # where two lines cross, draw the vertical line, not the horizontal one
+                    elif has_y_line:
+                        ch = self.reflines_char_y[char_y]
+                    # draw cursor
+                    if cursorBBox.contains(char_x*2, char_y*4) or \
+                        cursorBBox.contains(char_x*2+1, char_y*4+3):
+                        cattr = update_attr(cattr, colors.color_current_row)
+                    scr.addstr(char_y, char_x, ch, cattr.attr)
+
     def resetBounds(self):
         super().resetBounds()
         self.createLabels()
@@ -122,6 +166,43 @@ class GraphSheet(InvertedCanvas):
         self.cursorBox.ymin = ymin
         self.cursorBox.h = ymax-ymin
         return True
+
+    def plot_elements(self, invert_y=True):
+        self.plot_reflines()
+        super().plot_elements(invert_y=True)
+
+    def plot_reflines(self):
+        self.reflines_char_x = {}
+        self.reflines_char_y = {}
+
+        bb = self.visibleBox
+        xmin, ymin, xmax, ymax = bb.xmin, bb.ymin, bb.xmax, bb.ymax
+
+        for data_y in self.reflines_y:
+            data_y = float(data_y)
+            if data_y >= ymin and data_y <= ymax:
+                char_y, offset = divmod(self.scaleY(data_y), 4)
+                chars = self.options.disp_graph_reflines_y_charset
+                # if we're drawing two different reflines in the same square, fill it with a different char
+                if char_y in self.reflines_char_y and self.reflines_char_y[char_y] != chars[offset]:
+                    self.reflines_char_y[char_y] = vd.options.disp_graph_multiple_reflines_char
+                else:
+                    self.reflines_char_y[char_y] = chars[offset]
+
+        for data_x in self.reflines_x:
+            data_x = float(data_x)
+            if data_x >= xmin and data_x <= xmax:
+                plot_x = self.scaleX(data_x)
+                # plot_x is an integer count of plotter pixels, and each character box has 2 plotter pixels
+                char_x = plot_x // 2
+                # To subdivide the 2 plotter pixels per square into 4 zones, we have to first multiply by 2.
+                offset = 2*plot_x % 4
+                chars = self.options.disp_graph_reflines_x_charset
+                # if we're drawing two different reflines in the same square, fill it with a different char
+                if char_x in self.reflines_char_x and self.reflines_char_x[char_x] != chars[offset]:
+                    self.reflines_char_y[char_x] = vd.options.disp_graph_multiple_reflines_char
+                else:
+                    self.reflines_char_x[char_x] = chars[offset]
 
     def moveToCol(self, colstr):
         xmin, xmax = map(float, map(self.parseX, colstr.split()))
@@ -226,6 +307,58 @@ class GraphSheet(InvertedCanvas):
         rows = super().rowsWithin(plotter_bbox)
         return sorted(rows, key=lambda r: self.row_order[self.source.rowid(r)])
 
+    def draw_refline_x(self):
+        xcol = vd.numericCols(self.xcols)[0]
+        xtype = xcol.type
+        val = median(xcol.getValues(self.sourceRows))
+        suggested = format_input_value(val, xtype)
+        xstrs = vd.input("add line(s) at x = ", type="reflinex", value=suggested, defaultLast=True).split()
+
+        for xstr in xstrs:
+            vals = [ v.strip() for v in xstr.split(',') ]
+            if len(vals) != len(self.xcols):
+                vd.fail(f'must have {len(self.xcols)} x values, had {len(vals)} values: {xstr}')
+            self.reflines_x += [xtype(val) for xcol, val in zip(self.xcols, vals) if xtype(val) not in self.reflines_x ]
+        self.refresh()
+
+    def draw_refline_y(self):
+        ytype = self.ycols[0].type
+        val = median(self.ycols[0].getValues(self.sourceRows))
+        suggested = format_input_value(val, ytype)
+        ystrs = vd.input("add line(s) at y = ", type="refliney", value=suggested, defaultLast=True).split()
+
+        self.reflines_y += [ ytype(y) for y in ystrs if ytype(y) not in self.reflines_y ]
+        self.refresh()
+
+    def erase_refline_x(self):
+        if len(self.reflines_x) == 0:
+            vd.fail(f'no x refline to erase')
+        xtype = vd.numericCols(self.xcols)[0].type
+        suggested = format_input_value(self.reflines_x[0], xtype)
+
+        xstrs = vd.input('remove line(s) at x = ', value=suggested, type='reflinex', defaultLast=True).split()
+        for input_x in xstrs:
+            self.reflines_x.remove(xtype(input_x))
+        self.refresh()
+
+    def erase_refline_y(self):
+        ytype = self.ycols[0].type
+        suggested = format_input_value(self.reflines_y[0], ytype) if self.reflines_y else ''
+        ystrs = vd.input('remove line(s) at y = ', value=suggested, type='refliney', defaultLast=True).split()
+        for y in ystrs:
+            try:
+                self.reflines_y.remove(ytype(y))
+            except ValueError:
+                vd.fail(f'value {y} not in reflines_y')
+        self.refresh()
+
+def format_input_value(val, type):
+    '''format a value for entry into vd.input(), so its representation has no spaces and no commas'''
+    if type is date:
+        return val.strftime('%Y-%m-%d')
+    else:
+        return str(val)
+
 
 Sheet.addCommand('.', 'plot-column', 'vd.push(GraphSheet(sheet.name, "graph", source=sheet, sourceRows=rows, xcols=keyCols, ycols=numericCols([cursorCol])))', 'plot current numeric column vs key columns; numeric key column is used for x-axis, while categorical key columns determine color')
 Sheet.addCommand('g.', 'plot-numerics', 'vd.push(GraphSheet(sheet.name, "graph", source=sheet, sourceRows=rows, xcols=keyCols, ycols=numericCols(nonKeyVisibleCols)))', 'plot a graph of all visible numeric columns vs key columns')
@@ -261,6 +394,12 @@ def set_x(sheet, s):
 Canvas.addCommand('y', 'resize-y-input', 'sheet.set_y(input("set ymin ymax="))', 'set ymin/ymax on graph axes')
 Canvas.addCommand('x', 'resize-x-input', 'sheet.set_x(input("set xmin xmax="))', 'set xmin/xmax on graph axes')
 
+GraphSheet.addCommand('gx', 'draw-refline-x', 'sheet.draw_refline_x()', 'draw a vertical line at x-values (space-separated)')
+GraphSheet.addCommand('gy', 'draw-refline-y', 'sheet.draw_refline_y()', 'draw a horizontal line at y-values (space-separated)')
+GraphSheet.addCommand('zx', 'erase-refline-x', 'sheet.erase_refline_x()', 'remove a horizontal line at x-values (space-separated)')
+GraphSheet.addCommand('zy', 'erase-refline-y', 'sheet.erase_refline_y()', 'remove a vertical line at y-values (space-separated)')
+GraphSheet.addCommand('gzx', 'erase-reflines-x', 'sheet.reflines_x = []; sheet.refresh()', 'erase all vertical x-value lines')
+GraphSheet.addCommand('gzy', 'erase-reflines-y', 'sheet.reflines_y = []; sheet.refresh()', 'erase any horizontal y-value lines')
 
 vd.addGlobals({
     'GraphSheet': GraphSheet,
