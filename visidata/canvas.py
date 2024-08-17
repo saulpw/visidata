@@ -234,12 +234,28 @@ class Plotter(BaseSheet):
 
     def draw(self, scr):
         windowHeight, windowWidth = scr.getmaxyx()
-        disp_canvas_charset = self.options.disp_canvas_charset or ' o'
-        disp_canvas_charset += (256 - len(disp_canvas_charset)) * disp_canvas_charset[-1]
-
         if self.needsRefresh:
             self.render(windowHeight, windowWidth)
 
+        self.draw_pixels(scr)
+        self.draw_labels(scr)
+
+    def draw_empty(self, scr):
+        # use draw_empty() when calling draw_pixels() with clear_empty_squares=False
+        cursorBBox = self.plotterCursorBox
+        for char_y in range(0, self.plotheight//4):
+            for char_x in range(0, self.plotwidth//2):
+                cattr = ColorAttr()
+                ch = ' '
+                # draw cursor
+                if cursorBBox.contains(char_x*2, char_y*4) or \
+                    cursorBBox.contains(char_x*2+1, char_y*4+3):
+                    cattr = update_attr(cattr, colors.color_current_row)
+                scr.addstr(char_y, char_x, ch, cattr.attr)
+
+    def draw_pixels(self, scr, clear_empty_squares=True):
+        disp_canvas_charset = self.options.disp_canvas_charset or ' o'
+        disp_canvas_charset += (256 - len(disp_canvas_charset)) * disp_canvas_charset[-1]
         if self.pixels:
             cursorBBox = self.plotterCursorBox
             getPixelAttr = self.getPixelAttrRandom if self.options.disp_pixel_random else self.getPixelAttrMost
@@ -264,19 +280,26 @@ class Plotter(BaseSheet):
                             braille_num += pow2
                         pow2 *= 2
 
+                    ch = disp_canvas_charset[braille_num]
                     if braille_num != 0:
                         color = Counter(c for c in block_attrs if c).most_common(1)[0][0]
                         cattr = colors.get_color(color)
                     else:
                         cattr = ColorAttr()
+                        # don't erase empty squares, useful for subclasses that draw elements like reflines
+                        # before pixels are drawn
+                        if not clear_empty_squares:
+                            continue
 
+                    # draw cursor
                     if cursorBBox.contains(char_x*2, char_y*4) or \
                        cursorBBox.contains(char_x*2+1, char_y*4+3):
                         cattr = update_attr(cattr, colors.color_current_row)
 
                     if cattr.attr:
-                        scr.addstr(char_y, char_x, disp_canvas_charset[braille_num], cattr.attr)
+                        scr.addstr(char_y, char_x, ch, cattr.attr)
 
+    def draw_labels(self, scr):
         def _mark_overlap_text(labels, textobj):
             def _overlaps(a, b):
                 a_x1, _, a_txt, _, _ = a
@@ -318,7 +341,7 @@ class Plotter(BaseSheet):
                         cursorBBox = self.plotterCursorBox
                         for c in txt:
                             w = dispwidth(c)
-                            # check if the cursor contains the midpoint of the character box
+                            # draw cursor if the cursor contains the midpoint of the character cell
                             if cursorBBox.contains(char_x*2+1, char_y*4+2):
                                 char_attr = update_attr(cattr, colors.color_current_row)
                                 clipdraw(scr, char_y, char_x, c, char_attr, w)
@@ -742,7 +765,6 @@ class Canvas(Plotter):
         self.source.copyRows(rows)
         self.source.deleteBy(lambda r,rows=rows: r in rows)
         self.reload()
-
 
 Plotter.addCommand('v', 'visibility', 'options.disp_graph_labels = not options.disp_graph_labels', 'toggle disp_graph_labels option')
 
