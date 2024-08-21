@@ -157,9 +157,11 @@ class GraphSheet(InvertedCanvas):
                         cattr = update_attr(cattr, colors.color_current_row)
                     scr.addstr(char_y, char_x, ch, cattr.attr)
 
-    def resetBounds(self):
-        super().resetBounds()
+    def resetBounds(self, refresh=True):
+        super().resetBounds(refresh=False)
         self.createLabels()
+        if refresh:
+            self.refresh()
 
     def moveToRow(self, rowstr):
         ymin, ymax = map(float, map(self.parseY, rowstr.split()))

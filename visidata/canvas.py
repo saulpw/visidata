@@ -558,7 +558,7 @@ class Canvas(Plotter):
 
         self.resetBounds()
 
-    def resetBounds(self):
+    def resetBounds(self, refresh=True):
         'create canvasBox and cursorBox if necessary, and set visibleBox w/h according to zoomlevels.  then redisplay legends.'
         if not self.canvasBox:
             xmin, ymin, xmax, ymax = None, None, None, None
@@ -595,6 +595,8 @@ class Canvas(Plotter):
             self.cursorBox = Box(cb_xmin, cb_ymin, self.canvasCharWidth, self.canvasCharHeight)
 
         self.plotlegends()
+        if refresh:
+            self.refresh()
 
     def calcTopCursorY(self):
         'ymin for the cursor that will align its top with the top edge of the graph'
@@ -706,6 +708,7 @@ class Canvas(Plotter):
         vd.cancelThread(*(t for t in self.currentThreads if t.name == 'plotAll_async'))
         self.labels.clear()
         self.resetCanvasDimensions(h, w)
+        self.resetBounds(refresh=False)
         self.render_async()
 
     @asyncthread
@@ -798,7 +801,7 @@ Canvas.addCommand('zz', 'zoom-cursor', 'zoomTo(cursorBox)', 'set visible bounds 
 
 Canvas.addCommand('-', 'zoomout-cursor', 'tmp=cursorBox.center; incrZoom(options.disp_zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom out from cursor center')
 Canvas.addCommand('+', 'zoomin-cursor', 'tmp=cursorBox.center; incrZoom(1.0/options.disp_zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom into cursor center')
-Canvas.addCommand('_', 'zoom-all', 'sheet.canvasBox = None; sheet.visibleBox = None; sheet.xzoomlevel=sheet.yzoomlevel=1.0; resetBounds(); refresh()', 'zoom to fit full extent')
+Canvas.addCommand('_', 'zoom-all', 'sheet.canvasBox = None; sheet.visibleBox = None; sheet.xzoomlevel=sheet.yzoomlevel=1.0; resetBounds()', 'zoom to fit full extent')
 Canvas.addCommand('z_', 'set-aspect', 'sheet.aspectRatio = float(input("aspect ratio=", value=aspectRatio)); refresh()', 'set aspect ratio')
 
 # set cursor box with left click
