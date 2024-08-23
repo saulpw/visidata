@@ -551,7 +551,7 @@ def input(vd, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None,
                         updater=_drawPrompt,
                         **kwargs)
 
-    if ret:
+    if ret and kwargs.get('record', True):
         vd.addInputHistory(ret, type=type)
 
     elif defaultLast:
