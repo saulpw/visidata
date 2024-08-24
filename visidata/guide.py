@@ -65,6 +65,7 @@ MemorySheet ("Making note of certain values")
 # Specific use cases
 
 XsvGuide ("CSV/TSV and other text-delimited formats")
+GrepSheet ("Load output of grep-like tools")
 
 # advanced usage and developers
 
