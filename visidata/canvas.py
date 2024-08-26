@@ -544,13 +544,14 @@ class Canvas(Plotter):
         'adjust visibleBox.xymin so that canvasPoint is plotted at plotterPoint'
         self.visibleBox.xmin = canvasPoint.x - self.canvasW(plotterPoint.x-self.plotviewBox.xmin)
         self.visibleBox.ymin = canvasPoint.y - self.canvasH(plotterPoint.y-self.plotviewBox.ymin)
-        self.refresh()
+        self.resetBounds()
 
     def zoomTo(self, bbox):
         'set visible area to bbox, maintaining aspectRatio if applicable'
         self.fixPoint(self.plotviewBox.xymin, bbox.xymin)
         self.xzoomlevel=bbox.w/self.canvasBox.w
         self.yzoomlevel=bbox.h/self.canvasBox.h
+        self.resetBounds()
 
     def incrZoom(self, incr):
         self.xzoomlevel *= incr

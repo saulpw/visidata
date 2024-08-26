@@ -27,7 +27,7 @@ class InvertedCanvas(Canvas):
         'adjust visibleBox.xymin so that canvasPoint is plotted at plotterPoint'
         self.visibleBox.xmin = canvasPoint.x - self.canvasW(plotterPoint.x-self.plotviewBox.xmin)
         self.visibleBox.ymin = canvasPoint.y - self.canvasH(self.plotviewBox.ymax-plotterPoint.y)
-        self.refresh()
+        self.resetBounds()
 
     def rowsWithin(self, plotter_bbox):
         return super().rowsWithin(plotter_bbox, invert_y=True)
@@ -36,6 +36,7 @@ class InvertedCanvas(Canvas):
         super().zoomTo(bbox)
         self.fixPoint(Point(self.plotviewBox.xmin, self.plotviewBox.ymin),
                       Point(bbox.xmin, bbox.ymax + 1/4*self.canvasCharHeight))
+        self.resetBounds()
 
     def scaleY(self, canvasY) -> int:
         'returns a plotter y coordinate for a canvas y coordinate, with the y direction inverted'
@@ -122,7 +123,6 @@ class GraphSheet(InvertedCanvas):
 
         self.xzoomlevel=self.yzoomlevel=1.0
         self.resetBounds()
-        self.refresh()
 
     def draw(self, scr):
         windowHeight, windowWidth = scr.getmaxyx()
