@@ -506,7 +506,7 @@ def input(vd, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None,
         - *type*: string indicating the type of input to use for history.
         - *history*: list of strings to use for input history.
         - *defaultLast*:  on empty input, if True, return last history item.
-        - *display*: pass False to not display input (for sensitive input, e.g. a password).
+        - *display*: pass False to not display input (for sensitive input, e.g. a password), and to also prevent recording input as if *record* is False
         - *record*: pass False to not record input on cmdlog or input history (for sensitive or inconsequential input).
         - *completer*: ``completer(val, idx)`` is called on TAB to get next completed value.
         - *updater*: ``updater(val)`` is called every keypress or timeout.
@@ -551,9 +551,9 @@ def input(vd, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None,
                         updater=_drawPrompt,
                         **kwargs)
 
-    if ret and kwargs.get('record', True):
-        vd.addInputHistory(ret, type=type)
-
+    if ret:
+        if kwargs.get('record', True) and kwargs.get('display', True):
+            vd.addInputHistory(ret, type=type)
     elif defaultLast:
         history or vd.fail("no previous input")
         ret = history[-1]
