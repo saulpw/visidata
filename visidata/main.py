@@ -258,10 +258,8 @@ def main_vd():
             current_args[optname] = optval
             if flGlobal:
                 global_args[optname] = optval
-
         elif arg.startswith('+'):  # position cursor at start
             after_config.append((vd.moveToPos, *vd.parsePos(arg[1:], inputs=inputs)))
-
         elif current_args.get('play', None) and '=' in arg:
             # parse 'key=value' pairs for formatting cmdlog template in replay mode
             k, v = arg.split('=', maxsplit=1)

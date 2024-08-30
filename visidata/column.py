@@ -384,7 +384,6 @@ class Column(Extensible):
                                             error=['unknown'],
                                             note=f'[:onclick error-cell]{options.disp_note_typeexc}[:]',
                                             notecolor='color_warning')
-
         elif isinstance(typedval, threading.Thread):
             return DisplayWrapper(None,
                                 text=options.disp_pending,
