@@ -73,7 +73,6 @@ def save_npy(vd, p, sheet):
             dt = 'datetime64[s]'
         elif col.type in vd.numericTypes:
             dt = 'f8'
-
         else: #  if col.type in (str, anytype):
             width = col.getMaxWidth(sheet.rows)
             dt = 'U'+str(width)
