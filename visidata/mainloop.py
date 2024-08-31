@@ -165,7 +165,7 @@ def mainloop(vd, scr):
     numTimeouts = 0
     prefixWaiting = False
     vd.scrFull = scr
-    vd.disp_help = vd.options.disp_help
+    vd.disp_help = -1 if vd.options.disp_expert else 10
 
     vd.keystrokes = ''
     vd.drawThread = threading.current_thread()
