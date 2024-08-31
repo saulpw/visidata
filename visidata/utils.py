@@ -186,11 +186,17 @@ class ExplodingMock:
 
 class MissingAttrFormatter(string.Formatter):
     "formats {} fields with `''`, that would normally result in a raised KeyError or AttributeError or IndexError; intended for user customisable format strings."
+    def get_value(self, key, args, kwargs):
+        try:
+            return super().get_value(key, args, kwargs)
+        except Exception:
+            raise
+
     def get_field(self, field_name, args, kwargs):
         try:
             return super().get_field(field_name, args, kwargs)
-        except (KeyError, AttributeError, IndexError):
-            return (None, field_name)
+        except (KeyError, AttributeError, IndexError, ValueError) as e:
+            return ('{' + field_name + '}', field_name)
 
     def format_field(self, value, format_spec):
         # value is missing

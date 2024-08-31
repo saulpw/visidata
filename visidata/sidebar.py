@@ -6,7 +6,7 @@ from visidata import CommandHelpGetter, OptionHelpGetter
 
 
 vd.option('disp_sidebar', True, 'whether to display sidebar')
-vd.option('disp_sidebar_fmt', '{guide}', 'format string for default sidebar')
+vd.option('disp_sidebar_fmt', '', 'format string for default sidebar')
 vd.theme_option('disp_sidebar_width', 0, 'max width for sidebar')
 vd.theme_option('disp_sidebar_height', 0, 'max height for sidebar')
 vd.theme_option('color_sidebar', 'black on 114 blue', 'base color of sidebar')

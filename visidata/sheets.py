@@ -140,7 +140,7 @@ class TableSheet(BaseSheet):
     _coltype = SettableColumn
 
     rowtype = 'rows'
-    guide = '# {sheet.help_title}\n{sheet.help_columns}\n'
+    guide = '# {sheet.help_title}\n'
 
     @property
     def help_title(self):
