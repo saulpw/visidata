@@ -281,7 +281,7 @@ class TableSheet(BaseSheet):
         self.columns = []
         for c in self.initialCols:
             self.addColumn(deepcopy(c))
-            if self.options.disp_help > c.max_help:
+            if self.options.disp_expert > c.max_help:
                 c.hide()
 
         self.setKeys(self.columns[:self.nKeys])
@@ -1121,7 +1121,7 @@ BaseSheet.init('pane', lambda: 1)
 
 
 BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); reload()', 'Reload current sheet')
-Sheet.addCommand('^G', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line')
+Sheet.addCommand('', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line')
 
 Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', 'toggle current column as a key column')
 Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])', 'unset current column as a key column')

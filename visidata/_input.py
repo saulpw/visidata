@@ -14,7 +14,9 @@ vd.theme_option('disp_edit_fill', '_', 'edit field fill character')
 vd.theme_option('disp_unprintable', '·', 'substitute character for unprintables')
 vd.theme_option('mouse_interval', 1, 'max time between press/release for click (ms)', sheettype=None)
 
-vd.disp_help = 1  # current level of help shown (up to vd.options.disp_help as maximum)
+vd.disp_help = 0  # current page of help shown
+vd._help_sidebars = []  # list of (help:str|HelpPane, title:str)
+
 
 class AcceptInput(Exception):
     '*args[0]* is the input to be accepted'
@@ -89,31 +91,8 @@ def splice(v:str, i:int, s:str):
     return v if i < 0 else v[:i] + s + v[i:]
 
 
-# vd.options.disp_help is the effective maximum disp_help.  The user can cycle through the various levels of help.
-class HelpCycler:
-    def __init__(self, scr=None, help=''):
-        self.help = help
-        self.scr = scr
-
-    def __enter__(self):
-        self.draw()
-
-        return self
-
-    def __exit__(self, *args):
-        pass
-
-    def cycle(self):
-        vd.disp_help = (vd.disp_help-1)%(vd.options.disp_help+1)
-        self.draw()
-
-    def draw(self):
-        if self.scr:
-            vd.drawInputHelp(self.scr, self.help)
-
-
 @VisiData.api
-def drawInputHelp(vd, scr, help:str=''):
+def drawInputHelp(vd, scr):
     if not scr or not vd.cursesEnabled:
         return
 
@@ -121,15 +100,7 @@ def drawInputHelp(vd, scr, help:str=''):
     if not sheet:
         return
 
-    curhelp = ''
-    if vd.disp_help == 0:
-        vd.drawSidebar(scr, sheet)
-    elif vd.disp_help == 1:
-        curhelp = help
-        sheet.drawSidebarText(scr, curhelp)
-    elif vd.disp_help >= 2:
-        curhelp = vd.getHelpPane('input', module='visidata')
-        sheet.drawSidebarText(scr, curhelp, title='Input Keystrokes Help')
+    vd.drawSidebar(scr, sheet)
 
 
 def clean_printable(s):
@@ -223,7 +194,7 @@ def editline(vd, scr, y, x, w, i=0,
   If *clear* is True, clear whole editing area before displaying.
   '''
   with EnableCursor():
-   with HelpCycler(scr, help) as disp_help:
+   with vd.AddedHelp(vd.getHelpPane('input', module='visidata'), 'Input Keystrokes Help'), vd.AddedHelp(help, 'Input Field Help'):
     ESC='^['
     TAB='^I'
     history_state = HistoryState(history)
@@ -259,7 +230,7 @@ def editline(vd, scr, y, x, w, i=0,
     while True:
         vd.drawSheet(scr, vd.activeSheet)
         updater(v)
-        disp_help.draw()
+        vd.drawInputHelp(scr)
 
         if display:
             dispval = clean_printable(v)
@@ -296,7 +267,7 @@ def editline(vd, scr, y, x, w, i=0,
         elif ch == '^E' or ch == 'KEY_END':        i = len(v)
         elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1
         elif ch == '^G':
-            disp_help.cycle()
+            vd.cycleSidebar()
             continue  # not considered a first keypress
         elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1; v = delchar(v, i)
         elif ch == TAB:                            v, i = complete_state.complete(v, i, +1)
@@ -459,8 +430,7 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
 
         return updater(val)
 
-    with HelpCycler() as disp_help:
-      while True:
+    while True:
         try:
             input_kwargs = kwargs[cur_input_key]
             input_kwargs['value'] = vd.input(**input_kwargs,

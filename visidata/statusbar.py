@@ -11,7 +11,8 @@ import visidata
 from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, dispwidth, ColorAttr
 
 
-vd.option('disp_rstatus_fmt', '{sheet.threadStatus} {sheet.keystrokeStatus}   [:longname_status]{sheet.longname}[/]  {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}', 'right-side status format string')
+
+vd.option('disp_rstatus_fmt', '{sheet.threadStatus} {sheet.keystrokeStatus}   [:longname_status]{sheet.longname}[/]  {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}{vd.sidebarStatus}', 'right-side status format string')
 vd.option('disp_status_fmt', '{sheet.sheetlist}| ', 'left-side status format string')
 vd.theme_option('disp_lstatus_max', 0, 'maximum length of left status line')
 vd.theme_option('disp_status_sep', '│', 'separator between statuses')
