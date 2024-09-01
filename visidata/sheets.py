@@ -16,17 +16,24 @@ vd.activePane = 1   # pane numbering starts at 1; pane 0 means active pane
 vd.option('name_joiner', '_', 'string to join sheet or column names', max_help=0)
 vd.option('value_joiner', ' ', 'string to join display values', max_help=0)
 
+vd.option('disp_wrap_max_lines', 3, 'max lines for multiline view', max_help=1)
+vd.option('disp_wrap_break_long_words', False, 'break words longer than column width in multiline', max_help=1)
+vd.option('disp_wrap_replace_whitespace', False, 'replace whitespace with spaces in multiline', max_help=1)
+vd.option('disp_wrap_placeholder', '…', 'multiline string to indicate truncation', max_help=1)
+
 
 @drawcache
 def _splitcell(sheet, s, width=0, maxheight=1):
-    if width <= 0 or not sheet.options.textwrap_cells:
+    height = max(maxheight, sheet.options.disp_wrap_max_lines or 0)
+    if width <= 0 or height <= 0:
         return [s]
+
+    wrap_kwargs = sheet.options.getall('disp_wrap_')
+    wrap_kwargs['max_lines'] = height
 
     ret = []
     for attr, text in s:
-        for line in textwrap.wrap(
-            text, width=width, break_long_words=False, replace_whitespace=False
-            ):
+        for line in textwrap.wrap(text, width=width, **wrap_kwargs):
             if len(ret) >= maxheight:
                 ret[-1][0][1] += ' ' + line
                 break

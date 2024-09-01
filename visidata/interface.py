@@ -55,4 +55,3 @@ vd.theme_option('force_256_colors', False, 'use 256 colors even if curses report
 vd.option('quitguard', False, 'confirm before quitting modified sheet')
 vd.option('default_width', 20, 'default column width', replay=True, max_help=1)   # TODO: make not replay and remove from markdown saver
 vd.option('default_height', 4, 'default column height', max_help=-1)
-vd.option('textwrap_cells', True, 'wordwrap text for multiline rows', max_help=1)

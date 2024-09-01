@@ -244,4 +244,6 @@ def memo(vd, name, col, row):
 
 alias('view-cell', 'pyobj-cell')
 
+vd.optalias('textwrap_cells', 'disp_wrap_max_lines', 3) # wordwrap text for multiline rows
+
 vd.addGlobals(globals())
