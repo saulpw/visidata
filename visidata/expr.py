@@ -3,9 +3,9 @@ from visidata import Progress, Sheet, Column, asyncthread, vd, ExprColumn
 
 class CompleteExpr:
     def __init__(self, sheet=None):
-        self.sheet = sheet
         self.varnames = []
-        self.varnames.extend(sorted(col.name for col in self.sheet.columns))
+        if sheet:
+            self.varnames.extend(sorted(col.name for col in sheet.columns))
         self.varnames.extend(sorted(x for x in vd.getGlobals()))
         for c in vd.contexts:
             self.varnames.extend(sorted(x for x in dir(c)))
