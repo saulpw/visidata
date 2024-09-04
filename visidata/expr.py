@@ -4,6 +4,11 @@ from visidata import Progress, Sheet, Column, asyncthread, vd, ExprColumn
 class CompleteExpr:
     def __init__(self, sheet=None):
         self.sheet = sheet
+        self.varnames = []
+        self.varnames.extend(sorted(col.name for col in self.sheet.columns))
+        self.varnames.extend(sorted(x for x in vd.getGlobals()))
+        for c in vd.contexts:
+            self.varnames.extend(sorted(x for x in dir(c)))
 
     def __call__(self, val, state):
         i = len(val)-1
@@ -19,14 +24,14 @@ class CompleteExpr:
             base = val[:i+1]
             partial = val[i+1:]
 
-        varnames = []
-        varnames.extend(sorted((base+col.name) for col in self.sheet.columns if col.name.startswith(partial)))
-        varnames.extend(sorted((base+x) for x in vd.getGlobals() if x.startswith(partial)))
-
-        # Remove duplicate tabbing suggestions
-        varnames_dict = {var:None for var in varnames}
+        # Remove unmatching and duplicate completions
+        varnames_dict = {x:None for x in self.varnames if x.startswith(partial)}
         varnames = list(varnames_dict.keys())
-        return varnames[state%len(varnames)]
+
+        if not varnames:
+            return val
+
+        return base + varnames[state%len(varnames)]
 
 
 @Column.api
