@@ -3,7 +3,7 @@ import os
 from copy import copy
 
 from visidata import vd
-from visidata import Sheet, BaseSheet, VisiData, IndexSheet, Path, Progress, TypedExceptionWrapper, UNLOADED
+from visidata import Sheet, BaseSheet, VisiData, IndexSheet, Path, Progress, TypedExceptionWrapper, TypedWrapper, UNLOADED
 
 vd.option('safe_error', '#ERR', 'error string to use while saving', replay=True)
 vd.option('save_encoding', 'utf-8', 'encoding passed to codecs.open when saving a file', replay=True, help=vd.help_encoding)
@@ -58,6 +58,9 @@ def iterdispvals(sheet, *cols, format=False):
                         break
                     elif isinstance(dispval, TypedExceptionWrapper):
                         dispval = options_safe_error or str(dispval)
+                        break
+                    elif isinstance(dispval, TypedWrapper):
+                        dispval = ''
                         break
                     else:
                         dispval = t(dispval)
