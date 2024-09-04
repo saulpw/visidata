@@ -2,4 +2,3 @@
 {"sheet": null, "col": null, "row": null, "longname": "open-new", "input": null, "keystrokes": null, "comment": null}
 {"row": "", "longname": "addcol-expr", "input": "None", "keystrokes": "=", "comment": "create new column from Python expression, with column names as variables"}
 {"longname": "add-row"}
-{"longname": "save-sheet", "input": "tests/golden/issue2476.csv"}
