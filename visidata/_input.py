@@ -318,7 +318,7 @@ def editline(vd, scr, y, x, w, i=0,
 
 
 @VisiData.api
-def editText(vd, y, x, w, record=True, display=True, **kwargs):
+def editText(vd, y, x, w, record=True, display=True, value='', **kwargs):
     'Invoke modal single-line editor at (*y*, *x*) for *w* terminal chars. Use *display* is False for sensitive input like passphrases.  If *record* is True, get input from the cmdlog in batch mode, and save input to the cmdlog if *display* is also True. Return new value as string.'
     v = None
     if record and vd.cmdlog:
@@ -327,8 +327,12 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
     if v is None:
         if vd.activeSheet._scr is None:
             raise Exception('active sheet does not have a screen')
+
+        if value is None:
+            value = ''
+
         try:
-            v = vd.editline(vd.activeSheet._scr, y, x, w, display=display, **kwargs)
+            v = vd.editline(vd.activeSheet._scr, y, x, w, display=display, value=value, **kwargs)
         except AcceptInput as e:
             v = e.args[0]
 
@@ -340,13 +344,13 @@ def editText(vd, y, x, w, record=True, display=True, **kwargs):
         if record and vd.cmdlog:
             vd.setLastArgs(v)
 
-    if 'value' in kwargs:
-        starting_value = kwargs['value']
-        if isinstance(starting_value, (int, float)) and v[-1] == '%':  #2082
+    if value:
+        if isinstance(value, (int, float)) and v[-1] == '%':  #2082
             pct = float(v[:-1])
-            v = pct*starting_value/100
+            v = pct*value/100
 
-        v = type(starting_value)(v)
+        # convert back to type of original value
+        v = type(value)(v)
 
     return v
 

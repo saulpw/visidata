@@ -21,8 +21,12 @@ class EmailSheet(TableSheet):
 
 @EmailSheet.api
 def extract_part(sheet, givenpath, part):
-    with givenpath.open_bytes(mode='w') as fp:
-        fp.write(part.get_payload(decode=True))
+    payload = part.get_payload(decode=True)
+    if payload is None:
+        vd.warning('empty payload')
+    else:
+        with givenpath.open_bytes(mode='w') as fp:
+            fp.write(payload)
 
 @EmailSheet.api
 def extract_parts(sheet, givenpath, *parts):
@@ -37,10 +41,11 @@ def extract_parts(sheet, givenpath, *parts):
         try:
             os.makedirs(givenpath, exist_ok=True)
         except FileExistsError:
-            pass
+            vd.debug(f'{givenpath} already exists')
 
-        for part in parts:
-            vd.execAsync(sheet.extract_part, givenpath / part.get_filename(), part)
+        for i, part in enumerate(parts):
+            fn = part.get_filename() or f'part{i}'
+            vd.execAsync(sheet.extract_part, givenpath / fn, part)
     elif len(parts) == 1:
         vd.execAsync(sheet.extract_part, givenpath, parts[0])
     else:
