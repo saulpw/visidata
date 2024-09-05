@@ -22,6 +22,15 @@ for i in $TESTS ; do
     if [ "${i%-nosave.vd*}-nosave" == "${i%.vd*}" ];
     then
         TEST=false
+    elif [ "${i%-n312.vd*}-n312" == "${i%.vd*}" ];
+    then
+        if [ `python -c 'import sys; print(sys.version_info[:2] >= (3,12))'` == "True" ];
+        then
+            TEST=false
+        else
+            TEST=true
+        fi
+
     elif [ "${i%-311.vd*}-311" == "${i%.vd*}" ];
     then
         if [ `python -c 'import sys; print(sys.version_info[:2] >= (3,11))'` == "True" ];
