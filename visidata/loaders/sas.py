@@ -18,16 +18,21 @@ def open_sas7bdat(vd, p):
 class XptSheet(Sheet):
     def iterload(self):
         xport = vd.importExternal('xport')
+        xport.v56 = vd.importExternal('xport.v56', 'xport>=3')
         with open(self.source, 'rb') as fp:
-            self.rdr = xport.Reader(fp)
+            self.library = xport.v56.load(fp)
 
             self.columns = []
-            for i, var in enumerate(self.rdr._variables):
-                self.addColumn(ColumnItem(var.name, i, type=float if var.numeric else str))
+            dataset = self.library[list(self.library.keys())[0]]
 
-            # a visidata row must not be a tuple, so convert each tuple to a list
-            for t in self.rdr:
-                yield list(t)
+            varnames = dataset.contents.Variable.values
+            types = dataset.contents.Type.values
+
+            for i, (varname, typestr) in enumerate(zip(varnames, types)):
+                self.addColumn(ColumnItem(varname, i, type=float if typestr == 'Numeric' else str))
+
+            for row in dataset.values:
+                yield list(row)
 
 
 class SasSheet(Sheet):
