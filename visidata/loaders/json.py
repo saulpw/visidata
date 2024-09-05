@@ -94,7 +94,7 @@ class JsonSheet(Sheet):
         return AttrDict(fields)
 
     def openRow(self, row):
-        return PyobjSheet("%s[%s]" % (self.name, self.keystr(row)), source=row)
+        return PyobjSheet("%s[%s]" % (self.name, self.rowname(row)), source=row)
 
 JsonSheet.init('_knownKeys', set, copy=True)  # set of row keys already seen
 

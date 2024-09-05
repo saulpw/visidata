@@ -67,9 +67,6 @@ def indexMatch(L, func):
         if func(x):
             return i
 
-def keystr(k):
-    return  vd.options.rowkey_prefix+','.join(map(str, k))
-
 @VisiData.api
 def isLoggableCommand(vd, longname):
     for n in nonLogged:
@@ -93,15 +90,22 @@ def moveToRow(vs, rowstr):
     return True
 
 @Sheet.api
-def getRowIndexFromStr(vs, rowstr):
-    index = indexMatch(vs.rows, lambda r,vs=vs,rowstr=rowstr: keystr(vs.rowkey(r)) == rowstr)
-    if index is not None:
-        return index
+def getRowIndexFromStr(vs, row:str):
+    prefix = vd.options.rowkey_prefix
+    index = None
+    if isinstance(row, int):
+        index = row
+    elif isinstance(row, str) and row.startswith(prefix):
+        rowk = row[len(prefix):]
+        index = indexMatch(vs.rows, lambda r,vs=vs,rowstr=rowstr: rowk == ','.join(map(str, vs.rowkey(r))))
+    else:
+        try:
+            index = int(rowstr)
+        except ValueError:
+            vd.warning('invalid type for row index')
 
-    try:
-        return int(rowstr)
-    except ValueError:
-        return None
+    return index
+
 
 @Sheet.api
 def moveToCol(vs, col):
@@ -175,7 +179,7 @@ class CommandLogBase:
         comment = vd.currentReplayRow.comment if vd.currentReplayRow else cmd.helpstr
         vd.activeCommand = self.newRow(sheet=sheetname,
                                             col=colname,
-                                            row=str(rowname),
+                                            row=rowname,
                                             keystrokes=keystrokes,
                                             input=args,
                                             longname=cmd.longname,
@@ -475,6 +479,7 @@ CommandLogJsonl.addCommand('gx', 'replay-all', 'vd.replay(sheet)', 'replay conte
 CommandLog.options.json_sort_keys = False
 CommandLog.options.encoding = 'utf-8'
 CommandLogJsonl.options.json_sort_keys = False
+CommandLogJsonl.options.regex_skip = r'^(//|#).*'
 
 vd.addGlobals(CommandLogBase=CommandLogBase, CommandLogRow=CommandLogRow)
 

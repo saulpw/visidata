@@ -15,7 +15,7 @@ vd.option('fmt_expand_list', '%s[%s]', 'format str to use for names of columns e
 
 class PythonSheet(Sheet):
     def openRow(self, row):
-        return PyobjSheet("%s[%s]" % (self.name, self.keystr(row)), source=row)
+        return PyobjSheet("%s[%s]" % (self.name, self.rowname(row)), source=row)
 
 class PythonAtomSheet(PythonSheet):
     '''a sheet to display one Python object that does not offer deeper inspection,
@@ -226,7 +226,7 @@ def openRow(sheet, row, rowidx=None):
     'Return Sheet diving into *row*.'
     if row is None or sheet.nRows == 0: vd.fail('no row to dive into')
     if rowidx is None:
-        k = sheet.keystr(row) or str(sheet.cursorRowIndex)
+        k = sheet.rowname(row) or str(sheet.cursorRowIndex)
     else:
         k = rowidx
 
@@ -245,7 +245,7 @@ def openCell(sheet, col, row, rowidx=None):
     'Return Sheet diving into cell at *row* in *col*.'
     if col is None or row is None or sheet.nRows == 0: vd.fail('no cell to dive into')
     if rowidx is None:
-        k = sheet.keystr(row) or str(sheet.cursorRowIndex)
+        k = sheet.rowname(row) or str(sheet.cursorRowIndex)
     else:
         k = rowidx
     name = f'{sheet.name}[{k}].{col.name}'

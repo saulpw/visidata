@@ -600,7 +600,7 @@ class TableSheet(BaseSheet):
         'Return tuple of the key for *row*.'
         return tuple(c.getTypedValue(row) for c in self.keyCols)
 
-    def keystr(self, row):
+    def rowname(self, row):
         'Return string of the key for *row*.'
         return ','.join(map(str, self.rowkey(row)))
 
