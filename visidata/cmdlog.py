@@ -125,8 +125,7 @@ def commandCursor(sheet, execstr):
     colname, rowname = '', ''
     contains = lambda s, *substrs: any((a in s) for a in substrs)
     if contains(execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorRow') and sheet.nRows > 0:
-        k = sheet.rowkey(sheet.cursorRow)
-        rowname = keystr(k) if k else sheet.cursorRowIndex
+        rowname = sheet.cursorRowIndex
 
     if contains(execstr, 'cursorTypedValue', 'cursorDisplay', 'cursorValue', 'cursorCell', 'cursorCol', 'cursorVisibleCol', 'ColumnAtCursor'):
         if sheet.cursorCol:
