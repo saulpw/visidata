@@ -71,7 +71,7 @@ setup(
             "tabulate",
             "tomli",
             "wcwidth",
-            "xport==2.0.2",
+            "xport>=3.0",
         ]
     },
     package_data={
