@@ -1,5 +1,5 @@
 OrderDate	Region	Rep	Item	Units	Units_window	sum(Units_window)	Unit_Cost	Total
-2016-01-06	East	Jones	Pencil	95	[2] 95; 50	145	1.99	189.05
+2016-01-06	East	Jones	Pencil	95	[3] ; 95; 50	145	1.99	189.05
 2016-01-23	Central	Kivell	Binder	50	[3] 95; 50; 36	181	19.99	999.50
 2016-02-09	Central	Jardine	Pencil	36	[3] 50; 36; 27	113	4.99	179.64
 2016-02-26	Central	Gill	Pen	27	[3] 36; 27; 56	119	19.99	539.73
@@ -41,4 +41,4 @@ OrderDate	Region	Rep	Item	Units	Units_window	sum(Units_window)	Unit_Cost	Total
 2017-10-31	Central	Andrews	Pencil	14	[3] 57; 14; 11	82	1.29	18.06
 2017-11-17	Central	Jardine	Binder	11	[3] 14; 11; 94	119	4.99	54.89
 2017-12-04	Central	Jardine	Binder	94	[3] 11; 94; 28	133	19.99	1879.06
-2017-12-21	Central	Andrews	Binder	28	[2] 94; 28	122	4.99	139.72
+2017-12-21	Central	Andrews	Binder	28	[3] 94; 28; 	122	4.99	139.72
