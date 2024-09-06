@@ -96,7 +96,7 @@ vd.jointypes = [AttrDict(key=k, desc=v) for k, v in {
     'append': 'all rows from all sheets; columns from all sheets',
     'concat': 'all rows from all sheets; columns and type from first sheet',
     'extend': 'only rows from first sheet; type from first sheet; columns from all sheets',
-    'merge': 'merge differences from other sheets into first sheet (including new rows)',
+    'merge': 'all rows from all sheets; where keys match, use latest truthy value',
 }.items()]
 
 def joinkey(sheetKeyCols, row):
@@ -155,7 +155,9 @@ class JoinKeyColumn(Column):
 
 
 class MergeColumn(Column):
+    # .cols is { sheet: col, ... } in sheet-join order
     def calcValue(self, row):
+        'Return value from last joined sheet with truth-y value in this column for the given row.'
         for vs, c in reversed(list(self.cols.items())):
             if c:
                 v = c.getTypedValue(row[vs])
