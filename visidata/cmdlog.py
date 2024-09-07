@@ -94,17 +94,17 @@ def moveToRow(vs, rowstr):
     return True
 
 @Sheet.api
-def getRowIndexFromStr(vs, row:str):
+def getRowIndexFromStr(vs, row):
     prefix = vd.options.rowkey_prefix
     index = None
     if isinstance(row, int):
         index = row
     elif isinstance(row, str) and row.startswith(prefix):
         rowk = row[len(prefix):]
-        index = indexMatch(vs.rows, lambda r,vs=vs,rowstr=rowstr: rowk == ','.join(map(str, vs.rowkey(r))))
+        index = indexMatch(vs.rows, lambda r,vs=vs,rowk=rowk: rowk == ','.join(map(str, vs.rowkey(r))))
     else:
         try:
-            index = int(rowstr)
+            index = int(row)
         except ValueError:
             vd.warning('invalid type for row index')
 
