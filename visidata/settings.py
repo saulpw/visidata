@@ -107,12 +107,13 @@ class SettingsMgr(collections.OrderedDict):
 
 
 class Command:
-    def __init__(self, longname, execstr, helpstr='', module='', deprecated=False):
+    def __init__(self, longname, execstr, helpstr='', module='', replay=True, deprecated=False):
         self.longname = longname
         self.execstr = execstr
         self.helpstr = helpstr
         self.module = module
         self.deprecated = deprecated
+        self.replayable = replay
 
 
 class Option:
@@ -325,7 +326,7 @@ def theme_option(vd, name, *args, **kwargs):
 
 @BaseSheet.class_api
 @classmethod
-def addCommand(cls, keystrokes, longname, execstr, helpstr='', **kwargs):
+def addCommand(cls, keystrokes, longname, execstr, helpstr='', replay=True, **kwargs):
     '''Add a new command to *cls* sheet type.
 
     - *keystrokes*: default keybinding, including **prefixes**.
@@ -333,7 +334,8 @@ def addCommand(cls, keystrokes, longname, execstr, helpstr='', **kwargs):
     - *execstr*: Python statement to pass to `exec()`'ed when the command is executed.
     - *helpstr*: help string shown in the **Commands Sheet**.
     '''
-    vd.commands.set(longname, Command(longname, execstr, helpstr=helpstr, module=vd.importingModule, **kwargs), cls)
+    cmd = Command(longname, execstr, helpstr=helpstr, module=vd.importingModule, replay=replay, **kwargs)
+    vd.commands.set(longname, cmd, cls)
     if keystrokes:
         vd.bindkey(keystrokes, longname, cls)
     return longname

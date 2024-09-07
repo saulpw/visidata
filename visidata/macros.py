@@ -102,7 +102,7 @@ def saveMacro(self, rows, ks):
 def afterExecSheet(cmdlog, sheet, escaped, err):
     if not vd.macroMode: return
     if not vd.activeCommand: return
-    if vd.isLoggableCommand(vd.activeCommand.longname):
+    if vd.isLoggableCommand(vd.activeCommand):
         cmd = copy(vd.activeCommand)
         cmd.sheet = ''
         vd.macroMode.addRow(cmd)

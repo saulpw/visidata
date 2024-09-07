@@ -48,7 +48,7 @@ class HelpSheet(MetaSheet):
         Column('all_bindings', width=0, cache=True, getter=lambda col,row: list(set(col.sheet.revbinds.get(row.longname, [])))),
         Column('description', width=40, getter=lambda col,row: col.sheet.cmddict[(row.sheet, row.longname)].helpstr),
         ColumnAttr('execstr', width=0),
-        Column('logged', width=0, getter=lambda col,row: vd.isLoggableCommand(row.longname)),
+        Column('logged', width=0, getter=lambda col,row: vd.isLoggableCommand(row)),
     ]
     nKeys = 2
 

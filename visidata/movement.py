@@ -89,12 +89,12 @@ def visibleWidth(self):
     return self.sheet._visibleColLayout[vcolidx][1]
 
 
-Sheet.addCommand(None, 'go-left',  'cursorRight(-1)', 'go left')
-Sheet.addCommand(None, 'go-down',  'cursorDown(+1)', 'go down')
-Sheet.addCommand(None, 'go-up',    'cursorDown(-1)', 'go up')
-Sheet.addCommand(None, 'go-right', 'cursorRight(+1)', 'go right')
-Sheet.addCommand(None, 'go-pagedown', 'cursorDown(nScreenRows-1); sheet.topRowIndex = bottomRowIndex', 'scroll one page forward')
-Sheet.addCommand(None, 'go-pageup', 'cursorDown(-nScreenRows+1); sheet.bottomRowIndex = topRowIndex', 'scroll one page backward')
+Sheet.addCommand(None, 'go-left',  'cursorRight(-1)', 'go left', replay=False)
+Sheet.addCommand(None, 'go-down',  'cursorDown(+1)', 'go down', replay=False)
+Sheet.addCommand(None, 'go-up',    'cursorDown(-1)', 'go up', replay=False)
+Sheet.addCommand(None, 'go-right', 'cursorRight(+1)', 'go right', replay=False)
+Sheet.addCommand(None, 'go-pagedown', 'cursorDown(nScreenRows-1); sheet.topRowIndex = bottomRowIndex', 'scroll one page forward', replay=False)
+Sheet.addCommand(None, 'go-pageup', 'cursorDown(-nScreenRows+1); sheet.bottomRowIndex = topRowIndex', 'scroll one page backward', replay=False)
 
 Sheet.addCommand(None, 'go-leftmost', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0', 'go all the way to the left of sheet')
 Sheet.addCommand(None, 'go-top', 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'go all the way to the top of sheet')
@@ -135,8 +135,8 @@ Sheet.bindkey('BUTTON3_PRESSED', 'go-mouse')
 # vim-style scrolling with the 'z' prefix
 Sheet.addCommand('zz', 'scroll-middle', 'sheet.topRowIndex = cursorRowIndex-int(nScreenRows/2)', 'scroll current row to center of screen')
 
-Sheet.addCommand('kRIT5', 'go-right-page', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex', 'scroll cursor one page right')
-Sheet.addCommand('kLFT5', 'go-left-page', 'pageLeft()', 'scroll cursor one page left')
+Sheet.addCommand('kRIT5', 'go-right-page', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex', 'scroll cursor one page right', replay=False)
+Sheet.addCommand('kLFT5', 'go-left-page', 'pageLeft()', 'scroll cursor one page left', replay=False)
 Sheet.addCommand(None, 'scroll-left', 'sheet.cursorVisibleColIndex -= options.scroll_incr', 'scroll one column left')
 Sheet.addCommand(None, 'scroll-right', 'sheet.cursorVisibleColIndex += options.scroll_incr', 'scroll one column right')
 Sheet.addCommand(None, 'scroll-leftmost', 'sheet.leftVisibleColIndex = cursorVisibleColIndex', 'scroll sheet to leftmost column')

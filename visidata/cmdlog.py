@@ -12,7 +12,7 @@ vd.theme_option('color_status_replay', 'green', 'color of replay status indicato
 nonLogged = '''forget exec-longname undo redo quit
 show error errors statuses options threads jump
 replay cancel save-cmdlog macro cmdlog-sheet menu repeat reload-every
-go- search scroll prev next page start end zoom visibility sidebar
+search scroll prev next page start end zoom visibility sidebar
 mouse suspend redraw no-op help syscopy sysopen profile toggle'''.split()
 
 vd.option('rowkey_prefix', 'キ', 'string prefix for rowkey in the cmdlog', sheettype=None)
@@ -68,9 +68,13 @@ def indexMatch(L, func):
             return i
 
 @VisiData.api
-def isLoggableCommand(vd, longname):
+def isLoggableCommand(vd, cmd):
+    'Return whether command should be logged to the cmdlog, depending if it has a prefix in nonLogged, or was defined with replay=False.'
+    if not cmd.replayable:
+        return False
+
     for n in nonLogged:
-        if longname.startswith(n):
+        if cmd.longname.startswith(n):
             return False
     return True
 
@@ -184,6 +188,7 @@ class CommandLogBase:
                                             input=args,
                                             longname=cmd.longname,
                                             comment=comment,
+                                            replayable=cmd.replayable,
                                             undofuncs=[])
 
     def afterExecSheet(self, sheet, escaped, err):
@@ -196,7 +201,7 @@ class CommandLogBase:
             return
 
         # remove user-aborted commands and simple movements (unless first command on the sheet, which created the sheet)
-        if not sheet.cmdlog_sheet.rows or vd.isLoggableCommand(vd.activeCommand.longname):
+        if not sheet.cmdlog_sheet.rows or vd.isLoggableCommand(vd.activeCommand):
             if isLoggableSheet(sheet):      # don't record actions from cmdlog or other internal sheets on global cmdlog
                 self.addRow(vd.activeCommand)  # add to global cmdlog
             sheet.cmdlog_sheet.addRow(vd.activeCommand)  # add to sheet-specific cmdlog
@@ -206,7 +211,7 @@ class CommandLogBase:
     def openHook(self, vs, src):
         while isinstance(src, BaseSheet):
             src = src.source
-        r = self.newRow(keystrokes='o', input=str(src), longname='open-file')
+        r = self.newRow(keystrokes='o', input=str(src), longname='open-file', replayable=True)
         vs.cmdlog_sheet.addRow(r)
         self.addRow(r)
 
@@ -431,7 +436,7 @@ def cmdlog(vd):
 
 @VisiData.property
 def modifyCommand(vd):
-    if vd.activeCommand and vd.isLoggableCommand(vd.activeCommand.longname):
+    if vd.activeCommand and vd.isLoggableCommand(vd.activeCommand):
         return vd.activeCommand
     if not vd.cmdlog.rows:
         return None
