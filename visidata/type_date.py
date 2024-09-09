@@ -114,7 +114,7 @@ class datedelta(datetime.timedelta):
 
 
 # simple constants, for expressions like 'timestamp+15*minutes'
-vd.addGlobals(
+vd.addGlobalsUser(
     years=365.25,
     months=30.0,
     weeks=7.0,

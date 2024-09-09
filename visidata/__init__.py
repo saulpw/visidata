@@ -6,28 +6,37 @@ __author__ = 'Saul Pwanson <vd@saul.pw>'
 __status__ = 'Production/Stable'
 __copyright__ = 'Copyright (c) 2016-2021 ' + __author__
 
+import builtins
+import copy
+import itertools
+import math
+import random
+import string
+import json
+
 
 class EscapeException(BaseException):
     'Inherits from BaseException to avoid "except Exception" clauses.  Do not use a blanket "except:" or the task will be uncancelable.'
     pass
 
 
-def addGlobals(*args, **kwargs):
-    '''Update the VisiData globals dict with items from *args* and *kwargs*, which are mappings of names to functions.
-    Importers can call ``addGlobals(globals())`` to have their globals accessible to execstrings.
+def addGlobals(g:dict={}, **kwargs):
+    '''Update globals with items from *g* and also *kwargs*.  These will be available for eval and execstrings.'''
+    vd.getGlobals().update(g)
+    vd.getGlobals().update(kwargs)
 
-    Dunder methods are ignored, to prevent accidentally overwriting housekeeping methods.'''
-    drop_dunder = lambda d: {k: v for k, v in d.items() if not k.startswith("__")}
-    for g in args:
-        globals().update(drop_dunder(g))
-    globals().update(drop_dunder(kwargs))
+
+def addGlobalsUser(g:dict={}, **kwargs):
+    'Update globals with items from *g* and also *kwargs*.  These will be available for tab completion in eval strings (like column expressions).'
+    addGlobals(g, **kwargs)
+    vd.user_globals.update(g)
+    vd.user_globals.update(kwargs)
+
 
 
 def getGlobals():
-    'Return the VisiData globals dict.'
+    'Return the globals dict, used for eval and exectrings.'
     return globals()
-
-from math import *
 
 from .utils import *
 
@@ -38,7 +47,9 @@ vd = VisiData()
 vd.version = __version__
 
 vd.addGlobals = addGlobals
+vd.addGlobalsUser = addGlobalsUser
 vd.getGlobals = getGlobals
+vd.user_globals = {}
 
 import visidata.keys
 
@@ -136,6 +147,9 @@ for line in core_imports.splitlines():
     module = line[len('import '):]
     vd.importModule(module)
 
+def modvars(m, keys:str) -> dict:
+    return {k:getattr(m, k) for k in keys.split()}
+
 vd.importSubmodules('visidata.loaders')
 
 def importFeatures():
@@ -144,17 +158,17 @@ def importFeatures():
 
     vd.importStar('visidata.deprecated')
 
-    vd.importStar('builtins')
-    vd.importStar('copy')
-    vd.importStar('math')
-    vd.importStar('random')
-    vd.importStar('itertools')
-    vd.importStar('curses')
-
     import visidata.experimental  # import nothing by default but make package accessible
+
+    vd.addGlobalsUser(modvars(copy, 'copy deepcopy'))
+    vd.addGlobalsUser(modvars(builtins, 'abs all any ascii bin bool bytes callable chr complex dict dir divmod enumerate eval filter float format getattr hex int len list map max min next oct ord pow range repr reversed round set sorted str sum tuple type zip'))
+    vd.addGlobalsUser(modvars(math, 'acos acosh asin asinh atan atan2 atanh ceil copysign cos cosh degrees dist erf erfc exp expm1 fabs factorial floor fmod frexp fsum gamma gcd hypot isclose isfinite isinf isnan isqrt lcm ldexp lgamma log log1p log10 log2 modf radians remainder sin sinh sqrt tan tanh trunc prod perm comb nextafter ulp pi e tau inf nan'))
+    vd.addGlobalsUser(modvars(random, 'randrange randint choice choices sample uniform gauss'))
+    vd.addGlobalsUser(modvars(string, 'ascii_letters ascii_lowercase ascii_uppercase digits hexdigits punctuation printable whitespace'))
+    vd.addGlobalsUser(json=json)
 
 vd.finalInit()  # call all VisiData.init() from modules
 
 importFeatures()
 
-vd.addGlobals(globals())
+vd.addGlobalsUser(vd=vd)

@@ -1,4 +1,5 @@
 import itertools
+import curses
 
 from visidata import vd, BaseSheet, Sheet, Column, Progress, ALT, asyncthread
 
@@ -187,7 +188,7 @@ BaseSheet.addCommand(None, 'mouse-enable', 'mm, _ = curses.mousemask(-1); status
 BaseSheet.addCommand(None, 'mouse-disable', 'mm, _ = curses.mousemask(0); status("mouse "+("ON" if mm else "OFF"))', 'disable mouse events')
 
 
-vd.addGlobals({'rotateRange': rotateRange})
+vd.addGlobals(rotateRange=rotateRange, curses=curses)
 
 vd.addMenuItems('''
     View > Other sheet > previous sheet > jump-prev

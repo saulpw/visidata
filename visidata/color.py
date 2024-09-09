@@ -4,7 +4,7 @@ from copy import copy
 from collections import namedtuple
 from dataclasses import dataclass
 
-from visidata import vd, options, Extensible, drawcache, drawcache_property, VisiData
+from visidata import vd, Extensible, drawcache, drawcache_property, VisiData
 import visidata
 
 __all__ = ['ColorAttr', 'colors', 'update_attr', 'ColorMaker', 'rgb_to_attr']

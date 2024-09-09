@@ -6,7 +6,7 @@ class CompleteExpr:
         self.varnames = []
         if sheet:
             self.varnames.extend(sorted(col.name for col in sheet.columns))
-        self.varnames.extend(sorted(x for x in vd.getGlobals()))
+        self.varnames.extend(sorted(x for x in vd.user_globals))
         for c in vd.contexts:
             self.varnames.extend(sorted(x for x in dir(c)))
 
@@ -61,7 +61,7 @@ Sheet.addCommand('gz=', 'setcol-iter', 'cursorCol.setValues(someSelectedRows, *l
 
 Sheet.addCommand(None, 'show-expr', 'status(evalExpr(inputExpr("show expr="), cursorRow))', 'evaluate Python expression on current row and show result on status line')
 
-vd.addGlobals({'CompleteExpr': CompleteExpr})
+vd.addGlobals(CompleteExpr=CompleteExpr)
 
 vd.addMenuItems('''
     Edit > Modify > current cell > Python expression > setcell-expr
