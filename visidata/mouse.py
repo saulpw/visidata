@@ -62,6 +62,8 @@ def parseMouse(vd, **kwargs):
     keystroke = clicktype + curses.mouseEvents.get(bstate, str(bstate))
     ret = AttrDict(keystroke=keystroke, y=y, x=x, found=[])
     for winname, winscr in kwargs.items():
+        if not winscr:
+            continue
         px, py = vd.getrootxy(winscr)
         mh, mw = winscr.getmaxyx()
         if py <= y < py+mh and px <= x < px+mw:
