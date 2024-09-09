@@ -392,22 +392,25 @@ def getCommand(sheet, cmd):
 
 
 @VisiData.api
-def loadConfigFile(vd, fn='', _globals=None):
+def loadConfigFile(vd, fn=''):
     p = visidata.Path(fn or vd.options.config)
-    if _globals is None:
-        _globals = vd.getGlobals()
     if p.exists():
+        newdefs = {}
         try:
             with open(p) as fd:
                 code = compile(fd.read(), str(p), 'exec')
             vd.importingModule = 'visidatarc'
-            exec(code, _globals)
+            exec(code, vd.getGlobals(), newdefs)
         except Exception as e:
             vd.exceptionCaught(e)
         finally:
             vd.importingModule = None
 
-    vd.addGlobals(_globals)
+        keys = newdefs.get('__all__', None)
+        if keys:
+            vd.addGlobals({k:newdefs[k] for k in keys})
+        else:
+            vd.addGlobals(newdefs)
 
 
 def addOptions(parser):
@@ -479,7 +482,7 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
 
     # user customisations in config file in standard location
     if vd.options.config:
-        vd.loadConfigFile(vd.options.config, vd.getGlobals())
+        vd.loadConfigFile(vd.options.config)
 
 
 @VisiData.api
