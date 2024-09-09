@@ -148,7 +148,7 @@ for line in core_imports.splitlines():
     vd.importModule(module)
 
 def modvars(m, keys:str) -> dict:
-    return {k:getattr(m, k) for k in keys.split()}
+    return {k:getattr(m, k) for k in keys.split() if hasattr(m, k)}
 
 vd.importSubmodules('visidata.loaders')
 
