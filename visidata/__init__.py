@@ -156,7 +156,7 @@ def importFeatures():
     vd.importSubmodules('visidata.features')
     vd.importSubmodules('visidata.themes')
 
-    vd.importStar('visidata.deprecated')
+    import visidata.deprecated
 
     import visidata.experimental  # import nothing by default but make package accessible
 
