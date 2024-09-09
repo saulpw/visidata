@@ -8,8 +8,8 @@ class TestCompleteExpr:
         cexpr = visidata.CompleteExpr(vs)
         assert cexpr('fi', 0) == 'filename'  # visible column first
         assert cexpr('fi', 1) == 'filetype'  # hidden column second
-        assert cexpr('logn', 0) == 'lognormvariate'  # global from math
-        assert cexpr('a+logn', 0) == 'a+lognormvariate'
+        assert cexpr('fact', 0) == 'factorial'  # global from math
+        assert cexpr('a+fact', 0) == 'a+factorial'
 
         assert cexpr('testv', 0) == 'testv'  # no match returns same
 
