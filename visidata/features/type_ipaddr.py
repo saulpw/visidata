@@ -7,8 +7,8 @@ from visidata import vd
 from visidata.sheets import Column, TableSheet
 
 
-vd.addType(ip_address, icon=":", formatter=lambda fmt, ip: str(ip))
-vd.addType(ip_network, icon="/", formatter=lambda fmt, ip: str(ip))
+vd.addType(ip_address, icon=":", formatter=lambda fmt, ip: str(ip), name='ip_address')
+vd.addType(ip_network, icon="/", formatter=lambda fmt, ip: str(ip), name='ip_network')
 
 
 def isSupernet(cell, network, isNull):

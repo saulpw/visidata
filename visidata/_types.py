@@ -95,7 +95,7 @@ vd.typemap = {}
 def getType(vd, typetype):
     return vd.typemap.get(typetype) or VisiDataType()
 
-vdtype(None, '∅')
+vdtype(None, '∅', name='none')
 vdtype(anytype, '', formatter=lambda _,v: str(v))
 vdtype(str, '~', formatter=lambda _,v: v)
 vdtype(int, '#')
