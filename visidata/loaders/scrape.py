@@ -180,7 +180,6 @@ vd.addGlobals({
     'HtmlDocsSheet':SelectorColumn,
     'SelectorColumn':SelectorColumn,
     'DocsSelectorColumn':DocsSelectorColumn,
-    'soupstr':soupstr
 })
 
 vd.addMenuItem('Data', '+Scrape', 'selected cells', 'scrape-cells')

@@ -53,9 +53,8 @@ def numericFormatter(vd, fmtstr, typedval):
 def numericType(vd, icon='', fmtstr='', formatter=vd.numericFormatter):
     '''Decorator for numeric types.'''
     def _decorator(f):
-        vd.addType(f, icon=icon, fmtstr=fmtstr, formatter=formatter)
+        vd.addType(f, icon=icon, fmtstr=fmtstr, formatter=formatter, name=f.__name__)
         vd.numericTypes.append(f)
-        vd.addGlobals({f.__name__: f})
         return f
     return _decorator
 
@@ -82,6 +81,8 @@ def addType(vd, typetype=None, icon=None, fmtstr='', formatter=vd.numericFormatt
     t = VisiDataType(typetype=typetype, icon=icon, fmtstr=fmtstr, formatter=formatter, key=key, name=name)
     if typetype:
         vd.typemap[typetype] = t
+        if name:
+            vd.addGlobals({name: typetype})
     return t
 
 vdtype = vd.addType
