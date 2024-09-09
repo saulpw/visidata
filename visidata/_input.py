@@ -112,15 +112,179 @@ def delchar(s, i, remove=1):
     'Delete `remove` characters from str `s` beginning at position `i`.'
     return s if i < 0 else s[:i] + s[i+remove:]
 
+def find_nonword(s, a, b, incr):
+        if not s: return 0
+        a = min(max(a, 0), len(s)-1)
+        b = min(max(b, 0), len(s)-1)
 
-class CompleteState:
-    def __init__(self, completer_func):
+        if incr < 0:
+            while not s[b].isalnum() and b >= a:  # first skip non-word chars
+                b += incr
+            while s[b].isalnum() and b >= a:
+                b += incr
+            return min(max(b, -1), len(s))
+        else:
+            while not s[a].isalnum() and a < b:  # first skip non-word chars
+                a += incr
+            while s[a].isalnum() and a < b:
+                a += incr
+            return min(max(a, 0), len(s))
+
+class InputWidget:
+    def __init__(self,
+                 value:str='',
+                 i=0,
+                 display=True,
+                 history=[],
+                 completer=lambda text,idx: None,
+                 options=None):
+        '''
+            - value: starting value
+            - i: starting index into value
+            - display: False to not display input (for sensitive input, e.g. a password)
+            - history: list of strings; earliest entry first.
+            - completer: func(value:str, idx:int) takes the current value and tab completion index, and returns a string if there is a completion available, or None if not.
+            - options: sheet.options; defaults to vd.options.
+        '''
+        options = options or vd.options
+
+        self.orig_value = value
+        self.first_action = (i == 0)  # whether this would be the 'first action'; if so, clear text on input
+
+        # display theme
+        self.fillchar  = options.disp_edit_fill
+        self.truncchar = options.disp_truncator
+        self.display = display  # if False, obscure before displaying
+
+        # main state
+        self.value = self.orig_value  # value under edit
+        self.current_i = i
+        self.insert_mode = True
+
+        # history state
+        self.history = history
+        self.hist_idx = None
+        self.prev_val = None
+
+        # completion state
         self.comps_idx = -1
-        self.completer_func = completer_func
+        self.completer_func = completer
         self.former_i = None
         self.just_completed = False
 
-    def complete(self, v, i, state_incr):
+    def editline(self, scr, y, x, w, attr=ColorAttr(), updater=lambda val: None, bindings={}, clear=True) -> str:
+        'If *clear* is True, clear whole editing area before displaying.'
+        with EnableCursor():
+            while True:
+                vd.drawSheet(scr, vd.activeSheet)
+                if updater:
+                    updater(self.value)
+
+                vd.drawInputHelp(scr)
+
+                self.draw(scr, y, x, w, attr, clear=clear)
+                ch = vd.getkeystroke(scr)
+                if ch in bindings:
+                    self.value, self.current_i = bindings[ch](self.value, self.current_i)
+                else:
+                    if self.handle_key(ch):
+                        return self.value
+
+
+    def draw(self, scr, y, x, w, attr=ColorAttr(), clear=True):
+        i = self.current_i  # the onscreen offset within the field where v[i] is displayed
+        left_truncchar = right_truncchar = self.truncchar
+
+        if self.display:
+            dispval = clean_printable(self.value)
+        else:
+            dispval = '*' * len(self.value)
+
+        if len(dispval) < w:  # entire value fits
+            dispval += self.fillchar*(w-len(dispval)-1)
+        elif i == len(dispval):  # cursor after value (will append)
+            i = w-1
+            dispval = left_truncchar + dispval[len(dispval)-w+2:] + self.fillchar
+        elif i >= len(dispval)-w//2:  # cursor within halfwidth of end
+            i = w-(len(dispval)-i)
+            dispval = left_truncchar + dispval[len(dispval)-w+1:]
+        elif i <= w//2:  # cursor within halfwidth of beginning
+            dispval = dispval[:w-1] + right_truncchar
+        else:
+            i = w//2  # visual cursor stays right in the middle
+            k = 1 if w%2==0 else 0  # odd widths have one character more
+            dispval = left_truncchar + dispval[self.current_i-w//2+1:self.current_i+w//2-k] + right_truncchar
+
+        prew = clipdraw(scr, y, x, dispval[:i], attr, w, clear=clear, literal=True)
+        clipdraw(scr, y, x+prew, dispval[i:], attr, w-prew+1, clear=clear, literal=True)
+        if scr:
+            scr.move(y, x+prew)
+
+    def handle_key(self, ch:str) -> bool:
+        'Return True to accept current input.  Raise EscapeException on Ctrl+C, Ctrl+Q, or ESC.'
+        i = self.current_i
+        v = self.value
+
+        if ch == '':                               return False
+        elif ch == 'KEY_IC':                       self.insert_mode = not self.insert_mode
+        elif ch == '^A' or ch == 'KEY_HOME':       i = 0
+        elif ch == '^B' or ch == 'KEY_LEFT':       i -= 1
+        elif ch in ('^C', '^Q', '^['):             raise EscapeException(ch)
+        elif ch == '^D' or ch == 'KEY_DC':         v = delchar(v, i)
+        elif ch == '^E' or ch == 'KEY_END':        i = len(v)
+        elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1
+        elif ch == '^G':
+            vd.cycleSidebar()
+            return False # not considered a first keypress
+        elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1; v = delchar(v, i)
+        elif ch == '^I':                           v, i = self.completion(v, i, +1)
+        elif ch == 'KEY_BTAB':                     v, i = self.completion(v, i, -1)
+        elif ch in ['^J', '^M']:                   return True # ENTER to accept value
+        elif ch == '^K':                           v = v[:i]  # ^Kill to end-of-line
+        elif ch == '^N':
+            c = ''
+            while not c:
+                c = vd.getkeystroke(scr)
+            c = vd.prettykeys(c)
+            i += len(c)
+            v += c
+        elif ch == '^O':                           v = vd.launchExternalEditor(v); return True  # auto-accept after $EDITOR
+        elif ch == '^R':                           v = self.orig_value  # ^Reload initial value
+        elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1:i]), i)  # swap chars
+        elif ch == '^U':                           v = v[i:]; i = 0  # clear to beginning
+        elif ch == '^V':                           v = splice(v, i, until_get_wch(scr)); i += 1  # literal character
+        elif ch == '^W':                           j = find_nonword(v, 0, i-1, -1); v = v[:j+1] + v[i:]; i = j+1  # erase word
+        elif ch == '^Y':                           v = splice(v, i, str(vd.memory.clipval))
+        elif ch == '^Z':                           vd.suspend()
+        # CTRL+arrow
+        elif ch == 'kLFT5':                        i = find_nonword(v, 0, i-1, -1)+1; # word left
+        elif ch == 'kRIT5':                        i = find_nonword(v, i+1, len(v)-1, +1)+1; # word right
+        elif ch == 'kUP5':                         pass
+        elif ch == 'kDN5':                         pass
+        elif self.history and ch == 'KEY_UP':    v, i = self.prev_history(v, i)
+        elif self.history and ch == 'KEY_DOWN':  v, i = self.next_history(v, i)
+        elif len(ch) > 1:                          pass
+        else:
+            if self.first_action:
+                v = ''
+            if self.insert_mode:
+                v = splice(v, i, ch)
+            else:
+                v = v[:i] + ch + v[i+1:]
+
+            i += 1
+
+        if i < 0: i = 0
+        # v may have a non-str type with no len()
+        v = str(v)
+        if i > len(v): i = len(v)
+        self.current_i = i
+        self.value = v
+        self.first_action = False
+        self.reset_completion()
+        return False
+
+    def completion(self, v, i, state_incr):
         self.just_completed = True
         self.comps_idx += state_incr
 
@@ -139,20 +303,14 @@ class CompleteState:
         v = r + v[i:]
         return v, len(v)
 
-    def reset(self):
+    def reset_completion(self):
         if self.just_completed:
             self.just_completed = False
         else:
             self.former_i = None
             self.comps_idx = -1
 
-class HistoryState:
-    def __init__(self, history):
-        self.history = history
-        self.hist_idx = None
-        self.prev_val = None
-
-    def up(self, v, i):
+    def prev_history(self, v, i):
         if self.hist_idx is None:
             self.hist_idx = len(self.history)
             self.prev_val = v
@@ -162,7 +320,7 @@ class HistoryState:
         i = len(str(v))
         return v, i
 
-    def down(self, v, i):
+    def next_history(self, v, i):
         if self.hist_idx is None:
             return v, i
         elif self.hist_idx < len(self.history)-1:
@@ -175,156 +333,20 @@ class HistoryState:
         return v, i
 
 
-# history: earliest entry first
 @VisiData.api
-def editline(vd, scr, y, x, w, i=0,
-             attr=ColorAttr(),
-             value='',
-             fillchar=' ',
-             truncchar='-',
-             unprintablechar='.',
-             completer=lambda text,idx: None,
-             history=[],
-             display=True,
-             updater=lambda val: None,
-             bindings={},
-             help='',  # str|HelpPane
-             clear=True):
-  '''A better curses line editing widget.
-  If *clear* is True, clear whole editing area before displaying.
-  '''
-  with EnableCursor():
-   with vd.AddedHelp(vd.getHelpPane('input', module='visidata'), 'Input Keystrokes Help'), vd.AddedHelp(help, 'Input Field Help'):
-    ESC='^['
-    TAB='^I'
-    history_state = HistoryState(history)
-    complete_state = CompleteState(completer)
-    insert_mode = True
-    first_action = True
-    v = str(value)  # value under edit
-
-    # i = 0  # index into v, initial value can be passed in as argument as of 1.2
-    if i != 0:
-        first_action = False
-
-    left_truncchar = right_truncchar = truncchar
-
-    def find_nonword(s, a, b, incr):
-        if not s: return 0
-        a = min(max(a, 0), len(s)-1)
-        b = min(max(b, 0), len(s)-1)
-
-        if incr < 0:
-            while not s[b].isalnum() and b >= a:  # first skip non-word chars
-                b += incr
-            while s[b].isalnum() and b >= a:
-                b += incr
-            return min(max(b, -1), len(s))
-        else:
-            while not s[a].isalnum() and a < b:  # first skip non-word chars
-                a += incr
-            while s[a].isalnum() and a < b:
-                a += incr
-            return min(max(a, 0), len(s))
-
-    while True:
-        vd.drawSheet(scr, vd.activeSheet)
-        updater(v)
-        vd.drawInputHelp(scr)
-
-        if display:
-            dispval = clean_printable(v)
-        else:
-            dispval = '*' * len(v)
-
-        dispi = i  # the onscreen offset within the field where v[i] is displayed
-        if len(dispval) < w:  # entire value fits
-            dispval += fillchar*(w-len(dispval)-1)
-        elif i == len(dispval):  # cursor after value (will append)
-            dispi = w-1
-            dispval = left_truncchar + dispval[len(dispval)-w+2:] + fillchar
-        elif i >= len(dispval)-w//2:  # cursor within halfwidth of end
-            dispi = w-(len(dispval)-i)
-            dispval = left_truncchar + dispval[len(dispval)-w+1:]
-        elif i <= w//2:  # cursor within halfwidth of beginning
-            dispval = dispval[:w-1] + right_truncchar
-        else:
-            dispi = w//2  # visual cursor stays right in the middle
-            k = 1 if w%2==0 else 0  # odd widths have one character more
-            dispval = left_truncchar + dispval[i-w//2+1:i+w//2-k] + right_truncchar
-
-        prew = clipdraw(scr, y, x, dispval[:dispi], attr, w, clear=clear, literal=True)
-        clipdraw(scr, y, x+prew, dispval[dispi:], attr, w-prew+1, clear=clear, literal=True)
-        if scr: scr.move(y, x+prew)
-        ch = vd.getkeystroke(scr)
-        if ch == '':                               continue
-        elif ch in bindings:                       v, i = bindings[ch](v, i)
-        elif ch == 'KEY_IC':                       insert_mode = not insert_mode
-        elif ch == '^A' or ch == 'KEY_HOME':       i = 0
-        elif ch == '^B' or ch == 'KEY_LEFT':       i -= 1
-        elif ch in ('^C', '^Q', ESC):              raise EscapeException(ch)
-        elif ch == '^D' or ch == 'KEY_DC':         v = delchar(v, i)
-        elif ch == '^E' or ch == 'KEY_END':        i = len(v)
-        elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1
-        elif ch == '^G':
-            vd.cycleSidebar()
-            continue  # not considered a first keypress
-        elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1; v = delchar(v, i)
-        elif ch == TAB:                            v, i = complete_state.complete(v, i, +1)
-        elif ch == 'KEY_BTAB':                     v, i = complete_state.complete(v, i, -1)
-        elif ch in ['^J', '^M']:                   break  # ENTER to accept value
-        elif ch == '^K':                           v = v[:i]  # ^Kill to end-of-line
-        elif ch == '^N':
-            c = ''
-            while not c:
-                c = vd.getkeystroke(scr)
-            c = vd.prettykeys(c)
-            i += len(c)
-            v += c
-        elif ch == '^O':                           v = vd.launchExternalEditor(v); break
-        elif ch == '^R':                           v = str(value)  # ^Reload initial value
-        elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1:i]), i)  # swap chars
-        elif ch == '^U':                           v = v[i:]; i = 0  # clear to beginning
-        elif ch == '^V':                           v = splice(v, i, until_get_wch(scr)); i += 1  # literal character
-        elif ch == '^W':                           j = find_nonword(v, 0, i-1, -1); v = v[:j+1] + v[i:]; i = j+1  # erase word
-        elif ch == '^Y':                           v = splice(v, i, str(vd.memory.clipval))
-        elif ch == '^Z':                           vd.suspend()
-        # CTRL+arrow
-        elif ch == 'kLFT5':                        i = find_nonword(v, 0, i-1, -1)+1; # word left
-        elif ch == 'kRIT5':                        i = find_nonword(v, i+1, len(v)-1, +1)+1; # word right
-        elif ch == 'kUP5':                         pass
-        elif ch == 'kDN5':                         pass
-        elif history and ch == 'KEY_UP':           v, i = history_state.up(v, i)
-        elif history and ch == 'KEY_DOWN':         v, i = history_state.down(v, i)
-        elif len(ch) > 1:                          pass
-        else:
-            if first_action:
-                v = ''
-            if insert_mode:
-                v = splice(v, i, ch)
-            else:
-                v = v[:i] + ch + v[i+1:]
-
-            i += 1
-
-        if i < 0: i = 0
-        # v may have a non-str type with no len()
-        v = str(v)
-        if i > len(v): i = len(v)
-        first_action = False
-        complete_state.reset()
-
-    return v
-
-
-@VisiData.api
-def editText(vd, y, x, w, record=True, display=True, value='', **kwargs):
+def editText(vd, y, x, w, attr=ColorAttr(), value='',
+             help='',
+             updater=None, bindings={},
+             display=True, record=True, clear=True, **kwargs):
     'Invoke modal single-line editor at (*y*, *x*) for *w* terminal chars. Use *display* is False for sensitive input like passphrases.  If *record* is True, get input from the cmdlog in batch mode, and save input to the cmdlog if *display* is also True. Return new value as string.'
     v = None
     if record and vd.cmdlog:
         v = vd.getCommandInput()
 
     if v is None:
+        if vd.options.batch:
+            return ''
+
         if vd.activeSheet._scr is None:
             raise Exception('active sheet does not have a screen')
 
@@ -332,7 +354,11 @@ def editText(vd, y, x, w, record=True, display=True, value='', **kwargs):
             value = ''
 
         try:
-            v = vd.editline(vd.activeSheet._scr, y, x, w, display=display, value=value, **kwargs)
+            widget = InputWidget(value=str(value), display=display, **kwargs)
+
+            with vd.AddedHelp(vd.getHelpPane('input', module='visidata'), 'Input Keystrokes Help'), \
+                 vd.AddedHelp(help, 'Input Field Help'):
+                v = widget.editline(vd.activeSheet._scr, y, x, w, attr=attr, updater=updater, bindings=bindings, clear=clear)
         except AcceptInput as e:
             v = e.args[0]
 
@@ -519,8 +545,7 @@ def input(vd, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None,
     w = kwargs.pop('w', _drawPrompt())
     ret = vd.editText(y, promptlen, w=w,
                         attr=colors.color_edit_cell,
-                        unprintablechar=vd.options.disp_unprintable,
-                        truncchar=vd.options.disp_truncator,
+                        options=vd.options,
                         history=history,
                         updater=_drawPrompt,
                         **kwargs)
@@ -605,9 +630,7 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
     bindings.update(kwargs.get('bindings', {}))
     kwargs['bindings'] = bindings
 
-    editargs = dict(value=value,
-                    fillchar=self.options.disp_edit_fill,
-                    truncchar=self.options.disp_truncator)
+    editargs = dict(value=value, options=self.options)
 
     editargs.update(kwargs)  # update with user-specified args
     r = vd.editText(y, x, w, attr=colors.color_edit_cell, **editargs)
@@ -618,4 +641,4 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
     return r
 
 
-vd.addGlobals({'CompleteKey': CompleteKey, 'AcceptInput': AcceptInput})
+vd.addGlobals(CompleteKey=CompleteKey, AcceptInput=AcceptInput, InputWidget=InputWidget)

@@ -289,7 +289,6 @@ def main_vd():
         if not vd.options.interactive:
             options.undo = False
             options.quitguard = False
-        vd.editline = lambda *args, **kwargs: ''
         vd.execAsync = vd.execSync  # disable async
 
     for cmd in (args.preplay or '').split():
@@ -358,7 +357,6 @@ def main_vd():
                 return 1
 
             if vd.options.interactive:
-                vd.editline = lambda *args, vd=vd, **kwargs: visidata.VisiData.editline(vd, *args, **kwargs)
                 vd.execAsync = lambda *args, vd=vd, **kwargs: visidata.VisiData.execAsync(vd, *args, **kwargs)
                 run()
         else:
