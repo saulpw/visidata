@@ -497,7 +497,6 @@ def importModule(vd, pkgname):
 def importSubmodules(vd, pkgname):
     'Import all files below the given *pkgname*'
     import pkgutil
-    import os.path
 
     m = vd.importModule(pkgname)
     for module in pkgutil.walk_packages(m.__path__):
@@ -507,9 +506,6 @@ def importSubmodules(vd, pkgname):
 @VisiData.api
 def importStar(vd, pkgname):
     'Add all symbols from *pkgname* into visidata globals.'
-    import pkgutil
-    import os.path
-
     m = vd.importModule(pkgname)
     vd.addGlobals({pkgname:m})
     vd.addGlobals(m.__dict__)

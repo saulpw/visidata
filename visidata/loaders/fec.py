@@ -45,7 +45,6 @@ from visidata import (
     ColumnItem,
     asyncthread,
     Progress,
-    addGlobals,
 )
 
 class DiveSheet(Sheet):
@@ -297,6 +296,6 @@ class FECFiling(Sheet):
 def open_fec(vd, p):
     return FECFiling(p.base_stem, source=p)
 
-addGlobals({
+vd.addGlobals({
     "DiveSheet": DiveSheet
 })

@@ -1,6 +1,6 @@
 import time
 
-from visidata import vd, BaseException, VisiData
+from visidata import vd, VisiData
 
 from ._ibis import IbisTableSheet, IbisConnectionPool, IbisTableIndexSheet
 
