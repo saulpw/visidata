@@ -67,4 +67,4 @@ def USD(s):
     return float(amtstr) * currency_multiplier(currcode, 'USD')
 
 
-vd.addGlobalsUser(USD=USD)
+vd.addGlobals(USD=USD)
