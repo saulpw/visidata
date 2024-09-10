@@ -486,13 +486,17 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
 
 
 @VisiData.api
-def importModule(vd, pkgname):
+def importModule(vd, pkgname, symbols=[]):
     'Import the given *pkgname*, setting vd.importingModule to *pkgname* before import and resetting to None after.'
     modparts = pkgname.split('.')
     vd.importingModule = modparts[-1]
     r = importlib.import_module(pkgname)
     vd.importingModule = None
     vd.importedModules.append(r)
+    vd.addGlobals({pkgname:r})
+    if symbols:
+        vd.addGlobals({k:getattr(r, k) for k in symbols if hasattr(r, k)})
+
     return r
 
 
@@ -504,14 +508,6 @@ def importSubmodules(vd, pkgname):
     m = vd.importModule(pkgname)
     for module in pkgutil.walk_packages(m.__path__):
         vd.importModule(pkgname + '.' + module.name)
-
-
-@VisiData.api
-def importStar(vd, pkgname):
-    'Add all symbols from *pkgname* into visidata globals.'
-    m = vd.importModule(pkgname)
-    vd.addGlobals({pkgname:m})
-    vd.addGlobals(m.__dict__)
 
 
 @VisiData.api

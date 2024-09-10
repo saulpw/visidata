@@ -27,8 +27,6 @@ def getGlobals():
     'Return the VisiData globals dict.'
     return globals()
 
-from math import *
-
 from .utils import *
 
 from .extensible import *
@@ -144,12 +142,14 @@ def importFeatures():
 
     import visidata.deprecated
 
-    vd.importStar('builtins')
-    vd.importStar('copy')
-    vd.importStar('math')
-    vd.importStar('random')
-    vd.importStar('itertools')
-    vd.importStar('curses')
+    vd.importModule('copy', 'copy deepcopy'.split())
+    vd.importModule('builtins', 'abs all any ascii bin bool bytes callable chr complex dict dir divmod enumerate eval filter float format getattr hex int len list map max min next oct ord pow range repr reversed round set sorted str sum tuple type zip'.split())
+    vd.importModule('math', 'acos acosh asin asinh atan atan2 atanh ceil copysign cos cosh degrees dist erf erfc exp expm1 fabs factorial floor fmod frexp fsum gamma gcd hypot isclose isfinite isinf isnan isqrt lcm ldexp lgamma log log1p log10 log2 modf radians remainder sin sinh sqrt tan tanh trunc prod perm comb nextafter ulp pi e tau inf nan'.split())
+    vd.importModule('random', 'randrange randint choice choices sample uniform gauss lognormvariate'.split())
+    vd.importModule('string', 'ascii_letters ascii_lowercase ascii_uppercase digits hexdigits punctuation printable whitespace'.split())
+    vd.importModule('json')
+    vd.importModule('itertools')
+    vd.importModule('curses')
 
     import visidata.experimental  # import nothing by default but make package accessible
 
@@ -157,4 +157,4 @@ vd.finalInit()  # call all VisiData.init() from modules
 
 importFeatures()
 
-vd.addGlobals(globals())
+vd.addGlobals(vd=vd) # globals())
