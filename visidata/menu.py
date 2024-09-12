@@ -439,7 +439,7 @@ def runMenu(vd):
         else:
             nEscapes = 0
 
-        if k in ['^C', '^Q', 'q']:
+        if k in ['^C', '^Q', 'q', '^H', 'KEY_BACKSPACE']:
             return
 
         elif k in ['KEY_MOUSE']:
