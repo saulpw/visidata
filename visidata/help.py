@@ -43,7 +43,7 @@ class HelpSheet(MetaSheet):
         ColumnAttr('sheet'),
         ColumnAttr('module'),
         ColumnAttr('longname'),
-        Column('menupath', width=0, cache=True, getter=lambda col,row: vd.menuPathsByLongname[row.longname]),
+        Column('menupath', width=0, cache=True, getter=lambda col,row: vd.menuPathsByLongname.get(row.longname, None)),
         Column('keystrokes', getter=lambda col,row: col.sheet.revbinds.get(row.longname, [None])[0]),
         Column('all_bindings', width=0, cache=True, getter=lambda col,row: list(set(col.sheet.revbinds.get(row.longname, [])))),
         Column('description', width=40, getter=lambda col,row: col.sheet.cmddict[(row.sheet, row.longname)].helpstr),
