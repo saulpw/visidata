@@ -85,7 +85,7 @@ class JsonSheet(Sheet):
 
         for k in row:
             if k not in self._knownKeys:
-                c = ItemColumn(k, type=float if isinstance(row[k], (float, int)) else anytype)
+                c = ItemColumn(k)
                 self.addColumn(c)
 
         return ret
