@@ -43,6 +43,7 @@ def formatter_helpstr(sheet):
 def default_sidebar(sheet):
     'Default to format options.disp_sidebar_fmt.  Overridable.'
     fmt = sheet.options.disp_sidebar_fmt
+    if not fmt: return ''
     return sheet.formatString(fmt, help=sheet.formatter_helpstr)
 
 
