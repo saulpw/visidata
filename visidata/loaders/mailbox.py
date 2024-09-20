@@ -4,6 +4,7 @@ from visidata import VisiData, Sheet, ItemColumn, date, Column
 @VisiData.api
 def open_mbox(vd, p):
     return MboxSheet(p.base_stem, source=p, format='mbox')
+VisiData.open_mailbox = VisiData.open_mbox
 
 @VisiData.api
 def open_maildir(vd, p):
