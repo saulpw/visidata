@@ -85,8 +85,9 @@ class XmlSheet(Sheet):
 @VisiData.api
 def save_xml(vd, p, vs):
     isinstance(vs, XmlSheet) or vd.fail('must save xml from XmlSheet')
-    vs.root.write(str(p), encoding=options.encoding, standalone=False, pretty_print=True)
+    vs.root.write(str(p), encoding=vs.options.save_encoding, standalone=False, pretty_print=True)
 
+XmlSheet.options.save_encoding = 'utf-8'  #2520
 
 XmlSheet.addCommand('za', 'addcol-xmlattr', 'attr=input("add attribute: "); addColumnAtCursor(AttribColumn(attr, attr))', 'add column for xml attribute')
 XmlSheet.addCommand('v', 'visibility', 'showColumnsBasedOnRow(cursorRow)', 'show only columns in current row attributes')
