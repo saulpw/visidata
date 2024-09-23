@@ -12,7 +12,7 @@ Here's a tiny dataset of hat purchases. Each purchase may include multiple hats.
 
 ```
 +------------+-------+----------+-------+-------+
-| year       | color | hatCount | price | total |
+| date       | color | hatCount | price | total |
 +------------+-------+----------+-------+-------+
 | 2024-09-01 | Red   | 1        | 30    | 30    |
 | 2024-09-02 | Blue  | 1        | 28    | 28    |
