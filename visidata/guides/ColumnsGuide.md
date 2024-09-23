@@ -13,7 +13,7 @@
 ## Hide and Unhide columns
 
 Clean up the sheet by hiding unwanted columns.  Hidden columns are still present, but not visible in the main set of columns.
-(They are included on the right side and can be unhidden with {help.commands.resize_col_max}.
+(They are minimized on the right side and can be unhidden with {help.commands.resize_col_max}.
 
 - {help.commands.hide_col}
 - {help.commands.unhide_cols}
