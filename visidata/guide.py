@@ -20,7 +20,7 @@ CommandsSheet ("How to find the command you want run")
 MovementGuide ("Movement and search")
 InputGuide ("Input keystrokes")
 SortGuide ("Sorting")
-ColumnsGuide ("Rename, hide, and resize columns")
+ColumnsGuide ("Resize, hide, and rename columns")
 TypesSheet ("Column types")
 CommandLog  ("Undo and Replay")
 
