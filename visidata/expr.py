@@ -76,17 +76,19 @@ def setValuesFromExpr(self, rows, expr):
     'Set values in this column for *rows* to the result of the Python expression *expr* applied to each row.'
     compiledExpr = compile(expr, '<expr>', 'eval')
     vd.addUndoSetValues([self], rows)
+    nset = 0
     for row in Progress(rows, 'setting'):
         # Note: expressions that are only calculated once, do not need to pass column identity
         # they can reference their "previous selves" once without causing a recursive problem
         try:
             v = self.sheet.evalExpr(compiledExpr, row)
             self.setValue(row, v)
+            nset += 1
         except Exception as e:
             vd.exceptionCaught(e)
 
     self.recalc()
-    vd.status('set %d values = %s' % (len(rows), expr))
+    vd.status(f'set {nset} values = {expr}')
 
 
 @Sheet.api
