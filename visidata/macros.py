@@ -148,9 +148,10 @@ def reloadMacros(vd):
             vd.setMacro(r.binding, vs)
 
 
-Sheet.addCommand('m', 'macro-record', 'vd.cmdlog.startMacro()', 'record macro')
+Sheet.addCommand('m', 'macro-record', 'vd.cmdlog.startMacro()', 'start/stop macro recording', replay=False)
 Sheet.addCommand('gm', 'macro-sheet', 'vd.push(vd.macrosheet)', 'open an index of existing macros')
 
 vd.addMenuItems('''
+    System > Record macro > macro-record
     System > Macros sheet > macro-sheet
 ''')
