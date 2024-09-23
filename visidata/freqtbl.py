@@ -1,7 +1,7 @@
 from copy import copy
 import itertools
 
-from visidata import vd, asyncthread, vlen, VisiData, Column, AttrColumn, Sheet, ColumnsSheet, ENTER
+from visidata import vd, asyncthread, vlen, VisiData, Column, AttrColumn, Sheet, ColumnsSheet, ENTER, Fanout
 from visidata.pivot import PivotSheet, PivotGroupRow
 
 
@@ -19,10 +19,14 @@ def valueNames(vd, discrete_vals, numeric_vals):
     return '+'.join(ret)
 
 class HistogramColumn(Column):
+    '.sourceCol is the column to be histogrammed'
     def calcValue(col, row):
         histogram = col.sheet.options.disp_histogram
         histolen = col.width-2
-        return histogram*(histolen*len(row.sourcerows)//col.sheet.largest)
+        return histogram*(histolen*col.sourceCol.getTypedValue(row)//col.largest)
+
+    def updateLargest(col, row):
+        col.largest = max(col.largest, col.sourceCol.getTypedValue(row))
 
 
 def makeFreqTable(sheet, *groupByCols):
@@ -63,9 +67,6 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
         self.source.unselect(row.sourcerows)
         return super().unselectRow(row)
 
-    def updateLargest(self, grouprow):
-        self.largest = max(self.largest, len(grouprow.sourcerows))
-
     def resetCols(self):
         super().resetCols()
 
@@ -78,7 +79,7 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
             self.addColumn(c)
 
         if self.options.disp_histogram:
-            c = HistogramColumn('histogram', type=str, width=self.options.default_width*2)
+            c = HistogramColumn('histogram', type=str, width=self.options.default_width*2, sourceCol=countCol)
             self.addColumn(c)
 
         # if non-numeric grouping, reverse sort by count at end of load
@@ -88,8 +89,9 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
     def loader(self):
         'Generate frequency table.'
         # two more threads
+        histcols = [col for col in self.visibleCols if isinstance(col, HistogramColumn)]
         vd.sync(self.addAggregateCols(),
-                self.groupRows(self.updateLargest))
+                self.groupRows(lambda row, cols=Fanout(histcols): cols.updateLargest(row)))
 
     def afterLoad(self):
         super().afterLoad()
@@ -151,7 +153,7 @@ FreqTableSheet.addCommand('gu', 'unselect-rows', 'unselect(selectedRows)', 'unse
 FreqTableSheet.addCommand('g'+ENTER, 'dive-selected', 'vd.push(openRows(selectedRows))', 'open copy of source sheet with rows that are grouped in selected rows')
 FreqTableSheet.addCommand('', 'select-first', 'for r in rows: source.select([r.sourcerows[0]])', 'select first source row in each bin')
 
-FreqTableSheet.init('largest', lambda: 1)
+HistogramColumn.init('largest', lambda: 1)
 
 vd.addGlobals(
     makeFreqTable=makeFreqTable,
