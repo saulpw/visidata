@@ -20,6 +20,7 @@ vd.option('disp_wrap_max_lines', 3, 'max lines for multiline view', max_help=1)
 vd.option('disp_wrap_break_long_words', False, 'break words longer than column width in multiline', max_help=1)
 vd.option('disp_wrap_replace_whitespace', False, 'replace whitespace with spaces in multiline', max_help=1)
 vd.option('disp_wrap_placeholder', '…', 'multiline string to indicate truncation', max_help=1)
+vd.option('disp_multiline_focus', False, 'only expand cursor row for multiline view', max_help=1)
 
 
 @drawcache
@@ -399,7 +400,10 @@ class TableSheet(BaseSheet):
     @property
     def nScreenRows(self):
         'Number of visible rows at the current window height.'
-        return (self.windowHeight-self.nHeaderRows-self.nFooterRows)//self.rowHeight
+        n = (self.windowHeight-self.nHeaderRows-self.nFooterRows)
+        if self.options.disp_multiline_focus:  # focus multiline mode
+            return n-self.rowHeight
+        return n//self.rowHeight
 
     @drawcache_property
     def nHeaderRows(self):
@@ -869,9 +873,13 @@ class TableSheet(BaseSheet):
 
             # calc_height renders cell contents into displines
             displines = {}  # [vcolidx] -> list of lines in that cell
-            self.calc_height(row, displines, maxheight=self.rowHeight)
+            if options.disp_multiline_focus:
+                height = self.rowHeight if rowidx == self.cursorRowIndex else 1
+            else:
+                height = min(self.rowHeight, maxheight) or 1  # display even empty rows
 
-            height = min(self.rowHeight, maxheight) or 1  # display even empty rows
+            self.calc_height(row, displines, maxheight=height)
+
             self._rowLayout[rowidx] = (ybase, height)
 
             if height > 1:
