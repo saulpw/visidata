@@ -141,9 +141,9 @@ scroll current row to center of screen
 jump to previous sheet (swaps with current sheet)
 .Pp
 .It Ic  " /   ?" Ar regex
-.No search for Ar regex No forward/backward in current column
+.No search for Ar regex No forward/backward in current column's displayed values
 .It Ic  "g/  g?" Ar regex
-.No search for Ar regex No forward/backward over all visible columns
+.No search for Ar regex No forward/backward over all visible columns' displayed values
 .It Ic  "z/  z?" Ar expr
 .No search by Python Ar expr No forward/backward in current column (with column names as variables)
 .It Ic  " n   N"
@@ -240,6 +240,7 @@ open a frozen copy of current sheet with all visible columns evaluated
 .It Ic "z'  gz'"
 add/reset cache for current/all visible column(s)
 .Pp
+.It Note that regex operations apply to the displayed value in a cell.
 .It Ic " \&:" Ar regex
 .No add new columns from Ar regex No split; number of columns determined by example row at cursor
 .It Ic " \&;" Ar regex
