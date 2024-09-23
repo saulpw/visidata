@@ -53,5 +53,6 @@
 {"x": 42, "y": 4, "text": "exactly m", "color": "", "tags": [], "group": ""}
 {"x": 4, "y": 0, "text": "Character classes", "color": "bold underline", "tags": [], "group": ""}
 {"x": 35, "y": 0, "text": "Repetition", "color": "bold underline", "tags": [], "group": ""}
-{"x": 2, "y": 14, "text": "For full documentation on Python regular expressions, see", "color": "", "tags": [], "group": ""}
-{"x": 6, "y": 15, "text": "https://docs.python.org/3/library/re.html", "color": "underline", "tags": [], "group": "", "href": "https://docs.python.org/3/library/re.html"}
+{"x": 2, "y": 15, "text": "For full documentation on Python regular expressions, see", "color": "", "tags": [], "group": ""}
+{"x": 6, "y": 16, "text": "https://docs.python.org/3/library/re.html", "color": "underline", "tags": [], "group": "", "href": "https://docs.python.org/3/library/re.html"}
+{"x": 2, "y": 14, "text": "Note: regex operations apply to the displayed value in a cell", "color": "", "tags": [], "group": ""}
