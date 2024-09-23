@@ -137,7 +137,8 @@ class InputWidget:
                  display=True,
                  history=[],
                  completer=lambda text,idx: None,
-                 options=None):
+                 options=None,
+                 fillchar=''):
         '''
             - value: starting value
             - i: starting index into value
@@ -152,7 +153,7 @@ class InputWidget:
         self.first_action = (i == 0)  # whether this would be the 'first action'; if so, clear text on input
 
         # display theme
-        self.fillchar  = options.disp_edit_fill
+        self.fillchar  = fillchar or options.disp_edit_fill
         self.truncchar = options.disp_truncator
         self.display = display  # if False, obscure before displaying
 
