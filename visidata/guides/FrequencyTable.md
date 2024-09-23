@@ -8,19 +8,19 @@ A VisiData frequency table groups data into bins using one or more columns, and 
 - percent     - (the percentage of the total rows in each group)
 - histogram   - (a visual representation of the percentage)
 
-Here's a tiny dataset of individual hat purchases. Each purchase is for between 1-4 hats.
+Here's a tiny dataset of hat purchases. Each purchase may include multiple hats.
 
 ```
-+------------+-------+-------+-------+-------+
-| date       | color | count | price | total |
-+------------+-------+-------+-------+-------+
-| 2024-09-01 | Red   | 1     | 30    | 30    |
-| 2024-09-02 | Blue  | 1     | 28    | 28    |
-| 2024-09-02 | Green | 2     | 32    | 64    |
-| 2024-09-03 | Red   | 4     | 25    | 100   |
-| 2024-09-03 | Blue  | 1     | 33    | 33    |
-| 2024-09-03 | Blue  | 3     | 33    | 99    |
-+------------+-------+-------+-------+-------+
++------------+-------+----------+-------+-------+
+| year       | color | hatCount | price | total |
++------------+-------+----------+-------+-------+
+| 2024-09-01 | Red   | 1        | 30    | 30    |
+| 2024-09-02 | Blue  | 1        | 28    | 28    |
+| 2024-09-02 | Green | 2        | 32    | 64    |
+| 2024-09-03 | Red   | 4        | 25    | 100   |
+| 2024-09-03 | Blue  | 1        | 33    | 33    |
+| 2024-09-03 | Blue  | 3        | 33    | 99    |
++------------+-------+----------+-------+-------+
 ```
 
 A Frequency Table for the `color` column looks like:
