@@ -537,39 +537,6 @@ def SubColumnItem(idx, c, **kwargs):
         kwargs['name'] = c.name
     return SubColumnFunc(origcol=c, subfunc=getitemdef, expr=idx, **kwargs)
 
-class ExprColumn(Column):
-    'Column using *expr* to derive the value from each row.'
-    def __init__(self, name, expr=None, **kwargs):
-        super().__init__(name, **kwargs)
-        self.expr = expr or name
-        self.ncalcs = 0
-        self.totaltime = 0
-        self.maxtime = 0
-
-    def calcValue(self, row):
-        t0 = time.perf_counter()
-        r = self.sheet.evalExpr(self.compiledExpr, row, col=self)
-        t1 = time.perf_counter()
-        self.ncalcs += 1
-        self.maxtime = max(self.maxtime, t1-t0)
-        self.totaltime += (t1-t0)
-        return r
-
-    def putValue(self, row, val):
-        a = self.getDisplayValue(row)
-        b = self.format(self.type(val))
-        if a != b:
-            vd.warning("Cannot change value of calculated column.  Use `'` to freeze column.")
-
-    @property
-    def expr(self):
-        return self._expr
-
-    @expr.setter
-    def expr(self, expr):
-        self.compiledExpr = compile(expr, '<expr>', 'eval') if expr else None
-        self._expr = expr
-
 
 class SettableColumn(Column):
     'Column using rowid to store and retrieve values internally.'
@@ -592,7 +559,6 @@ vd.addGlobals(
     getitemdef=getitemdef,
     AttrColumn=AttrColumn,
     ItemColumn=ItemColumn,
-    ExprColumn=ExprColumn,
     SettableColumn=SettableColumn,
     SubColumnFunc=SubColumnFunc,
     SubColumnItem=SubColumnItem,
@@ -601,6 +567,5 @@ vd.addGlobals(
 # synonyms
     ColumnItem=ItemColumn,
     ColumnAttr=AttrColumn,
-    ColumnExpr=ExprColumn,
     DisplayWrapper=DisplayWrapper
 )

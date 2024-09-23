@@ -1,4 +1,40 @@
-from visidata import Progress, Sheet, Column, asyncthread, vd, ExprColumn
+import time
+
+from visidata import Progress, Sheet, Column, asyncthread, vd, Column
+
+
+class ExprColumn(Column):
+    'Column using *expr* to derive the value from each row.'
+    def __init__(self, name, expr=None, **kwargs):
+        super().__init__(name, **kwargs)
+        self.expr = expr or name
+        self.ncalcs = 0
+        self.totaltime = 0
+        self.maxtime = 0
+
+    def calcValue(self, row):
+        t0 = time.perf_counter()
+        r = self.sheet.evalExpr(self.compiledExpr, row, col=self)
+        t1 = time.perf_counter()
+        self.ncalcs += 1
+        self.maxtime = max(self.maxtime, t1-t0)
+        self.totaltime += (t1-t0)
+        return r
+
+    def putValue(self, row, val):
+        a = self.getDisplayValue(row)
+        b = self.format(self.type(val))
+        if a != b:
+            vd.warning("Cannot change value of calculated column.  Use `'` to freeze column.")
+
+    @property
+    def expr(self):
+        return self._expr
+
+    @expr.setter
+    def expr(self, expr):
+        self.compiledExpr = compile(expr, '<expr>', 'eval') if expr else None
+        self._expr = expr
 
 
 class CompleteExpr:
@@ -61,7 +97,11 @@ Sheet.addCommand('gz=', 'setcol-iter', 'cursorCol.setValues(someSelectedRows, *l
 
 Sheet.addCommand(None, 'show-expr', 'status(evalExpr(inputExpr("show expr="), cursorRow))', 'evaluate Python expression on current row and show result on status line')
 
-vd.addGlobals({'CompleteExpr': CompleteExpr})
+vd.addGlobals(
+    ExprColumn=ExprColumn,
+    ColumnExpr=ExprColumn,
+    CompleteExpr=CompleteExpr,
+)
 
 vd.addMenuItems('''
     Edit > Modify > current cell > Python expression > setcell-expr
