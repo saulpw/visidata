@@ -102,10 +102,11 @@ def saveMacro(self, rows, ks):
 def afterExecSheet(cmdlog, sheet, escaped, err):
     if not vd.macroMode: return
     if not vd.activeCommand: return
-    if vd.isLoggableCommand(vd.activeCommand):
-        cmd = copy(vd.activeCommand)
-        cmd.sheet = ''
-        vd.macroMode.addRow(cmd)
+    if vd.activeCommand.longname == 'macro-record': return
+
+    cmd = copy(vd.activeCommand)
+    cmd.sheet = ''
+    vd.macroMode.addRow(cmd)
 
 
 @CommandLogJsonl.api

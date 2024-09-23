@@ -6,6 +6,7 @@ import visidata
 
 vd.option('replay_wait', 0.0, 'time to wait between replayed commands, in seconds', sheettype=None)
 vd.theme_option('disp_replay_play', '▶', 'status indicator for active replay')
+vd.theme_option('disp_replay_record', '⏺', 'status indicator for macro record')
 vd.theme_option('color_status_replay', 'green', 'color of replay status indicator')
 
 # prefixes which should not be logged
@@ -384,8 +385,12 @@ def setLastArgs(vd, args):
 
 @VisiData.property
 def replayStatus(vd):
+    if vd.macroMode:
+        return f'|[:error] {len(vd.macroMode)} {vd.options.disp_replay_record} [:]'
+
     if vd._nextCommands:
-        return f' | [:status_replay] {len(vd._nextCommands)} {vd.options.disp_replay_play}[:]'
+        return f'|[:status_replay] {len(vd._nextCommands)} {vd.options.disp_replay_play} [:]'
+
     return ''
 
 
