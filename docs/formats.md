@@ -69,6 +69,7 @@ eleventyNavigation:
 | f5log                 | Parser for f5 logs                             | 3\.0            |                              |               |         | f5                                                            |                      |
 | toml                  | Tom's Obvious Minimal Language                 | 3\.0            |                              |               |         | Tom Preston-Werner                                            | tomllib              |
 | conll                 | CoNLL annotation scheme                        | 3\.0            |                              |               |         | Conference on Natural Language Learning                       | pyconll              |
+| [grep](#grep)         | grep command-line utility                      | 3\.1            |                              |               | 1973    | AT&T Bell Laboratories                                        |                      |
 
 # Extra notes about formats
 
@@ -182,3 +183,12 @@ This should similarly work for any format that has a `pandas.read_format()` func
 - loader-specific requirements
     - require setting authentication information in `~/.visidatarc` or on the CLI
     - launch the loader with `-f loadername` for steps to obtain and configure authentication credentials
+
+## Grep {#grep}
+A .grep file is a JSON lines file. It can be in two formats:
+1) A simple container with three fields:
+    file - a string with the path to the file where the match was found (absolute or relative path)
+    line_no - an integer with the line number in the file where the match was found,
+    text - a string with the text of the line that matched.
+2) ripgrep `grep_printer` format, described here:
+https://docs.rs/grep-printer/latest/grep_printer/struct.JSON.html
