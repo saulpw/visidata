@@ -415,17 +415,22 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
 
     previnput = vd.getCommandInput()
     if previnput is not None:
+        ret = None
         if isinstance(previnput, str):
             if previnput.startswith('{'):
-                return json.loads(previnput)
+                ret = json.loads(previnput)
             else:
                 ret = {k:v.get('value', '') for k,v in kwargs.items()}
                 primekey = list(ret.keys())[0]
                 ret[primekey] = previnput
-                return ret
 
         if isinstance(previnput, dict):
-            return previnput
+            ret = previnput
+
+        if ret:
+            if record and vd.cmdlog:
+                vd.setLastArgs(ret)
+            return ret
 
         assert False, type(previnput)
 
