@@ -249,7 +249,7 @@ class InputWidget:
             c = vd.prettykeys(c)
             i += len(c)
             v += c
-        elif ch == '^O':                           v = vd.launchExternalEditor(v); return True  # auto-accept after $EDITOR
+        elif ch == '^O':                           self.value = vd.launchExternalEditor(v); return True  # auto-accept after $EDITOR
         elif ch == '^R':                           v = self.orig_value  # ^Reload initial value
         elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1:i]), i)  # swap chars
         elif ch == '^U':                           v = v[i:]; i = 0  # clear to beginning
