@@ -20,7 +20,7 @@ In addition to cutting and pasting (see **ClipboardGuide**), rows can be created
 - {help.commands.edit_cell}
 
 While editing a cell, 
-    - [:keys]Ctrl+o[/] to edit the cell in a text editor.
+    - [:keys]Ctrl+O[/] to edit the cell in a text editor.
     - [:keys]Tab[/] to finish editing and go to the next cell
     - [:keys]Shift+Tab[/] to finish editing and go to the previous cell
 
