@@ -1,77 +1,86 @@
+---
+sheet: Sheet
+---
 # Pivot Tables are just Frequency Tables with more columns
 
 Pivot Tables group data by two or more fields. They display one set of values as column headings, another set as row headings, and compute aggregates like the sum or total count for each cell.
 
-```
-+------------+-------+-------+
-| date       | color | price |
-+------------+-------+-------+
-| 2024-09-01 | Red   | 30    |
-| 2024-09-02 | Blue  | 28    |
-| 2024-09-02 | Green | 64    |
-| 2024-09-03 | Red   | 100   |
-| 2024-09-03 | Blue  | 33    |
-| 2024-09-03 | Blue  | 99    |
-+------------+-------+-------+
-```
-
-Pivoting on the `date` and `color` columns produces a pivot table that shows how many items of each color were sold each day. Note that here, only the row count, not the sum of prices, is computed for each cell.
-
-```
-+------------+-----+------+-------+
-| date       | Red | Blue | Green |
-+------------+-----+------+-------+
-| 2024-09-01 | 1   | 0    | 0     |
-| 2024-09-02 | 0   | 1    | 1     |
-| 2024-09-03 | 1   | 2    | 0     |
-+------------+-----+------+-------+
-```
-
 ## Create a Pivot Table
 
-To create a pivot table, 
+1. Set the primary column(s) as `key columns`. These values will appear along the left side as row headings.
 
-1. set the primary column(s) as `key columns`. These values will appear along the left side as row headings.
 - {help.commands.key_col}
 
-2. The default aggregation provides a total count of the items in each cell. Create any other aggregation columns before building the pivot table. Each aggregation will add a column for each of the pivot columns, (for example sum Red, mean Red, sum Blue, mean Blue, etc.).  
+2. **OPTIONAL** The default aggregation method for pivot cells is `count`. Create any other aggregation columns ( with [:keys]+[/]) before building the pivot table. Each aggregation adds a column for every pivot column. See **Examples** below.
 
-If custom aggregations have been added, the default 'total count' aggregation will not be computed.
+Note: Custom aggregations replace the default `count` aggregation.
+
 - {help.commands.aggregate_col}
 
-3. Navigate to the column that you want to use as the column headings in your pivot table, and create the pivot table:
+3. Navigate to the column containing the pivot column values. 
+
+4. Create the pivot table:
 
 - {help.commands.pivot}
 
-Output would be like below (the color names have been shortened to only the first letter for display purposes) if you set the `date` as the key column, and then used the `color` to complete the pivot.
+## Dive into the underlying rows for a cell
 
-```
-+------------+-------+--------+-------+--------+-------+--------+
-| date       | sum_R | mean_R | sum_B | mean_B | sum_G | mean_G |
-+------------+-------+--------+-------+--------+-------+--------+
-| 2024-09-01 | 30    | 30     | 0     |        | 0     |        |
-| 2024-09-02 | 0     |        | 28    | 28     | 64    | 64     |
-| 2024-09-03 | 100   | 100    | 132   | 66     | 0     |        |
-+------------+-------+--------+-------+--------+-------+--------+
-```
+Each cell in the pivot table, like in a **Frequency Table**, links to the underlying rows.
+Explore them with:
 
-See that on 2024-09-03, the total sales for Blue hats was $132.
+- {help.commands.open-row}
 
-Sort the data:
+## Sort the rows
 
 - {help.commands.sort_asc}
 - {help.commands.sort_desc}
 
+## Swap rows and columns
 
-See the underlying rows for a cell:
-
-- {help.commands.open-row}
-
-
-## Swap rows and columns with the transpose command
-
-- {help.commands.transpose}
+{help.commands.transpose}
 
 ## Melt
 
 To unpivot, see the **MeltGuide**
+
+## Examples
+
+Sample input sheet **sales**:
+
+   date        color  price
+   ----------  -----  -----
+   2024-09-01  R      30
+   2024-09-02  B      28
+   2024-09-03  R      100
+   2024-09-03  B      33
+   2024-09-03  B      99
+
+1. Set **date** as the `key` column ([:keys]![/]).  
+2. Navigate to the **color** column.
+3. Pivot on the **color** column ([:keys]Shift+W[/]) 
+
+   date        R  B
+   ----------  -  -
+   2024-09-01  1  0
+   2024-09-02  0  1
+   2024-09-03  1  2
+
+Note that each cell contains the row count because of the default `count` aggregation.
+
+4. Return to the original **sales** sheet. [:keys]q[/] (`close-sheet`)
+5. Navigate to the **price** column.
+6. Set its format to float. [:keys]#[/] (`type-float`)
+7. Add a 'sum' aggregation [:keys]+[/] (`aggregate-col`))
+8. Add an 'avg' aggregation [:keys]+[/] (`aggregate-col`))
+9. Navigate to the **color** column.
+10. Pivot on the **color** column using [:keys]Shift+W[/] (`pivot-command`). 
+
+This generates each aggregation for all of the pivot columns. As mentioned above, any custom aggregations replace the default `count` aggregation:
+
+
+   date        sum_R   avg_R   sum_B   avg_B
+   ----------  ------  ------  ------  -----
+   2024-09-01   30.00   30.00    0.00
+   2024-09-02    0.00           28.00  28.00
+   2024-09-03  100.00  100.00  132.00  66.00
+
