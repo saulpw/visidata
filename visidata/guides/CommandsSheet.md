@@ -1,38 +1,28 @@
-# The Command Sheet: How to find the command you want run
+# How to find commands
 
-The Command Sheet lists all of the available commands, their keyboard bindings, function names and other information.
-
-## Use the fuzzy finder to search by name
+## Command Palette
 
 - {help.commands.exec_longname}
 
-Press [:keys]Tab[/] to provide a numeric jumplist. Typing the number next to a command will execute the command.
+Start typing a command longname or keyword in its helpstring.
 
-## Open the Command Sheet for all commands
+- [:code]Enter[/] to execute top command.
+- [:code]Tab[/] to highlight top command and provide a numeric jumplist.
+
+When a command is highlighted:
+
+- [:code]Tab[/]/[:code]Shift+Tab[/] to cycle highlighted command.
+- [:code]Enter[/] to execute highlighted command.
+- [:code]0-9[/] to execute numbered command.
+
+## Command Sheet
+
+The Command Sheet lists all of the available commands, their keyboard bindings, function names, and other information.
 
 - {help.commands.help_commands_all}
-
-
-## Open the Command Sheet for the current sheet
-
 - {help.commands.help_commands}
 
-## Search for commands
+'description' and 'longname' column: useful to find rows that share a longname suffix or prefix. E.g, `save` or `selected`.
 
-Just like any other sheet, use search and select on the Comand Sheet. The `description` and `longname` columns are helpful.
-
-- {help.commands.search_col}
-- {help.commands.search_cols}  
-
-- {help.commands.search_next}  
-- {help.commands.searchr_next}  
-
-To create a new sheet with only related commands, select rows that match some part of the command, for example, `save`:
-
-- {help.commands.select_cols_regex} to find and highlight commands containing a pattern
-- open these rows as a new sheet with [:keys]"[/]
-
-## Look up keybindings
-
-Using the `keystrokes` and/or the `all_bindings` column, search for a key binding. For example, search for 'Ctrl' to find all keybindings that use the 'Ctrl' key.
+'keystrokes' and 'all_bindings' column: useful to search for keybindings. E.g, `Ctrl` or `F`.
 
