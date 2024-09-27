@@ -55,8 +55,8 @@ Sample input sheet **sales**:
    2024-09-03  B      33
    2024-09-03  B      99
 
-1. Set **date** as the `key` column ([:keys]![/]).  
-2. Navigate to the **color** column.
+1. Set **date** as the `key` column ([:keys]![/])
+2. Navigate to the **color** column 
 3. Pivot on the **color** column ([:keys]Shift+W[/]) 
 
    date        R  B
@@ -67,13 +67,13 @@ Sample input sheet **sales**:
 
 Note that each cell contains the row count because of the default `count` aggregation.
 
-4. Return to the original **sales** sheet. [:keys]q[/] (`close-sheet`)
-5. Navigate to the **price** column.
-6. Set its format to float. [:keys]#[/] (`type-float`)
+4. Return to the original **sales** sheet [:keys]q[/] (`close-sheet`)
+5. Navigate to the **price** column
+6. Set its format to float [:keys]#[/] (`type-float`)
 7. Add a 'sum' aggregation [:keys]+[/] (`aggregate-col`))
 8. Add an 'avg' aggregation [:keys]+[/] (`aggregate-col`))
-9. Navigate to the **color** column.
-10. Pivot on the **color** column using [:keys]Shift+W[/] (`pivot-command`). 
+9. Navigate to the **color** column 
+10. Pivot on the **color** column [:keys]Shift+W[/] (`pivot-command`) 
 
 This generates each aggregation for all of the pivot columns. As mentioned above, any custom aggregations replace the default `count` aggregation:
 
