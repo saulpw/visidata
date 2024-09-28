@@ -1,0 +1,6 @@
+#!vd -p
+{"sheet": null, "col": null, "row": null, "longname": "open-file", "input": "sample_data/sample.tsv", "keystrokes": "o", "comment": null, "replayable": true}
+{"sheet": "sample", "col": "", "row": "", "longname": "select-rows", "input": "", "keystrokes": "gs", "comment": "select all rows", "replayable": true}
+{"sheet": "sample", "col": "Region", "row": 0, "longname": "setcol-input", "input": "East", "keystrokes": "ge", "comment": "set contents of current column for selected rows to same input", "replayable": true}
+{"sheet": "sample", "col": "", "row": "", "longname": "unselect-rows", "input": "", "keystrokes": "gu", "comment": "unselect all rows", "replayable": true}
+{"sheet": "sample", "col": "", "row": "", "longname": "hide-uniform-cols", "input": "", "comment": "hide any column that has multiple rows but only one distinct value", "replayable": true}
