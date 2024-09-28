@@ -24,7 +24,7 @@ __author__ = "Jeremy Singer-Vine <jsvine@gmail.com>"
 
 from copy import copy
 
-from visidata import Sheet, BaseSheet, asyncthread, Progress, vd
+from visidata import Sheet, TableSheet, asyncthread, Progress, vd
 
 
 def gen_identify_duplicates(sheet):
@@ -103,8 +103,8 @@ def dedupe_rows(sheet):
 
 
 # Add longname-commands to VisiData to execute these methods
-BaseSheet.addCommand(None, "select-duplicate-rows", "sheet.select_duplicate_rows()", "select each row that is a duplicate of a prior row")
-BaseSheet.addCommand(None, "dedupe-rows", "vd.push(sheet.dedupe_rows())", "open new sheet in which only non-duplicate rows in the active sheet are included")
+TableSheet.addCommand(None, "select-duplicate-rows", "sheet.select_duplicate_rows()", "select each row that is a duplicate of a prior row")
+TableSheet.addCommand(None, "dedupe-rows", "vd.push(sheet.dedupe_rows())", "open new sheet in which only non-duplicate rows in the active sheet are included")
 
 vd.addMenuItems('''
     Row > Select > duplicate rows > select-duplicate-rows
