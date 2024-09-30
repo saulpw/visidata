@@ -78,13 +78,13 @@ Next, fill out the text for the guide:
     keystroke is pressed or the command is executed by longname.
 
     The basic usage is:
-        1. {help.commands.macro_record}
+        1. {help.commands.macro-record}
         2. Execute a series of commands.
         3. `m` again to complete the recording, and prompt for the keystroke or longname to bind it to.
 
     # The Macros Sheet
 
-    - {help.commands.macro_sheet}
+    - {help.commands.macro-sheet}
 
     - `d` (`delete-row`) to mark macros for deletion.
     - {help.commands.commit_sheet}
