@@ -18,7 +18,7 @@ A sample of available commands:
     - [:code]Tab[/] to finish editing and go to the next cell
     - [:code]Shift+Tab[/] to finish editing and go to the previous cell
 
-When a sheet has been modified, a `[M]` will appear in the lower right status.
+Modifying a sheet displays a `[M]` in the lower right status.
 
 - {help.options.quitguard}
 
