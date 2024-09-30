@@ -18,6 +18,10 @@ A sample of available commands:
     - [:code]Tab[/] to finish editing and go to the next cell
     - [:code]Shift+Tab[/] to finish editing and go to the previous cell
 
+When a sheet has been modified, a `[M]` will appear in the lower right status.
+
+- {help.options.quitguard}
+
 ## Deferred Sheets
 
 Some sheet types support *deferred* saving. Examples include **SQLiteSheet** and **Dir Sheet**. Modifications are colored: green for added rows, red for deleted rows, and yellow for modified cells.
@@ -25,6 +29,3 @@ Some sheet types support *deferred* saving. Examples include **SQLiteSheet** and
 Commit the sheet to reflect changes on the filesystem.
 
 - {help.commands.commit_sheet}
-
-
-
