@@ -1,117 +1,100 @@
 # Frequency Tables are how you GROUP BY
 
-## About Frequency Tables
+- Group data into bins using one or more columns.
+- Count the number of items in each group.
+- Also perform custom aggregations for each group.
 
-A VisiData frequency table groups data into bins using one or more columns, and creates basic summary aggregates of the data. The default aggregates are as follows. However, if user-defined aggregate columns are present, they will also be included.
+- Similar to SQL:
 
-- count       - (the count of rows in each group)
-- percent     - (the percentage of the total rows in each group)
-- histogram   - (a visual representation of the percentage)
-
-Here's a tiny dataset of hat purchases. Each purchase may include multiple hats.
-
-```
-+------------+-------+----------+-------+-------+
-| date       | color | hatCount | price | total |
-+------------+-------+----------+-------+-------+
-| 2024-09-01 | Red   | 1        | 30    | 30    |
-| 2024-09-02 | Blue  | 1        | 28    | 28    |
-| 2024-09-02 | Green | 2        | 32    | 64    |
-| 2024-09-03 | Red   | 4        | 25    | 100   |
-| 2024-09-03 | Blue  | 1        | 33    | 33    |
-| 2024-09-03 | Blue  | 3        | 33    | 99    |
-+------------+-------+----------+-------+-------+
-```
-
-A Frequency Table for the `color` column looks like:
-
-```
-+-------+-------+---------+----------------------------------------+
-| color | count | percent | histogram                              |
-+-------+-------+---------+----------------------------------------+
-| Blue  | 3     | 50      | ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■ |
-| Red   | 2     | 33.33   | ■■■■■■■■■■■■■■■■■■■■■■■■■              |
-| Green | 1     | 16.67   | ■■■■■■■■■■■■                           |
-+-------+-------+---------+----------------------------------------+
-```
-
-Given data like this, use a frequency table to answer questions like:
-
-- How many purchases (rows) per day?
-- What unique colors were sold?
-- How many purchases (rows) per day and color?
-- What color generated the most in total sales?
-- What is the first purchase (row) for each day?
+   SELECT column_name, COUNT(*) 
+   FROM sheet_name 
+   GROUP BY column_name 
+   ORDER BY COUNT(*) DESC
 
 ## Group by a single column
 
-To group by date, navigate to the `date` column and press {help.commands.freq_col}
-
-Note that in addition to getting the counts, the frequency table also provides a list of unique items in the selected column.
-
-For example, navigating to the `color` column and pressing [:keys]Shift+F[/] is a quick way to see the unique colors.
+1. Navigate to the target column
+- {help.commands.freq_col}
 
 ## Group by multiple columns
 
-To group by multiple columns, the grouping columns must be set as key columns.
-
+1. Set one or more columns as key columns:
 - use {help.commands.key_col}
 
-In this example, date and color could be set as key columns.
-
-After setting one or more key columns, group by the key columns to create a frequency table:
-
+2. group by the key columns to create a frequency table:
 - {help.commands.freq_keys}
 
-This table can answer how many invoices were created per date and color.
+## Aggregators
 
-## User-defined aggregates
+Add aggregators to one or or more columns BEFORE creating a frequency table. 
+- Aggregators include min, max, sum, distinct count, and list.
 
-Note that in the examples above, only the row count was aggregated. Frequently, you want to add additional aggregations (like min, max, sum and/or average). These aggregations must be added before generating the frequency table, and they will show up next to built-in aggregations.
+1. Navigate to a column.
+2. Add aggregators (like min, max, sum, list, and distinct count).
+- {help.commands.aggregate-col}
 
-In this example, you can add a `sum` aggregation to the `total` column, and then group by the `color` column:
+3. Add more aggregators to the same or different columns.
+4. Generate the Frequency Table. [:keys]Shift+F[/] or [:keys]gShift+F[/]
 
-- Navigate to the `total` column: [:keys]gShift+L[/]
-- Add a `sum` aggregate [:keys]+[/] then enter [:keys]sum[/]
-- Navigate to the `color` column
-- Create the frequency table by pressing [:keys]Shift+F[/]
+## Explore the frequency data
 
-## Quick Summary
+Dive into a group to see the underlying row(s) using the **Frequency Table**:
 
-To quickly compare the frequency and aggregates of selected rows compared to the total dataset, use
+1. Navigate to the target row.
+- {help.commands.open_row}
+
+Dive into multiple groups:
+
+- Select multiple rows, for example with [:keys]t[/] (stoggle-row)
+- {help.commands.dive_selected}
+
+Return to the frequency table:
+- {help.commands.jump_prev}
+
+Select the first row of each group, and then return to the source data. For example, identify a sample from each each group:
+
+- (`select-first`) - select first source row in each bin
+- {help.commands.jump_prev}
+
+## Find Unique Values
+
+The bins of a frequeny table are the unique items.
+- The total unique count appears in the bottom right of the window, for example "14 bins".
+
+Copy the unique item list to a new sheet:
+
+1. Generate a frequency table (one or more columns).
+2. Hide unwanted columns. [:keys]-[/] or [:keys]Shift+C[/]
+3. Copy unique values to a new sheet
+- {help.commands.freeze-sheet}
+
+## Count only selected rows
+
+Create an ad-hoc frequeny table that compares the selected rows in the current columns to all rows:
 
 - {help.commands.freq_summary} 
 
-## Exploring the data
+The frequency summary can use aggregators as well.
 
-From the `FrequencySheet`, you can explore the underlying data for a single group using the following commands:
+## Sort the table
 
-- {help.commands.open_row}
-
-To explore multiple rows within the frequency table, select multiple rows, for example with [:keys]t[/] (stoggle-row)
-
-- {help.commands.dive_selected}
-
-In addition to seeing all of the individual rows, sometimes it is helpful to just see the first item from each group. Perhaps you want to see when something first occurred, or to see a representative sample of each group.
-
-- {help.commands.select_first}
-
-The rows are selected in the original sheet, so you must leave the frequency table and return to to the source sheet. One way is with:
-- {help.commands.jump_prev}
-
-
-## Sorting the data
-
-Like with other sheets, sort Frequency Table data by navigating to the desired column and using the sort keys:
+Navigate to the target column and sort:
 
 - {help.commands.sort_asc}
 - {help.commands.sort_desc}
 
 ## Using Split Panes with Frequency Tables
 
-There are a few functions that combine Split Panes (see the `SplitplanesGuide`) and Frequency Tables.
+Open a split [:keys]Shift+Z[/], and create a Frequency Table [:keys]Shift+F[/]. 
+- The table will automatically open in the other split.
 
-If you have an open split [:keys]Shift+Z[/], and create a Frequency Table, it will automatically open in the other split.
+1. Open a Frequency Table
+2. open a new split, when you explore the group(s) with [:keys]Enter[/] or [:keys]gEnter[/], the detail view will open in the other pane.
 
-Similarly, if you are in a Frequency Table and open a new split, when you explore the group(s) with [:keys]Enter[/] or [:keys]gEnter[/], the detail view will open in the other pane.
+See alo the `SplitplanesGuide`.
+
+## Table Options
+
+- {help.options.disp_histogram}
+- {help.options.disp_histlen}
 
