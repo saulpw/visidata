@@ -98,5 +98,5 @@ Also see the `SplitplanesGuide`.
 ## Table Options
 
 - {help.options.disp_histogram}
-- {help.options.disp_histlen}
+- {help.options.histogram_bins}
 
