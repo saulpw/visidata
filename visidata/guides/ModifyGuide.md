@@ -24,7 +24,11 @@ Modifying a sheet displays a `[M]` in the lower right status.
 
 ## Deferred Sheets
 
-Some sheet types support *deferred* saving. Examples include **SQLiteSheet** and **Dir Sheet**. Modifications are colored: green for added rows, red for deleted rows, and yellow for modified cells.
+Some sheet types support *deferred* saving. Examples include **SQLiteSheet** and **Dir Sheet**. Changes are colored for [:add_pending]added rows[/], [:delete_pending]deleted rows[/], [:change_pending]modified cells[/].
+
+- {help.options.color_add_pending}
+- {help.options.color_delete_pending}
+- {help.options.color_change_pending}
 
 Commit the sheet to reflect changes on the filesystem.
 
