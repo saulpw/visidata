@@ -1,0 +1,6 @@
+#!vd -p
+{"sheet": null, "col": null, "row": null, "longname": "open-file", "input": "sample_data/benchmark.csv", "keystrokes": "o", "comment": null, "replayable": true}
+{"sheet": "benchmark", "col": "Quantity", "row": "", "longname": "type-int", "input": "", "keystrokes": "#", "comment": "set type of current column to int", "replayable": true}
+{"sheet": "benchmark", "col": "Quantity", "row": "", "longname": "addcol-expr", "input": "curcol*2", "keystrokes": "=", "comment": "create new column from Python expression, with column names as variables", "replayable": true}
+{"sheet": "benchmark", "col": "", "row": "", "longname": "select-rows", "input": "", "keystrokes": "gs", "comment": "select all rows", "replayable": true}
+{"sheet": "benchmark", "col": "Quantity", "row": "", "longname": "setcol-expr", "input": "curcol*4", "keystrokes": "g=", "comment": "set current column for selected rows to result of Python expression", "replayable": true}

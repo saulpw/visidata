@@ -255,7 +255,7 @@ These variables and functions are available in the scope of an expression:
 
 Additional attributes can be added to sheets and columns.
 
-`col` deliberately returns a Column object, but any other Column object is interpreted as the value within that column for the same row. For example, both `curcol` and `cursorcol` return values, not the object itself.
+`col` deliberately returns a Column object, but any other Column object is interpreted as the value within that column for the same row. For example, both `curcol` and `cursorCol` return values, not the object itself.
 
 
 For example, this customizes addcol-expr to set the `curcol` attribute on the new ExprColumn to a snapshot of the current cursor column (at the time the expression column is added):

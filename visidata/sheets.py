@@ -4,7 +4,7 @@ from copy import copy, deepcopy
 import textwrap
 
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException
-from visidata import (options, Column, namedlist, SettableColumn,
+from visidata import (options, Column, namedlist, SettableColumn, AttrDict,
 TypedExceptionWrapper, BaseSheet, UNLOADED,
 clipdraw, clipdraw_chunks, ColorAttr, update_attr, colors, undoAttrFunc, vlen, dispwidth)
 import visidata
@@ -73,10 +73,11 @@ class RecursiveExprException(Exception):
 
 class LazyComputeRow:
     'Calculate column values as needed.'
-    def __init__(self, sheet, row, col=None):
+    def __init__(self, sheet, row, col=None, extra={}):
         self.row = row
         self.col = col
         self.sheet = sheet
+        self.extra = AttrDict(extra) # extra bindings
         self._usedcols = set()
 
         self._lcm.clear()  # reset locals on lcm
@@ -85,7 +86,7 @@ class LazyComputeRow:
     def _lcm(self):
         lcmobj = self.col or self.sheet
         if not hasattr(lcmobj, '_lcm'):
-            lcmobj._lcm = LazyChainMap(self.sheet, self.col, *vd.contexts)
+            lcmobj._lcm = LazyChainMap(self.sheet, self.col, self.extra, *vd.contexts)
         return lcmobj._lcm
 
     def __iter__(self):
@@ -384,10 +385,11 @@ class TableSheet(BaseSheet):
     def __repr__(self):
         return f'<{type(self).__name__}: {self.name}>'
 
-    def evalExpr(self, expr, row=None, col=None):
+    def evalExpr(self, expr:str, row=None, col=None, **kwargs):
+        'eval() expr in the context of (row, col), with extra bindings in kwargs'
         if row is not None:
             # contexts are cached by sheet/rowid for duration of drawcycle
-            contexts = vd._evalcontexts.setdefault((self, self.rowid(row), col), LazyComputeRow(self, row, col=col))
+            contexts = vd._evalcontexts.setdefault((self, self.rowid(row), col), LazyComputeRow(self, row, col, kwargs))
         else:
             contexts = dict(sheet=self)
 

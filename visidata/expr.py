@@ -14,7 +14,7 @@ class ExprColumn(Column):
 
     def calcValue(self, row):
         t0 = time.perf_counter()
-        r = self.sheet.evalExpr(self.compiledExpr, row, col=self)
+        r = self.sheet.evalExpr(self.compiledExpr, row, col=self, curcol=self)
         t1 = time.perf_counter()
         self.ncalcs += 1
         self.maxtime = max(self.maxtime, t1-t0)
@@ -72,7 +72,7 @@ class CompleteExpr:
 
 @Column.api
 @asyncthread
-def setValuesFromExpr(self, rows, expr):
+def setValuesFromExpr(self, rows, expr, **kwargs):
     'Set values in this column for *rows* to the result of the Python expression *expr* applied to each row.'
     compiledExpr = compile(expr, '<expr>', 'eval')
     vd.addUndoSetValues([self], rows)
@@ -81,7 +81,7 @@ def setValuesFromExpr(self, rows, expr):
         # Note: expressions that are only calculated once, do not need to pass column identity
         # they can reference their "previous selves" once without causing a recursive problem
         try:
-            v = self.sheet.evalExpr(compiledExpr, row)
+            v = self.sheet.evalExpr(compiledExpr, row, **kwargs)
             self.setValue(row, v)
             nset += 1
         except Exception as e:
@@ -96,12 +96,12 @@ def inputExpr(self, prompt, *args, **kwargs):
     return vd.input(prompt, "expr", *args, completer=CompleteExpr(self), **kwargs)
 
 
-Sheet.addCommand('=', 'addcol-expr', 'addColumnAtCursor(ExprColumn(inputExpr("new column expr="), curcol=cursorCol))', 'create new column from Python expression, with column names as variables')
-Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(someSelectedRows, inputExpr("set selected="))', 'set current column for selected rows to result of Python expression')
-Sheet.addCommand('z=', 'setcell-expr', 'cursorCol.setValues([cursorRow], evalExpr(inputExpr("set expr="), cursorRow,))', 'evaluate Python expression on current row and set current cell with result of Python expression')
+Sheet.addCommand('=', 'addcol-expr', 'addColumnAtCursor(ExprColumn(inputExpr("new column expr="), col=cursorCol, curcol=cursorCol))', 'create new column from Python expression, with column names as variables')
+Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(someSelectedRows, inputExpr("set selected="), curcol=cursorCol)', 'set current column for selected rows to result of Python expression')
+Sheet.addCommand('z=', 'setcell-expr', 'cursorCol.setValues([cursorRow], evalExpr(inputExpr("set expr="), row=cursorRow, curcol=cursorCol))', 'evaluate Python expression on current row and set current cell with result of Python expression')
 Sheet.addCommand('gz=', 'setcol-iter', 'cursorCol.setValues(someSelectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(someSelectedRows))))', 'set current column for selected rows to the items in result of Python sequence expression')
 
-Sheet.addCommand(None, 'show-expr', 'status(evalExpr(inputExpr("show expr="), cursorRow))', 'evaluate Python expression on current row and show result on status line')
+Sheet.addCommand(None, 'show-expr', 'status(evalExpr(inputExpr("show expr="), row=cursorRow, col=cursorCol))', 'evaluate Python expression on current row and show result on status line')
 
 vd.addGlobals(
     ExprColumn=ExprColumn,
