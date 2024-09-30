@@ -28,9 +28,10 @@
 
 Add aggregators to one or or more columns BEFORE creating a frequency table. 
 - Aggregators include min, max, sum, distinct count, and list.
+- Set an appropriate column type for the aggregator target, for example float:  [:key]%[/]
 
 1. Navigate to a column.
-2. Add aggregators (like min, max, sum, list, and distinct count).
+2. Add an aggregator (like min, max, sum, list, and distinct count).
 - {help.commands.aggregate-col}
 
 3. Add more aggregators to the same or different columns.
@@ -51,7 +52,9 @@ Dive into multiple groups:
 Return to the frequency table:
 - {help.commands.jump_prev}
 
-Select the first row of each group, and then return to the source data. For example, identify a sample from each each group:
+Select the first row of each group: 
+
+See the selections in the source sheet. For example, select a sample from each each group:
 
 - (`select-first`) - select first source row in each bin
 - {help.commands.jump_prev}
@@ -72,9 +75,8 @@ Copy the unique item list to a new sheet:
 
 Create an ad-hoc frequeny table that compares the selected rows in the current columns to all rows:
 
+- add aggregators if needed [:keys]+[/]
 - {help.commands.freq_summary} 
-
-The frequency summary can use aggregators as well.
 
 ## Sort the table
 
@@ -91,7 +93,7 @@ Open a split [:keys]Shift+Z[/], and create a Frequency Table [:keys]Shift+F[/].
 1. Open a Frequency Table
 2. open a new split, when you explore the group(s) with [:keys]Enter[/] or [:keys]gEnter[/], the detail view will open in the other pane.
 
-See alo the `SplitplanesGuide`.
+Also see the `SplitplanesGuide`.
 
 ## Table Options
 
