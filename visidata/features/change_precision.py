@@ -32,9 +32,7 @@ def setcol_precision(col, amount:int):
             if not precision_str is None:
                 col.fmtstr = f'%.{max(0, int(precision_str[1]) + amount)}f'
     else:
-        col.type = float
-        if col.fmtstr == '':
-            col.fmtstr = '%.2f'
+        vd.fail('column type must be numeric or date')
 
 
 vd.addMenuItems('''
