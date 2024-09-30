@@ -1092,6 +1092,7 @@ class F5LogSheet(Sheet):
             object_regex = None
 
         try:
+            import zoneinfo
             self._log_tz = zoneinfo.ZoneInfo(
                 vd.options.get("f5log_log_timzeone", "UTC")
             )
