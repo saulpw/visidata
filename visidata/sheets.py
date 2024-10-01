@@ -121,7 +121,8 @@ class LazyComputeRow:
                 c = self._lcm[colid]
             except (KeyError, AttributeError) as e:
                 if colid == 'sheet': return self.sheet
-                elif colid == 'row': c = self.row
+                elif colid == 'row': return self
+                elif colid == '_row': return self.row
                 elif colid == 'col': c = self.col
                 else:
                     raise KeyError(colid) from e
