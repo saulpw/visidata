@@ -193,6 +193,12 @@ def inputLongname(sheet):
                               help=vd.help_longname,
                               type='longname')
 
+@BaseSheet.api
+def inputLongnameSimple(sheet):
+    'Input a command longname without using the command palette.'
+    longnames = set(k for (k, obj), v in vd.commands.iter(sheet))
+    return vd.input("command name: ", completer=CompleteKey(sorted(longnames)), type='longname')
+
 
 @BaseSheet.api
 def exec_longname(sheet, longname):
@@ -202,3 +208,4 @@ def exec_longname(sheet, longname):
 
 
 vd.addCommand('Space', 'exec-longname', 'exec_longname(inputLongname())', 'execute command by its longname')
+vd.addCommand('zSpace', 'exec-longname-simple', 'exec_longname(inputLongnameSimple())', 'execute command by its longname')
