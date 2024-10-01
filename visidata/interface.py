@@ -34,14 +34,14 @@ vd.theme_option('disp_endbot_sep', '║', '') # ╽╿┃╜‖
 vd.theme_option('disp_selected_note', '•', '') #
 vd.theme_option('disp_sort_asc', '↑↟⇞⇡⇧⇑', 'characters for ascending sort') # ↑▲↟↥↾↿⇞⇡⇧⇈⤉⤒⥔⥘⥜⥠⍏˄ˆ
 vd.theme_option('disp_sort_desc', '↓↡⇟⇣⇩⇓', 'characters for descending sort') # ↓▼↡↧⇂⇃⇟⇣⇩⇊⤈⤓⥕⥙⥝⥡⍖˅ˇ
-vd.theme_option('color_default', 'white on black', 'the default fg and bg colors')
-vd.theme_option('color_default_hdr', 'bold', 'color of the column headers')
-vd.theme_option('color_bottom_hdr', 'underline', 'color of the bottom header row')
+vd.theme_option('color_default', 'white on 233', 'the default fg and bg colors')
+vd.theme_option('color_default_hdr', 'bold white on 233', 'color of the column headers')
+vd.theme_option('color_bottom_hdr', 'underline white on 233', 'color of the bottom header row')
 vd.theme_option('color_current_row', 'reverse', 'color of the cursor row')
 vd.theme_option('color_current_col', 'bold', 'color of the cursor column')
 vd.theme_option('color_current_cell', '', 'color of current cell, if different from color_current_row+color_current_col')
 vd.theme_option('color_current_hdr', 'bold reverse', 'color of the header for the cursor column')
-vd.theme_option('color_column_sep', '246 blue', 'color of column separators')
+vd.theme_option('color_column_sep', 'white on 233', 'color of column separators')
 vd.theme_option('color_key_col', '81 cyan', 'color of key columns')
 vd.theme_option('color_hidden_col', '8', 'color of hidden columns on metasheets')
 vd.theme_option('color_selected_row', '215 yellow', 'color of selected rows')
