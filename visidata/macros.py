@@ -5,7 +5,7 @@ from visidata.cmdlog import CommandLog, CommandLogJsonl
 from visidata import vd, UNLOADED, asyncthread, vlen
 from visidata import IndexSheet, VisiData, Sheet, Path, VisiDataMetaSheet, Column, ItemColumn, AttrColumn, BaseSheet
 
-vd.macroMode = None
+vd.macroMode = None  # CommandLog
 vd.macrobindings = {}
 
 
@@ -70,7 +70,10 @@ def loadMacro(vd, p:Path):
 
 @VisiData.api
 def runMacro(vd, binding:str):
+    mm = vd.macroMode
+    vd.macroMode = None
     vd.replay_sync(vd.macrobindings[binding])
+    vd.macroMode = mm
 
 
 @VisiData.api
