@@ -91,7 +91,7 @@ class GuideIndex(Sheet):
 
     rowtype = 'guides' # rowdef: list(guide number, guide name, topic description, points, max_points)
     columns = [
-        ItemColumn('n', 0, type=int),
+        ItemColumn('n', 0, width=0, type=int),
         ItemColumn('name', 1, width=0),
         ItemColumn('topic', 2, width=60),
     ]
