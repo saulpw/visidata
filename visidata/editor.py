@@ -37,6 +37,7 @@ def launchEditor(vd, *args):
 def launchBrowser(vd, *args):
     'Launch $BROWSER with *args* as arguments.'
     browser = os.environ.get('BROWSER') or vd.fail('no $BROWSER for %s' % args[0])
+    vd.status('opening ' + args[0])
     args = [browser] + list(args)
     subprocess.call(args)
 
