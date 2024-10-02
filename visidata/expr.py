@@ -101,7 +101,7 @@ Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(someSelectedR
 Sheet.addCommand('z=', 'setcell-expr', 'cursorCol.setValues([cursorRow], evalExpr(inputExpr("set expr="), row=cursorRow, curcol=cursorCol))', 'evaluate Python expression on current row and set current cell with result of Python expression')
 Sheet.addCommand('gz=', 'setcol-iter', 'cursorCol.setValues(someSelectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(someSelectedRows))))', 'set current column for selected rows to the items in result of Python sequence expression')
 
-Sheet.addCommand(None, 'show-expr', 'status(evalExpr(inputExpr("show expr="), row=cursorRow, col=cursorCol))', 'evaluate Python expression on current row and show result on status line')
+Sheet.addCommand(None, 'show-expr', 'status(evalExpr(inputExpr("show expr="), row=cursorRow, curcol=cursorCol))', 'evaluate Python expression on current row and show result on status line')
 
 vd.addGlobals(
     ExprColumn=ExprColumn,
