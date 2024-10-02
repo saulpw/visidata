@@ -15,6 +15,7 @@ vd.activePane = 1   # pane numbering starts at 1; pane 0 means active pane
 
 vd.option('name_joiner', '_', 'string to join sheet or column names', max_help=0)
 vd.option('value_joiner', ' ', 'string to join display values', max_help=0)
+vd.option('max_rows', 1_000_000_000, 'number of rows to load from source', max_help=0)
 
 vd.option('disp_wrap_max_lines', 3, 'max lines for multiline view', max_help=1)
 vd.option('disp_wrap_break_long_words', False, 'break words longer than column width in multiline', max_help=1)
@@ -301,7 +302,9 @@ class TableSheet(BaseSheet):
         self.rows = []
         try:
             with vd.Progress(gerund='loading', total=0):
-                for r in self.iterload():
+                for i, r in enumerate(self.iterload()):
+                    if self.precious and i > self.options.max_rows:
+                        break
                     self.addRow(r)
         except FileNotFoundError:
             return  # let it be a blank sheet without error
@@ -1002,7 +1005,9 @@ class SequenceSheet(Sheet):
 
         self.rows = []
         # add the rest of the rows
-        for r in vd.Progress(itsource, gerund='loading', total=0):
+        for i, r in enumerate(vd.Progress(itsource, gerund='loading', total=0)):
+            if self.precious and i > self.options.max_rows:
+                break
             self.addRow(r)
 
 
