@@ -21,6 +21,10 @@
 .Op Ar options
 .Op Ar input No ...
 .
+.Nm visidata
+.Op Ar options
+.Op Ar input No ...
+.
 .Nm vd
 .Op Ar options
 .Cm --play Ar cmdlog
@@ -33,7 +37,7 @@
 .Nm vd
 .Op Ar options
 .Op Ar input No ...
-.Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar col Ns : Ns Ar row
+.Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar row Ns : Ns Ar col
 .
 .Sh DESCRIPTION
 .Nm VisiData No is an easy-to-use multipurpose tool to explore, clean, edit, and restructure data.
@@ -101,7 +105,7 @@ toggle sidebar
 .No redo the most recent undo ( requires enabled Sy options.undo Ns )
 .Pp
 .It Ic "Space" Ar longname
-.No open command palette; execute command by its Ar longname
+.No open command palette; execute top command by its Ar longname
 .El
 .Ss "  Command Palette"
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
@@ -137,9 +141,9 @@ scroll current row to center of screen
 jump to previous sheet (swaps with current sheet)
 .Pp
 .It Ic  " /   ?" Ar regex
-.No search for Ar regex No forward/backward in current column
+.No search for Ar regex No forward/backward in current column's displayed values
 .It Ic  "g/  g?" Ar regex
-.No search for Ar regex No forward/backward over all visible columns
+.No search for Ar regex No forward/backward over all visible columns' displayed values
 .It Ic  "z/  z?" Ar expr
 .No search by Python Ar expr No forward/backward in current column (with column names as variables)
 .It Ic  " n   N"
@@ -236,6 +240,7 @@ open a frozen copy of current sheet with all visible columns evaluated
 .It Ic "z'  gz'"
 add/reset cache for current/all visible column(s)
 .Pp
+.It Note that regex operations apply to the displayed value in a cell.
 .It Ic " \&:" Ar regex
 .No add new columns from Ar regex No split; number of columns determined by example row at cursor
 .It Ic " \&;" Ar regex
@@ -875,10 +880,12 @@ show/hide methods and hidden properties
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Cm -P Ns = Ns Ar longname
 .No preplay Ar longname No before replay or regular launch; limited to Sy Base Sheet No bound commands
-.It Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar col Ns : Ns Ar row
-.No launch vd with Ar subsheet No of Ar toplevel No at top-of-stack, and cursor at Ar col No and Ar row Ns ; all arguments are optional
+.It Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar row Ns : Ns Ar col
+.No launch vd with Ar subsheet No of Ar toplevel No at top-of-stack, and cursor at Ar row No and Ar col Ns ; all arguments are optional
 .It Cm --overwrite Ns = Ns Ar c
 .No Overwrite with confirmation
+.It Cm --guides
+.No open Guide Index
 .
 .Pp
 .Lo f filetype filetype
@@ -913,14 +920,6 @@ exit on error and display stacktrace
 enable undo/redo
 .It Sy --col-cache-size Ns = Ns Ar "int        " No "0"
 max number of cache entries in each cached column
-.It Sy --note-pending Ns = Ns Ar "str          " No "\[u231B]"
-note to display for pending cells
-.It Sy --note-format-exc Ns = Ns Ar "str       " No "?"
-cell note for an exception during formatting
-.It Sy --note-getter-exc Ns = Ns Ar "str       " No "!"
-cell note for an exception during computation
-.It Sy --note-type-exc Ns = Ns Ar "str         " No "!"
-cell note for an exception during type conversion
 .It Sy --scroll-incr Ns = Ns Ar "int           " No "-3"
 amount to scroll with scrollwheel
 .It Sy --force-256-colors No "          False"
@@ -931,12 +930,12 @@ confirm before quitting modified sheet
 default column width
 .It Sy --default-height Ns = Ns Ar "int        " No "4"
 default column height
-.It Sy --textwrap-cells Ns = Ns Ar "bool       " No "True"
-wordwrap text for multiline rows
 .It Sy --name-joiner Ns = Ns Ar "str           " No "_"
 string to join sheet or column names
 .It Sy --value-joiner Ns = Ns Ar "str          " No " "
 string to join display values
+.It Sy --max-rows Ns = Ns Ar "int              " No "1000000000"
+number of rows to load from source
 .It Sy --wrap No "                      False"
 wrap text to fit window width on TextSheet
 .It Sy --save-filetype Ns = Ns Ar "str         " No "tsv"
@@ -1022,7 +1021,7 @@ source of randomized startup messages
 folder recursion depth on DirSheet
 .It Sy --dir-hidden No "                False"
 load hidden files on DirSheet
-.It Sy --config Ns = Ns Ar "Path               " No "~/.visidatarc"
+.It Sy --config Ns = Ns Ar "Path               " No "/home/saul/.visidatarc"
 config file to exec in Python
 .It Sy --play Ns = Ns Ar "str                  " No ""
 file.vdj to replay
@@ -1056,7 +1055,7 @@ device ID associated with matrix login
 client_id for reddit api
 .It Sy --reddit-client-secret Ns = Ns Ar "str  " No ""
 client_secret for reddit api
-.It Sy --reddit-user-agent Ns = Ns Ar "str     " No "3.0"
+.It Sy --reddit-user-agent Ns = Ns Ar "str     " No "3.1dev"
 user_agent for reddit api
 .It Sy --zulip-batch-size Ns = Ns Ar "int      " No "-100"
 number of messages to fetch per call (<0 to fetch before anchor)
@@ -1072,8 +1071,12 @@ Email for use with Zulip API key
 dialect passed to csv.reader
 .It Sy --csv-delimiter Ns = Ns Ar "str         " No ","
 delimiter passed to csv.reader
+.It Sy --csv-doublequote Ns = Ns Ar "bool      " No "True"
+quote-doubling setting passed to csv.reader
 .It Sy --csv-quotechar Ns = Ns Ar "str         " No """
 quotechar passed to csv.reader
+.It Sy --csv-quoting Ns = Ns Ar "int           " No "0"
+quoting style passed to csv.reader and csv.writer
 .It Sy --csv-skipinitialspace Ns = Ns Ar "bool " No "True"
 skipinitialspace passed to csv.reader
 .It Sy --csv-escapechar Ns = Ns Ar "NoneType   " No "None"
@@ -1095,6 +1098,8 @@ number of rows to check for fixed width columns
 max number of fixed-width columns to create (0 is no max)
 .It Sy --graphviz-edge-labels Ns = Ns Ar "bool " No "True"
 whether to include edge labels on graphviz diagrams
+.It Sy --grep-base-dir Ns = Ns Ar "NoneType    " No "None"
+base directory for relative paths opened with sysopen-row
 .It Sy --html-title Ns = Ns Ar "str            " No "<h2>{sheet.name}</h2>"
 table header when saving to html
 .It Sy --http-max-next Ns = Ns Ar "int         " No "0"
@@ -1121,6 +1126,8 @@ show all object versions in a versioned bucket
 sqlite statement to execute after opening a connection
 .It Sy --xlsx-meta-columns No "         False"
 include columns for cell objects, font colors, and fill colors
+.It Sy --xlsx-color-cells Ns = Ns Ar "bool     " No "True"
+color cells based on xlsx source
 .It Sy --xml-parser-huge-tree Ns = Ns Ar "bool " No "True"
 allow very deep trees and very long text content
 .It Sy --plt-marker Ns = Ns Ar "str            " No "."
@@ -1214,7 +1221,15 @@ displayed contents for computation exception
 width to use for unicode chars marked ambiguous
 .It Sy "disp_pending       " No ""
 string to display in pending cells
-.It Sy "color_note_pending " No "bold magenta"
+.It Sy "disp_note_pending  " No ":"
+note to display for pending cells
+.It Sy "disp_note_fmtexc   " No "?"
+cell note for an exception during formatting
+.It Sy "disp_note_getexc   " No "!"
+cell note for an exception during computation
+.It Sy "disp_note_typeexc  " No "!"
+cell note for an exception during type conversion
+.It Sy "color_note_pending " No "bold green"
 color of note in pending cells
 .It Sy "color_note_type    " No "226 yellow"
 color of cell note for non-str types in anytype columns
@@ -1252,9 +1267,9 @@ characters for ascending sort
 characters for descending sort
 .It Sy "color_default      " No "white on black"
 the default fg and bg colors
-.It Sy "color_default_hdr  " No "bold"
+.It Sy "color_default_hdr  " No "bold white on black"
 color of the column headers
-.It Sy "color_bottom_hdr   " No "underline"
+.It Sy "color_bottom_hdr   " No "underline white on black"
 color of the bottom header row
 .It Sy "color_current_row  " No "reverse"
 color of the cursor row
@@ -1264,7 +1279,7 @@ color of the cursor column
 color of current cell, if different from color_current_row+color_current_col
 .It Sy "color_current_hdr  " No "bold reverse"
 color of the header for the cursor column
-.It Sy "color_column_sep   " No "246 blue"
+.It Sy "color_column_sep   " No "white on black"
 color of column separators
 .It Sy "color_key_col      " No "81 cyan"
 color of key columns
@@ -1272,25 +1287,39 @@ color of key columns
 color of hidden columns on metasheets
 .It Sy "color_selected_row " No "215 yellow"
 color of selected rows
-.It Sy "color_clickable    " No "underline"
+.It Sy "color_clickable    " No "bold"
 color of internally clickable item
 .It Sy "color_code         " No "bold white on 237"
 color of code sample
-.It Sy "color_heading      " No "bold 200"
+.It Sy "color_heading      " No "bold black on yellow"
 color of header
 .It Sy "color_guide_unwritten" No "243 on black"
 color of unwritten guides in GuideGuide
-.It Sy "disp_rstatus_fmt   " No "{sheet.threadStatus} {sheet.keystrokeStatus}   {sheet.longname}  {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}"
+.It Sy "disp_wrap_max_lines" No "3"
+max lines for multiline view
+.It Sy "disp_wrap_break_long_words" No "False"
+break words longer than column width in multiline
+.It Sy "disp_wrap_replace_whitespace" No "False"
+replace whitespace with spaces in multiline
+.It Sy "disp_wrap_placeholder" No "\[u2026]"
+multiline string to indicate truncation
+.It Sy "disp_multiline_focus" No "False"
+only expand cursor row for multiline view
+.It Sy "disp_rstatus_fmt   " No "{sheet.threadStatus} {sheet.keystrokeStatus}   [:longname_status]{sheet.longname}[/]  {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}{vd.sidebarStatus}"
 right-side status format string
-.It Sy "disp_status_fmt    " No "[:onclick sheets-stack]{sheet.shortcut}\[u203A] {sheet.name}[/]| "
-status line prefix
+.It Sy "disp_status_fmt    " No "{sheet.sheetlist}| "
+left-side status format string
 .It Sy "disp_lstatus_max   " No "0"
 maximum length of left status line
 .It Sy "disp_status_sep    " No "\[u2502]"
 separator between statuses
 .It Sy "color_keystrokes   " No "bold white on 237"
-color of input keystrokes on status line
-.It Sy "color_keys         " No "bold"
+color of input keystrokes
+.It Sy "color_longname_guide" No "237"
+color of command longnames
+.It Sy "color_longname_status" No "white"
+color of command longnames
+.It Sy "color_keys         " No "bold reverse"
 color of keystrokes in help
 .It Sy "color_status       " No "bold on 238"
 status line color
@@ -1324,6 +1353,8 @@ default fmtstr to format for currency values
 color for negative values in currency displayer
 .It Sy "disp_replay_play   " No "\[u25B6]"
 status indicator for active replay
+.It Sy "disp_replay_record " No "\[u23FA]"
+status indicator for macro record
 .It Sy "color_status_replay" No "green"
 color of replay status indicator
 .It Sy "disp_histogram     " No "\[u25A0]"
@@ -1344,8 +1375,8 @@ color of selected graph points
 color for graph axis labels
 .It Sy "disp_graph_tick_x  " No "\[u2575]"
 character for graph x-axis ticks
-.It Sy "disp_help          " No "2"
-show help panel during input
+.It Sy "disp_expert        " No "2"
+max level of options and columns to include
 .It Sy "color_add_pending  " No "green"
 color for rows pending add
 .It Sy "color_change_pending" No "reverse yellow"
@@ -1354,7 +1385,7 @@ color for cells pending modification
 color for rows pending delete
 .It Sy "disp_sidebar       " No "True"
 whether to display sidebar
-.It Sy "disp_sidebar_fmt   " No "{guide}"
+.It Sy "disp_sidebar_fmt   " No ""
 format string for default sidebar
 .It Sy "disp_sidebar_width " No "0"
 max width for sidebar
@@ -1390,12 +1421,6 @@ color of active clue
 base color of command palette
 .It Sy "disp_cmdpal_max    " No "10"
 max number of suggestions for command palette
-.It Sy "color_shellcmd     " No "21 on 114 green"
-
-.It Sy "color_colname      " No "underline"
-
-.It Sy "color_longname     " No "bold 52 on 114 green"
-
 .It Sy "disp_scroll_context" No "0"
 minimum number of lines to keep visible above/below cursor when scrolling
 .It Sy "disp_sparkline     " No "\[u2581]\[u2582]\[u2583]\[u2584]\[u2585]\[u2586]\[u2587]"

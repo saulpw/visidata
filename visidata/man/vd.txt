@@ -5,9 +5,10 @@ NAME
 
 SYNOPSIS
      vd [options] [input ...]
+     visidata [options] [input ...]
      vd [options] --play cmdlog [-w waitsecs] [--batch] [-i] [-o output]
         [field=value]
-     vd [options] [input ...] +toplevel:subsheet:col:row
+     vd [options] [input ...] +toplevel:subsheet:row:col
 
 DESCRIPTION
      VisiData is an easy-to-use multipurpose tool to explore, clean, edit, and
@@ -53,7 +54,8 @@ DESCRIPTION
        R              redo the most recent undo (requires enabled
                       options.undo)
 
-     Space longname   open command palette; execute command by its longname
+     Space longname   open command palette; execute top command by its
+                      longname
 
      Command Palette
         Tab              Move to command palette, and cycle through commands
@@ -72,9 +74,10 @@ DESCRIPTION
 
      ^^ (Ctrl+^)      jump to previous sheet (swaps with current sheet)
 
-      /   ? regex     search for regex forward/backward in current column
+      /   ? regex     search for regex forward/backward in current column's
+                      displayed values
      g/  g? regex     search for regex forward/backward over all visible
-                      columns
+                      columns' displayed values
      z/  z? expr      search by Python expr forward/backward in current column
                       (with column names as variables)
       n   N           go to next/previous match from last regex search
@@ -142,6 +145,7 @@ DESCRIPTION
                       columns evaluated
      z'  gz'          add/reset cache for current/all visible column(s)
 
+     Note that regex operations apply to the displayed value in a cell.
       : regex         add new columns from regex split; number of columns
                       determined by example row at cursor
       ; regex         add new columns from capture groups of regex (also
@@ -562,10 +566,11 @@ COMMANDLINE OPTIONS
 
      -P=longname                  preplay longname before replay or regular
                                   launch; limited to Base Sheet bound commands
-     +toplevel:subsheet:col:row   launch vd with subsheet of toplevel at
-                                  top-of-stack, and cursor at col and row; all
+     +toplevel:subsheet:row:col   launch vd with subsheet of toplevel at
+                                  top-of-stack, and cursor at row and col; all
                                   arguments are optional
      --overwrite=c                Overwrite with confirmation
+     --guides                     open Guide Index
 
      -f, --filetype=filetype      tsv                set loader to use for
                                   filetype instead of file extension
@@ -585,15 +590,6 @@ COMMANDLINE OPTIONS
      --col-cache-size=int         0                  max number of cache en‐
                                                      tries in each cached col‐
                                                      umn
-     --note-pending=str           ⌛                 note to display for pend‐
-                                                     ing cells
-     --note-format-exc=str        ?                  cell note for an excep‐
-                                                     tion during formatting
-     --note-getter-exc=str        !                  cell note for an excep‐
-                                                     tion during computation
-     --note-type-exc=str          !                  cell note for an excep‐
-                                                     tion during type conver‐
-                                                     sion
      --scroll-incr=int            -3                 amount to scroll with
                                                      scrollwheel
      --force-256-colors           False              use 256 colors even if
@@ -602,12 +598,12 @@ COMMANDLINE OPTIONS
                                                      modified sheet
      --default-width=int          20                 default column width
      --default-height=int         4                  default column height
-     --textwrap-cells=bool        True               wordwrap text for multi‐
-                                                     line rows
      --name-joiner=str            _                  string to join sheet or
                                                      column names
      --value-joiner=str                              string to join display
                                                      values
+     --max-rows=int               1000000000         number of rows to load
+                                                     from source
      --wrap                       False              wrap text to fit window
                                                      width on TextSheet
      --save-filetype=str          tsv                specify default file type
@@ -706,7 +702,7 @@ COMMANDLINE OPTIONS
                                                      DirSheet
      --dir-hidden                 False              load hidden files on
                                                      DirSheet
-     --config=Path                ~/.visidatarc
+     --config=Path                /home/saul/.visidatarc
                                                      config file to exec in
                                                      Python
      --play=str                                      file.vdj to replay
@@ -743,7 +739,7 @@ COMMANDLINE OPTIONS
      --reddit-client-id=str                          client_id for reddit api
      --reddit-client-secret=str                      client_secret for reddit
                                                      api
-     --reddit-user-agent=str      3.0                user_agent for reddit api
+     --reddit-user-agent=str      3.1dev             user_agent for reddit api
      --zulip-batch-size=int       -100               number of messages to
                                                      fetch per call (<0 to
                                                      fetch before anchor)
@@ -759,8 +755,12 @@ COMMANDLINE OPTIONS
                                                      csv.reader
      --csv-delimiter=str          ,                  delimiter passed to
                                                      csv.reader
+     --csv-doublequote=bool       True               quote-doubling setting
+                                                     passed to csv.reader
      --csv-quotechar=str          "                  quotechar passed to
                                                      csv.reader
+     --csv-quoting=int            0                  quoting style passed to
+                                                     csv.reader and csv.writer
      --csv-skipinitialspace=bool  True               skipinitialspace passed
                                                      to csv.reader
      --csv-escapechar=NoneType    None               escapechar passed to
@@ -796,6 +796,9 @@ COMMANDLINE OPTIONS
      --graphviz-edge-labels=bool  True               whether to include edge
                                                      labels on graphviz dia‐
                                                      grams
+     --grep-base-dir=NoneType     None               base directory for rela‐
+                                                     tive paths opened with
+                                                     sysopen-row
      --html-title=str             <h2>{sheet.name}</h2>
                                                      table header when saving
                                                      to html
@@ -830,6 +833,8 @@ COMMANDLINE OPTIONS
      --xlsx-meta-columns          False              include columns for cell
                                                      objects, font colors, and
                                                      fill colors
+     --xlsx-color-cells=bool      True               color cells based on xlsx
+                                                     source
      --xml-parser-huge-tree=bool  True               allow very deep trees and
                                                      very long text content
      --plt-marker=str             .                  matplotlib.markers
@@ -920,7 +925,14 @@ COMMANDLINE OPTIONS
                                              marked ambiguous
      disp_pending                            string to display in pending
                                              cells
-     color_note_pending  bold magenta        color of note in pending cells
+     disp_note_pending   :                   note to display for pending cells
+     disp_note_fmtexc    ?                   cell note for an exception during
+                                             formatting
+     disp_note_getexc    !                   cell note for an exception during
+                                             computation
+     disp_note_typeexc   !                   cell note for an exception during
+                                             type conversion
+     color_note_pending  bold green          color of note in pending cells
      color_note_type     226 yellow          color of cell note for non-str
                                              types in anytype columns
      color_note_row      220 yellow          color of row note on left edge
@@ -941,8 +953,10 @@ COMMANDLINE OPTIONS
      disp_sort_asc       ↑↟⇞⇡⇧⇑              characters for ascending sort
      disp_sort_desc      ↓↡⇟⇣⇩⇓              characters for descending sort
      color_default       white on black      the default fg and bg colors
-     color_default_hdr   bold                color of the column headers
-     color_bottom_hdr    underline           color of the bottom header row
+     color_default_hdr   bold white on black
+                                             color of the column headers
+     color_bottom_hdr    underline white on black
+                                             color of the bottom header row
      color_current_row   reverse             color of the cursor row
      color_current_col   bold                color of the cursor column
      color_current_cell                      color of current cell, if differ‐
@@ -950,31 +964,41 @@ COMMANDLINE OPTIONS
                                              rent_row+color_current_col
      color_current_hdr   bold reverse        color of the header for the cur‐
                                              sor column
-     color_column_sep    246 blue            color of column separators
+     color_column_sep    white on black      color of column separators
      color_key_col       81 cyan             color of key columns
      color_hidden_col    8                   color of hidden columns on
                                              metasheets
      color_selected_row  215 yellow          color of selected rows
-     color_clickable     underline           color of internally clickable
+     color_clickable     bold                color of internally clickable
                                              item
      color_code          bold white on 237   color of code sample
-     color_heading       bold 200            color of header
+     color_heading       bold black on yellow
+                                             color of header
      color_guide_unwritten 243 on black      color of unwritten guides in
                                              GuideGuide
+     disp_wrap_max_lines 3                   max lines for multiline view
+     disp_wrap_break_long_words False        break words longer than column
+                                             width in multiline
+     disp_wrap_replace_whitespace False      replace whitespace with spaces in
+                                             multiline
+     disp_wrap_placeholder …                 multiline string to indicate
+                                             truncation
+     disp_multiline_focus False              only expand cursor row for multi‐
+                                             line view
      disp_rstatus_fmt    {sheet.threadStatus} {sheet.keystrokeStatus}
-                                             {sheet.longname}
+                                             [:longname_status]{sheet.longname}[/]
                                              {sheet.nRows:9d} {sheet.rowtype}
-                                             {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}
+                                             {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}{vd.sidebarStatus}
                                              right-side status format string
-     disp_status_fmt     [:onclick sheets-stack]{sheet.shortcut}›
-                                             {sheet.name}[/]|
-                                             status line prefix
+     disp_status_fmt     {sheet.sheetlist}|
+                                             left-side status format string
      disp_lstatus_max    0                   maximum length of left status
                                              line
      disp_status_sep     │                   separator between statuses
-     color_keystrokes    bold white on 237   color of input keystrokes on sta‐
-                                             tus line
-     color_keys          bold                color of keystrokes in help
+     color_keystrokes    bold white on 237   color of input keystrokes
+     color_longname_guide 237                color of command longnames
+     color_longname_status white             color of command longnames
+     color_keys          bold reverse        color of keystrokes in help
      color_status        bold on 238         status line color
      color_error         202 1               error message color
      color_warning       166 15              warning message color
@@ -999,6 +1023,7 @@ COMMANDLINE OPTIONS
                                              rency displayer
      disp_replay_play    ▶                   status indicator for active re‐
                                              play
+     disp_replay_record  ⏺                   status indicator for macro record
      color_status_replay green               color of replay status indicator
      disp_histogram      ■                   histogram element character
      disp_graph_labels   True                show axes and legend on graph
@@ -1015,13 +1040,14 @@ COMMANDLINE OPTIONS
      color_graph_selected bold               color of selected graph points
      color_graph_axis    bold                color for graph axis labels
      disp_graph_tick_x   ╵                   character for graph x-axis ticks
-     disp_help           2                   show help panel during input
+     disp_expert         2                   max level of options and columns
+                                             to include
      color_add_pending   green               color for rows pending add
      color_change_pending reverse yellow     color for cells pending modifica‐
                                              tion
      color_delete_pending red                color for rows pending delete
      disp_sidebar        True                whether to display sidebar
-     disp_sidebar_fmt    {guide}             format string for default sidebar
+     disp_sidebar_fmt                        format string for default sidebar
      disp_sidebar_width  0                   max width for sidebar
      disp_sidebar_height 0                   max height for sidebar
      color_sidebar       black on 114 blue   base color of sidebar
@@ -1043,10 +1069,6 @@ COMMANDLINE OPTIONS
      color_cmdpalette    black on 72         base color of command palette
      disp_cmdpal_max     10                  max number of suggestions for
                                              command palette
-     color_shellcmd      21 on 114 green
-     color_colname       underline
-     color_longname      bold 52 on 114 green
-
      disp_scroll_context 0                   minimum number of lines to keep
                                              visible above/below cursor when
                                              scrolling
