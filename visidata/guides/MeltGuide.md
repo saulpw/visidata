@@ -14,11 +14,17 @@ See **Examples** below for more details of the transformations
 Melt collapses the pivoted columns back into "Variable" and "Value" columns, converting from "wide" format into "long" format. After a melt, there is one row
 for each value in the pivot table.
 
+1. [Optional] remove a column from the output by hiding it: [:keys]-[/]
+2. [Optional] set key columns to keep them unmelted: [:keys]![/]
+
 - {help.commands.melt}
 
 ## Regex-Melt 
 
-A regex melt partially melts the pivoted columns. Using a regular expression,  
+A regex melt partially melts the pivoted columns. Provide a regular expression to separate the key column from other columns.
+
+1. [Optional] remove a column from the output by hiding it: [:keys]-[/]
+2. [Optional] set key columns to keep them unmelted: [:keys]![/]
 
 - {help.commands.melt_regex}
 
