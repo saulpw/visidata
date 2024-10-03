@@ -7,12 +7,11 @@ Pivot tables can be melted (or unpivoted) into regular row and column data in "l
 
 See the **PivotGuide** for how to create pivot tables.
 
-See **Examples** below for more details of the transformations
+See **Examples** below for more details of the transformations.
 
 ## Melt
 
-Melt collapses the pivoted columns back into "Variable" and "Value" columns, converting from "wide" format into "long" format. After a melt, there is one row
-for each value in the pivot table.
+Melt collapses the pivoted columns back into "Variable" and "Value" columns, converting from "wide" format into "long" format. After a melt, there is one row for each value in the pivot table.
 
 1. [Optional] remove a column from the output by hiding it: [:keys]-[/]
 2. [Optional] set key columns to keep them unmelted: [:keys]![/]
