@@ -22,7 +22,7 @@ vd.option('dir_hidden', False, 'load hidden files on DirSheet')
 @VisiData.api
 def guess_dir(vd, p):
     if p.is_dir():
-        return dict(filetype='dir')
+        return dict(filetype='dir', _likelihood=10)
 
 
 @VisiData.lazy_property
