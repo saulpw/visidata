@@ -4,8 +4,8 @@ from copy import copy, deepcopy
 import textwrap
 
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException
-from visidata import (options, Column, namedlist, SettableColumn, AttrDict,
-TypedExceptionWrapper, BaseSheet, UNLOADED,
+from visidata import (options, Column, namedlist, SettableColumn, AttrDict, DisplayWrapper,
+TypedExceptionWrapper, BaseSheet, UNLOADED, wrapply,
 clipdraw, clipdraw_chunks, ColorAttr, update_attr, colors, undoAttrFunc, vlen, dispwidth)
 import visidata
 
@@ -22,6 +22,7 @@ vd.option('disp_wrap_break_long_words', False, 'break words longer than column w
 vd.option('disp_wrap_replace_whitespace', False, 'replace whitespace with spaces in multiline', max_help=1)
 vd.option('disp_wrap_placeholder', '…', 'multiline string to indicate truncation', max_help=1)
 vd.option('disp_multiline_focus', False, 'only expand cursor row for multiline view', max_help=1)
+vd.option('color_aggregator', 'bold 255 white on 234 black', 'color of aggregator summary on bottom row', max_help=1)
 
 
 @drawcache
@@ -419,7 +420,7 @@ class TableSheet(BaseSheet):
     @property
     def nFooterRows(self):
         'Number of lines reserved at the bottom, including status line.'
-        return 1
+        return len(self.allAggregators) + 1
 
     @property
     def cursorCol(self):
@@ -767,6 +768,17 @@ class TableSheet(BaseSheet):
         'Return boolean: is given column index a key column?'
         return self.visibleCols[vcolidx] in self.keyCols
 
+    @drawcache_property
+    def allAggregators(self):
+        'Return dict of aggname -> list of cols with that aggregator.'
+        allaggs = collections.defaultdict(list) # aggname -> list of cols with that aggregator
+        for vcolidx, (x, colwidth) in sorted(self._visibleColLayout.items()):
+            col = self.availCols[vcolidx]
+            if not col.hidden:
+                for aggr in col.aggregators:
+                    allaggs[aggr.name].append(vcolidx)
+        return allaggs
+
     def draw(self, scr):
         'Draw entire screen onto the `scr` curses object.'
         if not self.columns:
@@ -804,7 +816,7 @@ class TableSheet(BaseSheet):
 
         y = headerRow + numHeaderRows
 
-        rows = self.rows[self.topRowIndex:min(self.topRowIndex+self.nScreenRows+1, self.nRows)]
+        rows = self.rows[self.topRowIndex:min(self.topRowIndex+self.nScreenRows, self.nRows)]
         vd.callNoExceptions(self.checkCursor)
 
         for rowidx, row in enumerate(rows):
@@ -817,6 +829,33 @@ class TableSheet(BaseSheet):
 
         if vcolidx+1 < self.nVisibleCols:
             scr.addstr(headerRow, self.windowWidth-2, self.options.disp_more_right, colors.color_column_sep.attr)
+
+        # draw bottom-row aggregators  #2209
+        rightx, rightw = self._visibleColLayout[self.rightVisibleColIndex]
+        rightx += rightw+1
+
+        for aggrname, colidxs in self.allAggregators.items():
+            clipdraw(scr, y, 0, ' '*rightx + f' {aggrname:9}', colors.color_aggregator, truncator='+')
+
+            for vcolidx in colidxs:
+                x, colwidth = self._visibleColLayout[vcolidx]
+                col = self.availCols[vcolidx]
+
+                if not col.hidden:
+                    dw = DisplayWrapper('')
+                    try:
+                        agg = vd.aggregators[aggrname]
+                        dw.value = col.aggregateTotal(agg)
+                        dw.typedval = wrapply(agg.type or col.type, dw.value)
+                        dw.text = col.format(dw.typedval)
+                    except Exception as e:
+                        dw.note = self.options.disp_note_typeexc
+                        dw.notecolor = 'color_warning'
+                        vd.exceptionCaught(e, status=False)
+                    disps = [('', ' ')] + list(col.display(dw, width=colwidth))
+                    clipdraw_chunks(scr, y, x, disps, colors.color_aggregator, w=colwidth)
+            y += 1
+
 
     def calc_height(self, row, displines=None, isNull=None, maxheight=1):
             'render cell contents for row into displines'

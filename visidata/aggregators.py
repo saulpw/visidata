@@ -5,7 +5,7 @@ import collections
 import statistics
 
 from visidata import Progress, Sheet, Column, ColumnsSheet, VisiData
-from visidata import vd, anytype, vlen, asyncthread, wrapply, AttrDict, date
+from visidata import vd, anytype, vlen, asyncthread, wrapply, AttrDict, date, INPROGRESS
 
 vd.help_aggregators = '''# Choose Aggregators
 Start typing an aggregator name or description.
@@ -48,6 +48,7 @@ def getValues(self, rows):
 vd.aggregators = collections.OrderedDict()  # [aggname] -> annotated func, or list of same
 
 Column.init('aggstr', str, copy=True)
+Column.init('_aggregatedTotals', dict)  # [aggname] -> agg total over all rows
 
 def aggregators_get(col):
     'A space-separated names of aggregators on this column.'
@@ -216,6 +217,20 @@ def addAggregators(sheet, cols, aggrnames):
 def aggname(col, agg):
     'Consistent formatting of the name of given aggregator for this column.  e.g. "col1_sum"'
     return '%s_%s' % (col.name, agg.name)
+
+@Column.api
+def aggregateTotal(col, agg):
+    if agg not in col._aggregatedTotals:
+        col._aggregatedTotals[agg] = INPROGRESS
+        col._aggregateTotalAsync(agg)
+    return col._aggregatedTotals[agg]
+
+
+@Column.api
+@asyncthread
+def _aggregateTotalAsync(col, agg):
+    col._aggregatedTotals[agg] = agg.aggregate(col, col.sheet.rows)
+
 
 @Column.api
 @asyncthread

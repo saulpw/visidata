@@ -26,7 +26,7 @@ vd.option('disp_displayer', 'generic', 'displayer to render the text in each cel
 
 
 class DisplayWrapper:
-    def __init__(self, value=None, *, typedval=None, text=None, note=None, notecolor=None, error=None):
+    def __init__(self, value=None, *, typedval=None, text='', note=None, notecolor=None, error=None):
         self.value = value      # actual value (any type)
         self.typedval = typedval  # consistently typed value (or None)
         self.text = text  # displayed string
@@ -413,7 +413,7 @@ class Column(Extensible):
             dw.note = options.disp_note_fmtexc
             dw.notecolor = 'color_warning'
 
-#        dw.display = self.display(dw)   # set during draw() when colwidth is known
+#        dw.display = self.display(dw)   # set during draw() once colwidth is known
         return dw
 
     def getDisplayValue(self, row):
