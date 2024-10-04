@@ -411,4 +411,10 @@ vd.addGlobals({
 vd.addMenuItems('''
     Plot > Graph > current column > plot-column
     Plot > Graph > all numeric columns > plot-numerics
+    Plot > Refline > draw at x coord (vert) > draw-refline-x
+    Plot > Refline > draw at y coord (horiz) > draw-refline-y
+    Plot > Refline > erase at x coord (vert) > erase-refline-x
+    Plot > Refline > erase at y coord (horiz) > erase-refline-y
+    Plot > Refline > erase all x (vert) > erase-reflines-x
+    Plot > Refline > erase all y (horiz) > erase-reflines-y
 ''')
