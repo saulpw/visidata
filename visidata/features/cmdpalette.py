@@ -58,6 +58,11 @@ def inputPalette(sheet, prompt, items,
                  formatter=lambda m, item, trigger_key: f'{trigger_key} {item}',
                  multiple=False,
                  **kwargs):
+    if sheet.options.disp_expert:
+        return vd.input(prompt,
+                completer=CompleteKey(sorted(item[value_key] for item in items)),
+                **kwargs)
+
     bindings = dict()
 
     tabitem = -1
