@@ -34,6 +34,10 @@ def save_vds(vd, p, *sheets):
                     d['col'] = type(col).__name__
                 fp.write('#'+json.dumps(d)+NL)
 
+            if not vs.rows:
+                fp.write(NL)  #2342  blank line to separate sheets without rows
+                continue
+
             with Progress(gerund='saving'):
                 for row in vs.iterdispvals(*vs.columns, format=False):
                     d = {col.name:val for col, val in row.items()}
