@@ -49,7 +49,6 @@ def iterdispvals(sheet, *cols, format=False):
                 dispval = col.getValue(r)
 
             except Exception as e:
-                vd.exceptionCaught(e)
                 dispval = options_safe_error or str(e)
 
             try:
