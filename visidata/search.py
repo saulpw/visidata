@@ -91,10 +91,10 @@ def moveInputRegex(sheet, action:str, type="regex", **kwargs):
 
 @Sheet.api
 @asyncthread
-def search_expr(sheet, expr, reverse=False):
+def search_expr(sheet, expr, reverse=False, curcol=None):
     for i in rotateRange(len(sheet.rows), sheet.cursorRowIndex, reverse=reverse):
         try:
-            if sheet.evalExpr(expr, sheet.rows[i]):
+            if sheet.evalExpr(expr, sheet.rows[i], curcol=curcol):
                 sheet.cursorRowIndex=i
                 return
         except Exception as e:
@@ -111,8 +111,8 @@ Sheet.addCommand('N', 'searchr-next', 'vd.moveRegex(sheet, reverse=True)', 'go t
 
 Sheet.addCommand('g/', 'search-cols', 'moveInputRegex("g/", backward=False, columns="visibleCols")', 'search for regex forwards over all visible columns')
 Sheet.addCommand('g?', 'searchr-cols', 'moveInputRegex("g?", backward=True, columns="visibleCols")', 'search for regex backwards over all visible columns')
-Sheet.addCommand('z/', 'search-expr', 'search_expr(inputExpr("search by expr: ") or fail("no expr"))', 'search by Python expression forwards in current column (with column names as variables)')
-Sheet.addCommand('z?', 'searchr-expr', 'search_expr(inputExpr("searchr by expr: ") or fail("no expr"), reverse=True)', 'search by Python expression backwards in current column (with column names as variables)')
+Sheet.addCommand('z/', 'search-expr', 'search_expr(inputExpr("search by expr: ") or fail("no expr"), curcol=cursorCol)', 'search by Python expression forwards in current column (with column names as variables)')
+Sheet.addCommand('z?', 'searchr-expr', 'search_expr(inputExpr("searchr by expr: ") or fail("no expr"), curcol=cursorCol, reverse=True)', 'search by Python expression backwards in current column (with column names as variables)')
 
 vd.addMenuItems('''
     View > Search > current column > search-col

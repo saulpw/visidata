@@ -196,8 +196,8 @@ Sheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=curs
 Sheet.addCommand('z,', 'select-exact-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', 'select rows matching current cell in current column')
 Sheet.addCommand('gz,', 'select-exact-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getTypedValue(r) == c.getTypedValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
 
-Sheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: "); select(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalExpr(expr, r)), progress=False)', 'select rows matching Python expression in any visible column')
-Sheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalExpr(expr, r)), progress=False)', 'unselect rows matching Python expression in any visible column')
+Sheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: "); select(gatherBy(lambda r, sheet=sheet, expr=expr, curcol=cursorCol: sheet.evalExpr(expr, r, curcol=curcol)), progress=False)', 'select rows matching Python expression in any visible column')
+Sheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr, curcol=cursorCol: sheet.evalExpr(expr, r, curcol=curcol)), progress=False)', 'unselect rows matching Python expression in any visible column')
 
 Sheet.addCommand(None, 'select-error-col', 'select(gatherBy(lambda r,c=cursorCol: c.isError(r)), progress=False)', 'select rows with errors in current column')
 Sheet.addCommand(None, 'select-error', 'select(gatherBy(lambda r,vcols=visibleCols: isinstance(r, TypedExceptionWrapper) or any([c.isError(r) for c in vcols])), progress=False)', 'select rows with errors in any column')
