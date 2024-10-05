@@ -115,6 +115,9 @@ Sheet.addCommand('z>', 'go-next-null', 'moveToNextRow(lambda row,col=cursorCol,i
 for i in range(1, 11):
     BaseSheet.addCommand(ALT+str(i)[-1], 'jump-sheet-'+str(i), f'vd.push(*(list(s for s in allSheets if s.shortcut==str({i})) or fail("no sheet")))', f'jump to sheet {i}')
 
+for i in range(11, 21):
+    BaseSheet.addCommand('', 'jump-sheet-'+str(i), f'vd.push(*(list(s for s in allSheets if s.shortcut==str({i})) or fail("no sheet")))', f'jump to sheet {i}')
+
 BaseSheet.bindkey('KEY_LEFT', 'go-left')
 BaseSheet.bindkey('KEY_DOWN', 'go-down')
 BaseSheet.bindkey('KEY_UP', 'go-up')
