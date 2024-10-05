@@ -54,8 +54,8 @@ def open_fdir(vd, p):
     return FileListSheet(p.base_stem, source=p)
 
 @VisiData.api
-def addShellColumns(vd, cmd, sheet):
-    shellcol = ColumnShell(cmd, source=sheet, width=0)
+def addShellColumns(vd, cmd, sheet, curcol=None):
+    shellcol = ColumnShell(cmd, source=sheet, width=0, curcol=curcol)
     sheet.addColumnAtCursor(
             Column(cmd+'_stdout', type=bytes.rstrip, srccol=shellcol, getter=lambda col,row: col.srccol.getValue(row)[0]),
             Column(cmd+'_stderr', type=bytes.rstrip, srccol=shellcol, getter=lambda col,row: col.srccol.getValue(row)[1]),
@@ -63,21 +63,21 @@ def addShellColumns(vd, cmd, sheet):
 
 
 class ColumnShell(Column):
-    def __init__(self, name, cmd=None, **kwargs):
+    def __init__(self, name, cmd=None, curcol=None, **kwargs):
         super().__init__(name, **kwargs)
         self.expr = cmd or name
+        self.curcol = curcol
 
     @asynccache(lambda col,row: (col, col.sheet.rowid(row)))
     def calcValue(self, row):
         try:
             import shlex
             args = []
-            context = LazyComputeRow(self.source, row)
+            context = LazyComputeRow(self.source, row, curcol=self.curcol)
             for arg in shlex.split(self.expr):
                 if arg.startswith('$'):
-                    args.append(shlex.quote(str(context[arg[1:]])))
-                else:
-                    args.append(arg)
+                    arg = shlex.quote(str(context[arg[1:]]))
+                args.append(arg)
 
             p = subprocess.Popen([os.getenv('SHELL', 'bash'), '-c', shlex.join(args)],
                     stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -253,7 +253,7 @@ def inputShell(vd):
 DirSheet.addCommand('`', 'open-dir-parent', 'vd.push(openSource(source.parent if source.resolve()!=Path(".").resolve() else os.path.dirname(source.resolve())))', 'open parent directory')  #1801
 BaseSheet.addCommand('', 'open-dir-current', 'vd.push(vd.currentDirSheet)', 'open Directory Sheet: browse properties of files in current directory')
 
-Sheet.addCommand('z;', 'addcol-shell', 'cmd=inputShell(); addShellColumns(cmd, sheet)', 'create new column from bash expression, with $columnNames as variables')
+Sheet.addCommand('z;', 'addcol-shell', 'cmd=inputShell(); addShellColumns(cmd, sheet, curcol=cursorCol)', 'create new column from bash expression, with $columnNames as variables')
 
 DirSheet.addCommand(ENTER, 'open-row-file', 'vd.push(openSource(cursorRow or fail("no row"), filetype="dir" if cursorRow.is_dir() else LazyComputeRow(sheet, cursorRow).ext))', 'open current file as a new sheet')
 DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r))', 'open selected files as new sheets')

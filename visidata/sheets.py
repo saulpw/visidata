@@ -75,11 +75,11 @@ class RecursiveExprException(Exception):
 
 class LazyComputeRow:
     'Calculate column values as needed.'
-    def __init__(self, sheet, row, col=None, extra={}):
+    def __init__(self, sheet, row, col=None, **kwargs):
         self.row = row
         self.col = col
         self.sheet = sheet
-        self.extra = AttrDict(extra) # extra bindings
+        self.extra = AttrDict(kwargs) # extra bindings
         self._usedcols = set()
 
         self._lcm.clear()  # reset locals on lcm
@@ -394,7 +394,7 @@ class TableSheet(BaseSheet):
         'eval() expr in the context of (row, col), with extra bindings in kwargs'
         if row is not None:
             # contexts are cached by sheet/rowid for duration of drawcycle
-            contexts = vd._evalcontexts.setdefault((self, self.rowid(row), col), LazyComputeRow(self, row, col, kwargs))
+            contexts = vd._evalcontexts.setdefault((self, self.rowid(row), col), LazyComputeRow(self, row, col, **kwargs))
         else:
             contexts = dict(sheet=self)
 
