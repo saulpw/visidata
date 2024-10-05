@@ -390,6 +390,10 @@ class TableSheet(BaseSheet):
     def __repr__(self):
         return f'<{type(self).__name__}: {self.name}>'
 
+    @drawcache_property
+    def currow(self):
+        return LazyComputeRow(self, self.cursorRow, self.cursorCol)
+
     def evalExpr(self, expr:str, row=None, col=None, **kwargs):
         'eval() expr in the context of (row, col), with extra bindings in kwargs'
         if row is not None:

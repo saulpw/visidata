@@ -67,13 +67,17 @@ class DrawablePane(Extensible):
         'Width of the current sheet window, in single-width characters.'
         return self._scr.getmaxyx()[1] if self._scr else 80
 
+    @property
+    def currow(self):
+        return None
+
     def execCommand2(self, cmd, vdglobals=None):
         "Execute `cmd` with `vdglobals` as globals and this sheet's attributes as locals.  Return True if user cancelled."
 
         try:
             self.sheet = self
             code = compile(cmd.execstr, cmd.longname, 'exec')
-            exec(code, vdglobals, LazyChainMap(vd, self))
+            exec(code, vdglobals, LazyChainMap(vd, self, {'currow':self.currow}))
             return False
         except EscapeException as e:  # user aborted
             vd.warning(str(e))
