@@ -54,7 +54,7 @@ Other commands (not specific to Columns Sheet):
             ColumnAttr('formatter', disp_expert=1, help='use a custom format function (**{col.help_formatters}**)'),
             ColumnAttr('displayer', disp_expert=1, help='use a custom display function (**{col.help_displayers}**)'),
             ValueColumn('value', help='change the value of this cell on the source sheet'),
-            ColumnAttr('expr', help='change the main column parameter'),
+            ColumnAttr('expr', disp_expert=1, help='change the main column parameter'),
             ColumnAttr('ncalcs', type=int, width=0, cache=False),
             ColumnAttr('maxtime', type=float, width=0, cache=False),
             ColumnAttr('totaltime', type=float, width=0, cache=False),
