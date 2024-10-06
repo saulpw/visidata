@@ -145,7 +145,7 @@ class Plotter(BaseSheet):
         self.labels = []  # (x, y, text, attr, row)
         self.hiddenAttrs = set()
         self.needsRefresh = False
-        self.resetCanvasDimensions(self.windowHeight, self.windowWidth)
+        self.resetCanvasDimensions(1, 1)  #2171
 
     @property
     def nRows(self):
@@ -416,6 +416,12 @@ class Canvas(Plotter):
                 if self.cursorBox.xmin == self.visibleBox.xmin and self.cursorBox.ymin == self.calcBottomCursorY():
                     realign_cursor = True
         super().resetCanvasDimensions(windowHeight, windowWidth)
+        # if window is not big enough to contain a particular margin, pretend that margin is 0
+        pvbox_x = pvbox_y = 0
+        if self.plotwidth > self.left_margin:
+            pvbox_x = self.left_margin
+        if self.plotheight > self.topMarginPixels:
+            pvbox_y = self.topMarginPixels
         if hasattr(self, 'legendwidth'):
             # +4 = 1 empty space after the graph + 2 characters for the legend prefixes of "1:", "2:", etc +
             #      1 character for the empty rightmost column
@@ -426,8 +432,10 @@ class Canvas(Plotter):
         else:
             pvbox_xmax = self.plotwidth-self.rightMarginPixels-1
         self.left_margin = min(self.left_margin, math.ceil(self.plotwidth * 1/3)//2*2)
-        self.plotviewBox = BoundingBox(self.left_margin, self.topMarginPixels,
-                                       pvbox_xmax, self.plotheight-self.bottomMarginPixels-1)
+        # enforce a minimum plotview box size of 1x1
+        pvbox_xmax = max(pvbox_xmax, 1)
+        pvbox_ymax = max(self.plotheight-self.bottomMarginPixels-1, 1)
+        self.plotviewBox = BoundingBox(pvbox_x, pvbox_y, pvbox_xmax, pvbox_ymax)
         if [self.plotheight, self.plotwidth] != old_plotsize:
             if hasattr(self, 'cursorBox') and self.cursorBox:
                 self.setCursorSizeInPlotterPixels(2, 4)
