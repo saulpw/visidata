@@ -77,7 +77,7 @@ class DrawablePane(Extensible):
         try:
             self.sheet = self
             code = compile(cmd.execstr, cmd.longname, 'exec')
-            exec(code, vdglobals, LazyChainMap(vd, self, {'currow':self.currow}))
+            exec(code, vdglobals, LazyChainMap(vd, self))
             return False
         except EscapeException as e:  # user aborted
             vd.warning(str(e))
