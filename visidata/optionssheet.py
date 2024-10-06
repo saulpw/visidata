@@ -17,14 +17,14 @@ class OptionsSheet(Sheet):
     precious = False
     columns = (
         Column('option', getter=lambda col,row: row.name),
-        Column('module', getter=lambda col,row: row.module, max_help=1),
+        Column('module', getter=lambda col,row: row.module, disp_expert=1),
         Column('value',
             getter=lambda col,row: col.sheet.diffOption(row.name),
             setter=lambda col,row,val: vd.options.set(row.name, val, col.sheet.source)
             ),
         Column('default', getter=lambda col,row: vd.options.getdefault(row.name)),
         Column('description', width=40, getter=lambda col,row: vd.options._get(row.name, 'default').helpstr),
-        AttrColumn('replayable', max_help=1),
+        AttrColumn('replayable', disp_expert=1),
     )
     colorizers = [
         CellColorizer(3, None, lambda s,c,r,v: v.value if r and c in s.columns[2:4] and r.name.startswith('color_') else None),
@@ -73,8 +73,6 @@ class OptionsSheet(Sheet):
     def iterload(self):
         for k in vd.options.keys():
             v = vd.options._get(k)
-#            if vd.options.disp_help > v.max_help:
-#                continue
             if v.sheettype in [None, BaseSheet]:
                 yield v
             elif self.source != 'global' and v.sheettype in self.source.superclasses():

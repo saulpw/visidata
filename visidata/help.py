@@ -4,7 +4,7 @@ import collections
 from visidata import VisiData, MetaSheet, ColumnAttr, Column, BaseSheet, VisiDataMetaSheet, SuspendCurses
 from visidata import vd, asyncthread, ENTER, drawcache, AttrDict, TextSheet
 
-vd.option('disp_expert', 2, 'max level of options and columns to include')
+vd.option('disp_expert', 0, 'max level of options and columns to include')
 
 @BaseSheet.api
 def hint_basichelp(sheet):

@@ -117,7 +117,7 @@ class Command:
 
 
 class Option:
-    def __init__(self, name, value, description='', module='', help='', max_help=10):
+    def __init__(self, name, value, description='', module='', help=''):
         # description gets shows on the manpage and the optionssheet; help is shown on the sidebar while editing
         self.name = name
         self.value = value
@@ -126,7 +126,6 @@ class Option:
         self.replayable = False
         self.sheettype = BaseSheet
         self.module = module
-        self.max_help = max_help
 
     def __str__(self):
         return str(self.value)
@@ -300,7 +299,7 @@ def _resolve_optalias(vd, optname, optval):
 
 
 @VisiData.api
-def option(vd, name, default, description, replay=False, sheettype=BaseSheet, help:str='', max_help=10):
+def option(vd, name, default, description, replay=False, sheettype=BaseSheet, help:str=''):
     '''Declare a new option.
 
    - `name`: name of option
@@ -313,7 +312,6 @@ def option(vd, name, default, description, replay=False, sheettype=BaseSheet, he
     opt.replayable = replay
     opt.sheettype=sheettype
     opt.extrahelp = help
-    opt.max_help = max_help
     return opt
 
 
@@ -321,7 +319,7 @@ def option(vd, name, default, description, replay=False, sheettype=BaseSheet, he
 def theme_option(vd, name, *args, **kwargs):
     if name.startswith('color_'):
         kwargs.setdefault('help', vd.help_color)
-    return vd.option(name, *args, **kwargs, max_help=-1)
+    return vd.option(name, *args, **kwargs)
 
 
 @BaseSheet.class_api

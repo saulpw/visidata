@@ -20,9 +20,9 @@ class InProgress(Exception):
 
 INPROGRESS = TypedExceptionWrapper(None, exception=InProgress())  # sentinel
 
-vd.option('col_cache_size', 0, 'max number of cache entries in each cached column', max_help=-1)
-vd.option('disp_formatter', 'generic', 'formatter to create the text in each cell (also used by text savers)', replay=True, max_help=0)
-vd.option('disp_displayer', 'generic', 'displayer to render the text in each cell', replay=False, max_help=0)
+vd.option('col_cache_size', 0, 'max number of cache entries in each cached column')
+vd.option('disp_formatter', 'generic', 'formatter to create the text in each cell (also used by text savers)', replay=True)
+vd.option('disp_displayer', 'generic', 'displayer to render the text in each cell', replay=False)
 
 
 class DisplayWrapper:
@@ -86,7 +86,7 @@ class Column(Extensible):
         self.formatter = ''
         self.displayer = ''
         self.defer = False
-        self.max_help = 10    # auto-hide above this disp_help level
+        self.disp_expert = 0    # auto-hide if options.disp_expert less than col.disp_expert
 
         self.setCache(cache)
         for k, v in kwargs.items():

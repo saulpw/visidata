@@ -58,7 +58,7 @@ def inputPalette(sheet, prompt, items,
                  formatter=lambda m, item, trigger_key: f'{trigger_key} {item}',
                  multiple=False,
                  **kwargs):
-    if sheet.options.disp_expert:
+    if sheet.options.disp_expert >= 5:
         return vd.input(prompt,
                 completer=CompleteKey(sorted(item[value_key] for item in items)),
                 **kwargs)

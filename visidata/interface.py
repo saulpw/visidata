@@ -53,5 +53,5 @@ vd.theme_option('color_guide_unwritten', '243 on black', 'color of unwritten gui
 vd.theme_option('force_256_colors', False, 'use 256 colors even if curses reports fewer')
 
 vd.option('quitguard', False, 'confirm before quitting modified sheet')
-vd.option('default_width', 20, 'default column width', replay=True, max_help=1)   # TODO: make not replay and remove from markdown saver
-vd.option('default_height', 4, 'default column height', max_help=-1)
+vd.option('default_width', 20, 'default column width', replay=True)   # TODO: make not replay and remove from markdown saver
+vd.option('default_height', 4, 'default column height')

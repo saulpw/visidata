@@ -13,16 +13,16 @@ import visidata
 vd.activePane = 1   # pane numbering starts at 1; pane 0 means active pane
 
 
-vd.option('name_joiner', '_', 'string to join sheet or column names', max_help=0)
-vd.option('value_joiner', ' ', 'string to join display values', max_help=0)
-vd.option('max_rows', 1_000_000_000, 'number of rows to load from source', max_help=0)
+vd.option('name_joiner', '_', 'string to join sheet or column names')
+vd.option('value_joiner', ' ', 'string to join display values')
+vd.option('max_rows', 1_000_000_000, 'number of rows to load from source')
 
-vd.option('disp_wrap_max_lines', 3, 'max lines for multiline view', max_help=1)
-vd.option('disp_wrap_break_long_words', False, 'break words longer than column width in multiline', max_help=1)
-vd.option('disp_wrap_replace_whitespace', False, 'replace whitespace with spaces in multiline', max_help=1)
-vd.option('disp_wrap_placeholder', '…', 'multiline string to indicate truncation', max_help=1)
-vd.option('disp_multiline_focus', False, 'only expand cursor row for multiline view', max_help=1)
-vd.option('color_aggregator', 'bold 255 white on 234 black', 'color of aggregator summary on bottom row', max_help=1)
+vd.option('disp_wrap_max_lines', 3, 'max lines for multiline view')
+vd.option('disp_wrap_break_long_words', False, 'break words longer than column width in multiline')
+vd.option('disp_wrap_replace_whitespace', False, 'replace whitespace with spaces in multiline')
+vd.option('disp_wrap_placeholder', '…', 'multiline string to indicate truncation')
+vd.option('disp_multiline_focus', False, 'only expand cursor row for multiline view')
+vd.option('color_aggregator', 'bold 255 white on 234 black', 'color of aggregator summary on bottom row')
 
 
 @drawcache
@@ -293,7 +293,7 @@ class TableSheet(BaseSheet):
         self.columns = []
         for c in self.initialCols:
             self.addColumn(deepcopy(c))
-            if self.options.disp_expert > c.max_help:
+            if self.options.disp_expert < c.disp_expert:
                 c.hide()
 
         self.setKeys(self.columns[:self.nKeys])

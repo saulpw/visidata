@@ -12,8 +12,8 @@ from visidata import VisiData, vd, options, globalCommand, Sheet, EscapeExceptio
 from visidata import ColumnAttr, Column, BaseSheet, ItemColumn
 
 
-vd.option('profile', False, 'enable profiling on threads', max_help=-1)
-vd.option('min_memory_mb', 0, 'minimum memory to continue loading and async processing', max_help=-1)
+vd.option('profile', False, 'enable profiling on threads')
+vd.option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
 
 vd.theme_option('color_working', '118 5', 'color of system running smoothly')
 
@@ -351,7 +351,7 @@ class ThreadProfiler:
                 vd.threads.remove(self.thread)
             else:
                 if self.thread.sheet:
-                    if vd.options.disp_expert < 0 or vd.options.profile:
+                    if vd.options.profile:
                         vd.status(f'[:bold]{self.thread.sheet.name[:32]}.{self.thread.name}[/] finished in {elapsed_s(self.thread):.1f}s')
                 if vd.options.profile:
                     self.thread.profile.dump_stats(f'{self.thread.name}.pyprof')
