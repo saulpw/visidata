@@ -3,33 +3,20 @@ sheettype: Sheet
 ---
 # Melt is just unpivot
 
-Pivot tables can be melted (or unpivoted) into regular row and column data in "long" format. The pivoted columns get flattened into a 'Variable' column, and the cell content become the 'Value' for each row.
-
-See the **PivotGuide** for how to create pivot tables.
-
-See **Examples** below for more details of the transformations.
-
-## Melt
-
 Melt collapses the pivoted columns back into "Variable" and "Value" columns, converting from "wide" format into "long" format. After a melt, there is one row for each value in the pivot table.
 
 1. [Optional] remove a column from the output by hiding it: [:keys]-[/]
 2. [Optional] set key columns to keep them unmelted: [:keys]![/]
 
-- {help.commands.melt}
-
-## Regex-Melt 
+3a. {help.commands.melt}
 
 A regex melt partially melts the pivoted columns. Provide a regular expression to separate the key column from other columns.
 
-1. [Optional] remove a column from the output by hiding it: [:keys]-[/]
-2. [Optional] set key columns to keep them unmelted: [:keys]![/]
-
-- {help.commands.melt_regex}
+3b. {help.commands.melt_regex}
 
 ## Examples
 
-Start with a pivot table, created by pivoting a table with color column (with R and B), and two aggregators `sum` and `mean`
+Start with a pivot table, created by pivoting a table with columns `R`,`B`, and key column `date`. There are two aggregators `sum` and `mean`:
 
    date        sum_R  mean_R  sum_B  mean_B
    ----------  -----  ------  -----  ------
@@ -37,7 +24,7 @@ Start with a pivot table, created by pivoting a table with color column (with R 
    2024-09-02  0              28     28
    2024-09-03  100    100     132    66
 
-### Standard `melt`:
+Press `Shift+M` for a standard melt:
 
    date        Variable  Value
    ----------  --------  -----
@@ -52,9 +39,7 @@ Start with a pivot table, created by pivoting a table with color column (with R 
    2024-09-03  sum_B     132
    2024-09-03  mean_B    66
 
-### Big melt: melt-regex
-
-Use the `melt-regex` of `(\w+)_(\w)` to separate the aggregator from the color. Only the aggregator will be fully melted. The colors will remain as columns:
+Or press `gShift+M` and then type a `regex` of `(\w+)_(\w)` to separate the aggregator from the column. Only the aggregator will be fully melted. The columns `R` and `B` will remain:
 
    date        Variable  B    R
    ----------  --------  ---  ---
