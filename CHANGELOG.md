@@ -1,8 +1,114 @@
 # VisiData version history
 
-# vX.X.X (XXXX-XX-XX)
+# v3.1 (2024-10-XX)
 
-- support replay from stdin for .vdj
+- drop support for Python 3.7  #2231
+- [vdsql] bump ibis dep to v8
+- [test] fix minimum pandas version to 1.5.3
+
+## Improvements
+
+- [sidebar] Ctrl+G to cycle sidebar (including off) in both main and input modes #2202
+- [sidebar help] rightmost statusline ({vd.sidebarStatus}) shows number of help sidebars (clickable to toggle sidebar)
+- [sheet tabs] left statusline sheet tabs (clickable to jump to sheet) #2030
+- [aggregators] immediate async summary of column aggregators on bottom rows #2209
+- [graph] reflines at user-defined x or y #2487
+- [aggr] add keymin, and handle corner cases #2308
+- [guides] add several guides (thanks to @thejud @reagle @ajkerrigan @anjakefala)
+- [expressions] much cleanup
+  - `row["colname"]` to refer to a specific column by name, without needing to be a valid identifier #2539
+  - `_row` is underlying row object
+  - support curcol in g= and select and search expressions #2524
+  - $curcol for addcol-sh
+  - globals include most symbols from math by default; also datetime and date both as the vd.date subclass
+  - [input] memory variables included as autocomplete keys #2509
+
+## Tweaks
+
+- [window] pad windows with None so all are same size #2279
+- [history] create visidata_dir (default ~/.visidata/) if not exists to enable input history by default #2298
+- [cli] "-p -" replays stdin as a .vdj file
+- [guide] allow front matter in guide .md files; "sheettype" metadata to associate with a sheet
+- [cmdpalette] do not fuzzymatch keys that start with _
+- [interface] hidden columns minutely visible past right of sheet; `_` to re-expand #2394
+- [interface] record all commands in macro (even replay=False); add status indicator when recording #2435
+- [interface] clickable cell error symbol
+- [interface] default theme color improvements, including a slight bg glow for cursor column
+- many small interface improvements: error messages, clarifications, edge cases, guardrails.  (thanks to @midichef for many of these)
+
+## Options
+
+- max_rows to stop loading early #2356
+- [xlsx] add xlsx_color_cells (default: True); set to False to disable xlsx cell colorizers
+- regex_skip is now replayable
+- disp_multiline_focus to only expand cursor row when multiline enabled #2205
+- disp_expert (int); set to 1 to enable advanced interface elements and unhide advanced columns by default; set to 5 (or greater) to disable input palette and help sidebars
+- pass disp_wrap_* to textwrap for multiline display #2506
+- rename note_* to disp_note_* #2381
+- separate color_longname into color_longname_status and color_longname_guide
+
+## Commands
+
+- addcol-histogram to make histogram from any numeric column #2208
+- exec-longname-simple for single-line (non-palette) input
+- go-col-name to go to a column by name
+- [dir] open-row-filetype to open row using the given filetype
+- [graph] plot-source-selected on ColumnsSheet #2424
+- [experimental] sort-selected-asc/desc #2295
+- deprecate view-cell #2381
+- unfurl finishes with column cursor on unfurled column
+
+## API
+
+- [command] addCommand(..., replay=False) to not add to cmdlog
+- [sort] add Sheet.ordering property as list[tuple[Column,bool]] #2295
+- [path] note nonstandard behavior of RepeatFile.read()
+- [input] allow different record kwarg for different fields in inputMultiple
+
+## Loaders
+
+- [msgpack] new loader #2419
+- [grep] new loader for output of grep/ripgrep #2443
+
+- [csv] display loading/saving progress
+- [csv] handle more dialect parameters from Sniffer
+- [csv tsv] remove default regex_skip of hash lines #2458
+- [eml] save email parts without filenames #2376
+- [fixed] skip separating space in fixed_width loader #2255
+- [json] remove column type inference #2475 #2131
+- [json] warn if some cols/sheets were not saved #2199
+- [markdown] use col_href as link for col
+- [ods] strip empty cells/rows from end #2440
+- [rec] roundtrippable
+- [sas] allow edits to source sheet
+- [save] derived null in text formats should be empty string #2476
+- [save] handle empty delimiter when options.safety_first
+- [text] do not strip lines of whitespace #2328
+- [tsv] allow empty regex_skip
+- [tsv] allow saving with NUL delimiters
+- [tsv] if field or row delimiter is NUL, disable regex skipping
+- [vds] allow sheets with no rows #2342
+- [xml] save XML as utf-8 instead of utf-8-sig #2520
+
+## Bugfixes
+
+- [command] addcol-sh: ensure arguments are properly quoted  #2415
+- [selection] make toggle thread-safe for FreqTableSheet #1671
+- [undo] prevent undo of command that created sheet #2244
+- [undo] cmdlog always use rowidx, not rowkey #2246
+- [cliptext] fix onclick url #2466
+- [mouse] fix mouse-disable  #2379
+- [sort] do not modify Sheet._ordering #2254
+- [bindings] do not re-prettykeys; call prettykeys for all bindkey() too #2247
+- [terminal] add no-op for ANSI focus-in and focus-in #2247
+- [sort] add _ordering to Sheet class instead of __init__ #2190
+- [transpose] allow to set values #2548
+- [sheet] make 20 tabs clickable #2030
+- [macro] do not record macro inner steps #2531
+- [filetype] use correct case for file extension determination #2263
+- [replay] stop stderr batch progress when interactive #2251
+- [replay] wait for replay to start before stderr progress #2251
+- [replay] fix rare duplication of replay cmds #2392
 
 # v3.0.2 (2024-01-15)
 
