@@ -2,6 +2,8 @@
 
 Frequency Tables group rows into bins by column value, and includes summary columns for source columns with aggregators.
 
+Set `--numeric-binning` to bin numeric rows into ranges instead of discrete values.
+
 - {help.commands.freq_col}
 
 - {help.commands.freq_keys}
@@ -37,3 +39,4 @@ See the `SplitpanesGuide` for more.
 
 - {help.options.disp_histogram}
 - {help.options.histogram_bins}
+- {help.options.numeric_binning}
