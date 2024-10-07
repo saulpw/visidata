@@ -77,7 +77,7 @@ setup(
     package_data={
         "visidata.man": ["vd.1", "vd.txt"],
         "visidata.ddw": ["input.ddw", "regex.ddw"],
-        "visidata.guides": ["visidata/*.md"],
+        "visidata.guides": ["visidata/guides/*.md"],
         "visidata.tests": ["sample.tsv", "benchmark.csv"],
         "visidata.desktop": ["visidata.desktop"],
         "visidata.experimenta.noahs_tapestry": [
