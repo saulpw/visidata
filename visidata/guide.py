@@ -9,6 +9,7 @@ import re
 
 from visidata import vd, BaseSheet, Sheet, ItemColumn, Column, VisiData, ENTER, RowColorizer, AttrDict, MissingAttrFormatter
 from visidata import wraptext, Path, CellColorizer
+import visidata
 
 guides_list = '''
 GuideIndex ("A Guide to VisiData Guides (you are here)")
@@ -81,7 +82,7 @@ vd.guides = {}  # name -> guidecls
 
 @VisiData.api
 def addGuide(vd, name):
-    guideSource = Path(vd.pkg_resources_files('visidata')/f'guides/{name}.md')
+    guideSource = Path(vd.pkg_resources_files(visidata)/f'guides/{name}.md')
     if guideSource.exists():
         vd.guides[name] = GuideSheet(name, source=guideSource)
 
