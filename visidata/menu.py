@@ -1,5 +1,6 @@
 import string
 import textwrap
+import time
 import curses
 
 from typing import List, Union
@@ -17,10 +18,20 @@ vd.theme_option('disp_menu_boxchars', '││──┌┐└┘├┤', 'box cha
 vd.theme_option('disp_menu_more', '»', 'command submenu indicator')
 vd.theme_option('disp_menu_push', '⎘', 'indicator if command pushes sheet onto sheet stack')
 vd.theme_option('disp_menu_input', '…', 'indicator if input required for command')
-vd.option('disp_menu_fmt', '| VisiData {vd.version} | Alt+H for help menu', 'right-side menu format string')
+vd.option('disp_menu_fmt', '| VisiData {vd.version} | {vd.hintStatus}', 'right-side menu format string')
 
 BaseSheet.init('activeMenuItems', list)
 vd.menuRunning = False
+
+@VisiData.property
+def hintStatus(vd):
+    if vd.options.disp_expert <= 0:
+        if int(time.time()/60) % 2 == 0:
+            return 'Alt+H for help menu'
+        else:
+            return 'Ctrl+G to cycle help sidebar'
+
+    return vd.sheet.getHint()
 
 def menudraw(*args):
     return clipdraw(*args, truncator='')

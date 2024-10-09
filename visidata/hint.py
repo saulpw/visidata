@@ -26,8 +26,8 @@ def getHint(sheet, *args, **kwargs) -> str:
                     n = 1
                     v = r
 
+                results.append((n, v))
                 if v not in sheet.prevHints:
-                    results.append((n, v))
                     sheet.prevHints[v] += 1
         except Exception as e:
             vd.debug(f'{f.__name__}: {e}')
@@ -35,5 +35,6 @@ def getHint(sheet, *args, **kwargs) -> str:
     if results:
         return sorted(results, reverse=True)[0][1]
 
+    return ''
 
 vd.addCommand('', 'help-hint', 'status(getHint() or pressMenu("Help"))', 'get context-dependent hint on what to do next')

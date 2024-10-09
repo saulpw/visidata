@@ -8,7 +8,7 @@ vd.option('disp_expert', 0, 'max level of options and columns to include')
 
 @BaseSheet.api
 def hint_basichelp(sheet):
-    return 0, '`Alt+[:underline]H[/]` to open the [:underline]H[/]elp menu'
+    return 0, 'Alt+H to open the [:underline]H[/]elp menu'
 
 
 @VisiData.api
