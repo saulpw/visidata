@@ -13,7 +13,6 @@
 - [sheet tabs] left statusline sheet tabs (clickable to jump to sheet) #2030
 - [aggregators] immediate async summary of column aggregators on bottom rows #2209
 - [graph] reflines at user-defined x or y #2487
-- [aggr] add keymin, and handle corner cases #2308
 - [guides] add several guides (thanks to @thejud @reagle @ajkerrigan @anjakefala)
 - [expressions] much cleanup
   - `row["colname"]` to refer to a specific column by name, without needing to be a valid identifier #2539
@@ -34,6 +33,7 @@
 - [interface] record all commands in macro (even replay=False); add status indicator when recording #2435
 - [interface] clickable cell error symbol
 - [interface] default theme color improvements, including a slight bg glow for cursor column
+- [aggregators] add keymin; handle corner cases #2308
 - many small interface improvements: error messages, clarifications, edge cases, guardrails.  (thanks to @midichef for many of these)
 
 ## Options
@@ -109,6 +109,7 @@
 - [replay] stop stderr batch progress when interactive #2251
 - [replay] wait for replay to start before stderr progress #2251
 - [replay] fix rare duplication of replay cmds #2392
+- and many more
 
 # v3.0.2 (2024-01-15)
 
