@@ -3,30 +3,13 @@ import functools
 
 from visidata import Sheet, Column, vd, asyncthread, Progress
 
-def getslice(L, i, j):
-    'Return L[i:j], except if i < 0 or j >= len(L), it pads with None, so the returned list always has j-i items.'
-    r = []
-    if i >= 0 and j < len(L):
-        return L[i:j]
-
-    a = i if i >= 0 else None
-    b = j if j < len(L) else None
-
-    for i in range(0, -i):
-        r.append(None)
-
-    r.extend(L[a:b])
-
-    for i in range(0, j-len(L)):
-        r.append(None)
-
-    return r
-
 @Sheet.api
 def window(sheet, before:int=0, after:int=0):
     '''Generate (row, list[row]) for each row in *sheet*, where list[row] is the rows within *before* number of rows before and *after* number of rows after the *row*.  The *row* itself is always included in the list.'''
     for i, r in enumerate(sheet.rows):
-        yield r, getslice(sheet.rows, i-before, i+after+1)
+        a = max(0, i-before) if before >= 0 else None
+        b = (i+after+1) if after >= 0 else None
+        yield r, sheet.rows[a:b]
 
 
 @Column.api
