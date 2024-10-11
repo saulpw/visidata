@@ -413,7 +413,7 @@ class TableSheet(BaseSheet):
         'Number of visible rows at the current window height.'
         n = (self.windowHeight-self.nHeaderRows-self.nFooterRows)
         if self.options.disp_multiline_focus:  # focus multiline mode
-            return n-self.rowHeight
+            return n-self.rowHeight+1
         return n//self.rowHeight
 
     @drawcache_property
