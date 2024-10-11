@@ -188,7 +188,7 @@ class InputWidget:
                 if ch in bindings:
                     self.value, self.current_i = bindings[ch](self.value, self.current_i)
                 else:
-                    if self.handle_key(ch):
+                    if self.handle_key(ch, scr):
                         return self.value
 
 
@@ -221,7 +221,7 @@ class InputWidget:
         if scr:
             scr.move(y, x+prew)
 
-    def handle_key(self, ch:str) -> bool:
+    def handle_key(self, ch:str, scr) -> bool:
         'Return True to accept current input.  Raise EscapeException on Ctrl+C, Ctrl+Q, or ESC.'
         i = self.current_i
         v = self.value
