@@ -932,9 +932,9 @@ class TableSheet(BaseSheet):
             self._rowLayout[rowidx] = (ybase, height)
 
             if height > 1:
-                colseps = [topsep] + [midsep]*height + [botsep]
-                endseps = [endtopsep] + [endmidsep]*height + [endbotsep]
-                keyseps = [keytopsep] + [keymidsep]*height + [keybotsep]
+                colseps = [topsep] + [midsep]*(height-2) + [botsep]
+                endseps = [endtopsep] + [endmidsep]*(height-2) + [endbotsep]
+                keyseps = [keytopsep] + [keymidsep]*(height-2) + [keybotsep]
             else:
                 colseps = [colsep]
                 endseps = [endsep]
