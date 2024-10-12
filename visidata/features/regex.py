@@ -129,7 +129,7 @@ def inputRegexSubst(vd, prompt):
 Sheet.addCommand(':', 'addcol-split', 'addColumnAtCursor(RegexColumn(makeRegexSplitter, cursorCol, inputRegex("split regex: ", type="regex-split")))', 'add column split by regex')
 Sheet.addCommand(';', 'addcol-capture', 'addColumnAtCursor(RegexColumn(makeRegexMatcher, cursorCol, inputRegex("capture regex: ", type="regex-capture")))', 'add column captured by regex')
 
-Sheet.addCommand('*', 'addcol-regex-subst', 'addColumnAtCursor(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, **inputRegexSubst("regex transform column"))))', 'add column derived from current column, replacing `search` regex with `replace` (may include \1 backrefs)')
+Sheet.addCommand('*', 'addcol-regex-subst', 'addColumnAtCursor(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, **inputRegexSubst("regex transform column"))))', 'add column derived from current column, replacing `search` regex with `replace` (may include \\1 backrefs)')
 Sheet.addCommand('g*', 'setcol-regex-subst', 'setValuesFromRegex([cursorCol], someSelectedRows, **inputRegexSubst("regex transform column"))', 'modify selected rows in current column, replacing `search` regex with `replace`, (may include backreferences \\1 etc)')
 Sheet.addCommand('gz*', 'setcol-regex-subst-all', 'setValuesFromRegex(visibleCols, someSelectedRows, **inputRegexSubst(f"regex transform {nVisibleCols} columns"))', 'modify selected rows in all visible columns, replacing `search` regex with `replace` (may include \\1 backrefs)')
 
