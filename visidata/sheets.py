@@ -21,7 +21,7 @@ vd.option('disp_wrap_max_lines', 3, 'max lines for multiline view')
 vd.option('disp_wrap_break_long_words', False, 'break words longer than column width in multiline')
 vd.option('disp_wrap_replace_whitespace', False, 'replace whitespace with spaces in multiline')
 vd.option('disp_wrap_placeholder', '…', 'multiline string to indicate truncation')
-vd.option('disp_multiline_focus', False, 'only expand cursor row for multiline view')
+vd.option('disp_multiline_focus', True, 'only multiline cursor row')
 vd.option('color_aggregator', 'bold 255 white on 234 black', 'color of aggregator summary on bottom row')
 
 
