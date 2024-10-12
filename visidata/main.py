@@ -90,28 +90,30 @@ vd.optalias('r', 'dir_depth', 100000)
 
 
 @visidata.VisiData.api
-def parsePos(vd, arg:str, inputs=None):
-    'Return (startsheets:list, startrow:str, startcol:str) from *arg* like "+sheet:subsheet:col:row".  Empty sheetstr in startsheets means the starting pos applies to all sheets.'
-    startsheets, startrow, startcol = [], None, None
-
-    if ':' not in arg:
-        return (None, arg, None)
+def parsePos(vd, arg:str, inputs:'list[tuple[str, dict]]'=None):
+    '''Return (startsheets:list, startcol:str, startrow:str) from *arg* like "+sheet:subsheet:col:row".
+    Returns an empty list for *startsheets* when the starting pos applies to all sheets.
+    Returns None for *startsheets* when the position expression did not specify a sheet.
+    *inputs* is a list of (path, options) tuples.
+    '''
+    startsheets, startcol, startrow = None, None, None
 
     pos = arg.split(':')
     if len(pos) == 1:
-        startsheet = [Path(inputs[-1]).base_stem] if inputs else None
-        start_pos = (startsheet, pos[0], None)
+        startsheets = [Path(inputs[-1][0]).base_stem] if inputs else None
+        startrow = arg
     elif len(pos) == 2:
-        startsheet = [Path(inputs[-1]).base_stem] if inputs else None
-        startrow, startcol = pos
-        start_pos = (None, startrow, startcol)
-    else:  # if len(pos) >= 3:
+        startsheets = [Path(inputs[-1][0]).base_stem] if inputs else None
+        startcol, startrow = pos
+    else:
+        # the first element of pos is the startsheet,
+        # the later elements (if present) describe the branch to a subsheet
         startsheets = pos[:-2]
-        startrow, startcol = pos[-2:]
-        start_pos = (startsheets, startrow, startcol)
-
-    # index subsheets need to be loaded *after* the cursor indexing
-    vd.options.set('load_lazy', True, obj=start_pos[0])
+        if startsheets == ['']: startsheets = []
+        startcol, startrow = pos[-2:]
+    if startcol == '':  startcol = None
+    if startrow == '':  startrow = None
+    start_pos = (startsheets, startcol, startrow)
 
     return start_pos
 
@@ -133,26 +135,43 @@ def outputProgressEvery(vd, sheet, seconds:float=0.5):
         time.sleep(seconds)
 
 @visidata.VisiData.api
-def moveToPos(vd, sources, startsheets, startrow, startcol):
-    sheets = []  # sheets to apply startrow:startcol to
+def moveToPos(vd, sources, startsheets, startcol, startrow):
+    sheets = []  # sheets to apply startcol:startrow to
     if not startsheets:
-        sheets = sources  # apply row/col to all sheets
+        sheets = sources  # apply col/row to all sheets
+        for vs in sheets:
+            vd.sync(vs.ensureLoaded())
+            vd.clearCaches()
     else:
         startsheet = startsheets[0] or sources[-1]
         vs = vd.getSheet(startsheet)
+        # Prevent the sheet from doing automatic ensureLoaded() on its subsheets when it
+        # loads, so that we can call ensureLoaded() ourselves and sync() on it.
+        vd.options.set('load_lazy', True, obj=vs)
         if not vs:
             vd.warning(f'no sheet "{startsheet}"')
             return
 
         vd.sync(vs.ensureLoaded())
         vd.clearCaches()
-        for startsheet in startsheets[1:]:
-            rowidx = vs.getRowIndexFromStr(vd.options.rowkey_prefix + startsheet)
-            if rowidx is None:
-                vd.warning(f'{vs.name} has no subsheet "{startsheet}"')
-                vs = None
-                break
-            vs = vs.rows[rowidx]
+        # descend the tree of subsheets
+        for subsheet in startsheets[1:]:
+            if subsheet and subsheet.isdigit():
+                rowidx = int(subsheet)
+            else:
+                rowidx = vs.getRowIndexFromStr(vd.options.rowkey_prefix + subsheet)
+                if rowidx is None:
+                    vd.warning(f'{vs.name} has no subsheet "{subsheet}"')
+                    return
+            try:
+                vs = vs.rows[rowidx]
+            except IndexError:
+                vd.warning(f'{vs.name} has no subsheet "{rowidx}"')
+                return
+            if not isinstance(vs, BaseSheet):
+                vd.warning(f'row {subsheet} for subsheet is not a sheet')
+                return
+            vd.options.set('load_lazy', True, obj=vs)
             vd.sync(vs.ensureLoaded())
             vd.clearCaches()
         if vs:
