@@ -101,3 +101,7 @@ Note that the results in the `date_re` column are lists of length 1.
     2024-09-01  2024        30
     2024-09-02  2024        28
     2024-09-03  2024        100
+
+#### Options
+
+- {help.options.regex_maxsplit}
