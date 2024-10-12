@@ -1,9 +1,9 @@
 ---
 sheet: Sheet
 ---
-# Matching And Transforming Strings With Regexes
+# Matching and Transforming Strings with Regex
 
-Visidata has built-in support for using Regular Expressions as input for some commands. This includes many commands that enable you to search and transform your data using these patterns.
+Some commands for selecting, searching, and transforming data, accept a regular expression as input.
 
 ## Select Rows
 
@@ -33,18 +33,18 @@ Visidata has built-in support for using Regular Expressions as input for some co
 - {help.commands.setcol-regex-subst}
 - {help.commands.setcol-regex-subst-all}
 
-Press `Tab` to move between `search` and `replace` inputs.
-Only including a `search` will remove whatever was matched.
+`Tab` to move between `search` and `replace` inputs.
+An empty `replace` removes the matching string.
 
 # Column Creation
 
 - {help.commands.addcol-regex-subst}
-
 - {help.commands.addcol-split}
-
 - {help.commands.addcol-capture}
 
 ## Examples
+
+### Split
 
 Sample input sheet **sales**:
 
@@ -54,7 +54,7 @@ Sample input sheet **sales**:
     2024-09-02  28
     2024-09-03  100
 
-1. [:keys]:[/] (`addcol-split`) on **date** column, followed by `-` to split on `-` character.
+1. [:code]:[/] (`addcol-split`) on **date** column, followed by `-` to split on hyphens.
 
     date        date_re             price
     ----------  ----------------    -----
@@ -62,9 +62,9 @@ Sample input sheet **sales**:
     2024-09-02  [3] 2024; 09; 02    28
     2024-09-03  [3] 2024; 09; 03    100
 
-Note that the resulting `date_re` column is of type **List**.
+Note that the results in the `date_re` column are lists of length 3.
 
-2. Press [:keys]([/] (`expand-col`) to expand it to multiple individual columns.
+2. [:code]([/] (`expand-col`) to expand a column with lists into multiple columns with the list elements.
 
     date        date_re[0]  date_re[1]  date_re[2]  price
     ----------  ----------  ----------  ----------  -----
@@ -72,7 +72,9 @@ Note that the resulting `date_re` column is of type **List**.
     2024-09-02  2024        09          02          28
     2024-09-03  2024        09          03          100
 
-3. On the **date** column, press [:keys]*[/] (`addcol-regex-subst`). Beside search type `-`. Press `Tab` and beside replace type `,` to replace all `-` with `,`.
+### Substitution
+
+1. On the **date** column, [:code]*[/] (`addcol-regex-subst`) and type `-`, then `Tab` to "replace" and type `,`.  Then `Enter` to replace all `-` with `,`.
 
     date        date_re     price
     ----------  ----------  -----
@@ -80,3 +82,22 @@ Note that the resulting `date_re` column is of type **List**.
     2024-09-02  2024,09,02  28
     2024-09-03  2024,09,03  100
 
+### Capture
+
+1. On the **date** column, [:code];[/] (`addcol-capture`) and type `(\d\d\d\d)` to capture and pull out the year.
+
+    date        date_re     price
+    ----------  --------    -----
+    2024-09-01  [1] 2024    30
+    2024-09-02  [1] 2024    28
+    2024-09-03  [1] 2024    100
+
+Note that the results in the `date_re` column are lists of length 1.
+
+2. [:code]([/] (`expand-col`) to expand a column with lists into multiple columns with the list elements.
+
+    date        date_re[0]  price
+    ----------  ----------  -----
+    2024-09-01  2024        30
+    2024-09-02  2024        28
+    2024-09-03  2024        100
