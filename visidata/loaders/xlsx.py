@@ -14,10 +14,12 @@ vd.option('xlsx_color_cells', True, 'color cells based on xlsx source')
 
 @VisiData.api
 def open_xls(vd, p):
+    p.is_local() or vd.fail('xls loader does not support remote files')
     return XlsIndexSheet(p.base_stem, source=p)
 
 @VisiData.api
 def open_xlsx(vd, p):
+    p.is_local() or vd.fail('xlsx loader does not support remote files')
     return XlsxIndexSheet(p.base_stem, source=p)
 
 class XlsxIndexSheet(IndexSheet):
