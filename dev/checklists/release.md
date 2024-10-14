@@ -74,6 +74,7 @@
   Push to pypi
     ```
     rm -rf dist/
+    rm -rf build/
     python3 setup.py sdist bdist_wheel
     chmod -R a+rX dist
     ls dist/
