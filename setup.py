@@ -67,7 +67,6 @@ setup(
             "pypng",
             "pytest",
             "PyYAML>=5.1",
-            "savReaderWriter @ git+https://github.com/anjakefala/savReaderWriter#egg=savReaderWriter",
             "tabulate",
             "tomli",
             "wcwidth",
