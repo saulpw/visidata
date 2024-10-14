@@ -1,6 +1,6 @@
 # VisiData version history
 
-# v3.1 (2024-10-XX)
+# v3.1 (2024-10-14)
 
 - drop support for Python 3.7  #2231
 - [vdsql] bump ibis dep to v8
