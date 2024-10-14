@@ -229,6 +229,12 @@ def attempt_move_to_pos(vd, sources, sheet_desc, startcol, startrow):
     vs = sheet_from_description(vd, sources, sheet_desc)
     if not vs:
         return False
+    # switch the active sheet, for command line args like +s::
+    if vs and startrow is None and startcol is None:
+        vd.push(vs)
+        return True
+
+    # try cursor moves
     success = True
     if startrow is not None:
         if startrow.isdigit():  # treat strings that look like integers as indices, never row keys
