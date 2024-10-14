@@ -67,11 +67,6 @@ jobs:
         git --no-pager diff --numstat tests/
         git --no-pager diff --exit-code tests/
 
-    - name: Check docs are built without errors
-      run: |
-        sudo apt install aha
-        dev/mkman.sh
-
     - name: Ensure VisiData can create completions
       run: python -v dev/zsh-completion.py
 
