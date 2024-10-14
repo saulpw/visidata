@@ -24,7 +24,6 @@
 
 ## Tweaks
 
-- [window] pad windows with None so all are same size #2279
 - [history] create visidata_dir (default ~/.visidata/) if not exists to enable input history by default #2298
 - [cli] "-p -" replays stdin as a .vdj file
 - [guide] allow front matter in guide .md files; "sheettype" metadata to associate with a sheet
