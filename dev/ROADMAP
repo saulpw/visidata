@@ -40,11 +40,7 @@
 6. default theme
   - tooling to make it easier to browse color combos
 
-7. website
-  - add vd.org/contributors
-  - add vd.org/pricing
-
-8. new clients
+7. new clients
 - vd tui client: connect to vd server as separate terminal process
 - vd web client
   - lightweight JS widget to display/interact with command server
