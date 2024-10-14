@@ -897,7 +897,7 @@ COMMANDLINE OPTIONS
                                              onto sheet stack
      disp_menu_input     …                   indicator if input required for
                                              command
-     disp_menu_fmt       | VisiData {vd.version} | Alt+H for help menu
+     disp_menu_fmt       | VisiData {vd.version} | {vd.hintStatus}
                                              right-side menu format string
      disp_float_fmt      {:.02f}             default fmtstr to format float
                                              values
@@ -958,7 +958,7 @@ COMMANDLINE OPTIONS
      color_bottom_hdr    underline white on black
                                              color of the bottom header row
      color_current_row   reverse             color of the cursor row
-     color_current_col   bold                color of the cursor column
+     color_current_col   bold on 232         color of the cursor column
      color_current_cell                      color of current cell, if differ‐
                                              ent from color_cur‐
                                              rent_row+color_current_col
@@ -983,8 +983,10 @@ COMMANDLINE OPTIONS
                                              multiline
      disp_wrap_placeholder …                 multiline string to indicate
                                              truncation
-     disp_multiline_focus False              only expand cursor row for multi‐
-                                             line view
+     disp_multiline_focus True               only multiline cursor row
+     color_aggregator    bold 255 white on 234 black
+                                             color of aggregator summary on
+                                             bottom row
      disp_rstatus_fmt    {sheet.threadStatus} {sheet.keystrokeStatus}
                                              [:longname_status]{sheet.longname}[/]
                                              {sheet.nRows:9d} {sheet.rowtype}
@@ -1040,7 +1042,15 @@ COMMANDLINE OPTIONS
      color_graph_selected bold               color of selected graph points
      color_graph_axis    bold                color for graph axis labels
      disp_graph_tick_x   ╵                   character for graph x-axis ticks
-     disp_expert         2                   max level of options and columns
+     color_graph_refline                     color for graph reference value
+                                             lines
+     disp_graph_reflines_x_charset ▏││▕      charset to render vertical refer‐
+                                             ence lines on graph
+     disp_graph_reflines_y_charset ▔──▁      charset to render horizontal ref‐
+                                             erence lines on graph
+     disp_graph_multiple_reflines_char ▒     char to render multiple parallel
+                                             reflines
+     disp_expert         0                   max level of options and columns
                                              to include
      color_add_pending   green               color for rows pending add
      color_change_pending reverse yellow     color for cells pending modifica‐
@@ -1179,4 +1189,4 @@ SUPPORTED SOURCES
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                    December 29, 2023                   Linux/MacOS
+Linux/MacOS                    October 13, 2024                    Linux/MacOS

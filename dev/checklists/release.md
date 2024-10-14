@@ -11,10 +11,6 @@
     c. visidata.org; (formats?)
         - remember to check the tables with prettier: https://github.com/saulpw/visidata/pull/2056
 
-3. Verify that VisiData is up-to-date:
-    * help menu
-    * plugins.jsonl
-
 3. Ensure `develop` automated tests run correctly with dev/test.sh
 
 4. Go through the manual tests checklist

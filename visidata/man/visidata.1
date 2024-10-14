@@ -1,4 +1,4 @@
-.Dd December 29, 2023
+.Dd October 13, 2024
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -1193,7 +1193,7 @@ command submenu indicator
 indicator if command pushes sheet onto sheet stack
 .It Sy "disp_menu_input    " No "\[u2026]"
 indicator if input required for command
-.It Sy "disp_menu_fmt      " No "| VisiData {vd.version} | Alt+H for help menu"
+.It Sy "disp_menu_fmt      " No "| VisiData {vd.version} | {vd.hintStatus}"
 right-side menu format string
 .It Sy "disp_float_fmt     " No "{:.02f}"
 default fmtstr to format float values
@@ -1273,7 +1273,7 @@ color of the column headers
 color of the bottom header row
 .It Sy "color_current_row  " No "reverse"
 color of the cursor row
-.It Sy "color_current_col  " No "bold"
+.It Sy "color_current_col  " No "bold on 232"
 color of the cursor column
 .It Sy "color_current_cell " No ""
 color of current cell, if different from color_current_row+color_current_col
@@ -1303,8 +1303,10 @@ break words longer than column width in multiline
 replace whitespace with spaces in multiline
 .It Sy "disp_wrap_placeholder" No "\[u2026]"
 multiline string to indicate truncation
-.It Sy "disp_multiline_focus" No "False"
-only expand cursor row for multiline view
+.It Sy "disp_multiline_focus" No "True"
+only multiline cursor row
+.It Sy "color_aggregator   " No "bold 255 white on 234 black"
+color of aggregator summary on bottom row
 .It Sy "disp_rstatus_fmt   " No "{sheet.threadStatus} {sheet.keystrokeStatus}   [:longname_status]{sheet.longname}[/]  {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}{vd.sidebarStatus}"
 right-side status format string
 .It Sy "disp_status_fmt    " No "{sheet.sheetlist}| "
@@ -1375,7 +1377,15 @@ color of selected graph points
 color for graph axis labels
 .It Sy "disp_graph_tick_x  " No "\[u2575]"
 character for graph x-axis ticks
-.It Sy "disp_expert        " No "2"
+.It Sy "color_graph_refline" No ""
+color for graph reference value lines
+.It Sy "disp_graph_reflines_x_charset" No "\[u258F]\[u2502]\[u2502]\[u2595]"
+charset to render vertical reference lines on graph
+.It Sy "disp_graph_reflines_y_charset" No "\[u2594]\[u2500]\[u2500]\[u2581]"
+charset to render horizontal reference lines on graph
+.It Sy "disp_graph_multiple_reflines_char" No "\[u2592]"
+char to render multiple parallel reflines
+.It Sy "disp_expert        " No "0"
 max level of options and columns to include
 .It Sy "color_add_pending  " No "green"
 color for rows pending add
