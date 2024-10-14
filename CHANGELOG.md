@@ -69,7 +69,6 @@
 
 - [msgpack] new loader #2419
 - [grep] new loader for output of grep/ripgrep #2443
-
 - [csv] display loading/saving progress
 - [csv] handle more dialect parameters from Sniffer
 - [csv tsv] remove default regex_skip of hash lines #2458
@@ -137,7 +136,6 @@
 - [cmdpalette] add sidebar for longname and aggregator palette  #2219
 - [guide] add `show-command-info` to display command info for a keystroke  #2228
 - [keys] add `*BtnUp` pretty keys for `BUTTON#_RELEASED`  #2219
-
 - [dup-selected] dup-selected should unselect all rows in copied sheet  #2225
 - [expr] fix KeyError crash with invalid inputs in `expr` for Python 3.12  #2179
 - [help] fix columns sheet sidebar
@@ -147,7 +145,6 @@
 - [sort] maintain ordering on sheet copies  #2190
 - [test] update unit tests to use packaged sample.tsv and benchmark.csv  #2218
 - [threads] do not try to cancel already finished thread #2235
-
 - [tests] add `assert-expr` and `assert-expr-row` to evaluate Python expressions, and assert result is truthy
 - [tests] parametrize feature tests (PR by @ajkerrigan #2230)
 
@@ -222,7 +219,6 @@
     - cannot save macros if `options.visidata_dir` does not exist
     - rename `options.visidata_dir`/macros.tsv' to `options.visidata_dir`/macros.jsonl'
     - add vd2to3.vdx script to port from 2.x macros to 3.x macros
-
 - [aggregators] sum uses start value from type of first value for Python 3.8+  #1996 #1999 #2009
 - [build] add a .desktop for VisiData  #1738
 - [choose] add type for join/aggregators history  #2075
@@ -639,7 +635,6 @@
 - [columns] speed up `getMaxWidth()` for wide columns, and correct some edge cases (PR by @midichef #1747)
 - [freqtbl] Default `disp_histogram` to U+25A0 BLACK SQUARE (■)) (PR by @daviewales #1949)
 - [loaders fixed] do not truncate wide columns with fixed-width saver (PR by @daviewales #1890)
-
 - add missing import `copy`
 - [graph] fix graph ranges for xmax, ymax < 1 (PR by @midichef #1752)
 - [graph] fix data on edges being drawn offscreen (PR by @midichef #1850)
