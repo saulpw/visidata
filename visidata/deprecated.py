@@ -250,3 +250,5 @@ vd.optalias('textwrap_cells', 'disp_wrap_max_lines', 3) # wordwrap text for mult
 @visidata.TableSheet.api
 def keystr(sheet, row):
     return sheet.rowname(row)
+
+vd.optalias('color_refline', 'color_graph_refline') # color_refline was used in v3.1 by mistake
