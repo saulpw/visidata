@@ -40,11 +40,16 @@ def hide_col(vd, col):
 def hide_uniform_cols(sheet):
     if len(sheet.rows) < 2:
         return
-    for col in sheet.visibleCols:
+    idx = sheet.cursorVisibleColIndex
+    for i, col in enumerate(sheet.visibleCols):
         vals = (col.getTypedValue(r) for r in sheet.rows)
         first = next(vals)
         if all(v == first for v in vals):
+            vd.status(f'hide {col.name} with value: {col.getDisplayValue(sheet.rows[0])}')
+            if i <= idx:
+                sheet.cursorRight(-1)
             col.hide()
+            Sheet.clear_all_caches()  #2578
 
 Sheet.addCommand('_', 'resize-col-max', 'if cursorCol: cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'toggle width of current column between full and default width')
 Sheet.addCommand('z_', 'resize-col-input', 'width = int(input("set width= ", value=cursorCol.width)); cursorCol.setWidth(width)', 'adjust width of current column to N')
