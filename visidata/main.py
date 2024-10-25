@@ -344,6 +344,8 @@ def main_vd():
             run(vd.sheets[0])
     else:
         if args.play == '-':
+            if vd.stdinSource.fptext.isatty():
+                vd.fail('replay commands must come by pipe, not by terminal')
             vdfile = vd.stdinSource
         else:
             vdfile = Path(args.play)
