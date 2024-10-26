@@ -249,7 +249,14 @@ class InputWidget:
             c = vd.prettykeys(c)
             i += len(c)
             v += c
-        elif ch == '^O':                           self.value = vd.launchExternalEditor(v); return True  # auto-accept after $EDITOR
+        elif ch == '^O':
+            edit_v = vd.launchExternalEditor(v)
+            if self.value == '' and edit_v == '':
+                # if a cell has a value of None, keep it when the editor exits with no change
+                raise EscapeException(ch)
+            else:
+                self.value = edit_v
+                return True
         elif ch == '^R':                           v = self.orig_value  # ^Reload initial value
         elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1:i]), i)  # swap chars
         elif ch == '^U':                           v = v[i:]; i = 0  # clear to beginning
