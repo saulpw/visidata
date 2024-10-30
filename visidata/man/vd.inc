@@ -782,7 +782,7 @@ abort replay
 .It Ic  ^T
 .No open global Sy Threads Sheet No for all asynchronous threads running
 .It Ic z^T
-.No open current sheet's Sy Threads Sheet No
+.No open current sheet's Sy Threads Sheet
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -791,7 +791,7 @@ abort replay
 .It Ic " ^C"
 abort thread at current row
 .It Ic "g^C"
-.No abort all threads on current Sy Threads Sheet No
+.No abort all threads on current Sy Threads Sheet
 .El
 .
 .Ss DERIVED SHEETS
