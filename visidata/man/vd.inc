@@ -967,11 +967,36 @@ disable loading .visidatarc and plugin addons
 .Dl Ic vd newfile.tsv
 .No open a blank sheet named Ar newfile No if file does not exist
 .Pp
-.Dl Ic vd sample.xlsx +:sheet1:2:3
-.No launch with Sy sheet1 No at top-of-stack, and cursor at column Sy 2 No and row Sy 3
-.Pp
 .Dl Ic vd -P open-plugins
 .No preplay longname Sy open-plugins No before starting the session
+.Pp
+.Dl Ic vd a.xlsx b.tsv c.tsv +0:3:1:2
+.No launch with cursor for sheet Sy 0 No (a.xlsx) at subsheet Sy 3 No in sheet Sy 0 Ns , col Sy 1 Ns , row Sy 2
+.Dl Ic vd a.xlsx b.tsv c.tsv +0:1:2
+.No launch with cursor for sheet Sy 0 No (a.xlsx) at col Sy 1 Ns , row Sy 2
+.Dl Ic vd a.tsv b.tsv c.tsv +1:2
+.No launch with cursor for last sheet (c.tsv) at col Sy 1 Ns , row Sy 2
+.Dl Ic vd a.tsv b.tsv c.tsv +1:
+.No launch with cursor for last sheet (c.tsv) at col Sy 1
+.Dl Ic vd a.tsv b.tsv c.tsv +:2
+.No launch with cursor for last sheet (c.tsv) at row Sy 2
+.Pp
+.Dl Ic vd a.xlsx b.xlsx c.xlsx +0:annual:1:2 +1:sales:monthly:3:4
+.No launch with cursor for sheet Sy 0 No (a.xlsx) in subsheet Sy annual No at col Sy 1 Ns , row Sy 2 Ns , and cursor for sheet Sy 1 No (b.xlsx), subsheet Sy sales No in subsheet monthly; col Sy 3 Ns , row Sy 4
+.Pp
+.Dl Ic vd a.tsv b.tsv c.tsv +1::
+.No launch in sheet Sy 1 No (b.tsv), with cursor at col 0, row 0
+.Dl Ic vd a.tsv b.tsv c.tsv +-2::
+.No launch in Sy 2nd No from last sheet (b.tsv), with cursor at col 0, row 0
+.Pp
+.Dl Ic vd a.tsv b.tsv c.tsv +:1:
+.No launch with cursors for all sheets at col Sy 1
+.Dl Ic vd a.tsv b.tsv c.tsv +::2
+.No launch with cursors for all sheets at row Sy 2
+.Dl Ic vd a.tsv b.tsv c.tsv +:1:2
+.No launch with cursors for all sheets at col Sy 1 Ns , row Sy 2
+.Dl Ic vd a.xlsx b.xslx c.xlsx +:a:1:2
+.No launch with cursors for all sheets at subsheet Sy a Ns , col Sy 1 Ns , row Sy 2
 .Sh FILES
 At the start of every session,
 .Sy VisiData No looks for Pa $HOME/.visidatarc Ns , and calls Python exec() on its contents if it exists.
