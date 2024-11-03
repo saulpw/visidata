@@ -226,10 +226,12 @@ def modifiedStatus(sheet):
     return ret
 
 
-@Sheet.property
+@BaseSheet.property
 def selectedStatus(sheet):
-    if sheet.nSelectedRows:
+    if hasattr(sheet, 'nSelectedRows') and sheet.nSelectedRows:
         return f' [:selected_row][:onclick dup-selected]{sheet.options.disp_selected_note}{sheet.nSelectedRows}[/][/] '
+    else:
+        return ''
 
 
 @VisiData.api
