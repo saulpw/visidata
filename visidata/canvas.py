@@ -384,6 +384,9 @@ class Canvas(Plotter):
     def reset(self):
         'clear everything in preparation for a fresh reload()'
         self.polylines.clear()
+        self.canvasBox = None
+        self.visibleBox = None
+        self.cursorBox = None
         self.left_margin = self.leftMarginPixels
         self.legends.clear()
         self.legendwidth = 0
