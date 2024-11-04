@@ -76,7 +76,7 @@ class FormCanvas(BaseSheet):
 
         while True:
             k = vd.getkeystroke(self.scrForm, self)
-            if k in ['^C', '^Q', '^[', 'q']:
+            if k in ['Ctrl+C', 'Ctrl+Q', 'Ctrl+[', 'q']:
                 return {}
             if curinput and k in curinput.keystrokes:
                 return {curinput.input: k}

@@ -109,8 +109,8 @@ def inputPalette(sheet, prompt, items,
 
         navailitems = min(len(palrows), nitems)
 
-        bindings['^I'] = lambda *args: tab(1, navailitems) or args
-        bindings['KEY_BTAB'] = lambda *args: tab(-1, navailitems) or args
+        bindings['Ctrl+I'] = lambda *args: tab(1, navailitems) or args
+        bindings['Shift+Tab'] = lambda *args: tab(-1, navailitems) or args
 
         for i in range(nitems-len(palrows)):
             palrows.append((None, None))
@@ -132,16 +132,16 @@ def inputPalette(sheet, prompt, items,
                 if not topitem: return
                 if multiple:
                     bindings[' '] = partial(add_to_input, value=topitem[value_key])
-                    bindings['^J'] = partial(accept_input_if_subset, value=topitem[value_key])
+                    bindings['Enter'] = partial(accept_input_if_subset, value=topitem[value_key])
                 else:
-                    bindings['^J'] = partial(accept_input, value=topitem[value_key])
+                    bindings['Enter'] = partial(accept_input, value=topitem[value_key])
             elif item and i == tabitem:
                 if not item: return
                 if multiple:
-                    bindings['^J'] = partial(accept_input_if_subset, value=item[value_key])
+                    bindings['Enter'] = partial(accept_input_if_subset, value=item[value_key])
                     bindings[' '] = partial(add_to_input, value=item[value_key])
                 else:
-                    bindings['^J'] = partial(accept_input, value=item[value_key])
+                    bindings['Enter'] = partial(accept_input, value=item[value_key])
                 attr = colors.color_menu_spec
 
             match_summary = formatter(m, item, trigger_key) if item else ' '

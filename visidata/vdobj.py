@@ -159,7 +159,9 @@ class VisiData(visidata.Extensible):
             if ord(k) >= 32 and ord(k) != 127:  # 127 == DEL or ^?
                 return k
             k = ord(k)
-        return curses.keyname(k).decode('utf-8')
+
+        keyname = curses.keyname(k).decode('utf-8')
+        return self.prettykeys(keyname)
 
     @property
     def screenHeight(self):

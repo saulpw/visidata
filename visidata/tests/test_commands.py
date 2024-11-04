@@ -166,10 +166,10 @@ class TestCommands:
         vd.scr = mock_screen
 
         if longname in inputLines:
-            line = [ch for ch in inputLines[longname]] + ['^J']
+            line = [ch for ch in inputLines[longname]] + ['Enter']
             vd.getkeystroke = Mock(side_effect=line)
         else:
-            vd.getkeystroke = Mock(side_effect=['^J'])
+            vd.getkeystroke = Mock(side_effect=['Enter'])
 
         sample_file = vd.pkg_resources_files(visidata) / 'tests/sample.tsv'
         vs = visidata.TsvSheet('test_commands', source=visidata.Path(sample_file))

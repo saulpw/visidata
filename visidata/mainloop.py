@@ -212,7 +212,6 @@ def mainloop(vd, scr):
                 vd.warning('duplicate prefix: ' + keystroke)
                 vd.keystrokes = ''
             else:
-                keystroke = vd.prettykeys(keystroke)
                 vd.keystrokes += keystroke
 
         vd.drawRightStatus(sheet._scr, sheet)  # visible for commands that wait for input

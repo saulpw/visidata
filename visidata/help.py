@@ -168,10 +168,10 @@ BaseSheet.addCommand('g^H', 'sysopen-help', 'openManPage()', 'Show the UNIX man 
 BaseSheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))', 'list commands and keybindings available on current sheet')
 BaseSheet.addCommand('gz^H', 'help-commands-all', 'vd.push(HelpSheet("all_commands", source=None, revbinds={}))', 'list commands and keybindings for all sheet types')
 
-BaseSheet.bindkey('KEY_F(1)', 'sysopen-help')
-BaseSheet.bindkey('zKEY_F(1)', 'help-commands')
-BaseSheet.bindkey('zKEY_BACKSPACE', 'help-commands')
-BaseSheet.bindkey('gKEY_BACKSPACE', 'sysopen-help')
+BaseSheet.bindkey('F1', 'sysopen-help')
+BaseSheet.bindkey('zF1', 'help-commands')
+BaseSheet.bindkey('zBksp', 'help-commands')
+BaseSheet.bindkey('gBksp', 'sysopen-help')
 
 HelpSheet.addCommand(None, 'exec-command', 'quit(sheet); draw_all(); activeStack[0].execCommand(cursorRow.longname)', 'execute command on undersheet')
 BaseSheet.addCommand(None, 'open-tutorial-visidata', 'launchBrowser("https://jsvine.github.io/intro-to-visidata/")', 'open https://jsvine.github.io/intro-to-visidata/')

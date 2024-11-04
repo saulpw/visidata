@@ -118,17 +118,17 @@ for i in range(1, 11):
 for i in range(11, 21):
     BaseSheet.addCommand('', 'jump-sheet-'+str(i), f'vd.push(*(list(s for s in allSheets if s.shortcut==str({i})) or fail("no sheet")))', f'jump to sheet {i}')
 
-BaseSheet.bindkey('KEY_LEFT', 'go-left')
-BaseSheet.bindkey('KEY_DOWN', 'go-down')
-BaseSheet.bindkey('KEY_UP', 'go-up')
-BaseSheet.bindkey('KEY_RIGHT', 'go-right')
-BaseSheet.bindkey('KEY_NPAGE', 'go-pagedown')
-BaseSheet.bindkey('KEY_PPAGE', 'go-pageup')
+BaseSheet.bindkey('Left', 'go-left')
+BaseSheet.bindkey('Down', 'go-down')
+BaseSheet.bindkey('Up', 'go-up')
+BaseSheet.bindkey('Right', 'go-right')
+BaseSheet.bindkey('PgDn', 'go-pagedown')
+BaseSheet.bindkey('PgUp', 'go-pageup')
 
-BaseSheet.bindkey('gKEY_LEFT', 'go-leftmost'),
-BaseSheet.bindkey('gKEY_RIGHT', 'go-rightmost'),
-BaseSheet.bindkey('gKEY_UP', 'go-top'),
-BaseSheet.bindkey('gKEY_DOWN', 'go-bottom'),
+BaseSheet.bindkey('gLeft', 'go-leftmost'),
+BaseSheet.bindkey('gRight', 'go-rightmost'),
+BaseSheet.bindkey('gUp', 'go-top'),
+BaseSheet.bindkey('gDown', 'go-bottom'),
 BaseSheet.bindkey('Home', 'go-top')
 BaseSheet.bindkey('End', 'go-bottom')
 
@@ -138,8 +138,8 @@ Sheet.bindkey('BUTTON3_PRESSED', 'go-mouse')
 # vim-style scrolling with the 'z' prefix
 Sheet.addCommand('zz', 'scroll-middle', 'sheet.topRowIndex = cursorRowIndex-int(nScreenRows/2)', 'scroll current row to center of screen')
 
-Sheet.addCommand('kRIT5', 'go-right-page', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex', 'scroll cursor one page right', replay=False)
-Sheet.addCommand('kLFT5', 'go-left-page', 'pageLeft()', 'scroll cursor one page left', replay=False)
+Sheet.addCommand('Ctrl+Right', 'go-right-page', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex', 'scroll cursor one page right', replay=False)
+Sheet.addCommand('Ctrl+Left', 'go-left-page', 'pageLeft()', 'scroll cursor one page left', replay=False)
 Sheet.addCommand(None, 'scroll-left', 'sheet.cursorVisibleColIndex -= options.scroll_incr', 'scroll one column left')
 Sheet.addCommand(None, 'scroll-right', 'sheet.cursorVisibleColIndex += options.scroll_incr', 'scroll one column right')
 Sheet.addCommand(None, 'scroll-leftmost', 'sheet.leftVisibleColIndex = cursorVisibleColIndex', 'scroll sheet to leftmost column')
@@ -161,10 +161,10 @@ Sheet.addCommand(None, 'go-home', 'sheet.topRowIndex = sheet.cursorRowIndex = 0;
 BaseSheet.bindkey('Ctrl+ScrollUp', 'scroll-left')
 BaseSheet.bindkey('Ctrl+ScrollDown', 'scroll-right')
 
-BaseSheet.bindkey('zKEY_UP', 'scroll-up')
-BaseSheet.bindkey('zKEY_DOWN', 'scroll-down')
-BaseSheet.bindkey('zKEY_LEFT', 'scroll-left')
-BaseSheet.bindkey('zKEY_RIGHT', 'scroll-right')
+BaseSheet.bindkey('zUp', 'scroll-up')
+BaseSheet.bindkey('zDown', 'scroll-down')
+BaseSheet.bindkey('zLeft', 'scroll-left')
+BaseSheet.bindkey('zRight', 'scroll-right')
 
 # vim-like keybindings
 
@@ -172,8 +172,8 @@ BaseSheet.bindkey('h', 'go-left'),
 BaseSheet.bindkey('j', 'go-down'),
 BaseSheet.bindkey('k', 'go-up'),
 BaseSheet.bindkey('l', 'go-right'),
-BaseSheet.bindkey('^F', 'go-pagedown'),
-BaseSheet.bindkey('^B', 'go-pageup'),
+BaseSheet.bindkey('Ctrl+F', 'go-pagedown'),
+BaseSheet.bindkey('Ctrl+B', 'go-pageup'),
 BaseSheet.bindkey('gg', 'go-top'),
 BaseSheet.bindkey('G',  'go-bottom'),
 BaseSheet.bindkey('gj', 'go-bottom'),
@@ -181,8 +181,8 @@ BaseSheet.bindkey('gk', 'go-top'),
 BaseSheet.bindkey('gh', 'go-leftmost'),
 BaseSheet.bindkey('gl', 'go-rightmost')
 
-BaseSheet.addCommand('^^', 'jump-prev', 'vd.activeStack[1:] or fail("no previous sheet"); vd.push(vd.activeStack[1])', 'jump to previous sheet in this pane')
-BaseSheet.addCommand('g^^', 'jump-first', 'vd.push(vd.activeStack[-1])', 'jump to first sheet')
+BaseSheet.addCommand('Ctrl+^', 'jump-prev', 'vd.activeStack[1:] or fail("no previous sheet"); vd.push(vd.activeStack[1])', 'jump to previous sheet in this pane')
+BaseSheet.addCommand('gCtrl+^', 'jump-first', 'vd.push(vd.activeStack[-1])', 'jump to first sheet')
 
 BaseSheet.addCommand('BUTTON1_RELEASED', 'no-op', 'pass', 'do nothing')
 

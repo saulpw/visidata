@@ -227,29 +227,29 @@ class InputWidget:
         v = self.value
 
         if ch == '':                               return False
-        elif ch == 'KEY_IC':                       self.insert_mode = not self.insert_mode
-        elif ch == '^A' or ch == 'KEY_HOME':       i = 0
-        elif ch == '^B' or ch == 'KEY_LEFT':       i -= 1
-        elif ch in ('^C', '^Q', '^['):             raise EscapeException(ch)
-        elif ch == '^D' or ch == 'KEY_DC':         v = delchar(v, i)
-        elif ch == '^E' or ch == 'KEY_END':        i = len(v)
-        elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1
-        elif ch == '^G':
+        elif ch == 'Ins':                          self.insert_mode = not self.insert_mode
+        elif ch == 'Ctrl+A' or ch == 'Home':       i = 0
+        elif ch == 'Ctrl+B' or ch == 'Left':       i -= 1
+        elif ch in ('Ctrl+C', 'Ctrl+Q', 'Ctrl+['): raise EscapeException(ch)
+        elif ch == 'Ctrl+D' or ch == 'Del':        v = delchar(v, i)
+        elif ch == 'Ctrl+E' or ch == 'End':        i = len(v)
+        elif ch == 'Ctrl+F' or ch == 'Right':      i += 1
+        elif ch == 'Ctrl+G':
             vd.cycleSidebar()
             return False # not considered a first keypress
-        elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1; v = delchar(v, i)
-        elif ch == '^I':                           v, i = self.completion(v, i, +1)
-        elif ch == 'KEY_BTAB':                     v, i = self.completion(v, i, -1)
-        elif ch in ['^J', '^M']:                   return True # ENTER to accept value
-        elif ch == '^K':                           v = v[:i]  # ^Kill to end-of-line
-        elif ch == '^N':
+        elif ch in ('Ctrl+H', 'Bksp', 'Ctrl+?'):   i -= 1; v = delchar(v, i)
+        elif ch == 'Tab':                       v, i = self.completion(v, i, +1)
+        elif ch == 'Shift+Tab':                     v, i = self.completion(v, i, -1)
+        elif ch == 'Enter':                        return True # ENTER to accept value
+        elif ch == 'Ctrl+K':                       v = v[:i]  # Ctrl+Kill to end-of-line
+        elif ch == 'Ctrl+N':
             c = ''
             while not c:
                 c = vd.getkeystroke(scr)
             c = vd.prettykeys(c)
             i += len(c)
             v += c
-        elif ch == '^O':
+        elif ch == 'Ctrl+O':
             edit_v = vd.launchExternalEditor(v)
             if self.value == '' and edit_v == '':
                 # if a cell has a value of None, keep it when the editor exits with no change
@@ -257,20 +257,20 @@ class InputWidget:
             else:
                 self.value = edit_v
                 return True
-        elif ch == '^R':                           v = self.orig_value  # ^Reload initial value
-        elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1:i]), i)  # swap chars
-        elif ch == '^U':                           v = v[i:]; i = 0  # clear to beginning
-        elif ch == '^V':                           v = splice(v, i, until_get_wch(scr)); i += 1  # literal character
-        elif ch == '^W':                           j = find_nonword(v, 0, i-1, -1); v = v[:j+1] + v[i:]; i = j+1  # erase word
-        elif ch == '^Y':                           v = splice(v, i, str(vd.memory.clipval))
-        elif ch == '^Z':                           vd.suspend()
+        elif ch == 'Ctrl+R':                       v = self.orig_value  # Ctrl+Reload initial value
+        elif ch == 'Ctrl+T':                       v = delchar(splice(v, i-2, v[i-1:i]), i)  # swap chars
+        elif ch == 'Ctrl+U':                       v = v[i:]; i = 0  # clear to beginning
+        elif ch == 'Ctrl+V':                       v = splice(v, i, until_get_wch(scr)); i += 1  # literal character
+        elif ch == 'Ctrl+W':                       j = find_nonword(v, 0, i-1, -1); v = v[:j+1] + v[i:]; i = j+1  # erase word
+        elif ch == 'Ctrl+Y':                       v = splice(v, i, str(vd.memory.clipval))
+        elif ch == 'Ctrl+Z':                       vd.suspend()
         # CTRL+arrow
-        elif ch == 'kLFT5':                        i = find_nonword(v, 0, i-1, -1)+1; # word left
-        elif ch == 'kRIT5':                        i = find_nonword(v, i+1, len(v)-1, +1)+1; # word right
-        elif ch == 'kUP5':                         pass
-        elif ch == 'kDN5':                         pass
-        elif self.history and ch == 'KEY_UP':    v, i = self.prev_history(v, i)
-        elif self.history and ch == 'KEY_DOWN':  v, i = self.next_history(v, i)
+        elif ch == 'Ctrl+Left':                    i = find_nonword(v, 0, i-1, -1)+1; # word left
+        elif ch == 'Ctrl+Right':                   i = find_nonword(v, i+1, len(v)-1, +1)+1; # word right
+        elif ch == 'Ctrl+Up':                      pass
+        elif ch == 'Ctrl+Down':                    pass
+        elif self.history and ch == 'Up':    v, i = self.prev_history(v, i)
+        elif self.history and ch == 'Down':  v, i = self.next_history(v, i)
         elif len(ch) > 1:                          pass
         else:
             if self.first_action:
@@ -481,12 +481,10 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
                                              updater=_drawPrompt,
                                              record=False,
                                              bindings={
-                'KEY_BTAB': change_input(-1),
-                '^I':       change_input(+1),
-                'KEY_SR':   change_input(-1),
-                'KEY_SF':   change_input(+1),
-                'kUP':      change_input(-1),
-                'kDN':      change_input(+1),
+                'Shift+Tab':   change_input(-1),
+                'Tab':     change_input(+1),
+                'Shift+Up':   change_input(-1),
+                'Shift+Down': change_input(+1),
             })
             break
         except ChangeInput as e:
@@ -623,21 +621,19 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
         value = value or col.getDisplayValue(self.rows[self.cursorRowIndex])
 
     bindings={
-        'kUP':        acceptThenFunc('go-up', 'rename-col' if rowidx < 0 else 'edit-cell'),
-        'KEY_SR':     acceptThenFunc('go-up', 'rename-col' if rowidx < 0 else 'edit-cell'),
-        'kDN':        acceptThenFunc('go-down', 'rename-col' if rowidx < 0 else 'edit-cell'),
-        'KEY_SF':     acceptThenFunc('go-down', 'rename-col' if rowidx < 0 else 'edit-cell'),
-        'KEY_SRIGHT': acceptThenFunc('go-right', 'rename-col' if rowidx < 0 else 'edit-cell'),
-        'KEY_SLEFT':  acceptThenFunc('go-left', 'rename-col' if rowidx < 0 else 'edit-cell'),
-        '^I':         acceptThenFunc('go-right', 'rename-col' if rowidx < 0 else 'edit-cell'),
-        'KEY_BTAB':   acceptThenFunc('go-left', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'Shift+Up':     acceptThenFunc('go-up', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'Shift+Down':     acceptThenFunc('go-down', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'Shift+Right': acceptThenFunc('go-right', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'Shift+Left':  acceptThenFunc('go-left', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'Tab':         acceptThenFunc('go-right', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'Shift+Tab':   acceptThenFunc('go-left', 'rename-col' if rowidx < 0 else 'edit-cell'),
     }
 
     if vcolidx >= self.nVisibleCols-1:
-        bindings['^I'] = acceptThenFunc('go-down', 'go-leftmost', 'edit-cell')
+        bindings['Tab'] = acceptThenFunc('go-down', 'go-leftmost', 'edit-cell')
 
     if vcolidx <= 0:
-        bindings['KEY_BTAB'] = acceptThenFunc('go-up', 'go-rightmost', 'edit-cell')
+        bindings['Shift+Tab'] = acceptThenFunc('go-up', 'go-rightmost', 'edit-cell')
 
     # update local bindings with kwargs.bindings instead of the inverse, to preserve kwargs.bindings for caller
     bindings.update(kwargs.get('bindings', {}))

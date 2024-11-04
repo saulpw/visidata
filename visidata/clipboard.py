@@ -204,8 +204,8 @@ Sheet.addCommand('zx', 'cut-cell', 'copyCells(cursorCol, [cursorRow]); cursorCol
 Sheet.addCommand('gzx', 'cut-cells', 'copyCells(cursorCol, onlySelectedRows); cursorCol.setValues(onlySelectedRows, None)', 'delete (cut) contents of current column for selected rows and move them to clipboard')
 
 
-Sheet.bindkey('KEY_DC', 'delete-cell'),
-Sheet.bindkey('gKEY_DC', 'delete-cells'),
+Sheet.bindkey('Del', 'delete-cell'),
+Sheet.bindkey('gDel', 'delete-cells'),
 
 vd.addMenuItems('''
     Edit > Delete > current row > delete-row
