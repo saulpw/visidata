@@ -1,11 +1,11 @@
 import os
 import time
 
-from visidata import vd, BaseSheet, Sheet, asyncthread, Path, ScopedSetattr
+from visidata import vd, BaseSheet, Sheet, asyncignore, asyncthread, Path, ScopedSetattr
 
 
 @BaseSheet.api
-@asyncthread
+@asyncignore
 def reload_every(sheet, seconds:int):
     while True:
         sheet.reload()
