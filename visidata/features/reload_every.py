@@ -8,7 +8,10 @@ from visidata import vd, BaseSheet, Sheet, asyncignore, asyncthread, Path, Scope
 @asyncignore
 def reload_every(sheet, seconds:int):
     while True:
-        sheet.reload()
+        # continue reloading till vd.remove() runs, like when the sheet is quit
+        if not sheet in vd.sheets:
+            break
+        vd.sync(sheet.reload())
         time.sleep(seconds)
 
 
