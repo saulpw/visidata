@@ -3,6 +3,7 @@ import math
 import functools
 import collections
 import statistics
+from copy import copy
 
 from visidata import Progress, Sheet, Column, ColumnsSheet, VisiData
 from visidata import vd, anytype, vlen, asyncthread, wrapply, AttrDict, date, INPROGRESS
@@ -205,10 +206,9 @@ def addAggregators(sheet, cols, aggrnames):
     for aggrname in aggrnames:
         aggrs = vd.aggregators.get(aggrname)
         aggrs = aggrs if isinstance(aggrs, list) else [aggrs]
-        for aggr in aggrs:
-            for c in cols:
-                if not hasattr(c, 'aggregators'):
-                    c.aggregators = []
+        for c in cols:
+            vd.addUndo(setattr, c, 'aggregators', copy(c.aggregators))
+            for aggr in aggrs:
                 if aggr and aggr not in c.aggregators:
                     c.aggregators += [aggr]
 
