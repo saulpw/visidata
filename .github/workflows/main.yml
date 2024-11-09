@@ -67,6 +67,10 @@ jobs:
         git --no-pager diff --numstat tests/
         git --no-pager diff --exit-code tests/
 
+    - name: Test replaying input from stdin
+      run: |
+          echo -e '{"a":1}\n{"a":2}' | vd -f jsonl -p dev/stdin.vdj --batch --debug -N
+
     - name: Ensure VisiData can create completions
       run: python -v dev/zsh-completion.py
 
