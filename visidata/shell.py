@@ -133,7 +133,7 @@ class DirSheet(Sheet):
         Column('filetype', width=0, cache='async', getter=lambda col,row: subprocess.Popen(['file', '--brief', row], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
     ]
     nKeys = 2
-    _ordering = [('modtime', True)]  # sort by reverse modtime initially
+    _ordering = [('modtime', True), ('filename', False)]  # sort by reverse modtime initially
 
     @staticmethod
     def colorOwner(sheet, col, row, val):
