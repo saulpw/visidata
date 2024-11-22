@@ -143,10 +143,10 @@ def outputProgressEvery(vd, sheet, seconds:float=0.5):
 
 @visidata.VisiData.api
 def moveToPos(vd, sources, sheet_desc, startcol, startrow):
-    if sheet_desc == []:
-        # the moves list must have each of move refer only 1 specific sheet,
-        # so expand an "all sheets" descriptor into individual sheet descriptors
-        sheet_descs = [[str(i)] for i in range(len(sources))]
+    if sheet_desc == [] or sheet_desc[0] == '':
+        ## the list moves must have each of its elements refer only 1
+        # sheet, so expand the "all sheets" sheet descriptor into individual sheets
+        sheet_descs = [[str(i)] + sheet_desc[1:] for i, sheet in enumerate(sources)]
     else:
         sheet_descs = [sheet_desc]
     # for each sheet, attempt column moves first, then rows
