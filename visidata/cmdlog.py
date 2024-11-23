@@ -87,7 +87,7 @@ def isLoggableSheet(sheet):
 def moveToRow(vs, rowstr):
     'Move cursor to row given by *rowstr*, which can be either the row number or keystr.'
     rowidx = vs.getRowIndexFromStr(rowstr)
-    if rowidx is None:
+    if rowidx is None or rowidx >= vs.nRows:
         return False
 
     vs.cursorRowIndex = rowidx
