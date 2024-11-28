@@ -1,5 +1,5 @@
 from copy import copy
-from visidata import vd, asyncthread, Path, Sheet, IndexSheet
+from visidata import vd, asyncthread, Path, Sheet, IndexSheet, TableSheet
 
 
 @Sheet.api
@@ -40,4 +40,5 @@ def syseditCells_async(sheet, cols, rows, filetype=None):
             col.setValuesTyped(rows, *[tempcol.getTypedValue(r) for r in tempvs.rows])
 
 
+TableSheet.addCommand('^O', 'sysedit-cell', 'cursorCol.setValues([cursorRow], vd.launchExternalEditor(cursorDisplay))', 'edit current cell in external $EDITOR')
 Sheet.addCommand('g^O', 'sysedit-selected', 'syseditCells(visibleCols, onlySelectedRows)', 'edit rows in $EDITOR')
