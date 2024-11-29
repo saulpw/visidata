@@ -96,8 +96,8 @@ def parsePos(vd, arg:str, inputs:'list[tuple[str, dict]]'=None):
     '''Return (startsheets:list, startcol:str, startrow:str) from *arg* like "+sheet:subsheet:col:row".
     The elements of *startsheets* are identifiers that pick out a sheet, either
     a) a string that is the name of a sheet or subsheet
-    b) a string that is numbers (which are indices of a row).
-    For example ['1', 'sales', '3'].
+    b) integers (which are indices of a row or column, or a sheet number).
+    For example [1, 'sales', 3].
     Returns an empty list for *startsheets* when the starting pos applies to all sheets.
     Returns None for *startsheets* when the position expression did not specify a sheet.
     *inputs* is a list of (path, options) tuples.
@@ -105,12 +105,20 @@ def parsePos(vd, arg:str, inputs:'list[tuple[str, dict]]'=None):
     if arg == '': return None
     startsheets, startcol, startrow = None, None, None
 
-    pos = arg.split(':')
+    pos = []
+    # convert any numeric index strings to ints
+    for idx in arg.split(':'):
+        if idx:
+            if idx.isdigit() or (idx[0] == '-' and idx[1:].isdigit()):
+                idx = int(idx)
+        pos.append(idx)
+
     if len(pos) == 1:
-        startsheets = [Path(inputs[-1][0]).base_stem] if inputs else None
+        # -1 means the last sheet in the list of open sheets
+        startsheets = [-1] if inputs else None
         startrow = arg
     elif len(pos) == 2:
-        startsheets = [Path(inputs[-1][0]).base_stem] if inputs else None
+        startsheets = [-1] if inputs else None
         startcol, startrow = pos
     else:
         # the first element of pos is the startsheet,
@@ -146,7 +154,7 @@ def moveToPos(vd, sources, sheet_desc, startcol, startrow):
     if sheet_desc == [] or sheet_desc[0] == '':
         ## the list moves must have each of its elements refer only 1
         # sheet, so expand the "all sheets" sheet descriptor into individual sheets
-        sheet_descs = [[str(i)] + sheet_desc[1:] for i, sheet in enumerate(sources)]
+        sheet_descs = [[i] + sheet_desc[1:] for i, sheet in enumerate(sources)]
     else:
         sheet_descs = [sheet_desc]
     # for each sheet, attempt column moves first, then rows
@@ -160,7 +168,7 @@ def moveToPos(vd, sources, sheet_desc, startcol, startrow):
 
 def sheet_from_description(vd, sources, sheet_desc):
     '''Return a Sheet to apply col/row to, given a list *sheet_desc* that refers to one specific sheet.
-        The *sheet_desc* is either a Sheet, or a list of strings similar to the return value of parsePos(),
+        The *sheet_desc* is either a Sheet, or a list of strings/ints similar to the return value of parsePos(),
         with the difference that *sheet_desc* will not ever be the empty list that denotes "all sheets".
         Return None if no matching sheet was found; if sheets are loading, a subsequent call may return
         a matching sheet.
@@ -174,9 +182,9 @@ def sheet_from_description(vd, sources, sheet_desc):
         if desc_lvl == 0:
             vs = None
             #try subsheets as numbers first, then as names
-            if subsheet.isdigit():
+            if isinstance(subsheet, int):
                 try:
-                    vs = sources[int(subsheet)]
+                    vs = sources[subsheet]
                 except IndexError:
                     pass
             else:
@@ -184,8 +192,8 @@ def sheet_from_description(vd, sources, sheet_desc):
             if not vs:
                 raise ValueError(f'no sheet "{subsheet}"')
         else:
-            if subsheet and subsheet.isdigit():
-                rowidx = int(subsheet)
+            if isinstance(subsheet, int):
+                rowidx = subsheet
             else:
                 rowidx = vs.getRowIndexFromStr(vd.options.rowkey_prefix + subsheet)
             try:
@@ -220,12 +228,13 @@ def retry_move_to_pos(vd, sources, moves, retry_interval=0.1):
                 continue
             if not move_succeeded:
                 unmoved.append(move)
-        moves = unmoved
-        if moves:
+        if unmoved:
             time.sleep(retry_interval)
+        moves = unmoved
 
 def attempt_move_to_pos(vd, sources, sheet_desc, startcol, startrow):
-    '''Return True if the move succeeded in moving to the row and column, on the described sheet.'''
+    '''Return True if the move succeeded in moving to the row and column, on the described sheet.
+        Raise ValueError to indicate that a move failed, and should not be retried.'''
     vs = sheet_from_description(vd, sources, sheet_desc)
     if not vs:
         return False
@@ -237,16 +246,12 @@ def attempt_move_to_pos(vd, sources, sheet_desc, startcol, startrow):
     # try cursor moves
     success = True
     if startrow is not None:
-        if startrow.isdigit():  # treat strings that look like integers as indices, never row keys
-            startrow = int(startrow)
         if not vs.moveToRow(startrow):
             if vs.nRows > 0:    # avoid uninformative warnings early in startup
                 vd.warning(f'{vs} has no row {startrow}:  nRows={len(vs.rows)}"')
             success = False
 
     if startcol is not None:
-        if startcol.isdigit():  # treat strings that look like integers as indices, never column names
-            startcol = int(startcol)
         if not vs.moveToCol(startcol):
             if vs.nRows > 0:
                 vd.warning(f'{vs} has no column {startcol}')
