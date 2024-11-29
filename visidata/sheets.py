@@ -576,7 +576,10 @@ class TableSheet(BaseSheet):
         index = 0
         ccol = self.cursorCol
         if ccol and not ccol.keycol:
-            index = self.columns.index(ccol)+1
+            try:
+                index = self.columns.index(ccol)+1
+            except ValueError: # when all columns are hidden, the one column shown is not in self.columns
+                index = 0
 
         self.addColumn(*cols, index=index)
         firstnewcol = [c for c in cols if not c.hidden][0]
