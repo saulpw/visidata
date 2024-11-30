@@ -1,4 +1,5 @@
 import textwrap
+import re
 
 from visidata import vd, BaseSheet, options, Sheet, ColumnItem, asyncthread
 from visidata import Column, vlen
@@ -62,6 +63,22 @@ class ErrorSheet(TextSheet):
     guide = '''# Error Sheet'''
     precious = False
 
+    def sysopen_error(self, col, row):
+        '''Open an external editor for the file relevant to the cursor line
+        in the Error Sheet. If the cursor is on the first line, use the file
+        mentioned at the end of the stack trace'''
+        if self.rows and self.cursorRowIndex == 0:
+            searchidx = len(self.rows) - 1
+        else:
+            searchidx = self.cursorRowIndex
+        pat = re.compile(r'^ +File "(.*)", line (\d+), in ')
+        for _, text in self.rows[searchidx::-1]: # rowdef: [linenum, text]
+            match = pat.search(text)
+            if match:
+                vd.launchEditor(match.group(1), f'+{match.group(2)}')
+                return
+
+
 class ErrorCellSheet(ErrorSheet):
     columns = [
         ColumnItem('linenum', 0, type=int, width=0),
@@ -102,6 +119,7 @@ Sheet.addCommand('z^E', 'error-cell', 'vd.push(ErrorCellSheet(sheet.name+"_cell_
 
 TextSheet.addCommand('^O', 'sysopen-sheet', 'sheet.sysopen(sheet.cursorRowIndex)', 'open copy of text sheet in $EDITOR and reload on exit')
 
+ErrorSheet.addCommand('Enter', 'sysopen-error', 'sysopen_error(cursorCol, cursorRow)', 'open traceback line in $EDITOR')
 
 TextSheet.options.save_filetype = 'txt'
 
