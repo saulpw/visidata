@@ -1,0 +1,6 @@
+#!vd -p
+{"sheet": null, "col": null, "row": null, "longname": "open-file", "input": "tests/data1.tsv", "keystrokes": "o", "comment": null, "replayable": true}
+{"sheet": "data1", "col": "Key", "row": "", "longname": "hide-col", "input": "", "keystrokes": "-", "comment": "hide the current column", "replayable": true}
+{"sheet": "data1", "col": "A", "row": "", "longname": "hide-col", "input": "", "keystrokes": "-", "comment": "hide the current column", "replayable": true}
+{"sheet": "data1", "col": "B", "row": "", "longname": "hide-col", "input": "", "keystrokes": "-", "comment": "hide the current column", "replayable": true}
+{"sheet": "data1", "col": 0, "row": "", "longname": "addcol-incr", "input": "", "keystrokes": "i", "comment": "add column with incremental values", "replayable": true}
