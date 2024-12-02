@@ -95,7 +95,7 @@ def recentErrorsSheet(self):
 
 
 
-BaseSheet.addCommand('^E', 'error-recent', 'vd.lastErrors and vd.push(recentErrorsSheet) or status("no error")', 'view traceback for most recent error')
+BaseSheet.addCommand('^E', 'error-recent', 'vd.push(recentErrorsSheet) if vd.lastErrors else status("no error")', 'view traceback for most recent error')
 BaseSheet.addCommand('g^E', 'errors-all', 'vd.push(vd.allErrorsSheet)', 'view traceback for most recent errors')
 
 Sheet.addCommand('z^E', 'error-cell', 'vd.push(ErrorCellSheet(sheet.name+"_cell_error", sourceSheet=sheet, source=getattr(cursorCell, "error", None) or fail("no error this cell")))', 'view traceback for error in current cell')
