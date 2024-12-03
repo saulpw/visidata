@@ -252,3 +252,12 @@ def keystr(sheet, row):
     return sheet.rowname(row)
 
 vd.optalias('color_refline', 'color_graph_refline') # color_refline was used in v3.1 by mistake
+
+@deprecated('3.2', '[self.unsetKeys([c]) if c.keycol else self.setKeys([c]) for c in cols]')
+@visidata.TableSheet.api
+def toggleKeys(self, cols):
+    for col in cols:
+        if col.keycol:
+            self.unsetKeys([col])
+        else:
+            self.setKeys([col])

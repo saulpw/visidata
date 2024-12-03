@@ -607,13 +607,6 @@ class TableSheet(BaseSheet):
         for col in cols:
             col.keycol = 0
 
-    def toggleKeys(self, cols):
-        for col in cols:
-            if col.keycol:
-                self.unsetKeys([col])
-            else:
-                self.setKeys([col])
-
     def rowkey(self, row):
         'Return tuple of the key for *row*.'
         return tuple(c.getTypedValue(row) for c in self.keyCols)
@@ -1192,7 +1185,8 @@ BaseSheet.init('pane', lambda: 1)
 BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); reload()', 'Reload current sheet')
 Sheet.addCommand('', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line')
 
-Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', 'toggle current column as a key column')
+Sheet.addCommand('!', 'key-col', 'exec_longname("key-col-off") if cursorCol.keycol else exec_longname("key-col-on")', 'toggle current column as a key column', replay=False)
+Sheet.addCommand('', 'key-col-on', 'setKeys([cursorCol])', 'set current column as a key column')
 Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])', 'unset current column as a key column')
 
 Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)) if not (cursorRow is None) else fail("no rows to edit")', 'edit contents of current cell')
