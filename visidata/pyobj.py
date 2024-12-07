@@ -49,7 +49,14 @@ def view(vd, obj):
 
 def getPublicAttrs(obj):
     'Return all public attributes (not methods or `_`-prefixed) on object.'
-    return [k for k in dir(obj) if not k.startswith('_') and not callable(getattr(obj, k))]
+    attrs = []
+    for k in dir(obj):
+        try:
+            if not k.startswith('_') and not callable(getattr(obj, k)):
+                attrs.append(k)
+        except AttributeError: #attributes like formatted_help can raise AttributeError  #2631
+            pass
+    return attrs
 
 def PyobjColumns(obj):
     'Return columns for each public attribute on an object.'
