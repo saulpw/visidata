@@ -191,7 +191,7 @@ def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', o
     if bottommsg:
         clipdraw(sidebarscr, h-1, winw-dispwidth(bottommsg)-4, '|'+bottommsg+'|', cattr)
 
-    sidebarscr.refresh()
+    sidebarscr.noutrefresh()
 
 
 @VisiData.api

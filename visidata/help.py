@@ -135,7 +135,7 @@ class HelpPane:
         self.scr.erase()
         self.scr.box()
         self.amgr.draw(self.scr, y=1, x=2, **kwargs)
-        self.scr.refresh()
+        self.scr.noutrefresh()
 
 
 @VisiData.api
