@@ -303,8 +303,9 @@ class TableSheet(BaseSheet):
         self.rows = []
         try:
             with vd.Progress(gerund='loading', total=0):
+                max_rows = self.options.max_rows
                 for i, r in enumerate(self.iterload()):
-                    if self.precious and i > self.options.max_rows:
+                    if self.precious and i == max_rows:
                         break
                     self.addRow(r)
         except FileNotFoundError:
@@ -1051,8 +1052,9 @@ class SequenceSheet(Sheet):
 
         self.rows = []
         # add the rest of the rows
+        max_rows = self.options.max_rows
         for i, r in enumerate(vd.Progress(itsource, gerund='loading', total=0)):
-            if self.precious and i > self.options.max_rows:
+            if self.precious and i == max_rows:
                 break
             self.addRow(r)
 
