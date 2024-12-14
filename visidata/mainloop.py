@@ -251,13 +251,14 @@ def mainloop(vd, scr):
         vd.checkForFinishedThreads()
         vd.callNoExceptions(sheet.checkCursor)
 
-        # no idle redraw unless background threads are running
         time.sleep(0)  # yield to other threads which may not have started yet
         if vd._nextCommands:
-            if vd.options.replay_wait > 0:
-                vd.curses_timeout = int(vd.options.replay_wait*1000)
-            else:
+            if vd.unfinishedThreads:  #2369 #2635
+                # while running a bg thread for a command, schedule infrequent redraws
                 vd.curses_timeout = nonidle_timeout
+            else:
+                # otherwise, schedule the next redraw and command (immediately, for default replay_wait)
+                vd.curses_timeout = int(vd.options.replay_wait*1000)
         elif vd.unfinishedThreads:
             vd.curses_timeout = nonidle_timeout
         else:
