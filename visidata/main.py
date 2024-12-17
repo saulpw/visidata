@@ -359,6 +359,7 @@ def main_vd():
                 return 1
 
             if vd.options.interactive:
+                vd.options.batch = False  #2639
                 vd.execAsync = lambda *args, vd=vd, **kwargs: visidata.VisiData.execAsync(vd, *args, **kwargs)
                 run()
         else:
