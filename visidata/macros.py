@@ -107,9 +107,10 @@ def afterExecSheet(cmdlog, sheet, escaped, err):
     if not vd.activeCommand: return
     if vd.activeCommand.longname == 'macro-record': return
 
-    cmd = copy(vd.activeCommand)
-    cmd.sheet = ''
-    vd.macroMode.addRow(cmd)
+    if vd.activeCommand.replayable:
+        cmd = copy(vd.activeCommand)
+        cmd.sheet = ''
+        vd.macroMode.addRow(cmd)
 
 
 @CommandLogJsonl.api
