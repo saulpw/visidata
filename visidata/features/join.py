@@ -166,7 +166,8 @@ class MergeColumn(Column):
 
     def putValue(self, row, value):
         for vs, c in reversed(list(self.cols.items())):
-            c.setValue(row[vs], value)
+            if row[vs] is not None:
+                c.setValue(row[vs], value)
 
     def isDiff(self, row, value):
         col = list(self.cols.values())[0]
