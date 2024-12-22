@@ -60,7 +60,12 @@ class ErrorSheet(TextSheet):
         ColumnItem('linenum', 0, type=int, width=0),
         ColumnItem('error', 1),
     ]
-    guide = '''# Error Sheet'''
+    guide = '''
+        # Error Sheet
+This is the traceback for an error.
+- move cursor then {help.commands.sysopen_error}
+- `q` to quit this error sheet.
+    '''
     precious = False
 
     def sysopen_error(self, col, row):
@@ -86,6 +91,7 @@ class ErrorCellSheet(ErrorSheet):
     ]
     guide = '''# Error Cell Sheet
 This sheet shows the error that occurred when calculating a cell.
+- move cursor then {help.commands.sysopen_error}
 - `q` to quit this error sheet.
 '''
 
