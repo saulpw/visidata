@@ -16,7 +16,7 @@ import signal
 import warnings
 import builtins  # to override print
 
-from visidata import vd, options, run, BaseSheet, AttrDict
+from visidata import vd, options, run, BaseSheet, AttrDict, stacktrace
 from visidata import Path
 from visidata.settings import _get_config_file
 import visidata
@@ -392,6 +392,9 @@ def vd_cli():
         print(e)
         if options.debug:
             raise
+    except Exception as e:
+        for l in stacktrace(): #show the stack trace without carets
+            print(l)
 
     sys.stderr.flush()
     sys.stdout.flush()
