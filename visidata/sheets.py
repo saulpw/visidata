@@ -305,7 +305,7 @@ class TableSheet(BaseSheet):
             with vd.Progress(gerund='loading', total=0):
                 max_rows = self.options.max_rows
                 for i, r in enumerate(self.iterload()):
-                    if self.precious and i == max_rows:
+                    if self.precious and i >= max_rows:
                         break
                     self.addRow(r)
         except FileNotFoundError:
