@@ -1,4 +1,5 @@
 import re
+import http.client
 
 from visidata import Path, RepeatFile, vd, VisiData
 from visidata.loaders.tsv import splitter
@@ -55,6 +56,8 @@ def openurl_http(vd, path, filetype=None):
         vd.fail(f'cannot open URL: HTTP Error {e.code}: {e.reason}')
     except urllib.error.URLError as e:
         vd.fail(f'cannot open URL: {e.reason}')
+    except (http.client.HTTPException, ConnectionError) as e:
+        vd.fail(f'cannot open URL: {e}')
 
     filetype = filetype or vd.guessFiletype(path, response, funcprefix='guessurl_').get('filetype')  # try guessing by url
     filetype = filetype or vd.guessFiletype(path, funcprefix='guess_').get('filetype')  # try guessing by contents
