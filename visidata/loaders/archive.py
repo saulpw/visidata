@@ -77,6 +77,12 @@ Commands:
                 pwd = vd.input(f'{args[0].filename} is encrypted, enter password: ', display=False)
                 return zip_open(*args, **kwargs, pwd=pwd.encode('utf-8'))
             vd.exceptionCaught(err)
+        except urllib.error.HTTPError as err:
+            if err.status is None:
+                vd.fail(f'cannot open URL: {err.msg}')
+            else:
+                vd.fail(f'cannot open URL: HTTP Error {err.status}: {err.msg}')
+
 
     def openRow(self, row):
             fi, zpath = row

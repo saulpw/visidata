@@ -52,6 +52,7 @@ import fnmatch
 import argparse
 import pathlib
 import urllib.parse
+import urllib.error
 from visidata import vd
 
 
@@ -149,7 +150,20 @@ class RemoteZipFile:
         return list(r.filename for r in self.infoiter())
 
     def infoiter(self):
-        resp = self.http.request('HEAD', self.url)
+        urllib3 = vd.importExternal('urllib3')
+        try:
+            resp = self.http.request('HEAD', self.url)
+        except urllib3.exceptions.HTTPError as e:
+            code = None
+            msg = f'urllib3.error.{e.__name__}'
+            hdrs = fp = None
+            # transform to HTTPError in urllib, instead of urllib3, to avoid caller needing urllib3
+            raise urllib.error.HTTPError(self.url, code, msg, hdrs, fp)
+        if not (200 <= resp.status <= 299):
+            code = resp.status
+            msg = 'HEAD request status not in range 200-299'
+            hdrs = fp = None
+            raise urllib.error.HTTPError(self.url, code, msg, hdrs, fp)
         r = resp.headers.get('Accept-Ranges', '')
         if r != 'bytes':
             hostname = urllib.parse.urlparse(self.url).netloc
@@ -231,7 +245,13 @@ class RemoteZipFile:
             self.extract(fn, path, pwd=pwd)
 
     def get_range(self, start, n):
-        return self.http.request('GET', self.url, headers={'Range': f'bytes={start}-{start+n-1}'}, preload_content=False)
+        try:
+            return self.http.request('GET', self.url, headers={'Range': f'bytes={start}-{start+n-1}'}, preload_content=False)
+        except urllib3.exceptions.HTTPError as e:
+            code = None
+            msg = f'urllib3.error.{e.__name__}'
+            hdrs = fp = None
+            raise urllib.error.HTTPError(self.url, code, msg, hdrs, fp)
 
     def matching_files(self, *globs):
         for f in self.files.values():
