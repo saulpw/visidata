@@ -37,7 +37,16 @@ def syseditCells_async(sheet, cols, rows, filetype=None):
             tempcol = tempvs.colsByName.get(col.name)
             if not tempcol: # column not in edited version
                 continue
-            col.setValuesTyped(rows, *[tempcol.getTypedValue(r) for r in tempvs.rows])
+            # only assign values that were changed by the editor
+            edited_rows = []
+            edited_vals = []
+            for r, r_edited in zip(rows, tempvs.rows):
+                v = tempcol.getDisplayValue(r_edited)
+                if col.getDisplayValue(r) != v:
+                    edited_rows.append(r)
+                    edited_vals.append(v)
+            if edited_rows:
+                col.setValuesTyped(edited_rows, *edited_vals)
 
 
 TableSheet.addCommand('^O', 'sysedit-cell', 'cd = cursorDisplay; e = vd.launchExternalEditor(cursorDisplay); cursorCol.setValues([cursorRow], e) if e != cd else None', 'edit current cell in external $EDITOR')
