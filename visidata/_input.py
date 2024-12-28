@@ -251,8 +251,8 @@ class InputWidget:
             v += c
         elif ch == '^O':
             edit_v = vd.launchExternalEditor(v)
-            if self.value == '' and edit_v == '':
-                # if a cell has a value of None, keep it when the editor exits with no change
+            if self.value == edit_v:
+                # leave cell unmodified when the editor exits with no change
                 raise EscapeException(ch)
             else:
                 self.value = edit_v
