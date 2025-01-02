@@ -101,6 +101,43 @@ class TestClipText:
         assert clips == clippeds
         assert clipw == clippedw
 
+    @pytest.mark.parametrize('s, w, clippeds, clippedw', [
+        ('b to', 4, 'b to', 4),
+        ('abcde', 8, 'abcde', 5),
+        (' jsonl', 5, 'jsonl', 5),
+        ('abcdで', 6, 'abcdで', 6),
+        ('abcdで', 5, 'bcdで', 5),
+        ('でbcdで', 6, 'bcdで', 5),
+        ('でbcdefghiで', 10, 'bcdefghiで', 10),
+        ('でbcdefghiで', 3, 'iで', 3),
+        ('でbcdで', 2, 'で', 2),
+        ('でbcdで', 1, '', 0),
+        ('でbcdで', 0, '', 0),
+        ('でbcdで', -1, '', 0),
+    ])
+    def test_clipstr_start(self, s, w, clippeds, clippedw):
+        clips, clipw = visidata.clipstr_start(s, w)
+        assert clips == clippeds
+        assert clipw == clippedw
+
+    @pytest.mark.parametrize('s, w, clippeds, clippedw', [
+        ('aAbcで', 6, 'aAbcで', 6),
+        ('aAbcで', 7, 'aAbcで', 6),
+        ('aAbcで', 1000, 'aAbcで', 6),
+        ('aAbcで', 5, '…bcで', 5),
+        ('でbcで', 5, '…bcで', 5),
+        ('でででででbcで', 5, '…bcで', 5),
+        ('でbcで', 3, '…で', 3),
+        ('でbcで', 2, '…', 1),
+        ('でbcで', 1, '…', 1),
+        ('でbcで', 0, '', 0),
+        ('でbcで', -1, '', 0),
+    ])
+    def test_clipstr_start_truncator(self, s, w, clippeds, clippedw):
+        clips, clipw = visidata.clipstr_start(s, w, truncator='…')
+        assert clips == clippeds
+        assert clipw == clippedw
+
     def test_clipdraw_chunks(self):
         prechunks = [
             ('', 'x'),

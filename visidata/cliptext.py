@@ -355,6 +355,22 @@ def clipbox(scr, lines, attr, title=''):
 
     clipdraw(scr, 0, w-len(title)-6, f"| {title} |", attr)
 
+def clipstr_start(dispval, w, truncator=''):
+    '''Return a tuple (frag, dw), where *frag* is the longest ending substring
+    of *dispval* that will fit in a space *w* terminal display characters wide,
+    and *dw* is the substring's display width as an int.'''
+    # Note: this implementation is likely incorrect for unusual Unicode
+    # strings or encodings, where trimming an initial character produces
+    # an invalid string or does not make the string shorter.
+    if w <= 0: return '', 0
+    j = len(dispval)
+    while j >= 1:
+        if dispwidth((truncator if j > 1 else '') + dispval[j-1:]) <= w:
+            j -= 1
+        else:
+            break
+    frag = (truncator if j > 0 else '') + dispval[j:]
+    return frag, dispwidth(frag)
 
 vd.addGlobals(clipstr=clipstr,
               clipdraw=clipdraw,
@@ -363,4 +379,5 @@ vd.addGlobals(clipstr=clipstr,
               dispwidth=dispwidth,
               iterchars=iterchars,
               iterchunks=iterchunks,
-              wraptext=wraptext)
+              wraptext=wraptext,
+              clipstr_start=clipstr_start)
