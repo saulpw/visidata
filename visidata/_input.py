@@ -112,7 +112,7 @@ def delchar(s, i, remove=1):
     'Delete `remove` characters from str `s` beginning at position `i`.'
     return s if i < 0 else s[:i] + s[i+remove:]
 
-def find_nonword(s, a, b, incr):
+def find_word(s, a, b, incr):
         if not s: return 0
         a = min(max(a, 0), len(s)-1)
         b = min(max(b, 0), len(s)-1)
@@ -124,9 +124,9 @@ def find_nonword(s, a, b, incr):
                 b += incr
             return min(max(b, -1), len(s))
         else:
-            while not s[a].isalnum() and a < b:  # first skip non-word chars
+            while s[a].isalnum() and a < b:       # first skip word chars
                 a += incr
-            while s[a].isalnum() and a < b:
+            while not s[a].isalnum() and a < b:   # then skip non-word chars
                 a += incr
             return min(max(a, 0), len(s))
 
@@ -261,12 +261,12 @@ class InputWidget:
         elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1:i]), i)  # swap chars
         elif ch == '^U':                           v = v[i:]; i = 0  # clear to beginning
         elif ch == '^V':                           v = splice(v, i, until_get_wch(scr)); i += 1  # literal character
-        elif ch == '^W':                           j = find_nonword(v, 0, i-1, -1); v = v[:j+1] + v[i:]; i = j+1  # erase word
+        elif ch == '^W':                           j = find_word(v, 0, i-1, -1); v = v[:j+1] + v[i:]; i = j+1  # erase word
         elif ch == '^Y':                           v = splice(v, i, str(vd.memory.clipval))
         elif ch == '^Z':                           vd.suspend()
         # CTRL+arrow
-        elif ch == 'kLFT5':                        i = find_nonword(v, 0, i-1, -1)+1; # word left
-        elif ch == 'kRIT5':                        i = find_nonword(v, i+1, len(v)-1, +1)+1; # word right
+        elif ch == 'kLFT5':                        i = find_word(v, 0, i-1, -1)+1;  # word left
+        elif ch == 'kRIT5':                        i = find_word(v, i, len(v)-1, +1);  # word right
         elif ch == 'kUP5':                         pass
         elif ch == 'kDN5':                         pass
         elif self.history and ch == 'KEY_UP':    v, i = self.prev_history(v, i)
