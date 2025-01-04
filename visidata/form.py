@@ -52,7 +52,7 @@ class FormCanvas(BaseSheet):
             # underline first occurrence of r.key in r.text
             if hasattr(r, 'key') and r.key:
                 index = r.text.find(r.key)
-                clipdraw(scr, y, x+index, r.text[index:len(r.key)+1], colors[color + " underline"])
+                clipdraw(scr, y, x+index, r.text[index:index+len(r.key)], colors[color + " underline"])
             vd.onMouse(scr, x, y, dispwidth(r.text), 1,
                     BUTTON1_PRESSED=lambda y,x,key,r=r,sheet=self: sheet.onPressed(r),
                     BUTTON1_RELEASED=lambda y,x,key,r=r,sheet=self: sheet.onReleased(r))
