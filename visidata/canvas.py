@@ -304,8 +304,8 @@ class Plotter(BaseSheet):
             def _overlaps(a, b):
                 a_x1, _, a_txt, _, _ = a
                 b_x1, _, b_txt, _, _ = b
-                a_x2 = a_x1 + len(a_txt)
-                b_x2 = b_x1 + len(b_txt)
+                a_x2 = a_x1 + dispwidth(a_txt)
+                b_x2 = b_x1 + dispwidth(b_txt)
                 if a_x1 < b_x1 < a_x2 or a_x1 < b_x2 < a_x2 or \
                    b_x1 < a_x1 < b_x2 or b_x1 < a_x2 < b_x2:
                    return True
@@ -325,10 +325,10 @@ class Plotter(BaseSheet):
             for pix_x, pix_y, txt, attr, row in self.labels:
                 if attr in self.hiddenAttrs:
                     continue
-                if row is not None:
-                    pix_x -= len(txt)/2*2
                 char_y = int(pix_y/4)
                 char_x = int(pix_x/2)
+                if row is not None:
+                    char_x -= math.ceil(dispwidth(txt)/2)*2
                 o = (char_x, char_y, txt, attr, row)
                 _mark_overlap_text(labels_by_line[char_y], o)
 

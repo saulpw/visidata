@@ -270,11 +270,11 @@ class GraphSheet(InvertedCanvas):
             txt = tick + txt
         else:
             right_margin = self.plotwidth - 1 - self.plotviewBox.xmax
-            if (len(txt)+len(tick))*2 <= right_margin:
+            if (dispwidth(txt)+dispwidth(tick))*2 <= right_margin:
                 txt = tick + txt
             else:
                 # shift rightmost label to be left of its tick
-                x -= len(txt)*2
+                x -= dispwidth(txt)*2
                 if len(tick) == 0:
                     x += 1
                 txt = txt + tick
