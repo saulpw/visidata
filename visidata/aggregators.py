@@ -6,7 +6,7 @@ import statistics
 from copy import copy
 
 from visidata import Progress, Sheet, Column, ColumnsSheet, VisiData
-from visidata import vd, anytype, vlen, asyncthread, wrapply, AttrDict, date, INPROGRESS
+from visidata import vd, anytype, vlen, asyncthread, wrapply, AttrDict, date, INPROGRESS, dispwidth
 
 vd.help_aggregators = '''# Choose Aggregators
 Start typing an aggregator name or description.
@@ -264,7 +264,7 @@ def chooseAggregators(vd):
     prompt = 'choose aggregators: '
     def _fmt_aggr_summary(match, row, trigger_key):
         formatted_aggrname = match.formatted.get('key', row.key) if match else row.key
-        r = ' '*(len(prompt)-3)
+        r = ' '*(dispwidth(prompt)-3)
         r += f'[:keystrokes]{trigger_key}[/]  '
         r += formatted_aggrname
         if row.desc:
