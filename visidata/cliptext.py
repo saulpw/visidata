@@ -310,6 +310,7 @@ def wraptext(text, width=80, indent=''):
         line = _markdown_to_internal(line)
         chunks = re.split(internal_markup_re, line)
         textchunks = [x for x in chunks if not is_vdcode(x)]
+        # textwrap.wrap does not handle variable-width characters  #2416
         for linenum, textline in enumerate(textwrap.wrap(''.join(textchunks), width=width, drop_whitespace=False)):
             txt = textline
             r = ''
@@ -345,7 +346,7 @@ def clipbox(scr, lines, attr, title=''):
     for i, line in enumerate(lines):
         clipdraw(scr, i+1, 2, line, attr)
 
-    clipdraw(scr, 0, w-len(title)-6, f"| {title} |", attr)
+    clipdraw(scr, 0, w-dispwidth(title)-6, f"| {title} |", attr)
 
 
 vd.addGlobals(clipstr=clipstr,

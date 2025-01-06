@@ -1,6 +1,6 @@
 import collections
 from functools import partial
-from visidata import DrawablePane, BaseSheet, vd, VisiData, CompleteKey, clipdraw, HelpSheet, colors, AcceptInput, AttrDict, drawcache_property
+from visidata import DrawablePane, BaseSheet, vd, VisiData, CompleteKey, clipdraw, HelpSheet, colors, AcceptInput, AttrDict, drawcache_property, dispwidth
 
 
 vd.theme_option('color_cmdpalette', 'black on 72', 'base color of command palette')
@@ -180,7 +180,7 @@ def inputLongname(sheet):
         formatted_name = f'[:bold][:onclick {row.longname}]{formatted_longname}[/][/]'
         if vd.options.debug and match:
             keystrokes = f'[{match.score}]'
-        r = f' [:keystrokes]{keystrokes.rjust(len(prompt)-5)}[/]  '
+        r = f' [:keystrokes]{keystrokes.rjust(dispwidth(prompt)-5)}[/]  '
         if trigger_key:
             r += f'[:keystrokes]{trigger_key}[/]'
         else:

@@ -1,7 +1,7 @@
 from collections import defaultdict
 import json
 import time
-from visidata import colors, vd, clipdraw, ColorAttr
+from visidata import colors, vd, clipdraw, ColorAttr, dispwidth
 
 __all__ = ['Animation', 'AnimationMgr']
 
