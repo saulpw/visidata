@@ -77,7 +77,7 @@ class Animation:
             self.total_ms = sum(f.duration_ms or 0 for f in self.frames.values())
             for f in self.frames.values():
                 for r, x, y, _ in self.iterdeep(f.rows):
-                    self.width = max(self.width, x+len(r.text))
+                    self.width = max(self.width, x+dispwidth(r.text))
                     self.height = max(self.height, y)
 
     def draw(self, scr, *, t=0, x=0, y=0, loop=False, attr=ColorAttr(), **kwargs):
