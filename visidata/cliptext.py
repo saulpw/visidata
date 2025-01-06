@@ -142,13 +142,15 @@ def iterchars(x):
 
 @functools.lru_cache(maxsize=100000)
 def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
-    '''Return clipped string and width in terminal display characters.
-    Note: width may differ from len(s) if East Asian chars are 'fullwidth'.'''
-    if not s:
+    ''' *s* is a string or an iterator that contains characters.
+    *dispw* is the integer screen width that the clipped string will fit inside, or None.
+    Return clipped string and width in terminal display characters.
+    Note: width may differ from len(s) if chars are 'fullwidth'.
+    If *dispw* is None, no clipping occurs.
+    If *trunch* has a width greater than *dispw*, the empty string
+    will be used as a truncator instead, and a warning will be shown.'''
+    if not s or (dispw is not None and dispw < 1): #iterator s would be truthy
         return '', 0
-
-    if dispw == 1:
-        return s[0], 1
 
     w = 0
     ret = ''
@@ -160,12 +162,17 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
             newc = c
             chlen = dispwidth(c)
 
+        #if the next character will not fit
         if dispw and w+chlen > dispw:
-            if trunchlen and dispw > trunchlen:
-                lastchlen = _dispch(ret[-1])[1]
-                if w+trunchlen > dispw:
+            if trunchlen > dispw:
+                vd.warning(f'truncator {repr(trunch)} is too big to fit in dispw of {dispw}')
+                return _clipstr(s, dispw, trunch='', oddspacech=oddspacech, combch=combch, modch=modch)
+            # if the trunch by itself can fit
+            if trunchlen and dispw >= trunchlen:
+                # if trunch cannot be appended to fit, trim the ending characters until the trunch will fit
+                while w and w+trunchlen > dispw:
                     ret = ret[:-1]
-                    w -= lastchlen
+                    w = dispwidth(ret)
                 ret += trunch  # replace final char with ellipsis
                 w += trunchlen
             break
@@ -178,6 +185,8 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
 
 @drawcache
 def clipstr(s, dispw, truncator=None, oddspace=None):
+    ''' *s* is a string or an iterator that contains characters.
+    *dispw* is the integer screen width that the clipped string will fit inside, or None.'''
     if options.visibility:
         return _clipstr(s, dispw,
                         trunch=options.disp_truncator if truncator is None else truncator,
