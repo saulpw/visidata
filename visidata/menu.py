@@ -178,9 +178,9 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
 
     maxbinding = 0
     if vd.options.disp_menu_keys:
-        maxbinding = max(len(item.binding or '') for item in menus)+1
+        maxbinding = max(dispwidth(item.binding or '') for item in menus)+1
 
-    w = max(len(item.title) for item in menus)+maxbinding+2
+    w = max(dispwidth(item.title) for item in menus)+maxbinding+2
 
     # draw borders before/under submenus
     if level > 1:
@@ -225,11 +225,11 @@ def drawSubmenu(vd, scr, sheet, y, x, menus, level, disp_menu_boxchars=''):
                         mainbinding = vd.prettykeys(revbinds[0])
 
         # actually display the menu item
-        title += ' '*(w-len(pretitle)-len(item.title)+1) # padding
+        title += ' '*(w-dispwidth(pretitle)-dispwidth(item.title)+1) # padding
 
         menudraw(scr, y+i, x+1, pretitle+title, attr)
         if maxbinding and mainbinding:
-            menudraw(scr, y+i, x+1+w-len(mainbinding), mainbinding, attr.update(colors.keystrokes))
+            menudraw(scr, y+i, x+1+w-dispwidth(mainbinding), mainbinding, attr.update(colors.keystrokes))
         menudraw(scr, y+i, x+2+w, titlenote, attr)
         menudraw(scr, y+i, x+3+w, ls, colors.color_menu)
 
@@ -317,7 +317,7 @@ def drawMenu(vd, scr, sheet):
                 BUTTON1_RELEASED=vd.nop,
                 BUTTON2_RELEASED=vd.nop,
                 BUTTON3_RELEASED=vd.nop)
-        x += len(item.title)+2
+        x += dispwidth(item.title)+2
 
     rightdisp = sheet.options.disp_menu_fmt.format(sheet=sheet, vd=vd)
     menudraw(scr, 0, x+4, rightdisp, colors.color_menu)
@@ -355,13 +355,13 @@ def drawMenu(vd, scr, sheet):
 
     # cmd.helpstr text
     for i, line in enumerate(helplines):
-        menudraw(scr, y+i, helpx, ls+' '+line+' '*(helpw-len(line)-3)+rs, helpattr)
+        menudraw(scr, y+i, helpx, ls+' '+line+' '*(helpw-dispwidth(line)-3)+rs, helpattr)
     y += len(helplines)
 
     if sidelines:
         menudraw(scr, y, helpx, ls+' '*(helpw-2)+rs, helpattr)
         for i, line in enumerate(sidelines):
-            menudraw(scr, y+i+1, helpx, ls+'    '+line+' '*(helpw-len(line)-6)+rs, helpattr)
+            menudraw(scr, y+i+1, helpx, ls+'    '+line+' '*(helpw-dispwidth(line)-6)+rs, helpattr)
         y += len(sidelines)+1
 
     menudraw(scr, y, helpx, bl+bs*(helpw-2)+br, helpattr)
@@ -371,7 +371,7 @@ def drawMenu(vd, scr, sheet):
         menudraw(scr, menuy, helpx+2, rsl, helpattr)
         ks = vd.prettykeys(mainbinding or '(unbound)')
         menudraw(scr, menuy, helpx+3, ' '+ks+' ', colors.color_menu_active)
-        menudraw(scr, menuy, helpx+2+len(ks)+3, lsr, helpattr)
+        menudraw(scr, menuy, helpx+2+dispwidth(ks)+3, lsr, helpattr)
     menudraw(scr, menuy, helpx+19, ' '+cmd.longname+' ', helpattr)
 
     vd.onMouse(scr, helpx, menuy, helpw, y-menuy+1,
