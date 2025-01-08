@@ -1,0 +1,5 @@
+#!vd -p
+{"sheet": null, "col": null, "row": null, "longname": "open-file", "input": "sample_data/sample.tsv", "keystrokes": "o", "comment": null, "replayable": true}
+{"sheet": "sample", "col": "OrderDate", "row": "", "longname": "addcol-iter", "input": "range(1, 100)", "comment": "add column with values from a Python sequence expression, repeating it if needed to fill", "replayable": true}
+{"sheet": "sample", "col": "A", "row": "", "longname": "type-int", "input": "", "keystrokes": "#", "comment": "set type of current column to int", "replayable": true}
+{"sheet": "sample", "col": "A", "row": "", "longname": "key-col-on", "input": "", "comment": "set current column as a key column", "replayable": true}

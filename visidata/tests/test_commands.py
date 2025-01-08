@@ -67,6 +67,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'addcol-incr-step': '2',
                  'setcol-incr-step': '2',
                  'setcol-iter': 'range(1, 100)',
+                 'addcol-iter': 'range(1, 100)',
                  'setcol-format-enum': '1=cat',
                  'open-ping': 'github.com',
                  'setcol-input': '5',
