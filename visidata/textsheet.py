@@ -83,6 +83,9 @@ This is the traceback for an error.
                 vd.launchEditor(match.group(1), f'+{match.group(2)}')
                 return
 
+    def reload(self):
+        src = self.source or (vd.lastErrors[-1] if vd.lastErrors else [])
+        self.rows = list(enumerate(src))
 
 class ErrorCellSheet(ErrorSheet):
     columns = [
@@ -102,23 +105,22 @@ class ErrorsSheet(Sheet):
         ColumnItem('lastline', -1)
     ]
     def reload(self):
-        self.rows = self.source
+        self.rows = self.source or vd.lastErrors
 
     def openRow(self, row):
         return ErrorSheet(source=self.cursorRow)
 
-@VisiData.property
+@VisiData.lazy_property
 def allErrorsSheet(self):
-    return ErrorsSheet("errors_all", source=vd.lastErrors)
+    return ErrorsSheet("errors_all")
 
-@VisiData.property
+@VisiData.lazy_property
 def recentErrorsSheet(self):
-    error = vd.lastErrors[-1] if vd.lastErrors else ''
-    return ErrorSheet("errors_recent", source=error)
+    return ErrorSheet("errors_recent")
 
 
 
-BaseSheet.addCommand('^E', 'error-recent', 'vd.push(recentErrorsSheet) if vd.lastErrors else status("no error")', 'view traceback for most recent error')
+BaseSheet.addCommand('^E', 'error-recent', 'recentErrorsSheet.reload(); vd.push(recentErrorsSheet) if vd.lastErrors else status("no error")', 'view traceback for most recent error')
 BaseSheet.addCommand('g^E', 'errors-all', 'vd.push(vd.allErrorsSheet)', 'view traceback for most recent errors')
 
 Sheet.addCommand('z^E', 'error-cell', 'vd.push(ErrorCellSheet(sheet.name+"_cell_error", sourceSheet=sheet, source=getattr(cursorCell, "error", None) or fail("no error this cell")))', 'view traceback for error in current cell')
