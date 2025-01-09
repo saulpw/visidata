@@ -731,7 +731,7 @@ class Canvas(Plotter):
     def plot_elements(self, invert_y=False):
         'plots points and lines and text onto the plotter'
 
-        self.resetBounds()
+        self.resetBounds(refresh=False)
 
         bb = self.visibleBox
         xmin, ymin, xmax, ymax = bb.xmin, bb.ymin, bb.xmax, bb.ymax
