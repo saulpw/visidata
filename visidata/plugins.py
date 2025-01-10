@@ -79,6 +79,7 @@ class PluginsSheet(Sheet):
         ItemColumn('installed', width=8),
         ItemColumn('description', width=60),
     ]
+    _ordering = [('name', True)]  # sort by name initially
     nKeys = 1
     def iterload(self):
         import pkgutil
