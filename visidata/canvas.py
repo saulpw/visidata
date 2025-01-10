@@ -317,7 +317,7 @@ class Plotter(BaseSheet):
             for o in labels:
                 if _overlaps(o[0], textobj):
                     o[1] = False
-                    label_fldraw[1] = False
+                    label_fldraw[1] = True
 
         if self.options.disp_graph_labels:
             labels_by_line = defaultdict(list) # y -> text labels
