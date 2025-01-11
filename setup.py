@@ -24,7 +24,7 @@ setup(
     py_modules=["visidata"],
     install_requires=[
         "python-dateutil",
-        'windows-curses >= 2.4; platform_system == "Windows"',  # 2119
+        'windows-curses >= 2.4.1; platform_system == "Windows"',  # 2119
         'importlib_resources; python_version<"3.9"',
     ],
     packages=[
