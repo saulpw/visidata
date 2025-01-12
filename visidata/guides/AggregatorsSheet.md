@@ -3,12 +3,9 @@ sheet: AggregatorSheet
 ---
 # Aggregations like sum, mean, and distinct
 
-
 Aggregators provide summary statistics for grouped rows.
 
-
 The current aggregators include:
-
 
    min           smallest value in the group
    max           largest value in the group
@@ -23,16 +20,13 @@ The current aggregators include:
    list          gathers values in column into a list
    stdev         standard deviation of values
 
-
-## View a one-off aggegation of a column
+## View a one-off aggregation of a column
 
 - {help.commands.memo-aggregate} 
 
 ## Create an aggregator column
 
-Aggregators appear in grouped sheets,  **Frequency Table** or **Pivot Table**.
-
-Note that, as of version 3.1, aggregators will also appear at the bottom of the column list in the source sheet.
+Aggregated columns appear in the **Frequency Table** and **Pivot Table** (grouped sheets).  Aggregated values will also appear at the bottom of their columns in the source sheet.
 
 - {help.commands.aggregate-col}
 
@@ -51,9 +45,7 @@ To get a predefined set of summary statistics for every column in the sheet, use
 
 - {help.commands.describe-all}
 
-
 ## Examples
-
 
 Sample input sheet **sales**:
 
@@ -64,7 +56,6 @@ Sample input sheet **sales**:
    2024-09-03  R      100
    2024-09-03  B      33
    2024-09-03  B      99
-
 
 1. Move to the `price` column
 2. Set it to currency: [:keys]$[/key]
@@ -83,14 +74,11 @@ Sample input sheet **sales**:
    2024-09-01  1      30.00
    2024-09-02  1      28.00
 
+## Creating new aggregator functions
 
-## Creating new aggregators
-
-It is also very easy to add new aggregators if you are familiar with Python. Here is an example of how to add a new aggregator to compute the range of the grouped valuesvalues (max - min):
-
-Add the following code to the `.visidatarc` file:
+To add a new aggregator to compute the range of the grouped values (max - min), add the following to `.visidatarc`:
 
 [:code]vd.aggregator('range', lambda values: max(values) - min(values), 'range of values')[/]
 
-
+The `values` parameter is a list of typed values from the column, with the function returning the aggregated value.
 The new aggregator will now be available the next time VisiData is started.
