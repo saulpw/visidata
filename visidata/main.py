@@ -389,12 +389,12 @@ def vd_cli():
         if vd.options.debug:
             raise
     except FileNotFoundError as e:
-        print(e)
+        print(e, file=sys.stderr)
         if options.debug:
             raise
     except Exception as e:
         for l in stacktrace(): #show the stack trace without carets
-            print(l)
+            print(l, file=sys.stderr)
 
     sys.stderr.flush()
     sys.stdout.flush()
