@@ -44,18 +44,19 @@ class PythonAtomSheet(PythonSheet):
 @VisiData.global_api
 def view(vd, obj):
     vd.run(PyobjSheet(getattr(obj, '__name__', ''), source=obj))
-
-
+    
 
 def getPublicAttrs(obj):
     'Return all public attributes (not methods or `_`-prefixed) on object.'
     attrs = []
     for k in dir(obj):
         try:
-            if not k.startswith('_') and not callable(getattr(obj, k)):
-                attrs.append(k)
-        except AttributeError: #attributes like formatted_help can raise AttributeError  #2631
+            if k.startswith('_') and not callable(getattr(obj, k)):
+                continue
+        except AttributeError: #2631 attributes like formatted_help can raise AttributeError
             pass
+        attrs.append(k)
+            
     return attrs
 
 def PyobjColumns(obj):
