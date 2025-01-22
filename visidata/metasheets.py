@@ -10,6 +10,11 @@ vd.option('visibility', 0, 'visibility level (0=low, 1=high)')
 
 vd_system_sep = '\t'
 
+def sort_disp_sym(col, row):
+    '''*row* is a Column object'''
+    for j, (sortcol, sortdir) in enumerate(row.sheet._ordering):
+        if sortcol == row: return row.sheet.options.disp_sort_desc[j:j+1] if sortdir else row.sheet.options.disp_sort_asc[j:j+1]
+    return None
 
 class ColumnsSheet(Sheet):
     rowtype = 'columns'
@@ -43,7 +48,7 @@ Other commands (not specific to Columns Sheet):
 
     columns = [
             ColumnAttr('sheet', type=str),
-            ColumnAttr('name', help='rename the column on the source sheet'),
+            Column('name', getter=lambda c, r: (sort_disp_sym(c,r) or ' ') + r.name, help='rename the column on the source sheet'),
             ColumnAttr('keycol', type=int, width=0),
             ColumnAttr('width', type=int, help='set the column width (`0` to hide completely)'),
             ColumnAttr('height', type=int, disp_expert=1, help='set a maximum height for the row, if this column will fill it'),
