@@ -313,7 +313,7 @@ class F5LogSheet(Sheet):
             cmd_data = msg[cmd_data_loc + 1 :]
             # split the message and the command
             msg, cmd = msg[:cmd_data_loc].rsplit(" ", maxsplit=1)
-            # strip off the trailling " -" from the message
+            # strip off the trailing " -" from the message
             msg = msg[:-2]
             object = cmd_data.split('"', maxsplit=2)
             if len(object) == 3:
