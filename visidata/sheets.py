@@ -299,7 +299,7 @@ class TableSheet(BaseSheet):
         self.setKeys(self.columns[:self.nKeys])
 
     def loader(self):
-        'Reset rows and sync load ``source`` via iterload.  Overrideable.'
+        'Reset rows and sync load ``source`` via iterload.  Overridable.'
         self.rows = []
         try:
             with vd.Progress(gerund='loading', total=0):
@@ -317,7 +317,7 @@ class TableSheet(BaseSheet):
             yield vd.fail('no iterload for this loader yet')
 
     def afterLoad(self):
-        'hook for after loading has finished.  Overrideable (be sure to call super).'
+        'hook for after loading has finished.  Overridable (be sure to call super).'
         # if an ordering has been specified, sort the sheet
         if self._ordering:
             vd.sync(self.sort())

@@ -345,7 +345,7 @@
 - [regex] use `inputRegex` (which has regex help) for all regex commands
 - [rename-col] add `options.rename_cascade`  #2088
     - if True, columns renames are cascaded into expressions
-- [replay] has been refactored to be sync, instead of a seperate async process  #1773 #1714
+- [replay] has been refactored to be sync, instead of a separate async process  #1773 #1714
 - [save] add `options.save_encoding (default: 'utf-8') to differentiate from `options.encoding` when saving a file  #1708
 - [save] add saver for STATA files (PR by @raffaem #1563)
 - [save] keep headers in txt as tsv if only one sheet and more than a single column  #2173
@@ -594,7 +594,7 @@
 
 - [cli] printout gone; use `builtins.print`
 - [color] use `ColorAttr` throughout  #2061 #2017
-    - seperate out fg/bg
+    - separate out fg/bg
     - allow bg and fg to take precedence independently
     - fixes issues with forced bg=black on sidebar for warning, and statusbar for working
 - [guides] add API for getting and adding guides
