@@ -138,6 +138,42 @@ class TestClipText:
         assert clips == clippeds
         assert clipw == clippedw
 
+    @pytest.mark.parametrize('s, w, clippeds, clippedw', [
+        ('1234567890', 6, '12…890', 6),
+        ('1234567890', 7, '123…890', 7),
+        ('1234567890', 8, '123…7890', 8),
+        ('1234567890', 9, '1234…7890', 9),
+        ('1234567890', 10, '1234567890', 10),
+        ('1234567890', 11, '1234567890', 10),
+        ('1234567890', 99, '1234567890', 10),
+        # all full-width characters
+        ('ででででで', 0,  '', 0),
+        ('ででででで', 1,  '…', 1),
+        ('ででででで', 2,  '…', 1),
+        ('ででででで', 3,  '…で', 3),
+        ('ででででで', 4,  '…で', 3),
+        ('ででででで', 5,  'で…で', 5),
+        ('ででででで', 6,  'で…で', 5),
+        ('ででででで', 7,  'で…でで', 7),
+        ('ででででで', 8,  'で…でで', 7),
+        ('ででででで', 9,  'でで…でで', 9),
+        ('ででででで', 10, 'ででででで', 10),
+        ('ででででで', 11, 'ででででで', 10),
+        ('ででででで', 99, 'ででででで', 10),
+        # odd string length, with mix of full-width characters
+        ('ででaaでa', 0,  '', 0),
+        ('ででaaでa', 1,  '…', 1),
+        ('ででaaでa', 2,  '…a', 2),
+        ('ででaaででa', 3,  '…a', 2),
+        ('ででaaででa', 4,  '…でa', 4),
+        ('ででaaででa', 5,  'で…a', 4),
+        ('ででaaででa', 6,  'で…でa', 6),
+    ])
+    def test_clipstr_middle(self, s, w, clippeds, clippedw):
+        clips, clipw = visidata.clipstr_middle(s, w)
+        assert clips == clippeds
+        assert clipw == clippedw
+
     def test_clipdraw_chunks(self):
         prechunks = [
             ('', 'x'),

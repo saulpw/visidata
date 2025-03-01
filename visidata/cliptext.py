@@ -372,6 +372,21 @@ def clipstr_start(dispval, w, truncator=''):
     frag = (truncator if j > 0 else '') + dispval[j:]
     return frag, dispwidth(frag)
 
+def clipstr_middle(s, n=10, truncator='…'):
+    '''Return a string having a display width <= *n*. Excess characters are
+    trimmed from the middle of the string, and replaced by a single
+    instance of *truncator*.'''
+    if n == 0: return '', 0
+    if dispwidth(s) > n:
+        #for even widths, give the leftover 1 space to the right fragment
+        l_space = n//2 if n%2 == 1 else max(n//2-1, 0)
+        l_frag, l_w = _clipstr(s, l_space)
+        #if left fragment did not fill its space, give the unused space to the right fragment
+        r_frag = clipstr_start(s, n//2+(l_space-l_w))[0]
+        res = l_frag + truncator + r_frag
+        return res, dispwidth(res)
+    return s, dispwidth(s)
+
 vd.addGlobals(clipstr=clipstr,
               clipdraw=clipdraw,
               clipdraw_chunks=clipdraw_chunks,
@@ -380,4 +395,5 @@ vd.addGlobals(clipstr=clipstr,
               iterchars=iterchars,
               iterchunks=iterchunks,
               wraptext=wraptext,
-              clipstr_start=clipstr_start)
+              clipstr_start=clipstr_start,
+              clipstr_middle=clipstr_middle)
