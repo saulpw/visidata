@@ -1,4 +1,5 @@
 from visidata import VisiData, vd, Sheet, Path, Column, ItemColumn, BaseSheet, anytype
+from itertools import chain
 
 @VisiData.api
 def open_h5(vd, p):
@@ -6,8 +7,11 @@ def open_h5(vd, p):
 
 VisiData.open_hdf5 = VisiData.open_h5
 
+vd.option('hdf5_matrix_enumerate', False, 'enumerate matrix rows and columns')
+
 class Hdf5ObjSheet(Sheet):
     'Support sheets in HDF5 format.'
+
     def iterload(self):
         h5py = vd.importExternal('h5py')
         source = self.source
@@ -39,13 +43,23 @@ class Hdf5ObjSheet(Sheet):
                         self.addColumn(ItemColumn(source.name, 0))
                         for v in source:
                             yield [v]
-                case 2:
+                case 2: # matrix
+                    matrix_enumerate = bool(self.options.get('hdf5_matrix_enumerate'))
+
                     ncols = source.shape[1]
                     ctype = _guess_type(source.dtype.descr[0][1])
-                    for i in range(ncols):
-                        self.addColumn(ItemColumn('', i, width=8, type=ctype), index=i)
-                    self.recalc()
-                    yield from source  # copy
+
+                    if matrix_enumerate:
+                        self.addColumn(ItemColumn("row", 0, width=8, keycol=1, type=int), index=0)
+                        for i in range(ncols):
+                            self.addColumn(ItemColumn(f'col{i}', i+1, width=8, type=ctype), index=i+1)
+                        self.recalc()
+                        yield from list(list((chain((i,), row))) for i, row in enumerate(source))
+                    else:
+                        for i in range(ncols):
+                            self.addColumn(ItemColumn('', i, width=8, type=ctype), index=i)
+                        self.recalc()
+                        yield from source  # copy
                 case _:
                     vd.fail('too many dimensions in shape %s' % str(source.shape))
         else:
