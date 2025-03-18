@@ -30,38 +30,37 @@ class Hdf5ObjSheet(Sheet):
             for k, v in source.items():
                 yield Hdf5ObjSheet(self.name, k, source=v)
         elif isinstance(source, h5py.Dataset):
-            match len(source.shape):
-                case 1:
-                    if source.dtype.names:
-                        for i, (colname, fmt, *_) in enumerate(source.dtype.descr):
-                            if not colname:
-                                colname = f"col{i}"
-                            ctype = _guess_type(fmt)
-                            self.addColumn(ItemColumn(colname, i, type=ctype))
-                        yield from source  # copy
-                    else:
-                        self.addColumn(ItemColumn(source.name, 0))
-                        for v in source:
-                            yield [v]
-                case 2: # matrix
-                    matrix_enumerate = bool(self.options.get('hdf5_matrix_enumerate'))
+            if len(source.shape)==1:
+                if source.dtype.names:
+                    for i, (colname, fmt, *_) in enumerate(source.dtype.descr):
+                        if not colname:
+                            colname = f"col{i}"
+                        ctype = _guess_type(fmt)
+                        self.addColumn(ItemColumn(colname, i, type=ctype))
+                    yield from source  # copy
+                else:
+                    self.addColumn(ItemColumn(source.name, 0))
+                    for v in source:
+                        yield [v]
+            elif len(source.shape)==2:
+                matrix_enumerate = bool(self.options.get('hdf5_matrix_enumerate'))
 
-                    ncols = source.shape[1]
-                    ctype = _guess_type(source.dtype.descr[0][1])
+                ncols = source.shape[1]
+                ctype = _guess_type(source.dtype.descr[0][1])
 
-                    if matrix_enumerate:
-                        self.addColumn(ItemColumn("row", 0, width=8, keycol=1, type=int), index=0)
-                        for i in range(ncols):
-                            self.addColumn(ItemColumn(f'col{i}', i+1, width=8, type=ctype), index=i+1)
-                        self.recalc()
-                        yield from list(list((chain((i,), row))) for i, row in enumerate(source))
-                    else:
-                        for i in range(ncols):
-                            self.addColumn(ItemColumn('', i, width=8, type=ctype), index=i)
-                        self.recalc()
-                        yield from source  # copy
-                case _:
-                    vd.fail('too many dimensions in shape %s' % str(source.shape))
+                if matrix_enumerate:
+                    self.addColumn(ItemColumn("row", 0, width=8, keycol=1, type=int), index=0)
+                    for i in range(ncols):
+                        self.addColumn(ItemColumn(f'col{i}', i+1, width=8, type=ctype), index=i+1)
+                    self.recalc()
+                    yield from list(list((chain((i,), row))) for i, row in enumerate(source))
+                else:
+                    for i in range(ncols):
+                        self.addColumn(ItemColumn('', i, width=8, type=ctype), index=i)
+                    self.recalc()
+                    yield from source  # copy
+            else:
+                vd.fail('too many dimensions in shape %s' % str(source.shape))
         else:
             vd.fail(f"too many dimensions in shape {source.shape}")
 

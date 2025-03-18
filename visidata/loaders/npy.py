@@ -40,30 +40,29 @@ class NpySheet(Sheet):
         self._matrix_enumerate = bool(self.options.get('npy_matrix_enumerate'))
 
         self.columns = []
-        match len(self.npy.shape):
-            case 1:
-                self._transpose = not bool(self.npy.dtype.names)
-                for i, (colname, fmt, *shape) in enumerate(self.npy.dtype.descr):
-                    if not colname:
-                        colname = f"col{i}"
-                    ctype = _guess_type(shape, fmt)
-                    if ctype=="time":
-                        self.addColumn(Column(colname, type=date, getter=lambda c,r,i=i: str(r[i])))
-                        continue
-                    self.addColumn(ItemColumn(colname, i, type=ctype))
-            case 2: # matrix
-                ncols = self.npy.shape[1]
-                ctype = _guess_type(None, self.npy.dtype.descr[0][1])
+        if len(self.npy.shape)==1:
+            self._transpose = not bool(self.npy.dtype.names)
+            for i, (colname, fmt, *shape) in enumerate(self.npy.dtype.descr):
+                if not colname:
+                    colname = f"col{i}"
+                ctype = _guess_type(shape, fmt)
+                if ctype=="time":
+                    self.addColumn(Column(colname, type=date, getter=lambda c,r,i=i: str(r[i])))
+                    continue
+                self.addColumn(ItemColumn(colname, i, type=ctype))
+        elif len(self.npy.shape)==2:
+            ncols = self.npy.shape[1]
+            ctype = _guess_type(None, self.npy.dtype.descr[0][1])
 
-                if self._matrix_enumerate:
-                    self.addColumn(ItemColumn("row", 0, width=8, keycol=1, type=int), index=0)
-                    for i in range(ncols):
-                        self.addColumn(ItemColumn(f'col{i}', i+1, width=8, type=ctype), index=i+1)
-                else:
-                    for i in range(ncols):
-                        self.addColumn(ItemColumn('', i+1, width=8, type=ctype), index=i)
-            case _:
-                vd.fail(f"too many dimensions in shape {self.npy.shape}")
+            if self._matrix_enumerate:
+                self.addColumn(ItemColumn("row", 0, width=8, keycol=1, type=int), index=0)
+                for i in range(ncols):
+                    self.addColumn(ItemColumn(f'col{i}', i+1, width=8, type=ctype), index=i+1)
+            else:
+                for i in range(ncols):
+                    self.addColumn(ItemColumn('', i+1, width=8, type=ctype), index=i)
+        else:
+            vd.fail(f"too many dimensions in shape {self.npy.shape}")
 
 def _guess_type(shape, fmt):
     if shape:
