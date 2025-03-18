@@ -28,7 +28,7 @@ class NpySheet(Sheet):
         else:
             source = self.npy
 
-        nrows = total=len(self.npy)
+        nrows = len(self.npy)
 
         if self._matrix_enumerate:
             source = list(list((chain((i,), row))) for i, row in enumerate(source))
@@ -130,4 +130,4 @@ def save_npy(vd, p, sheet):
 
     arr = np.array(data, dtype=dtype)
     with p.open_bytes(mode='w') as outf:
-        np.save(outf, arr, allow_pickle=bool(self.options.get('npy_allow_pickle')))
+        np.save(outf, arr, allow_pickle=bool(sheet.options.get('npy_allow_pickle')))
