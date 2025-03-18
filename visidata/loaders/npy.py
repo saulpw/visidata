@@ -1,4 +1,5 @@
 from visidata import VisiData, vd, Sheet, date, anytype, options, Column, ItemColumn, Progress, vlen, PyobjSheet, TypedWrapper
+from itertools import chain
 
 'Loaders for .npy and .npz.  Save to .npy.  Depends on the zip loader.'
 
@@ -11,19 +12,37 @@ def open_npz(vd, p):
     return NpzSheet(p.base_stem, source=p)
 
 vd.option('npy_allow_pickle', False, 'numpy allow unpickling objects (unsafe)')
+vd.option('npy_matrix_enumerate', False, 'enumerate matrix rows and columns')
 
 class NpySheet(Sheet):
+    _transpose: bool = False
+    _matrix_enumerate: bool = False
+
     def iterload(self):
         numpy = vd.importExternal('numpy')
         if not hasattr(self, 'npy'):
-            self.npy = numpy.load(str(self.source), encoding='bytes', **self.options.getall('npy_'))
+            self.npy = numpy.load(str(self.source), encoding='bytes', allow_pickle=bool(self.options.get('npy_allow_pickle')))
         self.reloadCols()
-        yield from Progress(self.npy, total=len(self.npy))
+        if self._transpose:
+            source = self.npy[:,None]
+        else:
+            source = self.npy
+
+        nrows = total=len(self.npy)
+
+        if self._matrix_enumerate:
+            source = list(list((chain((i,), row))) for i, row in enumerate(source))
+
+        yield from Progress(source, nrows)
+
 
     def reloadCols(self):
+        self._matrix_enumerate = bool(self.options.get('npy_matrix_enumerate'))
+
         self.columns = []
         match len(self.npy.shape):
             case 1:
+                self._transpose = not bool(self.npy.dtype.names)
                 for i, (colname, fmt, *shape) in enumerate(self.npy.dtype.descr):
                     if not colname:
                         colname = f"col{i}"
@@ -35,8 +54,14 @@ class NpySheet(Sheet):
             case 2: # matrix
                 ncols = self.npy.shape[1]
                 ctype = _guess_type(None, self.npy.dtype.descr[0][1])
-                for i in range(ncols):
-                    self.addColumn(ItemColumn('', i, width=8, type=ctype), index=i)
+
+                if self._matrix_enumerate:
+                    self.addColumn(ItemColumn("row", 0, width=8, keycol=1, type=int), index=0)
+                    for i in range(ncols):
+                        self.addColumn(ItemColumn(f'col{i}', i+1, width=8, type=ctype), index=i+1)
+                else:
+                    for i in range(ncols):
+                        self.addColumn(ItemColumn('', i+1, width=8, type=ctype), index=i)
             case _:
                 vd.fail(f"too many dimensions in shape {self.npy.shape}")
 
@@ -60,7 +85,7 @@ class NpzSheet(vd.ZipSheet):
 
     def iterload(self):
         numpy = vd.importExternal('numpy')
-        self.npz = numpy.load(str(self.source), encoding='bytes', **self.options.getall('npy_'))
+        self.npz = numpy.load(str(self.source), encoding='bytes', allow_pickle=bool(self.options.get('npy_allow_pickle')))
         yield from Progress(self.npz.items())
 
     def openRow(self, row):
@@ -106,4 +131,4 @@ def save_npy(vd, p, sheet):
 
     arr = np.array(data, dtype=dtype)
     with p.open_bytes(mode='w') as outf:
-        np.save(outf, arr, **sheet.options.getall('npy_'))
+        np.save(outf, arr, allow_pickle=bool(self.options.get('npy_allow_pickle')))
