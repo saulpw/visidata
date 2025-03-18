@@ -1,4 +1,4 @@
-from visidata import VisiData, vd, Sheet, date, anytype, options, Column, Progress, ColumnItem, vlen, PyobjSheet, TypedWrapper
+from visidata import VisiData, vd, Sheet, date, anytype, options, Column, ItemColumn, Progress, vlen, PyobjSheet, TypedWrapper
 
 'Loaders for .npy and .npz.  Save to .npy.  Depends on the zip loader.'
 
@@ -22,28 +22,40 @@ class NpySheet(Sheet):
 
     def reloadCols(self):
         self.columns = []
-        for i, (name, fmt, *shape) in enumerate(self.npy.dtype.descr):
-            if not name:
-                continue
-            if shape:
-                t = anytype
-            elif 'M' in fmt:
-                self.addColumn(Column(name, type=date, getter=lambda c,r,i=i: str(r[i])))
-                continue
-            elif 'i' in fmt or 'u' in fmt:
-                t = int
-            elif 'f' in fmt:
-                t = float
-            else:
-                t = anytype
-            self.addColumn(ColumnItem(name, i, type=t))
+        match len(self.npy.shape):
+            case 1:
+                for i, (colname, fmt, *shape) in enumerate(self.npy.dtype.descr):
+                    if not colname:
+                        colname = f"col{i}"
+                    ctype = _guess_type(shape, fmt)
+                    if ctype=="time":
+                        self.addColumn(Column(colname, type=date, getter=lambda c,r,i=i: str(r[i])))
+                        continue
+                    self.addColumn(ItemColumn(colname, i, type=ctype))
+            case 2: # matrix
+                ncols = self.npy.shape[1]
+                ctype = _guess_type(None, self.npy.dtype.descr[0][1])
+                for i in range(ncols):
+                    self.addColumn(ItemColumn('', i, width=8, type=ctype), index=i)
+            case _:
+                vd.fail(f"too many dimensions in shape {self.npy.shape}")
 
+def _guess_type(shape, fmt):
+    if shape:
+        return anytype
+    elif 'M' in fmt:
+        return "time"
+    elif 'i' in fmt or 'u' in fmt:
+        return int
+    elif 'f' in fmt:
+        return float
+    return anytype
 
 class NpzSheet(vd.ZipSheet):
     # rowdef: tuple(tablename, table)
     columns = [
-        ColumnItem('name', 0),
-        ColumnItem('length', 1, type=vlen),
+        ItemColumn('name', 0),
+        ItemColumn('length', 1, type=vlen),
     ]
 
     def iterload(self):
