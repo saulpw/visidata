@@ -8,8 +8,6 @@ import platform
 # from visidata import __version__
 __version__ = "3.2dev"
 
-vd_bin = "bin/vd" if platform.system() != "Windows" else "bin/vd.cmd"
-
 setup(
     name="visidata",
     version=__version__,
@@ -21,9 +19,10 @@ setup(
     author_email="visidata@saul.pw",
     url="https://visidata.org",
     download_url="https://github.com/saulpw/visidata/tarball/" + __version__,
-    scripts=[vd_bin, "bin/vd2to3.vdx"],
+    scripts=["bin/vd2to3.vdx"],
     entry_points={
-        "console_scripts": ["visidata=visidata.main:vd_cli"],
+        "console_scripts": ["vd=visidata.main:vd_cli",
+                            "visidata=visidata.main:vd_cli"],
     },
     py_modules=["visidata"],
     install_requires=[

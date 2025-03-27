@@ -1,6 +1,5 @@
 directory	filename	ext
 bin/	filter-doc.py	py
 bin/	vd	
-bin/	vd.cmd	cmd
 bin/	vd2to3.vdx	vdx
 bin/	viewtsv.py	py
