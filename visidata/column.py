@@ -249,6 +249,8 @@ class Column(Extensible):
 
         if self.type is anytype:
             if isinstance(typedval, (dict, list, tuple)):
+                if width is None:
+                    return ''.join(iterchars(typedval))
                 dispval, dispw = clipstr(iterchars(typedval), width)
                 return dispval
 
