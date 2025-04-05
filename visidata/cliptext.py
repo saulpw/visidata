@@ -148,7 +148,7 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
     Note: width may differ from len(s) if chars are 'fullwidth'.
     If *dispw* is None, no clipping occurs.
     If *trunch* has a width greater than *dispw*, the empty string
-    will be used as a truncator instead, and a warning will be shown.'''
+    will be used as a truncator instead.'''
     if not s or (dispw is not None and dispw < 1): #iterator s would be truthy
         return '', 0
 
@@ -165,7 +165,6 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
         #if the next character will not fit
         if dispw and w+chlen > dispw:
             if trunchlen > dispw:
-                vd.warning(f'truncator {repr(trunch)} is too big to fit in dispw of {dispw}')
                 return _clipstr(s, dispw, trunch='', oddspacech=oddspacech, combch=combch, modch=modch)
             # if the trunch by itself can fit
             if trunchlen and dispw >= trunchlen:
