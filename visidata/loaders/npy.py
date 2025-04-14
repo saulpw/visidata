@@ -60,7 +60,7 @@ class NpySheet(Sheet):
                     self.addColumn(ItemColumn(f'col{i}', i+1, width=8, type=ctype), index=i+1)
             else:
                 for i in range(ncols):
-                    self.addColumn(ItemColumn('', i+1, width=8, type=ctype), index=i)
+                    self.addColumn(ItemColumn('', i, width=8, type=ctype), index=i)
         else:
             vd.fail(f"too many dimensions in shape {self.npy.shape}")
 
