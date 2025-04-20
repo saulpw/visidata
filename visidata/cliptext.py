@@ -156,6 +156,7 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
     ret = ''
 
     trunchlen = dispwidth(trunch)
+    s = ''.join(s)
     for c in s:
         newc, chlen = _dispch(c, oddspacech=oddspacech, combch=combch, modch=modch)
         if not newc:

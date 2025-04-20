@@ -69,6 +69,8 @@ class TestClipText:
         ('abcdef', None, 'abcdef', 6),
         ('ででで', None, 'ででで', 6),
         ('で'*100, None, 'で'*100, 2*100),
+        (iterchars([1,2,3]), 1, '[', 1),
+        (iterchars({'a':1, 'b':2, 'c':3}), 1, '{', 1),
     ])
     def test_clipstr_wide_truncator(self, s, w, clippeds, clippedw):
         clips, clipw = visidata.clipstr(s, w, truncator='あ')
