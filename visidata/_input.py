@@ -177,11 +177,11 @@ class InputWidget:
         'If *clear* is True, clear whole editing area before displaying.'
         with EnableCursor():
             while True:
-                vd.drawSheet(scr, vd.activeSheet)
-                if updater:
-                    updater(self.value)
-
-                vd.drawInputHelp(scr)
+                if len(vd.pendingKeys) <= 3:  #speed up paste of long strings by skipping redraws
+                    vd.drawSheet(scr, vd.activeSheet)
+                    if updater:
+                        updater(self.value)
+                    vd.drawInputHelp(scr)
 
                 self.draw(scr, y, x, w, attr, clear=clear)
                 ch = vd.getkeystroke(scr)
