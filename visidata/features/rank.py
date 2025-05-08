@@ -22,8 +22,12 @@ class RankAggregator(ListAggregator):
         # compile row data, for each row a list of tuples: (group_key, rank_key, rownum)
         rowdata = [(col.sheet.rowkey(r), col.getTypedValue(r), rownum) for rownum, r in enumerate(rows)]
         # sort by row key and column value to prepare for grouping
+        # If the column is in descending order, use descending order for within-group ranking.
+        reverse = next((r for (c, r) in col.sheet.ordering if c == col or c == col.name), False)
         try:
-            rowdata.sort()
+            rowdata.sort(reverse=reverse)
+            if reverse:
+                vd.status('ranking {col.name} in descending order')
         except TypeError as e:
             vd.fail(f'elements in a ranking column must be comparable: {e.args[0]}')
         rowvals = []
@@ -42,7 +46,7 @@ class RankAggregator(ListAggregator):
 vd.aggregators['rank'] = RankAggregator('rank', anytype, helpstr='list of ranks, when grouping by key columns', listtype=int)
 
 def rank_sorted_iterable(vals_sorted) -> [int]:
-    '''*vals_sorted* is an iterable whose elements form one group.
+    '''*vals_sorted* is an iterable whose elements form one or more groups.
     The iterable must already be sorted.'''
 
     ranks = []
@@ -64,10 +68,20 @@ def addcol_sheetrank(sheet, rows):
     colname = f'{sheet.name}_sheetrank'
     c = SettableColumn(name=colname, type=int)
     sheet.addColumnAtCursor(c)
-    rowkeys = [(sheet.rowkey(r), rownum) for rownum, r in enumerate(rows)]
-    rowkeys.sort()
-    ranks = rank_sorted_iterable([rowkey for rowkey, rownum in rowkeys])
-    row_ranks = sorted(zip((rownum for _, rownum in rowkeys), ranks))
+    ordering = [(col, reverse) for (col, reverse) in sheet.ordering if col.keycol]
+    rowkeys = [(sheet.rowkey(r), rownum, r) for rownum, r in enumerate(rows)]
+    if ordering:
+        vd.status('using custom ordering for keycol sort')
+        keycols_ordered = [col for (col, reverse) in ordering]
+        keycols_unordered = [keycol for keycol in sheet.keyCols if not keycol in keycols_ordered]
+        ordering += [(keycol, False) for keycol in keycols_unordered]
+        def _sortkey(e): # sort the rows by using the column
+            return sheet.sortkey(e[2], ordering=ordering)
+        rowkeys.sort(key=_sortkey)
+    else:
+        rowkeys.sort()
+    ranks = rank_sorted_iterable([rowkey for rowkey, _, _ in rowkeys])
+    row_ranks = sorted(zip((rownum for _, rownum, _ in rowkeys), ranks))
     row_ranks = [rank for rownum, rank in row_ranks]
     c.setValues(sheet.rows, *row_ranks)
 
