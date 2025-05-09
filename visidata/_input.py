@@ -173,7 +173,7 @@ class InputWidget:
         self.former_i = None
         self.just_completed = False
 
-    def editline(self, scr, y, x, w, attr=ColorAttr(), updater=lambda val: None, bindings={}, clear=True) -> str:
+    def editline(self, scr, y, x, w, attr=ColorAttr(), updater=None, bindings={}, clear=True) -> str:
         'If *clear* is True, clear whole editing area before displaying.'
         with EnableCursor():
             while True:
