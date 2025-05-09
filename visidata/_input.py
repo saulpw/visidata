@@ -173,14 +173,13 @@ class InputWidget:
         self.former_i = None
         self.just_completed = False
 
-    def editline(self, scr, y, x, w, attr=ColorAttr(), updater=None, bindings={}, clear=True) -> str:
+    def editline(self, scr, y, x, w, attr=ColorAttr(), updater=lambda val:None, bindings={}, clear=True) -> str:
         'If *clear* is True, clear whole editing area before displaying.'
         with EnableCursor():
             while True:
                 if len(vd.pendingKeys) <= 3:  #speed up paste of long strings by skipping redraws
                     vd.drawSheet(scr, vd.activeSheet)
-                    if updater:
-                        updater(self.value)
+                    updater(self.value)
                     vd.drawInputHelp(scr)
 
                 self.draw(scr, y, x, w, attr, clear=clear)
@@ -344,7 +343,7 @@ class InputWidget:
 @VisiData.api
 def editText(vd, y, x, w, attr=ColorAttr(), value='',
              help='',
-             updater=None, bindings={},
+             updater=lambda val: None, bindings={},
              display=True, record=True, clear=True, **kwargs):
     'Invoke modal single-line editor at (*y*, *x*) for *w* terminal chars. Use *display* is False for sensitive input like passphrases.  If *record* is True, get input from the cmdlog in batch mode, and save input to the cmdlog if *display* is also True. Return new value as string.'
     v = None
