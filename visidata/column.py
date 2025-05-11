@@ -267,7 +267,8 @@ class Column(Extensible):
            The 'generic' displayer does not do any formatting.
         '''
         if width is not None and width > 1 and vd.isNumeric(self):
-            yield ('', dw.text.rjust(width-2))
+            padding = max((width-2) - dispwidth(dw.text), 0) * ' '
+            yield ('', padding + dw.text)
         else:
             yield ('', dw.text)
 
@@ -278,7 +279,8 @@ class Column(Extensible):
            The 'full' displayer allows formatting like [:color].
         '''
         if width is not None and width > 1 and vd.isNumeric(self):
-            yield from iterchunks(dw.text.rjust(width-2))
+            padding = max((width-2) - dispwidth(dw.text), 0) * ' '
+            yield from iterchunks(padding + dw.text)
         else:
             yield from iterchunks(dw.text)
 
