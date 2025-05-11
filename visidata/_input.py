@@ -626,7 +626,7 @@ class CompleteKey:
 @Sheet.api
 def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
     '''Call vd.editText for the cell at (*rowidx*, *vcolidx*).  Return the new value, properly typed.
-
+       - *vcolidx*: numeric index into ``self.availCols``. When None, use current column.
        - *rowidx*: numeric index into ``self.rows``.  If negative, indicates the column name in the header.
        - *value*: if given, the starting input; otherwise the starting input is the cell value or column name as appropriate.
        - *kwargs*: passthrough args to ``vd.editText``.
@@ -636,7 +636,7 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
         vcolidx = self.cursorVisibleColIndex
     x, w = self._visibleColLayout.get(vcolidx, (0, 0))
 
-    col = self.visibleCols[vcolidx]
+    col = self.availCols[vcolidx]
     if rowidx is None:
         rowidx = self.cursorRowIndex
 
@@ -658,7 +658,7 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
         'KEY_BTAB':   acceptThenFunc('go-left', 'rename-col' if rowidx < 0 else 'edit-cell'),
     }
 
-    if vcolidx >= self.nVisibleCols-1:
+    if vcolidx == self.nVisibleCols-1 or vcolidx >= self.nCols-1:
         bindings['^I'] = acceptThenFunc('go-down', 'go-leftmost', 'edit-cell')
 
     if vcolidx <= 0:
