@@ -319,10 +319,9 @@ class GraphSheet(InvertedCanvas):
         xstrs = vd.input("add line(s) at x = ", type="reflinex", value=suggested, defaultLast=True).split()
 
         for xstr in xstrs:
-            vals = [ v.strip() for v in xstr.split(',') ]
-            if len(vals) != len(self.xcols):
-                vd.fail(f'must have {len(self.xcols)} x values, had {len(vals)} values: {xstr}')
-            self.reflines_x += [xtype(val) for xcol, val in zip(self.xcols, vals) if xtype(val) not in self.reflines_x ]
+            refval = xtype(xstr.strip())
+            if refval not in self.reflines_x:
+                self.reflines_x.append(refval)
         self.refresh()
 
     def draw_refline_y(self):
