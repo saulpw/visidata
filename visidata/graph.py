@@ -341,11 +341,16 @@ class GraphSheet(InvertedCanvas):
         suggested = format_input_value(self.reflines_x[0], xtype)
 
         xstrs = vd.input('remove line(s) at x = ', value=suggested, type='reflinex', defaultLast=True).split()
-        for input_x in xstrs:
-            self.reflines_x.remove(xtype(input_x))
+        for x in xstrs:
+            try:
+                self.reflines_x.remove(xtype(x))
+            except ValueError:
+                vd.fail(f'value {x} not in reflines_x')
         self.refresh()
 
     def erase_refline_y(self):
+        if len(self.reflines_y) == 0:
+            vd.fail(f'no y refline to erase')
         ytype = self.ycols[0].type
         suggested = format_input_value(self.reflines_y[0], ytype) if self.reflines_y else ''
         ystrs = vd.input('remove line(s) at y = ', value=suggested, type='refliney', defaultLast=True).split()
