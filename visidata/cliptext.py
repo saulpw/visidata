@@ -356,6 +356,37 @@ def clipbox(scr, lines, attr, title=''):
 
     clipdraw(scr, 0, w-dispwidth(title)-6, f"| {title} |", attr)
 
+def clipstr_start(dispval, w, truncator=''):
+    '''Return a tuple (frag, dw), where *frag* is the longest ending substring
+    of *dispval* that will fit in a space *w* terminal display characters wide,
+    and *dw* is the substring's display width as an int.'''
+    # Note: this implementation is likely incorrect for unusual Unicode
+    # strings or encodings, where trimming an initial character produces
+    # an invalid string or does not make the string shorter.
+    if w <= 0: return '', 0
+    j = len(dispval)
+    while j >= 1:
+        if dispwidth((truncator if j > 1 else '') + dispval[j-1:]) <= w:
+            j -= 1
+        else:
+            break
+    frag = (truncator if j > 0 else '') + dispval[j:]
+    return frag, dispwidth(frag)
+
+def clipstr_middle(s, n=10, truncator='…'):
+    '''Return a string having a display width <= *n*. Excess characters are
+    trimmed from the middle of the string, and replaced by a single
+    instance of *truncator*.'''
+    if n == 0: return '', 0
+    if dispwidth(s) > n:
+        #for even widths, give the leftover 1 space to the right fragment
+        l_space = n//2 if n%2 == 1 else max(n//2-1, 0)
+        l_frag, l_w = _clipstr(s, l_space)
+        #if left fragment did not fill its space, give the unused space to the right fragment
+        r_frag = clipstr_start(s, n//2+(l_space-l_w))[0]
+        res = l_frag + truncator + r_frag
+        return res, dispwidth(res)
+    return s, dispwidth(s)
 
 vd.addGlobals(clipstr=clipstr,
               clipdraw=clipdraw,
@@ -364,4 +395,6 @@ vd.addGlobals(clipstr=clipstr,
               dispwidth=dispwidth,
               iterchars=iterchars,
               iterchunks=iterchunks,
-              wraptext=wraptext)
+              wraptext=wraptext,
+              clipstr_start=clipstr_start,
+              clipstr_middle=clipstr_middle)

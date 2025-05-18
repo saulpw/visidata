@@ -4,7 +4,7 @@ import curses
 import visidata
 
 from visidata import EscapeException, ExpectedException, clipdraw, Sheet, VisiData, BaseSheet
-from visidata import vd, colors, dispwidth, ColorAttr
+from visidata import vd, colors, dispwidth, ColorAttr, clipstr_start
 from visidata import AttrDict
 
 
@@ -193,31 +193,55 @@ class InputWidget:
 
     def draw(self, scr, y, x, w, attr=ColorAttr(), clear=True):
         i = self.current_i  # the onscreen offset within the field where v[i] is displayed
-        left_truncchar = right_truncchar = self.truncchar
+        trunch = self.truncchar
+        tr_w = dispwidth(trunch)
+        fill_w = dispwidth(self.fillchar)
+
+        def _calc_display(dispval, i):
+            '''Return a formatted substring of *dispval* that fills the on-screen width *w*.'''
+            if i == len(dispval): # add a fillchar so the user perceives room to type
+                dispval += self.fillchar
+            dw = dispwidth(dispval)
+            if dw <= w:  # entire value fits
+                dispval += self.fillchar*(w-dw)
+                return dispval, i
+            if w <= tr_w: # column is too narrow to hold a left and right truncation
+                return trunch, 0
+
+            dw = dispwidth(dispval[i:])
+            if dw + tr_w <= w and dw <= w//2: #cursor is within half-colwidth of end
+                #truncate the left and show the end
+                frag, n = clipstr_start(dispval, w-tr_w)
+                offset = len(dispval) - i
+                dispval = ' '*(w-tr_w - n) + trunch + frag
+                i = len(dispval) - offset
+                return dispval, i
+
+            # the remaining cases need the right side truncated, after the new dispval is returned
+            dw = dispwidth(dispval[:i+1])
+            if dw + tr_w <= w and dispwidth(dispval[:i]) <= w//2: #cursor is within half-colwidth of start
+                #truncate the right, and show the string start
+                pass
+            else: # truncate left and right sides
+                # Place the cursor at the midpoint of the available colwidth
+                left_w = (w - 2*tr_w)//2
+                # calculate the fragment to the left of the cursor
+                l_frag, n = clipstr_start(dispval[:i], left_w)
+                dispval = ' '*(left_w-n) + trunch + l_frag + dispval[i:]
+                i = left_w-n + len(trunch) + len(l_frag)
+            return dispval, i
 
         if self.display:
             dispval = clean_printable(self.value)
         else:
             dispval = '*' * len(self.value)
+        dispval, i = _calc_display(dispval, i)
 
-        if len(dispval) < w:  # entire value fits
-            dispval += self.fillchar*(w-len(dispval)-1)
-        elif i == len(dispval):  # cursor after value (will append)
-            i = w-1
-            dispval = left_truncchar + dispval[len(dispval)-w+2:] + self.fillchar
-        elif i >= len(dispval)-w//2:  # cursor within halfwidth of end
-            i = w-(len(dispval)-i)
-            dispval = left_truncchar + dispval[len(dispval)-w+1:]
-        elif i <= w//2:  # cursor within halfwidth of beginning
-            dispval = dispval[:w-1] + right_truncchar
-        else:
-            i = w//2  # visual cursor stays right in the middle
-            k = 1 if w%2==0 else 0  # odd widths have one character more
-            dispval = left_truncchar + dispval[self.current_i-w//2+1:self.current_i+w//2-k] + right_truncchar
-
-        prew = clipdraw(scr, y, x, dispval[:i], attr, w, clear=clear, literal=True)
-        clipdraw(scr, y, x+prew, dispval[i:], attr, w-prew+1, clear=clear, literal=True)
+        #clipdraw will truncate the right side of dispval with trunch as needed
+        clipdraw(scr, y, x, dispval, attr, w, clear=clear, literal=True)
+        clipdraw(scr, y, x+w, ' ', attr, 1, clear=clear, literal=True)
         if scr:
+            prew = dispwidth(dispval[:i])
             scr.move(y, x+prew)
 
     def handle_key(self, ch:str, scr) -> bool:
