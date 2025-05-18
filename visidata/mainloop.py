@@ -64,6 +64,7 @@ def setWindows(vd, scr, pct=None):
     disp_menu = getattr(vd, 'menuRunning', None) or vd.options.disp_menu
     topmenulines = 1 if disp_menu else 0
     h, w = scr.getmaxyx()
+    if h == 1: topmenulines = 0
 
     n = 0
     if pct:
@@ -71,6 +72,7 @@ def setWindows(vd, scr, pct=None):
         n = abs(pct)*h//100
         n = min(n, h-topmenulines-3)
         n = max(3, n)
+        if n > h: n = 0
 
     desiredConfig = dict(pct=pct, n=n, h=h-topmenulines, w=w)
 
