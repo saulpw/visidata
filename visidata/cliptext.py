@@ -142,13 +142,15 @@ def iterchars(x):
 
 @functools.lru_cache(maxsize=100000)
 def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
-    '''Return clipped string and width in terminal display characters.
-    Note: width may differ from len(s) if East Asian chars are 'fullwidth'.'''
-    if not s:
+    ''' *s* is a string or an iterator that contains characters.
+    *dispw* is the integer screen width that the clipped string will fit inside, or None.
+    Return clipped string and width in terminal display characters.
+    Note: width may differ from len(s) if chars are 'fullwidth'.
+    If *dispw* is None, no clipping occurs.
+    If *trunch* has a width greater than *dispw*, the empty string
+    will be used as a truncator instead.'''
+    if not s or (dispw is not None and dispw < 1): #iterator s would be truthy
         return '', 0
-
-    if dispw == 1:
-        return s[0], 1
 
     w = 0
     ret = ''
@@ -160,12 +162,16 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
             newc = c
             chlen = dispwidth(c)
 
+        #if the next character will not fit
         if dispw and w+chlen > dispw:
-            if trunchlen and dispw > trunchlen:
-                lastchlen = _dispch(ret[-1])[1]
-                if w+trunchlen > dispw:
+            if trunchlen > dispw:
+                return _clipstr(s, dispw, trunch='', oddspacech=oddspacech, combch=combch, modch=modch)
+            # if the trunch by itself can fit
+            if trunchlen and dispw >= trunchlen:
+                # if trunch cannot be appended to fit, trim the ending characters until the trunch will fit
+                while w and w+trunchlen > dispw:
                     ret = ret[:-1]
-                    w -= lastchlen
+                    w = dispwidth(ret)
                 ret += trunch  # replace final char with ellipsis
                 w += trunchlen
             break
@@ -178,6 +184,8 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
 
 @drawcache
 def clipstr(s, dispw, truncator=None, oddspace=None):
+    ''' *s* is a string or an iterator that contains characters.
+    *dispw* is the integer screen width that the clipped string will fit inside, or None.'''
     if options.visibility:
         return _clipstr(s, dispw,
                         trunch=options.disp_truncator if truncator is None else truncator,
@@ -310,6 +318,7 @@ def wraptext(text, width=80, indent=''):
         line = _markdown_to_internal(line)
         chunks = re.split(internal_markup_re, line)
         textchunks = [x for x in chunks if not is_vdcode(x)]
+        # textwrap.wrap does not handle variable-width characters  #2416
         for linenum, textline in enumerate(textwrap.wrap(''.join(textchunks), width=width, drop_whitespace=False)):
             txt = textline
             r = ''
@@ -345,8 +354,39 @@ def clipbox(scr, lines, attr, title=''):
     for i, line in enumerate(lines):
         clipdraw(scr, i+1, 2, line, attr)
 
-    clipdraw(scr, 0, w-len(title)-6, f"| {title} |", attr)
+    clipdraw(scr, 0, w-dispwidth(title)-6, f"| {title} |", attr)
 
+def clipstr_start(dispval, w, truncator=''):
+    '''Return a tuple (frag, dw), where *frag* is the longest ending substring
+    of *dispval* that will fit in a space *w* terminal display characters wide,
+    and *dw* is the substring's display width as an int.'''
+    # Note: this implementation is likely incorrect for unusual Unicode
+    # strings or encodings, where trimming an initial character produces
+    # an invalid string or does not make the string shorter.
+    if w <= 0: return '', 0
+    j = len(dispval)
+    while j >= 1:
+        if dispwidth((truncator if j > 1 else '') + dispval[j-1:]) <= w:
+            j -= 1
+        else:
+            break
+    frag = (truncator if j > 0 else '') + dispval[j:]
+    return frag, dispwidth(frag)
+
+def clipstr_middle(s, n=10, truncator='…'):
+    '''Return a string having a display width <= *n*. Excess characters are
+    trimmed from the middle of the string, and replaced by a single
+    instance of *truncator*.'''
+    if n == 0: return '', 0
+    if dispwidth(s) > n:
+        #for even widths, give the leftover 1 space to the right fragment
+        l_space = n//2 if n%2 == 1 else max(n//2-1, 0)
+        l_frag, l_w = _clipstr(s, l_space)
+        #if left fragment did not fill its space, give the unused space to the right fragment
+        r_frag = clipstr_start(s, n//2+(l_space-l_w))[0]
+        res = l_frag + truncator + r_frag
+        return res, dispwidth(res)
+    return s, dispwidth(s)
 
 vd.addGlobals(clipstr=clipstr,
               clipdraw=clipdraw,
@@ -355,4 +395,6 @@ vd.addGlobals(clipstr=clipstr,
               dispwidth=dispwidth,
               iterchars=iterchars,
               iterchunks=iterchunks,
-              wraptext=wraptext)
+              wraptext=wraptext,
+              clipstr_start=clipstr_start,
+              clipstr_middle=clipstr_middle)

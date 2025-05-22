@@ -2,11 +2,21 @@
 
 # Usage: test.sh [testname]
 
-set -e
-set -x
+#set -e
 shopt -s failglob
 
 trap "echo aborted; exit;" SIGINT SIGTERM
+
+run_silent_unless_error() {
+  output=$(eval "$@" 2>&1)  # Captures ALL stdout and stderr
+  exit_code=$?
+  if [ $exit_code -ne 0 ]; then
+    echo "TEST FAILED: $@"
+    echo "$output"
+    exit 1
+  fi
+  return $exit_code
+}
 
 if [ -z "$1" ] ; then
     # test.sh; run all .vd/.vdj in tests/
@@ -45,19 +55,15 @@ for i in $TESTS ; do
     fi
     if $TEST == true;
     then
-        echo $TEST
         for goldfn in tests/golden/${outbase%.vd*}.*; do
-            PYTHONPATH=. bin/vd --overwrite=False --play "$i" --batch --output "$goldfn" --config tests/.visidatarc --visidata-dir tests/.visidata
-            echo "save: $goldfn"
+            run_silent_unless_error "PYTHONPATH=. bin/vd --overwrite=False --play "$i" --batch --output "$goldfn" --config tests/.visidatarc --visidata-dir tests/.visidata"
         done
     else
-        echo $TEST
-        PYTHONPATH=. bin/vd --play "$i" --batch --config tests/.visidatarc --visidata-dir tests/.visidata
-        echo "done"
+        run_silent_unless_error "PYTHONPATH=. bin/vd --play "$i" --batch --config tests/.visidatarc --visidata-dir tests/.visidata"
     fi
 done
 
-PYTHONPATH=. bin/vd <(seq 10000) --overwrite=False --batch --output tests/golden/stdin-guesser.tsv --config tests/.visidatarc --visidata-dir tests/.visidata  #1978
+run_silent_unless_error "PYTHONPATH=. bin/vd <(seq 10000) --overwrite=False --batch --output tests/golden/stdin-guesser.tsv --config tests/.visidatarc --visidata-dir tests/.visidata"  #1978
 
 echo '=== git diffs for BUILD FAILURE ==='
 git --no-pager diff --numstat tests/

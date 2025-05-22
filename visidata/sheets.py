@@ -300,21 +300,39 @@ class TableSheet(BaseSheet):
 
     def loader(self):
         'Reset rows and sync load ``source`` via iterload.  Overridable.'
-        self.rows = []
         try:
-            with vd.Progress(gerund='loading', total=0):
-                max_rows = self.options.max_rows
-                for i, r in enumerate(self.iterload()):
-                    if self.precious and i >= max_rows:
-                        break
-                    self.addRow(r)
+            for r in self._iterloader():
+                pass
         except FileNotFoundError:
             return  # let it be a blank sheet without error
+
+    def _iterloader(self):
+        self.rows = []
+        with vd.Progress(gerund='loading', total=0):
+            max_rows = self.options.max_rows
+            for i, r in enumerate(self.iterload()):
+                if self.precious and i >= max_rows:
+                    break
+                self.addRow(r)
+                yield r
 
     def iterload(self):
         'Generate rows from ``self.source``.  Override in subclass.'
         if False:
             yield vd.fail('no iterload for this loader yet')
+
+    def loadStart(self):
+        self.loaditer = self._iterloader()
+
+    def loadSome(self):
+        if not self.loaditer:
+            return False
+        try:
+            next(self.loaditer)
+            return True
+        except StopIteration:
+            self.loaditer = None
+            return False
 
     def afterLoad(self):
         'hook for after loading has finished.  Overridable (be sure to call super).'
@@ -508,6 +526,9 @@ class TableSheet(BaseSheet):
     def cursorValue(self):
         'Raw value at current row and column.'
         return self.cursorCol.getValue(self.cursorRow)
+
+    def getTypedRow(self, rownum):
+        return [c.getTypedValue(self.rows[rownum]) for c in self.availCols]
 
     @property
     def statusLine(self):
@@ -741,7 +762,7 @@ class TableSheet(BaseSheet):
                 clipdraw(scr, y+i, x, name, hdrcattr, w=colwidth)
             vd.onMouse(scr, x, y+i, colwidth, 1, BUTTON3_RELEASED='rename-col')
 
-            if C and x+colwidth+len(C) < self.windowWidth and y+i < self.windowHeight:
+            if C and x+colwidth+dispwidth(C) < self.windowWidth and y+i < self.windowHeight:
                 scr.addstr(y+i, x+colwidth, C, sepcattr.attr)
 
         clipdraw(scr, y+h-1, min(x+colwidth, self.windowWidth-1)-dispwidth(T), T, hdrcattr)

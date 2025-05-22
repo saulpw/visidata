@@ -58,7 +58,7 @@ Sheet.addCommand('gz_', 'resize-cols-input', 'width = int(input("set width= ", v
 
 Sheet.addCommand('-', 'hide-col', 'hide_col(cursorCol)', 'hide the current column')
 Sheet.addCommand('z-', 'resize-col-half', 'cursorCol.setWidth(cursorCol.width//2)', 'reduce width of current column by half')
-Sheet.addCommand(None, 'hide-uniform-cols', 'sheet.hide_uniform_cols()', 'hide any column that has multiple rows but only one distinct value')
+Sheet.addCommand('g-', 'hide-uniform-cols', 'sheet.hide_uniform_cols()', 'hide any column that has multiple rows but only one distinct value')
 
 Sheet.addCommand('gv', 'unhide-cols', 'unhide_cols(columns, visibleRows)', 'unhide all hidden columns on current sheet')
 Sheet.addCommand('v', 'toggle-multiline', 'for c in visibleCols: c.toggleMultiline()', 'toggle multiline display')

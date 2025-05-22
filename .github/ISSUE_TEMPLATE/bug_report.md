@@ -21,7 +21,7 @@ assignees: ''
 
 **Actual result with screenshot**
 
-[If there is an error message, please include the full stack trace shown with `Ctrl+E`.]
+[If there is an error message, please include the full stack trace shown with `Ctrl+E` or `vd --debug`.]
 
 **Configuration**
 
