@@ -43,7 +43,7 @@ class Hdf5ObjSheet(Sheet):
                     for v in source:
                         yield [v]
             elif len(source.shape)==2:
-                matrix_enumerate = bool(self.options.get('hdf5_matrix_enumerate'))
+                matrix_enumerate = bool(self.options.hdf5_matrix_enumerate)
 
                 ncols = source.shape[1]
                 ctype = _guess_type(source.dtype.descr[0][1])
