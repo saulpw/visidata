@@ -1,0 +1,3 @@
+#!vd -p
+{"sheet": null, "col": null, "row": null, "longname": "open-file", "input": "sample_data/arrays.npz", "keystrokes": "o", "comment": null, "replayable": true}
+{"sheet": "arrays", "col": "", "row": 2, "longname": "open-row", "input": "", "keystrokes": "Enter", "comment": "open current row with sheet-specific dive", "replayable": true}
