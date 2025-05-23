@@ -2,7 +2,7 @@ from copy import copy
 from visidata import vd, asyncthread, Progress, Sheet, Column, options, UNLOADED
 import re
 
-cmdlog_col_prefix='\x00'  #string to mark the start of column info in an ordering string
+cmdlog_col_prefix='\u241f'  #string ␟ to mark the start of column info in an ordering string
 
 @Sheet.api
 def orderBy(sheet, *cols, reverse=False, change_column=False, save_cmd_input=False):
@@ -24,6 +24,8 @@ def orderBy(sheet, *cols, reverse=False, change_column=False, save_cmd_input=Fal
     if input:
         sheet._ordering = order_from_string(sheet, input)
         sheet.sort()
+        if save_cmd_input:
+            vd.activeCommand.input = order_string(sheet)
         return
 
     do_sort = False
@@ -59,22 +61,19 @@ class Reversor:
         return other.obj < self.obj
 
 def order_string(sheet):
-    # replace ambiguous colname strings with unambiguous Column objects
-    sheet._ordering = sheet.ordering
-    ret = ''.join([cmdlog_col_prefix+('>' if reverse else '<') + str(sheet.columns.index(col)) for col, reverse in sheet._ordering])
+    sheet._ordering = sheet.ordering  #converts any ambiguous colname strings to unambiguous Column objects
+    ret = ''.join([cmdlog_col_prefix+('>' if reverse else '<') + str(col.name) for col, reverse in sheet._ordering])
     return ret
 
 def order_from_string(sheet, s):
     instructions = re.split(cmdlog_col_prefix + '(?=[<>])', s)[1:]
     ordering = []
     for instr in instructions:
-        c = sheet.columns[int(instr[1:])]
+        c = sheet.column(instr[1:])
         if instr[0] == '<':
             reverse = False
         elif instr[0] == '>':
             reverse = True
-        else:
-            vd.error('invalid sort order: {instr}')
         ordering.append((c, reverse))
     return ordering
 
@@ -87,7 +86,7 @@ def edit_ordering(ordering, col, reverse):
     # handle changes to status of columns that are already in the ordering:  add/remove/flip
     changed = False
     for c, old_reverse in ordering:
-        if c == col:
+        if c is col:
             if reverse != old_reverse: # reverse the column's sort direction
                 new_ordering.append((c, reverse))
             # if the sort direction is unchanged, remove the column from the ordering
