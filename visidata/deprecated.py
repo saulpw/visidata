@@ -24,7 +24,7 @@ def deprecated(ver, instead='', check=True):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            deprecated_warn(wrapper)
+            deprecated_warn(wrapper, ver, instead)
             return func(*args, **kwargs)
 
         if check and hasattr(func, '_extensible_api'):

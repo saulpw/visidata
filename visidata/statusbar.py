@@ -48,6 +48,8 @@ def sheetlist(sheet):
 
     sheetnames = []
     for vs in sheets:
+        if not vs.precious:  #2573
+            continue
         if isinstance(vs, BaseSheet):
             shortcut = ' '
             if vs.shortcut in '1 2 3 4 5 6 7 8 9 10'.split():
