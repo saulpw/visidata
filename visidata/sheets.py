@@ -688,6 +688,7 @@ class TableSheet(BaseSheet):
 
     def calcColLayout(self):
         'Set right-most visible column, based on calculation.'
+        vd.clearCaches()
         minColWidth = dispwidth(self.options.disp_more_left)+dispwidth(self.options.disp_more_right)+2
         sepColWidth = dispwidth(self.options.disp_column_sep)
         winWidth = self.windowWidth
