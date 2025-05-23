@@ -60,10 +60,22 @@ class StaticSheet(Sheet):
                     row.append(val)
 
 
+@Sheet.api
+def setcol_freeze(sheet, unfrozen):  #2660  Contributed by @midichef
+    frozen = sheet.freeze_col(unfrozen)
+    frozen.name = unfrozen.name
+    unfrozen.hide()
+    vd.addUndoColNames([unfrozen])
+    unfrozen.name = frozen.name + '_unfrozen'
+    sheet.addColumnAtCursor(frozen)
+    vd.status(f'replaced {frozen.name} with frozen copy')
+
+
+Sheet.addCommand("z'", 'setcol-freeze', 'setcol_freeze(cursorCol)', 'replace current column with a frozen copy, with all cells evaluated')
 Sheet.addCommand("'", 'freeze-col', 'sheet.addColumnAtCursor(freeze_col(cursorCol))', 'add a frozen copy of current column with all cells evaluated')
 Sheet.addCommand("g'", 'freeze-sheet', 'vd.push(StaticSheet(sheet)); status("pushed frozen copy of "+name)', 'open a frozen copy of current sheet with all visible columns evaluated')
-Sheet.addCommand("z'", 'cache-col', 'cursorCol.resetCache()', 'add/reset cache for current column')
+Sheet.addCommand(None, 'cache-col', 'cursorCol.resetCache()', 'add/reset cache for current column')
 Sheet.addCommand("gz'", 'cache-cols', 'for c in visibleCols: c.resetCache()', 'add/reset cache for all visible columns')
 
-vd.addMenuItem('Column', 'Freeze', 'freeze-col')
+vd.addMenuItem('Column', 'Freeze', 'setcol-freeze')
 vd.addMenuItem('File', 'Freeze', 'freeze-sheet')
