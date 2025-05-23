@@ -48,6 +48,21 @@ def syseditCells_async(sheet, cols, rows, filetype=None):
             if edited_rows:
                 col.setValuesTyped(edited_rows, *edited_vals)
 
+@Sheet.api
+def sysedit_cell(sheet):
+    cd = sheet.cursorDisplay
+    if all(c.isprintable() for c in cd):
+        edit = vd.launchExternalEditor(cd)
+    else:
+        vd.status('opened cell in editor as binary data')
+        cv = str(sheet.cursorValue)
+        edit = vd.launchExternalEditor(bytes(cv, encoding=sheet.options.encoding), binary=True)
+        #e.g. get rid of Byte Order Marker for utf-8-sig encoding
+        edit = edit.decode(encoding=sheet.options.encoding)
+    if edit != cd:
+        sheet.cursorCol.setValues([sheet.cursorRow], edit)
+    else:
+        vd.status('edit left cell value unchanged')
 
-TableSheet.addCommand('^O', 'sysedit-cell', 'cd = cursorDisplay; e = vd.launchExternalEditor(cd); cursorCol.setValues([cursorRow], e) if e != cd else None', 'edit current cell in external $EDITOR')
+TableSheet.addCommand('^O', 'sysedit-cell', 'sysedit_cell()', 'edit current cell in external $EDITOR')
 Sheet.addCommand('g^O', 'sysedit-selected', 'syseditCells(visibleCols, onlySelectedRows)', 'edit rows in $EDITOR')

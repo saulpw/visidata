@@ -43,27 +43,33 @@ def launchBrowser(vd, *args):
 
 
 @visidata.VisiData.api
-def launchExternalEditor(vd, v, linenum=0):
-    'Launch $EDITOR to edit string *v* starting on line *linenum*.'
+def launchExternalEditor(vd, v, linenum=0, binary=False):
+    'Launch $EDITOR to edit bytes *v* starting on line *linenum*.'
     import tempfile
+    mode = 'wb' if binary else 'w'
     with tempfile.NamedTemporaryFile() as temp:
         temp.close()  #2118 must close before re-opening on windows
-        with open(temp.name, 'w') as fp:
+        with open(temp.name, mode) as fp:
             fp.write(v)
-        return vd.launchExternalEditorPath(visidata.Path(temp.name), linenum)
+        return vd.launchExternalEditorPath(visidata.Path(temp.name), linenum, binary=binary)
 
 
 @visidata.VisiData.api
-def launchExternalEditorPath(vd, path, linenum=0):
+def launchExternalEditorPath(vd, path, linenum=0, binary=False):
         'Launch $EDITOR to edit *path* starting on line *linenum*.'
         if linenum:
             visidata.vd.launchEditor(path, '+%s' % linenum)
         else:
             visidata.vd.launchEditor(path)
 
-        with open(path, 'r') as fp:
+        mode = 'rb' if binary else 'r'
+        with open(path, mode) as fp:
             try:
-                return fp.read().rstrip('\n')  # trim inevitable trailing newlines
+                data = fp.read()
+                if binary:
+                    return data
+                else:
+                    return data.rstrip('\n')  # trim inevitable trailing newlines
             except Exception as e:
                 visidata.vd.exceptionCaught(e)
                 return ''
