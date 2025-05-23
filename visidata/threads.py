@@ -337,7 +337,10 @@ class ThreadProfiler:
 
     def __enter__(self):
         if vd.options.profile:
-            self.thread.profile.enable()
+            try:
+                self.thread.profile.enable()
+            except ValueError: #"ValueError: Another profiling tool is already active"
+                pass
         return self
 
     def __exit__(self, exc_type, exc_val, tb):
