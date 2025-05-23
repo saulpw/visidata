@@ -5,7 +5,7 @@ import re
 cmdlog_col_prefix='\u241f'  #string ␟ to mark the start of column info in an ordering string
 
 @Sheet.api
-def orderBy(sheet, *cols, reverse=False, change_column=False, save_cmd_input=False):
+def orderBy(sheet, *cols, reverse=False, change_column=False, save_cmd_input=True):
     '''Add *cols* to internal ordering and re-sort the rows accordingly.
     Pass *reverse* as True to order these *cols* descending.
     Pass empty *cols* (or cols[0] of None) to clear internal ordering.
@@ -149,12 +149,12 @@ Sheet.addCommand('g[', 'sort-keys-asc', 'orderBy(None, *keyCols)', 'sort ascendi
 Sheet.addCommand('g]', 'sort-keys-desc', 'orderBy(None, *keyCols, reverse=True)', 'sort descending by all key columns; replace any existing sort criteria')
 
 # add to existing sort criteria
-Sheet.addCommand('', 'sort-asc-add', 'orderBy(cursorCol, save_cmd_input=True)', 'sort ascending by current column; add to existing sort criteria')
-Sheet.addCommand('', 'sort-desc-add', 'orderBy(cursorCol, reverse=True, save_cmd_input=True)', 'sort descending by current column; add to existing sort criteria')
-Sheet.addCommand('z[', 'sort-asc-change', 'orderBy(cursorCol, change_column=True, save_cmd_input=True)', 'sort ascending by current column; keep higher priority sort criteria')
-Sheet.addCommand('z]', 'sort-desc-change', 'orderBy(cursorCol, reverse=True, change_column=True, save_cmd_input=True)', 'sort descending by current column; keep higher priority sort criteria')
-Sheet.addCommand('gz[', 'sort-keys-asc-add', 'orderBy(*keyCols, save_cmd_input=True)', 'sort ascending by all key columns; add to existing sort criteria')
-Sheet.addCommand('gz]', 'sort-keys-desc-add', 'orderBy(*keyCols, reverse=True, save_cmd_input=True)', 'sort descending by all key columns; add to existing sort criteria')
+Sheet.addCommand('', 'sort-asc-add', 'orderBy(cursorCol)', 'sort ascending by current column; add to existing sort criteria')
+Sheet.addCommand('', 'sort-desc-add', 'orderBy(cursorCol, reverse=True)', 'sort descending by current column; add to existing sort criteria')
+Sheet.addCommand('z[', 'sort-asc-change', 'orderBy(cursorCol, change_column=True)', 'sort ascending by current column; keep higher priority sort criteria')
+Sheet.addCommand('z]', 'sort-desc-change', 'orderBy(cursorCol, reverse=True, change_column=True)', 'sort descending by current column; keep higher priority sort criteria')
+Sheet.addCommand('gz[', 'sort-keys-asc-add', 'orderBy(*keyCols)', 'sort ascending by all key columns; add to existing sort criteria')
+Sheet.addCommand('gz]', 'sort-keys-desc-add', 'orderBy(*keyCols, reverse=True)', 'sort descending by all key columns; add to existing sort criteria')
 
 vd.addMenuItems('''
     Column > Sort by > current column only > ascending > sort-asc
