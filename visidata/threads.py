@@ -385,6 +385,7 @@ class ProfileSheet(Sheet):
     ]
 
     nKeys=3
+    _ordering = [('inlinetime_us', True)]  # initially sort by inlinetime descending
 
     def reload(self):
         if isinstance(self.source, cProfile.Profile):
@@ -392,7 +393,6 @@ class ProfileSheet(Sheet):
         else:
             self.rows = self.source
 
-        self.orderBy(None, self.column('inlinetime_us'), reverse=True)
         self.callers = collections.defaultdict(list)  # [row.code] -> list(code)
 
         for r in self.rows:
