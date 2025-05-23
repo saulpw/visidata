@@ -4,9 +4,14 @@ from visidata import vd
 
 vd.themes['light'] = dict(
         color_default      = 'black on white',  # the default fg and bg colors
+        color_default_hdr  = 'bold black on white',
+        color_bottom_hdr   = 'underline black on white',
+        color_current_col  = 'bold on white',
+        color_column_sep   = 'black on white',
         color_key_col      = '20 blue',   # color of key columns
         color_edit_cell    = '234 black',     # cell color to use when editing cell
         color_selected_row = '164 magenta',  # color of selected rows
+        color_selected_col = 'bold on white',
         color_note_row     = '164 magenta',  # color of row note on left edge
         color_note_type    = '88 red',  # color of cell note for non-str types in anytype columns
         color_warning      = '202 11 yellow',
