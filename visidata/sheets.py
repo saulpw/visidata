@@ -584,12 +584,8 @@ class TableSheet(BaseSheet):
             col.recalc(self)
             self.columns.insert(idx+i, col)
 
-        # statements after addColumn in the same command may want to use these cached properties
-        Sheet.keyCols.fget.cache_clear()
-        Sheet.visibleCols.fget.cache_clear()
-        Sheet.availCols.fget.cache_clear()
-        Sheet.availColnames.fget.cache_clear()
-        Sheet.colsByName.fget.cache_clear()
+        # statements after addColumn in the same command may want to use these cached properties, which are now stale
+        vd.clearCaches()
 
         return cols[0]
 
