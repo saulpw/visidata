@@ -20,9 +20,10 @@ def isSelected(self, row):
 
 @Sheet.api
 @asyncthread
-def toggle(self, rows):
+def toggle(self, rows, add_undo=True):
     'Toggle selection of given *rows*.  Async.'
-    self.addUndoSelection()
+    if add_undo:
+        self.addUndoSelection()
     for r in Progress(rows, 'toggling', total=len(rows)):
         if self.isSelected(r):  #1671
             self.unselectRow(r)
@@ -36,16 +37,18 @@ def beforeLoad(self):
 
 
 @Sheet.api
-def select_row(self, row):
+def select_row(self, row, add_undo=True):
     'Add single *row* to set of selected rows.'
-    self.addUndoSelection()
+    if add_undo:
+        self.addUndoSelection()
     self.selectRow(row)
 
 
 @Sheet.api
-def toggle_row(self, row):
+def toggle_row(self, row, add_undo=True):
     'Toggle selection of given *row*.'
-    self.addUndoSelection()
+    if add_undo:
+        self.addUndoSelection()
     if self.isSelected(row):
         self.unselectRow(row)
     else:
@@ -53,9 +56,10 @@ def toggle_row(self, row):
 
 
 @Sheet.api
-def unselect_row(self, row):
+def unselect_row(self, row, add_undo=True):
     'Remove single *row* from set of selected rows.'
-    self.addUndoSelection()
+    if add_undo:
+        self.addUndoSelection()
     self.unselectRow(row) or vd.warning('row not selected')
 
 
@@ -82,9 +86,10 @@ def clearSelected(self):
 
 @Sheet.api
 @asyncthread
-def select(self, rows, status=True, progress=True):
-    "Add *rows* to set of selected rows. Async. Don't show progress if *progress* is False; don't show status if *status* is False."
-    self.addUndoSelection()
+def select(self, rows, status=True, progress=True, add_undo=True):
+    "Add *rows* to set of selected rows. Async. Don't show progress if *progress* is False; don't show status if *status* is False. If *add_undo* is False, do not add an undo selection function to the undo history; useful for lowering memory consumption when caller is changing a large batch of selects in one command."
+    if add_undo:
+        self.addUndoSelection()
     before = self.nSelectedRows
     if self.options.bulk_select_clear:
         self.clearSelected()
@@ -99,9 +104,10 @@ def select(self, rows, status=True, progress=True):
 
 @Sheet.api
 @asyncthread
-def unselect(self, rows, status=True, progress=True):
-    "Remove *rows* from set of selected rows. Async. Don't show progress if *progress* is False; don't show status if *status* is False."
-    self.addUndoSelection()
+def unselect(self, rows, status=True, progress=True, add_undo=True):
+    "Remove *rows* from set of selected rows. Async. Don't show progress if *progress* is False; don't show status if *status* is False. If *add_undo* is False, do not add an undo unselection function to the undo history; useful for lowering memory consumption when caller is changing a large batch of selects in one command."
+    if add_undo:
+        self.addUndoSelection()
     before = self.nSelectedRows
     for r in (Progress(rows, 'unselecting') if progress else rows):
         self.unselectRow(r)
