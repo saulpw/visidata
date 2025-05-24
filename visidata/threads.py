@@ -319,13 +319,14 @@ def open_pyprof(vd, p):
 @VisiData.api
 def toggleProfiling(vd):
     t = threading.current_thread()
-    if not t.profile:
-        t.profile = cProfile.Profile()
+    if not vd.options.profile:
+        if not t.profile:
+            t.profile = cProfile.Profile()
         t.profile.enable()
-        if not vd.options.profile:
-            vd.options.set('profile', True)
+        vd.options.set('profile', True)
     else:
-        t.profile.disable()
+        if t.profile:
+            t.profile.disable()
         vd.options.set('profile', False)
     vd.status('profiling ' + ('ON' if vd.options.profile else 'OFF'))
 
