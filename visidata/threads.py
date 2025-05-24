@@ -438,6 +438,10 @@ def codestr(code):
     return code.co_name
 
 
+@VisiData.lazy_property
+def allThreadsSheet(self):
+    return ThreadsSheet("threads", source=vd.threads)
+
 ThreadsSheet.addCommand('^C', 'cancel-thread', 'cancelThread(cursorRow)', 'abort thread at current row')
 ThreadsSheet.addCommand('g^C', 'cancel-all', 'cancelThread(*sheet.rows)', 'abort all threads on this threads sheet')
 ThreadsSheet.addCommand(None, 'add-row', 'fail("cannot add new rows on Threads Sheet")', 'invalid command')
@@ -452,7 +456,7 @@ BaseSheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads o
 BaseSheet.addCommand('g^C', 'cancel-all', 'liveThreads=list(t for vs in vd.sheets for t in vs.currentThreads); cancelThread(*liveThreads); status("canceled %s threads" % len(liveThreads))', 'abort all spawned threads')
 
 
-BaseSheet.addCommand('^T', 'threads-all', 'vd.push(ThreadsSheet("threads", source=vd.threads))', 'open Threads for all sheets')
+BaseSheet.addCommand('^T', 'threads-all', 'vd.push(vd.allThreadsSheet)', 'open Threads for all sheets')
 BaseSheet.addCommand('z^T', 'threads-sheet', 'vd.push(ThreadsSheet("threads", source=sheet.currentThreads))', 'open Threads for this sheet')
 
 vd.addGlobals({
