@@ -1152,8 +1152,8 @@ def confirmQuit(vs, verb='quit'):
 def preloadHook(sheet):
     'Override to setup for reload().'
     sheet.confirmQuit('reload')
-
     sheet.hasBeenModified = False
+    sheet.calcColLayout()
 
 
 @VisiData.api
