@@ -176,13 +176,12 @@ BaseSheet.bindkey('gKEY_BACKSPACE', 'sysopen-help')
 HelpSheet.addCommand(None, 'exec-command', 'quit(sheet); draw_all(); activeStack[0].execCommand(cursorRow.longname)', 'execute command on undersheet')
 BaseSheet.addCommand(None, 'open-tutorial-visidata', 'launchBrowser("https://jsvine.github.io/intro-to-visidata/")', 'open https://jsvine.github.io/intro-to-visidata/')
 
-vd.addMenuItem("Help", "VisiData tutorial", 'open-tutorial-visidata')
-vd.addMenuItem("Help", 'Sheet commands', 'help-commands')
-vd.addMenuItem("Help", 'All commands', 'help-commands-all')
 
 vd.addGlobals(HelpSheet=HelpSheet)
 
 vd.addMenuItems('''
+    Help > VisiData tutorial > open-tutorial-visidata
+    Help > All commands > help-commands-all
     Help > Quick reference > sysopen-help
     Help > Command list > help-commands
 ''')
