@@ -22,6 +22,7 @@ vd.option('disp_wrap_break_long_words', False, 'break words longer than column w
 vd.option('disp_wrap_replace_whitespace', False, 'replace whitespace with spaces in multiline')
 vd.option('disp_wrap_placeholder', '…', 'multiline string to indicate truncation')
 vd.option('disp_multiline_focus', True, 'only multiline cursor row')
+vd.option('color_multiline_bottom', '', 'color of bottom line of multiline rows')  #2715
 vd.option('color_aggregator', 'bold 255 white on 234 black', 'color of aggregator summary on bottom row')
 
 
@@ -286,7 +287,7 @@ class TableSheet(BaseSheet):
         self.recalc()
 
     def beforeLoad(self):
-        pass
+        self.calcColLayout()
 
     def resetCols(self):
         'Reset columns to class settings'
@@ -299,25 +300,43 @@ class TableSheet(BaseSheet):
         self.setKeys(self.columns[:self.nKeys])
 
     def loader(self):
-        'Reset rows and sync load ``source`` via iterload.  Overrideable.'
-        self.rows = []
+        'Reset rows and sync load ``source`` via iterload.  Overridable.'
         try:
-            with vd.Progress(gerund='loading', total=0):
-                max_rows = self.options.max_rows
-                for i, r in enumerate(self.iterload()):
-                    if self.precious and i >= max_rows:
-                        break
-                    self.addRow(r)
+            for r in self._iterloader():
+                pass
         except FileNotFoundError:
             return  # let it be a blank sheet without error
+
+    def _iterloader(self):
+        self.rows = []
+        with vd.Progress(gerund='loading', total=0):
+            max_rows = self.options.max_rows
+            for i, r in enumerate(self.iterload()):
+                if self.precious and i >= max_rows:
+                    break
+                self.addRow(r)
+                yield r
 
     def iterload(self):
         'Generate rows from ``self.source``.  Override in subclass.'
         if False:
             yield vd.fail('no iterload for this loader yet')
 
+    def loadStart(self):
+        self.loaditer = self._iterloader()
+
+    def loadSome(self):
+        if not self.loaditer:
+            return False
+        try:
+            next(self.loaditer)
+            return True
+        except StopIteration:
+            self.loaditer = None
+            return False
+
     def afterLoad(self):
-        'hook for after loading has finished.  Overrideable (be sure to call super).'
+        'hook for after loading has finished.  Overridable (be sure to call super).'
         # if an ordering has been specified, sort the sheet
         if self._ordering:
             vd.sync(self.sort())
@@ -509,6 +528,9 @@ class TableSheet(BaseSheet):
         'Raw value at current row and column.'
         return self.cursorCol.getValue(self.cursorRow)
 
+    def getTypedRow(self, rownum):
+        return [c.getTypedValue(self.rows[rownum]) for c in self.availCols]
+
     @property
     def statusLine(self):
         'Position of cursor and bounds of current sheet.'
@@ -563,12 +585,8 @@ class TableSheet(BaseSheet):
             col.recalc(self)
             self.columns.insert(idx+i, col)
 
-        # statements after addColumn in the same command may want to use these cached properties
-        Sheet.keyCols.fget.cache_clear()
-        Sheet.visibleCols.fget.cache_clear()
-        Sheet.availCols.fget.cache_clear()
-        Sheet.availColnames.fget.cache_clear()
-        Sheet.colsByName.fget.cache_clear()
+        # statements after addColumn in the same command may want to use these cached properties, which are now stale
+        vd.clearCaches()
 
         return cols[0]
 
@@ -667,6 +685,7 @@ class TableSheet(BaseSheet):
 
     def calcColLayout(self):
         'Set right-most visible column, based on calculation.'
+        vd.clearCaches()
         minColWidth = dispwidth(self.options.disp_more_left)+dispwidth(self.options.disp_more_right)+2
         sepColWidth = dispwidth(self.options.disp_column_sep)
         winWidth = self.windowWidth
@@ -741,7 +760,7 @@ class TableSheet(BaseSheet):
                 clipdraw(scr, y+i, x, name, hdrcattr, w=colwidth)
             vd.onMouse(scr, x, y+i, colwidth, 1, BUTTON3_RELEASED='rename-col')
 
-            if C and x+colwidth+len(C) < self.windowWidth and y+i < self.windowHeight:
+            if C and x+colwidth+dispwidth(C) < self.windowWidth and y+i < self.windowHeight:
                 scr.addstr(y+i, x+colwidth, C, sepcattr.attr)
 
         clipdraw(scr, y+h-1, min(x+colwidth, self.windowWidth-1)-dispwidth(T), T, hdrcattr)
@@ -932,10 +951,12 @@ class TableSheet(BaseSheet):
                 colseps = [topsep] + [midsep]*(height-2) + [botsep]
                 endseps = [endtopsep] + [endmidsep]*(height-2) + [endbotsep]
                 keyseps = [keytopsep] + [keymidsep]*(height-2) + [keybotsep]
+                color_multiline_bottom = colors.get_color('color_multiline_bottom', 2)
             else:
                 colseps = [colsep]
                 endseps = [endsep]
                 keyseps = [keysep]
+                color_multiline_bottom = 0
 
             for vcolidx, (col, cellval, lines) in displines.items():
                     if vcolidx not in self._visibleColLayout:
@@ -954,6 +975,7 @@ class TableSheet(BaseSheet):
 
                     cattr = self._colorize(col, row, cellval)
                     cattr = update_attr(cattr, basecellcattr)
+                    bottomcattr = update_attr(cattr, color_multiline_bottom) if height > 1 else cattr
 
                     note = getattr(cellval, 'note', None)
                     notewidth = 1 if note else 0
@@ -981,7 +1003,7 @@ class TableSheet(BaseSheet):
                         for attr, text in chunks:
                             prechunks.append((attr, text[hoffset:]))
 
-                        clipdraw_chunks(scr, y, x, prechunks, cattr, w=colwidth-notewidth)
+                        clipdraw_chunks(scr, y, x, prechunks, cattr if i < height-1 else bottomcattr, w=colwidth-notewidth)
                         vd.onMouse(scr, x, y, colwidth, 1, BUTTON3_RELEASED='edit-cell')
 
                         if sepchars and x+colwidth+dispwidth(sepchars) <= self.windowWidth:
@@ -1134,7 +1156,6 @@ def confirmQuit(vs, verb='quit'):
 def preloadHook(sheet):
     'Override to setup for reload().'
     sheet.confirmQuit('reload')
-
     sheet.hasBeenModified = False
 
 

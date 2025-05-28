@@ -17,10 +17,7 @@ def orderBy(sheet, *cols, reverse=False, change_column=False, save_cmd_input=Tru
 
     if options.undo:
         vd.addUndo(setattr, sheet, '_ordering', copy(sheet._ordering))
-        if sheet._ordering:
-            vd.addUndo(sheet.sort)
-        else:
-            vd.addUndo(setattr, sheet, 'rows', copy(sheet.rows))
+        vd.addUndo(setattr, sheet, 'rows', copy(sheet.rows))
 
     # for replay, read the full column ordering from the cmdlog input parameter  #2688
     input = vd.getLastArgs()

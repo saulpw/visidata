@@ -249,6 +249,8 @@ class Column(Extensible):
 
         if self.type is anytype:
             if isinstance(typedval, (dict, list, tuple)):
+                if width is None:
+                    return ''.join(iterchars(typedval))
                 dispval, dispw = clipstr(iterchars(typedval), width)
                 return dispval
 
@@ -264,7 +266,9 @@ class Column(Extensible):
 
            The 'generic' displayer does not do any formatting.
         '''
-        if width is not None and width > 1 and vd.isNumeric(self):
+        if width is not None and width > 1 and \
+                vd.isNumeric(self) and \
+                isinstance(dw.typedval, (int, float)):
             yield ('', dw.text.rjust(width-2))
         else:
             yield ('', dw.text)

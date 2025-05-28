@@ -33,15 +33,8 @@ See [visidata.org/install](https://visidata.org/install) for detailed instructio
 
 ### Usage
 
-On Linux and OS/X
-
-    $ vd <input>
-    $ <command> | vd
-
-On Windows
-
-    $ visidata <input>
-    $ <command> | visidata
+$ vd <input>
+$ <command> | vd
 
 Press `Ctrl+Q` to quit at any time.
 

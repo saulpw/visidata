@@ -57,7 +57,7 @@ The first several rows on this sheet are the existing color strings that are cur
 After these are the numeric colors; note that colors 0-7 correspond to the named colors above, with 0 being black and 7 being standard white.  Colors 8-15 are unnamed brighter versions of these colors: 8 is gray ("bright black") and 15 is bright white.
 
 Colors 16-231 form a regular color cube with a wide variety of gradations covering the color space.
-Colors 232-255 are gradiants of white, with 232 being the darkest possible gray (almost indistinguishable from the black of 0 and 16), and 255 being almost the brightest white (though 15 is brighter).
+Colors 232-255 are gradients of white, with 232 being the darkest possible gray (almost indistinguishable from the black of 0 and 16), and 255 being almost the brightest white (though 15 is brighter).
 
 ## [Changing Display Attributes within a string](#attrs) {#attrs}
 

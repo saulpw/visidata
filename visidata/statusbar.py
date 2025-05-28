@@ -8,7 +8,7 @@ import curses
 import sys
 
 import visidata
-from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, dispwidth, ColorAttr
+from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, dispwidth, ColorAttr, clipstr_middle
 
 
 
@@ -31,11 +31,6 @@ vd.theme_option('color_highlight_status', 'black on green', 'color of highlighte
 
 BaseSheet.init('longname', lambda: '')
 
-def fitWithin(s, n=10):
-    if len(s) > n:
-        return s[:n//2-1] + '…' + s[-n//2+1:]
-    return s
-
 @BaseSheet.property
 def ancestors(sheet):
     if isinstance(sheet.source, BaseSheet):
@@ -53,6 +48,8 @@ def sheetlist(sheet):
 
     sheetnames = []
     for vs in sheets:
+        if not vs.precious:  #2573
+            continue
         if isinstance(vs, BaseSheet):
             shortcut = ' '
             if vs.shortcut in '1 2 3 4 5 6 7 8 9 10'.split():
@@ -60,7 +57,7 @@ def sheetlist(sheet):
             if vs is vd.sheet:
                 sheetnames.append(f'[:menu_active]{shortcut}{vs.name}[:]')
             else:
-                sheetnames.append(f'[:onclick jump-sheet-{vs.shortcut}]' + fitWithin(f'{shortcut}{vs.name}', 20) + '[:]')
+                sheetnames.append(f'[:onclick jump-sheet-{vs.shortcut}]' + clipstr_middle(f'{shortcut}{vs.name}', 20)[0] + '[:]')
         else:
             sheetnames.append(vs)
 

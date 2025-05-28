@@ -263,7 +263,7 @@ vd(1)                                                                           
       <span style="font-weight:bold;">^G</span>              show cursor position and bounds of current sheet on status line
       <span style="font-weight:bold;">^V</span>              show version and copyright information on status line
       <span style="font-weight:bold;">^P</span>              open <span style="font-weight:bold;">Status</span> <span style="font-weight:bold;">History</span>
-     m <span style="text-decoration:underline;">keystroke</span>      first, begin recording macro; second, prompt for <span style="text-decoration:underline;">keystroke</span> , and complete recording. Macro can then be executed everytime provided keystroke is used. Will override existing keybinding. Macros will run on current row, column, sheet.
+     m <span style="text-decoration:underline;">keystroke</span>      first, begin recording macro; second, prompt for <span style="text-decoration:underline;">keystroke</span> , and complete recording. Macro can then be executed every time provided keystroke is used. Will override existing keybinding. Macros will run on current row, column, sheet.
      gm               open an index of all existing macros. Can be directly viewed with <span style="font-weight:bold;">Enter</span>, and then modified with <span style="font-weight:bold;">^S</span>.
 
       <span style="font-weight:bold;">^Y</span>  <span style="font-weight:bold;">z^Y</span>  <span style="font-weight:bold;">g^Y</span>    open current row/cell/sheet as Python object

@@ -7,13 +7,21 @@ import tempfile
 import functools
 import os
 import itertools
+import platform
 
 from visidata import VisiData, vd, asyncthread, SettableColumn
 from visidata import Sheet, Path, Column
 
-if sys.platform == 'win32':
+if (
+    # Windows
+    sys.platform == 'win32'
+    # WSL 2
+    or "microsoft-standard-WSL2" in platform.uname().release
+    # WSL 1
+    or sys.platform == 'linux' and platform.uname().release.endswith("-Microsoft")
+):
     syscopy_cmd_default = 'clip.exe'
-    syspaste_cmd_default = 'powershell -command Get-Clipboard'
+    syspaste_cmd_default = 'powershell.exe -noprofile -command Get-Clipboard'
 elif sys.platform == 'darwin':
     syscopy_cmd_default = 'pbcopy w'
     syspaste_cmd_default = 'pbpaste'

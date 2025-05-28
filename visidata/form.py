@@ -40,7 +40,7 @@ class FormCanvas(BaseSheet):
                 continue
             x, y = r.x, r.y
             if isinstance(y, float) and (0 < y < 1) or (-1 < y < 0): y = h*y
-            if isinstance(x, float) and (0 < x < 1) or (-1 < x < 0): x = w*x-(len(r.text)/2)
+            if isinstance(x, float) and (0 < x < 1) or (-1 < x < 0): x = w*x-(dispwidth(r.text)/2)
             x = int(x)
             y = int(y)
             if y < 0: y += h
@@ -61,7 +61,7 @@ class FormCanvas(BaseSheet):
         vd.setWindows(vd.scrFull)
         drawnrows = [r for r in self.source.rows if r.text]
         inputs = [r for r in self.source.rows if r.input]
-        maxw = max(int(r.x)+len(r.text) for r in drawnrows)
+        maxw = max(int(r.x)+dispwidth(r.text) for r in drawnrows)
         maxh = max(int(r.y) for r in drawnrows)
         h, w = vd.scrFull.getmaxyx()
         y, x = max(0, (h-maxh)//2-1), max(0, (w-maxw)//2-1)

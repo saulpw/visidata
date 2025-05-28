@@ -26,7 +26,11 @@ def guess_csv(vd, p):
 
         for csvopt in dir(dialect):
             if not csvopt.startswith('_'):
-                r['csv_'+csvopt] = getattr(dialect, csvopt)
+                v = getattr(dialect, csvopt)
+                optname = 'csv_'+csvopt
+                r[optname] = v
+                if vd.options.get(optname) != v:
+                    vd.warning(f'guessed option {optname}={v}')
 
         return r
 

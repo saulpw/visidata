@@ -5,7 +5,7 @@ Loaders
 
     You are welcome to submit new loaders to core VisiData, or as plugins. Please, see our `checklists for contribution <https://visidata.org/docs/contributing>`__.
 
-Creating a new loader for a data source is simple and straigthforward.
+Creating a new loader for a data source is simple and straightforward.
 
 1. ``open_filetype`` boilerplate
 2. ``FooSheet`` subclass with rowtype and rowdef

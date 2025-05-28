@@ -3,7 +3,7 @@ import itertools
 import functools
 from copy import copy
 
-from visidata import vd, VisiData, asyncthread, Sheet, Progress, IndexSheet, Column, CellColorizer, ColumnItem, SubColumnItem, TypedWrapper, ColumnsSheet, AttrDict
+from visidata import vd, VisiData, asyncthread, Sheet, Progress, IndexSheet, Column, CellColorizer, ColumnItem, SubColumnItem, TypedWrapper, ColumnsSheet, AttrDict, dispwidth
 
 vd.help_join = '# Join Help\nHELPTODO'
 
@@ -367,7 +367,7 @@ def chooseJointype(vd):
     prompt = 'choose jointype: '
     def _fmt_aggr_summary(match, row, trigger_key):
         formatted_jointype = match.formatted.get('key', row.key) if match else row.key
-        r = ' '*(len(prompt)-3)
+        r = ' '*(dispwidth(prompt)-3)
         r += f'[:keystrokes]{trigger_key}[/]  '
         r += formatted_jointype
         if row.desc:

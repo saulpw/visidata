@@ -4,6 +4,7 @@
 
 import sys
 import visidata
+dispwidth = visidata.dispwidth
 
 
 fncli, fnopts = sys.argv[1:]
@@ -31,7 +32,7 @@ with open(fncli, 'w') as cliOut:
         optkeys = visidata.options.keys()
         optvalues = [visidata.options._opts._get(optname) for optname in optkeys]
 
-        widestoptwidth, widestopt = sorted((len(opt.name)+len(str(opt.value)), opt.name) for opt in optvalues)[-1]
+        widestoptwidth, widestopt = sorted((dispwidth(opt.name)+dispwidth(str(opt.value)), opt.name) for opt in optvalues)[-1]
         print('widest option+default is "%s", width %d' % (widestopt, widestoptwidth))
         widestoptwidth = 35
         menuOut.write('.Bl -tag -width %s -compact\n' % ('X'*(widestoptwidth+3)))
@@ -51,7 +52,7 @@ with open(fncli, 'w') as cliOut:
             else:
                 cli_optname=opt.name.replace('_', '-')
                 cli_type=type(opt.value).__name__
-                optlen = len(cli_optname)+len(cli_type)+1
+                optlen = dispwidth(cli_optname)+dispwidth(cli_type)+1
                 if cli_type != 'bool' or visidata.options.getdefault(opt.name):
                     cliOut.write(options_cli_skel.format(cli_optname=cli_optname,
                                                     optname = opt.name,
