@@ -36,6 +36,16 @@ class WindowColumn(Column):
 
         return self._windowrows
 
+    def __getstate__(self):
+        r = super().__getstate__()
+        r['before'] = self.before
+        r['after'] = self.after
+        r['sourcecol'] = self.sourcecol.name
+        return r
+
+    def __setstate__(self, r):
+        self.sourcecol = self.sheet.column(r.pop('sourcecol', None))
+        return super().__setstate__(r)
 
 @Sheet.api
 def addcol_window(sheet, curcol):
@@ -54,3 +64,5 @@ Sheet.addCommand('w', 'addcol-window', 'addcol_window(cursorCol)', 'add column w
 Sheet.addCommand('', 'select-around-n', 'select_around(input("select rows around selected: ", value=1))', 'select additional N rows before/after each selected row')
 
 vd.addMenuItem('Row', 'Select', 'N rows around each selected row', 'select-around-n')
+
+vd.addGlobals(WindowColumn=WindowColumn)
