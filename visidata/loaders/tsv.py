@@ -56,10 +56,15 @@ def splitter(stream, delim='\n'):
 
     buf = type(delim)()
 
+    import re
     for chunk in stream:
         buf += chunk
 
-        *rows, buf = buf.split(delim)
+        if delim in '\r\n':
+            *rows, buf = buf.splitlines() #2571
+        else:
+            *rows, buf = buf.split(delim)
+
         yield from rows
 
     buf = buf.rstrip(delim)  # trim empty trailing lines
