@@ -36,7 +36,7 @@ class RankAggregator(ListAggregator):
                 if reverse:
                     vd.status('ranking {col.name} in descending order')
             except TypeError as e:
-                vd.fail(f'elements in a ranking column must be comparable: {e.args[0]}')
+                vd.fail(f'TypeError while comparing elements in ranked column; change col type: {e.args[0]}')
             rowvals = []
             #group by row key
             for _, group in itertools.groupby(rowdata, key=lambda v: v[0]):
@@ -84,17 +84,20 @@ def addcol_sheetrank(sheet, rows):
         p = _key_progress(prog) # increment progress every time p() is called
         ordering = [(col, reverse) for (col, reverse) in sheet.ordering if col.keycol]
         rowkeys = [(sheet.rowkey(r), p(rownum), r) for rownum, r in enumerate(rows)]
-        if ordering:
-            vd.status('using custom ordering for keycol sort')
-            keycols_ordered = [col for (col, reverse) in ordering]
-            keycols_unordered = [keycol for keycol in sheet.keyCols if not keycol in keycols_ordered]
-            ordering += [(keycol, False) for keycol in keycols_unordered]
-            def _sortkey(e): # sort the rows by using the column
-                p(None)
-                return sheet.sortkey(e[2], ordering=ordering)
-            rowkeys.sort(key=_sortkey)
-        else:
-            rowkeys.sort(key=p)
+        try:
+            if ordering:
+                vd.status('using custom ordering for keycol sort')
+                keycols_ordered = [col for (col, reverse) in ordering]
+                keycols_unordered = [keycol for keycol in sheet.keyCols if not keycol in keycols_ordered]
+                ordering += [(keycol, False) for keycol in keycols_unordered]
+                def _sortkey(e): # sort the rows by using the column
+                    p(None)
+                    return sheet.sortkey(e[2], ordering=ordering)
+                rowkeys.sort(key=_sortkey)
+            else:
+                rowkeys.sort(key=p)
+        except TypeError as e:
+            vd.fail(f'TypeError while sorting; change keycol type: {e.args[0]}')
         ranks = rank_sorted_iterable([p(rowkey) for rowkey, _, _ in rowkeys])
         row_ranks = sorted(zip((rownum for _, rownum, _ in rowkeys), ranks), key=p)
         row_ranks = [rank for rownum, rank in row_ranks]
