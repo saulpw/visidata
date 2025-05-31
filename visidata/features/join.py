@@ -383,18 +383,28 @@ def chooseJointype(vd):
             type='jointype')
 
 
-IndexSheet.addCommand('&', 'join-selected', 'left, rights = someSelectedRows[0], someSelectedRows[1:]; vd.push(left.openJoin(rights, jointype=chooseJointype()))', 'merge selected sheets with visible columns from all, keeping rows according to jointype')
+IndexSheet.addCommand('&', 'join-selected', 'left, rights = someSelectedRows[0], someSelectedRows[1:]; vd.push(left.openJoin(rights, jointype=chooseJointype()))', 'join selected sheets with visible columns from all, keeping rows according to jointype')
 IndexSheet.bindkey('g&', 'join-selected')
-Sheet.addCommand('&', 'join-sheets-top2', 'vd.push(openJoin(vd.sheets[1:2], jointype=chooseJointype()))', 'concatenate top two sheets in Sheets Stack')
-Sheet.addCommand('g&', 'join-sheets-all', 'vd.push(openJoin(vd.sheets[1:], jointype=chooseJointype()))', 'concatenate all sheets in Sheets Stack')
-
-ColumnsSheet.addCommand('&', 'join-sheets-cols', 'vd.push(join_sheets_cols(selectedRows, jointype=chooseJointype()))', '')
+Sheet.addCommand('&', 'join-sheets-top2', 'vd.push(openJoin(vd.sheets[1:2], jointype=chooseJointype()))', 'join top two sheets on Sheets Stack')
+Sheet.addCommand('g&', 'join-sheets-all', 'vd.push(openJoin(vd.sheets[1:], jointype=chooseJointype()))', 'join all sheets on Sheets Stack')
+ColumnsSheet.addCommand('&', 'join-sheets-cols', 'vd.push(join_sheets_cols(selectedRows, jointype=chooseJointype()))', 'join sheets for selected columns')
 
 vd.addMenuItems('''
-    Data > Join > selected sheets > join-selected
-    Data > Join > top two sheets > join-sheets-top2
-    Data > Join > all sheets > join-sheets-all
+    Data > Join > Selected Sheets > choose jointype > join-selected
+    Data > Join > Top Two Sheets > choose jointype > join-sheets-top2
+    Data > Join > All Sheets > choose jointype > join-sheets-all
 ''')
+
+for d in vd.jointypes:
+    jointype, joinhelp = d.key, d.desc
+    IndexSheet.addCommand('', f'join-selected-{jointype}', 'left, rights = someSelectedRows[0], someSelectedRows[1:]; vd.push(left.openJoin(rights, jointype="{jointype}))', f'join selected sheets, keeping {joinhelp}')
+    Sheet.addCommand('', f'join-sheets-top2-{jointype}', f'vd.push(openJoin(vd.sheets[1:2], jointype="{jointype}"))', f'join top two sheets on Sheets Stack, keeping {joinhelp}')
+    Sheet.addCommand('', f'join-sheets-all-{jointype}', f'vd.push(openJoin(vd.sheets[1:], jointype="{jointype}"))', f'join all sheets on Sheets Stack, keeping {joinhelp}')
+    ColumnsSheet.addCommand('', 'join-cols-{jointype}', 'vd.push(join_sheets_cols(selectedRows, jointype=chooseJointype()))', f'join sheets for selected columns, keeping {joinhelp}')
+
+    vd.addMenuItems(f'''Data > Join > Selected Sheets > {jointype} > join-selected-{jointype}''')
+    vd.addMenuItems(f'''Data > Join > Top Two Sheets > {jointype} > join-sheets-top2-{jointype}''')
+    vd.addMenuItems(f'''Data > Join > All Sheets > {jointype} > join-selected-{jointype}''')
 
 IndexSheet.guide += '''
     - `&` to join the selected sheets together
