@@ -287,7 +287,7 @@ class TableSheet(BaseSheet):
         self.recalc()
 
     def beforeLoad(self):
-        self.calcColLayout()
+        pass
 
     def resetCols(self):
         'Reset columns to class settings'
@@ -1161,6 +1161,7 @@ def preloadHook(sheet):
     'Override to setup for reload().'
     sheet.confirmQuit('reload')
     sheet.hasBeenModified = False
+    sheet.calcColLayout()
 
 
 @VisiData.api
