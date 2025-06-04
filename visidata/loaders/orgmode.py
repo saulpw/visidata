@@ -55,9 +55,11 @@ def encode_date(dt=None):
 
 
 class OrgContentsColumn(Column):
-    def setValue(self, row, v):
+    def setValue(self, row, v, setModified=True):
         super().setValue(row, v)
         orgmode_parse_into(row, v)
+        if setModified:
+            self.sheet.setModified()
 
     def putValue(self, row, v):
         self.sheet.save(row)
