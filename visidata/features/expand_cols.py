@@ -121,8 +121,10 @@ class ExpandedColumn(Column):
     def calcValue(self, row):
         return getitemdef(self.origCol.getValue(row), self.expr)
 
-    def setValue(self, row, value):
+    def setValue(self, row, value, setModified=True):
         self.origCol.getValue(row)[self.expr] = value
+        if setModified:
+            self.origCol.sheet.setModified()
 
 
 @Sheet.api
