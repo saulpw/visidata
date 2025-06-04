@@ -38,8 +38,8 @@ Other commands (not specific to Columns Sheet):
         'passthrough to the value on the source cursorRow'
         def calcValue(self, srcCol):
             return srcCol.getDisplayValue(srcCol.sheet.cursorRow)
-        def setValue(self, srcCol, val):
-            srcCol.setValue(srcCol.sheet.cursorRow, val)
+        def setValue(self, srcCol, val, setModified=True):
+            srcCol.setValue(srcCol.sheet.cursorRow, val, setModified=setModified)
 
     columns = [
             ColumnAttr('sheet', type=str),
