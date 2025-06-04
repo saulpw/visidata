@@ -156,8 +156,11 @@ class ColumnSourceAttr(Column):
     'Use row as attribute name on sheet source'
     def calcValue(self, attrname):
         return getattr(self.sheet.source, attrname)
-    def setValue(self, attrname, value):
-        return setattr(self.sheet.source, attrname, value)
+    def setValue(self, attrname, value, setModified=True):
+        ret = setattr(self.sheet.source, attrname, value)
+        if setModified:
+            self.sheet.setModified()
+        return ret
 
 def docstring(obj, attr):
     v = getattr(obj, attr)
