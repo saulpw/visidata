@@ -83,6 +83,10 @@ class PandasFreqTableSheet(PivotSheet):
         self.source._selectByILoc(row.sourcerows.mask_iloc, selected=False)
         return super().unselectRow(row)
 
+    def addUndoSelection(self):
+        self.source.addUndoSelection()
+        super().addUndoSelection()
+
     def updateLargest(self, grouprow):
         self.largest = max(self.largest, len(grouprow.sourcerows))
 
