@@ -240,7 +240,9 @@ class InputWidget:
 
         #clipdraw will truncate the right side of dispval with trunch as needed
         clipdraw(scr, y, x, dispval, attr, w, clear=clear, literal=True)
-        clipdraw(scr, y, x+w, ' ', attr, 1, clear=clear, literal=True)
+        if x+w < scr.getmaxyx()[1]:
+            #draw a space to indicate that the user can scroll right of the cell's final char
+            clipdraw(scr, y, x+w, ' ', attr, 1, clear=False, literal=True)
         if scr:
             prew = dispwidth(dispval[:i])
             scr.move(y, x+prew)

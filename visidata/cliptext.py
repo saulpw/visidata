@@ -215,8 +215,6 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, literal=False, **kwargs):
 
     x = max(0, x)
     y = max(0, y)
-    assert x >= 0, x
-    assert y >= 0, y
 
     return clipdraw_chunks(scr, y, x, chunks, attr, w=w, clear=clear, **kwargs)
 
