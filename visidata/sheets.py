@@ -721,7 +721,8 @@ class TableSheet(BaseSheet):
 
             width = max(width, 1)
             if col in self.keyCols or vcolidx >= self.leftVisibleColIndex:  # visible columns
-                self._visibleColLayout[vcolidx] = [x, min(width, self.windowWidth-x)]
+                #subtract 1 character of empty space from windowWidth, for the margin to the right of the sheet
+                self._visibleColLayout[vcolidx] = [x, max(min(width, self.windowWidth-x-1), 1)]
                 return width
 
 
