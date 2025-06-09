@@ -212,7 +212,7 @@ class BaseSheet(DrawablePane):
         try:
             for hookfunc in vd.beforeExecHooks:
                 hookfunc(self, cmd, '', keystrokes)
-            escaped = super().execCommand2(cmd, vdglobals=vdglobals)
+            escaped = self.execCommand2(cmd, vdglobals=vdglobals)
         except Exception as e:
             vd.debug(cmd.execstr)
             err = vd.exceptionCaught(e)

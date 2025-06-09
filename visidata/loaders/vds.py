@@ -2,7 +2,7 @@
 
 import json
 
-from visidata import VisiData, JsonSheet, Progress, IndexSheet, SettableColumn, ItemColumn, ExprColumn
+from visidata import vd, VisiData, JsonSheet, Progress, IndexSheet, SettableColumn, ItemColumn, ExprColumn
 
 
 NL='\n'
@@ -80,11 +80,10 @@ class VdsSheet(JsonSheet):
                     classname = 'ItemColumn'
                     d['expr'] = d['name']
 
-                c = globals()[classname](d.pop('name'), sheet=self)
+                c = vd.getGlobals()[classname](d.pop('name'), sheet=self)
                 self.addColumn(c)
                 self.colnames[c.name] = c
-                for k, v in d.items():
-                    setattr(c, k, v)
+                c.__setstate__(d)  # must happen after addColumn sets .sheet
 
                 line = fp.readline()
 

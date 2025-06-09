@@ -50,6 +50,7 @@ class Extensible:
         from visidata import vd
         func.importingModule = vd.importingModule
         setattr(cls, func.__name__, func)
+        func._extensible_api = True
         return func
 
     @classmethod
@@ -97,6 +98,7 @@ class Extensible:
         oldfunc = getattr(cls, name, None)
         if oldfunc:
             func = wraps(oldfunc)(func)
+        func._extensible_api = True
         setattr(cls, name, func)
         return func
 
@@ -107,6 +109,7 @@ class Extensible:
         def dofunc(self):
             return func(self)
         setattr(cls, func.__name__, dofunc)
+        func._extensible_api = True
         return dofunc
 
     @classmethod
@@ -121,6 +124,7 @@ class Extensible:
                 setattr(self, name, func(self))
             return getattr(self, name)
         setattr(cls, func.__name__, get_if_not)
+        func._extensible_api = True
         return get_if_not
 
     @classmethod

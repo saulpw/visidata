@@ -247,10 +247,10 @@ add/reset cache for current/all visible column(s)
 .No add new columns from capture groups of Ar regex No (also requires example row)
 .It Ic "z" Ns Ic "\&;" Ar expr
 .No create new column from bash Ar expr Ns , with Sy $ Ns columnNames as variables
-.It Ic " *" Ar regex Ns Sy / Ns Ar subst
-.No add column derived from current column, replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
-.It Ic "g*  gz*" Ar regex Ns Sy / Ns Ar subst
-.No modify selected rows in current/all visible column(s), replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
+.It Ic " *" Ar search No Sy Tab No Ar replace
+.No add column derived from current column, replacing Ar search No regex with Ar replace No (may include Sy \e1 No backrefs)
+.It Ic "g*  gz*" Ar search No Sy Tab No Ar replace
+.No modify selected rows in current/all visible column(s), replacing Ar search No with Ar replace No (may include Sy \e1 No backrefs)
 .Pp
 .It Ic " (   g("
 .No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) one level

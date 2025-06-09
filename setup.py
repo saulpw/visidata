@@ -2,11 +2,20 @@
 
 from setuptools import setup
 import platform
+import sysconfig
+
 
 
 # tox can't actually run python3 setup.py: https://github.com/tox-dev/tox/issues/96
 # from visidata import __version__
 __version__ = "3.2dev"
+install_requires = [
+    "python-dateutil",
+    'importlib_resources; python_version<"3.9"',
+]
+
+if not sysconfig.get_platform().startswith("mingw"):  # 2757
+    install_requires += ['windows-curses >= 2.4.1; platform_system == "Windows"']   # 2119
 
 setup(
     name="visidata",
@@ -25,11 +34,7 @@ setup(
                             "visidata=visidata.main:vd_cli"],
     },
     py_modules=["visidata"],
-    install_requires=[
-        "python-dateutil",
-        'windows-curses >= 2.4.1; platform_system == "Windows"',  # 2119
-        'importlib_resources; python_version<"3.9"',
-    ],
+    install_requires=install_requires,
     packages=[
         "visidata",
         "visidata.loaders",
@@ -73,6 +78,7 @@ setup(
             "tomli",
             "wcwidth",
             "xport>=3.0",
+        ],"windows-curses": ['windows-curses >= 2.4.1; platform_system == "Windows"',  # 2119 
         ]
     },
     package_data={

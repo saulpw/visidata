@@ -189,7 +189,7 @@ def main_vd():
         vd.warning(e)
 
     warnings.showwarning = vd.warning
-    vd.printout = builtins.print
+    vd.printerr = lambda *args: builtins.print(*args, file=sys.stderr)
 
     flPipedInput = not sys.stdin.isatty()
     flPipedOutput = not sys.stdout.isatty()
@@ -372,7 +372,7 @@ def main_vd():
 
     saver_threads = [t for t in vd.unfinishedThreads if t.name.startswith('save_')]
     if saver_threads:
-        vd.printout('finishing %d savers' % len(saver_threads))
+        vd.printerr('finishing %d savers' % len(saver_threads))
         vd.sync(*saver_threads)
 
     vd._stdout.flush()
