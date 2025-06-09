@@ -6,10 +6,7 @@ def orderBy(sheet, *cols, reverse=False):
     'Add *cols* to internal ordering and re-sort the rows accordingly.  Pass *reverse* as True to order these *cols* descending.  Pass empty *cols* (or cols[0] of None) to clear internal ordering.'
     if options.undo:
         vd.addUndo(setattr, sheet, '_ordering', copy(sheet._ordering))
-        if sheet._ordering:
-            vd.addUndo(sheet.sort)
-        else:
-            vd.addUndo(setattr, sheet, 'rows', copy(sheet.rows))
+        vd.addUndo(setattr, sheet, 'rows', copy(sheet.rows))
 
     do_sort = False
     if not cols or cols[0] is None:

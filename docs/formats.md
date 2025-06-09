@@ -73,7 +73,40 @@ eleventyNavigation:
 
 # Extra notes about formats
 
-[[GUIDE XsvGuide]]
+## tsv (Tab Separated Values), as simple as it gets
+
+- delimiter: field delimiter to use for tsv/usv filetype (default: .)
+- row_delimiter: row delimiter to use for tsv/usv filetype (default: \n)
+- tsv_safe_newline: replacement for newline character when saving to tsv (default: )
+- tsv_safe_tab: replacement for tab character when saving to tsv (default: .)
+
+Use `-f usv` for Unicode separators U+241F and U+241E.
+Use `-f tsv` for awk-like records.
+Use `--delimiter=` (an empty string) to make '\0' the value separator.
+Use `--row-delimiter=` to make '\0' the row separator.
+
+## csv (Comma Separated Values) for maximum compatibility {#csv}
+
+.csv files are a scourge upon the earth, and still regrettably common.
+All `csv_*` options are passed unchanged into csv.reader() and csv.writer().
+
+- csv_dialect: dialect passed to csv.reader (default: excel)
+- Accepted dialects are `excel-tab`, `unix`, and `excel`.
+- csv_delimiter: delimiter passed to csv.reader (default: ,)
+- csv_quotechar: quotechar passed to csv.reader (default: ")
+- csv_skipinitialspace: skipinitialspace passed to csv.reader (default: True)
+- csv_escapechar: escapechar passed to csv.reader (default: None)
+- csv_lineterminator: lineterminator passed to csv.writer (default: \n)
+
+## Saving TSV/CSV files
+
+- save_filetype: specify default file type to save as (default: tsv)
+- safety_first: sanitize input/output to handle edge cases, with a performance cost (default: False)
+
+## Useful options for text formats in general
+
+- regex_skip: regex of lines to skip in text sources (default: )
+- save_encoding: encoding passed to codecs.open when saving a file (default: utf8)
 
 ## fixed {#fixed}
 - loader-specific options

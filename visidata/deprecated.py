@@ -20,18 +20,27 @@ def deprecated_warn(func, ver, instead):
         vd.warning(f'Deprecated call traceback (most recent last):')
 
 
-def deprecated(ver, instead=''):
+def deprecated(ver, instead='', check=True):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            deprecated_warn(func, ver, instead)
+            deprecated_warn(wrapper, ver, instead)
             return func(*args, **kwargs)
+
+        if check and hasattr(func, '_extensible_api'):
+            vd.error(f"{func.__name__}: @deprecated applied in wrong order")  #2623
+
         return wrapper
     return decorator
 
 
-@deprecated('1.6', 'vd instead of vd()')
+def _deprecated_api(ver, instead=''):
+    'Decorator to deliberately wrap non-deprecated .api functions as a deprecated global function.  Use @deprecated instead, except in deprecated.py.'
+    return deprecated(ver, instead, check=False)
+
+
 @VisiData.api
+@deprecated('1.6', 'vd instead of vd()')
 def __call__(vd):
     'Deprecated; use plain "vd"'
     return vd
@@ -39,7 +48,7 @@ def __call__(vd):
 
 @deprecated('1.6')
 def copyToClipboard(value):
-    vd.error("copyToClipboard longer implemented")
+    vd.error("copyToClipboard no longer implemented")
     return visidata.clipboard_copy(value)
 
 
@@ -62,32 +71,32 @@ def bindkey_override(keystrokes, longname):
 bindkey = visidata.BaseSheet.bindkey
 unbindkey = visidata.BaseSheet.unbindkey
 
-@deprecated('2.0')
 @visidata.Sheet.api
+@deprecated('2.0')
 def exec_keystrokes(self, keystrokes, vdglobals=None):
     return self.execCommand(self.getCommand(keystrokes), vdglobals, keystrokes=keystrokes)
 
 visidata.Sheet.exec_command = deprecated('2.0')(visidata.Sheet.execCommand)
 
-@deprecated('2.0', 'def open_<filetype> instead')
 @VisiData.api
+@deprecated('2.0', 'def open_<filetype> instead')
 def filetype(vd, ext, constructor):
     'Add constructor to handle the given file type/extension.'
     globals().setdefault('open_'+ext, lambda p,ext=ext: constructor(p.base_stem, source=p, filetype=ext))
 
-@deprecated('2.0', 'Sheet(namepart1, namepart2, ...)')
 @VisiData.global_api
+@deprecated('2.0', 'Sheet(namepart1, namepart2, ...)')
 def joinSheetnames(vd, *sheetnames):
     'Concatenate sheet names in a standard way'
     return visidata.options.name_joiner.join(str(x) for x in sheetnames)
 
-@deprecated('2.0', 'PyobjSheet')
 @VisiData.global_api
+@deprecated('2.0', 'PyobjSheet')
 def load_pyobj(*names, **kwargs):
     return visidata.PyobjSheet(*names, **kwargs)
 
-@deprecated('2.0', 'PyobjSheet')
 @VisiData.global_api
+@deprecated('2.0', 'PyobjSheet')
 def push_pyobj(name, pyobj):
     vs = visidata.PyobjSheet(name, source=pyobj)
     if vs:
@@ -149,25 +158,25 @@ def load_tsv(fn):
 
 # NOTE: you cannot use deprecated() with nonfuncs
 
-cancelThread = deprecated('2.6', 'vd.cancelThread')(vd.cancelThread)
-status = deprecated('2.6', 'vd.status')(vd.status)
-warning = deprecated('2.6', 'vd.warning')(vd.warning)
-error = deprecated('2.6', 'vd.error')(vd.error)
-debug = deprecated('2.6', 'vd.debug')(vd.debug)
-fail = deprecated('2.6', 'vd.fail')(vd.fail)
+cancelThread = _deprecated_api('2.6', 'vd.cancelThread')(vd.cancelThread)
+status = _deprecated_api('2.6', 'vd.status')(vd.status)
+warning = _deprecated_api('2.6', 'vd.warning')(vd.warning)
+error = _deprecated_api('2.6', 'vd.error')(vd.error)
+debug = _deprecated_api('2.6', 'vd.debug')(vd.debug)
+fail = _deprecated_api('2.6', 'vd.fail')(vd.fail)
 
 option = theme = vd.option # deprecated('2.6', 'vd.option')(vd.option)
 jointypes = vd.jointypes # deprecated('2.6', 'vd.jointypes')(vd.jointypes)
-confirm = deprecated('2.6', 'vd.confirm')(vd.confirm)
-launchExternalEditor = deprecated('2.6', 'vd.launchExternalEditor')(vd.launchExternalEditor)
-launchEditor = deprecated('2.6', 'vd.launchEditor')(vd.launchEditor)
-exceptionCaught = deprecated('2.6', 'vd.exceptionCaught')(vd.exceptionCaught)
-openSource = deprecated('2.6', 'vd.openSource')(vd.openSource)
+confirm = _deprecated_api('2.6', 'vd.confirm')(vd.confirm)
+launchExternalEditor = _deprecated_api('2.6', 'vd.launchExternalEditor')(vd.launchExternalEditor)
+launchEditor = _deprecated_api('2.6', 'vd.launchEditor')(vd.launchEditor)
+exceptionCaught = _deprecated_api('2.6', 'vd.exceptionCaught')(vd.exceptionCaught)
+openSource = _deprecated_api('2.6', 'vd.openSource')(vd.openSource)
 globalCommand = visidata.BaseSheet.addCommand
-visidata.Sheet.StaticColumn = deprecated('2.11', 'Sheet.freeze_col')(visidata.Sheet.freeze_col)
+visidata.Sheet.StaticColumn = _deprecated_api('2.11', 'Sheet.freeze_col')(visidata.Sheet.freeze_col)
 #visidata.Path.open_text = deprecated('3.0', 'visidata.Path.open')(visidata.Path.open)  # undeprecated in 3.1
 
-vd.sysclip_value = deprecated('3.0', 'vd.sysclipValue')(vd.sysclipValue)
+vd.sysclip_value = _deprecated_api('3.0', 'vd.sysclipValue')(vd.sysclipValue)
 
 def itemsetter(i):
     def g(obj, v):
@@ -226,19 +235,19 @@ visidata.Sheet.addCommand('', 'capture-col', 'addRegexColumns(makeRegexMatcher, 
 #vd.option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to', sheettype=None)
 #BaseSheet.bindkey('KEY_BACKSPACE', 'menu-help')
 
-@deprecated('3.0', 'vd.callNoExceptions(col.setValue, row, value)')
 @visidata.Column.api
+@deprecated('3.0', 'vd.callNoExceptions(col.setValue, row, value)')
 def setValueSafe(self, row, value):
     'setValue and ignore exceptions.'
     return vd.callNoExceptions(self.setValue, row, value)
 
-@deprecated('3.0', 'vd.callNoExceptions(sheet.checkCursor)')
 @visidata.BaseSheet.api
+@deprecated('3.0', 'vd.callNoExceptions(sheet.checkCursor)')
 def checkCursorNoExceptions(sheet):
     return vd.callNoExceptions(sheet.checkCursor)
 
-@deprecated('3.1', 'vd.memoValue(name, value, displayvalue)')
 @VisiData.api
+@deprecated('3.1', 'vd.memoValue(name, value, displayvalue)')
 def memo(vd, name, col, row):
     return vd.memoValue(name, col.getTypedValue(row), col.getDisplayValue(row))
 
@@ -246,15 +255,15 @@ alias('view-cell', 'pyobj-cell')
 
 vd.optalias('textwrap_cells', 'disp_wrap_max_lines', 3) # wordwrap text for multiline rows
 
-@deprecated('3.1', 'sheet.rowname(row)')
 @visidata.TableSheet.api
+@deprecated('3.1', 'sheet.rowname(row)')
 def keystr(sheet, row):
     return sheet.rowname(row)
 
 vd.optalias('color_refline', 'color_graph_refline') # color_refline was used in v3.1 by mistake
 
-@deprecated('3.2', '[self.unsetKeys([c]) if c.keycol else self.setKeys([c]) for c in cols]')
 @visidata.TableSheet.api
+@deprecated('3.2', '[self.unsetKeys([c]) if c.keycol else self.setKeys([c]) for c in cols]')
 def toggleKeys(self, cols):
     for col in cols:
         if col.keycol:
