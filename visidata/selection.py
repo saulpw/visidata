@@ -30,6 +30,11 @@ def toggle(self, rows):
             self.selectRow(r)
 
 
+@Sheet.before
+def beforeLoad(self):
+    self._selectedRows.clear()
+
+
 @Sheet.api
 def select_row(self, row):
     'Add single *row* to set of selected rows.'

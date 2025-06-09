@@ -51,7 +51,7 @@ def undo(vd, sheet):
             row_idx = len(sheet.cmdlog_sheet.rows)-1 - i
             del sheet.cmdlog_sheet.rows[row_idx]
 
-            vd.clearCaches()  # undofunc can invalidate the drawcache
+            sheet.calcColLayout()  # undofunc can invalidate the column layout and/or drawcache
 
             vd.moveToReplayContext(cmdlogrow, sheet)
             vd.status("%s undone" % cmdlogrow.longname)

@@ -2,7 +2,7 @@ from copy import copy
 from statistics import mode, median, mean, stdev
 
 from visidata import vd, Column, ColumnAttr, vlen, RowColorizer, asyncthread, Progress, wrapply
-from visidata import BaseSheet, TableSheet, ColumnsSheet, SheetsSheet
+from visidata import BaseSheet, TableSheet, ColumnsSheet, IndexSheet
 
 
 vd.option('describe_aggrs', 'mean stdev', 'numeric aggregators to calculate on Describe sheet', help=vd.help_aggregators)
@@ -114,7 +114,7 @@ class DescribeSheet(ColumnsSheet):
 
 TableSheet.addCommand('I', 'describe-sheet', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet]))', 'open Describe Sheet with descriptive statistics for all visible columns')
 BaseSheet.addCommand('gI', 'describe-all', 'vd.push(DescribeSheet("describe_all", source=vd.stackedSheets))', 'open Describe Sheet with description statistics for all visible columns from all sheets')
-SheetsSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visible columns from selected sheets')
+IndexSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visible columns from selected sheets')
 
 DescribeSheet.addCommand('zs', 'select-cell', 'cursorRow.sheet.select(cursorValue)', 'select rows on source sheet which are being described in current cell')
 DescribeSheet.addCommand('zu', 'unselect-cell', 'cursorRow.sheet.unselect(cursorValue)', 'unselect rows on source sheet which are being described in current cell')

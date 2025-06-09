@@ -158,7 +158,8 @@ class TestCommands:
         # cleanup
         for f in ['flotsam.csv', 'debris.csv', 'jetsam.csv', 'lagan.csv', 'test_commands.vdj']:
             pf = Path(f)
-            if pf.exists: pf.unlink()
+            if pf.exists:
+                pf.unlink(missing_ok=True)
 
 
     def runOneTest(self, mock_screen, longname):
@@ -174,7 +175,7 @@ class TestCommands:
             vd.getkeystroke = Mock(side_effect=['^J'])
 
         sample_file = vd.pkg_resources_files(visidata) / 'tests/sample.tsv'
-        vs = visidata.TsvSheet('test_commands', source=visidata.Path(sample_file))
+        vs = visidata.TsvSheet('sample', source=visidata.Path(sample_file))
         cmd = vs.getCommand(longname)
         if not cmd:
             vd.warning(f'command cannot be tested on TsvSheet, skipping:  {longname}')

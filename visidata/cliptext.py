@@ -154,30 +154,32 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
 
     w = 0
     ret = ''
+    trunc_i = 0
+    w_truncated = 0
 
     trunchlen = dispwidth(trunch)
+    if dispw is None:
+        s = ''.join(s)
+        return s, dispwidth(s)
+    if trunchlen > dispw: #if the truncator cannot fit, use a truncator of ''
+        return _clipstr(s, dispw, trunch='', oddspacech=oddspacech, combch=combch, modch=modch)
     for c in s:
         newc, chlen = _dispch(c, oddspacech=oddspacech, combch=combch, modch=modch)
         if not newc:
             newc = c
             chlen = dispwidth(c)
 
-        #if the next character will not fit
-        if dispw and w+chlen > dispw:
-            if trunchlen > dispw:
-                return _clipstr(s, dispw, trunch='', oddspacech=oddspacech, combch=combch, modch=modch)
-            # if the trunch by itself can fit
-            if trunchlen and dispw >= trunchlen:
-                # if trunch cannot be appended to fit, trim the ending characters until the trunch will fit
-                while w and w+trunchlen > dispw:
-                    ret = ret[:-1]
-                    w = dispwidth(ret)
-                ret += trunch  # replace final char with ellipsis
-                w += trunchlen
-            break
-
-        w += chlen
-        ret += newc
+        #if the next character will fit
+        if w+chlen <= dispw:
+            ret += c
+            w += chlen
+            #move the truncation spot forward only when the truncation character can fit
+            if w+trunchlen <= dispw:
+                trunc_i += 1
+                w_truncated += chlen
+            continue
+        # if we reach this line, a character did not fit, and the result needs truncation
+        return ret[:trunc_i] + trunch, w_truncated+trunchlen
 
     return ret, w
 

@@ -2,7 +2,7 @@
 
 # Usage: test.sh [testname]
 
-set -e
+#set -e
 shopt -s failglob
 
 trap "echo aborted; exit;" SIGINT SIGTERM
@@ -11,7 +11,9 @@ run_silent_unless_error() {
   output=$(eval "$@" 2>&1)  # Captures ALL stdout and stderr
   exit_code=$?
   if [ $exit_code -ne 0 ]; then
-    echo "$output"  # Prints the ENTIRE captured output
+    echo "TEST FAILED: $@"
+    echo "$output"
+    exit 1
   fi
   return $exit_code
 }

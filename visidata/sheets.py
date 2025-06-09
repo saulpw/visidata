@@ -22,6 +22,7 @@ vd.option('disp_wrap_break_long_words', False, 'break words longer than column w
 vd.option('disp_wrap_replace_whitespace', False, 'replace whitespace with spaces in multiline')
 vd.option('disp_wrap_placeholder', '…', 'multiline string to indicate truncation')
 vd.option('disp_multiline_focus', True, 'only multiline cursor row')
+vd.option('color_multiline_bottom', '', 'color of bottom line of multiline rows')  #2715
 vd.option('color_aggregator', 'bold 255 white on 234 black', 'color of aggregator summary on bottom row')
 
 
@@ -688,6 +689,7 @@ class TableSheet(BaseSheet):
 
     def calcColLayout(self):
         'Set right-most visible column, based on calculation.'
+        vd.clearCaches()
         minColWidth = dispwidth(self.options.disp_more_left)+dispwidth(self.options.disp_more_right)+2
         sepColWidth = dispwidth(self.options.disp_column_sep)
         winWidth = self.windowWidth
@@ -795,6 +797,8 @@ class TableSheet(BaseSheet):
         'Return dict of aggname -> list of cols with that aggregator.'
         allaggs = collections.defaultdict(list) # aggname -> list of cols with that aggregator
         for vcolidx, (x, colwidth) in sorted(self._visibleColLayout.items()):
+            if vcolidx >= len(self.availCols):
+                break  #2607 #2763
             col = self.availCols[vcolidx]
             if not col.hidden:
                 for aggr in col.aggregators:
@@ -953,10 +957,12 @@ class TableSheet(BaseSheet):
                 colseps = [topsep] + [midsep]*(height-2) + [botsep]
                 endseps = [endtopsep] + [endmidsep]*(height-2) + [endbotsep]
                 keyseps = [keytopsep] + [keymidsep]*(height-2) + [keybotsep]
+                color_multiline_bottom = colors.get_color('color_multiline_bottom', 2)
             else:
                 colseps = [colsep]
                 endseps = [endsep]
                 keyseps = [keysep]
+                color_multiline_bottom = 0
 
             for vcolidx, (col, cellval, lines) in displines.items():
                     if vcolidx not in self._visibleColLayout:
@@ -975,6 +981,7 @@ class TableSheet(BaseSheet):
 
                     cattr = self._colorize(col, row, cellval)
                     cattr = update_attr(cattr, basecellcattr)
+                    bottomcattr = update_attr(cattr, color_multiline_bottom) if height > 1 else cattr
 
                     note = getattr(cellval, 'note', None)
                     notewidth = 1 if note else 0
@@ -1002,7 +1009,7 @@ class TableSheet(BaseSheet):
                         for attr, text in chunks:
                             prechunks.append((attr, text[hoffset:]))
 
-                        clipdraw_chunks(scr, y, x, prechunks, cattr, w=colwidth-notewidth)
+                        clipdraw_chunks(scr, y, x, prechunks, cattr if i < height-1 else bottomcattr, w=colwidth-notewidth)
                         vd.onMouse(scr, x, y, colwidth, 1, BUTTON3_RELEASED='edit-cell')
 
                         if sepchars and x+colwidth+dispwidth(sepchars) <= self.windowWidth:
@@ -1155,8 +1162,8 @@ def confirmQuit(vs, verb='quit'):
 def preloadHook(sheet):
     'Override to setup for reload().'
     sheet.confirmQuit('reload')
-
     sheet.hasBeenModified = False
+    sheet.calcColLayout()
 
 
 @VisiData.api

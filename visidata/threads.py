@@ -319,13 +319,14 @@ def open_pyprof(vd, p):
 @VisiData.api
 def toggleProfiling(vd):
     t = threading.current_thread()
-    if not t.profile:
-        t.profile = cProfile.Profile()
+    if not vd.options.profile:
+        if not t.profile:
+            t.profile = cProfile.Profile()
         t.profile.enable()
-        if not vd.options.profile:
-            vd.options.set('profile', True)
+        vd.options.set('profile', True)
     else:
-        t.profile.disable()
+        if t.profile:
+            t.profile.disable()
         vd.options.set('profile', False)
     vd.status('profiling ' + ('ON' if vd.options.profile else 'OFF'))
 
@@ -337,7 +338,10 @@ class ThreadProfiler:
 
     def __enter__(self):
         if vd.options.profile:
-            self.thread.profile.enable()
+            try:
+                self.thread.profile.enable()
+            except ValueError: #"ValueError: Another profiling tool is already active"
+                pass
         return self
 
     def __exit__(self, exc_type, exc_val, tb):
@@ -435,6 +439,10 @@ def codestr(code):
     return code.co_name
 
 
+@VisiData.lazy_property
+def allThreadsSheet(self):
+    return ThreadsSheet("threads", source=vd.threads)
+
 ThreadsSheet.addCommand('^C', 'cancel-thread', 'cancelThread(cursorRow)', 'abort thread at current row')
 ThreadsSheet.addCommand('g^C', 'cancel-all', 'cancelThread(*sheet.rows)', 'abort all threads on this threads sheet')
 ThreadsSheet.addCommand(None, 'add-row', 'fail("cannot add new rows on Threads Sheet")', 'invalid command')
@@ -449,7 +457,7 @@ BaseSheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads o
 BaseSheet.addCommand('g^C', 'cancel-all', 'liveThreads=list(t for vs in vd.sheets for t in vs.currentThreads); cancelThread(*liveThreads); status("canceled %s threads" % len(liveThreads))', 'abort all spawned threads')
 
 
-BaseSheet.addCommand('^T', 'threads-all', 'vd.push(ThreadsSheet("threads", source=vd.threads))', 'open Threads for all sheets')
+BaseSheet.addCommand('^T', 'threads-all', 'vd.push(vd.allThreadsSheet)', 'open Threads for all sheets')
 BaseSheet.addCommand('z^T', 'threads-sheet', 'vd.push(ThreadsSheet("threads", source=sheet.currentThreads))', 'open Threads for this sheet')
 
 vd.addGlobals({
