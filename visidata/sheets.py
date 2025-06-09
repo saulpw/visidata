@@ -797,6 +797,8 @@ class TableSheet(BaseSheet):
         'Return dict of aggname -> list of cols with that aggregator.'
         allaggs = collections.defaultdict(list) # aggname -> list of cols with that aggregator
         for vcolidx, (x, colwidth) in sorted(self._visibleColLayout.items()):
+            if vcolidx >= len(self.availCols):
+                break  #2607 #2763
             col = self.availCols[vcolidx]
             if not col.hidden:
                 for aggr in col.aggregators:
