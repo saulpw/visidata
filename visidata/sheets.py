@@ -287,7 +287,7 @@ class TableSheet(BaseSheet):
         self.recalc()
 
     def beforeLoad(self):
-        self.calcColLayout()
+        pass
 
     def resetCols(self):
         'Reset columns to class settings'
@@ -585,8 +585,12 @@ class TableSheet(BaseSheet):
             col.recalc(self)
             self.columns.insert(idx+i, col)
 
-        # statements after addColumn in the same command may want to use these cached properties, which are now stale
-        vd.clearCaches()
+        # statements after addColumn in the same command may want to use these cached properties
+        Sheet.keyCols.fget.cache_clear()
+        Sheet.visibleCols.fget.cache_clear()
+        Sheet.availCols.fget.cache_clear()
+        Sheet.availColnames.fget.cache_clear()
+        Sheet.colsByName.fget.cache_clear()
 
         return cols[0]
 
@@ -793,6 +797,8 @@ class TableSheet(BaseSheet):
         'Return dict of aggname -> list of cols with that aggregator.'
         allaggs = collections.defaultdict(list) # aggname -> list of cols with that aggregator
         for vcolidx, (x, colwidth) in sorted(self._visibleColLayout.items()):
+            if vcolidx >= len(self.availCols):
+                break  #2607 #2763
             col = self.availCols[vcolidx]
             if not col.hidden:
                 for aggr in col.aggregators:
@@ -1157,6 +1163,7 @@ def preloadHook(sheet):
     'Override to setup for reload().'
     sheet.confirmQuit('reload')
     sheet.hasBeenModified = False
+    sheet.calcColLayout()
 
 
 @VisiData.api
