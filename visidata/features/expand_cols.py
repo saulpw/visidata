@@ -182,10 +182,10 @@ Sheet.addCommand('g(', 'expand-cols', 'expand_cols_deep(visibleCols, depth=1)', 
 Sheet.addCommand('z(', 'expand-col-depth', 'expand_cols_deep([cursorCol], depth=int(input("expand depth=", value=0)))', 'expand current column of containers to given depth (0=fully)')
 Sheet.addCommand('gz(', 'expand-cols-depth', 'expand_cols_deep(visibleCols, depth=int(input("expand depth=", value=0)))', 'expand all visible columns of containers to given depth (0=fully)')
 
-Sheet.addCommand(')', 'contract-col', 'contract_cols([cursorCol])', 'remove current column and siblings from sheet columns and unhide parent')
-Sheet.addCommand('g)', 'contract-cols', 'contract_cols(visibleCols)', 'remove all child columns and unhide toplevel parents')
-Sheet.addCommand('z)', 'contract-col-depth', 'contract_cols([cursorCol], depth=int(input("contract depth=", value=0)))', 'remove current column and siblings from sheet columns and unhide parent')
-Sheet.addCommand('gz)', 'contract-cols-depth', 'contract_cols(visibleCols, depth=int(input("contract depth=", value=0)))', 'remove all child columns and unhide toplevel parents')
+Sheet.addCommand(')', 'contract-col', 'contract_cols([cursorCol])', 'remove current column and siblings from sheet columns and unhide parent (1 level)')
+Sheet.addCommand('g)', 'contract-cols', 'contract_cols(visibleCols)', 'remove all child columns and unhide toplevel parents (1 level)')
+Sheet.addCommand('z)', 'contract-col-depth', 'contract_cols([cursorCol], depth=int(input("contract depth=", value=0)))', 'remove current column and siblings from sheet columns and unhide parent, prompting for depth')
+Sheet.addCommand('gz)', 'contract-cols-depth', 'contract_cols(visibleCols, depth=int(input("contract depth=", value=0)))', 'remove all child columns and unhide toplevel parents, prompting for depth')
 
 ColumnsSheet.addCommand(')', 'contract-source-cols', 'source[0].addColumn(contract_source_cols(someSelectedRows), index=cursorRowIndex)', 'contract selected columns into column group')  #1702
 
