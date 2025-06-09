@@ -63,7 +63,6 @@ def rank_sorted_iterable(vals_sorted) -> [int]:
             ranks.append(rank)
     return ranks
 
-import time
 @Sheet.api
 @asyncthread
 def addcol_sheetrank(sheet, rows):
