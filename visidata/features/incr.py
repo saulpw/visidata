@@ -11,7 +11,7 @@ def numrange(vd, n, step=1):
     yield from ((base+x)*step for x in range(n))
 
 
-def test_numrange():
+def test_numrange(vd=None):
     assert list(vd.numrange(5)) == [1,2,3,4,5]
     assert list(vd.numrange(5, step=5)) == [5,10,15,20,25]  #2769
 
