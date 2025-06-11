@@ -1,5 +1,5 @@
 from copy import copy
-from visidata import vd, asyncthread, Progress, Sheet, Column, options, UNLOADED
+from visidata import vd, asyncthread, Progress, Sheet, Column, options, UNLOADED, ColumnsSheet
 import re
 
 cmdlog_col_prefix='\u241f'  #string ␟ to mark the start of column info in an ordering string
@@ -137,6 +137,20 @@ def sort(self):
     except TypeError as e:
         vd.warning('sort incomplete due to TypeError; change column type')
         vd.exceptionCaught(e, status=False)
+
+ColumnsSheet.columns += [
+        Column('sortorder',
+            type=int,
+            getter=lambda c,r: _sort_order(c, r),
+            help='sort priority and direction in source sheet')
+]
+
+def _sort_order(col, srccol):
+    sort_cols = [(n+1, reverse) for n, (c, reverse) in enumerate(srccol.sheet.ordering) if c is srccol]
+    if not sort_cols:
+        return None
+    n, reverse = sort_cols[0]
+    return -n if reverse else n
 
 
 # replace existing sort criteria
