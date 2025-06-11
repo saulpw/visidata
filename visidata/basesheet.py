@@ -76,6 +76,8 @@ class DrawablePane(Extensible):
 
         try:
             self.sheet = self
+            if cmd.deprecated:
+                vd.deprecated_warn(cmd.longname, cmd.deprecated, 'a different command')
             code = compile(cmd.execstr, cmd.longname, 'exec')
             exec(code, vdglobals, LazyChainMap(vd, self))
             return False

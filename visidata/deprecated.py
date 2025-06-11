@@ -3,12 +3,16 @@ import functools
 from visidata import VisiData, vd
 import visidata
 
-alias = visidata.BaseSheet.bindkey
+def deprecated_alias(depver, *args, **kwargs):
+    # expand this to create cmd
+    # with cmd.deprecated=depver
+    return visidata.BaseSheet.bindkey(*args, **kwargs)
 
-def deprecated_warn(func, ver, instead):
+@VisiData.api
+def deprecated_warn(vd, funcname, ver, instead):
     import traceback
 
-    msg = f'{func.__name__} deprecated since v{ver}'
+    msg = f'{funcname} deprecated since v{ver}'
     if instead:
         msg += f'; use {instead}'
 
@@ -24,7 +28,7 @@ def deprecated(ver, instead='', check=True):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            deprecated_warn(wrapper, ver, instead)
+            vd.deprecated_warn(wrapper.__name__, ver, instead)
             return func(*args, **kwargs)
 
         if check and hasattr(func, '_extensible_api'):
@@ -112,33 +116,33 @@ visidata.addGlobals({'load_pyobj': load_pyobj, 'isNumeric': isNumeric})
 
 # The longnames on the left are deprecated for 2.0
 
-alias('edit-cells', 'setcol-input')
-alias('fill-nulls', 'setcol-fill')
-alias('paste-cells', 'setcol-clipboard')
-alias('frequency-rows', 'frequency-summary')
-alias('dup-cell', 'dive-cell')
-alias('dup-row', 'dive-row')
-alias('next-search', 'search-next')
-alias('prev-search', 'search-prev')
-alias('search-prev', 'searchr-next')
-alias('prev-sheet', 'jump-prev')
-alias('prev-value', 'go-prev-value')
-alias('next-value', 'go-next-value')
-alias('prev-selected', 'go-prev-selected')
-alias('next-selected', 'go-next-selected')
-alias('prev-null', 'go-prev-null')
-alias('next-null', 'go-next-null')
-alias('page-right', 'go-right-page')
-alias('page-left', 'go-left-page')
-alias('dive-cell', 'open-cell')
-alias('dive-row', 'open-row')
-alias('add-sheet', 'open-new')
-alias('save-sheets-selected', 'save-selected')
-alias('join-sheets', 'join-selected')
-alias('dive-rows', 'dive-selected')
+deprecated_alias('2.0', 'edit-cells', 'setcol-input')
+deprecated_alias('2.0', 'fill-nulls', 'setcol-fill')
+deprecated_alias('2.0', 'paste-cells', 'setcol-clipboard')
+deprecated_alias('2.0', 'frequency-rows', 'frequency-summary')
+deprecated_alias('2.0', 'dup-cell', 'dive-cell')
+deprecated_alias('2.0', 'dup-row', 'dive-row')
+deprecated_alias('2.0', 'next-search', 'search-next')
+deprecated_alias('2.0', 'prev-search', 'search-prev')
+deprecated_alias('2.0', 'search-prev', 'searchr-next')
+deprecated_alias('2.0', 'prev-sheet', 'jump-prev')
+deprecated_alias('2.0', 'prev-value', 'go-prev-value')
+deprecated_alias('2.0', 'next-value', 'go-next-value')
+deprecated_alias('2.0', 'prev-selected', 'go-prev-selected')
+deprecated_alias('2.0', 'next-selected', 'go-next-selected')
+deprecated_alias('2.0', 'prev-null', 'go-prev-null')
+deprecated_alias('2.0', 'next-null', 'go-next-null')
+deprecated_alias('2.0', 'page-right', 'go-right-page')
+deprecated_alias('2.0', 'page-left', 'go-left-page')
+deprecated_alias('2.0', 'dive-cell', 'open-cell')
+deprecated_alias('2.0', 'dive-row', 'open-row')
+deprecated_alias('2.0', 'add-sheet', 'open-new')
+deprecated_alias('2.0', 'save-sheets-selected', 'save-selected')
+deprecated_alias('2.0', 'join-sheets', 'join-selected')
+deprecated_alias('2.0', 'dive-rows', 'dive-selected')
 
 # v2.3
-alias('show-aggregate', 'memo-aggregate')
+deprecated_alias('2.3', 'show-aggregate', 'memo-aggregate')
 #theme('use_default_colors', True, 'curses use default terminal colors')
 #option('expand_col_scanrows', 1000, 'number of rows to check when expanding columns (0 = all)')
 
@@ -190,8 +194,8 @@ vd.optalias('confirm_overwrite', 'overwrite', 'confirm')
 vd.optalias('show_graph_labels', 'disp_graph_labels')
 vd.optalias('zoom_incr', 'disp_zoom_incr')
 
-alias('visibility-sheet', 'toggle-multiline')
-alias('visibility-col', 'toggle-multiline')
+deprecated_alias('3.0', 'visibility-sheet', 'toggle-multiline')
+deprecated_alias('3.0', 'visibility-col', 'toggle-multiline')
 
 def clean_to_id(s):
     return visidata.vd.cleanName(s)
@@ -213,7 +217,7 @@ class OnExit:
         except Exception as e:
             vd.exceptionCaught(e)
 
-alias('open-inputs', 'open-input-history')
+deprecated_alias('3.0', 'open-inputs', 'open-input-history')
 
 #vd.option('plugins_url', 'https://visidata.org/plugins/plugins.jsonl', 'source of plugins sheet')
 
@@ -225,12 +229,12 @@ def inputRegexSubstOld(vd, prompt):
     return dict(before=before, after=after)
 
 
-visidata.Sheet.addCommand('', 'addcol-subst', 'addColumnAtCursor(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, **inputRegexSubstOld("transform column by regex: "))))', 'add column derived from current column, replacing regex with subst (may include \1 backrefs)', deprecated=True)
-visidata.Sheet.addCommand('', 'setcol-subst', 'setValuesFromRegex([cursorCol], someSelectedRows, **inputRegexSubstOld("transform column by regex: "))', 'regex/subst - modify selected rows in current column, replacing regex with subst, (may include backreferences \\1 etc)', deprecated=True)
-visidata.Sheet.addCommand('', 'setcol-subst-all', 'setValuesFromRegex(visibleCols, someSelectedRows, **inputRegexSubstOld(f"transform {nVisibleCols} columns by regex: "))', 'modify selected rows in all visible columns, replacing regex with subst (may include \\1 backrefs)', deprecated=True)
+visidata.Sheet.addCommand('', 'addcol-subst', 'addColumnAtCursor(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, **inputRegexSubstOld("transform column by regex: "))))', 'add column derived from current column, replacing regex with subst (may include \1 backrefs)', deprecated='3.0')
+visidata.Sheet.addCommand('', 'setcol-subst', 'setValuesFromRegex([cursorCol], someSelectedRows, **inputRegexSubstOld("transform column by regex: "))', 'regex/subst - modify selected rows in current column, replacing regex with subst, (may include backreferences \\1 etc)', deprecated='3.0')
+visidata.Sheet.addCommand('', 'setcol-subst-all', 'setValuesFromRegex(visibleCols, someSelectedRows, **inputRegexSubstOld(f"transform {nVisibleCols} columns by regex: "))', 'modify selected rows in all visible columns, replacing regex with subst (may include \\1 backrefs)', deprecated='3.0')
 
-visidata.Sheet.addCommand('', 'split-col', 'addRegexColumns(makeRegexSplitter, cursorCol, inputRegex("split regex: ", type="regex-split"))', 'Add new columns from regex split', deprecated=True)
-visidata.Sheet.addCommand('', 'capture-col', 'addRegexColumns(makeRegexMatcher, cursorCol, inputRegex("capture regex: ", type="regex-capture"))', 'add new column from capture groups of regex; requires example row', deprecated=True)
+visidata.Sheet.addCommand('', 'split-col', 'addRegexColumns(makeRegexSplitter, cursorCol, inputRegex("split regex: ", type="regex-split"))', 'Add new columns from regex split', deprecated='3.0')
+visidata.Sheet.addCommand('', 'capture-col', 'addRegexColumns(makeRegexMatcher, cursorCol, inputRegex("capture regex: ", type="regex-capture"))', 'add new column from capture groups of regex; requires example row', deprecated='3.0')
 
 #vd.option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to', sheettype=None)
 #BaseSheet.bindkey('KEY_BACKSPACE', 'menu-help')
@@ -251,7 +255,7 @@ def checkCursorNoExceptions(sheet):
 def memo(vd, name, col, row):
     return vd.memoValue(name, col.getTypedValue(row), col.getDisplayValue(row))
 
-alias('view-cell', 'pyobj-cell')
+deprecated_alias('3.1', 'view-cell', 'pyobj-cell')
 
 vd.optalias('textwrap_cells', 'disp_wrap_max_lines', 3) # wordwrap text for multiline rows
 
@@ -272,3 +276,5 @@ def toggleKeys(self, cols):
             self.setKeys([col])
 
 vd.optalias('disp_pixel_random', 'disp_graph_pixel_random')  #2661
+
+vd.addGlobals(deprecated_warn=deprecated_warn)
