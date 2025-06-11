@@ -52,6 +52,7 @@ Other commands (not specific to Columns Sheet):
             ColumnAttr('type', 'typestr', help='convert all values to a specific type'),
             ColumnAttr('fmtstr', help='use a custom format string, either C-style (`%0.4f`) or Python-style (`{{:0.4f}}`)'),
             ColumnAttr('formatter', disp_expert=1, help='use a custom format function (**{col.help_formatters}**)'),
+            Column('sortorder', type=int, cache=False, getter=lambda c,r: _sort_order(c,r)),
             ColumnAttr('displayer', disp_expert=1, help='use a custom display function (**{col.help_displayers}**)'),
             ValueColumn('value', help='change the value of this cell on the source sheet'),
             ColumnAttr('expr', disp_expert=1, help='change the main column parameter'),
@@ -87,6 +88,13 @@ class MetaSheet(Sheet):
 
 class VisiDataMetaSheet(TsvSheet):
     pass
+
+def _sort_order(col, srccol):
+    sort_cols = [(n+1, reverse) for n, (c, reverse) in enumerate(srccol.sheet.ordering) if c is srccol]
+    if not sort_cols:
+        return None
+    n, reverse = sort_cols[0]
+    return -n if reverse else n
 
 # commandline must not override these for internal sheets
 VisiDataMetaSheet.options.delimiter = vd_system_sep
