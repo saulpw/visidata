@@ -23,13 +23,13 @@ def reload_modified(sheet):
     assert isinstance(p, Path)
     assert not p.is_url()
 
-    mtime = os.stat(p).st_mtime
+    mtime = 0
     while True:
-        time.sleep(1)
         t = os.stat(p).st_mtime
         if t != mtime:
             mtime = t
             sheet.reload_rows()
+        time.sleep(1)
 
 
 @Sheet.api
