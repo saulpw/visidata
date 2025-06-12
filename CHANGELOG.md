@@ -1,5 +1,97 @@
 # VisiData version history
 
+# v3.2 (2025-06-xx)
+
+Thanks to @midichef for many bugfixes and improvements.
+
+## Improvements
+
+- [dev] add Python 3.13 test coverage
+* [config] XDG for default visidata_dir #2716 (#2755)
+
+- [windows] install vd.cmd #2619 @ptyork
+* [windows] Enable Windows clipboard in WSL #1920 @daviewales
+- [windows] update windows-curses version to 2.4.1 #2119
+* [windows] fix mouse support #2676  @ptyork
+
+- [sort] allow z[ and z] to reverse col sort dir or ignore col
+- [sort] replay sort-add/-change ordering from cmdlog input arg
+
+* [loaders psv] add simple .psv loader based on Tsv sheet #2727
+* [loaders numpy] support 2d matrices (#2724) @maxfl
+
+### Commands
+
+- [edit] add sysedit-cell command, using external editor
+- [errors] add sysopen-error command to view vd source code in editor
+- [freeze] add setcol-freeze, bind to z' #2260
+- [graph] add zoom-all-y #2751
+- [join] add per-jointype commands #2603
+- [layout] bind g- to hide-uniform-cols #2577 #2735
+- [syscopy] add syscol-colname #2760
+
+### Options
+
+- [draw] add options.color_multiline_bottom #2715
+- [graph] add options.color_graph_refline
+- [disp] Rename options.disp_pixel_random to options.disp_graph_pixel_random @cool-RR
+
+### Tweaks
+
+* [cmdpalette-] fix scoring of space-separated search terms
+* [cmdpalette-] make fuzzy match case-insensitive
+* [docs] Add WindowFunctionGuide and AggregatorSheet guides #2558 @thejud
+* [theme] update light theme #2729
+* [status] remove non-precious sheets from sheetlist #2573
+- [input-] fix word locator for Ctrl+Right motion
+- [errors-] make ErrorSheet/ErrorsSheet into singletons
+- [threads-] make threads-all show a singleton sheet
+- [threads-] allow repeated toggling of profiling
+- [IndexSheet] move gC and gI to IndexSheet #2603
+- [main-] enable cell editing for interactive batch mode #2639
+- [loaders hdf5] guess types(hdf5), understand unsigned int type @maxfl
+- [loaders archive,sqlite-] guess sqlite/tar/zip filetypes confidently
+- [loaders vds-] save/restore column-specific properties via getstate/setstate #2699
+
+## Bugfixes
+
+- [aggr-] allow undo for aggregate-col/cols
+- [canvas-] stop infinite refresh for graphs with many points
+- [cmdlog-] save prev replay when starting new replay #2531
+- [features-] reload_every: wait for reload before looping
+- [features-] sysedit: modify cell only if editor changes value (#2656)
+- [incr-] addcol-incr-step as expected #2769
+- [input-] preserve None cells on external editor quit
+- [join-] fix putValue for merge rows absent in any source sheet
+- [macro-] only record commands that are replayable
+- [main-] prevent hang when vd -p - reads from terminal
+- [open-] fix open-file for - in cmdlogs #2582
+- [open-] fix opening a dir with an filetype extension
+- [sheets-] record key-col toggle for replay as key-col-on/-off
+- [sort-] fix undo when sheet has a previous ordering
+- [vdsql-] ensure each thread in vdsql tracks its single connection
+
+
+## Cosmetic
+
+- [cliptext-] truncate sheet names handling full-width chars
+- [column-] do not rjustify non-numeric values #2750
+- [csv-] warn when guessed option differs from default #2690
+- [dir-] sort by filename, after sorting by modtime
+- [errors-] fix error-recent always showing "no error"
+- [fixed loader] use empty str for null_value in fixed width sheet
+- [form-] fix underlining of substrings by FormCanvas
+- [help- sidebar-] prevent sidebar flicker #2630
+- [help] fix duplicate help descriptions #2762
+- [input-] fix editline() for characters having screen width > 1
+- [input-] speed up pasting long strings into line editor
+- [main-] format vd_cli exceptions to be caretless
+- [menu-] remove duplicate Help entry #2714
+- [menu] replace hint with motd
+- [reload-] tolerate stale columns in drawcache during allAggregators #2607 #2763
+- [save-] warn if no save destination given  #2580
+- [threads-] catch error trying to start a second profiler
+
 # v3.1 (2024-10-14)
 
 - drop support for Python 3.7  #2231
