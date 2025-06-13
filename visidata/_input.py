@@ -113,6 +113,7 @@ def delchar(s, i, remove=1):
     return s if i < 0 else s[:i] + s[i+remove:]
 
 def find_word(s, a, b, incr):
+        '''Return first index of word boundary in s[a:b], going forward if incr is +1 and backward if incr is -1.'''
         if not s: return 0
         a = min(max(a, 0), len(s)-1)
         b = min(max(b, 0), len(s)-1)
@@ -285,6 +286,7 @@ class InputWidget:
         elif ch == '^U':                           v = v[i:]; i = 0  # clear to beginning
         elif ch == '^V':                           v = splice(v, i, until_get_wch(scr)); i += 1  # literal character
         elif ch == '^W':                           j = find_word(v, 0, i-1, -1); v = v[:j+1] + v[i:]; i = j+1  # erase word
+        elif ch in ('KEY_DC5','kDC5','kDC3'):      j = find_word(v, i, len(v), +1); v = v[:i] + v[j+1:]  # erase word forward
         elif ch == '^Y':                           v = splice(v, i, str(vd.memory.clipval))
         elif ch == '^Z':                           vd.suspend()
         # CTRL+arrow

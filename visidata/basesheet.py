@@ -107,6 +107,7 @@ class BaseSheet(DrawablePane):
     precious = True      # False for a few discardable metasheets
     defer = False        # False for not deferring changes until save
     guide = ''           # default to show in sidebar
+    icon = '›'
 
     def _obj_options(self):
         return vd.OptionsObject(vd._options, obj=self)

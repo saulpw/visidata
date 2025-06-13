@@ -53,7 +53,7 @@ def sheetlist(sheet):
         if isinstance(vs, BaseSheet):
             shortcut = ' '
             if vs.shortcut in '1 2 3 4 5 6 7 8 9 10'.split():
-                shortcut = vs.shortcut[-1] + '›'
+                shortcut = vs.shortcut[-1] + vs.icon
             if vs is vd.sheet:
                 sheetnames.append(f'[:menu_active]{shortcut}{vs.name}[:]')
             else:
