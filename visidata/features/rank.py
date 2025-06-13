@@ -100,4 +100,4 @@ def addcol_sheetrank(sheet, rows):
         row_ranks = [rank for rownum, rank in row_ranks]
         c.setValues(sheet.rows, *[p(row_rank) for row_rank in row_ranks])
 
-Sheet.addCommand('', 'addcol-sheetrank', 'sheet.addcol_sheetrank(rows)', 'add column with the rank of each row based on its key columns')
+Sheet.addCommand('', 'addcol-rank-sheet', 'sheet.addcol_sheetrank(rows)', 'add column with the rank of each row based on its key columns')
