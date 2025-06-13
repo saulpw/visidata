@@ -6,8 +6,8 @@ Thanks to @midichef for many bugfixes and improvements.
 
 ## Improvements
 
-- [dev] add Python 3.13 test coverage
 * [config] XDG for default visidata_dir #2716 (#2755)
+- [dev] add Python 3.13 test coverage
 
 - [windows] install vd.cmd #2619 @ptyork
 * [windows] Enable Windows clipboard in WSL #1920 @daviewales
@@ -16,12 +16,14 @@ Thanks to @midichef for many bugfixes and improvements.
 
 - [sort] allow z[ and z] to reverse col sort dir or ignore col
 - [sort] replay sort-add/-change ordering from cmdlog input arg
+- [sort] add sort order to ColumnsSheet  #2649
 
 * [loaders psv] add simple .psv loader based on Tsv sheet #2727
 * [loaders numpy] support 2d matrices (#2724) @maxfl
 
 ### Commands
 
+* [aggr] addcol-aggregate and addcol-rank-sheet
 - [edit] add sysedit-cell command, using external editor
 - [errors] add sysopen-error command to view vd source code in editor
 - [freeze] add setcol-freeze, bind to z' #2260
@@ -56,21 +58,24 @@ Thanks to @midichef for many bugfixes and improvements.
 ## Bugfixes
 
 - [aggr-] allow undo for aggregate-col/cols
+- [aggr-] cap runtime when formatting memo status
 - [canvas-] stop infinite refresh for graphs with many points
 - [cmdlog-] save prev replay when starting new replay #2531
+- [deprecated-] show warning when using deprecated commands  #2215
 - [features-] reload_every: wait for reload before looping
 - [features-] sysedit: modify cell only if editor changes value (#2656)
 - [incr-] addcol-incr-step as expected #2769
 - [input-] preserve None cells on external editor quit
 - [join-] fix putValue for merge rows absent in any source sheet
 - [macro-] only record commands that are replayable
+- [mailcap] install dead battery for mailcap in python 3.13 #2576
 - [main-] prevent hang when vd -p - reads from terminal
 - [open-] fix open-file for - in cmdlogs #2582
 - [open-] fix opening a dir with an filetype extension
+- [reload-] have reload-modified check for earlier changes  #2551
 - [sheets-] record key-col toggle for replay as key-col-on/-off
 - [sort-] fix undo when sheet has a previous ordering
 - [vdsql-] ensure each thread in vdsql tracks its single connection
-
 
 ## Cosmetic
 
@@ -90,6 +95,7 @@ Thanks to @midichef for many bugfixes and improvements.
 - [menu] replace hint with motd
 - [reload-] tolerate stale columns in drawcache during allAggregators #2607 #2763
 - [save-] warn if no save destination given  #2580
+- [status] use sheet.icon on sheetlist #2772
 - [threads-] catch error trying to start a second profiler
 
 # v3.1 (2024-10-14)
