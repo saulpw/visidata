@@ -12,6 +12,7 @@ __version__ = "3.2dev"
 install_requires = [
     "python-dateutil",
     'importlib_resources; python_version<"3.9"',
+    'standard-mailcap; python_version>="3.13"',
 ]
 
 if not sysconfig.get_platform().startswith("mingw"):  # 2757
@@ -78,7 +79,7 @@ setup(
             "tomli",
             "wcwidth",
             "xport>=3.0",
-        ],"windows-curses": ['windows-curses >= 2.4.1; platform_system == "Windows"',  # 2119 
+        ],"windows-curses": ['windows-curses >= 2.4.1; platform_system == "Windows"',  # 2119
         ]
     },
     package_data={
