@@ -1,4 +1,4 @@
-.Dd October 13, 2024
+.Dd June 13, 2025
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -193,6 +193,8 @@ adjust widths of all visible columns to Ar number
 .Pp
 .It Ic " -" Ns " (hyphen)"
 hide current column
+.It Ic "g-" Ns " (hyphen)"
+hide any column that has multiple rows but only one distinct value
 .It Ic "z-" Ns
 reduce width of current column by half
 .It Ic "gv" Ns
@@ -247,10 +249,10 @@ add/reset cache for current/all visible column(s)
 .No add new columns from capture groups of Ar regex No (also requires example row)
 .It Ic "z" Ns Ic "\&;" Ar expr
 .No create new column from bash Ar expr Ns , with Sy $ Ns columnNames as variables
-.It Ic " *" Ar regex Ns Sy / Ns Ar subst
-.No add column derived from current column, replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
-.It Ic "g*  gz*" Ar regex Ns Sy / Ns Ar subst
-.No modify selected rows in current/all visible column(s), replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
+.It Ic " *" Ar search No Sy Tab No Ar replace
+.No add column derived from current column, replacing Ar search No regex with Ar replace No (may include Sy \e1 No backrefs)
+.It Ic "g*  gz*" Ar search No Sy Tab No Ar replace
+.No modify selected rows in current/all visible column(s), replacing Ar search No with Ar replace No (may include Sy \e1 No backrefs)
 .Pp
 .It Ic " (   g("
 .No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) one level
@@ -300,7 +302,7 @@ sort ascending/descending by current column; replace any existing sort criteria
 .It Ic " g[   g]"
 sort ascending/descending by all key columns; replace any existing sort criteria
 .It Ic " z[   z]"
-sort ascending/descending by current column; add to existing sort criteria
+sort ascending/descending by current column; keep higher priority sort criteria
 .It Ic "gz[  gz]"
 sort ascending/descending by all key columns; add to existing sort criteria
 .It Ic " \&""
@@ -316,6 +318,8 @@ open duplicate sheet with deepcopy of selected rows
 The rows in these duplicated sheets (except deepcopy) are references to rows on the original source sheets, and so edits to the filtered rows will naturally be reflected in the original rows.  Use
 .Ic "g'"
 to freeze sheet contents in a deliberate copy.
+.Ic "z'"
+replace current column with a frozen copy, with all cells evaluated
 .
 .Ss Editing Rows and Cells
 .
@@ -352,6 +356,8 @@ fill null cells in current column with contents of non-null cells up the current
 .
 .It Ic "  e" Ar text
 edit contents of current cell
+.It Ic " ^O"
+.No edit contents of current cell in external Sy EDITOR
 .It Ic " ge" Ar text
 .No set contents of current column for selected rows to Ar text
 .
@@ -443,6 +449,8 @@ increase/decrease zoom level, centered on cursor
 zoom to fit full extent
 .It Ic "z_" No (underbar)
 set aspect ratio
+.It Ic "g_" No (underbar)
+Zoom y-axis to fit all visible data points
 .It Ic " x" Ar xmin xmax
 .No set Ar xmin Ns / Ns Ar xmax No on graph
 .It Ic " y" Ar ymin ymax
@@ -912,7 +920,7 @@ disable loading .visidatarc and plugin addons
 .
 .El
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
-.It Sy --visidata-dir Ns = Ns Ar "str          " No "~/.visidata/"
+.It Sy --visidata-dir Ns = Ns Ar "str          " No "/home/anja/.config/visidata"
 directory to load and store additional files
 .It Sy --debug No "                     False"
 exit on error and display stacktrace
@@ -1055,7 +1063,7 @@ device ID associated with matrix login
 client_id for reddit api
 .It Sy --reddit-client-secret Ns = Ns Ar "str  " No ""
 client_secret for reddit api
-.It Sy --reddit-user-agent Ns = Ns Ar "str     " No "3.1dev"
+.It Sy --reddit-user-agent Ns = Ns Ar "str     " No "3.2"
 user_agent for reddit api
 .It Sy --zulip-batch-size Ns = Ns Ar "int      " No "-100"
 number of messages to fetch per call (<0 to fetch before anchor)
@@ -1100,6 +1108,8 @@ max number of fixed-width columns to create (0 is no max)
 whether to include edge labels on graphviz diagrams
 .It Sy --grep-base-dir Ns = Ns Ar "NoneType    " No "None"
 base directory for relative paths opened with sysopen-row
+.It Sy --hdf5-matrix-enumerate No "     False"
+enumerate matrix rows and columns
 .It Sy --html-title Ns = Ns Ar "str            " No "<h2>{sheet.name}</h2>"
 table header when saving to html
 .It Sy --http-max-next Ns = Ns Ar "int         " No "0"
@@ -1110,6 +1120,8 @@ http headers to send to requests
 verify host and certificates for https
 .It Sy --npy-allow-pickle No "          False"
 numpy allow unpickling objects (unsafe)
+.It Sy --npy-matrix-enumerate No "      False"
+enumerate matrix rows and columns
 .It Sy --pcap-internet Ns = Ns Ar "str         " No "n"
 (y/s/n) if save_dot includes all internet hosts separately (y), combined (s), or does not include the internet (n)
 .It Sy --pdf-tables No "                False"
@@ -1144,8 +1156,6 @@ API Key for api.apilayer.com/fixer
 Cache days for currency conversions
 .It Sy --describe-aggrs Ns = Ns Ar "str        " No "mean stdev"
 numeric aggregators to calculate on Describe sheet
-.It Sy --hello-world Ns = Ns Ar "str           " No "\[u00A1]Hola mundo!"
-shown by the hello-world command
 .It Sy --incr-base Ns = Ns Ar "float           " No "1.0"
 start value for column increments
 .It Sy --ping-count Ns = Ns Ar "int            " No "3"
@@ -1193,7 +1203,7 @@ command submenu indicator
 indicator if command pushes sheet onto sheet stack
 .It Sy "disp_menu_input    " No "\[u2026]"
 indicator if input required for command
-.It Sy "disp_menu_fmt      " No "| VisiData {vd.version} | {vd.hintStatus}"
+.It Sy "disp_menu_fmt      " No "| VisiData {vd.version} | {vd.motd}"
 right-side menu format string
 .It Sy "disp_float_fmt     " No "{:.02f}"
 default fmtstr to format float values
@@ -1305,6 +1315,8 @@ replace whitespace with spaces in multiline
 multiline string to indicate truncation
 .It Sy "disp_multiline_focus" No "True"
 only multiline cursor row
+.It Sy "color_multiline_bottom" No ""
+color of bottom line of multiline rows
 .It Sy "color_aggregator   " No "bold 255 white on 234 black"
 color of aggregator summary on bottom row
 .It Sy "disp_rstatus_fmt   " No "{sheet.threadStatus} {sheet.keystrokeStatus}   [:longname_status]{sheet.longname}[/]  {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}{vd.sidebarStatus}"
@@ -1365,7 +1377,7 @@ histogram element character
 show axes and legend on graph
 .It Sy "disp_canvas_charset" No "\[u2800]\[u2801]\[u2802]\[u2803]\[u2804]\[u2805]\[u2806]\[u2807]\[u2808]\[u2809]\[u280A]\[u280B]\[u280C]\[u280D]\[u280E]\[u280F]\[u2810]\[u2811]\[u2812]\[u2813]\[u2814]\[u2815]\[u2816]\[u2817]\[u2818]\[u2819]\[u281A]\[u281B]\[u281C]\[u281D]\[u281E]\[u281F]\[u2820]\[u2821]\[u2822]\[u2823]\[u2824]\[u2825]\[u2826]\[u2827]\[u2828]\[u2829]\[u282A]\[u282B]\[u282C]\[u282D]\[u282E]\[u282F]\[u2830]\[u2831]\[u2832]\[u2833]\[u2834]\[u2835]\[u2836]\[u2837]\[u2838]\[u2839]\[u283A]\[u283B]\[u283C]\[u283D]\[u283E]\[u283F]\[u2840]\[u2841]\[u2842]\[u2843]\[u2844]\[u2845]\[u2846]\[u2847]\[u2848]\[u2849]\[u284A]\[u284B]\[u284C]\[u284D]\[u284E]\[u284F]\[u2850]\[u2851]\[u2852]\[u2853]\[u2854]\[u2855]\[u2856]\[u2857]\[u2858]\[u2859]\[u285A]\[u285B]\[u285C]\[u285D]\[u285E]\[u285F]\[u2860]\[u2861]\[u2862]\[u2863]\[u2864]\[u2865]\[u2866]\[u2867]\[u2868]\[u2869]\[u286A]\[u286B]\[u286C]\[u286D]\[u286E]\[u286F]\[u2870]\[u2871]\[u2872]\[u2873]\[u2874]\[u2875]\[u2876]\[u2877]\[u2878]\[u2879]\[u287A]\[u287B]\[u287C]\[u287D]\[u287E]\[u287F]\[u2880]\[u2881]\[u2882]\[u2883]\[u2884]\[u2885]\[u2886]\[u2887]\[u2888]\[u2889]\[u288A]\[u288B]\[u288C]\[u288D]\[u288E]\[u288F]\[u2890]\[u2891]\[u2892]\[u2893]\[u2894]\[u2895]\[u2896]\[u2897]\[u2898]\[u2899]\[u289A]\[u289B]\[u289C]\[u289D]\[u289E]\[u289F]\[u28A0]\[u28A1]\[u28A2]\[u28A3]\[u28A4]\[u28A5]\[u28A6]\[u28A7]\[u28A8]\[u28A9]\[u28AA]\[u28AB]\[u28AC]\[u28AD]\[u28AE]\[u28AF]\[u28B0]\[u28B1]\[u28B2]\[u28B3]\[u28B4]\[u28B5]\[u28B6]\[u28B7]\[u28B8]\[u28B9]\[u28BA]\[u28BB]\[u28BC]\[u28BD]\[u28BE]\[u28BF]\[u28C0]\[u28C1]\[u28C2]\[u28C3]\[u28C4]\[u28C5]\[u28C6]\[u28C7]\[u28C8]\[u28C9]\[u28CA]\[u28CB]\[u28CC]\[u28CD]\[u28CE]\[u28CF]\[u28D0]\[u28D1]\[u28D2]\[u28D3]\[u28D4]\[u28D5]\[u28D6]\[u28D7]\[u28D8]\[u28D9]\[u28DA]\[u28DB]\[u28DC]\[u28DD]\[u28DE]\[u28DF]\[u28E0]\[u28E1]\[u28E2]\[u28E3]\[u28E4]\[u28E5]\[u28E6]\[u28E7]\[u28E8]\[u28E9]\[u28EA]\[u28EB]\[u28EC]\[u28ED]\[u28EE]\[u28EF]\[u28F0]\[u28F1]\[u28F2]\[u28F3]\[u28F4]\[u28F5]\[u28F6]\[u28F7]\[u28F8]\[u28F9]\[u28FA]\[u28FB]\[u28FC]\[u28FD]\[u28FE]\[u28FF]"
 charset to render 2x4 blocks on canvas
-.It Sy "disp_graph_pixel_random  " No "False"
+.It Sy "disp_graph_pixel_random" No "False"
 randomly choose attr from set of pixels instead of most common
 .It Sy "disp_zoom_incr     " No "2.0"
 amount to multiply current zoomlevel when zooming

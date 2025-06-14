@@ -1,6 +1,6 @@
 # VisiData version history
 
-# v3.2 (2025-06-xx)
+# v3.2 (2025-06-15)
 
 Thanks to @midichef for many bugfixes and improvements.
 
