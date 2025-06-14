@@ -683,7 +683,7 @@ class TableSheet(BaseSheet):
                     continue
 
                 cur_x, cur_w = self._visibleColLayout[self.cursorVisibleColIndex]
-                if cur_x+cur_w < self.windowWidth:  # current columns fit entirely on screen
+                if cur_x+cur_w < self.windowWidth-1:  # current columns fit entirely on screen
                     break
                 self.leftVisibleColIndex += 1  # once within the bounds, walk over one column at a time
 
