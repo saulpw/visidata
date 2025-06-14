@@ -73,6 +73,7 @@ Thanks to @midichef for many bugfixes and improvements.
 - [open-] fix open-file for - in cmdlogs #2582
 - [open-] fix opening a dir with an filetype extension
 - [reload-] have reload-modified check for earlier changes  #2551
+- [save-] fix error string
 - [sheets-] record key-col toggle for replay as key-col-on/-off
 - [sort-] fix undo when sheet has a previous ordering
 - [vdsql-] ensure each thread in vdsql tracks its single connection
