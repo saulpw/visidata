@@ -474,7 +474,7 @@ class Column(Extensible):
                     break  #1747  early out to speed up wide columns
             w = w_max
         w = max(w, nlen)+2
-        w = min(w, self.sheet.windowWidth)
+        w = min(w, self.sheet.windowWidth-1)
         return w
 
 
