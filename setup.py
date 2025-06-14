@@ -5,6 +5,23 @@ import platform
 import sysconfig
 
 
+def all_requirements():
+    requirements = []
+    with open('requirements.txt', 'r', encoding='utf-8') as f:
+        requirements = []
+        for line in f:
+            line = line.strip()
+            if (line and not line.startswith('#') and not line.startswith('-e git+https')):
+
+                # inline comments
+                if '#' in line:
+                    line = line.split('#')[0].strip()
+
+                if line:
+                    requirements.append(line)
+
+        return requirements
+
 
 # tox can't actually run python3 setup.py: https://github.com/tox-dev/tox/issues/96
 # from visidata import __version__
@@ -80,7 +97,9 @@ setup(
             "wcwidth",
             "xport>=3.0",
         ],"windows-curses": ['windows-curses >= 2.4.1; platform_system == "Windows"',  # 2119
-        ]
+        ],
+        "all": all_requirements() + ["pyxlsb @ git+https://github.com/saulpw/pyxlsb.git@visidata",
+                        "savReaderWriter @ git+https://github.com/anjakefala/savReaderWriter",],
     },
     package_data={
         "visidata.man": ["vd.1", "vd.txt"],
