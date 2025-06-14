@@ -132,7 +132,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=True):
             break
 
     if savefunc is None:
-        vd.fail(f'no function to save as {filetype}')
+        vd.fail(f'no function to save as {filetypes}')
 
     if confirm_overwrite:
         vd.confirmOverwrite(givenpath)
