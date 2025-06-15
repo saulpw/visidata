@@ -98,8 +98,7 @@ setup(
             "xport>=3.0",
         ],"windows-curses": ['windows-curses >= 2.4.1; platform_system == "Windows"',  # 2119
         ],
-        "all": all_requirements() + ["pyxlsb @ git+https://github.com/saulpw/pyxlsb.git@visidata",
-                        "savReaderWriter @ git+https://github.com/anjakefala/savReaderWriter",],
+        "all": all_requirements(),
     },
     package_data={
         "visidata.man": ["vd.1", "vd.txt"],
