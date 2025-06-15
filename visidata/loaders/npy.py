@@ -105,7 +105,7 @@ def save_npy(vd, p, sheet):
         elif col.type in vd.numericTypes:
             dt = 'f8'
         else: #  if col.type in (str, anytype):
-            width = col.getMaxWidth(sheet.rows)
+            width = col.getMaxDataWidth(sheet.rows)
             dt = 'U'+str(width)
         dtype.append((col.name, dt))
 
