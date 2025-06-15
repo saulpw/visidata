@@ -46,6 +46,7 @@ Thanks to @midichef for many bugfixes and improvements.
 * [theme] update light theme #2729
 * [status] remove non-precious sheets from sheetlist #2573
 - [input-] fix word locator for Ctrl+Right motion
+- [input-] allow edit of cell in hidden column  #2749
 - [errors-] make ErrorSheet/ErrorsSheet into singletons
 - [threads-] make threads-all show a singleton sheet
 - [threads-] allow repeated toggling of profiling
@@ -64,18 +65,22 @@ Thanks to @midichef for many bugfixes and improvements.
 - [deprecated-] show warning when using deprecated commands  #2215
 - [features-] reload_every: wait for reload before looping
 - [features-] sysedit: modify cell only if editor changes value (#2656)
+* [freqtbl-] fix excessive memory usage for undo of selections  #2759
 - [incr-] addcol-incr-step as expected #2769
 - [input-] preserve None cells on external editor quit
 - [join-] fix putValue for merge rows absent in any source sheet
+- [layout-] change resize-cols-max into a toggle  #2782
 - [macro-] only record commands that are replayable
 - [mailcap] install dead battery for mailcap in python 3.13 #2576
 - [main-] prevent hang when vd -p - reads from terminal
+- [npy-] fix bug truncating cols wider than window  #2783
 - [open-] fix open-file for - in cmdlogs #2582
 - [open-] fix opening a dir with an filetype extension
 - [reload-] have reload-modified check for earlier changes  #2551
 - [save-] fix error string
 - [sheets-] record key-col toggle for replay as key-col-on/-off
 - [sort-] fix undo when sheet has a previous ordering
+- [undo-] fix undo editing cells in ValueColumn, ExpandedColumn, ColumnSourceAttr  #2765
 - [vdsql-] ensure each thread in vdsql tracks its single connection
 
 ## Cosmetic
@@ -91,6 +96,7 @@ Thanks to @midichef for many bugfixes and improvements.
 - [help] fix duplicate help descriptions #2762
 - [input-] fix editline() for characters having screen width > 1
 - [input-] speed up pasting long strings into line editor
+- [input-] fix off-by-1 when drawing at right edge of screen
 - [main-] format vd_cli exceptions to be caretless
 - [menu-] remove duplicate Help entry #2714
 - [menu] replace hint with motd
