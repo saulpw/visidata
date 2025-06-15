@@ -1,7 +1,7 @@
 # VisiData uses Python native int, float, str, and adds simple anytype.
 
 import locale
-from visidata import options, TypedWrapper, vd, VisiData
+from visidata import vd, VisiData
 
 vd.help_float_fmt = '''
 - fmt starting with `'%'` (like `%0.2f`) will use [:onclick https://docs.python.org/3.6/library/locale.html#locale.format_string]locale.format_string[/]
@@ -40,7 +40,7 @@ anytype.__name__ = ''
 @VisiData.global_api
 def numericFormatter(vd, fmtstr, typedval):
     try:
-        fmtstr = fmtstr or options['disp_'+type(typedval).__name__+'_fmt']
+        fmtstr = fmtstr or vd.options['disp_'+type(typedval).__name__+'_fmt']
         if fmtstr[0] == '%':
             return locale.format_string(fmtstr, typedval, grouping=False)
         else:

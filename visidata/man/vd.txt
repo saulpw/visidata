@@ -108,6 +108,8 @@ DESCRIPTION
      gz_ number       adjust widths of all visible columns to Ar number
 
       - (hyphen)      hide current column
+     g- (hyphen)      hide any column that has multiple rows but only one dis‐
+                      tinct value
      z-               reduce width of current column by half
      gv               unhide all columns
 
@@ -152,11 +154,12 @@ DESCRIPTION
                       requires example row)
      z; expr          create new column from bash expr, with $columnNames as
                       variables
-      * regex/subst   add column derived from current column, replacing regex
-                      with subst (may include \1 backrefs)
-     g*  gz* regex/subst
+      * search Tab replace
+                      add column derived from current column, replacing search
+                      regex with replace (may include \1 backrefs)
+     g*  gz* search Tab replace
                       modify selected rows in current/all visible column(s),
-                      replacing regex with subst (may include \1 backrefs)
+                      replacing search with replace (may include \1 backrefs)
 
       (   g(          expand current/all visible column(s) of lists (e.g. [3])
                       or dicts (e.g. {3}) one level
@@ -191,8 +194,8 @@ DESCRIPTION
                       existing sort criteria
       g[   g]         sort ascending/descending by all key columns; replace
                       any existing sort criteria
-      z[   z]         sort ascending/descending by current column; add to ex‐
-                      isting sort criteria
+      z[   z]         sort ascending/descending by current column; keep higher
+                      priority sort criteria
      gz[  gz]         sort ascending/descending by all key columns; add to ex‐
                       isting sort criteria
       "               open duplicate sheet with only selected rows
@@ -202,7 +205,8 @@ DESCRIPTION
      The rows in these duplicated sheets (except deepcopy) are references to
      rows on the original source sheets, and so edits to the filtered rows
      will naturally be reflected in the original rows.  Use g' to freeze sheet
-     contents in a deliberate copy.
+     contents in a deliberate copy.  z' replace current column with a frozen
+     copy, with all cells evaluated
 
    Editing Rows and Cells
        a   za         append blank row/column; appended columns cannot be
@@ -232,6 +236,7 @@ DESCRIPTION
        f              fill null cells in current column with contents of non-
                       null cells up the current column
        e text         edit contents of current cell
+      ^O              edit contents of current cell in external EDITOR
       ge text         set contents of current column for selected rows to text
 
      Commands While Editing Input
@@ -292,6 +297,7 @@ DESCRIPTION
          +   -              increase/decrease zoom level, centered on cursor
          _ (underbar)       zoom to fit full extent
         z_ (underbar)       set aspect ratio
+        g_ (underbar)       Zoom y-axis to fit all visible data points
          x xmin xmax        set xmin/xmax on graph
          y ymin ymax        set ymin/ymax on graph
          s   t   u          select/toggle/unselect rows on source sheet con‐
@@ -582,7 +588,8 @@ COMMANDLINE OPTIONS
                                   files
      -N, --nothing=T              False              disable loading
                                   .visidatarc and plugin addons
-     --visidata-dir=str           ~/.visidata/       directory to load and
+     --visidata-dir=str           /home/anja/.config/visidata
+                                                     directory to load and
                                                      store additional files
      --debug                      False              exit on error and display
                                                      stacktrace
@@ -739,7 +746,7 @@ COMMANDLINE OPTIONS
      --reddit-client-id=str                          client_id for reddit api
      --reddit-client-secret=str                      client_secret for reddit
                                                      api
-     --reddit-user-agent=str      3.1dev             user_agent for reddit api
+     --reddit-user-agent=str      3.2                user_agent for reddit api
      --zulip-batch-size=int       -100               number of messages to
                                                      fetch per call (<0 to
                                                      fetch before anchor)
@@ -799,6 +806,8 @@ COMMANDLINE OPTIONS
      --grep-base-dir=NoneType     None               base directory for rela‐
                                                      tive paths opened with
                                                      sysopen-row
+     --hdf5-matrix-enumerate      False              enumerate matrix rows and
+                                                     columns
      --html-title=str             <h2>{sheet.name}</h2>
                                                      table header when saving
                                                      to html
@@ -810,6 +819,8 @@ COMMANDLINE OPTIONS
                                                      cates for https
      --npy-allow-pickle           False              numpy allow unpickling
                                                      objects (unsafe)
+     --npy-matrix-enumerate       False              enumerate matrix rows and
+                                                     columns
      --pcap-internet=str          n                  (y/s/n) if save_dot in‐
                                                      cludes all internet hosts
                                                      separately (y), combined
@@ -851,8 +862,6 @@ COMMANDLINE OPTIONS
      --describe-aggrs=str         mean stdev         numeric aggregators to
                                                      calculate on Describe
                                                      sheet
-     --hello-world=str            ¡Hola mundo!       shown by the hello-world
-                                                     command
      --incr-base=float            1.0                start value for column
                                                      increments
      --ping-count=int             3                  send this many pings to
@@ -897,7 +906,7 @@ COMMANDLINE OPTIONS
                                              onto sheet stack
      disp_menu_input     …                   indicator if input required for
                                              command
-     disp_menu_fmt       | VisiData {vd.version} | {vd.hintStatus}
+     disp_menu_fmt       | VisiData {vd.version} | {vd.motd}
                                              right-side menu format string
      disp_float_fmt      {:.02f}             default fmtstr to format float
                                              values
@@ -984,6 +993,8 @@ COMMANDLINE OPTIONS
      disp_wrap_placeholder …                 multiline string to indicate
                                              truncation
      disp_multiline_focus True               only multiline cursor row
+     color_multiline_bottom                  color of bottom line of multiline
+                                             rows
      color_aggregator    bold 255 white on 234 black
                                              color of aggregator summary on
                                              bottom row
@@ -1033,7 +1044,7 @@ COMMANDLINE OPTIONS
                                              ⠀⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿⡀⡁⡂⡃⡄⡅⡆⡇⡈⡉⡊⡋⡌⡍⡎⡏⡐⡑⡒⡓⡔⡕⡖⡗⡘⡙⡚⡛⡜⡝⡞⡟⡠⡡⡢⡣⡤⡥⡦⡧⡨⡩⡪⡫⡬⡭⡮⡯⡰⡱⡲⡳⡴⡵⡶⡷⡸⡹⡺⡻⡼⡽⡾⡿⢀⢁⢂⢃⢄⢅⢆⢇⢈⢉⢊⢋⢌⢍⢎⢏⢐⢑⢒⢓⢔⢕⢖⢗⢘⢙⢚⢛⢜⢝⢞⢟⢠⢡⢢⢣⢤⢥⢦⢧⢨⢩⢪⢫⢬⢭⢮⢯⢰⢱⢲⢳⢴⢵⢶⢷⢸⢹⢺⢻⢼⢽⢾⢿⣀⣁⣂⣃⣄⣅⣆⣇⣈⣉⣊⣋⣌⣍⣎⣏⣐⣑⣒⣓⣔⣕⣖⣗⣘⣙⣚⣛⣜⣝⣞⣟⣠⣡⣢⣣⣤⣥⣦⣧⣨⣩⣪⣫⣬⣭⣮⣯⣰⣱⣲⣳⣴⣵⣶⣷⣸⣹⣺⣻⣼⣽⣾⣿
                                              charset to render 2x4 blocks on
                                              canvas
-     disp_pixel_random   False               randomly choose attr from set of
+     disp_graph_pixel_random False           randomly choose attr from set of
                                              pixels instead of most common
      disp_zoom_incr      2.0                 amount to multiply current zoom‐
                                              level when zooming
@@ -1189,4 +1200,4 @@ SUPPORTED SOURCES
 AUTHOR
      VisiData was made by Saul Pwanson <vd@saul.pw>.
 
-Linux/MacOS                    October 13, 2024                    Linux/MacOS
+Linux/MacOS                      June 13, 2025                     Linux/MacOS

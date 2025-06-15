@@ -98,6 +98,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">gz</span><span style="text-decoration:underline;">_</span> <span style="text-decoration:underline;">number</span>       adjust widths of all visible columns to Ar number
 
       <span style="font-weight:bold;">-</span> (hyphen)      hide current column
+     <span style="font-weight:bold;">g-</span> (hyphen)      hide any column that has multiple rows but only one distinct value
      <span style="font-weight:bold;">z-</span>               reduce width of current column by half
      <span style="font-weight:bold;">gv</span>               unhide all columns
 
@@ -128,9 +129,10 @@ vd(1)                                                                           
       <span style="font-weight:bold;">:</span> <span style="text-decoration:underline;">regex</span>         add new columns from <span style="text-decoration:underline;">regex</span> split; number of columns determined by example row at cursor
       <span style="font-weight:bold;">;</span> <span style="text-decoration:underline;">regex</span>         add new columns from capture groups of <span style="text-decoration:underline;">regex</span> (also requires example row)
      <span style="font-weight:bold;">z;</span> <span style="text-decoration:underline;">expr</span>          create new column from bash <span style="text-decoration:underline;">expr</span>, with <span style="font-weight:bold;">$</span>columnNames as variables
-      <span style="font-weight:bold;">*</span> <span style="text-decoration:underline;">regex</span><span style="font-weight:bold;">/</span><span style="text-decoration:underline;">subst</span>   add column derived from current column, replacing <span style="text-decoration:underline;">regex</span> with <span style="text-decoration:underline;">subst</span> (may include <span style="font-weight:bold;">\1</span> backrefs)
-     <span style="font-weight:bold;">g*</span>  <span style="font-weight:bold;">gz*</span> <span style="text-decoration:underline;">regex</span><span style="font-weight:bold;">/</span><span style="text-decoration:underline;">subst</span>
-                      modify selected rows in current/all visible column(s), replacing <span style="text-decoration:underline;">regex</span> with <span style="text-decoration:underline;">subst</span> (may include <span style="font-weight:bold;">\1</span> backrefs)
+      <span style="font-weight:bold;">*</span> <span style="text-decoration:underline;">search</span> <span style="font-weight:bold;">Tab</span> <span style="text-decoration:underline;">replace</span>
+                      add column derived from current column, replacing <span style="text-decoration:underline;">search</span> regex with <span style="text-decoration:underline;">replace</span> (may include <span style="font-weight:bold;">\1</span> backrefs)
+     <span style="font-weight:bold;">g*</span>  <span style="font-weight:bold;">gz*</span> <span style="text-decoration:underline;">search</span> <span style="font-weight:bold;">Tab</span> <span style="text-decoration:underline;">replace</span>
+                      modify selected rows in current/all visible column(s), replacing <span style="text-decoration:underline;">search</span> with <span style="text-decoration:underline;">replace</span> (may include <span style="font-weight:bold;">\1</span> backrefs)
 
       <span style="font-weight:bold;">(</span>   <span style="font-weight:bold;">g(</span>          expand current/all visible column(s) of lists (e.g. <span style="font-weight:bold;">[3]</span>) or dicts (e.g. <span style="font-weight:bold;">{3}</span>) one level
      <span style="font-weight:bold;">z(</span>  <span style="font-weight:bold;">gz(</span> <span style="text-decoration:underline;">depth</span>    expand current/all visible column(s) of lists (e.g. <span style="font-weight:bold;">[3]</span>) or dicts (e.g. <span style="font-weight:bold;">{3}</span>) to given <span style="text-decoration:underline;">depth</span> (<span style="text-decoration:underline;">0</span>= fully)
@@ -153,13 +155,13 @@ vd(1)                                                                           
    <span style="font-weight:bold;">Row</span> <span style="font-weight:bold;">Sorting/Filtering</span>
        <span style="font-weight:bold;">[</span>    <span style="font-weight:bold;">]</span>         sort ascending/descending by current column; replace any existing sort criteria
       <span style="font-weight:bold;">g[</span>   <span style="font-weight:bold;">g]</span>         sort ascending/descending by all key columns; replace any existing sort criteria
-      <span style="font-weight:bold;">z[</span>   <span style="font-weight:bold;">z]</span>         sort ascending/descending by current column; add to existing sort criteria
+      <span style="font-weight:bold;">z[</span>   <span style="font-weight:bold;">z]</span>         sort ascending/descending by current column; keep higher priority sort criteria
      <span style="font-weight:bold;">gz[</span>  <span style="font-weight:bold;">gz]</span>         sort ascending/descending by all key columns; add to existing sort criteria
       <span style="font-weight:bold;">&quot;</span>               open duplicate sheet with only selected rows
      <span style="font-weight:bold;">g&quot;</span>               open duplicate sheet with all rows
      <span style="font-weight:bold;">gz&quot;</span>              open duplicate sheet with deepcopy of selected rows
 
-     The rows in these duplicated sheets (except deepcopy) are references to rows on the original source sheets, and so edits to the filtered rows will naturally be reflected in the original rows.  Use <span style="font-weight:bold;">g'</span> to freeze sheet contents in a deliberate copy.
+     The rows in these duplicated sheets (except deepcopy) are references to rows on the original source sheets, and so edits to the filtered rows will naturally be reflected in the original rows.  Use <span style="font-weight:bold;">g'</span> to freeze sheet contents in a deliberate copy.  <span style="font-weight:bold;">z'</span> replace current column with a frozen copy, with all cells evaluated
 
    <span style="font-weight:bold;">Editing</span> <span style="font-weight:bold;">Rows</span> <span style="font-weight:bold;">and</span> <span style="font-weight:bold;">Cells</span>
        <span style="font-weight:bold;">a</span>   <span style="font-weight:bold;">za</span>         append blank row/column; appended columns cannot be copied to clipboard
@@ -177,6 +179,7 @@ vd(1)                                                                           
       <span style="font-weight:bold;">zY</span>  <span style="font-weight:bold;">gzY</span>         yank (copy) contents of current column for current/selected row(s) to system clipboard (using <span style="font-weight:bold;">options.clipboard</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">copy</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">cmd</span>)
        <span style="font-weight:bold;">f</span>              fill null cells in current column with contents of non-null cells up the current column
        <span style="font-weight:bold;">e</span> <span style="text-decoration:underline;">text</span>         edit contents of current cell
+      <span style="font-weight:bold;">^O</span>              edit contents of current cell in external <span style="font-weight:bold;">EDITOR</span>
       <span style="font-weight:bold;">ge</span> <span style="text-decoration:underline;">text</span>         set contents of current column for selected rows to <span style="text-decoration:underline;">text</span>
 
      <span style="font-weight:bold;">Commands</span> <span style="font-weight:bold;">While</span> <span style="font-weight:bold;">Editing</span> <span style="font-weight:bold;">Input</span>
@@ -224,6 +227,7 @@ vd(1)                                                                           
          <span style="font-weight:bold;">+</span>   <span style="font-weight:bold;">-</span>              increase/decrease zoom level, centered on cursor
          <span style="text-decoration:underline;">_</span> (underbar)       zoom to fit full extent
         <span style="font-weight:bold;">z</span><span style="text-decoration:underline;">_</span> (underbar)       set aspect ratio
+        <span style="font-weight:bold;">g</span><span style="text-decoration:underline;">_</span> (underbar)       Zoom y-axis to fit all visible data points
          <span style="font-weight:bold;">x</span> <span style="text-decoration:underline;">xmin</span> <span style="text-decoration:underline;">xmax</span>        set <span style="text-decoration:underline;">xmin</span>/<span style="text-decoration:underline;">xmax</span> on graph
          <span style="font-weight:bold;">y</span> <span style="text-decoration:underline;">ymin</span> <span style="text-decoration:underline;">ymax</span>        set <span style="text-decoration:underline;">ymin</span>/<span style="text-decoration:underline;">ymax</span> on graph
          <span style="font-weight:bold;">s</span>   <span style="font-weight:bold;">t</span>   <span style="font-weight:bold;">u</span>          select/toggle/unselect rows on source sheet contained within canvas cursor
@@ -441,7 +445,8 @@ vd(1)                                                                           
      <span style="font-weight:bold;">-y</span>, <span style="font-weight:bold;">--overwrite</span>=<span style="text-decoration:underline;">y</span>            y                  overwrite existing files without confirmation
      <span style="font-weight:bold;">-ro</span>, <span style="font-weight:bold;">--overwrite</span>=<span style="text-decoration:underline;">n</span>           n                  do not overwrite existing files
      <span style="font-weight:bold;">-N</span>, <span style="font-weight:bold;">--nothing</span>=<span style="text-decoration:underline;">T</span>              False              disable loading .visidatarc and plugin addons
-     <span style="font-weight:bold;">--visidata-dir</span>=<span style="text-decoration:underline;">str</span>           ~/.visidata/       directory to load and store additional files
+     <span style="font-weight:bold;">--visidata-dir</span>=<span style="text-decoration:underline;">str</span>           /home/anja/.config/visidata
+                                                     directory to load and store additional files
      <span style="font-weight:bold;">--debug</span>                      False              exit on error and display stacktrace
      <span style="font-weight:bold;">--undo</span>=<span style="text-decoration:underline;">bool</span>                  True               enable undo/redo
      <span style="font-weight:bold;">--col-cache-size</span>=<span style="text-decoration:underline;">int</span>         0                  max number of cache entries in each cached column
@@ -515,7 +520,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--matrix-device-id</span>=<span style="text-decoration:underline;">str</span>       VisiData           device ID associated with matrix login
      <span style="font-weight:bold;">--reddit-client-id</span>=<span style="text-decoration:underline;">str</span>                          client_id for reddit api
      <span style="font-weight:bold;">--reddit-client-secret</span>=<span style="text-decoration:underline;">str</span>                      client_secret for reddit api
-     <span style="font-weight:bold;">--reddit-user-agent</span>=<span style="text-decoration:underline;">str</span>      3.1dev             user_agent for reddit api
+     <span style="font-weight:bold;">--reddit-user-agent</span>=<span style="text-decoration:underline;">str</span>      3.2                user_agent for reddit api
      <span style="font-weight:bold;">--zulip-batch-size</span>=<span style="text-decoration:underline;">int</span>       -100               number of messages to fetch per call (&lt;0 to fetch before anchor)
      <span style="font-weight:bold;">--zulip-anchor</span>=<span style="text-decoration:underline;">int</span>           1000000000         message id to start fetching from
      <span style="font-weight:bold;">--zulip-delay-s</span>=<span style="text-decoration:underline;">float</span>        1e-05              seconds to wait between calls (0 to stop after first)
@@ -537,12 +542,14 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--fixed-maxcols</span>=<span style="text-decoration:underline;">int</span>          0                  max number of fixed-width columns to create (0 is no max)
      <span style="font-weight:bold;">--graphviz-edge-labels</span>=<span style="text-decoration:underline;">bool</span>  True               whether to include edge labels on graphviz diagrams
      <span style="font-weight:bold;">--grep-base-dir</span>=<span style="text-decoration:underline;">NoneType</span>     None               base directory for relative paths opened with sysopen-row
+     <span style="font-weight:bold;">--hdf5-matrix-enumerate</span>      False              enumerate matrix rows and columns
      <span style="font-weight:bold;">--html-title</span>=<span style="text-decoration:underline;">str</span>             &lt;h2&gt;{sheet.name}&lt;/h2&gt;
                                                      table header when saving to html
      <span style="font-weight:bold;">--http-max-next</span>=<span style="text-decoration:underline;">int</span>          0                  max next.url pages to follow in http response
      <span style="font-weight:bold;">--http-req-headers</span>=<span style="text-decoration:underline;">dict</span>      {}                 http headers to send to requests
      <span style="font-weight:bold;">--http-ssl-verify</span>=<span style="text-decoration:underline;">bool</span>       True               verify host and certificates for https
      <span style="font-weight:bold;">--npy-allow-pickle</span>           False              numpy allow unpickling objects (unsafe)
+     <span style="font-weight:bold;">--npy-matrix-enumerate</span>       False              enumerate matrix rows and columns
      <span style="font-weight:bold;">--pcap-internet</span>=<span style="text-decoration:underline;">str</span>          n                  (y/s/n) if save_dot includes all internet hosts separately (y), combined (s), or does not include the internet (n)
      <span style="font-weight:bold;">--pdf-tables</span>                 False              parse PDF for tables instead of pages of text
      <span style="font-weight:bold;">--postgres-schema</span>=<span style="text-decoration:underline;">str</span>        public             The desired schema for the Postgres database
@@ -560,7 +567,6 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--fixer-api-key</span>=<span style="text-decoration:underline;">str</span>                             API Key for api.apilayer.com/fixer
      <span style="font-weight:bold;">--fixer-cache-days</span>=<span style="text-decoration:underline;">int</span>       1                  Cache days for currency conversions
      <span style="font-weight:bold;">--describe-aggrs</span>=<span style="text-decoration:underline;">str</span>         mean stdev         numeric aggregators to calculate on Describe sheet
-     <span style="font-weight:bold;">--hello-world</span>=<span style="text-decoration:underline;">str</span>            ¡Hola mundo!       shown by the hello-world command
      <span style="font-weight:bold;">--incr-base</span>=<span style="text-decoration:underline;">float</span>            1.0                start value for column increments
      <span style="font-weight:bold;">--ping-count</span>=<span style="text-decoration:underline;">int</span>             3                  send this many pings to each host
      <span style="font-weight:bold;">--ping-interval</span>=<span style="text-decoration:underline;">float</span>        0.1                wait between ping rounds, in seconds
@@ -587,7 +593,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">more</span>      »                   command submenu indicator
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">push</span>      ⎘                   indicator if command pushes sheet onto sheet stack
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">input</span>     …                   indicator if input required for command
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>       | VisiData {vd.version} | {vd.hintStatus}
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">menu</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>       | VisiData {vd.version} | {vd.motd}
                                              right-side menu format string
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">float</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>      {:.02f}             default fmtstr to format float values
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">int</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>        {:d}                default fmtstr to format int values
@@ -647,6 +653,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">wrap</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">replace</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">whitespace</span> False      replace whitespace with spaces in multiline
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">wrap</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">placeholder</span> …                 multiline string to indicate truncation
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">multiline</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">focus</span> True               only multiline cursor row
+     <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">multiline</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">bottom</span>                  color of bottom line of multiline rows
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">aggregator</span>    bold 255 white on 234 black
                                              color of aggregator summary on bottom row
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">rstatus</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">fmt</span>    {sheet.threadStatus} {sheet.keystrokeStatus}   [:longname_status]{sheet.longname}[/]  {sheet.nRows:9d} {sheet.rowtype} {sheet.modifiedStatus}{sheet.selectedStatus}{vd.replayStatus}{vd.sidebarStatus}
@@ -681,7 +688,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">graph</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">labels</span>   True                show axes and legend on graph
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">canvas</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">charset</span> ⠀⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿⡀⡁⡂⡃⡄⡅⡆⡇⡈⡉⡊⡋⡌⡍⡎⡏⡐⡑⡒⡓⡔⡕⡖⡗⡘⡙⡚⡛⡜⡝⡞⡟⡠⡡⡢⡣⡤⡥⡦⡧⡨⡩⡪⡫⡬⡭⡮⡯⡰⡱⡲⡳⡴⡵⡶⡷⡸⡹⡺⡻⡼⡽⡾⡿⢀⢁⢂⢃⢄⢅⢆⢇⢈⢉⢊⢋⢌⢍⢎⢏⢐⢑⢒⢓⢔⢕⢖⢗⢘⢙⢚⢛⢜⢝⢞⢟⢠⢡⢢⢣⢤⢥⢦⢧⢨⢩⢪⢫⢬⢭⢮⢯⢰⢱⢲⢳⢴⢵⢶⢷⢸⢹⢺⢻⢼⢽⢾⢿⣀⣁⣂⣃⣄⣅⣆⣇⣈⣉⣊⣋⣌⣍⣎⣏⣐⣑⣒⣓⣔⣕⣖⣗⣘⣙⣚⣛⣜⣝⣞⣟⣠⣡⣢⣣⣤⣥⣦⣧⣨⣩⣪⣫⣬⣭⣮⣯⣰⣱⣲⣳⣴⣵⣶⣷⣸⣹⣺⣻⣼⣽⣾⣿
                                              charset to render 2x4 blocks on canvas
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">pixel</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">random</span>   False               randomly choose attr from set of pixels instead of most common
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">graph</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">pixel</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">random</span> False           randomly choose attr from set of pixels instead of most common
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">zoom</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">incr</span>      2.0                 amount to multiply current zoomlevel when zooming
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">graph</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">hidden</span>  238 blue            color of legend for hidden attribute
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">graph</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">selected</span> bold               color of selected graph points
@@ -808,5 +815,5 @@ vd(1)                                                                           
 <span style="font-weight:bold;">AUTHOR</span>
      <span style="font-weight:bold;">VisiData</span> was made by Saul Pwanson &lt;<span style="text-decoration:underline;">vd@saul.pw</span>&gt;.
 
-Linux/MacOS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     October 13, 2024                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    Linux/MacOS
+Linux/MacOS                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      June 13, 2025                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      Linux/MacOS
 </pre></section>

@@ -5,7 +5,7 @@ import pytest
 
 class TestMenu:
     def test_menuitems(self):
-        vd.addMenuItems('''Column > Add column > foobar > hello-world''')
+        vd.addMenuItems('''Column > Add column > foobar > addcol-sparkline''')
 
         m = TableSheet().getMenuItem(['Column', 'Add column', 'foobar'])
         assert m

@@ -100,6 +100,7 @@ Sheet.addCommand('=', 'addcol-expr', 'addColumnAtCursor(ExprColumn(inputExpr("ne
 Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(someSelectedRows, inputExpr("set selected="), curcol=cursorCol)', 'set current column for selected rows to result of Python expression')
 Sheet.addCommand('z=', 'setcell-expr', 'cursorCol.setValues([cursorRow], evalExpr(inputExpr("set expr="), row=cursorRow, curcol=cursorCol))', 'evaluate Python expression on current row and set current cell with result of Python expression')
 Sheet.addCommand('gz=', 'setcol-iter', 'cursorCol.setValues(someSelectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(someSelectedRows))))', 'set current column for selected rows to the items in result of Python sequence expression')
+Sheet.addCommand('', 'addcol-iter', 'iter_expr=inputExpr("new column iterator expr: "); it = eval(iter_expr, getGlobals()); c=SettableColumn(); addColumnAtCursor(c); c.setValues(rows, *it)', 'add column with values from a Python sequence expression, repeating it if needed to fill')
 
 Sheet.addCommand(None, 'show-expr', 'status(evalExpr(inputExpr("show expr="), row=cursorRow, curcol=cursorCol))', 'evaluate Python expression on current row and show result on status line')
 

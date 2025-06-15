@@ -114,6 +114,10 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=True):
     if not vsheets: # blank tuple
         vd.warning('no sheets to save')
         return
+    if not givenpath.name:
+        vd.warning('no save path given')
+        return
+
     unloaded = [ vs for vs in vsheets if vs.rows is UNLOADED ]
     vd.sync(*vd.ensureLoaded(unloaded))
 
@@ -128,7 +132,7 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=True):
             break
 
     if savefunc is None:
-        vd.fail(f'no function to save as {filetype}')
+        vd.fail(f'no function to save as {", ".join(filetypes)}')
 
     if confirm_overwrite:
         vd.confirmOverwrite(givenpath)

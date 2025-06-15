@@ -1,14 +1,17 @@
 import os
 import time
 
-from visidata import vd, BaseSheet, Sheet, asyncthread, Path, ScopedSetattr
+from visidata import vd, BaseSheet, Sheet, asyncignore, asyncthread, Path, ScopedSetattr
 
 
 @BaseSheet.api
-@asyncthread
+@asyncignore
 def reload_every(sheet, seconds:int):
     while True:
-        sheet.reload()
+        # continue reloading till vd.remove() runs, like when the sheet is quit
+        if not sheet in vd.sheets:
+            break
+        vd.sync(sheet.reload())
         time.sleep(seconds)
 
 
@@ -20,13 +23,13 @@ def reload_modified(sheet):
     assert isinstance(p, Path)
     assert not p.is_url()
 
-    mtime = os.stat(p).st_mtime
+    mtime = 0
     while True:
-        time.sleep(1)
         t = os.stat(p).st_mtime
         if t != mtime:
             mtime = t
             sheet.reload_rows()
+        time.sleep(1)
 
 
 @Sheet.api
@@ -46,7 +49,7 @@ def reload_rows(self):
 
 BaseSheet.addCommand('', 'reload-every', 'sheet.reload_every(input("reload interval (sec): ", value=1))', 'schedule sheet reload every N seconds') #683
 BaseSheet.addCommand('', 'reload-modified', 'sheet.reload_modified()', 'reload sheet when source file modified (tail-like behavior)')  #1686
-BaseSheet.addCommand('z^R', 'reload-rows', 'preloadHook(); reload_rows(); status("reloaded")', 'Reload current sheet')
+Sheet.addCommand('z^R', 'reload-rows', 'preloadHook(); reload_rows(); status("reloaded")', 'Reload current sheet leaving current columns intact')
 
 vd.addMenuItems('''
     File > Reload > rows only > reload-rows

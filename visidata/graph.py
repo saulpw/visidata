@@ -72,6 +72,8 @@ class InvertedCanvas(Canvas):
 
 # provides axis labels, legend
 class GraphSheet(InvertedCanvas):
+    rowtype = 'points'
+
     def __init__(self, *names, **kwargs):
         self.ylabel_maxw = 0
         super().__init__(*names, **kwargs)
@@ -145,7 +147,7 @@ class GraphSheet(InvertedCanvas):
             for char_x in range(0, self.plotwidth//2):
                 has_x_line = char_x in self.reflines_char_x.keys()
                 if has_x_line or has_y_line:
-                    cattr = colors.color_refline
+                    cattr = colors.color_graph_refline
                     if has_x_line:
                         ch = self.reflines_char_x[char_x]
                         # where two lines cross, draw the vertical line, not the horizontal one
@@ -268,11 +270,11 @@ class GraphSheet(InvertedCanvas):
             txt = tick + txt
         else:
             right_margin = self.plotwidth - 1 - self.plotviewBox.xmax
-            if (len(txt)+len(tick))*2 <= right_margin:
+            if (dispwidth(txt)+dispwidth(tick))*2 <= right_margin:
                 txt = tick + txt
             else:
                 # shift rightmost label to be left of its tick
-                x -= len(txt)*2
+                x -= dispwidth(txt)*2
                 if len(tick) == 0:
                     x += 1
                 txt = txt + tick

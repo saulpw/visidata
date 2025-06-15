@@ -1,10 +1,39 @@
 #!/usr/bin/env python3
 
 from setuptools import setup
+import platform
+import sysconfig
+
+
+def all_requirements():
+    requirements = []
+    with open('requirements.txt', 'r', encoding='utf-8') as f:
+        requirements = []
+        for line in f:
+            line = line.strip()
+            if (line and not line.startswith('#') and not line.startswith('-e git+https')):
+
+                # inline comments
+                if '#' in line:
+                    line = line.split('#')[0].strip()
+
+                if line:
+                    requirements.append(line)
+
+        return requirements
+
 
 # tox can't actually run python3 setup.py: https://github.com/tox-dev/tox/issues/96
 # from visidata import __version__
-__version__ = "3.1.1"
+__version__ = "3.2"
+install_requires = [
+    "python-dateutil",
+    'importlib_resources; python_version<"3.9"',
+    'standard-mailcap; python_version>="3.13"',
+]
+
+if not sysconfig.get_platform().startswith("mingw"):  # 2757
+    install_requires += ['windows-curses >= 2.4.1; platform_system == "Windows"']   # 2119
 
 setup(
     name="visidata",
@@ -17,17 +46,13 @@ setup(
     author_email="visidata@saul.pw",
     url="https://visidata.org",
     download_url="https://github.com/saulpw/visidata/tarball/" + __version__,
-    scripts=["bin/vd", "bin/vd2to3.vdx"],
+    scripts=["bin/vd2to3.vdx"],
     entry_points={
-        "console_scripts": ["visidata=visidata.main:vd_cli"],
+        "console_scripts": ["vd=visidata.main:vd_cli",
+                            "visidata=visidata.main:vd_cli"],
     },
     py_modules=["visidata"],
-    install_requires=[
-        "python-dateutil",
-        'windows-curses != 2.3.1; platform_system == "Windows"',  # 1841
-        "importlib-metadata >= 3.6",
-        'importlib_resources; python_version<"3.9"',
-    ],
+    install_requires=install_requires,
     packages=[
         "visidata",
         "visidata.loaders",
@@ -71,7 +96,10 @@ setup(
             "tomli",
             "wcwidth",
             "xport>=3.0",
-        ]
+        ],"windows-curses": ['windows-curses >= 2.4.1; platform_system == "Windows"',  # 2119
+        ],
+        "all": all_requirements() + ["pyxlsb @ git+https://github.com/saulpw/pyxlsb.git@visidata",
+                        "savReaderWriter @ git+https://github.com/anjakefala/savReaderWriter",],
     },
     package_data={
         "visidata.man": ["vd.1", "vd.txt"],

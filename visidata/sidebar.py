@@ -130,7 +130,7 @@ def drawSidebar(vd, scr, sheet):
 def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', overflowmsg:str='', bottommsg:str=''):
     scrh, scrw = scr.getmaxyx()
     maxw = sheet.options.disp_sidebar_width or scrw//2
-    maxh = sheet.options.disp_sidebar_height or scrh-2
+    maxh = sheet.options.disp_sidebar_height or max(scrh-2, 1)
 
     cattr = colors.get_color('color_sidebar')
 
@@ -158,6 +158,7 @@ def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', o
         if lines:
             maxlinew = max(maxlinew, max(dispwidth(textonly, maxwidth=maxw) for line, textonly in lines))
         winh = min(maxh, len(lines)+2)
+    winh = max(winh, 1)
 
     titlew = dispwidth(title)
 
@@ -166,6 +167,7 @@ def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', o
     maxlinew = max(maxlinew, titlew)
     winw = min(maxw, maxlinew+4)
     x, y, w, h = scrw-winw-1, scrh-winh-1, winw, winh
+    y = max(y, 0)
 
     sidebarscr = vd.subwindow(scr, x, y, w, h)
 
@@ -191,7 +193,7 @@ def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', o
     if bottommsg:
         clipdraw(sidebarscr, h-1, winw-dispwidth(bottommsg)-4, '|'+bottommsg+'|', cattr)
 
-    sidebarscr.refresh()
+    sidebarscr.noutrefresh()
 
 
 @VisiData.api

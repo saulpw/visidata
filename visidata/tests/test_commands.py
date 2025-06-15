@@ -67,6 +67,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'addcol-incr-step': '2',
                  'setcol-incr-step': '2',
                  'setcol-iter': 'range(1, 100)',
+                 'addcol-iter': 'range(1, 100)',
                  'setcol-format-enum': '1=cat',
                  'open-ping': 'github.com',
                  'setcol-input': '5',
@@ -116,6 +117,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'sheet': '',
                  'col': 'Units',
                  'row': '5',
+                 'addcol-aggregate': 'max',
               }
 
 @pytest.mark.usefixtures('curses_setup')
@@ -156,7 +158,8 @@ class TestCommands:
         # cleanup
         for f in ['flotsam.csv', 'debris.csv', 'jetsam.csv', 'lagan.csv', 'test_commands.vdj']:
             pf = Path(f)
-            if pf.exists: pf.unlink()
+            if pf.exists:
+                pf.unlink(missing_ok=True)
 
 
     def runOneTest(self, mock_screen, longname):
@@ -172,7 +175,7 @@ class TestCommands:
             vd.getkeystroke = Mock(side_effect=['^J'])
 
         sample_file = vd.pkg_resources_files(visidata) / 'tests/sample.tsv'
-        vs = visidata.TsvSheet('test_commands', source=visidata.Path(sample_file))
+        vs = visidata.TsvSheet('sample', source=visidata.Path(sample_file))
         cmd = vs.getCommand(longname)
         if not cmd:
             vd.warning(f'command cannot be tested on TsvSheet, skipping:  {longname}')

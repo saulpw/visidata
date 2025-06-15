@@ -110,3 +110,5 @@ def save_fixed(vd, p, *vsheets):
                     for col, val in dispvals.items():
                         fp.write(('{0:%s%s.%s} ' % ('>' if vd.isNumeric(col) else '<', widths[col], widths[col])).format(val))
                     fp.write('\n')
+
+FixedWidthColumnsSheet.options.null_value = ''    # the file format cannot contain None, so use empty string instead

@@ -1,5 +1,4 @@
 python-dateutil     # date type
-importlib_metadata>=3.6 # plugin groups backported for python <3.8
 
 # optional dependencies
 pandas>=1.5.3; python_version >= '3.11' # dta (Stata)
@@ -11,7 +10,6 @@ xlrd                # xls
 xlwt                # xls
 h5py                # hdf5
 psycopg2-binary     # postgres
-mysqlclient         # mysql
 boto3               # rds
 pyshp               # shapefiles
 mapbox-vector-tile  # mbtiles

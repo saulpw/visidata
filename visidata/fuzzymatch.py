@@ -367,23 +367,26 @@ CombinedMatch = collections.namedtuple('CombinedMatch', 'score formatted match')
 
 @VisiData.api
 def fuzzymatch(vd, haystack:"list[dict[str, str]]", needles:"list[str]) -> list[CombinedMatch]"):
-    'Return sorted list of matching dict values in haystack, augmenting the input dicts with _score:int and _positions:dict[k,set[int]] where k is each non-_ key in the haystack dict.'
-
+    '''Perform case-insensitive matching. Return sorted list of matching dict values in haystack, augmenting the input dicts with _score:int and _positions:dict[k,set[int]] where k is each non-_ key in the haystack dict.'''
+    needles = [ p.lower() for p in needles]
     matches = []
     for h in haystack:
         match = {}
         formatted_hay = {}
         for k, v in h.items():
             if k[0] == '_': continue
+            positions = set()
+            v = v.lower()
             for p in needles:
                 mr = _fuzzymatch(v, p)
                 if mr.score > 0:
-                    match[k] = mr
-                    formatted_hay[k] = _format_match(v, mr.positions)
+                    match.setdefault(k, []).append(mr)
+                    positions |= set(mr.positions)
+            formatted_hay[k] = _format_match(v, positions)
 
         if match:
             # square to prefer larger scores in a single haystack
-            score = int(sum(mr.score**2 for mr in match.values()))
+            score = int(sum([mr.score**2 for mrs in match.values() for mr in mrs]))
             matches.append(CombinedMatch(score=score, formatted=formatted_hay, match=h))
 
     return sorted(matches, key=lambda m: -m.score)

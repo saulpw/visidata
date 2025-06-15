@@ -1,4 +1,5 @@
 from copy import copy
+import threading
 import functools
 import operator
 import re
@@ -80,24 +81,18 @@ vd.openurl_sqlite = vd.open_vdsql
 class IbisConnectionPool:
     def __init__(self, source, pool=None, total=0):
         self.source = source
-        self.pool = pool if pool is not None else []
-        self.total = total
+        self._local = threading.local()
+        self._local.connection = None
 
     def __copy__(self):
-        return IbisConnectionPool(self.source, pool=self.pool, total=self.total)
+        return IbisConnectionPool(self.source)
 
     @contextmanager
     def get_conn(self):
-        if not self.pool:
-            import ibis
-            r = ibis.connect(str(self.source))
-        else:
-            r = self.pool.pop(0)
-
-        try:
-            yield r
-        finally:
-            self.pool.append(r)
+        import ibis
+        if not hasattr(self._local, 'connection') or not self._local.connection:
+            self._local.connection = ibis.connect(str(self.source))
+        yield self._local.connection
 
 
 class IbisTableIndexSheet(IndexSheet):

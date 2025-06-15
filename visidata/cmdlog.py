@@ -330,6 +330,9 @@ def replay_sync(vd, cmdlog):
     with vd.DisableAsync():
         vd.sync()  #2352 let cmdlog finish loading
         cmdlog.cursorRowIndex = 0
+        # save current replay, for cmdlogs that replay other cmdlogs, such as a macro executing another macro
+        prev_replay = vd.currentReplay
+        prev_replay_row = vd.currentReplayRow
         vd.currentReplay = cmdlog
 
         with Progress(total=len(cmdlog.rows)) as prog:
@@ -356,7 +359,8 @@ def replay_sync(vd, cmdlog):
                     vd.activeSheet.ensureLoaded()
 
         vd.status('replay complete')
-        vd.currentReplay = None
+        vd.currentReplay = prev_replay
+        vd.currentReplayRow = prev_replay_row
 
 
 @VisiData.api

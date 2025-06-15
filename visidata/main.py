@@ -2,7 +2,7 @@
 # Usage: $0 [<options>] [<input> ...]
 #        $0 [<options>] --play <cmdlog> [--batch] [-w <waitsecs>] [-o <output>] [field=value ...]
 
-__version__ = '3.1.1'
+__version__ = '3.2'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
 from copy import copy
@@ -16,7 +16,7 @@ import signal
 import warnings
 import builtins  # to override print
 
-from visidata import vd, options, run, BaseSheet, AttrDict
+from visidata import vd, options, run, BaseSheet, AttrDict, stacktrace
 from visidata import Path
 from visidata.settings import _get_config_file
 import visidata
@@ -189,7 +189,7 @@ def main_vd():
         vd.warning(e)
 
     warnings.showwarning = vd.warning
-    vd.printout = builtins.print
+    vd.printerr = lambda *args: builtins.print(*args, file=sys.stderr)
 
     flPipedInput = not sys.stdin.isatty()
     flPipedOutput = not sys.stdout.isatty()
@@ -344,6 +344,8 @@ def main_vd():
             run(vd.sheets[0])
     else:
         if args.play == '-':
+            if vd.stdinSource.fptext.isatty():
+                vd.fail('replay commands must come by pipe, not by terminal')
             vdfile = vd.stdinSource
         else:
             vdfile = Path(args.play)
@@ -357,6 +359,7 @@ def main_vd():
                 return 1
 
             if vd.options.interactive:
+                vd.options.batch = False  #2639
                 vd.execAsync = lambda *args, vd=vd, **kwargs: visidata.VisiData.execAsync(vd, *args, **kwargs)
                 run()
         else:
@@ -369,7 +372,7 @@ def main_vd():
 
     saver_threads = [t for t in vd.unfinishedThreads if t.name.startswith('save_')]
     if saver_threads:
-        vd.printout('finishing %d savers' % len(saver_threads))
+        vd.printerr('finishing %d savers' % len(saver_threads))
         vd.sync(*saver_threads)
 
     vd._stdout.flush()
@@ -386,9 +389,12 @@ def vd_cli():
         if vd.options.debug:
             raise
     except FileNotFoundError as e:
-        print(e)
+        print(e, file=sys.stderr)
         if options.debug:
             raise
+    except Exception as e:
+        for l in stacktrace(): #show the stack trace without carets
+            print(l, file=sys.stderr)
 
     sys.stderr.flush()
     sys.stdout.flush()

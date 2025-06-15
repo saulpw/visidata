@@ -1,4 +1,4 @@
-from visidata import VisiData, Sheet, vd, options
+from visidata import VisiData, Sheet, vd
 
 
 vd.option('incr_base', 1.0, 'start value for column increments', replay=True)
@@ -7,9 +7,13 @@ vd.option('incr_base', 1.0, 'start value for column increments', replay=True)
 @VisiData.api
 def numrange(vd, n, step=1):
     'Generate n values, starting from options.incr_base and increasing by step for each number.'
-    base = type(step)(options.incr_base)
-    yield from (base+x*step for x in range(n))
+    base = type(step)(vd.options.incr_base)
+    yield from ((base+x)*step for x in range(n))
 
+
+def test_numrange(vd=None):
+    assert list(vd.numrange(5)) == [1,2,3,4,5]
+    assert list(vd.numrange(5, step=5)) == [5,10,15,20,25]  #2769
 
 @VisiData.api
 def num(vd, *args):

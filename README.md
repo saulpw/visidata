@@ -1,4 +1,4 @@
-# VisiData v3.1
+# VisiData v3.2
 
 [![Tests](https://github.com/saulpw/visidata/workflows/visidata-ci-build/badge.svg)](https://github.com/saulpw/visidata/actions/workflows/main.yml)
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/saulpw/visidata)
@@ -33,15 +33,8 @@ See [visidata.org/install](https://visidata.org/install) for detailed instructio
 
 ### Usage
 
-On Linux and OS/X
-
     $ vd <input>
     $ <command> | vd
-
-On Windows
-
-    $ visidata <input>
-    $ <command> | visidata
 
 Press `Ctrl+Q` to quit at any time.
 

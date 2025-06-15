@@ -1,8 +1,8 @@
-name	width	type	fmtstr	value	aggregators
-feature_OrderDate				2016-01-06	
-feature_Region				East	
-feature_Rep				Jones	
-feature_Item				Pencil	
-feature_Units				95	
-feature_Unit_Cost				1.99	
-feature_Total				189.05	
+name	width	type	fmtstr	value	aggregators	sortorder
+feature_OrderDate				2016-01-06		
+feature_Region				East		
+feature_Rep				Jones		
+feature_Item				Pencil		
+feature_Units				95		
+feature_Unit_Cost				1.99		
+feature_Total				189.05		

@@ -446,7 +446,7 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
     # autoload installed plugins first
     args_plugins_autoload = args.plugins_autoload if 'plugins_autoload' in args else True
     if not args.nothing and args_plugins_autoload and vd.options.plugins_autoload:
-        from importlib_metadata import entry_points  # a backport which supports < 3.8 https://github.com/pypa/twine/pull/732
+        from importlib.metadata import entry_points
         try:
             eps = entry_points()
             eps_visidata = eps.select(group='visidata.plugins') if 'visidata.plugins' in eps.groups else []
@@ -550,7 +550,7 @@ def setPersistentOptions(vd, **kwargs):
                 fp.write(f'options.{optname}={repr(optval)}\n')
 
 
-vd.option('visidata_dir', '~/.visidata/', 'directory to load and store additional files', sheettype=None)
+vd.option('visidata_dir', user_config_dir('visidata'), 'directory to load and store additional files', sheettype=None)
 
 BaseSheet.bindkey('^M', '^J')  # for windows ENTER
 

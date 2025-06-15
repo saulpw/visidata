@@ -22,7 +22,7 @@ vd.option('dir_hidden', False, 'load hidden files on DirSheet')
 @VisiData.api
 def guess_dir(vd, p):
     if p.is_dir():
-        return dict(filetype='dir')
+        return dict(filetype='dir', _likelihood=10)
 
 
 @VisiData.lazy_property
@@ -133,7 +133,7 @@ class DirSheet(Sheet):
         Column('filetype', width=0, cache='async', getter=lambda col,row: subprocess.Popen(['file', '--brief', row], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
     ]
     nKeys = 2
-    _ordering = [('modtime', True)]  # sort by reverse modtime initially
+    _ordering = [('modtime', True), ('filename', False)]  # sort by reverse modtime initially
 
     @staticmethod
     def colorOwner(sheet, col, row, val):

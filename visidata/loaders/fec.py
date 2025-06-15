@@ -106,22 +106,19 @@ class DiveSheet(Sheet):
                     self.addRow(item)
 
                 except Exception as e:
-                    vd.warning("Can't dive on lists with heterogenous item types.")
+                    vd.warning("Can't dive on lists with heterogeneous item types.")
                     return False
 
     def openRow(self, row):
         if self.is_keyvalue:
             cell = row["value"]
-            name = vd.joinSheetnames(self.name, row["key"])
-
             if isinstance(cell, (list, dict)):
-                vs = self.__class__(name, source = cell)
+                vs = self.__class__(self.name, row["key"], source = cell)
             else:
                 vd.warning("Nothing to dive into.")
                 return
         else:
-            name = vd.joinSheetnames(self.name, "row")
-            vs = self.__class__(name, source = self.row)
+            vs = self.__class__(self.name, "row", source = self.row)
 
         success = vs.reload()
         if success == False:
@@ -174,7 +171,7 @@ class FECScheduleSheet(Sheet):
 
         for schedule_name in self.source.keys():
             vs = FECItemizationSheet(
-                vd.joinSheetnames(self.name, schedule_name),
+                self.name, schedule_name,
                 schedule_name = schedule_name,
                 source = self.source[schedule_name],
                 size = len(self.source[schedule_name]),
@@ -225,7 +222,7 @@ class FECFiling(Sheet):
                 ] else dict
 
             vs = cls(
-                vd.joinSheetnames(self.name, component_name),
+                self.name, component_name,
                 component_name = component_name,
                 source = source_cls(),
                 size = 0,
@@ -270,7 +267,7 @@ class FECFiling(Sheet):
                 if form_type not in sheet_row.source:
                     sheet_row.source[form_type] = [ ] 
                     subsheet = FECItemizationSheet(
-                        vd.joinSheetnames(sheet_row.name, form_type),
+                        sheet_row.name, form_type,
                         schedule_name = form_type,
                         source = [ ],
                         size = 0,

@@ -11,7 +11,7 @@ from visidata.bezier import bezier
 vd.theme_option('disp_graph_labels', True, 'show axes and legend on graph')
 vd.theme_option('plot_colors', 'green red yellow cyan magenta white 38 136 168', 'list of distinct colors to use for plotting distinct objects')
 vd.theme_option('disp_canvas_charset', ''.join(chr(0x2800+i) for i in range(256)), 'charset to render 2x4 blocks on canvas')
-vd.theme_option('disp_pixel_random', False, 'randomly choose attr from set of pixels instead of most common')
+vd.theme_option('disp_graph_pixel_random', False, 'randomly choose attr from set of pixels instead of most common')
 vd.theme_option('disp_zoom_incr', 2.0, 'amount to multiply current zoomlevel when zooming')
 vd.theme_option('color_graph_hidden', '238 blue', 'color of legend for hidden attribute')
 vd.theme_option('color_graph_selected', 'bold', 'color of selected graph points')
@@ -258,7 +258,7 @@ class Plotter(BaseSheet):
         disp_canvas_charset += (256 - len(disp_canvas_charset)) * disp_canvas_charset[-1]
         if self.pixels:
             cursorBBox = self.plotterCursorBox
-            getPixelAttr = self.getPixelAttrRandom if self.options.disp_pixel_random else self.getPixelAttrMost
+            getPixelAttr = self.getPixelAttrRandom if self.options.disp_graph_pixel_random else self.getPixelAttrMost
 
             for char_y in range(0, self.plotheight//4):
                 for char_x in range(0, self.plotwidth//2):
@@ -304,8 +304,8 @@ class Plotter(BaseSheet):
             def _overlaps(a, b):
                 a_x1, _, a_txt, _, _ = a
                 b_x1, _, b_txt, _, _ = b
-                a_x2 = a_x1 + len(a_txt)
-                b_x2 = b_x1 + len(b_txt)
+                a_x2 = a_x1 + dispwidth(a_txt)
+                b_x2 = b_x1 + dispwidth(b_txt)
                 if a_x1 < b_x1 < a_x2 or a_x1 < b_x2 < a_x2 or \
                    b_x1 < a_x1 < b_x2 or b_x1 < a_x2 < b_x2:
                    return True
@@ -325,10 +325,10 @@ class Plotter(BaseSheet):
             for pix_x, pix_y, txt, attr, row in self.labels:
                 if attr in self.hiddenAttrs:
                     continue
-                if row is not None:
-                    pix_x -= len(txt)/2*2
                 char_y = int(pix_y/4)
                 char_x = int(pix_x/2)
+                if row is not None:
+                    char_x -= math.ceil(dispwidth(txt)/2)*2
                 o = (char_x, char_y, txt, attr, row)
                 _mark_overlap_text(labels_by_line[char_y], o)
 
@@ -356,6 +356,7 @@ class Canvas(Plotter):
     rightMarginPixels = 4*2
     topMarginPixels = 0*4
     bottomMarginPixels = 1*4  # reserve bottom line for x axis
+    guide = '# Canvas\n'
 
     def __init__(self, *names, **kwargs):
         self.left_margin = self.leftMarginPixels
@@ -384,6 +385,9 @@ class Canvas(Plotter):
     def reset(self):
         'clear everything in preparation for a fresh reload()'
         self.polylines.clear()
+        self.canvasBox = None
+        self.visibleBox = None
+        self.cursorBox = None
         self.left_margin = self.leftMarginPixels
         self.legends.clear()
         self.legendwidth = 0
@@ -727,7 +731,7 @@ class Canvas(Plotter):
     def plot_elements(self, invert_y=False):
         'plots points and lines and text onto the plotter'
 
-        self.resetBounds()
+        self.resetBounds(refresh=False)
 
         bb = self.visibleBox
         xmin, ymin, xmax, ymax = bb.xmin, bb.ymin, bb.xmax, bb.ymax

@@ -24,7 +24,7 @@
   - [ ] float type
   - [ ] date type
   - [ ] nested data
-    - [ ] list of homogenous values
+    - [ ] list of homogeneous values
     - [ ] dict (subrecord)
   - [ ] multiple sheets
   - [ ] non-ascii characters

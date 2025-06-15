@@ -5,18 +5,21 @@ import datetime
 from visidata.loaders import unzip_http
 
 from visidata import vd, VisiData, asyncthread, Sheet, Progress, Menu, options
-from visidata import ColumnAttr, Column, Path
+from visidata import ColumnAttr, Column, Path, filesize
 from visidata.type_date import date
 
 @VisiData.api
 def guess_zip(vd, p):
     if not p.is_url() and zipfile.is_zipfile(p.open_bytes()):
-        return dict(filetype='zip')
+        return dict(filetype='zip', _likelihood=10)
 
 @VisiData.api
 def guess_tar(vd, p):
+    # an empty file will pass is_tarfile(), but can't be opened by tarfile.open()
+    if filesize(p) == 0:
+        return None
     if tarfile.is_tarfile(p.open_bytes()):
-        return dict(filetype='tar')
+        return dict(filetype='tar', _likelihood=10)
 
 @VisiData.api
 def open_zip(vd, p):

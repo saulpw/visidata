@@ -1,7 +1,7 @@
 from copy import copy
 import itertools
 
-from visidata import vd, asyncthread, vlen, VisiData, Column, AttrColumn, Sheet, ColumnsSheet, ENTER, Fanout
+from visidata import vd, vlen, VisiData, Column, AttrColumn, Sheet, ColumnsSheet, ENTER, Fanout
 from visidata.pivot import PivotSheet, PivotGroupRow
 
 
@@ -60,12 +60,56 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
         return '+'.join(c.name for c in self.groupByCols)
 
     def selectRow(self, row):
-        self.source.select(row.sourcerows)     # select all entries in the bin on the source sheet
+        # Does not create an undo-operation for the select on the source rows. The caller should create undo-information itself.
+        self.source.select(row.sourcerows, add_undo=False)     # select all entries in the bin on the source sheet
         return super().selectRow(row)  # then select the bin itself on this sheet
 
     def unselectRow(self, row):
-        self.source.unselect(row.sourcerows)
+        self.source.unselect(row.sourcerows, add_undo=False)
         return super().unselectRow(row)
+
+    def addUndoSelection(self):
+        self.source.addUndoSelection()
+        super().addUndoSelection()
+
+    # override Sheet operations that handle multiple rows:
+    #     select(), unselect(), and toggle()
+    # to make undo more efficient. Without this optimization, the memory
+    # use for the undo-tracking on the source sheet is O(n^2) in the number
+    # of bins selected, which can easily exceed all available memory.
+    def select(self, rows, status=True, progress=True, add_undo=True):
+        if add_undo:
+            self.addUndoSelection()
+        super().select(rows, status, progress, add_undo=False)
+
+    def unselect(self, rows, status=True, progress=True, add_undo=True):
+        if add_undo:
+            self.addUndoSelection()
+        super().unselect(rows, status, progress, add_undo=False)
+
+    def toggle(self, rows, add_undo=True):
+        'Toggle selection of given *rows* and corresponding rows in source sheet.'
+        if add_undo:
+            self.addUndoSelection()
+        super().toggle(rows, add_undo=False)
+
+    def select_row(self, row, add_undo=True):
+        'Add single *row* to set of selected rows, and corresponding rows in source sheet.'
+        if add_undo:
+            self.addUndoSelection()
+        super().select_row(row, add_undo=False)
+
+    def unselect_row(self, row, add_undo=True):
+        'Remove single *row* from set of selected rows, and remove corresponding rows in source sheet.'
+        if add_undo:
+            self.addUndoSelection()
+        super().unselect_row(row, add_undo=False)
+
+    def toggle_row(self, row, add_undo=True):
+        'Toggle selection of given *row* and of corresponding rows in source sheet.'
+        if add_undo:
+            self.addUndoSelection()
+        super().toggle_row(row, add_undo=False)
 
     def resetCols(self):
         super().resetCols()

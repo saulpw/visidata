@@ -25,3 +25,4 @@ class TransposeSheet(Sheet):
 Sheet.addCommand('T', 'transpose', 'vd.push(TransposeSheet(name+"_T", source=sheet))', 'open new sheet with rows and columns transposed')
 
 vd.addMenuItems('Data > Transpose > transpose')
+vd.addGlobals(TransposeSheet=TransposeSheet)

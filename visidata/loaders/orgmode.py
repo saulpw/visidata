@@ -55,8 +55,8 @@ def encode_date(dt=None):
 
 
 class OrgContentsColumn(Column):
-    def setValue(self, row, v):
-        super().setValue(row, v)
+    def setValue(self, row, v, setModified=True):
+        super().setValue(row, v, setModified=setModified)
         orgmode_parse_into(row, v)
 
     def putValue(self, row, v):
@@ -88,6 +88,7 @@ def sectionize(lines):
 
 def orgmode_parse(all_lines):
     root = parent = OrgSheet().newRow()
+    root.orig_contents = ''
     for linenum, lines in sectionize(all_lines):
         section = OrgSheet().newRow()
 

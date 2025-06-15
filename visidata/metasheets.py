@@ -38,8 +38,8 @@ Other commands (not specific to Columns Sheet):
         'passthrough to the value on the source cursorRow'
         def calcValue(self, srcCol):
             return srcCol.getDisplayValue(srcCol.sheet.cursorRow)
-        def setValue(self, srcCol, val):
-            srcCol.setValue(srcCol.sheet.cursorRow, val)
+        def setValue(self, srcCol, val, setModified=True):
+            srcCol.setValue(srcCol.sheet.cursorRow, val, setModified=setModified)
 
     columns = [
             ColumnAttr('sheet', type=str),
@@ -134,7 +134,7 @@ globalCommand('gC', 'columns-all', 'vd.push(vd.allColumnsSheet)', 'open Columns 
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))', 'open Columns Sheet: edit column properties for current sheet')
 
 # used ColumnsSheet, affecting the 'row' (source column)
-ColumnsSheet.addCommand('g!', 'key-selected', 'for c in onlySelectedRows: c.sheet.setKeys([c])', 'toggle selected source columns as key columns')
+ColumnsSheet.addCommand('g!', 'key-selected', 'for c in onlySelectedRows: c.sheet.setKeys([c])', 'set selected source columns as key columns')
 ColumnsSheet.addCommand('gz!', 'key-off-selected', 'for c in onlySelectedRows: c.sheet.unsetKeys([c])', 'unset selected source columns as key columns')
 
 ColumnsSheet.addCommand('g-', 'hide-selected', 'onlySelectedRows.hide()', 'hide selected source columns')
