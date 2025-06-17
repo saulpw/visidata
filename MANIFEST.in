@@ -1,5 +1,6 @@
 include README.md
 include LICENSE.gpl3
+include requirements.txt
 include visidata/man/vd.1
 include visidata/man/vd.txt
 include visidata/man/visidata.1
