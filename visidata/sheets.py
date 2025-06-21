@@ -290,7 +290,7 @@ class TableSheet(BaseSheet):
         pass
 
     def resetCols(self):
-        'Reset columns to class settings'
+        'Reset columns to class settings or constructor settings'
         self.columns = []
         for c in self.initialCols:
             self.addColumn(deepcopy(c))
@@ -1183,8 +1183,15 @@ def preloadHook(sheet):
 
 @VisiData.api
 def newSheet(vd, name, ncols, **kwargs):
-    return Sheet(name, columns=[SettableColumn(width=vd.options.default_width) for i in range(ncols)], **kwargs)
-
+    #use temporary column names until we have the sheet object that can assign names and keep track of them
+    rename_cols = [SettableColumn(width=vd.options.default_width, name=f'name{i}') for i in range(ncols)]
+    vs = Sheet(name, columns=rename_cols, **kwargs)
+    # For TableSheet, we cannot change colnames using setName() on vs.columns[i],
+    # because later in reload(), TableSheet.resetCols() recopies the names from the original
+    # column objects. So we have to run setName() on the original column objects.
+    for c in rename_cols:
+        c.setName(vs.incremented_colname())
+    return vs
 
 @BaseSheet.api
 def quitAndReleaseMemory(vs):

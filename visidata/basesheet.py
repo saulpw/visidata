@@ -126,6 +126,7 @@ class BaseSheet(DrawablePane):
         self.rows = rows      # list of opaque objects
         self._scr = None
         self.hasBeenModified = False
+        self.colname_ctr = 0
 
         super().__init__(**kwargs)
 
@@ -302,6 +303,10 @@ class BaseSheet(DrawablePane):
         'Return formatted string with *sheet* and *vd* accessible to expressions.  Missing expressions return empty strings instead of error.'
         return MissingAttrFormatter().format(fmt, sheet=self, vd=vd, **kwargs)
 
+    def incremented_colname(self):
+        vd.addUndo(setattr, self, 'colname_ctr', self.colname_ctr)
+        self.colname_ctr += 1
+        return to_excel(self.colname_ctr)
 
 
 @VisiData.api
@@ -348,3 +353,17 @@ def getSheet(vd, sheetname):
         vs.reload()
         vs.vd = vd
         return vs
+
+# credit to https://stackoverflow.com/questions/48983939/convert-a-number-to-excel-s-base-26/48984697#48984697
+def divmod_excel(n):
+    a, b = divmod(n, 26)
+    if b == 0:
+        return a - 1, b + 26
+    return a, b
+def to_excel(num):
+    '''*num* of 1, 2, 3... gives A B C .. Z AA AB .. ZZ AAA .. to infinity; *num* of 0 returns the empty string'''
+    chars = []
+    while num > 0:
+        num, d = divmod_excel(num)
+        chars.append('-ABCDEFGHIJKLMNOPQRSTUVWXYZ'[d])
+    return ''.join(reversed(chars))

@@ -40,21 +40,11 @@ class DisplayWrapper:
     def __eq__(self, other):
         return self.value == other
 
-def _default_colnames():
-    'A B C .. Z AA AB .. ZZ AAA .. to infinity'
-    i=0
-    while True:
-        i += 1
-        for x in itertools.product(string.ascii_uppercase, repeat=i):
-            yield ''.join(x)
-
-default_colnames = _default_colnames()
-
 
 class Column(Extensible):
     '''Base class for all column types.
 
-        - *name*: name of this column.
+        - *name*: name of this column; if None, current sheet will assign a name
         - *type*: ``anytype str int float date`` or other type-like conversion function.
         - *cache*: cache behavior
 
@@ -71,7 +61,10 @@ class Column(Extensible):
     def __init__(self, name=None, *, type=anytype, cache=False, **kwargs):
         self.sheet = ExplodingMock('use addColumn() on all columns')  # owning Sheet, set in .recalc() via Sheet.addColumn
         if name is None:
-            name = next(default_colnames)
+            if vd.sheet: # get a column name from the current sheet
+                name = vd.sheet.incremented_colname()
+            else:
+                name = ''
         self.name = str(name) # display visible name
         self.fmtstr = ''      # by default, use str()
         self._type = type     # anytype/str/int/float/date/func
