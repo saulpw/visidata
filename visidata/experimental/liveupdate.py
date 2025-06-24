@@ -42,4 +42,4 @@ def addcol_expr(sheet):
 
 
 Sheet.addCommand(None, 'addcol-expr', 'sheet.addcol_expr()', "create new column from Python expression, updating the column's calculated values live")
-Sheet.addCommand(None, 'addcol-new', 'c=addColumnAtIndex(SettableColumn(width=options.default_width)); draw(sheet._scr); cursorVisibleColIndex=visibleCols.index(c); c.name=editCell(cursorVisibleColIndex, -1); c.width=None', 'append new column, updating the column name live')
+Sheet.addCommand(None, 'addcol-new', 'c=addColumnAtCursor(SettableColumn(name="", width=options.default_width)); draw(sheet._scr); cursorVisibleColIndex=visibleCols.index(c); c.name=editCell(cursorVisibleColIndex, -1); c.width=None', 'append new column, updating the column name live')
