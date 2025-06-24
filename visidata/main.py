@@ -49,6 +49,8 @@ def eval_vd(logpath, *args, **kwargs):
         vs = vd.openSource(src, filetype='vdj')
     else:
         vs = vd.openSource(src, filetype=src.ext)
+    # add a row in place of the sheet creation command that undo() expects as the first command
+    vs.cmdlog_sheet.addRow(vs.cmdlog_sheet.newRow(sheet=None, row='', keystrokes='', input='', longname='no-op', undofuncs=[]))
     vs.name += '_vd'
     vd.sync(vs.reload())
     vs.vd = vd
