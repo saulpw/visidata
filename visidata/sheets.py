@@ -706,12 +706,15 @@ class TableSheet(BaseSheet):
         self.rightVisibleColIndex = vcolidx
 
     def calcSingleColLayout(self, col:Column, vcolidx:int, x:int=0, minColWidth:int=4):
-            if col.width is None and len(self.visibleRows) > 0:
+            if col.width is None:
+              if len(self.visibleRows) > 0:
                 vrows = self.visibleRows if self.nRows > 1000 else self.rows[:1000]  #1964
                 # handle delayed column width-finding
                 col.width = max(col.getMaxWidth(vrows), minColWidth)
                 if vcolidx < self.nVisibleCols-1:  # let last column fill up the max width
                     col.width = min(col.width, self.options.default_width)
+              else:
+                  col.width = self.options.default_width
 
             width = col.width if col.width is not None else self.options.default_width
 
