@@ -465,21 +465,17 @@ class Column(Extensible):
         return vd.status('set %d cells to %d values' % (len(rows), len(values)))
 
     def getMaxWidth(self, rows):
-        'Return the maximum length of any cell in column or its header (up to window width).'
-        w = 0
+        'Return the maximum length of any cell in column or its header (up to drawable window width).'
+        drawable_width = self.sheet.windowWidth-1
         nlen = dispwidth(self.name)
-        if len(rows) > 0:
-            w_max = 0
-            for r in rows:
-                row_w = dispwidth(self.getDisplayValue(r), maxwidth=self.sheet.windowWidth)
-                if w_max < row_w:
-                    w_max = row_w
-                if w_max >= self.sheet.windowWidth:
-                    break  #1747  early out to speed up wide columns
-            w = w_max
-        w = max(w, nlen)+2
-        w = min(w, self.sheet.windowWidth-1)
-        return w
+        w_max = nlen
+        for r in rows:
+            row_w = dispwidth(self.getDisplayValue(r), maxwidth=drawable_width)
+            if w_max < row_w:
+                w_max = row_w
+            if w_max >= self.sheet.windowWidth:
+                break  #1747  early out to speed up wide columns
+        return min(w_max+2, drawable_width)
 
 
 
