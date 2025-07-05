@@ -243,7 +243,9 @@ class Column(Extensible):
         return self.make_formatter()(*args, **kwargs)
 
     def formatValue(self, typedval, width=None):
-        'Return displayable string of *typedval* according to ``Column.fmtstr``.'
+        '''Return displayable string of *typedval* according to ``Column.fmtstr``.
+        If *width* is not None, values are clipped to that width when *typedval*
+        is a dict/list/tuple, but not for other types.'''
         if typedval is None:
             return None
 
@@ -359,7 +361,8 @@ class Column(Extensible):
         return ret
 
     def getCell(self, row):
-        'Return DisplayWrapper for displayable cell value.'
+        '''Return DisplayWrapper for displayable cell value.
+        For dict/list/tuple cells, the width of the value returned is capped at the column width.'''
         cellval = wrapply(self.getValue, row)
         typedval = wrapply(self.type, cellval)
 
@@ -421,7 +424,8 @@ class Column(Extensible):
         return dw
 
     def getDisplayValue(self, row):
-        'Return string displayed in this column for given *row*.'
+        '''Return string displayed in this column for given *row*.
+        For dict/list/tuple cells, the width of the display value returned is capped at the column width.'''
         return self.getCell(row).text
 
     def putValue(self, row, val):
