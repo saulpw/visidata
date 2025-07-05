@@ -463,13 +463,31 @@ class Column(Extensible):
         nlen = dispwidth(self.name)
         w_max = nlen
         for r in rows:
-            row_w = dispwidth(self.getDisplayValue(r), maxwidth=drawable_width)
+            row_w = self.measureValueWidthCapped(r, maxwidth=drawable_width)
             if w_max < row_w:
                 w_max = row_w
             if w_max >= self.sheet.windowWidth:
                 break  #1747  early out to speed up wide columns
         return min(w_max+2, drawable_width)
 
+    def measureValueWidthCapped(self, row, maxwidth=None):
+        '''Measure the width of the contents of a cell. Stop measuring at *maxwidth*,
+           to save time iterating over very long dict/list/tuple values.
+           If *maxwidth* is None, return the full width.'''
+        # The value classification logic here is taken from getCell,
+        # modified to cap the width examined for any dict/list/tuple
+        cellval = wrapply(self.getValue, row)
+        typedval = wrapply(self.type, cellval)
+        if isinstance(typedval, (TypedWrapper, threading.Thread)):
+            return dispwidth(self.getCell(row).text, maxwidth=maxwidth)
+        try:
+            text = self.format(typedval, width=maxwidth) or ''
+        except Exception as e:  # formatting failure
+            try:
+                text = str(cellval)
+            except Exception as e:
+                text = str(e)
+        return dispwidth(text, maxwidth=maxwidth)
 
 
 # ---- basic Columns
