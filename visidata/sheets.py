@@ -1212,6 +1212,10 @@ def async_deepcopy(sheet, rowlist):
 
 BaseSheet.init('pane', lambda: 1)
 
+@BaseSheet.api
+def calcColLayout(sheet):
+    pass  #2790
+
 
 BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); reload()', 'Reload current sheet')
 Sheet.addCommand('', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line')
