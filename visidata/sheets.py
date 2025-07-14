@@ -722,10 +722,15 @@ class TableSheet(BaseSheet):
         self.rightVisibleColIndex = vcolidx
 
     def calcSingleColLayout(self, col:Column, vcolidx:int, x:int=0, minColWidth:int=4):
-            if col.width is None and len(self.visibleRows) > 0:
-                vrows = self.visibleRows if self.nRows > 1000 else self.rows[:1000]  #1964
+            # We use a slice of rows that is similar to self.visibleRows but simpler,
+            # and larger. The goal is to avoid using nFooterRows. Because nFooterRows
+            # cannot in general be calculated properly until after calcColLayout() has
+            # determined which columns are visible.
+            vrows = self.rows[self.topRowIndex:self.topRowIndex+self.windowHeight]
+            if col.width is None and len(vrows) > 0:
+                measure_rows = vrows if self.nRows > 1000 else self.rows[:1000]  #1964
                 # handle delayed column width-finding
-                col.width = max(col.getMaxWidth(vrows), minColWidth)
+                col.width = max(col.getMaxWidth(measure_rows), minColWidth)
                 if vcolidx < self.nVisibleCols-1:  # let last column fill up the max width
                     col.width = min(col.width, self.options.default_width)
 
