@@ -656,20 +656,30 @@ class TableSheet(BaseSheet):
         elif self.topRowIndex > self.nRows-1:
             self.topRowIndex = self.nRows-1
 
+        self.adjustColLayout()
+
+        # calculations that rely on nScreenRows, like bottomRowIndex, need to be done after
+        # col layout has been adjusted. nScreenRows requires an accurate count of
+        # allAggregators, which requires knowing col visibility.
         # check bounds, scroll if necessary
         if self.topRowIndex > self.cursorRowIndex:
             self.topRowIndex = self.cursorRowIndex
         elif self.bottomRowIndex < self.cursorRowIndex:
             self.bottomRowIndex = self.cursorRowIndex
 
-        if self.cursorCol and self.cursorCol.keycol:
-            return
-
-        if self.leftVisibleColIndex >= self.cursorVisibleColIndex:
+    def adjustColLayout(self):
+        '''Move the left visible column to try to keep the cursorCol visible.
+        though the cursorCol cannot be visible when screen is totally filled by keycols.
+        Run calcColLayout() at least once.'''
+        # jumping to a column left of the previously on-screen columns:   put cursorCol as leftmost col
+        # jumping to a column right of the previously on-screen columns:  put cursorCol as far right as possible
+        if self.leftVisibleColIndex > self.cursorVisibleColIndex:        #jumping/moving left
             self.leftVisibleColIndex = self.cursorVisibleColIndex
+            self.calcColLayout()
         else:
             while True:
                 if self.leftVisibleColIndex == self.cursorVisibleColIndex:  # not much more we can do
+                    self.calcColLayout()
                     break
                 self.calcColLayout()
                 if not self._visibleColLayout:
@@ -688,7 +698,8 @@ class TableSheet(BaseSheet):
                 self.leftVisibleColIndex += 1  # once within the bounds, walk over one column at a time
 
     def calcColLayout(self):
-        'Set right-most visible column, based on calculation.'
+        '''Set right-most visible column, based on calculation.
+        Assign x coordinates and width to every column that fits on screen, visible or hidden.'''
         minColWidth = dispwidth(self.options.disp_more_left)+dispwidth(self.options.disp_more_right)+2
         sepColWidth = dispwidth(self.options.disp_column_sep)
         winWidth = self.windowWidth
