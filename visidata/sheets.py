@@ -689,7 +689,6 @@ class TableSheet(BaseSheet):
 
     def calcColLayout(self):
         'Set right-most visible column, based on calculation.'
-        vd.clearCaches()
         minColWidth = dispwidth(self.options.disp_more_left)+dispwidth(self.options.disp_more_right)+2
         sepColWidth = dispwidth(self.options.disp_column_sep)
         winWidth = self.windowWidth
@@ -798,8 +797,6 @@ class TableSheet(BaseSheet):
         'Return dict of aggname -> list of cols with that aggregator.'
         allaggs = collections.defaultdict(list) # aggname -> list of cols with that aggregator
         for vcolidx, (x, colwidth) in sorted(self._visibleColLayout.items()):
-            if vcolidx >= len(self.availCols):
-                break  #2607 #2763
             col = self.availCols[vcolidx]
             if not col.hidden:
                 for aggr in col.aggregators:
@@ -1163,8 +1160,8 @@ def confirmQuit(vs, verb='quit'):
 def preloadHook(sheet):
     'Override to setup for reload().'
     sheet.confirmQuit('reload')
+
     sheet.hasBeenModified = False
-    sheet.calcColLayout()
 
 
 @VisiData.api
@@ -1226,10 +1223,6 @@ def reload_or_replace(sheet):
 
 
 BaseSheet.init('pane', lambda: 1)
-
-@BaseSheet.api
-def calcColLayout(sheet):
-    pass  #2790
 
 
 BaseSheet.addCommand('^R', 'reload-sheet', 'reload_or_replace()', 'Reload current sheet')
