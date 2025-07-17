@@ -49,7 +49,6 @@ def hide_uniform_cols(sheet):
             if i <= idx:
                 sheet.cursorRight(-1)
             col.hide()
-            Sheet.clear_all_caches()  #2578
 
 Sheet.addCommand('_', 'resize-col-max', 'if cursorCol: cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'toggle width of current column between full and default width')
 Sheet.addCommand('z_', 'resize-col-input', 'width = int(input("set width= ", value=cursorCol.width)); cursorCol.setWidth(width)', 'adjust width of current column to N')
