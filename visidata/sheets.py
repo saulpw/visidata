@@ -722,6 +722,9 @@ class TableSheet(BaseSheet):
         self.rightVisibleColIndex = vcolidx
 
     def calcSingleColLayout(self, col:Column, vcolidx:int, x:int=0, minColWidth:int=4):
+            '''Return the width, for key columns, or for columns that are rightward of
+            the leftmost visibleCol, even if they are offscreen or hidden. Return
+            None for columns left of cursorVisibleColIndex, if they are not key columns.'''
             # We use a slice of rows that is similar to self.visibleRows but simpler,
             # and larger. The goal is to avoid using nFooterRows. Because nFooterRows
             # cannot in general be calculated properly until after calcColLayout() has
@@ -740,10 +743,11 @@ class TableSheet(BaseSheet):
             if vcolidx >= self.nVisibleCols and vcolidx == self.cursorVisibleColIndex:
                 width = self.options.default_width
 
+            #subtract 1 character of empty space from windowWidth, for the margin to the right of the sheet
+            width = min(width, self.windowWidth-x-1)
             width = max(width, 1)
             if col in self.keyCols or vcolidx >= self.leftVisibleColIndex:  # visible columns
-                #subtract 1 character of empty space from windowWidth, for the margin to the right of the sheet
-                self._visibleColLayout[vcolidx] = [x, max(min(width, self.windowWidth-x-1), 1)]
+                self._visibleColLayout[vcolidx] = [x, width]
                 return width
 
 
