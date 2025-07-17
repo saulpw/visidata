@@ -673,29 +673,36 @@ class TableSheet(BaseSheet):
         Run calcColLayout() at least once.'''
         # jumping to a column left of the previously on-screen columns:   put cursorCol as leftmost col
         # jumping to a column right of the previously on-screen columns:  put cursorCol as far right as possible
-        if self.leftVisibleColIndex > self.cursorVisibleColIndex:        #jumping/moving left
+        if self.leftVisibleColIndex > self.cursorVisibleColIndex:        # e.g. when jumping/moving left
             self.leftVisibleColIndex = self.cursorVisibleColIndex
-            self.calcColLayout()
-        else:
-            while True:
-                if self.leftVisibleColIndex == self.cursorVisibleColIndex:  # not much more we can do
-                    self.calcColLayout()
-                    break
+        elif self.leftVisibleColIndex < self.cursorVisibleColIndex:      # e.g. when jumping/moving right
+            #move leftVisibleCol until the cursor column fits fully on screen
+            while self.leftVisibleColIndex < self.cursorVisibleColIndex:  #ensures termination even if screen is completely filled by keycols
                 self.calcColLayout()
                 if not self._visibleColLayout:
                     break
+
+                # If the cursor is outside the visible columns currently laid out (1 window wide).
+                # One way to trigger this is with zc, jump to a column never seen yet.
                 mincolidx, maxcolidx = min(self._visibleColLayout.keys()), max(self._visibleColLayout.keys())
                 if self.cursorVisibleColIndex < mincolidx:
-                    self.leftVisibleColIndex -= max((self.cursorVisibleColIndex - mincolidx)//2, 1)
-                    continue
+                    # This case is expected never to occur. _visibleColLayout keys are enumerated from 0,
+                    # so mincolidx is always 0. and cursorVisibleColIndex is kept >= 0 (by checkCursor).
+                    self.leftVisibleColIndex = self.cursorVisibleColIndex
+                    break
                 elif self.cursorVisibleColIndex > maxcolidx:
-                    self.leftVisibleColIndex += max((maxcolidx - self.cursorVisibleColIndex)//2, 1)
+                    # some cases:  1) jumping rightward, so cursor has just moved to a column that is offscreen to the right
+                    #              2) when keycols fill entire screen
+                    self.leftVisibleColIndex += 1
                     continue
 
                 cur_x, cur_w = self._visibleColLayout[self.cursorVisibleColIndex]
                 if cur_x+cur_w < self.windowWidth-1:  # current columns fit entirely on screen
                     break
                 self.leftVisibleColIndex += 1  # once within the bounds, walk over one column at a time
+
+        if self.leftVisibleColIndex == self.cursorVisibleColIndex:  #will happen after cursor: jumped left, jumped right, or stayed in place
+            self.calcColLayout()
 
     def calcColLayout(self):
         '''Set right-most visible column, based on calculation.
