@@ -37,7 +37,8 @@ class ColorSheet(Sheet):
                 break
             if r is self.cursorRow:
                 s = f'█[{fg:3}]█'
-            scr.addstr(y, x, s, colors[colorstr].attr)
+            if x+len(s) < self.windowWidth-1:
+                scr.addstr(y, x, s, colors[colorstr].attr)
 
 
 BaseSheet.addCommand(None, 'open-colors', 'vd.push(vd.colorsSheet)', 'open Color Sheet with available terminal colors')
