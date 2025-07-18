@@ -67,5 +67,6 @@ run_silent_unless_error "PYTHONPATH=. bin/vd <(seq 10000) --overwrite=False --ba
 
 echo '=== git diffs for BUILD FAILURE ==='
 git --no-pager diff --numstat tests/
-git --no-pager diff --exit-code tests/
+git --no-pager diff --exit-code tests/; git_diff_exit_code="$?"
 echo '=============================================='
+exit "$git_diff_exit_code"
