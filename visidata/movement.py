@@ -84,9 +84,12 @@ def moveToNextRow(vs, func, reverse=False, msg='no different value up this colum
 def visibleWidth(self):
     'Width of column as is displayed in terminal'
     vcolidx = self.sheet.visibleCols.index(self)
-    if vcolidx not in self.sheet._visibleColLayout:
-        self.sheet.calcSingleColLayout(vcolidx)
-    return self.sheet._visibleColLayout[vcolidx][1]
+    if vcolidx in self.sheet._visibleColLayout:
+        w = self.sheet._visibleColLayout[vcolidx][1]
+    else:  #this case should never happen in normal use
+        #the width can be inaccurate if the column is not at x=0
+        w = self.sheet.calcSingleColLayout(vcolidx)
+    return w
 
 
 Sheet.addCommand(None, 'go-left',  'cursorRight(-1)', 'go left', replay=False)

@@ -714,9 +714,11 @@ class TableSheet(BaseSheet):
         vcolidx = 0
         for vcolidx, col in enumerate(self.availCols):
             width = self.calcSingleColLayout(col, vcolidx, x, minColWidth)
-            if width:
-                x += width+sepColWidth
-            if x > winWidth-1:
+            if width is not None:
+                if x < winWidth-1:
+                    self._visibleColLayout[vcolidx] = [x, width]
+                    x += width+sepColWidth
+            if x >= winWidth-1:
                 break
 
         self.rightVisibleColIndex = vcolidx
@@ -747,7 +749,6 @@ class TableSheet(BaseSheet):
             width = min(width, self.windowWidth-x-1)
             width = max(width, 1)
             if col in self.keyCols or vcolidx >= self.leftVisibleColIndex:  # visible columns
-                self._visibleColLayout[vcolidx] = [x, width]
                 return width
 
 
