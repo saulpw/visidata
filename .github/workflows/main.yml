@@ -40,12 +40,14 @@ jobs:
     - name: Ensure VisiData can load a dir
       run: vd . --batch
 
-    - name: Install lxml dependencies
-      run: sudo apt install -y libxml2-dev libxslt-dev
-
-    - name: Install ping dependencies
-      run: sudo apt install -y traceroute
-
+# Apt packages are slow to install, often taking up to a minute.
+# lxml dependencies are unneeded when installing lxml via pip
+#    - name: Install lxml dependencies
+#      run: sudo apt install -y libxml2-dev libxslt-dev
+# only needed for testing open-ping, which isn't tested currently anyway
+#    - name: Install ping dependencies
+#      run: sudo apt install -y traceroute
+#
     - name: Install optional dependencies
       run: |
         pip3 install ".[test]"
