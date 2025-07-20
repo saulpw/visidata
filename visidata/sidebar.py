@@ -111,7 +111,7 @@ def drawSidebar(vd, scr, sheet):
     bottommsg = ''
     overflowmsg = '[:reverse] Ctrl+P to view all status messages [/]'
     try:
-        if not sidebar and vd.options.disp_sidebar and vd.disp_help >= 0:
+        if not sidebar and vd.options.disp_sidebar and vd.disp_help >= 0 and sheet.help_sidebars:
             sidebar, title = sheet.help_sidebars[vd.disp_help%len(sheet.help_sidebars)]()
 
 #            bottommsg = sheet.formatString('[:onclick sidebar-toggle][:reverse] {help.commands.sidebar_toggle} [:]', help=sheet.formatter_helpstr)
