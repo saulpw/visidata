@@ -30,6 +30,7 @@ nonTested = (
         'breakpoint',
         'redraw',
         'menu',
+        'sysedit',
         'sysopen',
         'open-memusage',
         )
