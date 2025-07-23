@@ -171,7 +171,7 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
 
         #if the next character will fit
         if w+chlen <= dispw:
-            ret += c
+            ret += newc
             w += chlen
             #move the truncation spot forward only when the truncation character can fit
             if w+trunchlen <= dispw:
