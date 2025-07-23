@@ -103,6 +103,19 @@ class TestClipText:
         assert clips == clippeds
         assert clipw == clippedw
 
+    @pytest.mark.parametrize('s, w, truncator, clippeds, clippedw', [
+        ('first\nsecond\n\nthird\n\n\n', 22, '',  'first·second··third···', 22),
+        ('first\nsecond\n\nthird\n\n\n', 22, '…', 'first·second··third···', 22),
+        ('first\nsecond\n\nthird\n\n\n', 21, '',  'first·second··third··', 21),
+        ('first\nsecond\n\nthird\n\n\n', 21, '…', 'first·second··third·…', 21),
+        (''.join([chr(i) for i in range(256)]), 256, '',
+            '································ !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~··································¡¢£¤¥¦§¨©ª«¬\xad®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ', 256),
+    ])
+    def test_clipstr_unprintable(self, s, w, truncator, clippeds, clippedw):
+        clips, clipw = visidata.clipstr(s, w, truncator=truncator, oddspace='·')
+        assert clips == clippeds
+        assert clipw == clippedw
+
     @pytest.mark.parametrize('s, w, clippeds, clippedw', [
         ('b to', 4, 'b to', 4),
         ('abcde', 8, 'abcde', 5),
