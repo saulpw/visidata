@@ -102,7 +102,7 @@ class FormCanvas(BaseSheet):
 @functools.wraps(VisiData.confirm)
 @VisiData.api
 def confirm(vd, prompt, exc=EscapeException):
-    'Display *prompt* on status line and demand input that starts with "Y" or "y" to proceed.  Raise *exc* otherwise.  Return True.'
+    'Display *prompt* on status line and demand input that starts with "Y" or "y" to proceed. Return True when proceeding, otherwise raise *exc*, or if *exc* is falsy, return False'
     if vd.options.batch:
         return vd.fail('cannot confirm in batch mode: ' + prompt)
 
@@ -115,10 +115,11 @@ def confirm(vd, prompt, exc=EscapeException):
     ])
 
     ret = FormCanvas(source=form).run(vd.scrFull)
-    if not ret:
-        raise exc('')
-    yn = ret['yn'][:1]
-    if not yn or yn not in 'Yy':
+    confirmed = False  # default is to disconfirm, if user exited the confirmation via: Esc ^C ^Q q
+    if ret:
+        yn = ret['yn'][:1]
+        confirmed = yn and yn in 'Yy'
+    if not confirmed:
         msg = 'disconfirmed: ' + prompt
         if exc:
             raise exc(msg)
