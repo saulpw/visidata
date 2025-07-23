@@ -57,7 +57,7 @@ Sheet.addCommand('g_', 'resize-cols-max', 'for c in visibleCols: c.toggleWidth(c
 Sheet.addCommand('gz_', 'resize-cols-input', 'width = int(input("set width= ", value=cursorCol.width)); Fanout(visibleCols).setWidth(width)', 'adjust widths of all visible columns to N')
 
 Sheet.addCommand('-', 'hide-col', 'hide_col(cursorCol)', 'hide the current column')
-Sheet.addCommand('z-', 'resize-col-half', 'cursorCol.setWidth(cursorCol.width//2)', 'reduce width of current column by half')
+Sheet.addCommand('z-', 'resize-col-half', 'width = cursorCol.width if cursorCol.width is not None else options.default_width; cursorCol.setWidth(width//2)', 'reduce width of current column by half')
 Sheet.addCommand('g-', 'hide-uniform-cols', 'sheet.hide_uniform_cols()', 'hide any column that has multiple rows but only one distinct value')
 
 Sheet.addCommand('gv', 'unhide-cols', 'unhide_cols(columns, visibleRows)', 'unhide all hidden columns on current sheet')
