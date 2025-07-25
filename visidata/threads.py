@@ -270,6 +270,27 @@ def asyncsingle(func):
     _execAsync.searchThread = None
     return _execAsync
 
+def asyncsingle_queue(func):
+    '''Function decorator like `@asyncthread` but as a singleton.  When called, `func(...)` spawns a new thread, and waits for the end of any previous thread still running *func*.
+    ``vd.sync()`` does wait for unfinished asyncsingle_queue threads, which is an important difference from asyncsingle.
+    '''
+    @functools.wraps(func)
+    def _execAsync(*args, **kwargs):
+        def _func(*args, **kwargs):
+            func(*args, **kwargs)
+            _execAsync.searchThread = None
+            # end of thread
+
+        # cancel previous thread if running
+        if _execAsync.searchThread:
+            vd.sync(_execAsync.searchThread)
+
+        _func.__name__ = func.__name__ # otherwise, the the thread's name is '_func'
+
+        _execAsync.searchThread = vd.execAsync(_func, *args, **kwargs)
+    _execAsync.searchThread = None
+    return _execAsync
+
 @VisiData.property
 def unfinishedThreads(self):
     'A list of unfinished threads (those without a recorded `endTime`).'
@@ -465,6 +486,7 @@ vd.addGlobals({
     'Progress': Progress,
     'asynccache': asynccache,
     'asyncsingle': asyncsingle,
+    'asyncsingle_queue': asyncsingle_queue,
     'asyncignore': asyncignore,
 })
 
