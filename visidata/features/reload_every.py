@@ -1,7 +1,7 @@
 import os
 import time
 
-from visidata import vd, BaseSheet, Sheet, asyncignore, asyncthread, Path, ScopedSetattr
+from visidata import vd, BaseSheet, Sheet, asyncignore, asyncthread, asyncsingle_queue, Path, ScopedSetattr
 
 
 @BaseSheet.api
@@ -33,9 +33,9 @@ def reload_modified(sheet):
 
 
 @Sheet.api
-@asyncthread
+@asyncsingle_queue
 def reload_rows(self):
-    'Reload rows from ``self.source``, keeping current columns intact.  Async.'
+    '''Reload rows from ``self.source``, keeping current columns intact.  Async. If previous calls are running, waits for them to finish.'''
     with (ScopedSetattr(self, 'loading', True),
           ScopedSetattr(self, 'checkCursor', lambda: True),
           ScopedSetattr(self, 'cursorRowIndex', self.cursorRowIndex)):
