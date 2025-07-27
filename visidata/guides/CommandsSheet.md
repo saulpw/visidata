@@ -8,6 +8,7 @@ Start typing a command longname or keyword in its helpstring.
 
 - [:code]Enter[/] to execute top command.
 - [:code]Tab[/] to highlight top command and provide a numeric jumplist.
+- [:code]PgUp[/]/[:code]PgDn[/] to scroll through commands.
 
 When a command is highlighted:
 
