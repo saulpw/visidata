@@ -101,11 +101,14 @@ def inputPalette(sheet, prompt, items,
             useditems.append(m.match)
             palrows.append((m, m.match))
 
-        favitems = sorted([item for item in unuseditems if item not in useditems],
-                          key=lambda item: -vd.usedInputs.get(item[value_key], 0))
+        #List matches only, usually. But list the available choices when the user hasn't typed
+        # anything, or (when multiple is True) they've just pressed space after a word.
+        if not unfinished_words:
+            favitems = sorted([item for item in unuseditems if item not in useditems],
+                            key=lambda item: -vd.usedInputs.get(item[value_key], 0))
 
-        for item in favitems[:nitems-len(palrows)]:
-            palrows.append((None, item))
+            for item in favitems[:nitems-len(palrows)]:
+                palrows.append((None, item))
 
         navailitems = min(len(palrows), nitems)
 
@@ -129,12 +132,12 @@ def inputPalette(sheet, prompt, items,
 
             if tabitem < 0 and palrows:
                 _ , topitem = palrows[0]
-                if not topitem: return
-                if multiple:
-                    bindings[' '] = partial(add_to_input, value=topitem[value_key])
-                    bindings['^J'] = partial(accept_input_if_subset, value=topitem[value_key])
-                else:
-                    bindings['^J'] = partial(accept_input, value=topitem[value_key])
+                if topitem:
+                    if multiple:
+                        bindings[' '] = partial(add_to_input, value=topitem[value_key])
+                        bindings['^J'] = partial(accept_input_if_subset, value=topitem[value_key])
+                    else:
+                        bindings['^J'] = partial(accept_input, value=topitem[value_key])
             elif item and i == tabitem:
                 if not item: return
                 if multiple:
