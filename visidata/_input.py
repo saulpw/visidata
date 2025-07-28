@@ -245,7 +245,8 @@ class InputWidget:
             clipdraw(scr, y, x+w, ' ', attr, 1, clear=False, literal=True)
         if scr:
             prew = dispwidth(dispval[:i])
-            scr.move(y, x+prew)
+            if x+prew < scr.getmaxyx()[1]: #move cursor back to where the user is editing
+                scr.move(y, x+prew)
 
     def handle_key(self, ch:str, scr) -> bool:
         'Return True to accept current input.  Raise EscapeException on Ctrl+C, Ctrl+Q, or ESC.'
