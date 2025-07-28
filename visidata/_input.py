@@ -684,7 +684,10 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
     editargs = dict(value=value, options=self.options)
 
     editargs.update(kwargs)  # update with user-specified args
-    r = vd.editText(y, x, w, attr=colors.color_edit_cell, **editargs)
+    try:
+        r = vd.editText(y, x, w, attr=colors.color_edit_cell, **editargs)
+    except curses.error:
+        vd.fail(f'aborting edit due to resize')
 
     if rowidx >= 0:  # if not header
         r = col.type(r)  # convert input to column type, let exceptions be raised
