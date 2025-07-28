@@ -373,7 +373,7 @@ def editText(vd, y, x, w, attr=ColorAttr(), value='',
              help='',
              updater=lambda val: None, bindings={},
              display=True, record=True, clear=True, **kwargs):
-    'Invoke modal single-line editor at (*y*, *x*) for *w* terminal chars. Use *display* is False for sensitive input like passphrases.  If *record* is True, get input from the cmdlog in batch mode, and save input to the cmdlog if *display* is also True. Return new value as string.'
+    '''Invoke modal single-line editor at (*y*, *x*) for *w* terminal chars. Use *display* is False for sensitive input like passphrases.  If *record* is True, get input from the cmdlog in batch mode, and save input to the cmdlog if *display* is also True. Return new value as string. Callers should handle curses.error, which will be raised if the terminal is resized during the edit, in a way that moves the editor coordinates offscreen.'''
     v = None
     if record and vd.cmdlog:
         v = vd.getCommandInput()
@@ -583,21 +583,32 @@ def input(vd, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None,
         return sheet.windowWidth-promptlen-rstatuslen-2
 
     w = kwargs.pop('w', _drawPrompt())
-    ret = vd.editText(y, promptlen, w=w,
-                        attr=colors.color_edit_cell,
-                        options=vd.options,
-                        history=history,
-                        updater=_drawPrompt,
-                        **kwargs)
+    restarts = 0
+    while True:
+        #recalculate y to handle resize events
+        y = sheet.windowHeight-dy-1
+        try:
+            ret = vd.editText(y, promptlen, w=w,
+                                attr=colors.color_edit_cell,
+                                options=vd.options,
+                                history=history,
+                                updater=_drawPrompt,
+                                **kwargs)
+            if ret:
+                if kwargs.get('record', True) and kwargs.get('display', True):
+                    vd.addInputHistory(ret, type=type)
+            elif defaultLast:
+                history or vd.fail("no previous input")
+                ret = history[-1]
 
-    if ret:
-        if kwargs.get('record', True) and kwargs.get('display', True):
-            vd.addInputHistory(ret, type=type)
-    elif defaultLast:
-        history or vd.fail("no previous input")
-        ret = history[-1]
-
-    return ret
+            return ret
+        except curses.error:
+            vd.warning('restarting input due to resize')
+            restarts += 1
+            # if it keeps happening, it's probably not resize events, so give some debug output
+            if restarts >= 100:
+                vd.fail(f'aborting input:  y={y}, w={w}, windowHeight={sheet.windowHeight}, windowWidth={sheet.windowWidth}')
+            continue
 
 
 @VisiData.api
