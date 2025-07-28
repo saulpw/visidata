@@ -82,7 +82,7 @@ def inputPalette(sheet, prompt, items,
 
     def _draw_palette(value):
         nonlocal prev_value
-        words = value.lower().split()
+        words = value.split()
         if value != prev_value:
             reset_display()
             prev_value = value
