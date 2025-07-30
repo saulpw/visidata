@@ -245,7 +245,9 @@ def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clea
     try:
         for colorstate, chunk in chunks:
             if colorstate:
-                if isinstance(colorstate, str):
+                if isinstance(colorstate, ColorAttr):
+                    cattr = origattr.update(colorstate, 100)
+                elif isinstance(colorstate, str):
                     cattr = origattr.update(colors.get_color(colorstate), 100)
                 else:
                     cattr = origattr.update(colorstate['cattr'], 100)
