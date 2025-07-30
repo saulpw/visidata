@@ -2,6 +2,7 @@ import collections
 import itertools
 from copy import copy, deepcopy
 import textwrap
+import re
 
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException, Fanout
 from visidata import (options, Column, namedlist, SettableColumn, AttrDict, DisplayWrapper,
@@ -196,6 +197,7 @@ class TableSheet(BaseSheet):
 
         self._ordering = list(type(self)._ordering)  #2254
         self._colorizers = self.classColorizers
+        self.highlight_regex = None
         self.recalc()  # set .sheet on columns and start caches
 
         self.__dict__.update(kwargs)  # also done earlier in BaseSheet.__init__
@@ -1040,20 +1042,35 @@ class TableSheet(BaseSheet):
                     elif len(lines) < height:
                         lines.extend([[('', '')]]*(height-len(lines)))
 
+                    if self.options.highlight:
+                        hp = col.highlight_regex or self.highlight_regex
+                        hl_attr = colors.get_color(options.color_highlight_search)
+                    else:
+                        hp = None
                     for i, chunks in enumerate(lines):
                         y = ybase+i
 
                         sepchars = seps[i]
 
                         pre = disp_truncator if hoffset != 0 else disp_column_fill
-                        prechunks = []
+                        display_chunks = []
                         if colwidth > 2:
-                            prechunks.append(('', pre))
+                            display_chunks.append(('', pre))
 
                         for attr, text in chunks:
-                            prechunks.append((attr, text[hoffset:]))
+                            last = hoffset if hoffset > 0 else 0
+                            # note a limitation with Unicode:  the regex can cut a grapheme cluster into codepoints
+                            matches = re.finditer(hp, text) if hp else []
+                            for m in matches:
+                                m1 = m.start()
+                                m2 = m.end()
+                                display_chunks.append((attr, shown[last:m1]))
+                                display_chunks.append((hl_attr, shown[m1:m2]))
+                                last = m2
+                            if last < len(text):
+                                display_chunks.append((attr, shown[last:]))
 
-                        clipdraw_chunks(scr, y, x, prechunks, cattr if i < height-1 else bottomcattr, w=colwidth-notewidth)
+                        clipdraw_chunks(scr, y, x, display_chunks, cattr if i < height-1 else bottomcattr, w=colwidth-notewidth)
                         vd.onMouse(scr, x, y, colwidth, 1, BUTTON3_RELEASED='edit-cell')
 
                         if sepchars and x+colwidth+dispwidth(sepchars) <= self.windowWidth-1:
@@ -1310,7 +1327,7 @@ BaseSheet.addCommand('Tab', 'splitwin-swap', 'vd.activePane = 1 if sheet.pane ==
 BaseSheet.addCommand('gTab', 'splitwin-swap-pane', 'vd.options.disp_splitwin_pct=-vd.options.disp_splitwin_pct', 'swap panes onscreen')
 BaseSheet.addCommand('zZ', 'splitwin-input', 'vd.options.disp_splitwin_pct = input("% height for split window: ", value=vd.options.disp_splitwin_pct)', 'set split pane to specific size')
 
-BaseSheet.addCommand('Ctrl+L', 'redraw', 'sheet.refresh(); vd.redraw(); vd.draw_all()', 'Refresh screen')
+BaseSheet.addCommand('Ctrl+L', 'redraw', 'highlight_clear(); sheet.refresh(); vd.redraw(); vd.draw_all()', 'Refresh screen')
 BaseSheet.addCommand(None, 'guard-sheet', 'options.set("quitguard", True, sheet); status("guarded")', 'Set quitguard on current sheet to confirm before quit')
 BaseSheet.addCommand(None, 'guard-sheet-off', 'options.set("quitguard", False, sheet); status("unguarded")', 'Unset quitguard on current sheet to not confirm before quit')
 BaseSheet.addCommand(None, 'open-source', 'vd.replace(source)', 'jump to the source of this sheet')

@@ -86,8 +86,23 @@ def searchInputRegex(sheet, action:str, columns:str='cursorCol'):
 def moveInputRegex(sheet, action:str, type="regex", **kwargs):
     r = vd.inputMultiple(regex=dict(prompt=f"{action} regex: ", type=type, defaultLast=True, help=vd.help_regex),
                          flags=dict(prompt="regex flags: ", type="regex_flags", value=sheet.options.regex_flags, help=vd.help_regex_flags))
+    vd.moveRegex(sheet, regex=r['regex'], regex_flags=r['flags'], **kwargs)
+    return r
 
-    return vd.moveRegex(sheet, regex=r['regex'], regex_flags=r['flags'], **kwargs)
+@Sheet.api
+def setHighlightRegex(sheet, r, cols=[]):
+    if not sheet.options.highlight:
+        return
+    flagbits = sum(getattr(re, f.upper()) for f in r['flags'])
+    rc = re.compile(r['regex'], flagbits)
+    sheet.highlight_clear()
+    if cols is None:
+        vd.addUndo(setattr, sheet, 'highlight_regex', sheet.highlight_regex)
+        sheet.highlight_regex = rc
+    else:
+        for col in cols:
+            vd.addUndo(setattr, col, 'highlight_regex', col.highlight_regex)
+            col.highlight_regex = rc
 
 @Sheet.api
 @asyncthread
@@ -102,15 +117,35 @@ def search_expr(sheet, expr, reverse=False, curcol=None):
 
     vd.fail(f'no {sheet.rowtype} where {expr}')
 
+@Sheet.api
+def highlight_input(sheet, cols=[]):
+    r = vd.inputMultiple(regex=dict(prompt=f"highlight regex: ", type="regex", defaultLast=True, help=vd.help_regex),
+                        flags=dict(prompt="regex flags: ", type="regex_flags", value=sheet.options.regex_flags, help=vd.help_regex_flags))
+    if not sheet.options.highlight:
+        vd.warning('highlight option needs to be set to True')
+    setHighlightRegex(sheet, r, cols)
 
-Sheet.addCommand('r', 'search-keys', 'tmp=cursorVisibleColIndex; moveInputRegex("row key", type="regex-row", columns=keyCols or [visibleCols[0]]); sheet.cursorVisibleColIndex=tmp', 'go to next row with key matching regex')
-Sheet.addCommand('/', 'search-col', 'moveInputRegex("search", columns="cursorCol", backward=False)', 'search for regex forwards in current column')
-Sheet.addCommand('?', 'searchr-col', 'moveInputRegex("reverse search", columns="cursorCol", backward=True)', 'search for regex backwards in current column')
+@Sheet.api
+def highlight_clear(sheet):
+    if not sheet.options.highlight:
+        return
+    for col in sheet.columns:
+        if col.highlight_regex:
+            vd.addUndo(setattr, col, 'highlight_regex', col.highlight_regex)
+            col.highlight_regex = None
+    if sheet.highlight_regex:
+        vd.addUndo(setattr, sheet, 'highlight_regex', sheet.highlight_regex)
+        sheet.highlight_regex = None
+
+Sheet.addCommand('r', 'search-keys', 'tmp=cursorVisibleColIndex; cols=keyCols or [visibleCols[0]]; r=moveInputRegex("row key", type="regex-row", columns=cols); setHighlightRegex(r, cols); sheet.cursorVisibleColIndex=tmp', 'go to next row with key matching regex')
+Sheet.addCommand('/', 'search-col', 'r=moveInputRegex("search", columns="cursorCol", backward=False); setHighlightRegex(r, [cursorCol])', 'search for regex forwards in current column')
+
+Sheet.addCommand('?', 'searchr-col', 'r=moveInputRegex("reverse search", columns="cursorCol", backward=True); setHighlightRegex(r, [cursorCol])', 'search for regex backwards in current column')
 Sheet.addCommand('n', 'search-next', 'vd.moveRegex(sheet, reverse=False)', 'go to next match from last regex search')
 Sheet.addCommand('N', 'searchr-next', 'vd.moveRegex(sheet, reverse=True)', 'go to previous match from last regex search')
 
-Sheet.addCommand('g/', 'search-cols', 'moveInputRegex("g/", backward=False, columns="visibleCols")', 'search for regex forwards over all visible columns')
-Sheet.addCommand('g?', 'searchr-cols', 'moveInputRegex("g?", backward=True, columns="visibleCols")', 'search for regex backwards over all visible columns')
+Sheet.addCommand('g/', 'search-cols', 'r=moveInputRegex("g/", backward=False, columns="visibleCols"); setHighlightRegex(r, sheet.visibleCols)', 'search for regex forwards over all visible columns')
+Sheet.addCommand('g?', 'searchr-cols', 'r=moveInputRegex("g?", backward=True, columns="visibleCols"); setHighlightRegex(r, sheet.visibleCols)', 'search for regex backwards over all visible columns')
 Sheet.addCommand('z/', 'search-expr', 'search_expr(inputExpr("search by expr: ") or fail("no expr"), curcol=cursorCol)', 'search by Python expression forwards in current column (with column names as variables)')
 Sheet.addCommand('z?', 'searchr-expr', 'search_expr(inputExpr("searchr by expr: ") or fail("no expr"), curcol=cursorCol, reverse=True)', 'search by Python expression backwards in current column (with column names as variables)')
 
@@ -125,3 +160,10 @@ vd.addMenuItems('''
     View > Search backward > by Python expr > searchr-expr
     View > Search backward > again > searchr-next
 ''')
+
+vd.option('highlight', True, 'whether to highlight strings in searches')
+vd.option('color_highlight_search', '21 on 15', 'color to use for highlighting search results', sheettype=None)  #bright blue on white
+
+Sheet.addCommand('', 'highlight-sheet', 'highlight_input(None)', 'highlight a regex in all columns')
+Sheet.addCommand('', 'highlight-col', 'highlight_input([cursorCol])', 'highlight a regex in current column')
+Sheet.addCommand('', 'highlight-clear', 'highlight_clear()', 'clear the current highlight pattern')

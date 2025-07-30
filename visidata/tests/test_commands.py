@@ -120,6 +120,8 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'row': '5',
                  'addcol-aggregate': 'max',
                  'define-command': 'type-test cursorCol.type = str',
+                 'highlight-sheet': 'e..',
+                 'highlight-col': '[0-9]',
               }
 
 @pytest.mark.usefixtures('curses_setup')
