@@ -33,7 +33,7 @@ class AddedHelp:
             vd.clearCaches()
 
 
-@BaseSheet.property
+@BaseSheet.lazy_property
 def formatter_helpstr(sheet):
     return AttrDict(commands=CommandHelpGetter(type(sheet)),
                     options=OptionHelpGetter())
