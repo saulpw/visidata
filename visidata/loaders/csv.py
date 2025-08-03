@@ -13,6 +13,16 @@ vd.option('safety_first', False, 'sanitize input/output to handle edge cases, wi
 
 
 @VisiData.api
+def guess_csv_delimiter(vd, p):
+    'If csv_delimiter option has been modified from default, assume CSV format.'
+    default_delimiter = ','
+    current_delimiter = vd.options.csv_delimiter
+    
+    # If user has explicitly set a different delimiter, assume CSV format
+    if current_delimiter != default_delimiter:
+        return dict(filetype='csv', _likelihood=2)
+
+@VisiData.api
 def guess_csv(vd, p):
     import csv
     csv.field_size_limit(2**31-1)  #288 Windows has max 32-bit
