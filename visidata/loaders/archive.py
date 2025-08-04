@@ -2,6 +2,7 @@ import pathlib
 import tarfile
 import zipfile
 import datetime
+import os.path
 from visidata.loaders import unzip_http
 
 from visidata import vd, VisiData, asyncthread, Sheet, Progress, Menu, options
@@ -122,18 +123,35 @@ Commands:
             yield [zi, Path(zi.filename)]
 
 
+#from https://docs.python.org/3/library/tarfile.html#tarfile.REGTYPE
+tarfile_type_names = {
+    tarfile.REGTYPE:"file",
+    tarfile.AREGTYPE:"file",
+    tarfile.LNKTYPE:"hard link",
+    tarfile.SYMTYPE:"symbolic link",
+    tarfile.CHRTYPE:"character device",
+    tarfile.BLKTYPE:"block device",
+    tarfile.DIRTYPE:"directory",
+    tarfile.FIFOTYPE:"FIFO",
+    tarfile.CONTTYPE:"contiguous file",
+    tarfile.GNUTYPE_LONGNAME:"GNU tar longname",
+    tarfile.GNUTYPE_LONGLINK:"GNU tar longlink",
+    tarfile.GNUTYPE_SPARSE:"GNU tar sparse file",
+}
 class TarSheet(Sheet):
     'Wrapper for `tarfile` library.'
     rowtype = 'files' # rowdef TarInfo
     columns = [
         ColumnAttr('name'),
+        Column('ext', getter=lambda col,row: row.isdir() and '/' or os.path.splitext(row.name)[1][1:]),
         ColumnAttr('size', type=int),
         ColumnAttr('mtime', type=date),
-        ColumnAttr('type', type=int),
+        Column('type', getter=lambda col, row: tarfile_type_names.get(row.type, 'unknown')),
         ColumnAttr('mode', type=int),
         ColumnAttr('uname'),
         ColumnAttr('gname')
     ]
+    nKeys=1
 
     def openRow(self, fi):
             tfp = tarfile.open(name=str(self.source))
