@@ -1208,6 +1208,21 @@ def async_deepcopy(sheet, rowlist):
     _async_deepcopy(ret, rowlist)
     return ret
 
+@Sheet.api
+def reload_or_replace(sheet):
+    sheet.preloadHook()
+    if isinstance(sheet.source, visidata.Path) and \
+       sheet.source.is_url() and sheet.source.scheme != 'file':  #2825
+        #retrieve data again, because the earlier data saved in sheet.source may be outdated
+        vs = vd.openSource(visidata.Path(sheet.source.given))
+        if type(vs) != type(sheet):  #new data may have a different filetype
+            vd.push(vs)
+            vd.remove(sheet)
+            #user needs feedback that sheet changed, since the new sheet has a different shortcut
+            vd.status('replaced sheet due to changed filetype')
+            return
+        sheet.source = vs.source
+    sheet.reload()
 
 
 BaseSheet.init('pane', lambda: 1)
@@ -1217,7 +1232,7 @@ def calcColLayout(sheet):
     pass  #2790
 
 
-BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); reload()', 'Reload current sheet')
+BaseSheet.addCommand('^R', 'reload-sheet', 'reload_or_replace()', 'Reload current sheet')
 Sheet.addCommand('', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line')
 
 Sheet.addCommand('!', 'key-col', 'exec_longname("key-col-off") if cursorCol.keycol else exec_longname("key-col-on")', 'toggle current column as a key column', replay=False)
