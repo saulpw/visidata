@@ -184,7 +184,7 @@ def inputPalette(sheet, prompt, items,
 
             clipdraw(sheet._scr, h-nitems-2+i, 0, match_summary, attr, w=w)
         attr = colors.color_cmdpalette
-        instr = 'Press [:keystrokes]PgUp/PgDn[/] to scroll items, [:keystrokes]Tab/Shift+Tab/Enter[/] to choose.'
+        instr = 'Press [:keystrokes]PgUp/PgDn[/] to scroll items, [:keystrokes]Tab/Shift+Tab/Enter[/] to choose, [:keystrokes]Esc[/] to cancel.'
         clipdraw(sheet._scr, h-2, 0, instr, attr, w=w)
 
         return None
