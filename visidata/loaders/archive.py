@@ -113,6 +113,12 @@ Commands:
             if '://' in str(self.source):
                 unzip_http.warning = vd.warning
                 self._zfp = unzip_http.RemoteZipFile(str(self.source))
+            elif isinstance(self.source, Path):
+                if self.source.has_fp():  #when opening a zip inside tar or zip
+                    fp = self.source.open('rb')
+                else:
+                    fp = self.source
+                self._zfp = zipfile.ZipFile(fp, 'r')
             else:
                 self._zfp = zipfile.ZipFile(str(self.source), 'r')
 
