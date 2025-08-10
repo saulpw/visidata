@@ -85,7 +85,7 @@ Commands:
             return vd.openSource(Path(fi.filename, fp=fp, filesize=fi.file_size), filetype=options.filetype)
 
     def extract(self, *rows, path=None):
-        path = path or pathlib.Path('.')
+        path = path or Path('.')
 
         files = []
         for row in rows:
