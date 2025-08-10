@@ -91,7 +91,7 @@ Commands:
         for row in rows:
             r, _ = row
             vd.confirmOverwrite(path/r.filename)  #1452
-            self.extract_async(row)
+            self.extract_async(row, path=path)
 
     def sysopen_row(self, row):
         'Extract file in row to tempdir and launch $EDITOR.  Modifications will be discarded.'
