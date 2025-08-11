@@ -318,6 +318,9 @@ def wraptext(text, width=80, indent=''):
         line = _markdown_to_internal(line)
         chunks = re.split(internal_markup_re, line)
         textchunks = [x for x in chunks if not is_vdcode(x)]
+        if ''.join(textchunks) == '':  #for markup with no contents, like '[:tag][/]' or '[:]' or '[/]'
+            yield '', ''
+            continue
         # textwrap.wrap does not handle variable-width characters  #2416
         for linenum, textline in enumerate(textwrap.wrap(''.join(textchunks), width=width, drop_whitespace=False)):
             txt = textline
