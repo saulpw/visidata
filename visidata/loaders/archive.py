@@ -85,13 +85,13 @@ Commands:
             return vd.openSource(Path(fi.filename, fp=fp, filesize=fi.file_size), filetype=options.filetype)
 
     def extract(self, *rows, path=None):
-        path = path or pathlib.Path('.')
+        path = path or Path('.')
 
         files = []
         for row in rows:
             r, _ = row
             vd.confirmOverwrite(path/r.filename)  #1452
-            self.extract_async(row)
+            self.extract_async(row, path=path)
 
     def sysopen_row(self, row):
         'Extract file in row to tempdir and launch $EDITOR.  Modifications will be discarded.'
@@ -113,6 +113,12 @@ Commands:
             if '://' in str(self.source):
                 unzip_http.warning = vd.warning
                 self._zfp = unzip_http.RemoteZipFile(str(self.source))
+            elif isinstance(self.source, Path):
+                if self.source.has_fp():  #when opening a zip inside tar or zip
+                    fp = self.source.open('rb')
+                else:
+                    fp = self.source
+                self._zfp = zipfile.ZipFile(fp, 'r')
             else:
                 self._zfp = zipfile.ZipFile(str(self.source), 'r')
 
