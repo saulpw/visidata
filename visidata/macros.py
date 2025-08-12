@@ -40,7 +40,7 @@ class MacroSheet(IndexSheet):
     def putChanges(self):
         self.commitDeletes()  #1569  apply deletes early for saveSheets below
 
-        vd.saveSheets(self.source, self, confirm_overwrite=False)
+        vd.sync(vd.saveSheets(self.source, self, confirm_overwrite=False))
         self._deferredDels.clear()
         self.reload()
 
