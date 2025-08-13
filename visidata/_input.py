@@ -469,7 +469,6 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
 
         assert False, type(previnput)
 
-    y = sheet.windowHeight-1
     maxw = sheet.windowWidth//2
     attr = colors.color_edit_unfocused
 
@@ -495,9 +494,11 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
 
     def _drawPrompt(val):
         for k, v in kwargs.items():
+            #recalculate y to adjust for screen resizes during input()
+            y = sheet.windowHeight-v.get('dy')-1
             maxw = min(sheet.windowWidth-1, max(dispwidth(v.get('prompt')), dispwidth(str(v.get('value', '')))))
-            promptlen = clipdraw(scr, y-v.get('dy'), 0, v.get('prompt'), attr, w=maxw)  #1947
-            promptlen = clipdraw(scr, y-v.get('dy'), promptlen, v.get('value', ''),  attr, w=maxw)
+            promptlen = clipdraw(scr, y, 0, v.get('prompt'), attr, w=maxw)  #1947
+            promptlen = clipdraw(scr, y, promptlen, v.get('value', ''),  attr, w=maxw)
 
         return updater(val)
 
