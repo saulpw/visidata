@@ -586,7 +586,7 @@ def input(vd, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None,
 
     w = kwargs.pop('w', _drawPrompt())
     restarts = 0
-    while True:
+    while restarts < 100:
         #recalculate y to handle resize events
         y = sheet.windowHeight-dy-1
         try:
@@ -607,10 +607,8 @@ def input(vd, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None,
         except curses.error:
             vd.warning('restarting input due to resize')
             restarts += 1
-            # if it keeps happening, it's probably not resize events, so give some debug output
-            if restarts >= 100:
-                vd.fail(f'aborting input:  y={y}, w={w}, windowHeight={sheet.windowHeight}, windowWidth={sheet.windowWidth}')
-            continue
+    # if it keeps happening, it's probably not resize events, so give some debug output
+    vd.error(f'aborting input:  y={y}, w={w}, windowHeight={sheet.windowHeight}, windowWidth={sheet.windowWidth}')
 
 
 @VisiData.api
