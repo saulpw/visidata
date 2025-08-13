@@ -447,12 +447,16 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
     args_plugins_autoload = args.plugins_autoload if 'plugins_autoload' in args else True
     if not args.nothing and args_plugins_autoload and vd.options.plugins_autoload:
         from importlib.metadata import entry_points
+        eps_visidata = []
         try:
             eps = entry_points()
-            eps_visidata = eps.select(group='visidata.plugins') if 'visidata.plugins' in eps.groups else []
+            vp = 'visidata.plugins'
+            if hasattr(eps, 'groups'): #Python >= 3.10
+                eps_visidata = eps.select(group=vp)
+            else:                      #Python <  3.10
+                eps_visidata = eps.get(vp, [])
         except Exception as e:
-            eps_visidata = []
-            vd.warning('plugin autoload failed; see issue #1529')
+            vd.warning(f'plugin autoload failed; see issue #1529:  {e}')
 
         for ep in eps_visidata:
             try:
