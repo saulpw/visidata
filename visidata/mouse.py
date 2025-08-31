@@ -13,6 +13,8 @@ BaseSheet.init('mouseY', int)
 
 @VisiData.after
 def initCurses(vd):
+    if not getattr(curses, 'mousemask', None):
+      return
     curses.MOUSE_ALL = 0xffffffff
     curses.mousemask(curses.MOUSE_ALL if vd.options.mouse_interval else 0)
     curses.def_prog_mode()
