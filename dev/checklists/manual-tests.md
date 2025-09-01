@@ -96,3 +96,5 @@
 24. Test adding multiple aggregators via palette (+)
 25. time vd -p tests/quit-nosave.vdj  - note down the time. compare to PR #2369
 26. Use the z; command. Then type in a command line like echo "| Ceci n'est pas une pipe"
+27. vd -b -i -p tests/fill.vdj sample_data/a.tsv 
+Check that both benchmark and a.tsv are edittable.
