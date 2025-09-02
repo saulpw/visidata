@@ -294,7 +294,7 @@ class TableSheet(BaseSheet):
         self.columns = []
         for c in self.initialCols:
             self.addColumn(deepcopy(c))
-            if self.options.disp_expert < c.disp_expert:
+            if c.disp_expert and vd.wantsHelp('nometacols'):
                 c.hide()
 
         self.setKeys(self.columns[:self.nKeys])

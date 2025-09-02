@@ -4,7 +4,24 @@ import collections
 from visidata import VisiData, MetaSheet, ColumnAttr, Column, BaseSheet, VisiDataMetaSheet, SuspendCurses
 from visidata import vd, asyncthread, ENTER, drawcache, AttrDict, TextSheet
 
-vd.option('disp_expert', 0, 'max level of options and columns to include')
+
+vd.option('disp_help_flags', 'nometacols hints cmdpalette help guides inputkeys inputfield sidebar', '''
+  list of helper features to enable (space-separated):
+    - "cmdpalette": exec-longname suggestions
+    - "hints": context-sensitive hints on menu line
+    - "nometacols": hide expert columns on metasheets
+    - "guides": guides in sidebar
+    - "sidebar": context-sensitive sheet help in sidebar
+    - "inputkeys": input quick reference in sidebar
+    - "inputfield": context-sensitive help for each input field
+    - "all": enable all helper features
+    ''')
+
+
+@VisiData.api
+def wantsHelp(vd, feat):
+    return feat in vd.options.disp_help_flags or 'all' in vd.options.disp_help_flags
+
 
 @BaseSheet.api
 def hint_basichelp(sheet):
@@ -99,12 +116,13 @@ class HelpPane:
 
     def draw(self, scr, x=None, y=None, **kwargs):
         if not scr: return
-#        if vd.options.disp_help <= 0:
+#        if not vd.wantsHelp('statushelp'):
 #            if self.scr:
 #                self.scr.erase()
 #                self.scr.refresh()
 #                self.scr = None
 #            return
+
         if y is None: y=0  # show at top of screen by default
         if x is None: x=0
         hneeded = self.amgr.maxHeight+3
