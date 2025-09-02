@@ -392,8 +392,8 @@ def editText(vd, y, x, w, attr=ColorAttr(), value='',
         try:
             widget = InputWidget(value=str(value), display=display, **kwargs)
 
-            with vd.AddedHelp(vd.getHelpPane('input', module='visidata'), 'Input Keystrokes Help'), \
-                 vd.AddedHelp(help, 'Input Field Help'):
+            with vd.AddedHelp(vd.getHelpPane('input', module='visidata'), 'Input Keystrokes Help', 'inputkeys'), \
+                 vd.AddedHelp(help, 'Input Field Help', 'inputfield'):
                 v = widget.editline(vd.activeSheet._scr, y, x, w, attr=attr, updater=updater, bindings=bindings, clear=clear)
         except AcceptInput as e:
             v = e.args[0]

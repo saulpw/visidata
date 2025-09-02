@@ -1,5 +1,12 @@
 # VisiData version history
 
+# v3.3 (2025-09-xx)
+
+- added options.disp_help_flags; deprecated options.disp_expert
+   - these feature flags are supported: cmdpalette hints nometacols guides inputkeys inputfield all
+   - see helpstr for more details
+   - set option to '' to turn off all help overlays
+
 # v3.2 (2025-06-15)
 
 Thanks to @midichef for many bugfixes and improvements.

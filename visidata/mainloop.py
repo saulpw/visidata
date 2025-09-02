@@ -167,7 +167,7 @@ def mainloop(vd, scr):
     numTimeouts = 0
     prefixWaiting = False
     vd.scrFull = scr
-    if vd.options.disp_expert >= 5:
+    if not vd.wantsHelp('help'):
         vd.disp_help = -1
 
     vd.keystrokes = ''

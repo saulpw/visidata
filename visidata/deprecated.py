@@ -278,3 +278,8 @@ def toggleKeys(self, cols):
 vd.optalias('disp_pixel_random', 'disp_graph_pixel_random')  #2661
 
 vd.addGlobals(deprecated_warn=deprecated_warn)
+
+# v3.3
+
+#vd.option('disp_expert', 'max level of options and columns to include')
+#vd.option('disp_help', '')

@@ -79,7 +79,7 @@ class Column(Extensible):
         self.formatter = ''
         self.displayer = ''
         self.defer = False
-        self.disp_expert = 0    # auto-hide if options.disp_expert less than col.disp_expert
+        self.disp_expert = 0    # do not show if 'nometacols' in options.disp_help_flags
 
         self.setCache(cache)
         for k, v in kwargs.items():
