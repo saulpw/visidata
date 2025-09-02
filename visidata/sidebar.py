@@ -15,11 +15,12 @@ vd.theme_option('color_sidebar_title', 'black on yellow', 'color of sidebar titl
 @VisiData.api
 class AddedHelp:
     '''Context manager to add help text/screen to list of available sidebars.'''
-    def __init__(self, text:Union[str,'HelpPane'], title=''):
+    def __init__(self, text:Union[str,'HelpPane'], title='', help_flag=''):
+        self.helpfunc = None
         if text:
+            if not vd.wantsHelp(help_flag):
+                return
             self.helpfunc = lambda: (text, title)
-        else:
-            self.helpfunc = None
 
     def __enter__(self):
         if self.helpfunc:
@@ -73,7 +74,7 @@ def help_sidebars(sheet) -> 'list[Callable[[], tuple[str,str]]]':
 @VisiData.cached_property
 def sidebarStatus(vd) -> str:
     if vd.sheet.help_sidebars:
-        if vd.options.disp_sidebar and vd.disp_help >= 0:
+        if vd.wantsHelp('sidebar') and vd.disp_help >= 0:
             n = vd.disp_help+1
             return f'[:onclick sidebar-toggle][:sidebar][{n}/{len(vd.sheet.help_sidebars)}][/]'
         else:
@@ -111,7 +112,7 @@ def drawSidebar(vd, scr, sheet):
     bottommsg = ''
     overflowmsg = '[:reverse] Ctrl+P to view all status messages [/]'
     try:
-        if not sidebar and vd.options.disp_sidebar and vd.disp_help >= 0 and sheet.help_sidebars:
+        if not sidebar and vd.options.disp_sidebar and vd.wantsHelp('guides') and sheet.help_sidebars:
             sidebar, title = sheet.help_sidebars[vd.disp_help%len(sheet.help_sidebars)]()
 
 #            bottommsg = sheet.formatString('[:onclick sidebar-toggle][:reverse] {help.commands.sidebar_toggle} [:]', help=sheet.formatter_helpstr)

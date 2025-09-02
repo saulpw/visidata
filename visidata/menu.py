@@ -25,7 +25,7 @@ vd.menuRunning = False
 
 @VisiData.property
 def hintStatus(vd):
-    if vd.options.disp_expert <= 0:
+    if vd.wantsHelp('hints'):
         if int(time.time()/60) % 2 == 0:
             return 'Alt+H for help menu'
         else:
