@@ -5,17 +5,17 @@ from visidata import VisiData, MetaSheet, ColumnAttr, Column, BaseSheet, VisiDat
 from visidata import vd, asyncthread, ENTER, drawcache, AttrDict, TextSheet
 
 
-vd.option('disp_help_flags', 'nometacols hints cmdpalette help guides inputkeys inputfield sidebar', '''
-  list of helper features to enable (space-separated):
+vd.option('disp_help_flags', 'cmdpalette guides help hints inputfield inputkeys nometacols sidebar',
+    '''list of helper features to enable (space-separated):
     - "cmdpalette": exec-longname suggestions
-    - "hints": context-sensitive hints on menu line
-    - "nometacols": hide expert columns on metasheets
     - "guides": guides in sidebar
-    - "sidebar": context-sensitive sheet help in sidebar
-    - "inputkeys": input quick reference in sidebar
+    - "help": help sidebar collapsed by default
+    - "hints": context-sensitive hints on menu line
     - "inputfield": context-sensitive help for each input field
-    - "all": enable all helper features
-    ''')
+    - "inputkeys": input quick reference in sidebar
+    - "nometacols": hide expert columns on metasheets
+    - "sidebar": context-sensitive sheet help in sidebar
+    - "all": enable all helper features''')
 
 
 @VisiData.api
