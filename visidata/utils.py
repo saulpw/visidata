@@ -5,7 +5,7 @@ import re
 
 'Various helper classes and functions.'
 
-__all__ = ['AlwaysDict', 'AttrDict', 'DefaultAttrDict', 'moveListItem', 'namedlist', 'classproperty', 'MissingAttrFormatter', 'getitem', 'setitem', 'getitemdef', 'getitemdeep', 'setitemdeep', 'getattrdeep', 'setattrdeep', 'ExplodingMock', 'ScopedSetattr']
+__all__ = ['AlwaysDict', 'AttrDict', 'DefaultAttrDict', 'moveListItem', 'namedlist', 'classproperty', 'MissingAttrFormatter', 'getitem', 'setitem', 'getitemdef', 'getitemdeep', 'setitemdeep', 'getattrdeep', 'setattrdeep', 'ExplodingMock', 'ScopedSetattr', 'colname_letters']
 
 
 class AlwaysDict(dict):
@@ -215,3 +215,17 @@ def ScopedSetattr(obj, attrname, val):
         yield
     finally:
         setattr(obj, attrname, oldval)
+
+def colname_letters(num):
+    '''*num* is a 1-based integer: 1, 2, 3... gives A B C .. Z AA AB .. ZZ AAA .. to infinity; *num* of 0 returns the empty string'''
+    # credit to https://stackoverflow.com/questions/48983939/convert-a-number-to-excel-s-base-26/48984697#48984697
+    def divmod_excel(n):
+        a, b = divmod(n, 26)
+        if b == 0:
+            return a - 1, b + 26
+        return a, b
+    chars = []
+    while num > 0:
+        num, d = divmod_excel(num)
+        chars.append('-ABCDEFGHIJKLMNOPQRSTUVWXYZ'[d])
+    return ''.join(reversed(chars))
