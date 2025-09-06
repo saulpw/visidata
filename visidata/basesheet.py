@@ -346,17 +346,3 @@ def getSheet(vd, sheetname):
         vs.reload()
         vs.vd = vd
         return vs
-
-# credit to https://stackoverflow.com/questions/48983939/convert-a-number-to-excel-s-base-26/48984697#48984697
-def divmod_excel(n):
-    a, b = divmod(n, 26)
-    if b == 0:
-        return a - 1, b + 26
-    return a, b
-def to_excel(num):
-    '''*num* of 1, 2, 3... gives A B C .. Z AA AB .. ZZ AAA .. to infinity; *num* of 0 returns the empty string'''
-    chars = []
-    while num > 0:
-        num, d = divmod_excel(num)
-        chars.append('-ABCDEFGHIJKLMNOPQRSTUVWXYZ'[d])
-    return ''.join(reversed(chars))
