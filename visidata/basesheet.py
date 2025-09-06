@@ -126,7 +126,6 @@ class BaseSheet(DrawablePane):
         self.rows = rows      # list of opaque objects
         self._scr = None
         self.hasBeenModified = False
-        self.colname_ctr = 0
 
         super().__init__(**kwargs)
 
@@ -302,12 +301,6 @@ class BaseSheet(DrawablePane):
     def formatString(self, fmt, **kwargs):
         'Return formatted string with *sheet* and *vd* accessible to expressions.  Missing expressions return empty strings instead of error.'
         return MissingAttrFormatter().format(fmt, sheet=self, vd=vd, **kwargs)
-
-    def incremented_colname(self):
-        vd.addUndo(setattr, self, 'colname_ctr', self.colname_ctr)
-        self.colname_ctr += 1
-        return to_excel(self.colname_ctr)
-
 
 @VisiData.api
 def redraw(vd):

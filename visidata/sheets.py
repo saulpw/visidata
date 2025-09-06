@@ -190,6 +190,7 @@ class TableSheet(BaseSheet):
 
         # list of all columns in display order
         self.initialCols = kwargs.pop('columns', None) or type(self).columns
+        self.colname_ctr = 0
         self.resetCols()
 
         self._ordering = list(type(self)._ordering)  #2254
@@ -1037,6 +1038,11 @@ class TableSheet(BaseSheet):
                     break
 
             return height
+
+    def incremented_colname(self):
+        vd.addUndo(setattr, self, 'colname_ctr', self.colname_ctr)
+        self.colname_ctr += 1
+        return colname_letters(self.colname_ctr)
 
 vd.rowNoters = [
     # f(sheet, row) -> character to be displayed on the left side of row
