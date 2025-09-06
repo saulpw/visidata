@@ -1,0 +1,22 @@
+#!vd -p
+{"sheet": null, "col": "", "row": "", "longname": "open-file", "input": "sample_data/sample.tsv", "keystrokes": "o", "comment": null, "replayable": true}
+{"sheet": "sample", "col": "OrderDate", "row": "", "longname": "addcol-incr", "input": "", "keystrokes": "i", "comment": "add column with incremental values", "replayable": true}
+{"sheet": "sample", "col": "A", "row": "", "longname": "addcol-incr", "input": "", "keystrokes": "i", "comment": "add column with incremental values", "replayable": true}
+{"sheet": "sample", "col": "B", "row": "", "longname": "addcol-incr", "input": "", "keystrokes": "i", "comment": "add column with incremental values", "replayable": true}
+{"sheet": "sample", "col": "C", "row": "", "longname": "addcol-incr", "input": "", "keystrokes": "i", "comment": "add column with incremental values", "replayable": true}
+{"col": "", "row": "", "longname": "open-new", "input": "", "keystrokes": "Shift+A", "comment": "Open new empty sheet", "replayable": true}
+{"sheet": "unnamed", "col": "", "row": "", "longname": "add-row", "input": "", "keystrokes": "a", "comment": "append a blank row", "replayable": true}
+{"sheet": "unnamed", "col": "", "row": 0, "longname": "add-row", "input": "", "keystrokes": "a", "comment": "append a blank row", "replayable": true}
+{"sheet": "unnamed", "col": "", "row": 1, "longname": "add-row", "input": "", "keystrokes": "a", "comment": "append a blank row", "replayable": true}
+{"sheet": "unnamed", "col": "A", "row": "", "longname": "addcol-incr", "input": "", "keystrokes": "i", "comment": "add column with incremental values", "replayable": true}
+{"sheet": "unnamed", "col": "B", "row": "", "longname": "addcol-incr", "input": "", "keystrokes": "i", "comment": "add column with incremental values", "replayable": true}
+{"sheet": "unnamed", "col": "C", "row": "", "longname": "addcol-incr", "input": "", "keystrokes": "i", "comment": "add column with incremental values", "replayable": true}
+{"sheet": "unnamed", "col": "D", "row": "", "longname": "addcol-incr", "input": "", "keystrokes": "i", "comment": "add column with incremental values", "replayable": true}
+{"sheet": "sample", "col": "D", "row": "", "longname": "addcol-incr", "input": "", "keystrokes": "i", "comment": "add column with incremental values", "replayable": true}
+{"sheet": "sample", "col": "E", "row": "", "longname": "addcol-incr", "input": "", "keystrokes": "i", "comment": "add column with incremental values", "replayable": true}
+{"sheet": "sample", "col": "F", "row": "", "longname": "addcol-incr", "input": "", "keystrokes": "i", "comment": "add column with incremental values", "replayable": true}
+{"sheet": "sample", "col": "G", "row": "", "longname": "addcol-incr", "input": "", "keystrokes": "i", "comment": "add column with incremental values", "replayable": true}
+{"sheet": "unnamed", "col": "E", "row": "", "longname": "addcol-incr", "input": "", "keystrokes": "i", "comment": "add column with incremental values", "replayable": true}
+{"sheet": "unnamed", "col": "F", "row": "", "longname": "addcol-incr", "input": "", "keystrokes": "i", "comment": "add column with incremental values", "replayable": true}
+{"sheet": "unnamed", "col": "G", "row": "", "longname": "addcol-incr", "input": "", "keystrokes": "i", "comment": "add column with incremental values", "replayable": true}
+{"sheet": "unnamed", "col": "H", "row": "", "longname": "addcol-incr", "input": "", "keystrokes": "i", "comment": "add column with incremental values", "replayable": true}
