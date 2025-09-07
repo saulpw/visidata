@@ -7,6 +7,73 @@
    - see helpstr for more details
    - set option to '' to turn off all help overlays
 
+## Improvements
+
+- [basesheet-] start new column names fresh for each sheet @midichef
+
+- [form-] after confirm, Esc/^C/^Q/q show disconfirm msg @midichef
+
+- [palette-] add instruction to use Esc to cancel @midichef
+- [palette-] keep case of results, allow case-sensitive search @midichef
+- [palette-] scroll choices with PageUp/PageDown @midichef
+- [palette-] hide choices that do not match input @midichef
+
+- [save-] suggest 'stdin' as filename base instead of '-' @midichef
+- [sheets-] on reload, fetch fresh data for URLs @midichef
+- [tar-] add cols for ext and file type desc, use name as keycol @midichef
+
+## Commands
+
+- [plugins] liveupdate, fix broken addcol-new @midichef
+
+## Options
+
+- feat: auto-detect CSV format when csv_delimiter is specified @dennisangemi
+
+## Tweaks
+
+- [column-] improve getMaxWidth values for dict/list/tuple @midichef
+- [features-] hide-uniform-cols: remove cache clear @midichef
+- [input-] if input keeps restarting, error instead of fail @midichef
+- [sheets-] calc col visibility before using nScreenRows @midichef
+- [sheets-] prevent 80x25 layout after redraw @midichef
+- [sidebar-] cache formatter_helpstr for each sheet @midichef
+- [tests-] update ColumnsSheet to have widths immediately @midichef
+
+## Bugfixes
+
+- fix: include missing files in MANIFEST.in @chenrui333
+
+- [archive-] fix extracting to a chosen path @midichef
+- [archive-] fix error extracting to overwrite existing file @midichef
+- [archive-] fix loading zip files from inside archive files @midichef
+
+- [cliptext-] fix display of empty markup as several blank lines @midichef
+- [cliptext-] restore display translation of unprintable chars @midichef
+- [column-] stop getCell width-doubling for dict/list/tuple @midichef
+- [sheets-] remove calcSingleColLayout use of inaccurate visibleRows @midichef
+
+- fix Visidata crash on startup on NetBSD (and probably other \*BSD) wscons tty consoles, which do not expose "mousemask" in their system curses implementations. @russ
+- fix editText for files on command line with -b -i -p (#2840) @midichef
+- fix plugin autoload for Python versions < 3.10 @midichef
+
+- [macro-] fix corruption when saving macros after deletion @midichef
+- [reload-] wait for any previous reload_rows to finish #2808 @midichef
+- [resize-] fix resize-col-half for new columns with no rows  #2795
+- [sheet-] fix reload on sheets without col layout  #2790
+- [status] fix error when no help_sidebars
+
+## Cosmetic
+
+- [freqtbl-] stop printing status for selection on source sheet @midichef
+- [input-] handle screen resize during inputMultiple(), editCell(), input() @midichef
+- [sheets-] drop offscreen col from `_visibleColLayout` @midichef
+
+# API
+
+- [threads-] add asyncsingle_queue decorator @midichef
+
+
 # v3.2 (2025-06-15)
 
 Thanks to @midichef for many bugfixes and improvements.
