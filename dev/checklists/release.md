@@ -6,6 +6,8 @@
 
     a. CHANGELOG;
 
+     git log --pretty=format:"%s :%ae" $(git tag | tail -1)..HEAD
+
     b. manpage;
 
     c. visidata.org; (formats?)
@@ -24,8 +26,6 @@
 5. Set version number to next most reasonable number (v#.#.#)
 
    a. add to front of CHANGELOG, along with the release date and bullet points of major changes;
-
-     git log --pretty=format:"%s :%ae" $(git tag | tail -1)..HEAD
 
    b. update the date in the manpage;
 
