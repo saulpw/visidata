@@ -502,7 +502,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--motd-url</span>=<span style="text-decoration:underline;">str</span>                                  source of randomized startup messages
      <span style="font-weight:bold;">--dir-depth</span>=<span style="text-decoration:underline;">int</span>              0                  folder recursion depth on DirSheet
      <span style="font-weight:bold;">--dir-hidden</span>                 False              load hidden files on DirSheet
-     <span style="font-weight:bold;">--config</span>=<span style="text-decoration:underline;">Path</span>                /home/saul/.visidatarc
+     <span style="font-weight:bold;">--config</span>=<span style="text-decoration:underline;">Path</span>                /home/anja/.visidatarc
                                                      config file to exec in Python
      <span style="font-weight:bold;">--play</span>=<span style="text-decoration:underline;">str</span>                                      file.vdj to replay
      <span style="font-weight:bold;">--batch</span>                      False              replay in batch mode (with no interface and all status sent to stdout)
@@ -520,7 +520,7 @@ vd(1)                                                                           
      <span style="font-weight:bold;">--matrix-device-id</span>=<span style="text-decoration:underline;">str</span>       VisiData           device ID associated with matrix login
      <span style="font-weight:bold;">--reddit-client-id</span>=<span style="text-decoration:underline;">str</span>                          client_id for reddit api
      <span style="font-weight:bold;">--reddit-client-secret</span>=<span style="text-decoration:underline;">str</span>                      client_secret for reddit api
-     <span style="font-weight:bold;">--reddit-user-agent</span>=<span style="text-decoration:underline;">str</span>      3.2                user_agent for reddit api
+     <span style="font-weight:bold;">--reddit-user-agent</span>=<span style="text-decoration:underline;">str</span>      3.3                user_agent for reddit api
      <span style="font-weight:bold;">--zulip-batch-size</span>=<span style="text-decoration:underline;">int</span>       -100               number of messages to fetch per call (&lt;0 to fetch before anchor)
      <span style="font-weight:bold;">--zulip-anchor</span>=<span style="text-decoration:underline;">int</span>           1000000000         message id to start fetching from
      <span style="font-weight:bold;">--zulip-delay-s</span>=<span style="text-decoration:underline;">float</span>        1e-05              seconds to wait between calls (0 to stop after first)
@@ -698,7 +698,17 @@ vd(1)                                                                           
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">graph</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">reflines</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">x</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">charset</span> ▏││▕      charset to render vertical reference lines on graph
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">graph</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">reflines</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">y</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">charset</span> ▔──▁      charset to render horizontal reference lines on graph
      <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">graph</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">multiple</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">reflines</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">char</span> ▒     char to render multiple parallel reflines
-     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">expert</span>         0                   max level of options and columns to include
+     <span style="font-weight:bold;">disp</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">help</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">flags</span>     cmdpalette guides help hints inputfield inputkeys nometacols sidebar
+                                             list of helper features to enable (space-separated):
+                                                 - &quot;cmdpalette&quot;: exec-longname suggestions
+                                                 - &quot;guides&quot;: guides in sidebar
+                                                 - &quot;help&quot;: help sidebar collapsed by default
+                                                 - &quot;hints&quot;: context-sensitive hints on menu line
+                                                 - &quot;inputfield&quot;: context-sensitive help for each input field
+                                                 - &quot;inputkeys&quot;: input quick reference in sidebar
+                                                 - &quot;nometacols&quot;: hide expert columns on metasheets
+                                                 - &quot;sidebar&quot;: context-sensitive sheet help in sidebar
+                                                 - &quot;all&quot;: enable all helper features
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">add</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">pending</span>   green               color for rows pending add
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">change</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">pending</span> reverse yellow     color for cells pending modification
      <span style="font-weight:bold;">color</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">delete</span><span style="text-decoration:underline;">_</span><span style="font-weight:bold;">pending</span> red                color for rows pending delete
