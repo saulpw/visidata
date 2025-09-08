@@ -709,7 +709,7 @@ COMMANDLINE OPTIONS
                                                      DirSheet
      --dir-hidden                 False              load hidden files on
                                                      DirSheet
-     --config=Path                /home/saul/.visidatarc
+     --config=Path                /home/anja/.visidatarc
                                                      config file to exec in
                                                      Python
      --play=str                                      file.vdj to replay
@@ -746,7 +746,7 @@ COMMANDLINE OPTIONS
      --reddit-client-id=str                          client_id for reddit api
      --reddit-client-secret=str                      client_secret for reddit
                                                      api
-     --reddit-user-agent=str      3.2                user_agent for reddit api
+     --reddit-user-agent=str      3.3                user_agent for reddit api
      --zulip-batch-size=int       -100               number of messages to
                                                      fetch per call (<0 to
                                                      fetch before anchor)
@@ -1061,8 +1061,27 @@ COMMANDLINE OPTIONS
                                              erence lines on graph
      disp_graph_multiple_reflines_char ▒     char to render multiple parallel
                                              reflines
-     disp_expert         0                   max level of options and columns
-                                             to include
+     disp_help_flags     cmdpalette guides help hints inputfield inputkeys
+                                             nometacols sidebar
+                                             list of helper features to enable
+                                             (space-separated):
+                                                 - "cmdpalette": exec-longname
+                                             suggestions
+                                                 - "guides": guides in sidebar
+                                                 - "help": help sidebar col‐
+                                             lapsed by default
+                                                 - "hints": context-sensitive
+                                             hints on menu line
+                                                 - "inputfield": context-sen‐
+                                             sitive help for each input field
+                                                 - "inputkeys": input quick
+                                             reference in sidebar
+                                                 - "nometacols": hide expert
+                                             columns on metasheets
+                                                 - "sidebar": context-sensi‐
+                                             tive sheet help in sidebar
+                                                 - "all": enable all helper
+                                             features
      color_add_pending   green               color for rows pending add
      color_change_pending reverse yellow     color for cells pending modifica‐
                                              tion

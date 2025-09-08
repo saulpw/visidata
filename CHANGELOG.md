@@ -1,6 +1,6 @@
 # VisiData version history
 
-# v3.3 (2025-09-xx)
+# v3.3 (2025-09-07)
 
 - added options.disp_help_flags; deprecated options.disp_expert
    - these feature flags are supported: cmdpalette hints nometacols guides inputkeys inputfield all
@@ -41,7 +41,7 @@ Thanks to @midichef for most of the other bugfixes and improvements.
 
 - [plugins liveupdate-] fix broken addcol-new
 
-- [curses-] fix crash on startup on NetBSD (and probably other \*BSD) wscons tty consoles, which do not expose "mousemask" in their system curses implementations. @russ
+- [curses-] fix crash on startup on NetBSD (and probably other \*BSD) wscons tty consoles, which do not expose "mousemask" in their system curses implementations. @rsmirnov90
 - [input-] fix editText for files on command line with -b -i -p (#2840)
 - [plugin-] fix autoload for Python versions < 3.10
 
