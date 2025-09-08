@@ -7,72 +7,58 @@
    - see helpstr for more details
    - set option to '' to turn off all help overlays
 
+- fix: include missing files in MANIFEST.in @chenrui333
+
+Thanks to @midichef for most of the other bugfixes and improvements.
+
 ## Improvements
 
-- [basesheet-] start new column names fresh for each sheet @midichef
+- [csv] auto-detect CSV format when csv_delimiter is specified @dennisangemi
+- [basesheet-] start new column names fresh for each sheet
 
-- [form-] after confirm, Esc/^C/^Q/q show disconfirm msg @midichef
+- [form-] after confirm, Esc/^C/^Q/q show disconfirm msg
 
-- [palette-] add instruction to use Esc to cancel @midichef
-- [palette-] keep case of results, allow case-sensitive search @midichef
-- [palette-] scroll choices with PageUp/PageDown @midichef
-- [palette-] hide choices that do not match input @midichef
+- [cmdpalette-] add instruction to use Esc to cancel
+- [cmdpalette-] keep case of results, allow case-sensitive search
+- [cmdpalette-] scroll choices with PageUp/PageDown
+- [cmdpalette-] hide choices that do not match input
 
-- [save-] suggest 'stdin' as filename base instead of '-' @midichef
-- [sheets-] on reload, fetch fresh data for URLs @midichef
-- [tar-] add cols for ext and file type desc, use name as keycol @midichef
-
-## Commands
-
-- [plugins] liveupdate, fix broken addcol-new @midichef
-
-## Options
-
-- feat: auto-detect CSV format when csv_delimiter is specified @dennisangemi
-
-## Tweaks
-
-- [column-] improve getMaxWidth values for dict/list/tuple @midichef
-- [features-] hide-uniform-cols: remove cache clear @midichef
-- [input-] if input keeps restarting, error instead of fail @midichef
-- [sheets-] calc col visibility before using nScreenRows @midichef
-- [sheets-] prevent 80x25 layout after redraw @midichef
-- [sidebar-] cache formatter_helpstr for each sheet @midichef
-- [tests-] update ColumnsSheet to have widths immediately @midichef
+- [save-] suggest 'stdin' as filename base instead of '-'
+- [sheets-] on reload, fetch fresh data for URLs
+- [tar-] add cols for ext and file type desc, use name as keycol
+- performance improvements
+- display improvements
 
 ## Bugfixes
 
-- fix: include missing files in MANIFEST.in @chenrui333
+- [archive-] fix extracting to a chosen path
+- [archive-] fix error extracting to overwrite existing file
+- [archive-] fix loading zip files from inside archive files
 
-- [archive-] fix extracting to a chosen path @midichef
-- [archive-] fix error extracting to overwrite existing file @midichef
-- [archive-] fix loading zip files from inside archive files @midichef
+- [cliptext-] fix display of empty markup as several blank lines
+- [cliptext-] restore display translation of unprintable chars
+- [sheets-] remove calcSingleColLayout use of inaccurate visibleRows
 
-- [cliptext-] fix display of empty markup as several blank lines @midichef
-- [cliptext-] restore display translation of unprintable chars @midichef
-- [column-] stop getCell width-doubling for dict/list/tuple @midichef
-- [sheets-] remove calcSingleColLayout use of inaccurate visibleRows @midichef
+- [plugins liveupdate-] fix broken addcol-new
 
-- fix Visidata crash on startup on NetBSD (and probably other \*BSD) wscons tty consoles, which do not expose "mousemask" in their system curses implementations. @russ
-- fix editText for files on command line with -b -i -p (#2840) @midichef
-- fix plugin autoload for Python versions < 3.10 @midichef
+- [curses-] fix crash on startup on NetBSD (and probably other \*BSD) wscons tty consoles, which do not expose "mousemask" in their system curses implementations. @russ
+- [input-] fix editText for files on command line with -b -i -p (#2840)
+- [plugin-] fix autoload for Python versions < 3.10
 
-- [macro-] fix corruption when saving macros after deletion @midichef
-- [reload-] wait for any previous reload_rows to finish #2808 @midichef
+- [macro-] fix corruption when saving macros after deletion #2787
+- [reload-] wait for any previous reload_rows to finish #2808
 - [resize-] fix resize-col-half for new columns with no rows  #2795
 - [sheet-] fix reload on sheets without col layout  #2790
 - [status] fix error when no help_sidebars
 
 ## Cosmetic
 
-- [freqtbl-] stop printing status for selection on source sheet @midichef
-- [input-] handle screen resize during inputMultiple(), editCell(), input() @midichef
-- [sheets-] drop offscreen col from `_visibleColLayout` @midichef
+- [freqtbl-] stop printing status for selection on source sheet
+- [input-] handle screen resize during inputMultiple(), editCell(), input()
 
 # API
 
-- [threads-] add asyncsingle_queue decorator @midichef
-
+- [threads-] add asyncsingle_queue decorator
 
 # v3.2 (2025-06-15)
 
