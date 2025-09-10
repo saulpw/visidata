@@ -1,7 +1,7 @@
 import collections
 import math
 from functools import partial
-from visidata import DrawablePane, BaseSheet, vd, VisiData, CompleteKey, clipdraw, HelpSheet, colors, AcceptInput, AttrDict, drawcache_property, dispwidth
+from visidata import DrawablePane, BaseSheet, vd, VisiData, CompleteKey, clipdraw, HelpSheet, colors, AcceptInput, AttrDict, drawcache_property, dispwidth, EscapeException
 
 
 vd.theme_option('color_cmdpalette', 'black on 72', 'base color of command palette')
@@ -152,6 +152,11 @@ def inputPalette(sheet, prompt, items,
         for i in range(nitems-len(palrows)):
             palrows.append((None, None))
 
+        if not navailitems:
+            def _enter(v, i):
+                raise EscapeException(f'no choice matching {v}')
+            bindings['^J'] = _enter
+            bindings.pop(' ', None)
         used_triggers = set()
         for i, (m, item) in enumerate(palrows):
             trigger_key = ''
