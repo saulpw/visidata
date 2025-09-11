@@ -225,7 +225,7 @@ def mainloop(vd, scr):
             return vd.lastErrors and '\n'.join(vd.lastErrors[-1])
         elif vd.bindkeys._get(vd.keystrokes) is not None:
             try:
-                sheet.execCommand(vd.keystrokes, keystrokes=vd.keystrokes)
+                sheet.execCommand(vd.bindkeys._get(vd.keystrokes), keystrokes=vd.keystrokes)
             except Exception as e:  #2859
                 vd.exceptionCaught(e)
             prefixWaiting = False
