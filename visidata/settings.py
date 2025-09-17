@@ -383,8 +383,12 @@ def getCommand(sheet, cmd):
         return cmd
 
     longname = cmd
+    seen = []
     while vd.bindkeys._get(longname, obj=sheet) is not None:
         longname = vd.bindkeys._get(longname, obj=sheet)
+        if longname in seen:
+            vd.fail(f'keystroke/command definitions form a cycle: {longname}')
+        seen.append(longname)
 
     return vd.commands._get(longname, obj=sheet)
 
