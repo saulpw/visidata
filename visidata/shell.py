@@ -290,5 +290,5 @@ vd.addGlobals({
 
 vd.addMenuItems('''
     Column > Add column > shell > addcol-shell
-    Open > file in row > open-row-filetype
+    Row > Open file > open-row-filetype
 ''')
