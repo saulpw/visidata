@@ -141,7 +141,7 @@ def aggregator_list(vd, name, helpstr='', type=anytype, listtype=anytype):
 def mean(vals):
     vals = list(vals)
     if vals:
-        return float(sum(vals))/len(vals)
+        return sum(vals)/len(vals)
 
 def vsum(vals):
     return sum(vals, start=type(vals[0] if len(vals) else 0)())  #1996
@@ -233,9 +233,9 @@ def aggregate_groups(sheet, col, rows, aggr) -> list:
 
 vd.aggregator('min', min, 'minimum value')
 vd.aggregator('max', max, 'maximum value')
-vd.aggregator('avg', mean, 'arithmetic mean of values', type=float)
-vd.aggregator('mean', mean, 'arithmetic mean of values', type=float)
-vd.aggregator('median', statistics.median, 'median of values')
+vd.aggregator('avg', mean, 'arithmetic mean of values', type=lambda x: x)
+vd.aggregator('mean', mean, 'arithmetic mean of values', type=lambda x: x)
+vd.aggregator('median', statistics.median, 'median of values', type=lambda x: x)
 vd.aggregator('mode', statistics.mode, 'mode of values')
 vd.aggregator('sum', vsum, 'sum of values')
 vd.aggregator('distinct', set, 'distinct values', type=vlen)
