@@ -7,14 +7,8 @@ shopt -s failglob
 
 trap "echo aborted; exit;" SIGINT SIGTERM
 
-export LANG="en_US.UTF-8"
-export LC_COLLATE="en_US.UTF-8"
-export LC_CTYPE="en_US.UTF-8"
-export LC_MESSAGES="en_US.UTF-8"
-export LC_MONETARY="en_US.UTF-8"
-export LC_NUMERIC="en_US.UTF-8"
+export LC_NUMERIC="en_US.UTF-8" # 2867
 export LC_TIME="en_US.UTF-8"
-export LC_ALL=
 
 MAX_PARALLEL_JOBS=1
 while getopts "j:" opt; do
