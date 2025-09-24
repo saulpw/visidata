@@ -378,8 +378,8 @@ def chooseAggregators(vd, prompt = 'choose aggregators: '):
 def addcol_aggregate(sheet, col, aggrnames):
     for aggrname in aggrnames:
         aggrs = vd.aggregators.get(aggrname)
+        if aggrs is None: continue
         aggrs = aggrs if isinstance(aggrs, list) else [aggrs]
-        if not aggrs: continue
         for aggr in aggrs:
             rows = aggregate_groups(sheet, col, sheet.rows, aggr)
             if isinstance(aggr, ListAggregator):
