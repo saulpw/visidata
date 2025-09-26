@@ -1052,11 +1052,9 @@ class TableSheet(BaseSheet):
 
                         sepchars = seps[i]
 
-                        pre = disp_truncator if hoffset != 0 else disp_column_fill
                         display_chunks = []
-                        if colwidth > 2:
-                            display_chunks.append(('', pre))
 
+                        left_hl = False
                         for attr, text in chunks:
                             last = hoffset if hoffset > 0 else 0
                             # note a limitation with Unicode:  the regex can cut a grapheme cluster into codepoints
@@ -1065,6 +1063,7 @@ class TableSheet(BaseSheet):
                                 m1 = m.start()
                                 m2 = m.end()
                                 if m1 < hoffset:
+                                    left_hl = True
                                     if m2 <= hoffset:
                                         continue
                                     m1 = hoffset
@@ -1074,6 +1073,9 @@ class TableSheet(BaseSheet):
                                 last = m2
                             if last < len(text):
                                 display_chunks.append((attr, text[last:]))
+                        if colwidth > 2:
+                            pre = disp_truncator if hoffset != 0 else disp_column_fill
+                            display_chunks.insert(0, (hl_attr if left_hl else cattr, pre))
 
                         clipdraw_chunks(scr, y, x, display_chunks, cattr if i < height-1 else bottomcattr, w=colwidth-notewidth)
                         vd.onMouse(scr, x, y, colwidth, 1, BUTTON3_RELEASED='edit-cell')
