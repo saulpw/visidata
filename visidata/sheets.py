@@ -1055,6 +1055,8 @@ class TableSheet(BaseSheet):
                         display_chunks = []
 
                         left_hl = False
+                        right_hl = False
+                        dispw = 0
                         for attr, text in chunks:
                             last = hoffset if hoffset > 0 else 0
                             # note a limitation with Unicode:  the regex can cut a grapheme cluster into codepoints
@@ -1068,16 +1070,29 @@ class TableSheet(BaseSheet):
                                         continue
                                     m1 = hoffset
                                 if m1 > last:
-                                    display_chunks.append((attr, text[last:m1]))
-                                display_chunks.append((hl_attr, text[m1:m2]))
+                                    s = text[last:m1]
+                                    display_chunks.append((attr, s))
+                                    dispw += dispwidth(s)
+                                s = text[m1:m2]
+                                display_chunks.append((hl_attr, s))
+                                dispw += dispwidth(text[m1:m2])
+                                if dispw > colwidth-notewidth-1:
+                                    right_hl = True
+                                    last = len(text)
+                                    break
                                 last = m2
                             if last < len(text):
-                                display_chunks.append((attr, text[last:]))
+                                s = text[last:]
+                                display_chunks.append((attr, s))
+                                dispw += dispwidth(s)
                         if colwidth > 2:
                             pre = disp_truncator if hoffset != 0 else disp_column_fill
                             display_chunks.insert(0, (hl_attr if left_hl else cattr, pre))
 
                         clipdraw_chunks(scr, y, x, display_chunks, cattr if i < height-1 else bottomcattr, w=colwidth-notewidth)
+                        if right_hl:
+                            hl_attr = update_attr(cattr, hl_attr, 100)
+                            clipdraw(scr, y, x+(colwidth-notewidth-1), disp_truncator, hl_attr, w=dispwidth(disp_truncator))
                         vd.onMouse(scr, x, y, colwidth, 1, BUTTON3_RELEASED='edit-cell')
 
                         if sepchars and x+colwidth+dispwidth(sepchars) <= self.windowWidth-1:
