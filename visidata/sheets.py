@@ -1064,11 +1064,16 @@ class TableSheet(BaseSheet):
                             for m in matches:
                                 m1 = m.start()
                                 m2 = m.end()
-                                display_chunks.append((attr, shown[last:m1]))
-                                display_chunks.append((hl_attr, shown[m1:m2]))
+                                if m1 < hoffset:
+                                    if m2 <= hoffset:
+                                        continue
+                                    m1 = hoffset
+                                if m1 > last:
+                                    display_chunks.append((attr, text[last:m1]))
+                                display_chunks.append((hl_attr, text[m1:m2]))
                                 last = m2
                             if last < len(text):
-                                display_chunks.append((attr, shown[last:]))
+                                display_chunks.append((attr, text[last:]))
 
                         clipdraw_chunks(scr, y, x, display_chunks, cattr if i < height-1 else bottomcattr, w=colwidth-notewidth)
                         vd.onMouse(scr, x, y, colwidth, 1, BUTTON3_RELEASED='edit-cell')
