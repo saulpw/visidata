@@ -87,8 +87,8 @@ class GraphSheet(InvertedCanvas):
         self.ycols or vd.fail('%s is non-numeric' % '/'.join(yc.name for yc in kwargs.get('ycols')))
 
     def resetCanvasDimensions(self, windowHeight, windowWidth):
-        if self.left_margin < self.ylabel_maxw:
-            self.left_margin = self.ylabel_maxw
+        # 1 char for y-name, 1 char for blank, 10 chars for y-tick-labels
+        self.left_margin = 4 + 20
         super().resetCanvasDimensions(windowHeight, windowWidth)
 
     @asyncthread
@@ -250,13 +250,9 @@ class GraphSheet(InvertedCanvas):
     def add_y_axis_label(self, frac):
         label_data_y = self.visibleBox.ymin + frac*self.visibleBox.h
         txt = self.formatYLabel(label_data_y)
-        w = (dispwidth(txt)+1)*2
-        if self.ylabel_maxw < w:
-            self.ylabel_maxw = w
         y = self.scaleY(label_data_y)
-
-        # plot y-axis labels on the far left of the canvas, but within the plotview height-wise
-        self.plotlabel(0, y, txt, 'graph_axis')
+        x = 4 # start after y-name and blank space
+        self.plotlabel(x, y, txt, 'graph_axis')
 
     def add_x_axis_label(self, frac):
         label_data_x = self.visibleBox.xmin + frac*self.visibleBox.w
@@ -283,9 +279,16 @@ class GraphSheet(InvertedCanvas):
 
     def createLabels(self):
         self.gridlabels = []
-        self.ylabel_maxw = self.leftMarginPixels
 
-        # y-axis
+        # y-axis name
+        yname = ','.join(ycol.name for ycol in self.ycols)
+        y_center = self.plotviewBox.ymin + self.plotviewBox.h / 2
+        label_height_pixels = len(yname) * 4
+        y_start = y_center + label_height_pixels / 2
+        for i, char in enumerate(reversed(yname)):
+            self.plotlabel(0, y_start - i*4, char, 'graph_axis')
+
+        # y-axis ticks
         self.add_y_axis_label(1.00)
         self.add_y_axis_label(0.75)
         self.add_y_axis_label(0.50)
@@ -303,8 +306,10 @@ class GraphSheet(InvertedCanvas):
         # TODO: grid lines corresponding to axis labels
 
         xname = ','.join(xcol.name for xcol in self.xcols if vd.isNumeric(xcol)) or 'row#'
-        xname, _ = clipstr(xname, self.left_margin//2-2)
-        self.plotlabel(0, self.plotviewBox.ymax+4, xname+'»', 'graph_axis')
+        x_center = self.plotviewBox.xmin + self.plotviewBox.w / 2
+        label_width_pixels = dispwidth(xname) * 2
+        start_x = x_center - label_width_pixels / 2
+        self.plotlabel(start_x, self.plotviewBox.ymax+8, xname, 'graph_axis')
 
     def rowsWithin(self, plotter_bbox):
         'return list of deduped rows within plotter_bbox'

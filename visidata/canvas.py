@@ -355,7 +355,7 @@ class Canvas(Plotter):
     leftMarginPixels = 10*2
     rightMarginPixels = 4*2
     topMarginPixels = 0*4
-    bottomMarginPixels = 1*4  # reserve bottom line for x axis
+    bottomMarginPixels = 2*4  # reserve bottom line for x axis
     guide = '# Canvas\n'
 
     def __init__(self, *names, **kwargs):
