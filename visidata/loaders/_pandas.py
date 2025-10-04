@@ -358,7 +358,7 @@ class PandasSheet(Sheet):
         # There may be a better way to handle that case.
         vd.addUndo(self.addRows, oldrow.to_dict(), rowidx, undo=False)
         self._deleteRows(rowidx)
-        vd.memory.cliprows = [oldrow]
+        vd.setClipboardRows([oldrow])
         self.setModified()
 
     def deleteBy(self, by):

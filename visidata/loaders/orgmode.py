@@ -418,8 +418,8 @@ OrgSheet.addCommand('g^J', 'expand-selected', 'openRows(selectedRows)')
 OrgSheet.addCommand('gz^J', 'close-selected', 'closeRows(selectedRows)')
 OrgSheet.addCommand('ga', 'combine-selected', 'addRows([combine_rows(selectedRows)], index=cursorRowIndex); cursorDown(1)', 'combine selected rows into new org entry')
 
-OrgSheet.addCommand('zp', 'paste-data', 'paste_data_into(cursorRow, vd.memory.cliprows, vd.memory.clipcols)', 'move clipboard rows to children of current row')
-OrgSheet.addCommand('p', 'paste-sections', 'paste_data_into(cursorRow, vd.memory.cliprows, vd.memory.clipcols)', 'move clipboard rows to children of current row')
+OrgSheet.addCommand('zp', 'paste-data', 'paste_data_into(cursorRow, vd.getClipboardRows(), vd.getClipboardCols())', 'move clipboard rows to children of current row')
+OrgSheet.addCommand('p', 'paste-sections', 'paste_data_into(cursorRow, vd.getClipboardRows(), vd.getClipboardCols())', 'move clipboard rows to children of current row')
 OrgSheet.addCommand('g^S', 'save-all', 'save_all()', 'save all org files')
 
 

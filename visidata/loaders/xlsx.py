@@ -96,7 +96,7 @@ class XlsxSheet(SequenceSheet):
                            getter=lambda c,r: c.sheet.colorize_xlsx_cell(c,r)))
 
     def paste_after(self, rowidx):
-        to_paste = list(copy.copy(r) for r in reversed(vd.memory.cliprows))
+        to_paste = list(copy.copy(r) for r in reversed(vd.getClipboardRows()))
         self.addRows(to_paste, index=rowidx)
 
 
