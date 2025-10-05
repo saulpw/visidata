@@ -171,7 +171,7 @@ def paste_after(sheet, rowidx):
         vd.warning('nothing to paste from cliprows')
         return
 
-    for col in vd.getClipcols()[sheet.nVisibleCols:]:
+    for col in vd.getClipboardCols()[sheet.nVisibleCols:]:
         newcol = SettableColumn()
         newcol.__setstate__(col.__getstate__())
         sheet.addColumn(newcol)
@@ -183,7 +183,7 @@ def paste_after(sheet, rowidx):
             newrow = copy(extrow)
         else:
             newrow = sheet.newRow()
-            for col, extcol in zip(sheet.visibleCols, vd.getClipcols()):
+            for col, extcol in zip(sheet.visibleCols, vd.getClipboardCols()):
                 col.setValue(newrow, extcol.getTypedValue(extrow))
 
         addedRows.append(newrow)
