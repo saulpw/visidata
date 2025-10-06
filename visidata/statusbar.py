@@ -147,7 +147,7 @@ def debug(vd, *args, **kwargs):
         return vd.status(*args, **kwargs)
 
 def middleTruncate(s, w):
-    if len(s) <= w:
+    if len(s) <= 2*w:
         return s
     return s[:w] + options.disp_truncator + s[-w:]
 
