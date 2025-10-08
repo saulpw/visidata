@@ -165,8 +165,14 @@ class HtmlTableSheet(Sheet):
             it = itertools.zip_longest(*headers, fillvalue='')
         else:
             if len(self.rows) > 0:
-                it = list(list(x) for x in self.rows.pop(0))
-                it += [''] * (ncols-len(it))
+                if self.options.header == 0:
+                    it = ['']*ncols
+                else:
+                    it = []
+                    for _ in range(self.options.header):
+                        r = list(list(x) for x in self.rows.pop(0))
+                        r += ['']*(ncols-len(r))
+                        it = [a+b for a, b in zip(it, r)] if it else r
             else:
                 it = []
 
