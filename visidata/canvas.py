@@ -587,8 +587,12 @@ class Canvas(Plotter):
             ymax = ymax or 0
             if xmin == xmax:
                 xmax += 1
+                if xmin == xmax:  #handle large floats that were unchanged by += 1
+                    xmin = xmin * 0.99  #the alternative of increasing xmax could hit infinity
             if ymin == ymax:
                 ymax += 1
+                if ymin == ymax:
+                    ymin = ymin * 0.99
             self.canvasBox = BoundingBox(float(xmin), float(ymin), float(xmax), float(ymax))
 
         w = self.calcVisibleBoxWidth()
