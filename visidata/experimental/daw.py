@@ -2,14 +2,13 @@ import socket
 import json
 from collections import defaultdict
 
-from visidata import VisiData, Sheet, ItemColumn, asyncthread, AttrDict
+from visidata import VisiData, Sheet, ItemColumn, asyncthread, AttrDict, vlen
 
 TODO = '''
-2. save transcript as .md
-   + command to combine selected rows into runs by speaker
-   + reexpand combined row
-   + change current row speaker, cycle through speakers
-   ? edit text (is current vd edit sufficient?)
+   - undo combining
+   - changing speakers should set speaker on all baserows?
+
+3. save round-trippable json .transcript (for now)
 
 3. playback movement
    - show current playback timestamp on status line
@@ -53,6 +52,7 @@ class PodcastEditingSheet(Sheet):
         ItemColumn('end', type=float),
         ItemColumn('score', type=float, width=0),
         ItemColumn('word', width=80),
+        ItemColumn('baserows', type=vlen, width=0),
     ]
     nKeys = 1
 
@@ -89,7 +89,7 @@ class PodcastEditingSheet(Sheet):
             self.rows.remove(r)
 
     def expand_row(self, rowidx):
-        self.rows[rowidx:rowidx+1] = self.rows[rowidx].baserows
+        self.rows[rowidx:rowidx+1] = [AttrDict(r) for r in self.rows[rowidx].baserows]
 
     def cycle_speaker(self, row):
         speakers = list(self.speakers.keys())
@@ -104,9 +104,17 @@ def save_xmd(vd, p, sheet):
         for row in sheet.rows:
             fp.write(f'[{row.start:0.1f}] {row.speaker}: {row.word}\n\n')
 
+PodcastEditingSheet.options.save_filetype = 'transcript'
+
+@VisiData.api
+def save_transcript(vd, p, sheet):
+    with p.open(mode='w', encoding='utf-8') as fp:
+        d = dict(word_segments=sheet.rows)
+        fp.write(json.dumps(d)+'\n')
 
 PodcastEditingSheet.addCommand('1', 'audio-pause', 'audio_pause(True)')
 PodcastEditingSheet.addCommand('2', 'play-row', 'play_audio(cursorRow)')
 PodcastEditingSheet.addCommand('3', 'combine-selected', 'combine_rows(selectedRows)')
 PodcastEditingSheet.addCommand('4', 'expand-row', 'expand_row(cursorRowIndex)')
+PodcastEditingSheet.addCommand('g4', 'expand-selected', 'for row in selectedRows: expand_row(rows.index(row))')
 PodcastEditingSheet.addCommand('5', 'cycle-speaker', 'cycle_speaker(cursorRow)')
