@@ -387,6 +387,7 @@ def main_vd():
 
 def vd_cli():
     rc = -1
+    os.setpgrp()
     try:
         rc = main_vd()
     except BrokenPipeError:
@@ -404,4 +405,8 @@ def vd_cli():
 
     sys.stderr.flush()
     sys.stdout.flush()
+
+    signal.signal(signal.SIGTERM, signal.SIG_IGN)  # ignore the coming SIGTERM
+    os.killpg(os.getpgrp(), signal.SIGTERM)  # kill all subprocesses in our process group
+
     os._exit(rc)  # cleanup can be expensive with large datasets
