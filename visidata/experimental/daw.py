@@ -10,22 +10,22 @@ from visidata import vd, VisiData, Sheet, ItemColumn, asyncthread, AttrDict, vle
 
 
 TODO = '''
+- JSONDecodeError: sometimes query gets extra data with json.  make line buffering?
+
+- status of cut position: "cut 55ms after start of 'hello'"
+- keep playhead and row cursor in sync?
+- don't settle after 1second
 - undo combining
 - changing speakers should set speaker on all baserows?
-- keep playhead and row cursor in sync?
 - highlight current word in transcript?
 - visidata multiline for all lines at once
 
-3. playback movement
-   + launch mpv process with audio from transcript
-   + show current playback timestamp on status line
-   + [ / ] to play backward/forward 10s (z[ for 1s, g[ for 1 minute)
-     - sort still accessible via longname
-
 4. add marker
-   - 'a' to add marker at current timestamp
-      - may split row (with name or note inserted between)
-   - < / > to start playback at previous/next marker (g< to first marker, g> to last marker)
+   + 'a' to add marker at current timestamp
+      + may split row (with name or note inserted between)
+   + < / > to start playback at previous/next marker (g< to first marker, g> to last marker)
+   + z< and z> to adjust the previous marker
+   - play 100ms tone between segments
    - colorize marker rows
 
 5. basic editing
@@ -45,6 +45,31 @@ TODO = '''
 6. playback should skip cut sections
 '''
 
+def to_hms(t:float) -> str:
+    'Return HH:MM:SS.s'
+    h = int(t // 3600)
+    m = int((t % 3600) // 60)
+    s = int(t % 60)
+    ms = int((t - int(t))*10)
+    return f'{h:02d}:{m:02d}:{s:02d}.{ms:01d}'
+
+
+def flatten_rows(rows):
+    'Iterate through all baserows at the bottom of all rows.'
+    for r in rows:
+        if r.baserows:
+            yield from flatten_rows(r.baserows)
+        else:
+            yield r
+
+
+def replace_baserows(row):
+    'Turn row into AttrDict, recursively making its baserows also AttrDicts.'
+    r = AttrDict(row)
+    r.baserows = [replace_baserows(baser) for baser in (r.baserows or [])]
+    return r
+
+
 @VisiData.api
 def open_transcript(vd, p):
     '''path is transcript in JSON format; audio should be path.mp3'''
@@ -54,8 +79,10 @@ def open_transcript(vd, p):
 class PodcastEditingSheet(Sheet):
     columns = [
         ItemColumn('speaker'),
-        ItemColumn('start', type=float),
-        ItemColumn('end', type=float),
+        ItemColumn('start', type=to_hms),
+        ItemColumn('end', type=to_hms),
+        #ItemColumn('start', type=float),
+        #ItemColumn('end', type=float),
         ItemColumn('score', type=float, width=0),
         ItemColumn('word', width=80),
         ItemColumn('baserows', type=vlen, width=0),
@@ -74,7 +101,7 @@ class PodcastEditingSheet(Sheet):
 
         for word in d['word_segments']:
             self.speakers[word['speaker']].append(word)
-            yield AttrDict(word)
+            yield replace_baserows(word)
 
     def start_mpv(self):
         if os.path.exists(self.mpvsockfn):
@@ -135,19 +162,60 @@ class PodcastEditingSheet(Sheet):
         row.speaker = speakers[(speakers.index(row.speaker)+1)%len(speakers)]
 
     @property
+    def playback_time(self):
+        return float(self.mpv_query('playback-time'))
+
+    def getRowIndexByPlaytime(self, t:float, rows=None) -> int:
+        for i, r in enumerate(rows or self.rows):
+            if t <= r.end:  # when playhead is before line end for the first time
+                return i
+
+        vd.error(f'time {to_hms(t)} not found')
+
+    def go_playhead(self):
+        t = self.playback_time
+        self.cursorRowIndex = self.getRowIndexByPlaytime(t)
+
+    def add_marker(self):
+        t = self.playback_time
+        idx = self.getRowIndexByPlaytime(t)
+        row = self.rows[idx]
+        baseidx = self.getRowIndexByPlaytime(t, row.baserows)
+
+        # create new row with second part
+        newbaserows = row.baserows[baseidx:]
+        newrow = AttrDict(word=' '.join(r.word for r in flatten_rows(newbaserows)),
+                          speaker=row.speaker,
+                          start=row.baserows[baseidx].start,
+                          end=row.end,
+                          baserows=newbaserows)
+
+        # fix old row with first part
+        row.end = row.baserows[baseidx-1].end
+        row.baserows = row.baserows[:baseidx]
+        row.word = ' '.join(r.word for r in flatten_rows(row.baserows))
+
+        # XXX: should this be actual mark time or squarely between split words?
+        markertime = t  # (newrow.start + row.end)/2
+        self.addRow(AttrDict(word='', speaker='marker', start=markertime, end=markertime, baserows=[]), index=idx+1)
+        self.addRow(newrow, index=idx+2)
+
+    def go_marker_next(self, didx:int, startrow:int):
+        i = startrow
+        while 0 <= i < self.nRows-(0 if didx < 0 else 1):
+            i += didx
+            if self.rows[i].speaker == 'marker':
+                self.cursorRowIndex = i
+                return
+        vd.fail("no marker")
+
+    @property
     def playheadStatus(self):
         try:
-            return to_hms(float(self.mpv_query('playback-time')))
+            return to_hms(self.playback_time)
         except Exception as e:
-            vd.exceptionCaught(e)
-
-def to_hms(t:float) -> str:
-    'Return HH:MM:SS.s'
-    h = int(t // 3600)
-    m = int((t % 3600) // 60)
-    s = int(t % 60)
-    ms = int((t - int(t))*10)
-    return f'{h:02d}:{m:02d}:{s:02d}.{ms:01d}'
+            if vd.options.debug:
+                vd.exceptionCaught(e)
 
 @VisiData.api
 def save_xmd(vd, p, sheet):
@@ -159,20 +227,27 @@ def save_xmd(vd, p, sheet):
 
 @VisiData.api
 def save_transcript(vd, p, sheet):
+    d = dict(word_segments=sheet.rows, sourceaudio=sheet.sourceaudio)
     with p.open(mode='w', encoding='utf-8') as fp:
-        d = dict(word_segments=sheet.rows, sourceaudio=self.sourceaudio)
         fp.write(json.dumps(d)+'\n')
 
 PodcastEditingSheet.options.save_filetype = 'transcript'
 PodcastEditingSheet.options.disp_rstatus_fmt = '{sheet.playheadStatus}  ' + Sheet.options.disp_rstatus_fmt
 
-PodcastEditingSheet.addCommand('1', 'play-row', 'play_audio(cursorRow)')
+PodcastEditingSheet.addCommand('p', 'play-row', 'play_audio(cursorRow)')
 PodcastEditingSheet.addCommand('2', 'audio-pause', 'audio_pause(True)')
 PodcastEditingSheet.addCommand('3', 'combine-selected', 'combine_rows(selectedRows)')
 PodcastEditingSheet.addCommand('4', 'expand-row', 'expand_row(cursorRowIndex)')
 PodcastEditingSheet.addCommand('g4', 'expand-selected', 'for row in selectedRows: expand_row(rows.index(row))')
 PodcastEditingSheet.addCommand('5', 'cycle-speaker', 'cycle_speaker(cursorRow)')
-PodcastEditingSheet.addCommand('[', 'audio-back-10', 'seek_audio(-10)')
-PodcastEditingSheet.addCommand(']', 'audio-forward-10', 'seek_audio(+10)')
-PodcastEditingSheet.addCommand('g[', 'audio-back-60', 'seek_audio(-60)')
-PodcastEditingSheet.addCommand('g]', 'audio-forward-60', 'seek_audio(+60)')
+PodcastEditingSheet.addCommand('[', 'audio-back-10', 'seek_audio(-10); go_playhead()')
+PodcastEditingSheet.addCommand(']', 'audio-forward-10', 'seek_audio(+10); go_playhead()')
+PodcastEditingSheet.addCommand('g[', 'audio-back-60', 'seek_audio(-60); go_playhead()')
+PodcastEditingSheet.addCommand('g]', 'audio-forward-60', 'seek_audio(+60); go_playhead()')
+PodcastEditingSheet.addCommand('gg', 'go-playhead', 'go_playhead()', 'move row cursor to playhead' )
+
+PodcastEditingSheet.addCommand('a', 'add-marker', 'add_marker()', 'add marker at current playhead, splitting if necessary')
+PodcastEditingSheet.addCommand('<', 'go-marker-prev', 'go_marker_next(-1, cursorRowIndex)', 'move row cursor to previous marker')
+PodcastEditingSheet.addCommand('>', 'go-marker-next', 'go_marker_next(+1, cursorRowIndex)', 'move row cursor to next marker')
+PodcastEditingSheet.addCommand('g<', 'go-marker-first', 'go_marker_next(+1, 0)', 'move row cursor to first marker')
+PodcastEditingSheet.addCommand('g>', 'go-marker-last', 'go_marker_next(-1, nRows-1)', 'move row cursor to last marker')
