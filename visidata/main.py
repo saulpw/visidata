@@ -402,4 +402,5 @@ def vd_cli():
 
     sys.stderr.flush()
     sys.stdout.flush()
+    os.killpg(os.getpgrp(), signal.SIGTERM)
     os._exit(rc)  # cleanup can be expensive with large datasets
