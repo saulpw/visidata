@@ -6,27 +6,21 @@ import os.path
 import socket
 import subprocess
 
-from visidata import vd, VisiData, Sheet, ItemColumn, asyncthread, AttrDict, vlen
+from visidata import vd, VisiData, Sheet, ItemColumn, asyncthread, AttrDict, vlen, RowColorizer
+
+vd.theme_option('color_daw_marker', 'white on blue', 'color of marker rows in the DAW')
 
 
 TODO = '''
 - JSONDecodeError: sometimes query gets extra data with json.  make line buffering?
-
-- status of cut position: "cut 55ms after start of 'hello'"
-- keep playhead and row cursor in sync?
-- don't settle after 1second
 - undo combining
 - changing speakers should set speaker on all baserows?
 - highlight current word in transcript?
 - visidata multiline for all lines at once
 
 4. add marker
-   + 'a' to add marker at current timestamp
-      + may split row (with name or note inserted between)
-   + < / > to start playback at previous/next marker (g< to first marker, g> to last marker)
-   + z< and z> to adjust the previous marker
+   - z< and z> to adjust the previous marker
    - play 100ms tone between segments
-   - colorize marker rows
 
 5. basic editing
    - add edit column
@@ -73,6 +67,7 @@ def replace_baserows(row):
 @VisiData.api
 def open_transcript(vd, p):
     '''path is transcript in JSON format; audio should be path.mp3'''
+    vd.timeouts_before_idle = -1
     return PodcastEditingSheet(p.name, source=p)
 
 
@@ -86,6 +81,9 @@ class PodcastEditingSheet(Sheet):
         ItemColumn('score', type=float, width=0),
         ItemColumn('word', width=80),
         ItemColumn('baserows', type=vlen, width=0),
+    ]
+    colorizers = [
+            RowColorizer(5, 'color_daw_marker', lambda s,c,r,v: r.speaker == 'marker')
     ]
     nKeys = 1
 
@@ -134,6 +132,10 @@ class PodcastEditingSheet(Sheet):
 
     def audio_pause(self, b=True):
         self.mpv_command(command=['set_property', 'pause', b])
+
+    @property
+    def paused(self):
+        return self.mpv_query('pause')
 
     def play_audio(self, row):
         self.seek_audio(row.start, 'absolute')
@@ -190,6 +192,9 @@ class PodcastEditingSheet(Sheet):
                           end=row.end,
                           baserows=newbaserows)
 
+        if t > newrow.start:
+            vd.status(f'cut {int((t-newrow.start)*1000)}ms after start of "{newrow.word[:7]}"')
+
         # fix old row with first part
         row.end = row.baserows[baseidx-1].end
         row.baserows = row.baserows[:baseidx]
@@ -217,6 +222,14 @@ class PodcastEditingSheet(Sheet):
             if vd.options.debug:
                 vd.exceptionCaught(e)
 
+    def checkCursor(self):
+        super().checkCursor()
+        if not self.paused and self.cursorRowIndex < self.nRows-1:
+            nextrow = self.rows[self.cursorRowIndex+1]
+            if nextrow.start <= self.playback_time <= nextrow.end:
+                self.cursorRowIndex += 1
+
+
 @VisiData.api
 def save_xmd(vd, p, sheet):
     assert isinstance(sheet, PodcastEditingSheet)
@@ -235,7 +248,7 @@ PodcastEditingSheet.options.save_filetype = 'transcript'
 PodcastEditingSheet.options.disp_rstatus_fmt = '{sheet.playheadStatus}  ' + Sheet.options.disp_rstatus_fmt
 
 PodcastEditingSheet.addCommand('p', 'play-row', 'play_audio(cursorRow)')
-PodcastEditingSheet.addCommand('2', 'audio-pause', 'audio_pause(True)')
+PodcastEditingSheet.addCommand('P', 'audio-pause', 'audio_pause(True)')
 PodcastEditingSheet.addCommand('3', 'combine-selected', 'combine_rows(selectedRows)')
 PodcastEditingSheet.addCommand('4', 'expand-row', 'expand_row(cursorRowIndex)')
 PodcastEditingSheet.addCommand('g4', 'expand-selected', 'for row in selectedRows: expand_row(rows.index(row))')
