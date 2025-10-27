@@ -1,17 +1,30 @@
 from collections import defaultdict
 
 import json
+import copy
+import time
 import os
 import os.path
 import socket
 import subprocess
 
-from visidata import vd, VisiData, Sheet, ItemColumn, asyncthread, AttrDict, vlen, RowColorizer
+from visidata import vd, VisiData, Sheet, ItemColumn, asyncthread, AttrDict, vlen, RowColorizer, setitem
 
 vd.theme_option('color_daw_marker', 'white on blue', 'color of marker rows in the DAW')
 
 
 TODO = '''
+- get better transcript, speaker differentiated by channel (but there is channel leakage)
+
+- WEIRD: editing value on filter parms sheet updates value?!  how is it working?!
+- WEIRD: agate with ratio=1 disables it?  what does ratio parm do?!
+
+- add loudnorm filter
+- add compand filter
+- switch between filters with 'f'
+
+
+- sync gets lost if a word is <100ms
 - JSONDecodeError: sometimes query gets extra data with json.  make line buffering?
 - undo combining
 - changing speakers should set speaker on all baserows?
@@ -86,63 +99,33 @@ class PodcastEditingSheet(Sheet):
             RowColorizer(5, 'color_daw_marker', lambda s,c,r,v: r.speaker == 'marker')
     ]
     nKeys = 1
+    mpv = None
 
-    @property
-    def mpvsockfn(self):
-        return '/tmp/vdmpv'
+    curfilter = 'agate'
+    curparm = 'ratio'
 
     def iterload(self):
         d = json.loads(self.source.open_text().read())
         self.speakers = defaultdict(list)  # speakername -> list of words/baserows
-        self.sourceaudio = d.get('sourceaudio', None) or str(self.source.with_suffix('.mp3'))
-        self.start_mpv()
+        sourceaudio = d.get('sourceaudio', None)
+        if not sourceaudio:
+            if self.source.with_suffix('.mp3').exists():
+                sourceaudio = str(self.source.with_suffix('.mp3'))
+            elif self.source.with_suffix('.wav').exists():
+                sourceaudio = str(self.source.with_suffix('.wav'))
 
-        for word in d['word_segments']:
-            self.speakers[word['speaker']].append(word)
-            yield replace_baserows(word)
+        if sourceaudio:
+            self.mpv = MpvProcess(sourceaudio, self)
+            self.mpv.start_mpv()
+        else:
+            vd.warning("no matching audio file")
 
-    def start_mpv(self):
-        if os.path.exists(self.mpvsockfn):
-            os.unlink(self.mpvsockfn)
-
-        if not os.path.exists(self.mpvsockfn):
-            if not os.path.exists(self.sourceaudio):
-                vd.warning(f'{self.sourceaudio} does not exist')
-                return
-
-            p = subprocess.Popen(f'/usr/bin/mpv --input-ipc-server={self.mpvsockfn} {self.sourceaudio} --no-terminal', shell=True)
-
-    def mpv_command(self, **kwargs):
-        sock = socket.socket(socket.AF_UNIX)
-        sock.connect(self.mpvsockfn)
-        sock.sendall(json.dumps(kwargs).encode() + b'\n')
-        sock.close()
-
-    def mpv_query(self, propname):
-        sock = socket.socket(socket.AF_UNIX)
-        sock.connect(self.mpvsockfn)
-        sock.sendall(json.dumps(dict(command=['get_property', propname])).encode() + b'\n')
-        r = sock.recv(4096)
-        d = json.loads(r)
-        if d['error'] != 'success':
-            vd.error(d)
-
-        sock.close()
-        return d['data']
-
-    def audio_pause(self, b=True):
-        self.mpv_command(command=['set_property', 'pause', b])
-
-    @property
-    def paused(self):
-        return self.mpv_query('pause')
-
-    def play_audio(self, row):
-        self.seek_audio(row.start, 'absolute')
-        self.audio_pause(False)
-
-    def seek_audio(self, dt:float, *args):
-        self.mpv_command(command=['seek', str(dt), *args])
+        try:
+            for word in d['word_segments']:
+                self.speakers[word.get('speaker', None)].append(word)
+                yield replace_baserows(word)
+        except Exception as e:
+            vd.exceptionCaught(e)
 
     def combine_rows(self, rows):
         newrow = None
@@ -163,10 +146,6 @@ class PodcastEditingSheet(Sheet):
         speakers = list(self.speakers.keys())
         row.speaker = speakers[(speakers.index(row.speaker)+1)%len(speakers)]
 
-    @property
-    def playback_time(self):
-        return float(self.mpv_query('playback-time'))
-
     def getRowIndexByPlaytime(self, t:float, rows=None) -> int:
         for i, r in enumerate(rows or self.rows):
             if t <= r.end:  # when playhead is before line end for the first time
@@ -175,11 +154,11 @@ class PodcastEditingSheet(Sheet):
         vd.error(f'time {to_hms(t)} not found')
 
     def go_playhead(self):
-        t = self.playback_time
+        t = self.mpv.playback_time
         self.cursorRowIndex = self.getRowIndexByPlaytime(t)
 
     def add_marker(self):
-        t = self.playback_time
+        t = self.mpv.playback_time
         idx = self.getRowIndexByPlaytime(t)
         row = self.rows[idx]
         baseidx = self.getRowIndexByPlaytime(t, row.baserows)
@@ -217,17 +196,181 @@ class PodcastEditingSheet(Sheet):
     @property
     def playheadStatus(self):
         try:
-            return to_hms(self.playback_time)
+            return to_hms(self.mpv.playback_time)
         except Exception as e:
             if vd.options.debug:
                 vd.exceptionCaught(e)
 
     def checkCursor(self):
         super().checkCursor()
-        if not self.paused and self.cursorRowIndex < self.nRows-1:
+        if self.mpv.paused: return
+        if self is not vd.sheets[0]: return  # disable sync if not top sheet
+
+        if self.cursorRowIndex < self.nRows-1:
             nextrow = self.rows[self.cursorRowIndex+1]
-            if nextrow.start <= self.playback_time <= nextrow.end:
+            if nextrow.start <= self.mpv.playback_time <= nextrow.end:
                 self.cursorRowIndex += 1
+
+    def input_afilter_parm(self):
+        def _fmt_afilter_parm(match, row, trigger_key):
+            return f'{row.key} - {row.desc}'
+
+        return vd.activeSheet.inputPalette('choose your filter parameter: ',
+                self.mpv.afilters[self.curfilter],
+                value_key='key',
+                formatter=_fmt_afilter_parm,
+#                help=vd.help_join,
+                type='afilter')
+
+    def setFilterParmByIndex(self, filtername, parmname, idxvalue):
+        self.mpv.set_filter_parm(filtername, parmname, self.mpv.afilter_options[filtername][parmname][idxvalue])
+
+
+class MpvProcess:
+    mpvproc = None
+
+    afilters = dict(agate=[
+        AttrDict(key=k, desc=desc) for k, desc in dict(
+            level_in='input level before filtering',
+            mode='upward=higher parts amplified; downward=lower parts reduced',
+            range='level of gain reduction when the signal is below the threshold',
+            threshold='If a signal rises above this level the gain reduction is released',
+            ratio='ratio by which the signal is reduced',
+            attack='milliseconds the signal has to rise above the threshold before gain reduction stops',
+            release='milliseconds the signal has to fall below the threshold before the reduction is increased again',
+            makeup='amount of amplification of signal after processing',
+            knee='Curve the sharp knee around the threshold to enter gain reduction more softly',
+            detection='if exact signal should be taken for detection or an RMS like one',
+            link='if the average level between all channels or the louder channel affects the reduction'
+         ).items()])
+    # possible values across buttons 0 (default) to 9
+    afilter_options = dict(agate=dict(level_in=[1, 0.015625, 0.03, 0.1, 0.3, 1, 3, 10, 30, 64],
+                                mode=['downward', 'upward'],
+                                range=[0.06125,.1,.2,.3,.4,.5,.6,.7,.8,.9],
+                                threshold=[0.125,.1,.2,.3,.4,.5,.6,.7,.8,.9],
+                                ratio=[1,2,4,8,16,32,64,128,256,9000],
+                                attack=[20, 0.01, .1, 1, 3, 10, 30, 100, 1000, 9000],
+                                release=[250, 0.01, .1, 1, 3, 10, 30, 100, 1000, 9000],
+                                makeup=[1,1,2,3,4,6,8,16,32,64],
+                                knee=[2.828427,1,2,2.8,3,4,5,6,7,8],
+                                detection=['rms', 'peak'],
+                                link=['average', 'maximum']),
+                           )
+    # available filters and filter parameters with their default values
+    afilter_defaults = dict(agate=dict(level_in=1,
+                                mode='downward',
+                                range=0.06125,
+                                threshold=0.125,
+                                ratio=2,
+                                attack=20,  # ms
+                                release=250, # ms
+                                makeup=1,
+                                knee=2.828427, # 2*sqrt(2)
+                                detection='rms',
+                                link='average'),
+                            )
+
+    # currently set filter values
+    afilter_parms = copy.deepcopy(afilter_defaults)
+
+    def __init__(self, sourcefn, source:Sheet):
+        self.sourceaudio = sourcefn
+        self.mpvproc = None
+        self.source = source
+
+    def set_filter_parm(self, filtername, parmname, val):
+        self.afilter_parms[filtername][parmname] = val
+        self.restart_mpv(self.source.cursorRow.start) # self.playback_time
+
+    @property
+    def mpvsockfn(self):
+        return '/tmp/vdmpv'
+
+    def restart_mpv(self, t:float):
+        self.start_mpv()
+        time.sleep(0.5)
+        self.seek_audio(t, 'absolute')
+        self.audio_pause(False)
+
+    def is_default(self, filtername, parmname, val):
+        return val == self.afilter_defaults[filtername][parmname]
+
+    def start_mpv(self):
+        if self.mpvproc:
+            self.mpv_command(command=["quit"])
+            self.mpvproc = None
+
+        if os.path.exists(self.mpvsockfn):
+            os.unlink(self.mpvsockfn)
+
+        if not os.path.exists(self.mpvsockfn):
+            if not os.path.exists(self.sourceaudio):
+                vd.warning(f'{self.sourceaudio} does not exist')
+                return
+
+            filterparams = ','.join(
+                    (f'{filtername}=' + ':'.join(f'{k}={v}' for k, v in filterparms.items() if not self.is_default(filtername, k, v)))
+                        for filtername, filterparms in self.afilter_parms.items())
+            vd.status(filterparams)
+            self.mpvproc = subprocess.Popen(f'/usr/bin/mpv --no-terminal --input-ipc-server={self.mpvsockfn} --af={filterparams} {self.sourceaudio}', shell=True)
+
+    def mpv_command(self, **kwargs):
+        sock = socket.socket(socket.AF_UNIX)
+        sock.connect(self.mpvsockfn)
+        sock.sendall(json.dumps(kwargs).encode() + b'\n')
+        sock.close()
+
+    def mpv_query(self, propname):
+        sock = socket.socket(socket.AF_UNIX)
+        sock.connect(self.mpvsockfn)
+        sock.sendall(json.dumps(dict(command=['get_property', propname])).encode() + b'\n')
+        r = sock.recv(4096)
+        d = json.loads(r)
+        if d.get('error', None) != 'success':
+            vd.error(d)
+
+        sock.close()
+        return d['data']
+
+    def audio_pause(self, b=True):
+        self.mpv_command(command=['set_property', 'pause', b])
+
+    @property
+    def paused(self):
+        return self.mpv_query('pause')
+
+    @property
+    def playback_time(self):
+        return float(self.mpv_query('playback-time'))
+
+    def play_audio(self, row):
+        self.seek_audio(row.start, 'absolute')
+        self.audio_pause(False)
+
+    def seek_audio(self, dt:float, *args):
+        self.mpv_command(command=['seek', str(dt), *args])
+
+@VisiData.api
+class FilterParametersSheet(Sheet):
+    columns = [
+        ItemColumn('filter'),
+        ItemColumn('filter_parm'),
+        ItemColumn('value', setter=lambda c,r,v: c.sheet.source.mpv.set_filter_parm(r.filter, r.filter_parm, type(r.default_value)(v))),
+        ItemColumn('default_value'),
+        ItemColumn('help'),
+    ]
+    colorizers = [
+        RowColorizer(5, 'on 90', lambda s,c,r,v: r.value != r.default_value)
+    ]
+    def iterload(self):
+        for filtername, values in self.source.mpv.afilter_parms.items():
+            helpstrs = dict((i.key, i.desc) for i in self.source.mpv.afilters[filtername])
+            for filterparmname, parmvalue in values.items():
+                yield AttrDict(filter=filtername,
+                           filter_parm=filterparmname,
+                           value=parmvalue,
+                           default_value=self.source.mpv.afilter_defaults[filtername][filterparmname],
+                           help=helpstrs[filterparmname])
 
 
 @VisiData.api
@@ -247,16 +390,29 @@ def save_transcript(vd, p, sheet):
 PodcastEditingSheet.options.save_filetype = 'transcript'
 PodcastEditingSheet.options.disp_rstatus_fmt = '{sheet.playheadStatus}  ' + Sheet.options.disp_rstatus_fmt
 
-PodcastEditingSheet.addCommand('p', 'play-row', 'play_audio(cursorRow)')
-PodcastEditingSheet.addCommand('P', 'audio-pause', 'audio_pause(True)')
-PodcastEditingSheet.addCommand('3', 'combine-selected', 'combine_rows(selectedRows)')
-PodcastEditingSheet.addCommand('4', 'expand-row', 'expand_row(cursorRowIndex)')
-PodcastEditingSheet.addCommand('g4', 'expand-selected', 'for row in selectedRows: expand_row(rows.index(row))')
-PodcastEditingSheet.addCommand('5', 'cycle-speaker', 'cycle_speaker(cursorRow)')
-PodcastEditingSheet.addCommand('[', 'audio-back-10', 'seek_audio(-10); go_playhead()')
-PodcastEditingSheet.addCommand(']', 'audio-forward-10', 'seek_audio(+10); go_playhead()')
-PodcastEditingSheet.addCommand('g[', 'audio-back-60', 'seek_audio(-60); go_playhead()')
-PodcastEditingSheet.addCommand('g]', 'audio-forward-60', 'seek_audio(+60); go_playhead()')
+PodcastEditingSheet.addCommand('p', 'play-row', 'mpv.play_audio(cursorRow)')
+PodcastEditingSheet.addCommand('P', 'audio-pause', 'mpv.audio_pause(True)')
+PodcastEditingSheet.addCommand(')', 'combine-selected', 'combine_rows(selectedRows)')
+PodcastEditingSheet.addCommand('(', 'expand-row', 'expand_row(cursorRowIndex)')
+PodcastEditingSheet.addCommand('g(', 'expand-selected', 'for row in selectedRows: expand_row(rows.index(row))')
+
+PodcastEditingSheet.addCommand('Ctrl+R', 'restart-mpv', 'mpv.start_mpv()')
+#PodcastEditingSheet.addCommand('0', 'set-afilter-parm-default', 'afilter_parms[curfilter][curparm] = afilter_defaults[curfilter][curparm]; mpv.restart_mpv()')
+
+FilterParametersSheet.addCommand('P', 'audio-pause', 'source.mpv.audio_pause(True)')
+
+
+for i in range(0, 10):
+    PodcastEditingSheet.addCommand(str(i), f'set-afilter-parm-{i}', f'setFilterParmByIndex(curfilter, curparm, {i})')
+    FilterParametersSheet.addCommand(str(i), f'set-afilter-parm-{i}', f'source.setFilterParmByIndex(cursorRow.filter, cursorRow.filter_parm, {i}); reload()')
+
+PodcastEditingSheet.addCommand('zf', 'choose-afilter-parm', 'sheet.curparm = input_afilter_parm()', '')
+
+PodcastEditingSheet.addCommand('', 'cycle-speaker', 'cycle_speaker(cursorRow)')
+PodcastEditingSheet.addCommand('[', 'audio-back-10', 'mpv.seek_audio(-10); go_playhead()')
+PodcastEditingSheet.addCommand(']', 'audio-forward-10', 'mpv.seek_audio(+10); go_playhead()')
+PodcastEditingSheet.addCommand('g[', 'audio-back-60', 'mpv.seek_audio(-60); go_playhead()')
+PodcastEditingSheet.addCommand('g]', 'audio-forward-60', 'mpv.seek_audio(+60); go_playhead()')
 PodcastEditingSheet.addCommand('gg', 'go-playhead', 'go_playhead()', 'move row cursor to playhead' )
 
 PodcastEditingSheet.addCommand('a', 'add-marker', 'add_marker()', 'add marker at current playhead, splitting if necessary')
@@ -264,3 +420,5 @@ PodcastEditingSheet.addCommand('<', 'go-marker-prev', 'go_marker_next(-1, cursor
 PodcastEditingSheet.addCommand('>', 'go-marker-next', 'go_marker_next(+1, cursorRowIndex)', 'move row cursor to next marker')
 PodcastEditingSheet.addCommand('g<', 'go-marker-first', 'go_marker_next(+1, 0)', 'move row cursor to first marker')
 PodcastEditingSheet.addCommand('g>', 'go-marker-last', 'go_marker_next(-1, nRows-1)', 'move row cursor to last marker')
+
+PodcastEditingSheet.addCommand('`', 'open-vdaw-filters', 'vd.push(FilterParametersSheet("filters", source=sheet))')
