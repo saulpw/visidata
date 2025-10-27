@@ -377,7 +377,7 @@ def fuzzymatch(vd, haystack:"list[dict[str, str]]", needles:"list[str]) -> list[
         for k, v in h.items():
             if k[0] == '_': continue
             positions = set()
-            v_match = v if case_sensitive else v.lower()
+            v_match = str(v) if case_sensitive else str(v).lower()
             for p in needles:
                 mr = _fuzzymatch(v_match, p)
                 if mr.score > 0:
