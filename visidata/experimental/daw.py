@@ -11,45 +11,42 @@ import subprocess
 from visidata import vd, VisiData, Sheet, ItemColumn, asyncthread, AttrDict, vlen, RowColorizer, setitem
 
 vd.theme_option('color_daw_marker', 'white on blue', 'color of marker rows in the DAW')
+vd.theme_option('color_daw_cut', '238', 'color of cut rows')
 
 
 TODO = '''
-- get better transcript, speaker differentiated by channel (but there is channel leakage)
+   - remove diarization, rely on separate channels
+   - choose better parameters for agate to completely eliminate non-speaker
 
-- WEIRD: editing value on filter parms sheet updates value?!  how is it working?!
-- WEIRD: agate with ratio=1 disables it?  what does ratio parm do?!
+cleanups:
+    - JSONDecodeError: sometimes query gets extra data with json.  make line buffering?
 
-- add loudnorm filter
-- add compand filter
-- switch between filters with 'f'
-
-
-- sync gets lost if a word is <100ms
-- JSONDecodeError: sometimes query gets extra data with json.  make line buffering?
+- sync gets lost if a word is <100ms +1
 - undo combining
 - changing speakers should set speaker on all baserows?
 - highlight current word in transcript?
-- visidata multiline for all lines at once
+
+- WEIRD: editing value on filter parms sheet updates value?!  how is it working?!
+- WEIRD: agate with ratio=1 disables it?  what does ratio parm do?!
 
 4. add marker
    - z< and z> to adjust the previous marker
    - play 100ms tone between segments
 
 5. basic editing
-   - add edit column
-   - command to mark selected rows as 'cut'
-   - command to select rows from last marker
-   - colorize cut rows
-   - save .md with with markdown ~~strikethrough~~ for cut sections
-   - save back as same json with marker annotations and cut column
-      - should be round-trippable
    - save text punchlist for edits
+   - command to select rows from last marker
 
-5. numbered markers?
+6. numbered markers?
    - 1-9 for numbered (temporary) marker
    - 'z1' to set marker 1 at current timestamp; '1' to play starting at marker 1
 
-6. playback should skip cut sections
+7. expand ffmpeg filters available
++ add loudnorm filter?
+- add compand filter?
+- all all ffmpeg filters??
+- switch between filters with 'f'
+
 '''
 
 def to_hms(t:float) -> str:
@@ -89,6 +86,7 @@ class PodcastEditingSheet(Sheet):
         ItemColumn('speaker'),
         ItemColumn('start', type=to_hms),
         ItemColumn('end', type=to_hms),
+        ItemColumn('cut', width=6),
         #ItemColumn('start', type=float),
         #ItemColumn('end', type=float),
         ItemColumn('score', type=float, width=0),
@@ -96,7 +94,8 @@ class PodcastEditingSheet(Sheet):
         ItemColumn('baserows', type=vlen, width=0),
     ]
     colorizers = [
-            RowColorizer(5, 'color_daw_marker', lambda s,c,r,v: r.speaker == 'marker')
+        RowColorizer(5, 'color_daw_marker', lambda s,c,r,v: r.speaker == 'marker'),
+        RowColorizer(5, 'color_daw_cut', lambda s,c,r,v: r.cut)
     ]
     nKeys = 1
     mpv = None
@@ -140,7 +139,11 @@ class PodcastEditingSheet(Sheet):
             self.rows.remove(r)
 
     def expand_row(self, rowidx):
-        self.rows[rowidx:rowidx+1] = [AttrDict(r) for r in self.rows[rowidx].baserows]
+        baserows = self.rows[rowidx].baserows
+        if baserows:
+            self.rows[rowidx:rowidx+1] = [AttrDict(r) for r in baserows]
+        else:
+            vd.warning('no baserows')
 
     def cycle_speaker(self, row):
         speakers = list(self.speakers.keys())
@@ -193,6 +196,11 @@ class PodcastEditingSheet(Sheet):
                 return
         vd.fail("no marker")
 
+    @asyncthread
+    def cut_rows(self, rows):
+        for row in rows:
+            row['cut'] = True
+
     @property
     def playheadStatus(self):
         try:
@@ -202,14 +210,24 @@ class PodcastEditingSheet(Sheet):
                 vd.exceptionCaught(e)
 
     def checkCursor(self):
-        super().checkCursor()
-        if self.mpv.paused: return
-        if self is not vd.sheets[0]: return  # disable sync if not top sheet
+        # disable sync if paused or not top sheet
+        if not self.mpv.paused:
+            if self is vd.sheets[0] and \
+                self.cursorRowIndex < self.nRows-1:
+                    nextrow = self.rows[self.cursorRowIndex+1]
+                    if nextrow.start <= self.mpv.playback_time <= nextrow.end:
+                        self.cursorRowIndex += 1
 
-        if self.cursorRowIndex < self.nRows-1:
-            nextrow = self.rows[self.cursorRowIndex+1]
-            if nextrow.start <= self.mpv.playback_time <= nextrow.end:
+            skipped_cuts = False
+
+            while self.rows[self.cursorRowIndex].cut:
                 self.cursorRowIndex += 1
+                skipped_cuts = True
+
+            if skipped_cuts:
+                self.mpv.play_audio(self.rows[self.cursorRowIndex])
+
+        super().checkCursor()
 
     def input_afilter_parm(self):
         def _fmt_afilter_parm(match, row, trigger_key):
@@ -379,11 +397,22 @@ def save_xmd(vd, p, sheet):
 
     with p.open(mode='w', encoding=sheet.options.save_encoding) as fp:
         for row in sheet.rows:
-            fp.write(f'[{row.start:0.1f}] {row.speaker}: {row.word}\n\n')
+#            timestr = f'{row.start:0.1f}'
+            timestr = to_hms(row.start)
+
+            if row.speaker == 'marker':
+                line = '## ' + row.word
+            else:
+                line = f'[{timestr}] {row.speaker}: {row.word}'
+                line = line.strip()
+                if row.cut:
+                    line = f'~~{line}~~'
+
+            fp.write(line+'\n\n')
 
 @VisiData.api
 def save_transcript(vd, p, sheet):
-    d = dict(word_segments=sheet.rows, sourceaudio=sheet.sourceaudio)
+    d = dict(word_segments=sheet.rows, sourceaudio=sheet.mpv.sourceaudio)
     with p.open(mode='w', encoding='utf-8') as fp:
         fp.write(json.dumps(d)+'\n')
 
@@ -416,6 +445,8 @@ PodcastEditingSheet.addCommand('g]', 'audio-forward-60', 'mpv.seek_audio(+60); g
 PodcastEditingSheet.addCommand('gg', 'go-playhead', 'go_playhead()', 'move row cursor to playhead' )
 
 PodcastEditingSheet.addCommand('a', 'add-marker', 'add_marker()', 'add marker at current playhead, splitting if necessary')
+PodcastEditingSheet.addCommand('x', 'cut-rows', 'cut_rows([cursorRow])', 'cut audio for line at cursor row')
+PodcastEditingSheet.addCommand('gx', 'cut-selected', 'cut_rows(selectedRows)', 'cut audio for selected rows')
 PodcastEditingSheet.addCommand('<', 'go-marker-prev', 'go_marker_next(-1, cursorRowIndex)', 'move row cursor to previous marker')
 PodcastEditingSheet.addCommand('>', 'go-marker-next', 'go_marker_next(+1, cursorRowIndex)', 'move row cursor to next marker')
 PodcastEditingSheet.addCommand('g<', 'go-marker-first', 'go_marker_next(+1, 0)', 'move row cursor to first marker')
