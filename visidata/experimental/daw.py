@@ -42,7 +42,6 @@ cleanups:
    - 'z1' to set marker 1 at current timestamp; '1' to play starting at marker 1
 
 7. expand ffmpeg filters available
-+ add loudnorm filter?
 - add compand filter?
 - all all ffmpeg filters??
 - switch between filters with 'f'
@@ -247,8 +246,8 @@ class PodcastEditingSheet(Sheet):
 class MpvProcess:
     mpvproc = None
 
-    afilters = dict(agate=[
-        AttrDict(key=k, desc=desc) for k, desc in dict(
+    afilters = dict(
+        agate=[AttrDict(key=k, desc=desc) for k, desc in dict(
             level_in='input level before filtering',
             mode='upward=higher parts amplified; downward=lower parts reduced',
             range='level of gain reduction when the signal is below the threshold',
@@ -260,9 +259,22 @@ class MpvProcess:
             knee='Curve the sharp knee around the threshold to enter gain reduction more softly',
             detection='if exact signal should be taken for detection or an RMS like one',
             link='if the average level between all channels or the louder channel affects the reduction'
+         ).items()],
+        loudnorm=[AttrDict(key=k, desc=desc) for k, desc in dict(
+           i='integrated loudness target',
+           lra='loudness range target',
+           tp='maximum true peak',
+           measured_i='Measured IL of input file',
+           measured_lra='Measured LRA of input file',
+           measured_tp='Measured true peak of input file',
+           measured_thresh='Measured threshold of input file',
+           offset='offset gain. Gain is applied before the true-peak limiter',
+           linear='Normalize by linearly scaling the source audio',
+           dual_mono='Treat mono input files as "dual-mono"',
          ).items()])
     # possible values across buttons 0 (default) to 9
-    afilter_options = dict(agate=dict(level_in=[1, 0.015625, 0.03, 0.1, 0.3, 1, 3, 10, 30, 64],
+    afilter_options = dict(agate=dict(
+                                level_in=[1, 0.015625, 0.03, 0.1, 0.3, 1, 3, 10, 30, 64],
                                 mode=['downward', 'upward'],
                                 range=[0.06125,.1,.2,.3,.4,.5,.6,.7,.8,.9],
                                 threshold=[0.125,.1,.2,.3,.4,.5,.6,.7,.8,.9],
@@ -273,7 +285,18 @@ class MpvProcess:
                                 knee=[2.828427,1,2,2.8,3,4,5,6,7,8],
                                 detection=['rms', 'peak'],
                                 link=['average', 'maximum']),
-                           )
+                           loudnorm=dict(
+                               i=[],
+                               lra=[],
+                               tp=[],
+                               measured_i=[],
+                               measured_lra=[],
+                               measured_tp=[],
+                               measured_thresh=[],
+                               offset=[0, -99,-50,-20,-5,5,20,50,99],
+                               linear=[True, False],
+                               dual_mono=[False, True],
+                           ))
     # available filters and filter parameters with their default values
     afilter_defaults = dict(agate=dict(level_in=1,
                                 mode='downward',
