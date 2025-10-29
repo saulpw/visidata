@@ -182,6 +182,32 @@ def addUndoSelection(sheet):
     vd.addUndo(undoAttrCopyFunc([sheet], '_selectedRows'))
 
 
+@Sheet.api
+@asyncthread
+def selectToNextRow(vs, func, reverse=False, msg='no selected row'):
+    'Find next (prev if reverse) row for which func returns True.'
+    rng = range(vs.cursorRowIndex-1, -1, -1) if reverse else range(vs.cursorRowIndex+1, vs.nRows)
+    foundRowIdx = None
+    with Progress(total=len(vs.rows)) as prog:
+        for i in rng:
+            prog.addProgress(1)
+            try:
+                if func(vs.rows[i]):
+                    foundRowIdx = i
+                    break
+            except Exception:
+                pass
+
+    if foundRowIdx is None:
+        vd.status(msg)
+        return
+
+    if reverse:
+        vs.select(vs.rows[foundRowIdx:vs.cursorRowIndex+1])
+    else:
+        vs.select(vs.rows[vs.cursorRowIndex:foundRowIdx+1])
+
+
 Sheet.addCommand('t', 'stoggle-row', 'toggle_row(cursorRow); cursorDown(1)', 'toggle selection of current row')
 Sheet.addCommand('s', 'select-row', 'select_row(cursorRow); cursorDown(1)', 'select current row')
 Sheet.addCommand('u', 'unselect-row', 'unselect_row(cursorRow); cursorDown(1)', 'unselect current row')
@@ -189,6 +215,9 @@ Sheet.addCommand('u', 'unselect-row', 'unselect_row(cursorRow); cursorDown(1)', 
 Sheet.addCommand('gt', 'stoggle-rows', 'toggle(rows)', 'toggle selection of all rows')
 Sheet.addCommand('gs', 'select-rows', 'select(rows)', 'select all rows')
 Sheet.addCommand('gu', 'unselect-rows', 'clearSelected()', 'unselect all rows')
+
+Sheet.addCommand('z{', 'select-to-prev-selected', 'selectToNextRow(lambda row,sheet=sheet: sheet.isSelected(row), reverse=True)', 'select rows backwards to last selected row')
+Sheet.addCommand('z}', 'select-to-next-selected', 'selectToNextRow(lambda row,sheet=sheet: sheet.isSelected(row))', 'select rows forwards to next selected row')
 
 Sheet.addCommand('zt', 'stoggle-before', 'toggle(rows[:cursorRowIndex])', 'toggle selection of rows from top to cursor')
 Sheet.addCommand('zs', 'select-before', 'select(rows[:cursorRowIndex])', 'select all rows from top to cursor')
@@ -223,6 +252,8 @@ vd.addMenuItems('''
     Row > Select > equal to current row > select-equal-row
     Row > Select > errors > current column > select-error-col
     Row > Select > errors > any column > select-error
+    Row > Select > from prev selected > select-to-prev-selected
+    Row > Select > to next selected > select-to-next-selected
     Row > Unselect > current row > unselect-row
     Row > Unselect > all rows > unselect-rows
     Row > Unselect > from top > unselect-before
