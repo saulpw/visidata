@@ -62,7 +62,7 @@ def pageLeft(self):
 @Sheet.api
 @asyncthread
 def moveToNextRow(vs, func, reverse=False, msg='no different value up this column'):
-    'Move cursor to next (prev if reverse) row for which func returns True.  Returns False if no row meets the criteria.'
+    'Move cursor to next (prev if reverse) row for which func returns True.'
     rng = range(vs.cursorRowIndex-1, -1, -1) if reverse else range(vs.cursorRowIndex+1, vs.nRows)
     found = False
     with Progress(total=len(vs.rows)) as prog:
