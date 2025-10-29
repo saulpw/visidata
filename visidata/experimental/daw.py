@@ -12,10 +12,10 @@ from visidata import vd, VisiData, Sheet, ItemColumn, asyncthread, AttrDict, vle
 
 vd.theme_option('color_daw_marker', 'white on blue', 'color of marker rows in the DAW')
 vd.theme_option('color_daw_cut', '238', 'color of cut rows')
+vd.theme_option('daw_include_cuts', True, 'whether saving xmd format includes cuts with strikethrough')
 
 
 TODO = '''
-   - remove diarization, rely on separate channels
    - choose better parameters for agate to completely eliminate non-speaker
 
 cleanups:
@@ -34,17 +34,18 @@ cleanups:
    - play 100ms tone between segments
 
 5. basic editing
-   - save text punchlist for edits
-   - command to select rows from last marker
+   - command to select rows from last marker (zs)
 
 6. numbered markers?
    - 1-9 for numbered (temporary) marker
    - 'z1' to set marker 1 at current timestamp; '1' to play starting at marker 1
 
-7. expand ffmpeg filters available
-- add compand filter?
-- all all ffmpeg filters??
-- switch between filters with 'f'
+7. outputs
+   + a) cutlist (list of edits to apply)
+   + b) transcript with cuts included (has strikethrough for cut lines)
+   + c) transcript with cuts excluded (transcript of edited audio) -- based on options.daw_include_cuts
+   d) edited audio (pasting non-cut sections together)
+   e) .omf file for use in other DAW like reaper
 
 '''
 
@@ -210,7 +211,7 @@ class PodcastEditingSheet(Sheet):
 
     def checkCursor(self):
         # disable sync if paused or not top sheet
-        if not self.mpv.paused:
+        if self.mpv and not self.mpv.paused:
             if self is vd.sheets[0] and \
                 self.cursorRowIndex < self.nRows-1:
                     nextrow = self.rows[self.cursorRowIndex+1]
@@ -278,7 +279,7 @@ class MpvProcess:
                                 mode=['downward', 'upward'],
                                 range=[0.06125,.1,.2,.3,.4,.5,.6,.7,.8,.9],
                                 threshold=[0.125,.1,.2,.3,.4,.5,.6,.7,.8,.9],
-                                ratio=[1,2,4,8,16,32,64,128,256,9000],
+                                ratio=[2,1,3,10,30,100,300,1000,3000,9000],
                                 attack=[20, 0.01, .1, 1, 3, 10, 30, 100, 1000, 9000],
                                 release=[250, 0.01, .1, 1, 3, 10, 30, 100, 1000, 9000],
                                 makeup=[1,1,2,3,4,6,8,16,32,64],
@@ -286,40 +287,36 @@ class MpvProcess:
                                 detection=['rms', 'peak'],
                                 link=['average', 'maximum']),
                            loudnorm=dict(
-                               i=[],
-                               lra=[],
-                               tp=[],
-                               measured_i=[],
-                               measured_lra=[],
-                               measured_tp=[],
-                               measured_thresh=[],
+                               i=[-24.0],
+                               lra=[7.0],
+                               tp=[-0.0],
+                               measured_i=[None],
+                               measured_lra=[None],
+                               measured_tp=[None],
+                               measured_thresh=[None],
                                offset=[0, -99,-50,-20,-5,5,20,50,99],
                                linear=[True, False],
                                dual_mono=[False, True],
                            ))
-    # available filters and filter parameters with their default values
-    afilter_defaults = dict(agate=dict(level_in=1,
-                                mode='downward',
-                                range=0.06125,
-                                threshold=0.125,
-                                ratio=2,
-                                attack=20,  # ms
-                                release=250, # ms
-                                makeup=1,
-                                knee=2.828427, # 2*sqrt(2)
-                                detection='rms',
-                                link='average'),
-                            )
-
-    # currently set filter values
-    afilter_parms = copy.deepcopy(afilter_defaults)
+    afilter_parms = {}
 
     def __init__(self, sourcefn, source:Sheet):
         self.sourceaudio = sourcefn
         self.mpvproc = None
         self.source = source
 
+    def add_filter(self, filtername):
+        self.afilter_parms[filtername] = {
+            parmname:values[0] for parmname, values in self.afilter_options[filtername].items()
+        }
+        vd.status(f'filter {filtername} added')
+
+    def remove_filter(self, filtername):
+        del self.afilter_parms[filtername]
+
     def set_filter_parm(self, filtername, parmname, val):
+        if filtername not in self.afilter_parms:
+            self.add_filter(filtername)
         self.afilter_parms[filtername][parmname] = val
         self.restart_mpv(self.source.cursorRow.start) # self.playback_time
 
@@ -334,7 +331,7 @@ class MpvProcess:
         self.audio_pause(False)
 
     def is_default(self, filtername, parmname, val):
-        return val == self.afilter_defaults[filtername][parmname]
+        return val is None or val == self.afilter_options[filtername][parmname][0]
 
     def start_mpv(self):
         if self.mpvproc:
@@ -352,8 +349,12 @@ class MpvProcess:
             filterparams = ','.join(
                     (f'{filtername}=' + ':'.join(f'{k}={v}' for k, v in filterparms.items() if not self.is_default(filtername, k, v)))
                         for filtername, filterparms in self.afilter_parms.items())
-            vd.status(filterparams)
-            self.mpvproc = subprocess.Popen(f'/usr/bin/mpv --no-terminal --input-ipc-server={self.mpvsockfn} --af={filterparams} {self.sourceaudio}', shell=True)
+
+            if filterparams:
+                filterparams = '--af='+filterparams
+                vd.status(filterparams)
+
+            self.mpvproc = subprocess.Popen(f'/usr/bin/mpv --no-terminal --input-ipc-server={self.mpvsockfn} {filterparams} {self.sourceaudio}', shell=True)
 
     def mpv_command(self, **kwargs):
         sock = socket.socket(socket.AF_UNIX)
@@ -378,7 +379,9 @@ class MpvProcess:
 
     @property
     def paused(self):
-        return self.mpv_query('pause')
+        p = self.mpv_query('pause')
+#        vd.status(f'paused={p}')
+        return p
 
     @property
     def playback_time(self):
@@ -401,18 +404,40 @@ class FilterParametersSheet(Sheet):
         ItemColumn('help'),
     ]
     colorizers = [
-        RowColorizer(5, 'on 90', lambda s,c,r,v: r.value != r.default_value)
+        RowColorizer(5, 'on 90', lambda s,c,r,v: r.value is not None and r.value != r.default_value)
     ]
     def iterload(self):
-        for filtername, values in self.source.mpv.afilter_parms.items():
+        for filtername, values in self.source.mpv.afilter_options.items():
             helpstrs = dict((i.key, i.desc) for i in self.source.mpv.afilters[filtername])
             for filterparmname, parmvalue in values.items():
                 yield AttrDict(filter=filtername,
                            filter_parm=filterparmname,
-                           value=parmvalue,
-                           default_value=self.source.mpv.afilter_defaults[filtername][filterparmname],
+                           value=self.source.mpv.afilter_parms.get(filtername, {}).get(filterparmname, None),
+                           default_value=self.source.mpv.afilter_options[filtername][filterparmname][0],
                            help=helpstrs[filterparmname])
 
+
+@VisiData.api
+def save_cutlist(vd, p, sheet):
+    assert isinstance(sheet, PodcastEditingSheet)
+
+    with p.open(mode='w', encoding=sheet.options.save_encoding) as fp:
+        fp.write(f'## edits for {sheet.mpv.sourceaudio}\n\n')
+
+        i = 0
+        cut_start = None
+        cut_end = None
+        for row in sheet.rows:
+            if row.cut:
+                if cut_start is None:
+                    cut_start = row
+                cut_end = row
+            else:
+                if cut_start is not None:
+                    i += 1
+                    fp.write(f'{i}. cut from {to_hms(cut_start.start)} to {to_hms(cut_end.end)}: {cut_start.word[:10]}...{cut_end.word[-10:]}\n')
+                    cut_start = None
+                    cut_end = None
 
 @VisiData.api
 def save_xmd(vd, p, sheet):
@@ -429,9 +454,13 @@ def save_xmd(vd, p, sheet):
                 line = f'[{timestr}] {row.speaker}: {row.word}'
                 line = line.strip()
                 if row.cut:
-                    line = f'~~{line}~~'
+                    if sheet.options.daw_include_cuts:
+                        line = f'~~{line}~~'
+                    else:
+                        line = ''
 
-            fp.write(line+'\n\n')
+            if line:
+                fp.write(line+'\n\n')
 
 @VisiData.api
 def save_transcript(vd, p, sheet):
@@ -449,9 +478,10 @@ PodcastEditingSheet.addCommand('(', 'expand-row', 'expand_row(cursorRowIndex)')
 PodcastEditingSheet.addCommand('g(', 'expand-selected', 'for row in selectedRows: expand_row(rows.index(row))')
 
 PodcastEditingSheet.addCommand('Ctrl+R', 'restart-mpv', 'mpv.start_mpv()')
-#PodcastEditingSheet.addCommand('0', 'set-afilter-parm-default', 'afilter_parms[curfilter][curparm] = afilter_defaults[curfilter][curparm]; mpv.restart_mpv()')
 
 FilterParametersSheet.addCommand('P', 'audio-pause', 'source.mpv.audio_pause(True)')
+FilterParametersSheet.addCommand('a', 'add-filter', 'source.mpv.add_filter()', 'add filter on current row')
+FilterParametersSheet.addCommand('d', 'remove-filter', 'source.mpv.remove_filter()', 'remove filter on current row')
 
 
 for i in range(0, 10):
@@ -467,12 +497,12 @@ PodcastEditingSheet.addCommand('g[', 'audio-back-60', 'mpv.seek_audio(-60); go_p
 PodcastEditingSheet.addCommand('g]', 'audio-forward-60', 'mpv.seek_audio(+60); go_playhead()')
 PodcastEditingSheet.addCommand('gg', 'go-playhead', 'go_playhead()', 'move row cursor to playhead' )
 
-PodcastEditingSheet.addCommand('a', 'add-marker', 'add_marker()', 'add marker at current playhead, splitting if necessary')
-PodcastEditingSheet.addCommand('x', 'cut-rows', 'cut_rows([cursorRow])', 'cut audio for line at cursor row')
-PodcastEditingSheet.addCommand('gx', 'cut-selected', 'cut_rows(selectedRows)', 'cut audio for selected rows')
+PodcastEditingSheet.addCommand('a', 'add-marker', 'add_marker(); cursorDown(2)', 'add marker at current playhead, splitting if necessary')
+PodcastEditingSheet.addCommand('d', 'cut-rows', 'cut_rows([cursorRow]); cursorDown(1)', 'cut audio for line at cursor row')
+PodcastEditingSheet.addCommand('gd', 'cut-selected', 'cut_rows(selectedRows)', 'cut audio for selected rows')
 PodcastEditingSheet.addCommand('<', 'go-marker-prev', 'go_marker_next(-1, cursorRowIndex)', 'move row cursor to previous marker')
 PodcastEditingSheet.addCommand('>', 'go-marker-next', 'go_marker_next(+1, cursorRowIndex)', 'move row cursor to next marker')
 PodcastEditingSheet.addCommand('g<', 'go-marker-first', 'go_marker_next(+1, 0)', 'move row cursor to first marker')
 PodcastEditingSheet.addCommand('g>', 'go-marker-last', 'go_marker_next(-1, nRows-1)', 'move row cursor to last marker')
 
-PodcastEditingSheet.addCommand('`', 'open-vdaw-filters', 'vd.push(FilterParametersSheet("filters", source=sheet))')
+PodcastEditingSheet.addCommand('f', 'open-vdaw-filters', 'vd.push(FilterParametersSheet("filters", source=sheet))')
