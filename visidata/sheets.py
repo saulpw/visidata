@@ -1191,6 +1191,24 @@ def confirmQuit(vs, verb='quit'):
 
 
 @BaseSheet.api
+def quit_with_exit_confirm(sheet):
+    # confirm when quitting the last stacked sheet (app exit)
+    if len(vd.stackedSheets) <= 1 and not vd._nextCommands:
+        vd.draw_all()
+        vd.confirm('Are you sure you want to exit? ')
+    vd.quit(sheet)
+
+
+@VisiData.api
+def quit_all_with_exit_confirm(vd):
+    # confirm when quitting all sheets (app exit)
+    if not vd._nextCommands:
+        vd.draw_all()
+        vd.confirm('Are you sure you want to exit? ')
+    vd.quit(*vd.sheets)
+
+
+@BaseSheet.api
 def preloadHook(sheet):
     'Override to setup for reload().'
     sheet.confirmQuit('reload')
@@ -1283,9 +1301,9 @@ Sheet.addCommand('z#', 'type-len', 'cursorCol.type = vlen', 'set type of current
 Sheet.addCommand('%', 'type-float', 'cursorCol.type = float', 'set type of current column to float')
 Sheet.addCommand('', 'type-floatlocale', 'cursorCol.type = floatlocale', 'set type of current column to float using system locale set in LC_NUMERIC')
 
-BaseSheet.addCommand('q', 'quit-sheet',  'vd.quit(sheet)', 'quit current sheet')
+BaseSheet.addCommand('q', 'quit-sheet',  'quit_with_exit_confirm()', 'quit current sheet')
 BaseSheet.addCommand('Q', 'quit-sheet-free',  'quitAndReleaseMemory()', 'discard current sheet and free memory')
-globalCommand('gq', 'quit-all', 'vd.quit(*vd.sheets)', 'quit all sheets (clean exit)')
+globalCommand('gq', 'quit-all', 'quit_all_with_exit_confirm()', 'quit all sheets (clean exit)')
 
 BaseSheet.addCommand('Z', 'splitwin-half', 'splitPane(vd.options.disp_splitwin_pct or 50)', 'ensure split pane is set and push under sheet onto other pane')
 BaseSheet.addCommand('gZ', 'splitwin-close', 'vd.options.disp_splitwin_pct = 0\nfor vs in vd.activeStack: vs.pane = 1', 'close split screen')
