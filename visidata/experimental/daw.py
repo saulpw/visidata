@@ -18,6 +18,12 @@ vd.theme_option('daw_include_cuts', True, 'whether saving xmd format includes cu
 TODO = '''
    - choose better parameters for agate to completely eliminate non-speaker
 
+## merge .md and .json transcripts
+   - take the google doc as .md
+   - parse it into our .json format
+   - merge our whisper .json with that md.json
+      - the md.json is the canonical text/speakers and whisper.json is the canonical timings
+
 cleanups:
     - JSONDecodeError: sometimes query gets extra data with json.  make line buffering?
 
@@ -51,6 +57,8 @@ cleanups:
 
 def to_hms(t:float) -> str:
     'Return HH:MM:SS.s'
+    if t is None:
+        return ''
     h = int(t // 3600)
     m = int((t % 3600) // 60)
     s = int(t % 60)
