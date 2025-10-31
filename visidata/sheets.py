@@ -1182,14 +1182,14 @@ def quit(vd, *sheets):
 
 @BaseSheet.api
 def confirmQuit(vs, verb='quit'):
-    if vs.options.quitguard and not vd._nextCommands:
-        vd.draw_all()
-        if vs.precious and vs.hasBeenModified:
-            vd.confirm(f'{verb} modified sheet "{vs.name}"? ')
-        elif len(vd.stackedSheets) <= 1:
-            vd.confirm('Are you sure you want to exit? ')
+    if vd._nextCommands:
+        return
+    vd.draw_all()
+    if len(vd.stackedSheets) <= 1:
+        vd.confirm(f'Are you sure you want to {verb}?')
+    elif vs.options.quitguard and vs.precious and vs.hasBeenModified:
+        vd.confirm(f'{verb} modified sheet "{vs.name}"? ')
     elif vs.options.getonly('quitguard', vs, False) and not vd._nextCommands:  # if this sheet is specifically guarded
-        vd.draw_all()
         vd.confirm(f'{verb} guarded sheet "{vs.name}"? ')
 
 
