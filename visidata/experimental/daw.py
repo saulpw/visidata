@@ -8,7 +8,7 @@ import os.path
 import socket
 import subprocess
 
-from visidata import vd, VisiData, Sheet, ItemColumn, asyncthread, AttrDict, vlen, RowColorizer, setitem
+from visidata import vd, VisiData, Sheet, ItemColumn, asyncthread, AttrDict, vlen, RowColorizer, setitem, Column
 
 vd.theme_option('color_daw_marker', 'white on blue', 'color of marker rows in the DAW')
 vd.theme_option('color_daw_cut', '238', 'color of cut rows')
@@ -17,19 +17,22 @@ vd.option('daw_mpv_cmd', '/usr/bin/mpv --no-terminal --ao=pulse', '')
 
 
 TODO = '''
+- add undo to combining
+- ) to reclose current row
 
 ## make markers for mag matter to delineate sections
 
++ add marker text on row instead
 - add marker without audio playing (after current row)
+- duration of each segment
 - aggregate time for each section
-- add marker text on row instead?
 - select to next marker
 - move an edit time
-- duration of each segment
 - select some segments into side sheet and see what total duration they are
    - super neat if we can play them as an edit
 
 - command to rollup whisper transcript by speaker again
+- uncut command
 
 5. basic editing
    - command to select rows from last marker (zs)
@@ -44,7 +47,6 @@ cleanups:
     - JSONDecodeError: sometimes query gets extra data with json.  make line buffering?
 
 - sync gets lost if a word is <100ms +1
-- add undo to combining
 - changing speakers should set speaker on all baserows?
 - highlight current word in transcript?
 
@@ -104,9 +106,11 @@ def open_transcript(vd, p):
 
 class PodcastEditingSheet(Sheet):
     columns = [
+        ItemColumn('marker'),
         ItemColumn('speaker'),
         ItemColumn('start', type=to_hms),
         ItemColumn('end', type=to_hms),
+        Column('duration', type=to_hms, getter=lambda c,r: r.end-r.start),
         ItemColumn('cut', width=6),
         #ItemColumn('start', type=float),
         #ItemColumn('end', type=float),
@@ -115,11 +119,12 @@ class PodcastEditingSheet(Sheet):
         ItemColumn('baserows', type=vlen, width=0),
     ]
     colorizers = [
-        RowColorizer(5, 'color_daw_marker', lambda s,c,r,v: r.speaker == 'marker'),
+        RowColorizer(5, 'color_daw_marker', lambda s,c,r,v: r.marker),
         RowColorizer(5, 'color_daw_cut', lambda s,c,r,v: r.cut)
     ]
-    nKeys = 1
+    nKeys = 3
     mpv = None
+    nexthdrnum = 0
 
     curfilter = 'agate'
     curparm = 'ratio'
@@ -151,6 +156,7 @@ class PodcastEditingSheet(Sheet):
         uncutrows = [r for r in rows if not r.cut]
         newrow = AttrDict(word=' '.join(r.word for r in uncutrows),
                           speaker=' '.join(set(r.speaker for r in uncutrows if r.speaker)),
+                          marker=rows[0].marker,
                           start=uncutrows[0].start if uncutrows else rows[0].start,
                           end=uncutrows[-1].end if uncutrows else rows[-1].end,
                           baserows=rows)
@@ -162,6 +168,8 @@ class PodcastEditingSheet(Sheet):
     def expand_row(self, rowidx):
         baserows = self.rows[rowidx].baserows
         if baserows:
+            if self.rows[rowidx].marker:
+                baserows[0].marker = self.rows[rowidx].marker
             self.rows[rowidx:rowidx+1] = baserows
         else:
             vd.warning('no baserows')
@@ -205,14 +213,20 @@ class PodcastEditingSheet(Sheet):
 
         # XXX: should this be actual mark time or squarely between split words?
         markertime = t  # (newrow.start + row.end)/2
-        self.addRow(AttrDict(word='', speaker='marker', start=markertime, end=markertime, baserows=[]), index=idx+1)
+        self.addRow(AttrDict(word='', header=str(self.nextheadernum), start=markertime, end=markertime, baserows=[]), index=idx+1)
         self.addRow(newrow, index=idx+2)
+
+    @property
+    def nexthdrnum(self):
+        n = self.nexthdrnum
+        self.nexthdrnum += 1
+        return n
 
     def go_marker_next(self, didx:int, startrow:int):
         i = startrow
         while 0 <= i < self.nRows-(0 if didx < 0 else 1):
             i += didx
-            if self.rows[i].speaker == 'marker':
+            if self.rows[i].marker:
                 self.cursorRowIndex = i
                 return
         vd.fail("no marker")
@@ -469,16 +483,16 @@ def save_xmd(vd, p, sheet):
 #            timestr = f'{row.start:0.1f}'
             timestr = to_hms(row.start)
 
-            if row.speaker == 'marker':
-                line = '## ' + row.word
-            else:
-                line = f'[{timestr}] {row.speaker}: {row.word}'
-                line = line.strip()
-                if row.cut:
-                    if sheet.options.daw_include_cuts:
-                        line = f'~~{line}~~'
-                    else:
-                        line = ''
+            if row.marker:
+                fp.write('## {row.marker}\n\n')
+
+            line = f'[{timestr}] {row.speaker}: {row.word}'
+            line = line.strip()
+            if row.cut:
+                if sheet.options.daw_include_cuts:
+                    line = f'~~{line}~~'
+                else:
+                    line = ''
 
             if line:
                 fp.write(line+'\n\n')
@@ -494,7 +508,7 @@ PodcastEditingSheet.options.disp_rstatus_fmt = '{sheet.playheadStatus}  ' + Shee
 
 PodcastEditingSheet.addCommand('p', 'play-row', 'mpv.play_audio(cursorRow)')
 PodcastEditingSheet.addCommand('P', 'audio-pause', 'mpv.audio_pause(True)')
-PodcastEditingSheet.addCommand(')', 'combine-selected', 'combine_rows(selectedRows)')
+PodcastEditingSheet.addCommand('g)', 'combine-selected', 'combine_rows(selectedRows)')
 PodcastEditingSheet.addCommand('(', 'expand-row', 'expand_row(cursorRowIndex)')
 PodcastEditingSheet.addCommand('g(', 'expand-selected', 'for row in selectedRows: expand_row(rows.index(row))')
 
