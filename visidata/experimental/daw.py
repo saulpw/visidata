@@ -13,22 +13,38 @@ from visidata import vd, VisiData, Sheet, ItemColumn, asyncthread, AttrDict, vle
 vd.theme_option('color_daw_marker', 'white on blue', 'color of marker rows in the DAW')
 vd.theme_option('color_daw_cut', '238', 'color of cut rows')
 vd.theme_option('daw_include_cuts', True, 'whether saving xmd format includes cuts with strikethrough')
+vd.option('daw_mpv_cmd', '/usr/bin/mpv --no-terminal --ao=pulse', '')
 
 
 TODO = '''
-   - choose better parameters for agate to completely eliminate non-speaker
 
-## merge .md and .json transcripts
-   - take the google doc as .md
-   - parse it into our .json format
-   - merge our whisper .json with that md.json
-      - the md.json is the canonical text/speakers and whisper.json is the canonical timings
+## make markers for mag matter to delineate sections
+
+- test multi-level rollups (and unrolls to be inverses)
+  - rollup selected
+- add marker without audio playing (after current row)
+- aggregate time for each section
+- add marker text on row instead?
+- select to next marker
+- move an edit time
+- duration of each segment
+- select some segments into side sheet and see what total duration they are
+   - super neat if we can play them as an edit
+
+5. basic editing
+   - command to select rows from last marker (zs)
+   - cleanup: rename row.word to row.text throughout
+   - r to reformat current row.text into multiple rows, split at column width
+   - gr to reformat all selected rows
+   - p to play/pause, Shift+P to play from cursor
+
+
 
 cleanups:
     - JSONDecodeError: sometimes query gets extra data with json.  make line buffering?
 
 - sync gets lost if a word is <100ms +1
-- undo combining
+- add undo to combining
 - changing speakers should set speaker on all baserows?
 - highlight current word in transcript?
 
@@ -38,14 +54,6 @@ cleanups:
 4. add marker
    - z< and z> to adjust the previous marker
    - play 100ms tone at marker
-
-5. basic editing
-   - command to select rows from last marker (zs)
-   - cleanup: rename row.word to row.text throughout
-   - r to reformat current row.text into multiple rows, split at column width
-   - gr to reformat all selected rows
-   - p to play/pause, Shift+P to play from cursor
-
 
 6. numbered markers?
    - 1-9 for numbered (temporary) marker
@@ -367,7 +375,7 @@ class MpvProcess:
                 filterparams = '--af='+filterparams
                 vd.status(filterparams)
 
-            self.mpvproc = subprocess.Popen(f'/usr/bin/mpv --no-terminal --input-ipc-server={self.mpvsockfn} {filterparams} {self.sourceaudio}', shell=True)
+            self.mpvproc = subprocess.Popen(f'{vd.options.daw_mpv_cmd} --input-ipc-server={self.mpvsockfn} {filterparams} {self.sourceaudio}', shell=True)
 
     def mpv_command(self, **kwargs):
         sock = socket.socket(socket.AF_UNIX)

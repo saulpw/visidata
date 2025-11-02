@@ -13,22 +13,12 @@ import json
 import difflib
 
 TODO = '''
+
+
+
 ## ideas to better align
 
-+ compute estimated individual word starts (spread them evenly)
-
-+ integrate each mic transcription separately
-
-+ for each whisper word,
-  + find words in the transcript around the whisper time (within a few seconds)
-  + calc a score based on
-    + speaker match (+5)
-    + word match (+n letters matching)
-    + time alignment (+1 if within a second)
-
-- bug: speaker taken from previously added row, but should use pending_rows first if any
-- bug: same timing used for e.g. 13:37, two different lines
-
+- set 'cut' for each word in baserows
 - rename 'word' column to 'text'
 '''
 
