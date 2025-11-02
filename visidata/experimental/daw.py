@@ -20,8 +20,6 @@ TODO = '''
 
 ## make markers for mag matter to delineate sections
 
-- test multi-level rollups (and unrolls to be inverses)
-  - rollup selected
 - add marker without audio playing (after current row)
 - aggregate time for each section
 - add marker text on row instead?
@@ -30,6 +28,8 @@ TODO = '''
 - duration of each segment
 - select some segments into side sheet and see what total duration they are
    - super neat if we can play them as an edit
+
+- command to rollup whisper transcript by speaker again
 
 5. basic editing
    - command to select rows from last marker (zs)
@@ -148,21 +148,21 @@ class PodcastEditingSheet(Sheet):
             vd.exceptionCaught(e)
 
     def combine_rows(self, rows):
-        newrow = None
-        for r in list(rows):
-            if not newrow or newrow.speaker != r.speaker:
-                newrow = AttrDict(word='', speaker=r.speaker, start=r.start, end=0, baserows=[])
-                self.addRow(newrow)
+        uncutrows = [r for r in rows if not r.cut]
+        newrow = AttrDict(word=' '.join(r.word for r in uncutrows),
+                          speaker=' '.join(set(r.speaker for r in uncutrows if r.speaker)),
+                          start=uncutrows[0].start if uncutrows else rows[0].start,
+                          end=uncutrows[-1].end if uncutrows else rows[-1].end,
+                          baserows=rows)
+        self.addRow(newrow, index=self.cursorRowIndex)
 
-            newrow.word += r.word + ' '
-            newrow.end = r.end
-            newrow.baserows.extend(r.baserows or [r])
+        for r in rows:
             self.rows.remove(r)
 
     def expand_row(self, rowidx):
         baserows = self.rows[rowidx].baserows
         if baserows:
-            self.rows[rowidx:rowidx+1] = [AttrDict(r) for r in baserows]
+            self.rows[rowidx:rowidx+1] = baserows
         else:
             vd.warning('no baserows')
 
