@@ -37,10 +37,15 @@ cleanups:
 
 4. add marker
    - z< and z> to adjust the previous marker
-   - play 100ms tone between segments
+   - play 100ms tone at marker
 
 5. basic editing
    - command to select rows from last marker (zs)
+   - cleanup: rename row.word to row.text throughout
+   - r to reformat current row.text into multiple rows, split at column width
+   - gr to reformat all selected rows
+   - p to play/pause, Shift+P to play from cursor
+
 
 6. numbered markers?
    - 1-9 for numbered (temporary) marker

@@ -10,20 +10,24 @@ import sys
 import copy
 import re
 import json
+import difflib
 
 TODO = '''
 ## ideas to better align
 
-- compute estimated individual word starts (spread them evenly)
++ compute estimated individual word starts (spread them evenly)
 
-- integrate each mic transcription separately
++ integrate each mic transcription separately
 
-- for each whisper word,
-  - find words in the transcript around the whisper time (within a few seconds)
-  - calc a score based on
-    - speaker match (+5)
-    - word match (+n letters matching)
-    - time alignment (+1 if within a second)
++ for each whisper word,
+  + find words in the transcript around the whisper time (within a few seconds)
+  + calc a score based on
+    + speaker match (+5)
+    + word match (+n letters matching)
+    + time alignment (+1 if within a second)
+
+- bug: speaker taken from previously added row, but should use pending_rows first if any
+- bug: same timing used for e.g. 13:37, two different lines
 
 - rename 'word' column to 'text'
 '''
@@ -37,6 +41,32 @@ def parse_hhmmss(hms:str) -> float:
     h, m, s = hms.split(':')
     return int(h)*3600 + int(m)*60 + float(s)
 
+
+def interpolate_times(pending_rows:list[dict], startt, endt):
+    total_len = sum(len(r['word']) for r in pending_rows)
+    for i, pr in enumerate(pending_rows):
+        if i > 0:
+            pr['start'] = pending_rows[i-1]['end']
+        else:
+            pr['start'] = startt
+        pr['end'] = (len(pr['word'])/total_len)*(endt-startt)+pr['start']
+
+    return pending_rows
+
+
+def split_cuts(row, startcut=False):
+    parts = row['word'].split('~~')
+    cut = startcut  # whether we start in cut mode
+    for p in parts:
+        p = p.strip()
+        if p:
+            newrow = copy.copy(row)
+            newrow['word'] = p
+            if cut:
+                newrow['cut'] = cut
+            yield newrow
+
+        cut = not cut
 
 def parse_xmd(xmdfn:str) -> list:
     rows = []
@@ -55,78 +85,100 @@ def parse_xmd(xmdfn:str) -> list:
                 return rows
 
             d = m.groupdict()
-            d['speaker'] = d.get('speaker') or rows[-1].get('speaker')
+            if d['speaker'] == 'marker':
+                rows.append(d)
+                continue
+
+            d['speaker'] = d.get('speaker') or (pending_rows[-1].get('speaker') if pending_rows else rows[-1].get('speaker'))
 
             lastt = d['start'] = parse_hhmmss(d.get('start'))
 
             if lastt:
                 firstt = float(pending_rows[0]['start'])
-                total_len = sum(len(r['word']) for r in pending_rows)
-                for i, nytr in enumerate(pending_rows):
-                    if i > 0:
-                        nytr['start'] = pending_rows[i-1]['end']
-                    nytr['end'] = (len(nytr['word'])/total_len)*(lastt-firstt)+nytr['start']
-
-                    if nytr.get('start_cut'):
-                        del nytr['start_cut']
-                        nytr['word'] = '~~' + nytr['word']
-
-                    parts = nytr['word'].split('~~')
-                    cut = False
-                    for p in parts:
-                        newrow = copy.copy(nytr)
-                        newrow['word'] = p.strip()
-                        if cut:
-                            newrow['cut'] = True
-                        if p:
-                            rows.append(newrow)
-                        cut = not cut
+                for pr in interpolate_times(pending_rows, firstt, lastt):
+                    pr['baserows'] = interpolate_times([
+                        dict(start=None, end=None,
+                             speaker=pr['speaker'],
+                             cut=pr.get('cut'),
+                             word=w)
+                          for w in pr['word'].split()
+                      ], pr['start'], pr['end'])
+                    rows.append(pr)
 
                 pending_rows = []
-            pending_rows.append(d)
+
+            for newrow in split_cuts(d, d.pop('start_cut', False)):
+                pending_rows.append(newrow)
 
     return rows
 
+def find_words_around(needle:dict, haystack:list[dict], seconds=10):
+    return [w
+        for w in haystack
+            if abs(needle['start']-w['start']) < seconds]
 
-def combine_transcripts(mdt, whispert):
-    '''mdt has accurate speakers and words; whispert has accurate word-level timestamps'''
+def stderr(*args):
+    print(*args, file=sys.stderr)
 
-    word_timings = whispert['word_segments']
+def progress(s):
+    print(f"\r{s}", end='', file=sys.stderr)
+    sys.stderr.flush()
 
-    for row in mdt['word_segments']:
-        if row['speaker'] == 'marker':
-            continue
-        row['baserows'] = []
-        for w in row['word'].split():
-            found = False
-            #print(w)
-            for i, wordt in enumerate(word_timings):
-                if i > 3:
-                    break  # didn't find it :(
 
-                #print(wordt)
-                # - compare only words, no punctuation
-                if clean(wordt['word']) == clean(w):
-                    found = True
-                    #print('found it')
-                    d = dict(start=wordt['start'],
-                             end=wordt['end'],
-                             speaker=row['speaker'],
-                             word=w)
-                    row['baserows'].append(d)
-                    break
+def _score(whisperw, humanw):
+    r = 0
+    if whisperw.get('speaker') == humanw.get('speaker'):
+        r += 5
 
-            if found:
-                del word_timings[:i+1]  # remove everything to this point
-    return mdt
+    w1 = clean(whisperw['word'])
+    w2 = clean(humanw['word'])
+    r += difflib.SequenceMatcher(a=w1, b=w2).ratio()*10
+
+    r -= abs(whisperw['start'] - humanw['start'])
+    return r
 
 
 def main(xmdfn, *whisperfns):
     mdt = dict(word_segments=parse_xmd(xmdfn))
 
+    poss = []
     for whisperfn in whisperfns:
         whispert = json.loads(open(whisperfn).read())
-        mdt = combine_transcripts(mdt, whispert)
+        word_timings = whispert['word_segments']
+
+        for row in mdt['word_segments']:
+            progress(f"{row['start']:.01f}")
+            if row['speaker'] == 'marker':
+                continue
+            for humanw in row['baserows']:
+                for whisperw in find_words_around(humanw, word_timings):
+                    poss.append((_score(whisperw, humanw), whisperw, humanw))
+
+    poss.sort(key=lambda r: -r[0])
+
+    i = 0
+    for score, whisperw, humanw in poss:
+        if whisperw.get('used'):
+            continue
+
+        if humanw.get('match_score'):
+            continue
+
+        i += 1
+        humanw['start'] = whisperw['start']
+        humanw['end'] = whisperw['end']
+        humanw['match_score'] = score
+#        humanw['word'] += f" {i}"
+        whisperw['used'] = humanw
+
+    for row in mdt['word_segments']:
+        if row.get('speaker') == 'marker':
+            continue
+        if not row.get('baserows'):
+            stderr('no baserows', row)
+            continue
+        row['start'] = row['baserows'][0]['start']
+        row['end'] = row['baserows'][-1]['end']
 
     mdt['sourceaudio'] = 'daw/2025-10-16.mp3'
     print(json.dumps(mdt))
