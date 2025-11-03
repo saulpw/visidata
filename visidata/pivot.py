@@ -62,6 +62,8 @@ def makeAggrColumn(aggcol, aggregator):
     return AggrColumn(aggname,
                   type=aggregator.type or aggcol.type,
                   fmtstr=aggcol.fmtstr,
+                  formatter=aggcol.formatter,
+                  displayer=aggcol.displayer,
                   origCol=aggcol,
                   aggregator=aggregator)
 
