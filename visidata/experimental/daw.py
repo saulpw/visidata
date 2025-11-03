@@ -17,13 +17,18 @@ vd.option('daw_mpv_cmd', '/usr/bin/mpv --no-terminal --ao=pulse', '')
 
 
 TODO = '''
++ add default aggregator for duration
 - add undo to combining
 - ) to reclose current row
+- skip cut segments while playing
+- make sure round-tripping works
+   - if we improve merge_transcript, can it reapply the word-level timings without screwing up the organization of the transcript?
+- section should be set for every segment
+- header only emitted for the first one
 
 ## make markers for mag matter to delineate sections
 
-+ add marker text on row instead
-- add marker without audio playing (after current row)
+- add marker to current row
 - duration of each segment
 - aggregate time for each section
 - select to next marker
@@ -50,6 +55,9 @@ cleanups:
 - changing speakers should set speaker on all baserows?
 - highlight current word in transcript?
 
+- change 'word' to 'text' throughout
+- change 'baserows' to 'children' throughout
+
 - WEIRD: editing value on filter parms sheet updates value?!  how is it working?!
 - WEIRD: agate with ratio=1 disables it?  what does ratio parm do?!
 
@@ -70,9 +78,13 @@ cleanups:
 
 '''
 
-def to_hms(t:float) -> str:
+def to_hms(t:float, width=None) -> str:
     'Return HH:MM:SS.s'
     if t is None:
+        return ''
+    if t < 0:
+        return f'{t:0.1f}s'
+    if t == 0:
         return ''
     h = int(t // 3600)
     m = int((t % 3600) // 60)
@@ -103,14 +115,32 @@ def open_transcript(vd, p):
     vd.timeouts_before_idle = -1
     return PodcastEditingSheet(p.name, source=p)
 
+@Column.api
+def formatter_hhmmss(self, fmtstr):
+    return to_hms
+
+def _getter_duration(col, row):
+    if row.cut:
+        return 0
+
+    uncutrows = [br for br in row.baserows if not br.cut]
+
+    if not uncutrows:  # everything is cut
+        return 0
+
+    if len(uncutrows) == len(row.baserows):
+        return row.end-row.start
+
+    return sum(_getter_duration(col, br) for br in uncutrows)
+
 
 class PodcastEditingSheet(Sheet):
     columns = [
         ItemColumn('marker'),
         ItemColumn('speaker'),
-        ItemColumn('start', type=to_hms),
-        ItemColumn('end', type=to_hms),
-        Column('duration', type=to_hms, getter=lambda c,r: r.end-r.start),
+        ItemColumn('start', type=float, formatter='hhmmss'),
+        ItemColumn('end', type=float, formatter='hhmmss'),
+        Column('duration', type=float, formatter='hhmmss', cache=True, getter=_getter_duration),
         ItemColumn('cut', width=6),
         #ItemColumn('start', type=float),
         #ItemColumn('end', type=float),
@@ -151,6 +181,8 @@ class PodcastEditingSheet(Sheet):
                 yield replace_baserows(word)
         except Exception as e:
             vd.exceptionCaught(e)
+
+        self.column('duration').aggregators = 'sum'
 
     def combine_rows(self, rows):
         uncutrows = [r for r in rows if not r.cut]
@@ -506,8 +538,8 @@ def save_transcript(vd, p, sheet):
 PodcastEditingSheet.options.save_filetype = 'transcript'
 PodcastEditingSheet.options.disp_rstatus_fmt = '{sheet.playheadStatus}  ' + Sheet.options.disp_rstatus_fmt
 
-PodcastEditingSheet.addCommand('p', 'play-row', 'mpv.play_audio(cursorRow)')
-PodcastEditingSheet.addCommand('P', 'audio-pause', 'mpv.audio_pause(True)')
+PodcastEditingSheet.addCommand('P', 'play-row', 'mpv.play_audio(cursorRow)')
+PodcastEditingSheet.addCommand('p', 'play-toggle', 'mpv.audio_pause(not mpv.paused)')
 PodcastEditingSheet.addCommand('g)', 'combine-selected', 'combine_rows(selectedRows)')
 PodcastEditingSheet.addCommand('(', 'expand-row', 'expand_row(cursorRowIndex)')
 PodcastEditingSheet.addCommand('g(', 'expand-selected', 'for row in selectedRows: expand_row(rows.index(row))')

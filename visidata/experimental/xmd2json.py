@@ -15,7 +15,7 @@ TODO = '''
 
 ## ideas to better align
 
-- set 'cut' for each word in baserows
+- bug: Intro header on wrong line
 - rename 'word' column to 'text'
 '''
 
@@ -63,9 +63,6 @@ def parse_xmd(xmdfn:str) -> list:
             n = len(line) - len(line.lstrip('#')) - 1
             headers = headers[:n+1] + ['']*(n - len(headers)+1)
             headers[n] = line[n+1:]
-
-            t = rows[-1]['end'] if rows else 0
-            row = dict(marker=line[2:], start=t, end=t, word=line)
         else:
             m = re.match(r'(?P<start_cut>~~)?\\?(\[(?P<start>[\d:]+)\\?\] )?((?P<speaker>[A-Za-z]+): )?(?P<word>.*)', line)
             if not m:
@@ -82,7 +79,7 @@ def parse_xmd(xmdfn:str) -> list:
                 firstt = float(pending_rows[0]['start'])
 
                 if headers:
-                    pending_rows[0]['marker'] = headers[-1]
+                    row['marker'] = headers[-1]
                     headers = []
 
                 for pr in interpolate_times(pending_rows, firstt, lastt):
@@ -99,8 +96,6 @@ def parse_xmd(xmdfn:str) -> list:
 
             for newrow in split_cuts(row, row.pop('start_cut', False)):
                 pending_rows.append(newrow)
-
-            row = {}
 
     return rows
 
