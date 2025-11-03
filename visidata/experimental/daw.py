@@ -10,25 +10,26 @@ import subprocess
 
 from visidata import vd, VisiData, Sheet, ItemColumn, asyncthread, AttrDict, vlen, RowColorizer, setitem, Column
 
-vd.theme_option('color_daw_marker', 'white on blue', 'color of marker rows in the DAW')
+vd.theme_option('color_daw_header', 'white on blue', 'color of marker rows in the DAW')
 vd.theme_option('color_daw_cut', '238', 'color of cut rows')
 vd.theme_option('daw_include_cuts', True, 'whether saving xmd format includes cuts with strikethrough')
 vd.option('daw_mpv_cmd', '/usr/bin/mpv --no-terminal --ao=pulse', '')
 
 
 TODO = '''
-+ add default aggregator for duration
+- rename 'marker' to 'section'
+- skip cut segments while playing
+- r to reformat current row.text into multiple rows, split at column width
+   - gr to reformat all selected rows
+- bug: Mikel and SaulL speakers
+- cut level (1=first pass, 2=second, etc)
 - add undo to combining
 - ) to reclose current row
-- skip cut segments while playing
 - make sure round-tripping works
    - if we improve merge_transcript, can it reapply the word-level timings without screwing up the organization of the transcript?
-- section should be set for every segment
-- header only emitted for the first one
 
 ## make markers for mag matter to delineate sections
 
-+ add marker to current row (just edit using vd commands)
 - split row at given time, maintaining structure
 - duration of each segment
 - aggregate time for each section
@@ -43,11 +44,6 @@ TODO = '''
 5. basic editing
    - command to select rows from last marker (zs)
    - cleanup: rename row.word to row.text throughout
-   - r to reformat current row.text into multiple rows, split at column width
-   - gr to reformat all selected rows
-   - p to play/pause, Shift+P to play from cursor
-
-
 
 cleanups:
     - JSONDecodeError: sometimes query gets extra data with json.  make line buffering?
@@ -137,7 +133,7 @@ def _getter_duration(col, row):
 
 class PodcastEditingSheet(Sheet):
     columns = [
-        ItemColumn('marker'),
+        ItemColumn('marker', width=20),
         ItemColumn('speaker'),
         ItemColumn('start', type=float, formatter='hhmmss'),
         ItemColumn('end', type=float, formatter='hhmmss'),
@@ -150,10 +146,10 @@ class PodcastEditingSheet(Sheet):
         ItemColumn('baserows', type=vlen, width=0),
     ]
     colorizers = [
-        RowColorizer(5, 'color_daw_marker', lambda s,c,r,v: r.marker),
+        RowColorizer(5, 'color_daw_header', lambda s,c,r,v: r.header),  # section header
         RowColorizer(5, 'color_daw_cut', lambda s,c,r,v: r.cut)
     ]
-    nKeys = 3
+    nKeys = 2
     mpv = None
     nexthdrnum = 0
 
@@ -176,14 +172,20 @@ class PodcastEditingSheet(Sheet):
         else:
             vd.warning("no matching audio file")
 
+        curhdr = ''
         try:
             for word in d['word_segments']:
+                if word.get('marker', curhdr) != curhdr:  # only the first row of a section has 'header'
+                    curhdr = word['header'] = word['marker']
+
                 self.speakers[word.get('speaker', None)].append(word)
                 yield replace_baserows(word)
         except Exception as e:
             vd.exceptionCaught(e)
 
         self.column('duration').aggregators = 'sum'
+        self.column('start').aggregators = 'min'
+        self.column('end').aggregators = 'max'
 
     def combine_rows(self, rows):
         uncutrows = [r for r in rows if not r.cut]
@@ -255,11 +257,11 @@ class PodcastEditingSheet(Sheet):
         self.nexthdrnum += 1
         return n
 
-    def go_marker_next(self, didx:int, startrow:int):
+    def go_header_next(self, didx:int, startrow:int):
         i = startrow
         while 0 <= i < self.nRows-(0 if didx < 0 else 1):
             i += didx
-            if self.rows[i].marker:
+            if self.rows[i].header:
                 self.cursorRowIndex = i
                 return
         vd.fail("no marker")
@@ -511,13 +513,15 @@ def save_cutlist(vd, p, sheet):
 def save_xmd(vd, p, sheet):
     assert isinstance(sheet, PodcastEditingSheet)
 
+    prevhdr = ''
     with p.open(mode='w', encoding=sheet.options.save_encoding) as fp:
         for row in sheet.rows:
 #            timestr = f'{row.start:0.1f}'
             timestr = to_hms(row.start)
 
-            if row.marker:
-                fp.write('## {row.marker}\n\n')
+            if row.get('marker', prevhdr) != prevhdr:
+                prevhdr = row.get('marker')
+                fp.write(f'## {prevhdr}\n\n')
 
             line = f'[{timestr}] {row.speaker}: {row.word}'
             line = line.strip()
@@ -568,9 +572,9 @@ PodcastEditingSheet.addCommand('gg', 'go-playhead', 'go_playhead()', 'move row c
 PodcastEditingSheet.addCommand('a', 'add-marker', 'add_marker(); cursorDown(2)', 'add marker at current playhead, splitting if necessary')
 PodcastEditingSheet.addCommand('d', 'cut-rows', 'cut_rows([cursorRow]); cursorDown(1)', 'cut audio for line at cursor row')
 PodcastEditingSheet.addCommand('gd', 'cut-selected', 'cut_rows(selectedRows)', 'cut audio for selected rows')
-PodcastEditingSheet.addCommand('<', 'go-marker-prev', 'go_marker_next(-1, cursorRowIndex)', 'move row cursor to previous marker')
-PodcastEditingSheet.addCommand('>', 'go-marker-next', 'go_marker_next(+1, cursorRowIndex)', 'move row cursor to next marker')
-PodcastEditingSheet.addCommand('g<', 'go-marker-first', 'go_marker_next(+1, 0)', 'move row cursor to first marker')
-PodcastEditingSheet.addCommand('g>', 'go-marker-last', 'go_marker_next(-1, nRows-1)', 'move row cursor to last marker')
+PodcastEditingSheet.addCommand('<', 'go-marker-prev', 'go_header_next(-1, cursorRowIndex)', 'move row cursor to previous marker')
+PodcastEditingSheet.addCommand('>', 'go-marker-next', 'go_header_next(+1, cursorRowIndex)', 'move row cursor to next marker')
+PodcastEditingSheet.addCommand('g<', 'go-marker-first', 'go_header_next(+1, 0)', 'move row cursor to first marker')
+PodcastEditingSheet.addCommand('g>', 'go-marker-last', 'go_header_next(-1, nRows-1)', 'move row cursor to last marker')
 
 PodcastEditingSheet.addCommand('f', 'open-vdaw-filters', 'vd.push(FilterParametersSheet("filters", source=sheet))')
