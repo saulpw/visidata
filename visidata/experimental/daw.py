@@ -28,7 +28,8 @@ TODO = '''
 
 ## make markers for mag matter to delineate sections
 
-- add marker to current row
++ add marker to current row (just edit using vd commands)
+- split row at given time, maintaining structure
 - duration of each segment
 - aggregate time for each section
 - select to next marker
@@ -56,7 +57,7 @@ cleanups:
 - highlight current word in transcript?
 
 - change 'word' to 'text' throughout
-- change 'baserows' to 'children' throughout
+- change 'baserows' to 'rows' throughout?  for parity in splitRow
 
 - WEIRD: editing value on filter parms sheet updates value?!  how is it working?!
 - WEIRD: agate with ratio=1 disables it?  what does ratio parm do?!
