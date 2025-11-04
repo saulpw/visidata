@@ -7,20 +7,21 @@ from visidata import vd, VisiData, Sheet, ItemColumn, AttrColumn, asyncthread, A
 
 from . import MpvProcess
 
-vd.theme_option('color_daw_header', 'white on blue', 'color of marker rows in the DAW')
+vd.theme_option('color_daw_header', 'underline', 'color of first line in a transcript section')
+vd.theme_option('color_daw_playhead', 'blue', 'color of playhead line')
 vd.theme_option('color_daw_cut', '238', 'color of cut rows')
 vd.theme_option('daw_include_cuts', True, 'whether saving xmd format includes cuts with strikethrough')
 
 
 TODO = '''
-+ r to reformat current row.text into multiple rows, split at column width
-+ gr to reformat all selected rows
-   - bug: cuts are completely removed
-- split row at given time, maintaining structure
-
+- split row at given time for 'a'
+- getRowIndexByPlaytime: could use binary search
 - rename 'marker' to 'section'
 - skip cut segments while playing
-- bug: Mikel and SaulL speakers
+  - play segments individually
+  - colorize row based on time (do not change cursor)
+
+- bug: Mikel and SaulL speakers?
 - cut level (1=first pass, 2=second, etc)
 - add undo to combining
 - ) to reclose current row
@@ -29,10 +30,9 @@ TODO = '''
 
 ## make markers for mag matter to delineate sections
 
-+ duration of each segment
-+ aggregate time for each section
 - select to next marker
 - move an edit time
+- feature: play side sheet of rows
 + select some segments into side sheet and see what total duration they are
    - super neat if we can play them as an edit
 
@@ -412,6 +412,10 @@ class PodcastEditingSheet(Sheet):
 
         self.rows[rowidx:rowidx+1] = formatted_rows
 
+    def reformat_rows(self, rows):
+        for row in rows:
+            if not row.cut:
+                self.reformat_row(rows.index(row))
 
 @VisiData.api
 class FilterParametersSheet(Sheet):
@@ -494,13 +498,13 @@ PodcastEditingSheet.options.disp_rstatus_fmt = '{sheet.playheadStatus}  ' + Shee
 
 PodcastEditingSheet.addCommand('P', 'play-row', 'mpv.play_audio(cursorRow)')
 PodcastEditingSheet.addCommand('p', 'play-toggle', 'mpv.audio_pause(not mpv.paused)')
+FilterParametersSheet.addCommand('P', 'play-toggle', 'source.mpv.audio_pause(not source.mpv.paused)')
 PodcastEditingSheet.addCommand('g)', 'combine-selected', 'combine_rows(selectedRows)')
 PodcastEditingSheet.addCommand('(', 'expand-row', 'expand_row(cursorRowIndex)')
 PodcastEditingSheet.addCommand('g(', 'expand-selected', 'for row in selectedRows: expand_row(rows.index(row))')
 
 PodcastEditingSheet.addCommand('Ctrl+R', 'restart-mpv', 'mpv.start_mpv()')
 
-FilterParametersSheet.addCommand('P', 'audio-pause', 'source.mpv.audio_pause(True)')
 FilterParametersSheet.addCommand('a', 'add-filter', 'source.mpv.add_filter()', 'add filter on current row')
 FilterParametersSheet.addCommand('d', 'remove-filter', 'source.mpv.remove_filter()', 'remove filter on current row')
 
@@ -528,4 +532,4 @@ PodcastEditingSheet.addCommand('g>', 'go-marker-last', 'go_header_next(-1, nRows
 
 PodcastEditingSheet.addCommand('f', 'open-vdaw-filters', 'vd.push(FilterParametersSheet("filters", source=sheet))')
 PodcastEditingSheet.addCommand('r', 'reformat-row', 'reformat_row(cursorRowIndex)')
-PodcastEditingSheet.addCommand('gr', 'reformat-selected', 'for row in selectedRows:\n\tif not row.cut:\n\t\treformat_row(rows.index(row))')
+PodcastEditingSheet.addCommand('gr', 'reformat-selected', 'reformat_rows(selectedRows)')
