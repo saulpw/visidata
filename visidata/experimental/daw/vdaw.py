@@ -13,10 +13,13 @@ vd.theme_option('daw_include_cuts', True, 'whether saving xmd format includes cu
 
 
 TODO = '''
++ r to reformat current row.text into multiple rows, split at column width
++ gr to reformat all selected rows
+   - bug: cuts are completely removed
+- split row at given time, maintaining structure
+
 - rename 'marker' to 'section'
 - skip cut segments while playing
-- r to reformat current row.text into multiple rows, split at column width
-   - gr to reformat all selected rows
 - bug: Mikel and SaulL speakers
 - cut level (1=first pass, 2=second, etc)
 - add undo to combining
@@ -26,12 +29,11 @@ TODO = '''
 
 ## make markers for mag matter to delineate sections
 
-- split row at given time, maintaining structure
-- duration of each segment
-- aggregate time for each section
++ duration of each segment
++ aggregate time for each section
 - select to next marker
 - move an edit time
-- select some segments into side sheet and see what total duration they are
++ select some segments into side sheet and see what total duration they are
    - super neat if we can play them as an edit
 
 - command to rollup whisper transcript by speaker again
@@ -199,10 +201,9 @@ class EditRow:
                 r2 = EditRow(section=midrow.section, speaker=midrow.speaker)
                 r1.subrows = beforerows + [midrow]
                 r2.subrows = afterrows
-#                r2.subrows = [midrow] + afterrows
                 return r1, r2
         else:
-            return (beforerows, afterrows)
+            return None, None
 
     @property
     def baserows(self) -> list:  # deprecated
@@ -400,11 +401,14 @@ class PodcastEditingSheet(Sheet):
         formatted_rows = []
         wordnum = 0
         for line in textwrap.wrap(row.word,
-                        width=self.column('word').width,
+                        width=self.column('word').width-2,
                         break_long_words=False,
                         break_on_hyphens=False):
             pr, row = row.split_at_word(len(line.split())-1)
-            formatted_rows.append(pr)
+            if pr:
+                formatted_rows.append(pr)
+            if not row:
+                break
 
         self.rows[rowidx:rowidx+1] = formatted_rows
 
@@ -524,3 +528,4 @@ PodcastEditingSheet.addCommand('g>', 'go-marker-last', 'go_header_next(-1, nRows
 
 PodcastEditingSheet.addCommand('f', 'open-vdaw-filters', 'vd.push(FilterParametersSheet("filters", source=sheet))')
 PodcastEditingSheet.addCommand('r', 'reformat-row', 'reformat_row(cursorRowIndex)')
+PodcastEditingSheet.addCommand('gr', 'reformat-selected', 'for row in selectedRows:\n\tif not row.cut:\n\t\treformat_row(rows.index(row))')
