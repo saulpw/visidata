@@ -89,15 +89,6 @@ def to_hms(t:float, width=None) -> str:
     return f'{h:02d}:{m:02d}:{s:02d}.{ms:01d}'
 
 
-def flatten_rows(rows):
-    'Iterate through all baserows at the bottom of all rows.'
-    for r in rows:
-        if r.baserows:
-            yield from flatten_rows(r.baserows)
-        else:
-            yield r
-
-
 def replace_baserows(row):
     'Turn row into EditRow, recursively making its baserows also EditRows, until the bottom level which are simple AttrDicts.'
     row = AttrDict(row)
@@ -133,15 +124,27 @@ def _getter_duration(col, row):
 
     return sum(_getter_duration(col, br) for br in uncutrows)
 
-
 class EditRow:
-    def __init__(self, section:str='', speaker:str='', header:str='', **kwargs):
+    def __init__(self, section:str='', speaker:str='', header:str='', subrows:list=None, cut=None, **kwargs):
         self.section = section
         self.speaker = speaker
         self.header = header
-        self.subrows = []
+        self.subrows = subrows or []
+        if not subrows or cut is not None:
+            self.cut = cut
+        else:
+            self.cut = max(r.cut if r.cut else 0 for r in self.subrows)
 
-    def __contains__(self, t:float):
+    def to_json(self) -> dict:
+        return dict(marker=self.section,
+                    speaker=self.speaker,
+                    start=self.start,
+                    end=self.end,
+                    cut=self.cut,
+                    baserows=self.subrows,
+                    word=self.text)
+
+    def __contains__(self, t:float) -> bool:
         if not self.start or not self.end:
             return False
         return self.start <= t <= self.end
@@ -171,10 +174,6 @@ class EditRow:
     def uncutrows(self) -> list:
         return [r for r in self.subrows if not r.cut]
 
-    @property
-    def cut(self) -> int:
-        return not bool(self.uncutrows)
-
     @drawcache_property
     def nwords(self) -> int:
         return sum(r.nwords if isinstance(r, EditRow) else 1 for r in self.subrows)
@@ -191,6 +190,7 @@ class EditRow:
             elif wordnum + nsubwords - 1 > n:
                 afterrows.append(sr)
             else:
+                assert midrow is None
                 midrow = sr
                 cutwordnum = n - wordnum
 
@@ -200,7 +200,7 @@ class EditRow:
             if isinstance(midrow, EditRow):
                 r1 = EditRow(section=midrow.section, speaker=midrow.speaker, header=midrow.header)
                 r2 = EditRow(section=midrow.section, speaker=midrow.speaker)
-                a, b = sr.split_at_word(cutwordnum)
+                a, b = midrow.split_at_word(cutwordnum)
                 r1.subrows = beforerows + [a]
                 r2.subrows = [b] + afterrows
                 return r1, r2
@@ -212,6 +212,49 @@ class EditRow:
                 return r1, r2
         else:
             return None, None
+
+    def split_at_time(self, t:float) -> tuple['EditRow', 'EditRow']:
+        midrow = None
+        beforerows = None
+        afterrows = None
+        for i, r in enumerate(self.subrows):
+            if isinstance(r, EditRow):
+                if t in r:
+                    beforerows = self.subrows[:i]
+                    afterrows = self.subrows[i+1:]
+                    midrow = r
+                    break
+            else:  # bottomost level
+                if t <= r.start:
+                    if i == 0:
+                        beforerows = []
+                        afterrows = self.subrows
+                        break
+                    elif self.subrows[i-1].end <= t <= r.start:
+                        beforerows = self.subrows[:i]
+                        afterrows = self.subrows[i:]
+                        break
+                    else:  # in the middle of the previous word
+                        prevr = self.subrows[i-1]
+                        beforerows = self.subrows[:i-1]
+                        afterrows = self.subrows[i-1:]
+                        assert prevr.start <= t <= prevr.end, (prevr.start, t, prevr.end)
+                        break
+
+        if midrow:  # time t is contained within this subrow
+            if isinstance(midrow, EditRow):
+                a, b = midrow.split_at_time(t)
+                r1 = EditRow(section=midrow.section, speaker=midrow.speaker, header=self.header, subrows=beforerows + [a])
+                r2 = EditRow(section=midrow.section, speaker=midrow.speaker, subrows=[b] + afterrows)
+                return r1, r2
+            else:
+                r1 = EditRow(section=self.section, speaker=midrow.speaker, header=self.header, subrows=beforerows + [midrow])
+                r2 = EditRow(section=self.section, speaker=midrow.speaker, subrows=afterrows)
+                return r1, r2
+        else:
+            r1 = EditRow(section=self.section, speaker=self.speaker, header=self.header, subrows=beforerows)
+            r2 = EditRow(section=self.section, speaker=self.speaker, subrows=afterrows)
+            return r1, r2
 
     @property
     def baserows(self) -> list:  # deprecated
@@ -240,7 +283,7 @@ class PodcastEditingSheet(Sheet):
         RowColorizer(3, 'color_daw_playhead', lambda s,c,r,v: s.mpv.playback_time in r)
     ]
     nKeys = 2
-    mpv = None
+    mpv = AttrDict()  # bunk null mock object until server created
     nexthdrnum = 0
 
     curfilter = 'agate'
@@ -319,28 +362,10 @@ class PodcastEditingSheet(Sheet):
         t = self.mpv.playback_time
         idx = self.getRowIndexByPlaytime(t)
         row = self.rows[idx]
-        baseidx = self.getRowIndexByPlaytime(t, row.baserows)
 
-        # create new row with second part
-        newbaserows = row.baserows[baseidx:]
-        newrow = AttrDict(word=' '.join(r.word for r in flatten_rows(newbaserows)),
-                          speaker=row.speaker,
-                          start=row.baserows[baseidx].start,
-                          end=row.end,
-                          baserows=newbaserows)
-
-        if t > newrow.start:
-            vd.status(f'cut {int((t-newrow.start)*1000)}ms after start of "{newrow.word[:7]}"')
-
-        # fix old row with first part
-        row.end = row.baserows[baseidx-1].end
-        row.baserows = row.baserows[:baseidx]
-        row.word = ' '.join(r.word for r in flatten_rows(row.baserows))
-
-        # XXX: should this be actual mark time or squarely between split words?
-        markertime = t  # (newrow.start + row.end)/2
-        self.addRow(AttrDict(word='', header=str(self.nextheadernum), start=markertime, end=markertime, baserows=[]), index=idx+1)
-        self.addRow(newrow, index=idx+2)
+        row, newrow = row.split_at_time(t)
+        self.rows[idx] = row  # might be the same, modified in place
+        self.addRow(newrow, index=idx+1)
 
     @property
     def nexthdrnum(self):
@@ -360,7 +385,7 @@ class PodcastEditingSheet(Sheet):
     @asyncthread
     def cut_rows(self, rows):
         for row in rows:
-            row['cut'] = self.cutlevel
+            row.cut = self.cutlevel
 
     @property
     def playheadStatus(self):
@@ -497,11 +522,21 @@ def save_xmd(vd, p, sheet):
             if line:
                 fp.write(line+'\n\n')
 
+
+
+# use .to_json() for any class that is not already serializable, like EditRow
+def _default(self, obj):
+    return getattr(obj.__class__, "to_json", _default.default)(obj)
+
+_default.default = json.JSONEncoder().default
+json.JSONEncoder.default = _default
+
 @VisiData.api
 def save_transcript(vd, p, sheet):
     d = dict(word_segments=sheet.rows, sourceaudio=sheet.mpv.sourceaudio)
     with p.open(mode='w', encoding='utf-8') as fp:
         fp.write(json.dumps(d)+'\n')
+
 
 PodcastEditingSheet.options.save_filetype = 'transcript'
 PodcastEditingSheet.options.disp_rstatus_fmt = '{sheet.playheadStatus}  ' + Sheet.options.disp_rstatus_fmt

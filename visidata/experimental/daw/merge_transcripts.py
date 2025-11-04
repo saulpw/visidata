@@ -41,7 +41,8 @@ def main(humanfn, *whisperfns):
         word_timings = whispert['word_segments']
 
         for row in mdt['word_segments']:
-            progress(f"{row['start']:.01f}")
+            startt = row.get('start') or 0
+            progress(f"{startt:.01f}")
             if row['speaker'] == 'marker':
                 continue
             for humanw in row['baserows']:

@@ -64,19 +64,27 @@ def parse_xmd(xmdfn:str) -> list:
             headers = headers[:n+1] + ['']*(n - len(headers)+1)
             headers[n] = line[n+1:]
         else:
-            m = re.match(r'(?P<start_cut>~~)?\\?(\[(?P<start>[\d:]+)\\?\] )?((?P<speaker>[A-Za-z]+): )?(?P<word>.*)', line)
+            m = re.match(r'(?P<start_cut>~~)?\\?(\[(?P<start>[\d:\.]+)\\?\] )?((?P<speaker>[A-Za-z]+): )?(?P<word>.*)', line)
             if not m:
                 print('Unmatched: ' + line)
                 return rows
 
             row = m.groupdict()
 
-            row['speaker'] = row.get('speaker') or (pending_rows[-1].get('speaker') if pending_rows else rows[-1].get('speaker'))
+            row['speaker'] = row.get('speaker')
+            if not row['speaker']:
+                if pending_rows:
+                    row['speaker'] = pending_rows[-1].get('speaker')
+                elif rows:
+                    row['speaker'] = rows[-1].get('speaker')
 
             lastt = row['start'] = parse_hhmmss(row.get('start'))
 
             if lastt:
-                firstt = float(pending_rows[0]['start'])
+                if pending_rows:
+                    firstt = float(pending_rows[0]['start'])
+                else:
+                    firstt = 0
 
                 if headers:
                     row['marker'] = headers[-1]
