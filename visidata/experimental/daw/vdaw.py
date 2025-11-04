@@ -3,7 +3,8 @@ from collections import defaultdict
 import json
 import textwrap
 
-from visidata import vd, VisiData, Sheet, ItemColumn, AttrColumn, asyncthread, AttrDict, vlen, RowColorizer, setitem, Column
+from visidata import vd, VisiData, Sheet, ItemColumn, AttrColumn, AttrDict, vlen, RowColorizer, Column
+from visidata import drawcache_property, setitem, asyncthread
 
 from . import MpvProcess
 
@@ -140,26 +141,33 @@ class EditRow:
         self.header = header
         self.subrows = []
 
-    @property
-    def start(self) -> float:  # should be min?
-        return self.uncutrows[0].start if self.uncutrows else None
+    def __contains__(self, t:float):
+        if not self.start or not self.end:
+            return False
+        return self.start <= t <= self.end
 
-    @property
-    def end(self) -> float:  # should be max?
-        return self.uncutrows[-1].end if self.uncutrows else None
+    @drawcache_property
+    def start(self) -> float:
+        return min(r.end for r in self.uncutrows) if self.uncutrows else None
 
-    @property
+    @drawcache_property
+    def end(self) -> float:
+        return max(r.start for r in self.uncutrows) if self.uncutrows else None
+
+    @drawcache_property
     def duration(self) -> float:
         return sum((r.duration or 0) for r in self.uncutrows) if self.uncutRows else 0
 
-    @property
+    @drawcache_property
     def text(self) -> str:
         if self.cut:
+            # if shown directly, toplevel shows words for all rows regardless of cutness
             return ' '.join((r.word or '') for r in self.subrows)
         else:
-            return ' '.join((r.word or '') for r in self.uncutrows)
+            # otherwise cut subrows are elided
+            return ' '.join((r.word or '') if not r.cut else '…' for r in self.uncutrows)
 
-    @property
+    @drawcache_property
     def uncutrows(self) -> list:
         return [r for r in self.subrows if not r.cut]
 
@@ -167,9 +175,9 @@ class EditRow:
     def cut(self) -> int:
         return not bool(self.uncutrows)
 
-    @property
+    @drawcache_property
     def nwords(self) -> int:
-        return len(self.text.split())
+        return sum(r.nwords if isinstance(r, EditRow) else 1 for r in self.subrows)
 
     def split_at_word(self, n:int) -> tuple['EditRow', 'EditRow']:
         wordnum = 0
@@ -221,14 +229,15 @@ class PodcastEditingSheet(Sheet):
         AttrColumn('start', type=float, formatter='hhmmss'),
         AttrColumn('end', type=float, formatter='hhmmss'),
         Column('duration', type=float, formatter='hhmmss', cache=True, getter=_getter_duration),
-        AttrColumn('cut', width=6),
+        AttrColumn('cut', type=int, width=6),
         AttrColumn('score', type=float, width=0),
         AttrColumn('word', width=80),
         AttrColumn('baserows', type=vlen, width=0),
     ]
     colorizers = [
         RowColorizer(5, 'color_daw_header', lambda s,c,r,v: r.header),  # section header
-        RowColorizer(5, 'color_daw_cut', lambda s,c,r,v: r.cut)
+        RowColorizer(5, 'color_daw_cut', lambda s,c,r,v: r.cut),
+        RowColorizer(3, 'color_daw_playhead', lambda s,c,r,v: s.mpv.playback_time in r)
     ]
     nKeys = 2
     mpv = None
@@ -265,6 +274,7 @@ class PodcastEditingSheet(Sheet):
         except Exception as e:
             vd.exceptionCaught(e)
 
+        self.cutlevel = max(r.cut if r.cut else 0 for r in self.rows)
         self.column('duration').aggregators = 'sum'
         self.column('start').aggregators = 'min'
         self.column('end').aggregators = 'max'
@@ -296,11 +306,10 @@ class PodcastEditingSheet(Sheet):
         row.speaker = speakers[(speakers.index(row.speaker)+1)%len(speakers)]
 
     def getRowIndexByPlaytime(self, t:float, rows=None) -> int:
-        for i, r in enumerate(rows or self.rows):
-            if t <= r.end:  # when playhead is before line end for the first time
-                return i
-
-        vd.error(f'time {to_hms(t)} not found')
+        try:
+            return next(i for i,r in enumerate(rows or self.rows) if t in r)
+        except StopIteration:
+            vd.error(f'time {to_hms(t)} not found')
 
     def go_playhead(self):
         t = self.mpv.playback_time
@@ -351,7 +360,7 @@ class PodcastEditingSheet(Sheet):
     @asyncthread
     def cut_rows(self, rows):
         for row in rows:
-            row['cut'] = True
+            row['cut'] = self.cutlevel
 
     @property
     def playheadStatus(self):
@@ -362,6 +371,7 @@ class PodcastEditingSheet(Sheet):
                 vd.exceptionCaught(e)
 
     def checkCursor(self):
+        return super().checkCursor()
         # disable sync if paused or not top sheet
         if self.mpv and not self.mpv.paused:
             if self is vd.sheets[0] and \
@@ -523,7 +533,7 @@ PodcastEditingSheet.addCommand('g]', 'audio-forward-60', 'mpv.seek_audio(+60); g
 PodcastEditingSheet.addCommand('gg', 'go-playhead', 'go_playhead()', 'move row cursor to playhead' )
 
 PodcastEditingSheet.addCommand('a', 'add-marker', 'add_marker(); cursorDown(2)', 'add marker at current playhead, splitting if necessary')
-PodcastEditingSheet.addCommand('d', 'cut-rows', 'cut_rows([cursorRow]); cursorDown(1)', 'cut audio for line at cursor row')
+PodcastEditingSheet.addCommand('d', 'cut-row', 'cut_rows([cursorRow]); cursorDown(1)', 'cut audio for line at cursor row')
 PodcastEditingSheet.addCommand('gd', 'cut-selected', 'cut_rows(selectedRows)', 'cut audio for selected rows')
 PodcastEditingSheet.addCommand('<', 'go-marker-prev', 'go_header_next(-1, cursorRowIndex)', 'move row cursor to previous marker')
 PodcastEditingSheet.addCommand('>', 'go-marker-next', 'go_header_next(+1, cursorRowIndex)', 'move row cursor to next marker')
