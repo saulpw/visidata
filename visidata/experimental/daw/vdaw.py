@@ -1,8 +1,9 @@
 from collections import defaultdict
 
 import json
+import textwrap
 
-from visidata import vd, VisiData, Sheet, ItemColumn, asyncthread, AttrDict, vlen, RowColorizer, setitem, Column
+from visidata import vd, VisiData, Sheet, ItemColumn, AttrColumn, asyncthread, AttrDict, vlen, RowColorizer, setitem, Column
 
 from . import MpvProcess
 
@@ -95,9 +96,13 @@ def flatten_rows(rows):
 
 
 def replace_baserows(row):
-    'Turn row into AttrDict, recursively making its baserows also AttrDicts.'
-    r = AttrDict(row)
-    r.baserows = [replace_baserows(baser) for baser in (r.baserows or [])]
+    'Turn row into EditRow, recursively making its baserows also EditRows, until the bottom level which are simple AttrDicts.'
+    row = AttrDict(row)
+    if not row.baserows:
+        return row
+
+    r = EditRow(**row)
+    r.subrows = [replace_baserows(baser) for baser in row.baserows]
     return r
 
 
@@ -126,19 +131,99 @@ def _getter_duration(col, row):
     return sum(_getter_duration(col, br) for br in uncutrows)
 
 
+class EditRow:
+    def __init__(self, section:str='', speaker:str='', header:str='', **kwargs):
+        self.section = section
+        self.speaker = speaker
+        self.header = header
+        self.subrows = []
+
+    @property
+    def start(self) -> float:  # should be min?
+        return self.uncutrows[0].start if self.uncutrows else None
+
+    @property
+    def end(self) -> float:  # should be max?
+        return self.uncutrows[-1].end if self.uncutrows else None
+
+    @property
+    def duration(self) -> float:
+        return sum((r.duration or 0) for r in self.uncutrows) if self.uncutRows else 0
+
+    @property
+    def text(self) -> str:
+        if self.cut:
+            return ' '.join((r.word or '') for r in self.subrows)
+        else:
+            return ' '.join((r.word or '') for r in self.uncutrows)
+
+    @property
+    def uncutrows(self) -> list:
+        return [r for r in self.subrows if not r.cut]
+
+    @property
+    def cut(self) -> int:
+        return not bool(self.uncutrows)
+
+    @property
+    def nwords(self) -> int:
+        return len(self.text.split())
+
+    def split_at_word(self, n:int) -> tuple['EditRow', 'EditRow']:
+        wordnum = 0
+        beforerows = []
+        afterrows = []
+        midrow = None
+        for sr in self.uncutrows:
+            nsubwords = len(sr.word.split())
+            if wordnum < n:
+                beforerows.append(sr)
+            elif wordnum + nsubwords - 1 > n:
+                afterrows.append(sr)
+            else:
+                midrow = sr
+                cutwordnum = n - wordnum
+
+            wordnum += nsubwords
+
+        if midrow:  # word n is contained within this subrow
+            if isinstance(midrow, EditRow):
+                r1 = EditRow(section=midrow.section, speaker=midrow.speaker, header=midrow.header)
+                r2 = EditRow(section=midrow.section, speaker=midrow.speaker)
+                a, b = sr.split_at_word(cutwordnum)
+                r1.subrows = beforerows + [a]
+                r2.subrows = [b] + afterrows
+                return r1, r2
+            else:
+                r1 = EditRow(section=midrow.section, speaker=midrow.speaker, header=midrow.header)
+                r2 = EditRow(section=midrow.section, speaker=midrow.speaker)
+                r1.subrows = beforerows + [midrow]
+                r2.subrows = afterrows
+#                r2.subrows = [midrow] + afterrows
+                return r1, r2
+        else:
+            return (beforerows, afterrows)
+
+    @property
+    def baserows(self) -> list:  # deprecated
+        return self.subrows
+
+    @property
+    def word(self) -> str:  # deprecated
+        return self.text
+
+
 class PodcastEditingSheet(Sheet):
     columns = [
-        ItemColumn('marker', width=20),
-        ItemColumn('speaker'),
-        ItemColumn('start', type=float, formatter='hhmmss'),
-        ItemColumn('end', type=float, formatter='hhmmss'),
+        AttrColumn('section', width=20),
+        AttrColumn('speaker'),
+        AttrColumn('start', type=float, formatter='hhmmss'),
+        AttrColumn('end', type=float, formatter='hhmmss'),
         Column('duration', type=float, formatter='hhmmss', cache=True, getter=_getter_duration),
-        ItemColumn('cut', width=6),
-        #ItemColumn('start', type=float),
-        #ItemColumn('end', type=float),
-        ItemColumn('score', type=float, width=0),
-        ItemColumn('word', width=80),
-        ItemColumn('baserows', type=vlen, width=0),
+        AttrColumn('cut', width=6),
+        AttrColumn('score', type=float, width=0),
+        AttrColumn('word', width=80),
+        AttrColumn('baserows', type=vlen, width=0),
     ]
     colorizers = [
         RowColorizer(5, 'color_daw_header', lambda s,c,r,v: r.header),  # section header
@@ -170,6 +255,7 @@ class PodcastEditingSheet(Sheet):
         curhdr = ''
         try:
             for word in d['word_segments']:
+                word['section'] = word.get('marker')
                 if word.get('marker', curhdr) != curhdr:  # only the first row of a section has 'header'
                     curhdr = word['header'] = word['marker']
 
@@ -308,6 +394,20 @@ class PodcastEditingSheet(Sheet):
     def setFilterParmByIndex(self, filtername, parmname, idxvalue):
         self.mpv.set_filter_parm(filtername, parmname, self.mpv.afilter_options[filtername][parmname][idxvalue])
 
+    def reformat_row(self, rowidx):
+        row = self.rows[rowidx]
+
+        formatted_rows = []
+        wordnum = 0
+        for line in textwrap.wrap(row.word,
+                        width=self.column('word').width,
+                        break_long_words=False,
+                        break_on_hyphens=False):
+            pr, row = row.split_at_word(len(line.split())-1)
+            formatted_rows.append(pr)
+
+        self.rows[rowidx:rowidx+1] = formatted_rows
+
 
 @VisiData.api
 class FilterParametersSheet(Sheet):
@@ -423,3 +523,4 @@ PodcastEditingSheet.addCommand('g<', 'go-marker-first', 'go_header_next(+1, 0)',
 PodcastEditingSheet.addCommand('g>', 'go-marker-last', 'go_header_next(-1, nRows-1)', 'move row cursor to last marker')
 
 PodcastEditingSheet.addCommand('f', 'open-vdaw-filters', 'vd.push(FilterParametersSheet("filters", source=sheet))')
+PodcastEditingSheet.addCommand('r', 'reformat-row', 'reformat_row(cursorRowIndex)')
