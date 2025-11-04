@@ -15,34 +15,26 @@ vd.theme_option('daw_include_cuts', True, 'whether saving xmd format includes cu
 
 
 TODO = '''
-- split row at given time for 'a'
-- getRowIndexByPlaytime: could use binary search
-- rename 'marker' to 'section'
 - skip cut segments while playing
   - play segments individually
-  - colorize row based on time (do not change cursor)
+- cleanup: rename 'marker' to 'section'
+- cleanup: rename row.word to row.text throughout
+- change 'word' to 'text' throughout
+- change 'baserows' to 'rows' throughout?  for parity in splitRow
 
-- bug: Mikel and SaulL speakers?
-- cut level (1=first pass, 2=second, etc)
-- add undo to combining
-- ) to reclose current row
-- make sure round-tripping works
-   - if we improve merge_transcript, can it reapply the word-level timings without screwing up the organization of the transcript?
-
-## make markers for mag matter to delineate sections
+- sequential cut lines should show up as single …
 
 - select to next marker
-- move an edit time
-- feature: play side sheet of rows
-+ select some segments into side sheet and see what total duration they are
-   - super neat if we can play them as an edit
+- feature: play side subsheet of rows
 
 - command to rollup whisper transcript by speaker again
-- uncut command
 
 5. basic editing
+   - add undo to combining
+   - ) to reclose current row
+   - uncut command
    - command to select rows from last marker (zs)
-   - cleanup: rename row.word to row.text throughout
+   - move an edit time
 
 cleanups:
     - JSONDecodeError: sometimes query gets extra data with json.  make line buffering?
@@ -50,12 +42,6 @@ cleanups:
 - sync gets lost if a word is <100ms +1
 - changing speakers should set speaker on all baserows?
 - highlight current word in transcript?
-
-- change 'word' to 'text' throughout
-- change 'baserows' to 'rows' throughout?  for parity in splitRow
-
-- WEIRD: editing value on filter parms sheet updates value?!  how is it working?!
-- WEIRD: agate with ratio=1 disables it?  what does ratio parm do?!
 
 4. add marker
    - z< and z> to adjust the previous marker
@@ -395,38 +381,6 @@ class PodcastEditingSheet(Sheet):
             if vd.options.debug:
                 vd.exceptionCaught(e)
 
-    def checkCursor(self):
-        return super().checkCursor()
-        # disable sync if paused or not top sheet
-        if self.mpv and not self.mpv.paused:
-            if self is vd.sheets[0] and \
-                self.cursorRowIndex < self.nRows-1:
-                    nextrow = self.rows[self.cursorRowIndex+1]
-                    if nextrow.start <= self.mpv.playback_time <= nextrow.end:
-                        self.cursorRowIndex += 1
-
-            skipped_cuts = False
-
-            while self.rows[self.cursorRowIndex].cut:
-                self.cursorRowIndex += 1
-                skipped_cuts = True
-
-            if skipped_cuts:
-                self.mpv.play_audio(self.rows[self.cursorRowIndex])
-
-        super().checkCursor()
-
-    def input_afilter_parm(self):
-        def _fmt_afilter_parm(match, row, trigger_key):
-            return f'{row.key} - {row.desc}'
-
-        return vd.activeSheet.inputPalette('choose your filter parameter: ',
-                self.mpv.afilters[self.curfilter],
-                value_key='key',
-                formatter=_fmt_afilter_parm,
-#                help=vd.help_join,
-                type='afilter')
-
     def setFilterParmByIndex(self, filtername, parmname, idxvalue):
         self.mpv.set_filter_parm(filtername, parmname, self.mpv.afilter_options[filtername][parmname][idxvalue])
 
@@ -523,7 +477,6 @@ def save_xmd(vd, p, sheet):
                 fp.write(line+'\n\n')
 
 
-
 # use .to_json() for any class that is not already serializable, like EditRow
 def _default(self, obj):
     return getattr(obj.__class__, "to_json", _default.default)(obj)
@@ -553,12 +506,9 @@ PodcastEditingSheet.addCommand('Ctrl+R', 'restart-mpv', 'mpv.start_mpv()')
 FilterParametersSheet.addCommand('a', 'add-filter', 'source.mpv.add_filter()', 'add filter on current row')
 FilterParametersSheet.addCommand('d', 'remove-filter', 'source.mpv.remove_filter()', 'remove filter on current row')
 
-
 for i in range(0, 10):
     PodcastEditingSheet.addCommand(str(i), f'set-afilter-parm-{i}', f'setFilterParmByIndex(curfilter, curparm, {i})')
     FilterParametersSheet.addCommand(str(i), f'set-afilter-parm-{i}', f'source.setFilterParmByIndex(cursorRow.filter, cursorRow.filter_parm, {i}); reload()')
-
-PodcastEditingSheet.addCommand('zf', 'choose-afilter-parm', 'sheet.curparm = input_afilter_parm()', '')
 
 PodcastEditingSheet.addCommand('', 'cycle-speaker', 'cycle_speaker(cursorRow)')
 PodcastEditingSheet.addCommand('[', 'audio-back-10', 'mpv.seek_audio(-10); go_playhead()')
