@@ -102,7 +102,7 @@ def getattrdeep(obj, attr, *default, getter=getattr):
             obj = getter(obj, a)
 
         return getter(obj, attrs[-1])
-    except Exception as e:
+    except AttributeError as e:
         if not default: raise
         return default[0]
 
