@@ -3,6 +3,7 @@ from collections import defaultdict
 import json
 import textwrap
 
+from functools import cached_property
 from visidata import vd, VisiData, Sheet, ItemColumn, AttrColumn, AttrDict, vlen, RowColorizer, Column
 from visidata import drawcache_property, setitem, asyncthread
 
@@ -11,16 +12,22 @@ from . import MpvProcess
 vd.theme_option('color_daw_header', 'underline', 'color of first line in a transcript section')
 vd.theme_option('color_daw_playhead', 'blue', 'color of playhead line')
 vd.theme_option('color_daw_cut', '238', 'color of cut rows')
+vd.theme_option('color_daw_keep', 'green', 'color of kept rows')
 vd.theme_option('daw_include_cuts', True, 'whether saving xmd format includes cuts with strikethrough')
 
 
 TODO = '''
+- combine_rows needs to use EditRow
+- bug: duration not working: subrows is None?
+- invert .cut to .keep, with keep=-10 for essential cuts, then -9, etc.  keep>0 means definitely keep.  keep=0/None means undecided
+
++ cleanup: rename 'marker' to 'section'
++ cleanup: rename row.word to row.text throughout
++ change 'word' to 'text' throughout
++ change 'baserows' to 'subrows' throughout?  for parity in splitRow
+
 - skip cut segments while playing
   - play segments individually
-- cleanup: rename 'marker' to 'section'
-- cleanup: rename row.word to row.text throughout
-- change 'word' to 'text' throughout
-- change 'baserows' to 'rows' throughout?  for parity in splitRow
 
 - sequential cut lines should show up as single …
 
@@ -61,13 +68,13 @@ cleanups:
 '''
 
 def to_hms(t:float, width=None) -> str:
-    'Return HH:MM:SS.s'
-    if t is None:
+    'Return some form of HH:MM:SS.s'
+    if t is None or t == 0:
         return ''
-    if t < 0:
+
+    if t < 100:
         return f'{t:0.1f}s'
-    if t == 0:
-        return ''
+
     h = int(t // 3600)
     m = int((t % 3600) // 60)
     s = int(t % 60)
@@ -75,15 +82,19 @@ def to_hms(t:float, width=None) -> str:
     return f'{h:02d}:{m:02d}:{s:02d}.{ms:01d}'
 
 
-def replace_baserows(row):
-    'Turn row into EditRow, recursively making its baserows also EditRows, until the bottom level which are simple AttrDicts.'
-    row = AttrDict(row)
-    if not row.baserows:
-        return row
+def replace_subrows(row):
+    'Turn row into EditRow, recursively making its subrows also EditRows, until the bottom level which are simple AttrDicts.'
+    if not isinstance(row, EditRow):
+        ret = EditRow(**row)
+    else:
+        ret = row
 
-    r = EditRow(**row)
-    r.subrows = [replace_baserows(baser) for baser in row.baserows]
-    return r
+    if not ret.subrows:
+        if not ret.data:
+            ret.data = AttrDict(row)
+    else:
+        ret.subrows = [replace_subrows(baser) for baser in ret.subrows]
+    return ret
 
 
 @VisiData.api
@@ -100,67 +111,81 @@ def _getter_duration(col, row):
     if row.cut:
         return 0
 
-    uncutrows = [br for br in row.baserows if not br.cut]
+    if not row.subrows:
+        return row.end-row.start
+
+    uncutrows = [br for br in row.subrows if not br.cut]
 
     if not uncutrows:  # everything is cut
         return 0
 
-    if len(uncutrows) == len(row.baserows):
+    if len(uncutrows) == len(row.subrows):
         return row.end-row.start
 
     return sum(_getter_duration(col, br) for br in uncutrows)
 
 class EditRow:
     def __init__(self, section:str='', speaker:str='', header:str='', subrows:list=None, cut=None, **kwargs):
+        self.data = None  # start/end/text for leaf nodes
         self.section = section
         self.speaker = speaker
         self.header = header
-        self.subrows = subrows or []
+        self.subrows = [replace_subrows(baser) for baser in (subrows or [])]
         if not subrows or cut is not None:
             self.cut = cut
         else:
             self.cut = max(r.cut if r.cut else 0 for r in self.subrows)
 
     def to_json(self) -> dict:
-        return dict(marker=self.section,
+        return dict(section=self.section,
                     speaker=self.speaker,
                     start=self.start,
                     end=self.end,
                     cut=self.cut,
-                    baserows=self.subrows,
-                    word=self.text)
+                    subrows=self.subrows,
+                    text=self.text)
 
     def __contains__(self, t:float) -> bool:
         if not self.start or not self.end:
             return False
         return self.start <= t <= self.end
 
-    @drawcache_property
+    @cached_property
     def start(self) -> float:
+        if self.data: return self.data.start
         return min(r.end for r in self.uncutrows) if self.uncutrows else None
 
-    @drawcache_property
+    @cached_property
     def end(self) -> float:
+        if self.data: return self.data.end
         return max(r.start for r in self.uncutrows) if self.uncutrows else None
 
-    @drawcache_property
+    @cached_property
     def duration(self) -> float:
+        if self.data: return self.data.end-self.data.start
         return sum((r.duration or 0) for r in self.uncutrows) if self.uncutRows else 0
 
-    @drawcache_property
+    @cached_property
     def text(self) -> str:
+        if self.data: return self.data.text
         if self.cut:
             # if shown directly, toplevel shows words for all rows regardless of cutness
-            return ' '.join((r.word or '') for r in self.subrows)
+            return ' '.join((r.text or '') for r in self.subrows)
         else:
             # otherwise cut subrows are elided
-            return ' '.join((r.word or '') if not r.cut else '…' for r in self.uncutrows)
+            return ' '.join((r.text or '') if not r.cut else '…' for r in self.uncutrows)
 
-    @drawcache_property
+    def is_cut(self, row):
+        if isinstance(row.cut, (float, int)):
+            return row.cut < 0
+        else:
+            return bool(row.cut)
+
+    @cached_property
     def uncutrows(self) -> list:
-        return [r for r in self.subrows if not r.cut]
+        return [r for r in self.subrows if r and not self.is_cut(r)]
 
-    @drawcache_property
+    @cached_property
     def nwords(self) -> int:
         return sum(r.nwords if isinstance(r, EditRow) else 1 for r in self.subrows)
 
@@ -170,7 +195,7 @@ class EditRow:
         afterrows = []
         midrow = None
         for sr in self.uncutrows:
-            nsubwords = len(sr.word.split())
+            nsubwords = len(sr.text.split())
             if wordnum < n:
                 beforerows.append(sr)
             elif wordnum + nsubwords - 1 > n:
@@ -183,18 +208,14 @@ class EditRow:
             wordnum += nsubwords
 
         if midrow:  # word n is contained within this subrow
-            if isinstance(midrow, EditRow):
-                r1 = EditRow(section=midrow.section, speaker=midrow.speaker, header=midrow.header)
-                r2 = EditRow(section=midrow.section, speaker=midrow.speaker)
+            if midrow.subrows:
                 a, b = midrow.split_at_word(cutwordnum)
-                r1.subrows = beforerows + [a]
-                r2.subrows = [b] + afterrows
+                r1 = EditRow(section=self.section, speaker=self.speaker, header=self.header, subrows=beforerows + [a], cut=self.cut)
+                r2 = EditRow(section=self.section, speaker=self.speaker, subrows=[b] + afterrows, cut=self.cut)
                 return r1, r2
             else:
-                r1 = EditRow(section=midrow.section, speaker=midrow.speaker, header=midrow.header)
-                r2 = EditRow(section=midrow.section, speaker=midrow.speaker)
-                r1.subrows = beforerows + [midrow]
-                r2.subrows = afterrows
+                r1 = EditRow(section=self.section, speaker=self.speaker, header=self.header, subrows=beforerows + [midrow], cut=self.cut)
+                r2 = EditRow(section=self.section, speaker=self.speaker, subrows=afterrows, cut=self.cut)
                 return r1, r2
         else:
             return None, None
@@ -204,7 +225,7 @@ class EditRow:
         beforerows = None
         afterrows = None
         for i, r in enumerate(self.subrows):
-            if isinstance(r, EditRow):
+            if r.subrows:
                 if t in r:
                     beforerows = self.subrows[:i]
                     afterrows = self.subrows[i+1:]
@@ -228,7 +249,7 @@ class EditRow:
                         break
 
         if midrow:  # time t is contained within this subrow
-            if isinstance(midrow, EditRow):
+            if midrow.subrows:
                 a, b = midrow.split_at_time(t)
                 r1 = EditRow(section=midrow.section, speaker=midrow.speaker, header=self.header, subrows=beforerows + [a])
                 r2 = EditRow(section=midrow.section, speaker=midrow.speaker, subrows=[b] + afterrows)
@@ -242,14 +263,6 @@ class EditRow:
             r2 = EditRow(section=self.section, speaker=self.speaker, subrows=afterrows)
             return r1, r2
 
-    @property
-    def baserows(self) -> list:  # deprecated
-        return self.subrows
-
-    @property
-    def word(self) -> str:  # deprecated
-        return self.text
-
 
 class PodcastEditingSheet(Sheet):
     columns = [
@@ -260,12 +273,13 @@ class PodcastEditingSheet(Sheet):
         Column('duration', type=float, formatter='hhmmss', cache=True, getter=_getter_duration),
         AttrColumn('cut', type=int, width=6),
         AttrColumn('score', type=float, width=0),
-        AttrColumn('word', width=80),
-        AttrColumn('baserows', type=vlen, width=0),
+        AttrColumn('text', width=80),
+        AttrColumn('subrows', type=vlen, width=0),
     ]
     colorizers = [
         RowColorizer(5, 'color_daw_header', lambda s,c,r,v: r.header),  # section header
-        RowColorizer(5, 'color_daw_cut', lambda s,c,r,v: r.cut),
+        RowColorizer(5, 'color_daw_cut', lambda s,c,r,v: r.cut and r.cut < 0),
+        RowColorizer(5, 'color_daw_keep', lambda s,c,r,v: r.cut and r.cut > 0),
         RowColorizer(3, 'color_daw_playhead', lambda s,c,r,v: s.mpv.playback_time in r)
     ]
     nKeys = 2
@@ -277,7 +291,7 @@ class PodcastEditingSheet(Sheet):
 
     def iterload(self):
         d = json.loads(self.source.open_text().read())
-        self.speakers = defaultdict(list)  # speakername -> list of words/baserows
+        self.speakers = defaultdict(list)  # speakername -> list of words/subrows
         sourceaudio = d.get('sourceaudio', None)
         if not sourceaudio:
             if self.source.with_suffix('.mp3').exists():
@@ -293,13 +307,13 @@ class PodcastEditingSheet(Sheet):
 
         curhdr = ''
         try:
-            for word in d['word_segments']:
-                word['section'] = word.get('marker')
-                if word.get('marker', curhdr) != curhdr:  # only the first row of a section has 'header'
-                    curhdr = word['header'] = word['marker']
+            for row in d['word_segments']:
+                row['section'] = row.get('section')
+                if row.get('section', curhdr) != curhdr:  # only the first row of a section has 'header'
+                    curhdr = row['header'] = row['section']
 
-                self.speakers[word.get('speaker', None)].append(word)
-                yield replace_baserows(word)
+                self.speakers[row.get('speaker', None)].append(row)
+                yield EditRow(**row)
         except Exception as e:
             vd.exceptionCaught(e)
 
@@ -310,25 +324,29 @@ class PodcastEditingSheet(Sheet):
 
     def combine_rows(self, rows):
         uncutrows = [r for r in rows if not r.cut]
-        newrow = AttrDict(word=' '.join(r.word for r in uncutrows),
+        newrow = AttrDict(text=' '.join(r.text for r in uncutrows),
                           speaker=' '.join(set(r.speaker for r in uncutrows if r.speaker)),
-                          marker=rows[0].marker,
+                          section=rows[0].section,
                           start=uncutrows[0].start if uncutrows else rows[0].start,
                           end=uncutrows[-1].end if uncutrows else rows[-1].end,
-                          baserows=rows)
+                          subrows=rows)
         self.addRow(newrow, index=self.cursorRowIndex)
 
         for r in rows:
             self.rows.remove(r)
 
     def expand_row(self, rowidx):
-        baserows = self.rows[rowidx].baserows
-        if baserows:
-            if self.rows[rowidx].marker:
-                baserows[0].marker = self.rows[rowidx].marker
-            self.rows[rowidx:rowidx+1] = baserows
+        subrows = self.rows[rowidx].subrows
+        if subrows:
+            if self.rows[rowidx].section:
+                subrows[0].section = self.rows[rowidx].section
+            self.rows[rowidx:rowidx+1] = subrows
         else:
-            vd.warning('no baserows')
+            vd.warning('no subrows')
+
+    def bump(self, n, *rows):
+        for row in rows:
+            row.cut = (row.cut or 0)+n
 
     def cycle_speaker(self, row):
         speakers = list(self.speakers.keys())
@@ -344,7 +362,7 @@ class PodcastEditingSheet(Sheet):
         t = self.mpv.playback_time
         self.cursorRowIndex = self.getRowIndexByPlaytime(t)
 
-    def add_marker(self):
+    def split_at_playhead(self):
         t = self.mpv.playback_time
         idx = self.getRowIndexByPlaytime(t)
         row = self.rows[idx]
@@ -366,7 +384,7 @@ class PodcastEditingSheet(Sheet):
             if self.rows[i].header:
                 self.cursorRowIndex = i
                 return
-        vd.fail("no marker")
+        vd.fail("no more sections")
 
     @asyncthread
     def cut_rows(self, rows):
@@ -389,22 +407,27 @@ class PodcastEditingSheet(Sheet):
 
         formatted_rows = []
         wordnum = 0
-        for line in textwrap.wrap(row.word,
-                        width=self.column('word').width-2,
+        for line in textwrap.wrap(row.text,
+                        width=self.column('text').width-2,
                         break_long_words=False,
                         break_on_hyphens=False):
             pr, row = row.split_at_word(len(line.split())-1)
             if pr:
                 formatted_rows.append(pr)
-            if not row:
+
+            if not isinstance(row, EditRow):
                 break
 
         self.rows[rowidx:rowidx+1] = formatted_rows
 
     def reformat_rows(self, rows):
-        for row in rows:
-            if not row.cut:
+        for row in rows[::-1]:
+            if not row.cut or row.cut > 0:
                 self.reformat_row(rows.index(row))
+
+    def speed_change(self, dv):
+        self.speed *= dv
+        self.set_property('speed', self.speed)
 
 @VisiData.api
 class FilterParametersSheet(Sheet):
@@ -447,7 +470,7 @@ def save_cutlist(vd, p, sheet):
             else:
                 if cut_start is not None:
                     i += 1
-                    fp.write(f'{i}. cut from {to_hms(cut_start.start)} to {to_hms(cut_end.end)}: {cut_start.word[:10]}...{cut_end.word[-10:]}\n')
+                    fp.write(f'{i}. cut from {to_hms(cut_start.start)} to {to_hms(cut_end.end)}: {cut_start.text[:10]}...{cut_end.text[-10:]}\n')
                     cut_start = None
                     cut_end = None
 
@@ -461,11 +484,11 @@ def save_xmd(vd, p, sheet):
 #            timestr = f'{row.start:0.1f}'
             timestr = to_hms(row.start)
 
-            if row.get('marker', prevhdr) != prevhdr:
-                prevhdr = row.get('marker')
+            if row.get('section', prevhdr) != prevhdr:
+                prevhdr = row.get('section')
                 fp.write(f'## {prevhdr}\n\n')
 
-            line = f'[{timestr}] {row.speaker}: {row.word}'
+            line = f'[{timestr}] {row.speaker}: {row.text}'
             line = line.strip()
             if row.cut:
                 if sheet.options.daw_include_cuts:
@@ -494,9 +517,9 @@ def save_transcript(vd, p, sheet):
 PodcastEditingSheet.options.save_filetype = 'transcript'
 PodcastEditingSheet.options.disp_rstatus_fmt = '{sheet.playheadStatus}  ' + Sheet.options.disp_rstatus_fmt
 
-PodcastEditingSheet.addCommand('P', 'play-row', 'mpv.play_audio(cursorRow)')
-PodcastEditingSheet.addCommand('p', 'play-toggle', 'mpv.audio_pause(not mpv.paused)')
-FilterParametersSheet.addCommand('P', 'play-toggle', 'source.mpv.audio_pause(not source.mpv.paused)')
+PodcastEditingSheet.addCommand('P', 'play-row', 'mpv.play_audio(cursorRow.start)')
+PodcastEditingSheet.addCommand('p', 'play-toggle', 'mpv.pause_audio(not mpv.paused)')
+FilterParametersSheet.addCommand('P', 'play-toggle', 'source.mpv.pause_audio(not source.mpv.paused)')
 PodcastEditingSheet.addCommand('g)', 'combine-selected', 'combine_rows(selectedRows)')
 PodcastEditingSheet.addCommand('(', 'expand-row', 'expand_row(cursorRowIndex)')
 PodcastEditingSheet.addCommand('g(', 'expand-selected', 'for row in selectedRows: expand_row(rows.index(row))')
@@ -517,13 +540,18 @@ PodcastEditingSheet.addCommand('g[', 'audio-back-60', 'mpv.seek_audio(-60); go_p
 PodcastEditingSheet.addCommand('g]', 'audio-forward-60', 'mpv.seek_audio(+60); go_playhead()')
 PodcastEditingSheet.addCommand('gg', 'go-playhead', 'go_playhead()', 'move row cursor to playhead' )
 
-PodcastEditingSheet.addCommand('a', 'add-marker', 'add_marker(); cursorDown(2)', 'add marker at current playhead, splitting if necessary')
-PodcastEditingSheet.addCommand('d', 'cut-row', 'cut_rows([cursorRow]); cursorDown(1)', 'cut audio for line at cursor row')
-PodcastEditingSheet.addCommand('gd', 'cut-selected', 'cut_rows(selectedRows)', 'cut audio for selected rows')
-PodcastEditingSheet.addCommand('<', 'go-marker-prev', 'go_header_next(-1, cursorRowIndex)', 'move row cursor to previous marker')
-PodcastEditingSheet.addCommand('>', 'go-marker-next', 'go_header_next(+1, cursorRowIndex)', 'move row cursor to next marker')
-PodcastEditingSheet.addCommand('g<', 'go-marker-first', 'go_header_next(+1, 0)', 'move row cursor to first marker')
-PodcastEditingSheet.addCommand('g>', 'go-marker-last', 'go_header_next(-1, nRows-1)', 'move row cursor to last marker')
+PodcastEditingSheet.addCommand('F5', 'speed_change(-0.5)', 'adjust playspeed down 50%')
+PodcastEditingSheet.addCommand('F8', 'speed_change(+0.5)', 'adjust playspeed up 50%')
+
+PodcastEditingSheet.addCommand('a', 'add-cutpoint', 'split_at_playhead(); cursorDown(2)', 'split line at current playhead')
+PodcastEditingSheet.addCommand('d', 'cut-row', 'bump(-1, cursorRow); cursorDown(1)', 'cut audio for line at cursor row')
+PodcastEditingSheet.addCommand('y', 'bump-row', 'bump(+1, cursorRow); cursorDown(1)', 'upvote audio for line at cursor row')
+PodcastEditingSheet.addCommand('gd', 'cut-selected', 'bump(-1, *selectedRows)', 'cut audio for selected rows')
+PodcastEditingSheet.addCommand('gy', 'bump-selected', 'bump(+1, *selectedRows', 'bump audio for selected rows')
+PodcastEditingSheet.addCommand('<', 'go-header-prev', 'go_header_next(-1, cursorRowIndex)', 'move row cursor to previous section')
+PodcastEditingSheet.addCommand('>', 'go-header-next', 'go_header_next(+1, cursorRowIndex)', 'move row cursor to next section')
+PodcastEditingSheet.addCommand('g<', 'go-header-first', 'go_header_next(+1, 0)', 'move row cursor to first section')
+PodcastEditingSheet.addCommand('g>', 'go-header-last', 'go_header_next(-1, nRows-1)', 'move row cursor to last section')
 
 PodcastEditingSheet.addCommand('f', 'open-vdaw-filters', 'vd.push(FilterParametersSheet("filters", source=sheet))')
 PodcastEditingSheet.addCommand('r', 'reformat-row', 'reformat_row(cursorRowIndex)')

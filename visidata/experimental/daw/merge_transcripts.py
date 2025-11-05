@@ -22,8 +22,8 @@ def _score(whisperw, humanw):
     if whisperw.get('speaker') == humanw.get('speaker'):
         r += 5
 
-    w1 = clean(whisperw['word'])
-    w2 = clean(humanw['word'])
+    w1 = clean(whisperw.get('word', whisperw.get('text')))
+    w2 = clean(humanw['text'])
     r += difflib.SequenceMatcher(a=w1, b=w2).ratio()*10
 
     r -= abs(whisperw['start'] - humanw['start'])
@@ -45,7 +45,7 @@ def main(humanfn, *whisperfns):
             progress(f"{startt:.01f}")
             if row['speaker'] == 'marker':
                 continue
-            for humanw in row['baserows']:
+            for humanw in row['subrows']:
                 for whisperw in find_words_around(humanw, word_timings):
                     poss.append((_score(whisperw, humanw), whisperw, humanw))
 
@@ -63,17 +63,17 @@ def main(humanfn, *whisperfns):
         humanw['start'] = whisperw['start']
         humanw['end'] = whisperw['end']
         humanw['match_score'] = score
-#        humanw['word'] += f" {i}"
+#        humanw['text'] += f" {i}"
         whisperw['used'] = humanw
 
     for row in mdt['word_segments']:
         if row.get('speaker') == 'marker':
             continue
-        if not row.get('baserows'):
-            stderr('no baserows', row)
+        if not row.get('subrows'):
+            stderr('no subrows', row)
             continue
-        row['start'] = row['baserows'][0]['start']
-        row['end'] = row['baserows'][-1]['end']
+        row['start'] = row['subrows'][0]['start']
+        row['end'] = row['subrows'][-1]['end']
 
     mdt['sourceaudio'] = 'daw/2025-10-16.mp3'
     print(json.dumps(mdt))

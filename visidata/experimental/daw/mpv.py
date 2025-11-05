@@ -95,7 +95,7 @@ class MpvProcess:
         self.start_mpv()
         time.sleep(0.5)
         self.seek_audio(t, 'absolute')
-        self.audio_pause(False)
+        self.pause_audio(False)
 
     def is_default(self, filtername, parmname, val):
         return val is None or val == self.afilter_options[filtername][parmname][0]
@@ -135,14 +135,15 @@ class MpvProcess:
         sock.sendall(json.dumps(dict(command=['get_property', propname])).encode() + b'\n')
         r = sock.recv(4096)
         d = json.loads(r)
-        if d.get('error', None) != 'success':
-            vd.error(d)
+        error = d.get('error', None)
+        if error != 'success':
+            vd.error(f"mpv error: {d.get('error', '')}")
 
         sock.close()
         return d['data']
 
-    def audio_pause(self, b=True):
-        self.mpv_command(command=['set_property', 'pause', b])
+    def set_property(self, propname, b=True):
+        self.mpv_command(command=['set_property', propname, b])
 
     @property
     def paused(self):
@@ -154,9 +155,12 @@ class MpvProcess:
     def playback_time(self):
         return float(self.mpv_query('playback-time'))
 
-    def play_audio(self, row):
-        self.seek_audio(row.start, 'absolute')
-        self.audio_pause(False)
+    def pause_audio(self, b=True):
+        self.set_property('pause', b)
+
+    def play_audio(self, t:float):
+        self.seek_audio(t, 'absolute')
+        self.pause_audio(False)
 
     def seek_audio(self, dt:float, *args):
         self.mpv_command(command=['seek', str(dt), *args])

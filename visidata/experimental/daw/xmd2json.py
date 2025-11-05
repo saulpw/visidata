@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 '''
-Usage: $0 <human_transcript.md> <whisper_transcript.json...>
+Usage: $0 <human_transcript.json> <whisper_transcript.json...>
 
-Parse the human_transcript.md, and match the words from whisper_transcript.json to provide the word-level timings.  Output centaur_transcript.json.
+Parse human_transcript.json, and match the words from whisper_transcript.json to provide the word-level timings.  Output centaur_transcript.json to stdout.
 '''
 
 import sys
@@ -11,13 +11,6 @@ import copy
 import re
 import json
 
-TODO = '''
-
-## ideas to better align
-
-- bug: Intro header on wrong line
-- rename 'word' column to 'text'
-'''
 
 def parse_hhmmss(hms:str) -> float:
     if not hms:
@@ -27,25 +20,25 @@ def parse_hhmmss(hms:str) -> float:
 
 
 def interpolate_times(pending_rows:list[dict], startt, endt):
-    total_len = sum(len(r['word']) for r in pending_rows)
+    total_len = sum(len(r['text']) for r in pending_rows)
     for i, pr in enumerate(pending_rows):
         if i > 0:
             pr['start'] = pending_rows[i-1]['end']
         else:
             pr['start'] = startt
-        pr['end'] = (len(pr['word'])/total_len)*(endt-startt)+pr['start']
+        pr['end'] = (len(pr['text'])/total_len)*(endt-startt)+pr['start']
 
     return pending_rows
 
 
 def split_cuts(row, startcut=False):
-    parts = row['word'].split('~~')
+    parts = row['text'].split('~~')
     cut = startcut  # whether we start in cut mode
     for p in parts:
         p = p.strip()
         if p:
             newrow = copy.copy(row)
-            newrow['word'] = p
+            newrow['text'] = p
             if cut:
                 newrow['cut'] = cut
             yield newrow
@@ -64,7 +57,7 @@ def parse_xmd(xmdfn:str) -> list:
             headers = headers[:n+1] + ['']*(n - len(headers)+1)
             headers[n] = line[n+1:]
         else:
-            m = re.match(r'(?P<start_cut>~~)?\\?(\[(?P<start>[\d:\.]+)\\?\] )?((?P<speaker>[A-Za-z]+): )?(?P<word>.*)', line)
+            m = re.match(r'(?P<start_cut>~~)?\\?(\[(?P<start>[\d:\.]+)\\?\] )?((?P<speaker>[A-Za-z]+): )?(?P<text>.*)', line)
             if not m:
                 print('Unmatched: ' + line)
                 return rows
@@ -87,16 +80,16 @@ def parse_xmd(xmdfn:str) -> list:
                     firstt = 0
 
                 if headers:
-                    row['marker'] = headers[-1]
+                    row['section'] = headers[-1].strip()
                     headers = []
 
                 for pr in interpolate_times(pending_rows, firstt, lastt):
-                    pr['baserows'] = interpolate_times([
+                    pr['subrows'] = interpolate_times([
                         dict(start=None, end=None,
                              speaker=pr['speaker'],
                              cut=pr.get('cut'),
-                             word=w)
-                          for w in pr['word'].split()
+                             text=w)
+                          for w in pr['text'].split()
                       ], pr['start'], pr['end'])
                     rows.append(pr)
 
