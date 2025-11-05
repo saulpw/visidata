@@ -143,8 +143,8 @@ Sheet.addCommand('zz', 'scroll-middle', 'sheet.topRowIndex = cursorRowIndex-int(
 
 Sheet.addCommand('kRIT5', 'go-right-page', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex', 'scroll cursor one page right', replay=False)
 Sheet.addCommand('kLFT5', 'go-left-page', 'pageLeft()', 'scroll cursor one page left', replay=False)
-Sheet.addCommand(None, 'scroll-left', 'sheet.cursorVisibleColIndex -= options.scroll_incr', 'scroll one column left')
-Sheet.addCommand(None, 'scroll-right', 'sheet.cursorVisibleColIndex += options.scroll_incr', 'scroll one column right')
+Sheet.addCommand(None, 'scroll-left', 'sheet.cursorVisibleColIndex -= options.scroll_incr', 'scroll left by one column increment')
+Sheet.addCommand(None, 'scroll-right', 'sheet.cursorVisibleColIndex += options.scroll_incr', 'scroll right by one column increment')
 Sheet.addCommand(None, 'scroll-leftmost', 'sheet.leftVisibleColIndex = cursorVisibleColIndex', 'scroll sheet to leftmost column')
 Sheet.addCommand(None, 'scroll-rightmost', 'tmp = cursorVisibleColIndex; pageLeft(); sheet.cursorVisibleColIndex = tmp', 'scroll sheet to rightmost column')
 
