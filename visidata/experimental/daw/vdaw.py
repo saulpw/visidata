@@ -75,6 +75,13 @@ def to_hms(t:float, width=None) -> str:
     return f'{h:02d}:{m:02d}:{s:02d}.{ms:01d}'
 
 
+def is_cut(row):
+    if isinstance(row.cut, (float, int)):
+        return row.cut < 0
+    else:
+        return bool(row.cut)
+
+
 def replace_subrows(row):
     'Turn row into EditRow, recursively making its subrows also EditRows, until the bottom level which are simple AttrDicts.'
     if not isinstance(row, EditRow):
@@ -152,15 +159,9 @@ class EditRow:
             # otherwise cut subrows are elided
             return ' '.join((r.text or '') if not r.cut else '…' for r in self.uncutrows)
 
-    def is_cut(self, row):
-        if isinstance(row.cut, (float, int)):
-            return row.cut < 0
-        else:
-            return bool(row.cut)
-
     @cached_property
     def uncutrows(self) -> list:
-        return [r for r in self.subrows if r and not self.is_cut(r)]
+        return [r for r in self.subrows if r and not is_cut(r)]
 
     @cached_property
     def nwords(self) -> int:
@@ -248,7 +249,7 @@ class PodcastEditingSheet(Sheet):
         AttrColumn('start', type=float, formatter='hhmmss'),
         AttrColumn('end', type=float, formatter='hhmmss'),
         AttrColumn('duration', type=float, formatter='hhmmss'),
-        AttrColumn('cut', type=int, width=6),
+        AttrColumn('cut', type=float, width=6),
         AttrColumn('score', type=float, width=0),
         AttrColumn('text', width=80),
         AttrColumn('subrows', type=vlen, width=0),
@@ -266,6 +267,7 @@ class PodcastEditingSheet(Sheet):
 
     curfilter = 'agate'
     curparm = 'ratio'
+    speed = 1
 
     def iterload(self):
         self.speakers = defaultdict(list)  # speakername -> list of words/subrows
@@ -313,6 +315,7 @@ class PodcastEditingSheet(Sheet):
 
     def combine_rows(self, rows):
         vd.addUndo(setattr, self, 'rows', copy(self.rows))
+        self.modified = True
 
         uncutrows = [r for r in rows if not r.cut or r.cut < 0]
         newrow = EditRow(speaker=' '.join(set(r.speaker for r in uncutrows if r.speaker)),
@@ -325,6 +328,7 @@ class PodcastEditingSheet(Sheet):
 
     def expand_row(self, rowidx):
         vd.addUndo(setattr, self, 'rows', copy(self.rows))
+        self.modified = True
 
         subrows = self.rows[rowidx].subrows
         if subrows:
@@ -335,11 +339,13 @@ class PodcastEditingSheet(Sheet):
             vd.warning('no subrows')
 
     def bump(self, n, *rows):
+        self.modified = True
         for row in rows:
             vd.addUndo(setattr, row, 'cut', row.cut)
             row.cut = (row.cut or 0)+n
 
     def cycle_speaker(self, row):
+        self.modified = True
         vd.addUndo(setattr, row, 'speaker', row.speaker)
         speakers = list(self.speakers.keys())
         row.speaker = speakers[(speakers.index(row.speaker)+1)%len(speakers)]
@@ -348,7 +354,27 @@ class PodcastEditingSheet(Sheet):
         try:
             return next(i for i,r in enumerate(rows or self.rows) if t in r)
         except StopIteration:
-            vd.error(f'time {to_hms(t)} not found')
+            vd.debug(f'time {to_hms(t)} not found')
+
+    def checkCursor(self):
+        super().checkCursor()
+
+        t = self.mpv.playback_time
+        if not t:
+            return
+
+        origrowidx = self.getRowIndexByPlaytime(t)
+        i = origrowidx
+        while i < self.nRows:
+            pbrow = self.rows[i]
+            if not is_cut(pbrow):
+                break
+            i += 1
+
+        if i >= self.nRows:
+            self.mpv.pause_audio()
+        elif i != origrowidx:
+            self.mpv.play_audio(self.rows[i].start)
 
     def go_playhead(self):
         t = self.mpv.playback_time
@@ -414,7 +440,7 @@ class PodcastEditingSheet(Sheet):
 
     def speed_change(self, dv):
         self.speed *= dv
-        self.set_property('speed', self.speed)
+        self.mpv.set_property('speed', self.speed)
 
 
 @VisiData.api
@@ -528,14 +554,14 @@ PodcastEditingSheet.addCommand('g[', 'audio-back-60', 'mpv.seek_audio(-60); go_p
 PodcastEditingSheet.addCommand('g]', 'audio-forward-60', 'mpv.seek_audio(+60); go_playhead()')
 PodcastEditingSheet.addCommand('gg', 'go-playhead', 'go_playhead()', 'move row cursor to playhead' )
 
-PodcastEditingSheet.addCommand('F5', 'speed_change(-0.5)', 'adjust playspeed down 50%')
-PodcastEditingSheet.addCommand('F8', 'speed_change(+0.5)', 'adjust playspeed up 50%')
+PodcastEditingSheet.addCommand('F5', 'audio-slower', 'speed_change(0.5)', 'adjust playspeed down 50%')
+PodcastEditingSheet.addCommand('F8', 'audio-faster', 'speed_change(2.0)', 'adjust playspeed 2x')
 
 PodcastEditingSheet.addCommand('a', 'add-cutpoint', 'split_at_playhead(); cursorDown(2)', 'split line at current playhead')
 PodcastEditingSheet.addCommand('d', 'cut-row', 'bump(-1, cursorRow); cursorDown(1)', 'cut audio for line at cursor row')
-PodcastEditingSheet.addCommand('y', 'bump-row', 'bump(+1, cursorRow); cursorDown(1)', 'upvote audio for line at cursor row')
+PodcastEditingSheet.addCommand('y', 'bump-row', 'bump(+1, cursorRow)', 'upvote audio for line at cursor row')
 PodcastEditingSheet.addCommand('gd', 'cut-selected', 'bump(-1, *selectedRows)', 'cut audio for selected rows')
-PodcastEditingSheet.addCommand('gy', 'bump-selected', 'bump(+1, *selectedRows', 'bump audio for selected rows')
+PodcastEditingSheet.addCommand('gy', 'bump-selected', 'bump(+1, *selectedRows)', 'bump audio for selected rows')
 PodcastEditingSheet.addCommand('<', 'go-header-prev', 'go_header_next(-1, cursorRowIndex)', 'move row cursor to previous section')
 PodcastEditingSheet.addCommand('>', 'go-header-next', 'go_header_next(+1, cursorRowIndex)', 'move row cursor to next section')
 PodcastEditingSheet.addCommand('g<', 'go-header-first', 'go_header_next(+1, 0)', 'move row cursor to first section')

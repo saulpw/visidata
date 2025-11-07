@@ -131,16 +131,18 @@ class MpvProcess:
 
     def mpv_query(self, propname):
         sock = socket.socket(socket.AF_UNIX)
-        sock.connect(self.mpvsockfn)
-        sock.sendall(json.dumps(dict(command=['get_property', propname])).encode() + b'\n')
-        r = sock.recv(4096)
-        d = json.loads(r)
-        error = d.get('error', None)
-        if error != 'success':
-            vd.error(f"mpv error: {d.get('error', '')}")
-
-        sock.close()
-        return d['data']
+        try:
+            sock.connect(self.mpvsockfn)
+            sock.sendall(json.dumps(dict(command=['get_property', propname])).encode() + b'\n')
+            r = sock.recv(4096)
+            for line in r.splitlines():
+                d = json.loads(line)
+                error = d.get('error', '')
+                if error != 'success':
+                    vd.error(f"mpv error ({propname}): {error}")
+            return d['data']
+        finally:
+            sock.close()
 
     def set_property(self, propname, b=True):
         self.mpv_command(command=['set_property', propname, b])
