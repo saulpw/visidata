@@ -246,7 +246,7 @@ class Column(Extensible):
             if isinstance(typedval, (dict, list, tuple)):
                 if width is None:
                     return ''.join(iterchars(typedval))
-                dispval, dispw = clipstr(iterchars(typedval), width)
+                dispval, dispw = clipstr(iterchars(typedval), width-1) #subtract 1 for left-side margin
                 return dispval
 
         if isinstance(typedval, bytes):
