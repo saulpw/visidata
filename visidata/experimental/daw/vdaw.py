@@ -162,6 +162,10 @@ class EditRow:
         if self.data: return self.data.end-self.data.start
         return sum((r.duration or 0) for r in self.uncutrows) if self.uncutrows else 0
 
+    @drawcache_property
+    def raw_duration(self) -> float:
+        return self.end-self.start
+
     @cached_property
     def text(self) -> str:
         if self.data: return self.data.text
@@ -264,6 +268,7 @@ class PodcastEditingSheet(Sheet):
         AttrColumn('start', type=float, formatter='hhmmss'),
         AttrColumn('end', type=float, formatter='hhmmss'),
         AttrColumn('duration', type=float, formatter='hhmmss'),
+        AttrColumn('raw', 'raw_duration', type=float, formatter='hhmmss'),
         AttrColumn('cut', type=float, width=6),
         AttrColumn('score', type=float, width=0),
         AttrColumn('text', width=80),
@@ -319,6 +324,7 @@ class PodcastEditingSheet(Sheet):
             vd.exceptionCaught(e)
 
         self.column('duration').aggregators = 'sum'
+        self.column('raw').aggregators = 'sum'
         self.column('start').aggregators = 'min'
         self.column('end').aggregators = 'max'
 
