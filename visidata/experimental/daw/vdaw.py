@@ -585,8 +585,9 @@ def save_transcript(vd, p, sheet):
 PodcastEditingSheet.options.save_filetype = 'transcript'
 PodcastEditingSheet.options.disp_rstatus_fmt = '{sheet.playheadStatus}  ' + Sheet.options.disp_rstatus_fmt
 
-PodcastEditingSheet.addCommand('P', 'play-row', 'mpv.play_audio(cursorRow.start)')
-PodcastEditingSheet.addCommand('p', 'play-toggle', 'mpv.pause_audio(not mpv.paused)')
+PodcastEditingSheet.addCommand('P', 'play-row-raw', 'mpv.play_audio(cursorRow.start); sheet.skipcut=False; sheet.playidx=cursorRowIndex')
+PodcastEditingSheet.addCommand('p', 'play-row', 'mpv.play_audio(cursorRow.start); sheet.skipcut=True; sheet.playidx=cursorRowIndex')
+PodcastEditingSheet.addCommand('zp', 'play-toggle', 'mpv.pause_audio(not mpv.paused)')
 FilterParametersSheet.addCommand('P', 'play-toggle', 'source.mpv.pause_audio(not source.mpv.paused)')
 PodcastEditingSheet.addCommand('g)', 'combine-selected', 'combine_rows(selectedRows)')
 PodcastEditingSheet.addCommand('(', 'expand-row', 'expand_row(cursorRowIndex)')
