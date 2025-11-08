@@ -330,6 +330,17 @@ class PodcastEditingSheet(Sheet):
         self.column('start').aggregators = 'min'
         self.column('end').aggregators = 'max'
 
+    def openRows(self, rows):
+        def itersubrows(rows):
+            for r in rows:
+                yield from r.subrows
+
+        vs = PodcastEditingSheet(*self.names, rows[0].section,
+                                   source=self.source,
+                                   sourcerows=itersubrows(rows),
+                                   sourceaudio=self.sourceaudio)
+        vd.push(vs)
+
     def openRow(self, row):
         return PodcastEditingSheet(*self.names, row.section,
                                    source=self.source,
@@ -602,9 +613,9 @@ PodcastEditingSheet.addCommand('F8', 'audio-faster', 'speed_change(2.0)', 'adjus
 
 PodcastEditingSheet.addCommand('a', 'split-at-time', 'split_at_playhead(); cursorDown(2)', 'split line at current playhead')
 PodcastEditingSheet.addCommand('za', 'split-at-input', 'split_at_input(cursorRowIndex, input("word to split at: "))', 'split line at current playhead')
-PodcastEditingSheet.addCommand('d', 'cut-row', 'bump(-1, cursorRow); cursorDown(1)', 'cut audio for line at cursor row')
+PodcastEditingSheet.addCommand('x', 'cut-row', 'bump(-1, cursorRow)', 'cut audio for line at cursor row')
 PodcastEditingSheet.addCommand('y', 'bump-row', 'bump(+1, cursorRow)', 'upvote audio for line at cursor row')
-PodcastEditingSheet.addCommand('gd', 'cut-selected', 'bump(-1, *selectedRows)', 'cut audio for selected rows')
+PodcastEditingSheet.addCommand('gx', 'cut-selected', 'bump(-1, *selectedRows)', 'cut audio for selected rows')
 PodcastEditingSheet.addCommand('gy', 'bump-selected', 'bump(+1, *selectedRows)', 'bump audio for selected rows')
 PodcastEditingSheet.addCommand('<', 'go-header-prev', 'go_header_next(-1, cursorRowIndex)', 'move row cursor to previous section')
 PodcastEditingSheet.addCommand('>', 'go-header-next', 'go_header_next(+1, cursorRowIndex)', 'move row cursor to next section')
