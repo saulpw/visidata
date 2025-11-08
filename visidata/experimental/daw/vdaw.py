@@ -60,6 +60,8 @@ cleanups:
 
 '''
 
+options_daw_hms_seps = '::.'  # or maybe 'hm.' or '..,'
+
 def to_hms(t:float, width=None) -> str:
     'Return some form of HH:MM:SS.s'
     if t is None or t == 0:
@@ -68,11 +70,22 @@ def to_hms(t:float, width=None) -> str:
     if t < 100:
         return f'{t:0.1f}s'
 
+    ret = ''
+
     h = int(t // 3600)
+    if h > 0:
+        ret += f'{h}' + options_daw_hms_seps[0]
+
     m = int((t % 3600) // 60)
+    if ret or m > 0:
+        ret += f'{m:02d}' + options_daw_hms_seps[1]
+
     s = int(t % 60)
     ms = int((t - int(t))*10)
-    return f'{h:02d}:{m:02d}:{s:02d}.{ms:01d}'
+
+    ret += f'{s:02d}{options_daw_hms_seps[2]}{ms:01d}'
+
+    return ret
 
 
 def is_cut(row):
