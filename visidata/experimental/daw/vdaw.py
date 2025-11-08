@@ -144,7 +144,7 @@ class EditRow:
         if self.data: return self.data.end
         return max(r.end for r in self.subrows)
 
-    @cached_property
+    @drawcache_property
     def duration(self) -> float:
         if self.data: return self.data.end-self.data.start
         return sum((r.duration or 0) for r in self.uncutrows) if self.uncutrows else 0
@@ -159,8 +159,10 @@ class EditRow:
             # otherwise cut subrows are elided
             return ' '.join((r.text or '') if not r.cut else '…' for r in self.uncutrows)
 
-    @cached_property
+    @drawcache_property
     def uncutrows(self) -> list:
+        if is_cut(self):
+            return []
         return [r for r in self.subrows if r and not is_cut(r)]
 
     @cached_property
@@ -343,6 +345,7 @@ class PodcastEditingSheet(Sheet):
         for row in rows:
             vd.addUndo(setattr, row, 'cut', row.cut)
             row.cut = (row.cut or 0)+n
+        self.column('duration')._aggregatedTotals.clear()
 
     def cycle_speaker(self, row):
         self.modified = True
@@ -351,6 +354,7 @@ class PodcastEditingSheet(Sheet):
         row.speaker = speakers[(speakers.index(row.speaker)+1)%len(speakers)]
 
     def getRowIndexByPlaytime(self, t:float, rows=None) -> int:
+        'Return index of first row that ostensibly contains time t.'
         try:
             return next(i for i,r in enumerate(rows or self.rows) if t in r)
         except StopIteration:
