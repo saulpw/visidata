@@ -87,6 +87,8 @@ def to_hms(t:float, width=None) -> str:
 
     return ret
 
+def cleanword(s:str) -> str:
+    return ''.join(c for c in s if c.isalnum())
 
 def is_cut(row):
     if isinstance(row.cut, (float, int)):
@@ -414,6 +416,24 @@ class PodcastEditingSheet(Sheet):
         self.rows[idx] = row  # might be the same, modified in place
         self.addRow(newrow, index=idx+1)
 
+    def split_at_input(self, rowidx, word:str):
+        vd.addUndo(setattr, self, 'rows', copy(self.rows))
+
+        oldrow = self.rows[rowidx]
+
+        try:
+            wordidx = int(word)
+        except Exception:
+            words = [cleanword(w) for w in oldrow.text.split()]
+            wordidx = words.index(cleanword(word))
+
+        if wordidx == 0:
+            vd.fail('cannot split on first word')
+
+        row, newrow = oldrow.split_at_word(wordidx-1)
+        self.rows[rowidx] = row  # might be the same, modified in place
+        self.addRow(newrow, index=rowidx+1)
+
     def go_header_next(self, didx:int, startrow:int):
         i = startrow
         while 0 <= i < self.nRows-(0 if didx < 0 else 1):
@@ -580,7 +600,8 @@ PodcastEditingSheet.addCommand('gg', 'go-playhead', 'go_playhead()', 'move row c
 PodcastEditingSheet.addCommand('F5', 'audio-slower', 'speed_change(0.5)', 'adjust playspeed down 50%')
 PodcastEditingSheet.addCommand('F8', 'audio-faster', 'speed_change(2.0)', 'adjust playspeed 2x')
 
-PodcastEditingSheet.addCommand('a', 'add-cutpoint', 'split_at_playhead(); cursorDown(2)', 'split line at current playhead')
+PodcastEditingSheet.addCommand('a', 'split-at-time', 'split_at_playhead(); cursorDown(2)', 'split line at current playhead')
+PodcastEditingSheet.addCommand('za', 'split-at-input', 'split_at_input(cursorRowIndex, input("word to split at: "))', 'split line at current playhead')
 PodcastEditingSheet.addCommand('d', 'cut-row', 'bump(-1, cursorRow); cursorDown(1)', 'cut audio for line at cursor row')
 PodcastEditingSheet.addCommand('y', 'bump-row', 'bump(+1, cursorRow)', 'upvote audio for line at cursor row')
 PodcastEditingSheet.addCommand('gd', 'cut-selected', 'bump(-1, *selectedRows)', 'cut audio for selected rows')
