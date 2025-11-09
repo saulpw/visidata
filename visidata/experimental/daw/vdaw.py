@@ -129,6 +129,7 @@ class EditRow:
         self.section = section
         self.speaker = speaker
         self.header = header
+        self.weird = None
         self.subrows = [replace_subrows(baser) for baser in (subrows or [])]
         if not subrows or cut is not None:
             self.cut = cut
@@ -149,15 +150,15 @@ class EditRow:
             return False
         return self.start <= t <= self.end
 
-    @cached_property
+    @drawcache_property
     def start(self) -> float:
         if self.data: return self.data.start
-        return min(r.start for r in self.subrows)
+        return min((r.start for r in self.subrows if r.start), default=None)
 
-    @cached_property
+    @drawcache_property
     def end(self) -> float:
         if self.data: return self.data.end
-        return max(r.end for r in self.subrows)
+        return max((r.end for r in self.subrows if r.end), default=None)
 
     @drawcache_property
     def duration(self) -> float:
@@ -337,7 +338,7 @@ class PodcastEditingSheet(Sheet):
 
         vs = PodcastEditingSheet(*self.names, rows[0].section,
                                    source=self.source,
-                                   sourcerows=itersubrows(rows),
+                                   sourcerows=iterwords(rows),
                                    sourceaudio=self.sourceaudio)
         vd.push(vs)
 
@@ -496,6 +497,59 @@ class PodcastEditingSheet(Sheet):
         self.speed *= dv
         self.mpv.set_property('speed', self.speed)
 
+    @asyncthread
+    def flag_bad_timings(self):
+        def weird(t1, t2):
+            return t1 and t2 and (t1 > t2 or t2-t1 > 0.5)
+
+        words = list(iterwords(self.rows))
+        lastnonweirdt = 0
+        for i, w2 in enumerate(words):
+            if i == 0 or i >= len(words)-1:
+                continue
+
+            w1 = words[i-1]
+            w3 = words[i+1]
+
+            if weird(w2.start, w2.end):  # if too long
+                w2.weird = True
+            elif weird(w1.end, w2.start) and weird(w2.end, w3.start):
+                w2.weird = True
+            elif w2.start > w2.end or w2.start < lastnonweirdt:
+                w2.weird = True
+            else:
+                lastnonweirdt = w2.start  # or end?
+
+        for w in words:
+            if w.weird:
+                w.data.start = None
+                w.data.end = None
+
+        # pass 2: look for runs of "None" timings and interpolate from surrounding words
+        firstidx = None
+        for i, w in enumerate(words):
+            if w.start is None and firstidx is None:
+                firstidx = i
+            elif w.start is not None and firstidx is not None:
+                startt = words[firstidx-1].end + 0.1  # 100ms between words
+                endt = words[i].start - 0.1
+                # interpolate timings for None-timed sequence of words
+                dt = (endt-startt-0.01*(i-firstidx))/(i-firstidx)
+                vd.status(f'{dt*1000:.0f}ms for each of {i-firstidx} words from {startt:.1f}-{endt:.1f}s')
+                for j, wnone in enumerate(words[firstidx:i]):
+                    wnone.data.start = startt+dt*j + 0.005
+                    wnone.data.end = startt+dt*(j+1) - 0.005
+
+                firstidx = None
+            # else in the middle of a run, let it run
+
+def iterwords(segs):
+    for seg in segs:
+        if not seg.subrows:
+            yield seg
+        else:
+            yield from iterwords(seg.subrows)
+
 
 @VisiData.api
 class FilterParametersSheet(Sheet):
@@ -626,3 +680,5 @@ PodcastEditingSheet.addCommand('g>', 'go-header-last', 'go_header_next(-1, nRows
 PodcastEditingSheet.addCommand('f', 'open-vdaw-filters', 'vd.push(FilterParametersSheet("filters", source=sheet))')
 PodcastEditingSheet.addCommand('r', 'reformat-row', 'reformat_row(cursorRowIndex)')
 PodcastEditingSheet.addCommand('gr', 'reformat-selected', 'reformat_rows(selectedRows)')
+
+PodcastEditingSheet.addCommand('c', 'clean-timings', 'flag_bad_timings()')
