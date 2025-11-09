@@ -18,11 +18,9 @@ vd.theme_option('daw_include_cuts', True, 'whether saving xmd format includes cu
 
 
 TODO = '''
-- bug: word timings WAY off (adding 40% to duration when summed!)
-
-- skip cut segments while playing
-  - play segments individually
-  - feature: play side subsheet of rows
+- feat: replace line with separate stem (e.g. AI generated voice)
+- feat: play side subsheet of rows (if in order)
+- feat: edit text of subwords while maintaining timings
 
 - cleanup: rename PodcastEditingSheet to Transcript[Editing]Sheet
 
@@ -273,15 +271,16 @@ class PodcastEditingSheet(Sheet):
         AttrColumn('duration', type=float, formatter='hhmmss'),
         AttrColumn('raw', 'raw_duration', type=float, formatter='hhmmss'),
         AttrColumn('cut', type=float, width=6),
+        AttrColumn('weird'),
         AttrColumn('score', type=float, width=0),
         AttrColumn('text', width=80),
         AttrColumn('subrows', type=vlen, width=0),
     ]
     colorizers = [
         RowColorizer(5, 'color_daw_header', lambda s,c,r,v: r.header),  # section header
-        RowColorizer(5, 'color_daw_cut', lambda s,c,r,v: r.cut and r.cut < 0),
+        RowColorizer(3, 'color_daw_cut', lambda s,c,r,v: r.cut and r.cut < 0),
         RowColorizer(5, 'color_daw_keep', lambda s,c,r,v: r.cut and r.cut > 0),
-        RowColorizer(3, 'color_daw_playhead', lambda s,c,r,v: s.mpv.playback_time in r)
+        RowColorizer(4, 'color_daw_playhead', lambda s,c,r,v: s.mpv.playback_time in r)
     ]
     nKeys = 2
     mpv = AttrDict()  # bunk null mock object until server created
@@ -291,6 +290,7 @@ class PodcastEditingSheet(Sheet):
     curfilter = 'agate'
     curparm = 'ratio'
     speed = 1
+    skipcut = True  # play audio without cut segments
 
     def iterload(self):
         self.speakers = defaultdict(list)  # speakername -> list of words/subrows
@@ -388,30 +388,66 @@ class PodcastEditingSheet(Sheet):
 
     def getRowIndexByPlaytime(self, t:float, rows=None) -> int:
         'Return index of first row that ostensibly contains time t.'
-        try:
-            return next(i for i,r in enumerate(rows or self.rows) if t in r)
-        except StopIteration:
-            vd.debug(f'time {to_hms(t)} not found')
+        rowpath = self.find_row_path(t, rows or self.rows)
+        return rows.index(rowpath[0])
 
     def checkCursor(self):
         super().checkCursor()
+
+        if not self.skipcut:
+            return
 
         t = self.mpv.playback_time
         if not t:
             return
 
-        origrowidx = self.getRowIndexByPlaytime(t)
-        i = origrowidx
-        while i < self.nRows:
-            pbrow = self.rows[i]
-            if not is_cut(pbrow):
-                break
-            i += 1
+        words = self.words
+        rowpath = self.find_row_path(t)
+        widx = words.index(rowpath[-1])
+        cut = False
 
-        if i >= self.nRows:
+        while any(map(is_cut, rowpath)):
+            widx += 1
+            cut = True
+            rowpath = self.find_row_path(words[widx].start)
+
+        if widx >= len(words):
             self.mpv.pause_audio()
-        elif i != origrowidx:
-            self.mpv.play_audio(self.rows[i].start)
+
+        if cut:
+            newt = words[widx].start  # or words[widx-1].end
+            self.mpv.play_audio(newt)
+
+    def find_row_path(self, t:float, rows:list['EditRow']=None) -> list['EditRow']:
+        '''Return a list of EditRow along the path to the actual word at time t.
+        Each EditRow either contains t, or is immediately after t.
+        The toplevel segment containing t is ret[0], and the exact word at/near t is ret[-1].
+        '''
+        if rows is None:
+            rows = self.rows
+
+        # binary search
+        low = 0
+        high = len(rows) - 1
+
+        while low <= high:
+            mid = (high + low) // 2
+            midw = rows[mid]
+            if mid > 0 and t < rows[mid-1].end:  # t in/before preceding word
+                high = mid - 1
+            elif t > midw.end:  # t after mid word
+                low = mid + 1
+            else:  # t either within mid word or just before it
+                if not midw.subrows:
+                    return [midw]
+                else:
+                    return [midw] + self.find_row_path(t, midw.subrows)
+
+    def is_cut(self, t:float):
+        rowpath = self.find_row_path(t)
+        if t not in rowpath[-1]:
+            return False
+        return any(map(is_cut, rowpath))
 
     def go_playhead(self):
         t = self.mpv.playback_time
@@ -497,12 +533,17 @@ class PodcastEditingSheet(Sheet):
         self.speed *= dv
         self.mpv.set_property('speed', self.speed)
 
+    @drawcache_property
+    def words(self):
+        'All word-level EditRows'
+        return list(iterwords(self.rows))
+
     @asyncthread
     def flag_bad_timings(self):
         def weird(t1, t2):
             return t1 and t2 and (t1 > t2 or t2-t1 > 0.5)
 
-        words = list(iterwords(self.rows))
+        words = self.words
         lastnonweirdt = 0
         for i, w2 in enumerate(words):
             if i == 0 or i >= len(words)-1:
@@ -535,7 +576,7 @@ class PodcastEditingSheet(Sheet):
                 endt = words[i].start - 0.1
                 # interpolate timings for None-timed sequence of words
                 dt = (endt-startt-0.01*(i-firstidx))/(i-firstidx)
-                vd.status(f'{dt*1000:.0f}ms for each of {i-firstidx} words from {startt:.1f}-{endt:.1f}s')
+                # vd.status(f'{dt*1000:.0f}ms for each of {i-firstidx} words from {startt:.1f}-{endt:.1f}s')
                 for j, wnone in enumerate(words[firstidx:i]):
                     wnone.data.start = startt+dt*j + 0.005
                     wnone.data.end = startt+dt*(j+1) - 0.005
@@ -639,8 +680,8 @@ def save_transcript(vd, p, sheet):
 PodcastEditingSheet.options.save_filetype = 'transcript'
 PodcastEditingSheet.options.disp_rstatus_fmt = '{sheet.playheadStatus}  ' + Sheet.options.disp_rstatus_fmt
 
-PodcastEditingSheet.addCommand('P', 'play-row-raw', 'mpv.play_audio(cursorRow.start); sheet.skipcut=False; sheet.playidx=cursorRowIndex')
-PodcastEditingSheet.addCommand('p', 'play-row', 'mpv.play_audio(cursorRow.start); sheet.skipcut=True; sheet.playidx=cursorRowIndex')
+PodcastEditingSheet.addCommand('P', 'play-row-raw', 'mpv.play_audio(cursorRow.start); sheet.skipcut=False')
+PodcastEditingSheet.addCommand('p', 'play-row', 'mpv.play_audio(cursorRow.start); sheet.skipcut=True')
 PodcastEditingSheet.addCommand('zp', 'play-toggle', 'mpv.pause_audio(not mpv.paused)')
 FilterParametersSheet.addCommand('P', 'play-toggle', 'source.mpv.pause_audio(not source.mpv.paused)')
 PodcastEditingSheet.addCommand('g)', 'combine-selected', 'combine_rows(selectedRows)')
