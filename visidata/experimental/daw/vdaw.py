@@ -134,6 +134,9 @@ class EditRow:
         else:
             self.cut = max(r.cut if r.cut else 0 for r in self.subrows)
 
+    def __str__(self):
+        return f'[{self.start}-{self.end}] {self.speaker}: {self.editedtext}'
+
     def to_json(self) -> dict:
         return dict(section=self.section,
                     speaker=self.speaker,
@@ -176,6 +179,19 @@ class EditRow:
         else:
             # otherwise cut subrows are elided
             return ' '.join((r.text or '') if not r.cut else '…' for r in self.uncutrows)
+
+    @cached_property
+    def editedtext(self) -> str:
+        if self.data:
+            if is_cut(self):
+                return f'~~{self.data.text}~~'
+            else:
+                return self.data.text
+
+        line = ' '.join((r.text or '') for r in self.subrows)
+        if is_cut(self):
+            line = f'~~{line}~~'
+        return line
 
     @drawcache_property
     def uncutrows(self) -> list:
@@ -271,7 +287,6 @@ class PodcastEditingSheet(Sheet):
         AttrColumn('duration', type=float, formatter='hhmmss'),
         AttrColumn('raw', 'raw_duration', type=float, formatter='hhmmss'),
         AttrColumn('cut', type=float, width=6),
-        AttrColumn('weird'),
         AttrColumn('score', type=float, width=0),
         AttrColumn('text', width=80),
         AttrColumn('subrows', type=vlen, width=0),
@@ -388,7 +403,8 @@ class PodcastEditingSheet(Sheet):
 
     def getRowIndexByPlaytime(self, t:float, rows=None) -> int:
         'Return index of first row that ostensibly contains time t.'
-        rowpath = self.find_row_path(t, rows or self.rows)
+        rows = rows or self.rows
+        rowpath = self.find_row_path(t, rows)
         return rows.index(rowpath[0])
 
     def checkCursor(self):
@@ -459,6 +475,10 @@ class PodcastEditingSheet(Sheet):
         t = self.mpv.playback_time
         idx = self.getRowIndexByPlaytime(t)
         row = self.rows[idx]
+
+        if t in row:
+            idx += 1
+            row = self.rows[idx]
 
         row, newrow = row.split_at_time(t)
         self.rows[idx] = row  # might be the same, modified in place
@@ -633,9 +653,44 @@ def save_cutlist(vd, p, sheet):
             else:
                 if cut_start is not None:
                     i += 1
-                    fp.write(f'{i}. cut from {to_hms(cut_start.start)} to {to_hms(cut_end.end)}: {cut_start.text[:10]}...{cut_end.text[-10:]}\n')
+                    dt = '??'
+                    if cut_end.end and cut_start.start:
+                        dt = f'{cut_end.end - cut_start.start:.1f}'
+                    fp.write(f'{i}. cut {dt}s from {to_hms(cut_start.start)} to {to_hms(cut_end.end)}: {cut_start.text[:10]}...{cut_end.text[-10:]}\n')
                     cut_start = None
                     cut_end = None
+
+def iterspeakerrows(rows):
+    accumrows = []
+    for i, row in enumerate(rows):
+        assert row, i
+        if ' ' in row.speaker:
+            yield from iterspeakerrows(row.subrows)
+            continue
+
+        if not accumrows:
+            accumrows = [row]
+            continue
+
+        lastrow = accumrows[-1]
+        if is_cut(row) == is_cut(lastrow) and row.speaker == lastrow.speaker and row.section == lastrow.section:
+            accumrows.append(row)
+            continue
+
+        firstrow = accumrows[0]
+        r = EditRow(speaker=firstrow.speaker,
+                    section=firstrow.section)
+        r.data = AttrDict(start = firstrow.start, end = lastrow.end, text = ' '.join(r.editedtext for r in accumrows))
+        yield r
+
+        accumrows = [row]
+
+    firstrow = accumrows[0]
+    r = EditRow(speaker=firstrow.speaker,
+                section=firstrow.section)
+    r.data = AttrDict(start = firstrow.start, end = lastrow.end, text = ' '.join(r.editedtext for r in accumrows))
+    yield r
+
 
 @VisiData.api
 def save_xmd(vd, p, sheet):
@@ -643,15 +698,14 @@ def save_xmd(vd, p, sheet):
 
     prevhdr = ''
     with p.open(mode='w', encoding=sheet.options.save_encoding) as fp:
-        for row in sheet.rows:
-#            timestr = f'{row.start:0.1f}'
-            timestr = to_hms(row.start)
+        for row in iterspeakerrows(sheet.rows):
 
-            if row.get('section', prevhdr) != prevhdr:
-                prevhdr = row.get('section')
+            if row.section != prevhdr:
+                prevhdr = row.section
                 fp.write(f'## {prevhdr}\n\n')
 
-            line = f'[{timestr}] {row.speaker}: {row.text}'
+            timestr = to_hms(row.start)
+            line = f'[{timestr}] **{row.speaker}**: {row.text}'
             line = line.strip()
             if row.cut:
                 if sheet.options.daw_include_cuts:
