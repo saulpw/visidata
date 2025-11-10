@@ -18,44 +18,42 @@ vd.theme_option('daw_include_cuts', True, 'whether saving xmd format includes cu
 
 
 TODO = '''
-- feat: replace line with separate stem (e.g. AI generated voice)
+- single-word interjections inlined into other paragraph
+- bug: fix split
+- combine consecutive cuts in markdown
+- bug: batch convert transcript to xmd "terminated"
+
 - feat: play side subsheet of rows (if in order)
 - feat: edit text of subwords while maintaining timings
+- output should descend into EditRow; lower headers are subheaders?
 
-- cleanup: rename PodcastEditingSheet to Transcript[Editing]Sheet
+- feat: replace line with separate stem (e.g. AI generated voice)
 
 - ) to reclose current row.  or is that too much given ENTER/q?
 
-- output should descend into EditRow; lower headers are subheaders?
 
-- sequential cut lines should show up as single …
-- select to next marker
 - command to rollup whisper transcript by speaker again
-- command to select rows from last marker (zs)
-- move an edit time
+   - like the .xmd output grouping
 
-cleanups:
-  - JSONDecodeError: sometimes query gets extra data with json.  make line buffering?
+? sequential cut lines should show up as single …
+? select to next marker
+? command to select rows from last marker (zs)
 
-- sync gets lost if a word is <100ms +1
-- changing speakers should set speaker on all baserows?
-- highlight current word in transcript?
+- cleanup: rename PodcastEditingSheet to Transcript[Editing]Sheet
 
-4. add marker
-   - z< and z> to adjust the previous marker
+? highlight current word in transcript
+
+- track cutpoints as times
+- feat: z< and z> to adjust the previous cutpoint
    - play 100ms tone at marker
 
-6. numbered markers?
-   - 1-9 for numbered (temporary) marker
+- feat: 1-9 for numbered (temporary) marker
    - 'z1' to set marker 1 at current timestamp; '1' to play starting at marker 1
 
 7. outputs
-   + a) cutlist (list of edits to apply)
-   + b) transcript with cuts included (has strikethrough for cut lines)
    + c) transcript with cuts excluded (transcript of edited audio) -- based on options.daw_include_cuts
    d) edited audio (pasting non-cut sections together)
    e) .omf file for use in other DAW like reaper
-
 '''
 
 options_daw_hms_seps = '::.'  # or maybe 'hm.' or '..,'
@@ -135,7 +133,8 @@ class EditRow:
             self.cut = max(r.cut if r.cut else 0 for r in self.subrows)
 
     def __str__(self):
-        return f'[{self.start}-{self.end}] {self.speaker}: {self.editedtext}'
+        return f'[{self.cut} {self.start:.1f}-{self.end:.1f}] {self.speaker}: {self.editedtext}'
+        return f'[{"CUT " if is_cut(self) else ""}{self.start:.1f}-{self.end:.1f}] {self.speaker}: {self.editedtext}'
 
     def to_json(self) -> dict:
         return dict(section=self.section,
@@ -201,7 +200,7 @@ class EditRow:
 
     @cached_property
     def nwords(self) -> int:
-        return sum(r.nwords if isinstance(r, EditRow) else 1 for r in self.subrows)
+        return sum(r.nwords for r in self.subrows) if not self.data else len(self.data.text.split())
 
     def split_at_word(self, n:int) -> tuple['EditRow', 'EditRow']:
         wordnum = 0
@@ -661,6 +660,17 @@ def save_cutlist(vd, p, sheet):
                     cut_end = None
 
 def iterspeakerrows(rows):
+    def _combine_rows(accumrows):
+        firstrow = accumrows[0]
+        r = EditRow(speaker=firstrow.speaker,
+                    section=firstrow.section)
+        text = ' '.join(r.editedtext for r in accumrows)
+        if is_cut(firstrow):
+            text = text.replace('~~', '')
+            text = '~~' + text + '~~'
+        r.data = AttrDict(start=firstrow.start, end=lastrow.end, text=text)
+        return r
+
     accumrows = []
     for i, row in enumerate(rows):
         assert row, i
@@ -677,19 +687,19 @@ def iterspeakerrows(rows):
             accumrows.append(row)
             continue
 
-        firstrow = accumrows[0]
-        r = EditRow(speaker=firstrow.speaker,
-                    section=firstrow.section)
-        r.data = AttrDict(start = firstrow.start, end = lastrow.end, text = ' '.join(r.editedtext for r in accumrows))
-        yield r
+        if is_cut(row) == is_cut(lastrow) and row.section == lastrow.section:
+            # speaker different; only one word?
+            if row.nwords == 1:
+                r = EditRow(speaker=lastrow.speaker, section=row.section, cut=is_cut(row))   # fake speaker
+                r.data = AttrDict(start=row.start, end=row.end, text=f'[{row.speaker}: {row.text}]')
+                accumrows.append(r)
+                continue
+
+        yield _combine_rows(accumrows)
 
         accumrows = [row]
 
-    firstrow = accumrows[0]
-    r = EditRow(speaker=firstrow.speaker,
-                section=firstrow.section)
-    r.data = AttrDict(start = firstrow.start, end = lastrow.end, text = ' '.join(r.editedtext for r in accumrows))
-    yield r
+    yield _combine_rows(accumrows)
 
 
 @VisiData.api
