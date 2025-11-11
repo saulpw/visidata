@@ -84,7 +84,7 @@ def to_hms(t:float, width=None) -> str:
     return ret
 
 def cleanword(s:str) -> str:
-    return ''.join(c for c in s if c.isalnum())
+    return ''.join(c.lower() for c in s if c.isalnum())
 
 def is_cut(row):
     if isinstance(row.cut, (float, int)):
@@ -169,7 +169,7 @@ class EditRow:
     def raw_duration(self) -> float:
         return self.end-self.start
 
-    @cached_property
+    @drawcache_property
     def text(self) -> str:
         if self.data: return self.data.text
         if self.cut:
@@ -177,9 +177,9 @@ class EditRow:
             return ' '.join((r.text or '') for r in self.subrows)
         else:
             # otherwise cut subrows are elided
-            return ' '.join((r.text or '') if not r.cut else '…' for r in self.uncutrows)
+            return ' '.join((r.text or '') if not is_cut(r) else '…' for r in self.uncutrows)
 
-    @cached_property
+    @drawcache_property
     def editedtext(self) -> str:
         if self.data:
             if is_cut(self):
@@ -198,7 +198,7 @@ class EditRow:
             return []
         return [r for r in self.subrows if r and not is_cut(r)]
 
-    @cached_property
+    @drawcache_property
     def nwords(self) -> int:
         return sum(r.nwords for r in self.subrows) if not self.data else len(self.data.text.split())
 
@@ -316,10 +316,10 @@ class PodcastEditingSheet(Sheet):
             self.sourcerows = d['word_segments']
 
         if not self.sourceaudio:
-            if self.source.with_suffix('.mp3').exists():
-                self.sourceaudio = str(self.source.with_suffix('.mp3'))
-            elif self.source.with_suffix('.wav').exists():
+            if self.source.with_suffix('.wav').exists():
                 self.sourceaudio = str(self.source.with_suffix('.wav'))
+            elif self.source.with_suffix('.mp3').exists():
+                self.sourceaudio = str(self.source.with_suffix('.mp3'))
 
         if self.sourceaudio:
             self.mpv = MpvProcess(self.sourceaudio, self)
@@ -560,7 +560,7 @@ class PodcastEditingSheet(Sheet):
     @asyncthread
     def flag_bad_timings(self):
         def weird(t1, t2):
-            return t1 and t2 and (t1 > t2 or t2-t1 > 0.5)
+            return not t1 or not t2 or (t1 > t2 or t2-t1 > 0.5)
 
         words = self.words
         lastnonweirdt = 0
@@ -645,7 +645,7 @@ def save_cutlist(vd, p, sheet):
         cut_start = None
         cut_end = None
         for row in sheet.rows:
-            if row.cut:
+            if is_cut(row):
                 if cut_start is None:
                     cut_start = row
                 cut_end = row
@@ -655,7 +655,7 @@ def save_cutlist(vd, p, sheet):
                     dt = '??'
                     if cut_end.end and cut_start.start:
                         dt = f'{cut_end.end - cut_start.start:.1f}'
-                    fp.write(f'{i}. cut {dt}s from {to_hms(cut_start.start)} to {to_hms(cut_end.end)}: {cut_start.text[:10]}...{cut_end.text[-10:]}\n')
+                    fp.write(f'{i}. cut {dt}s from {to_hms(cut_start.start)} to {to_hms(cut_end.end)}: {cut_start.text[:20]}...{cut_end.text[-20:]}\n')
                     cut_start = None
                     cut_end = None
 
@@ -717,7 +717,7 @@ def save_xmd(vd, p, sheet):
             timestr = to_hms(row.start)
             line = f'[{timestr}] **{row.speaker}**: {row.text}'
             line = line.strip()
-            if row.cut:
+            if is_cut(row):
                 if sheet.options.daw_include_cuts:
                     line = f'~~{line}~~'
                 else:
