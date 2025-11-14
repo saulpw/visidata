@@ -1,7 +1,18 @@
-from visidata import vd, Sheet, options, Column, asyncthread, Progress, PivotGroupRow, ENTER, HistogramColumn
+from visidata import (
+    vd,
+    Sheet,
+    options,
+    Column,
+    asyncthread,
+    Progress,
+    PivotGroupRow,
+    ENTER,
+    HistogramColumn,
+)
 
 from visidata.loaders._pandas import PandasSheet
 from visidata.pivot import PivotSheet
+
 
 class DataFrameRowSliceAdapter:
     """Tracks original dataframe and a boolean row mask
@@ -10,19 +21,25 @@ class DataFrameRowSliceAdapter:
     consistent when iterating, as id() is used significantly
     by visidata's selectRow implementation.
     """
+
     def __init__(self, df, mask):
-        pd = vd.importExternal('pandas')
-        np = vd.importExternal('numpy')
+        pd = vd.importExternal("pandas")
+        np = vd.importExternal("numpy")
         if not isinstance(df, pd.DataFrame):
-            vd.fail('%s is not a dataframe' % type(df).__name__)
+            vd.fail("%s is not a dataframe" % type(df).__name__)
         if not isinstance(mask, pd.Series):
-            vd.fail('mask %s is not a Series' % type(mask).__name__)
+            vd.fail("mask %s is not a Series" % type(mask).__name__)
         if df.shape[0] != mask.shape[0]:
-            vd.fail('dataframe and mask have different shapes (%s vs %s)' % (df.shape[0], mask.shape[0]))
+            vd.fail(
+                "dataframe and mask have different shapes (%s vs %s)"
+                % (df.shape[0], mask.shape[0])
+            )
 
         self.df = df
         self.mask_bool = mask  # boolean mask
-        self.mask_iloc = np.where(mask.values)[0]  # integer indexes corresponding to mask
+        self.mask_iloc = np.where(mask.values)[
+            0
+        ]  # integer indexes corresponding to mask
         self.mask_count = mask.sum()
 
     def __len__(self):
@@ -31,6 +48,7 @@ class DataFrameRowSliceAdapter:
     def __getitem__(self, k):
         if isinstance(k, slice):
             import pandas as pd
+
             new_mask = pd.Series(False, index=self.df.index)
             new_mask.iloc[self.mask_iloc[k]] = True
             return DataFrameRowSliceAdapter(self.df, new_mask)
@@ -45,6 +63,7 @@ class DataFrameRowSliceAdapter:
     def __getattr__(self, k):
         # This is trouble ..
         return getattr(self.df[self.mask_bool], k)
+
 
 class DataFrameRowSliceIter:
     def __init__(self, df, mask_iloc, index=0):
@@ -62,14 +81,18 @@ class DataFrameRowSliceIter:
         self.index += 1
         return row
 
+
 def makePandasFreqTable(sheet, *groupByCols):
-    fqcolname = '%s_freq' % '-'.join(col.name for col in groupByCols)
-    return PandasFreqTableSheet(sheet.name, fqcolname, groupByCols=groupByCols, source=sheet)
+    fqcolname = "%s_freq" % "-".join(col.name for col in groupByCols)
+    return PandasFreqTableSheet(
+        sheet.name, fqcolname, groupByCols=groupByCols, source=sheet
+    )
 
 
 class PandasFreqTableSheet(PivotSheet):
-    'Generate frequency-table sheet on currently selected column.'
-    rowtype = 'bins'  # rowdef FreqRow(keys, sourcerows)
+    "Generate frequency-table sheet on currently selected column."
+
+    rowtype = "bins"  # rowdef FreqRow(keys, sourcerows)
 
     def selectRow(self, row):
         # Select all entries in the bin on the source sheet.
@@ -91,7 +114,7 @@ class PandasFreqTableSheet(PivotSheet):
         self.largest = max(self.largest, len(grouprow.sourcerows))
 
     def loader(self):
-        'Generate frequency table then reverse-sort by length.'
+        "Generate frequency table then reverse-sort by length."
         import pandas as pd
 
         # Note: visidata's base FrequencyTable bins numeric data in ranges
@@ -116,7 +139,7 @@ class PandasFreqTableSheet(PivotSheet):
             value_counts = df.pivot_table(
                 index=[c.name for c in self.groupByCols],
                 values=_pivot_count_column,
-                aggfunc="count"
+                aggfunc="count",
             )[_pivot_count_column].sort_values(ascending=False, kind="mergesort")
             # TODO: it seems that the ascending=False causes this to do a "reversed stable sort"?
             # TODO: possibly register something to delete this column as soon as
@@ -137,46 +160,72 @@ class PandasFreqTableSheet(PivotSheet):
             vd.fail("Unable to do FrequencyTable, no columns to group on provided")
 
         # add default bonus columns
-        for c in [
-                    Column('count', type=int,
-                           getter=lambda col,row: len(row.sourcerows)),
-                    Column('percent', type=float,
-                           getter=lambda col,row: len(row.sourcerows)*100/df.shape[0]),
-                    HistogramColumn('histogram', type=str, width=self.options.default_width*2)
-                    ]:
+        count_col = Column(
+            "count", type=int, getter=lambda col, row: len(row.sourcerows)
+        )
+        percent_col = Column(
+            "percent",
+            type=float,
+            getter=lambda col, row: len(row.sourcerows) * 100 / df.shape[0],
+        )
+        histogram_col = HistogramColumn(
+            "histogram",
+            type=str,
+            width=self.options.default_width * 2,
+            sourceCol=percent_col,
+            largest=100,
+        )
+
+        for c in (count_col, percent_col, histogram_col):
             self.addColumn(c)
 
         for element in Progress(value_counts.index):
             if len(self.groupByCols) == 1:
                 element = (element,)
             elif len(element) != len(self.groupByCols):
-                vd.fail('different number of index cols and groupby cols (%s vs %s)' % (len(element), len(self.groupByCols)))
+                vd.fail(
+                    "different number of index cols and groupby cols (%s vs %s)"
+                    % (len(element), len(self.groupByCols))
+                )
 
             mask = df[self.groupByCols[0].name] == element[0]
             for i in range(1, len(self.groupByCols)):
                 mask = mask & (df[self.groupByCols[i].name] == element[i])
 
-            self.addRow(PivotGroupRow(
-                element,
-                (0, 0),
-                DataFrameRowSliceAdapter(df, mask),
-                {}
-            ))
+            self.addRow(
+                PivotGroupRow(element, (0, 0), DataFrameRowSliceAdapter(df, mask), {})
+            )
 
     def openRow(self, row):
         return self.source.expand_source_rows(row)
+
 
 @Sheet.api
 def expand_source_rows(sheet, row):
     """Support for expanding a row of frequency table to underlying rows"""
     if row.sourcerows is None:
         vd.fail("no source rows")
-    return PandasSheet(sheet.name, vd.valueNames(row.discrete_keys, row.numeric_key), source=row.sourcerows)
+    return PandasSheet(
+        sheet.name,
+        vd.valueNames(row.discrete_keys, row.numeric_key),
+        source=row.sourcerows,
+    )
 
-PandasSheet.addCommand('F', 'freq-col', 'vd.push(makePandasFreqTable(sheet, cursorCol))', 'open Frequency Table grouped on current column, with aggregations of other columns')
-PandasSheet.addCommand('gF', 'freq-keys', 'vd.push(makePandasFreqTable(sheet, *keyCols))', 'open Frequency Table grouped by all key columns on source sheet, with aggregations of other columns')
 
-PandasFreqTableSheet.init('largest', lambda: 1)
+PandasSheet.addCommand(
+    "F",
+    "freq-col",
+    "vd.push(makePandasFreqTable(sheet, cursorCol))",
+    "open Frequency Table grouped on current column, with aggregations of other columns",
+)
+PandasSheet.addCommand(
+    "gF",
+    "freq-keys",
+    "vd.push(makePandasFreqTable(sheet, *keyCols))",
+    "open Frequency Table grouped by all key columns on source sheet, with aggregations of other columns",
+)
+
+PandasFreqTableSheet.init("largest", lambda: 1)
 PandasFreqTableSheet.options.numeric_binning = False
 
 vd.addGlobals(makePandasFreqTable=makePandasFreqTable)
