@@ -457,7 +457,12 @@ class IbisTableSheet(Sheet):
         q = self.ibis_current_expr
         for other in others:
             preds = [(a.ibis_col == b.ibis_col) for a, b in zip(self.keyCols, other.keyCols)]
-            q = q.join(other.ibis_current_expr, predicates=preds, how=jointype, suffixes=('', '_'+other.name))
+            # Try new API (ibis >= 9.0) with lname/rname, fall back to old API with suffixes
+            try:
+                q = q.join(other.ibis_current_expr, predicates=preds, how=jointype, lname='', rname='{name}_'+other.name)
+            except TypeError:
+                # Fall back to old API (ibis < 9.0)
+                q = q.join(other.ibis_current_expr, predicates=preds, how=jointype, suffixes=('', '_{name}_'+other.name))
 
         return IbisTableSheet('+'.join(vs.name for vs in sheets), sources=sheets, query=q, ibis_source=self.ibis_source, ibis_conpool=self.ibis_conpool)
 
