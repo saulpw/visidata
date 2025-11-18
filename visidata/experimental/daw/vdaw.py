@@ -193,6 +193,16 @@ class EditRow:
         return line
 
     @drawcache_property
+    def cookedtext(self) -> str:
+        if is_cut(self):
+            return ''
+
+        if self.data:
+            return self.data.text
+
+        return ' '.join((r.cookedtext or '') for r in self.subrows)
+
+    @drawcache_property
     def uncutrows(self) -> list:
         if is_cut(self):
             return []
@@ -659,15 +669,23 @@ def save_cutlist(vd, p, sheet):
                     cut_start = None
                     cut_end = None
 
-def iterspeakerrows(rows):
+def iterspeakerrows(rows, include_cuts=True):
     def _combine_rows(accumrows):
         firstrow = accumrows[0]
+        vd.status(include_cuts)
         r = EditRow(speaker=firstrow.speaker,
                     section=firstrow.section)
-        text = ' '.join(r.editedtext for r in accumrows)
-        if is_cut(firstrow):
-            text = text.replace('~~', '')
-            text = '~~' + text + '~~'
+        if include_cuts:
+            text = ' '.join(r.editedtext for r in accumrows)
+            if is_cut(firstrow):
+                text = text.replace('~~', '')
+                text = '~~' + text + '~~'
+        else:
+            if is_cut(firstrow):
+                text = ''
+            else:
+                text = ' '.join(r.cookedtext for r in accumrows).strip()
+
         r.data = AttrDict(start=firstrow.start, end=lastrow.end, text=text)
         return r
 
@@ -675,7 +693,7 @@ def iterspeakerrows(rows):
     for i, row in enumerate(rows):
         assert row, i
         if ' ' in row.speaker:
-            yield from iterspeakerrows(row.subrows)
+            yield from iterspeakerrows(row.subrows, include_cuts=include_cuts)
             continue
 
         if not accumrows:
@@ -708,22 +726,22 @@ def save_xmd(vd, p, sheet):
 
     prevhdr = ''
     with p.open(mode='w', encoding=sheet.options.save_encoding) as fp:
-        for row in iterspeakerrows(sheet.rows):
+        for row in iterspeakerrows(sheet.rows, sheet.options.daw_include_cuts):
 
             if row.section != prevhdr:
                 prevhdr = row.section
                 fp.write(f'## {prevhdr}\n\n')
 
-            timestr = to_hms(row.start)
-            line = f'[{timestr}] **{row.speaker}**: {row.text}'
-            line = line.strip()
-            if is_cut(row):
-                if sheet.options.daw_include_cuts:
-                    line = f'~~{line}~~'
-                else:
-                    line = ''
+            if sheet.options.daw_include_cuts:
+                text = row.text
+            else:
+                text = row.cookedtext
+                vd.status(text)
 
-            if line:
+            if text:
+                timestr = to_hms(row.start)
+                line = f'[{timestr}] **{row.speaker}**: {text}'
+                line = line.strip()
                 fp.write(line+'\n\n')
 
 
