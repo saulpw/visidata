@@ -31,7 +31,7 @@ class MacroSheet(IndexSheet):
 
     def iterload(self):
         yield from vd.macrobindings.values()
-            
+
     def commitDeleteRow(self, row):
         binding = row.binding
 
