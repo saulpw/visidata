@@ -147,9 +147,9 @@ def debug(vd, *args, **kwargs):
         return vd.status(*args, **kwargs)
 
 def middleTruncate(s, w):
-    if len(s) <= 2*w:
+    if len(s) <= w:
         return s
-    return s[:w] + options.disp_truncator + s[-w:]
+    return s[:w//2] + options.disp_truncator + s[-w//2:]
 
 
 def composeStatus(msgparts, n=1):
@@ -183,7 +183,7 @@ def drawLeftStatus(vd, scr, vs):
     lstatus = vs.leftStatus()
     maxwidth = options.disp_lstatus_max
     if maxwidth > 0:
-        lstatus = middleTruncate(lstatus, maxwidth//2)
+        lstatus = middleTruncate(lstatus, maxwidth)
 
     x = clipdraw(scr, y, 0, lstatus, cattr, w=vs.windowWidth-1)
 
