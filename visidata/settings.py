@@ -338,6 +338,18 @@ def addCommand(cls, keystrokes, longname, execstr, helpstr='', replay=True, **kw
         vd.bindkey(keystrokes, longname, cls)
     return longname
 
+@BaseSheet.class_api
+@classmethod
+def removeCommand(cls, keystrokes, longname):
+    '''Remove a command from *cls* sheet type.
+
+    - *keystrokes*: if provided, unbind this specific keystroke.
+    - *longname*: name of the command to remove.
+    '''
+    vd.commands.unset(longname, cls)
+    if keystrokes:
+        vd.unbindkey(keystrokes, cls)
+
 def _command(cls, binding, longname, helpstr, **kwargs):
     def decorator(func):
         funcname = longname.replace('-', '_')
