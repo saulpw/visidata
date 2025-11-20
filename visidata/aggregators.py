@@ -7,7 +7,7 @@ from copy import copy
 import itertools
 
 from visidata import Progress, Sheet, Column, ColumnsSheet, VisiData, SettableColumn
-from visidata import vd, anytype, vlen, asyncthread, wrapply, AttrDict, date, INPROGRESS, dispwidth, stacktrace, TypedExceptionWrapper
+from visidata import vd, anytype, numtype, vlen, asyncthread, wrapply, AttrDict, date, INPROGRESS, dispwidth, stacktrace, TypedExceptionWrapper
 
 vd.help_aggregators = '''# Choose Aggregators
 Start typing an aggregator name or description.
@@ -233,9 +233,9 @@ def aggregate_groups(sheet, col, rows, aggr) -> list:
 
 vd.aggregator('min', min, 'minimum value')
 vd.aggregator('max', max, 'maximum value')
-vd.aggregator('avg', mean, 'arithmetic mean of values', type=lambda x: x)
-vd.aggregator('mean', mean, 'arithmetic mean of values', type=lambda x: x)
-vd.aggregator('median', statistics.median, 'median of values', type=lambda x: x)
+vd.aggregator('avg', mean, 'arithmetic mean of values', type=numtype)
+vd.aggregator('mean', mean, 'arithmetic mean of values', type=numtype)
+vd.aggregator('median', statistics.median, 'median of values', type=numtype)
 vd.aggregator('mode', statistics.mode, 'mode of values')
 vd.aggregator('sum', vsum, 'sum of values')
 vd.aggregator('distinct', set, 'distinct values', type=vlen)
