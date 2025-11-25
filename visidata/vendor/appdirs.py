@@ -194,7 +194,7 @@ def user_config_dir(appname=None, appauthor=None, version=None, roaming=False):
     if system == "win32":
         path = user_data_dir(appname, appauthor, None, roaming)
     elif system == 'darwin':
-        path = os.path.expanduser('~/Library/Preferences/')
+        path = os.getenv('XDG_CONFIG_HOME', os.path.expanduser('~/Library/Preferences'))
         if appname:
             path = os.path.join(path, appname)
     else:
@@ -306,7 +306,7 @@ def user_cache_dir(appname=None, appauthor=None, version=None, opinion=True):
             if opinion:
                 path = os.path.join(path, "Cache")
     elif system == 'darwin':
-        path = os.path.expanduser('~/Library/Caches')
+        path = os.getenv('XDG_CACHE_HOME', os.path.expanduser('~/Library/Caches'))
         if appname:
             path = os.path.join(path, appname)
     else:
