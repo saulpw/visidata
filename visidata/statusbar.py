@@ -8,7 +8,7 @@ import curses
 import sys
 
 import visidata
-from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, dispwidth, ColorAttr, clipstr_middle, iterchunks, clip_markup_middle
+from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, dispwidth, ColorAttr, clipstr_middle, clip_markup_middle
 
 
 
@@ -160,7 +160,6 @@ def leftStatus(sheet):
     return sheet.formatString(sheet.options.disp_status_fmt)
 
 
-import re
 @VisiData.api
 def drawLeftStatus(vd, scr, vs):
     'Draw left side of status bar.'
