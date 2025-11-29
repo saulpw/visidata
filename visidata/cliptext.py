@@ -399,6 +399,7 @@ def clip_markup_middle(s:str, w:int):
     [:markup] [:] [/markup] [/]
     The dropped text is replaced with a single disp_truncator.
     When text without markup is clipped, *clipstr_middle()* is used.
+    The parsing will fail on markup that is nested.
     '''
     trunch = options.disp_truncator
 
