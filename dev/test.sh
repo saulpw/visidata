@@ -7,6 +7,9 @@ shopt -s failglob
 
 trap "echo aborted; exit;" SIGINT SIGTERM
 
+export LC_NUMERIC="en_US.UTF-8" #2867
+export LC_TIME="en_US.UTF-8"
+
 MAX_PARALLEL_JOBS=1
 while getopts "j:" opt; do
     case "$opt" in
