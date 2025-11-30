@@ -8,7 +8,7 @@ import curses
 import sys
 
 import visidata
-from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, dispwidth, ColorAttr, clipstr_middle
+from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, dispwidth, ColorAttr, clipstr_middle, clip_markup_middle
 
 
 
@@ -146,11 +146,6 @@ def debug(vd, *args, **kwargs):
     if options.debug:
         return vd.status(*args, **kwargs)
 
-def middleTruncate(s, w):
-    if len(s) <= w:
-        return s
-    return s[:w] + options.disp_truncator + s[-w:]
-
 
 def composeStatus(msgparts, n=1):
     msg = '; '.join(wrmap(str, msgparts))
@@ -183,7 +178,7 @@ def drawLeftStatus(vd, scr, vs):
     lstatus = vs.leftStatus()
     maxwidth = options.disp_lstatus_max
     if maxwidth > 0:
-        lstatus = middleTruncate(lstatus, maxwidth//2)
+        lstatus = clip_markup_middle(lstatus, maxwidth)
 
     x = clipdraw(scr, y, 0, lstatus, cattr, w=vs.windowWidth-1)
 
