@@ -249,6 +249,12 @@ def inputShell(vd):
     cmd = vd.input("sh$ ", type="sh")
     if '$' not in cmd:
         vd.warning('no $column in command')
+    else:
+        import shlex
+        colnames = [col.name for col in vd.sheet.columns]
+        badnames = [arg[1:] for arg in shlex.split(cmd) if arg.startswith('$') and arg[1:] not in colnames]
+        for name in badnames:
+            vd.fail(f'no such columns: {", ".join([name for name in badnames])}')
     return cmd
 
 DirSheet.addCommand('`', 'open-dir-parent', 'vd.push(openSource(source.parent if source.resolve()!=Path(".").resolve() else os.path.dirname(source.resolve())))', 'open parent directory')  #1801

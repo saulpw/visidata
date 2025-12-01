@@ -66,7 +66,9 @@ def asynccache(keyfunc=lambda *args, **kwargs: str(args)+str(kwargs)):
         def _execAsync(*args, **kwargs):
             k = keyfunc(*args, **kwargs)
             if k not in d:
-                d[k] = vd._queueFunc(func, *args, **kwargs, _readonly=True)
+                t = vd._queueFunc(func, *args, **kwargs, _readonly=True)
+                #atomic read/write to d[k]
+                d.setdefault(k, t)  #2826
             return d.get(k)._result
         return _execAsync
     return _decorator
