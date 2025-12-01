@@ -8,6 +8,7 @@ from visidata import (options, Column, namedlist, SettableColumn, AttrDict, Disp
 TypedExceptionWrapper, BaseSheet, UNLOADED, wrapply,
 clipdraw, clipdraw_chunks, ColorAttr, update_attr, colors, undoAttrFunc, vlen, dispwidth)
 import visidata
+from visidata.utils import colname_letters
 
 
 vd.activePane = 1   # pane numbering starts at 1; pane 0 means active pane
@@ -190,6 +191,7 @@ class TableSheet(BaseSheet):
 
         # list of all columns in display order
         self.initialCols = kwargs.pop('columns', None) or type(self).columns
+        self.colname_ctr = 0
         self.resetCols()
 
         self._ordering = list(type(self)._ordering)  #2254
@@ -290,11 +292,11 @@ class TableSheet(BaseSheet):
         pass
 
     def resetCols(self):
-        'Reset columns to class settings'
+        'Reset columns to class settings or constructor settings'
         self.columns = []
         for c in self.initialCols:
             self.addColumn(deepcopy(c))
-            if self.options.disp_expert < c.disp_expert:
+            if c.disp_expert and vd.wantsHelp('nometacols'):
                 c.hide()
 
         self.setKeys(self.columns[:self.nKeys])
@@ -560,7 +562,6 @@ class TableSheet(BaseSheet):
     def cursorRight(self, n=1):
         'Move cursor right `n` visible columns (or left if `n` is negative).'
         self.cursorVisibleColIndex += n
-        self.calcColLayout()
 
     def addColumn(self, *cols, index=None):
         '''Insert all *cols* into columns at *index*, or append to end of columns if *index* is None.
@@ -656,30 +657,44 @@ class TableSheet(BaseSheet):
         elif self.topRowIndex > self.nRows-1:
             self.topRowIndex = self.nRows-1
 
+        self.adjustColLayout()
+
+        # calculations that rely on nScreenRows, like bottomRowIndex, need to be done after
+        # col layout has been adjusted. nScreenRows requires an accurate count of
+        # allAggregators, which requires knowing col visibility.
         # check bounds, scroll if necessary
         if self.topRowIndex > self.cursorRowIndex:
             self.topRowIndex = self.cursorRowIndex
         elif self.bottomRowIndex < self.cursorRowIndex:
             self.bottomRowIndex = self.cursorRowIndex
 
-        if self.cursorCol and self.cursorCol.keycol:
-            return
-
-        if self.leftVisibleColIndex >= self.cursorVisibleColIndex:
+    def adjustColLayout(self):
+        '''Move the left visible column to try to keep the cursorCol visible.
+        though the cursorCol cannot be visible when screen is totally filled by keycols.
+        Run calcColLayout() at least once.'''
+        # jumping to a column left of the previously on-screen columns:   put cursorCol as leftmost col
+        # jumping to a column right of the previously on-screen columns:  put cursorCol as far right as possible
+        if self.leftVisibleColIndex > self.cursorVisibleColIndex:        # e.g. when jumping/moving left
             self.leftVisibleColIndex = self.cursorVisibleColIndex
-        else:
-            while True:
-                if self.leftVisibleColIndex == self.cursorVisibleColIndex:  # not much more we can do
-                    break
+        elif self.leftVisibleColIndex < self.cursorVisibleColIndex:      # e.g. when jumping/moving right
+            #move leftVisibleCol until the cursor column fits fully on screen
+            while self.leftVisibleColIndex < self.cursorVisibleColIndex:  #ensures termination even if screen is completely filled by keycols
                 self.calcColLayout()
                 if not self._visibleColLayout:
                     break
+
+                # If the cursor is outside the visible columns currently laid out (1 window wide).
+                # One way to trigger this is with zc, jump to a column never seen yet.
                 mincolidx, maxcolidx = min(self._visibleColLayout.keys()), max(self._visibleColLayout.keys())
                 if self.cursorVisibleColIndex < mincolidx:
-                    self.leftVisibleColIndex -= max((self.cursorVisibleColIndex - mincolidx)//2, 1)
-                    continue
+                    # This case is expected never to occur. _visibleColLayout keys are enumerated from 0,
+                    # so mincolidx is always 0. and cursorVisibleColIndex is kept >= 0 (by checkCursor).
+                    self.leftVisibleColIndex = self.cursorVisibleColIndex
+                    break
                 elif self.cursorVisibleColIndex > maxcolidx:
-                    self.leftVisibleColIndex += max((maxcolidx - self.cursorVisibleColIndex)//2, 1)
+                    # some cases:  1) jumping rightward, so cursor has just moved to a column that is offscreen to the right
+                    #              2) when keycols fill entire screen
+                    self.leftVisibleColIndex += 1
                     continue
 
                 cur_x, cur_w = self._visibleColLayout[self.cursorVisibleColIndex]
@@ -687,9 +702,12 @@ class TableSheet(BaseSheet):
                     break
                 self.leftVisibleColIndex += 1  # once within the bounds, walk over one column at a time
 
+        if self.leftVisibleColIndex == self.cursorVisibleColIndex:  #will happen after cursor: jumped left, jumped right, or stayed in place
+            self.calcColLayout()
+
     def calcColLayout(self):
-        'Set right-most visible column, based on calculation.'
-        vd.clearCaches()
+        '''Set right-most visible column, based on calculation.
+        Assign x coordinates and width to every column that fits on screen, visible or hidden.'''
         minColWidth = dispwidth(self.options.disp_more_left)+dispwidth(self.options.disp_more_right)+2
         sepColWidth = dispwidth(self.options.disp_column_sep)
         winWidth = self.windowWidth
@@ -698,18 +716,28 @@ class TableSheet(BaseSheet):
         vcolidx = 0
         for vcolidx, col in enumerate(self.availCols):
             width = self.calcSingleColLayout(col, vcolidx, x, minColWidth)
-            if width:
-                x += width+sepColWidth
-            if x > winWidth-1:
+            if width is not None:
+                if x < winWidth-1:
+                    self._visibleColLayout[vcolidx] = [x, width]
+                    x += width+sepColWidth
+            if x >= winWidth-1:
                 break
 
         self.rightVisibleColIndex = vcolidx
 
     def calcSingleColLayout(self, col:Column, vcolidx:int, x:int=0, minColWidth:int=4):
-            if col.width is None and len(self.visibleRows) > 0:
-                vrows = self.visibleRows if self.nRows > 1000 else self.rows[:1000]  #1964
+            '''Return the width, for key columns, or for columns that are rightward of
+            the leftmost visibleCol, even if they are offscreen or hidden. Return
+            None for columns left of cursorVisibleColIndex, if they are not key columns.'''
+            # We use a slice of rows that is similar to self.visibleRows but simpler,
+            # and larger. The goal is to avoid using nFooterRows. Because nFooterRows
+            # cannot in general be calculated properly until after calcColLayout() has
+            # determined which columns are visible.
+            vrows = self.rows[self.topRowIndex:self.topRowIndex+self.windowHeight]
+            if col.width is None and len(vrows) > 0:
+                measure_rows = vrows if self.nRows > 1000 else self.rows[:1000]  #1964
                 # handle delayed column width-finding
-                col.width = max(col.getMaxWidth(vrows), minColWidth)
+                col.width = max(col.getMaxWidth(measure_rows), minColWidth)
                 if vcolidx < self.nVisibleCols-1:  # let last column fill up the max width
                     col.width = min(col.width, self.options.default_width)
 
@@ -719,10 +747,10 @@ class TableSheet(BaseSheet):
             if vcolidx >= self.nVisibleCols and vcolidx == self.cursorVisibleColIndex:
                 width = self.options.default_width
 
+            #subtract 1 character of empty space from windowWidth, for the margin to the right of the sheet
+            width = min(width, self.windowWidth-x-1)
             width = max(width, 1)
             if col in self.keyCols or vcolidx >= self.leftVisibleColIndex:  # visible columns
-                #subtract 1 character of empty space from windowWidth, for the margin to the right of the sheet
-                self._visibleColLayout[vcolidx] = [x, max(min(width, self.windowWidth-x-1), 1)]
                 return width
 
 
@@ -798,8 +826,6 @@ class TableSheet(BaseSheet):
         'Return dict of aggname -> list of cols with that aggregator.'
         allaggs = collections.defaultdict(list) # aggname -> list of cols with that aggregator
         for vcolidx, (x, colwidth) in sorted(self._visibleColLayout.items()):
-            if vcolidx >= len(self.availCols):
-                break  #2607 #2763
             col = self.availCols[vcolidx]
             if not col.hidden:
                 for aggr in col.aggregators:
@@ -1024,6 +1050,11 @@ class TableSheet(BaseSheet):
 
             return height
 
+    def incremented_colname(self):
+        vd.addUndo(setattr, self, 'colname_ctr', self.colname_ctr)
+        self.colname_ctr += 1
+        return colname_letters(self.colname_ctr)
+
 vd.rowNoters = [
     # f(sheet, row) -> character to be displayed on the left side of row
 ]
@@ -1163,14 +1194,16 @@ def confirmQuit(vs, verb='quit'):
 def preloadHook(sheet):
     'Override to setup for reload().'
     sheet.confirmQuit('reload')
+
     sheet.hasBeenModified = False
-    sheet.calcColLayout()
 
 
 @VisiData.api
 def newSheet(vd, name, ncols, **kwargs):
-    return Sheet(name, columns=[SettableColumn(width=vd.options.default_width) for i in range(ncols)], **kwargs)
-
+    cols = [SettableColumn(width=vd.options.default_width, name=f'{colname_letters(i+1)}') for i in range(ncols)]
+    vs = Sheet(name, columns=cols, **kwargs)
+    vs.colname_ctr = ncols
+    return vs
 
 @BaseSheet.api
 def quitAndReleaseMemory(vs):
@@ -1208,16 +1241,27 @@ def async_deepcopy(sheet, rowlist):
     _async_deepcopy(ret, rowlist)
     return ret
 
+@Sheet.api
+def reload_or_replace(sheet):
+    sheet.preloadHook()
+    if isinstance(sheet.source, visidata.Path) and \
+       sheet.source.is_url() and sheet.source.scheme != 'file':  #2825
+        #retrieve data again, because the earlier data saved in sheet.source may be outdated
+        vs = vd.openSource(visidata.Path(sheet.source.given))
+        if type(vs) != type(sheet):  #new data may have a different filetype
+            vd.push(vs)
+            vd.remove(sheet)
+            #user needs feedback that sheet changed, since the new sheet has a different shortcut
+            vd.status('replaced sheet due to changed filetype')
+            return
+        sheet.source = vs.source
+    sheet.reload()
 
 
 BaseSheet.init('pane', lambda: 1)
 
-@BaseSheet.api
-def calcColLayout(sheet):
-    pass  #2790
 
-
-BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); reload()', 'Reload current sheet')
+BaseSheet.addCommand('^R', 'reload-sheet', 'reload_or_replace()', 'Reload current sheet')
 Sheet.addCommand('', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line')
 
 Sheet.addCommand('!', 'key-col', 'exec_longname("key-col-off") if cursorCol.keycol else exec_longname("key-col-on")', 'toggle current column as a key column', replay=False)

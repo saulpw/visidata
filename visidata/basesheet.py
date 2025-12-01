@@ -302,8 +302,6 @@ class BaseSheet(DrawablePane):
         'Return formatted string with *sheet* and *vd* accessible to expressions.  Missing expressions return empty strings instead of error.'
         return MissingAttrFormatter().format(fmt, sheet=self, vd=vd, **kwargs)
 
-
-
 @VisiData.api
 def redraw(vd):
     'Clear the terminal screen and let the next draw cycle recreate the windows and redraw everything.'

@@ -25,7 +25,7 @@ def all_requirements():
 
 # tox can't actually run python3 setup.py: https://github.com/tox-dev/tox/issues/96
 # from visidata import __version__
-__version__ = "3.3dev"
+__version__ = "3.4dev"
 install_requires = [
     "python-dateutil",
     'importlib_resources; python_version<"3.9"',

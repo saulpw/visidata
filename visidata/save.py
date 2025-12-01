@@ -111,7 +111,9 @@ def saveCols(vd, cols):
 
 @VisiData.api
 def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=True):
-    'Save all *vsheets* to *givenpath*.'
+    '''Save all *vsheets* to *givenpath*. Async.
+    Callers should be careful not to call reload() while saveSheets is still running.
+    Use vd.sync(saveSheets) to wait for the save to finish.'''
 
     if not vsheets: # blank tuple
         vd.warning('no sheets to save')

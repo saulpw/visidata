@@ -245,7 +245,8 @@ class InputWidget:
             clipdraw(scr, y, x+w, ' ', attr, 1, clear=False, literal=True)
         if scr:
             prew = dispwidth(dispval[:i])
-            scr.move(y, x+prew)
+            if x+prew < scr.getmaxyx()[1]: #move cursor back to where the user is editing
+                scr.move(y, x+prew)
 
     def handle_key(self, ch:str, scr) -> bool:
         'Return True to accept current input.  Raise EscapeException on Ctrl+C, Ctrl+Q, or ESC.'
@@ -373,7 +374,7 @@ def editText(vd, y, x, w, attr=ColorAttr(), value='',
              help='',
              updater=lambda val: None, bindings={},
              display=True, record=True, clear=True, **kwargs):
-    'Invoke modal single-line editor at (*y*, *x*) for *w* terminal chars. Use *display* is False for sensitive input like passphrases.  If *record* is True, get input from the cmdlog in batch mode, and save input to the cmdlog if *display* is also True. Return new value as string.'
+    '''Invoke modal single-line editor at (*y*, *x*) for *w* terminal chars. Use *display* is False for sensitive input like passphrases.  If *record* is True, get input from the cmdlog in batch mode, and save input to the cmdlog if *display* is also True. Return new value as string. Callers should handle curses.error, which will be raised if the terminal is resized during the edit, in a way that moves the editor coordinates offscreen.'''
     v = None
     if record and vd.cmdlog:
         v = vd.getCommandInput()
@@ -391,8 +392,8 @@ def editText(vd, y, x, w, attr=ColorAttr(), value='',
         try:
             widget = InputWidget(value=str(value), display=display, **kwargs)
 
-            with vd.AddedHelp(vd.getHelpPane('input', module='visidata'), 'Input Keystrokes Help'), \
-                 vd.AddedHelp(help, 'Input Field Help'):
+            with vd.AddedHelp(vd.getHelpPane('input', module='visidata'), 'Input Keystrokes Help', 'inputkeys'), \
+                 vd.AddedHelp(help, 'Input Field Help', 'inputfield'):
                 v = widget.editline(vd.activeSheet._scr, y, x, w, attr=attr, updater=updater, bindings=bindings, clear=clear)
         except AcceptInput as e:
             v = e.args[0]
@@ -468,7 +469,6 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
 
         assert False, type(previnput)
 
-    y = sheet.windowHeight-1
     maxw = sheet.windowWidth//2
     attr = colors.color_edit_unfocused
 
@@ -494,9 +494,11 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
 
     def _drawPrompt(val):
         for k, v in kwargs.items():
+            #recalculate y to adjust for screen resizes during input()
+            y = sheet.windowHeight-v.get('dy')-1
             maxw = min(sheet.windowWidth-1, max(dispwidth(v.get('prompt')), dispwidth(str(v.get('value', '')))))
-            promptlen = clipdraw(scr, y-v.get('dy'), 0, v.get('prompt'), attr, w=maxw)  #1947
-            promptlen = clipdraw(scr, y-v.get('dy'), promptlen, v.get('value', ''),  attr, w=maxw)
+            promptlen = clipdraw(scr, y, 0, v.get('prompt'), attr, w=maxw)  #1947
+            promptlen = clipdraw(scr, y, promptlen, v.get('value', ''),  attr, w=maxw)
 
         return updater(val)
 
@@ -583,21 +585,30 @@ def input(vd, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None,
         return sheet.windowWidth-promptlen-rstatuslen-2
 
     w = kwargs.pop('w', _drawPrompt())
-    ret = vd.editText(y, promptlen, w=w,
-                        attr=colors.color_edit_cell,
-                        options=vd.options,
-                        history=history,
-                        updater=_drawPrompt,
-                        **kwargs)
+    restarts = 0
+    while restarts < 100:
+        #recalculate y to handle resize events
+        y = sheet.windowHeight-dy-1
+        try:
+            ret = vd.editText(y, promptlen, w=w,
+                                attr=colors.color_edit_cell,
+                                options=vd.options,
+                                history=history,
+                                updater=_drawPrompt,
+                                **kwargs)
+            if ret:
+                if kwargs.get('record', True) and kwargs.get('display', True):
+                    vd.addInputHistory(ret, type=type)
+            elif defaultLast:
+                history or vd.fail("no previous input")
+                ret = history[-1]
 
-    if ret:
-        if kwargs.get('record', True) and kwargs.get('display', True):
-            vd.addInputHistory(ret, type=type)
-    elif defaultLast:
-        history or vd.fail("no previous input")
-        ret = history[-1]
-
-    return ret
+            return ret
+        except curses.error:
+            vd.warning('restarting input due to resize')
+            restarts += 1
+    # if it keeps happening, it's probably not resize events, so give some debug output
+    vd.error(f'aborting input:  y={y}, w={w}, windowHeight={sheet.windowHeight}, windowWidth={sheet.windowWidth}')
 
 
 @VisiData.api
@@ -673,7 +684,10 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
     editargs = dict(value=value, options=self.options)
 
     editargs.update(kwargs)  # update with user-specified args
-    r = vd.editText(y, x, w, attr=colors.color_edit_cell, **editargs)
+    try:
+        r = vd.editText(y, x, w, attr=colors.color_edit_cell, **editargs)
+    except curses.error:
+        vd.fail(f'aborting edit due to resize')
 
     if rowidx >= 0:  # if not header
         r = col.type(r)  # convert input to column type, let exceptions be raised

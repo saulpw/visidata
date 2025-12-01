@@ -36,11 +36,26 @@ else:
 vd.option('clipboard_copy_cmd', syscopy_cmd_default, 'command to copy stdin to system clipboard', sheettype=None)
 vd.option('clipboard_paste_cmd', syspaste_cmd_default, 'command to send contents of system clipboard to stdout', sheettype=None)
 
+@VisiData.api
+def setClipboardRows(vd, rows):
+    vd.memory.cliprows = rows
+
+@VisiData.api
+def getClipboardRows(vd):
+    return vd.memory.cliprows
+
+@VisiData.api
+def setClipboardCols(vd, cols):
+    vd.memory.clipcols = cols
+
+@VisiData.api
+def getClipboardCols(vd):
+    return vd.memory.clipcols
 
 @Sheet.api
 def copyRows(sheet, rows):
-    vd.memory.cliprows = rows
-    vd.memory.clipcols = list(sheet.visibleCols)
+    vd.setClipboardRows(rows)
+    vd.setClipboardCols(list(sheet.visibleCols))
     if not rows:
         vd.warning('no %s selected; clipboard emptied' % sheet.rowtype)
     else:
@@ -152,23 +167,23 @@ def delete_row(sheet, rowidx):
 @asyncthread
 def paste_after(sheet, rowidx):
     'Paste rows from *vd.cliprows* at *rowidx*.'
-    if not vd.memory.cliprows:  #1793
+    if not vd.getClipboardRows():  #1793
         vd.warning('nothing to paste from cliprows')
         return
 
-    for col in vd.memory.clipcols[sheet.nVisibleCols:]:
+    for col in vd.getClipboardCols()[sheet.nVisibleCols:]:
         newcol = SettableColumn()
         newcol.__setstate__(col.__getstate__())
         sheet.addColumn(newcol)
 
     addedRows = []
 
-    for extrow in vd.memory.cliprows:
+    for extrow in vd.getClipboardRows():
         if isinstance(extrow, Column):
             newrow = copy(extrow)
         else:
             newrow = sheet.newRow()
-            for col, extcol in zip(sheet.visibleCols, vd.memory.clipcols):
+            for col, extcol in zip(sheet.visibleCols, vd.getClipboardCols()):
                 col.setValue(newrow, extcol.getTypedValue(extrow))
 
         addedRows.append(newrow)

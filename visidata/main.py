@@ -2,7 +2,7 @@
 # Usage: $0 [<options>] [<input> ...]
 #        $0 [<options>] --play <cmdlog> [--batch] [-w <waitsecs>] [-o <output>] [field=value ...]
 
-__version__ = '3.3dev'
+__version__ = '3.4dev'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
 from copy import copy
@@ -49,6 +49,8 @@ def eval_vd(logpath, *args, **kwargs):
         vs = vd.openSource(src, filetype='vdj')
     else:
         vs = vd.openSource(src, filetype=src.ext)
+    # add a row in place of the sheet creation command that undo() expects as the first command
+    vs.cmdlog_sheet.addRow(vs.cmdlog_sheet.newRow(sheet=None, row='', keystrokes='', input='', longname='no-op', undofuncs=[]))
     vs.name += '_vd'
     vd.sync(vs.reload())
     vs.vd = vd
@@ -255,7 +257,11 @@ def main_vd():
                         optval = sys.argv[i+1]
                         i += 1
 
-            current_args[optname] = optval
+            # batch and interactive are only meaningful when applied globally,
+            # so exclude them from sheet-specific options. Those would
+            # override any later change to vd.options.batch in global settings.
+            if optname not in ('batch', 'interactive'):
+                current_args[optname] = optval
             if flGlobal:
                 global_args[optname] = optval
         elif arg.startswith('+'):  # position cursor at start
@@ -285,7 +291,7 @@ def main_vd():
     # fetch motd *after* options parsing/setting
     vd.domotd()
 
-    if args.batch:
+    if options.batch:
         if not vd.options.interactive:
             options.undo = False
             options.quitguard = False
@@ -316,7 +322,7 @@ def main_vd():
     for vs in reversed(sources):
         vd.push(vs, load=False) #1471, 1555
 
-    if not vd.sheets and not args.play and not args.batch:
+    if not vd.sheets and not args.play and not options.batch:
         if 'filetype' in current_args:
             newfunc = getattr(vd, 'new_' + current_args['filetype'], vd.getGlobals().get('new_' + current_args['filetype']))
             datestr = datetime.date.today().strftime('%Y-%m-%d')
@@ -333,14 +339,14 @@ def main_vd():
             vd.cmdlog.openHook(vd.currentDirSheet, vd.currentDirSheet.source)
 
     if not args.play:
-        if args.batch:
+        if options.batch:
             if sources:
                 vd.push(sources[0])
 
         for (f, *parms) in after_config:
             f(sources, *parms)
 
-        if not args.batch:
+        if not options.batch:
             run(vd.sheets[0])
     else:
         if args.play == '-':
@@ -351,7 +357,7 @@ def main_vd():
             vdfile = Path(args.play)
 
         vs = eval_vd(vdfile, *fmtargs, **fmtkwargs)
-        if args.batch:
+        if options.batch:
             if not args.debug:
                 vd.outputProgressThread = visidata.VisiData.execAsync(vd, vd.outputProgressEvery, vs, seconds=0.5, sheet=BaseSheet())  #1182
             vd.reloadMacros()

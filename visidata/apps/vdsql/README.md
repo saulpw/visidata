@@ -83,10 +83,10 @@ You can learn about VisiData starting with the [Intro to VisiData Tutorial](http
 There are a few differences, however:
 
 - Use `"` (dup-sheet) to run a new base query, including added columns, filtering for the current selection, and applying the current sort order.
-- By default vdsql will only get 10000 rows from a database source.  To get a different number, use `z"` to create a new sheet with a different limit.
+- By default vdsql will only get 500 rows from a database source.  To get a different number, use `z"` to create a new sheet with a different limit.
 - Some VisiData commands aren't implemented using the database engine.
 
-The base VisiData commands can only use the 10000 loaded rows, and this might be misleading, so most not-implemented commands should be disabled.
+The base VisiData commands can only use the 500 loaded rows, and this might be misleading, so most not-implemented commands should be disabled.
 
 But if you want to use the commands anyway, knowing the dataset is incomplete, you can use `g'` to freeze the current set of loaded rows into a new sheet.
 

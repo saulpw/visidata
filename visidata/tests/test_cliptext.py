@@ -103,6 +103,19 @@ class TestClipText:
         assert clips == clippeds
         assert clipw == clippedw
 
+    @pytest.mark.parametrize('s, w, truncator, clippeds, clippedw', [
+        ('first\nsecond\n\nthird\n\n\n', 22, '',  'first·second··third···', 22),
+        ('first\nsecond\n\nthird\n\n\n', 22, '…', 'first·second··third···', 22),
+        ('first\nsecond\n\nthird\n\n\n', 21, '',  'first·second··third··', 21),
+        ('first\nsecond\n\nthird\n\n\n', 21, '…', 'first·second··third·…', 21),
+        (''.join([chr(i) for i in range(256)]), 256, '',
+            '································ !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~··································¡¢£¤¥¦§¨©ª«¬\xad®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ', 256),
+    ])
+    def test_clipstr_unprintable(self, s, w, truncator, clippeds, clippedw):
+        clips, clipw = visidata.clipstr(s, w, truncator=truncator, oddspace='·')
+        assert clips == clippeds
+        assert clipw == clippedw
+
     @pytest.mark.parametrize('s, w, clippeds, clippedw', [
         ('b to', 4, 'b to', 4),
         ('abcde', 8, 'abcde', 5),
@@ -188,3 +201,68 @@ class TestClipText:
                 call(0, 0, 'x', 0),
                 call(0, 1, 'jso…', 0),
         ], any_order=True)
+
+    @pytest.mark.parametrize('s, dispw, clipped', [
+        #clip front half
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]',
+        50,
+        '[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]…[:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]'),
+
+        #clip back half, when front half is an exact fit at 24 wide
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234[:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]',
+        50,
+        '[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234…[:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]'),
+
+        #clip front half, when front half reaches 25 wide
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]12345[:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]',
+        50,
+        '[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]…[:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]'),
+
+        #clip back half, when front half is 24 wide and back half is 27 wide
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234[:menu-active]1234567[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:]',
+        50,
+        '[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234…[:menu-active]ten_chars3[:][:menu-active]ten_chars4[:]'),
+
+        #no clipping for a string exactly 50 wide, when front is 24 wide and back is 26
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234[:menu-active]123456[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:]',
+        50,
+        '[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234[:menu-active]123456[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:]'),
+
+        #trimming to very short widths
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234[:menu-active]123456[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:]',
+        5,
+        '…'),
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234[:menu-active]123456[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:]',
+        1,
+        '…'),
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234[:menu-active]123456[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:]',
+        0,
+        ''),
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234[:menu-active]123456[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:]',
+        -1,
+        ''),
+        ('[:onclick jump-sheet-1]a[:][:onclick jump-sheet-2]ten_chars1[:][:menu-active]ten_chars3[:][:onclick jump-sheet-4]b[:]',
+        4,
+        '[:onclick jump-sheet-1]a[:]…[:onclick jump-sheet-4]b[:]'),
+        ('[:onclick jump-sheet-1]a[:][:onclick jump-sheet-2]ten_chars1[:][:menu-active]ten_chars3[:][:onclick jump-sheet-4]b[:]',
+        2,
+        '…[:onclick jump-sheet-4]b[:]'),
+
+        #no clipping, contents have plenty of room
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]',
+        100,
+        '[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]'),
+
+        #no clipping, contents fit exactly
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]',
+        70,
+        '[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]'),
+
+        #contents are too wide by 1
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]',
+        69,
+         '[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:][:menu-active]ten_chars3[:]…[:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]'),
+    ])
+    def test_truncate_markup_middle(self, s, dispw, clipped):
+        output = visidata.clip_markup_middle(s, dispw)
+        assert output == clipped

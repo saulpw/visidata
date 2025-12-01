@@ -84,9 +84,12 @@ def moveToNextRow(vs, func, reverse=False, msg='no different value up this colum
 def visibleWidth(self):
     'Width of column as is displayed in terminal'
     vcolidx = self.sheet.visibleCols.index(self)
-    if vcolidx not in self.sheet._visibleColLayout:
-        self.sheet.calcSingleColLayout(vcolidx)
-    return self.sheet._visibleColLayout[vcolidx][1]
+    if vcolidx in self.sheet._visibleColLayout:
+        w = self.sheet._visibleColLayout[vcolidx][1]
+    else:  #this case should never happen in normal use
+        #the width can be inaccurate if the column is not at x=0
+        w = self.sheet.calcSingleColLayout(vcolidx)
+    return w
 
 
 Sheet.addCommand(None, 'go-left',  'cursorRight(-1)', 'go left', replay=False)
@@ -140,8 +143,8 @@ Sheet.addCommand('zz', 'scroll-middle', 'sheet.topRowIndex = cursorRowIndex-int(
 
 Sheet.addCommand('kRIT5', 'go-right-page', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex', 'scroll cursor one page right', replay=False)
 Sheet.addCommand('kLFT5', 'go-left-page', 'pageLeft()', 'scroll cursor one page left', replay=False)
-Sheet.addCommand(None, 'scroll-left', 'sheet.cursorVisibleColIndex -= options.scroll_incr', 'scroll one column left')
-Sheet.addCommand(None, 'scroll-right', 'sheet.cursorVisibleColIndex += options.scroll_incr', 'scroll one column right')
+Sheet.addCommand(None, 'scroll-left', 'sheet.cursorVisibleColIndex -= options.scroll_incr', 'scroll left by one column increment')
+Sheet.addCommand(None, 'scroll-right', 'sheet.cursorVisibleColIndex += options.scroll_incr', 'scroll right by one column increment')
 Sheet.addCommand(None, 'scroll-leftmost', 'sheet.leftVisibleColIndex = cursorVisibleColIndex', 'scroll sheet to leftmost column')
 Sheet.addCommand(None, 'scroll-rightmost', 'tmp = cursorVisibleColIndex; pageLeft(); sheet.cursorVisibleColIndex = tmp', 'scroll sheet to rightmost column')
 

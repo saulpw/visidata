@@ -1,5 +1,5 @@
 import random
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 
 from visidata import VisiData, vd, Sheet, options, anytype, asyncthread, ColumnItem
 
@@ -52,7 +52,7 @@ def openurl_postgres(vd, url, filetype=None):
                 dbname=dbname,
                 host=url.hostname,
                 port=url.port,
-                password=url.password)
+                password=unquote(url.password))
 
     return PgTablesSheet(dbname+"_tables", sql=SQL(conn))
 

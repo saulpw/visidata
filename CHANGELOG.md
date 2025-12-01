@@ -1,5 +1,65 @@
 # VisiData version history
 
+# v3.3 (2025-09-07)
+
+- added options.disp_help_flags; deprecated options.disp_expert
+   - these feature flags are supported: cmdpalette hints nometacols guides inputkeys inputfield all
+   - see helpstr for more details
+   - set option to '' to turn off all help overlays
+
+- fix: include missing files in MANIFEST.in @chenrui333
+
+Thanks to @midichef for most of the other bugfixes and improvements.
+
+## Improvements
+
+- [csv] auto-detect CSV format when csv_delimiter is specified @dennisangemi
+- [basesheet-] start new column names fresh for each sheet
+
+- [form-] after confirm, Esc/^C/^Q/q show disconfirm msg
+
+- [cmdpalette-] add instruction to use Esc to cancel
+- [cmdpalette-] keep case of results, allow case-sensitive search
+- [cmdpalette-] scroll choices with PageUp/PageDown
+- [cmdpalette-] hide choices that do not match input
+
+- [save-] suggest 'stdin' as filename base instead of '-'
+- [sheets-] on reload, fetch fresh data for URLs
+- [tar-] add cols for ext and file type desc, use name as keycol
+- performance improvements
+- display improvements
+
+## Bugfixes
+
+- [archive-] fix extracting to a chosen path
+- [archive-] fix error extracting to overwrite existing file
+- [archive-] fix loading zip files from inside archive files
+
+- [cliptext-] fix display of empty markup as several blank lines
+- [cliptext-] restore display translation of unprintable chars
+- [sheets-] remove calcSingleColLayout use of inaccurate visibleRows
+
+- [plugins liveupdate-] fix broken addcol-new
+
+- [curses-] fix crash on startup on NetBSD (and probably other \*BSD) wscons tty consoles, which do not expose "mousemask" in their system curses implementations. @rsmirnov90
+- [input-] fix editText for files on command line with -b -i -p (#2840)
+- [plugin-] fix autoload for Python versions < 3.10
+
+- [macro-] fix corruption when saving macros after deletion #2787
+- [reload-] wait for any previous reload_rows to finish #2808
+- [resize-] fix resize-col-half for new columns with no rows  #2795
+- [sheet-] fix reload on sheets without col layout  #2790
+- [status] fix error when no help_sidebars
+
+## Cosmetic
+
+- [freqtbl-] stop printing status for selection on source sheet
+- [input-] handle screen resize during inputMultiple(), editCell(), input()
+
+# API
+
+- [threads-] add asyncsingle_queue decorator
+
 # v3.2 (2025-06-15)
 
 Thanks to @midichef for many bugfixes and improvements.

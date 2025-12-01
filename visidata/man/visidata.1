@@ -1029,7 +1029,7 @@ source of randomized startup messages
 folder recursion depth on DirSheet
 .It Sy --dir-hidden No "                False"
 load hidden files on DirSheet
-.It Sy --config Ns = Ns Ar "Path               " No "/home/saul/.visidatarc"
+.It Sy --config Ns = Ns Ar "Path               " No "/home/anja/.visidatarc"
 config file to exec in Python
 .It Sy --play Ns = Ns Ar "str                  " No ""
 file.vdj to replay
@@ -1063,7 +1063,7 @@ device ID associated with matrix login
 client_id for reddit api
 .It Sy --reddit-client-secret Ns = Ns Ar "str  " No ""
 client_secret for reddit api
-.It Sy --reddit-user-agent Ns = Ns Ar "str     " No "3.2"
+.It Sy --reddit-user-agent Ns = Ns Ar "str     " No "3.3"
 user_agent for reddit api
 .It Sy --zulip-batch-size Ns = Ns Ar "int      " No "-100"
 number of messages to fetch per call (<0 to fetch before anchor)
@@ -1397,8 +1397,17 @@ charset to render vertical reference lines on graph
 charset to render horizontal reference lines on graph
 .It Sy "disp_graph_multiple_reflines_char" No "\[u2592]"
 char to render multiple parallel reflines
-.It Sy "disp_expert        " No "0"
-max level of options and columns to include
+.It Sy "disp_help_flags    " No "cmdpalette guides help hints inputfield inputkeys nometacols sidebar"
+list of helper features to enable (space-separated):
+    - "cmdpalette": exec-longname suggestions
+    - "guides": guides in sidebar
+    - "help": help sidebar collapsed by default
+    - "hints": context-sensitive hints on menu line
+    - "inputfield": context-sensitive help for each input field
+    - "inputkeys": input quick reference in sidebar
+    - "nometacols": hide expert columns on metasheets
+    - "sidebar": context-sensitive sheet help in sidebar
+    - "all": enable all helper features
 .It Sy "color_add_pending  " No "green"
 color for rows pending add
 .It Sy "color_change_pending" No "reverse yellow"

@@ -23,6 +23,8 @@ class TestVisidataPath:
         assert Path('foo').base_stem == 'foo'
         assert Path('foo.').ext == ''
         assert Path('foo.').base_stem == 'foo.'
+        assert Path('foo..').ext == ''
+        assert Path('foo..').base_stem == 'foo..'
         assert Path('.foo').ext == ''
         assert Path('.foo').base_stem == '.foo'
 

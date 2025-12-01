@@ -11,7 +11,6 @@ vd.themes['light'] = dict(
         color_key_col      = '20 blue',   # color of key columns
         color_edit_cell    = '234 black',     # cell color to use when editing cell
         color_selected_row = '164 magenta',  # color of selected rows
-        color_selected_col = 'bold on white',
         color_note_row     = '164 magenta',  # color of row note on left edge
         color_note_type    = '88 red',  # color of cell note for non-str types in anytype columns
         color_warning      = '202 11 yellow',

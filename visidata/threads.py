@@ -8,32 +8,68 @@ import collections
 import subprocess
 import curses
 
-from visidata import VisiData, vd, options, globalCommand, Sheet, EscapeException
+from visidata import VisiData, vd, options, globalCommand, Sheet, EscapeException, asyncthread
 from visidata import ColumnAttr, Column, BaseSheet, ItemColumn
 
 
 vd.option('profile', False, 'enable profiling on threads')
 vd.option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
+vd.option('max_threads', 10, 'maximum number of concurrent processes on DirSheet')
 
 vd.theme_option('color_working', '118 5', 'color of system running smoothly')
 
 BaseSheet.init('currentThreads', list)
 
-def asynccache(key=lambda *args, **kwargs: str(args)+str(kwargs)):
+
+vd._queuedFuncs = []
+
+
+class QueuedFunc:
+    def __init__(self, func, args, kwargs, readonly=False):
+        self._func = func
+        self._args = args
+        self._kwargs = kwargs
+        self._result = None
+        self._proc = None
+        self._readonly = readonly
+
+    def _run_sync(self):
+        self._result = self._func(*self._args, **self._kwargs)
+
+    def _run(self):
+        self._proc = vd.execAsync(self._run_sync, _readonly=self._readonly)
+
+
+@VisiData.api
+def _queueFunc(vd, func, *args, _readonly=False, **kwargs):
+    qf = QueuedFunc(func, args, kwargs, readonly=_readonly)
+    vd._queuedFuncs.append(qf)
+    vd._runToCapacity()
+    return qf
+
+
+@VisiData.api
+def _runToCapacity(vd):
+    for i in range(len(vd.unfinishedThreads), vd.options.max_threads+1):
+        if not vd._queuedFuncs:
+            break
+
+        qf = vd._queuedFuncs.pop(0)
+        qf._run()
+
+
+def asynccache(keyfunc=lambda *args, **kwargs: str(args)+str(kwargs)):
     def _decorator(func):
         'Function decorator, so first call to `func()` spawns a separate thread. Calls return the Thread until the wrapped function returns; subsequent calls return the cached return value.'
         d = {}  # per decoration cache
-        def _func(k, *args, **kwargs):
-            d[k] = func(*args, **kwargs)
-
         @functools.wraps(func)
         def _execAsync(*args, **kwargs):
-            k = key(*args, **kwargs)
+            k = keyfunc(*args, **kwargs)
             if k not in d:
-                t = vd.execAsync(_func, k, *args, **kwargs)
+                t = vd._queueFunc(func, *args, **kwargs, _readonly=True)
                 #atomic read/write to d[k]
                 d.setdefault(k, t)  #2826
-            return d.get(k)
+            return d.get(k)._result
         return _execAsync
     return _decorator
 
@@ -200,8 +236,12 @@ def execAsync(vd, func, *args, **kwargs):
     else:
         sheet = kwargs.pop('sheet')
 
-    if sheet is not None and (sheet.lastCommandThreads and threading.current_thread() not in sheet.lastCommandThreads):
-        vd.fail(f'still running **{sheet.lastCommandThreads[-1].name}** from previous command')
+    # threads from the last command can launch new non-readonly threads, but no
+    # one else can, if any threads from previous commands on this sheet are
+    # still running
+    if not kwargs.pop('_readonly', False):
+        if sheet is not None and (sheet.lastCommandThreads and threading.current_thread() not in sheet.lastCommandThreads):  #1148
+            vd.fail(f'still running **{sheet.lastCommandThreads[-1].name}** from previous command')
 
     # the current thread's activeCommand
     cmd = vd.activeCommand
@@ -238,6 +278,11 @@ def _toplevelTryFunc(func, *args, **kwargs):
     if t.sheet:
         t.sheet.currentThreads.remove(t)
 
+    try:
+        vd._runToCapacity()
+    except Exception as e:
+        vd.exceptionCaught(e)
+
 def asyncignore(func):
     'Decorator like `@asyncthread` but without attaching to a sheet, so no sheet.threadStatus will show it.'
     @functools.wraps(func)
@@ -269,6 +314,27 @@ def asyncsingle(func):
 
         _execAsync.searchThread = vd.execAsync(_func, *args, **kwargs)
         _execAsync.searchThread.noblock = True
+    _execAsync.searchThread = None
+    return _execAsync
+
+def asyncsingle_queue(func):
+    '''Function decorator like `@asyncthread` but as a singleton.  When called, `func(...)` spawns a new thread, and waits for the end of any previous thread still running *func*.
+    ``vd.sync()`` does wait for unfinished asyncsingle_queue threads, which is an important difference from asyncsingle.
+    '''
+    @functools.wraps(func)
+    def _execAsync(*args, **kwargs):
+        def _func(*args, **kwargs):
+            func(*args, **kwargs)
+            _execAsync.searchThread = None
+            # end of thread
+
+        # cancel previous thread if running
+        if _execAsync.searchThread:
+            vd.sync(_execAsync.searchThread)
+
+        _func.__name__ = func.__name__ # otherwise, the the thread's name is '_func'
+
+        _execAsync.searchThread = vd.execAsync(_func, *args, **kwargs)
     _execAsync.searchThread = None
     return _execAsync
 
@@ -467,6 +533,7 @@ vd.addGlobals({
     'Progress': Progress,
     'asynccache': asynccache,
     'asyncsingle': asyncsingle,
+    'asyncsingle_queue': asyncsingle_queue,
     'asyncignore': asyncignore,
 })
 

@@ -167,7 +167,7 @@ def mainloop(vd, scr):
     numTimeouts = 0
     prefixWaiting = False
     vd.scrFull = scr
-    if vd.options.disp_expert >= 5:
+    if not vd.wantsHelp('help'):
         vd.disp_help = -1
 
     vd.keystrokes = ''
@@ -224,7 +224,10 @@ def mainloop(vd, scr):
         elif keystroke == 'Ctrl+Q':
             return vd.lastErrors and '\n'.join(vd.lastErrors[-1])
         elif vd.bindkeys._get(vd.keystrokes) is not None:
-            sheet.execCommand(vd.keystrokes, keystrokes=vd.keystrokes)
+            try:
+                sheet.execCommand(vd.bindkeys._get(vd.keystrokes), keystrokes=vd.keystrokes)
+            except Exception as e:  #2859
+                vd.exceptionCaught(e)
             prefixWaiting = False
         elif vd.keystrokes in vd.allPrefixes:
             prefixWaiting = True

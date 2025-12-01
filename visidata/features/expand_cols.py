@@ -143,7 +143,6 @@ def contract_cols(sheet, cols, depth=1):  # depth == 0 means contract all the wa
             col.width = sheet.options.default_width
 
         sheet.columns = [col for col in sheet.columns if getattr(col, 'origCol', None) not in origCols]
-        sheet.calcColLayout()
 
 
 @Sheet.api

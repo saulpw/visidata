@@ -7,7 +7,7 @@ from copy import copy
 import itertools
 
 from visidata import Progress, Sheet, Column, ColumnsSheet, VisiData, SettableColumn
-from visidata import vd, anytype, vlen, asyncthread, wrapply, AttrDict, date, INPROGRESS, dispwidth, stacktrace, TypedExceptionWrapper
+from visidata import vd, anytype, numtype, vlen, asyncthread, wrapply, AttrDict, date, INPROGRESS, dispwidth, stacktrace, TypedExceptionWrapper
 
 vd.help_aggregators = '''# Choose Aggregators
 Start typing an aggregator name or description.
@@ -141,7 +141,7 @@ def aggregator_list(vd, name, helpstr='', type=anytype, listtype=anytype):
 def mean(vals):
     vals = list(vals)
     if vals:
-        return float(sum(vals))/len(vals)
+        return sum(vals)/len(vals)
 
 def vsum(vals):
     return sum(vals, start=type(vals[0] if len(vals) else 0)())  #1996
@@ -233,9 +233,9 @@ def aggregate_groups(sheet, col, rows, aggr) -> list:
 
 vd.aggregator('min', min, 'minimum value')
 vd.aggregator('max', max, 'maximum value')
-vd.aggregator('avg', mean, 'arithmetic mean of values', type=float)
-vd.aggregator('mean', mean, 'arithmetic mean of values', type=float)
-vd.aggregator('median', statistics.median, 'median of values')
+vd.aggregator('avg', mean, 'arithmetic mean of values', type=numtype)
+vd.aggregator('mean', mean, 'arithmetic mean of values', type=numtype)
+vd.aggregator('median', statistics.median, 'median of values', type=numtype)
 vd.aggregator('mode', statistics.mode, 'mode of values')
 vd.aggregator('sum', vsum, 'sum of values')
 vd.aggregator('distinct', set, 'distinct values', type=vlen)
@@ -378,8 +378,8 @@ def chooseAggregators(vd, prompt = 'choose aggregators: '):
 def addcol_aggregate(sheet, col, aggrnames):
     for aggrname in aggrnames:
         aggrs = vd.aggregators.get(aggrname)
+        if aggrs is None: continue
         aggrs = aggrs if isinstance(aggrs, list) else [aggrs]
-        if not aggrs: continue
         for aggr in aggrs:
             rows = aggregate_groups(sheet, col, sheet.rows, aggr)
             if isinstance(aggr, ListAggregator):

@@ -1,0 +1,3 @@
+#!vd -p
+{"sheet": "global", "col": null, "row": "filetype", "longname": "set-option", "input": "jsonla", "keystrokes": "", "comment": null, "replayable": null}
+{"longname": "open-file", "input": "sample_data/pr2815.jsonl", "keystrokes": "o", "replayable": true}

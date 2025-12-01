@@ -1,4 +1,4 @@
 name	width	type	fmtstr	value	aggregators	sortorder
-Name				Daniel		
-Number		int		1		
-Exile		bool		True		
+Name	16			Daniel		
+Number	8	int		1		
+Exile	7	bool		True		
