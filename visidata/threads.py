@@ -8,30 +8,64 @@ import collections
 import subprocess
 import curses
 
-from visidata import VisiData, vd, options, globalCommand, Sheet, EscapeException
+from visidata import VisiData, vd, options, globalCommand, Sheet, EscapeException, asyncthread
 from visidata import ColumnAttr, Column, BaseSheet, ItemColumn
 
 
 vd.option('profile', False, 'enable profiling on threads')
 vd.option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
+vd.option('max_threads', 10, 'maximum number of concurrent processes on DirSheet')
 
 vd.theme_option('color_working', '118 5', 'color of system running smoothly')
 
 BaseSheet.init('currentThreads', list)
 
-def asynccache(key=lambda *args, **kwargs: str(args)+str(kwargs)):
+
+vd._queuedFuncs = []
+
+
+class QueuedFunc:
+    def __init__(self, func, args, kwargs):
+        self._func = func
+        self._args = args
+        self._kwargs = kwargs
+        self._result = None
+        self._proc = None
+
+    def _run_sync(self):
+        self._result = self._func(*self._args, **self._kwargs)
+
+    def _run(self):
+        self._proc = vd.execAsync(self._run_sync, _readonly=self._readonly)
+
+
+@VisiData.api
+def _queueFunc(vd, func, *args, **kwargs):
+    qf = QueuedFunc(func, args, kwargs)
+    vd._queuedFuncs.append(qf)
+    vd._runToCapacity()
+    return qf
+
+@VisiData.api
+def _runToCapacity(vd):
+    for i in range(len(vd.unfinishedThreads), vd.options.max_threads+1):
+        if not vd._queuedFuncs:
+            break
+
+        qf = vd._queuedFuncs.pop(0)
+        qf._run()
+
+
+def asynccache(keyfunc=lambda *args, **kwargs: str(args)+str(kwargs)):
     def _decorator(func):
         'Function decorator, so first call to `func()` spawns a separate thread. Calls return the Thread until the wrapped function returns; subsequent calls return the cached return value.'
         d = {}  # per decoration cache
-        def _func(k, *args, **kwargs):
-            d[k] = func(*args, **kwargs)
-
         @functools.wraps(func)
         def _execAsync(*args, **kwargs):
-            k = key(*args, **kwargs)
+            k = keyfunc(*args, **kwargs)
             if k not in d:
-                d[k] = vd.execAsync(_func, k, *args, **kwargs)
-            return d.get(k)
+                d[k] = vd._queueFunc(func, *args, **kwargs)
+            return d.get(k)._result
         return _execAsync
     return _decorator
 
@@ -235,6 +269,11 @@ def _toplevelTryFunc(func, *args, **kwargs):
 
     if t.sheet:
         t.sheet.currentThreads.remove(t)
+
+    try:
+        vd._runToCapacity()
+    except Exception as e:
+        vd.exceptionCaught(e)
 
 def asyncignore(func):
     'Decorator like `@asyncthread` but without attaching to a sheet, so no sheet.threadStatus will show it.'
