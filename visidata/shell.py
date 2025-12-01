@@ -17,6 +17,7 @@ from visidata.type_date import date
 
 vd.option('dir_depth', 0, 'folder recursion depth on DirSheet')
 vd.option('dir_hidden', False, 'load hidden files on DirSheet')
+vd.option('active_procs', 10, 'number of concurrent processes on DirSheet')
 
 
 @VisiData.api
