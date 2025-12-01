@@ -25,12 +25,13 @@ vd._queuedFuncs = []
 
 
 class QueuedFunc:
-    def __init__(self, func, args, kwargs):
+    def __init__(self, func, args, kwargs, readonly=False):
         self._func = func
         self._args = args
         self._kwargs = kwargs
         self._result = None
         self._proc = None
+        self._readonly = readonly
 
     def _run_sync(self):
         self._result = self._func(*self._args, **self._kwargs)
@@ -40,11 +41,12 @@ class QueuedFunc:
 
 
 @VisiData.api
-def _queueFunc(vd, func, *args, **kwargs):
-    qf = QueuedFunc(func, args, kwargs)
+def _queueFunc(vd, func, *args, _readonly=False, **kwargs):
+    qf = QueuedFunc(func, args, kwargs, readonly=_readonly)
     vd._queuedFuncs.append(qf)
     vd._runToCapacity()
     return qf
+
 
 @VisiData.api
 def _runToCapacity(vd):
@@ -64,7 +66,7 @@ def asynccache(keyfunc=lambda *args, **kwargs: str(args)+str(kwargs)):
         def _execAsync(*args, **kwargs):
             k = keyfunc(*args, **kwargs)
             if k not in d:
-                d[k] = vd._queueFunc(func, *args, **kwargs)
+                d[k] = vd._queueFunc(func, *args, **kwargs, _readonly=True)
             return d.get(k)._result
         return _execAsync
     return _decorator
@@ -232,8 +234,12 @@ def execAsync(vd, func, *args, **kwargs):
     else:
         sheet = kwargs.pop('sheet')
 
-    if sheet is not None and (sheet.lastCommandThreads and threading.current_thread() not in sheet.lastCommandThreads):
-        vd.fail(f'still running **{sheet.lastCommandThreads[-1].name}** from previous command')
+    # threads from the last command can launch new non-readonly threads, but no
+    # one else can, if any threads from previous commands on this sheet are
+    # still running
+    if not kwargs.pop('_readonly', False):
+        if sheet is not None and (sheet.lastCommandThreads and threading.current_thread() not in sheet.lastCommandThreads):  #1148
+            vd.fail(f'still running **{sheet.lastCommandThreads[-1].name}** from previous command')
 
     # the current thread's activeCommand
     cmd = vd.activeCommand
