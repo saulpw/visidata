@@ -24,7 +24,7 @@ vd.option('disp_wrap_replace_whitespace', False, 'replace whitespace with spaces
 vd.option('disp_wrap_placeholder', '…', 'multiline string to indicate truncation')
 vd.option('disp_multiline_focus', True, 'only multiline cursor row')
 vd.option('color_multiline_bottom', '', 'color of bottom line of multiline rows')  #2715
-vd.option('color_aggregator', 'bold 255 white on 234 black', 'color of aggregator summary on bottom row')
+vd.option('color_aggregator', 'bold 255 white on 240 black', 'color of aggregator summary on bottom row')
 
 
 @drawcache
@@ -885,10 +885,17 @@ class TableSheet(BaseSheet):
 
         # draw bottom-row aggregators  #2209
         rightx, rightw = self._visibleColLayout[self.rightVisibleColIndex]
-        rightx += rightw+1
+        agglabelx = rightx+rightw+1
+        if agglabelx > self.windowWidth-9: # if offscreen, put labels in first non-aggregated column
+            for vcolidx, (x, _) in sorted(self._visibleColLayout.items()):
+                col = self.availCols[vcolidx]
+                if not col.aggregators:
+                    agglabelx = x
+                    break
 
         for aggrname, colidxs in self.allAggregators.items():
-            clipdraw(scr, y, 0, ' '*rightx + f' {aggrname:9}', colors.color_aggregator, truncator='+')
+            clipdraw(scr, y, 0, f' ', colors.color_aggregator, w=min(rightx+rightw+10, self.windowWidth-1))
+            clipdraw(scr, y, agglabelx, f' {aggrname:9}', colors.color_aggregator, truncator='')
 
             for vcolidx in colidxs:
                 x, colwidth = self._visibleColLayout[vcolidx]
