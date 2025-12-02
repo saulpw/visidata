@@ -10,6 +10,8 @@ trap "echo aborted; exit;" SIGINT SIGTERM
 export LC_NUMERIC="en_US.UTF-8" #2867
 export LC_TIME="en_US.UTF-8"
 
+PYTHON=${PYTHON:-python}
+
 MAX_PARALLEL_JOBS=1
 while getopts "j:" opt; do
     case "$opt" in
@@ -50,7 +52,7 @@ for i in $TESTS ; do
         TEST=false
     elif [ "${i%-n312.vd*}-n312" == "${i%.vd*}" ];
     then
-        if [ "$(python -c 'import sys; print(sys.version_info[:2] >= (3,12))')" == "True" ];
+        if [ "$($PYTHON -c 'import sys; print(sys.version_info[:2] >= (3,12))')" == "True" ];
         then
             TEST=false
         else
@@ -59,7 +61,7 @@ for i in $TESTS ; do
 
     elif [ "${i%-311.vd*}-311" == "${i%.vd*}" ];
     then
-        if [ "$(python -c 'import sys; print(sys.version_info[:2] >= (3,11))')" == "True" ];
+        if [ "$($PYTHON -c 'import sys; print(sys.version_info[:2] >= (3,11))')" == "True" ];
         then
             TEST=true
         else
