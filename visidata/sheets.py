@@ -343,7 +343,7 @@ class TableSheet(BaseSheet):
         if self._ordering:
             vd.sync(self.sort())
 
-    def iterrows(self):
+    def iterrows(self, gerund='iterating'):
         if self.rows is UNLOADED:
             try:
                 self.rows = []
@@ -354,7 +354,7 @@ class TableSheet(BaseSheet):
             except ExpectedException:
                 vd.sync(self.reload())
 
-        for row in vd.Progress(self.rows):
+        for row in vd.Progress(list(self.rows), gerund=gerund, total=self.nRows):
             yield row
 
     def __iter__(self):

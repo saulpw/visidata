@@ -153,12 +153,11 @@ def save_json(vd, p, *vsheets):
         if len(vsheets) == 1:
             fp.write('[\n')
             vs = vsheets[0]
-            with Progress(gerund='saving'):
-                for i, row in enumerate(vs.iterrows()):
-                    if i > 0:
-                        fp.write(',\n')
-                    rd = _rowdict(vs.visibleCols, row, keep_nulls=(i==0))
-                    fp.write(jsonenc.encode(rd))
+            for i, row in enumerate(vs.iterrows('saving')):
+                if i > 0:
+                    fp.write(',\n')
+                rd = _rowdict(vs.visibleCols, row, keep_nulls=(i==0))
+                fp.write(jsonenc.encode(rd))
             fp.write('\n]\n')
         else:
             it = {vs.name: [_rowdict(vs.visibleCols, row, keep_nulls=(i==0)) for i, row in enumerate(vs.iterrows())] for vs in vsheets}

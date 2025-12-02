@@ -42,7 +42,7 @@ def iterdispvals(sheet, *cols, format=False):
             transformers[col].append(lambda v,trdict=trdict: v.translate(trdict))
 
     options_safe_error = sheet.options.safe_error
-    for r in Progress(sheet.rows):
+    for r in sheet.iterrows('saving'):
         dispvals = collections.OrderedDict()  # [col] -> value
         for col, transforms in transformers.items():
             try:
@@ -100,7 +100,7 @@ def saveCols(vd, cols):
     sheet = cols[0].sheet
     vs = copy(sheet)
     vs.columns = list(cols)
-    vs.rows = sheet.rows
+    vs.rows = list(sheet.rows)  # copy list to avoid conflict with rows modifications
     if len(cols) == 1:
         savedcoltxt = cols[0].name + ' column'
     else:

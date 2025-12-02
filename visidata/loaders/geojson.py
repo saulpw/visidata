@@ -134,7 +134,7 @@ def _rowdict(cols, row):
 @VisiData.api
 def save_geojson(vd, p, vs):
     features = []
-    for row in Progress(vs.rows, 'saving'):
+    for row in vs.iterrows('saving'):
         copyrow = deepcopy(row)
         copyrow['properties'] = _rowdict(vs.visibleCols, row)
         features.append(copyrow)
