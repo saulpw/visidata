@@ -8,7 +8,7 @@
 
 A terminal interface for exploring and arranging tabular data.
 
-![Frequency table](http://visidata.org/freq-move-row.gif)
+![Frequency table](http://visidata.org/videos/freq-move-row.gif)
 
 VisiData supports tsv, csv, sqlite, json, xlsx (Excel), hdf5, and [many other formats](https://visidata.org/formats).
 
