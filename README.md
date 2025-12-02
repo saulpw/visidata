@@ -4,8 +4,7 @@
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/saulpw/visidata)
 
 [![discord](https://img.shields.io/discord/880915750007750737?label=discord)](https://visidata.org/chat)
-[![mastodon @visidata@fosstodon.org][2.1]][2]
-[![twitter @VisiData][1.1]][1]
+![Mastodon](https://img.shields.io/mastodon/follow/110136431814047095)
 
 A terminal interface for exploring and arranging tabular data.
 
@@ -64,10 +63,3 @@ VisiData is conceived and developed by Saul Pwanson `<vd@saul.pw>`.
 Anja Kefala `<anja.kefala@gmail.com>` maintains the documentation and packages for all platforms.
 
 Many thanks to numerous other [contributors](https://visidata.org/credits/), and to those wonderful users who provide feedback, for helping to make VisiData the awesome tool that it is.
-
-[1.1]: http://i.imgur.com/tXSoThF.png
-[1]: http://www.twitter.com/VisiData
-[2.1]: https://raw.githubusercontent.com/mastodon/mastodon/main/app/javascript/images/logo.svg
-[2]: https://fosstodon.org/@visidata
-
-<!-- Please don't remove this: Grab your social icons from https://github.com/carlsednaoui/gitsocial -->
