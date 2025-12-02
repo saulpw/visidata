@@ -4,7 +4,7 @@
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/saulpw/visidata)
 
 [![discord](https://img.shields.io/discord/880915750007750737?label=discord)](https://visidata.org/chat)
-![Mastodon](https://img.shields.io/mastodon/follow/110136431814047095)
+![Mastodon](https://img.shields.io/mastodon/follow/110136431814047095?domain=https%3A%2F%2Ffosston.org)
 
 A terminal interface for exploring and arranging tabular data.
 
