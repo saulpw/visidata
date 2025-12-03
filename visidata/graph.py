@@ -344,7 +344,7 @@ class GraphSheet(InvertedCanvas):
             try:
                 self.reflines_x.remove(xtype(x))
             except ValueError:
-                vd.fail(f'value {x} not in reflines_x')
+                vd.warning(f'value {x} not in reflines_x')
         self.refresh()
 
     def erase_refline_y(self):
@@ -357,7 +357,7 @@ class GraphSheet(InvertedCanvas):
             try:
                 self.reflines_y.remove(ytype(y))
             except ValueError:
-                vd.fail(f'value {y} not in reflines_y')
+                vd.warning(f'value {y} not in reflines_y')
         self.refresh()
 
 def format_input_value(val, type):
