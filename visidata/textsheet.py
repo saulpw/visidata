@@ -120,12 +120,12 @@ def recentErrorsSheet(self):
 
 
 
-BaseSheet.addCommand('^E', 'error-recent', 'recentErrorsSheet.reload(); vd.push(recentErrorsSheet) if vd.lastErrors else status("no error")', 'view traceback for most recent error')
-BaseSheet.addCommand('g^E', 'errors-all', 'vd.push(vd.allErrorsSheet)', 'view traceback for most recent errors')
+BaseSheet.addCommand('Ctrl+E', 'error-recent', 'recentErrorsSheet.reload(); vd.push(recentErrorsSheet) if vd.lastErrors else status("no error")', 'view traceback for most recent error')
+BaseSheet.addCommand('gCtrl+E', 'errors-all', 'vd.push(vd.allErrorsSheet)', 'view traceback for most recent errors')
 
-Sheet.addCommand('z^E', 'error-cell', 'vd.push(ErrorCellSheet(sheet.name+"_cell_error", sourceSheet=sheet, source=getattr(cursorCell, "error", None) or fail("no error this cell")))', 'view traceback for error in current cell')
+Sheet.addCommand('zCtrl+E', 'error-cell', 'vd.push(ErrorCellSheet(sheet.name+"_cell_error", sourceSheet=sheet, source=getattr(cursorCell, "error", None) or fail("no error this cell")))', 'view traceback for error in current cell')
 
-TextSheet.addCommand('^O', 'sysopen-sheet', 'sheet.sysopen(sheet.cursorRowIndex)', 'open copy of text sheet in $EDITOR and reload on exit')
+TextSheet.addCommand('Ctrl+O', 'sysopen-sheet', 'sheet.sysopen(sheet.cursorRowIndex)', 'open copy of text sheet in $EDITOR and reload on exit')
 
 ErrorSheet.addCommand('Enter', 'sysopen-error', 'sysopen_error(cursorCol, cursorRow)', 'open traceback line in $EDITOR')
 

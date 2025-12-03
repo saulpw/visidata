@@ -84,17 +84,17 @@ class TaskAnnotationsSheet(Sheet):
     def reload(self):
         self.rows = self.source['annotations']
 
-TodoSheet.addCommand('^O', 'edit-notes', 'editTask(cursorRow)')
+TodoSheet.addCommand('Ctrl+O', 'edit-notes', 'editTask(cursorRow)')
 TodoSheet.addCommand('a', 'add-task', 't=newRow(description=input("new task: ")); rows.insert(cursorRowIndex+1, t); t.save(); cursorDown()')
 TodoSheet.addCommand('d', 'complete-task', 'cursorRow.done(); cursorRow.refresh()')
 TodoSheet.addCommand('gd', 'complete-tasks', 'for r in selectedRows: r.done() or r.refresh()')
 TodoSheet.addCommand('zd', 'delete-task', 'cursorRow.delete(); cursorRow.refresh()')
 TodoSheet.addCommand('gzd', 'delete-tasks', 'for r in selectedRows: r.delete() or r.refresh()')
-TodoSheet.addCommand('z^R', 'refresh-tasks', 'cursorRow.refresh()')
-TodoSheet.addCommand('z^S', 'save-task', 'cursorRow.save()')
-TodoSheet.addCommand('^S', 'save-modified-tasks', 'list(r.save() for r in rows if r.modified)')
-TodoSheet.addCommand(' ', 'start-task', 'cursorRow.stop() if cursorRow["start"] else cursorRow.start()')
-TodoSheet.addCommand(ENTER, '', 'vd.push(TaskAnnotationsSheet("cursorRow.description", source=cursorRow))')
+TodoSheet.addCommand('zCtrl+R', 'refresh-tasks', 'cursorRow.refresh()')
+TodoSheet.addCommand('zCtrl+S', 'save-task', 'cursorRow.save()')
+TodoSheet.addCommand('Ctrl+S', 'save-modified-tasks', 'list(r.save() for r in rows if r.modified)')
+TodoSheet.addCommand('Space', 'start-task', 'cursorRow.stop() if cursorRow["start"] else cursorRow.start()')
+TodoSheet.addCommand('Enter', '', 'vd.push(TaskAnnotationsSheet("cursorRow.description", source=cursorRow))')
 TaskAnnotationsSheet.addCommand('a', 'add-task-note', 'source.add_annotation(input("note: ")); reload()')
 TaskAnnotationsSheet.addCommand('d', 'delete-task-note', 'source.remove_annotation(cursorRow); reload()')
 

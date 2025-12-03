@@ -9,7 +9,6 @@ Functionality is more limited than local paths, but supports:
 
 import textwrap
 from visidata import (
-    ENTER,
     Column,
     ItemColumn,
     Path,
@@ -259,31 +258,31 @@ def openurl_s3(vd, p, filetype):
 
 
 S3DirSheet.addCommand(
-    ENTER,
+    'Enter',
     "s3-open-row",
     "vd.push(next(sheet.open_rows([cursorRow])))",
     "open the current S3 entry",
 )
 S3DirSheet.addCommand(
-    "g" + ENTER,
+    "gEnter",
     "s3-open-rows",
     "for vs in sheet.open_rows(selectedRows): vd.push(vs)",
     "open all selected S3 entries",
 )
 S3DirSheet.addCommand(
-    "z^R",
+    "zCtrl+R",
     "s3-refresh-sheet",
     "sheet.refresh_path(str(sheet.source))",
     "clear the s3fs cache for this path, then reload",
 )
 S3DirSheet.addCommand(
-    "gz^R",
+    "gzCtrl+R",
     "s3-refresh-sheet-all",
     "sheet.refresh_path()",
     "clear the entire s3fs cache, then reload",
 )
 S3DirSheet.addCommand(
-    "^V",
+    "Ctrl+V",
     "s3-toggle-versioning",
     "sheet.toggle_versioning()",
     "enable/disable support for S3 versioning",

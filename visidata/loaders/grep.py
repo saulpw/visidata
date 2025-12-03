@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from visidata import vd, VisiData, JsonSheet, ColumnAttr, Path, ENTER, AttrDict, ExpectedException, stacktrace, TypedExceptionWrapper
+from visidata import vd, VisiData, JsonSheet, ColumnAttr, Path, AttrDict, ExpectedException, stacktrace, TypedExceptionWrapper
 import json
 import os
 from os import linesep
@@ -113,7 +113,7 @@ def sysopen_row(sheet, row):
     else:
         vd.fail(f'cannot find file: {p.given}')
 
-GrepSheet.addCommand(ENTER, 'sysopen-row', 'sysopen_row(cursorRow)', 'open current file in external $EDITOR, at the line')
+GrepSheet.addCommand('Enter', 'sysopen-row', 'sysopen_row(cursorRow)', 'open current file in external $EDITOR, at the line')
 
 vd.addGlobals({
     'GrepSheet': GrepSheet,

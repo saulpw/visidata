@@ -410,17 +410,17 @@ def sysopen_rows(sheet, rows):
 
     sheet.refreshRows()
 
-OrgSheet.addCommand('^O', 'sysopen-row', 'sysopen_row(cursorRow)', 'open current file in external $EDITOR')
-OrgSheet.addCommand('g^O', 'sysopen-rows', 'sysopen_rows(selectedRows)', 'open selected files in external $EDITOR')
-OrgSheet.addCommand('^J', 'expand-row', 'openRows([cursorRow]); sheet.cursorRowIndex += 1')
-OrgSheet.addCommand('z^J', 'close-row', 'closeRows([cursorRow]); sheet.cursorRowIndex += 1')
-OrgSheet.addCommand('g^J', 'expand-selected', 'openRows(selectedRows)')
-OrgSheet.addCommand('gz^J', 'close-selected', 'closeRows(selectedRows)')
+OrgSheet.addCommand('Ctrl+O', 'sysopen-row', 'sysopen_row(cursorRow)', 'open current file in external $EDITOR')
+OrgSheet.addCommand('gCtrl+O', 'sysopen-rows', 'sysopen_rows(selectedRows)', 'open selected files in external $EDITOR')
+OrgSheet.addCommand('Ctrl+J', 'expand-row', 'openRows([cursorRow]); sheet.cursorRowIndex += 1')
+OrgSheet.addCommand('zCtrl+J', 'close-row', 'closeRows([cursorRow]); sheet.cursorRowIndex += 1')
+OrgSheet.addCommand('gCtrl+J', 'expand-selected', 'openRows(selectedRows)')
+OrgSheet.addCommand('gzCtrl+J', 'close-selected', 'closeRows(selectedRows)')
 OrgSheet.addCommand('ga', 'combine-selected', 'addRows([combine_rows(selectedRows)], index=cursorRowIndex); cursorDown(1)', 'combine selected rows into new org entry')
 
 OrgSheet.addCommand('zp', 'paste-data', 'paste_data_into(cursorRow, vd.getClipboardRows(), vd.getClipboardCols())', 'move clipboard rows to children of current row')
 OrgSheet.addCommand('p', 'paste-sections', 'paste_data_into(cursorRow, vd.getClipboardRows(), vd.getClipboardCols())', 'move clipboard rows to children of current row')
-OrgSheet.addCommand('g^S', 'save-all', 'save_all()', 'save all org files')
+OrgSheet.addCommand('gCtrl+S', 'save-all', 'save_all()', 'save all org files')
 
 
 if __name__ == '__main__':

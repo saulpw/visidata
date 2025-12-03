@@ -273,7 +273,7 @@ def statusHistorySheet(vd):
     return StatusSheet("status_history", source=vd.statusHistory[::-1])  # in reverse order
 
 
-BaseSheet.addCommand('^P', 'open-statuses', 'vd.push(vd.statusHistorySheet)', 'open Status History')
+BaseSheet.addCommand('Ctrl+P', 'open-statuses', 'vd.push(vd.statusHistorySheet)', 'open Status History')
 
 vd.addMenuItems('''
     View > Statuses > open-statuses

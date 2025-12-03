@@ -210,7 +210,7 @@ class SidebarSheet(TextSheet):
 
 BaseSheet.addCommand('b', 'sidebar-toggle', 'vd.options.disp_sidebar = not vd.options.disp_sidebar', 'toggle sidebar')
 BaseSheet.addCommand('gb', 'open-sidebar', 'sheet.current_sidebar = "" if not hasattr(sheet, "current_sidebar") else sheet.current_sidebar; vd.push(SidebarSheet(name, options.disp_sidebar_fmt, source=sheet.current_sidebar.splitlines()))', 'open sidebar in new sheet')
-BaseSheet.addCommand('^G', 'sidebar-cycle', 'vd.cycleSidebar()', 'cycle through available sidebar panels')
+BaseSheet.addCommand('Ctrl+G', 'sidebar-cycle', 'vd.cycleSidebar()', 'cycle through available sidebar panels')
 
 
 vd.addMenuItems('''

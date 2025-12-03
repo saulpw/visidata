@@ -49,5 +49,5 @@ def syseditCells_async(sheet, cols, rows, filetype=None):
                 col.setValuesTyped(edited_rows, *edited_vals)
 
 
-TableSheet.addCommand('^O', 'sysedit-cell', 'cd = cursorDisplay; e = vd.launchExternalEditor(cd); cursorCol.setValues([cursorRow], e) if e != cd else None', 'edit current cell in external $EDITOR')
-Sheet.addCommand('g^O', 'sysedit-selected', 'syseditCells(visibleCols, onlySelectedRows)', 'edit rows in $EDITOR')
+TableSheet.addCommand('Ctrl+O', 'sysedit-cell', 'cd = cursorDisplay; e = vd.launchExternalEditor(cd); cursorCol.setValues([cursorRow], e) if e != cd else None', 'edit current cell in external $EDITOR')
+Sheet.addCommand('gCtrl+O', 'sysedit-selected', 'syseditCells(visibleCols, onlySelectedRows)', 'edit rows in $EDITOR')

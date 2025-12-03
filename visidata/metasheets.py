@@ -1,6 +1,6 @@
 import collections
 
-from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENTER, asyncthread, Sheet, IndexSheet
+from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, asyncthread, Sheet, IndexSheet
 from visidata import CellColorizer, RowColorizer, JsonLinesSheet, AttrDict
 from visidata import ColumnAttr, ItemColumn
 from visidata import TsvSheet, Path, Option

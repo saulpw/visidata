@@ -3,7 +3,7 @@ import inspect
 import math
 import numbers
 
-from visidata import vd, asyncthread, ENTER, deduceType, anytype
+from visidata import vd, asyncthread, deduceType, anytype
 from visidata import Sheet, Column, VisiData, ColumnItem, TableSheet, BaseSheet, Progress, ColumnAttr, SuspendCurses, TextSheet, setitem
 import visidata
 
@@ -298,23 +298,23 @@ def inputPythonExpr(sheet):
         return v, i
     return vd.input("eval: ", "expr", completer=visidata.CompleteExpr(), bindings={'^X': launch_repl})
 
-BaseSheet.addCommand('^X', 'pyobj-expr', 'expr=inputPythonExpr(); vd.push(PyobjSheet(expr, source=sheet.evalExpr(expr)))', 'evaluate Python expression and open result as Python object')
+BaseSheet.addCommand('Ctrl+X', 'pyobj-expr', 'expr=inputPythonExpr(); vd.push(PyobjSheet(expr, source=sheet.evalExpr(expr)))', 'evaluate Python expression and open result as Python object')
 BaseSheet.addCommand('', 'exec-python', 'expr = input("exec: ", "expr", completer=CompleteExpr()); exec(expr, getGlobals(), LazyChainMap(sheet, *vd.contexts, locals=vd.getGlobals()))', 'execute Python statement with expression scope')
-BaseSheet.addCommand('g^X', 'import-python', 'modname=input("import: ", type="import_python"); exec("import "+modname, getGlobals())', 'import Python module in the global scope')
-BaseSheet.addCommand('z^X', 'pyobj-expr-row', 'expr = input("eval over current row: ", "expr", completer=CompleteExpr()); vd.push(PyobjSheet(expr, source=evalExpr(expr, row=cursorRow)))', 'evaluate Python expression, in context of current row, and open result as Python object')
+BaseSheet.addCommand('gCtrl+X', 'import-python', 'modname=input("import: ", type="import_python"); exec("import "+modname, getGlobals())', 'import Python module in the global scope')
+BaseSheet.addCommand('zCtrl+X', 'pyobj-expr-row', 'expr = input("eval over current row: ", "expr", completer=CompleteExpr()); vd.push(PyobjSheet(expr, source=evalExpr(expr, row=cursorRow)))', 'evaluate Python expression, in context of current row, and open result as Python object')
 BaseSheet.addCommand('', 'assert-expr', 'expr=inputPythonExpr(); assert sheet.evalExpr(expr), f"{expr} not true"', 'eval Python expression and assert result is truthy')
 BaseSheet.addCommand('', 'assert-expr-row', 'expr=inputPythonExpr(); assert sheet.evalExpr(expr, row=cursorRow), f"{expr} not true"', 'eval Python expression in context of current row, and assert result is truthy')
 
-Sheet.addCommand('^Y', 'pyobj-row', 'status(type(cursorRow).__name__); vd.push(openRowPyobj(cursorRowIndex))', 'open current row as Python object')
-Sheet.addCommand('z^Y', 'pyobj-cell', 'status(type(cursorValue).__name__); vd.push(openCellPyobj(cursorCol, cursorRowIndex))', 'open current cell as Python object')
-BaseSheet.addCommand('g^Y', 'pyobj-sheet', 'status(type(sheet).__name__); vd.push(PyobjSheet(sheet.name+"_sheet", source=sheet))', 'open current sheet as Python object')
+Sheet.addCommand('Ctrl+Y', 'pyobj-row', 'status(type(cursorRow).__name__); vd.push(openRowPyobj(cursorRowIndex))', 'open current row as Python object')
+Sheet.addCommand('zCtrl+Y', 'pyobj-cell', 'status(type(cursorValue).__name__); vd.push(openCellPyobj(cursorCol, cursorRowIndex))', 'open current cell as Python object')
+BaseSheet.addCommand('gCtrl+Y', 'pyobj-sheet', 'status(type(sheet).__name__); vd.push(PyobjSheet(sheet.name+"_sheet", source=sheet))', 'open current sheet as Python object')
 
 Sheet.addCommand('', 'open-row-basic', 'vd.push(TableSheet.openRow(sheet, cursorRow))', 'dive into current row as basic table (ignoring subsheet dive)')
-Sheet.addCommand(ENTER, 'open-row', 'vd.push(openRow(cursorRow)) if cursorRow else vd.fail("no row to open")', 'open current row with sheet-specific dive')
-Sheet.addCommand('z'+ENTER, 'open-cell', 'vd.push(openCell(cursorCol, cursorRow))', 'open sheet with copies of rows referenced in current cell')
+Sheet.addCommand('Enter', 'open-row', 'vd.push(openRow(cursorRow)) if cursorRow else vd.fail("no row to open")', 'open current row with sheet-specific dive')
+Sheet.addCommand('zEnter', 'open-cell', 'vd.push(openCell(cursorCol, cursorRow))', 'open sheet with copies of rows referenced in current cell')
 openRows
-Sheet.addCommand('g'+ENTER, 'dive-selected', 'openRows(selectedRows)', 'open all selected rows')
-Sheet.addCommand('gz'+ENTER, 'dive-selected-cells', 'openCells(cursorCol, selectedRows)', 'open all selected cells')
+Sheet.addCommand('gEnter', 'dive-selected', 'openRows(selectedRows)', 'open all selected rows')
+Sheet.addCommand('gzEnter', 'dive-selected-cells', 'openCells(cursorCol, selectedRows)', 'open all selected cells')
 
 PyobjSheet.addCommand('v', 'visibility', 'sheet.options.visibility = 0 if sheet.options.visibility else 2; reload()', 'toggle show/hide for methods and hidden properties')
 PyobjSheet.addCommand('gv', 'show-hidden', 'sheet.options.visibility = 2; reload()', 'show methods and hidden properties')

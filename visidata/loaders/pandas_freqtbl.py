@@ -1,4 +1,4 @@
-from visidata import vd, Sheet, options, Column, asyncthread, Progress, PivotGroupRow, ENTER, HistogramColumn
+from visidata import vd, Sheet, options, Column, asyncthread, Progress, PivotGroupRow, HistogramColumn
 
 from visidata.loaders._pandas import PandasSheet
 from visidata.pivot import PivotSheet

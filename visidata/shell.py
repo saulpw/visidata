@@ -10,7 +10,7 @@ except ImportError:
     pass # pwd,grp modules not available on Windows
 
 from visidata import Column, Sheet, LazyComputeRow, asynccache, BaseSheet, vd
-from visidata import Path, ENTER, asyncthread, VisiData
+from visidata import Path, asyncthread, VisiData
 from visidata import modtime, filesize, vstat, Progress, TextSheet
 from visidata.type_date import date
 
@@ -88,7 +88,7 @@ class ColumnShell(Column):
 
 
 class DirSheet(Sheet):
-    'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
+    'Sheet displaying directory, using Enter to open a particular file.  Edited fields are applied to the filesystem.'
     guide = '''
         # Directory Sheet
         This is a list of files in the {sheet.displaySource} folder.
@@ -262,15 +262,15 @@ BaseSheet.addCommand('', 'open-dir-current', 'vd.push(vd.currentDirSheet)', 'ope
 
 Sheet.addCommand('z;', 'addcol-shell', 'cmd=inputShell(); addShellColumns(cmd, sheet, curcol=cursorCol)', 'create new column from bash expression, with $columnNames as variables')
 
-DirSheet.addCommand(ENTER, 'open-row-file', 'vd.push(openSource(cursorRow or fail("no row"), filetype="dir" if cursorRow.is_dir() else LazyComputeRow(sheet, cursorRow).ext))', 'open current file as a new sheet')
-DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r))', 'open selected files as new sheets')
-DirSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow)', 'open current file in external $EDITOR')
-DirSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*selectedRows)', 'open selected files in external $EDITOR')
+DirSheet.addCommand('Enter', 'open-row-file', 'vd.push(openSource(cursorRow or fail("no row"), filetype="dir" if cursorRow.is_dir() else LazyComputeRow(sheet, cursorRow).ext))', 'open current file as a new sheet')
+DirSheet.addCommand('gEnter', 'open-rows', 'for r in selectedRows: vd.push(openSource(r))', 'open selected files as new sheets')
+DirSheet.addCommand('Ctrl+O', 'sysopen-row', 'launchEditor(cursorRow)', 'open current file in external $EDITOR')
+DirSheet.addCommand('gCtrl+O', 'sysopen-rows', 'launchEditor(*selectedRows)', 'open selected files in external $EDITOR')
 
 DirSheet.addCommand('y', 'copy-row', 'copy_files([cursorRow], inputPath("copy to dest: "))', 'copy file to given directory *path*')
 DirSheet.addCommand('gy', 'copy-selected', 'copy_files(selectedRows, inputPath("copy to dest: ", value=cursorRow.given))', 'copy selected files to given directory *path*')
 
-DirSheet.addCommand('z'+ENTER, 'open-row-filetype', 'ft = input("filetype: ", type="filetype", value=options.filetype or LazyComputeRow(sheet, cursorRow).ext); vd.push(openSource(cursorRow, filetype=ft) or fail(f"file {cursorDisplay} does not exist"))', 'open file in current row as input filetype')
+DirSheet.addCommand('zEnter', 'open-row-filetype', 'ft = input("filetype: ", type="filetype", value=options.filetype or LazyComputeRow(sheet, cursorRow).ext); vd.push(openSource(cursorRow, filetype=ft) or fail(f"file {cursorDisplay} does not exist"))', 'open file in current row as input filetype')
 
 
 @DirSheet.api

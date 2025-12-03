@@ -116,10 +116,10 @@ Sheet.addCommand('z<', 'go-prev-null', 'moveToNextRow(lambda row,col=cursorCol,i
 Sheet.addCommand('z>', 'go-next-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), msg="no null down this column")', 'go down current column to next null value')
 
 for i in range(1, 11):
-    BaseSheet.addCommand(ALT+str(i)[-1], 'jump-sheet-'+str(i), f'vd.push(*(list(s for s in allSheets if s.shortcut==str({i})) or fail("no sheet")))', f'jump to sheet {i}')
+    BaseSheet.addCommand(f'Alt+{str(i)[-1]}', f'jump-sheet-{i}', f'vd.push(*(list(s for s in allSheets if s.shortcut==str({i})) or fail("no sheet")))', f'jump to sheet {i}')
 
 for i in range(11, 21):
-    BaseSheet.addCommand('', 'jump-sheet-'+str(i), f'vd.push(*(list(s for s in allSheets if s.shortcut==str({i})) or fail("no sheet")))', f'jump to sheet {i}')
+    BaseSheet.addCommand('', f'jump-sheet-{i}', f'vd.push(*(list(s for s in allSheets if s.shortcut==str({i})) or fail("no sheet")))', f'jump to sheet {i}')
 
 BaseSheet.bindkey('Left', 'go-left')
 BaseSheet.bindkey('Down', 'go-down')

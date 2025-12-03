@@ -1,4 +1,4 @@
-from visidata import vd, BaseSheet, ENTER, colors, dispwidth
+from visidata import vd, BaseSheet, colors, dispwidth
 import curses
 
 

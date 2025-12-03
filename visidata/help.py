@@ -2,7 +2,7 @@ import functools
 import collections
 
 from visidata import VisiData, MetaSheet, ColumnAttr, Column, BaseSheet, VisiDataMetaSheet, SuspendCurses
-from visidata import vd, asyncthread, ENTER, drawcache, AttrDict, TextSheet
+from visidata import vd, asyncthread, drawcache, AttrDict, TextSheet
 
 
 vd.option('disp_help_flags', 'cmdpalette guides help hints inputfield inputkeys nometacols sidebar',
@@ -181,15 +181,15 @@ def openManPage(vd):
             vd.push(TextSheet('man_vd', source=module_path/'man/vd.txt'))
 
 
-# in VisiData, g^H refers to the man page
-BaseSheet.addCommand('g^H', 'sysopen-help', 'openManPage()', 'Show the UNIX man page for VisiData')
-BaseSheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))', 'list commands and keybindings available on current sheet')
-BaseSheet.addCommand('gz^H', 'help-commands-all', 'vd.push(HelpSheet("all_commands", source=None, revbinds={}))', 'list commands and keybindings for all sheet types')
+# in VisiData, gCtrl+H refers to the man page
+BaseSheet.addCommand('gCtrl+H', 'sysopen-help', 'openManPage()', 'Show the UNIX man page for VisiData')
+BaseSheet.addCommand('zCtrl+H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))', 'list commands and keybindings available on current sheet')
+BaseSheet.addCommand('gzCtrl+H', 'help-commands-all', 'vd.push(HelpSheet("all_commands", source=None, revbinds={}))', 'list commands and keybindings for all sheet types')
 
-BaseSheet.bindkey('KEY_F(1)', 'sysopen-help')
-BaseSheet.bindkey('zKEY_F(1)', 'help-commands')
-BaseSheet.bindkey('zKEY_BACKSPACE', 'help-commands')
-BaseSheet.bindkey('gKEY_BACKSPACE', 'sysopen-help')
+BaseSheet.bindkey('F1', 'sysopen-help')
+BaseSheet.bindkey('zF1', 'help-commands')
+BaseSheet.bindkey('zBksp', 'help-commands')
+BaseSheet.bindkey('gBksp', 'sysopen-help')
 
 HelpSheet.addCommand(None, 'exec-command', 'quit(sheet); draw_all(); activeStack[0].execCommand(cursorRow.longname)', 'execute command on undersheet')
 BaseSheet.addCommand(None, 'open-tutorial-visidata', 'launchBrowser("https://jsvine.github.io/intro-to-visidata/")', 'open https://jsvine.github.io/intro-to-visidata/')

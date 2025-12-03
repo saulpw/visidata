@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from visidata import VisiData, vd, Sheet, Column, asyncthread, CellColorizer, ColumnItem, ENTER
+from visidata import VisiData, vd, Sheet, Column, asyncthread, CellColorizer, ColumnItem
 
 
 vd.option('color_xword_active', 'green', 'color of active clue')
@@ -35,6 +35,8 @@ class CrosswordsSheet(Sheet):
         for p in self.source.iterdir():
             self.addRow(Crossword(p.read(), str(p)))
 
+    def openRow(self):
+        return CrosswordSheet("clues_"+self.cursorRow.title, source=self.cursorRow)
 
 @VisiData.api
 class GridSheet(Sheet):
@@ -85,6 +87,9 @@ class CrosswordSheet(Sheet):
         self.xd = xdfile.xdfile(xd_contents=self.source.read_text(), filename=self.source)
         self.rows = self.xd.clues
 
+    def openRow(self):
+        return GridSheet("grid", source=self, pos=self.cursorRow[0])
+
 
 class PuzSheet(CrosswordSheet):
     @asyncthread
@@ -99,8 +104,5 @@ def save_xd(vd, p, vs):
     with p.open(mode='w', encoding='utf-8') as fp:
         fp.write(vs.xd.to_unicode())
 
-
-CrosswordsSheet.addCommand(ENTER, 'open-clues', 'vd.push(CrosswordSheet("clues_"+cursorRow.title, source=cursorRow))', 'open CrosswordSheet: clue answer pair for crossword')
-CrosswordSheet.addCommand(ENTER, 'open-grid', 'vd.push(GridSheet("grid", source=sheet, pos=cursorRow[0]))', 'open GridSheet: grid for crossword')
 
 GridSheet.options.disp_column_sep = ''

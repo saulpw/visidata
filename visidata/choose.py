@@ -1,5 +1,5 @@
 from copy import copy
-from visidata import vd, options, VisiData, ListOfDictSheet, ENTER, CompleteKey, ReturnValue
+from visidata import vd, options, VisiData, ListOfDictSheet, CompleteKey, ReturnValue
 
 
 vd.option('fancy_chooser', False, 'a nicer selection interface for aggregators and jointype')
@@ -80,5 +80,5 @@ def chooseMany(vd, choices, type=''):
     return chosen
 
 
-ChoiceSheet.addCommand(ENTER, 'choose-rows', 'makeChoice([cursorRow])')
-ChoiceSheet.addCommand('g'+ENTER, 'choose-rows-selected', 'makeChoice(onlySelectedRows)')
+ChoiceSheet.addCommand('Enter', 'choose-rows', 'makeChoice([cursorRow])')
+ChoiceSheet.addCommand('gEnter', 'choose-rows-selected', 'makeChoice(onlySelectedRows)')

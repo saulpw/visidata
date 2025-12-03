@@ -10,7 +10,7 @@
 '''
 
 import visidata
-from visidata import vd, VisiData, Sheet, AttrColumn, asyncthread, ENTER, anytype, date
+from visidata import vd, VisiData, Sheet, AttrColumn, asyncthread, anytype, date
 
 
 vd.option('reddit_client_id', '', 'client_id for reddit api')
@@ -291,9 +291,9 @@ def sysopen_subreddits(vd, *subreddits):
     vd.launchBrowser(url)
 
 
-SubredditSheet.addCommand('^O', 'sysopen-subreddit', 'sysopen_subreddits(cursorRow.display_name)', 'open browser window with subreddit')
-SubredditSheet.addCommand('g^O', 'sysopen-subreddits', 'sysopen_subreddits(*(row.display_name for row in selectedRows))', 'open browser window with messages from selected subreddits')
-SubredditSheet.addCommand('g'+ENTER, 'open-subreddits', 'vd.push(openRows(selectedRows))', 'open sheet with top ~1000 submissions for each selected subreddit')
+SubredditSheet.addCommand('Ctrl+O', 'sysopen-subreddit', 'sysopen_subreddits(cursorRow.display_name)', 'open browser window with subreddit')
+SubredditSheet.addCommand('gCtrl+O', 'sysopen-subreddits', 'sysopen_subreddits(*(row.display_name for row in selectedRows))', 'open browser window with messages from selected subreddits')
+SubredditSheet.addCommand('gEnter', 'open-subreddits', 'vd.push(openRows(selectedRows))', 'open sheet with top ~1000 submissions for each selected subreddit')
 SubredditSheet.addCommand('ga', 'add-subreddits-match', 'addRowsFromQuery(input("add subreddits matching: "))', 'add subreddits matching input by name or description')
 RedditSubmissions.addCommand('ga', 'add-submissions-match', 'addRowsFromQuery(input("add posts matching: "))', 'add posts in this subreddit matching input')
 
