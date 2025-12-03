@@ -329,8 +329,8 @@ vd.addGlobals({
 })
 
 vd.addMenuItems('''
-    View > Visibility > Methods and dunder attributes > show > show-hidden
-    View > Visibility > Methods and dunder attributes > hide > hide-hidden
+    View > Show > public properties only > hide-hidden
+    View > Show > methods and dunder attributes > show-hidden
     Row > Dive into > open-row
     System > Python > import library > import-python
     System > Python > current sheet > pyobj-sheet

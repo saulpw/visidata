@@ -1269,7 +1269,7 @@ BaseSheet.init('pane', lambda: 1)
 
 
 BaseSheet.addCommand('^R', 'reload-sheet', 'reload_or_replace()', 'Reload current sheet')
-Sheet.addCommand('', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line')
+Sheet.addCommand('', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet')
 
 Sheet.addCommand('!', 'key-col', 'exec_longname("key-col-off") if cursorCol.keycol else exec_longname("key-col-on")', 'toggle current column as a key column', replay=False)
 Sheet.addCommand('', 'key-col-on', 'setKeys([cursorCol])', 'set current column as a key column')
@@ -1356,6 +1356,8 @@ vd.addMenuItems('''
     View > Split pane > swap panes > splitwin-swap-pane
     View > Split pane > goto other pane > splitwin-swap
     View > Refresh screen > redraw
+    View > Show > cursor position > show-cursor
+    View > Show > evaluated expression > show-expr
     Column > Type as > anytype > type-any
     Column > Type as > string > type-string
     Column > Type as > integer > type-int
