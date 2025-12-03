@@ -512,6 +512,6 @@ BaseSheet.addCommand('Alt+p', 'menu-plot', 'pressMenu("Plot")', '')
 BaseSheet.addCommand('Alt+s', 'menu-system', 'pressMenu("System")', '')
 BaseSheet.addCommand('Alt+h', 'menu-help', 'pressMenu("Help")', 'open the Help menu')
 BaseSheet.bindkey('Ctrl+H', 'menu-help')
-BaseSheet.bindkey('KEY_BACKSPACE', 'menu-help')
+BaseSheet.bindkey('Bksp', 'menu-help')
 
 vd.addGlobals({'Menu': Menu})
