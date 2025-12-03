@@ -4,7 +4,7 @@ import visidata
 from visidata import Extensible, VisiData, vd, EscapeException, MissingAttrFormatter, AttrDict
 
 
-UNLOADED = tuple()  # sentinel for a sheet not yet loaded for the first time
+UNLOADED = tuple()  # sentinel for a sheet not yet loaded for the first time; should be iterable
 
 vd.beforeExecHooks = [] # func(sheet, cmd, args, keystrokes) called before the exec()
 
