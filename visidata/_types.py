@@ -95,8 +95,17 @@ vd.typemap = {}
 def getType(vd, typetype):
     return vd.typemap.get(typetype) or VisiDataType()
 
+
+@vd.numericType('')
+def numtype(r=None):
+    'A passthrough numeric type that uses default precision and formatting'
+    return r
+numtype.__name__ = 'num'
+
+
 vdtype(None, '∅', name='none')
 vdtype(anytype, '', formatter=lambda _,v: str(v))
+vdtype(numtype, '')
 vdtype(str, '~', formatter=lambda _,v: v)
 vdtype(int, '#')
 vdtype(float, '%')
@@ -135,5 +144,6 @@ class vlen(int):
         return self
 
 vd.addGlobals(anytype=anytype,
+              numtype=numtype,
               vdtype=vdtype,
               deduceType=deduceType)

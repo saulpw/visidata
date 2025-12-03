@@ -1,11 +1,12 @@
 from copy import copy
+import threading
 import functools
 import operator
 import re
 
 from contextlib import contextmanager
 from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace, PyobjSheet, BaseSheet, ExpectedException
-from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet, UNLOADED, ExprColumn, undoAttrCopyFunc, ENTER
+from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet, UNLOADED, ExprColumn, undoAttrCopyFunc
 
 vd.option('disp_ibis_sidebar', 'pending_sql', 'which sidebar property to display')
 vd.option('sql_always_count', False, 'whether to include count of total number of results')
@@ -80,24 +81,18 @@ vd.openurl_sqlite = vd.open_vdsql
 class IbisConnectionPool:
     def __init__(self, source, pool=None, total=0):
         self.source = source
-        self.pool = pool if pool is not None else []
-        self.total = total
+        self._local = threading.local()
+        self._local.connection = None
 
     def __copy__(self):
-        return IbisConnectionPool(self.source, pool=self.pool, total=self.total)
+        return IbisConnectionPool(self.source)
 
     @contextmanager
     def get_conn(self):
-        if not self.pool:
-            import ibis
-            r = ibis.connect(str(self.source))
-        else:
-            r = self.pool.pop(0)
-
-        try:
-            yield r
-        finally:
-            self.pool.append(r)
+        import ibis
+        if not hasattr(self._local, 'connection') or not self._local.connection:
+            self._local.connection = ibis.connect(str(self.source))
+        yield self._local.connection
 
 
 class IbisTableIndexSheet(IndexSheet):
@@ -462,7 +457,12 @@ class IbisTableSheet(Sheet):
         q = self.ibis_current_expr
         for other in others:
             preds = [(a.ibis_col == b.ibis_col) for a, b in zip(self.keyCols, other.keyCols)]
-            q = q.join(other.ibis_current_expr, predicates=preds, how=jointype, suffixes=('', '_'+other.name))
+            # Try new API (ibis >= 9.0) with lname/rname, fall back to old API with suffixes
+            try:
+                q = q.join(other.ibis_current_expr, predicates=preds, how=jointype, lname='', rname='{name}_'+other.name)
+            except TypeError:
+                # Fall back to old API (ibis < 9.0)
+                q = q.join(other.ibis_current_expr, predicates=preds, how=jointype, suffixes=('', '_{name}_'+other.name))
 
         return IbisTableSheet('+'.join(vs.name for vs in sheets), sources=sheets, query=q, ibis_source=self.ibis_source, ibis_conpool=self.ibis_conpool)
 
@@ -735,7 +735,7 @@ IbisTableSheet.addCommand('', 'select-col-regex', 'select_col_regex(cursorCol, i
 IbisTableSheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: "); select_expr(expr)', 'select rows matching Python expression in any visible column')
 IbisTableSheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr: sheet.evalExpr(expr, r)), progress=False)', 'unselect rows matching Python expression in any visible column')
 
-IbisFreqTable.addCommand('g'+ENTER, 'open-selected', 'vd.push(openRows(selectedRows))')
+IbisFreqTable.addCommand('gEnter', 'open-selected', 'vd.push(openRows(selectedRows))')
 IbisTableIndexSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("SQL query: ")))', 'open sheet with results of raw SQL query')
 
 IbisTableIndexSheet.class_options.load_lazy = True

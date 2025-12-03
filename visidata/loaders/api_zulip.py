@@ -1,7 +1,7 @@
 import time
 
 from visidata import vd, VisiData, BaseSheet, Sheet, TextSheet, PyobjSheet
-from visidata import ItemColumn, Column, vlen, date, asyncsingle, ENTER, AttrDict
+from visidata import ItemColumn, Column, vlen, date, asyncsingle, AttrDict
 
 vd.option('zulip_batch_size', -100, 'number of messages to fetch per call (<0 to fetch before anchor)')
 vd.option('zulip_anchor', 1000000000, 'message id to start fetching from')

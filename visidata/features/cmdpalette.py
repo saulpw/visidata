@@ -1,6 +1,7 @@
 import collections
+import math
 from functools import partial
-from visidata import DrawablePane, BaseSheet, vd, VisiData, CompleteKey, clipdraw, HelpSheet, colors, AcceptInput, AttrDict, drawcache_property
+from visidata import DrawablePane, BaseSheet, vd, VisiData, CompleteKey, clipdraw, HelpSheet, colors, AcceptInput, AttrDict, drawcache_property, dispwidth, EscapeException
 
 
 vd.theme_option('color_cmdpalette', 'black on 72', 'base color of command palette')
@@ -58,14 +59,21 @@ def inputPalette(sheet, prompt, items,
                  formatter=lambda m, item, trigger_key: f'{trigger_key} {item}',
                  multiple=False,
                  **kwargs):
-    if sheet.options.disp_expert >= 5:
+    if not vd.wantsHelp('cmdpalette'):
         return vd.input(prompt,
                 completer=CompleteKey(sorted(item[value_key] for item in items)),
                 **kwargs)
 
     bindings = dict()
 
+    #state variables for navigating display of matches
+    prev_value = None
     tabitem = -1
+    offset = 0
+    def reset_display():
+        nonlocal tabitem, offset
+        tabitem = -1
+        offset = 0
 
     def tab(n, nitems):
         nonlocal tabitem
@@ -73,7 +81,11 @@ def inputPalette(sheet, prompt, items,
         tabitem = (tabitem + n) % nitems
 
     def _draw_palette(value):
-        words = value.lower().split()
+        nonlocal prev_value
+        words = value.split()
+        if value != prev_value:
+            reset_display()
+            prev_value = value
 
         if multiple and words:
             if value.endswith(' '):
@@ -83,8 +95,8 @@ def inputPalette(sheet, prompt, items,
                 finished_words = words[:-1]
                 unfinished_words = [words[-1]]
         else:
-            unfinished_words = words
             finished_words = []
+            unfinished_words = words
 
         unuseditems = [item for item in items if item[value_key] not in finished_words]
 
@@ -92,29 +104,59 @@ def inputPalette(sheet, prompt, items,
 
         h = sheet.windowHeight
         w = min(100, sheet.windowWidth)
-        nitems = min(h-1, sheet.options.disp_cmdpal_max)
+        nitems = min(h-2, sheet.options.disp_cmdpal_max)
+        if nitems <= 0:
+            return None
 
         useditems = []
         palrows = []
+        n_results = 0
+        def read_matches(offset):
+            nonlocal useditems, palrows, value, n_results
 
-        for m in matches[:nitems]:
-            useditems.append(m.match)
-            palrows.append((m, m.match))
+            useditems = []
+            palrows = []
+            for m in matches[offset:offset+nitems]:
+                useditems.append(m.match)
+                palrows.append((m, m.match))
+            n_results += len(matches)
 
-        favitems = sorted([item for item in unuseditems if item not in useditems],
-                          key=lambda item: -vd.usedInputs.get(item[value_key], 0))
+            #List matches only, usually. But list the available choices when there's no input,
+            #or (if multiple is True) they've just pressed space after a word.
+            if not unfinished_words:
+                favitems = sorted([item for item in unuseditems if item not in useditems],
+                                key=lambda item: -vd.usedInputs.get(item[value_key], 0))
+                for item in favitems[offset-len(palrows):offset+nitems-len(palrows)]:
+                    palrows.append((None, item))
+                n_results += len(favitems)
+        read_matches(offset)
 
-        for item in favitems[:nitems-len(palrows)]:
-            palrows.append((None, item))
+        def change_page(dir=+1):
+            nonlocal offset, n_results, nitems
+            new_offset = offset + dir*nitems
+            # constrain offset to be a multiple of nitems
+            new_offset = min(new_offset, ((n_results-1) // nitems)*nitems)
+            new_offset = max(new_offset, 0)
+            if new_offset == offset: return None
+            offset = new_offset
 
         navailitems = min(len(palrows), nitems)
 
-        bindings['Ctrl+I'] = lambda *args: tab(1, navailitems) or args
+        bindings['Tab'] = lambda *args: tab(1, navailitems) or args
         bindings['Shift+Tab'] = lambda *args: tab(-1, navailitems) or args
+        bindings['PgUp'] = lambda *args: (change_page(-1) and read_matches(offset)) or args
+        bindings['PgDn'] = lambda *args: (change_page(+1) and read_matches(offset)) or args
+        for numkey in '1234567890':
+            bindings.pop(numkey, None)
 
         for i in range(nitems-len(palrows)):
             palrows.append((None, None))
 
+        if not navailitems:
+            def _enter(v, i):
+                raise EscapeException(f'no choice matching {v}')
+            bindings['^J'] = _enter
+            bindings.pop(' ', None)
         used_triggers = set()
         for i, (m, item) in enumerate(palrows):
             trigger_key = ''
@@ -129,24 +171,26 @@ def inputPalette(sheet, prompt, items,
 
             if tabitem < 0 and palrows:
                 _ , topitem = palrows[0]
-                if not topitem: return
-                if multiple:
-                    bindings[' '] = partial(add_to_input, value=topitem[value_key])
-                    bindings['Enter'] = partial(accept_input_if_subset, value=topitem[value_key])
-                else:
-                    bindings['Enter'] = partial(accept_input, value=topitem[value_key])
+                if topitem:
+                    if multiple:
+                        bindings['Enter'] = partial(accept_input_if_subset, value=topitem[value_key])
+                        bindings['Space'] = partial(add_to_input, value=topitem[value_key])
+                    else:
+                        bindings['Enter'] = partial(accept_input, value=topitem[value_key])
             elif item and i == tabitem:
-                if not item: return
                 if multiple:
                     bindings['Enter'] = partial(accept_input_if_subset, value=item[value_key])
-                    bindings[' '] = partial(add_to_input, value=item[value_key])
+                    bindings['Space'] = partial(add_to_input, value=item[value_key])
                 else:
                     bindings['Enter'] = partial(accept_input, value=item[value_key])
                 attr = colors.color_menu_spec
 
             match_summary = formatter(m, item, trigger_key) if item else ' '
 
-            clipdraw(sheet._scr, h-nitems-1+i, 0, match_summary, attr, w=w)
+            clipdraw(sheet._scr, h-nitems-2+i, 0, match_summary, attr, w=w)
+        attr = colors.color_cmdpalette
+        instr = 'Press [:keystrokes]PgUp/PgDn[/] to scroll items, [:keystrokes]Tab/Shift+Tab/Enter[/] to choose, [:keystrokes]Esc[/] to cancel.'
+        clipdraw(sheet._scr, h-2, 0, instr, attr, w=w)
 
         return None
 
@@ -180,7 +224,7 @@ def inputLongname(sheet):
         formatted_name = f'[:bold][:onclick {row.longname}]{formatted_longname}[/][/]'
         if vd.options.debug and match:
             keystrokes = f'[{match.score}]'
-        r = f' [:keystrokes]{keystrokes.rjust(len(prompt)-5)}[/]  '
+        r = f' [:keystrokes]{keystrokes.rjust(dispwidth(prompt)-5)}[/]  '
         if trigger_key:
             r += f'[:keystrokes]{trigger_key}[/]'
         else:
@@ -213,4 +257,4 @@ def exec_longname(sheet, longname):
 
 
 vd.addCommand('Space', 'exec-longname', 'exec_longname(inputLongname())', 'execute command by its longname')
-vd.addCommand('zSpace', 'exec-longname-simple', 'exec_longname(inputLongnameSimple())', 'execute command by its longname')
+vd.addCommand('zSpace', 'exec-longname-simple', 'exec_longname(inputLongnameSimple())', 'execute command by its longname (without command palette)')

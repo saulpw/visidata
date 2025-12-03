@@ -1,0 +1,21 @@
+#!vd -p
+{"sheet": "global", "col": null, "row": "disp_date_fmt", "longname": "set-option", "input": "%b %d, %Y", "keystrokes": "", "comment": null, "replayable": null}
+{"sheet": "global", "row": "disp_float_fmt", "longname": "set-option", "input": "%.05f", "keystrokes": ""}
+{"sheet": "global", "row": "default_width", "longname": "set-option", "input": "50", "keystrokes": ""}
+{"col": "", "row": "", "longname": "open-file", "input": "sample_data/employees.sqlite", "keystrokes": "o", "replayable": true}
+{"sheet": "employees", "col": "", "row": 1, "longname": "open-row", "input": "", "keystrokes": "Enter", "comment": "open current row with sheet-specific dive", "replayable": true}
+{"sheet": "emp", "col": "deptno", "row": "", "longname": "key-col-on", "input": "", "comment": "set current column as a key column", "replayable": true}
+{"sheet": "emp", "col": "job", "row": "", "longname": "key-col-on", "input": "", "comment": "set current column as a key column", "replayable": true}
+{"sheet": "emp", "col": "mgr", "row": "", "longname": "key-col-on", "input": "", "comment": "set current column as a key column", "replayable": true}
+{"sheet": "emp", "col": "empno", "row": "", "longname": "key-col-off", "input": "", "comment": "unset current column as a key column", "replayable": true}
+{"sheet": "emp", "col": "", "row": "", "longname": "addcol-rank-sheet", "input": "", "comment": "add column with the rank of each row based on its key columns", "replayable": true}
+{"sheet": "emp", "col": "emp_sheetrank", "row": "", "longname": "rename-col", "input": "sheetrank_default_sort", "keystrokes": "^", "comment": "rename current column", "replayable": true}
+{"sheet": "emp", "col": "deptno", "row": "", "longname": "sort-asc", "input": "", "keystrokes": "[", "comment": "sort ascending by current column; replace any existing sort criteria", "replayable": true}
+{"sheet": "emp", "col": "job", "row": "", "longname": "sort-desc-add", "input": "", "keystrokes": "z]", "comment": "sort descending by current column; add to existing sort criteria", "replayable": true}
+{"sheet": "emp", "col": "", "row": "", "longname": "addcol-rank-sheet", "input": "", "comment": "add column with the rank of each row based on its key columns", "replayable": true}
+{"sheet": "emp", "col": "emp_sheetrank", "row": "", "longname": "rename-col", "input": "sheetrank_1asc2desc", "keystrokes": "^", "comment": "rename current column", "replayable": true}
+{"sheet": "emp", "col": "deptno", "row": "", "longname": "sort-asc", "input": "", "keystrokes": "[", "comment": "sort ascending by current column; replace any existing sort criteria", "replayable": true}
+{"sheet": "emp", "col": "job", "row": "", "longname": "sort-asc-add", "input": "", "keystrokes": "z[", "comment": "sort ascending by current column; add to existing sort criteria", "replayable": true}
+{"sheet": "emp", "col": "mgr", "row": "", "longname": "sort-desc-add", "input": "", "keystrokes": "z]", "comment": "sort descending by current column; add to existing sort criteria", "replayable": true}
+{"sheet": "emp", "col": "", "row": "", "longname": "addcol-rank-sheet", "input": "", "comment": "add column with the rank of each row based on its key columns", "replayable": true}
+{"sheet": "emp", "col": "emp_sheetrank", "row": "", "longname": "rename-col", "input": "sheetrank_1asc2asc3desc", "keystrokes": "^", "comment": "rename current column", "replayable": true}

@@ -13,6 +13,13 @@ vd.option('safety_first', False, 'sanitize input/output to handle edge cases, wi
 
 
 @VisiData.api
+def guess_csv_delimiter(vd, p):
+    'If csv_delimiter option has been modified from default, assume CSV format.'
+    
+    if vd.options.csv_delimiter != vd.options.getdefault('csv_delimiter'):
+        return dict(filetype='csv', _likelihood=2)
+
+@VisiData.api
 def guess_csv(vd, p):
     import csv
     csv.field_size_limit(2**31-1)  #288 Windows has max 32-bit
@@ -26,7 +33,11 @@ def guess_csv(vd, p):
 
         for csvopt in dir(dialect):
             if not csvopt.startswith('_'):
-                r['csv_'+csvopt] = getattr(dialect, csvopt)
+                v = getattr(dialect, csvopt)
+                optname = 'csv_'+csvopt
+                r[optname] = v
+                if vd.options.get(optname) != v:
+                    vd.warning(f'guessed option {optname}={v}')
 
         return r
 

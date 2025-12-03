@@ -1,0 +1,7 @@
+#!vd -p
+{"sheet": null, "col": null, "row": null, "longname": "open-file", "input": "sample_data/sample.tsv", "keystrokes": "o", "comment": null, "replayable": true}
+{"sheet": "sample", "col": "Units", "row": "", "longname": "type-int", "input": "", "keystrokes": "#", "comment": "set type of current column to int", "replayable": true}
+{"sheet": "sample", "col": "Unit_Cost", "row": "", "longname": "type-float", "input": "", "keystrokes": "%", "comment": "set type of current column to float", "replayable": true}
+{"sheet": "sample", "col": "Units", "row": "", "longname": "sort-asc-change", "input": "\u241f<Units", "keystrokes": "z[", "comment": "sort ascending by current column; keep higher priority sort criteria", "replayable": true}
+{"sheet": "sample", "col": "Unit_Cost", "row": "", "longname": "sort-desc-change", "input": "\u241f<Units\u241f>Unit_Cost", "keystrokes": "z]", "comment": "sort descending by current column; keep higher priority sort criteria", "replayable": true}
+{"sheet": "sample", "col": "Units", "row": "", "longname": "sort-desc-change", "input": "\u241f>Units", "keystrokes": "z]", "comment": "sort descending by current column; keep higher priority sort criteria", "replayable": true}

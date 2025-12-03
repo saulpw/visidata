@@ -40,7 +40,7 @@ class FormCanvas(BaseSheet):
                 continue
             x, y = r.x, r.y
             if isinstance(y, float) and (0 < y < 1) or (-1 < y < 0): y = h*y
-            if isinstance(x, float) and (0 < x < 1) or (-1 < x < 0): x = w*x-(len(r.text)/2)
+            if isinstance(x, float) and (0 < x < 1) or (-1 < x < 0): x = w*x-(dispwidth(r.text)/2)
             x = int(x)
             y = int(y)
             if y < 0: y += h
@@ -52,7 +52,7 @@ class FormCanvas(BaseSheet):
             # underline first occurrence of r.key in r.text
             if hasattr(r, 'key') and r.key:
                 index = r.text.find(r.key)
-                clipdraw(scr, y, x+index, r.text[index:len(r.key)+1], colors[color + " underline"])
+                clipdraw(scr, y, x+index, r.text[index:index+len(r.key)], colors[color + " underline"])
             vd.onMouse(scr, x, y, dispwidth(r.text), 1,
                     BUTTON1_PRESSED=lambda y,x,key,r=r,sheet=self: sheet.onPressed(r),
                     BUTTON1_RELEASED=lambda y,x,key,r=r,sheet=self: sheet.onReleased(r))
@@ -61,7 +61,7 @@ class FormCanvas(BaseSheet):
         vd.setWindows(vd.scrFull)
         drawnrows = [r for r in self.source.rows if r.text]
         inputs = [r for r in self.source.rows if r.input]
-        maxw = max(int(r.x)+len(r.text) for r in drawnrows)
+        maxw = max(int(r.x)+dispwidth(r.text) for r in drawnrows)
         maxh = max(int(r.y) for r in drawnrows)
         h, w = vd.scrFull.getmaxyx()
         y, x = max(0, (h-maxh)//2-1), max(0, (w-maxw)//2-1)
@@ -102,8 +102,8 @@ class FormCanvas(BaseSheet):
 @functools.wraps(VisiData.confirm)
 @VisiData.api
 def confirm(vd, prompt, exc=EscapeException):
-    'Display *prompt* on status line and demand input that starts with "Y" or "y" to proceed.  Raise *exc* otherwise.  Return True.'
-    if vd.options.batch and not vd.options.interactive:
+    'Display *prompt* on status line and demand input that starts with "Y" or "y" to proceed. Return True when proceeding, otherwise raise *exc*, or if *exc* is falsy, return False'
+    if vd.options.batch:
         return vd.fail('cannot confirm in batch mode: ' + prompt)
 
     form = FormSheet('confirm', rows=[
@@ -115,10 +115,11 @@ def confirm(vd, prompt, exc=EscapeException):
     ])
 
     ret = FormCanvas(source=form).run(vd.scrFull)
-    if not ret:
-        raise exc('')
-    yn = ret['yn'][:1]
-    if not yn or yn not in 'Yy':
+    confirmed = False  # default is to disconfirm, if user exited the confirmation via: Esc ^C ^Q q
+    if ret:
+        yn = ret['yn'][:1]
+        confirmed = yn and yn in 'Yy'
+    if not confirmed:
         msg = 'disconfirmed: ' + prompt
         if exc:
             raise exc(msg)

@@ -1,5 +1,10 @@
 include README.md
 include LICENSE.gpl3
+include CHANGELOG.md
+include CONTRIBUTING.md
+include CODE_OF_CONDUCT.md
+include requirements.txt
+include requirements.scm
 include visidata/man/vd.1
 include visidata/man/vd.txt
 include visidata/man/visidata.1

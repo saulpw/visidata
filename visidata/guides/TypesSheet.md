@@ -17,7 +17,7 @@ VisiData pre-set defaults for formatting types:
 - `currency` removes non-numeric characters and parses the remainder as `float`.
 - `date` parses dates into date object (shown as ISO8601).
 - `vlen` formats the cell value to the length of the content
-- `float` uses the decimal seperator, keeping two significant digits.
+- `float` uses the decimal separator, keeping two significant digits.
 
 Change float precision with:
 - {help.commands.setcol-precision-less}

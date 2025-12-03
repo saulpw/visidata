@@ -1,4 +1,6 @@
 [codespell]
 skip = .git,*.pdf,*.svg,*.tsv,man,formats.jsonl,sample_data,*.cast,golden
 # some ad-hoc or less common word spellings or vars used
-ignore-words-list = vertexes,wil,ned,parms,datas,sav
+# `F`requency and such
+ignore-regex = `[A-Z]`[a-z]+\b
+ignore-words-list = vertexes,wil,ned,parms,datas,sav,inport,miniscule

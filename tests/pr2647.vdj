@@ -1,0 +1,10 @@
+#!vd -p
+{"sheet": null, "col": "", "row": "", "longname": "open-file", "input": "sample_data/a.tsv", "keystrokes": "o", "comment": null, "replayable": true}
+{"col": "", "row": "", "longname": "open-file", "input": "sample_data/b.tsv", "keystrokes": "o", "replayable": true}
+{"sheet": "a", "col": "key", "row": "", "longname": "key-col", "input": "", "keystrokes": "!", "comment": "toggle current column as a key column", "replayable": true}
+{"sheet": "b", "col": "key", "row": "", "longname": "key-col", "input": "", "keystrokes": "!", "comment": "toggle current column as a key column", "replayable": true}
+{"sheet": "b", "col": "", "row": "", "longname": "sheets-stack", "input": "", "keystrokes": "Shift+S", "comment": "open Sheets Stack: join or jump between the active sheets on the current stack", "replayable": true}
+{"sheet": "sheets", "col": "", "row": 1, "longname": "stoggle-row", "input": "", "keystrokes": "t", "comment": "toggle selection of current row", "replayable": true}
+{"sheet": "sheets", "col": "", "row": 2, "longname": "stoggle-row", "input": "", "keystrokes": "t", "comment": "toggle selection of current row", "replayable": true}
+{"sheet": "sheets", "col": "", "row": "", "longname": "join-selected", "input": "merge", "keystrokes": "&", "comment": "merge selected sheets with visible columns from all, keeping rows according to jointype", "replayable": true}
+{"sheet": "b+a", "col": "source_sheet", "row": 0, "longname": "edit-cell", "input": "c", "keystrokes": "e", "comment": "edit contents of current cell", "replayable": true}

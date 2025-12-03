@@ -222,7 +222,7 @@ class PivotSheet(Sheet):
         # group rows by their keys (groupByCols), and separate by their pivot values (pivotCols)
         groups = {}  # [formattedDiscreteKeys] -> (numericGroupRows:dict(formattedNumericKeyRange -> PivotGroupRow), groupRow:PivotGroupRow)  # groupRow is main/error row
 
-        for sourcerow in Progress(self.source.iterrows(), 'grouping', total=self.source.nRows):
+        for sourcerow in self.source.iterrows('grouping'):
             discreteKeys = list(forward(origcol.getTypedValue(sourcerow)) for origcol in discreteCols)
 
             # wrapply will pass-through a key-able TypedWrapper

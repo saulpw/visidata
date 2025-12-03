@@ -6,6 +6,8 @@
 
     a. CHANGELOG;
 
+     git log --pretty=format:"%s :%ae" $(git tag | tail -1)..HEAD
+
     b. manpage;
 
     c. visidata.org; (formats?)
@@ -74,6 +76,7 @@
   Push to pypi
     ```
     rm -rf dist/
+    rm -rf build/
     python3 setup.py sdist bdist_wheel
     chmod -R a+rX dist
     ls dist/

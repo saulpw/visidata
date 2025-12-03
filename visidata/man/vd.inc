@@ -1,4 +1,4 @@
-.Dd October 13, 2024
+.Dd June 13, 2025
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -193,6 +193,8 @@ adjust widths of all visible columns to Ar number
 .Pp
 .It Ic " -" Ns " (hyphen)"
 hide current column
+.It Ic "g-" Ns " (hyphen)"
+hide any column that has multiple rows but only one distinct value
 .It Ic "z-" Ns
 reduce width of current column by half
 .It Ic "gv" Ns
@@ -247,10 +249,10 @@ add/reset cache for current/all visible column(s)
 .No add new columns from capture groups of Ar regex No (also requires example row)
 .It Ic "z" Ns Ic "\&;" Ar expr
 .No create new column from bash Ar expr Ns , with Sy $ Ns columnNames as variables
-.It Ic " *" Ar regex Ns Sy / Ns Ar subst
-.No add column derived from current column, replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
-.It Ic "g*  gz*" Ar regex Ns Sy / Ns Ar subst
-.No modify selected rows in current/all visible column(s), replacing Ar regex No with Ar subst No (may include Sy \e1 No backrefs)
+.It Ic " *" Ar search No Sy Tab No Ar replace
+.No add column derived from current column, replacing Ar search No regex with Ar replace No (may include Sy \e1 No backrefs)
+.It Ic "g*  gz*" Ar search No Sy Tab No Ar replace
+.No modify selected rows in current/all visible column(s), replacing Ar search No with Ar replace No (may include Sy \e1 No backrefs)
 .Pp
 .It Ic " (   g("
 .No expand current/all visible column(s) of lists (e.g. Sy [3] Ns ) or dicts (e.g. Sy {3} Ns ) one level
@@ -300,7 +302,7 @@ sort ascending/descending by current column; replace any existing sort criteria
 .It Ic " g[   g]"
 sort ascending/descending by all key columns; replace any existing sort criteria
 .It Ic " z[   z]"
-sort ascending/descending by current column; add to existing sort criteria
+sort ascending/descending by current column; keep higher priority sort criteria
 .It Ic "gz[  gz]"
 sort ascending/descending by all key columns; add to existing sort criteria
 .It Ic " \&""
@@ -316,6 +318,8 @@ open duplicate sheet with deepcopy of selected rows
 The rows in these duplicated sheets (except deepcopy) are references to rows on the original source sheets, and so edits to the filtered rows will naturally be reflected in the original rows.  Use
 .Ic "g'"
 to freeze sheet contents in a deliberate copy.
+.Ic "z'"
+replace current column with a frozen copy, with all cells evaluated
 .
 .Ss Editing Rows and Cells
 .
@@ -352,6 +356,8 @@ fill null cells in current column with contents of non-null cells up the current
 .
 .It Ic "  e" Ar text
 edit contents of current cell
+.It Ic " ^O"
+.No edit contents of current cell in external Sy EDITOR
 .It Ic " ge" Ar text
 .No set contents of current column for selected rows to Ar text
 .
@@ -443,6 +449,8 @@ increase/decrease zoom level, centered on cursor
 zoom to fit full extent
 .It Ic "z_" No (underbar)
 set aspect ratio
+.It Ic "g_" No (underbar)
+Zoom y-axis to fit all visible data points
 .It Ic " x" Ar xmin xmax
 .No set Ar xmin Ns / Ns Ar xmax No on graph
 .It Ic " y" Ar ymin ymax

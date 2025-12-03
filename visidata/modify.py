@@ -334,7 +334,7 @@ Sheet.addCommand('ga', 'add-rows', 'n=int(input("add # rows: ", value=1)); addRo
 Sheet.addCommand('za', 'addcol-new', 'addColumnAtCursor(SettableColumn(input("column name: ")))', 'append an empty column')
 Sheet.addCommand('gza', 'addcol-bulk', 'addColumnAtCursor(*(SettableColumn() for c in range(int(input("add columns: ")))))', 'append N empty columns')
 
-Sheet.addCommand('z^S', 'commit-sheet', 'commit()', 'commit changes back to source.  not undoable!')
+Sheet.addCommand('zCtrl+S', 'commit-sheet', 'commit()', 'commit changes back to source.  not undoable!')
 
 vd.addMenuItems('''
     File > Save > changes to source > commit-sheet

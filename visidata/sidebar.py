@@ -15,11 +15,12 @@ vd.theme_option('color_sidebar_title', 'black on yellow', 'color of sidebar titl
 @VisiData.api
 class AddedHelp:
     '''Context manager to add help text/screen to list of available sidebars.'''
-    def __init__(self, text:Union[str,'HelpPane'], title=''):
+    def __init__(self, text:Union[str,'HelpPane'], title='', help_flag=''):
+        self.helpfunc = None
         if text:
+            if not vd.wantsHelp(help_flag):
+                return
             self.helpfunc = lambda: (text, title)
-        else:
-            self.helpfunc = None
 
     def __enter__(self):
         if self.helpfunc:
@@ -33,7 +34,7 @@ class AddedHelp:
             vd.clearCaches()
 
 
-@BaseSheet.property
+@BaseSheet.lazy_property
 def formatter_helpstr(sheet):
     return AttrDict(commands=CommandHelpGetter(type(sheet)),
                     options=OptionHelpGetter())
@@ -73,7 +74,7 @@ def help_sidebars(sheet) -> 'list[Callable[[], tuple[str,str]]]':
 @VisiData.cached_property
 def sidebarStatus(vd) -> str:
     if vd.sheet.help_sidebars:
-        if vd.options.disp_sidebar and vd.disp_help >= 0:
+        if vd.wantsHelp('sidebar') and vd.disp_help >= 0:
             n = vd.disp_help+1
             return f'[:onclick sidebar-toggle][:sidebar][{n}/{len(vd.sheet.help_sidebars)}][/]'
         else:
@@ -111,7 +112,7 @@ def drawSidebar(vd, scr, sheet):
     bottommsg = ''
     overflowmsg = '[:reverse] Ctrl+P to view all status messages [/]'
     try:
-        if not sidebar and vd.options.disp_sidebar and vd.disp_help >= 0:
+        if not sidebar and vd.options.disp_sidebar and vd.wantsHelp('guides') and sheet.help_sidebars:
             sidebar, title = sheet.help_sidebars[vd.disp_help%len(sheet.help_sidebars)]()
 
 #            bottommsg = sheet.formatString('[:onclick sidebar-toggle][:reverse] {help.commands.sidebar_toggle} [:]', help=sheet.formatter_helpstr)
@@ -130,7 +131,7 @@ def drawSidebar(vd, scr, sheet):
 def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', overflowmsg:str='', bottommsg:str=''):
     scrh, scrw = scr.getmaxyx()
     maxw = sheet.options.disp_sidebar_width or scrw//2
-    maxh = sheet.options.disp_sidebar_height or scrh-2
+    maxh = sheet.options.disp_sidebar_height or max(scrh-2, 1)
 
     cattr = colors.get_color('color_sidebar')
 
@@ -158,6 +159,7 @@ def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', o
         if lines:
             maxlinew = max(maxlinew, max(dispwidth(textonly, maxwidth=maxw) for line, textonly in lines))
         winh = min(maxh, len(lines)+2)
+    winh = max(winh, 1)
 
     titlew = dispwidth(title)
 
@@ -166,6 +168,7 @@ def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', o
     maxlinew = max(maxlinew, titlew)
     winw = min(maxw, maxlinew+4)
     x, y, w, h = scrw-winw-1, scrh-winh-1, winw, winh
+    y = max(y, 0)
 
     sidebarscr = vd.subwindow(scr, x, y, w, h)
 
@@ -191,7 +194,7 @@ def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', o
     if bottommsg:
         clipdraw(sidebarscr, h-1, winw-dispwidth(bottommsg)-4, '|'+bottommsg+'|', cattr)
 
-    sidebarscr.refresh()
+    sidebarscr.noutrefresh()
 
 
 @VisiData.api
@@ -207,7 +210,7 @@ class SidebarSheet(TextSheet):
 
 BaseSheet.addCommand('b', 'sidebar-toggle', 'vd.options.disp_sidebar = not vd.options.disp_sidebar', 'toggle sidebar')
 BaseSheet.addCommand('gb', 'open-sidebar', 'sheet.current_sidebar = "" if not hasattr(sheet, "current_sidebar") else sheet.current_sidebar; vd.push(SidebarSheet(name, options.disp_sidebar_fmt, source=sheet.current_sidebar.splitlines()))', 'open sidebar in new sheet')
-BaseSheet.addCommand('^G', 'sidebar-cycle', 'vd.cycleSidebar()', 'cycle through available sidebar panels')
+BaseSheet.addCommand('Ctrl+G', 'sidebar-cycle', 'vd.cycleSidebar()', 'cycle through available sidebar panels')
 
 
 vd.addMenuItems('''

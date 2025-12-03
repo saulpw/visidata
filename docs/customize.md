@@ -57,7 +57,7 @@ At minimum, `<Sheet>.addCommand` requires a longname and execstr.
 For example, to define a new command:
 
 ~~~
-Sheet.addCommand('^D', 'scroll-halfpage-down', 'cursorDown(nScreenRows//2); sheet.topRowIndex += nScreenRows//2')
+Sheet.addCommand('Ctrl+D', 'scroll-halfpage-down', 'cursorDown(nScreenRows//2); sheet.topRowIndex += nScreenRows//2')
 ~~~
 
 Commands and keybindings are set on a particular Sheet Type in the class hierarchy. Use `BaseSheet` for commands which don't need a sheet at all--these will apply to all sheets.  Commands and bindings on more specific sheets will override more generic ones.  `Sheet` is a generic table, `ColumnsSheet` would be for the columns sheet, `FreqTableSheet` for frequency tables, and so on.

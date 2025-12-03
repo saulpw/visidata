@@ -42,7 +42,7 @@ VisiData.save_vd = VisiData.save_tsv
 @VisiData.api
 def save_vdj(vd, p, *vsheets):
     with p.open(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
-        fp.write("#!vd -p\n")
+        fp.write("#!/usr/bin/env -S vd -p\n")
         for vs in vsheets:
             vs.write_jsonl(fp)
 
@@ -330,6 +330,9 @@ def replay_sync(vd, cmdlog):
     with vd.DisableAsync():
         vd.sync()  #2352 let cmdlog finish loading
         cmdlog.cursorRowIndex = 0
+        # save current replay, for cmdlogs that replay other cmdlogs, such as a macro executing another macro
+        prev_replay = vd.currentReplay
+        prev_replay_row = vd.currentReplayRow
         vd.currentReplay = cmdlog
 
         with Progress(total=len(cmdlog.rows)) as prog:
@@ -356,7 +359,8 @@ def replay_sync(vd, cmdlog):
                     vd.activeSheet.ensureLoaded()
 
         vd.status('replay complete')
-        vd.currentReplay = None
+        vd.currentReplay = prev_replay
+        vd.currentReplayRow = prev_replay_row
 
 
 @VisiData.api
@@ -472,13 +476,13 @@ BaseSheet.init('_shortcut')
 globalCommand('gD', 'cmdlog-all', 'vd.push(vd.cmdlog)', 'open global CommandLog for all commands executed in current session')
 globalCommand('D', 'cmdlog-sheet', 'vd.push(sheet.cmdlog)', "open current sheet's CommandLog with all other loose ends removed; includes commands from parent sheets")
 globalCommand('zD', 'cmdlog-sheet-only', 'vd.push(sheet.cmdlog_sheet)', 'open CommandLog for current sheet with commands from parent sheets removed')
-BaseSheet.addCommand('^D', 'save-cmdlog', 'saveSheets(inputPath("save cmdlog to: ", value=fnSuffix(name)), vd.cmdlog)', 'save CommandLog to filename.vdj file')
-BaseSheet.bindkey('^N', 'no-op')
-BaseSheet.addCommand('^K', 'replay-stop', 'vd.replay_cancel(); vd.warning("replay canceled")', 'cancel current replay')
+BaseSheet.addCommand('Ctrl+D', 'save-cmdlog', 'saveSheets(inputPath("save cmdlog to: ", value=fnSuffix(name)), vd.cmdlog)', 'save CommandLog to filename.vdj file')
+BaseSheet.bindkey('Ctrl+N', 'no-op')
+BaseSheet.addCommand('Ctrl+K', 'replay-stop', 'vd.replay_cancel(); vd.warning("replay canceled")', 'cancel current replay')
 
 globalCommand(None, 'show-status', 'status(input("status: "))', 'show given message on status line')
-globalCommand('^V', 'show-version', 'status(__version_info__);', 'Show version and copyright information on status line')
-globalCommand('z^V', 'check-version', 'checkVersion(input("require version: ", value=__version_info__))', 'check VisiData version against given version')
+globalCommand('Ctrl+V', 'show-version', 'status(__version_info__);', 'Show version and copyright information on status line')
+globalCommand('zCtrl+V', 'check-version', 'checkVersion(input("require version: ", value=__version_info__))', 'check VisiData version against given version')
 
 CommandLog.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("replayed one row")', 'replay command in current row')
 CommandLog.addCommand('gx', 'replay-all', 'vd.replay(sheet)', 'replay contents of entire CommandLog')

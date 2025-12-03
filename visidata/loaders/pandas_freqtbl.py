@@ -1,4 +1,4 @@
-from visidata import vd, Sheet, options, Column, asyncthread, Progress, PivotGroupRow, ENTER, HistogramColumn
+from visidata import vd, Sheet, options, Column, asyncthread, Progress, PivotGroupRow, HistogramColumn
 
 from visidata.loaders._pandas import PandasSheet
 from visidata.pivot import PivotSheet
@@ -82,6 +82,10 @@ class PandasFreqTableSheet(PivotSheet):
     def unselectRow(self, row):
         self.source._selectByILoc(row.sourcerows.mask_iloc, selected=False)
         return super().unselectRow(row)
+
+    def addUndoSelection(self):
+        self.source.addUndoSelection()
+        super().addUndoSelection()
 
     def updateLargest(self, grouprow):
         self.largest = max(self.largest, len(grouprow.sourcerows))

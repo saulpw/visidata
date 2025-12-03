@@ -33,14 +33,25 @@ class MacroSheet(IndexSheet):
         yield from vd.macrobindings.values()
 
     def commitDeleteRow(self, row):
-        del vd.macrobindings[row.binding]
+        binding = row.binding
+
+        # Remove from macrobindings
+        del vd.macrobindings[binding]
+
+        # Remove command registration and key bindings
+        if vd.isLongname(binding):
+            BaseSheet.removeCommand('', binding)
+        else:
+            BaseSheet.removeCommand(binding,f'exec-{row.name}')
+
+        # Delete source file
         vd.callNoExceptions(Path(row.source).unlink)
 
     @asyncthread
     def putChanges(self):
         self.commitDeletes()  #1569  apply deletes early for saveSheets below
 
-        vd.saveSheets(self.source, self, confirm_overwrite=False)
+        vd.sync(vd.saveSheets(self.source, self, confirm_overwrite=False))
         self._deferredDels.clear()
         self.reload()
 
@@ -107,9 +118,10 @@ def afterExecSheet(cmdlog, sheet, escaped, err):
     if not vd.activeCommand: return
     if vd.activeCommand.longname == 'macro-record': return
 
-    cmd = copy(vd.activeCommand)
-    cmd.sheet = ''
-    vd.macroMode.addRow(cmd)
+    if vd.activeCommand.replayable:
+        cmd = copy(vd.activeCommand)
+        cmd.sheet = ''
+        vd.macroMode.addRow(cmd)
 
 
 @CommandLogJsonl.api

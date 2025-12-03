@@ -64,6 +64,7 @@ def setWindows(vd, scr, pct=None):
     disp_menu = getattr(vd, 'menuRunning', None) or vd.options.disp_menu
     topmenulines = 1 if disp_menu else 0
     h, w = scr.getmaxyx()
+    if h == 1: topmenulines = 0
 
     n = 0
     if pct:
@@ -71,6 +72,7 @@ def setWindows(vd, scr, pct=None):
         n = abs(pct)*h//100
         n = min(n, h-topmenulines-3)
         n = max(3, n)
+        if n > h: n = 0
 
     desiredConfig = dict(pct=pct, n=n, h=h-topmenulines, w=w)
 
@@ -165,7 +167,7 @@ def mainloop(vd, scr):
     numTimeouts = 0
     prefixWaiting = False
     vd.scrFull = scr
-    if vd.options.disp_expert >= 5:
+    if not vd.wantsHelp('help'):
         vd.disp_help = -1
 
     vd.keystrokes = ''
@@ -221,7 +223,10 @@ def mainloop(vd, scr):
         elif keystroke == 'Ctrl+Q':
             return vd.lastErrors and '\n'.join(vd.lastErrors[-1])
         elif vd.bindkeys._get(vd.keystrokes) is not None:
-            sheet.execCommand(vd.keystrokes, keystrokes=vd.keystrokes)
+            try:
+                sheet.execCommand(vd.bindkeys._get(vd.keystrokes), keystrokes=vd.keystrokes)
+            except Exception as e:  #2859
+                vd.exceptionCaught(e)
             prefixWaiting = False
         elif vd.keystrokes in vd.allPrefixes:
             prefixWaiting = True
@@ -250,13 +255,14 @@ def mainloop(vd, scr):
         vd.checkForFinishedThreads()
         vd.callNoExceptions(sheet.checkCursor)
 
-        # no idle redraw unless background threads are running
         time.sleep(0)  # yield to other threads which may not have started yet
         if vd._nextCommands:
-            if vd.options.replay_wait > 0:
-                vd.curses_timeout = int(vd.options.replay_wait*1000)
-            else:
+            if vd.unfinishedThreads:  #2369 #2635
+                # while running a bg thread for a command, schedule infrequent redraws
                 vd.curses_timeout = nonidle_timeout
+            else:
+                # otherwise, schedule the next redraw and command (immediately, for default replay_wait)
+                vd.curses_timeout = int(vd.options.replay_wait*1000)
         elif vd.unfinishedThreads:
             vd.curses_timeout = nonidle_timeout
         else:

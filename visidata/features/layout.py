@@ -40,20 +40,24 @@ def hide_col(vd, col):
 def hide_uniform_cols(sheet):
     if len(sheet.rows) < 2:
         return
-    for col in sheet.visibleCols:
+    idx = sheet.cursorVisibleColIndex
+    for i, col in enumerate(sheet.visibleCols):
         vals = (col.getTypedValue(r) for r in sheet.rows)
         first = next(vals)
         if all(v == first for v in vals):
+            vd.status(f'hide {col.name} with value: {col.getDisplayValue(sheet.rows[0])}')
+            if i <= idx:
+                sheet.cursorRight(-1)
             col.hide()
 
 Sheet.addCommand('_', 'resize-col-max', 'if cursorCol: cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'toggle width of current column between full and default width')
 Sheet.addCommand('z_', 'resize-col-input', 'width = int(input("set width= ", value=cursorCol.width)); cursorCol.setWidth(width)', 'adjust width of current column to N')
-Sheet.addCommand('g_', 'resize-cols-max', 'for c in visibleCols: c.setWidth(c.getMaxWidth(visibleRows))', 'toggle widths of all visible columns between full and default width')
+Sheet.addCommand('g_', 'resize-cols-max', 'for c in visibleCols: c.toggleWidth(c.getMaxWidth(visibleRows))', 'toggle widths of all visible columns between full and default width')
 Sheet.addCommand('gz_', 'resize-cols-input', 'width = int(input("set width= ", value=cursorCol.width)); Fanout(visibleCols).setWidth(width)', 'adjust widths of all visible columns to N')
 
 Sheet.addCommand('-', 'hide-col', 'hide_col(cursorCol)', 'hide the current column')
-Sheet.addCommand('z-', 'resize-col-half', 'cursorCol.setWidth(cursorCol.width//2)', 'reduce width of current column by half')
-Sheet.addCommand(None, 'hide-uniform-cols', 'sheet.hide_uniform_cols()', 'hide any column that has multiple rows but only one distinct value')
+Sheet.addCommand('z-', 'resize-col-half', 'width = cursorCol.width if cursorCol.width is not None else options.default_width; cursorCol.setWidth(width//2)', 'reduce width of current column by half')
+Sheet.addCommand('g-', 'hide-uniform-cols', 'sheet.hide_uniform_cols()', 'hide any column that has multiple rows but only one distinct value')
 
 Sheet.addCommand('gv', 'unhide-cols', 'unhide_cols(columns, visibleRows)', 'unhide all hidden columns on current sheet')
 Sheet.addCommand('v', 'toggle-multiline', 'for c in visibleCols: c.toggleMultiline()', 'toggle multiline display')

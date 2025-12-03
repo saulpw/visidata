@@ -8,7 +8,7 @@ import curses
 import sys
 
 import visidata
-from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, dispwidth, ColorAttr
+from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, dispwidth, ColorAttr, clipstr_middle, clip_markup_middle
 
 
 
@@ -31,11 +31,6 @@ vd.theme_option('color_highlight_status', 'black on green', 'color of highlighte
 
 BaseSheet.init('longname', lambda: '')
 
-def fitWithin(s, n=10):
-    if len(s) > n:
-        return s[:n//2-1] + '…' + s[-n//2+1:]
-    return s
-
 @BaseSheet.property
 def ancestors(sheet):
     if isinstance(sheet.source, BaseSheet):
@@ -53,14 +48,16 @@ def sheetlist(sheet):
 
     sheetnames = []
     for vs in sheets:
+        if not vs.precious:  #2573
+            continue
         if isinstance(vs, BaseSheet):
             shortcut = ' '
             if vs.shortcut in '1 2 3 4 5 6 7 8 9 10'.split():
-                shortcut = vs.shortcut[-1] + '›'
+                shortcut = vs.shortcut[-1] + vs.icon
             if vs is vd.sheet:
                 sheetnames.append(f'[:menu_active]{shortcut}{vs.name}[:]')
             else:
-                sheetnames.append(f'[:onclick jump-sheet-{vs.shortcut}]' + fitWithin(f'{shortcut}{vs.name}', 20) + '[:]')
+                sheetnames.append(f'[:onclick jump-sheet-{vs.shortcut}]' + clipstr_middle(f'{shortcut}{vs.name}', 20)[0] + '[:]')
         else:
             sheetnames.append(vs)
 
@@ -149,11 +146,6 @@ def debug(vd, *args, **kwargs):
     if options.debug:
         return vd.status(*args, **kwargs)
 
-def middleTruncate(s, w):
-    if len(s) <= w:
-        return s
-    return s[:w] + options.disp_truncator + s[-w:]
-
 
 def composeStatus(msgparts, n=1):
     msg = '; '.join(wrmap(str, msgparts))
@@ -186,7 +178,7 @@ def drawLeftStatus(vd, scr, vs):
     lstatus = vs.leftStatus()
     maxwidth = options.disp_lstatus_max
     if maxwidth > 0:
-        lstatus = middleTruncate(lstatus, maxwidth//2)
+        lstatus = clip_markup_middle(lstatus, maxwidth)
 
     x = clipdraw(scr, y, 0, lstatus, cattr, w=vs.windowWidth-1)
 
@@ -213,7 +205,8 @@ def keystrokeStatus(vs):
 def threadStatus(vs) -> str:
     if vs.currentThreads:
         ret = str(vd.checkMemoryUsage())
-        gerunds = [p.gerund for p in vs.progresses if p.gerund] or ['processing']
+        gerunds = [p.gerund for p in vs.progresses if p.gerund] or [f'processing']
+        ret += f' [:working]{len(vd._queuedFuncs)} queued funcs[/] '
         ret += f' [:working]{vs.progressPct} {gerunds[0]}…[/]'
         return ret
     return ''
@@ -226,11 +219,15 @@ def modifiedStatus(sheet):
     return ret
 
 
+@BaseSheet.property
+def selectedStatus(sheet):
+    return ''
+
+
 @Sheet.property
 def selectedStatus(sheet):
     if sheet.nSelectedRows:
         return f' [:selected_row][:onclick dup-selected]{sheet.options.disp_selected_note}{sheet.nSelectedRows}[/][/] '
-
 
 @VisiData.api
 def drawRightStatus(vd, scr, vs):
@@ -276,7 +273,7 @@ def statusHistorySheet(vd):
     return StatusSheet("status_history", source=vd.statusHistory[::-1])  # in reverse order
 
 
-BaseSheet.addCommand('^P', 'open-statuses', 'vd.push(vd.statusHistorySheet)', 'open Status History')
+BaseSheet.addCommand('Ctrl+P', 'open-statuses', 'vd.push(vd.statusHistorySheet)', 'open Status History')
 
 vd.addMenuItems('''
     View > Statuses > open-statuses

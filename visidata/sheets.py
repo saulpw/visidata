@@ -3,11 +3,12 @@ import itertools
 from copy import copy, deepcopy
 import textwrap
 
-from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, ENTER, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException
+from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException
 from visidata import (options, Column, namedlist, SettableColumn, AttrDict, DisplayWrapper,
 TypedExceptionWrapper, BaseSheet, UNLOADED, wrapply,
 clipdraw, clipdraw_chunks, ColorAttr, update_attr, colors, undoAttrFunc, vlen, dispwidth)
 import visidata
+from visidata.utils import colname_letters
 
 
 vd.activePane = 1   # pane numbering starts at 1; pane 0 means active pane
@@ -22,7 +23,8 @@ vd.option('disp_wrap_break_long_words', False, 'break words longer than column w
 vd.option('disp_wrap_replace_whitespace', False, 'replace whitespace with spaces in multiline')
 vd.option('disp_wrap_placeholder', '…', 'multiline string to indicate truncation')
 vd.option('disp_multiline_focus', True, 'only multiline cursor row')
-vd.option('color_aggregator', 'bold 255 white on 234 black', 'color of aggregator summary on bottom row')
+vd.option('color_multiline_bottom', '', 'color of bottom line of multiline rows')  #2715
+vd.option('color_aggregator', 'bold 255 white on 240 black', 'color of aggregator summary on bottom row')
 
 
 @drawcache
@@ -189,6 +191,7 @@ class TableSheet(BaseSheet):
 
         # list of all columns in display order
         self.initialCols = kwargs.pop('columns', None) or type(self).columns
+        self.colname_ctr = 0
         self.resetCols()
 
         self._ordering = list(type(self)._ordering)  #2254
@@ -289,39 +292,58 @@ class TableSheet(BaseSheet):
         pass
 
     def resetCols(self):
-        'Reset columns to class settings'
+        'Reset columns to class settings or constructor settings'
         self.columns = []
         for c in self.initialCols:
             self.addColumn(deepcopy(c))
-            if self.options.disp_expert < c.disp_expert:
+            if c.disp_expert and vd.wantsHelp('nometacols'):
                 c.hide()
 
         self.setKeys(self.columns[:self.nKeys])
 
     def loader(self):
-        'Reset rows and sync load ``source`` via iterload.  Overrideable.'
-        self.rows = []
+        'Reset rows and sync load ``source`` via iterload.  Overridable.'
         try:
-            with vd.Progress(gerund='loading', total=0):
-                for i, r in enumerate(self.iterload()):
-                    if self.precious and i > self.options.max_rows:
-                        break
-                    self.addRow(r)
+            for r in self._iterloader():
+                pass
         except FileNotFoundError:
             return  # let it be a blank sheet without error
+
+    def _iterloader(self):
+        self.rows = []
+        with vd.Progress(gerund='loading', total=0):
+            max_rows = self.options.max_rows
+            for i, r in enumerate(self.iterload()):
+                if self.precious and i >= max_rows:
+                    break
+                self.addRow(r)
+                yield r
 
     def iterload(self):
         'Generate rows from ``self.source``.  Override in subclass.'
         if False:
             yield vd.fail('no iterload for this loader yet')
 
+    def loadStart(self):
+        self.loaditer = self._iterloader()
+
+    def loadSome(self):
+        if not self.loaditer:
+            return False
+        try:
+            next(self.loaditer)
+            return True
+        except StopIteration:
+            self.loaditer = None
+            return False
+
     def afterLoad(self):
-        'hook for after loading has finished.  Overrideable (be sure to call super).'
+        'hook for after loading has finished.  Overridable (be sure to call super).'
         # if an ordering has been specified, sort the sheet
         if self._ordering:
             vd.sync(self.sort())
 
-    def iterrows(self):
+    def iterrows(self, gerund='iterating'):
         if self.rows is UNLOADED:
             try:
                 self.rows = []
@@ -332,7 +354,7 @@ class TableSheet(BaseSheet):
             except ExpectedException:
                 vd.sync(self.reload())
 
-        for row in vd.Progress(self.rows):
+        for row in vd.Progress(list(self.rows), gerund=gerund, total=self.nRows):
             yield row
 
     def __iter__(self):
@@ -508,6 +530,9 @@ class TableSheet(BaseSheet):
         'Raw value at current row and column.'
         return self.cursorCol.getValue(self.cursorRow)
 
+    def getTypedRow(self, rownum):
+        return [c.getTypedValue(self.rows[rownum]) for c in self.availCols]
+
     @property
     def statusLine(self):
         'Position of cursor and bounds of current sheet.'
@@ -537,7 +562,6 @@ class TableSheet(BaseSheet):
     def cursorRight(self, n=1):
         'Move cursor right `n` visible columns (or left if `n` is negative).'
         self.cursorVisibleColIndex += n
-        self.calcColLayout()
 
     def addColumn(self, *cols, index=None):
         '''Insert all *cols* into columns at *index*, or append to end of columns if *index* is None.
@@ -576,7 +600,10 @@ class TableSheet(BaseSheet):
         index = 0
         ccol = self.cursorCol
         if ccol and not ccol.keycol:
-            index = self.columns.index(ccol)+1
+            try:
+                index = self.columns.index(ccol)+1
+            except ValueError: # when all columns are hidden, the one column shown is not in self.columns
+                index = 0
 
         self.addColumn(*cols, index=index)
         firstnewcol = [c for c in cols if not c.hidden][0]
@@ -604,13 +631,6 @@ class TableSheet(BaseSheet):
         for col in cols:
             col.keycol = 0
 
-    def toggleKeys(self, cols):
-        for col in cols:
-            if col.keycol:
-                self.unsetKeys([col])
-            else:
-                self.setKeys([col])
-
     def rowkey(self, row):
         'Return tuple of the key for *row*.'
         return tuple(c.getTypedValue(row) for c in self.keyCols)
@@ -637,39 +657,57 @@ class TableSheet(BaseSheet):
         elif self.topRowIndex > self.nRows-1:
             self.topRowIndex = self.nRows-1
 
+        self.adjustColLayout()
+
+        # calculations that rely on nScreenRows, like bottomRowIndex, need to be done after
+        # col layout has been adjusted. nScreenRows requires an accurate count of
+        # allAggregators, which requires knowing col visibility.
         # check bounds, scroll if necessary
         if self.topRowIndex > self.cursorRowIndex:
             self.topRowIndex = self.cursorRowIndex
         elif self.bottomRowIndex < self.cursorRowIndex:
             self.bottomRowIndex = self.cursorRowIndex
 
-        if self.cursorCol and self.cursorCol.keycol:
-            return
-
-        if self.leftVisibleColIndex >= self.cursorVisibleColIndex:
+    def adjustColLayout(self):
+        '''Move the left visible column to try to keep the cursorCol visible.
+        though the cursorCol cannot be visible when screen is totally filled by keycols.
+        Run calcColLayout() at least once.'''
+        # jumping to a column left of the previously on-screen columns:   put cursorCol as leftmost col
+        # jumping to a column right of the previously on-screen columns:  put cursorCol as far right as possible
+        if self.leftVisibleColIndex > self.cursorVisibleColIndex:        # e.g. when jumping/moving left
             self.leftVisibleColIndex = self.cursorVisibleColIndex
-        else:
-            while True:
-                if self.leftVisibleColIndex == self.cursorVisibleColIndex:  # not much more we can do
-                    break
+        elif self.leftVisibleColIndex < self.cursorVisibleColIndex:      # e.g. when jumping/moving right
+            #move leftVisibleCol until the cursor column fits fully on screen
+            while self.leftVisibleColIndex < self.cursorVisibleColIndex:  #ensures termination even if screen is completely filled by keycols
                 self.calcColLayout()
                 if not self._visibleColLayout:
                     break
+
+                # If the cursor is outside the visible columns currently laid out (1 window wide).
+                # One way to trigger this is with zc, jump to a column never seen yet.
                 mincolidx, maxcolidx = min(self._visibleColLayout.keys()), max(self._visibleColLayout.keys())
                 if self.cursorVisibleColIndex < mincolidx:
-                    self.leftVisibleColIndex -= max((self.cursorVisibleColIndex - mincolidx)//2, 1)
-                    continue
+                    # This case is expected never to occur. _visibleColLayout keys are enumerated from 0,
+                    # so mincolidx is always 0. and cursorVisibleColIndex is kept >= 0 (by checkCursor).
+                    self.leftVisibleColIndex = self.cursorVisibleColIndex
+                    break
                 elif self.cursorVisibleColIndex > maxcolidx:
-                    self.leftVisibleColIndex += max((maxcolidx - self.cursorVisibleColIndex)//2, 1)
+                    # some cases:  1) jumping rightward, so cursor has just moved to a column that is offscreen to the right
+                    #              2) when keycols fill entire screen
+                    self.leftVisibleColIndex += 1
                     continue
 
                 cur_x, cur_w = self._visibleColLayout[self.cursorVisibleColIndex]
-                if cur_x+cur_w < self.windowWidth:  # current columns fit entirely on screen
+                if cur_x+cur_w < self.windowWidth-1:  # current columns fit entirely on screen
                     break
                 self.leftVisibleColIndex += 1  # once within the bounds, walk over one column at a time
 
+        if self.leftVisibleColIndex == self.cursorVisibleColIndex:  #will happen after cursor: jumped left, jumped right, or stayed in place
+            self.calcColLayout()
+
     def calcColLayout(self):
-        'Set right-most visible column, based on calculation.'
+        '''Set right-most visible column, based on calculation.
+        Assign x coordinates and width to every column that fits on screen, visible or hidden.'''
         minColWidth = dispwidth(self.options.disp_more_left)+dispwidth(self.options.disp_more_right)+2
         sepColWidth = dispwidth(self.options.disp_column_sep)
         winWidth = self.windowWidth
@@ -678,18 +716,28 @@ class TableSheet(BaseSheet):
         vcolidx = 0
         for vcolidx, col in enumerate(self.availCols):
             width = self.calcSingleColLayout(col, vcolidx, x, minColWidth)
-            if width:
-                x += width+sepColWidth
-            if x > winWidth-1:
+            if width is not None:
+                if x < winWidth-1:
+                    self._visibleColLayout[vcolidx] = [x, width]
+                    x += width+sepColWidth
+            if x >= winWidth-1:
                 break
 
         self.rightVisibleColIndex = vcolidx
 
     def calcSingleColLayout(self, col:Column, vcolidx:int, x:int=0, minColWidth:int=4):
-            if col.width is None and len(self.visibleRows) > 0:
-                vrows = self.visibleRows if self.nRows > 1000 else self.rows[:1000]  #1964
+            '''Return the width, for key columns, or for columns that are rightward of
+            the leftmost visibleCol, even if they are offscreen or hidden. Return
+            None for columns left of cursorVisibleColIndex, if they are not key columns.'''
+            # We use a slice of rows that is similar to self.visibleRows but simpler,
+            # and larger. The goal is to avoid using nFooterRows. Because nFooterRows
+            # cannot in general be calculated properly until after calcColLayout() has
+            # determined which columns are visible.
+            vrows = self.rows[self.topRowIndex:self.topRowIndex+self.windowHeight]
+            if col.width is None and len(vrows) > 0:
+                measure_rows = vrows if self.nRows > 1000 else self.rows[:1000]  #1964
                 # handle delayed column width-finding
-                col.width = max(col.getMaxWidth(vrows), minColWidth)
+                col.width = max(col.getMaxWidth(measure_rows), minColWidth)
                 if vcolidx < self.nVisibleCols-1:  # let last column fill up the max width
                     col.width = min(col.width, self.options.default_width)
 
@@ -699,9 +747,10 @@ class TableSheet(BaseSheet):
             if vcolidx >= self.nVisibleCols and vcolidx == self.cursorVisibleColIndex:
                 width = self.options.default_width
 
+            #subtract 1 character of empty space from windowWidth, for the margin to the right of the sheet
+            width = min(width, self.windowWidth-x-1)
             width = max(width, 1)
             if col in self.keyCols or vcolidx >= self.leftVisibleColIndex:  # visible columns
-                self._visibleColLayout[vcolidx] = [x, min(width, self.windowWidth-x)]
                 return width
 
 
@@ -744,7 +793,7 @@ class TableSheet(BaseSheet):
                 clipdraw(scr, y+i, x, name, hdrcattr, w=colwidth)
             vd.onMouse(scr, x, y+i, colwidth, 1, BUTTON3_RELEASED='rename-col')
 
-            if C and x+colwidth+len(C) < self.windowWidth and y+i < self.windowHeight:
+            if C and x+colwidth+dispwidth(C) < self.windowWidth and y+i < self.windowHeight:
                 scr.addstr(y+i, x+colwidth, C, sepcattr.attr)
 
         clipdraw(scr, y+h-1, min(x+colwidth, self.windowWidth-1)-dispwidth(T), T, hdrcattr)
@@ -836,10 +885,17 @@ class TableSheet(BaseSheet):
 
         # draw bottom-row aggregators  #2209
         rightx, rightw = self._visibleColLayout[self.rightVisibleColIndex]
-        rightx += rightw+1
+        agglabelx = rightx+rightw+1
+        if agglabelx > self.windowWidth-9: # if offscreen, put labels in first non-aggregated column
+            for vcolidx, (x, _) in sorted(self._visibleColLayout.items()):
+                col = self.availCols[vcolidx]
+                if not col.aggregators:
+                    agglabelx = x
+                    break
 
         for aggrname, colidxs in self.allAggregators.items():
-            clipdraw(scr, y, 0, ' '*rightx + f' {aggrname:9}', colors.color_aggregator, truncator='+')
+            clipdraw(scr, y, 0, f' ', colors.color_aggregator, w=min(rightx+rightw+10, self.windowWidth-1))
+            clipdraw(scr, y, agglabelx, f' {aggrname:9}', colors.color_aggregator, truncator='')
 
             for vcolidx in colidxs:
                 x, colwidth = self._visibleColLayout[vcolidx]
@@ -935,10 +991,12 @@ class TableSheet(BaseSheet):
                 colseps = [topsep] + [midsep]*(height-2) + [botsep]
                 endseps = [endtopsep] + [endmidsep]*(height-2) + [endbotsep]
                 keyseps = [keytopsep] + [keymidsep]*(height-2) + [keybotsep]
+                color_multiline_bottom = colors.get_color('color_multiline_bottom', 2)
             else:
                 colseps = [colsep]
                 endseps = [endsep]
                 keyseps = [keysep]
+                color_multiline_bottom = 0
 
             for vcolidx, (col, cellval, lines) in displines.items():
                     if vcolidx not in self._visibleColLayout:
@@ -957,6 +1015,7 @@ class TableSheet(BaseSheet):
 
                     cattr = self._colorize(col, row, cellval)
                     cattr = update_attr(cattr, basecellcattr)
+                    bottomcattr = update_attr(cattr, color_multiline_bottom) if height > 1 else cattr
 
                     note = getattr(cellval, 'note', None)
                     notewidth = 1 if note else 0
@@ -984,10 +1043,10 @@ class TableSheet(BaseSheet):
                         for attr, text in chunks:
                             prechunks.append((attr, text[hoffset:]))
 
-                        clipdraw_chunks(scr, y, x, prechunks, cattr, w=colwidth-notewidth)
+                        clipdraw_chunks(scr, y, x, prechunks, cattr if i < height-1 else bottomcattr, w=colwidth-notewidth)
                         vd.onMouse(scr, x, y, colwidth, 1, BUTTON3_RELEASED='edit-cell')
 
-                        if sepchars and x+colwidth+dispwidth(sepchars) <= self.windowWidth:
+                        if sepchars and x+colwidth+dispwidth(sepchars) <= self.windowWidth-1:
                             scr.addstr(y, x+colwidth, sepchars, sepcattr.attr)
 
             for notefunc in vd.rowNoters:
@@ -997,6 +1056,11 @@ class TableSheet(BaseSheet):
                     break
 
             return height
+
+    def incremented_colname(self):
+        vd.addUndo(setattr, self, 'colname_ctr', self.colname_ctr)
+        self.colname_ctr += 1
+        return colname_letters(self.colname_ctr)
 
 vd.rowNoters = [
     # f(sheet, row) -> character to be displayed on the left side of row
@@ -1048,8 +1112,9 @@ class SequenceSheet(Sheet):
 
         self.rows = []
         # add the rest of the rows
+        max_rows = self.options.max_rows
         for i, r in enumerate(vd.Progress(itsource, gerund='loading', total=0)):
-            if self.precious and i > self.options.max_rows:
+            if self.precious and i >= max_rows:
                 break
             self.addRow(r)
 
@@ -1142,8 +1207,10 @@ def preloadHook(sheet):
 
 @VisiData.api
 def newSheet(vd, name, ncols, **kwargs):
-    return Sheet(name, columns=[SettableColumn(width=vd.options.default_width) for i in range(ncols)], **kwargs)
-
+    cols = [SettableColumn(width=vd.options.default_width, name=f'{colname_letters(i+1)}') for i in range(ncols)]
+    vs = Sheet(name, columns=cols, **kwargs)
+    vs.colname_ctr = ncols
+    return vs
 
 @BaseSheet.api
 def quitAndReleaseMemory(vs):
@@ -1181,15 +1248,31 @@ def async_deepcopy(sheet, rowlist):
     _async_deepcopy(ret, rowlist)
     return ret
 
+@Sheet.api
+def reload_or_replace(sheet):
+    sheet.preloadHook()
+    if isinstance(sheet.source, visidata.Path) and \
+       sheet.source.is_url() and sheet.source.scheme != 'file':  #2825
+        #retrieve data again, because the earlier data saved in sheet.source may be outdated
+        vs = vd.openSource(visidata.Path(sheet.source.given))
+        if type(vs) != type(sheet):  #new data may have a different filetype
+            vd.push(vs)
+            vd.remove(sheet)
+            #user needs feedback that sheet changed, since the new sheet has a different shortcut
+            vd.status('replaced sheet due to changed filetype')
+            return
+        sheet.source = vs.source
+    sheet.reload()
 
 
 BaseSheet.init('pane', lambda: 1)
 
 
-BaseSheet.addCommand('^R', 'reload-sheet', 'preloadHook(); reload()', 'Reload current sheet')
-Sheet.addCommand('', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet on status line')
+BaseSheet.addCommand('Ctrl+R', 'reload-sheet', 'reload_or_replace()', 'Reload current sheet')
+Sheet.addCommand('', 'show-cursor', 'status(statusLine)', 'show cursor position and bounds of current sheet')
 
-Sheet.addCommand('!', 'key-col', 'toggleKeys([cursorCol])', 'toggle current column as a key column')
+Sheet.addCommand('!', 'key-col', 'exec_longname("key-col-off") if cursorCol.keycol else exec_longname("key-col-on")', 'toggle current column as a key column', replay=False)
+Sheet.addCommand('', 'key-col-on', 'setKeys([cursorCol])', 'set current column as a key column')
 Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])', 'unset current column as a key column')
 
 Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)) if not (cursorRow is None) else fail("no rows to edit")', 'edit contents of current cell')
@@ -1213,11 +1296,11 @@ globalCommand('gq', 'quit-all', 'vd.quit(*vd.sheets)', 'quit all sheets (clean e
 
 BaseSheet.addCommand('Z', 'splitwin-half', 'splitPane(vd.options.disp_splitwin_pct or 50)', 'ensure split pane is set and push under sheet onto other pane')
 BaseSheet.addCommand('gZ', 'splitwin-close', 'vd.options.disp_splitwin_pct = 0\nfor vs in vd.activeStack: vs.pane = 1', 'close split screen')
-BaseSheet.addCommand('^I', 'splitwin-swap', 'vd.activePane = 1 if sheet.pane == 2 else 2', 'jump to inactive pane')
-BaseSheet.addCommand('g^I', 'splitwin-swap-pane', 'vd.options.disp_splitwin_pct=-vd.options.disp_splitwin_pct', 'swap panes onscreen')
+BaseSheet.addCommand('Ctrl+I', 'splitwin-swap', 'vd.activePane = 1 if sheet.pane == 2 else 2', 'jump to inactive pane')
+BaseSheet.addCommand('gCtrl+I', 'splitwin-swap-pane', 'vd.options.disp_splitwin_pct=-vd.options.disp_splitwin_pct', 'swap panes onscreen')
 BaseSheet.addCommand('zZ', 'splitwin-input', 'vd.options.disp_splitwin_pct = input("% height for split window: ", value=vd.options.disp_splitwin_pct)', 'set split pane to specific size')
 
-BaseSheet.addCommand('^L', 'redraw', 'sheet.refresh(); vd.redraw()', 'Refresh screen')
+BaseSheet.addCommand('Ctrl+L', 'redraw', 'sheet.refresh(); vd.redraw(); vd.draw_all()', 'Refresh screen')
 BaseSheet.addCommand(None, 'guard-sheet', 'options.set("quitguard", True, sheet); status("guarded")', 'Set quitguard on current sheet to confirm before quit')
 BaseSheet.addCommand(None, 'guard-sheet-off', 'options.set("quitguard", False, sheet); status("unguarded")', 'Unset quitguard on current sheet to not confirm before quit')
 BaseSheet.addCommand(None, 'open-source', 'vd.replace(source)', 'jump to the source of this sheet')
@@ -1273,6 +1356,8 @@ vd.addMenuItems('''
     View > Split pane > swap panes > splitwin-swap-pane
     View > Split pane > goto other pane > splitwin-swap
     View > Refresh screen > redraw
+    View > Show > cursor position > show-cursor
+    View > Show > evaluated expression > show-expr
     Column > Type as > anytype > type-any
     Column > Type as > string > type-string
     Column > Type as > integer > type-int

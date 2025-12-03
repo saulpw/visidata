@@ -72,6 +72,8 @@ class InvertedCanvas(Canvas):
 
 # provides axis labels, legend
 class GraphSheet(InvertedCanvas):
+    rowtype = 'points'
+
     def __init__(self, *names, **kwargs):
         self.ylabel_maxw = 0
         super().__init__(*names, **kwargs)
@@ -268,11 +270,11 @@ class GraphSheet(InvertedCanvas):
             txt = tick + txt
         else:
             right_margin = self.plotwidth - 1 - self.plotviewBox.xmax
-            if (len(txt)+len(tick))*2 <= right_margin:
+            if (dispwidth(txt)+dispwidth(tick))*2 <= right_margin:
                 txt = tick + txt
             else:
                 # shift rightmost label to be left of its tick
-                x -= len(txt)*2
+                x -= dispwidth(txt)*2
                 if len(tick) == 0:
                     x += 1
                 txt = txt + tick
@@ -317,10 +319,9 @@ class GraphSheet(InvertedCanvas):
         xstrs = vd.input("add line(s) at x = ", type="reflinex", value=suggested, defaultLast=True).split()
 
         for xstr in xstrs:
-            vals = [ v.strip() for v in xstr.split(',') ]
-            if len(vals) != len(self.xcols):
-                vd.fail(f'must have {len(self.xcols)} x values, had {len(vals)} values: {xstr}')
-            self.reflines_x += [xtype(val) for xcol, val in zip(self.xcols, vals) if xtype(val) not in self.reflines_x ]
+            refval = xtype(xstr.strip())
+            if refval not in self.reflines_x:
+                self.reflines_x.append(refval)
         self.refresh()
 
     def draw_refline_y(self):
@@ -339,11 +340,16 @@ class GraphSheet(InvertedCanvas):
         suggested = format_input_value(self.reflines_x[0], xtype)
 
         xstrs = vd.input('remove line(s) at x = ', value=suggested, type='reflinex', defaultLast=True).split()
-        for input_x in xstrs:
-            self.reflines_x.remove(xtype(input_x))
+        for x in xstrs:
+            try:
+                self.reflines_x.remove(xtype(x))
+            except ValueError:
+                vd.warning(f'value {x} not in reflines_x')
         self.refresh()
 
     def erase_refline_y(self):
+        if len(self.reflines_y) == 0:
+            vd.fail(f'no y refline to erase')
         ytype = self.ycols[0].type
         suggested = format_input_value(self.reflines_y[0], ytype) if self.reflines_y else ''
         ystrs = vd.input('remove line(s) at y = ', value=suggested, type='refliney', defaultLast=True).split()
@@ -351,7 +357,7 @@ class GraphSheet(InvertedCanvas):
             try:
                 self.reflines_y.remove(ytype(y))
             except ValueError:
-                vd.fail(f'value {y} not in reflines_y')
+                vd.warning(f'value {y} not in reflines_y')
         self.refresh()
 
 def format_input_value(val, type):

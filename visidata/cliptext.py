@@ -142,42 +142,52 @@ def iterchars(x):
 
 @functools.lru_cache(maxsize=100000)
 def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
-    '''Return clipped string and width in terminal display characters.
-    Note: width may differ from len(s) if East Asian chars are 'fullwidth'.'''
-    if not s:
+    ''' *s* is a string or an iterator that contains characters.
+    *dispw* is the integer screen width that the clipped string will fit inside, or None.
+    Return clipped string and width in terminal display characters.
+    Note: width may differ from len(s) if chars are 'fullwidth'.
+    If *dispw* is None, no clipping occurs.
+    If *trunch* has a width greater than *dispw*, the empty string
+    will be used as a truncator instead.'''
+    if not s or (dispw is not None and dispw < 1): #iterator s would be truthy
         return '', 0
-
-    if dispw == 1:
-        return s[0], 1
 
     w = 0
     ret = ''
+    trunc_i = 0
+    w_truncated = 0
 
     trunchlen = dispwidth(trunch)
+    if dispw is None:
+        s = ''.join(s)
+        return s, dispwidth(s)
+    if trunchlen > dispw: #if the truncator cannot fit, use a truncator of ''
+        return _clipstr(s, dispw, trunch='', oddspacech=oddspacech, combch=combch, modch=modch)
     for c in s:
         newc, chlen = _dispch(c, oddspacech=oddspacech, combch=combch, modch=modch)
         if not newc:
             newc = c
             chlen = dispwidth(c)
 
-        if dispw and w+chlen > dispw:
-            if trunchlen and dispw > trunchlen:
-                lastchlen = _dispch(ret[-1])[1]
-                if w+trunchlen > dispw:
-                    ret = ret[:-1]
-                    w -= lastchlen
-                ret += trunch  # replace final char with ellipsis
-                w += trunchlen
-            break
-
-        w += chlen
-        ret += newc
+        #if the next character will fit
+        if w+chlen <= dispw:
+            ret += newc
+            w += chlen
+            #move the truncation spot forward only when the truncation character can fit
+            if w+trunchlen <= dispw:
+                trunc_i += 1
+                w_truncated += chlen
+            continue
+        # if we reach this line, a character did not fit, and the result needs truncation
+        return ret[:trunc_i] + trunch, w_truncated+trunchlen
 
     return ret, w
 
 
 @drawcache
 def clipstr(s, dispw, truncator=None, oddspace=None):
+    ''' *s* is a string or an iterator that contains characters.
+    *dispw* is the integer screen width that the clipped string will fit inside, or None.'''
     if options.visibility:
         return _clipstr(s, dispw,
                         trunch=options.disp_truncator if truncator is None else truncator,
@@ -205,8 +215,6 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, literal=False, **kwargs):
 
     x = max(0, x)
     y = max(0, y)
-    assert x >= 0, x
-    assert y >= 0, y
 
     return clipdraw_chunks(scr, y, x, chunks, attr, w=w, clear=clear, **kwargs)
 
@@ -310,6 +318,10 @@ def wraptext(text, width=80, indent=''):
         line = _markdown_to_internal(line)
         chunks = re.split(internal_markup_re, line)
         textchunks = [x for x in chunks if not is_vdcode(x)]
+        if ''.join(textchunks) == '':  #for markup with no contents, like '[:tag][/]' or '[:]' or '[/]'
+            yield '', ''
+            continue
+        # textwrap.wrap does not handle variable-width characters  #2416
         for linenum, textline in enumerate(textwrap.wrap(''.join(textchunks), width=width, drop_whitespace=False)):
             txt = textline
             r = ''
@@ -345,8 +357,100 @@ def clipbox(scr, lines, attr, title=''):
     for i, line in enumerate(lines):
         clipdraw(scr, i+1, 2, line, attr)
 
-    clipdraw(scr, 0, w-len(title)-6, f"| {title} |", attr)
+    clipdraw(scr, 0, w-dispwidth(title)-6, f"| {title} |", attr)
 
+def clipstr_start(dispval, w, truncator=''):
+    '''Return a tuple (frag, dw), where *frag* is the longest ending substring
+    of *dispval* that will fit in a space *w* terminal display characters wide,
+    and *dw* is the substring's display width as an int.'''
+    # Note: this implementation is likely incorrect for unusual Unicode
+    # strings or encodings, where trimming an initial character produces
+    # an invalid string or does not make the string shorter.
+    if w <= 0: return '', 0
+    j = len(dispval)
+    while j >= 1:
+        if dispwidth((truncator if j > 1 else '') + dispval[j-1:]) <= w:
+            j -= 1
+        else:
+            break
+    frag = (truncator if j > 0 else '') + dispval[j:]
+    return frag, dispwidth(frag)
+
+def clipstr_middle(s, n=10, truncator='…'):
+    '''Return a string having a display width <= *n*. Excess characters are
+    trimmed from the middle of the string, and replaced by a single
+    instance of *truncator*.'''
+    if n == 0: return '', 0
+    if dispwidth(s) > n:
+        #for even widths, give the leftover 1 space to the right fragment
+        l_space = n//2 if n%2 == 1 else max(n//2-1, 0)
+        l_frag, l_w = _clipstr(s, l_space)
+        #if left fragment did not fill its space, give the unused space to the right fragment
+        r_frag = clipstr_start(s, n//2+(l_space-l_w))[0]
+        res = l_frag + truncator + r_frag
+        return res, dispwidth(res)
+    return s, dispwidth(s)
+
+def clip_markup_middle(s:str, w:int):
+    '''takes a string *s* containing optional visidata markup, and returns a string
+    truncated to have a display width less than or equal to *w*, while preserving markup
+    for the remaining text. When text with markup is clipped, what is omitted is one or
+    more entire markup sections, between markup start and end delimiters:
+    [:markup] [:] [/markup] [/]
+    The dropped text is replaced with a single disp_truncator.
+    When text without markup is clipped, *clipstr_middle()* is used.
+    The parsing will fail on markup that is nested.
+    '''
+    trunch = options.disp_truncator
+
+    if w <= 0: return ''
+    if dispwidth(s) <= w:
+        return s
+    if w < dispwidth(trunch): return ''
+
+    markup_section_re = r'(\[.*?\].*?\[[/:].*?\])'  # [:whatever]text[:] or [:whatever]text[/anything]
+    if not re.match(internal_markup_re, s):
+        return clipstr_middle(s, w, truncator=options.disp_truncator)
+    # build the front half of the string
+    output = []
+    chunks_w = 0
+    truncated = False
+    chunks = re.split(markup_section_re, s)
+    for i, chunk in enumerate(chunks):  #chunks are either regular text, or marked up section:  start, text, end
+        parts = re.split(internal_markup_re, chunk)
+        if len(parts) == 1:      #text with no markup
+            text_w = dispwidth(parts[0])
+        elif len(parts) == 5 and parts[0] == '' and parts[4] == '': #empty string, start, text, end, empty string
+            text_w = dispwidth(parts[2])
+        else:
+            vd.fail(f'error parsing markup clip')
+        if chunks_w + text_w < w//2:
+            output.append(chunk)
+            chunks_w += text_w
+        else:
+            output.append(trunch)  #skip the chunk instead of using a substring, because Unicode strings are complex to trim
+            truncated = True
+            break
+    # build the back half of the string, working backwards from the end
+    reverse_output = []
+    chunks_w = 0
+    for chunk in chunks[len(chunks)-1:i:-1]:
+        parts = re.split(internal_markup_re, chunk)
+        if len(parts) == 1:
+            text_w = dispwidth(parts[0])
+        elif len(parts) == 5 and parts[0] == '' and parts[4] == '':
+            text_w = dispwidth(parts[2])
+        else:
+            vd.fail(f'error parsing markup clip')
+        if chunks_w + text_w <= w//2 - (0 if truncated else dispwidth(trunch)):
+            reverse_output.append(chunk)
+            chunks_w += text_w
+        else:
+            if not truncated:
+                reverse_output.append(trunch)
+            break
+    output += reverse_output[::-1]
+    return ''.join(output)
 
 vd.addGlobals(clipstr=clipstr,
               clipdraw=clipdraw,
@@ -355,4 +459,7 @@ vd.addGlobals(clipstr=clipstr,
               dispwidth=dispwidth,
               iterchars=iterchars,
               iterchunks=iterchunks,
-              wraptext=wraptext)
+              wraptext=wraptext,
+              clipstr_start=clipstr_start,
+              clipstr_middle=clipstr_middle,
+              clip_markup_middle=clip_markup_middle)

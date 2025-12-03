@@ -42,7 +42,8 @@ def undo(vd, sheet):
 
     cmdlogrows = itertools.dropwhile(lambda r: r.longname == 'set-option', sheet.cmdlog_sheet.rows)
     # skip the first remaining command, to exclude it from undo,
-    # because it is always the one that created the sheet
+    # because it is always the command that created the sheet, or for
+    # replayed cmdlogs, a no-op placeholder row
     for i, cmdlogrow in enumerate(reversed(list(cmdlogrows)[1:])):
         if cmdlogrow.undofuncs:
             for undofunc, args, kwargs, in cmdlogrow.undofuncs[::-1]:

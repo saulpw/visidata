@@ -40,21 +40,11 @@ class DisplayWrapper:
     def __eq__(self, other):
         return self.value == other
 
-def _default_colnames():
-    'A B C .. Z AA AB .. ZZ AAA .. to infinity'
-    i=0
-    while True:
-        i += 1
-        for x in itertools.product(string.ascii_uppercase, repeat=i):
-            yield ''.join(x)
-
-default_colnames = _default_colnames()
-
 
 class Column(Extensible):
     '''Base class for all column types.
 
-        - *name*: name of this column.
+        - *name*: name of this column; if None, current sheet will assign a name
         - *type*: ``anytype str int float date`` or other type-like conversion function.
         - *cache*: cache behavior
 
@@ -71,7 +61,10 @@ class Column(Extensible):
     def __init__(self, name=None, *, type=anytype, cache=False, **kwargs):
         self.sheet = ExplodingMock('use addColumn() on all columns')  # owning Sheet, set in .recalc() via Sheet.addColumn
         if name is None:
-            name = next(default_colnames)
+            if vd.sheet: # get a column name from the current sheet
+                name = vd.sheet.incremented_colname()
+            else:
+                name = ''
         self.name = str(name) # display visible name
         self.fmtstr = ''      # by default, use str()
         self._type = type     # anytype/str/int/float/date/func
@@ -86,7 +79,7 @@ class Column(Extensible):
         self.formatter = ''
         self.displayer = ''
         self.defer = False
-        self.disp_expert = 0    # auto-hide if options.disp_expert less than col.disp_expert
+        self.disp_expert = 0    # do not show if 'nometacols' in options.disp_help_flags
 
         self.setCache(cache)
         for k, v in kwargs.items():
@@ -243,13 +236,17 @@ class Column(Extensible):
         return self.make_formatter()(*args, **kwargs)
 
     def formatValue(self, typedval, width=None):
-        'Return displayable string of *typedval* according to ``Column.fmtstr``.'
+        '''Return displayable string of *typedval* according to ``Column.fmtstr``.
+        If *width* is not None, values are clipped to that width when *typedval*
+        is a dict/list/tuple, but not for other types.'''
         if typedval is None:
             return None
 
         if self.type is anytype:
             if isinstance(typedval, (dict, list, tuple)):
-                dispval, dispw = clipstr(iterchars(typedval), width)
+                if width is None:
+                    return ''.join(iterchars(typedval))
+                dispval, dispw = clipstr(iterchars(typedval), width-1) #subtract 1 for left-side margin
                 return dispval
 
         if isinstance(typedval, bytes):
@@ -264,7 +261,9 @@ class Column(Extensible):
 
            The 'generic' displayer does not do any formatting.
         '''
-        if width is not None and width > 1 and vd.isNumeric(self):
+        if width is not None and width > 1 and \
+                vd.isNumeric(self) and \
+                isinstance(dw.typedval, (int, float)):
             yield ('', dw.text.rjust(width-2))
         else:
             yield ('', dw.text)
@@ -355,7 +354,8 @@ class Column(Extensible):
         return ret
 
     def getCell(self, row):
-        'Return DisplayWrapper for displayable cell value.'
+        '''Return DisplayWrapper for displayable cell value.
+        For dict/list/tuple cells, the width of the value returned is capped at the column width.'''
         cellval = wrapply(self.getValue, row)
         typedval = wrapply(self.type, cellval)
 
@@ -394,7 +394,7 @@ class Column(Extensible):
         dw.typedval = typedval
 
         try:
-            dw.text = self.format(typedval, width=(self.width or 0)*2) or ''
+            dw.text = self.format(typedval, width=self.width) or ''
 
             # annotate cells with raw value type in anytype columns, except for strings
             if self.type is anytype and type(cellval) is not str:
@@ -417,7 +417,8 @@ class Column(Extensible):
         return dw
 
     def getDisplayValue(self, row):
-        'Return string displayed in this column for given *row*.'
+        '''Return string displayed in this column for given *row*.
+        For dict/list/tuple cells, the width of the display value returned is capped at the column width.'''
         return self.getCell(row).text
 
     def putValue(self, row, val):
@@ -457,22 +458,36 @@ class Column(Extensible):
         return vd.status('set %d cells to %d values' % (len(rows), len(values)))
 
     def getMaxWidth(self, rows):
-        'Return the maximum length of any cell in column or its header (up to window width).'
-        w = 0
+        'Return the maximum length of any cell in column or its header (up to drawable window width).'
+        drawable_width = self.sheet.windowWidth-1
         nlen = dispwidth(self.name)
-        if len(rows) > 0:
-            w_max = 0
-            for r in rows:
-                row_w = dispwidth(self.getDisplayValue(r), maxwidth=self.sheet.windowWidth)
-                if w_max < row_w:
-                    w_max = row_w
-                if w_max >= self.sheet.windowWidth:
-                    break  #1747  early out to speed up wide columns
-            w = w_max
-        w = max(w, nlen)+2
-        w = min(w, self.sheet.windowWidth)
-        return w
+        w_max = nlen
+        for r in rows:
+            row_w = self.measureValueWidthCapped(r, maxwidth=drawable_width)
+            if w_max < row_w:
+                w_max = row_w
+            if w_max >= self.sheet.windowWidth:
+                break  #1747  early out to speed up wide columns
+        return min(w_max+2, drawable_width)
 
+    def measureValueWidthCapped(self, row, maxwidth=None):
+        '''Measure the width of the contents of a cell. Stop measuring at *maxwidth*,
+           to save time iterating over very long dict/list/tuple values.
+           If *maxwidth* is None, return the full width.'''
+        # The value classification logic here is taken from getCell,
+        # modified to cap the width examined for any dict/list/tuple
+        cellval = wrapply(self.getValue, row)
+        typedval = wrapply(self.type, cellval)
+        if isinstance(typedval, (TypedWrapper, threading.Thread)):
+            return dispwidth(self.getCell(row).text, maxwidth=maxwidth)
+        try:
+            text = self.format(typedval, width=maxwidth) or ''
+        except Exception as e:  # formatting failure
+            try:
+                text = str(cellval)
+            except Exception as e:
+                text = str(e)
+        return dispwidth(text, maxwidth=maxwidth)
 
 
 # ---- basic Columns

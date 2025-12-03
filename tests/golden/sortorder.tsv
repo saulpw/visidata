@@ -1,0 +1,8 @@
+name	width	type	fmtstr	value	aggregators	sortorder
+OrderDate	12			2017-10-31		
+Region	9			Central		
+Rep	10			Andrews		1
+Item	9			Pencil		-2
+Units	7	int		14		3
+Unit_Cost	11			1.29		
+Total	9			18.06		

@@ -1,10 +1,10 @@
 import re
 
-from visidata import Path, RepeatFile, vd, VisiData
+from visidata import Path, RepeatFile, vd, VisiData, __version_info__
 from visidata.loaders.tsv import splitter
 
 vd.option('http_max_next', 0, 'max next.url pages to follow in http response') #848
-vd.option('http_req_headers', {}, 'http headers to send to requests')
+vd.option('http_req_headers', {'User-Agent': __version_info__}, 'http headers to send to requests')
 vd.option('http_ssl_verify', True, 'verify host and certificates for https')
 
 

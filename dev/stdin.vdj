@@ -1,0 +1,5 @@
+#!vd -p
+{"sheet": "global", "col": null, "row": "regex_flags", "longname": "set-option", "input": "IS", "keystrokes": "", "comment": null, "replayable": null}
+{"sheet": "global", "row": "filetype", "longname": "set-option", "input": "jsonl", "keystrokes": ""}
+{"longname": "open-file", "input": "-", "keystrokes": "o", "replayable": true}
+{"sheet": "-", "col": "", "row": "", "longname": "transpose", "input": "", "keystrokes": "Shift+T", "comment": "open new sheet with rows and columns transposed", "replayable": true}

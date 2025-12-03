@@ -20,9 +20,10 @@ def isSelected(self, row):
 
 @Sheet.api
 @asyncthread
-def toggle(self, rows):
+def toggle(self, rows, add_undo=True):
     'Toggle selection of given *rows*.  Async.'
-    self.addUndoSelection()
+    if add_undo:
+        self.addUndoSelection()
     for r in Progress(rows, 'toggling', total=len(rows)):
         if self.isSelected(r):  #1671
             self.unselectRow(r)
@@ -30,17 +31,24 @@ def toggle(self, rows):
             self.selectRow(r)
 
 
+@Sheet.before
+def beforeLoad(self):
+    self._selectedRows.clear()
+
+
 @Sheet.api
-def select_row(self, row):
+def select_row(self, row, add_undo=True):
     'Add single *row* to set of selected rows.'
-    self.addUndoSelection()
+    if add_undo:
+        self.addUndoSelection()
     self.selectRow(row)
 
 
 @Sheet.api
-def toggle_row(self, row):
+def toggle_row(self, row, add_undo=True):
     'Toggle selection of given *row*.'
-    self.addUndoSelection()
+    if add_undo:
+        self.addUndoSelection()
     if self.isSelected(row):
         self.unselectRow(row)
     else:
@@ -48,9 +56,10 @@ def toggle_row(self, row):
 
 
 @Sheet.api
-def unselect_row(self, row):
+def unselect_row(self, row, add_undo=True):
     'Remove single *row* from set of selected rows.'
-    self.addUndoSelection()
+    if add_undo:
+        self.addUndoSelection()
     self.unselectRow(row) or vd.warning('row not selected')
 
 
@@ -77,9 +86,10 @@ def clearSelected(self):
 
 @Sheet.api
 @asyncthread
-def select(self, rows, status=True, progress=True):
-    "Add *rows* to set of selected rows. Async. Don't show progress if *progress* is False; don't show status if *status* is False."
-    self.addUndoSelection()
+def select(self, rows, status=True, progress=True, add_undo=True):
+    "Add *rows* to set of selected rows. Async. Don't show progress if *progress* is False; don't show status if *status* is False. If *add_undo* is False, do not add an undo selection function to the undo history; useful for lowering memory consumption when caller is changing a large batch of selects in one command."
+    if add_undo:
+        self.addUndoSelection()
     before = self.nSelectedRows
     if self.options.bulk_select_clear:
         self.clearSelected()
@@ -94,9 +104,10 @@ def select(self, rows, status=True, progress=True):
 
 @Sheet.api
 @asyncthread
-def unselect(self, rows, status=True, progress=True):
-    "Remove *rows* from set of selected rows. Async. Don't show progress if *progress* is False; don't show status if *status* is False."
-    self.addUndoSelection()
+def unselect(self, rows, status=True, progress=True, add_undo=True):
+    "Remove *rows* from set of selected rows. Async. Don't show progress if *progress* is False; don't show status if *status* is False. If *add_undo* is False, do not add an undo unselection function to the undo history; useful for lowering memory consumption when caller is changing a large batch of selects in one command."
+    if add_undo:
+        self.addUndoSelection()
     before = self.nSelectedRows
     for r in (Progress(rows, 'unselecting') if progress else rows):
         self.unselectRow(r)
@@ -191,10 +202,10 @@ Sheet.addCommand('\\', 'unselect-col-regex', 'unselectByIdx(searchInputRegex("un
 Sheet.addCommand('g|', 'select-cols-regex', 'selectByIdx(searchInputRegex("select", columns="visibleCols"))', 'select rows matching regex in any visible column')
 Sheet.addCommand('g\\', 'unselect-cols-regex', 'unselectByIdx(searchInputRegex("unselect", columns="visibleCols"))', 'unselect rows matching regex in any visible column')
 
-Sheet.addCommand(',', 'select-equal-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorDisplay: c.getDisplayValue(r) == v), progress=False)', 'select rows matching current cell in current column')
-Sheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getDisplayValue(r) == c.getDisplayValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
-Sheet.addCommand('z,', 'select-exact-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', 'select rows matching current cell in current column')
-Sheet.addCommand('gz,', 'select-exact-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getTypedValue(r) == c.getTypedValue(currow) for c in vcols])), progress=False)', 'select rows matching current row in all visible columns')
+Sheet.addCommand(',', 'select-equal-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorDisplay: c.getDisplayValue(r) == v), progress=False)', 'select rows matching current cell displayed value in current column')
+Sheet.addCommand('g,', 'select-equal-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getDisplayValue(r) == c.getDisplayValue(currow) for c in vcols])), progress=False)', 'select rows matching displayed values in current row in all visible columns')
+Sheet.addCommand('z,', 'select-exact-cell', 'select(gatherBy(lambda r,c=cursorCol,v=cursorTypedValue: c.getTypedValue(r) == v), progress=False)', 'select rows matching current cell typed value in current column')
+Sheet.addCommand('gz,', 'select-exact-row', 'select(gatherBy(lambda r,currow=cursorRow,vcols=visibleCols: all([c.getTypedValue(r) == c.getTypedValue(currow) for c in vcols])), progress=False)', 'select rows matching typed values in current row in all visible columns')
 
 Sheet.addCommand('z|', 'select-expr', 'expr=inputExpr("select by expr: "); select(gatherBy(lambda r, sheet=sheet, expr=expr, curcol=cursorCol: sheet.evalExpr(expr, r, curcol=curcol)), progress=False)', 'select rows matching Python expression in any visible column')
 Sheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by expr: "); unselect(gatherBy(lambda r, sheet=sheet, expr=expr, curcol=cursorCol: sheet.evalExpr(expr, r, curcol=curcol)), progress=False)', 'unselect rows matching Python expression in any visible column')

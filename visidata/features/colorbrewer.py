@@ -10,7 +10,7 @@ Thanks to:
        - color-cycle: change plot colors to another palette
        - color-reset:
 '''
-from visidata import vd, VisiData, GraphSheet, BaseSheet, Sheet, ItemColumn, CellColorizer, ENTER
+from visidata import vd, VisiData, GraphSheet, BaseSheet, Sheet, ItemColumn, CellColorizer
 
 # https://raw.githubusercontent.com/er1kb/colorbrewer-python/master/colorbrewer.py
 # https://gist.githubusercontent.com/er1kb/02f1fee3453431d5c0ccad5e62326a99/raw/73d047f0a3ffc35f0655488547e7f24fa3f04ea6/colortrans.py
@@ -352,7 +352,7 @@ GraphSheet.addCommand('C', 'open-palettes-sheet', 'vd.push(PalettesSheet("palett
 GraphSheet.addCommand('zc', 'cycle-palette-sheet', 'sheet.cycle_palette()', 'cycle to next color palette for this graph')
 GraphSheet.addCommand(None, 'unset-palette-sheet', 'sheet.options.unset("plot_colors"); reload()', 'reset to default color palette for this graph')
 
-PalettesSheet.addCommand(ENTER, 'choose-palette', 'source.set_palette(cursorRow[0], cursorRow[1])', 'set current palette for source graph')
+PalettesSheet.addCommand('Enter', 'choose-palette', 'source.set_palette(cursorRow[0], cursorRow[1])', 'set current palette for source graph')
 
 vd.addMenuItems('''
     Plot > Palette > cycle > cycle-palette-sheet

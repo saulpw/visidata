@@ -20,7 +20,7 @@ def requery(url, **kwargs):
 @VisiData.api
 def guess_sqlite(vd, p):
     if p.open_bytes().read(16).startswith(b'SQLite format'):
-        return dict(filetype='sqlite')
+        return dict(filetype='sqlite', _likelihood=10)
 
 
 @VisiData.api

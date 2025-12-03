@@ -10,19 +10,20 @@ except ImportError:
     pass # pwd,grp modules not available on Windows
 
 from visidata import Column, Sheet, LazyComputeRow, asynccache, BaseSheet, vd
-from visidata import Path, ENTER, asyncthread, VisiData
+from visidata import Path, asyncthread, VisiData
 from visidata import modtime, filesize, vstat, Progress, TextSheet
 from visidata.type_date import date
 
 
 vd.option('dir_depth', 0, 'folder recursion depth on DirSheet')
 vd.option('dir_hidden', False, 'load hidden files on DirSheet')
+vd.option('active_procs', 10, 'number of concurrent processes on DirSheet')
 
 
 @VisiData.api
 def guess_dir(vd, p):
     if p.is_dir():
-        return dict(filetype='dir')
+        return dict(filetype='dir', _likelihood=10)
 
 
 @VisiData.lazy_property
@@ -87,7 +88,7 @@ class ColumnShell(Column):
 
 
 class DirSheet(Sheet):
-    'Sheet displaying directory, using ENTER to open a particular file.  Edited fields are applied to the filesystem.'
+    'Sheet displaying directory, using Enter to open a particular file.  Edited fields are applied to the filesystem.'
     guide = '''
         # Directory Sheet
         This is a list of files in the {sheet.displaySource} folder.
@@ -133,7 +134,7 @@ class DirSheet(Sheet):
         Column('filetype', width=0, cache='async', getter=lambda col,row: subprocess.Popen(['file', '--brief', row], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
     ]
     nKeys = 2
-    _ordering = [('modtime', True)]  # sort by reverse modtime initially
+    _ordering = [('modtime', True), ('filename', False)]  # sort by reverse modtime initially
 
     @staticmethod
     def colorOwner(sheet, col, row, val):
@@ -248,6 +249,12 @@ def inputShell(vd):
     cmd = vd.input("sh$ ", type="sh")
     if '$' not in cmd:
         vd.warning('no $column in command')
+    else:
+        import shlex
+        colnames = [col.name for col in vd.sheet.columns]
+        badnames = [arg[1:] for arg in shlex.split(cmd) if arg.startswith('$') and arg[1:] not in colnames]
+        for name in badnames:
+            vd.fail(f'no such columns: {", ".join([name for name in badnames])}')
     return cmd
 
 DirSheet.addCommand('`', 'open-dir-parent', 'vd.push(openSource(source.parent if source.resolve()!=Path(".").resolve() else os.path.dirname(source.resolve())))', 'open parent directory')  #1801
@@ -255,15 +262,15 @@ BaseSheet.addCommand('', 'open-dir-current', 'vd.push(vd.currentDirSheet)', 'ope
 
 Sheet.addCommand('z;', 'addcol-shell', 'cmd=inputShell(); addShellColumns(cmd, sheet, curcol=cursorCol)', 'create new column from bash expression, with $columnNames as variables')
 
-DirSheet.addCommand(ENTER, 'open-row-file', 'vd.push(openSource(cursorRow or fail("no row"), filetype="dir" if cursorRow.is_dir() else LazyComputeRow(sheet, cursorRow).ext))', 'open current file as a new sheet')
-DirSheet.addCommand('g'+ENTER, 'open-rows', 'for r in selectedRows: vd.push(openSource(r))', 'open selected files as new sheets')
-DirSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow)', 'open current file in external $EDITOR')
-DirSheet.addCommand('g^O', 'sysopen-rows', 'launchEditor(*selectedRows)', 'open selected files in external $EDITOR')
+DirSheet.addCommand('Enter', 'open-row-file', 'vd.push(openSource(cursorRow or fail("no row"), filetype="dir" if cursorRow.is_dir() else LazyComputeRow(sheet, cursorRow).ext))', 'open current file as a new sheet')
+DirSheet.addCommand('gEnter', 'open-rows', 'for r in selectedRows: vd.push(openSource(r))', 'open selected files as new sheets')
+DirSheet.addCommand('Ctrl+O', 'sysopen-row', 'launchEditor(cursorRow)', 'open current file in external $EDITOR')
+DirSheet.addCommand('gCtrl+O', 'sysopen-rows', 'launchEditor(*selectedRows)', 'open selected files in external $EDITOR')
 
 DirSheet.addCommand('y', 'copy-row', 'copy_files([cursorRow], inputPath("copy to dest: "))', 'copy file to given directory *path*')
 DirSheet.addCommand('gy', 'copy-selected', 'copy_files(selectedRows, inputPath("copy to dest: ", value=cursorRow.given))', 'copy selected files to given directory *path*')
 
-DirSheet.addCommand('z'+ENTER, 'open-row-filetype', 'ft = input("filetype: ", type="filetype", value=options.filetype or LazyComputeRow(sheet, cursorRow).ext); vd.push(openSource(cursorRow, filetype=ft) or fail(f"file {cursorDisplay} does not exist"))', 'open file in current row as input filetype')
+DirSheet.addCommand('zEnter', 'open-row-filetype', 'ft = input("filetype: ", type="filetype", value=options.filetype or LazyComputeRow(sheet, cursorRow).ext); vd.push(openSource(cursorRow, filetype=ft) or fail(f"file {cursorDisplay} does not exist"))', 'open file in current row as input filetype')
 
 
 @DirSheet.api
@@ -290,5 +297,5 @@ vd.addGlobals({
 
 vd.addMenuItems('''
     Column > Add column > shell > addcol-shell
-    Open > file in row > open-row-filetype
+    Row > Open file > open-row-filetype
 ''')

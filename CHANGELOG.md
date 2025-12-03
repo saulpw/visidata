@@ -1,5 +1,170 @@
 # VisiData version history
 
+# v3.3 (2025-09-07)
+
+- added options.disp_help_flags; deprecated options.disp_expert
+   - these feature flags are supported: cmdpalette hints nometacols guides inputkeys inputfield all
+   - see helpstr for more details
+   - set option to '' to turn off all help overlays
+
+- fix: include missing files in MANIFEST.in @chenrui333
+
+Thanks to @midichef for most of the other bugfixes and improvements.
+
+## Improvements
+
+- [csv] auto-detect CSV format when csv_delimiter is specified @dennisangemi
+- [basesheet-] start new column names fresh for each sheet
+
+- [form-] after confirm, Esc/^C/^Q/q show disconfirm msg
+
+- [cmdpalette-] add instruction to use Esc to cancel
+- [cmdpalette-] keep case of results, allow case-sensitive search
+- [cmdpalette-] scroll choices with PageUp/PageDown
+- [cmdpalette-] hide choices that do not match input
+
+- [save-] suggest 'stdin' as filename base instead of '-'
+- [sheets-] on reload, fetch fresh data for URLs
+- [tar-] add cols for ext and file type desc, use name as keycol
+- performance improvements
+- display improvements
+
+## Bugfixes
+
+- [archive-] fix extracting to a chosen path
+- [archive-] fix error extracting to overwrite existing file
+- [archive-] fix loading zip files from inside archive files
+
+- [cliptext-] fix display of empty markup as several blank lines
+- [cliptext-] restore display translation of unprintable chars
+- [sheets-] remove calcSingleColLayout use of inaccurate visibleRows
+
+- [plugins liveupdate-] fix broken addcol-new
+
+- [curses-] fix crash on startup on NetBSD (and probably other \*BSD) wscons tty consoles, which do not expose "mousemask" in their system curses implementations. @rsmirnov90
+- [input-] fix editText for files on command line with -b -i -p (#2840)
+- [plugin-] fix autoload for Python versions < 3.10
+
+- [macro-] fix corruption when saving macros after deletion #2787
+- [reload-] wait for any previous reload_rows to finish #2808
+- [resize-] fix resize-col-half for new columns with no rows  #2795
+- [sheet-] fix reload on sheets without col layout  #2790
+- [status] fix error when no help_sidebars
+
+## Cosmetic
+
+- [freqtbl-] stop printing status for selection on source sheet
+- [input-] handle screen resize during inputMultiple(), editCell(), input()
+
+# API
+
+- [threads-] add asyncsingle_queue decorator
+
+# v3.2 (2025-06-15)
+
+Thanks to @midichef for many bugfixes and improvements.
+
+## Improvements
+
+* [config] XDG for default visidata_dir #2716 (#2755)
+- [dev] add Python 3.13 test coverage
+
+- [windows] install vd.cmd #2619 @ptyork
+* [windows] Enable Windows clipboard in WSL #1920 @daviewales
+- [windows] update windows-curses version to 2.4.1 #2119
+* [windows] fix mouse support #2676  @ptyork
+
+- [sort] allow z[ and z] to reverse col sort dir or ignore col
+- [sort] replay sort-add/-change ordering from cmdlog input arg
+- [sort] add sort order to ColumnsSheet  #2649
+
+* [loaders psv] add simple .psv loader based on Tsv sheet #2727
+* [loaders numpy] support 2d matrices (#2724) @maxfl
+
+### Commands
+
+* [aggr] addcol-aggregate and addcol-rank-sheet
+- [edit] add sysedit-cell command, using external editor
+- [errors] add sysopen-error command to view vd source code in editor
+- [freeze] add setcol-freeze, bind to z' #2260
+- [graph] add zoom-all-y #2751
+- [join] add per-jointype commands #2603
+- [layout] bind g- to hide-uniform-cols #2577 #2735
+- [syscopy] add syscol-colname #2760
+
+### Options
+
+- [draw] add options.color_multiline_bottom #2715
+- [graph] add options.color_graph_refline
+- [disp] Rename options.disp_pixel_random to options.disp_graph_pixel_random @cool-RR
+
+### Tweaks
+
+* [cmdpalette-] fix scoring of space-separated search terms
+* [cmdpalette-] make fuzzy match case-insensitive
+* [docs] Add WindowFunctionGuide and AggregatorSheet guides #2558 @thejud
+* [theme] update light theme #2729
+* [status] remove non-precious sheets from sheetlist #2573
+- [input-] fix word locator for Ctrl+Right motion
+- [input-] allow edit of cell in hidden column  #2749
+- [errors-] make ErrorSheet/ErrorsSheet into singletons
+- [threads-] make threads-all show a singleton sheet
+- [threads-] allow repeated toggling of profiling
+- [IndexSheet] move gC and gI to IndexSheet #2603
+- [main-] enable cell editing for interactive batch mode #2639
+- [loaders hdf5] guess types(hdf5), understand unsigned int type @maxfl
+- [loaders archive,sqlite-] guess sqlite/tar/zip filetypes confidently
+- [loaders vds-] save/restore column-specific properties via getstate/setstate #2699
+
+## Bugfixes
+
+- [aggr-] allow undo for aggregate-col/cols
+- [aggr-] cap runtime when formatting memo status
+- [canvas-] stop infinite refresh for graphs with many points
+- [cmdlog-] save prev replay when starting new replay #2531
+- [deprecated-] show warning when using deprecated commands  #2215
+- [features-] reload_every: wait for reload before looping
+- [features-] sysedit: modify cell only if editor changes value (#2656)
+* [freqtbl-] fix excessive memory usage for undo of selections  #2759
+- [incr-] addcol-incr-step as expected #2769
+- [input-] preserve None cells on external editor quit
+- [join-] fix putValue for merge rows absent in any source sheet
+- [layout-] change resize-cols-max into a toggle  #2782
+- [macro-] only record commands that are replayable
+- [mailcap] install dead battery for mailcap in python 3.13 #2576
+- [main-] prevent hang when vd -p - reads from terminal
+- [npy-] fix bug truncating cols wider than window  #2783
+- [open-] fix open-file for - in cmdlogs #2582
+- [open-] fix opening a dir with an filetype extension
+- [reload-] have reload-modified check for earlier changes  #2551
+- [save-] fix error string
+- [sheets-] record key-col toggle for replay as key-col-on/-off
+- [sort-] fix undo when sheet has a previous ordering
+- [undo-] fix undo editing cells in ValueColumn, ExpandedColumn, ColumnSourceAttr  #2765
+- [vdsql-] ensure each thread in vdsql tracks its single connection
+
+## Cosmetic
+
+- [cliptext-] truncate sheet names handling full-width chars
+- [column-] do not rjustify non-numeric values #2750
+- [csv-] warn when guessed option differs from default #2690
+- [dir-] sort by filename, after sorting by modtime
+- [errors-] fix error-recent always showing "no error"
+- [fixed loader] use empty str for null_value in fixed width sheet
+- [form-] fix underlining of substrings by FormCanvas
+- [help- sidebar-] prevent sidebar flicker #2630
+- [help] fix duplicate help descriptions #2762
+- [input-] fix editline() for characters having screen width > 1
+- [input-] speed up pasting long strings into line editor
+- [input-] fix off-by-1 when drawing at right edge of screen
+- [main-] format vd_cli exceptions to be caretless
+- [menu-] remove duplicate Help entry #2714
+- [menu] replace hint with motd
+- [reload-] tolerate stale columns in drawcache during allAggregators #2607 #2763
+- [save-] warn if no save destination given  #2580
+- [status] use sheet.icon on sheetlist #2772
+- [threads-] catch error trying to start a second profiler
+
 # v3.1 (2024-10-14)
 
 - drop support for Python 3.7  #2231
@@ -266,7 +431,7 @@
 - [freq] base histogram width on column width  #1807
 - [freq] set default disp_histogram to U+25A0 BLACK SQUARE (■)) (PR by @daviewales #1949 #1807)
     - [themes] ascii8 disp_histogram to *
-- [freq] add `open-preview` for split pane of soure rows at cursor  #1086
+- [freq] add `open-preview` for split pane of source rows at cursor  #1086
 - [graph] colorbrewer palette chooser (thanks @er1kb)
 - [graph] add commands to open external graph with matplotlib #1056
 - [help] remove `Enter` binding for **HelpSheet** to `exec-command`
@@ -345,7 +510,7 @@
 - [regex] use `inputRegex` (which has regex help) for all regex commands
 - [rename-col] add `options.rename_cascade`  #2088
     - if True, columns renames are cascaded into expressions
-- [replay] has been refactored to be sync, instead of a seperate async process  #1773 #1714
+- [replay] has been refactored to be sync, instead of a separate async process  #1773 #1714
 - [save] add `options.save_encoding (default: 'utf-8') to differentiate from `options.encoding` when saving a file  #1708
 - [save] add saver for STATA files (PR by @raffaem #1563)
 - [save] keep headers in txt as tsv if only one sheet and more than a single column  #2173
@@ -379,7 +544,7 @@
 
 - [diff] got moved to experimental
 - [inplace] optional replacement commands which update the new Column live as you write the expression
-- [livesearch] add `dup-search` and `dup-search-cols` which search for regex forwards, creating a duplicate sheet with maching rows live
+- [livesearch] add `dup-search` and `dup-search-cols` which search for regex forwards, creating a duplicate sheet with matching rows live
 - [mark] mark rows to more easily move cursor to them
 - [noahs] add basic structure for Noah's Tapestry data game
 - [rownum] addcol-rownum and addcol-delta
@@ -594,7 +759,7 @@
 
 - [cli] printout gone; use `builtins.print`
 - [color] use `ColorAttr` throughout  #2061 #2017
-    - seperate out fg/bg
+    - separate out fg/bg
     - allow bg and fg to take precedence independently
     - fixes issues with forced bg=black on sidebar for warning, and statusbar for working
 - [guides] add API for getting and adding guides

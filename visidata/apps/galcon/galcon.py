@@ -39,17 +39,17 @@ def openhttp_galcon(vd, p):
 class GalconSheet(Sheet):
     pass
 
-GalconSheet.addCommand(ALT+'g', 'options-galcon', 'vd.push(g_client.GameOptions)', 'push game options')
-GalconSheet.addCommand(ALT+'n', 'new-map', 'vd.status(g_client.get("/regen_map")); g_client.Map.reload()', 'make New map')
-GalconSheet.addCommand(ALT+'y', 'open-players', 'vd.push(g_client.Players)', 'push players sheet')
-GalconSheet.addCommand(ALT+'p', 'open-planets', 'vd.push(g_client.Planets)', 'push planets sheet')
-GalconSheet.addCommand(ALT+'m', 'open-map', 'vd.push(g_client.Map)', 'push map sheet')
-GalconSheet.addCommand(ALT+'u', 'open-routes', 'vd.push(g_client.QueuedDeployments)', 'push unsent routes sheet')
-GalconSheet.addCommand(ALT+'d', 'open-deployments', 'vd.push(g_client.HistoricalDeployments)', 'push historical deployments sheet')
-GalconSheet.addCommand(ALT+'e', 'open-events', 'vd.push(g_client.Events)', 'push events sheet')
-GalconSheet.addCommand(ALT+'r', 'open-scores', 'vd.push(SheetList("scores", g_client.get("/scores").json()))', 'push scores sheet')
-GalconSheet.addCommand('^S', 'end-turn', 'g_client.submit_turn()', 'submit deployments and end turn')
-GalconSheet.addCommand(ALT+'q', 'quit-game', 'g_client.player_quit(); vd.quit(s for s in vd.sheets if isinstance(s, GalconSheet))', 'quit the game (with confirm)')
+GalconSheet.addCommand('Alt+g', 'options-galcon', 'vd.push(g_client.GameOptions)', 'push game options')
+GalconSheet.addCommand('Alt+n', 'new-map', 'vd.status(g_client.get("/regen_map")); g_client.Map.reload()', 'make New map')
+GalconSheet.addCommand('Alt+y', 'open-players', 'vd.push(g_client.Players)', 'push players sheet')
+GalconSheet.addCommand('Alt+p', 'open-planets', 'vd.push(g_client.Planets)', 'push planets sheet')
+GalconSheet.addCommand('Alt+m', 'open-map', 'vd.push(g_client.Map)', 'push map sheet')
+GalconSheet.addCommand('Alt+u', 'open-routes', 'vd.push(g_client.QueuedDeployments)', 'push unsent routes sheet')
+GalconSheet.addCommand('Alt+d', 'open-deployments', 'vd.push(g_client.HistoricalDeployments)', 'push historical deployments sheet')
+GalconSheet.addCommand('Alt+e', 'open-events', 'vd.push(g_client.Events)', 'push events sheet')
+GalconSheet.addCommand('Alt+r', 'open-scores', 'vd.push(SheetList("scores", g_client.get("/scores").json()))', 'push scores sheet')
+GalconSheet.addCommand('Ctrl+S', 'end-turn', 'g_client.submit_turn()', 'submit deployments and end turn')
+GalconSheet.addCommand('Alt+q', 'quit-game', 'g_client.player_quit(); vd.quit(s for s in vd.sheets if isinstance(s, GalconSheet))', 'quit the game (with confirm)')
 
 
 class WSIClient:
@@ -247,7 +247,7 @@ class PlanetsSheet(GalconSheet):
                 self.addRow(AttrDict(planetobj))
         self.rows.sort(key=lambda row: row.name)
 
-PlanetsSheet.addCommand(ENTER, 'dive-planet', 'vd.push(g_client.Map); g_client.Map.cursorRowIndex = cursorRow.y; g_client.Map.cursorColIndex = cursorRow.x', 'go to this planet on the map')
+PlanetsSheet.addCommand('Enter', 'dive-planet', 'vd.push(g_client.Map); g_client.Map.cursorRowIndex = cursorRow.y; g_client.Map.cursorColIndex = cursorRow.x', 'go to this planet on the map')
 PlanetsSheet.addCommand('m', 'mark-planet', 'sheet.marked_planet = cursorRow', 'mark current planet as destination')
 PlanetsSheet.addCommand('f', 'deploy-planet', 'g_client.add_deployment([cursorRow], marked_planet, int(input("# ships: ", value=cursorRow.nships)))', 'deploy N ships from current planet to marked planet')
 PlanetsSheet.addCommand('gf', 'deploy-planets-selected', 'g_client.add_deployment(selectedRows, marked_planet, int(input("# ships: ")))', 'deploy N ships from each selected planet to marked planet')

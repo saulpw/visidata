@@ -3,12 +3,16 @@ import functools
 from visidata import VisiData, vd
 import visidata
 
-alias = visidata.BaseSheet.bindkey
+def deprecated_alias(depver, *args, **kwargs):
+    # expand this to create cmd
+    # with cmd.deprecated=depver
+    return visidata.BaseSheet.bindkey(*args, **kwargs)
 
-def deprecated_warn(func, ver, instead):
+@VisiData.api
+def deprecated_warn(vd, funcname, ver, instead):
     import traceback
 
-    msg = f'{func.__name__} deprecated since v{ver}'
+    msg = f'{funcname} deprecated since v{ver}'
     if instead:
         msg += f'; use {instead}'
 
@@ -20,18 +24,27 @@ def deprecated_warn(func, ver, instead):
         vd.warning(f'Deprecated call traceback (most recent last):')
 
 
-def deprecated(ver, instead=''):
+def deprecated(ver, instead='', check=True):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            deprecated_warn(func, ver, instead)
+            vd.deprecated_warn(wrapper.__name__, ver, instead)
             return func(*args, **kwargs)
+
+        if check and hasattr(func, '_extensible_api'):
+            vd.error(f"{func.__name__}: @deprecated applied in wrong order")  #2623
+
         return wrapper
     return decorator
 
 
-@deprecated('1.6', 'vd instead of vd()')
+def _deprecated_api(ver, instead=''):
+    'Decorator to deliberately wrap non-deprecated .api functions as a deprecated global function.  Use @deprecated instead, except in deprecated.py.'
+    return deprecated(ver, instead, check=False)
+
+
 @VisiData.api
+@deprecated('1.6', 'vd instead of vd()')
 def __call__(vd):
     'Deprecated; use plain "vd"'
     return vd
@@ -39,7 +52,7 @@ def __call__(vd):
 
 @deprecated('1.6')
 def copyToClipboard(value):
-    vd.error("copyToClipboard longer implemented")
+    vd.error("copyToClipboard no longer implemented")
     return visidata.clipboard_copy(value)
 
 
@@ -62,32 +75,32 @@ def bindkey_override(keystrokes, longname):
 bindkey = visidata.BaseSheet.bindkey
 unbindkey = visidata.BaseSheet.unbindkey
 
-@deprecated('2.0')
 @visidata.Sheet.api
+@deprecated('2.0')
 def exec_keystrokes(self, keystrokes, vdglobals=None):
     return self.execCommand(self.getCommand(keystrokes), vdglobals, keystrokes=keystrokes)
 
 visidata.Sheet.exec_command = deprecated('2.0')(visidata.Sheet.execCommand)
 
-@deprecated('2.0', 'def open_<filetype> instead')
 @VisiData.api
+@deprecated('2.0', 'def open_<filetype> instead')
 def filetype(vd, ext, constructor):
     'Add constructor to handle the given file type/extension.'
     globals().setdefault('open_'+ext, lambda p,ext=ext: constructor(p.base_stem, source=p, filetype=ext))
 
-@deprecated('2.0', 'Sheet(namepart1, namepart2, ...)')
 @VisiData.global_api
+@deprecated('2.0', 'Sheet(namepart1, namepart2, ...)')
 def joinSheetnames(vd, *sheetnames):
     'Concatenate sheet names in a standard way'
     return visidata.options.name_joiner.join(str(x) for x in sheetnames)
 
-@deprecated('2.0', 'PyobjSheet')
 @VisiData.global_api
+@deprecated('2.0', 'PyobjSheet')
 def load_pyobj(*names, **kwargs):
     return visidata.PyobjSheet(*names, **kwargs)
 
-@deprecated('2.0', 'PyobjSheet')
 @VisiData.global_api
+@deprecated('2.0', 'PyobjSheet')
 def push_pyobj(name, pyobj):
     vs = visidata.PyobjSheet(name, source=pyobj)
     if vs:
@@ -103,33 +116,33 @@ visidata.addGlobals({'load_pyobj': load_pyobj, 'isNumeric': isNumeric})
 
 # The longnames on the left are deprecated for 2.0
 
-alias('edit-cells', 'setcol-input')
-alias('fill-nulls', 'setcol-fill')
-alias('paste-cells', 'setcol-clipboard')
-alias('frequency-rows', 'frequency-summary')
-alias('dup-cell', 'dive-cell')
-alias('dup-row', 'dive-row')
-alias('next-search', 'search-next')
-alias('prev-search', 'search-prev')
-alias('search-prev', 'searchr-next')
-alias('prev-sheet', 'jump-prev')
-alias('prev-value', 'go-prev-value')
-alias('next-value', 'go-next-value')
-alias('prev-selected', 'go-prev-selected')
-alias('next-selected', 'go-next-selected')
-alias('prev-null', 'go-prev-null')
-alias('next-null', 'go-next-null')
-alias('page-right', 'go-right-page')
-alias('page-left', 'go-left-page')
-alias('dive-cell', 'open-cell')
-alias('dive-row', 'open-row')
-alias('add-sheet', 'open-new')
-alias('save-sheets-selected', 'save-selected')
-alias('join-sheets', 'join-selected')
-alias('dive-rows', 'dive-selected')
+deprecated_alias('2.0', 'edit-cells', 'setcol-input')
+deprecated_alias('2.0', 'fill-nulls', 'setcol-fill')
+deprecated_alias('2.0', 'paste-cells', 'setcol-clipboard')
+deprecated_alias('2.0', 'frequency-rows', 'frequency-summary')
+deprecated_alias('2.0', 'dup-cell', 'dive-cell')
+deprecated_alias('2.0', 'dup-row', 'dive-row')
+deprecated_alias('2.0', 'next-search', 'search-next')
+deprecated_alias('2.0', 'prev-search', 'search-prev')
+deprecated_alias('2.0', 'search-prev', 'searchr-next')
+deprecated_alias('2.0', 'prev-sheet', 'jump-prev')
+deprecated_alias('2.0', 'prev-value', 'go-prev-value')
+deprecated_alias('2.0', 'next-value', 'go-next-value')
+deprecated_alias('2.0', 'prev-selected', 'go-prev-selected')
+deprecated_alias('2.0', 'next-selected', 'go-next-selected')
+deprecated_alias('2.0', 'prev-null', 'go-prev-null')
+deprecated_alias('2.0', 'next-null', 'go-next-null')
+deprecated_alias('2.0', 'page-right', 'go-right-page')
+deprecated_alias('2.0', 'page-left', 'go-left-page')
+deprecated_alias('2.0', 'dive-cell', 'open-cell')
+deprecated_alias('2.0', 'dive-row', 'open-row')
+deprecated_alias('2.0', 'add-sheet', 'open-new')
+deprecated_alias('2.0', 'save-sheets-selected', 'save-selected')
+deprecated_alias('2.0', 'join-sheets', 'join-selected')
+deprecated_alias('2.0', 'dive-rows', 'dive-selected')
 
 # v2.3
-alias('show-aggregate', 'memo-aggregate')
+deprecated_alias('2.3', 'show-aggregate', 'memo-aggregate')
 #theme('use_default_colors', True, 'curses use default terminal colors')
 #option('expand_col_scanrows', 1000, 'number of rows to check when expanding columns (0 = all)')
 
@@ -149,25 +162,25 @@ def load_tsv(fn):
 
 # NOTE: you cannot use deprecated() with nonfuncs
 
-cancelThread = deprecated('2.6', 'vd.cancelThread')(vd.cancelThread)
-status = deprecated('2.6', 'vd.status')(vd.status)
-warning = deprecated('2.6', 'vd.warning')(vd.warning)
-error = deprecated('2.6', 'vd.error')(vd.error)
-debug = deprecated('2.6', 'vd.debug')(vd.debug)
-fail = deprecated('2.6', 'vd.fail')(vd.fail)
+cancelThread = _deprecated_api('2.6', 'vd.cancelThread')(vd.cancelThread)
+status = _deprecated_api('2.6', 'vd.status')(vd.status)
+warning = _deprecated_api('2.6', 'vd.warning')(vd.warning)
+error = _deprecated_api('2.6', 'vd.error')(vd.error)
+debug = _deprecated_api('2.6', 'vd.debug')(vd.debug)
+fail = _deprecated_api('2.6', 'vd.fail')(vd.fail)
 
 option = theme = vd.option # deprecated('2.6', 'vd.option')(vd.option)
 jointypes = vd.jointypes # deprecated('2.6', 'vd.jointypes')(vd.jointypes)
-confirm = deprecated('2.6', 'vd.confirm')(vd.confirm)
-launchExternalEditor = deprecated('2.6', 'vd.launchExternalEditor')(vd.launchExternalEditor)
-launchEditor = deprecated('2.6', 'vd.launchEditor')(vd.launchEditor)
-exceptionCaught = deprecated('2.6', 'vd.exceptionCaught')(vd.exceptionCaught)
-openSource = deprecated('2.6', 'vd.openSource')(vd.openSource)
+confirm = _deprecated_api('2.6', 'vd.confirm')(vd.confirm)
+launchExternalEditor = _deprecated_api('2.6', 'vd.launchExternalEditor')(vd.launchExternalEditor)
+launchEditor = _deprecated_api('2.6', 'vd.launchEditor')(vd.launchEditor)
+exceptionCaught = _deprecated_api('2.6', 'vd.exceptionCaught')(vd.exceptionCaught)
+openSource = _deprecated_api('2.6', 'vd.openSource')(vd.openSource)
 globalCommand = visidata.BaseSheet.addCommand
-visidata.Sheet.StaticColumn = deprecated('2.11', 'Sheet.freeze_col')(visidata.Sheet.freeze_col)
+visidata.Sheet.StaticColumn = _deprecated_api('2.11', 'Sheet.freeze_col')(visidata.Sheet.freeze_col)
 #visidata.Path.open_text = deprecated('3.0', 'visidata.Path.open')(visidata.Path.open)  # undeprecated in 3.1
 
-vd.sysclip_value = deprecated('3.0', 'vd.sysclipValue')(vd.sysclipValue)
+vd.sysclip_value = _deprecated_api('3.0', 'vd.sysclipValue')(vd.sysclipValue)
 
 def itemsetter(i):
     def g(obj, v):
@@ -181,8 +194,8 @@ vd.optalias('confirm_overwrite', 'overwrite', 'confirm')
 vd.optalias('show_graph_labels', 'disp_graph_labels')
 vd.optalias('zoom_incr', 'disp_zoom_incr')
 
-alias('visibility-sheet', 'toggle-multiline')
-alias('visibility-col', 'toggle-multiline')
+deprecated_alias('3.0', 'visibility-sheet', 'toggle-multiline')
+deprecated_alias('3.0', 'visibility-col', 'toggle-multiline')
 
 def clean_to_id(s):
     return visidata.vd.cleanName(s)
@@ -204,7 +217,7 @@ class OnExit:
         except Exception as e:
             vd.exceptionCaught(e)
 
-alias('open-inputs', 'open-input-history')
+deprecated_alias('3.0', 'open-inputs', 'open-input-history')
 
 #vd.option('plugins_url', 'https://visidata.org/plugins/plugins.jsonl', 'source of plugins sheet')
 
@@ -216,39 +229,57 @@ def inputRegexSubstOld(vd, prompt):
     return dict(before=before, after=after)
 
 
-visidata.Sheet.addCommand('', 'addcol-subst', 'addColumnAtCursor(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, **inputRegexSubstOld("transform column by regex: "))))', 'add column derived from current column, replacing regex with subst (may include \1 backrefs)', deprecated=True)
-visidata.Sheet.addCommand('', 'setcol-subst', 'setValuesFromRegex([cursorCol], someSelectedRows, **inputRegexSubstOld("transform column by regex: "))', 'regex/subst - modify selected rows in current column, replacing regex with subst, (may include backreferences \\1 etc)', deprecated=True)
-visidata.Sheet.addCommand('', 'setcol-subst-all', 'setValuesFromRegex(visibleCols, someSelectedRows, **inputRegexSubstOld(f"transform {nVisibleCols} columns by regex: "))', 'modify selected rows in all visible columns, replacing regex with subst (may include \\1 backrefs)', deprecated=True)
+visidata.Sheet.addCommand('', 'addcol-subst', 'addColumnAtCursor(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, **inputRegexSubstOld("transform column by regex: "))))', 'add column derived from current column, replacing regex with subst (may include \1 backrefs)', deprecated='3.0')
+visidata.Sheet.addCommand('', 'setcol-subst', 'setValuesFromRegex([cursorCol], someSelectedRows, **inputRegexSubstOld("transform column by regex: "))', 'regex/subst - modify selected rows in current column, replacing regex with subst, (may include backreferences \\1 etc)', deprecated='3.0')
+visidata.Sheet.addCommand('', 'setcol-subst-all', 'setValuesFromRegex(visibleCols, someSelectedRows, **inputRegexSubstOld(f"transform {nVisibleCols} columns by regex: "))', 'modify selected rows in all visible columns, replacing regex with subst (may include \\1 backrefs)', deprecated='3.0')
 
-visidata.Sheet.addCommand('', 'split-col', 'addRegexColumns(makeRegexSplitter, cursorCol, inputRegex("split regex: ", type="regex-split"))', 'Add new columns from regex split', deprecated=True)
-visidata.Sheet.addCommand('', 'capture-col', 'addRegexColumns(makeRegexMatcher, cursorCol, inputRegex("capture regex: ", type="regex-capture"))', 'add new column from capture groups of regex; requires example row', deprecated=True)
+visidata.Sheet.addCommand('', 'split-col', 'addRegexColumns(makeRegexSplitter, cursorCol, inputRegex("split regex: ", type="regex-split"))', 'Add new columns from regex split', deprecated='3.0')
+visidata.Sheet.addCommand('', 'capture-col', 'addRegexColumns(makeRegexMatcher, cursorCol, inputRegex("capture regex: ", type="regex-capture"))', 'add new column from capture groups of regex; requires example row', deprecated='3.0')
 
 #vd.option('cmdlog_histfile', '', 'file to autorecord each cmdlog action to', sheettype=None)
 #BaseSheet.bindkey('KEY_BACKSPACE', 'menu-help')
 
-@deprecated('3.0', 'vd.callNoExceptions(col.setValue, row, value)')
 @visidata.Column.api
+@deprecated('3.0', 'vd.callNoExceptions(col.setValue, row, value)')
 def setValueSafe(self, row, value):
     'setValue and ignore exceptions.'
     return vd.callNoExceptions(self.setValue, row, value)
 
-@deprecated('3.0', 'vd.callNoExceptions(sheet.checkCursor)')
 @visidata.BaseSheet.api
+@deprecated('3.0', 'vd.callNoExceptions(sheet.checkCursor)')
 def checkCursorNoExceptions(sheet):
     return vd.callNoExceptions(sheet.checkCursor)
 
-@deprecated('3.1', 'vd.memoValue(name, value, displayvalue)')
 @VisiData.api
+@deprecated('3.1', 'vd.memoValue(name, value, displayvalue)')
 def memo(vd, name, col, row):
     return vd.memoValue(name, col.getTypedValue(row), col.getDisplayValue(row))
 
-alias('view-cell', 'pyobj-cell')
+deprecated_alias('3.1', 'view-cell', 'pyobj-cell')
 
 vd.optalias('textwrap_cells', 'disp_wrap_max_lines', 3) # wordwrap text for multiline rows
 
-@deprecated('3.1', 'sheet.rowname(row)')
 @visidata.TableSheet.api
+@deprecated('3.1', 'sheet.rowname(row)')
 def keystr(sheet, row):
     return sheet.rowname(row)
 
 vd.optalias('color_refline', 'color_graph_refline') # color_refline was used in v3.1 by mistake
+
+@visidata.TableSheet.api
+@deprecated('3.2', '[self.unsetKeys([c]) if c.keycol else self.setKeys([c]) for c in cols]')
+def toggleKeys(self, cols):
+    for col in cols:
+        if col.keycol:
+            self.unsetKeys([col])
+        else:
+            self.setKeys([col])
+
+vd.optalias('disp_pixel_random', 'disp_graph_pixel_random')  #2661
+
+vd.addGlobals(deprecated_warn=deprecated_warn)
+
+# v3.3
+
+#vd.option('disp_expert', 'max level of options and columns to include')
+#vd.option('disp_help', '')

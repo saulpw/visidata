@@ -104,3 +104,4 @@ vd.addMenuItems('''
     Data > Melt > nonkey columns > melt
     Data > Melt > nonkey columns by regex > melt-regex
 ''')
+vd.addGlobals(MeltedSheet=MeltedSheet)

@@ -7,7 +7,7 @@ Each guide shows you how to use a particular feature in VisiData. Gray guides ha
 '''
 import re
 
-from visidata import vd, BaseSheet, Sheet, ItemColumn, Column, VisiData, ENTER, RowColorizer, AttrDict, MissingAttrFormatter
+from visidata import vd, BaseSheet, Sheet, ItemColumn, Column, VisiData, RowColorizer, AttrDict, MissingAttrFormatter
 from visidata import wraptext, Path, CellColorizer
 import visidata
 

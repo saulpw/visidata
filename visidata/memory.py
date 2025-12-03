@@ -1,4 +1,4 @@
-from visidata import Sheet, VisiData, ItemColumn, vd, AttrDict, Column, setitem, ESC
+from visidata import BaseSheet, Sheet, VisiData, ItemColumn, vd, AttrDict, Column, setitem, ESC
 
 vd.memory = AttrDict()
 vd.contexts += [vd.memory]
@@ -42,5 +42,5 @@ def inputMemoName(vd, value):
     return name
 
 
-Sheet.addCommand('Alt+Shift+M', 'open-memos', 'vd.push(vd.memosSheet)', 'open the Memory Sheet')
+BaseSheet.addCommand('Alt+Shift+M', 'open-memos', 'vd.push(vd.memosSheet)', 'open the Memory Sheet')
 Sheet.addCommand('Alt+m', 'memo-cell', 'vd.memoValue(inputMemoName(cursorDisplay), cursorTypedValue, cursorDisplay)', 'store value in current cell to Memory Sheet')

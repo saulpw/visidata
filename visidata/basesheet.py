@@ -4,7 +4,7 @@ import visidata
 from visidata import Extensible, VisiData, vd, EscapeException, MissingAttrFormatter, AttrDict
 
 
-UNLOADED = tuple()  # sentinel for a sheet not yet loaded for the first time
+UNLOADED = tuple()  # sentinel for a sheet not yet loaded for the first time; should be iterable
 
 vd.beforeExecHooks = [] # func(sheet, cmd, args, keystrokes) called before the exec()
 
@@ -76,6 +76,8 @@ class DrawablePane(Extensible):
 
         try:
             self.sheet = self
+            if cmd.deprecated:
+                vd.deprecated_warn(cmd.longname, cmd.deprecated, 'a different command')
             code = compile(cmd.execstr, cmd.longname, 'exec')
             exec(code, vdglobals, LazyChainMap(vd, self))
             return False
@@ -105,6 +107,7 @@ class BaseSheet(DrawablePane):
     precious = True      # False for a few discardable metasheets
     defer = False        # False for not deferring changes until save
     guide = ''           # default to show in sidebar
+    icon = '›'
 
     def _obj_options(self):
         return vd.OptionsObject(vd._options, obj=self)
@@ -212,7 +215,7 @@ class BaseSheet(DrawablePane):
         try:
             for hookfunc in vd.beforeExecHooks:
                 hookfunc(self, cmd, '', keystrokes)
-            escaped = super().execCommand2(cmd, vdglobals=vdglobals)
+            escaped = self.execCommand2(cmd, vdglobals=vdglobals)
         except Exception as e:
             vd.debug(cmd.execstr)
             err = vd.exceptionCaught(e)
@@ -298,8 +301,6 @@ class BaseSheet(DrawablePane):
     def formatString(self, fmt, **kwargs):
         'Return formatted string with *sheet* and *vd* accessible to expressions.  Missing expressions return empty strings instead of error.'
         return MissingAttrFormatter().format(fmt, sheet=self, vd=vd, **kwargs)
-
-
 
 @VisiData.api
 def redraw(vd):
