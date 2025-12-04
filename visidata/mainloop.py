@@ -34,6 +34,9 @@ def callNoExceptions(vd, func, *args, **kwargs):
 def drawSheet(vd, scr, sheet):
     'Erase *scr* and draw *sheet* on it, including status bars and sidebar.'
 
+    if not sheet:
+        return
+
     sheet.ensureLoaded()
 
     if not scr:
