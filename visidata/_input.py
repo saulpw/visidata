@@ -265,8 +265,8 @@ class InputWidget:
             vd.cycleSidebar()
             return False # not considered a first keypress
         elif ch in ('Ctrl+H', 'Bksp', 'Ctrl+?'):   i -= 1; v = delchar(v, i)
-        elif ch == 'Tab':                       v, i = self.completion(v, i, +1)
-        elif ch == 'Shift+Tab':                     v, i = self.completion(v, i, -1)
+        elif ch == 'Tab':                          v, i = self.completion(v, i, +1)
+        elif ch == 'Shift+Tab':                    v, i = self.completion(v, i, -1)
         elif ch == 'Enter':                        return True # ENTER to accept value
         elif ch == 'Ctrl+K':                       v = v[:i]  # Ctrl+Kill to end-of-line
         elif ch == 'Ctrl+N':
@@ -289,17 +289,17 @@ class InputWidget:
         elif ch == 'Ctrl+U':                           v = v[i:]; i = 0  # clear to beginning
         elif ch == 'Ctrl+V':                           v = splice(v, i, until_get_wch(scr)); i += 1  # literal character
         elif ch == 'Ctrl+W':                           j = find_word(v, 0, i-1, -1); v = v[:j+1] + v[i:]; i = j+1  # erase word
-        elif ch in ('KEY_DC5','kDC5','kDC3'):      j = find_word(v, i, len(v), +1); v = v[:i] + v[j+1:]  # erase word forward
+        elif ch in ('Ctrl+Del'):                       j = find_word(v, i, len(v), +1); v = v[:i] + v[j+1:]  # erase word forward
         elif ch == 'Ctrl+Y':                           v = splice(v, i, str(vd.memory.clipval))
         elif ch == 'Ctrl+Z':                           vd.suspend()
-        # CTRL+arrow
-        elif ch == 'kLFT5':                        i = find_word(v, 0, i-1, -1)+1;  # word left
-        elif ch == 'kRIT5':                        i = find_word(v, i, len(v)-1, +1);  # word right
-        elif ch == 'kUP5':                         pass
-        elif ch == 'kDN5':                         pass
-        elif self.history and ch == 'KEY_UP':    v, i = self.prev_history(v, i)
-        elif self.history and ch == 'KEY_DOWN':  v, i = self.next_history(v, i)
-        elif len(ch) > 1:                          vd.warning(f'unknown key {ch}')
+        elif ch == 'Ctrl+Left':                        i = find_word(v, 0, i-1, -1)+1;  # word left
+        elif ch == 'Ctrl+Right':                       i = find_word(v, i, len(v)-1, +1);  # word right
+        elif ch == 'Ctrl+Up':                          pass
+        elif ch == 'Ctrl+Down':                        pass
+        elif self.history and ch == 'Up':              v, i = self.prev_history(v, i)
+        elif self.history and ch == 'Down':            v, i = self.next_history(v, i)
+        elif ch == 'KEY_RESIZE':                       pass
+        elif len(ch) > 1:                              vd.warning(f'unknown key {ch}')
         else:
             if self.first_action:
                 v = ''
