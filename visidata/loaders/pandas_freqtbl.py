@@ -205,10 +205,14 @@ def expand_source_rows(sheet, row):
     """Support for expanding a row of frequency table to underlying rows"""
     if row.sourcerows is None:
         vd.fail("no source rows")
+    # Extract the actual filtered DataFrame to preserve column names
+    # row.sourcerows is a DataFrameRowSliceAdapter which doesn't preserve
+    # column names when passed to pd.DataFrame() constructor
+    source_df = row.sourcerows.df[row.sourcerows.mask_bool]
     return PandasSheet(
         sheet.name,
         vd.valueNames(row.discrete_keys, row.numeric_key),
-        source=row.sourcerows,
+        source=source_df,
     )
 
 
