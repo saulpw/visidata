@@ -1248,7 +1248,7 @@ def async_deepcopy(sheet, rowlist):
     _async_deepcopy(ret, rowlist)
     return ret
 
-@Sheet.api
+@BaseSheet.api
 def reload_or_replace(sheet):
     sheet.preloadHook()
     if isinstance(sheet.source, visidata.Path) and \
