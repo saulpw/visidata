@@ -1056,6 +1056,7 @@ class TableSheet(BaseSheet):
 
                         left_hl = False
                         right_hl = False
+                        truncate_right = False  #becomes True only if the highlighted chunk ends at the col edge
                         dispw = 0
                         for attr, text in chunks:
                             last = hoffset if hoffset > 0 else 0
@@ -1071,19 +1072,31 @@ class TableSheet(BaseSheet):
                                     m1 = hoffset
                                 if m1 > last:
                                     s = text[last:m1]
-                                    display_chunks.append((attr, s))
+                                    if truncate_right:
+                                        display_chunks[-1][1] += s
+                                    else:
+                                        display_chunks.append([attr, s])
                                     dispw += dispwidth(s)
                                 s = text[m1:m2]
-                                display_chunks.append((hl_attr, s))
+                                if truncate_right:
+                                    display_chunks[-1][1] += s
+                                else:
+                                    display_chunks.append([hl_attr, s])
                                 dispw += dispwidth(text[m1:m2])
                                 if dispw > colwidth-notewidth-1:
                                     right_hl = True
                                     last = len(text)
                                     break
+                                if dispw == colwidth-notewidth-1:
+                                    #append any subsequent cell text to the highlighted chunk so it gets a truncator added by clipdraw()
+                                    truncate_right = True
                                 last = m2
                             if last < len(text):
                                 s = text[last:]
-                                display_chunks.append((attr, s))
+                                if truncate_right:
+                                    display_chunks[-1][1] += s
+                                else:
+                                    display_chunks.append([attr, s])
                                 dispw += dispwidth(s)
                         if colwidth > 2:
                             pre = disp_truncator if hoffset != 0 else disp_column_fill
