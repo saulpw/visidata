@@ -112,8 +112,10 @@ class TextCanvas(BaseSheet):
     def slide(self, rows, dx, dy):
         maxX, maxY = self.windowWidth, self.windowHeight
         x1, y1, x2, y2 = boundingBox(rows)
-        dx = -x1 if x1+dx < 0 else (maxX-x2-1 if x2+dx > maxX-1 else dx)
-        dy = -y1 if y1+dy < 0 else (maxY-y2-1 if y2+dy > maxY-1 else dy)
+
+        if x1+dx < 0: dx = -x1
+        if y1+dy < 0: dy = -y1
+
         xcol = self.source.column('x')
         ycol = self.source.column('y')
         for r in rows:
