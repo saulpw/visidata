@@ -1,4 +1,5 @@
 import pytest
+import warnings
 from unittest.mock import Mock, patch
 
 import visidata
@@ -9,6 +10,7 @@ class TestEditText:
     def setUp(self):
         self.chars = []
         visidata.vd.getkeystroke = Mock(side_effect=self.chars)
+        visidata.vd.warning = warnings.warn
 
     @pytest.mark.parametrize('keys, result, kwargs', [
         ('Enter', '', {}),

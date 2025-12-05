@@ -257,7 +257,7 @@ class InputWidget:
         elif ch == 'Ins':                          self.insert_mode = not self.insert_mode
         elif ch == 'Ctrl+A' or ch == 'Home':       i = 0
         elif ch == 'Ctrl+B' or ch == 'Left':       i -= 1
-        elif ch in ('Ctrl+C', 'Ctrl+Q', 'Ctrl+['): raise EscapeException(ch)
+        elif ch in ('Ctrl+C', 'Ctrl+Q', 'Esc'): raise EscapeException(ch)
         elif ch == 'Ctrl+D' or ch == 'Del':        v = delchar(v, i)
         elif ch == 'Ctrl+E' or ch == 'End':        i = len(v)
         elif ch == 'Ctrl+F' or ch == 'Right':      i += 1
@@ -299,7 +299,7 @@ class InputWidget:
         elif ch == 'kDN5':                         pass
         elif self.history and ch == 'KEY_UP':    v, i = self.prev_history(v, i)
         elif self.history and ch == 'KEY_DOWN':  v, i = self.next_history(v, i)
-        elif len(ch) > 1:                          pass
+        elif len(ch) > 1:                          vd.warning(f'unknown key {ch}')
         else:
             if self.first_action:
                 v = ''
