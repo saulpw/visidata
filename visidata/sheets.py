@@ -1296,8 +1296,8 @@ globalCommand('gq', 'quit-all', 'vd.quit(*vd.sheets)', 'quit all sheets (clean e
 
 BaseSheet.addCommand('Z', 'splitwin-half', 'splitPane(vd.options.disp_splitwin_pct or 50)', 'ensure split pane is set and push under sheet onto other pane')
 BaseSheet.addCommand('gZ', 'splitwin-close', 'vd.options.disp_splitwin_pct = 0\nfor vs in vd.activeStack: vs.pane = 1', 'close split screen')
-BaseSheet.addCommand('Ctrl+I', 'splitwin-swap', 'vd.activePane = 1 if sheet.pane == 2 else 2', 'jump to inactive pane')
-BaseSheet.addCommand('gCtrl+I', 'splitwin-swap-pane', 'vd.options.disp_splitwin_pct=-vd.options.disp_splitwin_pct', 'swap panes onscreen')
+BaseSheet.addCommand('Tab', 'splitwin-swap', 'vd.activePane = 1 if sheet.pane == 2 else 2', 'jump to inactive pane')
+BaseSheet.addCommand('gTab', 'splitwin-swap-pane', 'vd.options.disp_splitwin_pct=-vd.options.disp_splitwin_pct', 'swap panes onscreen')
 BaseSheet.addCommand('zZ', 'splitwin-input', 'vd.options.disp_splitwin_pct = input("% height for split window: ", value=vd.options.disp_splitwin_pct)', 'set split pane to specific size')
 
 BaseSheet.addCommand('Ctrl+L', 'redraw', 'sheet.refresh(); vd.redraw(); vd.draw_all()', 'Refresh screen')
