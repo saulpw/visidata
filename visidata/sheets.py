@@ -1047,13 +1047,11 @@ class TableSheet(BaseSheet):
                         hl_attr = colors.get_color(options.color_highlight_search)
                     else:
                         hp = None
-                    for i, chunks in enumerate(lines):
-                        y = ybase+i
 
-                        sepchars = seps[i]
 
+                    def _highlight(chunks):
+                        '''consumes the generator *chunks*'''
                         display_chunks = []
-
                         left_hl = False
                         right_hl = False
                         truncate_right = False  #becomes True only if the highlighted chunk ends at the col edge
@@ -1101,8 +1099,15 @@ class TableSheet(BaseSheet):
                         if colwidth > 2:
                             pre = disp_truncator if hoffset != 0 else disp_column_fill
                             display_chunks.insert(0, (hl_attr if left_hl else cattr, pre))
+                        return display_chunks, right_hl
 
-                        clipdraw_chunks(scr, y, x, display_chunks, cattr if i < height-1 else bottomcattr, w=colwidth-notewidth)
+                    for i, chunks in enumerate(lines):
+                        y = ybase+i
+
+                        sepchars = seps[i]
+
+                        chunks, right_hl = _highlight(chunks)
+                        clipdraw_chunks(scr, y, x, chunks, cattr if i < height-1 else bottomcattr, w=colwidth-notewidth)
                         if right_hl:
                             hl_attr = update_attr(cattr, hl_attr, 100)
                             clipdraw(scr, y, x+(colwidth-notewidth-1), disp_truncator, hl_attr, w=dispwidth(disp_truncator))
