@@ -59,6 +59,10 @@ def preloadHook(sheet):
     sheet._deferredMods.clear()
     sheet._deferredDels.clear()
 
+@Sheet.after
+def afterLoad(sheet):
+    sheet.hasBeenModified = False
+
 @Sheet.api
 def rowAdded(self, row):
     'Mark row as a deferred add-row'
