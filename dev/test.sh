@@ -5,7 +5,8 @@
 #set -e
 shopt -s failglob
 
-trap "echo aborted; exit;" SIGINT SIGTERM
+trap "echo SIGTERM; exit;" SIGTERM
+trap "echo SIGINT; exit;" SIGINT
 
 export LC_NUMERIC="en_US.UTF-8" #2867
 export LC_TIME="en_US.UTF-8"
