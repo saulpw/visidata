@@ -58,6 +58,7 @@ def inputPalette(sheet, prompt, items,
                  value_key='key',
                  formatter=lambda m, item, trigger_key: f'{trigger_key} {item}',
                  multiple=False,
+                 x=0, y=0, w=0, h=0,
                  **kwargs):
     if not vd.wantsHelp('cmdpalette'):
         return vd.input(prompt,
@@ -81,7 +82,7 @@ def inputPalette(sheet, prompt, items,
         tabitem = (tabitem + n) % nitems
 
     def _draw_palette(value):
-        nonlocal prev_value
+        nonlocal prev_value, h, w
         words = value.split()
         if value != prev_value:
             reset_display()
@@ -102,8 +103,8 @@ def inputPalette(sheet, prompt, items,
 
         matches = vd.fuzzymatch(unuseditems, unfinished_words)
 
-        h = sheet.windowHeight
-        w = min(100, sheet.windowWidth)
+        h = h or sheet.windowHeight
+        w = w or min(100, sheet.windowWidth)
         nitems = min(h-2, sheet.options.disp_cmdpal_max)
         if nitems <= 0:
             return None
@@ -187,10 +188,11 @@ def inputPalette(sheet, prompt, items,
 
             match_summary = formatter(m, item, trigger_key) if item else ' '
 
-            clipdraw(sheet._scr, h-nitems-2+i, 0, match_summary, attr, w=w)
+            clipdraw(sheet._scr, y+h-nitems-2+i, x, match_summary, attr, w=w)
         attr = colors.color_cmdpalette
         instr = 'Press [:keystrokes]PgUp/PgDn[/] to scroll items, [:keystrokes]Tab/Shift+Tab/Enter[/] to choose, [:keystrokes]Esc[/] to cancel.'
-        clipdraw(sheet._scr, h-2, 0, instr, attr, w=w)
+        if dispwidth(instr) < w:
+            clipdraw(sheet._scr, h-2, x, instr, attr, w=w)
 
         return None
 
