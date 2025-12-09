@@ -36,6 +36,8 @@ visidata.vd.prettykeys_trdict = {
         'KEY_IC':    'Ins',
         'KEY_DC':    'Del',
 
+        'kUP6':      'Ctrl+Shift+Up',
+        'kDN6':      'Ctrl+Shift+Down',
         'kUP':       'Shift+Up',
         'kDN':       'Shift+Down',
         'KEY_SRIGHT':'Shift+Right',
