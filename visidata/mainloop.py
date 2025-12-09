@@ -260,15 +260,16 @@ def mainloop(vd, scr):
         vd.callNoExceptions(sheet.checkCursor)
 
         time.sleep(0)  # yield to other threads which may not have started yet
+        curses_timeout = vd.curses_timeout
         if vd._nextCommands:
             if vd.unfinishedThreads:  #2369 #2635
                 # while running a bg thread for a command, schedule infrequent redraws
-                vd.curses_timeout = nonidle_timeout
+                curses_timeout = nonidle_timeout
             else:
                 # otherwise, schedule the next redraw and command (immediately, for default replay_wait)
-                vd.curses_timeout = int(vd.options.replay_wait*1000)
+                curses_timeout = int(vd.options.replay_wait*1000)
         elif vd.unfinishedThreads:
-            vd.curses_timeout = nonidle_timeout
+            curses_timeout = nonidle_timeout
         else:
             numTimeouts += 1
             if vd.timeouts_before_idle >= 0 and numTimeouts >= vd.timeouts_before_idle:
@@ -276,7 +277,7 @@ def mainloop(vd, scr):
             else:
                 vd.curses_timeout = nonidle_timeout
 
-        scr.timeout(vd.curses_timeout)
+        scr.timeout(curses_timeout)
 
 
 @VisiData.api
