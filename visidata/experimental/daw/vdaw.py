@@ -374,7 +374,7 @@ class PodcastEditingSheet(Sheet):
 
     def combine_rows(self, rows):
         vd.addUndo(setattr, self, 'rows', copy(self.rows))
-        self.modified = True
+        self.setModified()
 
         uncutrows = [r for r in rows if not r.cut or r.cut < 0]
         newrow = EditRow(speaker=' '.join(set(r.speaker for r in uncutrows if r.speaker)),
@@ -387,7 +387,7 @@ class PodcastEditingSheet(Sheet):
 
     def expand_row(self, rowidx):
         vd.addUndo(setattr, self, 'rows', copy(self.rows))
-        self.modified = True
+        self.setModified()
 
         subrows = self.rows[rowidx].subrows
         if subrows:
@@ -398,14 +398,14 @@ class PodcastEditingSheet(Sheet):
             vd.warning('no subrows')
 
     def bump(self, n, *rows):
-        self.modified = True
+        self.setModified()
         for row in rows:
             vd.addUndo(setattr, row, 'cut', row.cut)
             row.cut = (row.cut or 0)+n
         self.column('duration')._aggregatedTotals.clear()
 
     def cycle_speaker(self, row):
-        self.modified = True
+        self.setModified()
         vd.addUndo(setattr, row, 'speaker', row.speaker)
         speakers = list(self.speakers.keys())
         row.speaker = speakers[(speakers.index(row.speaker)+1)%len(speakers)]
