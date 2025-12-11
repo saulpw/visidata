@@ -161,7 +161,6 @@ def runresult(vd):
 @VisiData.api
 def mainloop(vd, scr):
     'Manage execution of keystrokes and subsequent redrawing of screen.'
-    nonidle_timeout = vd.curses_timeout
 
     scr.timeout(vd.curses_timeout)
     with contextlib.suppress(curses.error):
@@ -260,7 +259,13 @@ def mainloop(vd, scr):
         vd.callNoExceptions(sheet.checkCursor)
 
         time.sleep(0)  # yield to other threads which may not have started yet
-        curses_timeout = vd.curses_timeout
+        scr.timeout(vd.get_curses_timeout())
+
+
+@VisiData.api
+def get_curses_timeout(vd) -> int:
+        nonidle_timeout = vd.curses_timeout
+
         if vd._nextCommands:
             if vd.unfinishedThreads:  #2369 #2635
                 # while running a bg thread for a command, schedule infrequent redraws
@@ -273,11 +278,11 @@ def mainloop(vd, scr):
         else:
             vd.numTimeouts += 1
             if vd.timeouts_before_idle >= 0 and vd.numTimeouts >= vd.timeouts_before_idle:
-                vd.curses_timeout = -1
+                curses_timeout = -1  # nothing has been happening for a bit, wait indefinitely
             else:
-                vd.curses_timeout = nonidle_timeout
+                curses_timeout = nonidle_timeout
 
-        scr.timeout(curses_timeout)
+        return curses_timeout
 
 
 @VisiData.api

@@ -134,7 +134,7 @@ class VisiData(visidata.Extensible):
         except curses.error:
             pass
         finally:
-            scr.timeout(self.curses_timeout)
+            scr.timeout(self.get_curses_timeout())
 
         return bool(self.pendingKeys)
 
