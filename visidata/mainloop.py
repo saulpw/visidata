@@ -167,7 +167,7 @@ def mainloop(vd, scr):
     with contextlib.suppress(curses.error):
         curses.curs_set(0)
 
-    numTimeouts = 0
+    vd.numTimeouts = 0
     prefixWaiting = False
     vd.scrFull = scr
     if not vd.wantsHelp('help'):
@@ -201,7 +201,7 @@ def mainloop(vd, scr):
             vd.keystrokes = ''
 
         if keystroke:  # wait until next keystroke to clear statuses and previous keystrokes
-            numTimeouts = 0
+            vd.numTimeouts = 0
             if not prefixWaiting:
                 vd.keystrokes = ''
 
@@ -271,8 +271,8 @@ def mainloop(vd, scr):
         elif vd.unfinishedThreads:
             curses_timeout = nonidle_timeout
         else:
-            numTimeouts += 1
-            if vd.timeouts_before_idle >= 0 and numTimeouts >= vd.timeouts_before_idle:
+            vd.numTimeouts += 1
+            if vd.timeouts_before_idle >= 0 and vd.numTimeouts >= vd.timeouts_before_idle:
                 vd.curses_timeout = -1
             else:
                 vd.curses_timeout = nonidle_timeout
