@@ -206,7 +206,12 @@ def threadStatus(vs) -> str:
     if vs.currentThreads:
         ret = str(vd.checkMemoryUsage())
         gerunds = [p.gerund for p in vs.progresses if p.gerund] or [f'processing']
-        ret += f' [:working]{len(vd._queuedFuncs)} queued funcs[/] '
+        if vd._queuedFuncs:
+            ret += f' [:working]{len(vd._queuedFuncs)} queued functions[/] '
+
+        if vd._nextCommands:
+            ret += f' [:working]{len(vd._nextCommands)} queued commands[/] '
+
         ret += f' [:working]{vs.progressPct} {gerunds[0]}…[/]'
         return ret
     return ''
