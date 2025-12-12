@@ -238,22 +238,20 @@ def mainloop(vd, scr):
             prefixWaiting = False
 
         # play next queued command
-        if vd._nextCommands and not vd.unfinishedThreads:
-            cmd = vd._nextCommands.pop(0)
-            if isinstance(cmd, (dict, list)):  # .vd cmdlog rows are NamedListTemplate
-                try:
+        try:
+            if vd._nextCommands and not vd.unfinishedThreads:
+                cmd = vd._nextCommands.pop(0)
+                if isinstance(cmd, (dict, list)):  # .vd cmdlog rows are NamedListTemplate
                     if vd.replayOne(cmd):
                         vd.replay_cancel()
-                except Exception as e:
-                    vd.exceptionCaught(e)
-                    vd.replay_cancel()
-            else:
-                sheet.execCommand(cmd, keystrokes=vd.keystrokes)
+                else:
+                    sheet.execCommand(cmd, keystrokes=vd.keystrokes)
+        except Exception as e:
+            vd.exceptionCaught(e)
+            vd.replay_cancel()
 
         if not vd._nextCommands:
-            if vd.currentReplay:
-                vd.currentReplayRow = None
-                vd.currentReplay = None
+            vd.replay_cancel()
 
         vd.checkForFinishedThreads()
         vd.callNoExceptions(sheet.checkCursor)
