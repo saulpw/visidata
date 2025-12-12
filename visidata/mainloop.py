@@ -267,12 +267,15 @@ def get_curses_timeout(vd) -> int:
         nonidle_timeout = vd.curses_timeout
 
         if vd._nextCommands:
-            if vd.unfinishedThreads:  #2369 #2635
+            if vd.currentReplay:
+                curses_timeout = int(vd.options.replay_wait*1000)
+            elif vd.unfinishedThreads:  #2369 #2635
                 # while running a bg thread for a command, schedule infrequent redraws
                 curses_timeout = nonidle_timeout
             else:
-                # otherwise, schedule the next redraw and command (immediately, for default replay_wait)
-                curses_timeout = int(vd.options.replay_wait*1000)
+                # otherwise, schedule the next redraw and command immediately
+                curses_timeout = 0
+
         elif vd.unfinishedThreads:
             curses_timeout = nonidle_timeout
         else:
