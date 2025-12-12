@@ -237,7 +237,17 @@ def mainloop(vd, scr):
             vd.status('no command for "%s"' % (vd.keystrokes))
             prefixWaiting = False
 
-        # play next queued command
+        vd._playNextQueuedCommand()
+
+        vd.checkForFinishedThreads()
+        vd.callNoExceptions(sheet.checkCursor)
+
+        time.sleep(0)  # yield to other threads which may not have started yet
+        scr.timeout(vd.get_curses_timeout())
+
+
+@VisiData.api
+def _playNextQueuedCommand(vd):
         try:
             if vd._nextCommands and not vd.unfinishedThreads:
                 cmd = vd._nextCommands.pop(0)
@@ -252,12 +262,6 @@ def mainloop(vd, scr):
 
         if not vd._nextCommands:
             vd.replay_cancel()
-
-        vd.checkForFinishedThreads()
-        vd.callNoExceptions(sheet.checkCursor)
-
-        time.sleep(0)  # yield to other threads which may not have started yet
-        scr.timeout(vd.get_curses_timeout())
 
 
 @VisiData.api
