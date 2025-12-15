@@ -65,7 +65,7 @@ To minimize dependencies, only the sqlite backend is included by default.
     vdsql mysql://...
     vdsql postgres://...
     vdsql foo.duckdb  # or .ddb
-    vdsql clickhouse://play:clickhouse@play.clickhouse.com/?secure=1
+    vdsql 'clickhouse://play:clickhouse@play.clickhouse.com/?secure=1'
     vdsql bigquery:///bigquery-public-data
 
     vdsql <file_or_url>

@@ -187,6 +187,10 @@ class IbisTableSheet(Sheet):
     def con(self):
         return self.ibis_conpool.get_conn()
 
+    @property
+    def help_sidebars(self) -> 'list[Callable[[], tuple[sidebar_text:str,title:str]]]':
+        return super().help_sidebars + [ lambda: (self.base_sql, 'base_sql') ]
+
     def choose_sidebar(self):
         sidebars = ['base_sql', 'pending_sql', 'ibis_current_expr', 'curcol_sql', 'pending_expr']
         opts = []
