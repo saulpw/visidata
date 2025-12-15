@@ -60,16 +60,18 @@ def acceptThenFunc(*longnames):
 class EnableCursor:
     def __enter__(self):
         with suppress(curses.error):
-            curses.mousemask(0)
+            if hasattr(curses, "mousemask"):
+                curses.mousemask(0)
             curses.curs_set(1)
 
     def __exit__(self, exc_type, exc_val, tb):
         with suppress(curses.error):
             curses.curs_set(0)
-            if vd.options.mouse_interval:
-                curses.mousemask(curses.MOUSE_ALL if hasattr(curses, "MOUSE_ALL") else 0xffffffff)
-            else:
-                curses.mousemask(0)
+            if hasattr(curses, "mousemask"):
+                if vd.options.mouse_interval:
+                    curses.mousemask(curses.MOUSE_ALL if hasattr(curses, "MOUSE_ALL") else 0xffffffff)
+                else:
+                    curses.mousemask(0)
 
 
 def until_get_wch(scr):
