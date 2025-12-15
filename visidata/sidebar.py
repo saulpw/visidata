@@ -12,6 +12,10 @@ vd.theme_option('disp_sidebar_height', 0, 'max height for sidebar')
 vd.theme_option('color_sidebar', 'black on 114 blue', 'base color of sidebar')
 vd.theme_option('color_sidebar_title', 'black on yellow', 'color of sidebar title')
 
+vd.disp_help = 0  # current page of help shown
+vd._help_sidebars = []  # list of (help:str|HelpPane, title:str)
+
+
 @VisiData.api
 class AddedHelp:
     '''Context manager to add help text/screen to list of available sidebars.'''

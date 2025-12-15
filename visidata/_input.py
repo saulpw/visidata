@@ -14,9 +14,6 @@ vd.theme_option('disp_edit_fill', '_', 'edit field fill character')
 vd.theme_option('disp_unprintable', '·', 'substitute character for unprintables')
 vd.theme_option('mouse_interval', 1, 'max time between press/release for click (ms)', sheettype=None)
 
-vd.disp_help = 0  # current page of help shown
-vd._help_sidebars = []  # list of (help:str|HelpPane, title:str)
-
 
 class AcceptInput(Exception):
     '*args[0]* is the input to be accepted'
