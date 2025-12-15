@@ -238,13 +238,13 @@ def rgb_to_xterm256(r:int,g:int,b:int,a:int=255) -> int:
         return int(16 + r*36 + g*6 + b)
 
 
-def xterm256_to_css(n:str|int) -> str:
+def xterm256_to_css(n:'str|int') -> str:
     r,g,b = xterm256_to_rgb(n)
     return f'#{r:02x}{g:02x}{b:02x}'
 
 
 @functools.lru_cache(256)
-def xterm256_to_rgb(n:str|int) -> tuple:
+def xterm256_to_rgb(n:'str|int') -> tuple:
     if not n:
         return (255,255,255)
     colordict = dict(
