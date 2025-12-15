@@ -189,8 +189,8 @@ BaseSheet.addCommand('gCtrl+^', 'jump-first', 'vd.push(vd.activeStack[-1])', 'ju
 
 BaseSheet.addCommand('BUTTON1_RELEASED', 'no-op', 'pass', 'do nothing')
 
-BaseSheet.addCommand(None, 'mouse-enable', 'mm, _ = curses.mousemask(-1); status("mouse "+("ON" if mm else "OFF"))', 'enable mouse events')
-BaseSheet.addCommand(None, 'mouse-disable', 'mm, _ = curses.mousemask(0); status("mouse "+("ON" if mm else "OFF"))', 'disable mouse events')
+BaseSheet.addCommand(None, 'mouse-enable', 'b = vd.enableMouse(True); status("mouse "+("ON" if b else "OFF"))', 'enable mouse events')
+BaseSheet.addCommand(None, 'mouse-disable', 'b = vd.enableMouse(False); status("mouse "+("ON" if b else "OFF"))', 'disable mouse events')
 
 
 vd.addGlobals({'rotateRange': rotateRange})

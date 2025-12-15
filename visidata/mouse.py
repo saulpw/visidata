@@ -13,17 +13,27 @@ BaseSheet.init('mouseY', int)
 
 @VisiData.after
 def initCurses(vd):
-    if not getattr(curses, 'mousemask', None):
-      return
     curses.MOUSE_ALL = 0xffffffff
-    curses.mousemask(curses.MOUSE_ALL if vd.options.mouse_interval else 0)
+    curses.mouseEvents = {}
+
+    if not vd.enableMouse(bool(vd.options.mouse_interval)):
+        return
+
     curses.def_prog_mode()
     curses.mouseinterval(vd.options.mouse_interval)
-    curses.mouseEvents = {}
 
     for k in dir(curses):
         if k.startswith('BUTTON') or k in ('REPORT_MOUSE_POSITION', '2097152'):
             curses.mouseEvents[getattr(curses, k)] = k
+
+
+@VisiData.api
+def enableMouse(vd, b:bool) -> bool:  #2913 #2851
+    'Call curses.mousemask(all if b else 0) only if available.  Return True if mouse enabled.'
+    if not hasattr(curses, 'mousemask'):
+        return False
+    mm, _ = curses.mousemask(curses.MOUSE_ALL if b else 0)
+    return bool(mm)
 
 
 @VisiData.after
