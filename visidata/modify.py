@@ -118,7 +118,7 @@ def rowDeleted(self, row):
 @Sheet.api
 @asyncthread
 def addRows(sheet, rows, index=None, undo=True):
-    'Add *rows* after row at *index*.'
+    'Add *rows* after row at *index*, possibly deferred, setting the modified status, and making it undoable if *undo* is True.'
     addedRows = {}
     if index is None: index=len(sheet.rows)
     for i, row in enumerate(Progress(rows, gerund='adding')):
