@@ -78,10 +78,11 @@ def update_attr(oldattr:ColorAttr, updattr:ColorAttr, updprec:int=None) -> Color
 class ColorMaker:
     def __init__(self):
         self.color_pairs = {}  # (fg,bg) -> (pairnum, colornamestr) (pairnum can be or'ed with other attrs)
-        self.color_cache = {}  # colorname -> colorpair
+        self.colorpair_cache = {}  # colorname -> pairnum
 
     @drawcache_property
-    def colorcache(self):
+    def colorattr_cache(self):
+        'mapping of colorname or optname to ColorAttr'
         return {}
 
     def setup(self):
@@ -115,11 +116,11 @@ class ColorMaker:
     def get_color(self, optname:str, precedence:int=0) -> ColorAttr:
         '''Return ColorAttr for options.color_foo if *optname* of either "foo" or "color_foo",
            Otherwise parse *optname* for colorstring like "bold 34 red on 135 blue".'''
-        r = self.colorcache.get(optname, None)
+        r = self.colorattr_cache.get(optname, None)
         if r is None:
             coloropt = vd.options._get(optname) or vd.options._get(f'color_{optname}')
             colornamestr = coloropt.value if coloropt else optname
-            r = self.colorcache[optname] = self._colornames_to_cattr(colornamestr, precedence)
+            r = self.colorattr_cache[optname] = self._colornames_to_cattr(colornamestr, precedence)
         return r
 
     def _split_colorstr(self, colorstr):
@@ -157,7 +158,7 @@ class ColorMaker:
         if not colorname:
             return default
 
-        r = self.color_cache.get(colorname, None)
+        r = self.colorpair_cache.get(colorname, None)
         if r is not None:
             return r
 
@@ -171,7 +172,7 @@ class ColorMaker:
 
         try: # test to see if color is available
             curses.init_pair(255, r, 0)
-            self.color_cache[colorname] = r
+            self.colorpair_cache[colorname] = r
             return r
         except curses.error as e:
             return None  # not available
@@ -203,7 +204,7 @@ class ColorMaker:
             if pairnum is None:
                 if len(self.color_pairs) > 254:
                     self.color_pairs.clear()  # start over
-                    self.color_cache.clear()
+                    self.colorpair_cache.clear()
                 pairnum = len(self.color_pairs)+1
                 if fg is None: fg = -1
                 if bg is None: bg = -1
