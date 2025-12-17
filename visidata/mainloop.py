@@ -13,6 +13,7 @@ __all__ = ['ReturnValue', 'run']
 vd.curses_timeout = 100 # curses timeout in ms
 vd.timeouts_before_idle = 10
 vd.min_draw_ms = 100  # draw_all at least this often, even if keystrokes are pending
+vd.numTimeouts = 0
 vd._lastDrawTime = 0  # last time drawn (from time.time())
 
 
