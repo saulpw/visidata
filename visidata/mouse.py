@@ -32,7 +32,7 @@ def enableMouse(vd, b:bool) -> bool:  #2913 #2851
     'Call curses.mousemask(all if b else 0) only if available.  Return True if mouse enabled.'
     if not hasattr(curses, 'mousemask'):
         return False
-    mm, _ = curses.mousemask(curses.get('MOUSE_ALL', 0xffffffff) if b else 0)
+    mm, _ = curses.mousemask(getattr(curses, 'MOUSE_ALL', 0xffffffff) if b else 0)
     return bool(mm)
 
 
