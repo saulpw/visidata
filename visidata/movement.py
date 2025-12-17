@@ -104,6 +104,10 @@ Sheet.addCommand(None, 'go-top', 'sheet.cursorRowIndex = sheet.topRowIndex = 0',
 Sheet.addCommand(None, 'go-bottom', 'sheet.cursorRowIndex = sheet.bottomRowIndex = len(rows)-1', 'go all the way to the bottom of sheet')
 Sheet.addCommand(None, 'go-rightmost', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1', 'go all the way to the right of sheet')
 
+Sheet.addCommand(None, 'go-screen-top', 'sheet.cursorRowIndex = sheet.topRowIndex', 'go to the first row visible on screen')
+Sheet.addCommand(None, 'go-screen-middle', 'sheet.cursorRowIndex = (sheet.topRowIndex+sheet.bottomRowIndex)//2', 'go to the middle row visible on screen')
+Sheet.addCommand(None, 'go-screen-bottom', 'sheet.cursorRowIndex = sheet.bottomRowIndex', 'go to the last row visible on screen')
+
 Sheet.addCommand('zr', 'go-row-number', 'sheet.cursorRowIndex = int(input("move to row number: "))', 'go to the given row number (0-based)')
 
 
@@ -200,6 +204,9 @@ vd.addMenuItems('''
     View > Other sheet > first sheet > jump-first
     Row > Goto > top > go-top
     Row > Goto > bottom > go-bottom
+    Row > Goto > screen top > go-screen-top
+    Row > Goto > screen bottom > go-screen-bottom
+    Row > Goto > screen middle > go-screen-middle
     Row > Goto > previous > page > go-pageup
     Row > Goto > previous > null > go-prev-null
     Row > Goto > previous > value > go-prev-value
