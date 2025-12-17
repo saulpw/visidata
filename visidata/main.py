@@ -405,7 +405,6 @@ def vd_cli():
     sys.stderr.flush()
     sys.stdout.flush()
 
-    for t in vd.unfinishedThreads:
-        os.kill(t.native_id, signal.SIGTERM)
+    vd.killLeftoverProcesses()
 
     os._exit(rc)  # cleanup can be expensive with large datasets

@@ -121,7 +121,7 @@ class MpvProcess:
                 filterparams = '--af='+filterparams
                 vd.status(filterparams)
 
-            self.mpvproc = subprocess.Popen(f'{vd.options.daw_mpv_cmd} --input-ipc-server={self.mpvsockfn} {filterparams} {self.sourceaudio}', shell=True)
+            self.mpvproc = vd.popen(f'{vd.options.daw_mpv_cmd} --input-ipc-server={self.mpvsockfn} {filterparams} {self.sourceaudio}', shell=True)
 
     def mpv_command(self, **kwargs):
         sock = socket.socket(socket.AF_UNIX)

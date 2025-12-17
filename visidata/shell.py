@@ -19,6 +19,21 @@ vd.option('dir_depth', 0, 'folder recursion depth on DirSheet')
 vd.option('dir_hidden', False, 'load hidden files on DirSheet')
 vd.option('active_procs', 10, 'number of concurrent processes on DirSheet')
 
+vd.spawnedProcesses = []
+
+@VisiData.api
+def popen(vd, *args, **kwargs):
+    p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    vd.spawnedProcesses.append(p)
+    return p
+
+
+@VisiData.api
+def killLeftoverProcesses(vd):
+    for p in vd.spawnedProcesses:
+        if p.returncode is not None:
+            p.kill()
+
 
 @VisiData.api
 def guess_dir(vd, p):
@@ -33,7 +48,7 @@ def currentDirSheet(p):
 
 @asyncthread
 def exec_shell(*args):
-    p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p = vd.popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
     if err or out:
         lines = err.decode('utf8').splitlines() + out.decode('utf8').splitlines()
@@ -80,7 +95,7 @@ class ColumnShell(Column):
                     arg = shlex.quote(str(context[arg[1:]]))
                 args.append(arg)
 
-            p = subprocess.Popen([os.getenv('SHELL', 'bash'), '-c', shlex.join(args)],
+            p = vd.popen([os.getenv('SHELL', 'bash'), '-c', shlex.join(args)],
                     stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             return p.communicate()
         except Exception as e:
@@ -131,7 +146,7 @@ class DirSheet(Sheet):
         Column('mode', width=0,
             getter=lambda col,row: '{:o}'.format(row.stat().st_mode),
             setter=lambda col,row,val: os.chmod(row, int(val, 8))),
-        Column('filetype', width=0, cache='async', getter=lambda col,row: subprocess.Popen(['file', '--brief', row], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
+        Column('filetype', width=0, cache='async', getter=lambda col,row: vd.popen(['file', '--brief', row], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
     ]
     nKeys = 2
     _ordering = [('modtime', True), ('filename', False)]  # sort by reverse modtime initially
