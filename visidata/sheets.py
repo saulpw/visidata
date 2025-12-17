@@ -521,6 +521,11 @@ class TableSheet(BaseSheet):
         return self.cursorCol.getDisplayValue(self.cursorRow)
 
     @property
+    def cursorFullDisplay(self):
+        'Full displayed value (without truncating on width) at current row and column.'
+        return self.cursorCol.format(self.cursorCol.getTypedValue(self.cursorRow))
+
+    @property
     def cursorTypedValue(self):
         'Typed value at current row and column.'
         return self.cursorCol.getTypedValue(self.cursorRow)
