@@ -23,7 +23,7 @@ vd.spawnedProcesses = []
 
 @VisiData.api
 def popen(vd, *args, **kwargs):
-    p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p = subprocess.Popen(*args, **kwargs)
     vd.spawnedProcesses.append(p)
     return p
 
