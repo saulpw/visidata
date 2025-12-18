@@ -197,7 +197,6 @@ class TableSheet(BaseSheet):
 
         self._ordering = list(type(self)._ordering)  #2254
         self._colorizers = self.classColorizers
-        self.highlight_regex = None
         self.recalc()  # set .sheet on columns and start caches
 
         self.__dict__.update(kwargs)  # also done earlier in BaseSheet.__init__
@@ -1048,65 +1047,16 @@ class TableSheet(BaseSheet):
                     else:
                         hp = None
 
-
-                    def _highlight(chunks):
-                        '''consumes the generator *chunks*'''
-                        display_chunks = []
-                        left_hl = False
-                        right_hl = False
-                        truncate_right = False  #becomes True only if the highlighted chunk ends at the col edge
-                        dispw = 0
-                        for attr, text in chunks:
-                            last = hoffset if hoffset > 0 else 0
-                            # note a limitation with Unicode:  the regex can cut a grapheme cluster into codepoints
-                            matches = re.finditer(hp, text) if hp else []
-                            for m in matches:
-                                m1 = m.start()
-                                m2 = m.end()
-                                if m1 < hoffset:
-                                    left_hl = True
-                                    if m2 <= hoffset:
-                                        continue
-                                    m1 = hoffset
-                                if m1 > last:
-                                    s = text[last:m1]
-                                    if truncate_right:
-                                        display_chunks[-1][1] += s
-                                    else:
-                                        display_chunks.append([attr, s])
-                                    dispw += dispwidth(s)
-                                s = text[m1:m2]
-                                if truncate_right:
-                                    display_chunks[-1][1] += s
-                                else:
-                                    display_chunks.append([hl_attr, s])
-                                dispw += dispwidth(text[m1:m2])
-                                if dispw > colwidth-notewidth-1:
-                                    right_hl = True
-                                    last = len(text)
-                                    break
-                                if dispw == colwidth-notewidth-1:
-                                    #append any subsequent cell text to the highlighted chunk so it gets a truncator added by clipdraw()
-                                    truncate_right = True
-                                last = m2
-                            if last < len(text):
-                                s = text[last:]
-                                if truncate_right:
-                                    display_chunks[-1][1] += s
-                                else:
-                                    display_chunks.append([attr, s])
-                                dispw += dispwidth(s)
-                        if colwidth > 2:
-                            pre = disp_truncator if hoffset != 0 else disp_column_fill
-                            display_chunks.insert(0, (hl_attr if left_hl else cattr, pre))
-                        return display_chunks, right_hl
-
-                    for i, chunks in enumerate(lines):
+                    for i, chunks in enumerate(lines): #chunks is a generator
                         y = ybase+i
 
                         sepchars = seps[i]
 
-                        chunks, right_hl = _highlight(chunks)
+                        # chunks becomes a list
+                        chunks, left_hl, right_hl = self.highlight_chunks(chunks, hp, hoffset, colwidth, notewidth, cattr, hl_attr)
+                        if colwidth > 2:
+                            pre = disp_truncator if hoffset != 0 else disp_column_fill
+                            chunks.insert(0, (hl_attr if left_hl else cattr, pre))
                         clipdraw_chunks(scr, y, x, chunks, cattr if i < height-1 else bottomcattr, w=colwidth-notewidth)
                         if right_hl:
                             hl_attr = update_attr(cattr, hl_attr, 100)
