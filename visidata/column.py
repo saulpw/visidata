@@ -80,7 +80,6 @@ class Column(Extensible):
         self.displayer = ''
         self.defer = False
         self.disp_expert = 0    # do not show if 'nometacols' in options.disp_help_flags
-        self.highlight_regex = None
 
         self.setCache(cache)
         for k, v in kwargs.items():
