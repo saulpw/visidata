@@ -19,9 +19,9 @@ services = {}  # [('tcp', 25)] -> 'smtp'
 def open_pcap(vd, p):
     return PcapSheet(p.base_stem, source=p)
 
-open_cap = open_pcap
-open_pcapng = open_pcap
-open_ntar = open_pcap
+VisiData.open_cap = VisiData.open_pcap
+VisiData.open_pcapng = VisiData.open_pcap
+VisiData.open_ntar = VisiData.open_pcap
 
 def manuf(mac):
     return oui.get(mac[:13]) or oui.get(mac[:10]) or oui.get(mac[:8])
