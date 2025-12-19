@@ -5,7 +5,7 @@ from visidata import VisiData, vd, Sheet, Column, Progress, ColumnAttr, ColumnIt
 def open_ttf(vd, p):
     return TTFTablesSheet(p.base_stem, source=p)
 
-vd.open_otf = vd.open_ttf
+VisiData.open_otf = VisiData.open_ttf
 
 class TTFTablesSheet(Sheet):
     rowtype = 'font tables'
