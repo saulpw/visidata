@@ -98,6 +98,8 @@ Sheet.addCommand(None, 'go-up',    'cursorDown(-1)', 'go up', replay=False)
 Sheet.addCommand(None, 'go-right', 'cursorRight(+1)', 'go right', replay=False)
 Sheet.addCommand(None, 'go-pagedown', 'cursorDown(nScreenRows-1); sheet.topRowIndex = bottomRowIndex', 'scroll one page forward', replay=False)
 Sheet.addCommand(None, 'go-pageup', 'cursorDown(-nScreenRows+1); sheet.bottomRowIndex = topRowIndex', 'scroll one page backward', replay=False)
+Sheet.addCommand(None, 'go-pagedown-half', 'n=nScreenRows//2; cursorDown(n); sheet.topRowIndex += n', 'scroll half page forward', replay=False)
+Sheet.addCommand(None, 'go-pageup-half', 'n=-nScreenRows//2; cursorDown(n); sheet.topRowIndex += n', 'scroll half page backward', replay=False)
 
 Sheet.addCommand(None, 'go-leftmost', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0', 'go all the way to the left of sheet')
 Sheet.addCommand(None, 'go-top', 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'go all the way to the top of sheet')
@@ -181,6 +183,8 @@ BaseSheet.bindkey('k', 'go-up'),
 BaseSheet.bindkey('l', 'go-right'),
 BaseSheet.bindkey('Ctrl+F', 'go-pagedown'),
 BaseSheet.bindkey('Ctrl+B', 'go-pageup'),
+#BaseSheet.bindkey('Ctrl+D', 'go-pagedown-half'),
+#BaseSheet.bindkey('Ctrl+U', 'go-pageup-half'),
 BaseSheet.bindkey('gg', 'go-top'),
 BaseSheet.bindkey('G',  'go-bottom'),
 BaseSheet.bindkey('gj', 'go-bottom'),
@@ -208,10 +212,12 @@ vd.addMenuItems('''
     Row > Goto > screen bottom > go-screen-bottom
     Row > Goto > screen middle > go-screen-middle
     Row > Goto > previous > page > go-pageup
+    Row > Goto > previous > half page > go-pageup-half
     Row > Goto > previous > null > go-prev-null
     Row > Goto > previous > value > go-prev-value
     Row > Goto > previous > selected > go-prev-selected
     Row > Goto > next > page > go-pagedown
+    Row > Goto > next > half page > go-pagedown-half
     Row > Goto > next > null > go-next-null
     Row > Goto > next > value > go-next-value
     Row > Goto > next > selected > go-next-selected
