@@ -236,6 +236,7 @@ def mainloop(vd, scr):
             prefixWaiting = True
         else:
             vd.status('no command for "%s"' % (vd.keystrokes))
+            sheet.longname = ''
             prefixWaiting = False
 
         vd._playNextQueuedCommand()
