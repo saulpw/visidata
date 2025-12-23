@@ -17,7 +17,7 @@ class TestEditText:
         ('a b Home c d Ctrl+A e f Enter', 'efcdab', {}),
         ('a b Left 1 Left Left Left 2 Enter', '2a1b', {}), # Left, past home
         ('a b Ctrl+C', None, dict(exception=visidata.EscapeException)),
-        ('a b Ctrl+[', None, dict(exception=visidata.EscapeException)),
+        ('a b Esc', None, dict(exception=visidata.EscapeException)),
         ('a Del Enter', 'a', {}),
         ('a b Left Del Enter', 'a', {}),
         ('a b Left c End d Enter', 'acbd', {}),

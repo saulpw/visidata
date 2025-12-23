@@ -289,7 +289,7 @@ class InputWidget:
         elif ch == 'Ctrl+U':                           v = v[i:]; i = 0  # clear to beginning
         elif ch == 'Ctrl+V':                           v = splice(v, i, until_get_wch(scr)); i += 1  # literal character
         elif ch == 'Ctrl+W':                           j = find_word(v, 0, i-1, -1); v = v[:j+1] + v[i:]; i = j+1  # erase word
-        elif ch in ('Ctrl+Del'):                       j = find_word(v, i, len(v), +1); v = v[:i] + v[j+1:]  # erase word forward
+        elif ch in ('Ctrl+Del',):                      j = find_word(v, i, len(v), +1); v = v[:i] + v[j+1:]  # erase word forward
         elif ch == 'Ctrl+Y':                           v = splice(v, i, str(vd.memory.clipval))
         elif ch == 'Ctrl+Z':                           vd.suspend()
         elif ch == 'Ctrl+Left':                        i = find_word(v, 0, i-1, -1)+1;  # word left

@@ -149,6 +149,7 @@ class VisiData(visidata.Extensible):
             try:
                 scr.refresh()
                 k = self.get_wch(scr)
+                self.drainPendingKeys(scr)
                 vs = vs or self.activeSheet
                 if vs:
                     self.drawRightStatus(vs._scr, vs) # continue to display progress %
@@ -160,6 +161,12 @@ class VisiData(visidata.Extensible):
                 return k
             k = ord(k)
         keyname = curses.keyname(k).decode('utf-8')
+        if keyname == '^[':  # Esc/Alt+
+            if self.pendingKeys:  # more to come
+                k = self.pendingKeys.pop(0)
+                return 'Alt+'+self.prettykeys(k)
+            else:
+                return 'Esc'
         return self.prettykeys(keyname)
 
     @property
