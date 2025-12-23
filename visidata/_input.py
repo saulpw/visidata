@@ -273,7 +273,6 @@ class InputWidget:
             c = ''
             while not c:
                 c = vd.getkeystroke(scr)
-            c = vd.prettykeys(c)
             i += len(c)
             v += c
         elif ch == 'Ctrl+O':
