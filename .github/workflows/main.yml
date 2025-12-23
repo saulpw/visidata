@@ -42,7 +42,7 @@ jobs:
 
     - name: Test startup time less than 400ms
       run: |
-        /usr/bin/time -f "%U" -o /tmp/vd_start_time vd -N -p dev/quit.vdx
+        /usr/bin/time -f "%U" -o /tmp/vd_start_time vd -b -N -p dev/quit.vdx
         (( $(echo "$(cat /tmp/vd_start_time) < 0.40" | bc -l) ))
 
 
