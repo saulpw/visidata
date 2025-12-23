@@ -40,6 +40,12 @@ jobs:
     - name: Ensure VisiData can load a dir
       run: vd . --batch
 
+    - name: Test startup time less than 400ms
+      run: |
+        /usr/bin/time -f "%U" -o /tmp/vd_start_time vd -N -p dev/quit.vdx
+        (( $(echo "$(cat /tmp/vd_start_time) < 0.40" | bc -l) ))
+
+
 # Apt packages are slow to install, often taking up to a minute.
 # lxml dependencies are unneeded when installing lxml via pip
 #    - name: Install lxml dependencies
