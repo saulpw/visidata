@@ -31,6 +31,7 @@ visidata.vd.prettykeys_trdict = {
         'KEY_IC5':   'Ctrl+Ins',
         'KEY_DC5':   'Ctrl+Del',
         'kDC5':      'Ctrl+Del',
+        'kDC3':      'Ctrl+Del',
         'KEY_SDC':   'Shift+Del',
 
         'KEY_IC':    'Ins',

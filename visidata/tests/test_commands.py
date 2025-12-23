@@ -43,7 +43,7 @@ def isTestableCommand(longname, cmdlist):
 
 inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                 'save-all': 'lagan.csv',
-                 'open-file': 'jetsam.csv',  # reopen what was just saved ('o' must come after ^S in the commands list)
+                 'open-file': 'jetsam.csv',  # reopen what was just saved ('o' must come after Ctrl+S in the commands list)
                  'save-col': 'flotsam.csv',
                  'save-col-keys': 'debris.csv',
                 'pyobj-expr': '2+2',            # open the python object for '4'
@@ -170,10 +170,10 @@ class TestCommands:
         vd.scr = mock_screen
 
         if longname in inputLines:
-            line = [ch for ch in inputLines[longname]] + ['^J']
+            line = [ch for ch in inputLines[longname]] + ['Enter']
             vd.getkeystroke = Mock(side_effect=line)
         else:
-            vd.getkeystroke = Mock(side_effect=['^J'])
+            vd.getkeystroke = Mock(side_effect=['Enter'])
 
         sample_file = vd.pkg_resources_files(visidata) / 'tests/sample.tsv'
         vs = visidata.TsvSheet('sample', source=visidata.Path(sample_file))

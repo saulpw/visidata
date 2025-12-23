@@ -143,10 +143,10 @@ def inputPalette(sheet, prompt, items,
 
         navailitems = min(len(palrows), nitems)
 
-        bindings['^I'] = lambda *args: tab(1, navailitems) or args
-        bindings['KEY_BTAB'] = lambda *args: tab(-1, navailitems) or args
-        bindings['KEY_PPAGE'] = lambda *args: (change_page(-1) and read_matches(offset)) or args
-        bindings['KEY_NPAGE'] = lambda *args: (change_page(+1) and read_matches(offset)) or args
+        bindings['Tab'] = lambda *args: tab(1, navailitems) or args
+        bindings['Shift+Tab'] = lambda *args: tab(-1, navailitems) or args
+        bindings['PgUp'] = lambda *args: (change_page(-1) and read_matches(offset)) or args
+        bindings['PgDn'] = lambda *args: (change_page(+1) and read_matches(offset)) or args
         for numkey in '1234567890':
             bindings.pop(numkey, None)
 
@@ -156,7 +156,7 @@ def inputPalette(sheet, prompt, items,
         if not navailitems:
             def _enter(v, i):
                 raise EscapeException(f'no choice matching {v}')
-            bindings['^J'] = _enter
+            bindings['Enter'] = _enter
             bindings.pop(' ', None)
         used_triggers = set()
         for i, (m, item) in enumerate(palrows):
@@ -174,16 +174,16 @@ def inputPalette(sheet, prompt, items,
                 _ , topitem = palrows[0]
                 if topitem:
                     if multiple:
-                        bindings['^J'] = partial(accept_input_if_subset, value=topitem[value_key])
-                        bindings[' '] = partial(add_to_input, value=topitem[value_key])
+                        bindings['Enter'] = partial(accept_input_if_subset, value=topitem[value_key])
+                        bindings['Space'] = partial(add_to_input, value=topitem[value_key])
                     else:
-                        bindings['^J'] = partial(accept_input, value=topitem[value_key])
+                        bindings['Enter'] = partial(accept_input, value=topitem[value_key])
             elif item and i == tabitem:
                 if multiple:
-                    bindings['^J'] = partial(accept_input_if_subset, value=item[value_key])
-                    bindings[' '] = partial(add_to_input, value=item[value_key])
+                    bindings['Enter'] = partial(accept_input_if_subset, value=item[value_key])
+                    bindings['Space'] = partial(add_to_input, value=item[value_key])
                 else:
-                    bindings['^J'] = partial(accept_input, value=item[value_key])
+                    bindings['Enter'] = partial(accept_input, value=item[value_key])
                 attr = colors.color_menu_spec
 
             match_summary = formatter(m, item, trigger_key) if item else ' '

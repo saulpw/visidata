@@ -182,8 +182,8 @@ GitStatus.addCommand(None, 'git-ignore-file', 'open(rootPath/".gitignore", "a").
 GitStatus.addCommand(None, 'git-ignore-wildcard', 'open(rootPath/.gitignore, "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore')
 
 
-#GitStatus.addCommand('zCtrl+J', 'diff-file-staged', 'vd.push(getStagedHunksSheet(sheet, cursorRow))', 'push staged diffs for this file')
-#GitStatus.addCommand('gzCtrl+J', 'diff-selected-staged', 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files')
+#GitStatus.addCommand('zEnter', 'diff-file-staged', 'vd.push(getStagedHunksSheet(sheet, cursorRow))', 'push staged diffs for this file')
+#GitStatus.addCommand('gzEnter', 'diff-selected-staged', 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files')
 #GitStatus.addCommand('Ctrl+O', 'sysopen-row', 'launchExternalEditorPath(Path(cursorRow.path))', 'open this file in $EDITOR')
 
 
