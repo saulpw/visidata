@@ -18,11 +18,15 @@ def ensureLoaded(vd, sheets):
 
 @asyncthread
 def _appendRowsAfterLoading(joinsheet, origsheets):
+    '''Will fail() if any sheets have different numbers of visible columns.'''
     with Progress(gerund='loading'):
         vd.ensureLoaded(origsheets)
         vd.sync()
 
     colnames = {c.name:c for c in joinsheet.visibleCols}
+    colcounts = { len(joinsheet.visibleCols) } | { len(vs.visibleCols) for vs in origsheets }
+    if len(colcounts) != 1:
+        vd.fail(f'sheets must have same number of columns for `concat`; use `append` instead')
     for vs in origsheets:
         joinsheet.rows.extend(vs.rows)
         for c in vs.visibleCols:
