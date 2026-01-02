@@ -3,7 +3,7 @@ import itertools
 import functools
 from copy import copy
 
-from visidata import vd, VisiData, asyncthread, Sheet, Progress, IndexSheet, Column, CellColorizer, ColumnItem, SubColumnItem, TypedWrapper, ColumnsSheet, AttrDict, dispwidth
+from visidata import vd, VisiData, asyncthread, Sheet, Progress, IndexSheet, Column, CellColorizer, ColumnItem, SubColumnItem, TypedWrapper, ColumnsSheet, AttrDict, dispwidth, SettableColumn
 
 vd.help_join = '# Join Help\nHELPTODO'
 
@@ -23,13 +23,18 @@ def _appendRowsAfterLoading(joinsheet, origsheets):
         vd.sync()
 
     colnames = {c.name:c for c in joinsheet.visibleCols}
+    sheetname_col = joinsheet.addColumn(SettableColumn('join_source',type=str), index=len(joinsheet.availCols))
+    sheetname_col.hide()
+
     for vs in origsheets:
+        nrows = len(joinsheet.rows)
         joinsheet.rows.extend(vs.rows)
         for c in vs.visibleCols:
             if c.name not in colnames:
                 newcol = copy(c)
                 colnames[c.name] = newcol
                 joinsheet.addColumn(newcol)
+        sheetname_col.setValuesTyped(joinsheet.rows[nrows:], vs.name)
 
 
 @VisiData.api
