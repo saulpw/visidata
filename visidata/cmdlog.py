@@ -453,24 +453,6 @@ def modifyCommand(vd):
     return vd.cmdlog.rows[-1]
 
 
-@CommandLogJsonl.api
-@asyncthread
-def repeat_for_n(cmdlog, r, n=1):
-    r.sheet = r.row = r.col = ""
-    for i in range(n):
-        vd.replayOne(r)
-
-@CommandLogJsonl.api
-@asyncthread
-def repeat_for_selected(cmdlog, r):
-    r.sheet = r.row = r.col = ""
-
-    for idx, r in enumerate(vd.sheet.rows):
-        if vd.sheet.isSelected(r):
-            vd.sheet.cursorRowIndex = idx
-            vd.replayOne(r)
-
-
 BaseSheet.init('_shortcut')
 
 
