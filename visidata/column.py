@@ -450,7 +450,7 @@ class Column(Extensible):
     def setValuesTyped(self, rows, *values):
         'Set values on this column for *rows* to *values*, coerced to column type, recycling values as needed to fill *rows*.  Abort on type exception.'
         vd.addUndoSetValues([self], rows)
-        for r, v in zip(rows, itertools.cycle(self.type(val) for val in values)):
+        for r, v in zip(vd.Progress(rows, gerund='setting', total=len(rows)), itertools.cycle(self.type(val) for val in values)):
             vd.callNoExceptions(self.setValue, r, v)
 
         self.recalc()
