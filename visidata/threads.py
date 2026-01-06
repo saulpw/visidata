@@ -511,6 +511,13 @@ def codestr(code):
 def allThreadsSheet(self):
     return ThreadsSheet("threads", source=vd.threads)
 
+@BaseSheet.api
+def cancel_sheet(sheet):
+    vd.replay_cancel()
+    vd._queuedFuncs.clear()
+    vd.cancelThread(*sheet.currentThreads or vd.fail("no active threads on this sheet"))
+
+
 ThreadsSheet.addCommand('Ctrl+C', 'cancel-thread', 'cancelThread(cursorRow)', 'abort thread at current row')
 ThreadsSheet.addCommand('gCtrl+C', 'cancel-all', 'cancelThread(*sheet.rows)', 'abort all threads on this threads sheet')
 ThreadsSheet.addCommand(None, 'add-row', 'fail("cannot add new rows on Threads Sheet")', 'invalid command')
@@ -521,7 +528,7 @@ ProfileStatsSheet.addCommand('Ctrl+O', 'sysopen-row', 'launchEditor(cursorRow[0]
 
 BaseSheet.addCommand('Ctrl+_', 'toggle-profile', 'toggleProfiling()', 'Enable or disable profiling on main VisiData process')
 
-BaseSheet.addCommand('Ctrl+C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads or fail("no active threads on this sheet"))', 'abort all threads on current sheet')
+BaseSheet.addCommand('Ctrl+C', 'cancel-sheet', 'cancel_sheet()', 'abort all threads on current sheet')
 BaseSheet.addCommand('gCtrl+C', 'cancel-all', 'liveThreads=list(t for vs in vd.sheets for t in vs.currentThreads); cancelThread(*liveThreads); status("canceled %s threads" % len(liveThreads))', 'abort all spawned threads')
 
 
