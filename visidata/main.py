@@ -278,6 +278,13 @@ def main_vd():
 
     args = AttrDict(current_args)
 
+    if args.profile:
+        import threading
+        import cProfile
+        t = threading.current_thread()
+        t.profile = cProfile.Profile()
+        t.profile.enable()
+
     if not args.nothing:
         vd.loadConfigAndPlugins(args)
 
@@ -407,4 +414,9 @@ def vd_cli():
 
     vd.killLeftoverProcesses()
 
-    os._exit(rc)  # cleanup can be expensive with large datasets
+    if vd.options.profile:
+        import threading
+        threading.current_thread().profile.disable()
+        threading.current_thread().profile.dump_stats('vd.pyprof')
+    else:
+        os._exit(rc)  # cleanup can be expensive with large datasets
