@@ -162,7 +162,7 @@ vd.addMenuItems('''
 ''')
 
 vd.option('highlight', True, 'whether to highlight strings in searches')
-vd.option('color_highlight_search', '21 on 15', 'color to use for highlighting search results', sheettype=None)  #bright blue on white
+vd.option('color_highlight_search', '21 blue on 15 white', 'color to use for highlighting search results', sheettype=None)  #bright blue on white
 
 Sheet.addCommand('', 'highlight-sheet', 'highlight_input(None)', 'highlight a regex in all columns')
 Sheet.addCommand('', 'highlight-col', 'highlight_input([cursorCol])', 'highlight a regex in current column')

@@ -1044,7 +1044,7 @@ class TableSheet(BaseSheet):
 
                     if self.options.highlight:
                         hp = col.highlight_regex or self.highlight_regex
-                        hl_attr = colors.get_color(options.color_highlight_search)
+                        hl_attr = colors.color_highlight_search
                     else:
                         hp = None
 
