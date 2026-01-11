@@ -190,7 +190,7 @@ def inputPalette(sheet, prompt, items,
 
             clipdraw(sheet._scr, y+h-nitems-2+i, x, match_summary, attr, w=w)
         attr = colors.color_cmdpalette
-        instr = 'Press [:keystrokes]PgUp/PgDn[/] to scroll items, [:keystrokes]Tab/Shift+Tab/Enter[/] to choose, [:keystrokes]Esc[/] to cancel.'
+        instr = 'Press [:keystrokes]PgUp/PgDn[/] to scroll items, [:keystrokes]Tab/Shift+Tab[/] then [:keystrokes]Enter[/] to choose, [:keystrokes]Esc[/] to cancel.'
         if dispwidth(instr) < w:
             clipdraw(sheet._scr, h-2, x, instr, attr, w=w)
 
