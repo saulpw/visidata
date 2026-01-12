@@ -482,7 +482,7 @@ class Column(Extensible):
     def getMaxWidth(self, rows):
         'Return the maximum length of any cell in column or its header (up to drawable window width).'
         drawable_width = self.sheet.windowWidth-1
-        nlen = dispwidth(self.name)
+        nlen = dispwidth(self.name, literal=True)
         w_max = nlen
         for r in rows:
             row_w = self.measureValueWidthCapped(r, maxwidth=drawable_width)

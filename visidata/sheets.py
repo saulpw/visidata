@@ -795,7 +795,7 @@ class TableSheet(BaseSheet):
                 hdrcattr = update_attr(hdrcattr, colors.color_bottom_hdr, 5)
 
             if y+i < self.windowHeight:
-                clipdraw(scr, y+i, x, name, hdrcattr, w=colwidth)
+                clipdraw(scr, y+i, x, name, hdrcattr, w=colwidth, literal=True)
             vd.onMouse(scr, x, y+i, colwidth, 1, BUTTON3_RELEASED='rename-col')
 
             if C and x+colwidth+dispwidth(C) < self.windowWidth and y+i < self.windowHeight:
