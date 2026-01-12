@@ -16,11 +16,11 @@ def getMaxDataWidth(col, rows):  #2255 need real max width for fixed width saver
     even if wider than window. (Slow for large cells!)'''
 
     w = 0
-    nlen = dispwidth(col.name)
+    nlen = dispwidth(col.name, literal=True)
     if len(rows) > 0:
         w_max = 0
         for r in rows:
-            row_w = dispwidth(col.getDisplayValue(r))
+            row_w = dispwidth(col.getDisplayValue(r), literal=True)
             if w_max < row_w:
                 w_max = row_w
         w = w_max
