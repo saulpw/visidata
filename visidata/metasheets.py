@@ -63,6 +63,7 @@ Other commands (not specific to Columns Sheet):
     colorizers = [
         RowColorizer(7, 'color_key_col', lambda s,c,r,v: r and r.keycol),
         RowColorizer(8, 'color_hidden_col', lambda s,c,r,v: r and r.hidden),
+        RowColorizer(8, 'color_readonly', lambda s,c,r,v: r and r.readonly),
     ]
 
     @property

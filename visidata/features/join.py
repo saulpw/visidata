@@ -4,6 +4,7 @@ import functools
 from copy import copy
 
 from visidata import vd, VisiData, asyncthread, Sheet, Progress, IndexSheet, Column, CellColorizer, ColumnItem, SubColumnItem, TypedWrapper, ColumnsSheet, AttrDict, dispwidth
+from visidata import WritableColumn
 
 vd.help_join = '# Join Help\nHELPTODO'
 
@@ -128,7 +129,7 @@ def groupRowsByKey(sheets:dict, rowsBySheetKey, rowsByKey):
                     ]
 
 
-class JoinKeyColumn(Column):
+class JoinKeyColumn(WritableColumn):
     def __init__(self, name='', keycols=None, **kwargs):
         super().__init__(name, type=keycols[0].type, width=keycols[0].width, **kwargs)
         self.keycols = keycols
@@ -154,7 +155,7 @@ class JoinKeyColumn(Column):
             c.recalc()
 
 
-class MergeColumn(Column):
+class MergeColumn(WritableColumn):
     # .cols is { sheet: col, ... } in sheet-join order
     def calcValue(self, row):
         'Return value from last joined sheet with truth-y value in this column for the given row.'
@@ -255,7 +256,7 @@ class JoinSheet(Sheet):
 
 
 ## for ExtendedSheet_reload below
-class ExtendedColumn(Column):
+class ExtendedColumn(WritableColumn):
     def calcValue(self, row):
         key = joinkey(self.firstJoinSource.keyCols, row)
         srcrow = self.rowsBySheetKey[self.srcsheet][key]

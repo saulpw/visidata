@@ -1,8 +1,9 @@
 from copy import copy
 
-from visidata import vd, VisiData, asyncthread
+from visidata import vd, VisiData, asyncthread, ColumnColorizer
 from visidata import Sheet, RowColorizer, CellColorizer, Column, BaseSheet, Progress
 
+vd.theme_option('color_readonly', 'on 52', 'color for readonly columns')
 vd.theme_option('color_add_pending', 'green', 'color for rows pending add')
 vd.theme_option('color_change_pending', 'reverse yellow', 'color for cells pending modification')
 vd.theme_option('color_delete_pending', 'red', 'color for rows pending delete')
@@ -50,7 +51,8 @@ Sheet.colorizers += [
         RowColorizer(9, 'color_add_pending', lambda s,c,r,v: s.rowid(r) in s._deferredAdds),
         CellColorizer(8, 'color_change_pending', lambda s,c,r,v: c and (r is not None) and s.isChanged(c, r)),
         RowColorizer(9, 'color_delete_pending', lambda s,c,r,v: s.isDeleted(r)),
-        ]
+        ColumnColorizer(9, 'color_readonly', lambda s,c,r,v: c and not r and c.readonly),
+]
 
 @Sheet.api
 def preloadHook(sheet):

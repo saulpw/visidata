@@ -4,14 +4,14 @@ from copy import deepcopy
 import json
 
 from visidata import VisiData, vd, Column, asyncthread, Progress, PythonSheet, InvertedCanvas, date, wrapply, TypedExceptionWrapper, TypedWrapper
-
+from visidata import WritableColumn
 
 
 @VisiData.api
 def open_geojson(vd, p):
     return GeoJSONSheet(p.base_stem, source=p)
 
-class GeoJSONColumn(Column):
+class GeoJSONColumn(WritableColumn):
     def calcValue(self, row):
         return row.get('properties', {}).get(self.expr)
 

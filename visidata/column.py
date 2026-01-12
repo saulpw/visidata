@@ -290,6 +290,10 @@ class Column(Extensible):
             self.setWidth(abs(self.width or self.getMaxWidth(self.sheet.visibleRows)))
 
     @property
+    def readonly(self):
+        return self.setter is None
+
+    @property
     def hidden(self):
         'Return True if width of this column is 0 or negative.'
         if self.width is None:
@@ -438,24 +442,42 @@ class Column(Extensible):
     @asyncthread
     def setValues(self, rows, *values):
         'Set values in this column for *rows* to *values*, recycling values as needed to fill *rows*.'
+        if self.readonly:
+            vd.fail("Cannot set values on readonly column")
+
         vd.addUndoSetValues([self], rows)
 
+        nsets = 0
         for r, v in zip(rows, itertools.cycle(values)):
-            vd.callNoExceptions(self.setValue, r, v)
+            try:
+                self.setValue(r, v)
+                nsets += 1
+            except Exception as e:
+                vd.exceptionCaught(e)
 
         self.recalc()
-        return vd.status('set %d cells to %d values' % (len(rows), len(values)))
+        if nsets:
+            return vd.status(f'set {nsets} cells to {len(values)} values')
 
     @asyncthread
     def setValuesTyped(self, rows, *values):
         'Set values on this column for *rows* to *values*, coerced to column type, recycling values as needed to fill *rows*.  Abort on type exception.'
+        if self.readonly:
+            vd.fail("Cannot set values on readonly column")
+
         vd.addUndoSetValues([self], rows)
+        nsets = 0
         for r, v in zip(vd.Progress(rows, gerund='setting', total=len(rows)), itertools.cycle(self.type(val) for val in values)):
-            vd.callNoExceptions(self.setValue, r, v)
+            try:
+                self.setValue(r, v)
+                nsets += 1
+            except Exception as e:
+                vd.exceptionCaught(e)
 
         self.recalc()
 
-        return vd.status('set %d cells to %d values' % (len(rows), len(values)))
+        if nsets:
+            return vd.status(f'set {nsets} cells to {len(values)} values')
 
     def getMaxWidth(self, rows):
         'Return the maximum length of any cell in column or its header (up to drawable window width).'
@@ -492,7 +514,12 @@ class Column(Extensible):
 
 # ---- basic Columns
 
-class AttrColumn(Column):
+class WritableColumn(Column):
+    @property
+    def readonly(self):
+        return False
+
+class AttrColumn(WritableColumn):
     'Column using getattr/setattr with *attr*.'
     def __init__(self, name=None, expr=None, **kwargs):
         super().__init__(name,
@@ -505,7 +532,7 @@ class AttrColumn(Column):
         setattrdeep(row, self.expr, val)
 
 
-class ItemColumn(Column):
+class ItemColumn(WritableColumn):
     'Column using getitem/setitem with *expr*.'
     def __init__(self, name=None, expr=None, **kwargs):
         super().__init__(name,
@@ -524,6 +551,10 @@ class SubColumnFunc(Column):
         super().__init__(name, type=origcol.type, width=origcol.width, expr=expr, **kwargs)
         self.origcol = origcol
         self.subfunc = subfunc
+
+    @property
+    def readonly(self):
+        return self.origcol.readonly
 
     def calcValue(self, row):
         subrow = self.subfunc(row, self.expr)
@@ -553,7 +584,7 @@ def SubColumnItem(idx, c, **kwargs):
     return SubColumnFunc(origcol=c, subfunc=getitemdef, expr=idx, **kwargs)
 
 
-class SettableColumn(Column):
+class SettableColumn(WritableColumn):
     'Column using rowid to store and retrieve values internally.'
     def putValue(self, row, value):
         self._store[self.sheet.rowid(row)] = value
@@ -574,6 +605,7 @@ vd.addGlobals(
     getitemdef=getitemdef,
     AttrColumn=AttrColumn,
     ItemColumn=ItemColumn,
+    WritableColumn=WritableColumn,
     SettableColumn=SettableColumn,
     SubColumnFunc=SubColumnFunc,
     SubColumnItem=SubColumnItem,

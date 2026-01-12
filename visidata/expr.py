@@ -1,6 +1,6 @@
 import time
 
-from visidata import Progress, Sheet, Column, asyncthread, vd, Column
+from visidata import Progress, Sheet, Column, asyncthread, vd
 
 
 class ExprColumn(Column):
@@ -20,12 +20,6 @@ class ExprColumn(Column):
         self.maxtime = max(self.maxtime, t1-t0)
         self.totaltime += (t1-t0)
         return r
-
-    def putValue(self, row, val):
-        a = self.getDisplayValue(row)
-        b = self.format(self.type(val))
-        if a != b:
-            vd.warning("Cannot change value of calculated column.  Use `'` to freeze column.")
 
     @property
     def expr(self):

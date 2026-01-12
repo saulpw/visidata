@@ -27,6 +27,7 @@ import os
 import re
 
 from visidata import vd, VisiData, Column, Sheet, ItemColumn, vlen, asyncthread, Path, AttrDict, date
+from visidata import WritableColumn
 
 
 @VisiData.api
@@ -54,7 +55,7 @@ def encode_date(dt=None):
     return '%02d%s%s' % (dt.year % 100, s[dt.month-1], s[dt.day-1])
 
 
-class OrgContentsColumn(Column):
+class OrgContentsColumn(WritableColumn):
     def setValue(self, row, v, setModified=True):
         super().setValue(row, v, setModified=setModified)
         orgmode_parse_into(row, v)
