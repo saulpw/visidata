@@ -478,7 +478,10 @@ CommandLog.options.encoding = 'utf-8'
 CommandLogJsonl.options.json_sort_keys = False
 CommandLogJsonl.options.regex_skip = r'^(//|#).*'
 
-vd.addGlobals(CommandLogBase=CommandLogBase, CommandLogRow=CommandLogRow)
+vd.addGlobals(CommandLogBase=CommandLogBase,
+              CommandLogJsonl=CommandLogJsonl,
+              CommandLogRow=CommandLogRow,
+              )
 
 vd.addMenuItems('''
             View > Command log > this sheet > cmdlog-sheet
