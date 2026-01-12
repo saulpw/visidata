@@ -196,32 +196,32 @@ class InputWidget:
             '''Return a formatted substring of *dispval* that fills the on-screen width *w*.'''
             if i == len(dispval): # add a fillchar so the user perceives room to type
                 dispval += self.fillchar
-            dw = dispwidth(dispval)
+            dw = dispwidth(dispval, literal=True)
             if dw <= w:  # entire value fits
                 dispval += self.fillchar*(w-dw)
                 return dispval, i
             if w <= tr_w: # column is too narrow to hold a left and right truncation
                 return trunch, 0
 
-            dw = dispwidth(dispval[i:])
+            dw = dispwidth(dispval[i:], literal=True)
             if dw + tr_w <= w and dw <= w//2: #cursor is within half-colwidth of end
                 #truncate the left and show the end
-                frag, n = clipstr_start(dispval, w-tr_w)
+                frag, n = clipstr_start(dispval, w-tr_w, literal=True)
                 offset = len(dispval) - i
                 dispval = ' '*(w-tr_w - n) + trunch + frag
                 i = len(dispval) - offset
                 return dispval, i
 
             # the remaining cases need the right side truncated, after the new dispval is returned
-            dw = dispwidth(dispval[:i+1])
-            if dw + tr_w <= w and dispwidth(dispval[:i]) <= w//2: #cursor is within half-colwidth of start
+            dw = dispwidth(dispval[:i+1], literal=True)
+            if dw + tr_w <= w and dispwidth(dispval[:i], literal=True) <= w//2: #cursor is within half-colwidth of start
                 #truncate the right, and show the string start
                 pass
             else: # truncate left and right sides
                 # Place the cursor at the midpoint of the available colwidth
                 left_w = (w - 2*tr_w)//2
                 # calculate the fragment to the left of the cursor
-                l_frag, n = clipstr_start(dispval[:i], left_w)
+                l_frag, n = clipstr_start(dispval[:i], left_w, literal=True)
                 dispval = ' '*(left_w-n) + trunch + l_frag + dispval[i:]
                 i = left_w-n + len(trunch) + len(l_frag)
             return dispval, i
@@ -238,7 +238,7 @@ class InputWidget:
             #draw a space to indicate that the user can scroll right of the cell's final char
             clipdraw(scr, y, x+w, ' ', attr, 1, clear=False, literal=True)
         if scr:
-            prew = dispwidth(dispval[:i])
+            prew = dispwidth(dispval[:i], literal=True)
             if x+prew < scr.getmaxyx()[1]: #move cursor back to where the user is editing
                 scr.move(y, x+prew)
 
@@ -489,7 +489,7 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
         for k, v in kwargs.items():
             #recalculate y to adjust for screen resizes during input()
             y = sheet.windowHeight-v.get('dy')-1
-            maxw = min(sheet.windowWidth-1, max(dispwidth(v.get('prompt')), dispwidth(str(v.get('value', '')))))
+            maxw = min(sheet.windowWidth-1, max(dispwidth(v.get('prompt')), dispwidth(str(v.get('value', '')), literal=True)))
             promptlen = clipdraw(scr, y, 0, v.get('prompt'), attr, w=maxw)  #1947
             promptlen = clipdraw(scr, y, promptlen, v.get('value', ''),  attr, w=maxw)
 

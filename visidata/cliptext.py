@@ -359,7 +359,7 @@ def clipbox(scr, lines, attr, title=''):
 
     clipdraw(scr, 0, w-dispwidth(title)-6, f"| {title} |", attr)
 
-def clipstr_start(dispval, w, truncator=''):
+def clipstr_start(dispval, w, truncator='', literal=False):
     '''Return a tuple (frag, dw), where *frag* is the longest ending substring
     of *dispval* that will fit in a space *w* terminal display characters wide,
     and *dw* is the substring's display width as an int.'''
@@ -369,12 +369,12 @@ def clipstr_start(dispval, w, truncator=''):
     if w <= 0: return '', 0
     j = len(dispval)
     while j >= 1:
-        if dispwidth((truncator if j > 1 else '') + dispval[j-1:]) <= w:
+        if dispwidth((truncator if j > 1 else '') + dispval[j-1:], literal=literal) <= w:
             j -= 1
         else:
             break
     frag = (truncator if j > 0 else '') + dispval[j:]
-    return frag, dispwidth(frag)
+    return frag, dispwidth(frag, literal=literal)
 
 def clipstr_middle(s, n=10, truncator='…'):
     '''Return a string having a display width <= *n*. Excess characters are
