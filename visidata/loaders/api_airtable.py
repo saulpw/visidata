@@ -50,7 +50,9 @@ class AirtableSheet(Sheet):
     def iterload(self):
         self.fields = set()
 
-        for page in self.api.iterate(self.airtable_base, self.airtable_table, view=self.airtable_view):
+        table = self.api.table(self.airtable_base, self.airtable_table)
+        
+        for page in table.iterate(view=self.airtable_view):
             for row in page:
                 yield row
 
