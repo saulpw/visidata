@@ -501,7 +501,7 @@ class Column(Extensible):
         cellval = wrapply(self.getValue, row)
         typedval = wrapply(self.type, cellval)
         if isinstance(typedval, (TypedWrapper, threading.Thread)):
-            return dispwidth(self.getCell(row).text, maxwidth=maxwidth)
+            return dispwidth(self.getCell(row).text, maxwidth=maxwidth, literal=True)
         try:
             text = self.format(typedval, width=maxwidth) or ''
         except Exception as e:  # formatting failure
@@ -509,7 +509,7 @@ class Column(Extensible):
                 text = str(cellval)
             except Exception as e:
                 text = str(e)
-        return dispwidth(text, maxwidth=maxwidth)
+        return dispwidth(text, maxwidth=maxwidth, literal=True)
 
 
 # ---- basic Columns
