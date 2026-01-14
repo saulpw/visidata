@@ -873,6 +873,6 @@ vd.addMenuItems('''
     Plot > Zoom > out > zoomout-cursor
     Plot > Zoom > in > zoomin-cursor
     Plot > Zoom > cursor > zoom-all
-    Plot > Dive into cursor > dive-cursor
-    Plot > Delete > under cursor > delete-cursor
+    View > Open subsheet > from cursor > dive-cursor
+    Edit > Delete > under cursor > delete-cursor
 ''')
