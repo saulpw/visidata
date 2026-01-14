@@ -279,9 +279,11 @@ def get_curses_timeout(vd) -> int:
             else:
                 # otherwise, schedule the next redraw and command immediately
                 curses_timeout = 0
+            vd.numTimeouts = 0
 
         elif vd.unfinishedThreads:
             curses_timeout = nonidle_timeout
+            vd.numTimeouts = 0
         else:
             vd.numTimeouts += 1
             if vd.timeouts_before_idle >= 0 and vd.numTimeouts >= vd.timeouts_before_idle:
