@@ -267,6 +267,8 @@ def _toplevelTryFunc(func, *args, **kwargs):
     t.name = func.__name__
     try:
         t.status = func(*args, **kwargs)
+        if t.status is None:
+            t.status = 'ended'
     except EscapeException as e:  # user aborted
         t.status = 'aborted by user'
         vd.warning(f'{t.name} aborted')
@@ -274,6 +276,8 @@ def _toplevelTryFunc(func, *args, **kwargs):
         t.exception = e
         t.status = 'exception'
         vd.exceptionCaught(e)
+    finally:
+        t.endTime = time.process_time()
 
     if t.sheet:
         t.sheet.currentThreads.remove(t)
@@ -343,14 +347,6 @@ def unfinishedThreads(self):
     'A list of unfinished threads (those without a recorded `endTime`).'
     return [t for t in self.threads if getattr(t, 'endTime', None) is None and getattr(t, 'sheet', None) is not None]
 
-@VisiData.api
-def checkForFinishedThreads(self):
-    'Mark terminated threads with endTime.'
-    for t in self.unfinishedThreads:
-        if not t.is_alive():
-            t.endTime = time.process_time()
-            if getattr(t, 'status', None) is None:
-                t.status = 'ended'
 
 @VisiData.api
 def sync(self, *joiningThreads):

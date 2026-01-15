@@ -241,7 +241,6 @@ def mainloop(vd, scr):
 
         vd._playNextQueuedCommand()
 
-        vd.checkForFinishedThreads()
         vd.callNoExceptions(sheet.checkCursor)
 
         time.sleep(0)  # yield to other threads which may not have started yet
