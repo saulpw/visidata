@@ -641,6 +641,10 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
     x, w = self._visibleColLayout.get(vcolidx, (0, 0))
 
     col = self.availCols[vcolidx]
+
+    if col.readonly:
+        vd.fail('cannot edit readonly column')
+
     if rowidx is None:
         rowidx = self.cursorRowIndex
 
