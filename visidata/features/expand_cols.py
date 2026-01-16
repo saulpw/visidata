@@ -3,7 +3,7 @@ import random
 import os.path
 from functools import singledispatch
 
-from visidata import vd, Sheet, asyncthread, Progress, Column, VisiData, deduceType, anytype, getitemdef, ColumnsSheet
+from visidata import vd, Sheet, asyncthread, Progress, Column, VisiData, deduceType, anytype, getitemdef, ColumnsSheet, WritableColumn
 
 
 @Sheet.api
@@ -117,7 +117,7 @@ def expand(col, rows):
 
 
 @VisiData.api
-class ExpandedColumn(Column):
+class ExpandedColumn(WritableColumn):
     def calcValue(self, row):
         return getitemdef(self.origCol.getValue(row), self.expr)
 
