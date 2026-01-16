@@ -4,7 +4,7 @@ import math
 import numbers
 
 from visidata import vd, asyncthread, deduceType, anytype
-from visidata import Sheet, Column, VisiData, ColumnItem, TableSheet, BaseSheet, Progress, ColumnAttr, SuspendCurses, TextSheet, setitem
+from visidata import Sheet, Column, VisiData, ColumnItem, TableSheet, BaseSheet, Progress, ColumnAttr, SuspendCurses, TextSheet, setitem, WritableColumn
 import visidata
 
 vd.option('visibility', 0, 'visibility level')
@@ -152,7 +152,7 @@ class SheetDict(PythonSheet):
         return PyobjSheet(f'{self.name}.{row}', source=self.source[row])
 
 
-class ColumnSourceAttr(Column):
+class ColumnSourceAttr(WritableColumn):
     'Use row as attribute name on sheet source'
     def calcValue(self, attrname):
         return getattr(self.sheet.source, attrname)

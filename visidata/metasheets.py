@@ -2,7 +2,7 @@ import collections
 
 from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, asyncthread, Sheet, IndexSheet
 from visidata import CellColorizer, RowColorizer, JsonLinesSheet, AttrDict
-from visidata import ColumnAttr, ItemColumn
+from visidata import ColumnAttr, ItemColumn, WritableColumn
 from visidata import TsvSheet, Path, Option
 from visidata import undoAttrFunc, VisiData, vlen
 
@@ -34,7 +34,7 @@ Other commands (not specific to Columns Sheet):
 - {help.commands.setcol_input}
 '''
 
-    class ValueColumn(Column):
+    class ValueColumn(WritableColumn):
         'passthrough to the value on the source cursorRow'
         def calcValue(self, srcCol):
             return srcCol.getDisplayValue(srcCol.sheet.cursorRow)

@@ -319,7 +319,7 @@ def ExtendedSheet_reload(self, sheets):
 
 
 ## for ConcatSheet
-class ConcatColumn(Column):
+class ConcatColumn(WritableColumn):
     '''ConcatColumn(name, cols={srcsheet:srccol}, ...)'''
     def getColBySheet(self, s):
         return self.cols.get(s, None)
