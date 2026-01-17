@@ -164,7 +164,7 @@ class VisiData(visidata.Extensible):
         if keyname == '^[':  # Esc/Alt+
             if self.pendingKeys:  # more to come
                 k = self.pendingKeys.pop(0)
-                return 'Alt+'+self.prettykeys(k)
+                return 'Alt+'+self.prettykeys(str(k))
             else:
                 return 'Esc'
         return self.prettykeys(keyname)

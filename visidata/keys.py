@@ -34,9 +34,41 @@ visidata.vd.prettykeys_trdict = {
         'kDC3':      'Ctrl+Del',
         'KEY_SDC':   'Shift+Del',
 
+        'kDC4':      'Alt+Shift+Del',
+        'kIC4':      'Alt+Shift+Ins',
+        'kUP4':      'Alt+Shift+Up',
+        'kDN4':      'Alt+Shift+Down',
+        'kHOM4':     'Alt+Shift+Home',
+        'kEND4':     'Alt+Shift+End',
+        'kRIT4':     'Alt+Shift+Right',
+        'kLFT4':     'Alt+Shift+Left',
+        'kPRV4':     'Alt+Shift+PgUp',
+        'kNXT4':     'Alt+Shift+PgDn',
+        'kBEG4':     'Alt+Shift+Begin',
+
+        'kBEG3':     'Alt+Begin',
+        'kIC3':      'Alt+Ins',
+        'kHOM3':     'Alt+Home',
+        'kEND3':     'Alt+End',
+        'kNXT3':     'Alt+PgDn',
+        'kPRV3':     'Alt+PgUp',
+        'kLFT3':     'Alt+Left',
+        'kRIT3':     'Alt+Right',
+        'kUP3':      'Alt+Up',
+        'kDN3':      'Alt+Down',
+
         'KEY_IC':    'Ins',
         'KEY_DC':    'Del',
 
+        'kBEG6':     'Ctrl+Shift+Begin',
+        'kRIT6':     'Ctrl+Shift+Right',
+        'kLFT6':     'Ctrl+Shift+Left',
+        'kHOM6':     'Ctrl+Shift+Home',
+        'kEND6':     'Ctrl+Shift+End',
+        'kPRV6':     'Ctrl+Shift+PgUp',
+        'kNXT6':     'Ctrl+Shift+PgDn',
+        'kIC6':      'Ctrl+Shift+Ins',
+        'kDC6':      'Ctrl+Shift+Del',
         'kUP6':      'Ctrl+Shift+Up',
         'kDN6':      'Ctrl+Shift+Down',
         'kUP':       'Shift+Up',
@@ -49,11 +81,13 @@ visidata.vd.prettykeys_trdict = {
         'KEY_SEND':  'Shift+End',
         'KEY_SPREVIOUS': 'Shift+PgUp',
         'KEY_SNEXT': 'Shift+PgDn',
+        'kBEG':      'Begin',
 
         'kxIN': 'FocusIn',
         'kxOUT': 'FocusOut',
 
         'KEY_BACKSPACE': 'Bksp',
+        '263': 'Bksp',
         'BUTTON1_RELEASED': 'LeftBtnUp',
         'BUTTON2_RELEASED': 'MiddleBtnUp',
         'BUTTON3_RELEASED': 'RightBtnUp',
@@ -77,7 +111,7 @@ for i in range(1, 13):
 
 
 @visidata.VisiData.api
-def prettykeys(vd, key):
+def prettykeys(vd, key:str) -> str:
     if not key or '+' in key[:-1]:
         return key
 
