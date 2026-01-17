@@ -32,7 +32,7 @@ def nextColName(sheet, show_cells=True):
     def _fmt_colname(match, row, trigger_key):
         name = match.formatted.get('name', row.name) if match else row.name
         r = ' '*(dispwidth(prompt)-3)
-        r += f'[:keystrokes]{trigger_key}[/]  '
+        r += f'[:keystrokes]{trigger_key}[/]  ' if trigger_key else '   '
         if show_cells and len(sheet.rows) > 0:
             # pad the right side with spaces
             # use row.name, because name from match contains
