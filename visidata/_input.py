@@ -642,7 +642,7 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
 
     col = self.availCols[vcolidx]
 
-    if col.readonly:
+    if col.readonly and rowidx >= 0:
         vd.fail('cannot edit readonly column')
 
     if rowidx is None:
