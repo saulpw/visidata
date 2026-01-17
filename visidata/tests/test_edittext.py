@@ -43,9 +43,12 @@ class TestEditText:
 
         ('a b Left Ctrl+U Enter', 'b', {}),
         ('a b Ctrl+U c Enter', 'c', {}),
+
+        ('w e Space a r e Space t h e Space w o r l d Ctrl+Left Ctrl+Left Ctrl+W Enter', 'we the world', {}),
+        ('w e Space a r e Space t h e Space w o r l d Ctrl+Left Ctrl+Left Ctrl+Del Enter', 'we are world', {}),
     ])
     def test_keys(self, mock_screen, keys, result, kwargs):
-        self.chars.extend(keys.split())
+        self.chars.extend([(' ' if k == 'Space' else k) for k in keys.split()])
 
         exception = kwargs.pop('exception', None)
         widget = visidata.InputWidget(**kwargs)
@@ -53,5 +56,8 @@ class TestEditText:
             with pytest.raises(exception):
                 widget.editline(mock_screen, 0, 0, 0, attr=visidata.ColorAttr())
         else:
-            r = widget.editline(mock_screen, 0, 0, 0, attr=visidata.ColorAttr())
+            try:
+                r = widget.editline(mock_screen, 0, 0, 0, attr=visidata.ColorAttr())
+            except StopIteration:
+                assert False, "need Enter (or cancel) at end of keypresses"
             assert r == result
