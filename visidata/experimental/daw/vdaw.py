@@ -19,8 +19,10 @@ vd.theme_option('daw_include_cuts', True, 'whether saving xmd format includes cu
 
 
 TODO = '''
+- cleanup: remove conf < 0.6; if row fully overlaps another row and is lower confidence, remove it.
+- bulk_combine rows per speaker: move to transcribe script?
 - filter still picking up words even though inaudible to my ear
-- actual transcription not great (would like to quickly flag words as incorrect for later)
+- flag words or whole sentences as incorrect for cleanup review
 - mpd needs to be killed on program exit
 
 - single-word interjections inlined into other paragraph
@@ -568,6 +570,10 @@ class PodcastEditingSheet(Sheet):
             if not row.cut or row.cut > 0:
                 self.reformat_row(rows.index(row), undo=False)
 
+    def bulk_combine(self, rows):
+        vd.addUndo(setattr, self, 'rows', copy(self.rows))
+        self.rows = list(iterspeakerrows(rows, inline_interjections=False))
+
     def speed_change(self, dv):
         self.speed *= dv
         self.mpv.set_property('speed', self.speed)
@@ -679,12 +685,13 @@ def save_cutlist(vd, p, sheet):
                     cut_start = None
                     cut_end = None
 
-def iterspeakerrows(rows, include_cuts=True):
+
+def iterspeakerrows(rows, include_cuts=True, inline_interjections=False):
     def _combine_rows(accumrows):
         firstrow = accumrows[0]
-        vd.status(include_cuts)
         r = EditRow(speaker=firstrow.speaker,
-                    section=firstrow.section)
+                    section=firstrow.section,
+                    subrows=accumrows)
         if include_cuts:
             text = ' '.join(r.editedtext for r in accumrows)
             if is_cut(firstrow):
@@ -703,7 +710,7 @@ def iterspeakerrows(rows, include_cuts=True):
     for i, row in enumerate(rows):
         assert row, i
         if ' ' in row.speaker:
-            yield from iterspeakerrows(row.subrows, include_cuts=include_cuts)
+            yield from iterspeakerrows(row.subrows, include_cuts=include_cuts, inline_interjections=inline_interjections)
             continue
 
         if not accumrows:
@@ -715,7 +722,7 @@ def iterspeakerrows(rows, include_cuts=True):
             accumrows.append(row)
             continue
 
-        if is_cut(row) == is_cut(lastrow) and row.section == lastrow.section:
+        if inline_interjections and is_cut(row) == is_cut(lastrow) and row.section == lastrow.section:
             # speaker different; only one word?
             if row.nwords == 1:
                 r = EditRow(speaker=lastrow.speaker, section=row.section, cut=is_cut(row))   # fake speaker
@@ -736,7 +743,7 @@ def save_xmd(vd, p, sheet):
 
     prevhdr = ''
     with p.open(mode='w', encoding=sheet.options.save_encoding) as fp:
-        for row in iterspeakerrows(sheet.rows, sheet.options.daw_include_cuts):
+        for row in iterspeakerrows(sheet.rows, include_cuts=sheet.options.daw_include_cuts, inline_interjections=True):
 
             if row.section != prevhdr:
                 prevhdr = row.section
@@ -813,5 +820,6 @@ PodcastEditingSheet.addCommand('g>', 'go-header-last', 'go_header_next(-1, nRows
 PodcastEditingSheet.addCommand('f', 'open-vdaw-filters', 'vd.push(FilterParametersSheet("filters", source=sheet))')
 PodcastEditingSheet.addCommand('r', 'reformat-row', 'reformat_row(cursorRowIndex)')
 PodcastEditingSheet.addCommand('gr', 'reformat-selected', 'reformat_rows(selectedRows)')
+PodcastEditingSheet.addCommand('', 'bulk-combine', 'bulk_combine(rows)')
 
 PodcastEditingSheet.addCommand('c', 'clean-timings', 'flag_bad_timings()')
