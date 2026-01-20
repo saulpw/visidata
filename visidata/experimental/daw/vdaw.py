@@ -1,3 +1,4 @@
+
 from collections import defaultdict
 from copy import copy
 
@@ -18,6 +19,10 @@ vd.theme_option('daw_include_cuts', True, 'whether saving xmd format includes cu
 
 
 TODO = '''
+- filter still picking up words even though inaudible to my ear
+- actual transcription not great (would like to quickly flag words as incorrect for later)
+- mpd needs to be killed on program exit
+
 - single-word interjections inlined into other paragraph
 - bug: fix split
 - combine consecutive cuts in markdown
@@ -121,7 +126,7 @@ def formatter_hhmmss(self, fmtstr):
 
 class EditRow:
     def __init__(self, section:str='', speaker:str='', header:str='', subrows:list=None, cut=None, **kwargs):
-        self.data = None  # start/end/text for leaf nodes
+        self.data = AttrDict(kwargs) # start/end/text for leaf nodes
         self.section = section
         self.speaker = speaker
         self.header = header
@@ -146,6 +151,8 @@ class EditRow:
                     text=self.text)
 
     def __contains__(self, t:float) -> bool:
+        if t is None:
+            return False
         if not self.start or not self.end:
             return False
         return self.start <= t <= self.end
@@ -288,6 +295,7 @@ class EditRow:
 
 
 class PodcastEditingSheet(Sheet):
+    # rowdef: EditRow
     columns = [
         AttrColumn('section', width=20),
         AttrColumn('speaker'),
@@ -296,7 +304,7 @@ class PodcastEditingSheet(Sheet):
         AttrColumn('duration', type=float, formatter='hhmmss'),
         AttrColumn('raw', 'raw_duration', type=float, formatter='hhmmss'),
         AttrColumn('cut', type=float, width=6),
-        AttrColumn('score', type=float, width=0),
+        Column('conf', getter=lambda c,r: r.data.conf, type=float, width=0),
         AttrColumn('text', width=80),
         AttrColumn('subrows', type=vlen, width=0),
     ]
@@ -319,11 +327,9 @@ class PodcastEditingSheet(Sheet):
     def iterload(self):
         self.speakers = defaultdict(list)  # speakername -> list of words/subrows
 
+        transcript = json.loads(self.source.open_text().read())
         if not self.sourcerows:
-            d = json.loads(self.source.open_text().read())
-            self.sourceaudio = d.get('sourceaudio', None)
-
-            self.sourcerows = d['word_segments']
+            self.sourcerows = transcript.get('word_segments')
 
         if not self.sourceaudio:
             if self.source.with_suffix('.wav').exists():
@@ -341,12 +347,16 @@ class PodcastEditingSheet(Sheet):
         try:
             for row in self.sourcerows:
                 if not isinstance(row, EditRow):
+                    if 'text' not in row:  # TODO: remove on next transcribe pass
+                        row['text'] = row.get('word')
                     row = EditRow(**row)
                 if row.section != curhdr:  # only the first row of a section has 'header'
                     curhdr = row.header = row.section
 
                 self.speakers[row.speaker].append(row)
                 yield row
+
+            self.rows.sort(key=lambda r: r.start)  # TODO: remove on next transcribe pass
         except Exception as e:
             vd.exceptionCaught(e)
 
