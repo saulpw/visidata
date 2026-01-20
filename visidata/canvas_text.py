@@ -75,6 +75,16 @@ class TextCanvas(BaseSheet):
     def rows(self, v):
         pass
 
+    @property
+    def minXY(self) -> int:
+        minX, minY, maxX, maxY = boundingBox(self.rows)
+        return minX, minY
+
+    @property
+    def maxXY(self) -> int:
+        minX, minY, maxX, maxY = boundingBox(self.rows)
+        return maxX, maxY
+
     def reload(self):
         pass
 
@@ -110,9 +120,9 @@ class TextCanvas(BaseSheet):
         return list(self.iterbox(self.cursorBox))
 
     def slide(self, rows, dx, dy):
-        maxX, maxY = self.windowWidth, self.windowHeight
         x1, y1, x2, y2 = boundingBox(rows)
 
+        # limit dx to not slide beyond top-left
         if x1+dx < 0: dx = -x1
         if y1+dy < 0: dy = -y1
 
@@ -138,7 +148,7 @@ TextCanvas.addCommand('Ctrl+Down', 'resize-cursor-taller', 'cursorBox.h += 1', '
 TextCanvas.addCommand('gzLeft', 'resize-cursor-min-width', 'cursorBox.w = 1')
 TextCanvas.addCommand('gzUp', 'resize-cursor-min-height', 'cursorBox.h = 1')
 TextCanvas.addCommand('z_', 'resize-cursor-min', 'cursorBox.h = cursorBox.w = 1')
-TextCanvas.addCommand('g_', 'resize-cursor-max', 'cursorBox.x1=cursorBox.y1=0; cursorBox.h=maxY+1; cursorBox.w=maxX+1')
+TextCanvas.addCommand('g_', 'resize-cursor-max', 'maxX, maxY = maxXY; cursorBox.x1=cursorBox.y1=0; cursorBox.h=maxY+1; cursorBox.w=maxX+1')
 TextCanvas.bindkey('zRight', 'resize-cursor-wider')
 TextCanvas.bindkey('zLeft', 'resize-cursor-thinner')
 TextCanvas.bindkey('zUp', 'resize-cursor-shorter')
@@ -164,10 +174,10 @@ TextCanvas.addCommand('H', 'slide-left-obj',       'slide(source.selectedRows, -
 TextCanvas.addCommand('J', 'slide-down-obj',       'slide(source.selectedRows, 0, +1)', 'slide selected objects down one character')
 TextCanvas.addCommand('K', 'slide-up-obj',         'slide(source.selectedRows, 0, -1)', 'slide selected objects up one character')
 TextCanvas.addCommand('L', 'slide-right-obj',      'slide(source.selectedRows, +1, 0)', 'slide selected objects right one character')
-TextCanvas.addCommand('gH', 'slide-leftmost-obj',  'slide(source.selectedRows, -maxX, 0)', 'slide selected objects all the way left')
-TextCanvas.addCommand('gJ', 'slide-bottom-obj',    'slide(source.selectedRows, 0, +maxY)', 'slide all selected objects all the way bottom')
-TextCanvas.addCommand('gK', 'slide-top-obj',       'slide(source.selectedRows, 0, -maxY)', 'slide all selected objects all the way top')
-TextCanvas.addCommand('gL', 'slide-rightmost-obj', 'slide(source.selectedRows, +maxX, 0)', 'slide all selected objects all the way right')
+TextCanvas.addCommand('gH', 'slide-leftmost-obj',  'slide(source.selectedRows, -maxXY[0], 0)', 'slide selected objects all the way left')
+TextCanvas.addCommand('gJ', 'slide-bottom-obj',    'slide(source.selectedRows, 0, +maxXY[1])', 'slide all selected objects all the way bottom')
+TextCanvas.addCommand('gK', 'slide-top-obj',       'slide(source.selectedRows, 0, -maxXY[1])', 'slide all selected objects all the way top')
+TextCanvas.addCommand('gL', 'slide-rightmost-obj', 'slide(source.selectedRows, +maxXY[0], 0)', 'slide all selected objects all the way right')
 
 
 TextCanvas.init('cursorBox', lambda: CharBox(None, 0,0,1,1))
