@@ -151,16 +151,24 @@ def outputProgressEvery(vd, sheet, seconds:float=0.5):
 
 @visidata.VisiData.api
 def moveToPos(vd, sources, sheet_desc, startcol, startrow):
-    if sheet_desc == [] or sheet_desc[0] == '':
-        ## the list moves must have each of its elements refer only 1
+    '''*sources* is a list of sheets, if it is empty, the currently active sheet is used'''
+    if len(sources) == 0:
+        sources = [vd.activeSheet]
+    if sheet_desc is None:  #apply move to the last sheet
+        sheet_descs = [[len(sources) - 1]]
+    elif sheet_desc == [] or sheet_desc[0] == '': #apply move to all sheets
+        # the list of moves must have each of its elements refer only to 1
         # sheet, so expand the "all sheets" sheet descriptor into individual sheets
         sheet_descs = [[i] + sheet_desc[1:] for i, sheet in enumerate(sources)]
     else:
         sheet_descs = [sheet_desc]
-    # for each sheet, attempt column moves first, then rows
     if startcol is not None or startrow is not None:
-        moves = [(d, startcol, None) for d in sheet_descs] + \
-                [(d, None, startrow) for d in sheet_descs]
+        moves = []
+        if startcol:
+            moves += [(d, startcol, None) for d in sheet_descs]
+        if startrow:
+            moves += [(d, None, startrow) for d in sheet_descs]
+        moves.append((sheet_descs[-1], None, None))
     else:
         moves = [(d, None, None) for d in sheet_descs]
     # start a thread to keep attempting the moves till they all succeed, for sheets that are slow to load
@@ -170,8 +178,8 @@ def sheet_from_description(vd, sources, sheet_desc):
     '''Return a Sheet to apply col/row to, given a list *sheet_desc* that refers to one specific sheet.
         The *sheet_desc* is either a Sheet, or a list of strings/ints similar to the return value of parsePos(),
         with the difference that *sheet_desc* will not ever be the empty list that denotes "all sheets".
-        Return None if no matching sheet was found; if sheets are loading, a subsequent call may return
-        a matching sheet.
+        Return None if no matching sheet was found; if no match was found because sheets are loading,
+        a subsequent call may return a matching sheet.
         Raise ValueError to indicate that a move failed, and should not be retried.'''
     if isinstance(sheet_desc, BaseSheet):
         vd.push(sheet_desc)
