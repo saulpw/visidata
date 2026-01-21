@@ -23,7 +23,7 @@ TODO = '''
 - bulk_combine rows per speaker: move to transcribe script?
 - filter still picking up words even though inaudible to my ear
 - flag words or whole sentences as incorrect for cleanup review
-- mpd needs to be killed on program exit
+- mpv needs to be killed on program exit
 
 - single-word interjections inlined into other paragraph
 - bug: fix split
@@ -67,7 +67,7 @@ options_daw_hms_seps = '::.'  # or maybe 'hm.' or '..,'
 
 def to_hms(t:float, width=None) -> str:
     'Return some form of HH:MM:SS.s'
-    if t is None or t == 0:
+    if not isinstance(t, (float, int)) or t == 0:
         return ''
 
     if t < 100:

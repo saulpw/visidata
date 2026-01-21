@@ -4,6 +4,7 @@ import socket
 import json
 import time
 import subprocess
+import shlex
 
 from visidata import AttrDict, Sheet, vd
 
@@ -121,7 +122,11 @@ class MpvProcess:
                 filterparams = '--af='+filterparams
                 vd.status(filterparams)
 
-            self.mpvproc = vd.popen(f'{vd.options.daw_mpv_cmd} --input-ipc-server={self.mpvsockfn} {filterparams} {self.sourceaudio}', shell=True)
+            cmd = shlex.split(vd.options.daw_mpv_cmd)
+            cmd.append(f'--input-ipc-server={self.mpvsockfn}')
+            cmd.append(filterparams)
+            cmd.append(self.sourceaudio)
+            self.mpvproc = vd.popen(cmd)
 
     def mpv_command(self, **kwargs):
         sock = socket.socket(socket.AF_UNIX)
@@ -141,6 +146,8 @@ class MpvProcess:
                 if error != 'success':
                     vd.error(f"mpv error ({propname}): {error}")
             return d['data']
+        except FileNotFoundError as e:
+            vd.warning(str(e))
         finally:
             sock.close()
 
@@ -155,7 +162,9 @@ class MpvProcess:
 
     @property
     def playback_time(self):
-        return float(self.mpv_query('playback-time'))
+        t = self.mpv_query('playback-time')
+        if t is not None:
+            return float(t)
 
     def pause_audio(self, b=True):
         self.set_property('pause', b)
