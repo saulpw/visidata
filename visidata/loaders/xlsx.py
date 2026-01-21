@@ -258,7 +258,7 @@ def theme_colors(sheet):
 
     theme_colors = []
 
-    for c in ['lt1', 'dk1', 'lt2', 'dk2', 'accent1', 'accent2', 'accent3', 'accent4', 'accent5', 'accent6']:
+    for c in ['lt1', 'dk1', 'lt2', 'dk2', 'accent1', 'accent2', 'accent3', 'accent4', 'accent5', 'accent6', 'hlink', 'folHlink']:
         accent = firstColorScheme.find(QName(xlmns, c).text)
         for i in list(accent): # walk all child nodes, rather than assuming [0]
             if 'window' in i.attrib['val']:
