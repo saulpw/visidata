@@ -3,7 +3,6 @@ import os.path
 import time
 
 from visidata import vd, VisiData, Path, modtime
-from visidata.settings import _get_cache_dir
 
 
 @VisiData.global_api
@@ -12,10 +11,9 @@ def urlcache(vd, url, days=1, text=True, headers={}):
     from urllib.request import Request, urlopen
     import urllib.parse
 
-    cache_dir = _get_cache_dir()
-    os.makedirs(cache_dir, exist_ok=True)
+    os.makedirs(vd.cache_dir, exist_ok=True)
 
-    p = Path(cache_dir / urllib.parse.quote(url, safe=''))
+    p = Path(vd.cache_dir / urllib.parse.quote(url, safe=''))
     if p.exists():
         secs = time.time() - modtime(p)
         if secs < days*24*60*60:

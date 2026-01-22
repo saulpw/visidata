@@ -12,7 +12,7 @@ class StoredList(list):
 
     @property
     def path(self):
-        vdpath = Path(vd.options.visidata_dir)
+        vdpath = vd.data_dir
         if not vdpath.exists():
             if vd.options.nothing:
                 return
