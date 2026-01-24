@@ -1041,7 +1041,7 @@ class TableSheet(BaseSheet):
                     elif len(lines) < height:
                         lines.extend([[('', '')]]*(height-len(lines)))
 
-                    if self.options.highlight:
+                    if self.options.highlight_search:
                         hp = col.highlight_regex or self.highlight_regex
                         hl_attr = colors.color_highlight_search
                     else:
