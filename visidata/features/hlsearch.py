@@ -80,7 +80,7 @@ def highlight_input(sheet, cols=[]):
                         flags=dict(prompt="regex flags: ", type="regex_flags", value=sheet.options.regex_flags, help=vd.help_regex_flags))
     if not sheet.options.highlight_search:
         vd.warning('highlight option needs to be set to True')
-    setHighlightRegex(sheet, r, cols)
+    sheet.setHighlightRegex(r, cols)
 
 @Sheet.api
 def highlight_clear(sheet):
