@@ -65,7 +65,7 @@ def setHighlightRegex(sheet, r, cols=[]):
         return
     flagbits = sum(getattr(re, f.upper()) for f in r['flags'])
     rc = re.compile(r['regex'], flagbits)
-    sheet.highlight_clear()
+    sheet.clear_search()
     if cols is None:
         vd.addUndo(setattr, sheet, 'highlight_regex', sheet.highlight_regex)
         sheet.highlight_regex = rc
@@ -82,8 +82,8 @@ def highlight_input(sheet, cols=[]):
         vd.warning('highlight option needs to be set to True')
     sheet.setHighlightRegex(r, cols)
 
-@Sheet.api
-def highlight_clear(sheet):
+@Sheet.after
+def clear_search(sheet):
     if not sheet.options.highlight_search:
         return
     for col in sheet.columns:
@@ -99,7 +99,7 @@ vd.option('color_highlight_search', '21 blue on 15 white', 'color to use for hig
 
 Sheet.addCommand('', 'highlight-sheet', 'highlight_input(None)', 'highlight a regex in all columns')
 Sheet.addCommand('', 'highlight-col', 'highlight_input([cursorCol])', 'highlight a regex in current column')
-Sheet.addCommand('', 'highlight-clear', 'highlight_clear()', 'clear the current highlight pattern')
+Sheet.addCommand('', 'highlight-clear', 'clear_search()', 'clear the current highlight pattern')
 # redefine existing commands
 Sheet.addCommand('r', 'search-keys', 'tmp=cursorVisibleColIndex; cols=keyCols or [visibleCols[0]]; r=moveInputRegex("row key", type="regex-row", columns=cols); setHighlightRegex(r, cols); sheet.cursorVisibleColIndex=tmp', 'go to next row with key matching regex')
 Sheet.addCommand('/', 'search-col', 'r=moveInputRegex("search", columns="cursorCol", backward=False); setHighlightRegex(r, [cursorCol])', 'search for regex forwards in current column')
