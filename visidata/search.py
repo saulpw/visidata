@@ -102,6 +102,11 @@ def search_expr(sheet, expr, reverse=False, curcol=None):
 
     vd.fail(f'no {sheet.rowtype} where {expr}')
 
+@Sheet.api
+def clear_search(sheet):
+    '''A stub function to clear any aftereffects of search, such as when
+       highlight_search is active.'''
+    pass
 
 Sheet.addCommand('r', 'search-keys', 'tmp=cursorVisibleColIndex; moveInputRegex("row key", type="regex-row", columns=keyCols or [visibleCols[0]]); sheet.cursorVisibleColIndex=tmp', 'go to next row with key matching regex')
 Sheet.addCommand('/', 'search-col', 'moveInputRegex("search", columns="cursorCol", backward=False)', 'search for regex forwards in current column')
