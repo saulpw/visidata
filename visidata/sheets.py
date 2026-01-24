@@ -1052,8 +1052,11 @@ class TableSheet(BaseSheet):
 
                         sepchars = seps[i]
 
-                        # chunks becomes a list
-                        chunks, left_hl, right_hl = self.highlight_chunks(chunks, hp, hoffset, colwidth, notewidth, cattr, hl_attr)
+                        left_hl = right_hl = False
+                        if hp: # chunks becomes a list
+                            chunks, left_hl, right_hl = self.highlight_chunks(chunks, hp, hoffset, colwidth, notewidth, cattr, hl_attr)
+                        else:
+                            chunks = list(chunks)
                         if colwidth > 2:
                             pre = disp_truncator if hoffset != 0 else disp_column_fill
                             chunks.insert(0, (hl_attr if left_hl else cattr, pre))
