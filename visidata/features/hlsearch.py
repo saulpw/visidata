@@ -61,7 +61,7 @@ def highlight_chunks(sheet, chunks, hp, hoffset, colwidth, notewidth, cattr, hl_
 
 @Sheet.api
 def setHighlightRegex(sheet, r, cols=[]):
-    if not sheet.options.highlight:
+    if not sheet.options.highlight_search:
         return
     flagbits = sum(getattr(re, f.upper()) for f in r['flags'])
     rc = re.compile(r['regex'], flagbits)
@@ -78,13 +78,13 @@ def setHighlightRegex(sheet, r, cols=[]):
 def highlight_input(sheet, cols=[]):
     r = vd.inputMultiple(regex=dict(prompt=f"highlight regex: ", type="regex", defaultLast=True, help=vd.help_regex),
                         flags=dict(prompt="regex flags: ", type="regex_flags", value=sheet.options.regex_flags, help=vd.help_regex_flags))
-    if not sheet.options.highlight:
+    if not sheet.options.highlight_search:
         vd.warning('highlight option needs to be set to True')
     setHighlightRegex(sheet, r, cols)
 
 @Sheet.api
 def highlight_clear(sheet):
-    if not sheet.options.highlight:
+    if not sheet.options.highlight_search:
         return
     for col in sheet.columns:
         if col.highlight_regex:
@@ -94,7 +94,7 @@ def highlight_clear(sheet):
         vd.addUndo(setattr, sheet, 'highlight_regex', sheet.highlight_regex)
         sheet.highlight_regex = None
 
-vd.option('highlight', True, 'whether to highlight strings in searches')
+vd.option('highlight_search', True, 'whether to highlight strings in searches')
 vd.option('color_highlight_search', '21 blue on 15 white', 'color to use for highlighting search results', sheettype=None)  #bright blue on white
 
 Sheet.addCommand('', 'highlight-sheet', 'highlight_input(None)', 'highlight a regex in all columns')
