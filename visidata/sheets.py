@@ -27,6 +27,7 @@ vd.option('disp_multiline_focus', True, 'only multiline cursor row')
 vd.option('color_multiline_bottom', '', 'color of bottom line of multiline rows')  #2715
 vd.option('color_aggregator', 'bold 255 white on 240 black', 'color of aggregator summary on bottom row')
 
+vd.option('highlight_search', False, 'whether to highlight strings in searches') #needs to be set here, is overriden in features/hlsearch.py
 
 @drawcache
 def _splitcell(sheet, s, width=0, maxheight=1):
