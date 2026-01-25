@@ -783,7 +783,8 @@ class Canvas(Plotter):
     def deleteSourceRows(self, rows):
         rows = list(rows)
         self.source.copyRows(rows)
-        self.source.deleteBy(lambda r,rows=rows: r in rows)
+        rowids = {self.source.rowid(r):True for r in rows}
+        self.source.deleteBy(lambda r,rowids=rowids: self.source.rowid(r) in rowids)
         self.reload()
 
 Plotter.addCommand('v', 'visibility', 'options.disp_graph_labels = not options.disp_graph_labels', 'toggle disp_graph_labels option')
