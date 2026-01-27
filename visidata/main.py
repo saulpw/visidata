@@ -15,7 +15,6 @@ import functools
 import signal
 import warnings
 import builtins  # to override print
-import time
 
 from visidata import vd, options, run, BaseSheet, AttrDict, stacktrace
 from visidata import Path, asyncthread
@@ -168,11 +167,9 @@ def moveToPos(vd, sources, sheet_desc, startcol, startrow):
             moves += [(d, startcol, None) for d in sheet_descs]
         if startrow:
             moves += [(d, None, startrow) for d in sheet_descs]
-        moves.append((sheet_descs[-1], None, None))
     else:
         moves = [(d, None, None) for d in sheet_descs]
-    # start a thread to keep attempting the moves till they all succeed, for sheets that are slow to load
-    retry_move_to_pos(vd, sources, moves)
+    vd.queue_move_to_pos(sources, moves)
 
 def sheet_from_description(vd, sources, sheet_desc):
     '''Return a Sheet to apply col/row to, given a list *sheet_desc* that refers to one specific sheet.
@@ -220,25 +217,25 @@ def sheet_from_description(vd, sources, sheet_desc):
             vd.options.set('load_lazy', True, obj=vs)
             vd.sync(vs.ensureLoaded())
             vd.clearCaches()
-    vd.push(vs)
+    # use load=False to avoid calling afterLoad() early, before queue_move_to_pos
+    # can replace the default afterLoad with a wrapped version
+    vd.push(vs, load=False)
     return vs
 
-@asyncthread
-def retry_move_to_pos(vd, sources, moves, retry_interval=0.1):
-    while moves:
-        unmoved = []
-        for move in moves:
-            try:
+@visidata.VisiData.api
+def queue_move_to_pos(vd, sources, moves):
+    for move in moves:
+        sheet_desc = move[0]
+        vs = sheet_from_description(vd, sources, sheet_desc)
+        if not vs:
+            continue
+        def decorator(func, move=move):
+            def wrapper():
+                ret = func()
                 move_succeeded = attempt_move_to_pos(vd, sources, *move)
-            except ValueError as e:
-                # skip failed moves if they can't ever succeed
-                vd.warning(e)
-                continue
-            if not move_succeeded:
-                unmoved.append(move)
-        if unmoved:
-            time.sleep(retry_interval)
-        moves = unmoved
+                return ret
+            return wrapper
+        vs.afterLoad = decorator(vs.afterLoad)
 
 def attempt_move_to_pos(vd, sources, sheet_desc, startcol, startrow):
     '''Return True if the move succeeded in moving to the row and column, on the described sheet.
@@ -301,7 +298,7 @@ def main_vd():
     vd.stdinSource = Path('-', fp=None)  # fp filled in below after options parsed for encoding
 
     # parse args, including +sheetname:subsheet:4:3 starting at row:col on sheetname:subsheet[:...]
-    after_config = []
+    sheet_moves = []
     fmtargs = []
     fmtkwargs = {}
     inputs = []
@@ -362,7 +359,7 @@ def main_vd():
         elif arg.startswith('+'):  # position cursor at start
             parsed_pos = vd.parsePos(arg[1:], inputs=inputs)
             if parsed_pos:
-                after_config.append((vd.moveToPos, *parsed_pos))
+                sheet_moves.append(parsed_pos)
         elif current_args.get('play', None) and '=' in arg:
             # parse 'key=value' pairs for formatting cmdlog template in replay mode
             k, v = arg.split('=', maxsplit=1)
@@ -443,12 +440,17 @@ def main_vd():
             vd.cmdlog.openHook(vd.currentDirSheet, vd.currentDirSheet.source)
 
     if not args.play:
+        # process the moves in order of increasing length of sheet desc,
+        # so that every sheet loads (and executes its moves in afterLoad)
+        # before its subsheets require it to be loaded
+        for move in sorted(sheet_moves, key=lambda m: ((len(m[0]) if m[0] is not None else 0),m[1],m[2])):
+            vd.moveToPos(sources, *move)
+        if sheet_moves:  #redo the last move in the argument list, to show the sheet
+            vd.moveToPos(sources, *sheet_moves[-1])
+
         if options.batch:
             if sources:
                 vd.push(sources[0])
-
-        for (f, *parms) in after_config:
-            f(sources, *parms)
 
         if not options.batch:
             run(vd.sheets[0])
