@@ -81,13 +81,13 @@ def select_duplicate_rows(sheet, duplicates=True):
 
 
 @Sheet.api
-def dedupe_rows(sheet):
+def dedupe_rows(sheet, suffix='_deduped'):
     """
     Given a sheet, pushes a new sheet in which only non-duplicate rows are
     included.
     """
     vs = copy(sheet)
-    vs.name += "_deduped"
+    vs.name += suffix
 
     @asyncthread
     def _reload(self=vs):
