@@ -135,7 +135,7 @@ class EditRow:
 
     @drawcache_property
     def text(self) -> str:
-        if self.data: return self.data.text
+        if not self.subrows: return self.data.text
         if self.cut:
             # if shown directly, toplevel shows words for all rows regardless of cutness
             return ' '.join((r.text or '') for r in self.subrows)
@@ -262,7 +262,7 @@ class PodcastEditingSheet(Sheet):
         AttrColumn('raw', 'raw_duration', type=float, formatter='hhmmss'),
         AttrColumn('cut', type=float, width=6),
         Column('conf', getter=lambda c,r: r.data.conf, type=float, width=0),
-        AttrColumn('text', width=80),
+        AttrColumn('text', width=80, setter=lambda c,r,v: c.sheet.set_text_recursive(r, v)),
         AttrColumn('subrows', type=vlen, width=0),
     ]
     colorizers = [
@@ -377,6 +377,30 @@ class PodcastEditingSheet(Sheet):
         if row.subrows:
             for subrow in row.subrows:
                 self.set_speaker_recursive(subrow, speaker)
+
+    def set_text_recursive(self, row, newtext):
+        '''Set text on row, distributing edits to underlying word-level subrows.'''
+        if not row.subrows:
+            # Leaf node (word) - set text directly
+            row.data.text = newtext
+        else:
+            # Grouped row - distribute text to word-level subrows
+            new_words = newtext.split()
+            leaf_words = list(iterwords([row]))
+
+            # Map new words to existing word rows
+            for i, leaf_word in enumerate(leaf_words):
+                if i < len(new_words):
+                    leaf_word.data.text = new_words[i]
+                else:
+                    # If fewer words in new text, clear remaining words
+                    leaf_word.data.text = ''
+
+            # If there are more new words than existing subrows, warn user
+            if len(new_words) > len(leaf_words):
+                vd.warning(f'New text has {len(new_words)} words but row only has {len(leaf_words)} word slots; extra words ignored')
+
+        self.setModified()
 
     def cycle_speaker(self, row):
         self.setModified()

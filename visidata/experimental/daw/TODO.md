@@ -1,8 +1,6 @@
 - flag words or lines as incorrect for cleanup review
-- mpv needs to be killed on program exit
 
 - single-word interjections inlined into other paragraph
-- bug: fix split
 - combine consecutive cuts in markdown
 - bug: batch convert transcript to xmd "terminated"
 
