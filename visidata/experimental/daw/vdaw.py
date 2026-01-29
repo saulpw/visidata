@@ -734,28 +734,28 @@ def save_transcript(vd, p, sheet):
 PodcastEditingSheet.options.save_filetype = 'transcript'
 PodcastEditingSheet.options.disp_rstatus_fmt = '{sheet.playheadStatus}  ' + Sheet.options.disp_rstatus_fmt
 
-PodcastEditingSheet.addCommand('P', 'play-row-raw', 'mpv.play_audio(cursorRow.start); sheet.skipcut=False')
-PodcastEditingSheet.addCommand('p', 'play-row', 'mpv.play_audio(cursorRow.start); sheet.skipcut=True')
-PodcastEditingSheet.addCommand('zp', 'play-toggle', 'mpv.pause_audio(not mpv.paused)')
-FilterParametersSheet.addCommand('P', 'play-toggle', 'source.mpv.pause_audio(not source.mpv.paused)')
-PodcastEditingSheet.addCommand('g)', 'combine-selected', 'combine_rows(selectedRows)')
-PodcastEditingSheet.addCommand('(', 'expand-row', 'expand_row(cursorRowIndex)')
-PodcastEditingSheet.addCommand('g(', 'expand-selected', 'for row in selectedRows: expand_row(rows.index(row))')
+PodcastEditingSheet.addCommand('P', 'play-row-raw', 'mpv.play_audio(cursorRow.start); sheet.skipcut=False', 'play from cursor row without skipping cuts')
+PodcastEditingSheet.addCommand('p', 'play-row', 'mpv.play_audio(cursorRow.start); sheet.skipcut=True', 'play from cursor row skipping cuts')
+PodcastEditingSheet.addCommand('zp', 'play-toggle', 'mpv.pause_audio(not mpv.paused)', 'toggle pause/play')
+FilterParametersSheet.addCommand('P', 'play-toggle', 'source.mpv.pause_audio(not source.mpv.paused)', 'toggle pause/play')
+PodcastEditingSheet.addCommand('g)', 'combine-selected', 'combine_rows(selectedRows)', 'combine selected rows into one')
+PodcastEditingSheet.addCommand('(', 'expand-row', 'expand_row(cursorRowIndex)', 'expand row into subrows')
+PodcastEditingSheet.addCommand('g(', 'expand-selected', 'for row in selectedRows: expand_row(rows.index(row))', 'expand selected rows into subrows')
 
-PodcastEditingSheet.addCommand('Ctrl+R', 'restart-mpv', 'mpv.start_mpv()')
+PodcastEditingSheet.addCommand('Ctrl+R', 'restart-mpv', 'mpv.start_mpv()', 'restart mpv process')
 
 FilterParametersSheet.addCommand('a', 'add-filter', 'source.mpv.add_filter()', 'add filter on current row')
 FilterParametersSheet.addCommand('d', 'remove-filter', 'source.mpv.remove_filter()', 'remove filter on current row')
 
 for i in range(0, 10):
-    PodcastEditingSheet.addCommand(str(i), f'set-afilter-parm-{i}', f'setFilterParmByIndex(curfilter, curparm, {i})')
-    FilterParametersSheet.addCommand(str(i), f'set-afilter-parm-{i}', f'source.setFilterParmByIndex(cursorRow.filter, cursorRow.filter_parm, {i}); reload()')
+    PodcastEditingSheet.addCommand(str(i), f'set-afilter-parm-{i}', f'setFilterParmByIndex(curfilter, curparm, {i})', f'set audio filter parameter to preset {i}')
+    FilterParametersSheet.addCommand(str(i), f'set-afilter-parm-{i}', f'source.setFilterParmByIndex(cursorRow.filter, cursorRow.filter_parm, {i}); reload()', f'set filter parameter to preset {i}')
 
-PodcastEditingSheet.addCommand('', 'cycle-speaker', 'cycle_speaker(cursorRow)')
-PodcastEditingSheet.addCommand('[', 'audio-back-10', 'mpv.seek_audio(-10); go_playhead()')
-PodcastEditingSheet.addCommand(']', 'audio-forward-10', 'mpv.seek_audio(+10); go_playhead()')
-PodcastEditingSheet.addCommand('g[', 'audio-back-60', 'mpv.seek_audio(-60); go_playhead()')
-PodcastEditingSheet.addCommand('g]', 'audio-forward-60', 'mpv.seek_audio(+60); go_playhead()')
+PodcastEditingSheet.addCommand('', 'cycle-speaker', 'cycle_speaker(cursorRow)', 'cycle through speakers')
+PodcastEditingSheet.addCommand('[', 'audio-back-10', 'mpv.seek_audio(-10); go_playhead()', 'seek backward 10 seconds')
+PodcastEditingSheet.addCommand(']', 'audio-forward-10', 'mpv.seek_audio(+10); go_playhead()', 'seek forward 10 seconds')
+PodcastEditingSheet.addCommand('g[', 'audio-back-60', 'mpv.seek_audio(-60); go_playhead()', 'seek backward 60 seconds')
+PodcastEditingSheet.addCommand('g]', 'audio-forward-60', 'mpv.seek_audio(+60); go_playhead()', 'seek forward 60 seconds')
 PodcastEditingSheet.addCommand('gg', 'go-playhead', 'go_playhead()', 'move row cursor to playhead' )
 
 PodcastEditingSheet.addCommand('F5', 'audio-slower', 'speed_change(0.5)', 'adjust playspeed down 50%')
@@ -772,9 +772,9 @@ PodcastEditingSheet.addCommand('>', 'go-header-next', 'go_header_next(+1, cursor
 PodcastEditingSheet.addCommand('g<', 'go-header-first', 'go_header_next(+1, 0)', 'move row cursor to first section')
 PodcastEditingSheet.addCommand('g>', 'go-header-last', 'go_header_next(-1, nRows-1)', 'move row cursor to last section')
 
-PodcastEditingSheet.addCommand('f', 'open-vdaw-filters', 'vd.push(FilterParametersSheet("filters", source=sheet))')
-PodcastEditingSheet.addCommand('r', 'reformat-row', 'reformat_row(cursorRowIndex)')
-PodcastEditingSheet.addCommand('gr', 'reformat-selected', 'reformat_rows(selectedRows)')
-PodcastEditingSheet.addCommand('', 'bulk-combine', 'bulk_combine(rows)')
+PodcastEditingSheet.addCommand('f', 'open-vdaw-filters', 'vd.push(FilterParametersSheet("filters", source=sheet))', 'open audio filter parameters')
+PodcastEditingSheet.addCommand('r', 'reformat-row', 'reformat_row(cursorRowIndex)', 'reformat row to fit column width')
+PodcastEditingSheet.addCommand('gr', 'reformat-selected', 'reformat_rows(selectedRows)', 'reformat selected rows to fit column width')
+PodcastEditingSheet.addCommand('', 'bulk-combine', 'bulk_combine(rows)', 'combine all rows by speaker')
 
-PodcastEditingSheet.addCommand('c', 'clean-timings', 'flag_bad_timings()')
+PodcastEditingSheet.addCommand('c', 'clean-timings', 'flag_bad_timings()', 'detect and fix bad word timings')
