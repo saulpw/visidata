@@ -255,7 +255,7 @@ class PodcastEditingSheet(Sheet):
     # rowdef: EditRow
     columns = [
         AttrColumn('section', width=20),
-        AttrColumn('speaker'),
+        AttrColumn('speaker', setter=lambda c,r,v: c.sheet.set_speaker_recursive(r, v)),
         AttrColumn('start', type=float, formatter='hhmmss'),
         AttrColumn('end', type=float, formatter='hhmmss'),
         AttrColumn('duration', type=float, formatter='hhmmss'),
@@ -371,11 +371,19 @@ class PodcastEditingSheet(Sheet):
             row.cut = (row.cut or 0)+n
         self.column('duration')._aggregatedTotals.clear()
 
+    def set_speaker_recursive(self, row, speaker):
+        '''Set speaker on row and recursively on all subrows.'''
+        row.speaker = speaker
+        if row.subrows:
+            for subrow in row.subrows:
+                self.set_speaker_recursive(subrow, speaker)
+
     def cycle_speaker(self, row):
         self.setModified()
         vd.addUndo(setattr, row, 'speaker', row.speaker)
         speakers = list(self.speakers.keys())
-        row.speaker = speakers[(speakers.index(row.speaker)+1)%len(speakers)]
+        new_speaker = speakers[(speakers.index(row.speaker)+1)%len(speakers)]
+        self.set_speaker_recursive(row, new_speaker)
 
     def getRowIndexByPlaytime(self, t:float, rows=None) -> int:
         'Return index of first row that ostensibly contains time t.'
@@ -747,7 +755,8 @@ for i in range(0, 10):
     PodcastEditingSheet.addCommand(str(i), f'set-afilter-parm-{i}', f'setFilterParmByIndex(curfilter, curparm, {i})', f'set audio filter parameter to preset {i}')
     FilterParametersSheet.addCommand(str(i), f'set-afilter-parm-{i}', f'source.setFilterParmByIndex(cursorRow.filter, cursorRow.filter_parm, {i}); reload()', f'set filter parameter to preset {i}')
 
-PodcastEditingSheet.addCommand('', 'cycle-speaker', 'cycle_speaker(cursorRow)', 'cycle through speakers')
+PodcastEditingSheet.addCommand('c', 'cycle-speaker', 'cycle_speaker(cursorRow)', 'cycle through speakers')
+PodcastEditingSheet.addCommand('gc', 'cycle-speaker-selected', 'for row in selectedRows: cycle_speaker(row)', 'cycle through speakers for selected rows')
 PodcastEditingSheet.addCommand('[', 'audio-back-10', 'mpv.seek_audio(-10); go_playhead()', 'seek backward 10 seconds')
 PodcastEditingSheet.addCommand(']', 'audio-forward-10', 'mpv.seek_audio(+10); go_playhead()', 'seek forward 10 seconds')
 PodcastEditingSheet.addCommand('g[', 'audio-back-60', 'mpv.seek_audio(-60); go_playhead()', 'seek backward 60 seconds')
@@ -773,4 +782,4 @@ PodcastEditingSheet.addCommand('r', 'reformat-row', 'reformat_row(cursorRowIndex
 PodcastEditingSheet.addCommand('gr', 'reformat-selected', 'reformat_rows(selectedRows)', 'reformat selected rows to fit column width')
 PodcastEditingSheet.addCommand('', 'bulk-combine', 'bulk_combine(rows)', 'combine all rows by speaker')
 
-PodcastEditingSheet.addCommand('c', 'clean-timings', 'flag_bad_timings()', 'detect and fix bad word timings')
+PodcastEditingSheet.addCommand('', 'clean-timings', 'flag_bad_timings()', 'detect and fix bad word timings')

@@ -1,7 +1,3 @@
-- edit speaker for group cascades edit to all words
-- split-at-time seems broken
-
-
 - flag words or lines as incorrect for cleanup review
 - mpv needs to be killed on program exit
 
