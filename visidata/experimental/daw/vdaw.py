@@ -19,10 +19,11 @@ vd.theme_option('daw_include_cuts', True, 'whether saving xmd format includes cu
 
 
 TODO = '''
-- cleanup: remove conf < 0.6; if row fully overlaps another row and is lower confidence, remove it.
-- bulk_combine rows per speaker: move to transcribe script?
-- filter still picking up words even though inaudible to my ear
-- flag words or whole sentences as incorrect for cleanup review
+- edit speaker for group cascades edit to all words
+- split-at-time seems broken
+
+
+- flag words or lines as incorrect for cleanup review
 - mpv needs to be killed on program exit
 
 - single-word interjections inlined into other paragraph
