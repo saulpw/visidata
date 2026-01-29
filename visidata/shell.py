@@ -31,7 +31,7 @@ def popen(vd, *args, **kwargs):
 @VisiData.api
 def killLeftoverProcesses(vd):
     for p in vd.spawnedProcesses:
-        if p.returncode is not None:
+        if p.returncode is None:
             p.kill()
 
 
