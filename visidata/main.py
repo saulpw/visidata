@@ -417,5 +417,5 @@ def vd_cli():
         import threading
         threading.current_thread().profile.disable()
         threading.current_thread().profile.dump_stats('vd.pyprof')
-    else:
+    elif not vd.options.debug:
         os._exit(rc)  # cleanup can be expensive with large datasets
