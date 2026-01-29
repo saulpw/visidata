@@ -41,9 +41,50 @@ Modifications can be saved via `Ctrl+S` to the original .json file, or use a `.t
 
 For now, save as `foo.xmd` to get a markdown transcript with strikethrough for deleted lines.
 
-## applying ffmpeg fiters
+## Editing Commands
 
-- Use vdaw to experiment with ffmpeg filters
+### Playback
+- `p` - Play from cursor row (skipping cuts)
+- `P` - Play from cursor row (including cuts)
+- `zp` - Toggle pause
+- `[` / `]` - Seek backward/forward 10 seconds
+- `g[` / `g]` - Seek backward/forward 60 seconds
+- `gg` - Jump cursor to playhead
+- `F5` - Slow down playback speed by 50%
+- `F8` - Speed up playback 2x
+- `Ctrl+R` - Restart mpv process
+
+### Cutting/Keeping Audio
+- `x` - Cut audio for line at cursor row
+- `y` - Keep/upvote audio for line at cursor row
+- `gx` - Cut audio for selected rows
+- `gy` - Keep audio for selected rows
+
+### Splitting & Combining
+- `a` - Split line at current playhead
+- `za` - Split line at word (prompts for word)
+- `g)` - Combine selected rows into one
+- `(` - Expand row into subrows
+- `g(` - Expand selected rows
+
+### Navigation
+- `<` / `>` - Move to previous/next section header
+- `g<` / `g>` - Move to first/last section header
+
+### Text Formatting
+- `r` - Reformat row (wrap text to column width)
+- `gr` - Reformat selected rows
+
+### Audio Filters
+- `f` - Open audio filter parameters sheet
+- `0-9` - Set filter parameter to preset value (in filter sheet or main sheet)
+
+### Utilities
+- `c` - Clean/interpolate bad word timings
+
+## Applying ffmpeg filters
+
+- Use vdaw to experiment with ffmpeg filters via the `f` command
 
      - agate
      - compand
