@@ -230,8 +230,8 @@ class EditRow:
                         break
                     else:  # in the middle of the previous word
                         prevr = self.subrows[i-1]
-                        beforerows = self.subrows[:i-1]
-                        afterrows = self.subrows[i-1:]
+                        beforerows = self.subrows[:i]
+                        afterrows = self.subrows[i:]
                         assert prevr.start <= t <= prevr.end, (prevr.start, t, prevr.end)
                         break
 
@@ -451,10 +451,6 @@ class PodcastEditingSheet(Sheet):
         t = self.mpv.playback_time
         idx = self.getRowIndexByPlaytime(t)
         row = self.rows[idx]
-
-        if t in row:
-            idx += 1
-            row = self.rows[idx]
 
         row, newrow = row.split_at_time(t)
         self.rows[idx] = row  # might be the same, modified in place
