@@ -25,7 +25,7 @@ def _appendRowsAfterLoading(joinsheet, origsheets):
         vd.sync()
 
     colnames = {c.name:c for c in joinsheet.visibleCols}
-    colcounts = { len(joinsheet.visibleCols) } | { len(vs.visibleCols) for vs in origsheets }
+    colcounts = { len(vs.visibleCols) for vs in origsheets }
     if len(colcounts) != 1:
         vd.fail(f'sheets must have same number of columns for `concat`; use `append` instead')
     for vs in origsheets:
