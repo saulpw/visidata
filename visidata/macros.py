@@ -159,7 +159,10 @@ def run(vd, *args, **kwargs):
 def reloadMacros(vd):
     vd.macros.reload()
     for r in vd.macros:
-        vs = vd.loadMacro(Path(r.source))
+        p = Path(r.source)
+        if not p.is_absolute():
+            p = vd.macros.path.parent / r.source
+        vs = vd.loadMacro(p)
         if vs:
             vd.setMacro(r.binding, vs)
 
