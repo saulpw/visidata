@@ -304,8 +304,8 @@ class Plotter(BaseSheet):
             def _overlaps(a, b):
                 a_x1, _, a_txt, _, _ = a
                 b_x1, _, b_txt, _, _ = b
-                a_x2 = a_x1 + dispwidth(a_txt)
-                b_x2 = b_x1 + dispwidth(b_txt)
+                a_x2 = a_x1 + dispwidth(a_txt, literal=True)
+                b_x2 = b_x1 + dispwidth(b_txt, literal=True)
                 if a_x1 < b_x1 < a_x2 or a_x1 < b_x2 < a_x2 or \
                    b_x1 < a_x1 < b_x2 or b_x1 < a_x2 < b_x2:
                    return True
@@ -328,7 +328,7 @@ class Plotter(BaseSheet):
                 char_y = int(pix_y/4)
                 char_x = int(pix_x/2)
                 if row is not None:
-                    char_x -= math.ceil(dispwidth(txt)/2)*2
+                    char_x -= math.ceil(dispwidth(txt, literal=True)/2)*2
                 o = (char_x, char_y, txt, attr, row)
                 _mark_overlap_text(labels_by_line[char_y], o)
 
@@ -337,14 +337,14 @@ class Plotter(BaseSheet):
                     if fldraw:
                         char_x, char_y, txt, attr, row = o
                         cattr = colors.get_color(attr)
-                        clipdraw(scr, char_y, char_x, txt, cattr, dispwidth(txt))
+                        clipdraw(scr, char_y, char_x, txt, cattr, dispwidth(txt, literal=True), literal=True)
                         cursorBBox = self.plotterCursorBox
                         for c in txt:
-                            w = dispwidth(c)
+                            w = dispwidth(c, literal=True)
                             # draw cursor if the cursor contains the midpoint of the character cell
                             if cursorBBox.contains(char_x*2+1, char_y*4+2):
                                 char_attr = update_attr(cattr, colors.color_current_row)
-                                clipdraw(scr, char_y, char_x, c, char_attr, w)
+                                clipdraw(scr, char_y, char_x, c, char_attr, w, literal=True)
                             char_x += w
 
 
@@ -405,7 +405,7 @@ class Canvas(Plotter):
                 del self.legends[lastlegend]
                 legend = '[other]'
 
-            self.legendwidth = max(self.legendwidth, dispwidth(legend))
+            self.legendwidth = max(self.legendwidth, dispwidth(legend, literal=True))
             self.legends[legend] = attr
             self.plotAttrs[k] = attr
         return attr
