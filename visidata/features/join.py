@@ -381,7 +381,7 @@ def inputJointype(vd):
     def _fmt_aggr_summary(match, row, trigger_key):
         formatted_jointype = match.formatted.get('key', row.key) if match else row.key
         r = ' '*(dispwidth(prompt)-3)
-        r += f'[:keystrokes]{trigger_key}[/]  ' if trigger_key else '   '
+        r += f' [:keystrokes]{trigger_key}[/] ' if trigger_key else '   '
         r += f'[:bold]{formatted_jointype}[/]'
         if row.desc:
             r += ' - '
