@@ -33,17 +33,16 @@ def nextColName(sheet, show_cells=True):
         name = match.formatted.get('name', row.name) if match else row.name
         r = ' '*(dispwidth(prompt)-3)
         r += f'[:keystrokes]{trigger_key}[/]  ' if trigger_key else '   '
+        r += f'[:bold]{name}[/]'
         if show_cells and len(sheet.rows) > 0:
             # pad the right side with spaces
             # use row.name, because name from match contains
             # extra formatting characters that change its length
             n_spaces = max(20 - dispwidth(row.name), 0)
-            r += name + n_spaces*' '
+            r += n_spaces*' '
             r += '   '
             #todo:  does not show disp_note_none for None
             r += row._cursor_cell
-        else:
-            r += name
         return r
 
     name = vd.activeSheet.inputPalette(prompt,

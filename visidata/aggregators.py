@@ -366,7 +366,7 @@ def chooseAggregators(vd, prompt = 'choose aggregators: '):
         formatted_aggrname = match.formatted.get('key', row.key) if match else row.key
         r = ' '*(dispwidth(prompt)-3)
         r += f'[:keystrokes]{trigger_key}[/]  ' if trigger_key else '   '
-        r += formatted_aggrname
+        r += f'[:bold]{formatted_aggrname}[/]'
         if row.desc:
             r += ' - '
             r += match.formatted.get('desc', row.desc) if match else row.desc
