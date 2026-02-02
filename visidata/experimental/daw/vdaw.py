@@ -737,7 +737,7 @@ def save_xmd(vd, p, sheet):
                 fp.write(f'## {prevhdr}\n\n')
 
             if sheet.options.daw_include_cuts:
-                text = row.text
+                text = row.data.text
             else:
                 text = row.cookedtext
                 vd.status(text)
