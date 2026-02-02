@@ -673,7 +673,7 @@ def save_cutlist(vd, p, sheet):
                     cut_end = None
 
 
-def iterspeakerrows(rows, include_cuts=True, inline_interjections=False):
+def iterspeakerrows(rows, include_cuts=True, inline_interjections=False, already_cut=False):
     def _combine_rows(accumrows):
         firstrow = accumrows[0]
         r = EditRow(speaker=firstrow.speaker,
@@ -681,11 +681,11 @@ def iterspeakerrows(rows, include_cuts=True, inline_interjections=False):
                     subrows=accumrows)
         if include_cuts:
             text = ' '.join(r.editedtext for r in accumrows)
-            if is_cut(firstrow):
+            if already_cut or is_cut(firstrow):
                 text = text.replace('~~', '')
                 text = '~~' + text + '~~'
         else:
-            if is_cut(firstrow):
+            if already_cut or is_cut(firstrow):
                 text = ''
             else:
                 text = ' '.join(r.cookedtext for r in accumrows).strip()
@@ -697,7 +697,7 @@ def iterspeakerrows(rows, include_cuts=True, inline_interjections=False):
     for i, row in enumerate(rows):
         assert row, i
         if ' ' in row.speaker:
-            yield from iterspeakerrows(row.subrows, include_cuts=include_cuts, inline_interjections=inline_interjections)
+            yield from iterspeakerrows(row.subrows, include_cuts=include_cuts, inline_interjections=inline_interjections, already_cut=is_cut(row))
             continue
 
         if not accumrows:
