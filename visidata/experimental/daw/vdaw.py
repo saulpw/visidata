@@ -126,8 +126,12 @@ class EditRow:
 
     @drawcache_property
     def duration(self) -> float:
+        if is_cut(self):
+            return 0
+        if self.subrows:
+            return sum((r.duration or 0) for r in self.uncutrows) if self.uncutrows else 0
         if self.data: return self.data.end-self.data.start
-        return sum((r.duration or 0) for r in self.uncutrows) if self.uncutrows else 0
+        return 0
 
     @drawcache_property
     def raw_duration(self) -> float:
