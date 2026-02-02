@@ -772,7 +772,7 @@ PodcastEditingSheet.addCommand('zp', 'play-toggle', 'mpv.pause_audio(not mpv.pau
 FilterParametersSheet.addCommand('P', 'play-toggle', 'source.mpv.pause_audio(not source.mpv.paused)', 'toggle pause/play')
 PodcastEditingSheet.addCommand('g)', 'combine-selected', 'combine_rows(selectedRows)', 'combine selected rows into one')
 PodcastEditingSheet.addCommand('(', 'expand-row', 'expand_row(cursorRowIndex)', 'expand row into subrows')
-PodcastEditingSheet.addCommand('g(', 'expand-selected', 'for row in selectedRows: expand_row(rows.index(row))', 'expand selected rows into subrows')
+PodcastEditingSheet.addCommand('g(', 'expand-selected', 'for row in selectedRows: if not is_cut(row): expand_row(rows.index(row))', 'expand selected rows into subrows')
 
 PodcastEditingSheet.addCommand('Ctrl+R', 'restart-mpv', 'mpv.start_mpv()', 'restart mpv process')
 
@@ -796,8 +796,8 @@ PodcastEditingSheet.addCommand('F8', 'audio-faster', 'speed_change(2.0)', 'adjus
 
 PodcastEditingSheet.addCommand('a', 'split-at-time', 'split_at_playhead(); cursorDown(2)', 'split line at current playhead')
 PodcastEditingSheet.addCommand('za', 'split-at-input', 'split_at_input(cursorRowIndex, input("word to split at: "))', 'split line at current playhead')
-PodcastEditingSheet.addCommand('x', 'cut-row', 'bump(-1, cursorRow)', 'cut audio for line at cursor row')
-PodcastEditingSheet.addCommand('y', 'bump-row', 'bump(+1, cursorRow)', 'upvote audio for line at cursor row')
+PodcastEditingSheet.addCommand('x', 'cut-row', 'bump(-1, cursorRow); cursorDown()', 'cut audio for line at cursor row')
+PodcastEditingSheet.addCommand('y', 'bump-row', 'bump(+1, cursorRow); cursorDown()', 'upvote audio for line at cursor row')
 PodcastEditingSheet.addCommand('gx', 'cut-selected', 'bump(-1, *selectedRows)', 'cut audio for selected rows')
 PodcastEditingSheet.addCommand('gy', 'bump-selected', 'bump(+1, *selectedRows)', 'bump audio for selected rows')
 PodcastEditingSheet.addCommand('<', 'go-header-prev', 'go_header_next(-1, cursorRowIndex)', 'move row cursor to previous section')
