@@ -162,6 +162,21 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
     def openCell(self, col, row):
         return Sheet.openCell(self, col, row)
 
+    @asyncthread
+    def deleteSourceRows(self, freqtbl_rows):
+        src = self.source
+        src.addUndoSelection()
+        for freqtbl_row in freqtbl_rows:
+            srows = freqtbl_row.sourcerows
+            srowids = dict.fromkeys([src.rowid(r) for r in srows], True)
+            src.deleteBy(lambda r,srowids=srowids,src=src: src.rowid(r) in srowids)
+            rid = self.rowid(freqtbl_row)
+            self.deleteBy(lambda r: self.rowid(r) == rid)
+            #unselect after deletion should work, since Sheet.delete_row() does it too
+            for srow in srows:
+                if src.isSelected(srow):
+                    src.unselectRow(srow)
+
 
 class FreqTableSheetSummary(FreqTableSheet):
     'Append a PivotGroupRow to FreqTableSheet with only selectedRows.'
@@ -196,6 +211,8 @@ vd.addMenuItem('Data', 'Frequency table', 'current row', 'freq-row')
 FreqTableSheet.addCommand('gu', 'unselect-rows', 'unselect(selectedRows)', 'unselect all source rows grouped in current row')
 FreqTableSheet.addCommand('gEnter', 'dive-selected', 'vd.push(openRows(selectedRows))', 'open copy of source sheet with rows that are grouped in selected rows')
 FreqTableSheet.addCommand('', 'select-first', 'for r in rows: source.select([r.sourcerows[0]])', 'select first source row in each bin')
+FreqTableSheet.addCommand('zd', 'delete-source-bin', 'sheet.deleteSourceRows([cursorRow])', 'custom: delete bins from source')
+FreqTableSheet.addCommand('gzd', 'delete-source-selected-bins', 'sheet.deleteSourceRows(selectedRows); sheet.clearSelected()', 'custom: delete selected bins from source')
 FreqTableSheet.bindkey('p', 'no-op')  #freqtbl rows aren't designed to allow pasting, so the default paste commands cause errors
 FreqTableSheet.bindkey('P', 'no-op')
 
