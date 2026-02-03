@@ -204,13 +204,13 @@ ItemColumn('key', 0)  # accesses row[0] or row['key']
 When accessing cell values in your code, choose the appropriate method:
 
 ```python
-# ✅ For DISPLAY purposes (truncated if needed for screen width)
+# For DISPLAY purposes (truncated if needed for screen width)
 col.getDisplayValue(row)
 
-# ✅ For PROCESSING full cell contents (recommended for features that analyze data)
+# For PROCESSING full cell contents as text (recommended for features that analyze data)
 col.format(col.getTypedValue(row))  # Gets full contents, even if truncated for display
 
-# ✅ For getting raw typed value
+# For getting raw typed value (to pass to other Python functions)
 col.getTypedValue(row)  # Returns actual typed value (int, str, date, etc.)
 ```
 
@@ -280,12 +280,12 @@ from visidata import (
 Use built-in properties for working with selected rows:
 
 ```python
-# ✅ CORRECT - Use someSelectedRows (built-in property)
+# CORRECT - Use someSelectedRows (built-in property)
 Sheet.addCommand('', 'process-selected',
     'processRows(someSelectedRows)',
     'process selected rows or fail if none selected')
 
-# ❌ WRONG - Don't manually check
+# WRONG - Don't manually check
 Sheet.addCommand('', 'process-selected',
     'processRows(selectedRows or fail("no rows selected"))',
     'process selected rows')
@@ -305,13 +305,13 @@ Sheet.addCommand('', 'process-selected',
 For external API integrations, **require credentials via environment variables only**:
 
 ```python
-# ✅ CORRECT - Environment variable only
+# CORRECT - Environment variable only
 @VisiData.lazy_property
 def my_api_client(vd):
     api_key = os.environ.get('MY_API_KEY') or vd.fail('set $MY_API_KEY')
     return MyAPIClient(api_key=api_key)
 
-# ❌ WRONG - Don't create options for API keys
+# WRONG - Don't create options for API keys
 vd.option('my_api_key', '', 'API key')  # Don't do this
 api_key = vd.options.my_api_key or vd.fail(...)  # Don't do this
 ```
@@ -407,7 +407,7 @@ Use **module name** or abbrevation as prefix for options used exclusively by tha
            with open(template_path) as f:
                return f.read()
        except Exception as e:
-           vd.exceptionCaught(e)
+           vd.exceptionCaught(e)  # this shows the developer a stacktrace
            vd.fail(f'Could not load template from {template_path}')
    return DEFAULT_TEMPLATE
 

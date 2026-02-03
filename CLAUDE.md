@@ -51,28 +51,6 @@ vd.addMenuItems('''
 ''')
 ```
 
-### Common Patterns
-
-**Getting full cell contents** (not truncated for display):
-```python
-cell_text = col.format(col.getTypedValue(row))  # Full contents
-```
-
-**Working with selected rows**:
-```python
-Sheet.addCommand('', 'cmd', 'process(someSelectedRows)', 'process selected rows')
-```
-
-**API credentials** (environment variables only):
-```python
-api_key = os.environ.get('MY_API_KEY') or vd.fail('set $MY_API_KEY')
-```
-
-**Provider-agnostic option naming**:
-```python
-vd.option('llm_model', 'default-model', 'model name')  # Not 'anthropic_model'
-```
-
 ### Example Feature Structure
 ```python
 from visidata import vd, Sheet, Column
