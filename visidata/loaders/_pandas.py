@@ -186,7 +186,7 @@ class PandasSheet(Sheet):
         for col in (c for c in df.columns if not c.startswith("__vd_")):
             self.addColumn(Column(
                 col,
-                type=self.dtype_to_type(df[col]),
+                type=self.dtype_to_type(df[col].dtype),
                 getter=self.getValue,
                 setter=self.setValue,
                 expr=col
@@ -384,6 +384,11 @@ def view_pandas(vd, df):
     run(PandasSheet('', source=df))
 
 
+# Override basic selection commands to work with PandasSheet's selection mechanism
+PandasSheet.addCommand('s', 'select-row', 'addUndoSelection(); selectRow(cursorRow)', 'select current row')
+PandasSheet.addCommand('u', 'unselect-row', 'addUndoSelection(); unselectRow(cursorRow)', 'unselect current row')
+PandasSheet.addCommand('t', 'stoggle-row', 'addUndoSelection(); toggle([cursorRow])', 'toggle selection of current row')
+
 # Override with vectorized implementations
 PandasSheet.addCommand(None, 'stoggle-rows', 'toggleByIndex()', 'toggle selection of all rows')
 PandasSheet.addCommand(None, 'select-rows', 'selectByIndex()', 'select all rows')
@@ -406,6 +411,9 @@ PandasSheet.addCommand('g\\', 'unselect-cols-regex', 'selectByRegex(regex=inputR
 
 # Override with a pandas/dataframe-aware implementation
 PandasSheet.addCommand('"', 'dup-selected', 'vs=PandasSheet(sheet.name, "selectedref", source=selectedRows.df); vd.push(vs)', 'open duplicate sheet with only selected rows')
+PandasSheet.addCommand('g"', 'dup-rows', 'vs=PandasSheet(sheet.name+"_copy", "copy", source=sheet.df); vd.push(vs)', 'open duplicate sheet with all rows')
+PandasSheet.addCommand('z"', 'dup-selected-deep', 'vs=PandasSheet(sheet.name+"_selecteddeepcopy", "selecteddeepcopy", source=selectedRows.df.copy(deep=True)); vd.push(vs)', 'open duplicate sheet with deepcopy of selected rows')
+PandasSheet.addCommand('gz"', 'dup-rows-deep', 'vs=PandasSheet(sheet.name+"_deepcopy", "deepcopy", source=sheet.df.copy(deep=True)); vd.push(vs)', 'open duplicate sheet with deepcopy of all rows')
 
 vd.addGlobals({
     'PandasSheet': PandasSheet,
