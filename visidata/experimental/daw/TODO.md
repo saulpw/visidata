@@ -1,3 +1,13 @@
+- when rollup with g), don't put it at the cursor, put it at the 
+   - put cursor on rolled up line
+- rollup all sections?
+- preserve cut amount with 'a'
+- only colorize text for 'cut' sections?
+- use background instead of underline for section start
+- use underline for playhead?
+- 'a' after last word creates two empty rows?
+- cut text should not be shown in rolled up text in vd?
+
 - flag words or lines as incorrect for cleanup review
 
 - single-word interjections inlined into other paragraph
