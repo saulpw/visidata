@@ -411,9 +411,9 @@ PandasSheet.addCommand('g\\', 'unselect-cols-regex', 'selectByRegex(regex=inputR
 
 # Override with a pandas/dataframe-aware implementation
 PandasSheet.addCommand('"', 'dup-selected', 'vs=PandasSheet(sheet.name, "selectedref", source=selectedRows.df); vd.push(vs)', 'open duplicate sheet with only selected rows')
-PandasSheet.addCommand('g"', 'dup-rows', 'vs=PandasSheet(sheet.name+"_copy", "copy", source=sheet.df); vd.push(vs)', 'open duplicate sheet with all rows')
-PandasSheet.addCommand('z"', 'dup-selected-deep', 'vs=PandasSheet(sheet.name+"_selecteddeepcopy", "selecteddeepcopy", source=selectedRows.df.copy(deep=True)); vd.push(vs)', 'open duplicate sheet with deepcopy of selected rows')
-PandasSheet.addCommand('gz"', 'dup-rows-deep', 'vs=PandasSheet(sheet.name+"_deepcopy", "deepcopy", source=sheet.df.copy(deep=True)); vd.push(vs)', 'open duplicate sheet with deepcopy of all rows')
+PandasSheet.addCommand('g"', 'dup-rows', 'vs=PandasSheet(sheet.name, "copy", source=sheet.df); vd.push(vs)', 'open duplicate sheet with all rows')
+PandasSheet.addCommand('z"', 'dup-selected-deep', 'vs=PandasSheet(sheet.name, "selecteddeepcopy", source=selectedRows.df.copy(deep=True)); vd.push(vs)', 'open duplicate sheet with deepcopy of selected rows')
+PandasSheet.addCommand('gz"', 'dup-rows-deep', 'vs=PandasSheet(sheet.name, "deepcopy", source=sheet.df.copy(deep=True)); vd.push(vs)', 'open duplicate sheet with deepcopy of all rows')
 
 vd.addGlobals({
     'PandasSheet': PandasSheet,
