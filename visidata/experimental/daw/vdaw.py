@@ -676,6 +676,7 @@ def save_cutlist(vd, p, sheet):
 def iterspeakerrows(rows, include_cuts=True, inline_interjections=False, already_cut=False):
     def _combine_rows(accumrows):
         firstrow = accumrows[0]
+        lastrow = accumrows[-1]
         r = EditRow(speaker=firstrow.speaker,
                     section=firstrow.section,
                     subrows=accumrows)
@@ -697,6 +698,9 @@ def iterspeakerrows(rows, include_cuts=True, inline_interjections=False, already
     for i, row in enumerate(rows):
         assert row, i
         if ' ' in row.speaker:
+            if accumrows:
+                yield _combine_rows(accumrows)
+                accumrows = []
             yield from iterspeakerrows(row.subrows, include_cuts=include_cuts, inline_interjections=inline_interjections, already_cut=is_cut(row))
             continue
 
@@ -712,7 +716,7 @@ def iterspeakerrows(rows, include_cuts=True, inline_interjections=False, already
         if inline_interjections and is_cut(row) == is_cut(lastrow) and row.section == lastrow.section:
             # speaker different; only one word?
             if row.nwords == 1:
-                r = EditRow(speaker=lastrow.speaker, section=row.section, cut=is_cut(row))   # fake speaker
+                r = EditRow(speaker=lastrow.speaker, section=row.section, cut=row.cut)   # fake speaker, preserve original cut value
                 r.data = AttrDict(start=row.start, end=row.end, text=f'[{row.speaker}: {row.text}]')
                 accumrows.append(r)
                 continue
