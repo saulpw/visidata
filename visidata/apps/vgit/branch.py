@@ -1,6 +1,6 @@
 import re
 
-from visidata import vd, Column, VisiData, ItemColumn, AttrColumn, Path, AttrDict, RowColorizer, date, Progress
+from visidata import vd, WritableColumn, VisiData, ItemColumn, AttrColumn, Path, AttrDict, RowColorizer, date, Progress
 
 from .gitsheet import GitSheet
 
@@ -23,7 +23,7 @@ def _remove_prefix(text, prefix):
     return text
 
 
-class GitBranchNameColumn(Column):
+class GitBranchNameColumn(WritableColumn):
     def calcValue(self, row):
         return _remove_prefix(row.localbranch, 'remotes/')
 
