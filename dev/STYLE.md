@@ -199,6 +199,23 @@ AttrColumn('name')  # accesses row.name
 ItemColumn('key', 0)  # accesses row[0] or row['key']
 ```
 
+### Getting Cell Values
+
+When accessing cell values in your code, choose the appropriate method:
+
+```python
+# ✅ For DISPLAY purposes (truncated if needed for screen width)
+col.getDisplayValue(row)
+
+# ✅ For PROCESSING full cell contents (recommended for features that analyze data)
+col.format(col.getTypedValue(row))  # Gets full contents, even if truncated for display
+
+# ✅ For getting raw typed value
+col.getTypedValue(row)  # Returns actual typed value (int, str, date, etc.)
+```
+
+**Rule of thumb**: Use `col.format(col.getTypedValue(row))` when you need the complete cell contents for processing (like sending to an API, saving to file, or analysis). Use `getDisplayValue()` only for display purposes.
+
 ## API Decorators
 
 Add methods to existing classes using decorators:
@@ -255,6 +272,53 @@ from visidata import (
     asyncthread,           # Async decorator
 )
 ```
+
+## Working with Rows
+
+### Selected Rows
+
+Use built-in properties for working with selected rows:
+
+```python
+# ✅ CORRECT - Use someSelectedRows (built-in property)
+Sheet.addCommand('', 'process-selected',
+    'processRows(someSelectedRows)',
+    'process selected rows or fail if none selected')
+
+# ❌ WRONG - Don't manually check
+Sheet.addCommand('', 'process-selected',
+    'processRows(selectedRows or fail("no rows selected"))',
+    'process selected rows')
+```
+
+**Available row properties**:
+- `rows` - All rows in sheet
+- `selectedRows` - Currently selected rows (may be empty list)
+- `someSelectedRows` - Selected rows, or fail if none selected (unless in batch mode or option set)
+- `cursorRow` - Row at cursor position
+- `visibleRows` - on-screen visible rows
+
+## API Keys and Credentials
+
+### Security Best Practices
+
+For external API integrations, **require credentials via environment variables only**:
+
+```python
+# ✅ CORRECT - Environment variable only
+@VisiData.lazy_property
+def my_api_client(vd):
+    api_key = os.environ.get('MY_API_KEY') or vd.fail('set $MY_API_KEY')
+    return MyAPIClient(api_key=api_key)
+
+# ❌ WRONG - Don't create options for API keys
+vd.option('my_api_key', '', 'API key')  # Don't do this
+api_key = vd.options.my_api_key or vd.fail(...)  # Don't do this
+```
+
+### Option Naming
+
+Use **module name** or abbrevation as prefix for options used exclusively by that module.
 
 ## Best Practices
 
@@ -332,7 +396,32 @@ from visidata import (
    vd.warning('warning message') # Shows warning
    vd.status('status message')   # Shows status message
    vd.debug('status message')    # shows status message when options.debug is set (with e.g. CLI --debug)
+   vd.exceptionCaught(e)         # Log exception and continue (used in loops/async)
    ```
+
+4. **Fail-Fast for Required Resources**: When loading required external resources (templates, config files), fail immediately rather than falling back silently:
+   ```python
+   # ✅ GOOD - Fail fast if custom template can't be loaded
+   if template_path:
+       try:
+           with open(template_path) as f:
+               return f.read()
+       except Exception as e:
+           vd.exceptionCaught(e)
+           vd.fail(f'Could not load template from {template_path}')
+   return DEFAULT_TEMPLATE
+
+   # ❌ LESS CLEAR - Silent fallback may hide configuration issues
+   if template_path:
+       try:
+           with open(template_path) as f:
+               return f.read()
+       except Exception as e:
+           vd.warning(f'Could not load template: {e}')
+           return DEFAULT_TEMPLATE  # User may not notice the warning
+   ```
+
+   Use fail-fast when the user explicitly configured something (like a custom template path) but it doesn't work. This makes configuration errors obvious.
 
 ## Examples
 
