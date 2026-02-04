@@ -212,7 +212,7 @@ class PandasSheet(Sheet):
 
     def _checkSelectedIndex(self):
         pd = vd.importExternal('pandas')
-        if self._selectedMask.index is not self.df.index:
+        if not self._selectedMask.index.equals(self.df.index):
             # DataFrame was modified inplace, so the selection is no longer valid
             vd.status('pd.DataFrame.index updated, clearing {} selected rows'
                       .format(self._selectedMask.sum()))
@@ -384,10 +384,38 @@ def view_pandas(vd, df):
     run(PandasSheet('', source=df))
 
 
-# Override basic selection commands to work with PandasSheet's selection mechanism
-PandasSheet.addCommand('s', 'select-row', 'addUndoSelection(); selectRow(cursorRow)', 'select current row')
-PandasSheet.addCommand('u', 'unselect-row', 'addUndoSelection(); unselectRow(cursorRow)', 'unselect current row')
-PandasSheet.addCommand('t', 'stoggle-row', 'addUndoSelection(); toggle([cursorRow])', 'toggle selection of current row')
+def _pandas_dup_with_selection(sheet, df, name_suffix, kind, select_all=False, status_msg=None):
+    vs = PandasSheet(sheet.name + name_suffix, kind, source=df)
+    positions = []
+    if not select_all:
+        try:
+            positions = [i for i, v in enumerate(sheet._selectedMask.values) if v]
+        except Exception:
+            positions = []
+
+    orig_reload = getattr(PandasSheet.reload, "__wrapped__", PandasSheet.reload)
+
+    def _reload_with_selection(vs=vs, orig_reload=orig_reload, positions=positions, select_all=select_all):
+        orig_reload(vs)
+        try:
+            if select_all:
+                if getattr(vs, '_selectedMask', None) is not None:
+                    vs._selectedMask.iloc[:] = True
+                return
+            if positions:
+                vs._selectedMask.iloc[positions] = True
+        except Exception:
+            try:
+                if positions:
+                    vs.selectByIdx(positions)
+            except Exception:
+                pass
+
+    vs.reload = asyncthread(_reload_with_selection)
+    if status_msg:
+        vd.status(status_msg)
+    return vs
+
 
 # Override with vectorized implementations
 PandasSheet.addCommand(None, 'stoggle-rows', 'toggleByIndex()', 'toggle selection of all rows')
@@ -410,11 +438,9 @@ PandasSheet.addCommand('g|', 'select-cols-regex', 'selectByRegex(regex=inputRege
 PandasSheet.addCommand('g\\', 'unselect-cols-regex', 'selectByRegex(regex=inputRegex("select regex: ", defaultLast=True), columns=visibleCols, unselect=True)', 'unselect rows matching regex in any visible column')
 
 # Override with a pandas/dataframe-aware implementation
-PandasSheet.addCommand('"', 'dup-selected', 'vs=PandasSheet(sheet.name, "selectedref", source=selectedRows.df); vd.push(vs)', 'open duplicate sheet with only selected rows')
-PandasSheet.addCommand('g"', 'dup-rows', 'vs=PandasSheet(sheet.name, "copy", source=sheet.df); vd.push(vs)', 'open duplicate sheet with all rows')
-PandasSheet.addCommand('z"', 'dup-selected-deep', 'vs=PandasSheet(sheet.name, "selecteddeepcopy", source=selectedRows.df.copy(deep=True)); vd.push(vs)', 'open duplicate sheet with deepcopy of selected rows')
-PandasSheet.addCommand('gz"', 'dup-rows-deep', 'vs=PandasSheet(sheet.name, "deepcopy", source=sheet.df.copy(deep=True)); vd.push(vs)', 'open duplicate sheet with deepcopy of all rows')
+PandasSheet.addCommand('"', 'dup-selected', 'vs=_pandas_dup_with_selection(sheet, selectedRows.df, "", "selectedref", select_all=True); vd.push(vs)', 'open duplicate sheet with only selected rows')
 
 vd.addGlobals({
     'PandasSheet': PandasSheet,
+    '_pandas_dup_with_selection': _pandas_dup_with_selection,
 })
