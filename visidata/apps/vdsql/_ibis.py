@@ -6,7 +6,7 @@ import re
 
 from contextlib import contextmanager
 from visidata import VisiData, Sheet, IndexSheet, vd, date, anytype, vlen, clipdraw, colors, stacktrace, PyobjSheet, BaseSheet, ExpectedException
-from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet, UNLOADED, ExprColumn, undoAttrCopyFunc
+from visidata import ItemColumn, AttrColumn, Column, TextSheet, asyncthread, wrapply, ColumnsSheet, UNLOADED, ExprColumn, undoAttrCopyFunc, Path
 
 vd.option('disp_ibis_sidebar', 'pending_sql', 'which sidebar property to display')
 vd.option('sql_always_count', False, 'whether to include count of total number of results')
@@ -65,10 +65,10 @@ def open_vdsql(vd, p, filetype=None):
 
     vd.configure_ibis()
 
-    # on-demand aliasing, so we don't need deps for all backends
-    ext_aliases = dict(db='sqlite', ddb='duckdb', sqlite3='sqlite')
-    if p.ext in ext_aliases:
-        setattr(ibis, p.ext, ext_aliases.get(p.ext))
+    if not p.is_url() and p.ext in ('ddb', 'duckdb'):
+        p = Path(f'duckdb://{p}')
+    elif not p.is_url() and p.ext in ('sqlite', 'sqlite3'):
+        p = Path(f'sqlite://{p}')
 
     return IbisTableIndexSheet(p.base_stem, source=p, filetype=None, database_name=None,
                                ibis_conpool=IbisConnectionPool(p), sheet_type=IbisTableSheet)
