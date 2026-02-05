@@ -11,14 +11,16 @@ Powered by [Ibis](https://ibis-project.org).
 
 ## Minimum Requirements
 
-- Python 3.9
+- Python 3.10
 - VisiData develop
-- Ibis 6.0
+- Ibis 12.0
 
 ### Confirmed supported backends
 
 - SQLite
 - MySQL
+  - requires libmysqlclient-dev (on Debian)
+  - if warning about timezones: `mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql mysql`
 - PostgreSQL
 - DuckDB
 - ClickHouse

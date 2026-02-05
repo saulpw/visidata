@@ -189,7 +189,11 @@ def main_vd():
     except locale.Error as e:
         vd.warning(e)
 
-    warnings.showwarning = vd.warning
+    if options.debug:
+        warnings.showwarning = lambda msg, cat, fn, lineno, *args, **kwargs: vd.warning(f'{fn}:{lineno}: {msg}')
+    else:
+        warnings.showwarning = lambda msg, *args, **kwargs: vd.warning(msg)
+
     vd.printerr = lambda *args: builtins.print(*args, file=sys.stderr)
 
     flPipedInput = not sys.stdin.isatty()

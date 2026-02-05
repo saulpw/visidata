@@ -1,4 +1,4 @@
-ibis-framework[duckdb,clickhouse,bigquery] >= 6
+ibis-framework[duckdb,clickhouse,bigquery] >= 12
 psycopg2-binary
 duckdb-engine
 duckdb
