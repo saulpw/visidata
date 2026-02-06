@@ -212,7 +212,7 @@ class PandasSheet(Sheet):
 
     def _checkSelectedIndex(self):
         pd = vd.importExternal('pandas')
-        if self._selectedMask.index is not self.df.index:
+        if not self._selectedMask.index.equals(self.df.index):
             # DataFrame was modified inplace, so the selection is no longer valid
             vd.status('pd.DataFrame.index updated, clearing {} selected rows'
                       .format(self._selectedMask.sum()))
@@ -384,10 +384,11 @@ def view_pandas(vd, df):
     run(PandasSheet('', source=df))
 
 
-# Override basic selection commands to work with PandasSheet's selection mechanism
-PandasSheet.addCommand('s', 'select-row', 'addUndoSelection(); selectRow(cursorRow)', 'select current row')
-PandasSheet.addCommand('u', 'unselect-row', 'addUndoSelection(); unselectRow(cursorRow)', 'unselect current row')
-PandasSheet.addCommand('t', 'stoggle-row', 'addUndoSelection(); toggle([cursorRow])', 'toggle selection of current row')
+# Override basic selection commands to work with PandasSheet's selection mechanism.
+# Match standard behavior: select/toggle/unselect and move the cursor down one row.
+PandasSheet.addCommand('s', 'select-row', 'select_row(cursorRow); cursorDown(1)', 'select current row')
+PandasSheet.addCommand('u', 'unselect-row', 'unselect_row(cursorRow); cursorDown(1)', 'unselect current row')
+PandasSheet.addCommand('t', 'stoggle-row', 'toggle_row(cursorRow); cursorDown(1)', 'toggle selection of current row')
 
 # Override with vectorized implementations
 PandasSheet.addCommand(None, 'stoggle-rows', 'toggleByIndex()', 'toggle selection of all rows')
