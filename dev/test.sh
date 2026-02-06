@@ -80,14 +80,14 @@ for i in $TESTS ; do
     if [ "$TEST" == true ];
     then
         for goldfn in tests/golden/"${outbase%.vd*}".*; do
-            PYTHONPATH=. run_silent_unless_error bin/vd --overwrite=False --play "$i" --batch --output "$goldfn" --config tests/.visidatarc --visidata-dir tests/.visidata &
+            PYTHONPATH=. run_silent_unless_error bin/vd --overwrite=n --play "$i" --batch --output "$goldfn" --config tests/.visidatarc --visidata-dir tests/.visidata &
         done
     else
         PYTHONPATH=. run_silent_unless_error bin/vd --play "$i" --batch --config tests/.visidatarc --visidata-dir tests/.visidata &
     fi
 done
 
-PYTHONPATH=. run_silent_unless_error bin/vd <(seq 10000) --overwrite=False --batch --output tests/golden/stdin-guesser.tsv --config tests/.visidatarc --visidata-dir tests/.visidata  #1978
+PYTHONPATH=. run_silent_unless_error bin/vd <(seq 10000) --overwrite=n --batch --output tests/golden/stdin-guesser.tsv --config tests/.visidatarc --visidata-dir tests/.visidata  #1978
 
 #wait for any remaining background jobs to finish
 wait
