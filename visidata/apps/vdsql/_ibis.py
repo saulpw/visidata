@@ -187,6 +187,40 @@ class IbisTableSheet(Sheet):
     def con(self):
         return self.ibis_conpool.get_conn()
 
+    @property
+    def help_sidebars(self):
+        'Return list of available sidebars: (text, title) callables.'
+        sidebars = []
+        # Add base sidebars from parent class
+        sidebars.extend(super().help_sidebars)
+
+        # Add vdsql-specific SQL sidebars
+        sidebar_options = [
+            ('pending_sql', 'SQL (pending)'),
+            ('base_sql', 'SQL (base)'),
+            ('str_current_expr', 'Ibis expr (current)'),
+            ('str_pending_expr', 'Ibis expr (pending)'),
+        ]
+
+        for attr_name, title in sidebar_options:
+            try:
+                # Test if the attribute can be accessed
+                getattr(self, attr_name)
+                # Add a lambda that captures both attr_name and title
+                sidebars.append(lambda a=attr_name, t=title: (getattr(self, a), t))
+            except Exception:
+                if self.options.debug:
+                    vd.exceptionCaught()
+
+        # Add curcol_sql if it's available
+        try:
+            if self.curcol_sql:
+                sidebars.append(lambda: (self.curcol_sql, 'Column SQL'))
+        except Exception:
+            pass
+
+        return sidebars
+
     def choose_sidebar(self):
         sidebars = ['base_sql', 'pending_sql', 'ibis_current_expr', 'curcol_sql', 'pending_expr']
         opts = []
@@ -206,17 +240,9 @@ class IbisTableSheet(Sheet):
             return self.ibis_expr_to_sql(expr, fragment=True)
 
     def ibis_expr_to_sql(self, expr, fragment=False):
-        import sqlparse
         with self.con as con:
-            context = con.compiler.make_context()
-            trclass = con.compiler.translator_class(expr.op(), context=context)
-            if fragment:
-                compiled = trclass.get_result()
-            else:
-                compiled = con.compile(expr)
-            if not isinstance(compiled, str):
-                compiled = str(compiled.compile(compile_kwargs={'literal_binds': True}))
-        return sqlparse.format(compiled, reindent=True, keyword_case='upper', wrap_after=40)
+            s = con.compile(expr, pretty=True)
+        return s
 
     @property
     def sidebar(self) -> str:
@@ -254,6 +280,14 @@ class IbisTableSheet(Sheet):
     @property
     def ibis_current_expr(self):
         return self.get_current_expr(typed=False)
+
+    @property
+    def str_current_expr(self):
+        return str(self.ibis_current_expr)
+
+    @property
+    def str_pending_expr(self):
+        return str(self.pending_expr)
 
     def get_current_expr(self, typed=False):
         q = self.query
