@@ -220,7 +220,7 @@ def mainloop(vd, scr):
                 keystroke = vd.prettykeys(keystroke)
                 vd.keystrokes += keystroke
 
-        vd.drawRightStatus(sheet._scr, sheet)  # visible for commands that wait for input
+        vd.callNoExceptions(vd.drawRightStatus, sheet._scr, sheet)  # visible for commands that wait for input
 
         if not keystroke:  # timeout instead of keypress
             pass
