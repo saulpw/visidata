@@ -120,8 +120,15 @@ class IbisTableIndexSheet(IndexSheet):
             nrows_col.expr = 'countRows'
             nrows_col.width += 3
 
-            for tblname in con.list_tables():
-                yield self.sheet_type(tblname,
+            schemas = self.options.postgres_schema.split()
+
+            dbnames = [dbname
+                       for dbname in con.list_databases()
+                       if '*' in schemas or dbname in schemas]
+
+            for dbname in dbnames or [None]:
+                for tblname in con.list_tables(database=dbname):
+                    vs = self.sheet_type(tblname,
                         ibis_source=self.source,
                         ibis_filetype=self.filetype,
                         ibis_conpool=self.ibis_conpool,
@@ -129,6 +136,8 @@ class IbisTableIndexSheet(IndexSheet):
                         table_name=tblname,
                         source=self.source,
                         query=None)
+                    vs.dbname = dbname
+                    yield vs
 
 
 class IbisColumn(ItemColumn):
@@ -169,6 +178,8 @@ class IbisColumn(ItemColumn):
     #    self.sheet.query = oldexpr.drop([struct_field.get_name()]).mutate(fields)
         self.sheet.query = oldexpr.mutate(fields)
         return expandedCols
+
+IbisTableIndexSheet.columns = [AttrColumn('dbname')] + IbisTableIndexSheet.columns
 
 
 class LazyIbisColMap:
@@ -772,6 +783,7 @@ IbisTableSheet.addCommand('z\\', 'unselect-expr', 'expr=inputExpr("unselect by e
 IbisFreqTable.addCommand('gEnter', 'open-selected', 'vd.push(openRows(selectedRows))')
 IbisTableIndexSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("SQL query: ")))', 'open sheet with results of raw SQL query')
 
+IbisTableIndexSheet.class_options.postgres_schema = ''
 IbisTableIndexSheet.class_options.load_lazy = True
 IbisTableIndexSheet.sheet_type = IbisTableSheet
 IbisTableSheet.class_options.clean_names = True
