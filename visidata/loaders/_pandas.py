@@ -186,7 +186,7 @@ class PandasSheet(Sheet):
         for col in (c for c in df.columns if not c.startswith("__vd_")):
             self.addColumn(Column(
                 col,
-                type=self.dtype_to_type(df[col]),
+                type=self.dtype_to_type(df[col].dtype),
                 getter=self.getValue,
                 setter=self.setValue,
                 expr=col
@@ -212,7 +212,7 @@ class PandasSheet(Sheet):
 
     def _checkSelectedIndex(self):
         pd = vd.importExternal('pandas')
-        if self._selectedMask.index is not self.df.index:
+        if not self._selectedMask.index.equals(self.df.index):
             # DataFrame was modified inplace, so the selection is no longer valid
             vd.status('pd.DataFrame.index updated, clearing {} selected rows'
                       .format(self._selectedMask.sum()))
@@ -384,6 +384,12 @@ def view_pandas(vd, df):
     run(PandasSheet('', source=df))
 
 
+# Override basic selection commands to work with PandasSheet's selection mechanism.
+# Match standard behavior: select/toggle/unselect and move the cursor down one row.
+PandasSheet.addCommand('s', 'select-row', 'select_row(cursorRow); cursorDown(1)', 'select current row')
+PandasSheet.addCommand('u', 'unselect-row', 'unselect_row(cursorRow); cursorDown(1)', 'unselect current row')
+PandasSheet.addCommand('t', 'stoggle-row', 'toggle_row(cursorRow); cursorDown(1)', 'toggle selection of current row')
+
 # Override with vectorized implementations
 PandasSheet.addCommand(None, 'stoggle-rows', 'toggleByIndex()', 'toggle selection of all rows')
 PandasSheet.addCommand(None, 'select-rows', 'selectByIndex()', 'select all rows')
@@ -406,6 +412,9 @@ PandasSheet.addCommand('g\\', 'unselect-cols-regex', 'selectByRegex(regex=inputR
 
 # Override with a pandas/dataframe-aware implementation
 PandasSheet.addCommand('"', 'dup-selected', 'vs=PandasSheet(sheet.name, "selectedref", source=selectedRows.df); vd.push(vs)', 'open duplicate sheet with only selected rows')
+PandasSheet.addCommand('g"', 'dup-rows', 'vs=PandasSheet(sheet.name, "copy", source=sheet.df); vd.push(vs)', 'open duplicate sheet with all rows')
+PandasSheet.addCommand('z"', 'dup-selected-deep', 'vs=PandasSheet(sheet.name, "selecteddeepcopy", source=selectedRows.df.copy(deep=True)); vd.push(vs)', 'open duplicate sheet with deepcopy of selected rows')
+PandasSheet.addCommand('gz"', 'dup-rows-deep', 'vs=PandasSheet(sheet.name, "deepcopy", source=sheet.df.copy(deep=True)); vd.push(vs)', 'open duplicate sheet with deepcopy of all rows')
 
 vd.addGlobals({
     'PandasSheet': PandasSheet,

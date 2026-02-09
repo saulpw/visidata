@@ -51,7 +51,7 @@ Sheet.colorizers += [
         RowColorizer(9, 'color_add_pending', lambda s,c,r,v: s.rowid(r) in s._deferredAdds),
         CellColorizer(8, 'color_change_pending', lambda s,c,r,v: c and (r is not None) and s.isChanged(c, r)),
         RowColorizer(9, 'color_delete_pending', lambda s,c,r,v: s.isDeleted(r)),
-        ColumnColorizer(9, 'color_readonly', lambda s,c,r,v: c and not r and c.readonly),
+        ColumnColorizer(9, 'color_readonly', lambda s,c,r,v: c and (r is None) and c.readonly),
 ]
 
 @Sheet.api
