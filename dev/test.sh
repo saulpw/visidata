@@ -51,9 +51,9 @@ for i in $TESTS ; do
     if [ "${i%-nosave.vd*}-nosave" == "${i%.vd*}" ];
     then
         TEST=false
-    elif [ "${i%-n312.vd*}-n312" == "${i%.vd*}" ];
+    elif [ "${i%-n311.vd*}-n311" == "${i%.vd*}" ];
     then
-        if [ "$($PYTHON -c 'import sys; print(sys.version_info[:2] >= (3,12))')" == "True" ];
+        if [ "$($PYTHON -c 'import sys; print(sys.version_info[:2] >= (3,11))')" == "True" ];
         then
             TEST=false
         else
