@@ -19,7 +19,13 @@ class PythonPackagesSheet(PythonSheet):
 
     def reload(self):
         import importlib.metadata
-        self.rows = sorted(importlib.metadata.distributions(), key=lambda d: d.name.lower())
+        distributions = list(importlib.metadata.distributions())
+        try:
+            self.rows = sorted(distributions, key=lambda d: d.name.lower())
+        except AttributeError:  # Python == 3.9       distributions do not have .name attr, instead use .metadata.distributions['Name']
+            for r in distributions:
+                r.name = r.metadata['Name']
+            self.rows = sorted(distributions, key=lambda d: d.name.lower())
 
     def openRow(self, row):
         'Open package metadata as Python object'
