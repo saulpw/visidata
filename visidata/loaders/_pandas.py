@@ -1,21 +1,42 @@
 from functools import partial
 
-from visidata import VisiData, vd, Sheet, date, anytype, Path, options, Column, asyncthread, Progress, undoAttrCopyFunc, run
+from visidata import (
+    VisiData,
+    vd,
+    Sheet,
+    date,
+    anytype,
+    Path,
+    options,
+    Column,
+    asyncthread,
+    Progress,
+    undoAttrCopyFunc,
+    run,
+)
+
 
 @VisiData.api
 def open_pandas(vd, p):
     return PandasSheet(p.base_stem, source=p)
 
+
 @VisiData.api
 def open_dta(vd, p):
-    return PandasSheet(p.base_stem, source=p, filetype='stata')
+    return PandasSheet(p.base_stem, source=p, filetype="stata")
+
 
 VisiData.open_stata = VisiData.open_pandas
 
-for ft in 'feather gbq orc pickle sas stata'.split():
-    funcname ='open_'+ft
+for ft in "feather gbq orc pickle sas stata".split():
+    funcname = "open_" + ft
     if not getattr(VisiData, funcname, None):
-        setattr(VisiData, funcname, lambda vd,p,ft=ft: PandasSheet(p.base_stem, source=p, filetype=ft))
+        setattr(
+            VisiData,
+            funcname,
+            lambda vd, p, ft=ft: PandasSheet(p.base_stem, source=p, filetype=ft),
+        )
+
 
 @VisiData.api
 @asyncthread
@@ -32,7 +53,7 @@ def save_dta(vd, p, *sheets):
     # Get data types
     types = list()
     dispvals = next(vs.iterdispvals(format=True))
-    for col,_ in dispvals.items():
+    for col, _ in dispvals.items():
         if col.type in [bool, int, float]:
             types.append(col.type)
         elif vd.isNumeric(col):
@@ -47,21 +68,22 @@ def save_dta(vd, p, *sheets):
             data[r_i, c_i] = v
 
     # Convert to pandas DataFrame and save
-    dtype = {col:t for col,t in zip(columns, types)}
+    dtype = {col: t for col, t in zip(columns, types)}
     df = pd.DataFrame(data, columns=columns)
     df = df.astype(dtype)
     df.to_stata(p, version=118, write_index=False)
 
+
 class DataFrameAdapter:
     def __init__(self, df):
-        pd = vd.importExternal('pandas')
+        pd = vd.importExternal("pandas")
         if not isinstance(df, pd.DataFrame):
-            vd.fail('%s is not a dataframe' % type(df).__name__)
+            vd.fail("%s is not a dataframe" % type(df).__name__)
 
         self.df = df
 
     def __len__(self):
-        if 'df' not in self.__dict__:
+        if "df" not in self.__dict__:
             return 0
         return len(self.df)
 
@@ -71,13 +93,14 @@ class DataFrameAdapter:
         return self.df.iloc[k]
 
     def __getattr__(self, k):
-        if 'df' not in self.__dict__:
+        if "df" not in self.__dict__:
             raise AttributeError(f"'{self.__class__.__name__}' has no attribute '{k}'")
         return getattr(self.df, k)
 
+
 # source=DataFrame
 class PandasSheet(Sheet):
-    '''Sheet sourced from a pandas.DataFrame
+    """Sheet sourced from a pandas.DataFrame
 
     Warning:
         The index of the pandas.DataFrame input must be unique.
@@ -88,12 +111,16 @@ class PandasSheet(Sheet):
     Note:
         Columns starting with "__vd_" are reserved for internal usage
         by the VisiData loader.
-    '''
+    """
 
     def dtype_to_type(self, dtype):
-        np = vd.importExternal('numpy')
+        np = vd.importExternal("numpy")
+        pd = vd.importExternal("pandas")
+        # Handle pandas StringDtype before trying numpy conversion
+        if isinstance(dtype, pd.StringDtype):
+            return str
         # Find the underlying numpy dtype for any pandas extension dtypes
-        dtype = getattr(dtype, 'numpy_dtype', dtype)
+        dtype = getattr(dtype, "numpy_dtype", dtype)
         try:
             if np.issubdtype(dtype, np.integer):
                 return int
@@ -101,78 +128,82 @@ class PandasSheet(Sheet):
                 return float
             if np.issubdtype(dtype, np.datetime64):
                 return date
-        except TypeError:
-            # For categoricals and other pandas-defined dtypes
+        except (TypeError, ValueError):
+            # For categoricals, StringDtype, and other pandas-defined dtypes
             pass
         return anytype
 
     def read_tsv(self, path, **kwargs):
-        'Partial function for reading TSV files using pd.read_csv'
-        pd = vd.importExternal('pandas')
-        return pd.read_csv(path, sep='\t', **kwargs)
+        "Partial function for reading TSV files using pd.read_csv"
+        pd = vd.importExternal("pandas")
+        return pd.read_csv(path, sep="\t", **kwargs)
 
     @property
     def df(self):
-        if isinstance(getattr(self, 'rows', None), DataFrameAdapter):
+        if isinstance(getattr(self, "rows", None), DataFrameAdapter):
             return self.rows.df
 
     @df.setter
     def df(self, val):
-        if isinstance(getattr(self, 'rows', None), DataFrameAdapter):
+        if isinstance(getattr(self, "rows", None), DataFrameAdapter):
             self.rows.df = val
         else:
             self.rows = DataFrameAdapter(val)
 
     def getValue(self, col, row):
-        '''Look up column values in the underlying DataFrame.'''
+        """Look up column values in the underlying DataFrame."""
         return col.sheet.df.loc[row.name, col.expr]
 
     def setValue(self, col, row, val):
-        '''
+        """
         Update a column's value in the underlying DataFrame, loosening the
         column's type as needed. Take care to avoid assigning to a view or
         a copy as noted here:
 
         https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#why-does-assignment-fail-when-using-chained-indexing
-        '''
+        """
         try:
             col.sheet.df.loc[row.name, col.expr] = val
         except ValueError as err:
-            vd.warning(f'Type of {val} does not match column {col.name}. Changing type.')
+            vd.warning(
+                f"Type of {val} does not match column {col.name}. Changing type."
+            )
             col.type = anytype
             col.sheet.df.loc[row.name, col.expr] = val
         self.setModified()
 
     @asyncthread
     def reload(self):
-        pd = vd.importExternal('pandas')
+        pd = vd.importExternal("pandas")
         if isinstance(self.source, pd.DataFrame):
             df = self.source
         elif isinstance(self.source, Path):
-            filetype = getattr(self, 'filetype', self.source.ext)
-            if filetype == 'tsv':
+            filetype = getattr(self, "filetype", self.source.ext)
+            if filetype == "tsv":
                 readfunc = self.read_tsv
-            elif filetype == 'jsonl':
+            elif filetype == "jsonl":
                 readfunc = partial(pd.read_json, lines=True)
-            elif filetype == 'hdf5':
+            elif filetype == "hdf5":
                 readfunc = partial(pd.read_hdf, lines=True)
             else:
-                readfunc = getattr(pd, 'read_'+filetype) or vd.error('no pandas.read_'+filetype)
+                readfunc = getattr(pd, "read_" + filetype) or vd.error(
+                    "no pandas.read_" + filetype
+                )
             # readfunc() handles binary and text open()
-            df = readfunc(self.source, **options.getall('pandas_'+filetype+'_'))
+            df = readfunc(self.source, **options.getall("pandas_" + filetype + "_"))
             # some read methods (html, for example) return a list of dataframes
             if isinstance(df, list):
                 for idx, inner_df in enumerate(df[1:], start=1):
-                    vd.push(PandasSheet(f'{self.name}[{idx}]', source=inner_df))
+                    vd.push(PandasSheet(f"{self.name}[{idx}]", source=inner_df))
                 df = df[0]
-                self.name += '[0]'
-            if (filetype == 'pickle') and not isinstance(df, pd.DataFrame):
-                vd.fail('pandas loader can only unpickle dataframes')
+                self.name += "[0]"
+            if (filetype == "pickle") and not isinstance(df, pd.DataFrame):
+                vd.fail("pandas loader can only unpickle dataframes")
         else:
             try:
                 df = pd.DataFrame(self.source)
             except ValueError as err:
-                vd.fail('error building pandas DataFrame from source data: %s' % err)
+                vd.fail("error building pandas DataFrame from source data: %s" % err)
 
         # reset the index here
         if type(df.index) is not pd.RangeIndex:
@@ -184,25 +215,29 @@ class PandasSheet(Sheet):
 
         self.columns = []
         for col in (c for c in df.columns if not c.startswith("__vd_")):
-            self.addColumn(Column(
-                col,
-                type=self.dtype_to_type(df[col]),
-                getter=self.getValue,
-                setter=self.setValue,
-                expr=col
-            ))
+            self.addColumn(
+                Column(
+                    col,
+                    type=self.dtype_to_type(df[col].dtype),
+                    getter=self.getValue,
+                    setter=self.setValue,
+                    expr=col,
+                )
+            )
 
-        if self.columns[0].name == 'index': # if the df contains an index column
-            self.column('index').hide()
+        if self.columns[0].name == "index":  # if the df contains an index column
+            self.column("index").hide()
 
         self.rows = DataFrameAdapter(df)
         self._selectedMask = pd.Series(False, index=df.index)
         if df.index.nunique() != df.shape[0]:
-            vd.warning("Non-unique index, row selection API may not work or may be incorrect")
+            vd.warning(
+                "Non-unique index, row selection API may not work or may be incorrect"
+            )
 
     @asyncthread
     def sort(self):
-        '''Sort rows according to the current self._ordering.'''
+        """Sort rows according to the current self._ordering."""
         by_cols = []
         ascending = []
         for col, reverse in self._ordering[::-1]:
@@ -211,15 +246,18 @@ class PandasSheet(Sheet):
         self.rows.sort_values(by=by_cols, ascending=ascending, inplace=True)
 
     def _checkSelectedIndex(self):
-        pd = vd.importExternal('pandas')
+        pd = vd.importExternal("pandas")
         if self._selectedMask.index is not self.df.index:
             # DataFrame was modified inplace, so the selection is no longer valid
-            vd.status('pd.DataFrame.index updated, clearing {} selected rows'
-                      .format(self._selectedMask.sum()))
+            vd.status(
+                "pd.DataFrame.index updated, clearing {} selected rows".format(
+                    self._selectedMask.sum()
+                )
+            )
             self._selectedMask = pd.Series(False, index=self.df.index)
 
     def rowid(self, row):
-        return getattr(row, 'name', None) or ''
+        return getattr(row, "name", None) or ""
 
     # Base selection API. Refer to GH #266: using id() will not identify
     # pandas rows since iterating on rows / selecting rows will return
@@ -232,7 +270,7 @@ class PandasSheet(Sheet):
         return self._selectedMask.loc[row.name]
 
     def selectRow(self, row):
-        'Select given row'
+        "Select given row"
         self._checkSelectedIndex()
         self._selectedMask.loc[row.name] = True
 
@@ -256,17 +294,17 @@ class PandasSheet(Sheet):
     @asyncthread
     def select(self, rows, status=True, progress=True):
         self.addUndoSelection()
-        for row in (Progress(rows, 'selecting') if progress else rows):
+        for row in Progress(rows, "selecting") if progress else rows:
             self.selectRow(row)
 
     @asyncthread
     def unselect(self, rows, status=True, progress=True):
         self.addUndoSelection()
-        for row in (Progress(rows, 'unselecting') if progress else rows):
+        for row in Progress(rows, "unselecting") if progress else rows:
             self.unselectRow(row)
 
     def clearSelected(self):
-        pd = vd.importExternal('pandas')
+        pd = vd.importExternal("pandas")
         self._selectedMask = pd.Series(False, index=self.df.index)
 
     def selectByIndex(self, start=None, end=None):
@@ -288,24 +326,28 @@ class PandasSheet(Sheet):
 
     @asyncthread
     def selectByRegex(self, regex, columns, unselect=False):
-        '''
+        """
         Find rows matching regex in the provided columns. By default, add
         matching rows to the selection. If unselect is True, remove from the
         active selection instead.
-        '''
-        pd = vd.importExternal('pandas')
-        case_sensitive = 'I' not in vd.options.regex_flags
-        masks = pd.DataFrame([
-            self.df[col.expr].astype(str).str.contains(pat=regex, case=case_sensitive, regex=True)
-            for col in columns
-        ])
+        """
+        pd = vd.importExternal("pandas")
+        case_sensitive = "I" not in vd.options.regex_flags
+        masks = pd.DataFrame(
+            [
+                self.df[col.expr]
+                .astype(str)
+                .str.contains(pat=regex, case=case_sensitive, regex=True)
+                for col in columns
+            ]
+        )
         if unselect:
             self._selectedMask = self._selectedMask & ~masks.any()
         else:
             self._selectedMask = self._selectedMask | masks.any()
 
     def addUndoSelection(self):
-        vd.addUndo(undoAttrCopyFunc([self], '_selectedMask'))
+        vd.addUndo(undoAttrCopyFunc([self], "_selectedMask"))
 
     @property
     def nRows(self):
@@ -314,23 +356,25 @@ class PandasSheet(Sheet):
         return len(self.df)
 
     def newRows(self, n):
-        '''
+        """
         Return n rows of empty data. Let pandas decide on the most
         appropriate missing value (NaN, NA, etc) based on the underlying
         DataFrame's dtypes.
-        '''
+        """
 
-        pd = vd.importExternal('pandas')
-        return pd.DataFrame({
-            col: [None] * n for col in self.df.columns
-        }).astype(self.df.dtypes.to_dict(), errors='ignore')
+        pd = vd.importExternal("pandas")
+        return pd.DataFrame({col: [None] * n for col in self.df.columns}).astype(
+            self.df.dtypes.to_dict(), errors="ignore"
+        )
 
     def addRows(self, rows, index=None, undo=True):
-        pd = vd.importExternal('pandas')
+        pd = vd.importExternal("pandas")
         if index is None:
             self.df = self.df.append(pd.DataFrame(rows))
         else:
-            self.df = pd.concat((self.df.iloc[0:index], pd.DataFrame(rows), self.df.iloc[index:]))
+            self.df = pd.concat(
+                (self.df.iloc[0:index], pd.DataFrame(rows), self.df.iloc[index:])
+            )
         self.df.index = pd.RangeIndex(self.nRows)
         self._checkSelectedIndex()
         if undo:
@@ -338,7 +382,7 @@ class PandasSheet(Sheet):
             vd.addUndo(self._deleteRows, range(index, index + len(rows)))
 
     def _deleteRows(self, which):
-        pd = vd.importExternal('pandas')
+        pd = vd.importExternal("pandas")
         self.df.drop(which, inplace=True)
         self.df.index = pd.RangeIndex(self.nRows)
         self._checkSelectedIndex()
@@ -348,8 +392,8 @@ class PandasSheet(Sheet):
         vd.addUndo(self._deleteRows, index or self.nRows - 1)
 
     def delete_row(self, rowidx):
-        pd = vd.importExternal('pandas')
-        oldrow = self.df.iloc[rowidx:rowidx+1]
+        pd = vd.importExternal("pandas")
+        oldrow = self.df.iloc[rowidx : rowidx + 1]
 
         # Use to_dict() here to work around an edge case when applying undos.
         # As an action is undone, its entry gets removed from the cmdlog sheet.
@@ -362,51 +406,115 @@ class PandasSheet(Sheet):
         self.setModified()
 
     def deleteBy(self, by):
-        '''Delete rows for which func(row) is true.  Returns number of deleted rows.'''
-        pd = vd.importExternal('pandas')
+        """Delete rows for which func(row) is true.  Returns number of deleted rows."""
+        pd = vd.importExternal("pandas")
         nRows = self.nRows
-        vd.addUndo(setattr, self, 'df', self.df.copy())
+        vd.addUndo(setattr, self, "df", self.df.copy())
         self.df = self.df[~by]
         self.df.index = pd.RangeIndex(self.nRows)
         ndeleted = nRows - self.nRows
 
         self.setModified()
-        vd.status('deleted %s %s' % (ndeleted, self.rowtype))
+        vd.status("deleted %s %s" % (ndeleted, self.rowtype))
         return ndeleted
 
     def deleteSelected(self):
-        '''Delete all selected rows.'''
+        """Delete all selected rows."""
         self.deleteBy(self._selectedMask)
 
 
 @VisiData.global_api
 def view_pandas(vd, df):
-    run(PandasSheet('', source=df))
+    run(PandasSheet("", source=df))
 
 
 # Override with vectorized implementations
-PandasSheet.addCommand(None, 'stoggle-rows', 'toggleByIndex()', 'toggle selection of all rows')
-PandasSheet.addCommand(None, 'select-rows', 'selectByIndex()', 'select all rows')
-PandasSheet.addCommand(None, 'unselect-rows', 'unselectByIndex()', 'unselect all rows')
+PandasSheet.addCommand(
+    None, "stoggle-rows", "toggleByIndex()", "toggle selection of all rows"
+)
+PandasSheet.addCommand(None, "select-rows", "selectByIndex()", "select all rows")
+PandasSheet.addCommand(None, "unselect-rows", "unselectByIndex()", "unselect all rows")
 
-PandasSheet.addCommand(None, 'stoggle-before', 'toggleByIndex(end=cursorRowIndex)', 'toggle selection of rows from top to cursor')
-PandasSheet.addCommand(None, 'select-before', 'selectByIndex(end=cursorRowIndex)', 'select all rows from top to cursor')
-PandasSheet.addCommand(None, 'unselect-before', 'unselectByIndex(end=cursorRowIndex)', 'unselect all rows from top to cursor')
-PandasSheet.addCommand(None, 'stoggle-after', 'toggleByIndex(start=cursorRowIndex)', 'toggle selection of rows from cursor to bottom')
-PandasSheet.addCommand(None, 'select-after', 'selectByIndex(start=cursorRowIndex)', 'select all rows from cursor to bottom')
-PandasSheet.addCommand(None, 'unselect-after', 'unselectByIndex(start=cursorRowIndex)', 'unselect all rows from cursor to bottom')
-PandasSheet.addCommand(None, 'random-rows', 'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=DataFrameAdapter(sheet.df.sample(nrows or nRows)); vd.push(vs)', 'open duplicate sheet with a random population subset of N rows')
+PandasSheet.addCommand(
+    None,
+    "stoggle-before",
+    "toggleByIndex(end=cursorRowIndex)",
+    "toggle selection of rows from top to cursor",
+)
+PandasSheet.addCommand(
+    None,
+    "select-before",
+    "selectByIndex(end=cursorRowIndex)",
+    "select all rows from top to cursor",
+)
+PandasSheet.addCommand(
+    None,
+    "unselect-before",
+    "unselectByIndex(end=cursorRowIndex)",
+    "unselect all rows from top to cursor",
+)
+PandasSheet.addCommand(
+    None,
+    "stoggle-after",
+    "toggleByIndex(start=cursorRowIndex)",
+    "toggle selection of rows from cursor to bottom",
+)
+PandasSheet.addCommand(
+    None,
+    "select-after",
+    "selectByIndex(start=cursorRowIndex)",
+    "select all rows from cursor to bottom",
+)
+PandasSheet.addCommand(
+    None,
+    "unselect-after",
+    "unselectByIndex(start=cursorRowIndex)",
+    "unselect all rows from cursor to bottom",
+)
+PandasSheet.addCommand(
+    None,
+    "random-rows",
+    'nrows=int(input("random number to select: ", value=nRows)); vs=copy(sheet); vs.name=name+"_sample"; vs.rows=DataFrameAdapter(sheet.df.sample(nrows or nRows)); vd.push(vs)',
+    "open duplicate sheet with a random population subset of N rows",
+)
 
 # Handle the regex selection family of commands through a single method,
 # since the core logic is shared
-PandasSheet.addCommand('|', 'select-col-regex', 'selectByRegex(regex=inputRegex("select regex: ", defaultLast=True), columns=[cursorCol])', 'select rows matching regex in current column')
-PandasSheet.addCommand('\\', 'unselect-col-regex', 'selectByRegex(regex=inputRegex("select regex: ", defaultLast=True), columns=[cursorCol], unselect=True)', 'unselect rows matching regex in current column')
-PandasSheet.addCommand('g|', 'select-cols-regex', 'selectByRegex(regex=inputRegex("select regex: ", defaultLast=True), columns=visibleCols)', 'select rows matching regex in any visible column')
-PandasSheet.addCommand('g\\', 'unselect-cols-regex', 'selectByRegex(regex=inputRegex("select regex: ", defaultLast=True), columns=visibleCols, unselect=True)', 'unselect rows matching regex in any visible column')
+PandasSheet.addCommand(
+    "|",
+    "select-col-regex",
+    'selectByRegex(regex=inputRegex("select regex: ", defaultLast=True), columns=[cursorCol])',
+    "select rows matching regex in current column",
+)
+PandasSheet.addCommand(
+    "\\",
+    "unselect-col-regex",
+    'selectByRegex(regex=inputRegex("select regex: ", defaultLast=True), columns=[cursorCol], unselect=True)',
+    "unselect rows matching regex in current column",
+)
+PandasSheet.addCommand(
+    "g|",
+    "select-cols-regex",
+    'selectByRegex(regex=inputRegex("select regex: ", defaultLast=True), columns=visibleCols)',
+    "select rows matching regex in any visible column",
+)
+PandasSheet.addCommand(
+    "g\\",
+    "unselect-cols-regex",
+    'selectByRegex(regex=inputRegex("select regex: ", defaultLast=True), columns=visibleCols, unselect=True)',
+    "unselect rows matching regex in any visible column",
+)
 
 # Override with a pandas/dataframe-aware implementation
-PandasSheet.addCommand('"', 'dup-selected', 'vs=PandasSheet(sheet.name, "selectedref", source=selectedRows.df); vd.push(vs)', 'open duplicate sheet with only selected rows')
+PandasSheet.addCommand(
+    '"',
+    "dup-selected",
+    'vs=PandasSheet(sheet.name, "selectedref", source=selectedRows.df); vd.push(vs)',
+    "open duplicate sheet with only selected rows",
+)
 
-vd.addGlobals({
-    'PandasSheet': PandasSheet,
-})
+vd.addGlobals(
+    {
+        "PandasSheet": PandasSheet,
+    }
+)
