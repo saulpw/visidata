@@ -31,7 +31,7 @@ setup(
         keywords="visidata sql rdbms ibis substrait",
         author="Saul Pwanson",
         url="https://github.com/visidata/vdsql",
-        python_requires=">=3.9",
+        python_requires=">=3.10",
         packages=find_packages(exclude=["tests"]),
         entry_points={'visidata.plugins': 'vdsql=visidata.apps.vdsql'},
         scripts=['vdsql'],
