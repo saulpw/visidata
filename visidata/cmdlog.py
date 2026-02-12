@@ -366,7 +366,6 @@ def replay_sync(vd, cmdlog):
 @VisiData.api
 def replay(vd, cmdlog):
     'Inject commands into live execution with interface.'
-    vd.push(cmdlog)
     vd._nextCommands.extend(cmdlog.rows)
     vd.currentReplay = cmdlog
 
