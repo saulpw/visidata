@@ -379,6 +379,9 @@ def main_vd():
                 vd.execAsync = lambda *args, vd=vd, **kwargs: visidata.VisiData.execAsync(vd, *args, **kwargs)
                 run()
         else:
+            vd.push(vs)
+            for src in reversed(sources):
+                vd.push(src, load=False)
             vd.replay(vs)
             run()
 
