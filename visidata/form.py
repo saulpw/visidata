@@ -40,7 +40,7 @@ class FormCanvas(BaseSheet):
                 continue
             x, y = r.x, r.y
             if isinstance(y, float) and (0 < y < 1) or (-1 < y < 0): y = h*y
-            if isinstance(x, float) and (0 < x < 1) or (-1 < x < 0): x = w*x-(dispwidth(r.text)/2)
+            if isinstance(x, float) and (0 < x < 1) or (-1 < x < 0): x = w*x-(dispwidth(r.text, literal=True)/2)
             x = int(x)
             y = int(y)
             if y < 0: y += h
@@ -48,12 +48,12 @@ class FormCanvas(BaseSheet):
             color = r.color
             if r is self.pressedLabel:
                 color += ' reverse'
-            clipdraw(scr, y, x, r.text, colors[color])
+            clipdraw(scr, y, x, r.text, colors[color], literal=True)
             # underline first occurrence of r.key in r.text
             if hasattr(r, 'key') and r.key:
                 index = r.text.find(r.key)
-                clipdraw(scr, y, x+index, r.text[index:index+len(r.key)], colors[color + " underline"])
-            vd.onMouse(scr, x, y, dispwidth(r.text), 1,
+                clipdraw(scr, y, x+index, r.text[index:index+len(r.key)], colors[color + " underline"], literal=True)
+            vd.onMouse(scr, x, y, dispwidth(r.text, literal=True), 1,
                     BUTTON1_PRESSED=lambda y,x,key,r=r,sheet=self: sheet.onPressed(r),
                     BUTTON1_RELEASED=lambda y,x,key,r=r,sheet=self: sheet.onReleased(r))
 
@@ -61,7 +61,7 @@ class FormCanvas(BaseSheet):
         vd.setWindows(vd.scrFull)
         drawnrows = [r for r in self.source.rows if r.text]
         inputs = [r for r in self.source.rows if r.input]
-        maxw = max(int(r.x)+dispwidth(r.text) for r in drawnrows)
+        maxw = max(int(r.x)+dispwidth(r.text, literal=True) for r in drawnrows)
         maxh = max(int(r.y) for r in drawnrows)
         h, w = vd.scrFull.getmaxyx()
         y, x = max(0, (h-maxh)//2-1), max(0, (w-maxw)//2-1)
@@ -102,7 +102,7 @@ class FormCanvas(BaseSheet):
 @functools.wraps(VisiData.confirm)
 @VisiData.api
 def confirm(vd, prompt, exc=EscapeException):
-    'Display *prompt* on status line and demand input that starts with "Y" or "y" to proceed. Return True when proceeding, otherwise raise *exc*, or if *exc* is falsy, return False'
+    'Display *prompt* on status line and demand input that starts with "Y" or "y" to proceed. Return True when proceeding, otherwise raise *exc*, or if *exc* is falsy, return False. *prompt* is literal text that cannot contain visidata markup code.'
     if vd.options.batch:
         return vd.fail('cannot confirm in batch mode: ' + prompt)
 
