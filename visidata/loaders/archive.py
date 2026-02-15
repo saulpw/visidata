@@ -67,16 +67,12 @@ Commands:
 
     def openZipFile(self, fp, *args, **kwargs):
         '''Use VisiData input to handle password-protected zip files.'''
-        if isinstance(fp, zipfile.ZipFile):
-            zip_open =  fp.open
-        elif isinstance(fp, unzip_http.RemoteZipFile):
-            zip_open = fp._open
         try:
-            return zip_open(*args, **kwargs)
+            return fp.open(*args, **kwargs)
         except RuntimeError as err:
             if 'password required' in err.args[0]:
                 pwd = vd.input(f'{args[0].filename} is encrypted, enter password: ', display=False)
-                return zip_open(*args, **kwargs, pwd=pwd.encode('utf-8'))
+                return fp.open(*args, **kwargs, pwd=pwd.encode('utf-8'))
             vd.exceptionCaught(err)
 
     def openRow(self, row):
@@ -111,6 +107,7 @@ Commands:
     def zfp(self):
         if not self._zfp:
             if '://' in str(self.source):
+                vd.importExternal('urllib3')
                 unzip_http.warning = vd.warning
                 self._zfp = unzip_http.RemoteZipFile(str(self.source))
             elif isinstance(self.source, Path):
