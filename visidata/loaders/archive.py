@@ -122,8 +122,11 @@ Commands:
         return self._zfp
 
     def iterload(self):
-        for zi in Progress(self.zfp.infolist()):
-            yield [zi, Path(zi.filename)]
+        try:
+            for zi in Progress(self.zfp.infolist()):
+                yield [zi, Path(zi.filename)]
+        except Exception as e:
+            vd.fail(f'{e}')
 
 
 #from https://docs.python.org/3/library/tarfile.html#tarfile.REGTYPE
