@@ -350,16 +350,6 @@ def wraptext(text, width=80, indent=''):
             yield c, ''
 
 
-def clipbox(scr, lines, attr, title=''):
-    scr.erase()
-    scr.bkgd(attr)
-    scr.box()
-    h, w = scr.getmaxyx()
-    for i, line in enumerate(lines):
-        clipdraw(scr, i+1, 2, line, attr)
-
-    clipdraw(scr, 0, w-dispwidth(title)-6, f"| {title} |", attr)
-
 def clipstr_start(dispval, w, truncator='', literal=False):
     '''Return a tuple (frag, dw), where *frag* is the longest ending substring
     of *dispval* that will fit in a space *w* terminal display characters wide,
@@ -456,7 +446,6 @@ def clip_markup_middle(s:str, w:int):
 vd.addGlobals(clipstr=clipstr,
               clipdraw=clipdraw,
               clipdraw_chunks=clipdraw_chunks,
-              clipbox=clipbox,
               dispwidth=dispwidth,
               iterchars=iterchars,
               iterchunks=iterchunks,
