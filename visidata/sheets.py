@@ -801,7 +801,7 @@ class TableSheet(BaseSheet):
             if C and x+colwidth+dispwidth(C) < self.windowWidth and y+i < self.windowHeight:
                 scr.addstr(y+i, x+colwidth, C, sepcattr.attr)
 
-        clipdraw(scr, y+h-1, min(x+colwidth, self.windowWidth-1)-dispwidth(T), T, hdrcattr)
+        clipdraw(scr, y+h-1, min(x+colwidth, self.windowWidth-1)-dispwidth(T), T, hdrcattr, literal=True)
 
         try:
             if vcolidx == self.leftVisibleColIndex and col not in self.keyCols and self.nonKeyVisibleCols.index(col) > 0:
@@ -899,8 +899,8 @@ class TableSheet(BaseSheet):
                     break
 
         for aggrname, colidxs in self.allAggregators.items():
-            clipdraw(scr, y, 0, f' ', colors.color_aggregator, w=min(rightx+rightw+10, self.windowWidth-1))
-            clipdraw(scr, y, agglabelx, f' {aggrname:9}', colors.color_aggregator, truncator='')
+            clipdraw(scr, y, 0, f' ', colors.color_aggregator, w=min(rightx+rightw+10, self.windowWidth-1), literal=True)
+            clipdraw(scr, y, agglabelx, f' {aggrname:9}', colors.color_aggregator, truncator='', literal=True)
 
             for vcolidx in colidxs:
                 x, colwidth = self._visibleColLayout[vcolidx]
@@ -1057,7 +1057,7 @@ class TableSheet(BaseSheet):
             for notefunc in vd.rowNoters:
                 ch = notefunc(self, row)
                 if ch:
-                    clipdraw(scr, ybase, 0, ch, colors.color_note_row)
+                    clipdraw(scr, ybase, 0, ch, colors.color_note_row, literal=True)
                     break
 
             return height
