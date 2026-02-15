@@ -151,10 +151,16 @@ class RemoteZipFile:
 
     def infoiter(self):
         resp = self.http.request('HEAD', self.url)
+        if not (200 <= resp.status <= 299):
+            error(f'cannot open URL: HTTP status {resp.status}')
+
         r = resp.headers.get('Accept-Ranges', '')
         if r != 'bytes':
             hostname = urllib.parse.urlparse(self.url).netloc
             warning(f"{hostname} Accept-Ranges header ('{r}') is not 'bytes'--trying anyway")
+
+        if 'Content-Length' not in resp.headers:
+            error('cannot open URL: missing Content-Length header')
 
         self.zip_size = int(resp.headers['Content-Length'])
         resp = self.get_range(
