@@ -254,7 +254,7 @@ def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clea
                 continue
 
             if origw is None:
-                chunkw = dispwidth(chunk, maxwidth=windowWidth-totaldispw)
+                chunkw = dispwidth(chunk, maxwidth=windowWidth-totaldispw, literal=True)
             else:
                 chunkw = origw-totaldispw
 
