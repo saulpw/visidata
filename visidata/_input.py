@@ -424,7 +424,7 @@ def inputsingle(vd, prompt, record=True):
     y = sheet.windowHeight-1
     w = sheet.windowWidth
     rstatuslen = vd.drawRightStatus(sheet._scr, sheet)
-    promptlen = clipdraw(sheet._scr, y, 0, prompt, 0, w=w-rstatuslen-1)
+    promptlen = clipdraw(sheet._scr, y, 0, prompt, 0, w=w-rstatuslen-1, literal=True)
     sheet._scr.move(y, w-promptlen-rstatuslen-2)
 
     while not v:
@@ -489,9 +489,10 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
         for k, v in kwargs.items():
             #recalculate y to adjust for screen resizes during input()
             y = sheet.windowHeight-v.get('dy')-1
-            maxw = min(sheet.windowWidth-1, max(dispwidth(v.get('prompt')), dispwidth(str(v.get('value', '')), literal=True)))
-            promptlen = clipdraw(scr, y, 0, v.get('prompt'), attr, w=maxw)  #1947
-            promptlen = clipdraw(scr, y, promptlen, v.get('value', ''),  attr, w=maxw)
+            maxw = min(sheet.windowWidth-1, max(dispwidth(v.get('prompt'), literal=True),
+                                                dispwidth(str(v.get('value', '')), literal=True)))
+            promptlen = clipdraw(scr, y, 0, v.get('prompt'), attr, w=maxw, literal=True)  #1947
+            promptlen = clipdraw(scr, y, promptlen, v.get('value', ''),  attr, w=maxw, literal=True)
 
         return updater(val)
 
