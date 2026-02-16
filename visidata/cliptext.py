@@ -205,7 +205,7 @@ def clipstr(s, dispw, truncator=None, oddspace=None):
 def clipdraw(scr, y, x, s, attr, w=None, clear=True, literal=False, **kwargs):
     '''Draw `s`  at (y,x)-(y,x+w) with curses `attr`, clipping with ellipsis char.
        If `clear`, clear whole editing area before displaying.
-       If `literal`, do not interpret internal color code markup.
+       If `literal`, do not interpret internal vd code markup.
        Return width drawn (max of w).
     '''
     if not literal:
@@ -219,10 +219,11 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, literal=False, **kwargs):
     return clipdraw_chunks(scr, y, x, chunks, attr, w=w, clear=clear, **kwargs)
 
 
-def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clear=True, literal=False, **kwargs):
+def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clear=True, **kwargs):
     '''Draw `chunks` (sequence of (color:str, text:str) as from iterchunks) at (y,x)-(y,x+w) with curses `attr`, clipping with ellipsis char.
        If `clear`, clear whole editing area before displaying.
        Return width drawn (max of w).
+       Text elements of `chunks` are literal, meaning any contained vd code markup is drawn raw as uninterpreted text.
     '''
     if scr:
         windowHeight, windowWidth = scr.getmaxyx()
