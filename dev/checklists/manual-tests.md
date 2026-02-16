@@ -96,5 +96,11 @@
 24. Test adding multiple aggregators via palette (+)
 25. time vd -p tests/quit-nosave.vdj  - note down the time. compare to PR #2369
 26. Use the z; command. Then type in a command line like echo "| Ceci n'est pas une pipe"
-27. vd -b -i -p tests/fill.vdj sample_data/a.tsv 
+27. vd -b -i -p tests/fill.vdj sample_data/a.tsv
 Check that both benchmark and a.tsv are edittable.
+
+## Cursor/Scrolling
+28. scroll all the way down with j
+29. pgdn from 1, stay at top, exactly one page forward
+30. 3xj, pgdn from there, relative cursor position stays
+31. ZZ

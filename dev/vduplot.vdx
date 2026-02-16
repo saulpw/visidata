@@ -1,0 +1,21 @@
+#!/usr/bin/env vd -p
+open-file http://visidata.org/usage.tsv
+col daily_users
+type-int
+aggregate-col sum
+col motd_fetches
+type-int
+aggregate-col sum
+col date
+freq-col
+sheet usage_date_freq
+type-date
+addcol-expr date.isocalendar()[2]
+rename-col dotw
+addcol-expr 'Sat/Sun' if dotw >=6 else 'Mon-Fri'
+key-col
+col date
+sort-desc
+col daily_users_sum
+select-equal-cell
+plot-column
