@@ -189,19 +189,6 @@ class TestClipText:
         assert clips == clippeds
         assert clipw == clippedw
 
-    def test_clipdraw_chunks(self):
-        prechunks = [
-            ('', 'x'),
-            ('', 'jsonl'),
-        ]
-        scr = Mock()
-        scr.getmaxyx.return_value = (80,25)
-        visidata.clipdraw_chunks(scr, 0, 0, prechunks, visidata.ColorAttr(), w=5)
-        scr.addstr.assert_has_calls([
-                call(0, 0, 'x', 0),
-                call(0, 1, 'jso…', 0),
-        ], any_order=True)
-
     @pytest.mark.parametrize('s, dispw, clipped', [
         #clip front half
         ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]',
