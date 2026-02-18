@@ -664,10 +664,16 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
     }
 
     if vcolidx == self.nVisibleCols-1 or vcolidx >= self.nCols-1:
-        bindings['Tab'] = acceptThenFunc('go-down', 'go-leftmost', 'edit-cell')
+        if rowidx < 0:
+            bindings['Tab'] = acceptThenFunc('go-leftmost', 'rename-col')
+        else:
+            bindings['Tab'] = acceptThenFunc('go-down', 'go-leftmost', 'edit-cell')
 
     if vcolidx <= 0:
-        bindings['Shift+Tab'] = acceptThenFunc('go-up', 'go-rightmost', 'edit-cell')
+        if rowidx < 0:
+            bindings['Shift+Tab'] = acceptThenFunc('go-rightmost', 'rename-col')
+        else:
+            bindings['Shift+Tab'] = acceptThenFunc('go-up', 'go-rightmost', 'edit-cell')
 
     # update local bindings with kwargs.bindings instead of the inverse, to preserve kwargs.bindings for caller
     bindings.update(kwargs.get('bindings', {}))
