@@ -50,6 +50,22 @@ To unbind `i` before binding it:
 3. Launch VisiData.
 
 
+### Customizing cell editing keybindings
+
+`bindkey` changes keybindings in normal (non-editing) mode.  To change keybindings during cell editing, use `vd.editCellBindings` with `acceptThenFunc()`:
+
+~~~
+vd.editCellBindings['Enter'] = acceptThenFunc('go-down', 'edit-cell')
+~~~
+
+`acceptThenFunc()` takes one or more command longnames.  It saves the current edit, then executes each command in sequence.  For example, to make `Enter` save and move down to edit the next cell (spreadsheet-style):
+
+~~~
+vd.editCellBindings['Enter'] = acceptThenFunc('go-down', 'edit-cell')
+~~~
+
+See [Editing Contents](/docs/edit) for the full list of default cell editing keybindings.
+
 ### Creating new commands
 
 At minimum, `<Sheet>.addCommand` requires a longname and execstr.

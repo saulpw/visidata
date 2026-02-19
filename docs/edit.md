@@ -40,6 +40,20 @@ Command             Operation
 `Up`/`Down`         sets contents to previous/next in history
 `Tab`/`Shift-Tab`   autocompletes input (when available)
 
+### Cell navigation while editing
+
+When editing a cell (with `e`), these additional commands move to an adjacent cell and continue editing:
+
+Command             Operation
+--------            ----------
+`Shift+Down`/`Shift+Up`       saves and moves to cell below/above
+`Shift+Right`/`Shift+Left`    saves and moves to cell right/left
+`Tab`/`Shift-Tab`             saves and moves to cell right/left
+
+`Tab` wraps to the next row when at the last column; `Shift-Tab` wraps to the previous row when at the first column.
+
+These bindings can be customized; see [Customize](/docs/customize#customizing-cell-editing-keybindings).
+
 ---
 
 ## How to rename columns

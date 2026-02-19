@@ -19,6 +19,7 @@ class AcceptInput(Exception):
     '*args[0]* is the input to be accepted'
 
 vd._injectedInput = None  # for vd.injectInput
+vd.editCellBindings = {}  # user-customizable bindings for cell editing; use acceptThenFunc() to define
 
 
 @VisiData.api
@@ -669,6 +670,7 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
     if vcolidx <= 0:
         bindings['Shift+Tab'] = acceptThenFunc('go-up', 'go-rightmost', 'edit-cell')
 
+    bindings.update(vd.editCellBindings)
     # update local bindings with kwargs.bindings instead of the inverse, to preserve kwargs.bindings for caller
     bindings.update(kwargs.get('bindings', {}))
     kwargs['bindings'] = bindings
@@ -687,4 +689,4 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
     return r
 
 
-vd.addGlobals(CompleteKey=CompleteKey, AcceptInput=AcceptInput, InputWidget=InputWidget)
+vd.addGlobals(CompleteKey=CompleteKey, AcceptInput=AcceptInput, InputWidget=InputWidget, acceptThenFunc=acceptThenFunc)
