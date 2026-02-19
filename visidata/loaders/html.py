@@ -114,9 +114,21 @@ class HtmlTableSheet(Sheet):
 
         maxlinks = {}  # [colnum] -> nlinks:int
         ncols = 0
+        active_rowspans = {}  # {colnum: (remaining_rows, cellval, links)}
 
         for rownum, r in enumerate(self.source.iter('tr')):
-            row = []
+            row = {}  # colnum -> (cellval, links)
+            is_data_row = False
+
+            # fill in cells from active rowspans first
+            for colnum in list(active_rowspans):
+                remaining, val, lnks = active_rowspans[colnum]
+                row[colnum] = (val, lnks)
+                maxlinks[colnum] = max(maxlinks.get(colnum, 0), len(lnks))
+                if remaining <= 1:
+                    del active_rowspans[colnum]
+                else:
+                    active_rowspans[colnum] = (remaining - 1, val, lnks)
 
             colnum = 0
             # get starting column, which might be different if there were rowspan>1 already
@@ -137,9 +149,9 @@ class HtmlTableSheet(Sheet):
                         for x in cell.iter('a')
                 ]
 
-                maxlinks[colnum] = max(maxlinks.get(colnum, 0), len(links))
-
                 if is_header(cell):
+                    maxlinks[colnum] = max(maxlinks.get(colnum, 0), len(links))
+
                     for k in range(rownum, rownum+rowspan):
                         while k >= len(headers):  # extend headers list with lists for all header rows
                             headers.append([])
@@ -150,15 +162,26 @@ class HtmlTableSheet(Sheet):
                             headers[k][j] = cellval
                         cellval = ''   # use empty non-None value for subsequent rows in the rowspan
                 else:
-                    while colnum >= len(row):
-                        row.append((None, []))
+                    is_data_row = True
+                    # skip over columns occupied by rowspans
+                    while colnum in row:
+                        colnum += 1
+
+                    maxlinks[colnum] = max(maxlinks.get(colnum, 0), len(links))
                     row[colnum] = (cellval, links)
+
+                    if rowspan > 1:
+                        for j in range(colnum, colnum+colspan):
+                            active_rowspans[j] = (rowspan - 1, cellval, links)
 
                 colnum += colspan
 
-            if any(row):
-                yield row
-                ncols = max(ncols, colnum)
+            if is_data_row and row:
+                ncols = max(ncols, max(row) + 1)
+                rowlist = [(None, [])] * ncols
+                for i, v in row.items():
+                    rowlist[i] = v
+                yield rowlist
 
         self.columns = []
         if headers:
