@@ -39,6 +39,8 @@ The *execstr* is a string of Python code passed to ``exec()`` when the command i
 
 The ``vd`` and ``sheet`` symbols are available to specify explicitly.
 
+``currow`` is available on TableSheets; it provides access to column values for the current cursor row by name (e.g. ``currow.Price`` returns the typed value of the ``Price`` column for the cursor row).
+
 .. note::
 
     Unqualified ``options`` in a command execstr will use the sheet-specific options context for the current sheet.

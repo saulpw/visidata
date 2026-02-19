@@ -266,6 +266,7 @@ These variables and functions are available in the scope of an expression:
 - **`row`**: the current row (a Python object of the internal rowtype)
 - **`curcol`**: evaluate to the typed value of this row in the column that the cursor was on at the time that the expression column was added.
 - **`cursorCol`**: evaluate to the typed value of this row for the column the cursor is on. Changes as the cursor moves for `=`. Uses the column from the time the calculation was made for `g=`, `gz=`, and `z=`.
+- **`currow`**: a convenience object for accessing column values of the current cursor row by name. e.g. `currow.Price` returns the typed value of the `Price` column for the cursor row.
 
 Additional attributes can be added to sheets and columns.
 

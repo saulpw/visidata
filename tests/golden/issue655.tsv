@@ -1,0 +1,52 @@
+Date	Customer	SKU	Item	Quantity	Unit	Paid
+7/3/2018 1:47p	Food, Kitten 3kg	FOOD213	BFF Oh My Gravy! Beef & Salmon 2.8oz	4	$12.95	$51.8
+7/3/2018 3:32p	Food, Kitten 3kg	FOOD121	Food, Adult Cat - 3.5 oz	1	$4.22	$4.22
+7/5/2018 4:15p	Food, Kitten 3kg	FOOD121	Food, Adult Cat 3.5 oz	1	$4.22	$4.22
+7/6/2018 12:15p	Food, Kitten 3kg	FOOD122	Food, Senior Wet Cat - 3 oz	12	$1.29	157¥
+7/10/2018 10:28a	Food, Kitten 3kg	NSCT201	Food, Salamander	30	$.05	$1.5
+7/10/2018 5:23p	Food, Kitten 3kg	CAT060	Cat, Korat (Felis catus)	1	$720.42	$720.42
+7/10/2018 5:23p	Food, Kitten 3kg	FOOD130	Food, Kitten 3kg	1	$14.94	$14.94
+7/13/2018 10:26a	Food, Kitten 3kg	NSCT523	Monster, Rust (Monstrus gygaxus)	1	$39.95	$39.95
+7/13/2018 3:49p	Food, Kitten 3kg	FOOD216	BFF Oh My Gravy! Chicken & Shrimp 2.8oz	4	$12.95	$51.8
+7/17/2018 9:01a	Food, Kitten 3kg	FOOD217	BFF Oh My Gravy! Duck & Tuna 2.8oz	4	$12.95	$51.8
+7/17/2018 11:30a	Food, Kitten 3kg	LAGO342	Rabbit (Oryctolagus cuniculus)	2	$32.94	$65.88
+7/18/2018 12:16p	Food, Kitten 3kg	FOOD122	Food, Senior Wet Cat - 3 oz	6	$1.29	157¥
+7/19/2018 10:28a	Food, Kitten 3kg	FOOD170	Food, Dog - 5kg	5	$44.95	$224.75
+7/20/2018 2:13p	Food, Kitten 3kg	FOOD167	Food, Premium Wet Cat - 3.5 oz	50	$3.95	$197.5
+7/23/2018 1:41p	Food, Kitten 3kg	FOOD215	BFF Oh My Gravy! Lamb & Tuna 2.8oz	4	$12.95	$51.8
+7/23/2018 4:23p	Food, Kitten 3kg	TOY235	Laser Pointer	1	$16.12	$16.12
+7/24/2018 12:16p	Food, Kitten 3kg	FOOD122	Food, Senior Wet Cat - 3 oz	3	$1.29	157¥
+7/26/2018 4:39p	Food, Kitten 3kg	FOOD420	Food, Shark - 10 kg	1	$15.70	$15.7
+7/27/2018 12:16p	Food, Kitten 3kg	FOOD122	Food, Senior Wet Cat - 3 oz	3	$1.29	157¥
+7/30/2018 12:17p	Food, Kitten 3kg	RETURN	Food, Senior Wet Cat - 3 oz	1	$1.29	157¥
+7/31/2018 5:42p	Food, Kitten 3kg	CAT060	Food, Dragon - 50kg	5	$720.42	$3602.1
+8/1/2018 2:44p	Food, Kitten 3kg	FOOD360	Food, Rhinocerous - 50kg	4	$5.72	$22.88
+8/2/2018 5:12p	Food, Kitten 3kg	CAT110	Cat, Maine Coon (Felix catus)	1	$1,309.68	$1309.68
+8/2/2018 5:12p	Food, Kitten 3kg	FOOD130	Food, Kitten 3kg	3	$14.94	$44.82
+8/6/2018 10:21a	Food, Kitten 3kg	FOOD212	BFF Oh My Gravy! Beef & Chicken 2.8oz	4	$12.95	$51.8
+8/7/2018 4:12p	Food, Kitten 3kg	REPT082	Kingsnake, California (Lampropeltis getula)	1	$89.95	$89.95
+8/7/2018 4:12p	Food, Kitten 3kg	RDNT443	Mouse, Pinky (Mus musculus)	1	$1.49	$1.49
+8/10/2018 4:31p	Food, Kitten 3kg	FOOD211	BFF Oh My Gravy! Chicken & Turkey 2.8oz	4	$12.95	$51.8
+8/13/2018 2:07p	Food, Kitten 3kg	RDNT443	Mouse, Pinky (Mus musculus)	1	$1.49	$1.49
+8/13/2018 2:08p	Food, Kitten 3kg	FOOD146	Forti Diet Prohealth Mouse/Rat 3lbs	2	$2.00	$4.0
+8/15/2018 11:57a	Food, Kitten 3kg	RETURN	Parrot, Norwegian Blue (Mopsitta tanta)	1	$2300.00	-$2300.0
+8/15/2018 3:48p	Food, Kitten 3kg	FOOD121	Food, Adult Cat - 3.5 oz	2	$4.22	$8.44
+8/16/2018 11:50a	Food, Kitten 3kg	RETURN	Rabbit (Oryctolagus cuniculus)	6	$0	$0.0
+8/16/2018 4:00p	Food, Kitten 3kg	DOG010	Dog, Golden Retriever (Canis lupus familiaris)	1	$2,495.99	$2495.99
+8/16/2018 5:15p	Food, Kitten 3kg	BIRD160	Parakeet, Blue (Melopsittacus undulatus)	1	29.95	$31.85
+8/17/2018 9:26a	Food, Kitten 3kg	NSCT201	Food, Spider	5	$.05	$0.25
+8/20/2018 9:36a	Food, Kitten 3kg	RETURN	Dog, Golden Retriever (Canis lupus familiaris)	1	$1,247.99	-$1247.99
+8/20/2018 1:47p	Food, Kitten 3kg	GOAT224	Goat, American Pygmy (Capra hircus)	1	₪499	$160.51
+8/20/2018 3:31p	Food, Kitten 3kg	NSCT201	Crickets, Adult Live (Gryllus assimilis)	30	$.05	$1.5
+8/20/2018 5:12p	Food, Kitten 3kg	NSCT084	Food, Pangolin	30	$.17	$5.10
+8/21/2018 12:13p	Food, Kitten 3kg	FOOD214	BFF Oh My Gravy! Duck & Salmon 2.8oz	4	$12.95	$51.8
+8/22/2018 9:38a	Food, Kitten 3kg	BIRD160	Food, Quoll	1	29.95	$29.95
+8/22/2018 2:13p	Food, Kitten 3kg	FOOD170	Food, Adult Dog - 5kg	1	$44.95	$44.95
+8/22/2018 5:49p	Food, Kitten 3kg	SFTY052	Fire Extinguisher, kitchen-rated	1	$61.70	$61.70
+8/24/2018 11:42a	Food, Kitten 3kg	FOOD218	BFF Oh My Gravy! Chicken & Salmon 2.8oz	4	$12.95	$51.8
+8/27/2018 3:05p	Food, Kitten 3kg	NSCT443	Mealworms, Large (Tenebrio molitor) 100ct	1	$1.99	$1.99
+8/28/2018 5:32p	Food, Kitten 3kg	CAT020	Cat, Scottish Fold (Felis catus)	1	$1,964.53	$1964.53
+8/28/2018 5:32p	Food, Kitten 3kg	FOOD130	Food, Kitten 3kg	2	$14.94	$29.88
+8/29/2018 10:07a	Food, Kitten 3kg	FOOD219	BFF Oh My Gravy! Chicken & Pumpkin 2.8oz	4	$12.95	$51.8
+8/31/2018 12:00a	Food, Kitten 3kg	FOOD219	BFF Oh My Gravy! Chicken & Pumpkin 2.8oz	144	$12.95	$1864.8
+8/31/2018 5:57p	Food, Kitten 3kg	REPT217	Lizard, Spinytail (Uromastyx ornatus)	1	$99.95	$99.95

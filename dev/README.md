@@ -10,6 +10,7 @@ Resources for VisiData contributors and maintainers.
 | `GIT.md` | Git workflow and branching conventions |
 | `DOCS.md` | Documentation standards |
 | `PERFORMANCE.md` | Performance guidelines |
+| `TESTING.md` | Test framework guide (golden tests, pytest, writing new tests) |
 
 ## Checklists
 
