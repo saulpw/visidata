@@ -65,7 +65,7 @@ pytest visidata/tests/test_features.py    # run test_ functions discovered from 
 
 ## Bug Fix Testing
 
-Always test bug fixes with golden tests, not ad-hoc Python scripts. Create a `.vdx` test in `tests/`, generate golden output, and verify with `dev/test.sh`.
+Always test bug fixes with golden tests, not ad-hoc Python scripts. Write the test FIRST, verify it FAILS on the current code, then make the code change and verify the test passes. Create a `.vdx` test in `tests/`, generate golden output, and verify with `dev/test.sh`.
 
 ## Sample Data
 
