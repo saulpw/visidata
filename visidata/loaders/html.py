@@ -138,6 +138,9 @@ class HtmlTableSheet(Sheet):
                         break
                     colnum += 1
 
+            children = [cell for cell in r.getchildren() if not isinstance(cell, lxml.etree.CommentBase)]
+            has_data_cells = any(not is_header(cell) for cell in children)
+
             for cell in r.getchildren():
                 colspan = int(cell.attrib.get('colspan', 1))
                 rowspan = int(cell.attrib.get('rowspan', 1))
@@ -149,7 +152,7 @@ class HtmlTableSheet(Sheet):
                         for x in cell.iter('a')
                 ]
 
-                if is_header(cell):
+                if is_header(cell) and not has_data_cells:
                     maxlinks[colnum] = max(maxlinks.get(colnum, 0), len(links))
 
                     for k in range(rownum, rownum+rowspan):
