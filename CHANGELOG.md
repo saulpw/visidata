@@ -1,5 +1,122 @@
 # VisiData version history
 
+# v3.4 (unreleased)
+
+Thanks to @midichef for many bugfixes and improvements.
+
+## New Features
+
+- [commands] add `define-command` and `document` for current row (#655)
+- [repl] add embedded ptipython REPL (#2736)
+- [edit] add `vd.editCellBindings` for user-customizable cell editing keybindings (#2986)
+- [keys] prettykeys overhaul: all bindings now use human-readable key names (#2594)
+- [selection] add `select-to-prev-selected` and `select-to-next-selected` commands
+- [profile] add `--profile` flag for main thread profiling
+- [vimcompat] add vimcompat experiment with go-page-half bindings @daviewales (#2927)
+- [packages] add Python packages sheet
+- [daw] add vdaw: experimental transcript-based audio editor
+- [colors] add conversion functions to/from xterm256
+
+## Improvements
+
+- [column] add `color_readonly` option; better status for non-writable columns (#2936)
+- [column] mark expanded columns and custom columns as writable (#2936)
+- [edit-cell] fail early on readonly column (#2936)
+- [input] add Ctrl+Bksp, Alt+Bksp, Alt+d bindings (#2500)
+- [keys] add Ctrl+Shift+Up/Down and Alt+NumPad prettykeys
+- [cmdlog] expose CommandLogJsonl (#2940)
+- [indexsheet] bind cancel row to zCtrl+C (#2938)
+- [menu] add show-cursor and show-expr (#2848)
+- [dedupe] enable custom sheet name suffixes
+- [incr] use setValuesTyped to allow setting of non-numeric columns
+- [modify] add Progress to setValuesTyped
+- [movement] add go-screen-* commands (#2797)
+- [graph] accept refline input for multiple xcols; better error checking
+- [graph][seaborn] add title and axis labels @meestahp
+- [aggregator] show summary labels in first non-aggregated column if right edge not on screen
+- [types] add numtype, use for avg/median aggregators @pequiste (#2868)
+- [aggregators] copy formatter/displayer col attrs to AggrColumn
+- [aggregators] preserve type returned by mean/avg/median instead of coercing to int @pequiste
+- [icons] show icons with sheets: Dir, FreqTable, Graph
+- [canvas_text] add maxXY from darkdraw, fix g sliders
+- [clipboard api] add get/setClipboardRows and get/setClipboardCols
+- [help] refer to visidata clipboard as "internal clipboard" (#2864 #2865)
+- [memory] move open-memos to BaseSheet
+- [mouse api] add vd.enableMouse; ignore if no curses.mousemask (#2913 #2851)
+- [config] respect XDG_CONFIG_HOME and XDG_CACHE_HOME on macOS @maxim-uvarov-ai-assistant
+- [xdg] use user_data_dir for StoredLists like input_history (#2889)
+- [statusbar] make lstatus_max truncation preserve vd markup (#2908)
+- [shell] add options.max_threads for asynccache used by addcol-shell
+- [asynccache/shell] make asynccache/addcol-shell thread-safe and runnable in macros and replay (#2826)
+- [xlsx] add hlink/folHLink to color list (#2948)
+- [syscopy] add cursorFullDisplay for complex objects (#2806)
+
+## Loaders
+
+- [vdsql] add postgres_schema option to show tables from multiple schemas (#2027)
+- [vdsql] show SQL in sidebar (#2200)
+- [vdsql] aliases for .ddb, .sqlite, .db (#2259)
+- [vdsql] bump ibis version (#2410 #2682)
+- [vdsql] fix join compatibility with Ibis >= 9.0 @terencelaurent (#2899)
+- [airtable] update loader to work with latest pyairtable library @mplattner
+- [conll] update loader to work with pyconll v4.0
+- [eml/pcap] enable loaders for mhtml, cap, pcapng, ntar file types
+- [html] for # of header rows, use options.header
+- [mysql] fix connecting with no password @pequiste
+- [http] add default user agent (#2880)
+
+## Bugfixes
+
+- [pandas] fix loader bugs @weichm (#2968)
+- [mainloop] do not exit if rightstatus throws an exception
+- [mainloop] reset numTimeouts when there are unfinishedThreads @iamleot (#2931)
+- [canvas] delete in linear time instead of quadratic
+- [canvas] properly handle labels containing markup
+- [column] fix col width calc for data with markup
+- [column] fix width that formatValue used for list/dict/tuple
+- [loaders] stop truncating markup in fixed-width data
+- [column] stop truncating col names holding markup
+- [input] fix cursor x when editing data with markup
+- [input] fix use of rowidx before it is set
+- [input] fix perf pegging cpu (#2911)
+- [input] allow editing header of readonly column
+- [palette] when no choices match, show warning on Enter
+- [palette] align choices with prompt before Tab is pressed
+- [palette] clarify that TAB precedes ENTER
+- [settings] prevent lockup when keystroke is same as longname
+- [mainloop] for bindkey cmd, show longname in fail msg; catch fail() from execCommand
+- [repeat] use queueCommand instead of replayOne (#2932)
+- [popen] kill leftover processes that have NOT finished
+- [exit] kill subprocesses before os._exit
+- [modify] clear modified status after load to prevent overvigilant quitguard
+- [cmdlog] replay commands on hidden columns (#2849)
+- [cmdlog] make vdj shebang work on macOS @ilyagr (#2870)
+- [status] do not show previous longname after unbound key (#2779)
+- [join] fail on concat of sheets with unequal # of cols
+- [sync] mark finished thread reliably with endTime
+- [freqtbl] disable paste-before and paste-after
+- [path] remove progress in iter (#2323)
+- [path] handle filenames ending in . in Python 3.14 (#2887)
+- [macro] fix vd attempts to use deleted macros @haoyeau (#2893)
+- [clipboard] fix wrong api usage
+- [http] fix default user agent (#2880)
+- [canvas] fix division by zero when col's only value is a large float (#2884)
+- [movement] fix desc of scroll-up/down/left/right amount
+- [fuzzymatch] stringify non-str values
+- [debug] do not avoid cleanup if options.debug
+- [aggr] catch nonexistent aggr in addcol-aggregate
+- [reload] reload_or_replace function should be on BaseSheet
+- [open-row] allow pandas to open row as sheet (#2925)
+- [postgres] unquote url.password in postgres loader @egwynn
+- [theme] remove nonexistent color from light theme
+- [shell] move open-row from incorrect Open toplevel menu
+- [mainloop] fix undo of first user alteration to a replayed cmdlog
+- [curses] fix crash on startup on NetBSD wscons tty consoles @rsmirnov90 (#2851)
+
+## API
+
+- [threads] add asyncsingle_queue decorator
+
 # v3.3 (2025-09-07)
 
 - added options.disp_help_flags; deprecated options.disp_expert
