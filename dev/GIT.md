@@ -74,6 +74,10 @@ We've started doing this for PRs also. It's a bit of clutter but it helps:
 - Avoid regressions if the function ever gets rewritten
 - Track which issues resulted in actual code changes
 
+## GitHub Comments and Replies
+
+Commit before posting GitHub comments/replies. Let Saul push first, then post the comment. Don't post replies to issues before the relevant code is committed and pushed.
+
 ## Branch and Merge Workflow
 
 In general:

@@ -92,8 +92,11 @@ PYTHONPATH=. run_silent_unless_error bin/vd <(seq 10000) --overwrite=n --batch -
 #wait for any remaining background jobs to finish
 wait
 
-echo '=== git diffs for BUILD FAILURE ==='
-git --no-pager diff --numstat tests/
-git --no-pager diff --exit-code tests/; git_diff_exit_code="$?"
-echo '=============================================='
-exit "$git_diff_exit_code"
+diff_output=$(git --no-pager diff tests/)
+if [ -z "$diff_output" ]; then
+    echo "PASS"
+else
+    echo "$diff_output"
+    echo "FAIL (see output)"
+    exit 1
+fi

@@ -21,6 +21,9 @@ VisiData uses different naming conventions for different contexts:
 - Methods with **embedded underscore** are private but available to VisiData internals
 - Methods **without underscores** (usually camelCase) are public API
 
+### Keybinding Notation
+- Capital letters like `Z` mean `Shift+Z`. `gZ` means `g` then `Shift+Z`. Don't confuse `z` (lowercase prefix) with `Z` (Shift+Z command).
+
 ### String Quoting Style
 - Most strings in VisiData are single-quoted
 - Within an execstr, inner strings are double-quoted
@@ -103,6 +106,9 @@ Sheet.addCommand('gEnter', 'dive-selected', 'openRows(selectedRows)', 'help')
 # Command with z prefix (zoom/single variant)
 Sheet.addCommand('zEnter', 'open-cell', 'vd.push(openCell(cursorCol, cursorRow))', 'help')
 ```
+
+### execstr Input Limitation
+An execstr can only call `input()` once per command execution, since replay provides a single input string. If a command needs multiple parameters, take them as a single input and split.
 
 ### Command Placement
 

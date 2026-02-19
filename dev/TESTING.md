@@ -63,6 +63,10 @@ pytest visidata/tests/test_features.py    # run test_ functions discovered from 
 
 **The `test_features.py` pattern:** Any VisiData module can define `test_*` functions that take `vd` as a parameter. These are auto-discovered and run by pytest. Useful for testing features alongside their implementation (see `features/slide.py` for an example using `vd.runvdx()`).
 
+## Bug Fix Testing
+
+Always test bug fixes with golden tests, not ad-hoc Python scripts. Create a `.vdx` test in `tests/`, generate golden output, and verify with `dev/test.sh`.
+
 ## Sample Data
 
 - `visidata/tests/sample.tsv` — small TSV (44 rows, 7 columns: OrderDate, Region, Rep, Item, Units, Unit_Cost, Total)
