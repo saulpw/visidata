@@ -1,52 +1,32 @@
 # vdsql: [VisiData](https://visidata.org) for Databases
 
-A VisiData interface for databases
+A VisiData interface for databases.
 
 Powered by [Ibis](https://ibis-project.org).
 
 ## Features
 
 - query data in VisiData from any supported backend
+- compose complex queries using VisiData commands instead of writing SQL
 - output resulting query in SQL, Substrait, or Python
 
-## Minimum Requirements
+## Requirements
 
-- Python 3.10
-- VisiData develop
-- Ibis 12.0
+- Python 3.10+
+- VisiData 3.0+
+- Ibis 12.0+
 
-### Confirmed supported backends
+## Installation
 
-- SQLite
-- MySQL
-  - requires libmysqlclient-dev (on Debian)
-  - if warning about timezones: `mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql mysql`
-- PostgreSQL
-- DuckDB
-- ClickHouse
-- Google BigQuery
-- Snowflake
+### Install from pip
 
-### [Other backends supported by Ibis](https://ibis-project.org/docs/3.1.0/backends/)
-
-These backends are supported by Ibis and should work, but haven't specifically been tested with vdsql.
-If you have have problems connecting, please [file an issue](https://github.com/visidata/vdsql/issues/new).
-
-- Apache Impala
-- Datafusion
-- Dask
-- PySpark
-- HeavyAI
-
-## Install latest release
-
-This will install both:
+This installs both:
   - the usual `vd` with the vdsql plugin available (use `-f vdsql` to use Ibis instead of builtin loaders),
   - the `vdsql` script that acts identically to `vd` but will use Ibis instead of VisiData's builtin loader.
 
     pip install vdsql
 
-## Or install manually as a VisiData plugin (cutting edge development)
+### Install manually (cutting edge development)
 
     git clone git@github.com:saulpw/visidata.git
     cd visidata/visidata/apps/vdsql
@@ -55,26 +35,27 @@ This will install both:
 ### Install Ibis backends
 
 To minimize dependencies, only the sqlite backend is included by default.
-[Install other backends for Ibis](https://ibis-project.org/docs/3.1.0/backends/#direct-execution-backends) directly, and they will be supported automatically:
+[Install other backends for Ibis](https://ibis-project.org/backends/) directly, and they will be supported automatically:
 
     pip install 'ibis-framework[postgres]'
 
 ## Usage
 
-### Open a database
-
-    vdsql foo.sqlite  # or .sqlite3
-    vdsql mysql://...
-    vdsql postgres://...
-    vdsql foo.duckdb  # or .ddb
-    vdsql clickhouse://play:clickhouse@play.clickhouse.com/?secure=1
-    vdsql bigquery:///bigquery-public-data
+### Connecting to databases
 
     vdsql <file_or_url>
-
     vd -f ibis <file_or_url>
 
 where `file_or_url` is any connection string supported by `ibis.connect()` or any of the filetypes and options that VisiData itself supports.
+
+#### Connection examples
+
+    vdsql foo.sqlite          # or .sqlite3, .db
+    vdsql foo.duckdb          # or .ddb
+    vdsql mysql://...
+    vdsql postgres://...
+    vdsql clickhouse://play:clickhouse@play.clickhouse.com/?secure=1
+    vdsql bigquery:///bigquery-public-data
 
 ### Commands
 
@@ -84,29 +65,76 @@ You can learn about VisiData starting with the [Intro to VisiData Tutorial](http
 
 There are a few differences, however:
 
-- Use `"` (dup-sheet) to run a new base query, including added columns, filtering for the current selection, and applying the current sort order.
-- By default vdsql will only get 500 rows from a database source.  To get a different number, use `z"` to create a new sheet with a different limit.
-- Some VisiData commands aren't implemented using the database engine.
+- `"` (dup-sheet) runs a new base query, including added columns, filtering for the current selection, and applying the current sort order.
+- `z"` creates a new sheet with a different row limit.
+- `gz"` removes the row limit entirely (fetch all rows).
+- `'` casts the current column to its given type, persisting into future queries (with `"`).
+- `g'` freezes the current set of loaded rows into a plain VisiData sheet, where all VisiData commands are available.
 
-The base VisiData commands can only use the 500 loaded rows, and this might be misleading, so most not-implemented commands should be disabled.
-
-But if you want to use the commands anyway, knowing the dataset is incomplete, you can use `g'` to freeze the current set of loaded rows into a new sheet.
-
-This sheet is a plain (non-database) VisiData sheet, so all VisiData commands can be used on it.
-
-### Freezing the column type
-
-Use `'` to cast the current column to its given type, which persists into future queries (with `"`).
+Some VisiData commands aren't implemented using the database engine.
+The base VisiData commands can only use the loaded rows (500 by default), and this might be misleading, so most not-implemented commands are disabled.
+If you want to use them anyway, knowing the dataset is incomplete, use `g'` to freeze the sheet first.
 
 ### Sidebar
 
-`vdsql` uses the VisiData sidebar (introduced in v2.9) to show the SQL query for the current view.
+`vdsql` uses the VisiData sidebar to show the SQL query for the current view.
 
-- To toggle the sidebar on/off, press `b`.
-- To choose a sidebar option, press `zb`.
-- To open the sidebar as its own sheet, press `gb`.
+- `b` to toggle the sidebar on/off
+- `zb` to choose a sidebar option (pending SQL, base SQL, etc.)
+- `gb` to open the sidebar as its own sheet
 
 In this way you can compose a SQL expression using VisiData commands, open the SQL sidebar, and save the resulting query to a file (or copy it into your system clipboard buffer).
+
+### Options
+
+- `ibis_limit` (default: `500`) - max number of rows to fetch per query
+- `postgres_schema` (default: `''`, public only) - which PostgreSQL schemas to show (space-separated list; use `*` for all non-system schemas)
+- `sql_always_count` (default: `False`) - include total row count in every query
+- `disp_ibis_sidebar` (default: `pending_sql`) - which sidebar property to display
+
+## Supported Backends
+
+### Confirmed
+
+- SQLite
+- MySQL
+- PostgreSQL
+- DuckDB
+- ClickHouse
+- Google BigQuery
+- Snowflake
+
+### Backend-specific notes
+
+#### PostgreSQL
+
+By default, only tables from the `public` schema are shown.
+
+To show tables from specific schemas:
+
+    vdsql --postgres-schema='myschema otherschema' postgres://...
+
+To show tables from all non-system schemas:
+
+    vdsql --postgres-schema='*' postgres://...
+
+Note: quote or escape `*` on the command line to prevent shell glob expansion.
+
+#### MySQL
+
+- Requires `libmysqlclient-dev` (on Debian/Ubuntu)
+- If you get a timezone warning: `mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql mysql`
+
+### Other backends supported by Ibis
+
+These backends are supported by Ibis and should work, but haven't specifically been tested with vdsql.
+If you have problems connecting, please [file an issue](https://github.com/saulpw/visidata/issues/new).
+
+- Apache Impala
+- Datafusion
+- Dask
+- PySpark
+- HeavyAI
 
 # License
 
