@@ -109,3 +109,7 @@ Use this when investigating or optimizing performance issues.
 - Profiling techniques and tools
 - Analyzing profiling results
 - Optimization workflow
+
+## Updating Documentation
+
+When making **user-facing changes** (new commands, changed behavior, new options, new/changed loaders, UI changes), check [docs/README.md](docs/README.md) to identify which documentation files need to be updated.
