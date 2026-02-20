@@ -253,3 +253,25 @@ class TestClipText:
     def test_truncate_markup_middle(self, s, dispw, clipped):
         output = visidata.clip_markup_middle(s, dispw)
         assert output == clipped
+
+    @pytest.mark.parametrize('text, width, expected', [
+        # color tag spanning two lines should carry over
+        ('[:error]line one\nline two[/]', 80,
+         [('[:error]line one[/]', 'line one'),
+          ('[:error]line two[/]', 'line two')]),
+        # nested tags spanning lines
+        ('[:bold]a\n[:error]b[/]\nc[/]', 80,
+         [('[:bold]a[/]', 'a'),
+          ('[:bold][:error]b[/][/]', 'b'),
+          ('[:bold]c[/]', 'c')]),
+        # no markup, multiline (should work as before)
+        ('hello\nworld', 80,
+         [('hello', 'hello'),
+          ('world', 'world')]),
+        # single line with markup (should work as before)
+        ('[:error]oops[/]', 80,
+         [('[:error]oops[/]', 'oops')]),
+    ])
+    def test_wraptext_color_spans_lines(self, text, width, expected):
+        result = list(visidata.wraptext(text, width=width))
+        assert result == expected
