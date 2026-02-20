@@ -5,7 +5,7 @@
 set -e
 
 echo "Running unit tests..."
-PYTHONPATH=. python -m pytest
+PYTHONPATH=. python -m pytest visidata/tests/
 
 echo "Running cmdlog tests..."
 dev/test.sh -j 4
