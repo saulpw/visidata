@@ -65,7 +65,12 @@ pytest visidata/tests/test_features.py    # run test_ functions discovered from 
 
 ## Bug Fix Testing
 
-Always test bug fixes with golden tests, not ad-hoc Python scripts. Write the test FIRST, verify it FAILS on the current code, then make the code change and verify the test passes. Create a `.vdx` test in `tests/`, generate golden output, and verify with `dev/test.sh`.
+Always write tests FIRST, verify they FAIL on the current code, then fix the code and verify the tests pass. Use the appropriate test type:
+
+- **Unit tests** (pytest) for pure functions like `wraptext()`, `clipstr()`, `iterchunks()` — add to existing test files in `visidata/tests/`
+- **Golden tests** for behavior that requires the full VisiData UI/session — create a `.vdx` test in `tests/`
+
+For golden tests: create a `.vdx` file, generate golden output, and verify with `dev/test.sh`.
 
 ## Sample Data
 

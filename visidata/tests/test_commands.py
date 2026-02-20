@@ -33,6 +33,9 @@ nonTested = (
         'sysedit',
         'sysopen',
         'open-memusage',
+        'open-url',
+        'open-repl',
+        'open-tutorial',
         )
 
 def isTestableCommand(longname, cmdlist):
