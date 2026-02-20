@@ -116,6 +116,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'col': 'Units',
                  'row': '5',
                  'addcol-aggregate': 'max',
+                 'define-command': 'type-test cursorCol.type = str',
               }
 
 @pytest.mark.usefixtures('curses_setup')
@@ -133,7 +134,9 @@ class TestCommands:
 
         nerrs = 0
         ntotal = 0
-        for longname in cmdlist.keys():
+        # cmdlist is changed when define-command is tested, so save its keys to avoid RuntimeError: OrderedDict mutated during iteration
+        longnames = list(cmdlist.keys())
+        for longname in longnames:
             cmd = vs.getCommand(longname)
             if cmd and cmd.deprecated:
                 continue
