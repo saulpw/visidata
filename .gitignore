@@ -17,3 +17,4 @@ tags
 .DS_Store
 .direnv
 .envrc
+.meta

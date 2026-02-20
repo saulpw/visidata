@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# Pre-push hook: run unit tests and cmdlog tests before pushing
+
+set -e
+
+echo "Running unit tests..."
+PYTHONPATH=. python -m pytest
+
+echo "Running cmdlog tests..."
+dev/test.sh -j 4
+
+echo "All tests passed."
