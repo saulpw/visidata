@@ -37,6 +37,20 @@ vd -f sqlite bar.db
 ls -l | vd -f fixed
 ~~~
 
+### How CLI options apply to files
+
+Because `-f`/`--filetype` is a regular option, it applies to all subsequent files on the command line, not just the one immediately following.
+
+You can reset back to extension-based detection for later files with `-f ""`:
+
+See the [manpage](/man#commandline-options) for more details.
+
+~~~
+vd -f csv data.txt -f "" other.jsonl
+~~~
+
+This loads `data.txt` as csv, and `other.jsonl` using its file extension as usual.
+
 ---
 
 ## Loading sources supported by pandas
