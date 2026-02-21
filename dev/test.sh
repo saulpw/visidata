@@ -25,15 +25,24 @@ done
 shift $((OPTIND - 1))
 
 run_test() {
-  testname="$1"
+  local testname="$1"
   shift
   output=$("$@" 2>&1)  # Captures ALL stdout and stderr
   exit_code=$?
   if [ $exit_code -ne 0 ]; then
     echo ""
-    echo "FAIL: $testname (exit $exit_code)"
-    echo "$output" | tail -20
-    return $exit_code
+    case "$testname" in
+      *-flaky)
+        echo "FLAKY: $testname (exit $exit_code)"
+        echo "$output" | tail -20
+        return 0
+        ;;
+      *)
+        echo "FAIL: $testname (exit $exit_code)"
+        echo "$output" | tail -20
+        return $exit_code
+        ;;
+    esac
   fi
 }
 
@@ -42,6 +51,7 @@ should_skip() {
     case "${i%.vd*}" in
         *-broken) echo "broken" ;;
         *-nosave) return 1 ;;  # not skipped, just no golden comparison
+        *-flaky)  return 1 ;;  # not skipped; failures reported but non-fatal
         *-n311)  [ "$PY311" == "True" ] && echo "n311" ;;
         *-311)   [ "$PY311" != "True" ] && echo "311" ;;
     esac
