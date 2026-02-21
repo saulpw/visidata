@@ -47,6 +47,13 @@ Otherwise they will not have full Sheet functionality from extensions.
 ### Command Placement
 Commands that reference a row or col should be on `Sheet` (not global or `BaseSheet`).
 
+## Loaders vs Features
+
+- **Loaders** (`visidata/loaders/`): Any module that defines a `vd.open_<ext>()` function. This is what makes `vd file.ext` or `vd file -f ext` work.
+- **Features** (`visidata/features/`): Everything else — commands, UI enhancements, integrations that don't define an `open_` entry point.
+
+If a module defines `open_<ext>`, it's a loader, even if it also adds commands or sheets.
+
 ## Feature File Structure
 
 A typical feature file follows this pattern:
