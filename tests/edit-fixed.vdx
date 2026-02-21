@@ -1,0 +1,5 @@
+# test load and edit fixed-width file  #2265
+open-file sample_data/benchmark.fixed
+col Customer
+row 1
+edit-cell EDITED NAME

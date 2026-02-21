@@ -35,31 +35,54 @@ class FixedWidthColumn(WritableColumn):
         return row[0][self.i:self.j]
 
     def putValue(self, row, value):
-        value = str(value)[:self.j-self.i]
-        j = self.j or len(row)
-        row[0] = row[0][:self.i] + '%-*s' % (j-self.i, value) + row[0][self.j:]
+        j = self.j or len(row[0])
+        value = str(value)[:j-self.i]
+        row[0] = row[0][:self.i] + '%-*s' % (j-self.i, value) + row[0][j:]
 
 def columnize(rows):
     'Generate (i,j) indexes for fixed-width columns found in rows'
 
-    ## find all character columns that are not spaces ever
+    if not rows:
+        return
+
+    # Use first row (header) to determine column positions  #2265
+    # This prevents data with internal spaces from creating false column splits
+    header = rows[0]
+    colstarts = []
+    in_space = True
+    for i, ch in enumerate(header):
+        if not ch.isspace():
+            if in_space:
+                colstarts.append(i)
+            in_space = False
+        else:
+            in_space = True
+
+    if not colstarts:
+        return
+
+    # find actual end of each column using all rows  #2255
     allNonspaces = set()
     for r in rows:
         for i, ch in enumerate(r):
             if not ch.isspace():
                 allNonspaces.add(i)
-
-    colstart = 0
-    prev = 0
-
-    # collapse fields
-    for i in allNonspaces:
-        if i > prev+1:
-            yield colstart, prev+1 #2255
-            colstart = i
-        prev = i
-
-    yield colstart, prev+1   # final column gets rest of line
+    for idx, start in enumerate(colstarts):
+        if idx + 1 < len(colstarts):
+            # column ends at last non-space position before next column start
+            nextstart = colstarts[idx + 1]
+            end = start
+            for pos in range(start, nextstart):
+                if pos in allNonspaces:
+                    end = pos + 1
+            yield start, end  #2255
+        else:
+            # final column: find last non-space position
+            end = start
+            for pos in allNonspaces:
+                if pos >= start and pos + 1 > end:
+                    end = pos + 1
+            yield start, end
 
 
 class FixedWidthColumnsSheet(SequenceSheet):
