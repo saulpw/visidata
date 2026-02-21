@@ -84,3 +84,7 @@ In general:
 - Commits should be **rebased** instead of merged, for a more linear and less cluttered commit log
 - Try to **squash features** into a single commit (but don't over-squash either)
 - Keep the commit history clean and meaningful
+
+### Default Branch for Commits
+
+By default, commit to **develop** unless explicitly working in another branch on a PR. If on a different branch, cherry-pick or switch to develop first.
