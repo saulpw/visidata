@@ -53,7 +53,7 @@ def iterdispvals(sheet, *cols, format=False):
 
             try:
                 for t in transforms:
-                    if dispval is None:
+                    if dispval is None or isinstance(dispval, float) and dispval != dispval:
                         break
                     elif isinstance(dispval, TypedExceptionWrapper):
                         dispval = options_safe_error or str(dispval)
@@ -64,7 +64,7 @@ def iterdispvals(sheet, *cols, format=False):
                     else:
                         dispval = t(dispval)
 
-                if dispval is None and format:
+                if (dispval is None or isinstance(dispval, float) and dispval != dispval) and format:
                     dispval = ''
             except Exception as e:
                 dispval = str(dispval)

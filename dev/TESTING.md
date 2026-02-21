@@ -17,6 +17,11 @@ dev/test.sh issue655     # run a single test (matches tests/issue655.vd*)
 dev/test.sh -j 4         # run tests in parallel
 ```
 
+**Important:** The full test suite takes several minutes. Always capture output to a file so you can refer back to it without re-running:
+```bash
+dev/test.sh -j 4 2>&1 | tee /tmp/vd-test.out
+```
+
 **Test file formats:**
 - `.vd` — TSV command log (columns: sheet, col, row, longname, input, keystrokes, comment)
 - `.vdj` — JSON command log
@@ -77,6 +82,15 @@ For golden tests: create a `.vdx` file, generate golden output, and verify with 
 - `visidata/tests/sample.tsv` — small TSV (44 rows, 7 columns: OrderDate, Region, Rep, Item, Units, Unit_Cost, Total)
 - `sample_data/benchmark.csv` — larger CSV (51 rows, 7 columns: Date, Customer, SKU, Item, Quantity, Unit, Paid)
 - Various other formats in `sample_data/`
+
+## vdsql Tests
+
+vdsql has its own test suite in `visidata/apps/vdsql/tests/`, run via `visidata/apps/vdsql/test.sh`. These are golden tests using the same pattern (replay `.vdj` files, compare output against `tests/golden/`). CI runs them separately via `.github/workflows/vdsql.yml`.
+
+```bash
+cd visidata/apps/vdsql && bash test.sh           # run all vdsql tests
+cd visidata/apps/vdsql && bash test.sh unselect   # run a single test
+```
 
 ## Test Configuration
 
