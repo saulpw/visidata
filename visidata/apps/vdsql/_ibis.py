@@ -179,7 +179,7 @@ class IbisColumn(ItemColumn):
         self.sheet.query = oldexpr.mutate(fields)
         return expandedCols
 
-IbisTableIndexSheet.columns = [AttrColumn('dbname')] + IbisTableIndexSheet.columns
+IbisTableIndexSheet.columns = IbisTableIndexSheet.columns[:1] + [AttrColumn('dbname')] + IbisTableIndexSheet.columns[1:]
 
 
 class LazyIbisColMap:
