@@ -10,21 +10,22 @@ on:
     - develop
 
 jobs:
-  run-tests:
+  full-tests:
 
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.9", "3.14"]
 
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
-    - name: Set up Python ${{ matrix.pythonversion }}
-      uses: actions/setup-python@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
+        cache: 'pip'
 
     - name: Set up Environment
       run: |
@@ -64,7 +65,7 @@ jobs:
         pytest -sv visidata/tests/
 
     - name: Run Cmdlog Tests in parallel
-      run: dev/test.sh -j 4
+      run: dev/test.sh -j $(nproc)
       shell: bash
 
     - name: Test macros
@@ -86,3 +87,35 @@ jobs:
         if ! [[ $NUMLINES -eq 10000 ]]; then
             exit 1
         fi
+
+  unit-tests:
+
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+
+    - name: Install Base VisiData
+      run: pip3 install .
+
+    - name: Ensure VisiData works with Base Dependencies
+      run: vd --version
+
+    - name: Install test dependencies
+      run: |
+        pip3 install ".[test]"
+        pip3 install pytest
+
+    - name: Run unit tests
+      run: |
+        pytest -sv visidata/tests/
