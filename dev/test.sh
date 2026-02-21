@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Usage: test.sh [-j n_jobs] [testname]
+# Usage: test.sh [-j n_jobs] [-v] [testname]
 
 #set -e
 shopt -s failglob
@@ -12,91 +12,108 @@ export LC_NUMERIC="en_US.UTF-8" #2867
 export LC_TIME="en_US.UTF-8"
 
 PYTHON=${PYTHON:-python}
+PY311=$($PYTHON -c 'import sys; print(sys.version_info[:2] >= (3,11))')
 
 MAX_PARALLEL_JOBS=1
-while getopts "j:" opt; do
+VERBOSE=0
+while getopts "j:v" opt; do
     case "$opt" in
-        j)
-            MAX_PARALLEL_JOBS="$OPTARG"
-            ;;
+        j) MAX_PARALLEL_JOBS="$OPTARG" ;;
+        v) VERBOSE=1 ;;
     esac;
 done
 shift $((OPTIND - 1))
-echo "Using MAX_PARALLEL_JOBS=$MAX_PARALLEL_JOBS"
 
-run_silent_unless_error() {
-  output=$(PYTHONPATH="$PYTHONPATH" "$@" 2>&1)  # Captures ALL stdout and stderr
+run_test() {
+  testname="$1"
+  shift
+  output=$("$@" 2>&1)  # Captures ALL stdout and stderr
   exit_code=$?
   if [ $exit_code -ne 0 ]; then
-    # output everything in a single echo command instead of multiple. Perhaps that will
-    # help avoid mixing of output from simultaneous invocations of run_silent_unless_error
-    echo "TEST FAILED:" "$@" "\n" "$output"
-    exit 1
+    echo ""
+    echo "FAIL: $testname (exit $exit_code)"
+    echo "$output" | tail -20
+    return $exit_code
   fi
-  return $exit_code
+}
+
+should_skip() {
+    local i="$1"
+    case "${i%.vd*}" in
+        *-broken) echo "broken" ;;
+        *-nosave) return 1 ;;  # not skipped, just no golden comparison
+        *-n311)  [ "$PY311" == "True" ] && echo "n311" ;;
+        *-311)   [ "$PY311" != "True" ] && echo "311" ;;
+    esac
 }
 
 if [ -z "$1" ] ; then
-    # test.sh; run all .vd/.vdj in tests/
+    # test.sh; run all .vd/.vdj/.vdx in tests/
     TESTS="tests/*.vd*"
 else
-    # test.sh testname; run tests/testname.vd
+    # test.sh testname; run tests/testname.vd*
     TESTS="tests/$1.vd*"
 fi
 
+N_TESTS=0
+N_SKIPPED=0
+ANY_FAILED=0
+
 for i in $TESTS ; do
-    echo "--- $i"
-    # remove tests/ prefix
     outbase=${i##tests/}
-    if [ "${i%-nosave.vd*}-nosave" == "${i%.vd*}" ];
-    then
-        TEST=false
-    elif [ "${i%-n311.vd*}-n311" == "${i%.vd*}" ];
-    then
-        if [ "$($PYTHON -c 'import sys; print(sys.version_info[:2] >= (3,11))')" == "True" ];
-        then
-            TEST=false
-        else
-            TEST=true
-        fi
+    testname=${outbase%.vd*}
 
-    elif [ "${i%-311.vd*}-311" == "${i%.vd*}" ];
-    then
-        if [ "$($PYTHON -c 'import sys; print(sys.version_info[:2] >= (3,11))')" == "True" ];
-        then
-            TEST=true
-        else
-            TEST=false
-        fi
-
-    else
-        TEST=true
+    skip_reason=$(should_skip "$i")
+    if [ -n "$skip_reason" ]; then
+        N_SKIPPED=$((N_SKIPPED + 1))
+        echo "SKIP: $testname ($skip_reason)"
+        continue
     fi
+
+    N_TESTS=$((N_TESTS + 1))
+    if [ $VERBOSE -eq 1 ]; then
+        echo "--- $testname"
+    else
+        printf "."
+    fi
+
     while (( $(jobs -p | wc -l) >= MAX_PARALLEL_JOBS )); do
         #-n means wait until any of the background processes finish
-        wait -n
+        wait -n || ANY_FAILED=1
     done
+
     # it should be safe to run tests in parallel, as long as no tests try to write to the same file simultaneously
-    if [ "$TEST" == true ];
-    then
-        for goldfn in tests/golden/"${outbase%.vd*}".*; do
-            PYTHONPATH=. run_silent_unless_error bin/vd --overwrite=n --play "$i" --batch --output "$goldfn" --config tests/.visidatarc --visidata-dir tests/.visidata &
+    if [ "${i%-nosave.vd*}-nosave" != "${i%.vd*}" ]; then
+        for goldfn in tests/golden/"$testname".*; do
+            run_test "$testname" env PYTHONPATH=. bin/vd --overwrite=n --play "$i" --batch --output "$goldfn" --config tests/.visidatarc --visidata-dir tests/.visidata &
         done
     else
-        PYTHONPATH=. run_silent_unless_error bin/vd --play "$i" --batch --config tests/.visidatarc --visidata-dir tests/.visidata &
+        run_test "$testname" env PYTHONPATH=. bin/vd --play "$i" --batch --config tests/.visidatarc --visidata-dir tests/.visidata &
     fi
 done
 
-PYTHONPATH=. run_silent_unless_error bin/vd <(seq 10000) --overwrite=n --batch --output tests/golden/stdin-guesser.tsv --config tests/.visidatarc --visidata-dir tests/.visidata  #1978
+N_TESTS=$((N_TESTS + 1))
+run_test "stdin-guesser" env PYTHONPATH=. bin/vd <(seq 10000) --overwrite=n --batch --output tests/golden/stdin-guesser.tsv --config tests/.visidatarc --visidata-dir tests/.visidata  #1978
 
+[ $VERBOSE -eq 0 ] && echo ""
 #wait for any remaining background jobs to finish
+wait -n 2>/dev/null || ANY_FAILED=1
 wait
 
 diff_output=$(git --no-pager diff tests/)
-if [ -z "$diff_output" ]; then
-    echo "PASS"
-else
+if [ -n "$diff_output" ]; then
     echo "$diff_output"
-    echo "FAIL (see output)"
+    echo ""
+    echo "FAIL: golden output changed (see diff above)"
+    ANY_FAILED=1
+fi
+
+# summary
+[ $N_SKIPPED -gt 0 ] && SKIP_MSG=", $N_SKIPPED skipped" || SKIP_MSG=""
+
+if [ "$ANY_FAILED" -ne 0 ]; then
+    echo "FAILED ($N_TESTS tests${SKIP_MSG})"
     exit 1
+else
+    echo "PASS ($N_TESTS tests${SKIP_MSG})"
 fi
