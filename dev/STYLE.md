@@ -412,6 +412,18 @@ Use **module name** or abbrevation as prefix for options used exclusively by tha
    vd.exceptionCaught(e)         # Log exception and continue (used in loops/async)
    ```
 
+   When a value should be a `TypedExceptionWrapper` on error but is not itself a larger error, use `wrapply` instead of `try/except`:
+   ```python
+   # ✅ GOOD - wrapply wraps exceptions into TypedExceptionWrapper automatically
+   result = wrapply(some_func, arg1, arg2)
+
+   # ❌ LESS GOOD - manual try/except for the same thing
+   try:
+       result = some_func(arg1, arg2)
+   except Exception as e:
+       result = TypedExceptionWrapper(None, exception=e)
+   ```
+
 4. **Fail-Fast for Required Resources**: When loading required external resources (templates, config files), fail immediately rather than falling back silently:
    ```python
    # ✅ GOOD - Fail fast if custom template can't be loaded

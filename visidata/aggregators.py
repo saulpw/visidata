@@ -314,7 +314,7 @@ def aggregateTotal(col, agg):
 @Column.api
 @asyncthread
 def _aggregateTotalAsync(col, agg):
-    col._aggregatedTotals[agg] = agg.aggregate(col, col.sheet.rows)
+    col._aggregatedTotals[agg] = wrapply(agg.aggregate, col, col.sheet.rows)
 
 
 @Column.api
