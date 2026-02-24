@@ -3,7 +3,7 @@ import itertools
 from copy import copy, deepcopy
 import textwrap
 
-from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException
+from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException, Fanout
 from visidata import (options, Column, namedlist, SettableColumn, AttrDict, DisplayWrapper,
 TypedExceptionWrapper, BaseSheet, UNLOADED, wrapply,
 clipdraw, clipdraw_chunks, ColorAttr, update_attr, colors, undoAttrFunc, vlen, dispwidth)
@@ -497,6 +497,11 @@ class TableSheet(BaseSheet):
     def nonKeyVisibleCols(self):
         'List of visible non-key columns.'
         return [c for c in self.columns if not c.hidden and c not in self.keyCols]
+
+    @property
+    def numericCols(self):
+        'Fanout of visible numeric columns.'
+        return Fanout(vd.numericCols(self.visibleCols))
 
     @property
     def keyColNames(self):
