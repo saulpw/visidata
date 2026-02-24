@@ -88,3 +88,9 @@ In general:
 ### Default Branch for Commits
 
 By default, commit to **develop** unless explicitly working in another branch on a PR. If on a different branch, cherry-pick or switch to develop first.
+
+### Pull Requests
+
+`develop` is the trunk branch. PRs come from side branches, not from develop directly. Create a feature branch off develop for PRs.
+
+After creating a PR, always check CI status with `gh pr checks` and fix any failures before moving on.
