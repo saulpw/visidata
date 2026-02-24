@@ -34,6 +34,14 @@ Aggregator      Description
 `list`          gathers values in column into a list
 `stdev`         standard deviation of values
 
+### Aggregation bar
+
+When one or more columns have aggregators, the **aggregation bar** appears at the bottom of the sheet.
+Each aggregator has its own row, showing the aggregator name and the computed value for each column with that aggregator.
+Values are computed over all rows asynchronously.
+
+- {help.options.color_aggregator}
+
 The follow howtos will have examples of workflows involving grouping of data and statistical aggregation.
 
 ---
