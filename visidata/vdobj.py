@@ -105,11 +105,14 @@ class VisiData(visidata.Extensible):
         visidata.Extensible.clear_all_caches()
 
     def resetVisiData(self):
-        self.clearCaches()  # we want vd to return a new VisiData object for each command
-        vd = visidata.vd  # get the new vd
+        vd = visidata.vd  # get the actual vd
         vd.cmdlog.rows = []
-        vd.sheets = []
-        vd.allSheets = []
+        vd.sheets.clear()
+        vd.allSheets.clear()
+        vd.lastErrors.clear()
+        vd.options.resetToDefaults()
+
+        vd.clearCaches()
         return vd
 
     def get_wch(self, scr):

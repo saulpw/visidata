@@ -1,38 +1,62 @@
 # Testing
 
-## Test Types
-
 VisiData has two test systems:
 
-### 1. Golden tests (integration/replay tests)
+## 1. Golden tests (integration/replay tests)
 
 Located in `tests/`. These are the primary test suite.
 
-**How it works:** Each test is a command log (`.vd`, `.vdj`, or `.vdx` file) that gets replayed with `--batch --output`. The output is compared against a golden file in `tests/golden/`. If `git diff` shows changes, the test fails.
+**How it works:** Each test is a command log (`.vd`, `.vdj`, or `.vdx` file) that gets replayed in batch mode. The output is written to `tests/output/` and compared against the expected output in `tests/golden/` using `diff`. If they differ, the test fails. Tests also fail if any command raises an exception during replay.
+
+**Console output:** Only warnings, errors, and diffs are shown. In debug mode (`-d`), the full diff is printed and replay aborts on the first error. Errors include the test name for context.
 
 **Running tests:**
+
+Use `dev/test.sh` directly (not `bash dev/test.sh`) so that permission prompts can be approved in bulk.
+
 ```bash
-dev/test.sh              # run all tests
-dev/test.sh issue655     # run a single test (matches tests/issue655.vd*)
-dev/test.sh -j 4         # run tests in parallel
+dev/test.sh              # run all tests (batched, fast)
+dev/test.sh issue655     # run one test
+dev/test.sh foo bar baz  # run multiple tests
+dev/test.sh -d           # debug mode: abort on first error, show diffs
+
+dev/run-tests-individually.sh                # run each test in its own process (slower, isolated)
+dev/run-tests-individually.sh tests/foo.vdx  # run specific tests individually
 ```
 
-**Important:** The full test suite takes several minutes. Always capture output to a file so you can refer back to it without re-running:
-```bash
-dev/test.sh -j 4 2>&1 | tee /tmp/vd-test.out
-```
+By default, `test.sh` batches all tests into a single `vd` process for speed (~20s vs minutes). Use `run-tests-individually.sh` to run each test in its own process — slower but provides full isolation, useful for debugging cross-test contamination.
+
+The replay file is now always loaded as `vdx`, but tests may be in vd, vdj, or vdx format; the `.vdx` loader now interprets all three formats (even commingled).
+
+Prefer vdx format for new tests.
+
+**What the harness checks:**
+1. **Runtime errors** — any exception during replay (tracked via `vd.lastErrors`)
+2. **Missing output** — expected output files that were never created
+3. **Diff failures** — output that doesn't match the golden file
+4. **No golden file** — output files with no corresponding golden file
+
+A test fails if any of these conditions are true for it.
 
 **Test file formats:**
 - `.vd` — TSV command log (columns: sheet, col, row, longname, input, keystrokes, comment)
-- `.vdj` — JSON command log
-- `.vdx` — Simple command format (one command per line: `longname [input]`)
+- `.vdj` — JSON command log: {sheet, col, row, longname, input, keystrokes, comment}
+- `.vdx` — Simple command format (one command per line: `longname [input]`; sheet/row/col not as context but as separate movement commands)
 
-**Golden files:** `tests/golden/testname.ext` — the expected output. The extension determines the save format (`.tsv`, `.csv`, `.html`, etc.).
+All three formats allow `#` line comments.
+
+**Golden files:** `tests/golden/testname.ext` — the expected output (committed, read-only reference). The extension determines the save format (`.tsv`, `.csv`, `.html`, etc.).
+
+**Test output:** `tests/output/testname.ext` — actual output from the latest test run (gitignored, never committed). Compare against golden with `diff tests/golden/name.ext tests/output/name.ext`.
 
 **Conventions:**
 - `-nosave` suffix (e.g., `issue2225-nosave.vdx`) skips golden comparison; useful for tests that only need to not crash
-- Tests should modify data and check the result via golden output, rather than using `assert-expr` commands
+- `-broken` suffix skips the test entirely
+- `-flaky` suffix runs the test but treats failures as non-fatal
+- `-311` suffix runs only on Python 3.11+; `-n311` runs only below 3.11
+- Tests should modify data and provide golden output file, rather than using `assert-expr` commands
 - Set explicit cursor positions (e.g., `row 6`) rather than relying on defaults, for test hygiene
+- Explicit saving is not necessary, as the test harness will save the top sheet to the proper output file
 
 **Creating a new golden test:**
 1. Write a `.vdx` file in `tests/` (simplest format)
@@ -50,7 +74,34 @@ dev/test.sh -j 4 2>&1 | tee /tmp/vd-test.out
 - `define-command longname execstr` — define an ad-hoc command for testing
 - `assert-expr expr` / `assert-expr-row expr` — assert (prefer golden output comparison instead)
 
-### 2. Python tests (pytest)
+## Batch replay internals
+
+The test harness (`dev/test.sh`) concatenates all tests into a single VDX batch, separated by `replay-reset` / `replay-output` / `replay-end` commands (defined in `visidata/features/replay_bulk.py`).
+
+**Batch structure:**
+```
+option global replay_ignore_errors True
+replay-reset tests/output/foo.tsv      # reset state, set output path
+<contents of tests/foo.vdx>            # test commands
+replay-output                           # save top sheet, reset
+replay-reset tests/output/bar.tsv      # next test...
+<contents of tests/bar.vdx>
+replay-output
+replay-reset baz-nosave                 # nosave tests use replay-end instead
+<contents of tests/baz-nosave.vdx>
+replay-end                              # no save
+replay-exit                             # end of batch
+```
+
+**Key commands:**
+- `replay-reset <path>` — call `resetVisiData()` to get clean state (including resetting options to defaults), set output path
+- `replay-output` — save current sheet to path
+- `replay-end` — no-op (for nosave tests)
+- `replay-exit` — no-op (end of batch)
+
+**Error handling:** `replay_ignore_errors` lets the batch continue past individual command errors. Errors printed via `vd.status()` appear on stderr for diagnostic purposes, but do not affect test pass/fail. Only output correctness (golden file diffs) determines test success.
+
+## 2. Python tests (pytest)
 
 Located in `visidata/tests/`. Run with `pytest`.
 
@@ -66,7 +117,7 @@ pytest visidata/tests/test_features.py    # run test_ functions discovered from 
 - `test_features.py` — discovers `test_*` functions from VisiData's imported modules (e.g., `test_slide_keycol_1` in `features/slide.py`)
 - `test_cliptext.py`, `test_date.py`, etc. — unit tests for specific functions
 
-**The `test_features.py` pattern:** Any VisiData module can define `test_*` functions that take `vd` as a parameter. These are auto-discovered and run by pytest. Useful for testing features alongside their implementation (see `features/slide.py` for an example using `vd.runvdx()`).
+**The `feature.py:def test_feature(vd)` pattern:** Any VisiData module can define `test_*` functions that take `vd` as a parameter. These are auto-discovered and run by pytest. Useful for testing features alongside their implementation (see `features/slide.py` for an example using `vd.runvdx()`).
 
 ## Test Style
 
@@ -81,13 +132,13 @@ Always write tests FIRST, verify they FAIL on the current code, then fix the cod
 
 For golden tests: create a `.vdx` file, generate golden output, and verify with `dev/test.sh`.
 
-## Sample Data
+# Sample Data
 
-- `visidata/tests/sample.tsv` — small TSV (44 rows, 7 columns: OrderDate, Region, Rep, Item, Units, Unit_Cost, Total)
-- `sample_data/benchmark.csv` — larger CSV (51 rows, 7 columns: Date, Customer, SKU, Item, Quantity, Unit, Paid)
+- `sample_data/benchmark.csv`:  small CSV (51 rows, 7 columns: Date, Customer, SKU, Item, Quantity, Unit, Paid)
 - Various other formats in `sample_data/`
+- Every new loader should provide its test data of `sample_data/benchmark.filetype` in its own format (if applicable), with columns properly typed.
 
-## vdsql Tests
+# vdsql Tests
 
 vdsql has its own test suite in `visidata/apps/vdsql/tests/`, run via `visidata/apps/vdsql/test.sh`. These are golden tests using the same pattern (replay `.vdj` files, compare output against `tests/golden/`). CI runs them separately via `.github/workflows/vdsql.yml`.
 
@@ -96,7 +147,7 @@ cd visidata/apps/vdsql && bash test.sh           # run all vdsql tests
 cd visidata/apps/vdsql && bash test.sh unselect   # run a single test
 ```
 
-## Test Configuration
+# Test Configuration
 
 - `tests/.visidatarc` — test-specific options
 - `tests/.visidata/` — test-specific visidata directory

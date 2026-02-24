@@ -5,6 +5,7 @@ from visidata import VisiData, BaseSheet, Sheet, ColumnAttr, VisiDataMetaSheet, 
 import visidata
 
 vd.option('replay_wait', 0.0, 'time to wait between replayed commands, in seconds', sheettype=None)
+vd.option('replay_ignore_errors', False, 'continue replay on error instead of aborting', sheettype=None)
 vd.theme_option('disp_replay_play', '▶', 'status indicator for active replay')
 vd.theme_option('disp_replay_record', '⏺', 'status indicator for macro record')
 vd.theme_option('color_status_replay', 'green', 'color of replay status indicator')
@@ -344,13 +345,15 @@ def replay_sync(vd, cmdlog):
                 vd.statuses.clear()
                 try:
                     if vd.replayOne(cmdlog.cursorRow):
-                        vd.replay_cancel()
-                        return True
+                        if not vd.options.replay_ignore_errors:
+                            vd.replay_cancel()
+                            return True
                 except Exception as e:
-                    vd.replay_cancel()
                     vd.exceptionCaught(e)
-                    vd.status('replay canceled')
-                    return True
+                    if not vd.options.replay_ignore_errors:
+                        vd.replay_cancel()
+                        vd.status('replay canceled')
+                        return True
 
                 cmdlog.cursorRowIndex += 1
                 prog.addProgress(1)

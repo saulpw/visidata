@@ -39,7 +39,8 @@ class SettingsMgr(collections.OrderedDict):
         else:
             return None
 
-        self.allobjs[v] = obj
+        if not isinstance(obj, str) or v not in self.allobjs:
+            self.allobjs[v] = obj
         return v
 
     def getobj(self, objname):
@@ -107,6 +108,15 @@ class SettingsMgr(collections.OrderedDict):
         for k in self.keys():
             for o in self[k]:
                 yield (k, o), self[k][o]
+
+    def resetToDefaults(self):
+        'Remove global and instance-level settings, keeping defaults and class-level overrides.'
+        for k in self:
+            to_remove = [objname for objname in self[k]
+                         if objname != 'default'
+                         and not (inspect.isclass(self.allobjs.get(objname)))]
+            for objname in to_remove:
+                del self[k][objname]
 
 
 
@@ -250,6 +260,11 @@ class OptionsObject:
             obj.cmdlog_sheet.addRow(vd.cmdlog.newRow(sheet=objname, row=optname,
                         keystrokes='', input=str(value),
                         longname=longname, undofuncs=[]))
+
+    def resetToDefaults(self):
+        'Remove all non-default option settings.'
+        self._opts.resetToDefaults()
+        self._cache.clear()
 
     def setdefault(self, optname, value, helpstr, module):
         return self._set(optname, value, 'default', helpstr=helpstr, module=module)

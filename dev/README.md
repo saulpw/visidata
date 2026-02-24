@@ -30,9 +30,9 @@ See [design/README.md](design/README.md) for full index.
 
 | File | Description |
 |------|-------------|
-| `test.sh` | Run test suite |
+| `test.sh` | Run test suite (batched, fast; `-d` for debug; see `TESTING.md`) |
 | `diff-test.sh` | Diff-based test runner |
-| `run-tests-individually.sh` | Run each test file separately |
+| `run-tests-individually.sh` | Run each test in its own process (isolated, slower; see `TESTING.md`) |
 | `mkman.sh` | Generate manpage |
 | `mkpandas-df.py` | Generate pandas DataFrame test fixtures |
 | `zsh-completion.py` | Generate zsh completions |
