@@ -145,7 +145,8 @@ def startMacro(cmdlog):
         finally:
             vd.macroMode = None
     else:
-        vd.status("recording macro; stop recording with `m`")
+        ks = vd.sheet.revbinds.get('macro-record', ['m'])[0]  #2776
+        vd.status(f"recording macro; stop recording with `{ks}`")
         vd.macroMode = CommandLogJsonl('current_macro', rows=[])
 
 
