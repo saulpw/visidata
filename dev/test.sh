@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# Usage: test.sh [-j n_jobs] [-v] [testname]
+# Usage: test.sh [-d] [testname ...]
+#   -d  debug mode: abort on first error, show diffs
 
 #set -e
 shopt -s failglob
@@ -14,37 +15,15 @@ export LC_TIME="en_US.UTF-8"
 PYTHON=${PYTHON:-python}
 PY311=$($PYTHON -c 'import sys; print(sys.version_info[:2] >= (3,11))')
 
-MAX_PARALLEL_JOBS=1
-VERBOSE=0
-while getopts "j:v" opt; do
+DEBUG=0
+while getopts "d" opt; do
     case "$opt" in
-        j) MAX_PARALLEL_JOBS="$OPTARG" ;;
-        v) VERBOSE=1 ;;
+        d) DEBUG=1 ;;
     esac;
 done
 shift $((OPTIND - 1))
 
-run_test() {
-  local testname="$1"
-  shift
-  output=$("$@" 2>&1)  # Captures ALL stdout and stderr
-  exit_code=$?
-  if [ $exit_code -ne 0 ]; then
-    echo ""
-    case "$testname" in
-      *-flaky)
-        echo "FLAKY: $testname (exit $exit_code)"
-        echo "$output" | tail -20
-        return 0
-        ;;
-      *)
-        echo "FAIL: $testname (exit $exit_code)"
-        echo "$output" | tail -20
-        return $exit_code
-        ;;
-    esac
-  fi
-}
+VD_OPTS="--batch --config tests/.visidatarc --visidata-dir tests/.visidata"
 
 should_skip() {
     local i="$1"
@@ -57,17 +36,37 @@ should_skip() {
     esac
 }
 
-if [ -z "$1" ] ; then
-    # test.sh; run all .vd/.vdj/.vdx in tests/
+# Resolve test arguments to file list
+if [ $# -eq 0 ] ; then
     TESTS="tests/*.vd*"
 else
-    # test.sh testname; run tests/testname.vd*
-    TESTS="tests/$1.vd*"
+    TESTS=""
+    for arg in "$@"; do
+        if [ -f "$arg" ] ; then
+            TESTS+=" $arg"
+        else
+            arg="${arg#tests/}"
+            TESTS+=" tests/$arg.vd*"
+        fi
+    done
 fi
+
+mkdir -p tests/output
 
 N_TESTS=0
 N_SKIPPED=0
-ANY_FAILED=0
+declare -a EXPECTED_OUTPUTS  # output files we expect to be created
+declare -A FAILED_TESTS
+declare -A FLAKY_TESTS
+
+# Clean output directory before running tests
+rm -f tests/output/*
+
+# Build batch: all tests in a single vd process
+BATCH=""
+if [ $DEBUG -eq 0 ]; then
+    BATCH+="option global replay_ignore_errors True"$'\n'
+fi
 
 for i in $TESTS ; do
     outbase=${i##tests/}
@@ -81,49 +80,90 @@ for i in $TESTS ; do
     fi
 
     N_TESTS=$((N_TESTS + 1))
-    if [ $VERBOSE -eq 1 ]; then
-        echo "--- $testname"
-    else
-        printf "."
-    fi
-
-    while (( $(jobs -p | wc -l) >= MAX_PARALLEL_JOBS )); do
-        #-n means wait until any of the background processes finish
-        wait -n || ANY_FAILED=1
-    done
-
-    # it should be safe to run tests in parallel, as long as no tests try to write to the same file simultaneously
     if [ "${i%-nosave.vd*}-nosave" != "${i%.vd*}" ]; then
         for goldfn in tests/golden/"$testname".*; do
-            run_test "$testname" env PYTHONPATH=. bin/vd --overwrite=n --play "$i" --batch --output "$goldfn" --config tests/.visidatarc --visidata-dir tests/.visidata &
+            outfn="tests/output/$(basename "$goldfn")"
+            BATCH+="replay-reset $outfn"$'\n'
+            BATCH+="$(cat "$i")"$'\n'
+            BATCH+="replay-output"$'\n'
+            EXPECTED_OUTPUTS+=("$outfn")
         done
     else
-        run_test "$testname" env PYTHONPATH=. bin/vd --play "$i" --batch --config tests/.visidatarc --visidata-dir tests/.visidata &
+        BATCH+="replay-reset $testname"$'\n'
+        BATCH+="$(cat "$i")"$'\n'
+        BATCH+="replay-end"$'\n'
     fi
 done
 
+if [ -n "$BATCH" ]; then
+    BATCH+="replay-exit"$'\n'
+    env PYTHONPATH=. bin/vd --play - $VD_OPTS <<< "$BATCH"
+fi
+
+# stdin-guesser: always runs as its own process  #1978
 N_TESTS=$((N_TESTS + 1))
-run_test "stdin-guesser" env PYTHONPATH=. bin/vd <(seq 10000) --overwrite=n --batch --output tests/golden/stdin-guesser.tsv --config tests/.visidatarc --visidata-dir tests/.visidata  #1978
-
-[ $VERBOSE -eq 0 ] && echo ""
-#wait for any remaining background jobs to finish
-wait -n 2>/dev/null || ANY_FAILED=1
-wait
-
-diff_output=$(git --no-pager diff tests/)
-if [ -n "$diff_output" ]; then
-    echo "$diff_output"
+output=$(env PYTHONPATH=. bin/vd <(seq 10000) --overwrite=n $VD_OPTS --output tests/output/stdin-guesser.tsv 2>&1)
+exit_code=$?
+if [ $exit_code -ne 0 ]; then
     echo ""
-    echo "FAIL: golden output changed (see diff above)"
-    ANY_FAILED=1
+    echo "FAIL: stdin-guesser (exit $exit_code)"
+    echo "$output"
+    FAILED_TESTS[stdin-guesser]=1
+fi
+
+record_failure() {
+    local testname="$1" msg="$2"
+    case "$testname" in
+        *-flaky)
+            echo "FLAKY: $testname ($msg)"
+            FLAKY_TESTS[$testname]=1
+            ;;
+        *)
+            echo "DIFF: $testname ($msg)"
+            FAILED_TESTS[$testname]=1
+            ;;
+    esac
+}
+
+# Check for expected output files that were never created (batch aborted mid-run)
+for outfn in "${EXPECTED_OUTPUTS[@]}"; do
+    if [ ! -f "$outfn" ]; then
+        testname=$(basename "$outfn" | sed 's/\.[^.]*$//')
+        record_failure "$testname" "no output: $outfn"
+    fi
+done
+
+for outfn in tests/output/*; do
+    [ "$outfn" = "tests/output/.gitignore" ] && continue
+    [ -f "$outfn" ] || continue
+    goldfn="tests/golden/$(basename "$outfn")"
+    if [ ! -f "$goldfn" ]; then
+        testname=$(basename "$outfn" | sed 's/\.[^.]*$//')
+        record_failure "$testname" "no golden file: $goldfn"
+    elif ! diff -q "$goldfn" "$outfn" > /dev/null 2>&1; then
+        testname=$(basename "$outfn" | sed 's/\.[^.]*$//')
+        record_failure "$testname" "$outfn"
+        if [ $DEBUG -eq 1 ]; then
+            diff "$goldfn" "$outfn"
+            break
+        fi
+    fi
+done
+N_FAILED=${#FAILED_TESTS[@]}
+N_FLAKY=${#FLAKY_TESTS[@]}
+if [ $N_FAILED -gt 0 ]; then
+    echo ""
+    echo "$N_FAILED tests failed: ${!FAILED_TESTS[*]}"
 fi
 
 # summary
+N_PASSED=$((N_TESTS - N_FAILED - N_FLAKY))
 [ $N_SKIPPED -gt 0 ] && SKIP_MSG=", $N_SKIPPED skipped" || SKIP_MSG=""
+[ $N_FLAKY -gt 0 ] && FLAKY_MSG=", $N_FLAKY flaky" || FLAKY_MSG=""
 
-if [ "$ANY_FAILED" -ne 0 ]; then
-    echo "FAILED ($N_TESTS tests${SKIP_MSG})"
+if [ $N_FAILED -gt 0 ]; then
+    echo "FAIL: $N_PASSED/$N_TESTS tests passed${FLAKY_MSG}${SKIP_MSG}"
     exit 1
 else
-    echo "PASS ($N_TESTS tests${SKIP_MSG})"
+    echo "PASS: $N_PASSED/$N_TESTS tests passed${FLAKY_MSG}${SKIP_MSG}"
 fi

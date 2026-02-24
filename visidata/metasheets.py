@@ -97,7 +97,7 @@ VisiDataMetaSheet.options.row_delimiter = '\n'
 VisiDataMetaSheet.options.encoding = 'utf-8'
 
 
-@VisiData.property
+@VisiData.lazy_property
 def allColumnsSheet(vd):
     return ColumnsSheet("all_columns", source=vd.stackedSheets)
 
@@ -130,7 +130,7 @@ def join_cols(sheet):
 
 
 # copy vd.sheets so that ColumnsSheet itself isn't included (for recalc in addRow)
-globalCommand('gC', 'columns-all', 'vd.push(vd.allColumnsSheet)', 'open Columns Sheet: edit column properties for all visible columns from all sheets on the sheets stack')
+globalCommand('gC', 'columns-all', 'vs=vd.allColumnsSheet; vs.reload(); vd.push(vs)', 'open Columns Sheet: edit column properties for all visible columns from all sheets on the sheets stack')
 
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))', 'open Columns Sheet: edit column properties for current sheet')
 

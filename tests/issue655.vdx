@@ -1,6 +1,6 @@
 open-file sample_data/benchmark.csv
-row 6
 define-command test-655 cursorCol.setValues(selectedRows, currow.Item)
+row 6
 col Customer
 select-rows
 test-655

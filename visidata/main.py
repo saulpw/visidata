@@ -44,8 +44,8 @@ def eval_vd(logpath, *args, **kwargs):
 
     src = Path(logpath.given, fptext=io.StringIO(log), filesize=len(log))
     if logpath is vd.stdinSource:
-        # replay from stdin only supports .vdj
-        vs = vd.openSource(src, filetype='vdj')
+        # vdx format handles .vd (tsv), .vdj (json), and .vdx (minimal) lines
+        vs = vd.openSource(src, filetype='vdx')
     else:
         vs = vd.openSource(src, filetype=src.ext)
     # add a row in place of the sheet creation command that undo() expects as the first command

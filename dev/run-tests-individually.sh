@@ -1,24 +1,15 @@
 #!/usr/bin/env bash
 # usage: ./dev/run-tests-individually.sh [<tests/name.vd> […]]
 #
-# Runs tests/*.vd or the given test files individually and summarize failures
-# at the end.
+# Runs each test in its own vd process, for full isolation.
+# Slower than `dev/test.sh` (which batches all tests into one process),
+# but useful for debugging cross-test contamination.
 #
-# The stdout and stderr of each test is saved in tests/log/<name>.log.  Files
-# in tests/golden/ which are rewritten by tests are not saved.
-#
-# Your repository must be clean: no uncommitted changes or untracked files are
-# allowed.  The working dir is restored after each test, and this policy
-# prevents you from losing your changes.  It also prevents such changes from
-# accidentally perturbing test results.
+# The stdout and stderr of each test is saved in tests/log/<name>.log.
+# Test output goes to tests/output/ (gitignored), golden files are not modified.
 #
 set -euo pipefail
 shopt -s nullglob
-
-if [[ -n $(git status --porcelain --untracked-files=all) ]]; then
-    echo "repo is dirty; aborting" >&2
-    exit 1
-fi
 
 main() {
     local test_file test_name
@@ -47,9 +38,6 @@ main() {
             fail "$test_name"
             failures+=("$test_file")
         fi
-
-        # Restore working dir to a pristine state.
-        git restore .
     done
 
     if [[ ${#failures[@]} -ne 0 ]]; then
