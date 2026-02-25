@@ -1,6 +1,6 @@
 import itertools
 import re
-from visidata import vd, Sheet, AttrDict, dispwidth
+from visidata import vd, Sheet, AttrDict, dispwidth, escape_vdcode
 
 
 @Sheet.api
@@ -30,7 +30,8 @@ def nextColName(sheet, show_cells=True):
         colnames.append(item)
 
     def _fmt_colname(match, row, trigger_key):
-        name = match.formatted.get('name', row.name) if match else row.name
+        # columns may contain [:text] that looks like markup, so we have to escape it
+        name = match.formatted.get('name', row.name) if match else escape_vdcode(row.name)
         r = ' '*(dispwidth(prompt)-3)
         r += f' [:keystrokes]{trigger_key}[/] ' if trigger_key else '   '
         r += f'[:bold]{name}[/]'
@@ -42,7 +43,7 @@ def nextColName(sheet, show_cells=True):
             r += n_spaces*' '
             r += '   '
             #todo:  does not show disp_note_none for None
-            r += row._cursor_cell
+            r += escape_vdcode(row._cursor_cell)
         return r
 
     name = vd.activeSheet.inputPalette(prompt,
