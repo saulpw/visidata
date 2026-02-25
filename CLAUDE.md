@@ -110,6 +110,12 @@ Use this when investigating or optimizing performance issues.
 - Analyzing profiling results
 - Optimization workflow
 
+### [dev/OPTIONS.md](dev/OPTIONS.md) - Options System
+Use this when working with options, adding new options, or understanding how configuration resolves.
+- Resolution chain (instance → class → global → default)
+- How sheets and paths participate in options
+- Setting and reading options at different levels
+
 ## Updating Documentation
 
 When making **user-facing changes** (new commands, changed behavior, new options, new/changed loaders, UI changes), check [docs/README.md](docs/README.md) to identify which documentation files need to be updated.

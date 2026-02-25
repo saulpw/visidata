@@ -209,6 +209,10 @@ class Path(os.PathLike):
         else:
             self.compression = None
 
+    @property
+    def options(self):
+        return vd.OptionsObject(vd._options, obj=self)
+
     def __getattr__(self, k):
         if hasattr(self.__dict__, k):
             r = getattr(self.__dict__, k)
