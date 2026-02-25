@@ -12,7 +12,7 @@ the introductory comment/documentation:
 import collections
 from dataclasses import dataclass
 from enum import Enum
-from visidata import VisiData, vd
+from visidata import VisiData, vd, escape_vdcode
 
 # Overwrite to true to get some diagnostic visualization
 DEBUG = False
@@ -357,9 +357,17 @@ def _fuzzymatch(target: str, pattern: str) -> MatchResult:
 
 
 def _format_match(s, positions):
+    '''*positions* is a list of indices into string *s*.
+    Returns a string containing visidata markup, where every character that matches is surrounded by [:match] [/].
+    Any bracket character that is to be displayed literally, is escaped.'''
     out = list(s)
+    literals = dict.fromkeys([i for i, c in enumerate(s) if c == '['], True)
     for p in positions:
         out[p] = f'[:match]{out[p]}[/]'
+        literals[p] = False
+    for j in literals:
+        if literals[j]:
+            out[j] = escape_vdcode('[')
     return "".join(out)
 
 CombinedMatch = collections.namedtuple('CombinedMatch', 'score formatted match')
