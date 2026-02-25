@@ -7,7 +7,9 @@ import textwrap
 from visidata import vd, drawcache, update_attr, colors, ColorAttr
 
 disp_column_fill = ' '
-internal_markup_re = r'(\[[:/][^\]]*?\])'  # [:whatever until the closing bracket] or [/whatever] or [:]
+bracket_markup_re = r'\[[:/][^\]]*?\]'  # [:whatever until the closing bracket] or [/whatever] or [:whatever] or [/] or [:]
+literal_markup_re = r'\uFFF9.*?\uFFFb'
+internal_markup_re = f'({literal_markup_re}|{bracket_markup_re})'
 
 ### Curses helpers
 
@@ -58,15 +60,28 @@ def is_vdcode(s:str) -> bool:
     return (s.startswith('[:') and s.endswith(']')) or \
            (s.startswith('[/') and s.endswith(']'))
 
+def escape_vdcode(s:str) -> str:
+    # wrap between Interlinear Annotation Anchor and Interlinear Annotation Terminator
+    return '\uFFF9' + s + '\uFFFB'
+
+def is_marked_literal(s):
+    return s and s[0] == '\uFFF9' and s[-1] == '\uFFFB'
 
 def iterchunks(s, literal=False):
-    attrstack = [dict(link='', cattr=ColorAttr())]
+    literal_attr = dict(link='', cattr=ColorAttr())
+    if literal:
+        yield literal_attr, s
+        return
+    attrstack = [literal_attr]
     chunks = re.split(internal_markup_re, s)
     for chunk in chunks:
         if not chunk:
             continue
 
-        if not literal and is_vdcode(chunk):
+        if is_marked_literal(chunk):
+            yield literal_attr, chunk[1:-1]
+            continue
+        elif is_vdcode(chunk):
             cattr = attrstack[-1]['cattr']
             link = attrstack[-1]['link']
 
@@ -486,4 +501,5 @@ vd.addGlobals(clipstr=clipstr,
               wraptext=wraptext,
               clipstr_start=clipstr_start,
               clipstr_middle=clipstr_middle,
-              clip_markup_middle=clip_markup_middle)
+              clip_markup_middle=clip_markup_middle,
+              escape_vdcode=escape_vdcode)
