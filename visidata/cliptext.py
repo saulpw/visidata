@@ -354,44 +354,46 @@ def wraptext(text, width=80, indent=''):
         active_tags = line_tags
 
         textchunks = [x for x in chunks if not is_vdcode(x)]
-        if ''.join(textchunks) == '':  #for markup with no contents, like '[:tag][/]' or '[:]' or '[/]'
+        linetext = ''.join(textchunks)
+        if linetext == '':  #for markup with no contents, like '[:tag][/]' or '[:]' or '[/]'
             yield '', ''
             continue
         # textwrap.wrap does not handle variable-width characters  #2416
-        for linenum, textline in enumerate(textwrap.wrap(''.join(textchunks), width=width, drop_whitespace=False)):
-            txt = textline
-            r = ''
+        for linenum, wrapped_textline in enumerate(textwrap.wrap(linetext, width=width, drop_whitespace=False)):
+            wrapped_remainder = wrapped_textline
+            marked_up = ''
             while chunks:
                 c = chunks[0]
-                if len(c) > len(txt):
-                    r += txt
-                    chunks[0] = c[len(txt):]
+                if len(c) > len(wrapped_remainder):  #handle wrapping a chunk of text across a line boundary
+                    marked_up += wrapped_remainder
+                    chunks[0] = c[len(wrapped_remainder):]
                     break
 
+                #if we got here, then len(c) <= len(wrapped_remainder)
                 if len(chunks) == 1:
-                    r += chunks.pop(0)
+                    marked_up += chunks.pop(0)   #the while-loop terminates here
                 else:
+                    #the first chunk is text (or the empty string), and the second chunk is markup like '[:tag]'
                     chunks.pop(0)
-                    r += txt[:len(c)] + chunks.pop(0)
+                    marked_up += wrapped_remainder[:len(c)] + chunks.pop(0)
+                    wrapped_remainder = wrapped_remainder[len(c):]
 
-                txt = txt[len(c):]
-
-            r = r.strip()
+            marked_up = marked_up.strip()
             # close any unclosed tags at end of line, reopen at start of next
             if active_tags:
-                # count how many tags are open but not closed in r
-                open_in_r = []
-                for part in re.split(internal_markup_re, r):
+                # count how many tags are open but not closed in marked_up
+                open_in_marked_up = []
+                for part in re.split(internal_markup_re, marked_up):
                     if is_vdcode(part):
                         if part.startswith('[:'):
-                            open_in_r.append(part)
-                        elif part.startswith('[/') and open_in_r:
-                            open_in_r.pop()
-                r += '[/]' * len(open_in_r)
+                            open_in_marked_up.append(part)
+                        elif part.startswith('[/') and open_in_marked_up:
+                            open_in_marked_up.pop()
+                marked_up += '[/]' * len(open_in_marked_up)
 
             if linenum > 0:
-                r = indent + r
-            yield r, textline
+                marked_up = indent + marked_up
+            yield marked_up, wrapped_textline
 
         for c in chunks:
             yield c, ''
