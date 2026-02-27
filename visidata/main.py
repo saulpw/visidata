@@ -16,7 +16,7 @@ import signal
 import warnings
 import builtins  # to override print
 
-from visidata import vd, options, run, BaseSheet, AttrDict, stacktrace
+from visidata import vd, options, run, BaseSheet, Sheet, AttrDict, stacktrace
 from visidata import Path, asyncthread
 import visidata
 
@@ -229,13 +229,9 @@ def queue_move_to_pos(vd, sources, moves):
         vs = sheet_from_description(vd, sources, sheet_desc)
         if not vs:
             continue
-        def decorator(func, move=move):
-            def wrapper():
-                ret = func()
-                move_succeeded = attempt_move_to_pos(vd, sources, *move)
-                return ret
-            return wrapper
-        vs.afterLoad = decorator(vs.afterLoad)
+        if not hasattr(vs, '_startpos_moves'):
+            vs._startpos_moves = []
+        vs._startpos_moves.append((sources, move))
 
 def attempt_move_to_pos(vd, sources, sheet_desc, startcol, startrow):
     '''Return True if the move succeeded in moving to the row and column, on the described sheet.
@@ -262,6 +258,15 @@ def attempt_move_to_pos(vd, sources, sheet_desc, startcol, startrow):
                 vd.warning(f'{vs} has no column {startcol}')
             success = False
     return success
+
+@Sheet.after
+def afterLoad(sheet):
+    moves = getattr(sheet, '_startpos_moves', None)
+    if not moves:
+        return
+    del sheet._startpos_moves
+    for sources, move in moves:
+        attempt_move_to_pos(vd, sources, *move)
 
 def main_vd():
     'Open the given sources using the VisiData interface.'
