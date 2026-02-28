@@ -229,9 +229,12 @@ def queue_move_to_pos(vd, sources, moves):
         vs = sheet_from_description(vd, sources, sheet_desc)
         if not vs:
             continue
-        if not hasattr(vs, '_startpos_moves'):
-            vs._startpos_moves = []
-        vs._startpos_moves.append((sources, move))
+        if vs.rows is not visidata.basesheet.UNLOADED:
+            attempt_move_to_pos(vd, sources, *move)
+        else:
+            if not hasattr(vs, '_startpos_moves'):
+                vs._startpos_moves = []
+            vs._startpos_moves.append((sources, move))
 
 def attempt_move_to_pos(vd, sources, sheet_desc, startcol, startrow):
     '''Return True if the move succeeded in moving to the row and column, on the described sheet.
