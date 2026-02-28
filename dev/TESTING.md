@@ -68,6 +68,10 @@ pytest visidata/tests/test_features.py    # run test_ functions discovered from 
 
 **The `test_features.py` pattern:** Any VisiData module can define `test_*` functions that take `vd` as a parameter. These are auto-discovered and run by pytest. Useful for testing features alongside their implementation (see `features/slide.py` for an example using `vd.runvdx()`).
 
+## Test Style
+
+When a test is a series of one-liner asserts (like testing a pure function with many input/output pairs), combine them into a single test function. Add a short comment at the end of each line if the reason isn't obvious from the assertion itself. Don't create separate test functions for each case.
+
 ## Bug Fix Testing
 
 Always write tests FIRST, verify they FAIL on the current code, then fix the code and verify the tests pass. Use the appropriate test type:
