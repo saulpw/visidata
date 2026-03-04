@@ -30,6 +30,7 @@ vd.option('preplay', '', 'longnames to preplay before replay')
 vd.option('imports', 'plugins', 'imports to preload before .visidatarc (command-line only)')
 vd.option('nothing', False, 'no config, no plugins, nothing extra')
 vd.option('interactive', False, 'run interactive mode after batch replay')
+vd.option('s3_anon', False, 'run S3 in anonymous mode')
 
 # for --play
 def eval_vd(logpath, *args, **kwargs):
