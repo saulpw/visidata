@@ -52,6 +52,7 @@ class S3Path(Path):
             self._fs = s3fs_core.S3FileSystem(
                 client_kwargs={"endpoint_url": vd.options.s3_endpoint or None},
                 version_aware=self.version_aware,
+                anon=vd.options.s3_anon,
             )
 
         return self._fs
