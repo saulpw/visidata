@@ -27,7 +27,6 @@ vd.option('disp_multiline_focus', True, 'only multiline cursor row')
 vd.option('color_multiline_bottom', '', 'color of bottom line of multiline rows')  #2715
 vd.option('color_aggregator', 'bold 255 white on 240 black', 'color of aggregator summary on bottom row')
 
-vd.option('highlight_search', False, 'whether to highlight strings in searches') #needs to be set here, is overriden in features/hlsearch.py
 
 @drawcache
 def _splitcell(sheet, s, width=0, maxheight=1):
@@ -1042,7 +1041,7 @@ class TableSheet(BaseSheet):
                     elif len(lines) < height:
                         lines.extend([[('', '')]]*(height-len(lines)))
 
-                    if self.options.highlight_search:
+                    if self.options.get('highlight_search', False):
                         hp = col.highlight_regex or self.highlight_regex
                         hl_attr = colors.color_highlight_search
                     else:
@@ -1057,7 +1056,7 @@ class TableSheet(BaseSheet):
                         if hp: # chunks becomes a list
                             chunks, left_hl, right_hl = self.highlight_chunks(chunks, hp, hoffset, colwidth, notewidth, cattr, hl_attr)
                         else:
-                            chunks = list(chunks)
+                            chunks = [(attr, text[hoffset:]) for attr, text in chunks]
                         if colwidth > 2:
                             pre = disp_truncator if hoffset != 0 else disp_column_fill
                             chunks.insert(0, (hl_attr if left_hl else cattr, pre))
