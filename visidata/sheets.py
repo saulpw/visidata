@@ -1199,8 +1199,17 @@ def push(vd, vs, pane=0, load=True):
 def quit(vd, *sheets):
     'Remove *sheets* from sheets stack, asking for confirmation if needed.'
 
+    remaining = set(vd.stackedSheets) - set(sheets)
+    exiting = not remaining
+    if exiting and vd.options.quitguard and not vd._nextCommands:
+        nmodified = sum(1 for vs in sheets if vs.precious and vs.hasBeenModified)
+        modmsg = f' ({nmodified} sheet(s) modified)' if nmodified else ' (nothing modified)'
+        vd.draw_all()
+        vd.confirm(f'exit VisiData{modmsg}? ')
+
     for vs in sheets:
-        vs.confirmQuit('quit')
+        if not exiting:
+            vs.confirmQuit('quit')
         vs.pane = 0
         vd.remove(vs)
     if vd.activeCommand:
