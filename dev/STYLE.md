@@ -333,6 +333,10 @@ api_key = vd.options.my_api_key or vd.fail(...)  # Don't do this
 
 Use **module name** or abbrevation as prefix for options used exclusively by that module.
 
+### Options Defined in Feature Files
+
+When core code (e.g. `sheets.py`) needs to check an option defined by a feature file, use `options.get()` with a default so it works even if the feature isn't loaded.  Don't define the option in two places with different defaults.
+
 ## Best Practices
 
 ### Documentation
