@@ -78,6 +78,8 @@ We've started doing this for PRs also. It's a bit of clutter but it helps:
 
 Commit before posting GitHub comments/replies. Let Saul push first, then post the comment. Don't post replies to issues before the relevant code is committed and pushed.
 
+AI-generated comments should have the model attribution at the bottom (e.g. `[Claude Opus 4.6]`), not the top.
+
 ## Branch and Merge Workflow
 
 In general:
