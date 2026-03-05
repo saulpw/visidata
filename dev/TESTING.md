@@ -50,7 +50,7 @@ All three formats allow `#` line comments.
 **Test output:** `tests/output/testname.ext` — actual output from the latest test run (gitignored, never committed). Compare against golden with `diff tests/golden/name.ext tests/output/name.ext`.
 
 **Conventions:**
-- `-nosave` suffix (e.g., `issue2225-nosave.vdx`) skips golden comparison; useful for tests that only need to not crash
+- `-nosave` suffix (e.g., `issue2225-nosave.vdx`) skips golden comparison; runs in a separate batch without `replay_ignore_errors`, so `assert-expr` failures are caught. Use for tests that verify internal state via assertions rather than output comparison.
 - `-broken` suffix skips the test entirely
 - `-flaky` suffix runs the test but treats failures as non-fatal
 - `-311` suffix runs only on Python 3.11+; `-n311` runs only below 3.11
