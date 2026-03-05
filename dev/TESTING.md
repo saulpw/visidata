@@ -26,7 +26,7 @@ dev/run-tests-individually.sh                # run each test in its own process 
 dev/run-tests-individually.sh tests/foo.vdx  # run specific tests individually
 ```
 
-By default, `test.sh` batches all tests into a single `vd` process for speed (~10s vs minutes). Use `run-tests-individually.sh` to run each test in its own process — slower but provides full isolation, useful for debugging cross-test contamination.
+By default, `test.sh` splits tests into `nproc` parallel batches for speed (~5s). Use `-j N` to control parallelism. Use `run-tests-individually.sh` to run each test in its own process — slower but provides full isolation, useful for debugging cross-test contamination.
 
 The replay file is now always loaded as `vdx`, but tests may be in vd, vdj, or vdx format; the `.vdx` loader now interprets all three formats (even commingled).
 
@@ -80,7 +80,7 @@ All three formats allow `#` line comments.
 
 ## Batch replay internals
 
-The test harness (`dev/test.sh`) concatenates all tests into a single VDX batch, separated by `replay-reset` / `replay-output` / `replay-end` commands (defined in `visidata/features/replay_bulk.py`).
+The test harness (`dev/test.sh`) splits tests into parallel VDX batches (sequential chunks so tests with similar imports share a process), separated by `replay-reset` / `replay-output` / `replay-end` commands (defined in `visidata/features/replay_bulk.py`).
 
 **Batch structure:**
 ```

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-# Usage: test.sh [-d] [testname ...]
-#   -d  debug mode: abort on first error, show diffs
+# Usage: test.sh [-d] [-j N] [testname ...]
+#   -d    debug mode: abort on first error, show diffs
+#   -j N  number of parallel golden batch processes (default: nproc)
 
 #set -e
 shopt -s failglob
@@ -16,9 +17,11 @@ PYTHON=${PYTHON:-python}
 PY311=$($PYTHON -c 'import sys; print(sys.version_info[:2] >= (3,11))')
 
 DEBUG=0
-while getopts "d" opt; do
+NPROCS=$(nproc)
+while getopts "dj:" opt; do
     case "$opt" in
         d) DEBUG=1 ;;
+        j) NPROCS=$OPTARG ;;
     esac;
 done
 shift $((OPTIND - 1))
@@ -64,8 +67,8 @@ declare -A FLAKY_TESTS
 # Clean output directory before running tests
 rm -f tests/output/*
 
-# Build two batches: golden tests (errors ignored) and nosave tests (errors abort)
-BATCH=""
+# Build parallel golden batches and a nosave batch
+declare -a GOLDEN_TESTS
 NOSAVE_BATCH=""
 
 for i in $TESTS ; do
@@ -81,21 +84,33 @@ for i in $TESTS ; do
 
     N_TESTS=$((N_TESTS + 1))
     if [ "${i%-nosave.vd*}-nosave" != "${i%.vd*}" ]; then
-        for goldfn in tests/golden/"$testname".*; do
-            outfn="tests/output/$(basename "$goldfn")"
-            BATCH+="replay-reset $outfn"$'\n'
-            if [ $DEBUG -eq 0 ]; then
-                BATCH+="option global replay_ignore_errors True"$'\n'
-            fi
-            BATCH+="$(cat "$i")"$'\n'
-            BATCH+="replay-output"$'\n'
-            EXPECTED_OUTPUTS+=("$outfn")
-        done
+        GOLDEN_TESTS+=("$i")
     else
         NOSAVE_BATCH+="replay-reset $testname"$'\n'
-        NOSAVE_BATCH+="$(cat "$i")"$'\n'
+        NOSAVE_BATCH+="$(< "$i")"$'\n'
         NOSAVE_BATCH+="replay-end"$'\n'
     fi
+done
+
+# Chunk golden tests into NPROCS sequential batches (keeps similar imports together)
+N_GOLDEN=${#GOLDEN_TESTS[@]}
+CHUNK=$(( (N_GOLDEN + NPROCS - 1) / NPROCS ))
+declare -a BATCHES
+for (( idx=0; idx<N_GOLDEN; idx++ )); do
+    i="${GOLDEN_TESTS[$idx]}"
+    BATCH_IDX=$(( idx / CHUNK ))
+    testname=${i##tests/}
+    testname=${testname%.vd*}
+    for goldfn in tests/golden/"$testname".*; do
+        outfn="tests/output/$(basename "$goldfn")"
+        BATCHES[$BATCH_IDX]+="replay-reset $outfn"$'\n'
+        if [ $DEBUG -eq 0 ]; then
+            BATCHES[$BATCH_IDX]+="option global replay_ignore_errors True"$'\n'
+        fi
+        BATCHES[$BATCH_IDX]+="$(< "$i")"$'\n'
+        BATCHES[$BATCH_IDX]+="replay-output"$'\n'
+        EXPECTED_OUTPUTS+=("$outfn")
+    done
 done
 
 # Launch nosave and stdin-guesser in background, golden in foreground
@@ -113,11 +128,20 @@ N_TESTS=$((N_TESTS + 1))
 env PYTHONPATH=. bin/vd <(seq 10000) --overwrite=n $VD_OPTS --output tests/output/stdin-guesser.tsv > /tmp/vd-stdin-guesser-output.txt 2>&1 &
 STDIN_PID=$!
 
-# golden batch runs in foreground (longest running)
-if [ -n "$BATCH" ]; then
-    BATCH+="replay-exit"$'\n'
-    env PYTHONPATH=. bin/vd --play - $VD_OPTS <<< "$BATCH"
-fi
+# golden batches run in parallel
+declare -a GOLDEN_PIDS
+for idx in "${!BATCHES[@]}"; do
+    if [ -n "${BATCHES[$idx]}" ]; then
+        BATCHES[$idx]+="replay-exit"$'\n'
+        env PYTHONPATH=. bin/vd --play - $VD_OPTS <<< "${BATCHES[$idx]}" > /tmp/vd-golden-batch-$idx.txt 2>&1 &
+        GOLDEN_PIDS+=($!)
+    fi
+done
+
+# wait for golden batches
+for pid in "${GOLDEN_PIDS[@]}"; do
+    wait $pid
+done
 
 # wait for background jobs
 if [ -n "$NOSAVE_PID" ]; then
