@@ -212,6 +212,8 @@ AttrColumn('name')  # accesses row.name
 ItemColumn('key', 0)  # accesses row[0] or row['key']
 ```
 
+**Note**: `ColumnItem` is a deprecated alias for `ItemColumn`. Always use `ItemColumn` in new code.
+
 ### Getting Cell Values
 
 When accessing cell values in your code, choose the appropriate method:

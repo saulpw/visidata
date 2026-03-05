@@ -3,7 +3,7 @@ import itertools
 import functools
 from copy import copy
 
-from visidata import vd, VisiData, asyncthread, Sheet, Progress, IndexSheet, Column, CellColorizer, ColumnItem, SubColumnItem, TypedWrapper, ColumnsSheet, AttrDict, dispwidth
+from visidata import vd, VisiData, asyncthread, Sheet, Progress, IndexSheet, Column, CellColorizer, ItemColumn, SubColumnItem, TypedWrapper, ColumnsSheet, AttrDict, dispwidth
 from visidata import WritableColumn
 
 vd.help_join = '# Join Help\nHELPTODO'
@@ -24,17 +24,25 @@ def _appendRowsAfterLoading(joinsheet, origsheets):
         vd.ensureLoaded(origsheets)
         vd.sync()
 
-    colnames = {c.name:c for c in joinsheet.visibleCols}
     colcounts = { len(vs.visibleCols) for vs in origsheets }
     if len(colcounts) != 1:
         vd.fail(f'sheets must have same number of columns for `concat`; use `append` instead')
+
+    # rowdef: (srcSheet, srcRow), same as ConcatSheet  #2929
+    srcKeyColNames = {c.name for c in origsheets[0].keyCols}
+    joinsheet.columns = []
+    joinsheet.addColumn(ItemColumn('origin_sheet', 0, width=0))
+    keyedcols = collections.defaultdict(dict)  # name -> { sheet -> col }
+
     for vs in origsheets:
-        joinsheet.rows.extend(vs.rows)
+        joinsheet.rows.extend((vs, r) for r in vs.rows)
         for c in vs.visibleCols:
-            if c.name not in colnames:
-                newcol = copy(c)
-                colnames[c.name] = newcol
+            if not keyedcols[c.name]:
+                newcol = ConcatColumn(c.name, cols=keyedcols[c.name], type=c.type)
+                if c.name in srcKeyColNames:
+                    newcol.keycol = c.keycol
                 joinsheet.addColumn(newcol)
+            keyedcols[c.name][vs] = c
 
 
 @VisiData.api
@@ -342,7 +350,7 @@ class ConcatColumn(WritableColumn):
 # rowdef: (srcSheet, srcRow)
 class ConcatSheet(Sheet):
     'combination of multiple sheets by row concatenation. source=list of sheets. '
-    columns = [ColumnItem('origin_sheet', 0, width=0)]
+    columns = [ItemColumn('origin_sheet', 0, width=0)]
     def iterload(self):
         # only one column with each name allowed per sheet
         keyedcols = collections.defaultdict(dict)  # name -> { sheet -> col }

@@ -31,6 +31,8 @@ jointype            description
 `diff`              keeps only rows NOT in all sheets
 `extend`            keeps all rows and retain **SheetType** from first selected sheet
 `merge`             Merges differences from other sheets into first sheet
+`append`            keeps all rows from all sheets; columns from all sheets
+`concat`            keeps all rows from all sheets; columns and type from first sheet
 
 ## How to append two datasets
 
@@ -38,3 +40,7 @@ jointype            description
 2. Press `Shift+S` to open the **Sheets sheet**.
 3. Use `s` or `t` to select the sheets to merge.
 4. Type `&` and press `Enter` on `append` to concatenate the selected datasets.
+
+## Identifying source rows
+
+The `append` and `concat` join types add a hidden `origin_sheet` column that shows which source sheet each row came from. Unhide all hidden columns with `gv`.
