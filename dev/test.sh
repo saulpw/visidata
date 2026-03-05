@@ -29,6 +29,8 @@ should_skip() {
     local i="$1"
     case "${i%.vd*}" in
         *-broken) echo "broken" ;;
+        *-manual) echo "manual" ;;
+        *-perf)   echo "perf" ;;
         *-nosave) return 1 ;;  # not skipped, just no golden comparison
         *-flaky)  return 1 ;;  # not skipped; failures reported but non-fatal
         *-n311)  [ "$PY311" == "True" ] && echo "n311" ;;
@@ -96,20 +98,35 @@ for i in $TESTS ; do
     fi
 done
 
+# Launch nosave and stdin-guesser in background, golden in foreground
+
+# nosave tests run without replay_ignore_errors so assert-expr failures are caught
+NOSAVE_PID=""
+if [ -n "$NOSAVE_BATCH" ]; then
+    NOSAVE_BATCH+="replay-exit"$'\n'
+    env PYTHONPATH=. bin/vd --play - $VD_OPTS <<< "$NOSAVE_BATCH" > /tmp/vd-nosave-output.txt 2>&1 &
+    NOSAVE_PID=$!
+fi
+
+# stdin-guesser: always runs as its own process  #1978
+N_TESTS=$((N_TESTS + 1))
+env PYTHONPATH=. bin/vd <(seq 10000) --overwrite=n $VD_OPTS --output tests/output/stdin-guesser.tsv > /tmp/vd-stdin-guesser-output.txt 2>&1 &
+STDIN_PID=$!
+
+# golden batch runs in foreground (longest running)
 if [ -n "$BATCH" ]; then
     BATCH+="replay-exit"$'\n'
     env PYTHONPATH=. bin/vd --play - $VD_OPTS <<< "$BATCH"
 fi
 
-# nosave tests run without replay_ignore_errors so assert-expr failures are caught
-if [ -n "$NOSAVE_BATCH" ]; then
-    NOSAVE_BATCH+="replay-exit"$'\n'
-    nosave_output=$(env PYTHONPATH=. bin/vd --play - $VD_OPTS <<< "$NOSAVE_BATCH" 2>&1)
+# wait for background jobs
+if [ -n "$NOSAVE_PID" ]; then
+    wait $NOSAVE_PID
     nosave_exit=$?
     if [ $nosave_exit -ne 0 ]; then
-        echo "$nosave_output" >&2
+        cat /tmp/vd-nosave-output.txt >&2
         # extract failing test name from error output
-        failing_test=$(echo "$nosave_output" | grep -oP '^\S+-nosave' | head -1)
+        failing_test=$(grep -oP '^\S+-nosave' /tmp/vd-nosave-output.txt | head -1)
         if [ -n "$failing_test" ]; then
             FAILED_TESTS[$failing_test]=1
         else
@@ -118,14 +135,12 @@ if [ -n "$NOSAVE_BATCH" ]; then
     fi
 fi
 
-# stdin-guesser: always runs as its own process  #1978
-N_TESTS=$((N_TESTS + 1))
-output=$(env PYTHONPATH=. bin/vd <(seq 10000) --overwrite=n $VD_OPTS --output tests/output/stdin-guesser.tsv 2>&1)
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
+wait $STDIN_PID
+stdin_exit=$?
+if [ $stdin_exit -ne 0 ]; then
     echo ""
-    echo "FAIL: stdin-guesser (exit $exit_code)"
-    echo "$output"
+    echo "FAIL: stdin-guesser (exit $stdin_exit)"
+    cat /tmp/vd-stdin-guesser-output.txt
     FAILED_TESTS[stdin-guesser]=1
 fi
 
