@@ -62,11 +62,9 @@ declare -A FLAKY_TESTS
 # Clean output directory before running tests
 rm -f tests/output/*
 
-# Build batch: all tests in a single vd process
+# Build two batches: golden tests (errors ignored) and nosave tests (errors abort)
 BATCH=""
-if [ $DEBUG -eq 0 ]; then
-    BATCH+="option global replay_ignore_errors True"$'\n'
-fi
+NOSAVE_BATCH=""
 
 for i in $TESTS ; do
     outbase=${i##tests/}
@@ -84,20 +82,40 @@ for i in $TESTS ; do
         for goldfn in tests/golden/"$testname".*; do
             outfn="tests/output/$(basename "$goldfn")"
             BATCH+="replay-reset $outfn"$'\n'
+            if [ $DEBUG -eq 0 ]; then
+                BATCH+="option global replay_ignore_errors True"$'\n'
+            fi
             BATCH+="$(cat "$i")"$'\n'
             BATCH+="replay-output"$'\n'
             EXPECTED_OUTPUTS+=("$outfn")
         done
     else
-        BATCH+="replay-reset $testname"$'\n'
-        BATCH+="$(cat "$i")"$'\n'
-        BATCH+="replay-end"$'\n'
+        NOSAVE_BATCH+="replay-reset $testname"$'\n'
+        NOSAVE_BATCH+="$(cat "$i")"$'\n'
+        NOSAVE_BATCH+="replay-end"$'\n'
     fi
 done
 
 if [ -n "$BATCH" ]; then
     BATCH+="replay-exit"$'\n'
     env PYTHONPATH=. bin/vd --play - $VD_OPTS <<< "$BATCH"
+fi
+
+# nosave tests run without replay_ignore_errors so assert-expr failures are caught
+if [ -n "$NOSAVE_BATCH" ]; then
+    NOSAVE_BATCH+="replay-exit"$'\n'
+    nosave_output=$(env PYTHONPATH=. bin/vd --play - $VD_OPTS <<< "$NOSAVE_BATCH" 2>&1)
+    nosave_exit=$?
+    if [ $nosave_exit -ne 0 ]; then
+        echo "$nosave_output" >&2
+        # extract failing test name from error output
+        failing_test=$(echo "$nosave_output" | grep -oP '^\S+-nosave' | head -1)
+        if [ -n "$failing_test" ]; then
+            FAILED_TESTS[$failing_test]=1
+        else
+            FAILED_TESTS["nosave-batch"]=1
+        fi
+    fi
 fi
 
 # stdin-guesser: always runs as its own process  #1978

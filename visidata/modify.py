@@ -82,13 +82,15 @@ def cellChanged(col, row, val):
     oldval = col.getValue(row)
     if oldval != val:
         rowid = col.sheet.rowid(row)
-        
-        # for newly added rows (that are already deferred additions), apply changes directly instead of tracking separately
+
         if rowid in col.sheet._deferredAdds:
             col.putValue(row, val)
+            def _undoNewCellChanged(col, row, oldval):
+                col.putValue(row, oldval)
+            vd.addUndo(_undoNewCellChanged, col, row, oldval)
             return
-        
-        # for existing rows, track as deferred modification
+
+
         if rowid not in col.sheet._deferredMods:
             rowmods = {}
             col.sheet._deferredMods[rowid] = (row, rowmods)

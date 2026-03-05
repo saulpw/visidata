@@ -17,7 +17,6 @@ def replay_reset(vs):  # noqa: ARG001
     p = vd.input("output path: ")
     vd.resetVisiData()
     vd.options.batch = True
-    vd.options.replay_ignore_errors = True
     vd.replay_output_path = p
     vd.replay_line = 0
 
