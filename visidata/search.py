@@ -102,7 +102,7 @@ def search_expr(sheet, expr, reverse=False, curcol=None):
 
     vd.fail(f'no {sheet.rowtype} where {expr}')
 
-@Sheet.api
+@BaseSheet.api
 def clear_search(sheet):
     '''A stub function to clear any aftereffects of search, such as when
        highlight_search is active.'''
