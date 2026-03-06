@@ -96,3 +96,7 @@ By default, commit to **develop** unless explicitly working in another branch on
 `develop` is the trunk branch. PRs come from side branches, not from develop directly. Create a feature branch off develop for PRs.
 
 After creating a PR, always check CI status with `gh pr checks` and fix any failures before moving on.
+
+### Bug Fix PRs
+
+Always add a regression test for bug fix PRs. Generate the golden output with the fix applied, and verify the test fails without the fix and passes with it.
