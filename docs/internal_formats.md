@@ -29,6 +29,8 @@ Since much of the time the sheet/col/row cursor position columns are blank, only
 So the .vdx format is lines of commands with the command longnamefirst, and then a space and input (if used).  Comments start with `#`.
 The cursor can be moved specifically with the `col` and `row` commands.
 
+The .vdx loader also handles .vd and .vdj lines, so `--play -` (stdin) always uses the `vdx` filetype, which accepts any of the three command log formats.
+
 This format is interesting for some use cases but not compelling enough to replace .vdj.
 There is no current intent to replace the .vdj format with .vdx.
 

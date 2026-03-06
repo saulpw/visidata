@@ -60,4 +60,6 @@ VisiData supports several cmdlog formats:
 - **`.vdj`** (JSONL) — JSON objects, one per line; fields include `sheet`, `col`, `row`, `longname`, `input`, `keystrokes`, `comment`
 - **`.vdx`** (simplified) — human-readable, one command per line; only emits `sheet`/`col`/`row` lines when they change
 
+When replaying from stdin (`vd -p -`), VisiData uses the `.vdx` loader, which accepts all three formats.
+
 ---
