@@ -36,8 +36,12 @@ class FixedWidthColumn(WritableColumn):
 
     def putValue(self, row, value):
         j = self.j or len(row[0])
-        value = str(value)[:j-self.i]
-        row[0] = row[0][:self.i] + '%-*s' % (j-self.i, value) + row[0][j:]
+        colwidth = j - self.i
+        value = str(value)
+        if len(value) > colwidth:
+            vd.warning(f'{self.name}: value truncated to {colwidth} chars')
+            value = value[:colwidth]
+        row[0] = row[0][:self.i] + '%-*s' % (colwidth, value) + row[0][j:]
 
 def columnize(rows, has_header=True):
     'Generate (i,j) indexes for fixed-width columns found in rows'
