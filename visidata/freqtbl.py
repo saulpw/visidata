@@ -157,7 +157,6 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
     def openRows(self, rows):
         vs = copy(self.source)
         vs.names = vs.names + ["several"]
-        vs.source = self
         vs.rows = list(itertools.chain.from_iterable(row.sourcerows for row in rows))
         return vs
 
