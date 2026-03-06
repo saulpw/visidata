@@ -114,6 +114,10 @@ Sheet.addCommand('gEnter', 'dive-selected', 'openRows(selectedRows)', 'help')
 Sheet.addCommand('zEnter', 'open-cell', 'vd.push(openCell(cursorCol, cursorRow))', 'help')
 ```
 
+### execstr Comprehension Scoping
+
+Never reference exec locals (like `cursorRow`) inside a list comprehension filter in an execstr — it breaks on Python < 3.12. Extract to a `@Sheet.api` method instead.
+
 ### execstr Input Limitation
 An execstr can only call `input()` once per command execution, since replay provides a single input string. If a command needs multiple parameters, take them as a single input and split.
 
