@@ -2,6 +2,8 @@
 
 Quick reference for VisiData development. For detailed coding patterns, conventions, and best practices, see **[dev/STYLE.md](dev/STYLE.md)**.
 
+`CLAUDE.md` and `AGENTS.md` are complementary: use this file for primary contributor workflow and architecture context, and use `AGENTS.md` for concise agent-oriented repository guidance.
+
 ## Important Note About AI Usage
 
 VisiData (created in 2016) is 99% written by humans and is NOT a vibe-coded AI project.  This file is meant to allow AI-assisted development of features and bugfixes.  **All code must be reviewed and approved and tested by a human before being merged into the codebase or submitted as a PR.**
