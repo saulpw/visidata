@@ -185,6 +185,13 @@ class FreqTablePreviewSheet(Sheet):
         return self.source.cursorRow.sourcerows
 
 
+@Sheet.api
+def exceptRows(sheet, exceptrows):
+    'Return all rows except *exceptrows* (single row or list of rows).'
+    if not isinstance(exceptrows, list):
+        exceptrows = [exceptrows]
+    return [r for r in sheet.rows if r not in exceptrows]
+
 FreqTableSheet.addCommand('', 'open-preview', 'vd.push(FreqTablePreviewSheet(sheet.name, "preview", source=sheet, columns=source.columns), pane=2); vd.options.disp_splitwin_pct=50', 'open split preview of source rows at cursor')
 
 Sheet.addCommand('F', 'freq-col', 'vd.push(makeFreqTable(sheet, cursorCol))', 'open Frequency Table grouped on current column, with aggregations of other columns')
@@ -197,8 +204,8 @@ vd.addMenuItem('Data', 'Frequency table', 'current row', 'freq-row')
 FreqTableSheet.addCommand('gu', 'unselect-rows', 'unselect(selectedRows)', 'unselect all source rows grouped in current row')
 FreqTableSheet.addCommand('gEnter', 'dive-selected', 'vd.push(openRows(selectedRows))', 'open copy of source sheet with rows that are grouped in selected rows')
 FreqTableSheet.addCommand('', 'select-first', 'for r in rows: source.select([r.sourcerows[0]])', 'select first source row in each bin')
-FreqTableSheet.addCommand('zEnter', 'dive-except', 'vd.push(openRows([r for r in rows if r is not cursorRow]))', 'open copy of source sheet excluding rows in current bin')
-FreqTableSheet.addCommand('gzEnter', 'dive-except-selected', 'vd.push(openRows([r for r in rows if r not in selectedRows]))', 'open copy of source sheet excluding rows in selected bins')
+FreqTableSheet.addCommand('zEnter', 'dive-except', 'vd.push(openRows(exceptRows(cursorRow)))', 'open copy of source sheet excluding rows in current bin')
+FreqTableSheet.addCommand('gzEnter', 'dive-except-selected', 'vd.push(openRows(exceptRows(selectedRows)))', 'open copy of source sheet excluding rows in selected bins')
 FreqTableSheet.bindkey('p', 'no-op')  #freqtbl rows aren't designed to allow pasting, so the default paste commands cause errors
 FreqTableSheet.bindkey('P', 'no-op')
 
