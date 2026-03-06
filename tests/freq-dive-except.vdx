@@ -4,5 +4,5 @@ col Customer
 freq-col
 row 0
 dive-except
-col Date
+col SKU
 sort-asc
