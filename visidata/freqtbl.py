@@ -47,6 +47,8 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
 
 - `Enter` to open a copy of the source sheet, with only the rows in the current bin.
 - `g Enter` to open a copy of the source sheet, with a combination of the rows from all selected bins.
+- `zEnter` to open a copy of the source sheet, with all rows *except* those in the current bin.
+- `gzEnter` to open a copy of the source sheet, with all rows *except* those in selected bins.
 
 ## Tips
 
@@ -155,7 +157,6 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
     def openRows(self, rows):
         vs = copy(self.source)
         vs.names = vs.names + ["several"]
-        vs.source = self
         vs.rows = list(itertools.chain.from_iterable(row.sourcerows for row in rows))
         return vs
 
@@ -196,6 +197,8 @@ vd.addMenuItem('Data', 'Frequency table', 'current row', 'freq-row')
 FreqTableSheet.addCommand('gu', 'unselect-rows', 'unselect(selectedRows)', 'unselect all source rows grouped in current row')
 FreqTableSheet.addCommand('gEnter', 'dive-selected', 'vd.push(openRows(selectedRows))', 'open copy of source sheet with rows that are grouped in selected rows')
 FreqTableSheet.addCommand('', 'select-first', 'for r in rows: source.select([r.sourcerows[0]])', 'select first source row in each bin')
+FreqTableSheet.addCommand('zEnter', 'dive-except', 'vd.push(openRows([r for r in rows if r is not cursorRow]))', 'open copy of source sheet excluding rows in current bin')
+FreqTableSheet.addCommand('gzEnter', 'dive-except-selected', 'vd.push(openRows([r for r in rows if r not in selectedRows]))', 'open copy of source sheet excluding rows in selected bins')
 FreqTableSheet.bindkey('p', 'no-op')  #freqtbl rows aren't designed to allow pasting, so the default paste commands cause errors
 FreqTableSheet.bindkey('P', 'no-op')
 

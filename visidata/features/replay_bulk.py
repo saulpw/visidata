@@ -26,8 +26,8 @@ def replay_reset(vs):  # noqa: ARG001
 @BaseSheet.api
 def replay_end(vs):  # noqa: ARG001
     'Reset state for next test (no output).'
-    elapsed = time.time() - vd.replay_start_time
-    print(f'{elapsed:.1f}s  {vd.replay_output_path}')
+    if vd.options.debug:
+        print(f'{time.time() - vd.replay_start_time:.1f}s  {vd.replay_output_path}')
 
 @VisiData.before
 def status(vd, *args, priority=0):
@@ -40,8 +40,8 @@ def replay_output(vs):
     outpath = Path(vd.replay_output_path)
     vd.saveSheets(outpath, vs, confirm_overwrite=False)
     vd.sync()
-    elapsed = time.time() - vd.replay_start_time
-    print(f'{elapsed:.1f}s  {vd.replay_output_path}')
+    if vd.options.debug:
+        print(f'{time.time() - vd.replay_start_time:.1f}s  {vd.replay_output_path}')
 
 
 @BaseSheet.api

@@ -52,7 +52,7 @@ All three formats allow `#` line comments.
 **Test output:** `tests/output/testname.ext` — actual output from the latest test run (gitignored, never committed). Compare against golden with `diff tests/golden/name.ext tests/output/name.ext`.
 
 **Conventions:**
-- `-nosave` suffix (e.g., `issue2225-nosave.vdx`) skips golden comparison; runs in a separate batch without `replay_ignore_errors`, so `assert-expr` failures are caught. Use for tests that verify internal state via assertions rather than output comparison.
+- `-nosave` suffix (e.g., `issue2225-nosave.vdx`) skips golden comparison; runs in a separate batch without `replay_ignore_errors`, so `assert-expr` failures are caught. Use for tests that verify internal state via assertions rather than output comparison. Also required for graph/canvas tests, since the pixel buffer is not populated in batch mode (cursor-based commands are no-ops).
 - `-broken` suffix skips the test entirely
 - `-manual` suffix skips the test entirely (for tests not suitable for automation but worth keeping)
 - `-perf` suffix skips the test in `test.sh`; run separately via `dev/perftest.sh`
@@ -61,6 +61,7 @@ All three formats allow `#` line comments.
 - Tests should modify data and provide golden output file, rather than using `assert-expr` commands
 - Set explicit cursor positions (e.g., `row 6`) rather than relying on defaults, for test hygiene
 - Explicit saving is not necessary, as the test harness will save the top sheet to the proper output file
+- Never fetch from the network in tests; use local fixture files instead (flaky connections cause spurious CI failures)
 
 **Creating a new golden test:**
 1. Write a `.vdx` file in `tests/` (simplest format)

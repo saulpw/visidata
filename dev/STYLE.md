@@ -472,3 +472,9 @@ See `visidata/features/pypkg.py` for a complete, real-world example.
 - `visidata/sheet.py` - Core Sheet class
 - `visidata/column.py` - Column definitions
 - `visidata/main.py` - Application entry point
+
+## Tests
+
+### Prefer `.vdx` over `.vd` for new tests
+
+New golden tests should use the `.vdx` format (one command per line) rather than the `.vd` cmdlog format (tab-separated columns). `.vdx` is much more readable and easier to write.
