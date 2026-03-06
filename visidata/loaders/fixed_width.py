@@ -39,7 +39,7 @@ class FixedWidthColumn(WritableColumn):
         value = str(value)[:j-self.i]
         row[0] = row[0][:self.i] + '%-*s' % (j-self.i, value) + row[0][j:]
 
-def columnize(rows):
+def columnize(rows, has_header=True):
     'Generate (i,j) indexes for fixed-width columns found in rows'
 
     if not rows:
@@ -47,16 +47,19 @@ def columnize(rows):
 
     # Use first row (header) to determine column positions  #2265
     # This prevents data with internal spaces from creating false column splits
-    header = rows[0]
+    # With no header (header=0), find columns where ALL rows have spaces  #2265
+    if has_header:
+        detect_rows = [rows[0]]
+    else:
+        detect_rows = rows
+
     colstarts = []
-    in_space = True
-    for i, ch in enumerate(header):
-        if not ch.isspace():
-            if in_space:
+    maxlen = max(len(r) for r in detect_rows)
+    for i in range(maxlen):
+        all_space = all(i >= len(r) or r[i].isspace() for r in detect_rows)
+        if not all_space:
+            if i == 0 or all(i-1 >= len(r) or r[i-1].isspace() for r in detect_rows):
                 colstarts.append(i)
-            in_space = False
-        else:
-            in_space = True
 
     if not colstarts:
         return
@@ -97,7 +100,7 @@ class FixedWidthColumnsSheet(SequenceSheet):
         maxcols = self.options.fixed_maxcols
         self.columns = []
         fixedRows = list([x] for x in self.optlines(itsource, 'fixed_rows'))
-        for i, j in columnize(list(r[0] for r in fixedRows)):
+        for i, j in columnize(list(r[0] for r in fixedRows), has_header=bool(self.options.header)):
             if maxcols and self.nCols >= maxcols-1:
                 self.addColumn(FixedWidthColumn('', i, None))
                 break
