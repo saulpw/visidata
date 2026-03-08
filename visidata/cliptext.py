@@ -324,6 +324,7 @@ def wraptext(text, width=80, indent=''):
     '''
     Word-wrap `text` and yield (formatted_line, textonly_line) for each line of at most `width` characters.
     Formatting like `[:color]text[/]` is ignored for purposes of computing width, and not included in `textonly_line`.
+    Markup that spans multiple lines, is automatically applied to each individual component line. But markup-escaping formatting (see literal_markup_re) is not.
     '''
     import re
 
@@ -355,7 +356,12 @@ def wraptext(text, width=80, indent=''):
                     line_tags.pop()
         active_tags = line_tags
 
-        textchunks = [x for x in chunks if not is_vdcode(x)]
+        textchunks = []
+        for chunk in chunks:  # 3 kinds of chunk:  marked-literal text, markup, and regular text
+            if is_marked_literal(chunk):
+                textchunks.append(chunk[1:-1])
+            elif not is_vdcode(chunk):
+                textchunks.append(chunk)
         linetext = ''.join(textchunks)
         if linetext == '':  #for markup with no contents, like '[:tag][/]' or '[:]' or '[/]'
             yield '', ''
@@ -372,10 +378,10 @@ def wraptext(text, width=80, indent=''):
                     break
 
                 #if we got here, then len(c) <= len(wrapped_remainder)
-                if len(chunks) == 1:
+                if len(chunks) == 1:  #the last chunk is regular text
                     marked_up += chunks.pop(0)   #the while-loop terminates here
-                else:
-                    #the first chunk is text (or the empty string), and the second chunk is markup like '[:tag]'
+                else:  #if there are multiple chunks, the line contains markup tags or escaped text
+                    #the first chunk is text (or the empty string), and the second chunk is either escaped text or markup
                     chunks.pop(0)
                     marked_up += wrapped_remainder[:len(c)] + chunks.pop(0)
                     wrapped_remainder = wrapped_remainder[len(c):]
