@@ -282,3 +282,17 @@ class TestClipText:
     def test_wraptext_color_spans_lines(self, text, width, expected):
         result = list(visidata.wraptext(text, width=width))
         assert result == expected
+
+    @pytest.mark.parametrize('text, width, expected', [
+        # escaped plain text lacking markup, to demonstrate
+        ('\uFFF9.:bold.a.:.123\uFFFb', 10,
+         [('\uFFF9.:bold.a.:.123\uFFFb', '.:bold.a.:'),
+          ('', '.123')]),
+        # escaped markup wraps just like the example above
+        ('\uFFF9[:bold]a[:]123\uFFFb', 10,
+         [('\uFFF9[:bold]a[:]123\uFFFb', '[:bold]a[:'),
+          ('', ']123')]),
+    ])
+    def test_wraptext_color_spans_lines(self, text, width, expected):
+        result = list(visidata.wraptext(text, width=width))
+        assert result == expected
