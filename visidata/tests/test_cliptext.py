@@ -271,6 +271,13 @@ class TestClipText:
         # single line with markup (should work as before)
         ('[:error]oops[/]', 80,
          [('[:error]oops[/]', 'oops')]),
+        # nested tags spanning lines, closed with [:]
+        ('[:bold]a\n[:error]b\nc[:]\nd [:bold]e[/]', 80,
+         [('[:bold]a[/]', 'a'),
+          ('[:bold][:error]b[/][/]', 'b'),
+          ('[:bold][:error]c[:]', 'c'),
+          ('d [:bold]e[/]', 'd e'),
+         ]),
     ])
     def test_wraptext_color_spans_lines(self, text, width, expected):
         result = list(visidata.wraptext(text, width=width))

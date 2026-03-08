@@ -347,10 +347,12 @@ def wraptext(text, width=80, indent=''):
         for chunk in chunks:
             if is_vdcode(chunk):
                 if chunk.startswith('[:'):
-                    line_tags.append(chunk)
-                elif chunk.startswith('[/'):
-                    if line_tags:
-                        line_tags.pop()
+                    if chunk[2] == ']' and line_tags:
+                        line_tags = []
+                    else:
+                        line_tags.append(chunk)
+                elif chunk.startswith('[/') and line_tags:
+                    line_tags.pop()
         active_tags = line_tags
 
         textchunks = [x for x in chunks if not is_vdcode(x)]
@@ -386,7 +388,11 @@ def wraptext(text, width=80, indent=''):
                 for part in re.split(internal_markup_re, marked_up):
                     if is_vdcode(part):
                         if part.startswith('[:'):
-                            open_in_marked_up.append(part)
+                            if part[2] == ']':
+                                if open_in_marked_up:
+                                    open_in_marked_up = []
+                            else:
+                                open_in_marked_up.append(part)
                         elif part.startswith('[/') and open_in_marked_up:
                             open_in_marked_up.pop()
                 marked_up += '[/]' * len(open_in_marked_up)
