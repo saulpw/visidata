@@ -78,7 +78,15 @@ We've started doing this for PRs also. It's a bit of clutter but it helps:
 
 Commit before posting GitHub comments/replies. Let Saul push first, then post the comment. Don't post replies to issues before the relevant code is committed and pushed.
 
-AI-generated comments should have the model attribution at the bottom (e.g. `[Claude Opus 4.6]`), not the top.
+AI-generated comments should have the full attribution at the bottom: `[this message written by Claude Opus 4.6 and approved by @saulpw]`.
+
+### Closing Issues for Implemented Features
+
+When closing an issue for a feature that's already been implemented, the comment should include:
+- A link to the implementing commit(s)
+- Links to relevant documentation pages
+- A brief example of how to use the feature (matching the original request if possible)
+- Label wishlist issues with `wish granted` when closing
 
 ## Branch and Merge Workflow
 
