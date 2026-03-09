@@ -1,3 +1,5 @@
+'Adwaita theme with light and dark variants using 256-colors.'
+
 from visidata import vd
 
 vd.themes["adwaita_light"] = dict(
@@ -9,6 +11,7 @@ vd.themes["adwaita_light"] = dict(
     color_current_hdr="bold reverse",
     color_column_sep="7 on 15",
     color_key_col="26 blue",
+    color_edit_cell="26 blue",
     color_selected_row="0 on 111",
     color_note_row="178 yellow",
     color_note_type="26 blue",
@@ -36,6 +39,7 @@ vd.themes["adwaita_dark"] = dict(
     color_current_hdr="bold reverse",
     color_column_sep="59 on 234",
     color_key_col="68 blue",
+    color_edit_cell="68 blue",
     color_selected_row="234 on 15",
     color_note_row="214 yellow",
     color_note_type="68 blue",
