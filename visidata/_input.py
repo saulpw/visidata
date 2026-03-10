@@ -1,5 +1,6 @@
 from contextlib import suppress
 import curses
+import json
 
 import visidata
 

@@ -1,4 +1,4 @@
-Date	Date_month	Date_day	Date_year	Date_hour	Date_min	Date_meridiem	Customer	SKU	Item	Quantity	Unit	Paid
+Date	Date_re.month	Date_re.day	Date_re.year	Date_re.hour	Date_re.min	Date_re.meridiem	Customer	SKU	Item	Quantity	Unit	Paid
 7/3/2018 1:47p	7	3	2018	1	47	p	Robert Armstrong	FOOD213	BFF Oh My Gravy! Beef & Salmon 2.8oz	4	$12.95	$51.8
 7/3/2018 3:32p	7	3	2018	3	32	p	Kyle Kennedy	FOOD121	Food, Adult Cat - 3.5 oz	1	$4.22	$4.22
 7/5/2018 4:15p	7	5	2018	4	15	p	Douglas "Dougie" Powers	FOOD121	Food, Adult Cat 3.5 oz	1	$4.22	$4.22

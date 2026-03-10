@@ -1,6 +1,6 @@
 sheet	col	row	longname	input	keystrokes	comment
 			open-file	sample_data/benchmark.csv	o	
 benchmark			select-rows		gs	
-benchmark			setcol-subst-all	food/nutri	gz*	
-benchmark	SKU		setcol-subst	nutri/NUTRI	g*	
+benchmark			setcol-regex-subst-all	{"before":"food","after":"nutri"}	gz*
+benchmark	SKU		setcol-regex-subst	{"before":"nutri","after":"NUTRI"}	g*
 benchmark			unselect-rows		gu	
