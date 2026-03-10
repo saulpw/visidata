@@ -148,7 +148,7 @@ class HtmlTableSheet(Sheet):
                     continue
                 cellval = ' '.join(x.strip() for x in cell.itertext())  # text only without markup
                 links = [
-                    vd.callNoExceptions(urllib.parse.urljoin, self.source.base_url, x.get('href')) or x.get('href')
+                    vd.callIgnoreExceptions(urllib.parse.urljoin, self.source.base_url, x.get('href')) or x.get('href')
                         for x in cell.iter('a')
                 ]
 

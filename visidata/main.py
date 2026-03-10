@@ -508,7 +508,8 @@ def main_vd():
 
     saver_threads = [t for t in vd.unfinishedThreads if t.name.startswith('save_')]
     if saver_threads:
-        vd.printerr('finishing %d savers' % len(saver_threads))
+        if not options.batch:
+            vd.printerr('finishing %d savers' % len(saver_threads))
         vd.sync(*saver_threads)
 
     vd._stdout.flush()

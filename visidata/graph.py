@@ -409,6 +409,13 @@ GraphSheet.addCommand('zy', 'erase-refline-y', 'sheet.erase_refline_y()', 'remov
 GraphSheet.addCommand('gzx', 'erase-reflines-x', 'sheet.reflines_x = []; sheet.refresh()', 'erase all vertical x-value lines')
 GraphSheet.addCommand('gzy', 'erase-reflines-y', 'sheet.reflines_y = []; sheet.refresh()', 'erase any horizontal y-value lines')
 
+@GraphSheet.after
+def reload(sheet):
+    if not vd.cursesEnabled:
+        sheet.resetCanvasDimensions(25, 80)
+        sheet.resetBounds(refresh=False)
+        sheet.plot_elements(invert_y=True)
+
 vd.addGlobals({
     'GraphSheet': GraphSheet,
     'InvertedCanvas': InvertedCanvas,
