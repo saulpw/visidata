@@ -1,5 +1,54 @@
 # Testing
 
+## Running all tests
+
+`dev/test-all.sh` is the top-level test runner. It discovers and runs all `tests/test-*.sh` scripts, prefixes each script's output with its name, and reports pass/fail.
+
+```bash
+dev/test-all.sh                        # run all test scripts
+dev/test-all.sh tests/test-vdx.sh      # run a specific test script
+dev/test-all.sh tests/test-smoke.sh tests/test-macros.sh  # run several
+```
+
+Each `tests/test-*.sh` script is self-contained and can also be run directly.
+
+### Environment variables
+
+Defined in `tests/testenv.sh`, which all test scripts source. `test-all.sh` re-exports them for child processes.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PYTHON` | `python3` | Python interpreter |
+| `VD` | `$PYTHON -m visidata --config tests/.visidatarc --visidata-dir tests/.visidata` | VisiData command with stock test config |
+| `NPROCS` | `$(nproc)` | Parallel test processes |
+| `OUTDIR` | `tests/output` | Directory for test output files |
+
+Use `$VD` in test scripts instead of hardcoding `bin/vd` or `python -m visidata`. Both paths call the same `vd_cli()` entry point; `$PYTHON -m visidata` is preferred because it's explicit about which Python interpreter is used. `$VD` includes `--config` and `--visidata-dir` so tests are isolated from the user's personal config.
+
+### Test scripts
+
+| Script | What it tests |
+|--------|--------------|
+| `test-vdx.sh` | Golden tests: replays all `tests/*.vd*` files via `dev/test.sh` |
+| `test-pytest.sh` | Python unit tests via pytest |
+| `test-smoke.sh` | Basic startup and directory opening |
+| `test-macros.sh` | Macro replay (#1652) |
+| `test-startpos.sh` | CLI `+N`/`+col:row` positioning (#2425) |
+| `test-startup-time.sh` | Startup under 400ms (#2216) |
+| `test-stdin.sh` | Stdin piping (#1978) |
+| `test-stdin-replay.sh` | Replaying with stdin input |
+| `test-zsh-syntax.sh` | Zsh completion generation |
+
+### Writing a new test script
+
+1. Create `tests/test-name.sh` (must match `tests/test-*.sh` glob)
+2. `source tests/testenv.sh` at the top
+3. Use `$VD --batch ...` for VisiData invocations (config flags already included)
+4. Use `$OUTDIR` for output files, `mkdir -p $OUTDIR` if needed
+5. Exit non-zero on failure
+
+---
+
 VisiData has two test systems:
 
 ## 1. Golden tests (integration/replay tests)
@@ -67,8 +116,8 @@ All three formats allow `#` line comments.
 1. Write a `.vdx` file in `tests/` (simplest format)
 2. Generate the golden output:
    ```bash
-   PYTHONPATH=. bin/vd --play tests/mytest.vdx --batch --output tests/golden/mytest.tsv \
-       --config tests/.visidatarc --visidata-dir tests/.visidata
+   source tests/testenv.sh
+   $VD --play tests/mytest.vdx --batch --output tests/golden/mytest.tsv
    ```
 3. Review the golden output, then run `dev/test.sh mytest` to confirm it passes
 
@@ -154,5 +203,6 @@ cd visidata/apps/vdsql && bash test.sh unselect   # run a single test
 
 # Test Configuration
 
-- `tests/.visidatarc` — test-specific options
-- `tests/.visidata/` — test-specific visidata directory
+- `tests/testenv.sh` — common environment variables sourced by all test scripts
+- `tests/.visidatarc` — test-specific options (loaded via `$VD`)
+- `tests/.visidata/` — test-specific visidata directory (loaded via `$VD`)
