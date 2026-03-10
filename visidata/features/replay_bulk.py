@@ -67,7 +67,7 @@ def allow_error(vs, pattern:str):  # noqa: ARG001
 @BaseSheet.api
 def replay_exit(vs):  # noqa: ARG001
     'Exit cleanly at end of batch replay.'
-    pass
+    vd.sheets.clear()
 
 
 BaseSheet.addCommand('', 'replay-reset', 'replay_reset()', 'initialize test state for a test', testable=False)
