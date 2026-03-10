@@ -41,7 +41,7 @@ class UnfurledSheet(Sheet):
                     # the exception on its own lacks clarity
                     yield [row, TypedExceptionWrapper(None, exception=e), TypedExceptionWrapper(None, exception=e)]
                 else:
-                    vd.exceptionCaught(e)
+                    vd.exceptionCaught(e, status=False)
                 continue
 
             if not isinstance(val, Iterable) or isinstance(val, str):
