@@ -4,7 +4,7 @@ import visidata
 from visidata import VisiData
 
 @VisiData.api
-def getStatusSource(vd):
+def getStatusSource(vd) -> str:
     if not vd.options.debug:
         return ''
     stack = inspect.stack(context=0)  #2370

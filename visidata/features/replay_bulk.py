@@ -1,3 +1,4 @@
+import re
 import time
 
 from visidata import vd, BaseSheet, Path, VisiData
@@ -5,6 +6,7 @@ from visidata import vd, BaseSheet, Path, VisiData
 vd.replay_output_path = ''  # output path set by replay-reset, used by replay-output
 vd.replay_line = 0  # current line number within a test
 vd.replay_start_time = 0  # timestamp when current test started
+vd.replay_allowed_errors = []  # set by allow-error, checked by status hook
 
 
 @VisiData.before
@@ -21,6 +23,8 @@ def replay_reset(vs):  # noqa: ARG001
     vd.replay_output_path = p
     vd.replay_line = 0
     vd.replay_start_time = time.time()
+    vd.replay_allowed_errors = []
+    vd.statusHistory.clear()  # clear for cross-test isolation
 
 
 @BaseSheet.api
@@ -29,10 +33,20 @@ def replay_end(vs):  # noqa: ARG001
     if vd.options.debug:
         print(f'{time.time() - vd.replay_start_time:.1f}s  {vd.replay_output_path}')
 
-@VisiData.before
-def status(vd, *args, priority=0):
+_default_printStatus = VisiData.printStatus
+
+@VisiData.api
+def printStatus(vd, *args, priority=0, source=None):
+    'Print labeled status during bulk replay; default stderr otherwise.'
     if priority > 0 and vd.replay_output_path:
-        print(f'{vd.replay_output_path}:{vd.replay_line}: {args[0]}')
+        msg = str(args[0])
+        allowed = any(re.search(p, msg) for p in vd.replay_allowed_errors)
+        if not allowed:
+            print(f'{vd.replay_output_path}:{vd.replay_line}: {msg}')
+        elif vd.options.debug:
+            print(f'{vd.replay_output_path}:{vd.replay_line}: {msg} (expected)')
+    else:
+        _default_printStatus(vd, *args, priority=priority, source=source)
 
 @BaseSheet.api
 def replay_output(vs):
@@ -45,12 +59,19 @@ def replay_output(vs):
 
 
 @BaseSheet.api
+def allow_error(vs, pattern:str):  # noqa: ARG001
+    'suppress expected error messages matching regex pattern during batch replay'
+    vd.replay_allowed_errors.append(pattern)
+
+
+@BaseSheet.api
 def replay_exit(vs):  # noqa: ARG001
     'Exit cleanly at end of batch replay.'
     pass
 
 
-BaseSheet.addCommand('', 'replay-reset', 'replay_reset()', 'initialize test state for a test')
-BaseSheet.addCommand('', 'replay-end', 'replay_end()', 'reset state for test runner (no output)')
-BaseSheet.addCommand('', 'replay-output', 'replay_output()', 'save output and reset state for test runner')
-BaseSheet.addCommand('', 'replay-exit', 'replay_exit()', 'exit cleanly at end of batch replay')
+BaseSheet.addCommand('', 'replay-reset', 'replay_reset()', 'initialize test state for a test', testable=False)
+BaseSheet.addCommand('', 'replay-end', 'replay_end()', 'reset state for test runner (no output)', testable=False)
+BaseSheet.addCommand('', 'replay-output', 'replay_output()', 'save output and reset state for test runner', testable=False)
+BaseSheet.addCommand('', 'replay-exit', 'replay_exit()', 'exit cleanly at end of batch replay', testable=False)
+BaseSheet.addCommand('', 'allow-error', 'allow_error(vd.input("allow error: "))', 'suppress expected error messages matching regex pattern', testable=False)

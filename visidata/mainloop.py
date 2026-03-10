@@ -6,7 +6,7 @@ import signal
 import threading
 import time
 
-from visidata import vd, VisiData, colors, ESC, options, BaseSheet, AttrDict
+from visidata import vd, VisiData, colors, ESC, options, BaseSheet, AttrDict, stacktrace
 
 __all__ = ['ReturnValue', 'run']
 
@@ -29,6 +29,17 @@ def callNoExceptions(vd, func, *args, **kwargs):
         return func(*args, **kwargs)
     except Exception as e:
         vd.exceptionCaught(e)
+
+
+@VisiData.api
+def callIgnoreExceptions(vd, func, *args, **kwargs):
+    'Catch and ignore any raised exceptions.  Log as errors when options.debug.'
+    try:
+        return func(*args, **kwargs)
+    except Exception as e:
+        if vd.options.debug:
+            vd.lastErrors.append(stacktrace(exclude_caller=True))
+            vd.status(f'{type(e).__name__}: {e}', priority=2)
 
 
 @VisiData.api
