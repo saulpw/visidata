@@ -27,66 +27,14 @@ jobs:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
 
-    - name: Set up Environment
+    - name: Install VisiData with test dependencies
       run: |
-        export PYTHONPATH=~/visidata:~/visidata/visidata
-        locale
-
-    - name: Install Base VisiData
-      run: pip3 install .
-
-    - name: Ensure VisiData works with Base Dependencies
-      run: vd --version
-
-    - name: Ensure VisiData can load a dir
-      run: vd . --batch
-
-    - name: Test startup time less than 400ms
-      run: |
-        /usr/bin/time -f "%U" -o /tmp/vd_start_time vd -b -N -p dev/quit.vdx
-        (( $(echo "$(cat /tmp/vd_start_time) < 0.40" | bc -l) ))
-
-
-# Apt packages are slow to install, often taking up to a minute.
-# lxml dependencies are unneeded when installing lxml via pip
-#    - name: Install lxml dependencies
-#      run: sudo apt install -y libxml2-dev libxslt-dev
-# only needed for testing open-ping, which isn't tested currently anyway
-#    - name: Install ping dependencies
-#      run: sudo apt install -y traceroute
-#
-    - name: Install optional dependencies
-      run: |
+        pip3 install .
         pip3 install ".[test]"
         pip3 install pytest
 
-    - name: Run unit tests
-      run: |
-        pytest -sv visidata/tests/
-
-    - name: Run Cmdlog Tests in parallel
-      run: dev/test.sh -j $(nproc)
-      shell: bash
-
-    - name: Test macros
-      run: |
-        XDG_DATA_HOME=tests/xdg/data XDG_CONFIG_HOME=tests/xdg/config vd --batch -p tests/macros/test_macro.vd --output tests/macros/golden/test_macro.tsv
-        git --no-pager diff --numstat tests/
-        git --no-pager diff --exit-code tests/
-
-    - name: Test replaying input from stdin
-      run: |
-          echo -e '{"a":1}\n{"a":2}' | vd -f jsonl -p dev/stdin.vdj --batch --debug -N
-
-    - name: Ensure VisiData can create completions
-      run: python -v dev/zsh-completion.py
-
-    - name: Ensure VisiData does not drop lines from RepeatFiles
-      run: |
-        NUMLINES=$(seq 10000 | vd -b | wc -l)
-        if ! [[ $NUMLINES -eq 10000 ]]; then
-            exit 1
-        fi
+    - name: Run tests
+      run: dev/test-all.sh
 
   unit-tests:
 
@@ -105,17 +53,11 @@ jobs:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
 
-    - name: Install Base VisiData
-      run: pip3 install .
-
-    - name: Ensure VisiData works with Base Dependencies
-      run: vd --version
-
-    - name: Install test dependencies
+    - name: Install VisiData with test dependencies
       run: |
+        pip3 install .
         pip3 install ".[test]"
         pip3 install pytest
 
     - name: Run unit tests
-      run: |
-        pytest -sv visidata/tests/
+      run: tests/test-pytest.sh
