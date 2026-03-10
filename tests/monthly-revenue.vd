@@ -1,8 +1,10 @@
 sheet	col	row	longname	input	keystrokes	comment
 			open-file	sample_data/benchmark.csv	o	
-benchmark	Date	0	capture-col	(\d+/\d+)	;	
-benchmark	Date		hide-col		-	
-benchmark	Date_re0		rename-col	Date	^	
+benchmark	Date	0	addcol-capture	(\d+/\d+)	;
+benchmark	Date_re		expand-col		(
+benchmark	Date_re		hide-col		-
+benchmark	Date		hide-col		-
+benchmark	Date_re[0]		rename-col	Date	^
 benchmark	Paid		type-currency		$	
 benchmark	Paid		aggregate-col	sum	+	
 benchmark	Date		freq-col		F	
