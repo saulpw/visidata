@@ -36,6 +36,7 @@ nonTested = (
         'open-url',
         'open-repl',
         'open-tutorial',
+        'git-',
         )
 
 def isTestableCommand(longname, cmdlist):
@@ -144,6 +145,8 @@ class TestCommands:
         for longname in longnames:
             cmd = vs.getCommand(longname)
             if cmd and cmd.deprecated:
+                continue
+            if cmd and not getattr(cmd, 'testable', True):
                 continue
             if not isTestableCommand(longname, cmdlist):
                 continue

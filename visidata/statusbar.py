@@ -84,8 +84,18 @@ def statusHistory(vd):
     return list()  # list of [priority, statusmsg, repeats] for all status messages ever
 
 @VisiData.api
-def getStatusSource(vd):
-    return None
+def getStatusSource(vd) -> str:
+    return ''
+
+
+@VisiData.api
+def printStatus(vd, *args, priority=0, source=None):
+    'Print status to stderr in batch mode. Overridable by plugins.'
+    if priority > 0:
+        msg = '\r' + composeStatus(args)
+        if vd.options.debug:
+            msg += f' [{source}]'
+        builtins.print(msg, file=sys.stderr)
 
 
 @VisiData.api
@@ -99,11 +109,8 @@ def status(vd, *args, priority=0):
 
     source = vd.getStatusSource()
 
-    if not vd.cursesEnabled and priority > 0:
-        msg = '\r' + composeStatus(args)
-        if vd.options.debug:
-            msg += f' [{source}]'
-        builtins.print(msg, file=sys.stderr)
+    if not vd.cursesEnabled:
+        vd.printStatus(*args, priority=priority, source=source)
 
     return vd.addToStatusHistory(*args, priority=priority, source=source)
 

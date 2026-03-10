@@ -118,6 +118,12 @@ Sheet.addCommand('zEnter', 'open-cell', 'vd.push(openCell(cursorCol, cursorRow))
 
 Never reference exec locals (like `cursorRow`) inside a list comprehension filter in an execstr — it breaks on Python < 3.12. Extract to a `@Sheet.api` method instead.
 
+### addCommand kwargs
+
+- `replay=False` — command is not added to cmdlog by default (e.g. requires curses)
+- `deprecated=True` — command is deprecated and hidden from help
+- `testable=False` — exclude from `test_commands.py` automated sweep (for test infrastructure commands, commands that require external state, etc.)
+
 ### execstr Input Limitation
 An execstr can only call `input()` once per command execution, since replay provides a single input string. If a command needs multiple parameters, take them as a single input and split.
 

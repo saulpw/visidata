@@ -121,13 +121,14 @@ class SettingsMgr(collections.OrderedDict):
 
 
 class Command:
-    def __init__(self, longname, execstr, helpstr='', module='', replay=True, deprecated=False):
+    def __init__(self, longname, execstr, helpstr='', module='', replay=True, deprecated=False, testable=True):
         self.longname = longname
         self.execstr = execstr
         self.helpstr = helpstr
         self.module = module
         self.deprecated = deprecated
         self.replayable = replay
+        self.testable = testable
 
 
 class Option:
