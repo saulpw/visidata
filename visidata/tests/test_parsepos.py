@@ -6,13 +6,13 @@ def test_parsePos():
     inputs = [('foo.csv', {})]
 
     assert vd.parsePos('') is None
-    assert vd.parsePos('2', inputs=inputs) == ([-1], None, '2')  # +row with inputs: last sheet
+    assert vd.parsePos('2', inputs=inputs) == ([0], None, '2')  # +row with inputs: last sheet (index 0)
     assert vd.parsePos('2', inputs=None) == (None, None, '2')  # +row without inputs: current sheet
-    assert vd.parsePos('-1', inputs=inputs) == ([-1], None, '-1')  # negative row index stays as string
-    assert vd.parsePos('1:', inputs=inputs) == ([-1], 1, None)  # +col:
-    assert vd.parsePos(':2', inputs=inputs) == ([-1], None, 2)  # +:row
-    assert vd.parsePos('1:2', inputs=inputs) == ([-1], 1, 2)  # +col:row
-    assert vd.parsePos('name:value', inputs=inputs) == ([-1], 'name', 'value')  # string col:row
+    assert vd.parsePos('-1', inputs=inputs) == ([0], None, '-1')  # negative row index stays as string
+    assert vd.parsePos('1:', inputs=inputs) == ([0], 1, None)  # +col:
+    assert vd.parsePos(':2', inputs=inputs) == ([0], None, 2)  # +:row
+    assert vd.parsePos('1:2', inputs=inputs) == ([0], 1, 2)  # +col:row
+    assert vd.parsePos('name:value', inputs=inputs) == ([0], 'name', 'value')  # string col:row
     assert vd.parsePos(':1:', inputs=inputs) == ([], 1, None)  # +:col: all sheets
     assert vd.parsePos(':1:2') == ([], 1, 2)  # +:col:row all sheets
     assert vd.parsePos('::2') == ([], None, 2)  # +::row all sheets

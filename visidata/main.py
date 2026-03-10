@@ -117,10 +117,10 @@ def parsePos(vd, arg:str, inputs:'list[tuple[str, dict]]'=None):
 
     if len(pos) == 1:
         # -1 means the last sheet in the list of open sheets
-        startsheets = [-1] if inputs else None
+        startsheets = [len(inputs) - 1] if inputs else None
         startrow = arg
     elif len(pos) == 2:
-        startsheets = [-1] if inputs else None
+        startsheets = [len(inputs) - 1] if inputs else None
         startcol, startrow = pos
     else:
         # the first element of pos is the startsheet,
@@ -220,9 +220,13 @@ def sheet_from_description(vd, sources, sheet_desc):
             vd.options.set('load_lazy', True, obj=vs)
             vd.sync(vs.ensureLoaded())
             vd.clearCaches()
-    # use load=False to avoid calling afterLoad() early, before queue_move_to_pos
-    # can replace the default afterLoad with a wrapped version
-    vd.push(vs, load=False)
+    # Only push for subsheet navigation or sheets not already on the stack.
+    # For single-level moves (cursor positioning on an existing source),
+    # don't change the stack order — just return the sheet for cursor moves.
+    if len(sheet_desc) > 1 or vs not in vd.sheets:
+        # use load=False to avoid calling afterLoad() early, before queue_move_to_pos
+        # can replace the default afterLoad with a wrapped version
+        vd.push(vs, load=False)
     return vs
 
 @visidata.VisiData.api
@@ -238,6 +242,8 @@ def queue_move_to_pos(vd, sources, moves):
             if not hasattr(vs, '_startpos_moves'):
                 vs._startpos_moves = []
             vs._startpos_moves.append((sources, move))
+            if vd.options.batch:
+                vd.sync(vs.ensureLoaded())
 
 def attempt_move_to_pos(vd, sources, sheet_desc, startcol, startrow):
     '''Return True if the move succeeded in moving to the row and column, on the described sheet.
@@ -451,6 +457,10 @@ def main_vd():
             vd.cmdlog.openHook(vd.currentDirSheet, vd.currentDirSheet.source)
 
     if not args.play:
+        if options.batch:
+            if sources:
+                vd.push(sources[0])
+
         # process the moves in order of increasing length of sheet desc,
         # so that every sheet loads (and executes its moves in afterLoad)
         # before its subsheets require it to be loaded
@@ -458,10 +468,6 @@ def main_vd():
             vd.moveToPos(sources, *move)
         if sheet_moves:  #redo the last move in the argument list, to show the sheet
             vd.moveToPos(sources, *sheet_moves[-1])
-
-        if options.batch:
-            if sources:
-                vd.push(sources[0])
 
         if not options.batch:
             run(vd.sheets[0])
