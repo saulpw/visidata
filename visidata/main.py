@@ -481,7 +481,7 @@ def main_vd():
 
         vs = eval_vd(vdfile, *fmtargs, **fmtkwargs)
         if options.batch:
-            if not args.debug:
+            if not args.debug and sys.stderr.isatty() and not os.environ.get('NO_COLOR'):
                 vd.outputProgressThread = visidata.VisiData.execAsync(vd, vd.outputProgressEvery, vs, seconds=0.5, sheet=BaseSheet())  #1182
             vd.reloadMacros()
             if vd.replay_sync(vs):  # error
@@ -543,3 +543,5 @@ def vd_cli():
         threading.current_thread().profile.dump_stats('vd.pyprof')
     elif not vd.options.debug:
         os._exit(rc)  # cleanup can be expensive with large datasets
+
+    sys.exit(rc)
