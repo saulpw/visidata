@@ -26,6 +26,7 @@ vd.option('config', vd.config_file, 'config file to exec in Python', sheettype=N
 vd.option('play', '', 'file.vdj to replay')
 vd.option('batch', False, 'replay in batch mode (with no interface and all status sent to stdout)')
 vd.option('output', None, 'save the final visible sheet to output at the end of replay')
+vd.option('output_cell', None, 'output the cursor cell display value at exit')
 vd.option('preplay', '', 'longnames to preplay before replay')
 vd.option('imports', 'plugins', 'imports to preload before .visidatarc (command-line only)')
 vd.option('nothing', False, 'no config, no plugins, nothing extra')
@@ -65,7 +66,7 @@ def duptty():
         stdin = open(os.dup(0),
                      encoding=vd.options.getonly('encoding', 'global', 'utf-8'),
                      errors=vd.options.getonly('encoding_errors', 'global', 'surrogateescape'))  #2047
-        stdout = open(os.dup(1))  # for dumping to stdout from interface
+        stdout = open(os.dup(1), mode='w')  # for dumping to stdout from interface
         os.dup2(fin.fileno(), 0)
         os.dup2(fout.fileno(), 1)
 
@@ -85,6 +86,7 @@ vd.optalias('p', 'play')
 vd.optalias('b', 'batch')
 vd.optalias('P', 'preplay')
 vd.optalias('o', 'output')
+vd.optalias('O', 'output_cell')
 vd.optalias('w', 'replay_wait')
 vd.optalias('d', 'delimiter')
 vd.optalias('c', 'config')
@@ -490,9 +492,13 @@ def main_vd():
             vd.replay(vs)
             run()
 
-    if vd.stackedSheets and (flPipedOutput or args.output):
+    if vd.stackedSheets and (flPipedOutput or args.output) and not args.output_cell:
         outpath = Path(args.output or '-')
         vd.saveSheets(outpath, vd.activeSheet, confirm_overwrite=False)
+
+    if vd.stackedSheets and args.output_cell:
+        outfile = vd._stdout if args.output_cell == '-' else open(args.output_cell, 'w')
+        print(vd.activeSheet.cursorDisplay, file=outfile)
 
     saver_threads = [t for t in vd.unfinishedThreads if t.name.startswith('save_')]
     if saver_threads:
