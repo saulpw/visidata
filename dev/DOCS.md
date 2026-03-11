@@ -1,5 +1,7 @@
 # VisiData Documentation Style Guide
 
+`docs/man.md` is generated from the manpage source (`visidata/man/vd.inc`) by `dev/mkman.sh`. Edit `vd.inc`, not `man.md`.
+
 VisiData supports basic markdown like # Headings, **bold**, *italics*, `code snippets`, and _underscore_.
 
 VisiData has its own display attribute syntax. For e.g.:

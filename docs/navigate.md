@@ -28,6 +28,23 @@ Command(s)              Operation
 ` n`  `Shift+N`              move to next/previous *regex* match from last search
 `z/`  `z?` *expr*       search by Python *expr* up/down (with column names as variables)
 
+By default, search matches are highlighted in the sheet (like vim's `hlsearch`).
+
+Command(s)              Operation
+--------------          ---------------
+`highlight-col`         highlight a regex in the current column (without moving)
+`highlight-sheet`       highlight a regex in all columns (without moving)
+`highlight-clear`       clear all highlight patterns
+
+Undo of a search command does not undo the highlighting; use `highlight-clear` to remove all highlights.
+
+**Options**
+
+Option                         Default                 Description
+-----                          -----                   -----
+`highlight_search`             `True`                  whether to highlight search matches
+`color_highlight_search`       `21 blue on 15 white`   color for highlighted search matches
+
 The following example uses [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
 
 **Question** Has there been a day where we sold more than 95 **Item**s?

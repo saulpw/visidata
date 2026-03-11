@@ -149,6 +149,16 @@ jump to previous sheet (swaps with current sheet)
 .It Ic  " n   N"
 go to next/previous match from last regex search
 .Pp
+.No Search matches are highlighted when Sy options.highlight_search No is set (default: on).
+.It ( Ns Ar highlight-col Ns )
+highlight a regex in current column (without moving)
+.It ( Ns Ar highlight-sheet Ns )
+highlight a regex in all columns (without moving)
+.It ( Ns Ar highlight-clear Ns )
+clear all highlight patterns
+.Pp
+.No Undoing a search does not clear the highlighting; use Ar highlight-clear No instead.
+.Pp
 .It Ic  " <   >"
 go up/down current column to next value
 .It Ic  "z<  z>"
