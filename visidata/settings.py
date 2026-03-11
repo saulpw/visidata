@@ -140,6 +140,7 @@ class Option:
         self.extrahelp = help
         self.replayable = False
         self.sheettype = BaseSheet
+        self.cli_only = False
         self.module = module
 
     def __str__(self):
@@ -319,7 +320,7 @@ def _resolve_optalias(vd, optname, optval):
 
 
 @VisiData.api
-def option(vd, name, default, description, replay=False, sheettype=BaseSheet, help:str=''):
+def option(vd, name, default, description, replay=False, sheettype=BaseSheet, help:str='', cli_only=False):
     '''Declare a new option.
 
    - `name`: name of option
@@ -327,11 +328,13 @@ def option(vd, name, default, description, replay=False, sheettype=BaseSheet, he
    - `helpstr`: short description of option (as shown in the **Options Sheet**)
    - `replay`: ``True`` if changes to the option should be stored in the **Command Log**
    - `sheettype`: ``None`` if the option is not sheet-specific, to make it global on CLI
+   - `cli_only`: ``True`` if the option is only meaningful as a CLI argument (hidden from Options Sheet)
     '''
     opt = vd.options.setdefault(name, default, description, vd.importingModule)
     opt.replayable = replay
     opt.sheettype=sheettype
     opt.extrahelp = help
+    opt.cli_only = cli_only
     return opt
 
 

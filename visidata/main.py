@@ -25,8 +25,8 @@ vd.version_info = __version_info__
 vd.option('config', vd.config_file, 'config file to exec in Python', sheettype=None)
 vd.option('play', '', 'file.vdj to replay')
 vd.option('batch', False, 'replay in batch mode (with no interface and all status sent to stdout)')
-vd.option('output', None, 'save the final visible sheet to output at the end of replay')
-vd.option('output_cell', None, 'output the cursor cell display value at exit')
+vd.option('output', None, 'save the final visible sheet to output at the end of replay', cli_only=True)
+vd.option('output_cell', None, 'output the cursor cell display value at exit', cli_only=True)
 vd.option('preplay', '', 'longnames to preplay before replay')
 vd.option('imports', 'plugins', 'imports to preload before .visidatarc (command-line only)')
 vd.option('nothing', False, 'no config, no plugins, nothing extra')
@@ -323,6 +323,7 @@ def main_vd():
     i=1
     current_args = {}
     global_args = {}
+    clionly_args = {}
     flGlobal = True
     optsdone = False
 
@@ -354,25 +355,27 @@ def main_vd():
             optname = optname.replace('-', '_')
             optname, optval = vd._resolve_optalias(optname, optval)
 
-            if optval is None:  # missing argument, maybe bool?
-                opt = vd.options._get(optname)
-                if opt:
-                    if type(opt.value) is bool:
-                        optval = True
-                    else:
-                        if i >= len(sys.argv)-1:
-                            vd.error(f'"-{optname}" missing argument')
+            opt = vd.options._get(optname)
+            if optval is None and opt:  # missing argument, determine type
+                if type(opt.value) is bool:
+                    optval = True
+                else:
+                    if i >= len(sys.argv)-1:
+                        vd.error(f'"-{optname}" missing argument')
 
-                        optval = sys.argv[i+1]
-                        i += 1
+                    optval = sys.argv[i+1]
+                    i += 1
 
-            # batch and interactive are only meaningful when applied globally,
-            # so exclude them from sheet-specific options. Those would
-            # override any later change to vd.options.batch in global settings.
-            if optname not in ('batch', 'interactive'):
-                current_args[optname] = optval
-            if flGlobal:
-                global_args[optname] = optval
+            if opt and opt.cli_only:
+                clionly_args[optname] = optval
+            else:
+                # batch and interactive are only meaningful when applied globally,
+                # so exclude them from sheet-specific options. Those would
+                # override any later change to vd.options.batch in global settings.
+                if optname not in ('batch', 'interactive'):
+                    current_args[optname] = optval
+                if flGlobal:
+                    global_args[optname] = optval
         elif arg.startswith('+'):  # position cursor at start
             parsed_pos = vd.parsePos(arg[1:], inputs=inputs)
             if parsed_pos:
@@ -388,6 +391,7 @@ def main_vd():
         i += 1
 
     args = AttrDict(current_args)
+    args.update(clionly_args)
 
     if args.profile:
         import threading

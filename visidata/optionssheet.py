@@ -73,6 +73,8 @@ class OptionsSheet(Sheet):
     def iterload(self):
         for k in vd.options.keys():
             v = vd.options._get(k)
+            if v.cli_only:
+                continue
             if v.sheettype in [None, BaseSheet]:
                 yield v
             elif self.source != 'global' and v.sheettype in self.source.superclasses():
