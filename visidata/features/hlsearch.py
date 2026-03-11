@@ -3,6 +3,12 @@ from visidata import vd, dispwidth
 import re
 
 
+# NOTE: both Sheet and Column have highlight_regex, but g/ sets per-column
+# (not sheet-level), so sheet.highlight_regex is only used by highlight-sheet.
+# clear_search() always wipes both before any new pattern is set, so the
+# `col.highlight_regex or sheet.highlight_regex` in drawRow() never chooses
+# between two live patterns. The two-attribute model seems like it could be simplified to
+# one.  See PR #2861 for discussion.
 TableSheet.init('highlight_regex', lambda: None, copy=False)
 Column.init('highlight_regex', lambda: None, copy=False)
 
