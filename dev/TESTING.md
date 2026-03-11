@@ -69,8 +69,6 @@ dev/test.sh issue655     # run one test
 dev/test.sh foo bar baz  # run multiple tests
 dev/test.sh -d           # debug mode: abort on first error, show diffs
 
-dev/perftest.sh          # run perf benchmarks (sequential, per-test timing)
-
 dev/run-tests-individually.sh                # run each test in its own process (slower, isolated)
 dev/run-tests-individually.sh tests/foo.vdx  # run specific tests individually
 ```
@@ -104,7 +102,7 @@ All three formats allow `#` line comments.
 - `-nosave` suffix (e.g., `issue2225-nosave.vdx`) skips golden comparison; runs in a separate batch without `replay_ignore_errors`, so `assert-expr` failures are caught. Use for tests that verify internal state via assertions rather than output comparison. Also required for graph/canvas tests, since the pixel buffer is not populated in batch mode (cursor-based commands are no-ops).
 - `-broken` suffix skips the test entirely
 - `-manual` suffix skips the test entirely (for tests not suitable for automation but worth keeping)
-- `-perf` suffix skips the test in `test.sh`; run separately via `dev/perftest.sh`
+- `-perf` suffix runs via `test-perf.sh` (separate from `test.sh`); reports wall time per test
 - `-flaky` suffix runs the test but treats failures as non-fatal
 - `-311` suffix runs only on Python 3.11+; `-n311` runs only below 3.11
 - Tests should modify data and provide golden output file, rather than using `assert-expr` commands
