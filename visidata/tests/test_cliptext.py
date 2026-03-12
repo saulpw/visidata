@@ -293,6 +293,6 @@ class TestClipText:
          [('\uFFF9[:bold]a[:]123\uFFFb', '[:bold]a[:'),
           ('', ']123')]),
     ])
-    def test_wraptext_color_spans_lines(self, text, width, expected):
+    def test_wraptext_escaped_literals(self, text, width, expected):
         result = list(visidata.wraptext(text, width=width))
         assert result == expected
