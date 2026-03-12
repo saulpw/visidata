@@ -1,5 +1,3 @@
-import os
-import contextlib
 import itertools
 import collections
 import math
@@ -120,36 +118,6 @@ def save_tsv(vd, p, vs):
         for dispvals in vs.iterdispvals(format=True, delimiter=unitsep):
             fp.write(unitsep.join(dispvals.values()))
             fp.write(rowsep)
-
-
-@Sheet.api
-def append_tsv_row(vs, row):
-    'Append `row` to vs.source, creating file with correct headers if necessary. For internal use only.'
-    if not vs.source.exists():
-        with contextlib.suppress(FileExistsError):
-            parentdir = vs.source.parent
-            if parentdir:
-                os.makedirs(parentdir)
-
-        # Write tsv header for Sheet `vs` to Path `p`
-        trdict = vs.safe_trdict()
-        unitsep = vs.source.options.delimiter
-
-        with vs.source.open(mode='w') as fp:
-            colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + vs.options.row_delimiter
-            if colhdr.strip():  # is anything but whitespace
-                fp.write(colhdr)
-
-    newrow = ''
-
-    contents = vs.source.open(mode='r').read()
-    if not contents.endswith('\n'):  #1569
-        newrow += '\n'
-
-    newrow += '\t'.join(col.getDisplayValue(row) for col in vs.visibleCols) + '\n'
-
-    with vs.source.open(mode='a') as fp:
-        fp.write(newrow)
 
 
 vd.addGlobals({
