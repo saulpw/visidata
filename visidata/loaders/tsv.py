@@ -8,8 +8,8 @@ import time
 from visidata import vd, asyncthread, options, Progress, ColumnItem, SequenceSheet, Sheet, VisiData
 from visidata import namedlist, filesize
 
-vd.option('delimiter', '\t', 'field delimiter to use for tsv/usv/psv filetype', replay=True)
-vd.option('row_delimiter', '\n', 'row delimiter to use for tsv/usv/psv filetype', replay=True)
+vd.option('delimiter', '\t', 'field delimiter to use for tsv/csv filetype', replay=True)
+vd.option('row_delimiter', '\n', 'row delimiter to use for tsv/csv filetype', replay=True)
 vd.option('tsv_safe_newline', '\u001e', 'replacement for newline character when saving to tsv', replay=True)
 vd.option('tsv_safe_tab', '\u001f', 'replacement for tab character when saving to tsv', replay=True)
 
