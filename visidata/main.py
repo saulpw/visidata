@@ -426,11 +426,13 @@ def main_vd():
         if flPipedInput and not inputs:  # '|vd' without explicit '-'
             inputs.append((vd.stdinSource, copy(current_args)))
 
+    # filetype is consumed by openPath (stored on source path), not applied as a sheet option
+    cli_filetype = current_args.pop('filetype', None)
+
     sources = []
     for p, opts in inputs:
-        # filetype is a special option, bc it is needed to construct the specific sheet type
-        if ('filetype' in current_args) and ('filetype' not in opts):
-            opts['filetype'] = current_args['filetype']
+        if cli_filetype and ('filetype' not in opts):
+            opts['filetype'] = cli_filetype
 
         vs = vd.openSource(p, create=True, **opts) or vd.fail(f'could not open {p}')
         for k, v in current_args.items():  # apply final set of args to sheets specifically on cli, if not set otherwise #573
@@ -445,14 +447,14 @@ def main_vd():
         vd.push(vs, load=False) #1471, 1555
 
     if not vd.sheets and not args.play and not options.batch:
-        if 'filetype' in current_args:
-            newfunc = getattr(vd, 'new_' + current_args['filetype'], vd.getGlobals().get('new_' + current_args['filetype']))
+        if cli_filetype:
+            newfunc = getattr(vd, 'new_' + cli_filetype, vd.getGlobals().get('new_' + cli_filetype))
             datestr = datetime.date.today().strftime('%Y-%m-%d')
             if newfunc:
-                vd.status('creating blank %s' % current_args['filetype'])
-                vd.push(newfunc(Path(datestr + '.' + current_args['filetype'])))
+                vd.status('creating blank %s' % cli_filetype)
+                vd.push(newfunc(Path(datestr + '.' + cli_filetype)))
             else:
-                vd.status('new_%s does not exist, creating new blank sheet' % current_args['filetype'])
+                vd.status('new_%s does not exist, creating new blank sheet' % cli_filetype)
                 vd.push(vd.newSheet(datestr, 1))
         else:
             vd.push(vd.currentDirSheet)

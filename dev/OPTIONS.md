@@ -50,6 +50,9 @@ vd.options.set('foo', value, Sheet) # set on Sheet class
 vd.options.foo = value              # set globally (when no sheet context)
 vd.options.set('foo', value, 'global')
 
+# Without cmdlog recording (for derived/internal state)
+p.options.set('filetype', filetype, p, cmdlog=False)
+
 # Check if explicitly set on an object (ignoring inheritance)
 vd.options.getonly('foo', obj, default)
 ```
@@ -76,10 +79,12 @@ Since a sheet's source is typically a Path (`self.source`), the sheet can read p
 ```python
 # In a sheet method or afterLoad hook:
 pos = self.source.options.initial_pos    # read from the path
-ft = self.source.options.filetype        # (future) read filetype from the path
+ft = self.source.options.filetype        # read filetype from the path
 ```
 
 This is useful when state needs to flow from CLI arg parsing (where the Path exists) to sheet loading (where the sheet exists but wasn't created yet at parse time).
+
+`filetype` is the canonical example: `openPath()` resolves the filetype (from explicit param, path options, or extension) and stores it on the path. Loaders read it via `self.source.options.filetype`.
 
 ## Key Files
 

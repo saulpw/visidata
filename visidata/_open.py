@@ -81,9 +81,7 @@ def guess_extension(vd, path):
 def openPath(vd, p, filetype=None, create=False):
     '''Call ``open_<filetype>(p)`` or ``openurl_<p.scheme>(p, filetype)``.  Return constructed but unloaded sheet of appropriate type.
     If True, *create* will return a new, blank **Sheet** if file does not exist.'''
-    # allow user to assign a filetype to a pathname:  options.set('filetype', 'csv', '-')
-    filetype = filetype or vd.options.getonly('filetype', str(p), None)  #1710
-    filetype = filetype or vd.options.getonly('filetype', 'global', None)
+    filetype = filetype or p.options.filetype  # resolve from path instance, Path class, global  #1710
 
     if p.scheme and not p.has_fp():
         schemes = p.scheme.split('+')
@@ -101,9 +99,11 @@ def openPath(vd, p, filetype=None, create=False):
     # assign filetype from extension, but only for files, not directories
     if not p.is_dir():  #2547
         filetype = filetype or p.ext
-    filetype = filetype or vd.options.filetype
 
     filetype = filetype.lower()
+
+    # store resolved filetype on path for downstream access (e.g. self.source.options.filetype)
+    p.options.set('filetype', filetype, p, cmdlog=False)
 
     if not p.exists():
         newfunc = getattr(vd, 'new_' + filetype, vd.getGlobals().get('new_' + filetype))

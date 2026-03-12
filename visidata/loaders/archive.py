@@ -5,7 +5,7 @@ import datetime
 import os.path
 from visidata.loaders import unzip_http
 
-from visidata import vd, VisiData, asyncthread, Sheet, Progress, Menu, options
+from visidata import vd, VisiData, asyncthread, Sheet, Progress, Menu
 from visidata import ColumnAttr, Column, Path, filesize
 from visidata.type_date import date
 
@@ -78,7 +78,7 @@ Commands:
     def openRow(self, row):
             fi, zpath = row
             fp = self.openZipFile(self.zfp, fi)
-            return vd.openSource(Path(fi.filename, fp=fp, filesize=fi.file_size), filetype=options.filetype)
+            return vd.openSource(Path(fi.filename, fp=fp, filesize=fi.file_size))
 
     def extract(self, *rows, path=None):
         path = path or Path('.')

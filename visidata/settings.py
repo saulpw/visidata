@@ -206,7 +206,7 @@ class OptionsObject:
                 return opt.value
         return default
 
-    def set(self, optname, value, obj='global'):
+    def set(self, optname, value, obj='global', cmdlog=True):
         "Override *value* for *optname* in the options context, or in the *obj* context if given."
         opt = self._get(optname)
         module = None  # keep default
@@ -224,7 +224,7 @@ class OptionsObject:
             else:
                 value = t(value)
 
-            if curval != value and self._get(optname, 'default').replayable:
+            if cmdlog and curval != value and self._get(optname, 'default').replayable:
                 if obj != 'default' and type(obj) is not type:  # default and class options set on init aren't recorded
                     if vd.cmdlog:
                         self.add_option_to_cmdlogs(obj, optname, value, 'set-option')
