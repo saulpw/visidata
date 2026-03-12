@@ -16,13 +16,16 @@
 
 ## Code Style
 
-- **Options**: Always `vd.options.foo`, never import `options` directly.
-- **Comments**: Inline after code, not on a separate line above. `if x:  # reason` not `# reason\nif x:`
-- **Issue refs**: Number first: `#2416  description`, not `description  #2416`
-- **Blank lines**: Two between top-level defs. Blank lines between logical sections within functions.
+- **Indentation**: 4 spaces, always. Fix any mis-indented code you encounter.
+- **Imports**: `vd` should be the first name in `from visidata import vd, ...`
+- **Options**: Always `vd.options.foo`, never import `options` directly. This includes docstrings/comments that mention options — write `vd.options.foo` not `options.foo`.
+- **Comments**: Always `# space` after the hash. Short explanatory comments go inline after the code: `if x:  # reason` not `# reason` on the line above. Section-header comments that describe a block of code stay on their own line — don't cram them inline onto long lines.
+- **Issue refs**: Number first: `#2416  description`, not `description  #2416`.
+- **Blank lines**: Two blank lines between every top-level def/class. Add blank lines between logical sections within functions.
 - **Unicode escapes**: Uppercase hex: `'\u25E6'` not `'\u25e6'`
 - **Command names**: `kebab-case` (`open-python-packages`, `freeze-col`)
 - **`ColumnItem`** is deprecated — use `ItemColumn` in new code.
+- **Redundant imports**: Remove inner-function imports when the module is already imported at the top of the file.
 
 ## Structure
 
