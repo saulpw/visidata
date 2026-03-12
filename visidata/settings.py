@@ -273,8 +273,8 @@ class OptionsObject:
 
     def getall(self, prefix=''):
         'Return dictionary of all options beginning with `prefix` (with `prefix` removed from the name).'
-        return { optname[len(prefix):] : vd.options[optname]
-                    for optname in vd.options.keys()
+        return { optname[len(prefix):] : self[optname]
+                    for optname in self.keys()
                         if optname.startswith(prefix) }
 
     def __getattr__(self, optname):      # options.foo

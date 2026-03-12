@@ -8,8 +8,8 @@ import time
 from visidata import vd, asyncthread, options, Progress, ColumnItem, SequenceSheet, Sheet, VisiData
 from visidata import namedlist, filesize
 
-vd.option('delimiter', '\t', 'field delimiter to use for tsv/usv filetype', replay=True)
-vd.option('row_delimiter', '\n', 'row delimiter to use for tsv/usv filetype', replay=True)
+vd.option('delimiter', '\t', 'field delimiter to use for tsv/usv/psv filetype', replay=True)
+vd.option('row_delimiter', '\n', 'row delimiter to use for tsv/usv/psv filetype', replay=True)
 vd.option('tsv_safe_newline', '\u001e', 'replacement for newline character when saving to tsv', replay=True)
 vd.option('tsv_safe_tab', '\u001f', 'replacement for tab character when saving to tsv', replay=True)
 
@@ -69,12 +69,9 @@ def splitter(stream, delim='\n'):
 
 # rowdef: list
 class TsvSheet(SequenceSheet):
-    delimiter = ''
-    row_delimiter = ''
-
     def iterload(self):
-        delim = self.delimiter or self.options.delimiter
-        rowdelim = self.row_delimiter or self.options.row_delimiter
+        delim = self.source.options.delimiter
+        rowdelim = self.source.options.row_delimiter
         if delim == '':
             vd.warning("using '\\x00' as field delimiter")
             delim = '\x00'  #2272
@@ -102,10 +99,10 @@ class TsvSheet(SequenceSheet):
 
 
 @VisiData.api
-def save_tsv(vd, p, vs, delimiter='', row_delimiter=''):
+def save_tsv(vd, p, vs):
     'Write sheet to file `fn` as TSV.'
-    unitsep = delimiter or vs.options.delimiter
-    rowsep = row_delimiter or vs.options.row_delimiter
+    unitsep = p.options.delimiter
+    rowsep = p.options.row_delimiter
     if unitsep == '':
         vd.warning("saving with '\\x00' as field delimiter")
         unitsep = '\x00'
@@ -114,13 +111,13 @@ def save_tsv(vd, p, vs, delimiter='', row_delimiter=''):
         rowsep = '\x00'
     if unitsep == rowsep:
         vd.fail('field delimiter and row delimiter cannot be the same')
-    trdict = vs.safe_trdict()
+    trdict = vs.safe_trdict(delimiter=unitsep)
 
     with p.open(mode='w', encoding=vs.options.save_encoding) as fp:
         colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + rowsep
         fp.write(colhdr)
 
-        for dispvals in vs.iterdispvals(format=True):
+        for dispvals in vs.iterdispvals(format=True, delimiter=unitsep):
             fp.write(unitsep.join(dispvals.values()))
             fp.write(rowsep)
 
@@ -136,7 +133,7 @@ def append_tsv_row(vs, row):
 
         # Write tsv header for Sheet `vs` to Path `p`
         trdict = vs.safe_trdict()
-        unitsep = options.delimiter
+        unitsep = vs.source.options.delimiter
 
         with vs.source.open(mode='w') as fp:
             colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + vs.options.row_delimiter

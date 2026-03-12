@@ -438,6 +438,9 @@ def main_vd():
         for k, v in current_args.items():  # apply final set of args to sheets specifically on cli, if not set otherwise #573
             if not vs.options.is_set(k, vs):
                 vs.options[k] = v
+            # source path is authoritative for format options  #2727
+            if isinstance(vs.source, Path) and not vs.source.options.is_set(k, vs.source):
+                vs.source.options.set(k, v, vs.source, cmdlog=False)
 
         # log source to cmdlog
         vd.cmdlog.openHook(vs, vs.source)
