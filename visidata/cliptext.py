@@ -79,7 +79,7 @@ def iterchunks(s, literal=False):
             continue
 
         if is_marked_literal(chunk):
-            yield literal_attr, chunk[1:-1]
+            yield attrstack[-1], chunk[1:-1]
             continue
         elif is_vdcode(chunk):
             cattr = attrstack[-1]['cattr']
