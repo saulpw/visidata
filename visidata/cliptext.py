@@ -8,7 +8,7 @@ from visidata import vd, drawcache, update_attr, colors, ColorAttr
 
 disp_column_fill = ' '
 bracket_markup_re = r'\[[:/][^\]]*?\]'  # [:whatever until the closing bracket] or [/whatever] or [:whatever] or [/] or [:]
-literal_markup_re = r'\uFFF9.*?\uFFFb'
+literal_markup_re = r'\uFFF9.*?\uFFFB'
 internal_markup_re = f'({literal_markup_re}|{bracket_markup_re})'
 
 ### Curses helpers
