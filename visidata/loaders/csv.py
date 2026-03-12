@@ -57,11 +57,17 @@ class CsvSheet(SequenceSheet):
         import csv
         csv.field_size_limit(2**31-1)  #288 Windows has max 32-bit
 
+        csv_opts = self.source.options.getall('csv_')
+        # -d (generic delimiter) overrides csv_delimiter if csv_delimiter wasn't explicitly set  #2727
+        if self.source.options.delimiter != self.source.options.getdefault('delimiter'):
+            if csv_opts['delimiter'] == self.source.options.getdefault('csv_delimiter'):
+                csv_opts['delimiter'] = self.source.options.delimiter
+
         with self.open_text_source(newline='') as fp:
-            if options.safety_first:
-                rdr = csv.reader(removeNulls(fp), **options.getall('csv_'))
+            if self.options.safety_first:
+                rdr = csv.reader(removeNulls(fp), **csv_opts)
             else:
-                rdr = csv.reader(fp, **options.getall('csv_'))
+                rdr = csv.reader(fp, **csv_opts)
 
             while True:
                 try:
@@ -79,8 +85,14 @@ def save_csv(vd, p, sheet):
     import csv
     csv.field_size_limit(2**31-1)  #288 Windows has max 32-bit
 
+    csv_opts = p.options.getall('csv_')
+    # -d (generic delimiter) overrides csv_delimiter if csv_delimiter wasn't explicitly set  #2727
+    if p.options.delimiter != p.options.getdefault('delimiter'):
+        if csv_opts['delimiter'] == p.options.getdefault('csv_delimiter'):
+            csv_opts['delimiter'] = p.options.delimiter
+
     with p.open(mode='w', encoding=sheet.options.save_encoding, newline='') as fp:
-        cw = csv.writer(fp, **options.getall('csv_'))
+        cw = csv.writer(fp, **csv_opts)
         colnames = [col.name for col in sheet.visibleCols]
         if ''.join(colnames):
             cw.writerow(colnames)

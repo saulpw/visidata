@@ -9,10 +9,10 @@ vd.option('safe_error', '#ERR', 'error string to use while saving', replay=True)
 vd.option('save_encoding', 'utf-8', 'encoding passed to codecs.open when saving a file', replay=True, help=vd.help_encoding)
 
 @Sheet.api
-def safe_trdict(vs):
+def safe_trdict(vs, delimiter=None):
     'returns string.translate dictionary for replacing tabs and newlines'
     if vs.options.safety_first:
-        delim = vs.options.delimiter
+        delim = delimiter or vs.options.delimiter
         trdict = {
              0: '', #  strip NUL completely
             10: vs.options.tsv_safe_newline,  # \n
@@ -26,13 +26,13 @@ def safe_trdict(vs):
 
 
 @Sheet.api
-def iterdispvals(sheet, *cols, format=False):
+def iterdispvals(sheet, *cols, format=False, delimiter=None):
     'For each row in sheet, yield OrderedDict of values for given cols.  Values are typed if format=False, or a formatted display string if format=True.'
     if not cols:
         cols = sheet.visibleCols
 
     transformers = collections.OrderedDict()  # list of transformers for each column in order
-    trdict = sheet.safe_trdict()
+    trdict = sheet.safe_trdict(delimiter=delimiter)
     for col in cols:
         transformers[col] = [ col.type ]
         if format:
@@ -197,8 +197,8 @@ def save_txt(vd, p, *vsheets):
 
     with p.open(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
         for vs in vsheets:
-            unitsep = vs.options.delimiter
-            rowsep = vs.options.row_delimiter
+            unitsep = p.options.delimiter
+            rowsep = p.options.row_delimiter
             for dispvals in vs.iterdispvals(*vs.visibleCols, format=True):
                 fp.write(unitsep.join(dispvals.values()))
                 fp.write(rowsep)

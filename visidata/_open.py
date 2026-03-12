@@ -168,6 +168,9 @@ def openSource(vd, p, filetype=None, create=False, **kwargs):
 
     for optname, optval in kwargs.items():
         vs.options[optname] = optval
+        # Path is authoritative for format options  #2727
+        if isinstance(vs.source, Path):
+            vs.source.options.set(optname, optval, vs.source, cmdlog=False)
 
     return vs
 
