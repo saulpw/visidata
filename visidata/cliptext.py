@@ -4,7 +4,7 @@ import re
 import functools
 import textwrap
 
-from visidata import options, drawcache, vd, update_attr, colors, ColorAttr
+from visidata import vd, drawcache, update_attr, colors, ColorAttr
 
 disp_column_fill = ' '
 internal_markup_re = r'(\[[:/][^\]]*?\])'  # [:whatever until the closing bracket] or [/whatever] or [:]
@@ -93,8 +93,8 @@ def iterchunks(s, literal=False):
 
 @functools.lru_cache(maxsize=100000)
 def dispwidth(ss, maxwidth=None, literal=False):
-    'Return display width of string, according to unicodedata width and options.disp_ambig_width.'
-    disp_ambig_width = options.disp_ambig_width
+    'Return display width of string, according to unicodedata width and vd.options.disp_ambig_width.'
+    disp_ambig_width = vd.options.disp_ambig_width
     w = 0
 
     for _, s in iterchunks(ss, literal=literal):
@@ -188,16 +188,16 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
 def clipstr(s, dispw, truncator=None, oddspace=None):
     ''' *s* is a string or an iterator that contains characters.
     *dispw* is the integer screen width that the clipped string will fit inside, or None.'''
-    if options.visibility:
+    if vd.options.visibility:
         return _clipstr(s, dispw,
-                        trunch=options.disp_truncator if truncator is None else truncator,
-                        oddspacech=options.disp_oddspace if oddspace is None else oddspace,
+                        trunch=vd.options.disp_truncator if truncator is None else truncator,
+                        oddspacech=vd.options.disp_oddspace if oddspace is None else oddspace,
                         modch='\u25e6',
                         combch='\u25cc')
     else:
         return _clipstr(s, dispw,
-                trunch=options.disp_truncator if truncator is None else truncator,
-                oddspacech=options.disp_oddspace if oddspace is None else oddspace,
+                trunch=vd.options.disp_truncator if truncator is None else truncator,
+                oddspacech=vd.options.disp_oddspace if oddspace is None else oddspace,
                 modch='',
                 combch='')
 
@@ -424,7 +424,7 @@ def clip_markup_middle(s:str, w:int):
     When text without markup is clipped, *clipstr_middle()* is used.
     The parsing will fail on markup that is nested.
     '''
-    trunch = options.disp_truncator
+    trunch = vd.options.disp_truncator
 
     if w <= 0: return ''
     if dispwidth(s) <= w:
@@ -433,7 +433,7 @@ def clip_markup_middle(s:str, w:int):
 
     markup_section_re = r'(\[.*?\].*?\[[/:].*?\])'  # [:whatever]text[:] or [:whatever]text[/anything]
     if not re.match(internal_markup_re, s):
-        return clipstr_middle(s, w, truncator=options.disp_truncator)
+        return clipstr_middle(s, w, truncator=vd.options.disp_truncator)
     # build the front half of the string
     output = []
     chunks_w = 0
