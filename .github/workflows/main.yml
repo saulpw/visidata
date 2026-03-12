@@ -16,7 +16,7 @@ jobs:
       matrix:
         python-version: ["3.9", "3.14"]
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     timeout-minutes: 20
     steps:
     - uses: actions/checkout@v4
@@ -42,7 +42,7 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     timeout-minutes: 10
     steps:
     - uses: actions/checkout@v4

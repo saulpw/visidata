@@ -16,7 +16,7 @@ jobs:
       matrix:
         python-version: ["3.10", "3.14"]
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
     - uses: actions/checkout@v2
 
