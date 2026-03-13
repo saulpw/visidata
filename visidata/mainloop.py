@@ -224,12 +224,14 @@ def mainloop(vd, scr):
                 except Exception as e:
                     vd.exceptionCaught(e)
 
-            if keystroke and keystroke in vd.allPrefixes and keystroke in vd.keystrokes[:-1]:
+            keystroke = vd.prettykeys(keystroke)
+            potential = vd.keystrokes + keystroke
+            if keystroke and keystroke in vd.allPrefixes and keystroke in vd.keystrokes and potential not in vd.allPrefixes and vd.bindkeys._get(potential) is None:  #3012
                 vd.warning('duplicate prefix: ' + keystroke)
                 vd.keystrokes = ''
+                keystroke = ''
             else:
-                keystroke = vd.prettykeys(keystroke)
-                vd.keystrokes += keystroke
+                vd.keystrokes = potential
 
         vd.callNoExceptions(vd.drawRightStatus, sheet._scr, sheet)  # visible for commands that wait for input
 
