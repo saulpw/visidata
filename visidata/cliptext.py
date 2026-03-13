@@ -37,6 +37,7 @@ ZERO_WIDTH_CF = set(map(chr, [
     0x2063,  # Invisible separator
 ]))
 
+
 def wcwidth(cc, ambig=1):
         if cc in ZERO_WIDTH_CF:
             return 1
@@ -398,6 +399,7 @@ def clipstr_start(dispval, w, truncator='', literal=False):
     frag = (truncator if j > 0 else '') + dispval[j:]
     return frag, dispwidth(frag, literal=literal)
 
+
 def clipstr_middle(s, n=10, truncator='…'):
     '''Return a string having a display width <= *n*. Excess characters are
     trimmed from the middle of the string, and replaced by a single
@@ -412,6 +414,7 @@ def clipstr_middle(s, n=10, truncator='…'):
         res = l_frag + truncator + r_frag
         return res, dispwidth(res)
     return s, dispwidth(s)
+
 
 def clip_markup_middle(s:str, w:int):
     '''takes a string *s* containing optional visidata markup, and returns a string
