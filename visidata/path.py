@@ -420,6 +420,8 @@ class RepeatFile:
         self.iter_lines = iter_lines
         self.lines = lines if lines is not None else []
         self.iter = RepeatFileIter(self)
+        self.encoding = None  #2829
+        self.errors = None
 
     def __enter__(self):
         '''Returns a new independent file-like object, sharing the same line cache.'''
@@ -483,6 +485,24 @@ class RepeatFile:
 
     def __next__(self):
         return next(self.iter)
+
+    def readable(self):
+        return True
+
+    def writable(self):
+        return False
+
+    def seekable(self):
+        return True
+
+    def read1(self, n=-1):
+        return self.read(n)
+
+    def peek(self, n=-1):
+        pos = self.tell()
+        data = self.read(n)
+        self.seek(pos)
+        return data
 
     def exists(self):
         return True
