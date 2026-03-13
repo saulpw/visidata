@@ -1,7 +1,4 @@
-import os
-
-import visidata
-from visidata import Extensible, VisiData, vd, EscapeException, MissingAttrFormatter, AttrDict
+from visidata import vd, Extensible, VisiData, EscapeException, MissingAttrFormatter
 
 
 UNLOADED = tuple()  # sentinel for a sheet not yet loaded for the first time; should be iterable
