@@ -2,6 +2,7 @@ import io
 import pytest
 
 from visidata import Path
+from visidata.path import RepeatFile, BytesIOWrapper
 
 class TestVisidataPath:
 
@@ -35,3 +36,21 @@ class TestVisidataPath:
         a = next(p.open())
         b = next(p.open())
         assert a == b
+
+    def test_iterdir_yields_visidata_paths(self):  # #2188
+        for p in Path('/tmp').iterdir():
+            assert isinstance(p, Path), f'{p} is {type(p)}, expected visidata.Path'
+            break  # just check the first one
+
+    def test_name_returns_full_filename(self):  # #2188
+        assert Path('foo.csv').name == 'foo.csv'
+        assert Path('/tmp/bar.tsv').name == 'bar.tsv'
+        assert Path('foo').name == 'foo'
+        assert Path('foo.csv.gz').name == 'foo.csv.gz'
+
+    def test_repeatfile_bytesiowrapper(self):  # #2829
+        rf = RepeatFile(iter(['hello\n', 'world\n']))
+        bio = BytesIOWrapper(rf)
+        data = bio.read()
+        assert isinstance(data, bytes)
+        assert b'hello' in data
