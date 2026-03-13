@@ -115,6 +115,7 @@ def my_vd_method(vd): ...
 ## Tests
 - Prefer `.vdx` over `.vd` for new golden tests.
 - When adding or modifying a format saver, add `"roundtrip": "yes"|"inexact"` to `dev/formats.jsonl` and verify with `tests/test-roundtrip.sh <fmt>`.
+- Include the issue number as a comment on the `def test_` line: `def test_foo(self):  # #2829`
 
 ## Reference
 - See `visidata/features/pypkg.py` for a complete example.
