@@ -60,7 +60,6 @@ def is_vdcode(s:str) -> bool:
 
 def iterchunks(s, literal=False):
     attrstack = [dict(link='', cattr=ColorAttr())]
-    legitopens = 0
     chunks = re.split(internal_markup_re, s)
     for chunk in chunks:
         if not chunk:
@@ -286,7 +285,7 @@ def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clea
 
             if chunkw < dispw:
                 break
-    except Exception as e:
+    except Exception as e:  # noqa: F841
         if vd.options.debug:
             raise
 #        raise type(e)('%s [clip_draw y=%s x=%s dispw=%s w=%s clippedlen=%s]' % (e, y, x, totaldispw, w, len(clipped))
@@ -446,7 +445,7 @@ def clip_markup_middle(s:str, w:int):
         elif len(parts) == 5 and parts[0] == '' and parts[4] == '': #empty string, start, text, end, empty string
             text_w = dispwidth(parts[2])
         else:
-            vd.fail(f'error parsing markup clip')
+            vd.fail('error parsing markup clip')
         if chunks_w + text_w < w//2:
             output.append(chunk)
             chunks_w += text_w
@@ -464,7 +463,7 @@ def clip_markup_middle(s:str, w:int):
         elif len(parts) == 5 and parts[0] == '' and parts[4] == '':
             text_w = dispwidth(parts[2])
         else:
-            vd.fail(f'error parsing markup clip')
+            vd.fail('error parsing markup clip')
         if chunks_w + text_w <= w//2 - (0 if truncated else dispwidth(trunch)):
             reverse_output.append(chunk)
             chunks_w += text_w
