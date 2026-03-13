@@ -8,7 +8,7 @@ from visidata import Sheet, BaseSheet, VisiData, IndexSheet, Path, Progress, Typ
 vd.option('safe_error', '#ERR', 'error string to use while saving', replay=True)
 vd.option('save_encoding', 'utf-8', 'encoding passed to codecs.open when saving a file', replay=True, help=vd.help_encoding)
 
-_compression_formats = {'gz', 'bz2', 'xz', 'lzma', 'zst'}
+_compression_formats = {'gz', 'bz2', 'xz', 'lzma', 'zst', 'zstd'}
 
 def parse_filetype(ft):
     'Parse filetype string like "json.gz" into (format, compression). Returns (ft, None) for plain types.'
@@ -136,26 +136,45 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=True):
     unloaded = [ vs for vs in vsheets if vs.rows is UNLOADED ]
     vd.sync(*vd.ensureLoaded(unloaded))
 
-    # resolve filetype: path option (from save-as or -f) > extension > save_filetype
+    # resolve filetype: path option (from inputPath or -f) > extension > save_filetype
     path_filetype = givenpath.options.is_set('filetype', givenpath)
     if path_filetype:
         fmt, compression = parse_filetype(path_filetype.value)
         if compression and givenpath.compression is None:
             givenpath.compression = compression
-        filetypes = [fmt, givenpath.ext.lower(), vd.options.save_filetype.lower()]
     else:
-        filetypes = [givenpath.ext.lower(), vd.options.save_filetype.lower()]
+        fmt = None
+
+    givenext = givenpath.ext.lower()
+    default_ft = vd.options.save_filetype.lower()
 
     vd.clearCaches()
 
-    for ft in filetypes:
-        savefunc = getattr(vsheets[0], 'save_' + ft, None) or getattr(vd, 'save_' + ft, None)
+    savefunc = None
+    filetype = None
+
+    def _find_saver(ft):
+        return getattr(vsheets[0], 'save_' + ft, None) or getattr(vd, 'save_' + ft, None)
+
+    if fmt:
+        savefunc = _find_saver(fmt)
         if savefunc:
-            filetype = ft
-            break
+            filetype = fmt
+
+    if not savefunc:
+        savefunc = _find_saver(givenext)
+        if savefunc:
+            filetype = givenext
+
+    if not savefunc:
+        savefunc = _find_saver(default_ft)
+        if savefunc:
+            if givenext:
+                vd.confirm(f'no .{givenext} saver, save as {default_ft}? ')  #2286
+            filetype = default_ft
 
     if savefunc is None:
-        vd.fail(f'no function to save as {", ".join(filetypes)}')
+        vd.fail(f'no saver for {givenext} or {default_ft}')
 
     if confirm_overwrite:
         vd.confirmOverwrite(givenpath)
