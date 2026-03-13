@@ -103,6 +103,8 @@ class FormCanvas(BaseSheet):
 @VisiData.api
 def confirm(vd, prompt, exc=EscapeException):
     'Display *prompt* on status line and demand input that starts with "Y" or "y" to proceed. Return True when proceeding, otherwise raise *exc*, or if *exc* is falsy, return False. *prompt* is literal text that cannot contain visidata markup code.'
+    if vd.options.confirm.startswith('y'):
+        return True
     if vd.options.batch:
         return vd.fail('cannot confirm in batch mode: ' + prompt)
 
