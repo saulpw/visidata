@@ -399,6 +399,10 @@ class Path(os.PathLike):
         if self.is_url():
             return urlparse(self.given).scheme
 
+    def iterdir(self):  #2188
+        'Yield Path objects of the directory contents.'
+        return (Path(p) for p in self._path.iterdir())
+
     def with_name(self, name):
         'Return a sibling Path with *name* as a filename in the same directory.'
         if self.is_url():
