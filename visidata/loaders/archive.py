@@ -42,7 +42,7 @@ class ZipSheet(Sheet):
     columns = [
         Column('directory',
             getter=lambda col,row: str(row[1].parent) if str(row[1].parent) == '.' else str(row[1].parent) + '/'),
-        Column('filename', getter=lambda col,row: row[1].name + row[1].suffix),
+        Column('filename', getter=lambda col,row: row[1].name),
         Column('abspath', type=str, width=0, getter=lambda col,row: row[1]),
         Column('ext', getter=lambda col,row: row[0].filename.endswith('/') and '/' or row[1].ext),
         Column('size', getter=lambda col,row: row[0].file_size, type=int),

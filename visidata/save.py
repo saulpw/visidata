@@ -83,7 +83,7 @@ def itervals(sheet, *cols, format=False):
 def getDefaultSaveName(sheet):
     src = getattr(sheet, 'source', None)
     if hasattr(src, 'scheme') and src.scheme:
-        return src.name + src.suffix
+        return src.name
     if isinstance(src, Path):
         if src.given == '-':
             return f'stdin.{sheet.options.save_filetype}'

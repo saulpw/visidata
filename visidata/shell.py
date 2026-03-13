@@ -125,7 +125,7 @@ class DirSheet(Sheet):
             getter=lambda col,row: str(row.parent) if str(row.parent) in ('.', '/') else str(row.parent) + '/',
             setter=lambda col,row,val: col.sheet.moveFile(row, val)),
         Column('filename',
-            getter=lambda col,row: row._path.name,
+            getter=lambda col,row: row.name,
             setter=lambda col,row,val: col.sheet.renameFile(row, val)),
         Column('abspath', width=0, type=str,
             getter=lambda col,row: row,
@@ -167,7 +167,7 @@ class DirSheet(Sheet):
 
     def moveFile(self, row, newparent):
         parent = Path(newparent)
-        newpath = Path(parent/(row.name + row.suffix))
+        newpath = Path(parent/row.name)
         if parent.exists():
             if not parent.is_dir():
                 vd.error('destination %s not a directory' % parent)

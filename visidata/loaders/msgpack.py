@@ -3,7 +3,7 @@ from visidata import vd, VisiData, JsonSheet
 
 @VisiData.api
 def open_msgpack(vd, p):
-    return MsgpackSheet(p.name, source=p)
+    return MsgpackSheet(p.base_stem, source=p)
 
 
 VisiData.open_msgpackz = VisiData.open_msgpack

@@ -176,8 +176,10 @@ class Path(os.PathLike):
 
     @property
     def name(self):
-        'Filename without any extensions.  Not the same as pathlib.Path.'
-        return self.base_stem
+        'Full filename including extensions. Same as pathlib.Path.name.'
+        if self._given == '.':
+            return self._path.absolute().name
+        return self._path.name
 
     @property
     def given(self):

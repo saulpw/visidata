@@ -309,19 +309,9 @@ S3DirSheet.addCommand(
 S3DirSheet.addCommand(
     "x",
     "s3-download-row",
-    # Note about the use of `_path.name` here. Given a `visidata.Path`
-    # object `path`, `path._path` is a `pathlib.Path` object.
-    #
-    # `visidata.Path` objects do some fun parsing to pick out
-    # file types and extensions, handle compression transparently,
-    # etc. That parsing leaves the `name` attribute without a file
-    # extension, and makes it a little tricky to tack back on.
-    #
-    # `pathlib.Path` objects have a `name` with the extension intact.
-    # That makes `path._path.name` a convenient default output path.
     textwrap.dedent(
         """
-        savepath = inputPath("download to: ", value=Path(cursorRow["name"])._path.name)
+        savepath = inputPath("download to: ", value=Path(cursorRow["name"]).name)
         sheet.download([cursorRow], savepath)
     """
     ),

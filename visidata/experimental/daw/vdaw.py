@@ -74,7 +74,7 @@ def replace_subrows(row):
 def open_transcript(vd, p):
     '''path is transcript in JSON format; audio should be path.mp3'''
     vd.timeouts_before_idle = -1
-    return PodcastEditingSheet(p.name, source=p)
+    return PodcastEditingSheet(p.base_stem, source=p)
 
 @Column.api
 def formatter_hhmmss(self, fmtstr):
