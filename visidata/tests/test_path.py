@@ -47,6 +47,12 @@ class TestVisidataPath:
         assert Path('/tmp/bar.tsv').name == 'bar.tsv'
         assert Path('foo').name == 'foo'
         assert Path('foo.csv.gz').name == 'foo.csv.gz'
+        assert Path('foo.csv.gz').ext == 'csv'
+        assert Path('foo.csv.gz').compression == 'gz'
+        assert Path('foo.vds.zst').ext == 'vds'
+        assert Path('foo.vds.zst').compression == 'zst'
+        assert Path('foo.vds.zstd').ext == 'vds'  #2286
+        assert Path('foo.vds.zstd').compression == 'zstd'  #2286
 
     def test_repeatfile_bytesiowrapper(self):  # #2829
         rf = RepeatFile(iter(['hello\n', 'world\n']))
