@@ -7,31 +7,27 @@ vd.theme_option('color_readonly', 'on 52', 'color for readonly columns')
 vd.theme_option('color_add_pending', 'green', 'color for rows pending add')
 vd.theme_option('color_change_pending', 'reverse yellow', 'color for cells pending modification')
 vd.theme_option('color_delete_pending', 'red', 'color for rows pending delete')
-vd.option('overwrite', 'c', 'overwrite existing files {y=yes|c=confirm|n=no}')
+vd.option('overwrite', 'c', 'allow overwriting existing files {c=check|n=no/readonly}')
 
 vd.optalias('readonly', 'overwrite', 'n')
 vd.optalias('ro', 'overwrite', 'n')
-vd.optalias('y', 'overwrite', 'y')
+vd.optalias('y', 'confirm', 'y')
 
 
 @VisiData.api
 def couldOverwrite(vd) -> bool:
     'Return True if overwrite might be allowed.'
-    return vd.options.overwrite.startswith(('y','c'))
+    return not vd.options.overwrite.startswith('n')
 
 
 @VisiData.api
 def confirmOverwrite(vd, path, msg:str=''):
     'Fail if file exists and overwrite not allowed.'
     if path is None or path.exists():
-        msg = msg or f'{path.given} exists. overwrite? '
-        ow = vd.options.overwrite
-        if ow.startswith('c'):  # confirm
-            vd.confirm(msg)
-        elif ow.startswith('y'):  # yes/always
-            pass
-        else: #1805  empty/no/never/readonly
+        if vd.options.overwrite.startswith('n'):  #1805
             vd.fail('overwrite disabled')
+        msg = msg or f'{path.given} exists. overwrite? '
+        vd.confirm(msg)
     return True
 
 # deferred cached

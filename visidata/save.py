@@ -169,12 +169,14 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=True):
     if not savefunc:
         savefunc = _find_saver(default_ft)
         if savefunc:
-            if givenext:
-                vd.confirm(f'no .{givenext} saver, save as {default_ft}? ')  #2286
+            tried = fmt or givenext
+            if tried:
+                vd.confirm(f'no `{tried}` saver, save as {default_ft}? ')  #2286
             filetype = default_ft
 
     if savefunc is None:
-        vd.fail(f'no saver for {givenext} or {default_ft}')
+        tried = ' or '.join(x for x in [fmt, givenext, default_ft] if x)
+        vd.fail(f'no saver for {tried}')
 
     if confirm_overwrite:
         vd.confirmOverwrite(givenpath)

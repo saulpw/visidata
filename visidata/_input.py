@@ -9,6 +9,8 @@ from visidata import vd, colors, dispwidth, ColorAttr, clipstr_start
 from visidata import AttrDict
 
 
+vd.option('confirm', 'a', 'confirm interactive prompts {a=ask|y=yes}')
+
 vd.theme_option('color_edit_unfocused', '238 on 110', 'display color for unfocused input in form')
 vd.theme_option('color_edit_cell', '233 on 110', 'cell color to use when editing cell')
 vd.theme_option('disp_edit_fill', '_', 'edit field fill character')
@@ -620,6 +622,8 @@ def input(vd, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None,
 @VisiData.api
 def confirm(vd, prompt, exc=EscapeException):
     'Display *prompt* on status line and demand input that starts with "Y" or "y" to proceed.  Raise *exc* otherwise.  Return True.'
+    if vd.options.confirm.startswith('y'):
+        return True
     if vd.options.batch:
         return vd.fail('cannot confirm in batch mode: ' + prompt)
 

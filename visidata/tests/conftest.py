@@ -11,7 +11,7 @@ def curses_setup():
 
     curses.curs_set = lambda v: None
     curses.doupdate = lambda: None
-    visidata.options.overwrite = 'y'
+    visidata.options.confirm = 'y'
 
 
 @pytest.fixture(scope="function")
