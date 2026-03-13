@@ -203,7 +203,7 @@ class Path(os.PathLike):
             self.base_stem = self._path.name
 
         # check if file is compressed
-        if self.suffix in ['.gz', '.bz2', '.xz', '.lzma', '.zst']:
+        if self.suffix in ['.gz', '.bz2', '.xz', '.lzma', '.zst', '.zstd']:
             self.compression = self.ext
             uncompressedpath = Path(self.given[:-len(self.suffix)])  # strip suffix
             self.base_stem = uncompressedpath.base_stem
@@ -335,7 +335,7 @@ class Path(os.PathLike):
         elif self.compression in ['xz', 'lzma']:
             import lzma
             zopen = lzma.open
-        elif self.compression == 'zst':
+        elif self.compression in ('zst', 'zstd'):
             zstandard = vd.importExternal('zstandard')
             zopen = zstandard.open
         else:
