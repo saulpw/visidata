@@ -26,7 +26,7 @@ def all_requirements():
 
 # tox can't actually run python3 setup.py: https://github.com/tox-dev/tox/issues/96
 # from visidata import __version__
-__version__ = "3.4dev"
+__version__ = "3.4.dev0"
 install_requires = [
     "python-dateutil",
     'importlib_resources; python_version<"3.9"',
@@ -114,7 +114,7 @@ setup(
             "noahs.sqlite",
         ],
     },
-    license="GPLv3",
+    license="GPL-3.0-only",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
@@ -122,7 +122,6 @@ setup(
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
         "Intended Audience :: System Administrators",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
         "Topic :: Database :: Front-Ends",
