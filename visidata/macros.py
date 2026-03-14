@@ -1,3 +1,4 @@
+import re
 from copy import copy
 from functools import wraps
 
@@ -7,6 +8,8 @@ from visidata import IndexSheet, VisiData, Sheet, Path, VisiDataMetaSheet, Colum
 
 vd.macroMode = None  # CommandLog
 vd.macrobindings = {}
+
+MACRO_PARAM_RE = re.compile(r'\{(\w+)(?:=([^}]*))?\}')
 
 
 vd.macros = vd.StoredList(name='macros')
@@ -19,9 +22,12 @@ class MacroSheet(IndexSheet):
 
         - `Enter` to open the current macro.
         - `d` to mark macro for delete; `z Ctrl+S` to commit.
+        - Edit `keystroke` to bind/change a keystroke for a macro.
+        - Edit `input` or `col` to use `{param}` or `{param=default}` for parameters.
     '''
     columns = [
         AttrColumn('binding'),
+        AttrColumn('keystroke'),
         AttrColumn('helpstr'),
         Column('num_commands', type=vlen, width=0),
         AttrColumn('source'),
@@ -35,6 +41,7 @@ class MacroSheet(IndexSheet):
 
     def commitDeleteRow(self, row):
         binding = row.binding
+        keystroke = getattr(row, 'keystroke', '')
 
         # Remove from macrobindings
         del vd.macrobindings[binding]
@@ -42,8 +49,10 @@ class MacroSheet(IndexSheet):
         # Remove command registration and key bindings
         if vd.isLongname(binding):
             BaseSheet.removeCommand('', binding)
+            if keystroke:
+                BaseSheet.unbindkey(keystroke)
         else:
-            BaseSheet.removeCommand(binding,f'exec-{row.name}')
+            BaseSheet.removeCommand(binding, f'exec-{row.name}')
 
         # Delete source file
         vd.callNoExceptions(Path(row.source).unlink)
@@ -85,31 +94,73 @@ def loadMacro(vd, p:Path):
 def runMacro(vd, binding:str):
     mm = vd.macroMode
     vd.macroMode = None
-    vd.replay_sync(vd.macrobindings[binding])
+
+    cmdlog = vd.macrobindings[binding]
+
+    # #2785: check for parameterized inputs
+    params = {}  # name -> default
+    for row in cmdlog.rows:
+        for field in ('input', 'col'):
+            val = getattr(row, field, '')
+            if val:
+                for m in MACRO_PARAM_RE.finditer(str(val)):
+                    name, default = m.group(1), m.group(2)
+                    if name not in params:
+                        params[name] = default or ''
+
+    if params:
+        param_values = vd.inputMultiple(**{
+            name: dict(prompt=f'{name}: ', value=default)
+            for name, default in params.items()
+        })
+
+        cmdlog = copy(cmdlog)
+        cmdlog.rows = []
+        for row in vd.macrobindings[binding].rows:
+            row = copy(row)
+            for field in ('input', 'col'):
+                val = getattr(row, field, '')
+                if val:
+                    setattr(row, field, MACRO_PARAM_RE.sub(
+                        lambda m: param_values.get(m.group(1), m.group(0)),
+                        str(val)))
+            cmdlog.rows.append(row)
+
+    vd.replay_sync(cmdlog)
     vd.macroMode = mm
 
 
 @VisiData.api
-def setMacro(vd, ks:str, vs, helpstr=''):
+def setMacro(vd, ks:str, vs, helpstr='', keystroke=''):
     'Set *ks* which is either a keystroke or a longname to run the cmdlog in *vs*.'
+    ks = vd.prettykeys(ks)
+    keystroke = vd.prettykeys(keystroke) if keystroke else ''
     vs.binding = ks
     vs.helpstr = helpstr
+    vs.keystroke = keystroke
     vd.macrobindings[ks] = vs
-    if vd.isLongname(ks):
-        BaseSheet.addCommand('', ks, f'runMacro("{ks}")', helpstr)
-    else:
-        BaseSheet.addCommand(ks, f'exec-{vs.name}', f'runMacro("{ks}")', helpstr)
+    old_module = vd.importingModule
+    vd.importingModule = 'macros'
+    try:
+        if vd.isLongname(ks):
+            BaseSheet.addCommand('', ks, f'runMacro("{ks}")', helpstr)
+            if keystroke:  #2784
+                BaseSheet.bindkey(keystroke, ks)
+        else:
+            BaseSheet.addCommand(ks, f'exec-{vs.name}', f'runMacro("{ks}")', helpstr)
+    finally:
+        vd.importingModule = old_module
 
 
 @CommandLogJsonl.api
-def saveMacro(self, rows, ks):
+def saveMacro(self, rows, ks, keystroke=''):
         vs = copy(self)
         vs.rows = rows
         macropath = Path(vd.fnSuffix(str(Path(vd.options.visidata_dir)/ks)))
         vd.save_vdj(macropath, vs)
         vd.status(f'{ks} saved to {macropath}')
-        vd.setMacro(ks, vs)
-        vd.macros.append(dict(binding=ks, source=str(macropath), helpstr=''))
+        vd.setMacro(ks, vs, keystroke=keystroke)
+        vd.macros.append(dict(binding=ks, source=str(macropath), helpstr='', keystroke=keystroke))
         vd.reloadMacros()
         vd.macrosheet.reload()
 
@@ -142,9 +193,25 @@ def startMacro(cmdlog):
                 - Press `Ctrl+N` and then press another keystroke to spell that keystroke.
                 - Press `Ctrl+C` to cancel the macro recording.
             ''')
+            ks = vd.prettykeys(ks)
             while ks in vd.macrobindings:
-                ks = vd.input(f'{ks} already in use; set macro to keybinding: ')
-            vd.cmdlog.saveMacro(vd.macroMode.rows, ks)
+                ks = vd.prettykeys(vd.input(f'{ks} already in use; set macro to keybinding: '))
+
+            keystroke = ''
+            if vd.isLongname(ks):  #2784
+                keystroke = vd.input('bind keystroke (Enter to skip): ', help='''
+                    # Bind a keystroke to this macro (optional)
+                    Spell out a keystroke (like `Alt+b`) or press `Enter` to skip.
+                    - Press `Ctrl+N` and then press another keystroke to spell that keystroke.
+                ''')
+                while keystroke:
+                    keystroke = vd.prettykeys(keystroke)
+                    existing = vd.bindkeys._get(keystroke, BaseSheet)
+                    if not existing:
+                        break
+                    keystroke = vd.input(f'{keystroke} already bound to {existing}; enter keystroke (Enter to skip): ')
+
+            vd.cmdlog.saveMacro(vd.macroMode.rows, ks, keystroke=keystroke)
         finally:
             vd.macroMode = None
     else:
@@ -168,7 +235,7 @@ def reloadMacros(vd):
             p = vd.macros.path.parent / r.source
         vs = vd.loadMacro(p)
         if vs:
-            vd.setMacro(r.binding, vs, getattr(r, 'helpstr', ''))
+            vd.setMacro(r.binding, vs, getattr(r, 'helpstr', ''), keystroke=getattr(r, 'keystroke', ''))
 
 
 Sheet.addCommand('m', 'macro-record', 'vd.cmdlog.startMacro()', 'start/stop macro recording', replay=False)
