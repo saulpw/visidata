@@ -105,7 +105,7 @@ def inputPalette(sheet, prompt, items,
 
         h = h or sheet.windowHeight
         w = w or min(100, sheet.windowWidth)
-        nitems = min(h-2, sheet.options.disp_cmdpal_max)
+        nitems = min(h-3, sheet.options.disp_cmdpal_max)
         if nitems <= 0:
             return None
 
@@ -158,6 +158,9 @@ def inputPalette(sheet, prompt, items,
                 raise EscapeException(f'no choice matching {v}')
             bindings['Enter'] = _enter
             bindings.pop(' ', None)
+        pal_cattr = colors.get_color('color_cmdpalette')
+        vd.drawBox(sheet._scr, x, y+h-nitems-3, w, nitems+2, pal_cattr, bottom=False)
+
         used_triggers = set()
         for i, (m, item) in enumerate(palrows):
             trigger_key = ''
@@ -188,11 +191,11 @@ def inputPalette(sheet, prompt, items,
 
             match_summary = formatter(m, item, trigger_key) if item else ' '
 
-            clipdraw(sheet._scr, y+h-nitems-2+i, x, match_summary, attr, w=w)
+            clipdraw(sheet._scr, y+h-nitems-2+i, x+1, match_summary, attr, w=w-2)
         attr = colors.color_cmdpalette
         instr = 'Press [:keystrokes]PgUp/PgDn[/] to scroll items, [:keystrokes]Tab/Shift+Tab[/] then [:keystrokes]Enter[/] to choose, [:keystrokes]Esc[/] to cancel.'
-        if dispwidth(instr) < w:
-            clipdraw(sheet._scr, h-2, x, instr, attr, w=w)
+        if dispwidth(instr) < w-2:
+            clipdraw(sheet._scr, h-2, x+1, instr, attr, w=w-2)
 
         return None
 

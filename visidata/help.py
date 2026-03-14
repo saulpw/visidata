@@ -1,7 +1,7 @@
 import functools
 import collections
 
-from visidata import VisiData, MetaSheet, ColumnAttr, Column, BaseSheet, VisiDataMetaSheet, SuspendCurses
+from visidata import VisiData, MetaSheet, ColumnAttr, Column, BaseSheet, VisiDataMetaSheet, SuspendCurses, ColorAttr
 from visidata import vd, asyncthread, drawcache, AttrDict, TextSheet
 
 
@@ -151,7 +151,9 @@ class HelpPane:
             self.parentscr = scr
 
         self.scr.erase()
-        self.scr.box()
+        cattr = kwargs.get('attr', ColorAttr())
+        h_box, w_box = self.scr.getmaxyx()
+        vd.drawBox(self.scr, 0, 0, w_box, h_box, cattr)
         self.amgr.draw(self.scr, y=1, x=2, **kwargs)
         self.scr.noutrefresh()
 

@@ -132,6 +132,20 @@ def drawSidebar(vd, scr, sheet):
 
     return sheet.drawSidebarText(scr, text=sheet.current_sidebar, title=title, overflowmsg=overflowmsg, bottommsg=bottommsg)
 
+@VisiData.api
+def drawBox(vd, scr, x, y, w, h, cattr, bottom=True):
+    'Draw a box border using disp_boxchars with fg=cattr.bg. Return border ColorAttr.'
+    ls, rs, ts, bs, tl, tr, bl, br = vd.options.disp_boxchars
+    border_cattr = ColorAttr(fg=cattr.bg, bg=-1)
+    clipdraw(scr, y, x, tl + ts*(w-2) + tr, border_cattr, w=w, literal=True)
+    if bottom:
+        clipdraw(scr, y+h-1, x, bl + bs*(w-2) + br, border_cattr, w=w, literal=True)
+    for row in range(1, h-1 if bottom else h):
+        clipdraw(scr, y+row, x, ls, border_cattr, w=1, literal=True)
+        clipdraw(scr, y+row, x+w-1, rs, border_cattr, w=1, literal=True)
+    return border_cattr
+
+
 @BaseSheet.api
 def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', overflowmsg:str='', bottommsg:str=''):
     scrh, scrw = scr.getmaxyx()
@@ -180,14 +194,7 @@ def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', o
     sidebarscr.erase()
     sidebarscr.bkgd(' ', cattr.attr)
 
-    ls, rs, ts, bs, tl, tr, bl, br = sheet.options.disp_boxchars
-    border_cattr = ColorAttr(fg=cattr.bg, bg=-1)
-    # draw border on parent scr (clipdraw clips last col of subwindow)
-    clipdraw(scr, y, x, tl + ts*(w-2) + tr, border_cattr, w=w, literal=True)
-    clipdraw(scr, y+h-1, x, bl + bs*(w-2) + br, border_cattr, w=w, literal=True)
-    for row in range(1, h-1):
-        clipdraw(scr, y+row, x, ls, border_cattr, w=1, literal=True)
-        clipdraw(scr, y+row, x+w-1, rs, border_cattr, w=1, literal=True)
+    border_cattr = vd.drawBox(sidebarscr, 0, 0, w, h, cattr)
 
     vd.onMouse(sidebarscr, 0, 0, w, h, BUTTON1_RELEASED='no-op', BUTTON1_PRESSED='no-op')
 

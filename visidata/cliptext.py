@@ -1,3 +1,4 @@
+import curses
 import unicodedata
 import sys
 import re
@@ -234,6 +235,14 @@ def clipdraw(scr, y, x, s, attr, w=None, clear=True, literal=False, **kwargs):
     return clipdraw_chunks(scr, y, x, chunks, attr, w=w, clear=clear, **kwargs)
 
 
+def _addstr(scr, y, x, s, attr):
+    'addstr with curses.error suppressed (e.g. writing to last cell of window).'
+    try:
+        scr.addstr(y, x, s, attr)
+    except curses.error:
+        pass
+
+
 def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clear=True, **kwargs):
     '''Draw `chunks` (sequence of (color:str, text:str) as from iterchunks) at (y,x)-(y,x+w) with curses `attr`, clipping with ellipsis char.
        If `clear`, clear whole editing area before displaying.
@@ -253,9 +262,9 @@ def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clea
     link = ''
 
     if w and clear:
-        actualw = min(w, windowWidth-x-1)
+        actualw = min(w, windowWidth-x)
         if scr:
-            scr.addstr(y, x, disp_column_fill*actualw, cattr.attr)  # clear whole area before displaying
+            _addstr(scr, y, x, disp_column_fill*actualw, cattr.attr)  # clear whole area before displaying
 
     try:
         for colorstate, chunk in chunks:
@@ -278,7 +287,7 @@ def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clea
             else:
                 chunkw = origw-totaldispw
 
-            chunkw = min(chunkw, windowWidth-x-1)
+            chunkw = min(chunkw, windowWidth-x)
             if chunkw <= 0:  # no room anyway
                 return totaldispw
             if not scr:
@@ -288,7 +297,7 @@ def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clea
             clipped, dispw = clipstr(chunk, chunkw, **kwargs)
 
             if y >= 0 and y < windowHeight:
-                scr.addstr(y, x, clipped, cattr.attr)
+                _addstr(scr, y, x, clipped, cattr.attr)
             else:
                 if vd.options.debug:
                     raise Exception(f'addstr(y={y} x={x}) out of bounds')
