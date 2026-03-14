@@ -1,0 +1,5 @@
+# test parameterized {col} in macros  #2785
+open-file sample_data/sample.tsv
+sort-by-col {"mycol": "Units"}
+assert-expr cursorCol.name == 'Units'
+assert-expr sheet._ordering[0][0].name == 'Units'

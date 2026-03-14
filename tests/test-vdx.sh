@@ -15,6 +15,7 @@ source tests/testenv.sh
 
 export LC_NUMERIC="en_US.UTF-8" #2867
 export LC_TIME="en_US.UTF-8"
+export XDG_DATA_HOME=tests/xdg/data
 
 PY311=$($PYTHON -c 'import sys; print(sys.version_info[:2] >= (3,11))')
 

@@ -1,0 +1,2 @@
+#!vd -p
+{"sheet": "", "col": "{mycol}", "row": "", "longname": "sort-asc", "input": "", "keystrokes": "[", "comment": "sort ascending by this column"}
