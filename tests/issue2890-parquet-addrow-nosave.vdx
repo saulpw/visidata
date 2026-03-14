@@ -1,0 +1,10 @@
+# adding a row to a parquet sheet should not crash  #2890
+
+open-file sample_data/sample.parquet
+
+add-row
+
+col Region
+edit-cell test
+
+assert-expr sheet.cursorValue == 'test'
