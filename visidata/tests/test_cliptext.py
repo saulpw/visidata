@@ -194,6 +194,10 @@ class TestClipText:
         ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]',
         50,
         '[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]…[:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]'),
+        #clip front half, dropping escaped markup
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]\uFFF9[:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:]\uFFFB[:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]',
+        50,
+        '[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]…[:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]'),
 
         #clip back half, when front half is an exact fit at 24 wide
         ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234[:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]',
