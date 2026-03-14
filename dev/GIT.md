@@ -112,3 +112,7 @@ Always consider updating docs when a user-facing feature is added or changed. Ch
 ### Bug Fix PRs
 
 Always add a regression test for bug fix PRs. Generate the golden output with the fix applied, and verify the test fails without the fix and passes with it.
+
+### Wishlist items
+
+- For external wishlist items, implement → PR → tag requester to verify.
