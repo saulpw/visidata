@@ -451,8 +451,9 @@ def clip_markup_middle(s:str, w:int):
     for the remaining text. When text with markup is clipped, what is omitted is one or
     more entire markup sections, between markup start and end delimiters:
     [:markup] [:] [/markup] [/]
+    When clipping escaped text, what is omitted is the entire escaped section.
     The dropped text is replaced with a single disp_truncator.
-    When text without markup is clipped, *clipstr_middle()* is used.
+    When clipping text without markup or escaping, *clipstr_middle()* is used.
     The parsing will fail on markup that is nested.
     '''
     trunch = vd.options.disp_truncator
@@ -462,7 +463,7 @@ def clip_markup_middle(s:str, w:int):
         return s
     if w < dispwidth(trunch): return ''
 
-    markup_section_re = r'(\[.*?\].*?\[[/:].*?\])'  # [:whatever]text[:] or [:whatever]text[/anything]
+    markup_section_re = f'({literal_markup_re}|' + r'\[.*?\].*?\[[/:].*?\])'  # escaped markup or [:whatever]text[:] or [:whatever]text[/anything]
     if not re.match(internal_markup_re, s):
         return clipstr_middle(s, w, truncator=vd.options.disp_truncator)
     # build the front half of the string
@@ -471,13 +472,18 @@ def clip_markup_middle(s:str, w:int):
     truncated = False
     chunks = re.split(markup_section_re, s)
     for i, chunk in enumerate(chunks):  #chunks are either regular text, or marked up section:  start, text, end
-        parts = re.split(internal_markup_re, chunk)
-        if len(parts) == 1:      #text with no markup
-            text_w = dispwidth(parts[0])
-        elif len(parts) == 5 and parts[0] == '' and parts[4] == '': #empty string, start, text, end, empty string
-            text_w = dispwidth(parts[2])
+        # or escaped literal:  start, literal, end
+        if is_marked_literal(chunk):
+            chunk = chunk[1:-1]
+            text_w = dispwidth(chunk)
         else:
-            vd.fail('error parsing markup clip')
+            parts = re.split(internal_markup_re, chunk)
+            if len(parts) == 1:      #text with no markup
+                text_w = dispwidth(chunk)
+            elif len(parts) == 5 and parts[0] == '' and parts[4] == '': #empty string, start, text, end, empty string
+                text_w = dispwidth(parts[2])
+            else:
+                vd.fail('error parsing markup clip')
         if chunks_w + text_w < w//2:
             output.append(chunk)
             chunks_w += text_w
