@@ -1,0 +1,13 @@
+# n/N should repeat z/ expr search, not just regex search  #3015
+
+open-file sample_data/benchmark.csv
+col Quantity
+type-int
+
+# search by expr for Quantity > 10
+search-expr Quantity > 10
+assert-cell 12
+
+# search-next should repeat the expr search
+search-next
+assert-cell 30

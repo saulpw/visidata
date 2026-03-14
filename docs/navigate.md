@@ -25,7 +25,7 @@ Command(s)              Operation
 --------------          ---------------
 ` /`  ` ?` *regex*      search for *regex* matches up/down the **current** column
 `g/`  `g?` *regex*      search for *regex* matches up/down over **all visible** columns
-` n`  `Shift+N`              move to next/previous *regex* match from last search
+` n`  `Shift+N`              move to next/previous match from last search
 `z/`  `z?` *expr*       search by Python *expr* up/down (with column names as variables)
 
 By default, search matches are highlighted in the sheet (like vim's `hlsearch`).

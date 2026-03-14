@@ -74,7 +74,7 @@ vd(1)                                                                           
       <span style="font-weight:bold;">/</span>   <span style="font-weight:bold;">?</span> <span style="text-decoration:underline;">regex</span>     search for <span style="text-decoration:underline;">regex</span> forward/backward in current column's displayed values
      <span style="font-weight:bold;">g/</span>  <span style="font-weight:bold;">g?</span> <span style="text-decoration:underline;">regex</span>     search for <span style="text-decoration:underline;">regex</span> forward/backward over all visible columns' displayed values
      <span style="font-weight:bold;">z/</span>  <span style="font-weight:bold;">z?</span> <span style="text-decoration:underline;">expr</span>      search by Python <span style="text-decoration:underline;">expr</span> forward/backward in current column (with column names as variables)
-      <span style="font-weight:bold;">n</span>   <span style="font-weight:bold;">N</span>           go to next/previous match from last regex search
+      <span style="font-weight:bold;">n</span>   <span style="font-weight:bold;">N</span>           go to next/previous match from last search
 
       <span style="font-weight:bold;">&lt;</span>   <span style="font-weight:bold;">&gt;</span>           go up/down current column to next value
      <span style="font-weight:bold;">z&lt;</span>  <span style="font-weight:bold;">z&gt;</span>           go up/down current column to next null value

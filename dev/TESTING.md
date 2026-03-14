@@ -125,6 +125,7 @@ All three formats allow `#` line comments.
 - `select-rows` — select all rows
 - `define-command longname execstr` — define an ad-hoc command for testing
 - `assert-expr expr` / `assert-expr-row expr` — assert (prefer golden output comparison instead)
+- `assert-cell value` — assert cursor cell display value matches expected string (useful for testing cursor movement like search)
 
 ## Batch replay internals
 

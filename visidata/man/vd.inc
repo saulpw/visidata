@@ -147,7 +147,7 @@ jump to previous sheet (swaps with current sheet)
 .It Ic  "z/  z?" Ar expr
 .No search by Python Ar expr No forward/backward in current column (with column names as variables)
 .It Ic  " n   N"
-go to next/previous match from last regex search
+go to next/previous match from last search
 .Pp
 .No Search matches are highlighted when Sy options.highlight_search No is set (default: on).
 .It ( Ns Ar highlight-col Ns )

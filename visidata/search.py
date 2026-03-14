@@ -15,6 +15,7 @@ vd.help_regex_flags = '''# Regex Flags Help
 @VisiData.api
 @asyncthread
 def moveRegex(vd, sheet, *args, **kwargs):
+    vd.searchContext['type'] = 'regex'
     list(vd.searchRegex(sheet, *args, moveCursor=True, **kwargs))
 
 
@@ -92,6 +93,9 @@ def moveInputRegex(sheet, action:str, type="regex", **kwargs):
 @Sheet.api
 @asyncthread
 def search_expr(sheet, expr, reverse=False, curcol=None):
+    vd.searchContext['type'] = 'expr'
+    vd.searchContext['expr'] = expr
+    vd.searchContext['backward'] = reverse
     for i in rotateRange(len(sheet.rows), sheet.cursorRowIndex, reverse=reverse):
         try:
             if sheet.evalExpr(expr, sheet.rows[i], curcol=curcol):
@@ -102,6 +106,35 @@ def search_expr(sheet, expr, reverse=False, curcol=None):
 
     vd.fail(f'no {sheet.rowtype} where {expr}')
 
+@VisiData.api
+@asyncthread
+def moveExpr(vd, sheet, reverse=False):
+    'Go to next match for last expr search.'
+    expr = vd.searchContext.get('expr') or vd.fail('no expr')
+    backward = vd.searchContext.get('backward', False)
+    if reverse:
+        backward = not backward
+    for i in rotateRange(len(sheet.rows), sheet.cursorRowIndex, reverse=backward):
+        try:
+            if sheet.evalExpr(expr, sheet.rows[i], curcol=sheet.cursorCol):
+                sheet.cursorRowIndex = i
+                return
+        except Exception as e:
+            vd.exceptionCaught(e)
+    vd.fail(f'no {sheet.rowtype} where {expr}')
+
+
+@VisiData.api
+def searchNext(vd, sheet, reverse=False):
+    'Go to next/previous match from last search (regex or expr).'
+    if vd.searchContext.get('type') == 'expr':
+        vd.moveExpr(sheet, reverse=reverse)
+    elif vd.searchContext.get('type') == 'regex':
+        vd.moveRegex(sheet, reverse=reverse)
+    else:
+        vd.fail('no previous search')
+
+
 @BaseSheet.api
 def clear_search(sheet):
     '''A stub function to clear any aftereffects of search, such as when
@@ -111,8 +144,8 @@ def clear_search(sheet):
 Sheet.addCommand('r', 'search-keys', 'tmp=cursorVisibleColIndex; moveInputRegex("row key", type="regex-row", columns=keyCols or [visibleCols[0]]); sheet.cursorVisibleColIndex=tmp', 'go to next row with key matching regex')
 Sheet.addCommand('/', 'search-col', 'moveInputRegex("search", columns="cursorCol", backward=False)', 'search for regex forwards in current column')
 Sheet.addCommand('?', 'searchr-col', 'moveInputRegex("reverse search", columns="cursorCol", backward=True)', 'search for regex backwards in current column')
-Sheet.addCommand('n', 'search-next', 'vd.moveRegex(sheet, reverse=False)', 'go to next match from last regex search')
-Sheet.addCommand('N', 'searchr-next', 'vd.moveRegex(sheet, reverse=True)', 'go to previous match from last regex search')
+Sheet.addCommand('n', 'search-next', 'vd.searchNext(sheet, reverse=False)', 'go to next match from last search')
+Sheet.addCommand('N', 'searchr-next', 'vd.searchNext(sheet, reverse=True)', 'go to previous match from last search')
 
 Sheet.addCommand('g/', 'search-cols', 'moveInputRegex("g/", backward=False, columns="visibleCols")', 'search for regex forwards over all visible columns')
 Sheet.addCommand('g?', 'searchr-cols', 'moveInputRegex("g?", backward=True, columns="visibleCols")', 'search for regex backwards over all visible columns')

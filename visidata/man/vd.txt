@@ -80,7 +80,7 @@ DESCRIPTION
                       columns' displayed values
      z/  z? expr      search by Python expr forward/backward in current column
                       (with column names as variables)
-      n   N           go to next/previous match from last regex search
+      n   N           go to next/previous match from last search
 
       <   >           go up/down current column to next value
      z<  z>           go up/down current column to next null value

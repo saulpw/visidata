@@ -305,6 +305,7 @@ BaseSheet.addCommand('', 'define-command', 'v=input("longname execstr: "); sheet
 BaseSheet.addCommand('zCtrl+X', 'pyobj-expr-row', 'expr = input("eval over current row: ", "expr", completer=CompleteExpr()); vd.push(PyobjSheet(expr, source=evalExpr(expr, row=cursorRow)))', 'evaluate Python expression, in context of current row, and open result as Python object')
 BaseSheet.addCommand('', 'assert-expr', 'expr=inputPythonExpr(); assert eval(expr), f"{expr} not true"', 'eval Python expression and assert result is truthy')
 BaseSheet.addCommand('', 'assert-expr-row', 'expr=inputPythonExpr(); assert sheet.evalExpr(expr, row=cursorRow), f"{expr} not true"', 'eval Python expression in context of current row, and assert result is truthy')
+Sheet.addCommand('', 'assert-cell', 'v=vd.input("expected value: "); got=cursorCol.getDisplayValue(cursorRow); assert got == v, f"expected {v!r} but got {got!r}"', 'assert cursor cell display value matches expected string')
 
 Sheet.addCommand('Ctrl+Y', 'pyobj-row', 'status(type(cursorRow).__name__); vd.push(openRowPyobj(cursorRowIndex))', 'open current row as Python object')
 Sheet.addCommand('zCtrl+Y', 'pyobj-cell', 'status(type(cursorValue).__name__); vd.push(openCellPyobj(cursorCol, cursorRowIndex))', 'open current cell as Python object')
