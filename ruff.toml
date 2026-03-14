@@ -2,7 +2,9 @@
 # Suppresses intentional style choices; flags real issues only.
 
 [lint]
-select = ["E", "F"]
+preview = true
+explicit-preview-rules = true
+select = ["E", "F", "E302", "E303"]
 
 ignore = [
     "E501",   # line too long — no line length limit in visidata
