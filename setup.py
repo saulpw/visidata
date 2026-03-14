@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from setuptools import setup
+import os.path
 import platform
 import sysconfig
 
@@ -71,7 +72,7 @@ setup(
         "visidata.desktop",
     ],
     data_files=[
-        ("share/man/man1", ["visidata/man/vd.1", "visidata/man/visidata.1"]),
+        ("share/man/man1", [f for f in ["visidata/man/vd.1", "visidata/man/visidata.1"] if os.path.exists(f)]),
         ("share/applications", ["visidata/desktop/visidata.desktop"]),
     ],
     extras_require={
@@ -101,7 +102,7 @@ setup(
         "all": all_requirements(),
     },
     package_data={
-        "visidata.man": ["vd.1", "vd.txt"],
+        "visidata.man": [f for f in ["vd.1", "vd.txt"] if os.path.exists(os.path.join("visidata", "man", f))],
         "visidata.ddw": ["input.ddw", "regex.ddw"],
         "visidata": ["guides/*.md"],
         "visidata.tests": ["sample.tsv", "benchmark.csv"],
