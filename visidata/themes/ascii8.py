@@ -54,6 +54,7 @@ vd.themes['ascii8'] = dict(
 
     color_graph_axis='bold',
     color_sidebar='black on blue',
+    disp_boxchars='||--++++',
     color_add_pending='green',
     color_change_pending='reverse yellow',
     color_delete_pending='red',

@@ -1,7 +1,7 @@
 from typing import Optional, Union
 import textwrap
 
-from visidata import vd, VisiData, BaseSheet, colors, TextSheet, clipdraw, wraptext, dispwidth, AttrDict, wrmap
+from visidata import vd, VisiData, BaseSheet, colors, TextSheet, clipdraw, wraptext, dispwidth, AttrDict, wrmap, ColorAttr
 from visidata import CommandHelpGetter, OptionHelpGetter
 
 
@@ -11,6 +11,7 @@ vd.theme_option('disp_sidebar_width', 0, 'max width for sidebar')
 vd.theme_option('disp_sidebar_height', 0, 'max height for sidebar')
 vd.theme_option('color_sidebar', 'black on 114 blue', 'base color of sidebar')
 vd.theme_option('color_sidebar_title', 'black on yellow', 'color of sidebar title')
+vd.theme_option('disp_boxchars', '▐▌▄█▗▖▐▌', 'box characters (ls rs ts bs tl tr bl br)')
 
 vd.disp_help = 0  # current page of help shown
 vd._help_sidebars = []  # list of (help:str|HelpPane, title:str)
@@ -178,7 +179,16 @@ def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', o
 
     sidebarscr.erase()
     sidebarscr.bkgd(' ', cattr.attr)
-    sidebarscr.border()
+
+    ls, rs, ts, bs, tl, tr, bl, br = sheet.options.disp_boxchars
+    border_cattr = ColorAttr(fg=cattr.bg, bg=-1)
+    # draw border on parent scr (clipdraw clips last col of subwindow)
+    clipdraw(scr, y, x, tl + ts*(w-2) + tr, border_cattr, w=w, literal=True)
+    clipdraw(scr, y+h-1, x, bl + bs*(w-2) + br, border_cattr, w=w, literal=True)
+    for row in range(1, h-1):
+        clipdraw(scr, y+row, x, ls, border_cattr, w=1, literal=True)
+        clipdraw(scr, y+row, x+w-1, rs, border_cattr, w=1, literal=True)
+
     vd.onMouse(sidebarscr, 0, 0, w, h, BUTTON1_RELEASED='no-op', BUTTON1_PRESSED='no-op')
 
     if hasattr(text, 'draw'):  # like a HelpPane
@@ -193,10 +203,10 @@ def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', o
             x += clipdraw(sidebarscr, i+1, 2, line, cattr, w=w-3)
             i += 1
 
-    x = max(0, w-titlew-6)
-    clipdraw(sidebarscr, 0, x, f"|[:sidebar_title] {title} [:]|", cattr, w=titlew+4)
+    x = max(0, w-titlew-4)
+    clipdraw(sidebarscr, 0, x, f"[:sidebar_title] {title} [:]", border_cattr, w=titlew+2)
     if bottommsg:
-        clipdraw(sidebarscr, h-1, winw-dispwidth(bottommsg)-4, '|'+bottommsg+'|', cattr)
+        clipdraw(sidebarscr, h-1, winw-dispwidth(bottommsg)-2, bottommsg, border_cattr)
 
     sidebarscr.noutrefresh()
 
