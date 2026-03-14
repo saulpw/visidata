@@ -1,13 +1,6 @@
 #!/usr/bin/env bash
 
-# Pre-push hook: run unit tests and cmdlog tests before pushing
+# Pre-push hook: run all tests before pushing
 
 set -e
-
-echo "Running unit tests..."
-make test-pytest
-
-echo "Running cmdlog tests..."
-make test-vdx
-
-echo "All tests passed."
+make test-all
