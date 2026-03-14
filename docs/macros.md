@@ -25,5 +25,7 @@ Use `gm` (`open-macros-or-whatever`) to open an index existing macros.
 
 Macros can be marked for deletion (with `d`). Changes can then be committed with `z Ctrl+S`.
 
+The `helpstr` column can be edited to add a description for each macro. This description will show up in the command palette and the Commands Sheet. Save changes with `z Ctrl+S`.
+
 `Enter` will open the macro in the current row, and you can view the series of commands composing it.
 
