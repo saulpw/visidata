@@ -105,6 +105,10 @@ By default, commit to **develop** unless explicitly working in another branch on
 
 Run `dev/test-all.sh` locally before pushing. After creating a PR, check CI status with `gh pr checks` and fix any failures before moving on.
 
+### Documentation
+
+Always consider updating docs when a user-facing feature is added or changed. Check `docs/README.md` for which files to update.
+
 ### Bug Fix PRs
 
 Always add a regression test for bug fix PRs. Generate the golden output with the fix applied, and verify the test fails without the fix and passes with it.
