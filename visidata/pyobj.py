@@ -303,7 +303,7 @@ BaseSheet.addCommand('', 'exec-python', 'expr = input("exec: ", "expr", complete
 BaseSheet.addCommand('gCtrl+X', 'import-python', 'modname=input("import: ", type="import_python"); exec("import "+modname, getGlobals())', 'import Python module in the global scope')
 BaseSheet.addCommand('', 'define-command', 'v=input("longname execstr: "); sheet.addCommand("", *v.split(" ", maxsplit=1), "custom defined command") if " " in v else None', 'define a new command with the given longname and Python execstr')
 BaseSheet.addCommand('zCtrl+X', 'pyobj-expr-row', 'expr = input("eval over current row: ", "expr", completer=CompleteExpr()); vd.push(PyobjSheet(expr, source=evalExpr(expr, row=cursorRow)))', 'evaluate Python expression, in context of current row, and open result as Python object')
-BaseSheet.addCommand('', 'assert-expr', 'expr=inputPythonExpr(); assert sheet.evalExpr(expr), f"{expr} not true"', 'eval Python expression and assert result is truthy')
+BaseSheet.addCommand('', 'assert-expr', 'expr=inputPythonExpr(); assert eval(expr), f"{expr} not true"', 'eval Python expression and assert result is truthy')
 BaseSheet.addCommand('', 'assert-expr-row', 'expr=inputPythonExpr(); assert sheet.evalExpr(expr, row=cursorRow), f"{expr} not true"', 'eval Python expression in context of current row, and assert result is truthy')
 
 Sheet.addCommand('Ctrl+Y', 'pyobj-row', 'status(type(cursorRow).__name__); vd.push(openRowPyobj(cursorRowIndex))', 'open current row as Python object')
