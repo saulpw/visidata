@@ -8,7 +8,13 @@ def open_parquet(vd, p):
 
 
 class ParquetColumn(Column):
+    @property
+    def readonly(self):
+        return False
+
     def calcValue(self, row):
+        if self.name in row:  #2890
+            return row[self.name]
         rownum = row.get("__rownum__")
         if rownum is None:
             return None
@@ -17,6 +23,9 @@ class ParquetColumn(Column):
             return memoryview(val.as_buffer())[:2**20].tobytes().decode('utf-8')
         else:
             return val.as_py()
+
+    def putValue(self, row, val):
+        row[self.name] = val
 
 
 class ParquetSheet(Sheet):
