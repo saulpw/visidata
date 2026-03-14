@@ -25,7 +25,7 @@ def searchRegex(vd, sheet, moveCursor=False, reverse=False, regex_flags=None, **
         def findMatchingColumn(sheet, row, columns, func):
             'Find column for which func matches the displayed value in this row'
             for c in columns:
-                if func(c.getDisplayValue(row)):
+                if func(c.getFullDisplayValue(row)):
                     return c
 
         vd.searchContext.update(kwargs)

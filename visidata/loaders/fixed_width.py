@@ -20,7 +20,7 @@ def getMaxDataWidth(col, rows):  #2255 need real max width for fixed width saver
     if len(rows) > 0:
         w_max = 0
         for r in rows:
-            row_w = dispwidth(col.getDisplayValue(r), literal=True)
+            row_w = dispwidth(col.getFullDisplayValue(r), literal=True)
             if w_max < row_w:
                 w_max = row_w
         w = w_max

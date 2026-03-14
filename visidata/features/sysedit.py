@@ -41,13 +41,13 @@ def syseditCells_async(sheet, cols, rows, filetype=None):
             edited_rows = []
             edited_vals = []
             for r, r_edited in zip(rows, tempvs.rows):
-                v = tempcol.getDisplayValue(r_edited)
-                if col.getDisplayValue(r) != v:
+                v = tempcol.getFullDisplayValue(r_edited)
+                if col.getFullDisplayValue(r) != v:
                     edited_rows.append(r)
                     edited_vals.append(v)
             if edited_rows:
                 col.setValuesTyped(edited_rows, *edited_vals)
 
 
-TableSheet.addCommand('Ctrl+O', 'sysedit-cell', 'cd = cursorDisplay; e = vd.launchExternalEditor(cd); cursorCol.setValues([cursorRow], e) if e != cd else None', 'edit current cell in external $EDITOR')
+TableSheet.addCommand('Ctrl+O', 'sysedit-cell', 'cd = cursorFullDisplay; e = vd.launchExternalEditor(cd); cursorCol.setValues([cursorRow], e) if e != cd else None', 'edit current cell in external $EDITOR')
 Sheet.addCommand('gCtrl+O', 'sysedit-selected', 'syseditCells(visibleCols, onlySelectedRows)', 'edit rows in $EDITOR')

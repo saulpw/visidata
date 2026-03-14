@@ -425,6 +425,16 @@ class Column(Extensible):
         For dict/list/tuple cells, the width of the display value returned is capped at the column width.'''
         return self.getCell(row).text
 
+    def getFullDisplayValue(self, row):
+        '''Return display string for *row* in this column, without width truncation.'''
+        typedval = self.getTypedValue(row)
+        if isinstance(typedval, TypedWrapper):
+            return self.getCell(row).text
+        try:
+            return self.format(typedval) or ''
+        except Exception:
+            return self.getCell(row).text
+
     def putValue(self, row, val):
         'Change value for *row* in this column to *val* immediately.  Does not check the type.  Overridable; by default calls ``.setter(row, val)``.'
         if self.setter:

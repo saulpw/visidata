@@ -98,8 +98,8 @@ def my_vd_method(vd): ...
 - `rows`, `selectedRows`, `someSelectedRows` (fails if none), `cursorRow`, `visibleRows`
 
 ## Cell Values
-- Display: `col.getDisplayValue(row)`
-- Processing: `col.format(col.getTypedValue(row))`
+- Display (truncated): `col.getDisplayValue(row)` — for UI display
+- Display (full): `col.getFullDisplayValue(row)` — for data operations (save, search, compare, edit)
 - Raw typed: `col.getTypedValue(row)`
 
 ## Error Handling
