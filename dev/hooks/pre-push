@@ -5,9 +5,9 @@
 set -e
 
 echo "Running unit tests..."
-PYTHONPATH=. python -m pytest visidata/tests/
+make test-pytest
 
 echo "Running cmdlog tests..."
-dev/test.sh -j 4
+make test-vdx
 
 echo "All tests passed."

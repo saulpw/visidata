@@ -28,13 +28,10 @@ jobs:
         cache: 'pip'
 
     - name: Install VisiData with test dependencies
-      run: |
-        pip3 install .
-        pip3 install ".[test]"
-        pip3 install pytest
+      run: make install-test
 
     - name: Run tests
-      run: dev/test-all.sh
+      run: make test
 
   unit-tests:
 
@@ -54,10 +51,7 @@ jobs:
         cache: 'pip'
 
     - name: Install VisiData with test dependencies
-      run: |
-        pip3 install .
-        pip3 install ".[test]"
-        pip3 install pytest
+      run: make install-test
 
     - name: Run unit tests
-      run: tests/test-pytest.sh
+      run: make test-pytest
