@@ -9,7 +9,10 @@ def open_parquet(vd, p):
 
 class ParquetColumn(Column):
     def calcValue(self, row):
-        val = self.source[row["__rownum__"]]
+        rownum = row.get("__rownum__")
+        if rownum is None:
+            return None
+        val = self.source[rownum]
         if val.type == 'large_string':
             return memoryview(val.as_buffer())[:2**20].tobytes().decode('utf-8')
         else:
