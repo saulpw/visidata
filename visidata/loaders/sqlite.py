@@ -58,7 +58,9 @@ class SqliteSheet(Sheet):
         return con
 
     def rawSql(self, q:str) -> 'SqliteSheet':
-        return SqliteSheet('query', source=self.source, query=q)
+        vs = SqliteSheet('', source=self.source)
+        vs.query = q  #2136: via setter; constructor kwargs bypass the property
+        return vs
 
     @property
     def sidebar(self):
@@ -123,10 +125,17 @@ class SqliteSheet(Sheet):
 
             self.result = self.execute(conn, query, parms=getattr(self, 'parms', []))
 
+            resultcols = []
             for i, desc in enumerate(self.result.description):
-                self.addColumn(ColumnItem(desc[0], i))
+                col = ColumnItem(desc[0], i)
+                self.addColumn(col)
+                resultcols.append(col)
 
-            for row in self.result:
+            typemap = {int: int, float: float}  #2136
+            for i, row in enumerate(self.result):
+                if i == 0:
+                    for col, val in zip(resultcols, row):
+                        col.type = typemap.get(type(val), anytype)
                 yield row
 
     def iterload(self):
@@ -294,6 +303,7 @@ def save_sqlite(vd, p, *vsheets):
 
 
 SqliteSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("execute SQL: ", type="sql")))', 'execute raw SQL statement')
+SqliteSheet.addCommand('', 'edit-sql', 'sheet.query = input("edit SQL: ", value=query, type="sql"); sheet.name = " ".join(query.strip().split()); reload()', 'edit and re-execute SQL query')  #2136
 
 SqliteIndexSheet.addCommand('a', 'add-table', 'fail("create a new table by saving a sheet to this database file")', 'stub; add table by saving a sheet to the db file instead')
 SqliteIndexSheet.bindkey('ga', 'add-table')
@@ -302,7 +312,16 @@ VisiData.save_db = VisiData.save_sqlite
 
 vd.addMenuItems('''
     Data > execute SQL query > exec-sql
+    Data > edit SQL query > edit-sql
 ''')
+
+from visidata.indexsheet import SheetsSheet  #2136
+SheetsSheet.columns.append(
+    Column('query',
+        getter=lambda c,r: getattr(r, 'query', None) or None,
+        setter=lambda c,r,v: (setattr(r, 'query', v), setattr(r, 'name', ' '.join(v.strip().split())), r.reload()) if isinstance(r, SqliteSheet) else None
+    )
+)
 
 vd.addGlobals({
     'SqliteIndexSheet': SqliteIndexSheet,
