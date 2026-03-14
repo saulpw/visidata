@@ -72,7 +72,7 @@ Sheet.addCommand('gEnter', 'dive-selected', 'openRows(selectedRows)', 'help')
 
 - Put on `BaseSheet` for all contexts, `TableSheet` for table contexts, specific sheet for that sheet only.
 - Never reference exec locals (like `cursorRow`) inside list comprehension filters in execstrs — breaks on Python < 3.12. Extract to `@Sheet.api` method.
-- An execstr can only call `input()` once (replay provides a single input string).
+- A command can only call `input()` once, even with `replay=False`.
 - `replay=False` — not added to cmdlog. `deprecated=True` — hidden from help. `testable=False` — excluded from test sweep.
 
 ## API Decorators

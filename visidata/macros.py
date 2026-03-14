@@ -22,6 +22,7 @@ class MacroSheet(IndexSheet):
     '''
     columns = [
         AttrColumn('binding'),
+        AttrColumn('helpstr'),
         Column('num_commands', type=vlen, width=0),
         AttrColumn('source'),
     ]
@@ -53,6 +54,7 @@ class MacroSheet(IndexSheet):
 
         vd.sync(vd.saveSheets(self.source, self, confirm_overwrite=False))
         self._deferredDels.clear()
+        vd.reloadMacros()
         self.reload()
 
     def newRow(self):
@@ -88,14 +90,15 @@ def runMacro(vd, binding:str):
 
 
 @VisiData.api
-def setMacro(vd, ks:str, vs):
+def setMacro(vd, ks:str, vs, helpstr=''):
     'Set *ks* which is either a keystroke or a longname to run the cmdlog in *vs*.'
     vs.binding = ks
+    vs.helpstr = helpstr
     vd.macrobindings[ks] = vs
     if vd.isLongname(ks):
-        BaseSheet.addCommand('', ks, f'runMacro("{ks}")')
+        BaseSheet.addCommand('', ks, f'runMacro("{ks}")', helpstr)
     else:
-        BaseSheet.addCommand(ks, f'exec-{vs.name}', f'runMacro("{ks}")')
+        BaseSheet.addCommand(ks, f'exec-{vs.name}', f'runMacro("{ks}")', helpstr)
 
 
 @CommandLogJsonl.api
@@ -106,7 +109,7 @@ def saveMacro(self, rows, ks):
         vd.save_vdj(macropath, vs)
         vd.status(f'{ks} saved to {macropath}')
         vd.setMacro(ks, vs)
-        vd.macros.append(dict(binding=ks, source=str(macropath)))
+        vd.macros.append(dict(binding=ks, source=str(macropath), helpstr=''))
         vd.reloadMacros()
         vd.macrosheet.reload()
 
@@ -165,7 +168,7 @@ def reloadMacros(vd):
             p = vd.macros.path.parent / r.source
         vs = vd.loadMacro(p)
         if vs:
-            vd.setMacro(r.binding, vs)
+            vd.setMacro(r.binding, vs, getattr(r, 'helpstr', ''))
 
 
 Sheet.addCommand('m', 'macro-record', 'vd.cmdlog.startMacro()', 'start/stop macro recording', replay=False)
