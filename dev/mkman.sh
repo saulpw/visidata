@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Usage: $0
-#    builds vd(1) man page in src repo (to be checked in)
+#    builds vd(1) man page in src repo (run via `make man`)
 
 # TODO:
 #   - parse_options should be moved to bin/

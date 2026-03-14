@@ -78,6 +78,11 @@ vd.addGlobals(MySheet=MySheet)
 3. Iterate and refine
 4. Document with docstrings and comments
 
+## Make Targets
+
+- `make test` — run all tests
+- `make help` — list all targets
+
 ## Documentation
 
 For comprehensive development documentation, see the `dev/` directory:

@@ -286,7 +286,12 @@ def main_vd():
         print(vd.version_info)
         return 0
     if '-h' in sys.argv or '--help' in sys.argv:
-        print((Path(vd.pkg_resources_files(visidata)) / 'man' / 'vd.txt').open().read())
+        manpath = Path(vd.pkg_resources_files(visidata)) / 'man' / 'vd.txt'
+        if manpath.exists():
+            print(manpath.open().read())
+        else:
+            print('usage: vd [options] [input ...]')
+            print('  see https://visidata.org/man for full reference')
         return 0
     vd.status(__version_info__)
 
