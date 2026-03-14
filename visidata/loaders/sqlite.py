@@ -149,7 +149,7 @@ class SqliteSheet(Sheet):
                 else:
                     return None
             elif not isinstance(v, (int, float, str)):
-                v = col.getDisplayValue(r)
+                v = col.getFullDisplayValue(row)
             return v
 
         def values(row, cols):
@@ -285,7 +285,7 @@ def save_sqlite(vd, p, *vsheets):
                 elif isinstance(v, (list, tuple, dict)):
                     v = jsonenc.encode(v)
                 elif not isinstance(v, (int, float, str)):
-                    v = col.getDisplayValue(r)
+                    v = col.getFullDisplayValue(r)
                 sqlvals.append(v)
             sql = 'INSERT INTO "%s" (%s) VALUES (%s)' % (tblname, ','.join(f'"{c.name}"' for c in vs.visibleCols), ','.join('?' for v in sqlvals))
             c.execute(sql, sqlvals)

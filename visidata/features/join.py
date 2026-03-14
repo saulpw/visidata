@@ -113,7 +113,7 @@ vd.jointypes = [AttrDict(key=k, desc=v) for k, v in {
 }.items()]
 
 def joinkey(sheetKeyCols, row):
-    return tuple(c.getDisplayValue(row) for c in sheetKeyCols)
+    return tuple(c.getFullDisplayValue(row) for c in sheetKeyCols)
 
 
 def groupRowsByKey(sheets:dict, rowsBySheetKey, rowsByKey):

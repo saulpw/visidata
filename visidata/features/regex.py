@@ -14,14 +14,14 @@ vd.option('regex_maxsplit', 0, 'maxsplit to pass to regex.split', replay=True)
 
 @VisiData.api
 def makeRegexSplitter(vd, regex, origcol):
-    return lambda row, regex=regex, origcol=origcol, maxsplit=options.regex_maxsplit: regex.split(origcol.getDisplayValue(row), maxsplit=maxsplit)
+    return lambda row, regex=regex, origcol=origcol, maxsplit=options.regex_maxsplit: regex.split(origcol.getFullDisplayValue(row), maxsplit=maxsplit)
 
 @VisiData.api
 def makeRegexMatcher(vd, regex, origcol):
     if not regex.groups:
         vd.fail('specify a capture group')  #1778
     def _regexMatcher(row):
-        m = regex.search(origcol.getDisplayValue(row))
+        m = regex.search(origcol.getFullDisplayValue(row))
         if m:
             return m.groupdict() if m.groupdict() else m.groups()
     return _regexMatcher
@@ -76,7 +76,7 @@ def addRegexColumns(vs, regexMaker, origcol, regexstr):
 
 @VisiData.api
 def regexTransform(vd, origcol, before='', after=''):
-    return lambda col,row,origcol=origcol,before=before,after=after,flags=origcol.sheet.regex_flags(): re.sub(before, after, origcol.getDisplayValue(row), flags=flags)
+    return lambda col,row,origcol=origcol,before=before,after=after,flags=origcol.sheet.regex_flags(): re.sub(before, after, origcol.getFullDisplayValue(row), flags=flags)
 
 
 @VisiData.api

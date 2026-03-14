@@ -518,7 +518,7 @@ def main_vd():
 
     if vd.stackedSheets and args.output_cell:
         outfile = vd._stdout if args.output_cell == '-' else open(args.output_cell, 'w')
-        print(vd.activeSheet.cursorDisplay, file=outfile)
+        print(vd.activeSheet.cursorFullDisplay, file=outfile)
 
     saver_threads = [t for t in vd.unfinishedThreads if t.name.startswith('save_')]
     if saver_threads:

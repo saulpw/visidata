@@ -529,7 +529,7 @@ class TableSheet(BaseSheet):
     @property
     def cursorFullDisplay(self):
         'Full displayed value (without truncating on width) at current row and column.'
-        return self.cursorCol.format(self.cursorCol.getTypedValue(self.cursorRow))
+        return self.cursorCol.getFullDisplayValue(self.cursorRow)
 
     @property
     def cursorTypedValue(self):
@@ -623,7 +623,7 @@ class TableSheet(BaseSheet):
 
     def setColNames(self, rows):
         for c in self.visibleCols:
-            c.name = '\n'.join(str(c.getDisplayValue(r)) for r in rows)
+            c.name = '\n'.join(str(c.getFullDisplayValue(r)) for r in rows)
 
     def setKeys(self, cols):
         'Make all *cols* into key columns.'
@@ -1305,7 +1305,7 @@ Sheet.addCommand('', 'key-col-on', 'setKeys([cursorCol])', 'set current column a
 Sheet.addCommand('z!', 'key-col-off', 'unsetKeys([cursorCol])', 'unset current column as a key column')
 
 Sheet.addCommand('e', 'edit-cell', 'cursorCol.setValues([cursorRow], editCell(cursorVisibleColIndex)) if not (cursorRow is None) else fail("no rows to edit")', 'edit contents of current cell')
-Sheet.addCommand('ge', 'setcol-input', 'cursorCol.setValuesTyped(selectedRows, input("set selected to: ", value=cursorDisplay))', 'set contents of current column for selected rows to same input')
+Sheet.addCommand('ge', 'setcol-input', 'cursorCol.setValuesTyped(selectedRows, input("set selected to: ", value=cursorFullDisplay))', 'set contents of current column for selected rows to same input')
 
 Sheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.reload=lambda vs=vs,rows=selectedRows: setattr(vs, "rows", list(rows)); vd.push(vs)', 'open a duplicate sheet with only the selected rows')
 Sheet.addCommand('g"', 'dup-rows', 'vs=copy(sheet); vs.name+="_copy"; vs.rows=list(rows); status("copied "+vs.name); vs.select(selectedRows); vd.push(vs)', 'open a duplicate sheet with all rows')

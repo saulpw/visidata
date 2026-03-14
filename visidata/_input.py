@@ -655,7 +655,7 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
         if col.readonly:
             vd.fail('cannot edit readonly column')
         y, h = self._rowLayout.get(rowidx, (0, 0))
-        value = value or col.getDisplayValue(self.rows[self.cursorRowIndex])
+        value = value or col.getFullDisplayValue(self.rows[self.cursorRowIndex])
 
     bindings={
         'Shift+Up':     acceptThenFunc('go-up', 'rename-col' if rowidx < 0 else 'edit-cell'),
