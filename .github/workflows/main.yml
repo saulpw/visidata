@@ -54,4 +54,4 @@ jobs:
       run: make install-test
 
     - name: Run unit tests
-      run: make test-pytest
+      run: make test
