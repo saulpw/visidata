@@ -113,6 +113,7 @@ def my_vd_method(vd): ...
 - Docstrings on classes (single-quoted) and methods
 
 ## Tests
+- Use `.vdx` cmdlog tests for feature/behavior tests, not pytest. Pytest is only for unit tests of pure utility functions.
 - Prefer `.vdx` over `.vd` for new golden tests.
 - When adding or modifying a format saver, add `"roundtrip": "yes"|"inexact"` to `dev/formats.jsonl` and verify with `tests/test-roundtrip.sh <fmt>`.
 - Include the issue number as a comment on the `def test_` line: `def test_foo(self):  # #2829`
