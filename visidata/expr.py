@@ -90,7 +90,22 @@ def inputExpr(self, prompt, *args, **kwargs):
     return vd.input(prompt, "expr", *args, completer=CompleteExpr(self), **kwargs)
 
 
-Sheet.addCommand('=', 'addcol-expr', 'addColumnAtCursor(ExprColumn(inputExpr("new column expr="), col=cursorCol, curcol=cursorCol))', 'create new column from Python expression, with column names as variables')
+@Sheet.api
+def addcol_expr(sheet, expr_input, **kwargs):  # #3022
+    'Parse "name=expr" and return an ExprColumn. If no name given, use the expression as the name.'
+    name, expr = expr_input, None
+    eq_idx = expr_input.find('=')
+    if eq_idx > 0:
+        lhs = expr_input[:eq_idx].strip()
+        rhs = expr_input[eq_idx+1:]
+        if lhs.isidentifier() and rhs and rhs[0] != '=':
+            expr = rhs.strip() or None
+            if expr:
+                name = lhs
+    return ExprColumn(name, expr=expr, **kwargs)
+
+
+Sheet.addCommand('=', 'addcol-expr', 'addColumnAtCursor(addcol_expr(inputExpr("new column expr="), col=cursorCol, curcol=cursorCol))', 'create new column from Python expression, with column names as variables')
 Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(someSelectedRows, inputExpr("set selected="), curcol=cursorCol)', 'set current column for selected rows to result of Python expression')
 Sheet.addCommand('z=', 'setcell-expr', 'cursorCol.setValues([cursorRow], evalExpr(inputExpr("set expr="), row=cursorRow, curcol=cursorCol))', 'evaluate Python expression on current row and set current cell with result of Python expression')
 Sheet.addCommand('gz=', 'setcol-iter', 'cursorCol.setValues(someSelectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(someSelectedRows))))', 'set current column for selected rows to the items in result of Python sequence expression')
