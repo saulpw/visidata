@@ -37,6 +37,10 @@ Additional Python packages are needed for some formats:
     pipx install visidata --preinstall openpyxl --preinstall lxml
     # or: uv tool install visidata --with openpyxl --with lxml
 
+To add format packages to an existing pipx install:
+
+    pipx inject visidata openpyxl lxml
+
 To install the cutting edge `develop` branch (no warranty expressed or implied):
 
     pip3 install git+https://github.com/saulpw/visidata.git@develop
