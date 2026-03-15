@@ -385,7 +385,8 @@ def fuzzymatch(vd, haystack:"list[dict[str, str]]", needles:"list[str]) -> list[
         for k, v in h.items():
             if k[0] == '_': continue
             positions = set()
-            v_match = str(v) if case_sensitive else str(v).lower()
+            v = str(v) if v is not None else ''
+            v_match = v if case_sensitive else v.lower()
             for p in needles:
                 mr = _fuzzymatch(v_match, p)
                 if mr.score > 0:
@@ -425,3 +426,13 @@ def test_fuzzymatch(vd):
     assert _fuzzymatch('hello world', 'elo wo') == MatchResult(
         1, 8, 127, [7, 6, 5, 4, 2, 1]
     )
+
+    # #2XXX None values in haystack should not crash fuzzymatch
+    haystack = [
+        dict(longname='open-file', description='open the given file'),
+        dict(longname='save-sheet', description=None),
+        dict(longname='quit-all', description='quit all sheets'),
+    ]
+    results = vd.fuzzymatch(haystack, ['save'])
+    assert len(results) > 0
+    assert results[0].match['longname'] == 'save-sheet'
