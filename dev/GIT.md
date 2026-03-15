@@ -107,7 +107,7 @@ Run `dev/test-all.sh` locally before pushing. After creating a PR, check CI stat
 
 ### Documentation
 
-Always consider updating docs when a user-facing feature is added or changed. Check `docs/README.md` for which files to update.
+Update docs in the same commit as the code change, not as a separate follow-up commit. Check `docs/README.md` for which files to update.
 
 ### Bug Fix PRs
 
