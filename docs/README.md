@@ -32,6 +32,7 @@ Guide to what each file covers, so it's clear which files to update when user-fa
 - menu.md: Toplevel menubar, arrow key/hjkl navigation
 - mouse.md: Mouse interaction options
 - pipes.md: Using VisiData in stdin/stdout pipelines
+- dirsheet.md: Directory Sheet (DirSheet): browsing, editing, previewing files
 - split.md: Split screen, viewing two sheets simultaneously
 - save-restore.md: Saving and replaying sessions
 - plugins.md: Installing plugins (builtin, pip, ~/.visidata/plugins/)
