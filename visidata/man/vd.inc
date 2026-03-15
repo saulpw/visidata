@@ -225,8 +225,8 @@ rename current column to combined contents of current cell in selected rows (or 
 .It Ic "gz^"
 rename all visible columns to combined contents of current column for selected rows (or current row)
 .Pp
-.It Ic "  =" Ar expr
-.No create new column from Python Ar expr Ns , with column names, and attributes, as variables
+.It Ic "  =" Ar [name=]expr
+.No create new column from Python Ar expr Ns , with column names, and attributes, as variables. Optionally specify column Ar name Ns .
 .It Ic " g=" Ar expr
 .No set current column for selected rows to result of Python Ar expr
 .It Ic "gz=" Ar expr

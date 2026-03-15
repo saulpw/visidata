@@ -252,6 +252,8 @@ Note that by default the expansion logic will look for nested columns in **up to
 
 The `=` command takes a Python expression as input and creates a new column, where each cell evaluates the expression in the context of its row.
 
+To specify the column name, use `name=expr` (e.g. `total = Units * Unit_Cost`).  If no name is given, the expression itself is used as the column name.
+
 These variables and functions are available in the scope of an expression:
 
 - **Column names** evaluate to the typed value of the cell in the named column for the same row.
