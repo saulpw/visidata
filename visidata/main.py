@@ -49,7 +49,7 @@ def eval_vd(logpath, *args, **kwargs):
         # vdx format handles .vd (tsv), .vdj (json), and .vdx (minimal) lines
         vs = vd.openSource(src, filetype='vdx')
     else:
-        vs = vd.openSource(src, filetype=src.ext)
+        vs = vd.openSource(src, filetype=src.ext or 'vdx')
     # add a row in place of the sheet creation command that undo() expects as the first command
     vs.cmdlog_sheet.addRow(vs.cmdlog_sheet.newRow(sheet=None, row='', keystrokes='', input='', longname='no-op', undofuncs=[]))
     vs.name += '_vd'
