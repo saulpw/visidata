@@ -59,6 +59,9 @@ vd.addMenuItems('''
 vd.addGlobals(MySheet=MySheet)  # keyword args, not dict
 ```
 
+### Caching Per-Row Data
+When you need one cached value per row, use a `Column` with `cache=True` (or `cache='async'` for expensive I/O).  Don't build a separate dict — Column's cache is already keyed by `rowid` and integrates with the sheet lifecycle.  Example: `DirSheet` uses a hidden `Column('preview', width=0, cache=True, ...)` to cache preview sheet objects per file.
+
 ### Loaders vs Features
 - **Loaders** (`visidata/loaders/`): defines `vd.open_<ext>()`
 - **Features** (`visidata/features/`): everything else
