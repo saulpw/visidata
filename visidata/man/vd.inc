@@ -766,6 +766,8 @@ edit option at current row
 remove option override for this context
 .It Ic "^S"
 .No save option configuration to Sy foo.visidatarc
+.It Ic "z^S"
+.No save option overrides to config file
 .El
 .
 .Ss CommandLog (Shift+D)

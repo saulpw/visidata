@@ -114,6 +114,11 @@ Supply a space-separated list of aggregator names to `options.describe_aggrs` in
 options.describe_aggrs = 'mean stdev irr'
 ```
 
+### Saving options from the Options Sheet {#save-options}
+
+Options edited on the Options Sheet (`Shift+O`) can be saved to the config file with `z Ctrl+S`.
+Only options that differ from the default and aren't already in the config file will be appended.
+
 ### Turning off motd {#motd}
 
 By default, the first time each day that VisiData is used, it downloads a single small file of startup messages.
