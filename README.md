@@ -24,6 +24,19 @@ To install the latest release from PyPi:
 
     pip3 install visidata
 
+To try VisiData without installing, use [pipx](https://pipx.pypa.io/) or [uv](https://docs.astral.sh/uv/):
+
+    pipx run visidata          # or: uvx visidata
+
+To install permanently (adds `vd` to your PATH):
+
+    pipx install visidata      # or: uv tool install visidata
+
+Additional Python packages are needed for some formats:
+
+    pipx install visidata --preinstall openpyxl --preinstall lxml
+    # or: uv tool install visidata --with openpyxl --with lxml
+
 To install the cutting edge `develop` branch (no warranty expressed or implied):
 
     pip3 install git+https://github.com/saulpw/visidata.git@develop
