@@ -37,6 +37,8 @@ The trailing `-` is for cases when the entire commit is safe and/or desirable to
 
 When we put together a patch release, we scan commit messages for this marker to see which ones should be included. Ideally only and all `-` marked commits since the last release would be in a patch release.
 
+Do not assume a commit is patch-safe — always ask before adding the `-` marker.
+
 #### Issue Numbers
 Any issue numbers fixed in a commit should be appended to the git commit summary line, including the leading `#`.
 
