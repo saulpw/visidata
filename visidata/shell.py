@@ -112,6 +112,7 @@ class DirSheet(Sheet):
         - {help.commands.open_rows}
         - {help.commands.open_dir_parent}
         - {help.commands.sysopen_row}
+        - {help.commands.open_preview}
 
         ## Options (must reload to take effect)
 
@@ -147,6 +148,7 @@ class DirSheet(Sheet):
             getter=lambda col,row: '{:o}'.format(row.stat().st_mode),
             setter=lambda col,row,val: os.chmod(row, int(val, 8))),
         Column('filetype', width=0, cache='async', getter=lambda col,row: vd.popen(['file', '--brief', row], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].strip()),
+        Column('preview', width=0, cache=True, getter=lambda col,row: col.sheet._openPreview(row)),
     ]
     nKeys = 2
     _ordering = [('modtime', True), ('filename', False)]  # sort by reverse modtime initially
@@ -286,6 +288,47 @@ DirSheet.addCommand('y', 'copy-row', 'copy_files([cursorRow], inputPath("copy to
 DirSheet.addCommand('gy', 'copy-selected', 'copy_files(selectedRows, inputPath("copy to dest: ", value=cursorRow.given))', 'copy selected files to given directory *path*')
 
 DirSheet.addCommand('zEnter', 'open-row-filetype', 'ft = input("filetype: ", type="filetype", value=options.filetype or LazyComputeRow(sheet, cursorRow).ext); vd.push(openSource(cursorRow, filetype=ft) or fail(f"file {cursorDisplay} does not exist"))', 'open file in current row as input filetype')
+DirSheet.addCommand('', 'open-preview', 'sheet.previewFile(cursorRow)', 'open split preview of file at cursor')
+
+
+@DirSheet.api
+def _openPreview(sheet, p):
+    vs = vd.openSource(p, filetype="dir" if p.is_dir() else LazyComputeRow(sheet, p).ext)
+    vs._dirpreview = True
+    vs.ensureLoaded()
+    return vs
+
+
+@DirSheet.api
+def previewFile(sheet, p):
+    if not p: return
+    vs = sheet.column('preview').getValue(p)
+    if not isinstance(vs, BaseSheet):
+        return  # still loading or error
+    # remove old preview from pane 2
+    for old in vd.sheetstack(2):
+        if getattr(old, '_dirpreview', False):
+            vd.sheets.remove(old)
+    vd.push(vs, pane=2)
+    vd.options.disp_splitwin_pct = vd.options.disp_splitwin_pct or 50
+    sheet._previewing = True
+
+
+@DirSheet.after
+def checkCursor(sheet):
+    if not getattr(sheet, '_previewing', False):
+        return
+    if not vd.options.disp_splitwin_pct:
+        sheet._previewing = False
+        return
+    p = sheet.cursorRow
+    if p and p != getattr(sheet, '_preview_path', None):
+        sheet._preview_path = p
+        sheet.previewFile(p)
+    # preload previews for visible rows
+    previewCol = sheet.column('preview')
+    for row in sheet.rows[sheet.topRowIndex:sheet.topRowIndex + sheet.nScreenRows]:
+        previewCol.getValue(row)
 
 
 @DirSheet.api
@@ -313,4 +356,5 @@ vd.addGlobals({
 vd.addMenuItems('''
     Column > Add column > shell > addcol-shell
     Row > Open file > open-row-filetype
+    View > Preview file > open-preview
 ''')
