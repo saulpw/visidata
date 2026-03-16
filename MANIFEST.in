@@ -13,6 +13,9 @@ include visidata/ddw/regex.ddw
 include visidata/tests/sample.tsv
 include visidata/tests/benchmark.csv
 include visidata/desktop/visidata.desktop
+include visidata/desktop/org.visidata.VisiData.metainfo.xml
+include visidata/desktop/icons/48x48/visidata.png
+include visidata/desktop/icons/32x32/visidata.png
 include visidata/experimental/noahs_tapestry/*.json
 include visidata/experimental/noahs_tapestry/*.md
 include visidata/experimental/noahs_tapestry/*.ddw

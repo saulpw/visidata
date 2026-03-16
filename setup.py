@@ -74,6 +74,9 @@ setup(
     data_files=[
         ("share/man/man1", [f for f in ["visidata/man/vd.1", "visidata/man/visidata.1"] if os.path.exists(f)]),
         ("share/applications", ["visidata/desktop/visidata.desktop"]),
+        ("share/metainfo", ["visidata/desktop/org.visidata.VisiData.metainfo.xml"]),
+        ("share/icons/hicolor/48x48/apps", ["visidata/desktop/icons/48x48/visidata.png"]),
+        ("share/icons/hicolor/32x32/apps", ["visidata/desktop/icons/32x32/visidata.png"]),
     ],
     extras_require={
         "test": [
@@ -106,7 +109,12 @@ setup(
         "visidata.ddw": ["input.ddw", "regex.ddw"],
         "visidata": ["guides/*.md"],
         "visidata.tests": ["sample.tsv", "benchmark.csv"],
-        "visidata.desktop": ["visidata.desktop"],
+        "visidata.desktop": [
+            "visidata.desktop",
+            "org.visidata.VisiData.metainfo.xml",
+            "icons/48x48/visidata.png",
+            "icons/32x32/visidata.png",
+        ],
         "visidata.experimenta.noahs_tapestry": [
             "*.ddw",
             "*.md",

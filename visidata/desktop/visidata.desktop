@@ -2,6 +2,8 @@
 Type=Application
 Terminal=true
 Name=VisiData
-Icon=utilities-terminal
+Icon=visidata
 Exec=vd %F
-Categories=Utility;TextTools
+Categories=Utility;TextTools;
+Comment=Terminal interface for exploring and arranging tabular data
+Keywords=terminal;spreadsheet;tabular;data;csv;
