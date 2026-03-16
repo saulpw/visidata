@@ -78,6 +78,28 @@ def addShellColumns(vd, cmd, sheet, curcol=None):
             shellcol)
 
 
+def _buildShellExpr(expr, context):
+    import shlex
+
+    lexer = shlex.shlex(expr, posix=False, punctuation_chars='|&;()')
+    lexer.whitespace_split = True
+    tokens = list(lexer)
+
+    parts = []
+    for token in tokens:
+        if set(token) <= set('|&;()'):
+            parts.append(token)
+            continue
+
+        expanded = shlex.split(token, posix=True)
+        if len(expanded) == 1 and expanded[0].startswith('$'):
+            parts.append(shlex.quote(str(context[expanded[0][1:]])))
+        else:
+            parts.append(token)
+
+    return ' '.join(parts)
+
+
 class ColumnShell(Column):
     def __init__(self, name, cmd=None, curcol=None, **kwargs):
         super().__init__(name, **kwargs)
@@ -87,15 +109,9 @@ class ColumnShell(Column):
     @asynccache(lambda col,row: (col, col.sheet.rowid(row)))
     def calcValue(self, row):
         try:
-            import shlex
-            args = []
             context = LazyComputeRow(self.source, row, curcol=self.curcol)
-            for arg in shlex.split(self.expr):
-                if arg.startswith('$'):
-                    arg = shlex.quote(str(context[arg[1:]]))
-                args.append(arg)
-
-            p = vd.popen([os.getenv('SHELL', 'bash'), '-c', shlex.join(args)],
+            cmd = _buildShellExpr(self.expr, context)
+            p = vd.popen([os.getenv('SHELL', 'bash'), '-c', cmd],
                     stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             return p.communicate()
         except Exception as e:
