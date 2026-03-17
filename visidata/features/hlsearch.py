@@ -41,13 +41,13 @@ def highlight_chunks(sheet, chunks, hp, hoffset, colwidth, notewidth, cattr, hl_
                     display_chunks[-1][1] += s
                 else:
                     display_chunks.append([attr, s])
-                dispw += dispwidth(s)
+                dispw += dispwidth(s, literal=True)
             s = text[m1:m2]
             if truncate_right:
                 display_chunks[-1][1] += s
             else:
                 display_chunks.append([hl_attr, s])
-            dispw += dispwidth(text[m1:m2])
+            dispw += dispwidth(text[m1:m2], literal=True)
             if dispw > colwidth-notewidth-1:
                 right_hl = True
                 last = len(text)
@@ -62,7 +62,7 @@ def highlight_chunks(sheet, chunks, hp, hoffset, colwidth, notewidth, cattr, hl_
                 display_chunks[-1][1] += s
             else:
                 display_chunks.append([attr, s])
-            dispw += dispwidth(s)
+            dispw += dispwidth(s, literal=True)
     return display_chunks, left_hl, right_hl
 
 @Sheet.api
