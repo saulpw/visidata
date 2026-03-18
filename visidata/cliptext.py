@@ -173,17 +173,17 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
     trunc_i = 0
     w_truncated = 0
 
-    trunchlen = dispwidth(trunch)
+    trunchlen = dispwidth(trunch, literal=True)
     if dispw is None:
         s = ''.join(s)
-        return s, dispwidth(s)
+        return s, dispwidth(s, literal=True)
     if trunchlen > dispw: #if the truncator cannot fit, use a truncator of ''
         return _clipstr(s, dispw, trunch='', oddspacech=oddspacech, combch=combch, modch=modch)
     for c in s:
         newc, chlen = _dispch(c, oddspacech=oddspacech, combch=combch, modch=modch)
         if not newc:
             newc = c
-            chlen = dispwidth(c)
+            chlen = dispwidth(c, literal=True)
 
         #if the next character will fit
         if w+chlen <= dispw:
@@ -441,17 +441,17 @@ def clipstr_start(dispval, w, truncator='', literal=False):
 def clipstr_middle(s, n=10, truncator='…'):
     '''Return a string having a display width <= *n*. Excess characters are
     trimmed from the middle of the string, and replaced by a single
-    instance of *truncator*.'''
+    instance of *truncator*. Markup is treated as literal text.'''
     if n == 0: return '', 0
-    if dispwidth(s) > n:
+    if dispwidth(s, literal=True) > n:
         #for even widths, give the leftover 1 space to the right fragment
         l_space = n//2 if n%2 == 1 else max(n//2-1, 0)
         l_frag, l_w = _clipstr(s, l_space)
         #if left fragment did not fill its space, give the unused space to the right fragment
         r_frag = clipstr_start(s, n//2+(l_space-l_w))[0]
         res = l_frag + truncator + r_frag
-        return res, dispwidth(res)
-    return s, dispwidth(s)
+        return res, dispwidth(res, literal=True)
+    return s, dispwidth(s, literal=True)
 
 
 def clip_markup_middle(s:str, w:int):
@@ -470,7 +470,7 @@ def clip_markup_middle(s:str, w:int):
     if w <= 0: return ''
     if dispwidth(s) <= w:
         return s
-    if w < dispwidth(trunch): return ''
+    if w < dispwidth(trunch, literal=True): return ''
 
     markup_section_re = f'({literal_markup_re}|' + r'\[.*?\].*?\[[/:].*?\])'  # escaped markup or [:whatever]text[:] or [:whatever]text[/anything]
     if not re.match(internal_markup_re, s):
@@ -484,13 +484,13 @@ def clip_markup_middle(s:str, w:int):
         # or escaped literal:  start, literal, end
         if is_marked_literal(chunk):
             chunk = chunk[1:-1]
-            text_w = dispwidth(chunk)
+            text_w = dispwidth(chunk, literal=True)
         else:
             parts = re.split(internal_markup_re, chunk)
             if len(parts) == 1:      #text with no markup
-                text_w = dispwidth(chunk)
+                text_w = dispwidth(chunk, literal=True)
             elif len(parts) == 5 and parts[0] == '' and parts[4] == '': #empty string, start, text, end, empty string
-                text_w = dispwidth(parts[2])
+                text_w = dispwidth(parts[2], literal=True)
             else:
                 vd.fail('error parsing markup clip')
         if chunks_w + text_w < w//2:
@@ -506,12 +506,12 @@ def clip_markup_middle(s:str, w:int):
     for chunk in chunks[len(chunks)-1:i:-1]:
         parts = re.split(internal_markup_re, chunk)
         if len(parts) == 1:
-            text_w = dispwidth(parts[0])
+            text_w = dispwidth(parts[0], literal=True)
         elif len(parts) == 5 and parts[0] == '' and parts[4] == '':
-            text_w = dispwidth(parts[2])
+            text_w = dispwidth(parts[2], literal=True)
         else:
             vd.fail('error parsing markup clip')
-        if chunks_w + text_w <= w//2 - (0 if truncated else dispwidth(trunch)):
+        if chunks_w + text_w <= w//2 - (0 if truncated else dispwidth(trunch, literal=True)):
             reverse_output.append(chunk)
             chunks_w += text_w
         else:
