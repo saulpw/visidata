@@ -1,3 +1,0 @@
-open-file tests/duckdb_test.duckdb
-row キdepartments
-open-row

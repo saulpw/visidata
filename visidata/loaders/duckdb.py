@@ -66,6 +66,7 @@ def open_duckdb(vd, p):
 # rowdef: list of values
 class DuckdbSheet(Sheet):
     'Provide functionality for importing DuckDB databases.'
+    rowtype = 'rows'
     savesToSource = True
     defer = True
     query = ''
@@ -204,7 +205,7 @@ class DuckdbSheet(Sheet):
         self.preloadHook()
         self.reload()
 
-
+# rowdef: DuckdbSheet for one table or view in the database
 class DuckdbIndexSheet(DuckdbSheet, IndexSheet):
     rowtype = 'tables'
     savesToSource = True
