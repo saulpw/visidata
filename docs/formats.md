@@ -13,6 +13,7 @@ eleventyNavigation:
 | zip                   | ZIP archive format                             | 0\.28           |                              | 0\.28         | 1989    | PKWARE                                                        |                      |
 | hdf5                  | Hierarchical Data Format                       | 0\.28           |                              | 0\.28         | 199x    | NCSA                                                          | h5py                 |
 | [sqlite](#sqlite)     | sqlite                                         | 0\.42           |                              | 0\.42         | 2000    | D\. Richard Hipp                                              |                      |
+| [duckdb](#duckdb)     | DuckDB                                         | 3\.4            |                              | 3\.4          | 2019    | DuckDB Foundation                                             | duckdb               |
 | xls                   | Excel spreadsheets                             | 0\.42           |                              | 0\.42         | 1987    | Microsoft                                                     | xlrd                 |
 | [fixed](#fixed)       | fixed width text                               | 0\.97           |                              | 0\.97         |         |                                                               |                      |
 | [postgres](#postgres) | PostgreSQL database                            | 0\.97           |                              | 0\.97         | 1996    |                                                               |                      |
@@ -155,6 +156,12 @@ In psql:
 ## sqlite {#sqlite}
 - supports saving for CREATE/INSERT (not wholesale updates)
 - `z Ctrl+S` to commit any `add-row`/`edit-cell`/`delete-row`
+
+## duckdb {#duckdb}
+- loader-specific requirements
+    - `duckdb` python module in path or virtual environment
+- supports saving for CREATE/INSERT
+- `z Ctrl+S` to commit deferred `add-row`/`edit-cell`/`delete-row` changes back to the source database
 
 ## mysql {#mysql}
 - loader-specific requirements
