@@ -18,10 +18,6 @@ tags
 .direnv
 .envrc
 .meta
-agents/
-notes/
-data/
-out/
 
 # Generated man pages (run `make man` to build)
 visidata/man/vd.1
