@@ -96,6 +96,7 @@ In general:
 - Commits should be **rebased** instead of merged, for a more linear and less cluttered commit log
 - Try to **squash features** into a single commit (but don't over-squash either)
 - Keep the commit history clean and meaningful
+- After every rebase, run `git diff <base>...HEAD --stat` to verify only expected files are in the diff before pushing
 
 ### Default Branch for Commits
 
