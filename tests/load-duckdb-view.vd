@@ -1,0 +1,3 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	tests/duckdb_test.duckdb	o	open file
+duckdb_test		キdept_view	open-row		Enter	open the sample DuckDB view
