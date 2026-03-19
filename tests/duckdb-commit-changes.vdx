@@ -1,0 +1,18 @@
+exec-python import os, shutil, tempfile, uuid; p=os.path.join(tempfile.gettempdir(), f'duckdb-commit-{uuid.uuid4().hex}.duckdb'); shutil.copyfile('tests/duckdb_test.duckdb', p); vd.push(vd.openSource(p))
+exec-python vd.options.overwrite='y'
+row キedit_pk
+open-row
+row 0
+col note
+edit-cell crème brûlée
+add-row
+col id
+edit-cell 3
+col note
+edit-cell added
+col amount
+edit-cell 3.75
+row 2
+delete-row
+commit-sheet
+reload-sheet

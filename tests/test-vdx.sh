@@ -19,6 +19,8 @@ export LC_TIME="en_US.UTF-8"
 export XDG_DATA_HOME=tests/xdg/data
 
 PY311=$($PYTHON -c 'import sys; print(sys.version_info[:2] >= (3,11))')
+PY310=$($PYTHON -c 'import sys; print(sys.version_info[:2] >= (3,10))')
+HAS_DUCKDB=$($PYTHON -c 'import importlib.util; print(importlib.util.find_spec("duckdb") is not None)')
 
 DEBUG=0
 while getopts "dj:" opt; do
@@ -37,6 +39,13 @@ should_skip() {
         *-broken) echo "broken" ;;
         *-manual) echo "manual" ;;
         *-perf)   echo "perf" ;;
+        *duckdb*)
+            if [ "$PY310" != "True" ]; then
+                echo "duckdb requires py310"
+            elif [ "$HAS_DUCKDB" != "True" ]; then
+                echo "duckdb missing"
+            fi
+            ;;
         *-nosave) return 1 ;;  # not skipped, just no golden comparison
         *-flaky)  return 1 ;;  # not skipped; failures reported but non-fatal
         *-n311)  [ "$PY311" == "True" ] && echo "n311" ;;
