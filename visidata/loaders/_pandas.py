@@ -384,12 +384,6 @@ def view_pandas(vd, df):
     run(PandasSheet('', source=df))
 
 
-# Override basic selection commands to work with PandasSheet's selection mechanism.
-# Match standard behavior: select/toggle/unselect and move the cursor down one row.
-PandasSheet.addCommand('s', 'select-row', 'select_row(cursorRow); cursorDown(1)', 'select current row')
-PandasSheet.addCommand('u', 'unselect-row', 'unselect_row(cursorRow); cursorDown(1)', 'unselect current row')
-PandasSheet.addCommand('t', 'stoggle-row', 'toggle_row(cursorRow); cursorDown(1)', 'toggle selection of current row')
-
 # Override with vectorized implementations
 PandasSheet.addCommand(None, 'stoggle-rows', 'toggleByIndex()', 'toggle selection of all rows')
 PandasSheet.addCommand(None, 'select-rows', 'selectByIndex()', 'select all rows')
