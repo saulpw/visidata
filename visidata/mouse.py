@@ -1,6 +1,6 @@
 import curses
 
-from visidata import vd, VisiData, BaseSheet, Sheet, AttrDict
+from visidata import vd, VisiData, BaseSheet, Sheet, AttrDict, dispwidth
 
 
 # registry of mouse events.  cleared before every draw cycle.
@@ -126,7 +126,8 @@ def handleMouse(vd, sheet):
 @Sheet.api
 def visibleColAtX(sheet, x):
     for vcolidx, (colx, w) in sheet._visibleColLayout.items():
-        if colx <= x <= colx+w:
+        colsepw = dispwidth(vd.options.disp_column_sep, literal=True)
+        if colx <= x <= colx+w+colsepw-1:
             return vcolidx
 
 
