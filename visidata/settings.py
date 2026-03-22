@@ -279,7 +279,10 @@ class OptionsObject:
 
     def __getattr__(self, optname):      # options.foo
         'Return value of option `optname` for stored options context.'
-        return self.__getitem__(optname)
+        opt = self._get(optname, obj=self._obj)
+        if not opt:
+            raise AttributeError(optname)
+        return opt.value
 
     def __setattr__(self, optname, value):   # options.foo = value
         'Set *value* of option *optname* for stored options context.'
