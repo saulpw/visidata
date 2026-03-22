@@ -321,7 +321,6 @@ def initCurses(vd):
     curses.noecho()
 
     curses.raw()    # get control keys instead of signals
-    curses.meta(1)  # allow "8-bit chars"
 
     scr.keypad(1)
 
