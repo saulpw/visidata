@@ -9,7 +9,6 @@ class Extensible:
     @classmethod
     def init(cls, membername, initfunc=lambda: None, copy=False):
         'Prepend equivalent of ``self.<membername> = initfunc()`` to ``<cls>.__init__``.  If *copy* is True, <membername> will be copied when object is copied.'
-
         def thisclass_hasattr(cls, k):
             return getattr(cls, k, None) is not getattr(cls.__bases__[0], k, None)
 
