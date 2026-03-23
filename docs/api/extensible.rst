@@ -78,6 +78,39 @@ This works like ``@property``, except it only computes the value on first access
     This way, they are not created until their first use, which allows them to take advantage of Sheet extensions that were loaded after the plugin.
 
 
+.. autofunction:: visidata.Extensible.before
+
+Runs *beforefunc* before the original method.  The return value of *beforefunc* is ignored.
+
+::
+
+    @Sheet.before
+    def reload(sheet):
+        vd.status('reloading...')
+
+.. autofunction:: visidata.Extensible.after
+
+Runs *afterfunc* after the original method.  The return value of *afterfunc* is ignored; the original's return value is preserved.
+
+::
+
+    @DrawablePane.after
+    def execCommand2(sheet, cmd, *args, **kwargs):
+        vd.usedInputs[cmd.longname] += 1
+
+.. autofunction:: visidata.Extensible.around
+
+Wraps the original method, passing it as the first argument (*oldfunc*) to *aroundfunc*.
+*aroundfunc* can call *oldfunc* with modified arguments, return a different value, or skip calling it entirely.
+
+::
+
+    @VisiData.around
+    def input(vd, oldfunc, prompt, **kwargs):
+        if should_intercept(kwargs):
+            return custom_input(vd, prompt, **kwargs)
+        return oldfunc(vd, prompt, **kwargs)
+
 .. autofunction:: visidata.Extensible.init
 
 If a module wants to store some data on an Extensible class, it can add
