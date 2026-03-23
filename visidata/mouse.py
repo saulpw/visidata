@@ -9,6 +9,8 @@ vd.mousereg = []  # list of AttrDict(y=, x=, h=, w=, buttonfuncs=dict)
 # sheet mouse position for current mouse event
 BaseSheet.init('mouseX', int)
 BaseSheet.init('mouseY', int)
+# sheet info for a click that may become a drag
+BaseSheet.init('drag1')
 
 
 @VisiData.after
@@ -124,11 +126,21 @@ def handleMouse(vd, sheet):
 
 
 @Sheet.api
-def visibleColAtX(sheet, x):
+def visibleColInfoAtX(sheet, x):
+    '''return (vcolidx, is_separator) for the x-coordinate'''
     for vcolidx, (colx, w) in sheet._visibleColLayout.items():
-        colsepw = dispwidth(vd.options.disp_column_sep, literal=True)
-        if colx <= x <= colx+w+colsepw-1:
-            return vcolidx
+        if vcolidx == sheet.nVisibleCols-1:
+            sep = vd.options.disp_rowend_sep
+        elif (sheet.keyCols and col is sheet.keyCols[-1]):
+            sep = vd.options.disp_key_sep
+        else:
+            sep = vd.options.disp_column_sep
+        sepw = dispwidth(sep, literal=True)
+        if colx <= x <= colx+w+sepw-1:
+            if colx <= x <= colx+w-1:  #in the cell
+                return (vcolidx, False)
+            else:   #in the end-of-column separator
+                return (vcolidx, True)
 
 
 @Sheet.api
@@ -138,18 +150,37 @@ def visibleRowAtY(sheet, y):
             return rowidx
 
 
-@Sheet.command('BUTTON1_PRESSED', 'go-mouse', 'set cursor to row and column where mouse was clicked')
-Sheet.bindkey('BUTTON1_CLICKED', 'go-mouse')
-Sheet.bindkey('BUTTON3_PRESSED', 'go-mouse')
-def go_mouse(sheet):
+Sheet.addCommand('BUTTON1_PRESSED', 'go-mouse-1', 'go_mouse(drag_button=1)', 'set cursor to row and column where mouse was clicked, or start a drag event')
+Sheet.bindkey('BUTTON1_CLICKED', 'go-mouse-1')
+Sheet.addCommand('BUTTON1_RELEASED', 'check-drag', 'drag_button1()', 'resize column if col separator has been dragged')
+Sheet.addCommand('BUTTON3_PRESSED', 'go-mouse', 'go_mouse()', 'set cursor to row and column where mouse was clicked')
+@Sheet.api
+def go_mouse(sheet, drag_button=None):
     if sheet.mouseY == sheet.windowHeight-1:
         return
     ridx = sheet.visibleRowAtY(sheet.mouseY)
     if ridx is not None:
         sheet.cursorRowIndex = ridx
-    cidx = sheet.visibleColAtX(sheet.mouseX)
+    cidx, is_column = sheet.visibleColInfoAtX(sheet.mouseX)
     if cidx is not None:
         sheet.cursorVisibleColIndex = cidx
+        if drag_button == 1 and is_column:
+            # save info for a possible drag event
+            sheet.drag1 = (sheet.visibleCols[cidx], sheet.mouseX)
+        else:
+            sheet.drag1 = None
+
+@Sheet.api
+def drag_button1(sheet):
+    if not sheet.drag1:
+        return
+    delta_w = sheet.mouseX - sheet.drag1[1]
+    col = sheet.drag1[0]
+    sheet.drag1 = None
+    if col.width and col.width > 0:
+        new_w = col.width + delta_w
+        if new_w > 0:
+            col.setWidth(new_w)
 
 Sheet.addCommand(None, 'scroll-mouse', 'sheet.topRowIndex=cursorRowIndex-mouseY+1', 'scroll to mouse cursor location')
 
