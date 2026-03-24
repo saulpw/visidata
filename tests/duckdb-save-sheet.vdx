@@ -1,4 +1,4 @@
-open-file tests/duckdb_test.duckdb
+open-file tests/.visidata/duckdb_test.duckdb
 row キedit_pk
 open-row
 exec-python from visidata import Path; import os, tempfile, uuid; p=os.path.join(tempfile.gettempdir(), f'duckdb-save-{uuid.uuid4().hex}.duckdb'); vd.options.overwrite='y'; vd.saveSheets(Path(p), sheet); vd.push(vd.openSource(p))

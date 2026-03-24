@@ -8,10 +8,23 @@
 #set -e
 shopt -s failglob
 
-trap "echo SIGTERM; exit;" SIGTERM
-trap "echo SIGINT; exit;" SIGINT
-
 source tests/testenv.sh
+
+cleanup_duckdb_fixtures() {
+    $PYTHON - <<'PY'
+from pathlib import Path
+
+for p in (Path('tests/.visidata/benchmark.duckdb'), Path('tests/.visidata/duckdb_test.duckdb')):
+    try:
+        p.unlink()
+    except FileNotFoundError:
+        pass
+PY
+}
+
+trap 'cleanup_duckdb_fixtures; echo SIGTERM; exit;' SIGTERM
+trap 'cleanup_duckdb_fixtures; echo SIGINT; exit;' SIGINT
+trap cleanup_duckdb_fixtures EXIT
 
 export LC_NUMERIC="en_US.UTF-8" #2867
 export LC_TIME="en_US.UTF-8"
@@ -76,6 +89,82 @@ declare -A FLAKY_TESTS
 
 # Clean output directory before running tests
 rm -f tests/output/*
+
+needs_duckdb_fixtures=0
+for i in $TESTS ; do
+    case "${i%.vd*}" in
+        *duckdb*)
+            needs_duckdb_fixtures=1
+            break
+            ;;
+    esac
+done
+
+if [ "$HAS_DUCKDB" = "True" ] && [ "$needs_duckdb_fixtures" -eq 1 ]; then
+    $PYTHON - <<'PY'
+from pathlib import Path
+import duckdb
+
+fixture_dir = Path('tests/.visidata')
+benchmark_db = fixture_dir / 'benchmark.duckdb'
+test_db = fixture_dir / 'duckdb_test.duckdb'
+
+for p in (benchmark_db, test_db):
+    try:
+        p.unlink()
+    except FileNotFoundError:
+        pass
+
+con = duckdb.connect(str(benchmark_db))
+con.execute("""
+    CREATE TABLE benchmark AS
+    SELECT *
+    FROM read_csv('sample_data/benchmark.csv', header=true, all_varchar=true)
+""")
+con.close()
+
+con = duckdb.connect(str(test_db))
+con.execute('CREATE SCHEMA other')
+con.execute('CREATE TABLE departments (deptno INTEGER PRIMARY KEY, dname VARCHAR, loc VARCHAR)')
+con.executemany('INSERT INTO departments VALUES (?, ?, ?)', [
+    (10, 'ACCOUNTING', 'NEW YORK'),
+    (20, '\u7814\u53d1', '\u6771\u4eac'),
+])
+con.execute('CREATE VIEW dept_view AS SELECT * FROM departments ORDER BY deptno')
+
+con.execute('CREATE TABLE edit_pk (id INTEGER PRIMARY KEY, note VARCHAR, amount DECIMAL(10,2))')
+con.executemany('INSERT INTO edit_pk VALUES (?, ?, ?)', [
+    (1, 'na\u00efve caf\u00e9', 1.25),
+    (2, '\u6771\u4eac', 2.50),
+])
+
+con.execute('CREATE TABLE edit_no_pk (id INTEGER, note VARCHAR)')
+con.executemany('INSERT INTO edit_no_pk VALUES (?, ?)', [
+    (1, 'alpha'),
+    (2, 'bravo'),
+])
+
+con.execute('CREATE TABLE shared_rows (id INTEGER PRIMARY KEY, note VARCHAR)')
+con.executemany('INSERT INTO shared_rows VALUES (?, ?)', [
+    (1, 'main one'),
+    (2, 'main two'),
+])
+
+con.execute('CREATE TABLE other."edit composite" ("key one" INTEGER, "key""two" VARCHAR, note VARCHAR, PRIMARY KEY ("key one", "key""two"))')
+con.executemany('INSERT INTO other."edit composite" VALUES (?, ?, ?)', [
+    (1, 'a', 'alpha'),
+    (1, 'b', 'bravo'),
+    (2, 'c', 'charlie'),
+])
+
+con.execute('CREATE TABLE other.shared_rows (id INTEGER PRIMARY KEY, note VARCHAR)')
+con.executemany('INSERT INTO other.shared_rows VALUES (?, ?)', [
+    (1, 'other one'),
+    (2, 'other two'),
+])
+con.close()
+PY
+fi
 
 # Build parallel golden batches and a nosave batch
 declare -a GOLDEN_TESTS
