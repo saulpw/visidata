@@ -112,6 +112,20 @@ def my_vd_method(vd): ...
 - Use `wrapply(func, args)` instead of try/except when wrapping into `TypedExceptionWrapper`
 - Fail fast when user-configured resources can't load — don't silently fall back.
 
+### Error Messages
+
+1. **Lowercase start** — `no rows selected`, not `No rows selected`
+2. **No trailing period** — `no rows selected`, not `no rows selected.`
+3. **No contractions** — `cannot`, not `can't`; `did not`, not `didn't`
+4. **Backticks wrap user-supplied values** — `` no column matching `{name}` ``, not single- or double-quoted `'{name}'` or bare `{name}`
+5. **Backticks wrap commands/keystrokes/options** — `` use `append` instead ``, `` options.undo not enabled ``
+6. **Full words** — `column` not `col`, `not implemented` not `notimpl`
+7. **`no {thing}` for missing prerequisites** — `no regex`, `no rows selected`
+8. **`cannot {verb}` for disallowed operations** — `cannot save multiple sheets to non-dir`
+9. **Terse single fragments** — avoid multi-sentence messages; use semicolon to separate fragments. Most messages are flat declarative fragments (`no rows selected`, `cannot save`).
+10. **Hide internals** — avoid Python method names, class names, type names in user-facing messages (except in error or debug); say what the user can do about it instead
+11. **Consistent severity** — same concept should generally use the same function (fail or warning, not a mix)
+
 ## Documentation
 - Always add `# rowdef:` comment above sheet classes
 - Docstrings on classes (single-quoted) and methods
