@@ -183,6 +183,7 @@ class InputWidget:
                 ch = vd.getkeystroke(scr)
                 if ch in bindings:
                     self.value, self.current_i = bindings[ch](self.value, self.current_i)
+                    self.first_action = False
                 else:
                     if self.handle_key(ch, scr):
                         return self.value
