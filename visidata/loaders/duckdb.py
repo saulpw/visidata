@@ -289,6 +289,7 @@ DuckdbIndexSheet.columns = IndexSheet.columns[:1] + [
 ] + IndexSheet.columns[1:] + [
     Column('sql', width=0, getter=lambda c, r: r.create_sql or ''),
 ]
+DuckdbIndexSheet.class_options.load_lazy = True
 
 
 @VisiData.api

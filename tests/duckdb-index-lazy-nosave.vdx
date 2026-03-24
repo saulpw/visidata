@@ -1,0 +1,2 @@
+open-file tests/.visidata/duckdb_test.duckdb
+exec-python from visidata import UNLOADED; assert all(r.rows is UNLOADED for r in vd.sheet.rows)
