@@ -60,6 +60,19 @@ The following example uses [sample.tsv](https://raw.githubusercontent.com/saulpw
 
 ---
 
+## Input history
+
+When entering a search regex or other input that has been used before, a history palette appears showing previous inputs.
+
+- `Up`/`Down` cycle through previous inputs (like shell history).
+- `Down` past the newest entry restores the original typed text.
+- Type to fuzzy search through history.
+- `PgUp`/`PgDn` to scroll through the history palette.
+
+The history palette uses the same visual style as the command palette, and is enabled when `cmdpalette` is included in `options.disp_help_flags`.
+
+---
+
 ## How to move between sheets
 
 The Sheets Sheet is a list of all sheets that have ever been opened (in order of opening).
