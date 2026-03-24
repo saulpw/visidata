@@ -120,4 +120,4 @@ Always add a regression test for bug fix PRs. Generate the golden output with th
 
 ### Wishlist items
 
-- For external wishlist items, implement → PR → tag requester to verify.
+- For external wishlist items, implement -> PR -> tag requester to verify.

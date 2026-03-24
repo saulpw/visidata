@@ -75,7 +75,7 @@ Sheet.addCommand('gEnter', 'dive-selected', 'openRows(selectedRows)', 'help')
 
 - Put on `BaseSheet` for all contexts, `TableSheet` for table contexts, specific sheet for that sheet only.
 - Never reference exec locals (like `cursorRow`) inside list comprehension filters in execstrs — breaks on Python < 3.12. Extract to `@Sheet.api` method.
-- When extracting a helper for a command, name it after the command's longname (e.g. `addcol-expr` → `addcol_expr`).
+- When extracting a helper for a command, name it after the command's longname (e.g. `addcol-expr` -> `addcol_expr`).
 - A command can only call `input()` once, even with `replay=False`.
 - `replay=False` — not added to cmdlog. `deprecated=True` — hidden from help. `testable=False` — excluded from test sweep.
 
@@ -131,6 +131,7 @@ def my_vd_method(vd): ...
 ## Documentation
 - Always add `# rowdef:` comment above sheet classes
 - Docstrings on classes (single-quoted) and methods
+- **7-bit ASCII only** in comments, docstrings, and help strings. Use ASCII substitutes (`--` not `—`, `->` not `→`, `~=` not `≈`, `'` not `'`). Unicode in display characters, theme_options, and data is fine.
 
 ## Tests
 - Use `.vdx` cmdlog tests for feature/behavior tests, not pytest. Pytest is only for unit tests of pure utility functions.

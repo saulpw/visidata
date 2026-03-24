@@ -35,7 +35,7 @@ class YamlSheet(JsonSheet):
             try:
                 first = next(documents)
             except StopIteration:
-                # Empty file‽
+                # Empty file?!
                 yield None
                 return
 

@@ -154,7 +154,7 @@ def llmAnalyzeColumn(sheet, col, rows, query):
             skipped += 1
             continue
 
-        # Truncate if too long (rough estimate: 4 chars ≈ 1 token)
+        # Truncate if too long (rough estimate: 4 chars ~= 1 token)
         max_chars = vd.options.llm_max_tokens * 3
         if len(cell_text) > max_chars:
             cell_text = cell_text[:max_chars] + '...'

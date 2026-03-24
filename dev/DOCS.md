@@ -15,12 +15,12 @@ Reference any option value with `{vd.options.optname}`.
 This is a great way to ensure that the appropriate option is displayed, even if the user changed the option value.
 
 - Use `{help.commands.longname}` to put the properly formatted string (below) into the GuideSheet.
-It’s much preferred to change the command helpstring itself, in order to make this pattern work, than to write it out manually.
+It's much preferred to change the command helpstring itself, in order to make this pattern work, than to write it out manually.
 It will look like this:
 
     - `<keystroke>` (`<longname>`) to <command helpstring>.
 
-The keystroke immediately follows the bullet.  Do not say “Press” or “Use” within VisiData docs and helpstrings.
+The keystroke immediately follows the bullet.  Do not say "Press" or "Use" within VisiData docs and helpstrings.
 
 - List relevant options with the following pattern.
 
@@ -28,7 +28,7 @@ The keystroke immediately follows the bullet.  Do not say “Press” or “Use�
 
     - Similarly, prefer to use {help.options.option-name} to expand into the above, and prefer to modify the helpstring instead of writing it out manually.
 
- - Do not use the second person perspective (“you”, “yours”) outside of tutorials.
+ - Do not use the second person perspective ("you", "yours") outside of tutorials.
 
  - Do not mention "In VisiData" - we can assume that the user is in VisiData already.
  - Do not use extraneous filler words.

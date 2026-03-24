@@ -222,7 +222,7 @@ def sheet_from_description(vd, sources, sheet_desc):
             vd.clearCaches()
     # Only push for subsheet navigation or sheets not already on the stack.
     # For single-level moves (cursor positioning on an existing source),
-    # don't change the stack order — just return the sheet for cursor moves.
+    # don't change the stack order -- just return the sheet for cursor moves.
     if len(sheet_desc) > 1 or vs not in vd.sheets:
         # use load=False to avoid calling afterLoad() early, before queue_move_to_pos
         # can replace the default afterLoad with a wrapped version
