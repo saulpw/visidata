@@ -30,3 +30,14 @@ class TestColumnize:
         cols = list(columnize(rows))
         assert len(cols) == 1
         assert cols[0] == (0, 5)
+
+    def test_right_justified_headers(self):  #3029
+        'right-justified headers wider data should not lose data'
+        rows = [
+            '   PID    PPID',
+            '123456  123456',
+        ]
+        cols = list(columnize(rows))
+        assert len(cols) == 2, f'Expected 2, got {len(cols)}: {cols}'
+        vals = [rows[1][i:j].strip() for i, j in cols]
+        assert vals == ['123456', '123456']

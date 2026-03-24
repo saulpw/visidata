@@ -74,6 +74,25 @@ def columnize(rows, has_header=True):
         for i, ch in enumerate(r):
             if not ch.isspace():
                 allNonspaces.add(i)
+
+    if has_header and len(colstarts) > 1:  #3029
+        # Adjust for right-justified headers where data extends beyond header text
+        if any(pos in allNonspaces for pos in range(colstarts[0])):
+            colstarts[0] = 0
+        for idx in range(1, len(colstarts)):
+            run_end = None
+            in_run = False
+            for pos in range(colstarts[idx-1], colstarts[idx]):
+                if pos not in allNonspaces:
+                    in_run = True
+                elif in_run:
+                    run_end = pos
+                    in_run = False
+            if in_run:
+                run_end = colstarts[idx]
+            if run_end is not None:
+                colstarts[idx] = run_end
+
     for idx, start in enumerate(colstarts):
         if idx + 1 < len(colstarts):
             # column ends at last non-space position before next column start
