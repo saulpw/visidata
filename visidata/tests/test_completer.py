@@ -1,10 +1,8 @@
-import pytest
 import visidata
 
 class TestCompleteExpr:
     def test_completer(self):
         vs = visidata.DirSheet('test', source=visidata.Path('.'))
-        vs.reload()
         cexpr = visidata.CompleteExpr(vs)
         assert cexpr('fi', 0) == 'filename'  # visible column first
         assert cexpr('fi', 1) == 'filetype'  # hidden column second
