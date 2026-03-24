@@ -1,6 +1,6 @@
 import json
 
-from visidata import vd, VisiData, Sheet, Column, Progress, anytype, ItemColumn, asyncthread, TypedExceptionWrapper, TypedWrapper, IndexSheet, AttrColumn, vlen
+from visidata import vd, VisiData, Sheet, Column, Progress, anytype, ItemColumn, asyncthread, TypedExceptionWrapper, TypedWrapper, IndexSheet, AttrColumn, UNLOADED, vlen
 from visidata.type_date import date
 
 
@@ -75,6 +75,8 @@ class DuckdbSheet(Sheet):
     schema_name = 'main'
     database_name = ''
     create_sql = ''
+    estimated_rows = None
+    column_count = None
 
     def conn(self, read_only=True):
         duckdb = vd.importExternal('duckdb')
@@ -99,6 +101,18 @@ class DuckdbSheet(Sheet):
             return conn.execute(sql)
         return conn.execute(sql, parms)
 
+    @property
+    def nRows(self):
+        if self.rows is UNLOADED and self.estimated_rows is not None:
+            return self.estimated_rows
+        return super().nRows
+
+    @property
+    def nCols(self):
+        if self.rows is UNLOADED and self.column_count is not None:
+            return self.column_count
+        return super().nCols
+
     def iterload_table(self):
         self.pk_columns = []
 
@@ -117,7 +131,10 @@ class DuckdbSheet(Sheet):
                 if self.pk_columns:
                     self.setKeys(self.pk_columns)
 
-            result = self.execute(conn, f'SELECT * FROM {_relation_ref(self)}')
+            sql = f'SELECT * FROM {_relation_ref(self)}'
+            if self.options.max_rows < vd.options.getdefault('max_rows'):
+                sql += f' LIMIT {self.options.max_rows}'
+            result = self.execute(conn, sql)
             yield from _iterfetch(result)
         finally:
             conn.close()
@@ -220,6 +237,8 @@ class DuckdbIndexSheet(DuckdbSheet, IndexSheet):
                     schema_name,
                     database_name,
                     'BASE TABLE' AS relation_type,
+                    estimated_size,
+                    column_count,
                     sql
                 FROM duckdb_tables()
                 WHERE NOT internal AND NOT temporary
@@ -229,13 +248,15 @@ class DuckdbIndexSheet(DuckdbSheet, IndexSheet):
                     schema_name,
                     database_name,
                     'VIEW' AS relation_type,
+                    NULL AS estimated_size,
+                    column_count,
                     sql
                 FROM duckdb_views()
                 WHERE NOT internal AND NOT temporary
                 ORDER BY schema_name, relation_name, relation_type
             '''
 
-            for relation_name, schema_name, database_name, relation_type, sql in self.execute(conn, metadata_sql).fetchall():
+            for relation_name, schema_name, database_name, relation_type, estimated_size, column_count, sql in self.execute(conn, metadata_sql).fetchall():
                 yield DuckdbSheet(
                     relation_name,
                     source=self,
@@ -243,6 +264,8 @@ class DuckdbIndexSheet(DuckdbSheet, IndexSheet):
                     schema_name=schema_name,
                     database_name=database_name,
                     table_type=relation_type,
+                    estimated_rows=estimated_size,
+                    column_count=column_count,
                     create_sql=sql,
                 )
         finally:
