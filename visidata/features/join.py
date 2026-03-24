@@ -69,7 +69,7 @@ def openJoin(sheet, others, jointype=''):
         name = '&'.join(vs.name for vs in sheets)
         sheettypes = set(type(vs) for vs in sheets)
         if len(sheettypes) != 1:  # only one type of sheet #1598
-            vd.fail(f'only same sheet types can be concat-joined; use "append"')
+            vd.fail(f'only same sheet types can be concat-joined; use `append`')
 
         joinsheet = copy(sheet)
         joinsheet.name = name

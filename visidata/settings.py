@@ -230,7 +230,7 @@ class OptionsObject:
                         self.add_option_to_cmdlogs(obj, optname, value, 'set-option')
         else:
             curval = None
-            vd.warning('setting unknown option %s' % optname)
+            vd.warning(f'setting unknown option `{optname}`')
             module = 'unknown'
 
         return self._set(optname, value, obj, module=module)
@@ -404,7 +404,7 @@ def bindkey(cls, keystrokes, longname):
     'Bind *keystrokes* to *longname* on the *cls* sheet type.'
     oldlongname = vd.bindkeys._get(keystrokes, cls)
     if oldlongname:
-        vd.warning('%s was already bound to %s' % (keystrokes, oldlongname))
+        vd.warning(f'`{keystrokes}` was already bound to `{oldlongname}`')
     vd.bindkey(keystrokes, longname, cls)
 
 @BaseSheet.class_api
@@ -514,7 +514,7 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
                 sys.modules[f'visidata.plugins.{ep.name}'] = plug
                 vd.debug(f'Plugin {ep.name} loaded')
             except Exception as e:
-                vd.warning(f'Plugin {ep.name} failed to load')
+                vd.warning(f'plugin `{ep.name}` failed to load')
                 vd.exceptionCaught(e)
             finally:
                 vd.importingModule = None
@@ -569,7 +569,7 @@ def importExternal(vd, modname, pipmodname=''):
         vd.addGlobals({modname:m})
         return m
     except ModuleNotFoundError as e:
-        vd.fail(f'External package "{modname}" not installed; run: pip install {pipmodname}')
+        vd.fail(f'package `{modname}` not installed; run: `pip install {pipmodname}`')
 
 
 @VisiData.api

@@ -257,10 +257,10 @@ def moveToReplayContext(vd, r, vs):
         vd.clearCaches()
 
         if r.row not in [None, '']:
-            vs.moveToRow(r.row) or vd.error(f'no "{r.row}" row on {vs}')
+            vs.moveToRow(r.row) or vd.error(f'no `{r.row}` row on {vs}')
 
         if r.col not in [None, '']:
-            vs.moveToCol(r.col) or vd.error(f'no "{r.col}" column on {vs}')
+            vs.moveToCol(r.col) or vd.error(f'no `{r.col}` column on {vs}')
 
 
 @VisiData.api
@@ -272,7 +272,7 @@ def replayOne(vd, r):
             vd.fail('failed to find command to replay')
 
         if r.sheet and longname not in ['set-option', 'unset-option']:
-            vs = vd.getSheet(r.sheet) or vd.error('no sheet named %s' % r.sheet)
+            vs = vd.getSheet(r.sheet) or vd.error(f'no sheet named `{r.sheet}`')
         else:
             vs = None
 

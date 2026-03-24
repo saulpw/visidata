@@ -106,7 +106,7 @@ class DiveSheet(Sheet):
                     self.addRow(item)
 
                 except Exception as e:
-                    vd.warning("Can't dive on lists with heterogeneous item types.")
+                    vd.warning("cannot dive on lists with heterogeneous item types")
                     return False
 
     def openRow(self, row):
@@ -115,7 +115,7 @@ class DiveSheet(Sheet):
             if isinstance(cell, (list, dict)):
                 vs = self.__class__(self.name, row["key"], source = cell)
             else:
-                vd.warning("Nothing to dive into.")
+                vd.warning("nothing to dive into")
                 return
         else:
             vs = self.__class__(self.name, "row", source = self.row)

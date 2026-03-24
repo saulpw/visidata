@@ -40,7 +40,7 @@ def gen_identify_duplicates(sheet):
 
     cols_to_check = None
     if len(keyCols) == 0:
-        vd.warning("No key cols specified. Using all columns.")
+        vd.warning("no key columns specified; using all columns")
         cols_to_check = sheet.visibleCols
     else:
         cols_to_check = sheet.keyCols

@@ -263,7 +263,7 @@ class Path(os.PathLike):
                 # convert 'a' to 'w' for stdout: https://bugs.python.org/issue27805
                 return os.dup(vd._stdout.fileno())
             else:
-                vd.error('invalid mode "%s" for Path.open()' % mode)
+                vd.error(f'invalid mode `{mode}` for Path.open()')
                 return sys.stderr
 
         return self._open(mode=mode)
@@ -294,7 +294,7 @@ class Path(os.PathLike):
                 # convert 'a' to 'w' for stdout: https://bugs.python.org/issue27805
                 return open(os.dup(vd._stdout.fileno()), 'wt')
             else:
-                vd.error('invalid mode "%s" for Path.open()' % mode)
+                vd.error(f'invalid mode `{mode}` for Path.open()')
                 return sys.stderr
 
         return self._open(mode=mode, encoding=encoding or vd.options.encoding, errors=vd.options.encoding_errors, newline=newline)

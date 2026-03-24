@@ -453,7 +453,7 @@ class Column(Extensible):
     def setValues(self, rows, *values):
         'Set values in this column for *rows* to *values*, recycling values as needed to fill *rows*.'
         if self.readonly:
-            vd.fail("Cannot set values on readonly column")
+            vd.fail("cannot set values on readonly column")
 
         vd.addUndoSetValues([self], rows)
 
@@ -473,7 +473,7 @@ class Column(Extensible):
     def setValuesTyped(self, rows, *values):
         'Set values on this column for *rows* to *values*, coerced to column type, recycling values as needed to fill *rows*.  Abort on type exception.'
         if self.readonly:
-            vd.fail("Cannot set values on readonly column")
+            vd.fail("cannot set values on readonly column")
 
         vd.addUndoSetValues([self], rows)
         nsets = 0

@@ -85,7 +85,7 @@ class OptionsSheet(Sheet):
                 yield v
 
     def newRow(self):
-        vd.fail('adding rows to the options sheet is not supported.')
+        vd.fail('adding rows to the options sheet is not supported')
 
 
 BaseSheet.addCommand('O', 'options-global', 'vd.push(vd.globalOptionsSheet)', 'open Options Sheet: edit global options (apply to all sheets)')

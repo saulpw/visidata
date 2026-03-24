@@ -268,7 +268,7 @@ class TableSheet(BaseSheet):
 
     def column(self, colname):
         'Return first column whose name matches *colname*.'
-        return self.colsByName.get(colname) or vd.fail('no column matching "%s"' % colname)
+        return self.colsByName.get(colname) or vd.fail(f'no column matching `{colname}`')
 
     def recalc(self):
         'Clear caches and set the ``sheet`` attribute on all columns.'

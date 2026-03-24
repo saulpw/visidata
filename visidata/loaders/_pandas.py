@@ -138,7 +138,7 @@ class PandasSheet(Sheet):
         try:
             col.sheet.df.loc[row.name, col.expr] = val
         except ValueError as err:
-            vd.warning(f'Type of {val} does not match column {col.name}. Changing type.')
+            vd.warning(f'type of {val} does not match column `{col.name}`; changing type')
             col.type = anytype
             col.sheet.df.loc[row.name, col.expr] = val
         self.setModified()
@@ -198,7 +198,7 @@ class PandasSheet(Sheet):
         self.rows = DataFrameAdapter(df)
         self._selectedMask = pd.Series(False, index=df.index)
         if df.index.nunique() != df.shape[0]:
-            vd.warning("Non-unique index, row selection API may not work or may be incorrect")
+            vd.warning("non-unique index; row selection may not work correctly")
 
     @asyncthread
     def sort(self):

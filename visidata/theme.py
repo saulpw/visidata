@@ -19,7 +19,7 @@ def run(vd, *args, **kwargs):
 @VisiData.api
 def set_theme(obj, theme=''):
     if theme and theme not in vd.themes:
-        vd.warning(f'no "{theme}" theme available')
+        vd.warning(f'no `{theme}` theme available')
         return
 
     # unset everything first

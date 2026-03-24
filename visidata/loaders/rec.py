@@ -93,7 +93,7 @@ class RecIndexSheet(IndexSheet):
                 elif desc in ['confidential']:  # encrypted
                     pass
                 else:
-                    vd.warning('Unhandled descriptor: ' +line)
+                    vd.warning(f'unhandled descriptor: {line}')
             else:
                 if newRecord:
                     row = None

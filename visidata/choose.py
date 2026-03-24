@@ -70,7 +70,7 @@ def chooseMany(vd, choices, type=''):
                 if c in choice_keys:
                     chosen.append(c)
                 else:
-                    vd.warning('invalid choice "%s"' % c)
+                    vd.warning(f'invalid choice `{c}`')
         except ReturnValue as e:
             chosen = e.args[0]
 

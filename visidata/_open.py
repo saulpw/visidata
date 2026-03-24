@@ -133,10 +133,10 @@ def openPath(vd, p, filetype=None, create=False):
             for k, v in opts.items():
                 if k != 'filetype' and not k.startswith('_'):
                     setattr(vs.options, k, v)
-            vd.status('guessed "%s" filetype based on contents' % opts['filetype'])
+            vd.status(f'guessed `{opts["filetype"]}` filetype based on contents')
             return vs
 
-        vd.warning('unknown "%s" filetype' % filetype)
+        vd.warning(f'unknown `{filetype}` filetype')
 
         filetype = 'txt'
         openfunc = vd.open_txt

@@ -145,11 +145,11 @@ def save_json(vd, p, *vsheets):
 
         dupnames = find_duplicates([vs.name for vs in vsheets])
         for name in dupnames:
-            vd.warning('json cannot save sheet with duplicated name: ' + name)
+            vd.warning(f'json cannot save sheet with duplicated name `{name}`')
         for vs in vsheets:
             dupnames = find_duplicates([c.name for c in vs.visibleCols])
             for name in dupnames:
-                vd.warning('json cannot save column with duplicated name: ' + name)
+                vd.warning(f'json cannot save column with duplicated name `{name}`')
         if len(vsheets) == 1:
             fp.write('[\n')
             vs = vsheets[0]
@@ -173,25 +173,21 @@ def write_jsonl(vs, fp):
         jsonenc = _vjsonEncoder()
         dupnames = find_duplicates([c.name for c in vcols])
         for name in dupnames:
-            vd.warning('json cannot save column with duplicated name: ' + name)
+            vd.warning(f'json cannot save column with duplicated name `{name}`')
         with Progress(gerund='saving'):
             for i, row in enumerate(vs.iterrows()):
                 rowdict = _rowdict(vcols, row, keep_nulls=(i==0))
                 fp.write(jsonenc.encode(rowdict) + '\n')
 
         if len(vs) == 0:
-            vd.warning(
-                "Output file is empty - cannot save headers without data for jsonl.\n"
-                "Use `.jsonla` filetype to save as JSONL arrays format "
-                "rather than JSONL dict format to preserve the headers."
-            )
+            vd.warning("output file is empty; use `jsonla` filetype to preserve headers without data")
 
 
 @VisiData.api
 def save_jsonl(vd, p, *vsheets):
     with p.open(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
         if len(vsheets) > 1:
-            vd.warning('jsonl cannot separate sheets yet. Concatenating all rows.')
+            vd.warning('jsonl cannot save multiple sheets; concatenating all rows')
         for vs in vsheets:
             vs.write_jsonl(fp)
 

@@ -83,7 +83,7 @@ class GraphSheet(InvertedCanvas):
         self.reflines_char_x = {}    # { x value in character coordinates -> character to use to draw that vertical line }
         self.reflines_char_y = {}    # { y value in character coordinates -> character to use to draw that horizontal line }
 
-        vd.numericCols(self.xcols) or vd.fail('at least one numeric key col necessary for x-axis')
+        vd.numericCols(self.xcols) or vd.fail('at least one numeric key column necessary for x-axis')
         self.ycols or vd.fail('%s is non-numeric' % '/'.join(yc.name for yc in kwargs.get('ycols')))
 
     def resetCanvasDimensions(self, windowHeight, windowWidth):

@@ -199,7 +199,7 @@ Sheet.addCommand('P', 'paste-before', 'paste_after(cursorRowIndex-1)', 'paste in
 Sheet.addCommand('gy', 'copy-selected', 'copyRows(onlySelectedRows)', 'copy selected rows to internal clipboard')
 
 Sheet.addCommand('zy', 'copy-cell', 'copyCells(cursorCol, [cursorRow]); vd.memoValue("clipval", cursorTypedValue, cursorDisplay)', 'copy current cell to internal clipboard')
-Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.memory.clipval) if vd.memory.clipval else vd.warning("nothing to paste from clipval")', 'set contents of current cell to last internal clipboard value')
+Sheet.addCommand('zp', 'paste-cell', 'cursorCol.setValuesTyped([cursorRow], vd.memory.clipval) if vd.memory.clipval else vd.warning("nothing to paste")', 'set contents of current cell to last internal clipboard value')
 
 Sheet.addCommand('d', 'delete-row', 'delete_row(cursorRowIndex); defer and cursorDown(1)', 'delete current row')
 Sheet.addCommand('gd', 'delete-selected', 'deleteSelected()', 'delete selected rows')

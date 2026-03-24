@@ -108,7 +108,7 @@ class GeoJSONMap(InvertedCanvas):
                 for hole in polygon[1:]:
                     self.polygon(hole, 0, row)
         else:
-            vd.warning('notimpl shapeType %s' % typ)
+            vd.warning(f'not implemented: shapeType `{typ}`')
 
         return bbox
 

@@ -208,7 +208,7 @@ def sheet_from_description(vd, sources, sheet_desc):
                 if rowidx is None: raise IndexError
                 vs_subsheet = vs.rows[rowidx]
             except IndexError:
-                vd.warning(f'sheet {vs.name} has no subsheet "{subsheet}"')
+                vd.warning(f'sheet {vs.name} has no subsheet `{subsheet}`')
                 return None
             if not isinstance(vs_subsheet, BaseSheet):
                 raise ValueError(f'row "{subsheet}" is not a sheet in {vs.name}')
@@ -366,7 +366,7 @@ def main_vd():
                     optval = True
                 else:
                     if i >= len(sys.argv)-1:
-                        vd.error(f'"-{optname}" missing argument')
+                        vd.error(f'`-{optname}` missing argument')
 
                     optval = sys.argv[i+1]
                     i += 1

@@ -33,7 +33,7 @@ def openurl_http(vd, path, filetype=None):
         sch = schemes[0]
         openfunc = getattr(vd, f'openhttp_{sch}', vd.getGlobals().get(f'openhttp_{sch}'))
         if not openfunc:
-            vd.fail(f'no vd.openhttp_{sch}')
+            vd.fail(f'no handler for `{sch}` url scheme')
         return openfunc(Path(schemes[-1]+'://'+path.given.split('://')[1]))
 
     import urllib.request

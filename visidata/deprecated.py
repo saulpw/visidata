@@ -21,7 +21,7 @@ def deprecated_warn(vd, funcname, ver, instead):
     if vd.options.debug:
         for line in reversed(traceback.extract_stack(limit=7)[:-2]):
             vd.warning(f'    {line.name} at {line.filename}:{line.lineno}')
-        vd.warning(f'Deprecated call traceback (most recent last):')
+        vd.warning(f'deprecated call traceback (most recent last):')
 
 
 def deprecated(ver, instead='', check=True):

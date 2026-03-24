@@ -28,7 +28,7 @@ def addFakerProviders(fake, providers):
 
     for provider in providers:
         if not issubclass(provider, faker.providers.BaseProvider):
-            vd.warning('"{}" not a Faker Provider'.format(provider.__name__))
+            vd.warning(f'`{provider.__name__}` not a Faker provider')
             continue
         fake.add_provider(provider)
 
@@ -39,7 +39,7 @@ def setValuesFromFaker(col, faketype, rows):
     fake = faker.Faker(col.sheet.options.faker_locale)
     if col.sheet.options.faker_extra_providers:
         addFakerProviders(fake, col.sheet.options.faker_extra_providers)
-    fakefunc = getattr(fake, faketype, None) or vd.fail(f'no such faker "{faketype}"')
+    fakefunc = getattr(fake, faketype, None) or vd.fail(f'no such faker `{faketype}`')
 
     fakeMap = {}
     fakeMap[None] = None

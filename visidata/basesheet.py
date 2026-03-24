@@ -333,7 +333,7 @@ def getSheet(vd, sheetname):
     matchingSheets = [x for x in vd.sheets if x.name == sheetname]
     if matchingSheets:
         if len(matchingSheets) > 1:
-            vd.warning('more than one sheet named "%s"' % sheetname)
+            vd.warning(f'more than one sheet named `{sheetname}`')
         return matchingSheets[0]
 
     try:

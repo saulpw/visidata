@@ -134,7 +134,7 @@ class PandasFreqTableSheet(PivotSheet):
             # value_counts = value_counts.stack(list(range(len(self.groupByCols) - 1)))
             # value_counts = value_counts.loc[value_counts > 0].sort_values(ascending=False)
         else:
-            vd.fail("Unable to do FrequencyTable, no columns to group on provided")
+            vd.fail("no columns to group on")
 
         # add default bonus columns
         for c in [

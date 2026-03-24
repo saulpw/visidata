@@ -169,7 +169,7 @@ def checkMemoryUsage(vd):
         if vd.options.debug:
             vd.exceptionCaught(e)
         vd.options.min_memory_mb = 0
-        vd.warning('disabling min_memory_mb: "free" not installed')
+        vd.warning('disabling `min_memory_mb`; `free` not installed')
         return ''
     tot_m, used_m, free_m = map(int, freestats[-1].split()[1:])
     ret = f'  [{free_m}MB] '
