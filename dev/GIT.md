@@ -106,6 +106,8 @@ By default, commit to **develop** unless explicitly working in another branch on
 
 `develop` is the trunk branch. PRs come from side branches, not from develop directly. Create a feature branch off develop for PRs.
 
+All PRs must include an [AI Level](ai-levels.md) (0-10) in the PR body. At level 4+, specify the model/version used.
+
 Run `dev/test-all.sh` locally before pushing. After creating a PR, check CI status with `gh pr checks` and fix any failures before moving on.
 
 ### Documentation
