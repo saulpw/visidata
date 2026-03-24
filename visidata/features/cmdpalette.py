@@ -204,6 +204,7 @@ def inputPalette(sheet, prompt, items,
             completer=completer,
             updater=_draw_palette,
             bindings=bindings,
+            _history_palette=False,
             **kwargs)
 
 

@@ -508,6 +508,7 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
                                              attr=colors.color_edit_cell,
                                              updater=_drawPrompt,
                                              record=False,
+                                             _input_rows=len(keys),
                                              bindings={
                 'Shift+Tab':   change_input(-1),
                 'Tab':     change_input(+1),
