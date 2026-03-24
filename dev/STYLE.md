@@ -114,6 +114,8 @@ def my_vd_method(vd): ...
 
 ### Error Messages
 
+**Check these rules before writing any `vd.fail`, `vd.warning`, or `vd.status` string.**
+
 1. **Lowercase start** — `no rows selected`, not `No rows selected`
 2. **No trailing period** — `no rows selected`, not `no rows selected.`
 3. **No contractions** — `cannot`, not `can't`; `did not`, not `didn't`
