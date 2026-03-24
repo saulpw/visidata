@@ -292,8 +292,10 @@ class InputWidget:
         elif ch == 'Ctrl+Right':                       i = find_word(v, i, len(v)-1, +1);  # word right
         elif ch == 'Ctrl+Up':                          pass
         elif ch == 'Ctrl+Down':                        pass
-        elif self.history and ch == 'Up':              v, i = self.prev_history(v, i)
-        elif self.history and ch == 'Down':            v, i = self.next_history(v, i)
+        elif ch == 'Up':
+            if self.history: v, i = self.prev_history(v, i)
+        elif ch == 'Down':
+            if self.history: v, i = self.next_history(v, i)
         elif ch == 'KEY_RESIZE':                       pass
         elif len(ch) > 1:                              vd.warning(f'unknown key {ch}')
         else:
