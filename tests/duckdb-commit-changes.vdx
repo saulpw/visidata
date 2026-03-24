@@ -1,4 +1,4 @@
-exec-python import os, shutil, tempfile, uuid; p=os.path.join(tempfile.gettempdir(), f'duckdb-commit-{uuid.uuid4().hex}.duckdb'); shutil.copyfile('tests/duckdb_test.duckdb', p); vd.push(vd.openSource(p))
+exec-python import os, shutil, tempfile, uuid; p=os.path.join(tempfile.gettempdir(), f'duckdb-commit-{uuid.uuid4().hex}.duckdb'); shutil.copyfile('tests/.visidata/duckdb_test.duckdb', p); vd.push(vd.openSource(p))
 exec-python vd.options.overwrite='y'
 row キedit_pk
 open-row

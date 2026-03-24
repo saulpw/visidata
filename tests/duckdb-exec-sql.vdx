@@ -1,2 +1,2 @@
-open-file tests/duckdb_test.duckdb
+open-file tests/.visidata/duckdb_test.duckdb
 exec-sql select dname, loc from "main"."dept_view" order by deptno
