@@ -151,9 +151,6 @@ BaseSheet.bindkey('gDown', 'go-bottom'),
 BaseSheet.bindkey('Home', 'go-top')
 BaseSheet.bindkey('End', 'go-bottom')
 
-Sheet.bindkey('BUTTON1_CLICKED', 'go-mouse')
-Sheet.bindkey('BUTTON3_PRESSED', 'go-mouse')
-
 # vim-style scrolling with the 'z' prefix
 Sheet.addCommand('zz', 'scroll-middle', 'sheet.topRowIndex = cursorRowIndex-int(nScreenRows/2)', 'scroll current row to center of screen')
 
