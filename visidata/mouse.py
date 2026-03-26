@@ -139,6 +139,8 @@ def visibleRowAtY(sheet, y):
 
 
 @Sheet.command('BUTTON1_PRESSED', 'go-mouse', 'set cursor to row and column where mouse was clicked')
+Sheet.bindkey('BUTTON1_CLICKED', 'go-mouse')
+Sheet.bindkey('BUTTON3_PRESSED', 'go-mouse')
 def go_mouse(sheet):
     if sheet.mouseY == sheet.windowHeight-1:
         return
