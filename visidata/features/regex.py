@@ -33,6 +33,7 @@ def RegexColumn(vs, regexMaker, origcol, regexstr):
     func = regexMaker(regex, origcol)
     return Column(origcol.name+'_re',
                   getter=lambda col,row,func=func: func(row),
+                  setter=None,
                   origCol=origcol)
 
 

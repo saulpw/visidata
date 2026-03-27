@@ -126,6 +126,9 @@ class ExpandedColumn(WritableColumn):
         if setModified:
             self.origCol.sheet.setModified()
 
+    def readonly(self):
+        return True
+
 
 @Sheet.api
 @asyncthread
