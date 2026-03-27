@@ -64,7 +64,12 @@ def asynccache(keyfunc=lambda *args, **kwargs: str(args)+str(kwargs)):
         d = {}  # per decoration cache
         @functools.wraps(func)
         def _execAsync(*args, **kwargs):
-            k = keyfunc(*args, **kwargs)
+            cache_version = tuple((
+                getattr(a, 'typestr', None),
+                len(getattr(getattr(a, 'sheet', None), 'rows', ()) or ()),
+                getattr(getattr(a, 'sheet', None), '_data_version', None),
+            ) for a in args)
+            k = (keyfunc(*args, **kwargs), cache_version)
             if k not in d:
                 t = vd._queueFunc(func, *args, **kwargs, _readonly=True)
                 #atomic read/write to d[k]
