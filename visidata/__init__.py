@@ -41,6 +41,8 @@ import visidata.keys
 
 from .basesheet import *
 
+BaseSheet.init('_data_version', lambda: 0)
+
 import visidata.settings
 
 # importModule tracks where commands/options/etc are coming from (via vd.importingModule)
