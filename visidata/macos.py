@@ -1,3 +1,41 @@
+import os
+import sys
+
+
+def _bootstrap_terminfo():
+    if sys.platform != 'darwin':
+        return
+
+    if os.environ.get('TERMINFO'):
+        return
+
+    terminfo_dirs = []
+    if os.environ.get('TERMINFO_DIRS'):
+        terminfo_dirs.extend(os.environ['TERMINFO_DIRS'].split(':'))
+
+    terminfo_dirs.extend([
+        '/opt/homebrew/opt/ncurses/share/terminfo',
+        '/usr/local/opt/ncurses/share/terminfo',
+        '/usr/share/terminfo',
+        '/usr/share/lib/terminfo',
+        '/usr/lib/terminfo',
+        '/lib/terminfo',
+        '/etc/terminfo',
+    ])
+
+    found = []
+    seen = set()
+    for p in terminfo_dirs:
+        if p and p not in seen and os.path.isdir(p):
+            seen.add(p)
+            found.append(p)
+
+    if found:
+        os.environ['TERMINFO_DIRS'] = ':'.join(found)
+
+
+_bootstrap_terminfo()
+
 from visidata import BaseSheet
 
 # for mac users to use Option+x as Alt+x without reconfiguring the terminal
