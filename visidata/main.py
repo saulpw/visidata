@@ -20,6 +20,14 @@ from visidata import vd, options, run, BaseSheet, Sheet, AttrDict, stacktrace
 from visidata import Path, asyncthread
 import visidata
 
+
+def _normalize_term():
+    if os.environ.get('TERM') == 'xterm-ghostty':
+        os.environ['TERM'] = 'xterm-256color'
+
+
+_normalize_term()
+
 vd.version_info = __version_info__
 
 vd.option('config', vd.config_file, 'config file to exec in Python', sheettype=None)
