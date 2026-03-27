@@ -80,6 +80,7 @@ class Column(Extensible):
         self.displayer = ''
         self.defer = False
         self.disp_expert = 0    # do not show if 'nometacols' in options.disp_help_flags
+        self._cachedAggsVersion = None
 
         self.setCache(cache)
         for k, v in kwargs.items():
@@ -114,9 +115,17 @@ class Column(Extensible):
         'Reset column cache, attach column to *sheet*, and reify column name.'
         if self._cachedValues:
             self._cachedValues.clear()
+        self.clearCachedAggs()
         if sheet:
             self.sheet = sheet
         self.name = self._name
+
+    def clearCachedAggs(self):
+        for attr in ('_cachedAggregates', '_cachedAggs', '_aggregatedTotals', '_aggregatedValues'):
+            cache = getattr(self, attr, None)
+            if cache is not None:
+                cache.clear()
+        self._cachedAggsVersion = None
 
     @property
     def name(self):
@@ -148,6 +157,10 @@ class Column(Extensible):
     @typestr.setter
     def typestr(self, v):
         self.type = vd.getGlobals()[v or 'anytype']
+        self.clearCachedAggs()
+        sheet = getattr(self, 'sheet', None)
+        if hasattr(sheet, '_data_version'):
+            sheet._data_version += 1
 
     @property
     def type(self):
