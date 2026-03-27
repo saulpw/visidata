@@ -41,6 +41,7 @@ import visidata.keys
 
 from .basesheet import *
 
+import visidata.macos
 import visidata.settings
 
 # importModule tracks where commands/options/etc are coming from (via vd.importingModule)
@@ -113,7 +114,6 @@ import visidata.sort
 import visidata.memory
 import visidata.macros
 
-import visidata.macos
 import visidata.windows
 
 import visidata.form
