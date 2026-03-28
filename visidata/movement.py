@@ -92,6 +92,14 @@ def visibleWidth(self):
     return w
 
 
+@BaseSheet.api
+def jump_sheet(sheet, name):
+    matches = [s for s in vd.allSheets if s.name == name]
+    if not matches:
+        vd.fail(f'no sheet named `{name}`')
+    vd.push(matches[0])
+
+
 Sheet.addCommand(None, 'go-left',  'cursorRight(-1)', 'go left', replay=False)
 Sheet.addCommand(None, 'go-down',  'cursorDown(+1)', 'go down', replay=False)
 Sheet.addCommand(None, 'go-up',    'cursorDown(-1)', 'go up', replay=False)
@@ -126,6 +134,8 @@ for i in range(1, 11):
 
 for i in range(11, 21):
     BaseSheet.addCommand('', f'jump-sheet-{i}', f'vd.push(*(list(s for s in allSheets if s.shortcut==str({i})) or fail("no sheet")))', f'jump to sheet {i}')
+
+BaseSheet.addCommand('', 'jump-sheet', 'jump_sheet(input("jump to sheet: ", completer=CompleteKey(s.name for s in allSheets)))', 'jump to sheet by name')
 
 BaseSheet.bindkey('Left', 'go-left')
 BaseSheet.bindkey('Down', 'go-down')
