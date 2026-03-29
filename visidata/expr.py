@@ -68,6 +68,8 @@ class CompleteExpr:
 @asyncthread
 def setValuesFromExpr(self, rows, expr, **kwargs):
     'Set values in this column for *rows* to the result of the Python expression *expr* applied to each row.'
+    if self.readonly:
+        vd.fail("cannot set values on readonly column")
     compiledExpr = compile(expr, '<expr>', 'eval')
     vd.addUndoSetValues([self], rows)
     nset = 0
