@@ -187,6 +187,16 @@ def command_server(vd, conn):
                     text += '\n' + composeStatus(msgparts, count)
                 vd.statuses.clear()
             conn.send(text.encode('utf-8', errors='replace') + b'\n')
+        elif line == 'cancel-sheet':
+            vd._nextCommands.clear()
+            sheet = vd.sheet
+            if sheet and sheet.currentThreads:
+                vd.cancelThread(*sheet.currentThreads)
+        elif line == 'cancel-all':
+            vd._nextCommands.clear()
+            threads = [t for vs in vd.sheets for t in vs.currentThreads]
+            if threads:
+                vd.cancelThread(*threads)
         elif line == 'sync':
             _wait_for_idle(timeout=60)
         elif line.startswith('{'):
