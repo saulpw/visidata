@@ -44,6 +44,7 @@ VisiData.save_vd = VisiData.save_tsv
 def save_vdj(vd, p, *vsheets):
     with p.open(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
         fp.write("#!/usr/bin/env -S vd -p\n")
+        fp.write(f"# {visidata.__version_info__}\n")
         for vs in vsheets:
             vs.write_jsonl(fp)
 

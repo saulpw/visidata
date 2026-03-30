@@ -1,5 +1,6 @@
-#!/usr/bin/env vd -p
-open-file http://visidata.org/usage.tsv
+#!/usr/bin/env -S vd -p
+# VisiData v3.4dev
+open-file http://visidata.org/usage.jsonl
 col daily_users
 type-int
 aggregate-col sum
