@@ -126,13 +126,22 @@ def inputRegexSubst(vd, prompt):
     return vd.inputMultiple(before=dict(type='regex', prompt='search: ', help=prompt),
                             after=dict(type='regex-replace', prompt='replace: ', help=prompt))
 
+@Sheet.api
+def setcol_regex_subst(sheet, cols):
+    if all([c.readonly for c in cols]):
+        vd.fail("cannot set values on readonly columns")
+    if len(cols) > 1:
+        prompt = f'regex transform {len(cols)} columns'
+    else:
+        prompt = 'regex transform column'
+    sheet.setValuesFromRegex(cols, sheet.someSelectedRows, **vd.inputRegexSubst(prompt))
 
 Sheet.addCommand(':', 'addcol-split', 'addColumnAtCursor(RegexColumn(makeRegexSplitter, cursorCol, inputRegex("split regex: ", type="regex-split")))', 'add column split by regex')
 Sheet.addCommand(';', 'addcol-capture', 'addColumnAtCursor(RegexColumn(makeRegexMatcher, cursorCol, inputRegex("capture regex: ", type="regex-capture")))', 'add column captured by regex')
 
 Sheet.addCommand('*', 'addcol-regex-subst', 'addColumnAtCursor(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, **inputRegexSubst("regex transform column"))))', 'add column derived from current column, replacing `search` regex with `replace` (may include \\1 backrefs)')
-Sheet.addCommand('g*', 'setcol-regex-subst', 'setValuesFromRegex([cursorCol], someSelectedRows, **inputRegexSubst("regex transform column"))', 'modify selected rows in current column, replacing `search` regex with `replace`, (may include backreferences \\1 etc)')
-Sheet.addCommand('gz*', 'setcol-regex-subst-all', 'setValuesFromRegex(visibleCols, someSelectedRows, **inputRegexSubst(f"regex transform {nVisibleCols} columns"))', 'modify selected rows in all visible columns, replacing `search` regex with `replace` (may include \\1 backrefs)')
+Sheet.addCommand('g*', 'setcol-regex-subst', 'setcol_regex_subst([cursorCol])', 'modify selected rows in current column, replacing `search` regex with `replace`, (may include \\1 backrefs)')
+Sheet.addCommand('gz*', 'setcol-regex-subst-all', 'setcol_regex_subst(visibleCols)', 'modify selected rows in all visible columns, replacing `search` regex with `replace` (may include \\1 backrefs)')
 
 
 vd.addMenuItems('''
