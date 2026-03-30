@@ -68,8 +68,6 @@ class CompleteExpr:
 @asyncthread
 def setValuesFromExpr(self, rows, expr, **kwargs):
     'Set values in this column for *rows* to the result of the Python expression *expr* applied to each row.'
-    if self.readonly:
-        vd.fail("cannot set values on readonly column")
     compiledExpr = compile(expr, '<expr>', 'eval')
     vd.addUndoSetValues([self], rows)
     nset = 0
@@ -106,9 +104,14 @@ def addcol_expr(sheet, expr_input, **kwargs):  # #3022
                 name = lhs
     return ExprColumn(name, expr=expr, **kwargs)
 
+@Sheet.api
+def setcol_expr(sheet, col):
+    if col.readonly:
+        vd.fail("cannot set values on readonly column")
+    col.setValuesFromExpr(sheet.someSelectedRows, sheet.inputExpr("set selected="), curcol=col)
 
 Sheet.addCommand('=', 'addcol-expr', 'addColumnAtCursor(addcol_expr(inputExpr("new column expr="), col=cursorCol, curcol=cursorCol))', 'create new column from Python expression, with column names as variables')
-Sheet.addCommand('g=', 'setcol-expr', 'cursorCol.setValuesFromExpr(someSelectedRows, inputExpr("set selected="), curcol=cursorCol)', 'set current column for selected rows to result of Python expression')
+Sheet.addCommand('g=', 'setcol-expr', 'setcol_expr(cursorCol)', 'set current column for selected rows to result of Python expression')
 Sheet.addCommand('z=', 'setcell-expr', 'cursorCol.setValues([cursorRow], evalExpr(inputExpr("set expr="), row=cursorRow, curcol=cursorCol))', 'evaluate Python expression on current row and set current cell with result of Python expression')
 Sheet.addCommand('gz=', 'setcol-iter', 'cursorCol.setValues(someSelectedRows, *list(itertools.islice(eval(input("set column= ", "expr", completer=CompleteExpr())), len(someSelectedRows))))', 'set current column for selected rows to the items in result of Python sequence expression')
 Sheet.addCommand('', 'addcol-iter', 'iter_expr=inputExpr("new column iterator expr: "); it = eval(iter_expr, getGlobals()); c=SettableColumn(); addColumnAtCursor(c); c.setValues(rows, *it)', 'add column with values from a Python sequence expression, repeating it if needed to fill')
