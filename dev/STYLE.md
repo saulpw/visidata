@@ -94,6 +94,7 @@ def my_vd_method(vd): ...
 - Prefix options with module name/abbreviation when exclusive to that module.
 - File properties (like `filetype`) belong on the path: `self.source.options.filetype`
 - When core code checks an option from a feature file, use `options.get()` with a default.
+- Prefer `obj.options.foo = x` over `obj.options.set('foo', x, obj)` when equivalent.
 
 ## Credentials
 - Environment variables only, never options: `os.environ.get('MY_API_KEY') or vd.fail('set $MY_API_KEY')`
