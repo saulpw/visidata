@@ -27,6 +27,8 @@ Special tags for non-functional changes:
 - **`dev`** - Non-code commits relevant to development: release notes, packaging, git/github configuration, CI, file renames, etc.
 - **`nfc`** - Guaranteed non-functional changes not in the above categories
 
+When fixing a test golden or follow-up that should have been part of a previous commit, use that commit's tag (not `tests`). For example, if `[fixed-]` changed behavior but missed updating a golden, the golden fix commit should also be `[fixed-]`.
+
 Other tags:
 - **`api`** - Deliberate, breaking, or sweeping changes to the API
 
