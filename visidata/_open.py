@@ -20,8 +20,23 @@ def inputFilename(vd, prompt, *args, **kwargs):
 
 
 @VisiData.api
-def inputPath(vd, *args, **kwargs):
-    return Path(vd.inputFilename(*args, **kwargs))
+def inputPath(vd, *args, filetype='', **kwargs):
+    'Input a path with filetype field. Sets filetype on the returned Path if given.'
+    prompt = args[0] if args else kwargs.pop('prompt', 'path: ')
+    completer = _completeFilename
+    if not vd.couldOverwrite():  #1805
+        completer = None
+        v = kwargs.get('value', '')
+        if v and Path(v).exists():
+            kwargs['value'] = ''
+    r = vd.inputMultiple(
+        path=dict(prompt=prompt, type='filename', completer=completer, **kwargs),
+        filetype=dict(prompt='as filetype: ', type='filetype', value=filetype),
+    )
+    p = Path(r['path'].strip())
+    if r['filetype']:
+        p.options.filetype = r['filetype']
+    return p
 
 
 def _completeFilename(val, state):

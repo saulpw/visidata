@@ -416,11 +416,11 @@ open
 .It Ic "zo"
 open file or url from path in current cell
 .It Ic "^S g^S" Ar filename
-.No save current/all sheet(s) to Ar filename No in format determined by extension (default .tsv)
+.No save current/all sheet(s) to Ar filename No with given filetype
 .It ""
 .No Note: if the format does not support multisave, or the Ar filename No ends in a Sy / Ns , a directory will be created.
 .It Ic "z^S" Ar filename
-.No save current column only to Ar filename No in format determined by extension (default .tsv)
+.No save current column only to Ar filename No with given filetype
 .It Ic "^D" Ar filename.vdj
 .No save Sy CommandLog No to Ar filename.vdj No file
 .It Ic "A"
