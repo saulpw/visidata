@@ -49,7 +49,7 @@ test-all:
 	dev/test-all.sh
 
 test-vgit:
-	vd -p visidata/apps/vgit/tests/*.vdx --batch
+	vd --config tests/.visidatarc -p visidata/apps/vgit/tests/*.vdx --batch
 
 test-vdsql:
 	cd visidata/apps/vdsql && ./test.sh

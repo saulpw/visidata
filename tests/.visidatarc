@@ -1,0 +1,1 @@
+options.motd_url = ''
