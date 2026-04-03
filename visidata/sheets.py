@@ -778,8 +778,10 @@ class TableSheet(BaseSheet):
             hdrcattr = update_attr(hdrcattr, colors.color_current_hdr, 2)
 
         C = self.options.disp_column_sep
-        if (self.keyCols and col is self.keyCols[-1]) or vcolidx == self.nVisibleCols-1:
+        if (self.keyCols and col is self.keyCols[-1]):
             C = self.options.disp_keycol_sep
+        elif vcolidx == self.nVisibleCols-1:
+            C = self.options.disp_rowend_sep
 
         x, colwidth = self._visibleColLayout[vcolidx]
 
