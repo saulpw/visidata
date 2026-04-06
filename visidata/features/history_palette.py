@@ -31,9 +31,18 @@ class HistoryPalette:
         if self.top > self.cursor:              self.top = self.cursor
         if self.top + nv - 1 < self.cursor:     self.top = self.cursor - nv + 1
 
+    def _recompute(self, value):
+        'Recompute display list from fuzzy match against current input.'
+        if value:
+            matches = vd.fuzzymatch(self.haystack, value.split())
+            self.display = [(m.formatted.get('input', m.match['input']), m.match['input']) for m in matches]
+        else:
+            self.display = [(item, item) for item in self.items]
+
     def enter_nav(self, v):
         'Save orig and place cursor at end of display list.'
         self.orig = v
+        self._recompute(v)
         self.cursor = len(self.display) - 1
         self.top = max(0, self.cursor - self.nvis() + 1)
 
@@ -44,9 +53,9 @@ class HistoryPalette:
 
     def nav_up(self, v, i):
         'Move cursor up one item, entering nav mode if needed.'
-        if not self.display: return v, i
         if self.cursor == -1:
             self.enter_nav(v)
+            if not self.display: return v, i
         else:
             self.cursor -= 1
             self.bounds()
@@ -65,8 +74,9 @@ class HistoryPalette:
 
     def nav_pgup(self, v, i):
         'Scroll up one page.'
-        if not self.display: return v, i
-        if self.cursor == -1: self.enter_nav(v)
+        if self.cursor == -1:
+            self.enter_nav(v)
+            if not self.display: return v, i
         nv = self.nvis()
         old_top = self.top
         self.cursor -= nv - 1
@@ -110,13 +120,7 @@ class HistoryPalette:
             self.cursor = -1  # user typed something
 
         if self.cursor == -1:
-            # Recompute display list (nav bindings read this on next keypress)
-            if value:
-                matches = vd.fuzzymatch(self.haystack, value.split())
-                self.display = [(m.formatted.get('input', m.match['input']), m.match['input']) for m in matches]
-            else:
-                self.display = [(item, item) for item in self.items]
-            return  # don't draw until user navigates
+            return  # don't draw until user navigates; display recomputed in enter_nav
 
         if not self.display: return
         ndisplay = min(len(self.display), nv)
