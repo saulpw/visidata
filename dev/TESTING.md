@@ -172,6 +172,14 @@ pytest visidata/tests/test_features.py    # run test_ functions discovered from 
 
 **The `feature.py:def test_feature(vd)` pattern:** Any VisiData module can define `test_*` functions that take `vd` as a parameter. These are auto-discovered and run by pytest. Useful for testing features alongside their implementation (see `features/slide.py` for an example using `vd.runvdx()`).
 
+## Test Output Noise
+
+Test output should be clean: only progress, results, and genuinely actionable warnings. Spurious warnings, deprecation messages, and "known harmless" stderr noise should be **fixed at the source**, not ignored — even when they don't cause failures.
+
+**Never** redirect to `/dev/null` to hide noise. Never `grep -v` it away.
+
+If the error is reasonable and expected, the `allow-error` vdx command takes a regex and will suppress a known error message.
+
 ## Test Style
 
 When a test is a series of one-liner asserts (like testing a pure function with many input/output pairs), combine them into a single test function. Add a short comment at the end of each line if the reason isn't obvious from the assertion itself. Don't create separate test functions for each case.

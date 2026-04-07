@@ -27,6 +27,12 @@ jobs:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
 
+    - name: Install en_US.UTF-8 locale
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y locales
+        sudo locale-gen en_US.UTF-8
+
     - name: Install VisiData with test dependencies
       run: make install-test
 
@@ -49,6 +55,12 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
+
+    - name: Install en_US.UTF-8 locale
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y locales
+        sudo locale-gen en_US.UTF-8
 
     - name: Install VisiData with test dependencies
       run: make install-test
