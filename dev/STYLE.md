@@ -76,6 +76,7 @@ Sheet.addCommand('gEnter', 'dive-selected', 'openRows(selectedRows)', 'help')
 - Put on `BaseSheet` for all contexts, `TableSheet` for table contexts, specific sheet for that sheet only.
 - Never reference exec locals (like `cursorRow`) inside list comprehension filters in execstrs — breaks on Python < 3.12. Extract to `@Sheet.api` method.
 - When extracting a helper for a command, name it after the command's longname (e.g. `addcol-expr` -> `addcol_expr`).
+- In general, keep `input*()` calls in the execstr, not inside helpers — the menu system inspects the execstr for the string 'input' to determine which commands take input.  To keep execstrs from getting too long, create another inputSomething(). Pass the input result into the helper as an argument.  Exception: when input should not be requested if some other condition fails, and that condition is too complicated for the execstr.
 - A command can only call `input()` once, even with `replay=False`.
 - `replay=False` — not added to cmdlog. `deprecated=True` — hidden from help. `testable=False` — excluded from test sweep.
 
