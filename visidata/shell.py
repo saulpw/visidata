@@ -88,14 +88,15 @@ class ColumnShell(Column):
     def calcValue(self, row):
         try:
             import shlex
-            args = []
+            import re
             context = LazyComputeRow(self.source, row, curcol=self.curcol)
-            for arg in shlex.split(self.expr):
-                if arg.startswith('$'):
-                    arg = shlex.quote(str(context[arg[1:]]))
-                args.append(arg)
 
-            p = vd.popen([os.getenv('SHELL', 'bash'), '-c', shlex.join(args)],
+            def replace_var(m):
+                return shlex.quote(str(context[m.group(1)]))
+
+            cmd = re.sub(r'\$(\w+)', replace_var, self.expr)  #3026
+
+            p = vd.popen([os.getenv('SHELL', 'bash'), '-c', cmd],
                     stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             return p.communicate()
         except Exception as e:
