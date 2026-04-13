@@ -8,6 +8,8 @@ Functionality is more limited than local paths, but supports:
 """
 
 import textwrap
+from functools import cached_property
+
 from visidata import (
     Column,
     ItemColumn,
@@ -120,6 +122,14 @@ class S3DirSheet(Sheet):
         )
         self.fs = source.fs
 
+    @cached_property
+    def _display_prefix(self):
+        """The source prefix to strip from row names for display."""
+        prefix = self.source.given
+        if prefix.startswith("s3://"):
+            prefix = prefix[5:]
+        return prefix.rstrip("/") + "/"
+
     def object_display_name(self, row):
         """Provide a friendly display name for an S3 path.
 
@@ -127,16 +137,34 @@ class S3DirSheet(Sheet):
         prefix bits to imitate a directory browser. When glob matching,
         include the full key name for each entry.
         """
-        return (
-            row.get("name")
-            if self.use_glob_matching
-            else row.get("name").rpartition("/")[2]
-        )
+        if self.use_glob_matching:
+            return row.get("name")
+        name = row.get("name", "")
+        if name.startswith(self._display_prefix):
+            return name[len(self._display_prefix):]
+        return name.rpartition("/")[2]
+
+    def _yield_entry(self, key, info):
+        """Yield row(s) for an S3 key, expanding versions if version-aware."""
+        if self.version_aware and info.get("type") == "file":
+            yield from (
+                {**obj_version, "name": key, "type": "file"}
+                for obj_version in self.fs.object_version_info(key)
+                if key.partition("/")[2] == obj_version["Key"]
+            )
+        else:
+            yield info
+
+    def _iterdir(self, path, dir_depth, depth=0):
+        """Walk S3 path, recursing into directories up to dir_depth levels."""
+        for info in self.fs.ls(path, detail=True):
+            key = info["name"]
+            yield from self._yield_entry(key, info)
+            if info.get("type") == "directory" and depth < dir_depth:
+                yield from self._iterdir(key, dir_depth, depth + 1)
 
     def iterload(self):
         """Delegate to the underlying filesystem to fetch S3 entries."""
-        list_func = self.fs.glob if self.use_glob_matching else self.fs.ls
-
         if not (
             self.use_glob_matching
             or self.fs.exists(self.source.given)
@@ -149,15 +177,11 @@ class S3DirSheet(Sheet):
         else:
             self.column("latest").hide(True)
 
-        for key in list_func(str(self.source)):
-            if self.version_aware and self.fs.isfile(key):
-                yield from (
-                    {**obj_version, "name": key, "type": "file"}
-                    for obj_version in self.fs.object_version_info(key)
-                    if key.partition("/")[2] == obj_version["Key"]
-                )
-            else:
-                yield self.fs.stat(key)
+        if self.use_glob_matching:
+            for info in self.fs.glob(str(self.source), detail=True).values():
+                yield from self._yield_entry(info["name"], info)
+        else:
+            yield from self._iterdir(str(self.source), self.options.dir_depth)
 
     @asyncthread
     def download(self, rows, savepath):
