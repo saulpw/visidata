@@ -48,7 +48,7 @@ def start_server(host, port, vd_bin, vd_args=''):
     'Launch VisiData in a new terminal with command server.'
     launch_cmd = os.environ.get('VD_LAUNCH_CMD', 'tmux split-window -h')
     config_arg = '--config visidatarc' if os.path.isfile('visidatarc') else ''
-    proc = subprocess.Popen(f'{launch_cmd} {vd_bin} --quitguard=False --server-port {port} {config_arg} {vd_args}', shell=True)
+    proc = subprocess.Popen(f'{launch_cmd} {vd_bin} --quitguard=False --server-port {port} --disp_scroll_context=3 {config_arg} {vd_args}', shell=True)
 
     for _ in range(30):
         ret = proc.poll()
