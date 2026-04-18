@@ -43,3 +43,8 @@ The keystroke immediately follows the bullet.  Do not say "Press" or "Use" withi
  - Prefix option names with `options.` in prose (e.g. `options.numeric_binning`). Not needed in option tables where the column header already says "option".
  - Describe user-facing behavior, not implementation details. e.g. "Undoing on the frequency table also undoes on the source sheet" not "Both sheets share a single undo point".
  - Prefer lists to tables when each row works as a self-contained list item (not too many columns).
+ - Use ASCII punctuation only. No em-dashes, en-dashes, smart quotes, or Unicode ellipses. Plain `-` or `:` instead.
+ - Section headings are short noun phrases or bare imperatives ("Sort by one column", "Hide and Unhide columns"), not full sentences or "How to X" constructions.
+ - Skip introductory paragraphs when the heading is self-explanatory. At most one short sentence of setup.
+ - Describe what the command does, not what the UI looks like ("a prompt appears at the bottom of the screen" is UI narration).
+ - Avoid hedging parentheticals like "(when available)", "(if possible)".
