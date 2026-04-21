@@ -117,7 +117,7 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
         super().resetCols()
 
         # add default bonus columns
-        countCol = AttrColumn('count', 'sourcerows', type=vlen)
+        countCol = AttrColumn('count', 'sourcerows', type=vlen, width=9) #width=9 to properly align counts < 10**7
         for c in [
             countCol,
             Column('percent', type=float, getter=lambda col,row: len(row.sourcerows)*100/col.sheet.source.nRows),
