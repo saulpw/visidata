@@ -131,8 +131,8 @@ def visibleColInfoAtX(sheet, x):
     for vcolidx, (colx, w) in sheet._visibleColLayout.items():
         if vcolidx == sheet.nVisibleCols-1:
             sep = vd.options.disp_rowend_sep
-        elif (sheet.keyCols and col is sheet.keyCols[-1]):
-            sep = vd.options.disp_key_sep
+        elif (sheet.keyCols and sheet.visibleCols[vcolidx] is sheet.keyCols[-1]):
+            sep = vd.options.disp_keycol_sep
         else:
             sep = vd.options.disp_column_sep
         sepw = dispwidth(sep, literal=True)
