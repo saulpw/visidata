@@ -559,7 +559,7 @@ class PodcastEditingSheet(Sheet):
 
     def bulk_combine(self, rows):
         vd.addUndo(setattr, self, 'rows', copy(self.rows))
-        self.rows = list(iterspeakerrows(rows, inline_interjections=False))
+        self.rows = list(iterspeakerrows(rows, include_cuts=self.options.daw_include_cuts, inline_interjections=False))
 
     def speed_change(self, dv):
         self.speed *= dv
