@@ -1,7 +1,7 @@
 from copy import copy
 import itertools
 
-from visidata import vd, vlen, VisiData, Column, AttrColumn, Sheet, ColumnsSheet, Fanout
+from visidata import vd, vlen, VisiData, Column, AttrColumn, Sheet, ColumnsSheet, Fanout, asyncthread
 from visidata.pivot import PivotSheet, PivotGroupRow
 
 
@@ -97,18 +97,21 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
             self.addUndoSelection()
         super().toggle(rows, add_undo=False)
 
+    @asyncthread
     def select_row(self, row, add_undo=True):
         'Add single *row* to set of selected rows, and corresponding rows in source sheet.'
         if add_undo:
             self.addUndoSelection()
         super().select_row(row, add_undo=False)
 
+    @asyncthread
     def unselect_row(self, row, add_undo=True):
         'Remove single *row* from set of selected rows, and remove corresponding rows in source sheet.'
         if add_undo:
             self.addUndoSelection()
         super().unselect_row(row, add_undo=False)
 
+    @asyncthread
     def toggle_row(self, row, add_undo=True):
         'Toggle selection of given *row* and of corresponding rows in source sheet.'
         if add_undo:
