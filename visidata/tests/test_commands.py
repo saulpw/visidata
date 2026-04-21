@@ -124,6 +124,9 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'define-command': 'type-test cursorCol.type = str',
                  'highlight-sheet': 'e..',
                  'highlight-col': '[0-9]',
+                 'color-cell': 'True',
+                 'color-row': 'True',
+                 'color-col': 'True',
               }
 
 @pytest.mark.usefixtures('curses_setup')
@@ -188,7 +191,7 @@ class TestCommands:
         vs = visidata.TsvSheet('sample', source=visidata.Path(sample_file))
         cmd = vs.getCommand(longname)
         if not cmd:
-            vd.warning(f'command cannot be tested on TsvSheet, skipping:  {longname}')
+            vd.debug(f'command cannot be tested on TsvSheet, skipping:  {longname}')
             return
         vs.reload.__wrapped__(vs)
         vs.vd = vd

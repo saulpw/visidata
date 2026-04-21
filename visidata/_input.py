@@ -560,7 +560,8 @@ def input(vd, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None,
         attr = ColorAttr()
     sheet = vd.activeSheet
     if not vd.cursesEnabled:
-        if kwargs.get('record', True) and vd.cmdlog:
+        if vd.cmdlog:
+            # batch/replay mode: use replay input regardless of record flag; never read stdin
             return vd.getCommandInput()
 
         if kwargs.get('display', True):
