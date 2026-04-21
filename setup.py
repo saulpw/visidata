@@ -96,6 +96,7 @@ setup(
             "pypng",
             "pytest",
             "PyYAML>=5.1",
+            "shapely",
             "tabulate",
             "tomli",
             "wcwidth",
