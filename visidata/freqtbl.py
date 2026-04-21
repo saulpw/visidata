@@ -63,11 +63,13 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
 
     def selectRow(self, row):
         # Does not create an undo-operation for the select on the source rows. The caller should create undo-information itself.
-        self.source.select(row.sourcerows, status=False, add_undo=False)     # select all entries in the bin on the source sheet
+        for r in row.sourcerows:
+            self.source.selectRow(r)
         return super().selectRow(row)  # then select the bin itself on this sheet
 
     def unselectRow(self, row):
-        self.source.unselect(row.sourcerows, status=False, add_undo=False)
+        for r in row.sourcerows:
+            self.source.unselectRow(r)
         return super().unselectRow(row)
 
     def addUndoSelection(self):
