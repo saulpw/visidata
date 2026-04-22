@@ -131,7 +131,7 @@ def visibleColInfoAtX(sheet, x):
     for vcolidx, (colx, w) in sheet._visibleColLayout.items():
         if vcolidx == sheet.nVisibleCols-1:
             sep = vd.options.disp_rowend_sep
-        elif (sheet.keyCols and sheet.visibleCols[vcolidx] is sheet.keyCols[-1]):
+        elif (sheet.keyCols and sheet.availCols[vcolidx] is sheet.keyCols[-1]):
             sep = vd.options.disp_keycol_sep
         else:
             sep = vd.options.disp_column_sep
@@ -166,7 +166,7 @@ def go_mouse(sheet, drag_button=None):
         sheet.cursorVisibleColIndex = cidx
         if drag_button == 1 and is_column:
             # save info for a possible drag event
-            sheet.drag1 = (sheet.visibleCols[cidx], sheet.mouseX)
+            sheet.drag1 = (sheet.availCols[cidx], sheet.mouseX)
         else:
             sheet.drag1 = None
 
