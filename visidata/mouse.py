@@ -129,13 +129,7 @@ def handleMouse(vd, sheet):
 def visibleColInfoAtX(sheet, x):
     '''return (vcolidx, is_separator) for the x-coordinate'''
     for vcolidx, (colx, w) in sheet._visibleColLayout.items():
-        if vcolidx == sheet.nVisibleCols-1:
-            sep = vd.options.disp_rowend_sep
-        elif (sheet.keyCols and sheet.availCols[vcolidx] is sheet.keyCols[-1]):
-            sep = vd.options.disp_keycol_sep
-        else:
-            sep = vd.options.disp_column_sep
-        sepw = dispwidth(sep, literal=True)
+        sepw = dispwidth(sheet.column_separator(vcolidx), literal=True)
         if colx <= x <= colx+w+sepw-1:
             if colx <= x <= colx+w-1:  #in the cell
                 return (vcolidx, False)

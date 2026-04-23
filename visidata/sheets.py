@@ -720,7 +720,6 @@ class TableSheet(BaseSheet):
         '''Set right-most visible column, based on calculation.
         Assign x coordinates and width to every column that fits on screen, visible or hidden.'''
         minColWidth = dispwidth(self.options.disp_more_left)+dispwidth(self.options.disp_more_right)+2
-        sepColWidth = dispwidth(self.options.disp_column_sep)
         winWidth = self.windowWidth
         self._visibleColLayout = {}
         x = 0
@@ -730,6 +729,7 @@ class TableSheet(BaseSheet):
             if width is not None:
                 if x < winWidth-1:
                     self._visibleColLayout[vcolidx] = [x, width]
+                    sepColWidth = dispwidth(self.column_separator(vcolidx), literal=True)
                     x += width+sepColWidth
             if x >= winWidth-1:
                 break
@@ -764,6 +764,14 @@ class TableSheet(BaseSheet):
             if col in self.keyCols or vcolidx >= self.leftVisibleColIndex:  # visible columns
                 return width
 
+    def column_separator(self, vcolidx):
+        '''returns the separator string drawn on the right side of the column'''
+        if (sheet.keyCols and sheet.availCols[vcolidx] is sheet.keyCols[-1]):
+            return vd.options.disp_keycol_sep
+        elif vcolidx == self.nVisibleCols-1:
+            return vd.options.disp_rowend_sep
+        else:  #applies to hidden columns too
+            return vd.options.disp_column_sep
 
     def drawColHeader(self, scr, y, h, vcolidx):
         'Compose and draw column header for given vcolidx.'
