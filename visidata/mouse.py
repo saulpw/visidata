@@ -141,6 +141,7 @@ def visibleColInfoAtX(sheet, x):
                 return (vcolidx, False)
             else:   #in the end-of-column separator
                 return (vcolidx, True)
+    return (None, False)
 
 
 @Sheet.api
