@@ -96,7 +96,7 @@ def select(self, rows, status=True, progress=True, add_undo=True):
     for r in (Progress(rows, 'selecting') if progress else rows):
         self.selectRow(r)
     if status:
-        if options.bulk_select_clear:
+        if self.options.bulk_select_clear:
             msg = 'selected %s %s%s' % (self.nSelectedRows, self.rowtype, ' instead' if before > 0 else '')
         else:
             msg = 'selected %s%s %s' % (self.nSelectedRows-before, ' more' if before > 0 else '', self.rowtype)
