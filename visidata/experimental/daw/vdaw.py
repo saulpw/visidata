@@ -733,6 +733,7 @@ def save_xmd(vd, p, sheet):
     assert isinstance(sheet, PodcastEditingSheet)
 
     prevhdr = ''
+    edited_time = 0.0
     with p.open(mode='w', encoding=sheet.options.save_encoding) as fp:
         for row in iterspeakerrows(sheet.rows, include_cuts=sheet.options.daw_include_cuts, inline_interjections=True):
 
@@ -742,12 +743,14 @@ def save_xmd(vd, p, sheet):
 
             if sheet.options.daw_include_cuts:
                 text = row.data.text
+                timestr = to_hms(row.start)
             else:
                 text = row.cookedtext
                 vd.status(text)
+                timestr = to_hms(edited_time)
+                edited_time += row.duration or 0
 
             if text:
-                timestr = to_hms(row.start)
                 line = f'[{timestr}] **{row.speaker}**: {text}'
                 line = line.strip()
                 fp.write(line+'\n\n')
