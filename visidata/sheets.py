@@ -806,7 +806,7 @@ class TableSheet(BaseSheet):
                 clipdraw(scr, y+i, x, name, hdrcattr, w=colwidth, literal=True)
             vd.onMouse(scr, x, y+i, colwidth, 1, BUTTON3_RELEASED='rename-col')
 
-            if C and x+colwidth+dispwidth(C) < self.windowWidth and y+i < self.windowHeight:
+            if C and x+colwidth+dispwidth(C) < self.windowWidth-1 and y+i < self.windowHeight:
                 scr.addstr(y+i, x+colwidth, C, sepcattr.attr)
 
         clipdraw(scr, y+h-1, min(x+colwidth, self.windowWidth-1)-dispwidth(T), T, hdrcattr, literal=True)
@@ -936,7 +936,7 @@ class TableSheet(BaseSheet):
                 displines = {}  # [vcolidx] -> list of lines in that cell
 
             for vcolidx, (x, colwidth) in sorted(self._visibleColLayout.items()):
-                if x < self.windowWidth:  # only draw inside window
+                if x < self.windowWidth-1:  # only draw inside window
                     vcols = self.availCols
                     if vcolidx >= self.nVisibleCols and vcolidx != self.cursorVisibleColIndex:
                         continue
