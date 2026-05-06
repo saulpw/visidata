@@ -277,8 +277,8 @@ def commitDeleteRow(self, row):
     'To commit a deleted row.  Override per sheet type.'
 
 
-@asyncthread
 @Sheet.api
+@asyncthread
 def putChanges(sheet):
     'Commit changes to ``sheet.source``. May overwrite source completely without confirmation.  Overridable.'
     sheet.commitAdds()
