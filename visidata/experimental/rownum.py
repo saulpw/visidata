@@ -2,8 +2,8 @@ from visidata import *
 from functools import wraps, partial
 
 
-@asyncthread
 @Sheet.api
+@asyncthread
 def calcRowIndex(sheet, indexes):
     for rownum, r in enumerate(sheet.rows):
         indexes[sheet.rowid(r)] = rownum
