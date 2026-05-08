@@ -87,15 +87,12 @@ class ColumnShell(Column):
     @asynccache(lambda col,row: (col, col.sheet.rowid(row)))
     def calcValue(self, row):
         try:
+            import re
             import shlex
-            args = []
             context = LazyComputeRow(self.source, row, curcol=self.curcol)
-            for arg in shlex.split(self.expr):
-                if arg.startswith('$'):
-                    arg = shlex.quote(str(context[arg[1:]]))
-                args.append(arg)
+            cmd = re.sub(r'\$(\w+)', lambda m: shlex.quote(str(context[m.group(1)])), self.expr)
 
-            p = vd.popen([os.getenv('SHELL', 'bash'), '-c', shlex.join(args)],
+            p = vd.popen([os.getenv('SHELL', 'bash'), '-c', cmd],
                     stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             return p.communicate()
         except Exception as e:
