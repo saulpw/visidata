@@ -19,7 +19,7 @@ def makeRegexSplitter(vd, regex, origcol):
 @VisiData.api
 def makeRegexMatcher(vd, regex, origcol):
     if not regex.groups:
-        vd.fail('specify a capture group')  #1778
+        vd.fail('specify a capture group using parentheses')  #1778
     def _regexMatcher(row):
         m = regex.search(origcol.getFullDisplayValue(row))
         if m:
