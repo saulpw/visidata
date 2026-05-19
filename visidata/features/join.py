@@ -413,7 +413,7 @@ for d in vd.jointypes:
     IndexSheet.addCommand('', f'join-selected-{jointype}', 'left, rights = someSelectedRows[0], someSelectedRows[1:]; vd.push(left.openJoin(rights, jointype="{jointype}))', f'join selected sheets, keeping {joinhelp}')
     Sheet.addCommand('', f'join-sheets-top2-{jointype}', f'vd.push(openJoin(vd.sheets[1:2], jointype="{jointype}"))', f'join top two sheets on Sheets Stack, keeping {joinhelp}')
     Sheet.addCommand('', f'join-sheets-all-{jointype}', f'vd.push(openJoin(vd.sheets[1:], jointype="{jointype}"))', f'join all sheets on Sheets Stack, keeping {joinhelp}')
-    ColumnsSheet.addCommand('', 'join-cols-{jointype}', 'vd.push(join_sheets_cols(selectedRows, jointype=inputJointype()))', f'join sheets for selected columns, keeping {joinhelp}')
+    ColumnsSheet.addCommand('', f'join-cols-{jointype}', 'vd.push(join_sheets_cols(selectedRows, jointype=inputJointype()))', f'join sheets for selected columns, keeping {joinhelp}')
 
     vd.addMenuItems(f'''Data > Join > Selected Sheets > {jointype} > join-selected-{jointype}''')
     vd.addMenuItems(f'''Data > Join > Top Two Sheets > {jointype} > join-sheets-top2-{jointype}''')
