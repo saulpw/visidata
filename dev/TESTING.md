@@ -166,7 +166,9 @@ pytest visidata/tests/test_features.py    # run test_ functions discovered from 
 
 **Key files:**
 - `conftest.py` — fixtures: `curses_setup` (mock curses), `mock_screen` (mock screen object)
-- `test_commands.py` — runs every registered command once with sample data
+- `test_commands.py`
+  - `test_baseCommands` — runs every command reachable from `TsvSheet` once with sample data. Silently skips commands scoped to non-Sheet hierarchies (`IndexSheet`, `ColumnsSheet`, etc.) — they fail `vs.getCommand(longname)`'s MRO walk and log `'command cannot be tested on TsvSheet, skipping'`.
+  - `test_command_execstrs_compile` — `compile()`s every registered command's execstr via `vd.commands.iterall()`. Catches syntax errors regardless of which sheet class the command is bound to.
 - `test_features.py` — discovers `test_*` functions from VisiData's imported modules (e.g., `test_slide_keycol_1` in `features/slide.py`)
 - `test_cliptext.py`, `test_date.py`, etc. — unit tests for specific functions
 
@@ -183,6 +185,10 @@ If the error is reasonable and expected, the `allow-error` vdx command takes a r
 ## Test Style
 
 When a test is a series of one-liner asserts (like testing a pure function with many input/output pairs), combine them into a single test function. Add a short comment at the end of each line if the reason isn't obvious from the assertion itself. Don't create separate test functions for each case.
+
+## Static and lint-style checks
+
+Developer-only validation belongs in pytest, not in runtime mechanisms. Don't add `--test` CLI flags, env vars, or `vd.options.debug`-gated branches in `addCommand` (or similar) to enable a check. Add a pytest function instead — `vd.commands.iterall()` already exposes every `(longname, sheet-class)` pair at import time, and other settings registries are similarly available.
 
 ## Bug Fix Testing
 
