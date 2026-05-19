@@ -1,4 +1,6 @@
 import os
+import re
+import shlex
 import shutil
 import stat
 import subprocess
@@ -78,6 +80,9 @@ def addShellColumns(vd, cmd, sheet, curcol=None):
             shellcol)
 
 
+SHELL_COLREF_RE = r'\$\{([^}]+)\}|\$(\w+)'
+
+
 class ColumnShell(Column):
     def __init__(self, name, cmd=None, curcol=None, **kwargs):
         super().__init__(name, **kwargs)
@@ -87,15 +92,11 @@ class ColumnShell(Column):
     @asynccache(lambda col,row: (col, col.sheet.rowid(row)))
     def calcValue(self, row):
         try:
-            import shlex
-            args = []
             context = LazyComputeRow(self.source, row, curcol=self.curcol)
-            for arg in shlex.split(self.expr):
-                if arg.startswith('$'):
-                    arg = shlex.quote(str(context[arg[1:]]))
-                args.append(arg)
-
-            p = vd.popen([os.getenv('SHELL', 'bash'), '-c', shlex.join(args)],
+            cmd = re.sub(SHELL_COLREF_RE,
+                         lambda m: shlex.quote(str(context[m.group(1) or m.group(2)])),
+                         self.expr)
+            p = vd.popen([os.getenv('SHELL', 'bash'), '-c', cmd],
                     stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             return p.communicate()
         except Exception as e:
@@ -264,14 +265,14 @@ class FileListSheet(DirSheet):
 @VisiData.api
 def inputShell(vd):
     cmd = vd.input("sh$ ", type="sh")
-    if '$' not in cmd:
+    refs = [m.group(1) or m.group(2) for m in re.finditer(SHELL_COLREF_RE, cmd)]
+    if not refs:
         vd.warning('no $column in command')
     else:
-        import shlex
         colnames = [col.name for col in vd.sheet.columns]
-        badnames = [arg[1:] for arg in shlex.split(cmd) if arg.startswith('$') and arg[1:] not in colnames]
-        for name in badnames:
-            vd.fail(f'no such columns: {", ".join([name for name in badnames])}')
+        badnames = [name for name in refs if name not in colnames]
+        if badnames:
+            vd.fail(f'no such columns: {", ".join(badnames)}')
     return cmd
 
 DirSheet.addCommand('`', 'open-dir-parent', 'vd.push(openSource(source.parent if source.resolve()!=Path(".").resolve() else os.path.dirname(source.resolve())))', 'open parent directory')  #1801
