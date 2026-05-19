@@ -61,7 +61,10 @@ def join_sheets_cols(vd, cols, jointype:str=''):
 
 @Sheet.api
 def openJoin(sheet, others, jointype=''):
-    sheets = [sheet] + others
+    if sheet is vd.sheetsSheet:
+        sheets = others
+    else:
+        sheets = [sheet] + others
 
     sheets[1:] or vd.fail("join requires more than 1 sheet")
 
