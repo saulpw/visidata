@@ -132,6 +132,16 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
 @pytest.mark.usefixtures('curses_setup')
 class TestCommands:
 
+    def test_command_execstrs_compile(self):
+        'every registered command execstr must be syntactically valid Python'
+        errors = []
+        for (longname, objname), cmd in visidata.vd.commands.iterall():
+            try:
+                compile(cmd.execstr, f'{longname} ({objname})', 'exec')
+            except SyntaxError as e:
+                errors.append(f'{longname} on {objname} (from {cmd.module}): {e}')
+        assert not errors, 'syntax errors in registered commands:\n  ' + '\n  '.join(errors)
+
     def test_baseCommands(self, mock_screen):
         'exec each global command at least once'
 
