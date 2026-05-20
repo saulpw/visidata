@@ -37,7 +37,6 @@ install-dev:
 	pip3 install -e .
 
 install-test:
-	pip3 install .
 	pip3 install ".[test]"
 
 install-all:
