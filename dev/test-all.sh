@@ -3,7 +3,10 @@
 # Usage: test-all.sh [test scripts...]
 
 source tests/testenv.sh
-export PYTHON VD NPROCS OUTDIR
+# PYTHONFAULTHANDLER: SIGABRT → all-thread traceback dump
+export PYTHON VD NPROCS OUTDIR PYTHONFAULTHANDLER=1
+
+TEST_TIMEOUT=${TEST_TIMEOUT:-120}
 
 FAILED=""
 N=0
@@ -15,8 +18,12 @@ fi
 for t in "$@"; do
     name=$(basename "$t" .sh)
     N=$((N + 1))
-    "$t" 2>&1 | sed -u "s/^/$name: /"
-    if [ ${PIPESTATUS[0]} -ne 0 ]; then
+    timeout --signal=ABRT --kill-after=5 "$TEST_TIMEOUT" "$t" 2>&1 | sed -u "s/^/$name: /"
+    rc=${PIPESTATUS[0]}
+    if [ $rc -eq 124 ] || [ $rc -eq 137 ]; then
+        echo "FAIL: $name (timed out after ${TEST_TIMEOUT}s)"
+        FAILED="$FAILED $name"
+    elif [ $rc -ne 0 ]; then
         echo "FAIL: $name"
         FAILED="$FAILED $name"
     fi
