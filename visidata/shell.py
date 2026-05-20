@@ -23,6 +23,10 @@ vd.option('active_procs', 10, 'number of concurrent processes on DirSheet')
 
 vd.spawnedProcesses = []
 
+def bytes_rstrip(*args, **kwargs): #3081
+    return bytes.rstrip(*args, **kwargs)
+
+
 @VisiData.api
 def popen(vd, *args, **kwargs):
     p = subprocess.Popen(*args, **kwargs)
@@ -75,8 +79,8 @@ def open_fdir(vd, p):
 def addShellColumns(vd, cmd, sheet, curcol=None):
     shellcol = ColumnShell(cmd, source=sheet, width=0, curcol=curcol)
     sheet.addColumnAtCursor(
-            Column(cmd+'_stdout', type=bytes.rstrip, srccol=shellcol, getter=lambda col,row: col.srccol.getValue(row)[0]),
-            Column(cmd+'_stderr', type=bytes.rstrip, srccol=shellcol, getter=lambda col,row: col.srccol.getValue(row)[1]),
+            Column(cmd+'_stdout', type=bytes_rstrip, srccol=shellcol, getter=lambda col,row: col.srccol.getValue(row)[0]),
+            Column(cmd+'_stderr', type=bytes_rstrip, srccol=shellcol, getter=lambda col,row: col.srccol.getValue(row)[1]),
             shellcol)
 
 
@@ -350,9 +354,10 @@ def copy_files(sheet, paths, dest):
             vd.exceptionCaught(e)
 
 
-vd.addGlobals({
-    'DirSheet': DirSheet
-})
+vd.addGlobals(
+    DirSheet=DirSheet,
+    bytes_rstrip=bytes.rstrip,
+)
 
 vd.addMenuItems('''
     Column > Add column > shell > addcol-shell
