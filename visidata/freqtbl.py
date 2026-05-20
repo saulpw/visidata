@@ -1,7 +1,7 @@
 from copy import copy
 import itertools
 
-from visidata import vd, vlen, VisiData, Column, AttrColumn, Sheet, ColumnsSheet, Fanout, asyncthread
+from visidata import vd, vlen, VisiData, Column, AttrColumn, Sheet, ColumnsSheet, Fanout, Progress, asyncthread
 from visidata.pivot import PivotSheet, PivotGroupRow
 
 
@@ -63,12 +63,12 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
 
     def selectRow(self, row):
         # Does not create an undo-operation for the select on the source rows. The caller should create undo-information itself.
-        for r in row.sourcerows:
+        for r in Progress(row.sourcerows, 'selecting'):
             self.source.selectRow(r)
         return super().selectRow(row)  # then select the bin itself on this sheet
 
     def unselectRow(self, row):
-        for r in row.sourcerows:
+        for r in Progress(row.sourcerows, 'unselecting'):
             self.source.unselectRow(r)
         return super().unselectRow(row)
 
