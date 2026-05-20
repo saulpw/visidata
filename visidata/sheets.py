@@ -20,7 +20,7 @@ vd.option('value_joiner', ' ', 'string to join display values')
 vd.option('max_rows', 1_000_000_000, 'number of rows to load from source')
 
 vd.option('disp_wrap_max_lines', 3, 'max lines for multiline view')
-vd.option('disp_wrap_break_long_words', False, 'break words longer than column width in multiline')
+vd.option('disp_wrap_break_long_words', True, 'break words longer than column width in multiline')
 vd.option('disp_wrap_replace_whitespace', False, 'replace whitespace with spaces in multiline')
 vd.option('disp_wrap_placeholder', '…', 'multiline string to indicate truncation')
 vd.option('disp_multiline_focus', True, 'only multiline cursor row')
