@@ -1,7 +1,7 @@
 import collections
 import ipaddress
 
-from visidata import VisiData, vd, Sheet, options, Column, asyncthread, Progress, TsvSheet, getattrdeep, ColumnAttr, date, vlen, filesize
+from visidata import VisiData, vd, Sheet, options, Column, asyncignore, Progress, TsvSheet, getattrdeep, ColumnAttr, date, vlen, filesize
 
 vd.option('pcap_internet', 'n', '(y/s/n) if save_dot includes all internet hosts separately (y), combined (s), or does not include the internet (n)')
 
@@ -104,7 +104,7 @@ def read_pcap(f):
         return dpkt.pcap.Reader(f.open_bytes())
 
 
-@asyncthread
+@asyncignore
 def load_oui(url):
     vsoui = TsvSheet('vsoui', source=vd.urlcache(url, days=30))
     vsoui.reload.__wrapped__(vsoui)
@@ -118,7 +118,7 @@ def load_oui(url):
             vd.exceptionCaught(e)
 
 
-@asyncthread
+@asyncignore
 def load_iana(url):
     ports_tsv = TsvSheet('ports_tsv', source=vd.urlcache(url, days=30))
     ports_tsv.reload.__wrapped__(ports_tsv)
