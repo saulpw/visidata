@@ -1,7 +1,7 @@
 from copy import copy
 import itertools
 
-from visidata import vd, vlen, VisiData, Column, AttrColumn, Sheet, ColumnsSheet, Fanout
+from visidata import vd, vlen, VisiData, Column, AttrColumn, Sheet, ColumnsSheet, Fanout, Progress, asyncthread
 from visidata.pivot import PivotSheet, PivotGroupRow
 
 
@@ -63,11 +63,13 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
 
     def selectRow(self, row):
         # Does not create an undo-operation for the select on the source rows. The caller should create undo-information itself.
-        self.source.select(row.sourcerows, status=False, add_undo=False)     # select all entries in the bin on the source sheet
+        for r in Progress(row.sourcerows, 'selecting'):
+            self.source.selectRow(r)
         return super().selectRow(row)  # then select the bin itself on this sheet
 
     def unselectRow(self, row):
-        self.source.unselect(row.sourcerows, status=False, add_undo=False)
+        for r in Progress(row.sourcerows, 'unselecting'):
+            self.source.unselectRow(r)
         return super().unselectRow(row)
 
     def addUndoSelection(self):
@@ -95,18 +97,21 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
             self.addUndoSelection()
         super().toggle(rows, add_undo=False)
 
+    @asyncthread
     def select_row(self, row, add_undo=True):
         'Add single *row* to set of selected rows, and corresponding rows in source sheet.'
         if add_undo:
             self.addUndoSelection()
         super().select_row(row, add_undo=False)
 
+    @asyncthread
     def unselect_row(self, row, add_undo=True):
         'Remove single *row* from set of selected rows, and remove corresponding rows in source sheet.'
         if add_undo:
             self.addUndoSelection()
         super().unselect_row(row, add_undo=False)
 
+    @asyncthread
     def toggle_row(self, row, add_undo=True):
         'Toggle selection of given *row* and of corresponding rows in source sheet.'
         if add_undo:
