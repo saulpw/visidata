@@ -100,7 +100,7 @@ setup(
             "tabulate",
             "tomli",
             "wcwidth",
-            "xport>=3.0",
+            "xport>=3.0,<3.3",
         ],"windows-curses": ['windows-curses >= 2.4.1; platform_system == "Windows"',  # 2119
         ],
         "all": all_requirements(),
