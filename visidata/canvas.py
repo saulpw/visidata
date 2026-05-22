@@ -722,7 +722,7 @@ class Canvas(Plotter):
     def render(self, h, w):
         'resets plotter, cancels previous render threads, spawns a new render'
         self.needsRefresh = False
-        vd.cancelThread(*(t for t in self.currentThreads if t.name == 'plotAll_async'))
+        vd.cancelThread(*(t for t in self.currentThreads if t.name == 'render_async'))
         self.labels.clear()
         self.resetCanvasDimensions(h, w)
         self.resetBounds(refresh=False)
