@@ -234,7 +234,7 @@ class DirSheet(Sheet):
         folders = set()
 
         for p in _walkfiles(self.source, self.options.dir_depth):
-            if not hidden_files and str(p).startswith('.') and not str(p).startswith('..'):
+            if not hidden_files and p.name.startswith('.'):
                 continue
 
             yield p
