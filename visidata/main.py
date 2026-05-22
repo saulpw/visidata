@@ -486,7 +486,7 @@ def main_vd():
         if not options.batch:
             run(vd.sheets[0])
     else:
-        if args.play == '-':
+        if args.play in ('-', '/dev/stdin'):  # /dev/stdin: post-duptty fd 0 is the tty, not the pipe
             if vd.stdinSource.fptext.isatty():
                 vd.fail('replay commands must come by pipe, not by terminal')
             vdfile = vd.stdinSource
