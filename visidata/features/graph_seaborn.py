@@ -15,7 +15,6 @@ def plot_seaborn(vd, rows, xcols, ycols):
 
 
 def ext_plot_seaborn(vd, rows, xcols, ycols):
-    pd = vd.importExternal('pandas')
     plt = vd.importExternal('matplotlib.pyplot', 'matplotlib')
     sns = vd.importExternal('seaborn')
 
