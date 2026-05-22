@@ -252,7 +252,7 @@ def mainloop(vd, scr):
             sheet.longname = ''
             prefixWaiting = False
 
-        vd._playNextQueuedCommand()
+        vd._playNextQueuedCommand(sheet)
 
         vd.callNoExceptions(sheet.checkCursor)
 
@@ -261,7 +261,7 @@ def mainloop(vd, scr):
 
 
 @VisiData.api
-def _playNextQueuedCommand(vd):
+def _playNextQueuedCommand(vd, sheet):
         try:
             if vd._nextCommands and not vd.unfinishedThreads:
                 cmd = vd._nextCommands.pop(0)
