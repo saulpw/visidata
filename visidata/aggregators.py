@@ -412,6 +412,7 @@ ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or 
 Sheet.addCommand('', 'addcol-aggregate', 'addcol_aggregate(cursorCol, chooseAggregators(prompt="aggregator for groups: "))', 'add column(s) with aggregator of rows grouped by key columns')
 
 vd.addGlobals(
+    Aggregator=Aggregator,
     ListAggregator=ListAggregator
 )
 
