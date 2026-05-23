@@ -53,6 +53,8 @@ Examples:
 For brevity:
 - Don't use generic verbs like `fix` or `use` (and especially not `utilize`)
 - Don't repeat the module name in the summary
+- Bodies stay short — prose about *why*, not a multi-section template.
+- Same brevity for external-repo commits and PRs (drop the VisiData-specific `[tag-]` and issue refs).
 
 ### Examples
 
