@@ -2,7 +2,6 @@
 
 from setuptools import setup
 import os.path
-import platform
 import sysconfig
 
 
@@ -12,7 +11,7 @@ def all_requirements():
         requirements = []
         for line in f:
             line = line.strip()
-            if (line and not line.startswith('#') and not line.startswith('-e git+https')):
+            if (line and not line.startswith('#') and not line.startswith('-e git+https') and not line.startswith('git+https')):
 
                 # inline comments
                 if '#' in line:
