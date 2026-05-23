@@ -9,14 +9,19 @@ from visidata import vd, VisiData, Sheet, GraphSheet, Progress, asyncthread
 @asyncthread
 def plot_seaborn(vd, rows, xcols, ycols):
     vd.status(f'plotting {len(rows)} rows using matplotlib')
+    # import all libraries used by ext_plot_seaborn() inside the originating visidata process,
+    # not the spawned process, so they stay imported for speed on subsequent calls
+    global pyplot, seaborn
+    pyplot = vd.importExternal('matplotlib.pyplot', 'matplotlib')
+    seaborn = vd.importExternal('seaborn')
     import multiprocessing
     mp = multiprocessing.Process(target=ext_plot_seaborn, args=(vd, rows, xcols, ycols))
     mp.start()
 
 
 def ext_plot_seaborn(vd, rows, xcols, ycols):
-    plt = vd.importExternal('matplotlib.pyplot', 'matplotlib')
-    sns = vd.importExternal('seaborn')
+    plt = pyplot
+    sns = seaborn
 
     # Set the default theme
     sns.set()
