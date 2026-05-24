@@ -113,7 +113,7 @@ def inputPalette(sheet, prompt, items,
         palrows = []
         n_results = 0
         def read_matches(offset):
-            nonlocal useditems, palrows, value, n_results
+            nonlocal useditems, palrows, n_results
 
             useditems = []
             palrows = []
@@ -133,7 +133,7 @@ def inputPalette(sheet, prompt, items,
         read_matches(offset)
 
         def change_page(dir=+1):
-            nonlocal offset, n_results, nitems
+            nonlocal offset
             new_offset = offset + dir*nitems
             # constrain offset to be a multiple of nitems
             new_offset = min(new_offset, ((n_results-1) // nitems)*nitems)
