@@ -3,7 +3,6 @@ import shutil
 import subprocess
 import io
 import sys
-import tempfile
 import functools
 import os
 import itertools
@@ -104,6 +103,7 @@ def syscopyCells_async(sheet, cols, rows, filetype):
 
     vd.status(f'copying {vs.nRows} {vs.rowtype} to system clipboard as {filetype}')
 
+    import tempfile
     with io.StringIO() as buf:
         with tempfile.NamedTemporaryFile() as temp:
             temp.close()  #2118

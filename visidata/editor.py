@@ -2,7 +2,6 @@ import os
 import sys
 import signal
 import subprocess
-import tempfile
 import curses
 
 import visidata
