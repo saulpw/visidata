@@ -453,17 +453,6 @@ def loadConfigFile(vd, fn=''):
             vd.addGlobals(newdefs)
 
 
-def addOptions(parser):
-    for optname in vd.options.keys('default'):
-        if optname.startswith('color_') or optname.startswith('disp_'):
-            continue
-        action = 'store_true' if options[optname] is False else 'store'
-        try:
-            parser.add_argument('--' + optname.replace('_', '-'), action=action, dest=optname, default=None, help=options._opts._get(optname).helpstr)
-        except argparse.ArgumentError:
-            pass
-
-
 @VisiData.cached_property
 def config_file(vd):
     xdg_config_file = visidata.Path(user_config_dir('visidata')) / 'config.py'
