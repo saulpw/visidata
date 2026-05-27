@@ -133,7 +133,7 @@ class Command:
 
 class Option:
     def __init__(self, name, value, description='', module='', help=''):
-        # description gets shows on the manpage and the optionssheet; help is shown on the sidebar while editing
+        # description gets shown on the manpage and the optionssheet; help is shown on the sidebar while editing
         self.name = name
         self.value = value
         self.helpstr = description
@@ -328,9 +328,10 @@ def option(vd, name, default, description, replay=False, sheettype=BaseSheet, he
 
    - `name`: name of option
    - `default`: default value when no other override exists
-   - `helpstr`: short description of option (as shown in the **Options Sheet**)
+   - `description`: short description of option (as shown in the **Options Sheet**)
    - `replay`: ``True`` if changes to the option should be stored in the **Command Log**
    - `sheettype`: ``None`` if the option is not sheet-specific, to make it global on CLI
+   - `help`: extra help for the option (shown in the sidebar while editing)
    - `cli_only`: ``True`` if the option is only meaningful as a CLI argument (hidden from Options Sheet)
     '''
     opt = vd.options.setdefault(name, default, description, vd.importingModule)
