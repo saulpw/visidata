@@ -45,7 +45,8 @@ Use `$VD` in test scripts instead of hardcoding `bin/vd` or `python -m visidata`
 2. `source tests/testenv.sh` at the top
 3. Use `$VD --batch ...` for VisiData invocations (config flags already included)
 4. Use `$OUTDIR` for output files, `mkdir -p $OUTDIR` if needed
-5. Exit non-zero on failure
+5. Never use `-o /dev/stdout` to capture output — write to `$OUTDIR` files instead (piped stdout interacts badly with VisiData's `flPipedOutput`)
+6. Exit non-zero on failure
 
 ---
 

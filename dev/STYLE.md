@@ -141,5 +141,11 @@ def my_vd_method(vd): ...
 - When adding or modifying a format saver, add `"roundtrip": "yes"|"inexact"` to `dev/formats.jsonl` and verify with `tests/test-roundtrip.sh <fmt>`.
 - Include the issue number as a comment on the `def test_` line: `def test_foo(self):  # #2829`
 
+## Deferred Sheets
+- `rowid()` must use `calcValue()`, not `getValue()` — `getValue` checks deferred mods via `rowid`, causing infinite recursion.
+
+## Postgres / psycopg2
+- Only pass connection params (`host`, `port`, `user`, `password`) when they have values — omitting `host` uses Unix socket (peer auth), passing `localhost` forces TCP (password auth).
+
 ## Reference
 - See `visidata/features/pypkg.py` for a complete example.
