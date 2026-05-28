@@ -705,6 +705,7 @@ class TableSheet(BaseSheet):
                 elif self.cursorVisibleColIndex > maxcolidx:
                     # some cases:  1) jumping rightward, so cursor has just moved to a column that is offscreen to the right
                     #              2) when keycols fill entire screen
+                    #              3) during reload, when we have no rows loaded yet
                     self.leftVisibleColIndex += 1
                     continue
 
