@@ -405,12 +405,19 @@ def editText(vd, y, x, w, attr=ColorAttr(), value='',
             vd.setLastArgs(v)
 
     if value:
+        t = type(value)
         if isinstance(value, (int, float)) and v[-1] == '%':  #2082
             pct = float(v[:-1])
             v = pct*value/100
-
-        # convert back to type of original value
-        v = type(value)(v)
+            # convert back to type of original value
+            v = t(v)
+        elif isinstance(v, str) and isinstance(value, (list, tuple, dict)):
+            import ast
+            v = ast.literal_eval(v)
+            if not isinstance(v, t):
+                vd.warning(f'error parsing string `{v}` into {t}')
+        else:
+            v = t(v)
 
     return v
 
