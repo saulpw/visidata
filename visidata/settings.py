@@ -217,6 +217,11 @@ class OptionsObject:
                 return self.unset(optname, obj=obj)
             elif isinstance(value, str) and t is bool: # special case for bool options
                 value = value and (value[0] not in "0fFnN")  # ''/0/false/no are false, everything else is true
+            elif isinstance(value, str) and t in (list, tuple, dict):
+                import ast
+                value = ast.literal_eval(value)
+                if not isinstance(value, t):
+                    vd.warning(f'error parsing string for `{optname}` into {t}')
             elif type(value) is t:    # if right type, no conversion
                 pass
             elif curval is None:  # if None, do not apply type conversion
