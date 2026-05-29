@@ -13,9 +13,9 @@ import visidata
 from visidata import vd, VisiData, Sheet, AttrColumn, asyncthread, anytype, date
 
 
-vd.option('reddit_client_id', '', 'client_id for reddit api')
-vd.option('reddit_client_secret', '', 'client_secret for reddit api')
-vd.option('reddit_user_agent', visidata.__version_info__, 'user_agent for reddit api')
+vd.option('reddit_client_id', '', 'client_id for reddit API')
+vd.option('reddit_client_secret', '', 'client_secret for reddit API')
+vd.option('reddit_user_agent', visidata.__version_info__, 'user_agent for reddit API')
 
 
 @VisiData.api
