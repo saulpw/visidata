@@ -207,8 +207,8 @@ N_PASSED=$((N_TESTS - N_FAILED - N_FLAKY))
 [ $N_FLAKY -gt 0 ] && FLAKY_MSG=", $N_FLAKY flaky" || FLAKY_MSG=""
 
 if [ $N_FAILED -gt 0 ]; then
-    echo "FAIL: $N_PASSED/$N_TESTS tests passed${FLAKY_MSG}${SKIP_MSG}"
+    echo "FAIL: $N_PASSED/$N_TESTS passed in $(elapsed)s${FLAKY_MSG}${SKIP_MSG}"
     exit 1
 else
-    echo "PASS: $N_PASSED/$N_TESTS tests passed${FLAKY_MSG}${SKIP_MSG}"
+    echo "$N_PASSED passed in $(elapsed)s${FLAKY_MSG}${SKIP_MSG}"
 fi

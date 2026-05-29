@@ -85,8 +85,8 @@ fi
 
 [ $SKIPPED -gt 0 ] && SKIP_MSG=", $SKIPPED skipped" || SKIP_MSG=""
 if [ $FAILED -gt 0 ]; then
-    echo "FAIL: $PASSED passed, $FAILED failed${SKIP_MSG}"
+    echo "FAIL: $PASSED/$((PASSED + FAILED)) passed in $(elapsed)s${SKIP_MSG}"
     exit 1
 else
-    echo "PASS: $PASSED passed${SKIP_MSG}"
+    echo "$PASSED passed in $(elapsed)s${SKIP_MSG}"
 fi
