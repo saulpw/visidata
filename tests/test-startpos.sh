@@ -44,7 +44,7 @@ check "+0:0:1:0 -> dname col" "ACCOUNTING" sample_data/employees.sqlite +0:0:1:0
 check "+0:0::1 -> row 1" "20" sample_data/employees.sqlite +0:0::1
 
 if [[ $FAIL -eq 1 ]]; then
-    echo "FAILED"
+    echo "FAILED in $(elapsed)s"
     exit 1
 fi
-echo "all startpos tests passed"
+echo "all startpos tests passed in $(elapsed)s"

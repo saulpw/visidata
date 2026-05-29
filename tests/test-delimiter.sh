@@ -88,7 +88,7 @@ head -1 $OUTDIR/cross.csv | grep -q ',' || { echo "FAIL: psv->csv uses comma"; F
 head -1 $OUTDIR/cross.csv | grep -qv '|' || { echo "FAIL: psv->csv no pipes"; FAIL=1; }
 
 if [[ $FAIL -eq 1 ]]; then
-    echo "FAILED"
+    echo "FAILED in $(elapsed)s"
     exit 1
 fi
-echo "all delimiter tests passed"
+echo "all delimiter tests passed in $(elapsed)s"
