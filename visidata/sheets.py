@@ -549,7 +549,7 @@ class TableSheet(BaseSheet):
         'Position of cursor and bounds of current sheet.'
         rowinfo = 'row %d (%d selected)' % (self.cursorRowIndex, self.nSelectedRows)
         colinfo = 'col %d (%d visible)' % (self.cursorVisibleColIndex, len(self.visibleCols))
-        return '%s  %s' % (rowinfo, colinfo)
+        return f'{self.name} {rowinfo}  {colinfo}'
 
     @property
     def nRows(self):
