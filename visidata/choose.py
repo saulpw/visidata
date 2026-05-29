@@ -2,7 +2,7 @@ from copy import copy
 from visidata import vd, options, VisiData, ListOfDictSheet, CompleteKey, ReturnValue
 
 
-vd.option('fancy_chooser', False, 'a nicer selection interface for aggregators and jointype')
+vd.option('fancy_chooser', False, 'use nicer selection interface for aggregators and jointype')
 
 @VisiData.api
 def chooseOne(vd, choices, type=''):
