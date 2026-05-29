@@ -6,7 +6,7 @@ from visidata import vd, Column, Sheet, asyncthread, Progress, VisiData
 
 vd.option('faker_locale', 'en_US', 'default locale to use for Faker', replay=True)
 vd.option('faker_extra_providers', None, 'list of additional Provider classes to load via add_provider()', replay=True)
-vd.option('faker_salt', '', 'Use a non-empty string to enable deterministic fakes')
+vd.option('faker_salt', '', 'make fakes deterministic, when seed string is non-empty')
 
 def addFakerProviders(fake, providers):
     '''

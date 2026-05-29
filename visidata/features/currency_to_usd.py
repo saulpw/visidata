@@ -6,8 +6,8 @@ from visidata import vd
 import functools
 import json
 
-vd.option('fixer_api_key', '', 'API Key for api.apilayer.com/fixer')
-vd.option('fixer_cache_days', 1, 'Cache days for currency conversions')
+vd.option('fixer_api_key', '', 'API key for api.apilayer.com/fixer')
+vd.option('fixer_cache_days', 1, 'how long to cache currency conversions, in days')
 
 currency_symbols = {
     '$': 'USD',

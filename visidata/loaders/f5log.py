@@ -8,7 +8,7 @@ This plugin supports the default log format for:
 
 It extracts common log entries, particularly around monitoring, iRules and configuration change audits. It tries to extract data into common fields to assist rapid filtering.
 
-f5log_object_regex provides a simple way to perform a regex on an object name extracted by a splitter and get extra columns out of it. This is very useful when objectnames have a structure. Simply use named groups in your regex to get named columns out.
+f5log_object_regex provides a simple way to apply a regex on an object name extracted by a splitter and get extra columns out of it. This is very useful when objectnames have a structure. Simply use named groups in your regex to get named columns out.
 
 Regex: (?:/Common/)(?P<site>[^-]+)-(?P<vstype>[^-]+)-(?P<application>[^-]+)
 
@@ -66,18 +66,18 @@ vd.theme_option("color_f5log_logid_info", "green", "color of info")
 vd.option(
     "f5log_object_regex",
     None,
-    "A regex to perform on the object name, useful where object names have a structure to extract. Use the (?P<foo>...) named groups form to get column names.",
+    "regex to apply to the object name. Useful where object names have a structure to extract. Use the (?P<foo>...) named groups form to get column names.",
     help='regex'
 )
 vd.option(
     "f5log_log_year",
     None,
-    "Override the default year used for log parsing. Use all four digits of the year (e.g., 2022). By default (None) use the year from the ctime of the file, or failing that the current year.",
+    "override the default year used for log parsing. Use all four digits of the year (e.g., 2022). By default (None) use the year from the ctime of the file, or failing that the current year.",
 )
 vd.option(
     "f5log_log_timezone",
     "UTC",
-    "The timezone the source file is in, by default UTC.",
+    "timezone of the source file",
 )
 
 

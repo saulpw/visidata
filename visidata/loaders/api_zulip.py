@@ -6,8 +6,8 @@ from visidata import ItemColumn, Column, vlen, date, asyncsingle, AttrDict
 vd.option('zulip_batch_size', -100, 'number of messages to fetch per call (<0 to fetch before anchor)')
 vd.option('zulip_anchor', 1000000000, 'message id to start fetching from')
 vd.option('zulip_delay_s', 0.00001, 'seconds to wait between calls (0 to stop after first)')
-vd.option('zulip_api_key', '', 'Zulip API key')
-vd.option('zulip_email', '', 'Email for use with Zulip API key')
+vd.option('zulip_api_key', '', 'API key for Zulip')
+vd.option('zulip_email', '', 'email address for use with Zulip API key')
 
 
 @VisiData.api
