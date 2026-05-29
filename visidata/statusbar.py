@@ -25,7 +25,7 @@ vd.theme_option('color_status', 'bold on 238', 'status line color')
 vd.theme_option('color_error', '202 1', 'error message color')
 vd.theme_option('color_warning', '166 15', 'warning message color')
 vd.theme_option('color_top_status', 'underline', 'top window status bar color')
-vd.theme_option('color_active_status', 'black on 68 blue', ' active window status bar color')
+vd.theme_option('color_active_status', 'black on 68 blue', 'active window status bar color')
 vd.theme_option('color_inactive_status', '8 on black', 'inactive window status bar color')
 vd.theme_option('color_highlight_status', 'black on green', 'color of highlighted elements in statusbar')
 
