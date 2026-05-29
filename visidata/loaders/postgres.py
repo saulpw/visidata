@@ -5,7 +5,7 @@ from visidata import VisiData, vd, Sheet, options, anytype, asyncthread, ColumnI
 
 __all__ = ['openurl_postgres', 'openurl_postgresql', 'openurl_rds', 'PgTable', 'PgTablesSheet']
 
-vd.option('postgres_schema', 'public', 'The desired schema for the Postgres database')
+vd.option('postgres_schema', 'public', 'desired schema for the Postgres database')
 
 def codeToType(type_code, colname):
     psycopg2 = vd.importExternal('psycopg2', 'psycopg2-binary')
