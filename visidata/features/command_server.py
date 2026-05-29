@@ -2,7 +2,9 @@
 
 import io
 import json
+import os
 import socket
+import stat
 import time
 
 from visidata import vd, VisiData, asyncignore, Sheet
@@ -11,6 +13,7 @@ from visidata.statusbar import composeStatus
 
 vd.option('server_addr', '127.0.0.1', 'IP address to listen for commands', sheettype=None, replay=False)
 vd.option('server_port', 0, 'port to listen for commands', sheettype=None, replay=False)
+vd.option('server_socket', '', 'path to Unix domain socket to listen for commands (takes precedence over server_port)', sheettype=None, replay=False)
 vd.option('server_cursor_width', 200, 'max display width per cell in cursor row echo', sheettype=None, replay=False)
 
 
@@ -143,8 +146,12 @@ class SocketIO(io.RawIOBase):
 
 @VisiData.before
 def mainloop(vd, scr):
+    sock_path = vd.options.server_socket
     port = vd.options.server_port
-    if port:
+    if sock_path:
+        vd.timeouts_before_idle = -1  # never block indefinitely on getch when server is active
+        vd.unix_command_listener(sock_path)
+    elif port:
         vd.timeouts_before_idle = -1  # never block indefinitely on getch when server is active
         vd.command_listener(vd.options.server_addr, port)
 
@@ -160,6 +167,28 @@ def command_listener(vd, addr, port):
 
         conn, (addr, inport) = s.accept()
         vd.debug(f'Connection from {addr}:{inport}')
+        vd.queueCommand('no-op')  # update screen
+
+        vd.command_server(conn)
+
+
+@VisiData.api
+@asyncignore
+def unix_command_listener(vd, path):
+    # refuse-to-clobber: only unlink if existing path is a socket
+    if os.path.lexists(path) and not stat.S_ISSOCK(os.lstat(path).st_mode):
+        vd.fail(f'server_socket path {path!r} exists and is not a socket')
+    try:
+        os.unlink(path)
+    except FileNotFoundError:
+        pass
+    # bind once and accept many to avoid an unlink/rebind race between connections
+    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    s.bind(path)
+    s.listen(5)
+    while True:
+        conn, _ = s.accept()
+        vd.debug(f'Connection on {path}')
         vd.queueCommand('no-op')  # update screen
 
         vd.command_server(conn)
