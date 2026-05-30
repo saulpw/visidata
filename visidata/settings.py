@@ -221,7 +221,7 @@ class OptionsObject:
                 import ast
                 value = ast.literal_eval(value)
                 if not isinstance(value, t):
-                    vd.warning(f'error parsing string for `{optname}` into {t}')
+                    vd.fail(f'error parsing string for `{optname}` into {t}')
             elif type(value) is t:    # if right type, no conversion
                 pass
             elif curval is None:  # if None, do not apply type conversion
