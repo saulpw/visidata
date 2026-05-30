@@ -415,7 +415,7 @@ def editText(vd, y, x, w, attr=ColorAttr(), value='',
             import ast
             v = ast.literal_eval(v)
             if not isinstance(v, t):
-                vd.warning(f'error parsing string `{v}` into {t}')
+                vd.fail(f'error parsing string `{v}` into {t}')
         else:
             v = t(v)
 
