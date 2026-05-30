@@ -116,6 +116,14 @@ def status(vd, *args, priority=0):
 
 @VisiData.api
 def addToStatusHistory(vd, *args, priority=0, source=None):
+    safe = []  #3111 snapshot now; args may be mutated later
+    for a in args:
+        try:
+            safe.append(str(a))
+        except Exception as e:
+            safe.append(f'{type(e).__name__}: {e}')
+    args = tuple(safe)
+
     if vd.statusHistory:
         prevpri, prevargs, _, _ = vd.statusHistory[-1]
         if prevpri == priority and prevargs == args:
@@ -124,6 +132,7 @@ def addToStatusHistory(vd, *args, priority=0, source=None):
 
     vd.statusHistory.append([priority, args, 1, source])
     return True
+
 
 @VisiData.api
 def error(vd, *args):
@@ -290,3 +299,21 @@ BaseSheet.addCommand('Ctrl+P', 'open-statuses', 'vd.push(vd.statusHistorySheet)'
 vd.addMenuItems('''
     View > Statuses > open-statuses
 ''')
+
+
+## tests
+
+def test_addToStatusHistory_snapshot_mutable(vd):  #3111
+    vd.statusHistory.clear()
+    d = {}
+    vd.addToStatusHistory(d)
+    d['newval'] = 'cellval'
+    assert vd.statusHistory[-1][1] == ('{}',)
+
+
+def test_addToStatusHistory_str_failure_shown(vd):  #3111
+    class Bad:
+        def __str__(self): raise ValueError('nope')
+    vd.statusHistory.clear()
+    vd.addToStatusHistory('before', Bad(), 'after')
+    assert vd.statusHistory[-1][1] == ('before', 'ValueError: nope', 'after')
