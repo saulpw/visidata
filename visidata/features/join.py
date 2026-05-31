@@ -150,14 +150,16 @@ class JoinKeyColumn(WritableColumn):
         self.keycols = keycols
 
     def calcValue(self, row):
-        vals = set()
-        for i, c in enumerate(self.keycols):
+        vals = []
+        for c in self.keycols:
             if row[c.sheet] is not None:
-                vals.add(c.getTypedValue(row[c.sheet]))
-        if len(vals) != 1:
+                v = c.getTypedValue(row[c.sheet])
+                if not any(v == existing for existing in vals):  #3099
+                    vals.append(v)
+        if len(vals) > 1:
             keycolnames = ', '.join([f'{col.sheet.name}:{col.name}' for col in self.keycols])
             vd.warning(f"source key columns ({keycolnames}) have different types")
-        return vals.pop()
+        return vals[0]
 
     def putValue(self, row, value):
         for i, c in enumerate(self.keycols):
@@ -425,3 +427,12 @@ for d in vd.jointypes:
 IndexSheet.guide += '''
     - `&` to join the selected sheets together
 '''
+
+
+def test_join_unhashable(vd):
+    'JoinKeyColumn.calcValue must not crash on unhashable typed values  #3099'
+    cols = lambda: [ItemColumn('key', 'key'), ItemColumn('val', 'val')]
+    s1 = Sheet('a', columns=cols(), rows=[{'key': [1, 2], 'val': 'from-a'}])
+    s2 = Sheet('b', columns=cols(), rows=[{'key': [1, 2], 'val': 'from-b'}])
+    kc = JoinKeyColumn('key', keycols=[s1.column('key'), s2.column('key')])
+    assert kc.calcValue({s1: s1.rows[0], s2: s2.rows[0]}) == [1, 2]
