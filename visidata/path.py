@@ -438,6 +438,7 @@ class RepeatFile:
         self.iter = RepeatFileIter(self)
         self.encoding = None  #2829
         self.errors = None
+        self.closed = False  #3097
 
     def __enter__(self):
         '''Returns a new independent file-like object, sharing the same line cache.'''
@@ -452,7 +453,7 @@ class RepeatFile:
 
     def read(self, n=None):
         '''Returns a string or bytes object. Unlike the standard read() function, when *n* is given, more than *n* characters/bytes can be returned, and often will.'''
-        if n is None:
+        if n is None or n < 0:  #3097: -1 means read all
             n = 10**12  # some too huge number
         r = []
         size = 0
@@ -487,6 +488,7 @@ class RepeatFile:
             else:
                 raise ValueError('invalid whence (%s, should be %s, %s or %s)' % (whence, io.SEEK_SET, io.SEEK_CUR, io.SEEK_END))
         self.iter.nextIndex = offset
+        return offset  #3097: io protocol — seek returns new position
 
     def readline(self, size=-1):
         if size != -1:
@@ -519,6 +521,12 @@ class RepeatFile:
         data = self.read(n)
         self.seek(pos)
         return data
+
+    def close(self):  #3097
+        self.closed = True
+
+    def flush(self):  #3097
+        pass
 
     def exists(self):
         return True

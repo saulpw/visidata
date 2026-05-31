@@ -54,3 +54,12 @@ class TestVisidataPath:
         data = bio.read()
         assert isinstance(data, bytes)
         assert b'hello' in data
+
+    def test_repeatfile_io_interface(self):  # #3097
+        rf = RepeatFile(iter(['hello', 'world']))
+        assert rf.closed is False
+        rf.flush()  # no-op, must not raise
+        # read(-1) means read everything, per file protocol
+        assert rf.read(-1) == 'hello\nworld\n'
+        rf.close()
+        assert rf.closed is True
