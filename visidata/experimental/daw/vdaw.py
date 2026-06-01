@@ -299,8 +299,11 @@ class PodcastEditingSheet(Sheet):
                 self.sourceaudio = str(self.source.with_suffix('.mp3'))
 
         if self.sourceaudio:
-            self.mpv = MpvProcess(self.sourceaudio, self)
-            self.mpv.start_mpv()
+            try:
+                self.mpv = MpvProcess(self.sourceaudio, self)
+                self.mpv.start_mpv()
+            except Exception as e:
+                vd.exceptionCaught(e)  # audio setup must not block transcript loading
         else:
             vd.warning("no matching audio file")
 
@@ -725,7 +728,8 @@ def iterspeakerrows(rows, include_cuts=True, inline_interjections=False, already
 
         accumrows = [row]
 
-    yield _combine_rows(accumrows)
+    if accumrows:
+        yield _combine_rows(accumrows)
 
 
 @VisiData.api
