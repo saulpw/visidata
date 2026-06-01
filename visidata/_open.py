@@ -129,7 +129,7 @@ def openPath(vd, p, filetype=None, create=False):
         vd.status('creating blank %s' % (p.given))
         return newfunc(p)
 
-    if p.is_fifo():
+    if p.is_fifo() and not p.has_fp():
         # read the file as text, into a RepeatFile that can be opened multiple times
         p = Path(p.given, fp=p.open(mode='rb'))
 
