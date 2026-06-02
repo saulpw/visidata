@@ -2,6 +2,7 @@ from copy import copy
 from visidata import VisiData, vd, Sheet, options, Column, Progress, setitem, ColumnAttr, vlen, RowColorizer, Path
 
 vd.option('xml_parser_huge_tree', True, 'allow very deep trees and very long text content')
+vd.option('xml_parser_recover', True, 'try hard to parse through broken XML')
 
 
 @VisiData.api
