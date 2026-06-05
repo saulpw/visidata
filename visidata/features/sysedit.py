@@ -16,7 +16,7 @@ def syseditCells_async(sheet, cols, rows, filetype=None):
     vs.columns = cols
 
     import tempfile
-    with tempfile.NamedTemporaryFile() as temp:
+    with tempfile.NamedTemporaryFile(prefix="visidata") as temp:
         temp.close()  #2118
         p = Path(temp.name)
 

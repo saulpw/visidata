@@ -44,7 +44,7 @@ class TextSheet(Sheet):
                     fp.write('\n')
 
         import tempfile
-        with tempfile.NamedTemporaryFile() as temp:
+        with tempfile.NamedTemporaryFile(prefix="visidata") as temp:
             temp.close()  #2118
             writelines(sheet, temp.name)
             vd.launchEditor(temp.name, '+%s' % linenum)

@@ -45,7 +45,7 @@ def launchBrowser(vd, *args):
 def launchExternalEditor(vd, v, linenum=0):
     'Launch $EDITOR to edit string *v* starting on line *linenum*.'
     import tempfile
-    with tempfile.NamedTemporaryFile() as temp:
+    with tempfile.NamedTemporaryFile(prefix="visidata") as temp:
         temp.close()  #2118 must close before re-opening on windows
         with open(temp.name, 'w') as fp:
             fp.write(v)
