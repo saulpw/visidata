@@ -3,6 +3,7 @@ from collections import defaultdict
 from copy import copy
 
 import json
+import os
 import textwrap
 
 from functools import cached_property
@@ -293,7 +294,10 @@ class PodcastEditingSheet(Sheet):
             self.sourcerows = transcript.get('word_segments')
 
         if not self.sourceaudio:
-            if self.source.with_suffix('.wav').exists():
+            self.sourceaudio = transcript.get('sourceaudio')  # recorded path round-trips on save
+
+        if not self.sourceaudio or not os.path.exists(self.sourceaudio):
+            if self.source.with_suffix('.wav').exists():  # discovered sibling wins when recorded path is missing
                 self.sourceaudio = str(self.source.with_suffix('.wav'))
             elif self.source.with_suffix('.mp3').exists():
                 self.sourceaudio = str(self.source.with_suffix('.mp3'))
@@ -769,7 +773,7 @@ json.JSONEncoder.default = _default
 
 @VisiData.api
 def save_transcript(vd, p, sheet):
-    d = dict(word_segments=sheet.rows, sourceaudio=sheet.mpv.sourceaudio)
+    d = dict(word_segments=sheet.rows, sourceaudio=sheet.sourceaudio or sheet.mpv.sourceaudio)
     with p.open(mode='w', encoding='utf-8') as fp:
         fp.write(json.dumps(d)+'\n')
 
