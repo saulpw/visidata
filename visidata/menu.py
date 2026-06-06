@@ -446,6 +446,8 @@ def runMenu(vd):
             nEscapes += 1  #1470
             if nEscapes > 1:
                 return
+            else:
+                vd.status('press Esc again to exit the menu')
             continue
         else:
             nEscapes = 0
