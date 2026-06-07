@@ -203,7 +203,7 @@ def save_zip(vd, p, *vsheets):
         with zipfile.ZipFile(str(p), 'w', zipfile.ZIP_DEFLATED, allowZip64=True, compresslevel=9) as zfp:
             for vs in Progress(vsheets):
                 filetype = vs.options.save_filetype
-                tmpp = Path(f'{tmpdir}{vs.name}.{filetype}')
+                tmpp = Path(tmpdir)/f'{vs.name}.{filetype}'
                 savefunc = getattr(vs, 'save_' + filetype, None) or getattr(vd, 'save_' + filetype, None)
                 savefunc(tmpp, vs)
                 zfp.write(tmpp, f'{vs.name}.{vs.options.save_filetype}')
