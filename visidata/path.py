@@ -35,6 +35,22 @@ See [:onclick https://docs.python.org/3/library/codecs.html#error-handlers]https
 
 vd.option('encoding', 'utf-8-sig', 'encoding passed to codecs.open when reading a file', replay=True, help=vd.help_encoding)
 vd.option('encoding_errors', 'surrogateescape', 'encoding_errors passed to codecs.open', replay=True, help=vd.help_encoding_errors)
+vd.option('tmp_prefix', 'visidata-', 'prefix for temporary files and directories', sheettype=None)  #3127
+
+
+@VisiData.api
+def TempFile(vd, **kwargs):
+    'Return a tempfile.NamedTemporaryFile with the `tmp_prefix` option as prefix.'
+    import tempfile
+    return tempfile.NamedTemporaryFile(prefix=vd.options.tmp_prefix, **kwargs)
+
+
+@VisiData.api
+def TempDir(vd, **kwargs):
+    'Return a tempfile.TemporaryDirectory with the `tmp_prefix` option as prefix.'
+    import tempfile
+    return tempfile.TemporaryDirectory(prefix=vd.options.tmp_prefix, **kwargs)
+
 
 @VisiData.api
 def pkg_resources_files(vd, package):

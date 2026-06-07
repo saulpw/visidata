@@ -198,9 +198,8 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=True):
 def save_zip(vd, p, *vsheets):
     vd.clearCaches()
 
-    import tempfile
     import zipfile
-    with tempfile.TemporaryDirectory() as tmpdir:
+    with vd.TempDir() as tmpdir:
         with zipfile.ZipFile(str(p), 'w', zipfile.ZIP_DEFLATED, allowZip64=True, compresslevel=9) as zfp:
             for vs in Progress(vsheets):
                 filetype = vs.options.save_filetype

@@ -91,8 +91,7 @@ Commands:
 
     def sysopen_row(self, row):
         'Extract file in row to tempdir and launch $EDITOR.  Modifications will be discarded.'
-        import tempfile
-        with tempfile.TemporaryDirectory() as tempdir:
+        with vd.TempDir() as tempdir:
             self.zfp.extract(member=row[0], path=tempdir)
             vd.launchExternalEditorPath(Path(tempdir)/row[0].filename)
 

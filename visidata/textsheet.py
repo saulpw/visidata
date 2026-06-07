@@ -43,8 +43,7 @@ class TextSheet(Sheet):
                     fp.write(row[1])
                     fp.write('\n')
 
-        import tempfile
-        with tempfile.NamedTemporaryFile() as temp:
+        with vd.TempFile() as temp:
             temp.close()  #2118
             writelines(sheet, temp.name)
             vd.launchEditor(temp.name, '+%s' % linenum)
