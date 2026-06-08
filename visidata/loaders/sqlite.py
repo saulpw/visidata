@@ -1,7 +1,7 @@
 from copy import copy
 import re
 
-from visidata import VisiData, vd, Sheet, options, Column, Progress, anytype, ColumnItem, asyncthread, TypedExceptionWrapper, TypedWrapper, IndexSheet, vlen
+from visidata import VisiData, vd, Sheet, options, Column, AttrColumn, Progress, anytype, ColumnItem, asyncthread, TypedExceptionWrapper, TypedWrapper, IndexSheet, UNLOADED, vlen
 from visidata.type_date import date
 
 vd.option('sqlite_onconnect', '', 'sqlite statement to execute after opening a connection')
@@ -41,8 +41,20 @@ class SqliteSheet(Sheet):
     'Provide functionality for importing SQLite databases.'
     savesToSource = True
     defer = True
-    query = ''
+    _query = ''
     tableName = ''
+
+    @property
+    def query(self) -> str:
+        return self._query
+
+    @query.setter
+    def query(self, v:str):
+        if self.tableName:
+            vd.fail('use exec-sql to create a query sheet from a table')
+        self._query = v
+        self.name = ' '.join(v.strip().split())
+        self.rows = UNLOADED  #3020: auto-reload on next draw, no stale state
 
     def conn(self):
         import sqlite3
@@ -212,6 +224,7 @@ class SqliteSheet(Sheet):
 
 
 class SqliteIndexSheet(SqliteSheet, IndexSheet):
+    columns = IndexSheet.columns + [AttrColumn('query', width=0)]  #2136
     rowtype = 'tables'
     tableName = 'sqlite_master'
     savesToSource = True
@@ -303,7 +316,7 @@ def save_sqlite(vd, p, *vsheets):
 
 
 SqliteSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("execute SQL: ", type="sql")))', 'execute raw SQL statement')
-SqliteSheet.addCommand('', 'edit-sql', 'sheet.query = input("edit SQL: ", value=query, type="sql"); sheet.name = " ".join(query.strip().split()); reload()', 'edit and re-execute SQL query')  #2136
+SqliteSheet.addCommand('', 'edit-sql', 'sheet.query = input("edit SQL: ", value=query, type="sql")', 'edit and re-execute SQL query')  #2136
 
 SqliteIndexSheet.addCommand('a', 'add-table', 'fail("create a new table by saving a sheet to this database file")', 'stub; add table by saving a sheet to the db file instead')
 SqliteIndexSheet.bindkey('ga', 'add-table')
@@ -314,14 +327,6 @@ vd.addMenuItems('''
     Data > execute SQL query > exec-sql
     Data > edit SQL query > edit-sql
 ''')
-
-from visidata.indexsheet import SheetsSheet  #2136
-SheetsSheet.columns.append(
-    Column('query',
-        getter=lambda c,r: getattr(r, 'query', None) or None,
-        setter=lambda c,r,v: (setattr(r, 'query', v), setattr(r, 'name', ' '.join(v.strip().split())), r.reload()) if isinstance(r, SqliteSheet) else None
-    )
-)
 
 vd.addGlobals({
     'SqliteIndexSheet': SqliteIndexSheet,
