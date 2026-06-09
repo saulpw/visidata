@@ -1,11 +1,12 @@
 '''slide rows/columns around'''
 
 import visidata
-from visidata import Sheet, moveListItem, vd
+from visidata import Sheet, ColumnsSheet, moveListItem, vd
 
 @Sheet.api
 def slide_col(sheet, colidx, newcolidx):
     vd.addUndo(moveVisibleCol, sheet, newcolidx, colidx)
+    sheet.setModified()
     return moveVisibleCol(sheet, colidx, newcolidx)
 
 @Sheet.api
@@ -17,7 +18,12 @@ def slide_keycol(sheet, fromKeyColIdx, toKeyColIdx):
 @Sheet.api
 def slide_row(sheet, rowidx, newcolidx):
     vd.addUndo(moveListItem, sheet.rows, newcolidx, rowidx)
+    sheet.setModified()
     return moveListItem(sheet.rows, rowidx, newcolidx)
+
+@ColumnsSheet.before
+def slide_row(sheet, rowidx, newcolidx):
+    sheet.rows[rowidx].sheet.setModified()  # reordering source columns modifies the source
 
 
 def moveKeyCol(sheet, fromKeyColIdx, toKeyColIdx):

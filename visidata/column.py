@@ -137,6 +137,8 @@ class Column(Extensible):
 
         if self.sheet:
             name = self.sheet.maybeClean(name)
+            if name != self._name:
+                self.sheet.setModified()
 
         self._name = name
 
@@ -158,6 +160,8 @@ class Column(Extensible):
     def type(self, t):
         if self._type != t:
             vd.addUndo(setattr, self, '_type', self.type)
+            if self.sheet:
+                self.sheet.setModified()
         if not t:
             self._type = anytype
         elif isinstance(t, str):
@@ -175,6 +179,8 @@ class Column(Extensible):
         if self.width != w:
             if self.width == 0 or w == 0:  # hide/unhide
                 vd.addUndo(setattr, self, '_width', self.width)
+            if self.sheet:
+                self.sheet.setModified()
             self._width = w
 
     @property
@@ -204,6 +210,8 @@ class Column(Extensible):
 
     @fmtstr.setter
     def fmtstr(self, v):
+        if self.sheet and v != self._fmtstr:
+            self.sheet.setModified()
         self._fmtstr = v
 
     def _format_len(self, typedval, **kwargs):
