@@ -748,10 +748,10 @@ class TableSheet(BaseSheet):
             vrows = self.rows[self.topRowIndex:self.topRowIndex+self.windowHeight]
             if col.width is None and len(vrows) > 0:
                 measure_rows = vrows if self.nRows > 1000 else self.rows[:1000]  #1964
-                # handle delayed column width-finding
-                col.width = max(col.getMaxWidth(measure_rows), minColWidth)
+                # delayed auto-width: assign _width to skip setModified
+                col._width = max(col.getMaxWidth(measure_rows), minColWidth)
                 if vcolidx < self.nVisibleCols-1:  # let last column fill up the max width
-                    col.width = min(col.width, self.options.default_width)
+                    col._width = min(col._width, self.options.default_width)
 
             width = col.width if col.width is not None else self.options.default_width
 

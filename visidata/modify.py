@@ -1,7 +1,7 @@
 from copy import copy
 
 from visidata import vd, VisiData, asyncthread, ColumnColorizer
-from visidata import Sheet, RowColorizer, CellColorizer, Column, BaseSheet, Progress
+from visidata import Sheet, RowColorizer, CellColorizer, Column, BaseSheet, Progress, ColumnsSheet
 
 vd.theme_option('color_readonly', 'on 52', 'color for readonly columns')
 vd.theme_option('color_add_pending', 'green', 'color for rows pending add')
@@ -271,6 +271,16 @@ def commitAddRow(self, row):
 @Sheet.api
 def commitDeleteRow(self, row):
     'To commit a deleted row.  Override per sheet type.'
+
+
+# on the ColumnsSheet a row is a source column; adding/deleting marks the source modified
+@ColumnsSheet.before
+def addRow(sheet, row, index=None):
+    row.sheet.setModified()
+
+@ColumnsSheet.api
+def commitDeleteRow(sheet, row):
+    row.sheet.setModified()
 
 
 @Sheet.api

@@ -154,6 +154,7 @@ def delete_row(sheet, rowidx):
         if sheet.isSelected(oldrow):
             sheet.addUndoSelection()
             sheet.unselectRow(oldrow)
+        sheet.commitDeleteRow(oldrow)
     else:
         oldrow = sheet.rows[rowidx]
         sheet.rowDeleted(oldrow)
