@@ -193,7 +193,8 @@ class TableSheet(BaseSheet):
         # list of all columns in display order
         self.initialCols = kwargs.pop('columns', None) or type(self).columns
         self.colname_ctr = 0
-        self.resetCols()
+        with vd.suppressUndo():  # building a sheet's layout is not an undoable user action
+            self.resetCols()
 
         self._ordering = list(type(self)._ordering)  #2254
         self._colorizers = self.classColorizers
@@ -279,10 +280,12 @@ class TableSheet(BaseSheet):
     def reload(self):
         'Load or reload rows and columns from ``self.source``.  Async.  Override resetCols() or loader() in subclass.'
         with visidata.ScopedSetattr(self, 'loading', True):
-            self.resetCols()
+            with vd.suppressUndo():  # building a sheet's layout is not an undoable user action
+                self.resetCols()
             self.beforeLoad()
             try:
-                self.loader()
+                with vd.suppressUndo():
+                    self.loader()
                 vd.debug(f'finished loading {self}')
             finally:
                 self.afterLoad()
