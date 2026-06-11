@@ -13,7 +13,7 @@ vd.help_int_fmt = '''
 - other fmt (like `{:4d}` is passed to Python [:onclick https://docs.python.org/3/library/string.html#custom-string-formatting)]string.format[/]
 '''
 
-vd.option('disp_float_fmt', '{:.02f}', 'default fmtstr to format float values', replay=True, help=vd.help_float_fmt)
+vd.option('disp_float_fmt', '{:.2f}', 'default fmtstr to format float values', replay=True, help=vd.help_float_fmt)
 vd.option('disp_int_fmt', '{:d}', 'default fmtstr to format int values', replay=True, help=vd.help_int_fmt)
 
 
