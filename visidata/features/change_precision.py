@@ -28,9 +28,13 @@ def setcol_precision(col, amount:int):
         if col.fmtstr == '':
             col.fmtstr = f'%.{2 + amount}f'
         else:
-            precision_str = re.match(r'%.([0-9]+)f', col.fmtstr)
-            if not precision_str is None:
-                col.fmtstr = f'%.{max(0, int(precision_str[1]) + amount)}f'
+            m = re.fullmatch(r'\{:\.([0-9]+)f\}|%\.([0-9]+)f', col.fmtstr)
+            if not m:
+                vd.fail(f'could not parse column fmtstr')
+            if m[1]:
+                col.fmtstr = '{:.' + f'{max(0, int(m[1]) + amount)}f' + '}'
+            elif m[2]:
+                col.fmtstr =       f'%.{max(0, int(m[2]) + amount)}f'
     else:
         vd.fail('column type must be numeric or date')
 
