@@ -127,6 +127,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'color-cell': 'True',
                  'color-row': 'True',
                  'color-col': 'True',
+                 'setcol-precision-input': '5',
               }
 
 @pytest.mark.usefixtures('curses_setup')
