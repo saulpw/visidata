@@ -5,6 +5,8 @@ import re
 
 from visidata import VisiData, vd, Sheet, Column, floatsi, currency, date
 
+FLOAT_FORMAT_RE = r'\{:\.([0-9]+)f\}|%\.([0-9]+)f'
+
 date_fmtstrs = [
     '%Y',
     '%Y-%m',
@@ -28,7 +30,7 @@ def setcol_precision(col, amount:int):
         if col.fmtstr == '':
             col.fmtstr = f'%.{2 + amount}f'
         else:
-            m = re.fullmatch(r'\{:\.([0-9]+)f\}|%\.([0-9]+)f', col.fmtstr)
+            m = re.fullmatch(FLOAT_FORMAT_RE, col.fmtstr)
             if not m:
                 vd.fail(f'could not parse column fmtstr')
             if m[1]:
@@ -40,7 +42,7 @@ def setcol_precision(col, amount:int):
 
 @VisiData.api
 def setcol_precision_input(vd):
-     m = re.fullmatch(r'\{:\.([0-9]+)f\}|%\.([0-9]+)f', vd.options.disp_float_fmt)
+     m = re.fullmatch(FLOAT_FORMAT_RE, vd.options.disp_float_fmt)
      if not m:
          vd.fail('could not parse disp_float_fmt')
      precision = max(0, int(vd.input("float precision=", value="2")))
