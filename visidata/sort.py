@@ -41,7 +41,11 @@ def orderBy(sheet, *cols, reverse=False, change_column=False, save_cmd_input=Tru
         sheet._ordering = new_ordering
         do_sort = True
     else:
+        sortcols = [sortcol for (sortcol,rev) in sheet._ordering]
         for c in cols:
+            # for sort-*-add commands: if the column is already a sortcol, change it to have the lowest priority
+            if c in sortcols:
+                sheet._ordering = [(keepcol,rev) for (keepcol,rev) in sheet._ordering if keepcol != c]
             sheet._ordering.append((c, reverse))
             do_sort = True
 
