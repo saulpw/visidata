@@ -41,11 +41,10 @@ def setcol_precision(col, amount:int):
         vd.fail('column type must be numeric or date')
 
 @VisiData.api
-def setcol_precision_input(vd):
+def setopt_precision(vd, precision):
      m = re.fullmatch(FLOAT_FORMAT_RE, vd.options.disp_float_fmt)
      if not m:
          vd.fail('could not parse disp_float_fmt')
-     precision = max(0, int(vd.input("float precision=", value="2")))
      if m[1]:
          vd.options.disp_float_fmt = '{:.' + str(precision) + 'f}'
      elif m[2]:
@@ -58,4 +57,4 @@ vd.addMenuItems('''
 
 Sheet.addCommand('Alt+-', 'setcol-precision-less', 'cursorCol.setcol_precision(-1)', 'show less precision in current column')
 Sheet.addCommand('Alt++', 'setcol-precision-more', 'cursorCol.setcol_precision(1)', 'show more precision in current column')
-Sheet.addCommand('g%', 'setcol-precision-input', 'vd.setcol_precision_input()', 'change the number of decimal places shown for floats')
+Sheet.addCommand('g%', 'setcol-precision-input', 'precision = max(0, int(vd.input("float precision=", value="2"))); vd.setopt_precision(precision)', 'change the number of decimal places shown for floats')
