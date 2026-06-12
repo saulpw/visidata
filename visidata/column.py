@@ -177,8 +177,7 @@ class Column(Extensible):
     @width.setter
     def width(self, w):
         if self.width != w:
-            if self.width == 0 or w == 0:  # hide/unhide
-                vd.addUndo(setattr, self, '_width', self.width)
+            vd.addUndo(setattr, self, '_width', self.width)
             if self.sheet:
                 self.sheet.setModified()
             self._width = w

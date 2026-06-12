@@ -1,7 +1,7 @@
 import threading
 
 from visidata import vd, UNLOADED, namedlist, vlen, asyncthread, globalCommand, date
-from visidata import VisiData, BaseSheet, Sheet, ColumnAttr, VisiDataMetaSheet, JsonLinesSheet, TypedWrapper, AttrDict, Progress, ErrorSheet, CompleteKey, Path
+from visidata import VisiData, BaseSheet, Sheet, ColumnAttr, VisiDataMetaSheet, JsonLinesSheet, TypedWrapper, AttrDict, Progress, ErrorSheet, CompleteKey, Path, ColumnsSheet
 import visidata
 
 vd.option('replay_wait', 0.0, 'time to wait between replayed commands, in seconds', sheettype=None)
@@ -422,6 +422,14 @@ def cmdlog_sheet(sheet):
     return c
 
 
+@ColumnsSheet.property
+def cmdlog_sheet(sheet):
+    'Edits to a single source sheet log (and undo) against that source. #3133'
+    if len(sheet.source) == 1 and isinstance(sheet.source[0], BaseSheet):
+        return sheet.source[0].cmdlog_sheet
+    return super(ColumnsSheet, sheet).cmdlog_sheet
+
+
 @BaseSheet.property
 def shortcut(self):
     if self._shortcut:
@@ -443,7 +451,8 @@ def shortcut(self):
 def cmdlog(vd):
     if not vd._cmdlog:
         vd._cmdlog = CommandLogJsonl('cmdlog', rows=[])  # no reload
-        vd._cmdlog.resetCols()
+        with vd.suppressUndo():  # building a sheet's layout is not an undoable user action
+            vd._cmdlog.resetCols()
         vd.beforeExecHooks.append(vd._cmdlog.beforeExecHook)
     return vd._cmdlog
 

@@ -1,7 +1,10 @@
 import itertools
+import contextlib
 from copy import copy
 
 from visidata import vd, options, VisiData, BaseSheet, UNLOADED
+
+vd._undo_suppressed = False  # set while building a sheet's layout; GIL makes the flip atomic
 
 BaseSheet.init('undone', list)  # list of CommandLogRow for redo after undo
 
@@ -16,9 +19,20 @@ def isUndoableCommand(longname):
     return True
 
 @VisiData.api
+@contextlib.contextmanager
+def suppressUndo(vd):
+    'Do not record undos within this block (e.g. while constructing a sheet).'
+    old = vd._undo_suppressed
+    vd._undo_suppressed = True
+    try:
+        yield
+    finally:
+        vd._undo_suppressed = old
+
+@VisiData.api
 def addUndo(vd, undofunc, *args, **kwargs):
     'On undo of latest command, call ``undofunc(*args, **kwargs)``.'
-    if vd.options.undo:
+    if vd.options.undo and not vd._undo_suppressed:
         # occurs when VisiData is just starting up.
         # very early in startup, modifyCommand does not yet exist
         if not vd.activeCommand:
