@@ -18,6 +18,7 @@ tags
 .direnv
 .envrc
 .meta
+.claude
 
 # Generated man pages (run `make man` to build)
 visidata/man/vd.1
