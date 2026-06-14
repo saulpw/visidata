@@ -156,6 +156,12 @@ def _sort_order(col, srccol):
     n, reverse = sort_cols[0]
     return -n if reverse else n
 
+@Sheet.api
+def validate_sortcols(sheet):
+    '''Make sure all sort columns in the sheet ordering still exist.
+    Intended to be called after operations that destroy columns.'''
+    sheet._ordering = [(col,rev) for (col, rev) in sheet._ordering if col in sheet.columns]
+
 
 # replace existing sort criteria
 Sheet.addCommand('[', 'sort-asc', 'orderBy(None, cursorCol)', 'sort ascending by current column; replace any existing sort criteria')
