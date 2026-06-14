@@ -162,6 +162,10 @@ def validate_sortcols(sheet):
     Intended to be called after operations that destroy columns.'''
     sheet._ordering = [(col,rev) for (col, rev) in sheet._ordering if col in sheet.columns]
 
+@ColumnsSheet.after
+def delete_row(self, rowidx):
+    for vs in self.source:
+        vs.validate_sortcols()
 
 # replace existing sort criteria
 Sheet.addCommand('[', 'sort-asc', 'orderBy(None, cursorCol)', 'sort ascending by current column; replace any existing sort criteria')
