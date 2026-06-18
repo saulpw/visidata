@@ -736,27 +736,58 @@ def iterspeakerrows(rows, include_cuts=True, inline_interjections=False, already
         yield _combine_rows(accumrows)
 
 
+def roughcut_timer(rows):
+    '''Map a raw timestamp to its position in the rough-cut audio.
+
+    Kept rows extend the current range, a cut row ends it. The rough cut keeps
+    silence *within* a range and drops only the cut spans, so summing kept-row
+    durations undercounts (it loses inter-row silence); map through the kept
+    ranges instead so the timestamps line up with the rendered audio.'''
+    ranges = []
+    cs = ce = None
+    for row in rows:
+        if is_cut(row):
+            if cs is not None:
+                ranges.append((cs, ce)); cs = ce = None
+        elif row.start is not None and row.end is not None:
+            if cs is None: cs = row.start
+            ce = row.end
+    if cs is not None:
+        ranges.append((cs, ce))
+
+    prefix = []; acc = 0.0
+    for s, e in ranges:
+        prefix.append(acc); acc += e - s
+
+    def to_roughcut(t):
+        if t is None: return 0.0
+        for (s, e), p in zip(ranges, prefix):
+            if t < s: return p       # in a cut gap before this range
+            if t <= e: return p + (t - s)
+        return acc
+    return to_roughcut
+
+
 @VisiData.api
 def save_xmd(vd, p, sheet):
     assert isinstance(sheet, PodcastEditingSheet)
 
     prevhdr = ''
-    edited_time = 0.0
+    include_cuts = sheet.options.daw_include_cuts
+    to_roughcut = None if include_cuts else roughcut_timer(sheet.rows)
     with p.open(mode='w', encoding=sheet.options.save_encoding) as fp:
-        for row in iterspeakerrows(sheet.rows, include_cuts=sheet.options.daw_include_cuts, inline_interjections=True):
+        for row in iterspeakerrows(sheet.rows, include_cuts=include_cuts, inline_interjections=True):
 
             if row.section != prevhdr:
                 prevhdr = row.section
                 fp.write(f'## {prevhdr}\n\n')
 
-            if sheet.options.daw_include_cuts:
+            if include_cuts:
                 text = row.data.text
                 timestr = to_hms(row.start)
             else:
                 text = row.cookedtext
-                vd.status(text)
-                timestr = to_hms(edited_time)
-                edited_time += row.duration or 0
+                timestr = to_hms(to_roughcut(row.start))
 
             if text:
                 line = f'[{timestr}] **{row.speaker}**: {text}'
