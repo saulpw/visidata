@@ -514,7 +514,7 @@ def main_vd():
 
     if vd.stackedSheets and (flPipedOutput or args.output) and not args.output_cell:
         outpath = Path(args.output or '-')
-        vd.saveSheets(outpath, vd.activeSheet, confirm_overwrite=False)
+        vd.saveSheets(outpath, vd.activeSheet, confirm_overwrite=not vd.couldOverwrite())
 
     if vd.stackedSheets and args.output_cell:
         outfile = vd._stdout if args.output_cell == '-' else open(args.output_cell, 'w')
