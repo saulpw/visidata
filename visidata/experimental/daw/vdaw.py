@@ -375,6 +375,11 @@ class PodcastEditingSheet(Sheet):
         else:
             vd.warning('no subrows')
 
+    def expand_selected(self):
+        for row in self.someSelectedRows:
+            if not is_cut(row):
+                self.expand_row(self.rows.index(row))
+
     def bump(self, n, *rows):
         self.setModified()
         for row in rows:
@@ -818,7 +823,7 @@ PodcastEditingSheet.addCommand('zp', 'play-toggle', 'mpv.pause_audio(not mpv.pau
 FilterParametersSheet.addCommand('P', 'play-toggle', 'source.mpv.pause_audio(not source.mpv.paused)', 'toggle pause/play')
 PodcastEditingSheet.addCommand('g)', 'combine-selected', 'combine_rows(selectedRows)', 'combine selected rows into one')
 PodcastEditingSheet.addCommand('(', 'expand-row', 'expand_row(cursorRowIndex)', 'expand row into subrows')
-PodcastEditingSheet.addCommand('g(', 'expand-selected', 'for row in selectedRows: if not is_cut(row): expand_row(rows.index(row))', 'expand selected rows into subrows')
+PodcastEditingSheet.addCommand('g(', 'expand-selected', 'expand_selected()', 'expand selected rows into subrows')
 
 PodcastEditingSheet.addCommand('Ctrl+R', 'restart-mpv', 'mpv.start_mpv()', 'restart mpv process')
 
