@@ -452,9 +452,6 @@ def inputsingle(vd, prompt, record=True):
 @VisiData.api
 def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
     'A simple form, where each input is an entry in `kwargs`, with the key being the key in the returned dict, and the value being a dictionary of kwargs to the singular input().'
-    sheet = vd.activeSheet
-    scr = sheet._scr
-
     previnput = vd.getCommandInput()
     if previnput is not None:
         ret = None
@@ -475,6 +472,9 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
             return ret
 
         assert False, type(previnput)
+
+    sheet = vd.activeSheet  # after replay shortcut: no active sheet during bulk replay-reset
+    scr = sheet._scr
 
     maxw = sheet.windowWidth//2
     attr = colors.color_edit_unfocused
