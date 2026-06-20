@@ -101,6 +101,7 @@ In general:
 - Try to **squash features** into a single commit (but don't over-squash either)
 - Keep the commit history clean and meaningful
 - After every rebase, run `git diff <base>...HEAD --stat` to verify only expected files are in the diff before pushing
+- After finishing a task on a side branch and pushing it, switch back to **develop** (don't leave the working tree on the feature branch)
 
 ### Default Branch for Commits
 
