@@ -144,10 +144,10 @@ BaseSheet.bindkey('Right', 'go-right')
 BaseSheet.bindkey('PgDn', 'go-pagedown')
 BaseSheet.bindkey('PgUp', 'go-pageup')
 
-BaseSheet.bindkey('gLeft', 'go-leftmost'),
-BaseSheet.bindkey('gRight', 'go-rightmost'),
-BaseSheet.bindkey('gUp', 'go-top'),
-BaseSheet.bindkey('gDown', 'go-bottom'),
+BaseSheet.bindkey('gLeft', 'go-leftmost')
+BaseSheet.bindkey('gRight', 'go-rightmost')
+BaseSheet.bindkey('gUp', 'go-top')
+BaseSheet.bindkey('gDown', 'go-bottom')
 BaseSheet.bindkey('Home', 'go-top')
 BaseSheet.bindkey('End', 'go-bottom')
 
@@ -184,17 +184,17 @@ BaseSheet.bindkey('zRight', 'scroll-right')
 
 # vim-like keybindings
 
-BaseSheet.bindkey('h', 'go-left'),
-BaseSheet.bindkey('j', 'go-down'),
-BaseSheet.bindkey('k', 'go-up'),
-BaseSheet.bindkey('l', 'go-right'),
-BaseSheet.bindkey('Ctrl+F', 'go-pagedown'),
-BaseSheet.bindkey('Ctrl+B', 'go-pageup'),
-BaseSheet.bindkey('gg', 'go-top'),
-BaseSheet.bindkey('G',  'go-bottom'),
-BaseSheet.bindkey('gj', 'go-bottom'),
-BaseSheet.bindkey('gk', 'go-top'),
-BaseSheet.bindkey('gh', 'go-leftmost'),
+BaseSheet.bindkey('h', 'go-left')
+BaseSheet.bindkey('j', 'go-down')
+BaseSheet.bindkey('k', 'go-up')
+BaseSheet.bindkey('l', 'go-right')
+BaseSheet.bindkey('Ctrl+F', 'go-pagedown')
+BaseSheet.bindkey('Ctrl+B', 'go-pageup')
+BaseSheet.bindkey('gg', 'go-top')
+BaseSheet.bindkey('G',  'go-bottom')
+BaseSheet.bindkey('gj', 'go-bottom')
+BaseSheet.bindkey('gk', 'go-top')
+BaseSheet.bindkey('gh', 'go-leftmost')
 BaseSheet.bindkey('gl', 'go-rightmost')
 
 BaseSheet.addCommand('Ctrl+^', 'jump-prev', 'vd.activeStack[1:] or fail("no previous sheet"); vd.push(vd.activeStack[1])', 'jump to previous sheet in this pane')

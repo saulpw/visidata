@@ -1,3 +1,4 @@
 {
-    "reportAttributeAccessIssue": "none"
+    "reportAttributeAccessIssue": "none",
+    "reportOptionalMemberAccess": "none"
 }
