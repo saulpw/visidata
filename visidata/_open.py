@@ -5,7 +5,9 @@ import sys
 from visidata import VisiData, vd, Path, BaseSheet, TableSheet, TextSheet, SettableColumn
 
 
-vd.option('filetype', '', 'specify file type', replay=True)
+vd.option('filetype', '', 'input filetype; overrides file extension', replay=True)
+
+vd.stdinSource = None  # Path('-') with piped fp, set in main()
 
 
 @VisiData.api
@@ -170,14 +172,15 @@ def openSource(vd, p, filetype=None, create=False, **kwargs):
 
     vs = None
     if isinstance(p, str):
-        if '://' in p:
-            vs = vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
-        elif p == '-':
-            if vd.stdinSource.fptext.isatty():
-                vd.fail('cannot open stdin when it is a tty')
-            vs = vd.openPath(vd.stdinSource, filetype=filetype)
-        else:
-            vs = vd.openPath(Path(p), filetype=filetype, create=create)  # convert to Path and recurse
+        p = Path(p)
+
+    if p.given == '-' and p.fp is None and p.fptext is None and vd.stdinSource is not None:
+        p = vd.stdinSource  # bare Path('-') means piped stdin
+
+    if p is vd.stdinSource:
+        if p.fptext is None or p.fptext.isatty():
+            vd.fail('cannot open stdin when it is a tty')
+        vs = vd.openPath(p, filetype=filetype)
     else:
         vs = vd.openPath(p, filetype=filetype, create=create)
 
@@ -205,7 +208,7 @@ def open_txt(vd, p):
     return TextSheet(p.base_stem, source=p)
 
 
-BaseSheet.addCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: "), create=True))', 'Open file or URL')
+BaseSheet.addCommand('o', 'open-file', 'vd.push(openSource(inputPath("open: "), create=True))', 'Open file or URL')
 TableSheet.addCommand('zo', 'open-cell-file', 'cd=cursorDisplay; (vd.push(openSource(cd) if cd else fail("no path given")) or fail(f"file {cd} does not exist"))', 'Open file or URL from path in current cell')
 BaseSheet.addCommand('gU', 'undo-last-quit', 'push(allSheets[-1])', 'reopen most recently closed sheet')
 

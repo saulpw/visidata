@@ -150,33 +150,24 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=True):
 
     vd.clearCaches()
 
-    savefunc = None
-    filetype = None
-
     def _find_saver(ft):
         return getattr(vsheets[0], 'save_' + ft, None) or getattr(vd, 'save_' + ft, None)
 
-    if fmt:
-        savefunc = _find_saver(fmt)
+    savefunc = filetype = None
+    requested = [ft for ft in (fmt, givenext) if ft]
+    for ft in requested:
+        savefunc = _find_saver(ft)
         if savefunc:
-            filetype = fmt
-
-    if not savefunc:
-        savefunc = _find_saver(givenext)
-        if savefunc:
-            filetype = givenext
+            filetype = ft
+            break
 
     if not savefunc:
         savefunc = _find_saver(default_ft)
-        if savefunc:
-            tried = fmt or givenext
-            if tried:
-                vd.confirm(f'no `{tried}` saver, save as {default_ft}? ')  #2286
-            filetype = default_ft
-
-    if savefunc is None:
-        tried = ' or '.join(x for x in [fmt, givenext, default_ft] if x)
-        vd.fail(f'no saver for {tried}')
+        if not savefunc:
+            vd.fail(f'no saver for {" or ".join(requested + [default_ft])}')
+        if requested:
+            vd.confirm(f'no `{requested[0]}` saver, save as {default_ft}? ')  #2286
+        filetype = default_ft
 
     if confirm_overwrite:
         vd.confirmOverwrite(givenpath)

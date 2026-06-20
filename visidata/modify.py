@@ -17,17 +17,21 @@ vd.optalias('y', 'confirm', 'y')
 @VisiData.api
 def couldOverwrite(vd) -> bool:
     'Return True if overwrite might be allowed.'
-    return not vd.options.overwrite.startswith('n')
+    return vd.options.overwrite.startswith(('c', 'y'))
 
 
 @VisiData.api
 def confirmOverwrite(vd, path, msg:str=''):
-    'Fail if file exists and overwrite not allowed.'
-    if path is None or path.exists():
-        if vd.options.overwrite.startswith('n'):  #1805
-            vd.fail('overwrite disabled')
-        msg = msg or f'{path.given} exists. overwrite? '
-        vd.confirm(msg)
+    'Fail if file exists and overwrite not allowed.  *path* of None always checks.'
+    if path is not None and not path.exists():
+        return True
+    ow = vd.options.overwrite
+    if not ow.startswith(('c', 'y')):  #1805 empty/no/never: readonly
+        vd.fail('overwrite disabled')
+    if ow.startswith('c'):  # 'y' (legacy) excluded on purpose: it overwrites without confirming
+        if not msg and path is not None:
+            msg = f'{path.given} exists. overwrite? '
+        vd.confirm(msg or 'overwrite? ')
     return True
 
 # deferred cached
