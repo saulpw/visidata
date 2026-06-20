@@ -39,6 +39,7 @@ The keystroke immediately follows the bullet.  Do not say "Press" or "Use" withi
  - Use `[:semantic_color]` instead of hard-coded colors when possible.
  - Use `[:keystrokes]` in the guide for keystrokes, longnames, and CLI options--anything the user would actually type.  But not for output (what the user sees).
  - Keystrokes use the actual key combination the user presses: `Shift+F` not `F`, `Shift+W` not `W`.
+ - Write modifier keys as `Ctrl+X`, `Alt+X`, `Shift+X` — never caret notation (`^X`).
  - Separate prefix modifiers from the base key with a space: `g Enter`, `z Shift+F`, `gz Enter`.
  - Prefix option names with `options.` in prose (e.g. `options.numeric_binning`). Not needed in option tables where the column header already says "option".
  - Describe user-facing behavior, not implementation details. e.g. "Undoing on the frequency table also undoes on the source sheet" not "Both sheets share a single undo point".
