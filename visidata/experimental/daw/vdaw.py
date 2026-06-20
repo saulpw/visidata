@@ -376,9 +376,10 @@ class PodcastEditingSheet(Sheet):
             vd.warning('no subrows')
 
     def expand_selected(self):
-        for row in self.someSelectedRows:
-            if not is_cut(row):
-                self.expand_row(self.rows.index(row))
+        # snapshot indices before mutating; expand high->low so each splice doesn't shift the pending ones
+        rowidxs = sorted(self.rows.index(row) for row in self.someSelectedRows if not is_cut(row))
+        for i in reversed(rowidxs):
+            self.expand_row(i)
 
     def bump(self, n, *rows):
         self.setModified()
