@@ -811,7 +811,12 @@ class TableSheet(BaseSheet):
                 hdrcattr = update_attr(hdrcattr, colors.color_bottom_hdr, 5)
 
             if y+i < self.windowHeight:
-                clipdraw(scr, y+i, x, name, hdrcattr, w=colwidth, literal=True)
+                if col.width or colwidth != 2:
+                    #columns that are not hidden, or a hidden column where the cursor is:  draw the full name
+                    clipdraw(scr, y+i, x, name, hdrcattr, w=colwidth, literal=True)
+                else:  #any hidden column which does not contain the cursor
+                    #show just the first 1-2 characters (or clip it with ellipsis if it's wider than 2)
+                    clipdraw(scr, y+i, x, col.name, hdrcattr, w=2, literal=True)
             vd.onMouse(scr, x, y+i, colwidth, 1, BUTTON3_RELEASED='rename-col')
 
             if C and x+colwidth+dispwidth(C) < self.windowWidth-1 and y+i < self.windowHeight:
