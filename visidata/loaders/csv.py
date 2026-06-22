@@ -71,12 +71,16 @@ class CsvSheet(SequenceSheet):
 
             while True:
                 try:
-                    yield next(rdr)
+                    row = next(rdr)
                 except csv.Error as e:
                     e.stacktrace=stacktrace()
                     yield [TypedExceptionWrapper(None, exception=e)]
+                    continue
                 except StopIteration:
                     return
+                if not row:  # blank line; the tsv loader skips these too
+                    continue  #3085
+                yield row
 
 
 @VisiData.api
