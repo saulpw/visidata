@@ -1,8 +1,9 @@
-from typing import Optional, Union
+from typing import Optional, Union, Callable
 import textwrap
 
 from visidata import vd, VisiData, BaseSheet, colors, TextSheet, clipdraw, wraptext, dispwidth, AttrDict, wrmap, ColorAttr
 from visidata import CommandHelpGetter, OptionHelpGetter
+from visidata.help import HelpPane
 
 
 vd.option('disp_sidebar', True, 'whether to display sidebar')

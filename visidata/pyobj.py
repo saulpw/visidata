@@ -314,7 +314,6 @@ BaseSheet.addCommand('gCtrl+Y', 'pyobj-sheet', 'status(type(sheet).__name__); vd
 Sheet.addCommand('', 'open-row-basic', 'vd.push(TableSheet.openRow(sheet, cursorRow))', 'dive into current row as basic table (ignoring subsheet dive)')
 Sheet.addCommand('Enter', 'open-row', 'vd.push(openRow(cursorRow)) if cursorRow is not None else vd.fail("no row to open")', 'open current row with sheet-specific dive')
 Sheet.addCommand('zEnter', 'open-cell', 'vd.push(openCell(cursorCol, cursorRow))', 'open sheet with copies of rows referenced in current cell')
-openRows
 Sheet.addCommand('gEnter', 'dive-selected', 'openRows(selectedRows)', 'open all selected rows')
 Sheet.addCommand('gzEnter', 'dive-selected-cells', 'openCells(cursorCol, selectedRows)', 'open all selected cells')
 
