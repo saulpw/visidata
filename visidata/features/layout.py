@@ -34,7 +34,13 @@ def unhide_cols(vd, cols, rows):
 @VisiData.api
 def hide_col(vd, col):
     if not col: vd.fail("no columns to hide")
+    sheet = col.sheet
+    # hiding rightmost visible col: keep cursor on new rightmost instead of stranding on first hidden
+    keepcursor = sheet and not col.hidden and col in sheet.visibleCols \
+                 and sheet.cursorVisibleColIndex >= len(sheet.visibleCols)-1
     col.hide()
+    if keepcursor:
+        sheet.cursorRight(-1)
 
 @Sheet.api
 @asyncthread
