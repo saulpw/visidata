@@ -193,7 +193,7 @@ Sheet.addCommand('g)', 'contract-cols', 'contract_cols(visibleCols)', 'remove al
 Sheet.addCommand('z)', 'contract-col-depth', 'contract_cols([cursorCol], depth=int(input("contract depth=", value=0)))', 'remove current column and siblings from sheet columns and unhide parent, prompting for depth')
 Sheet.addCommand('gz)', 'contract-cols-depth', 'contract_cols(visibleCols, depth=int(input("contract depth=", value=0)))', 'remove all child columns and unhide toplevel parents, prompting for depth')
 
-ColumnsSheet.addCommand(')', 'contract-source-cols', 'source[0].addColumn(contract_source_cols(someSelectedRows), index=cursorRowIndex)', 'contract selected columns into column group')  #1702
+ColumnsSheet.addCommand(')', 'contract-source-cols', 'source[0].addColumn(contract_source_cols(someSelectedRows), index=cursorRowIndex); clearSelected()', 'contract selected columns into column group')  #1702
 
 
 vd.addMenuItems('''
