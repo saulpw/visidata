@@ -2,7 +2,7 @@
        install install-dev install-test install-all \
        test test-all test-vgit test-vdsql \
        build man zsh-completion docker \
-       setup-hooks setup-vscode lint \
+       setup-hooks setup-vscode check \
        diff-test clean
 
 help:
@@ -25,7 +25,7 @@ help:
 	@echo "  make setup-vscode      copy devcontainer configs to .vscode/"
 	@echo ""
 	@echo "Utility:"
-	@echo "  make lint              run ruff linter"
+	@echo "  make check             run ruff linter and pyright type checker"
 	@echo "  make diff-test         show diffs from last test run"
 	@echo "  make clean             remove generated files"
 
@@ -76,8 +76,9 @@ setup-vscode:
 
 # Utility
 
-lint:
+check:
 	ruff check .
+	pyright
 
 diff-test:
 	dev/diff-test.sh
