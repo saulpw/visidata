@@ -101,6 +101,13 @@ def openPath(vd, p, filetype=None, create=False):
     filetype = filetype or p.options.filetype  # resolve from path instance, Path class, global  #1710
 
     if p.scheme and not p.has_fp():
+        # an explicit filetype with a dedicated open_<filetype> overrides url-scheme dispatch  #3126
+        if filetype:
+            ft = filetype.lower()
+            openfunc = getattr(vd, 'open_'+ft, None) or vd.getGlobals().get('open_'+ft, None)
+            if openfunc:
+                return openfunc(p)
+
         schemes = p.scheme.split('+')
         openfuncname = 'openurl_' + schemes[-1]
 
