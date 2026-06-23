@@ -45,6 +45,12 @@ To install the cutting edge `develop` branch (no warranty expressed or implied):
 
     pip3 install git+https://github.com/saulpw/visidata.git@develop
 
+If VisiData reports `package X not installed` even after you installed it, `vd`
+is almost certainly running from a different environment than the one you
+installed the package into. Check `which vd`, then install the package into
+*that* environment — e.g. `pipx inject visidata X` for a pipx install, or the
+Homebrew Python for `brew install visidata`.
+
 See [visidata.org/install](https://visidata.org/install) for detailed instructions for all available platforms and package managers.
 
 ### Usage
