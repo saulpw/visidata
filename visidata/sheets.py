@@ -12,9 +12,6 @@ import visidata
 from visidata.utils import colname_letters
 
 
-vd.activePane = 1   # pane numbering starts at 1; pane 0 means active pane
-
-
 vd.option('name_joiner', '_', 'string to join sheet or column names')
 vd.option('value_joiner', ' ', 'string to join display values')
 vd.option('max_rows', 1_000_000_000, 'number of rows to load from source')
@@ -1261,17 +1258,6 @@ def quitAndReleaseMemory(vs):
         vd.allSheets.remove(vs)
 
 
-@BaseSheet.api
-def splitPane(sheet, pct=None):
-    if vd.activeStack[1:]:
-        undersheet = vd.activeStack[1]
-        pane = 1 if undersheet.pane == 2 else 2
-        vd.push(undersheet, pane=pane)
-        vd.activePane = pane
-
-    vd.options.disp_splitwin_pct = pct
-
-
 @Sheet.api
 def async_deepcopy(sheet, rowlist):
     @asyncthread
@@ -1298,16 +1284,6 @@ def reload_or_replace(sheet):
             return
         sheet.source = vs.source
     sheet.reload()
-
-@VisiData.api
-def splitwin_close(vd):
-    vd.options.disp_splitwin_pct = 0
-    for vs in vd.stackedSheets:
-        vs.pane = 1
-        vd.activePane = 1
-
-
-BaseSheet.init('pane', lambda: 1)
 
 
 BaseSheet.addCommand('Ctrl+R', 'reload-sheet', 'reload_or_replace()', 'Reload current sheet')
@@ -1336,11 +1312,6 @@ BaseSheet.addCommand('q', 'quit-sheet',  'vd.quit(sheet)', 'quit current sheet')
 BaseSheet.addCommand('Q', 'quit-sheet-free',  'quitAndReleaseMemory()', 'discard current sheet and free memory')
 globalCommand('gq', 'quit-all', 'vd.quit(*vd.sheets)', 'quit all sheets (clean exit)')
 
-BaseSheet.addCommand('Z', 'splitwin-half', 'splitPane(vd.options.disp_splitwin_pct or 50)', 'ensure split pane is set and push under sheet onto other pane')
-BaseSheet.addCommand('gZ', 'splitwin-close', 'vd.splitwin_close()', 'close split screen')
-BaseSheet.addCommand('Tab', 'splitwin-swap', 'vd.activePane = 1 if sheet.pane == 2 else 2', 'jump to inactive pane')
-BaseSheet.addCommand('gTab', 'splitwin-swap-pane', 'vd.options.disp_splitwin_pct=-vd.options.disp_splitwin_pct', 'swap panes onscreen')
-BaseSheet.addCommand('zZ', 'splitwin-input', 'vd.options.disp_splitwin_pct = input("% height for split window: ", value=vd.options.disp_splitwin_pct)', 'set split pane to specific size')
 
 BaseSheet.addCommand('Ctrl+L', 'redraw', 'clear_search(); sheet.refresh(); vd.redraw(); vd.draw_all()', 'Refresh screen')
 BaseSheet.addCommand(None, 'guard-sheet', 'options.set("quitguard", True, sheet); status("guarded")', 'Set quitguard on current sheet to confirm before quit')
@@ -1392,11 +1363,6 @@ vd.addMenuItems('''
     View > Sheets > stack > sheets-stack
     View > Sheets > all > sheets-all
     View > Other sheet > source sheet > open-source
-    View > Split pane > in half > splitwin-half
-    View > Split pane > in percent > splitwin-input
-    View > Split pane > unsplit > splitwin-close
-    View > Split pane > swap panes > splitwin-swap-pane
-    View > Split pane > goto other pane > splitwin-swap
     View > Refresh screen > redraw
     View > Show > cursor position > show-cursor
     View > Show > evaluated expression > show-expr

@@ -1,6 +1,5 @@
-from visidata import VisiData, vd
+from visidata import vd
 
-vd.theme_option('disp_splitwin_pct', 0, 'height of second sheet on screen')
 vd.theme_option('disp_note_none', '⌀',  'visible contents of a cell whose value is None')
 vd.theme_option('disp_truncator', '…', 'indicator that the contents are only partially visible')
 vd.theme_option('disp_oddspace', '\u00b7', 'displayable character for odd whitespace')
