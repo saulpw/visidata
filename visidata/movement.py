@@ -36,6 +36,13 @@ def pageLeft(self):
     So really both the `leftIndex` and the `cursorIndex` should move in
     tandem until things are correct.'''
 
+    # a hidden column shows alone when the cursor is on it (index past the
+    # visible cols); step back into the visible columns instead of stalling  #3134
+    if self.cursorVisibleColIndex >= self.nVisibleCols:
+        self.cursorVisibleColIndex = self.nVisibleCols-1
+        self.leftVisibleColIndex = self.cursorVisibleColIndex
+        return
+
     targetIdx = self.leftVisibleColIndex  # for rightmost column
     firstNonKeyVisibleColIndex = self.visibleCols.index(self.nonKeyVisibleCols[0])
     while self.rightVisibleColIndex != targetIdx and self.leftVisibleColIndex > firstNonKeyVisibleColIndex:
