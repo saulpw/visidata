@@ -18,6 +18,20 @@ def toggleWidth(self, width):
         self.width = int(self.sheet.options.default_width)
 
 
+@Sheet.api
+def resize_cols_max(sheet, cols):
+    'Resize all *cols* to max width as a group; if all already at max, reset all to default.'
+    rows = sheet.visibleRows
+    maxwidths = {c: c.getMaxWidth(rows) for c in cols}
+    if all(c.width == maxwidths[c] for c in cols):
+        default = int(sheet.options.default_width)
+        for c in cols:
+            c.setWidth(default)
+    else:
+        for c in cols:
+            c.setWidth(maxwidths[c])
+
+
 @Column.api
 def toggleMultiline(self):
     if self.height == 1:
@@ -59,7 +73,7 @@ def hide_uniform_cols(sheet):
 
 Sheet.addCommand('_', 'resize-col-max', 'if cursorCol: cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'toggle width of current column between full and default width')
 Sheet.addCommand('z_', 'resize-col-input', 'width = int(input("set width= ", value=cursorCol.width)); cursorCol.setWidth(width)', 'adjust width of current column to N')
-Sheet.addCommand('g_', 'resize-cols-max', 'for c in visibleCols: c.toggleWidth(c.getMaxWidth(visibleRows))', 'toggle widths of all visible columns between full and default width')
+Sheet.addCommand('g_', 'resize-cols-max', 'sheet.resize_cols_max(visibleCols)', 'set widths of all visible columns to full width; if all already full, reset to default')
 Sheet.addCommand('gz_', 'resize-cols-input', 'width = int(input("set width= ", value=cursorCol.width)); Fanout(visibleCols).setWidth(width)', 'adjust widths of all visible columns to N')
 
 Sheet.addCommand('-', 'hide-col', 'hide_col(cursorCol)', 'hide the current column')
