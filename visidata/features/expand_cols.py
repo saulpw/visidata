@@ -164,6 +164,7 @@ def contract_source_cols(sheet, cols):
     for vs in sheet.source:
         vd.addUndo(setattr, vs, 'columns', vs.columns)
         vs.columns[:] = [c for c in vs.columns if c not in cols]
+        vs.validate_sortcols()
     return ret
 
 
