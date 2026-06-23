@@ -400,7 +400,7 @@ def flowname(flow):
 def try_apply(func, *args, **kwargs):
     try:
         return func(*args, **kwargs)
-    except Exception as e:
+    except Exception:
         pass
 
 

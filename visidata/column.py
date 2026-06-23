@@ -521,7 +521,7 @@ class Column(Extensible):
             return dispwidth(self.getCell(row).text, maxwidth=maxwidth, literal=True)
         try:
             text = self.format(typedval, width=maxwidth) or ''
-        except Exception as e:  # formatting failure
+        except Exception:  # formatting failure
             try:
                 text = str(cellval)
             except Exception as e:

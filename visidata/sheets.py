@@ -908,7 +908,7 @@ class TableSheet(BaseSheet):
                     break
 
         for aggrname, colidxs in self.allAggregators.items():
-            clipdraw(scr, y, 0, f' ', colors.color_aggregator, w=min(rightx+rightw+10, self.windowWidth-1), literal=True)
+            clipdraw(scr, y, 0, ' ', colors.color_aggregator, w=min(rightx+rightw+10, self.windowWidth-1), literal=True)
             clipdraw(scr, y, agglabelx, f' {aggrname:9}', colors.color_aggregator, truncator='', literal=True)
 
             for vcolidx in colidxs:

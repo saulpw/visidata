@@ -82,7 +82,7 @@ def setHighlightRegex(sheet, r, cols=[]):
 
 @Sheet.api
 def highlight_input(sheet, cols=[]):
-    r = vd.inputMultiple(regex=dict(prompt=f"highlight regex: ", type="regex", defaultLast=True, help=vd.help_regex),
+    r = vd.inputMultiple(regex=dict(prompt="highlight regex: ", type="regex", defaultLast=True, help=vd.help_regex),
                         flags=dict(prompt="regex flags: ", type="regex_flags", value=sheet.options.regex_flags, help=vd.help_regex_flags))
     if not sheet.options.highlight_search:
         vd.warning('`highlight_search` option needs to be set to True')

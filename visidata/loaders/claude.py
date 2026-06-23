@@ -42,7 +42,7 @@ def _content_text(msg):
             elif block.get('type') == 'tool_use':
                 parts.append(f'[{block.get("name", "tool")}]')
             elif block.get('type') == 'tool_result':
-                parts.append(f'[result]')
+                parts.append('[result]')
         return ' '.join(parts).strip()
     return str(c)
 

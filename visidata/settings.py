@@ -563,7 +563,7 @@ def importExternal(vd, modname, pipmodname=''):
         m = importlib.import_module(modname)
         vd.addGlobals({modname:m})
         return m
-    except ModuleNotFoundError as e:
+    except ModuleNotFoundError:
         vd.fail(f'package `{modname}` not installed; run: `pip install {pipmodname}`')
 
 

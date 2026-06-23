@@ -105,7 +105,7 @@ class DiveSheet(Sheet):
 
                     self.addRow(item)
 
-                except Exception as e:
+                except Exception:
                     vd.warning("cannot dive on lists with heterogeneous item types")
                     return False
 

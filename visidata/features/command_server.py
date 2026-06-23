@@ -108,7 +108,7 @@ def _capture_screen():
     # sheet stack with shortcut numbers (use jump-sheet-N to navigate)
     sheets = vd.sheets
     parts = [f'{s.shortcut}:{s.name}' for s in reversed(sheets)]
-    text += f'\nsheets: ' + ' > '.join(parts)
+    text += '\nsheets: ' + ' > '.join(parts)
 
     # selection state (so caller notices stale selections)
     nsel = sheet.nSelectedRows

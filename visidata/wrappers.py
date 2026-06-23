@@ -91,7 +91,7 @@ def wrmap(func, iterable, *args):
     for it in iterable:
         try:
             yield func(it, *args)
-        except Exception as e:
+        except Exception:
             pass
 
 

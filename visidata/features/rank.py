@@ -88,7 +88,7 @@ def addcol_sheetrank(sheet, rows):
             if ordering:
                 vd.status('using custom ordering for keycol sort')
                 keycols_ordered = [col for (col, reverse) in ordering]
-                keycols_unordered = [keycol for keycol in sheet.keyCols if not keycol in keycols_ordered]
+                keycols_unordered = [keycol for keycol in sheet.keyCols if keycol not in keycols_ordered]
                 ordering += [(keycol, False) for keycol in keycols_unordered]
                 def _sortkey(e): # sort the rows by using the column
                     p(None)

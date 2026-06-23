@@ -221,7 +221,7 @@ def keystrokeStatus(vs):
 def threadStatus(vs) -> str:
     if vs.currentThreads:
         ret = str(vd.checkMemoryUsage())
-        gerunds = [p.gerund for p in vs.progresses if p.gerund] or [f'processing']
+        gerunds = [p.gerund for p in vs.progresses if p.gerund] or ['processing']
         if vd._queuedFuncs:
             ret += f' [:working]{len(vd._queuedFuncs)} queued functions[/] '
 

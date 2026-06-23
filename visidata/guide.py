@@ -206,7 +206,7 @@ BaseSheet.addCommand('', 'open-guide-index', 'vd.push(GuideIndex("VisiData_Guide
 
 @VisiData.api
 def inputKeys(vd, prompt):
-    return vd.input(prompt, help=f'''
+    return vd.input(prompt, help='''
                 # Input Keystrokes
                 - Press `Ctrl+N` and then press another keystroke to spell out that keystroke.
                 - Press `Ctrl+C` to cancel the input.

@@ -506,7 +506,7 @@ class WSIHandler(http.server.BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/plain')
             self.end_headers()
             self.wfile.write(str(e).encode('utf-8')) #
-        except Exception as e:
+        except Exception:
             print(traceback.format_exc())
             self.send_response(404)
             self.send_header('Content-type', 'text/plain')

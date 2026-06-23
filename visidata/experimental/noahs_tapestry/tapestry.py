@@ -38,7 +38,7 @@ class NoahsPuzzle(Sheet):
     precious = False
 
     def iterload(self):
-        clues = json.loads(vd.getNoahsPath(f'clues.json').read_text())
+        clues = json.loads(vd.getNoahsPath('clues.json').read_text())
         source = vd.getNoahsPath(f'puzzle{self.puznum}.md')
         winWidth = 78
         formatted_text = source.open(encoding='utf-8').read().format(**clues)
@@ -52,7 +52,7 @@ class NoahsPuzzle(Sheet):
 
 @VisiData.cached_property
 def noahsSolutions(vd):
-    return json.loads(vd.getNoahsPath(f'solutions.json').read_text())
+    return json.loads(vd.getNoahsPath('solutions.json').read_text())
 
 @VisiData.api
 def solve_puzzle(vd, answer):
@@ -61,7 +61,7 @@ def solve_puzzle(vd, answer):
         vd.fail("Hmmm, that doesn't seem right. Try again?")
 
     vd.noahsTapestry.solved.add(puznum)
-    vd.status(f'Correct! The candle is now lit.')
+    vd.status('Correct! The candle is now lit.')
     vd.push(vd.noahsTapestry)
 
 

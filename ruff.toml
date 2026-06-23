@@ -4,9 +4,10 @@
 [lint]
 preview = true
 explicit-preview-rules = true
-select = ["E", "F", "E302", "E303"]
+select = ["E", "F"]
 
 ignore = [
+    "E3",     # blank lines — visidata controls vertical whitespace deliberately
     "E501",   # line too long — no line length limit in visidata
     "E701",   # multiple statements on one line (colon) — deliberate visidata style
     "E702",   # multiple statements on one line (semicolon) — deliberate visidata style

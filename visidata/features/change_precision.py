@@ -32,7 +32,7 @@ def setcol_precision(col, amount:int):
         else:
             m = re.fullmatch(FLOAT_FORMAT_RE, col.fmtstr)
             if not m:
-                vd.fail(f'could not parse column fmtstr')
+                vd.fail('could not parse column fmtstr')
             if m[1]:
                 col.fmtstr = '{:.' + f'{max(0, int(m[1]) + amount)}f' + '}'
             elif m[2]:

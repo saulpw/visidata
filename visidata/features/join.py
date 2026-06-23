@@ -26,7 +26,7 @@ def _appendRowsAfterLoading(joinsheet, origsheets):
 
     colcounts = { len(vs.visibleCols) for vs in origsheets }
     if len(colcounts) != 1:
-        vd.fail(f'sheets must have same number of columns for `concat`; use `append` instead')
+        vd.fail('sheets must have same number of columns for `concat`; use `append` instead')
 
     # rowdef: (srcSheet, srcRow), same as ConcatSheet  #2929
     srcKeyColNames = {c.name for c in origsheets[0].keyCols}
@@ -72,7 +72,7 @@ def openJoin(sheet, others, jointype=''):
         name = '&'.join(vs.name for vs in sheets)
         sheettypes = set(type(vs) for vs in sheets)
         if len(sheettypes) != 1:  # only one type of sheet #1598
-            vd.fail(f'only same sheet types can be concat-joined; use `append`')
+            vd.fail('only same sheet types can be concat-joined; use `append`')
 
         joinsheet = copy(sheet)
         joinsheet.name = name
@@ -89,7 +89,7 @@ def openJoin(sheet, others, jointype=''):
 
     nkeys = set(len(s.keyCols) for s in sheets)
     if 0 in nkeys or len(nkeys) != 1:
-        vd.fail(f'all sheets must have the same number of key columns')
+        vd.fail('all sheets must have the same number of key columns')
 
     if jointype == 'extend':
         vs = copy(sheets[0])

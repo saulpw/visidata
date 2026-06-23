@@ -77,7 +77,7 @@ def _(sampleValue, col, vals):
             if isinstance(v, str):
                 return 0
             return len(v)
-        except Exception as e:
+        except Exception:
             return 0
 
     if hasattr(sampleValue, '_fields'):  # looks like a namedtuple

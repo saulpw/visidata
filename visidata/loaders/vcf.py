@@ -34,7 +34,7 @@ class VcfSheet(PythonSheet):
                     for k, v in row.contents.items():
                         if v and str(v[0].value).startswith('(None)'):
                             continue
-                        if not k in addedCols:
+                        if k not in addedCols:
                             addedCols.add(k)
                             self.addColumn(Column(k, expr=k, getter=unbox))
                     self.addRow(row.contents)

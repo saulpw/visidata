@@ -41,7 +41,7 @@ class OptionsSheet(Sheet):
         else:
             r = '# Sheet Options\nThis is a list of option settings specifically for the current sheet.'
 
-        r += f'\n\n- `e` to edit/toggle the current option value'
+        r += '\n\n- `e` to edit/toggle the current option value'
         r += '\n- `d` to restore option to builtin default'
         r += '\n- `z Ctrl+S` to save option overrides to config file'
         return r

@@ -68,7 +68,7 @@ def pkg_resources_files(vd, package):
 def vstat(path, force=False):
     try:
         return os.stat(path)
-    except Exception as e:
+    except Exception:
         return None
 
 def filesize(path):
@@ -399,7 +399,7 @@ class Path(os.PathLike):
         try:
             if not self.is_url():
                 return self._path.stat()
-        except Exception as e:
+        except Exception:
             return None
 
     @wraps(pathlib.Path.exists)

@@ -19,7 +19,7 @@ def open_zulip(vd, p):
         vd.warning('zulip_api_key must be set first')
         vd.status('Enter your login email and Zulip API key (see _https://zulip.com/api/api-keys_).')
         email = vd.input(f'Login email for {p.given}: ', record=False)
-        api_key = vd.input(f'Zulip API key: ', record=False)
+        api_key = vd.input('Zulip API key: ', record=False)
 
         vd.setPersistentOptions(zulip_email=email, zulip_api_key=api_key)
 

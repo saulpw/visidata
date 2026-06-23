@@ -74,7 +74,7 @@ def duptty():
         # close file descriptors for original stdin/stdout
         fin.close()
         fout.close()
-    except Exception as e:
+    except Exception:
         stdin = sys.stdin
         stdout = sys.stdout
 
@@ -547,14 +547,14 @@ def vd_cli():
         rc = main_vd()
     except BrokenPipeError:
         os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno()) # handle broken pipe gracefully
-    except visidata.ExpectedException as e:
+    except visidata.ExpectedException:
         if vd.options.debug:
             raise
     except FileNotFoundError as e:
         print(e, file=sys.stderr)
         if options.debug:
             raise
-    except Exception as e:
+    except Exception:
         for l in stacktrace(): #show the stack trace without carets
             print(l, file=sys.stderr)
 

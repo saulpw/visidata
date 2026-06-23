@@ -269,7 +269,7 @@ def _toplevelTryFunc(func, *args, **kwargs):
         t.status = func(*args, **kwargs)
         if t.status is None:
             t.status = 'ended'
-    except EscapeException as e:  # user aborted
+    except EscapeException:  # user aborted
         t.status = 'aborted by user'
         vd.warning(f'{t.name} aborted')
     except Exception as e:

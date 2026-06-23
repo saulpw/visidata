@@ -290,8 +290,8 @@ class InputWidget:
         elif ch in ('Ctrl+Del','Alt+Del','Alt+d'):     j = find_word(v, i, len(v)-1, +1); v = v[:i] + v[j:]  # erase word forward
         elif ch == 'Ctrl+Y':                           v = splice(v, i, str(vd.memory.clipval))
         elif ch == 'Ctrl+Z':                           vd.suspend()
-        elif ch == 'Ctrl+Left':                        i = find_word(v, 0, i-1, -1)+1;  # word left
-        elif ch == 'Ctrl+Right':                       i = find_word(v, i, len(v)-1, +1);  # word right
+        elif ch == 'Ctrl+Left':                        i = find_word(v, 0, i-1, -1)+1  # word left
+        elif ch == 'Ctrl+Right':                       i = find_word(v, i, len(v)-1, +1)  # word right
         elif ch == 'Ctrl+Up':                          pass
         elif ch == 'Ctrl+Down':                        pass
         elif ch == 'Up':
@@ -328,7 +328,7 @@ class InputWidget:
             self.former_i = i
         try:
             r = self.completer_func(v[:self.former_i], self.comps_idx)
-        except Exception as e:
+        except Exception:
             # raise  # beep/flash; how to report exception?
             return v, i
 
@@ -705,7 +705,7 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
     try:
         r = vd.editText(y, x, w, attr=colors.color_edit_cell, **editargs)
     except curses.error:
-        vd.fail(f'aborting edit due to resize')
+        vd.fail('aborting edit due to resize')
 
     if rowidx >= 0:  # if not header
         r = col.type(r)  # convert input to column type, let exceptions be raised

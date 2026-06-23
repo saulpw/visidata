@@ -77,7 +77,7 @@ def iterdispvals(sheet, *cols, format=False, delimiter=None):
 
                 if (dispval is None or isinstance(dispval, float) and dispval != dispval) and format:
                     dispval = ''
-            except Exception as e:
+            except Exception:
                 dispval = str(dispval)
 
             dispvals[col] = dispval

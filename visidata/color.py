@@ -88,7 +88,7 @@ class ColorMaker:
     def setup(self):
         try:
             curses.use_default_colors()
-        except Exception as e:
+        except Exception:
             pass
 
     @drawcache_property
@@ -174,7 +174,7 @@ class ColorMaker:
             curses.init_pair(255, r, 0)
             self.colorpair_cache[colorname] = r
             return r
-        except curses.error as e:
+        except curses.error:
             return None  # not available
         except ValueError:  # Python 3.10+  issue #1227
             return None
@@ -210,7 +210,7 @@ class ColorMaker:
                 if bg is None: bg = -1
                 try:
                     curses.init_pair(pairnum, fg, bg)
-                except curses.error as e:
+                except curses.error:
                     return 0  # do not cache
                 self.color_pairs[(fg, bg)] = (pairnum, colorname)
 

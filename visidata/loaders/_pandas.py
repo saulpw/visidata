@@ -137,7 +137,7 @@ class PandasSheet(Sheet):
         '''
         try:
             col.sheet.df.loc[row.name, col.expr] = val
-        except ValueError as err:
+        except ValueError:
             vd.warning(f'type of {val} does not match column `{col.name}`; changing type')
             col.type = anytype
             col.sheet.df.loc[row.name, col.expr] = val

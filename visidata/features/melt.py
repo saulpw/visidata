@@ -80,7 +80,7 @@ class MeltedSheet(Sheet):
                     try:
                         if melt_null or not isNull(c.getValue(r)):
                             meltedrow[varval] = c
-                    except Exception as e:
+                    except Exception:
                         pass
 
                 if meltedrow:  # remove rows with no content (all nulls)

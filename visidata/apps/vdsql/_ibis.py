@@ -238,7 +238,7 @@ class IbisTableSheet(Sheet):
         for s in sidebars:
             try:
                 opts.append({'key': s, 'value':getattr(self, s)})
-            except Exception as e:
+            except Exception:
                 if self.options.debug:
                     vd.exceptionCaught()
 

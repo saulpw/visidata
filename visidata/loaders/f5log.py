@@ -1085,7 +1085,7 @@ class F5LogSheet(Sheet):
         if vd.options.get("f5log_object_regex"):
             try:
                 object_regex = re.compile(vd.options.get("f5log_object_regex"))
-            except re.error as exc:
+            except re.error:
                 # TODO: make this error into the errors sheet
                 object_regex = None
         else:
@@ -1096,7 +1096,7 @@ class F5LogSheet(Sheet):
             self._log_tz = zoneinfo.ZoneInfo(
                 vd.options.get("f5log_log_timzeone", "UTC")
             )
-        except zoneinfo.ZoneInfoNotFoundError as exc:
+        except zoneinfo.ZoneInfoNotFoundError:
             # TODO: make this error go into the errors sheet
             self._log_tz = zoneinfo.ZoneInfo("UTC")
 

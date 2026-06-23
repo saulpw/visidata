@@ -169,7 +169,7 @@ def save_xlsx(vd, p, *sheets):
             row = _convert_save_row(dispvals)
             try:
                 ws.append(row)
-            except openpyxl.utils.exceptions.IllegalCharacterError as e:
+            except openpyxl.utils.exceptions.IllegalCharacterError:
                 row = _convert_save_row(dispvals, replace_illegal=True)  #1402
                 ws.append(row)
 

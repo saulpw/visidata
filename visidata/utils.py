@@ -94,7 +94,7 @@ def getattrdeep(obj, attr, *default, getter=getattr):
                 return getter(obj, attr)
         except RecursionError:  #1696
             raise
-        except Exception as e:
+        except Exception:
             pass
 
         attrs = attr.split('.')
@@ -102,7 +102,7 @@ def getattrdeep(obj, attr, *default, getter=getattr):
             obj = getter(obj, a)
 
         return getter(obj, attrs[-1])
-    except Exception as e:
+    except Exception:
         if not default: raise
         return default[0]
 
@@ -115,14 +115,14 @@ def setattrdeep(obj, attr, val, getter=getattr, setter=setattr):
     try:  # if attribute exists, overwrite toplevel value, even if dotted
         getter(obj, attr)
         return setter(obj, attr, val)
-    except Exception as e:
+    except Exception:
         pass
 
     attrs = attr.split('.')
     for a in attrs[:-1]:
         try:
             obj = getter(obj, a)
-        except Exception as e:
+        except Exception:
             obj = obj[a] = type(obj)()  # assume homogeneous nesting
 
     setter(obj, attrs[-1], val)
@@ -195,7 +195,7 @@ class MissingAttrFormatter(string.Formatter):
     def get_field(self, field_name, args, kwargs):
         try:
             return super().get_field(field_name, args, kwargs)
-        except (KeyError, AttributeError, IndexError, ValueError) as e:
+        except (KeyError, AttributeError, IndexError, ValueError):
             return ('{' + field_name + '}', field_name)
 
     def format_field(self, value, format_spec):

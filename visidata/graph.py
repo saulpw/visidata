@@ -340,7 +340,7 @@ class GraphSheet(InvertedCanvas):
 
     def erase_refline_x(self):
         if len(self.reflines_x) == 0:
-            vd.fail(f'no x refline to erase')
+            vd.fail('no x refline to erase')
         xtype = vd.numericCols(self.xcols)[0].type
         suggested = format_input_value(self.reflines_x[0], xtype)
 
@@ -354,7 +354,7 @@ class GraphSheet(InvertedCanvas):
 
     def erase_refline_y(self):
         if len(self.reflines_y) == 0:
-            vd.fail(f'no y refline to erase')
+            vd.fail('no y refline to erase')
         ytype = self.ycols[0].type
         suggested = format_input_value(self.reflines_y[0], ytype) if self.reflines_y else ''
         ystrs = vd.input('remove line(s) at y = ', value=suggested, type='refliney', defaultLast=True).split()
