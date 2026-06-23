@@ -1,11 +1,9 @@
-from typing import Optional, Union, Callable, TYPE_CHECKING
+from typing import Optional, Union, Callable
 import textwrap
 
 from visidata import vd, VisiData, BaseSheet, colors, TextSheet, clipdraw, wraptext, dispwidth, AttrDict, wrmap, ColorAttr
 from visidata import CommandHelpGetter, OptionHelpGetter
-
-if TYPE_CHECKING:
-    from visidata.help import HelpPane
+from visidata.help import HelpPane
 
 
 vd.option('disp_sidebar', True, 'whether to display sidebar')
