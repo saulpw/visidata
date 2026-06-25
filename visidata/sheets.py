@@ -763,6 +763,8 @@ class TableSheet(BaseSheet):
             # when cursor showing a hidden column
             if vcolidx >= self.nVisibleCols and vcolidx == self.cursorVisibleColIndex:
                 width = self.options.default_width
+            elif col.hidden:  #non-cursor hidden cols have room for 1 letter + truncator  #3150
+                return 2
 
             #subtract 1 character of empty space from windowWidth, for the margin to the right of the sheet
             width = min(width, self.windowWidth-x-1)
