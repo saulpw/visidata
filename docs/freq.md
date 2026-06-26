@@ -73,6 +73,7 @@ Undoing selection changes on the frequency table will also undo them on the sour
 
 - `g '` (`freeze-sheet`) to create a plain data sheet snapshot of the frequency table.
 - Add aggregators on source columns with `+` before opening the frequency table to see summary statistics per bin.
+- Select bins with inconsistent values and use `ge` to unify them; the correction propagates back to the source sheet. See [bulk corrections](/docs/edit#bulk-corrections).
 
 ---
 
