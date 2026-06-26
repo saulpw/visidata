@@ -5,7 +5,9 @@ import re
 import functools
 import textwrap
 
-from visidata import vd, drawcache, update_attr, colors, ColorAttr
+from visidata import vd, VisiData, drawcache, update_attr, colors, ColorAttr
+
+vd.theme_option('disp_boxchars', '▐▌▄▀▗▖▝▘', 'box characters (ls rs ts bs tl tr bl br)')
 
 disp_column_fill = ' '
 bracket_markup_re = r'\[[:/][^\]]*?\]'  # [:whatever until the closing bracket] or [/whatever] or [:whatever] or [/] or [:]
@@ -520,6 +522,23 @@ def clip_markup_middle(s:str, w:int):
             break
     output += reverse_output[::-1]
     return ''.join(output)
+
+@VisiData.api
+def drawBox(vd, scr, x, y, w, h, cattr, bottom=True, top=True, shadow=-1):
+    '''Draw a box border using disp_boxchars with fg=cattr.bg over *shadow* bg.
+    The half-block edges fade from cattr toward *shadow* (a darker shade reads as a drop shadow).
+    Omit *top*/*bottom* to connect the box to an adjacent bar. Return border ColorAttr.'''
+    ls, rs, ts, bs, tl, tr, bl, br = vd.options.disp_boxchars
+    border_cattr = ColorAttr(fg=cattr.bg, bg=shadow)
+    if top:
+        clipdraw(scr, y, x, tl + ts*(w-2) + tr, border_cattr, w=w, literal=True)
+    if bottom:
+        clipdraw(scr, y+h-1, x, bl + bs*(w-2) + br, border_cattr, w=w, literal=True)
+    for row in range(1 if top else 0, h-1 if bottom else h):
+        clipdraw(scr, y+row, x, ls, border_cattr, w=1, literal=True)
+        clipdraw(scr, y+row, x+w-1, rs, border_cattr, w=1, literal=True)
+    return border_cattr
+
 
 vd.addGlobals(clipstr=clipstr,
               clipdraw=clipdraw,
