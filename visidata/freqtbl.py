@@ -84,6 +84,8 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
     def select(self, rows, status=True, progress=True, add_undo=True):
         if add_undo:
             self.addUndoSelection()
+        if self.options.bulk_select_clear:  # clear source once, not per-bin in selectRow
+            self.source._selectedRows.clear()
         super().select(rows, status, progress, add_undo=False)
 
     def unselect(self, rows, status=True, progress=True, add_undo=True):
