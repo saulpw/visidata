@@ -13,6 +13,10 @@
     ],
 
     "//": "Disabled rules are dominated by false positives from VisiData's dynamic patterns (vd.* injection, @VisiData.api, lazy mappings, deferred/optional imports, custom annotations). reportUndefinedVariable / reportPossiblyUnbound stay ON: they catch real NameError-class bugs.",
+    "//idiom": "reportUnusedExpression: the `cond or vd.fail(...)` short-circuit-assertion idiom is statement-level throughout. reportSelfClsParameterName: methods take vd/col/sheet as first param under @VisiData.api etc. reportMissingModuleSource: optional C-extension deps (MySQLdb) ship no stubs.",
+    "reportUnusedExpression": "none",
+    "reportSelfClsParameterName": "none",
+    "reportMissingModuleSource": "none",
     "reportAttributeAccessIssue": "none",
     "reportOptionalMemberAccess": "none",
     "reportArgumentType": "none",

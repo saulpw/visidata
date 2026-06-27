@@ -1,4 +1,4 @@
-__all__ = '__title__ __author__ __version__ __description__ __license__ __copyright__'.split()
+__all__ = ['__title__', '__author__', '__version__', '__description__', '__license__', '__copyright__']
 
 __title__ = 'vdsql'
 __author__ = 'Saul Pwanson <code@saul.pw>'
