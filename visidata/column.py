@@ -453,6 +453,8 @@ class Column(Extensible):
             self.cellChanged(row, val)
         else:
             self.putValue(row, val)
+        if self._cachedValues is not None:  #3155 evict stale entry so undo/setValue show on cached col
+            self._cachedValues.pop(self.sheet.rowid(row), None)
         if setModified:  #1800
             self.sheet.setModified()
 
