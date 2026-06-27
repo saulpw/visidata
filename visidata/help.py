@@ -163,7 +163,8 @@ class HelpPane:
 def getHelpPane(vd, name, module='visidata') -> HelpPane:
     ret = HelpPane(name)
     try:
-        ret.amgr.load(name, (vd.pkg_resources_files(module)/f'ddw/{name}.ddw').open(encoding='utf-8'))
+        with (vd.pkg_resources_files(module)/f'ddw/{name}.ddw').open(encoding='utf-8') as fp:
+            ret.amgr.load(name, fp)
         ret.amgr.trigger(name, loop=True)
     except FileNotFoundError as e:
         vd.debug(str(e))
