@@ -115,7 +115,7 @@ setup(
             "icons/48x48/visidata.png",
             "icons/32x32/visidata.png",
         ],
-        "visidata.experimenta.noahs_tapestry": [
+        "visidata.experimental.noahs_tapestry": [
             "*.ddw",
             "*.md",
             "*.json",
