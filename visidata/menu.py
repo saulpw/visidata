@@ -297,7 +297,6 @@ def drawMenu(vd, scr, sheet):
     scr.addstr(0, 0, ' '*(w-1), colors.color_menu.attr)
     disp_menu_boxchars = sheet.options.disp_menu_boxchars
     x = 1
-    ymax = 4
     toplevel = sheet.menus
     for i, item in enumerate(toplevel):
         if sheet.activeMenuItems and i == sheet.activeMenuItems[0]:

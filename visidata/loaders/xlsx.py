@@ -240,7 +240,7 @@ def xlsx_color_to_xterm256(sheet, color) -> str:
 def theme_and_tint_to_rgb(sheet, theme, tint) -> str:
     """Given a workbook, a theme number and a tint return a xterm256 color number"""
     rgb = sheet.theme_colors[theme]
-    h, l, s = rgb_to_ms_hls(rgb)
+    h, l, s = rgb_to_ms_hls(rgb)  # noqa: E741
     r, g, b = ms_hls_to_rgb(h, tint_luminance(tint, l), s)
 
     return rgb_to_attr(r*256, g*256, b*256)
@@ -279,7 +279,7 @@ def rgb_to_ms_hls(red, green=None, blue=None):
             red = int(red[0:2], 16) / RGBMAX
         else:
             red, green, blue = red
-    h, l, s = rgb_to_hls(red, green, blue)
+    h, l, s = rgb_to_hls(red, green, blue)  # noqa: E741
     return (int(round(h * HLSMAX)), int(round(l * HLSMAX)), int(round(s * HLSMAX)))
 
 def ms_hls_to_rgb(hue, lightness=None, saturation=None):

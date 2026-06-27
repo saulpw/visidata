@@ -550,7 +550,6 @@ class PodcastEditingSheet(Sheet):
         row = self.rows[rowidx]
 
         formatted_rows = []
-        wordnum = 0
         for line in textwrap.wrap(row.text,
                         width=self.column('text').width-2,
                         break_long_words=False,

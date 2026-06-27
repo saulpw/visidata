@@ -57,6 +57,7 @@ def openurl_postgres(vd, url, filetype=None):
     return PgTablesSheet(dbname+"_tables", sql=SQL(conn))
 
 
+openurl_postgresql = openurl_postgres
 VisiData.openurl_postgresql=VisiData.openurl_postgres
 
 

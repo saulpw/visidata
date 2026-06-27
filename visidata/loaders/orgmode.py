@@ -25,6 +25,7 @@ import collections
 import datetime
 import os
 import re
+import sys
 
 from visidata import vd, VisiData, Column, Sheet, ItemColumn, vlen, asyncthread, Path, AttrDict, date
 from visidata import WritableColumn
@@ -246,7 +247,6 @@ A list of orgmode sections from _{sheet.source}_.
                     yield fpath/fn
 
         if self.filetype == 'orgdir':
-            basepath = str(self.source)
             for p in _walkfiles(self.source):
                 if p.base_stem.startswith('.'): continue
                 if p.ext in ['org', 'md']:
@@ -322,7 +322,6 @@ def paste_into(sheet, row, sourcerows, cols):
 
 @OrgSheet.api
 def paste_data_into(sheet, row, sourcerows, cols):
-    body = row.body or ''
     for r in sourcerows:
         data = vd.encode_json(r, cols)
         row.contents += f':{cols[0].sheet.name}:{data}\n'
@@ -405,7 +404,7 @@ def sysopen_rows(sheet, rows):
                 lastrow = lastrow.parent
 
             if lastrow:
-                sourceRows.append(section)
+                sheet.sourceRows.append(section)
             else:
                 sheet.addRow(section)
 

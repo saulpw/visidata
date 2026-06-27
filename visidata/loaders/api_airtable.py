@@ -17,7 +17,7 @@ def guessurl_airtable(vd, p, response):
 
 @VisiData.api
 def open_airtable(vd, p):
-    pyairtable = vd.importExternal('pyairtable')
+    vd.importExternal('pyairtable')
 
     token = os.environ.get('AIRTABLE_AUTH_TOKEN') or vd.options.airtable_auth_token
     if not token:

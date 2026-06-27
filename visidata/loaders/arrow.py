@@ -82,7 +82,7 @@ class ArrowSheet(Sheet):
 @VisiData.api
 def save_arrow(vd, p, sheet, streaming=False):
     pa = vd.importExternal('pyarrow')
-    np = vd.importExternal('numpy')
+    vd.importExternal('numpy')
 
     typemap = {
         anytype: pa.string(),

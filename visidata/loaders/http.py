@@ -65,7 +65,7 @@ def openurl_http(vd, path, filetype=None):
         n = 0
         while response:
             path.responses.append(response)
-            with response as fp:
+            with response:
                 for line in splitter(response, delim=b'\n'):
                     yield line.decode(vd.options.encoding)
 

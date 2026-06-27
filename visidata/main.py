@@ -555,8 +555,8 @@ def vd_cli():
         if options.debug:
             raise
     except Exception:
-        for l in stacktrace(): #show the stack trace without carets
-            print(l, file=sys.stderr)
+        for line in stacktrace(): #show the stack trace without carets
+            print(line, file=sys.stderr)
 
     sys.stderr.flush()
     sys.stdout.flush()

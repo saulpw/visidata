@@ -20,8 +20,8 @@ def requirements_extra():
 
 setup(
         name="vdsql",
-        version=__version__,
-        description=__description__,
+        version=__version__,  # noqa: F821
+        description=__description__,  # noqa: F821
         long_description=readme(),
         long_description_content_type="text/markdown",
         classifiers=[

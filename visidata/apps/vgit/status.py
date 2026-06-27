@@ -112,10 +112,6 @@ class GitStatus(GitSheet):
         return self.gitBranchStatuses.get(self.branch, 'no branch')
 
     def iterload(self):
-        files = [GitFile(p, self.source) for p in self.source.iterdir() if p.stem not in ('.git')]  # files in working dir
-
-        filenames = dict((gf.filename, gf) for gf in files)
-
         self._cachedStatus.clear()
         for fn in self.git_iter('ls-files', '-z'):
             self._cachedStatus[fn] = AttrDict(status='  ')

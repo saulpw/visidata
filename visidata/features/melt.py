@@ -35,10 +35,8 @@ class MeltedSheet(Sheet):
                 if cats not in valcols:
                     valcols[cats] = []
                 valcols[cats].append((valcolname, c))
-                ncats = len(varvals)
             else:
                 vd.status(f'"{c.name}" column does not match regex, skipping')
-                ncats = 0
 
         return valcols
 

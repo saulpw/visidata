@@ -103,7 +103,7 @@ class _Progress:
             self.sheet.progresses.remove(self)
 
     def __iter__(self):
-        with self as prog:
+        with self:
             for item in self.iterable:
                 yield item
                 self.made += 1
@@ -262,7 +262,7 @@ def execAsync(vd, func, *args, **kwargs):
     return thread
 
 def _toplevelTryFunc(func, *args, **kwargs):
-  with ThreadProfiler(threading.current_thread()) as prof:
+  with ThreadProfiler(threading.current_thread()):
     t = threading.current_thread()
     t.name = func.__name__
     try:

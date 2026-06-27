@@ -83,7 +83,6 @@ Commands:
     def extract(self, *rows, path=None):
         path = path or Path('.')
 
-        files = []
         for row in rows:
             r, _ = row
             vd.confirmOverwrite(path/r.filename)  #1452

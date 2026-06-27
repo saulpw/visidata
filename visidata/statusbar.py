@@ -40,9 +40,6 @@ def ancestors(sheet):
 
 @BaseSheet.property
 def sheetlist(sheet):
-    leafsheets = []
-    parents = set()
-
     sheetstack = vd.sheetstack(sheet.pane)
     sheets = [x for x in vd.allSheets if x in sheetstack]+ [x for x in sheetstack if x not in vd.allSheets]
 

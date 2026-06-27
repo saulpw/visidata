@@ -195,7 +195,6 @@ class InputWidget:
         i = self.current_i  # the onscreen offset within the field where v[i] is displayed
         trunch = self.truncchar
         tr_w = dispwidth(trunch)
-        fill_w = dispwidth(self.fillchar)
 
         def _calc_display(dispval, i):
             '''Return a formatted substring of *dispval* that fills the on-screen width *w*.'''

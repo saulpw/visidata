@@ -73,7 +73,7 @@ def copyCells(sheet, col, rows):
 def syscopyValue(sheet, val):
     # pipe val to stdin of clipboard command
 
-    p = subprocess.run(
+    subprocess.run(
         sheet.options.clipboard_copy_cmd.split(),
         input=val,
         encoding='utf-8',
@@ -117,7 +117,6 @@ def syscopyCells_async(sheet, cols, rows, filetype):
 
 @VisiData.api
 def sysclipValue(vd):
-    cmd = vd.options.clipboard_paste_cmd
     return subprocess.check_output(vd.options.clipboard_paste_cmd.split()).decode('utf-8')
 
 

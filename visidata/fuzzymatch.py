@@ -139,7 +139,7 @@ def debugV2(T, pattern, F, lastIdx, H, C):
     width = lastIdx - F[0] + 1
 
     for i, f in enumerate(F):
-        I = i * width
+        I = i * width  # noqa: E741
         if i == 0:
             print('  ', end='')
             for j in range(f, lastIdx + 1):
@@ -330,7 +330,7 @@ def _fuzzymatch(target: str, pattern: str) -> MatchResult:
     j = maxScorePos
     preferMatch = True
     while True:
-        I = i * width
+        I = i * width  # noqa: E741
         j0 = j - f0
         s = H[I + j0]
 

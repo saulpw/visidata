@@ -157,7 +157,7 @@ def maybe_clean(s, vs):
     return s
 
 def load_tsv(fn):
-    vs = open_tsv(Path(fn))
+    vs = vd.open_tsv(visidata.Path(fn))
     yield from vs.iterload()
 
 # NOTE: you cannot use deprecated() with nonfuncs

@@ -41,7 +41,7 @@ class HtmlTablesSheet(IndexSheet):
         Column('heading', getter=lambda col,row: row.html.xpath('normalize-space(./preceding-sibling::*[self::h1 or self::h2 or self::h3 or self::h4 or self::h5 or self::h6][1])') or None, cache=True),
     ]
     def iterload(self):
-        lxml = vd.importExternal('lxml')
+        vd.importExternal('lxml')
         from lxml import html
         with self.source.open(encoding='utf-8') as fp:
             doc = html.parse(fp, parser=vd.utf8_parser, base_url=self.source.given)
@@ -75,7 +75,7 @@ class HtmlLinksSheet(Sheet):
         ItemColumn('link', 2, width=40),
     ]
     def iterload(self):
-        lxml = vd.importExternal('lxml')
+        vd.importExternal('lxml')
         from lxml.html import iterlinks
         root = self.source.getroot()
         root.make_links_absolute(self.source.docinfo.URL, handle_failures='ignore')
@@ -250,7 +250,7 @@ def utf8_parser(vd):
 
 @VisiData.api
 def HTML(vd, s):
-    lxml = vd.importExternal('lxml')
+    vd.importExternal('lxml')
     from lxml import html
     return html.fromstring(s, parser=vd.utf8_parser)
 

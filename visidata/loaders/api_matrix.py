@@ -118,7 +118,6 @@ class MatrixSheet(Sheet):
         self.addRow(chunk)
 
     def room_event(self, room, chunk):
-        ev = AttrDict(chunk)
         t = chunk['type']
         if t == 'm.receipt':
             for msgid, content in chunk['content'].items():

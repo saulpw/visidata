@@ -229,10 +229,6 @@ class DirSheet(Sheet):
                         yield fpath/d
                     subdirs.clear()
 
-        basepath = str(self.source)
-
-        folders = set()
-
         for p in _walkfiles(self.source, self.options.dir_depth):
             if not hidden_files and p.name.startswith('.'):
                 continue

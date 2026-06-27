@@ -348,7 +348,7 @@ class PandasSheet(Sheet):
         vd.addUndo(self._deleteRows, index or self.nRows - 1)
 
     def delete_row(self, rowidx):
-        pd = vd.importExternal('pandas')
+        vd.importExternal('pandas')
         oldrow = self.df.iloc[rowidx:rowidx+1]
 
         # Use to_dict() here to work around an edge case when applying undos.

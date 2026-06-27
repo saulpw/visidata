@@ -122,7 +122,7 @@ class PingSheet(Sheet):
         self.rows = []
         pings_sent = {}
         ping_count = self.options.ping_count
-        with Progress(total=ping_count*len(self.sources), gerund='pinging') as prog:
+        with Progress(total=ping_count*len(self.sources), gerund='pinging'):
           while not self.stop:
             r = {'time':time.time()}
             yield r

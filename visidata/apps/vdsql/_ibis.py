@@ -268,7 +268,7 @@ class IbisTableSheet(Sheet):
         return LazyIbisColMap(self, self.query)
 
     def select_row(self, row):
-        k = self.rowkey(row) or vd.fail('need key column to select individual rows')
+        self.rowkey(row) or vd.fail('need key column to select individual rows')
         super().selectRow(row)
         self.ibis_selection.append(self.matchRowKeyExpr(row))
 
@@ -518,7 +518,7 @@ def ibis_col(col):
 
 
 @Column.api
-def get_ibis_col(col, query:'ibis.Expr', typed=False) -> 'ibis.Expr':
+def get_ibis_col(col, query:'ibis.Expr', typed=False) -> 'ibis.Expr':  # noqa: F821
     'Return ibis.Expr for `col` within context of `query`, cast by VisiData column type if `typed`.'
     import ibis.common.exceptions
 

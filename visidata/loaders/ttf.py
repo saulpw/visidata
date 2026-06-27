@@ -53,7 +53,7 @@ class TTFGlyphsSheet(Sheet):
 
 
 def makePen(*args, **kwargs):
-    fontTools = vd.importExternal('fontTools', 'fonttools')
+    vd.importExternal('fontTools', 'fonttools')
     from fontTools.pens.basePen import BasePen
 
     class GlyphPen(InvertedCanvas, BasePen):

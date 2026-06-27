@@ -36,7 +36,6 @@ class SQL:
         import MySQLdb as mysql
         import MySQLdb.cursors as cursors
 
-        dbname = self.url.path[1:]
         connection_parameters = dict(
             user=self.url.username,
             database=self.url.path[1:],

@@ -47,7 +47,6 @@ def addRegexColumns(vs, regexMaker, origcol, regexstr):
     func = regexMaker(regex, origcol)
 
     cols = {}
-    ncols = 0  # number of new columns added already
     for r in Progress(vs.getSampleRows()):
         m = vd.callNoExceptions(func, r)
         if not m:

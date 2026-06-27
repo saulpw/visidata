@@ -44,7 +44,7 @@ class GitBlame(GitSheet):
             parts = lines[i].split()
             sha, orig, final = parts[:3]
             if len(parts) > 3:
-                nlines_this_group = parts[3]
+                pass
 
             if sha not in headers:
                 hdr = AttrDict(sha=sha, orig_linenum=orig, final_linenum=final)

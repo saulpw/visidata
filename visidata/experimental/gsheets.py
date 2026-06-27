@@ -14,7 +14,7 @@ VisiData.open_g = VisiData.open_gsheets
 
 @VisiData.lazy_property
 def google_discovery(self):
-    googleapiclient = vd.importExternal('googleapiclient', 'google-api-python-client')
+    vd.importExternal('googleapiclient', 'google-api-python-client')
     from googleapiclient import discovery
     return discovery
 

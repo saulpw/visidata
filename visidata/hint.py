@@ -12,7 +12,6 @@ def prevHints(sheet):
 def getHint(sheet, *args, **kwargs) -> str:
     funcs = [getattr(sheet, x) for x in dir(sheet) if x.startswith('hint_')]
     results = []
-    hints = sheet.prevHints
     for f in funcs:
         try:
             r = f(*args, **kwargs)
