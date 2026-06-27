@@ -2,7 +2,7 @@ import functools
 import collections
 
 from visidata import VisiData, MetaSheet, ColumnAttr, Column, BaseSheet, VisiDataMetaSheet, SuspendCurses, ColorAttr
-from visidata import vd, asyncthread, drawcache, AttrDict, TextSheet
+from visidata import vd, asyncthread, drawcache, AttrDict, TextSheet, Path
 
 
 vd.option('disp_help_flags', 'cmdpalette guides help hints inputfield inputkeys nometacols sidebar',
@@ -180,7 +180,7 @@ def openManPage(vd):
     with SuspendCurses():
         module_path = vd.pkg_resources_files(__name__.split('.')[0])
         if os.system(' '.join(['man', str(module_path/'man/vd.1')])) != 0:
-            vd.push(TextSheet('man_vd', source=module_path/'man/vd.txt'))
+            vd.push(TextSheet('man_vd', source=Path(str(module_path/'man/vd.txt'))))
 
 
 # in VisiData, gCtrl+H refers to the man page
