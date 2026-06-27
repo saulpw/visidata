@@ -15,7 +15,7 @@ Thanks to @midichef for many bugfixes and improvements.
 - [edit] add `vd.editCellBindings` for user-customizable cell editing keybindings (#2986)
 - [selection] add `select-to-prev-selected` and `select-to-next-selected` commands
 - [movement] add `jump-sheet` command (select sheet by name with tab-completion)
-- [sheets] add `setcol-precision` to change displayed float precision
+- [columns] change displayed float precision with `Alt+-`/`Alt++`/`g%` (setcol-precision-less/-more/-input)
 - [exec-shell] add command to drop into an interactive `$SHELL`
 - [repl] add embedded ptipython REPL (#2736)
 - [server] add command-server (AF_UNIX socket: screen/sync/progress protocol) and vdx client
