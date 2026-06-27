@@ -158,7 +158,7 @@ class JoinKeyColumn(WritableColumn):
                     vals.append(v)
         if len(vals) > 1:
             keycolnames = ', '.join([f'{col.sheet.name}:{col.name}' for col in self.keycols])
-            vd.warning(f"source key columns ({keycolnames}) have different types")
+            vd.warning(f"key cols ({keycolnames}) matched by display value but have differing typed values")
         return vals[0]
 
     def putValue(self, row, value):
