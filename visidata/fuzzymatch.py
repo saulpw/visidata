@@ -374,7 +374,7 @@ CombinedMatch = collections.namedtuple('CombinedMatch', 'score formatted match')
 
 
 @VisiData.api
-def fuzzymatch(vd, haystack:"list[dict[str, str]]", needles:"list[str]) -> list[CombinedMatch]", case_sensitive=False):
+def fuzzymatch(vd, haystack:"list[dict[str, str]]", needles:"list[str]", case_sensitive=False) -> "list[CombinedMatch]":
     '''Perform matching that is case-insensitive by default. Return sorted list of matching dict values in haystack, augmenting the input dicts with _score:int and _positions:dict[k,set[int]] where k is each non-_ key in the haystack dict. Set *case_sensitive* to match case.'''
     if not case_sensitive:
         needles = [ p.lower() for p in needles]

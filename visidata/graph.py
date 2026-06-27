@@ -153,6 +153,7 @@ class GraphSheet(InvertedCanvas):
                 has_x_line = char_x in self.reflines_char_x.keys()
                 if has_x_line or has_y_line:
                     cattr = colors.color_graph_refline
+                    ch = ''
                     if has_x_line:
                         ch = self.reflines_char_x[char_x]
                         # where two lines cross, draw the vertical line, not the horizontal one

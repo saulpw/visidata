@@ -207,7 +207,7 @@ Loads continuously starting with most recent, until all messages have been read.
             for dest in recp:
                 self.send_message(msg, row['subject'], dest['email'], 'private')
         else:
-            self.send_message(msg, row['subject'], dest, 'stream')
+            self.send_message(msg, row['subject'], recp, 'stream')
 
     def send_message(self, msg, subject, dest, msgtype='stream'):
         req = {

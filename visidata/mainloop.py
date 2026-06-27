@@ -348,6 +348,7 @@ def run(vd, *sheetlist):
     'Main entry point; launches vdtui with the given sheets already pushed (last one is visible)'
 
     scr = None
+    ret = None
     try:
         # Populate VisiData object with sheets from a given list.
         for vs in sheetlist:

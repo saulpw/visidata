@@ -264,6 +264,7 @@ A list of orgmode sections from _{sheet.source}_.
 #        row.file_string = open(path).read()
         row = orgmode_parse(open(path).readlines())
         st = path.stat()
+        mtime = None
         if st:
             mtime = st.st_mtime
 

@@ -479,6 +479,8 @@ def clip_markup_middle(s:str, w:int):
     output = []
     chunks_w = 0
     truncated = False
+    text_w = 0
+    i = 0
     chunks = re.split(markup_section_re, s)
     for i, chunk in enumerate(chunks):  #chunks are either regular text, or marked up section:  start, text, end
         # or escaped literal:  start, literal, end

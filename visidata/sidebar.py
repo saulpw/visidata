@@ -157,6 +157,7 @@ def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', o
 
     text = text or ''
 
+    lines = []
     if hasattr(text, 'draw'):  # like a HelpPane
         maxlinew = text.width
         winh = min(maxh, text.height+2)+1

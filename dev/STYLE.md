@@ -130,6 +130,15 @@ def my_vd_method(vd): ...
 10. **Hide internals** — avoid Python method names, class names, type names in user-facing messages (except in error or debug); say what the user can do about it instead
 11. **Consistent severity** — same concept should generally use the same function (fail or warning, not a mix)
 
+## Type Checking (pyright / `make check`)
+When pyright flags something, choose the narrowest remedy in this order of preference:
+1. **Fix it.** Prefer a real code/type-annotation change over any suppression. A `# type: ignore` that a proper annotation, a variable init, or a `TYPE_CHECKING` import would resolve must be that fix instead.
+2. **Rule-level** (`pyrightconfig.json` `"reportX": "none"`) — fine, for rules that are false-positive-dominated under VisiData's dynamic patterns (`vd.*` injection, `@VisiData.api`, lazy mappings, deferred/optional imports).
+3. **File-level** (`# pyright: reportX=false` at top of file) — tolerable, e.g. a file using `from visidata import *`, or a known-broken/vendored module.
+4. **Line-level** (`# pyright: ignore[...]`, `# type: ignore`) — almost never. Only when there is no real fix and no file/rule scope fits.
+
+Common real fixes: initialize a variable before a conditional branch (reportPossiblyUnbound); `if TYPE_CHECKING: import x` for forward-ref annotations of optional deps; bind a conditional import to `None` in its `except`.
+
 ## Documentation
 - Always add `# rowdef:` comment above sheet classes
 - Docstrings on classes (single-quoted) and methods

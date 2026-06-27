@@ -117,6 +117,7 @@ def getRowIndexFromStr(vs, row):
 @Sheet.api
 def moveToCol(vs, col):
     'Move cursor to column given by *col*, which can be either the column number or column name.'
+    vcolidx = None
     if isinstance(col, str):
         vcolidx = indexMatch(vs.availCols, lambda c,name=col: name == c.name)
     elif isinstance(col, int):

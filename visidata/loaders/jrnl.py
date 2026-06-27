@@ -38,8 +38,8 @@ class JrnlSheet(TableSheet):
 
             if row is None:
                 vd.fail('jrnl file must start with a "[date time] title" line')
-            row.body += line + '\n'
-            row.tags = ' '.join([row.tags]+tags)
+            row.body += line + '\n'  # pyright: ignore[reportPossiblyUnboundVariable]
+            row.tags = ' '.join([row.tags]+tags)  # pyright: ignore[reportPossiblyUnboundVariable]
             prevline = line.strip()
 
 

@@ -68,6 +68,7 @@ def getMenuItem(sheet, menupath:List[str]=None):
     if not menupath:
         menupath = sheet.activeMenuItems
 
+    currentItem = None
     try:
         currentItem = sheet
         for i in menupath:

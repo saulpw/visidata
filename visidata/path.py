@@ -61,7 +61,7 @@ def pkg_resources_files(vd, package):
     try:
         from importlib.resources import files
     except ImportError: #1968
-        from importlib_resources import files  # pyright: ignore[reportMissingImports]
+        from importlib_resources import files
     return files(package)
 
 @lru_cache()

@@ -50,13 +50,15 @@ class SQL:
 
         connection = mysql.connect(**connection_parameters)
 
+        cursor = None
         try:
             cursor = connection.cursor() # one connection per request as SSCursor only allows to fetch data asynchronously from one query at a time
             cursor.execute(qstr)
             with cursor as c:
                 yield c
         finally:
-            cursor.close()
+            if cursor is not None:
+                cursor.close()
             connection.close()
 
     @asyncthread

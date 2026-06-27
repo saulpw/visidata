@@ -9,7 +9,8 @@ try:
     import pwd
     import grp
 except ImportError:
-    pass # pwd,grp modules not available on Windows
+    pwd = None # pwd,grp modules not available on Windows
+    grp = None
 
 from visidata import Column, Sheet, LazyComputeRow, asynccache, BaseSheet, vd
 from visidata import Path, asyncthread, VisiData

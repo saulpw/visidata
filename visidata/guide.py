@@ -135,6 +135,7 @@ class CommandHelpGetter:
         binding = self.helpsheet.revbinds.get(longname, [None])[0] or '<unbound>'
         # cmddict has a SheetClass associated with each command
         # go through all the parents of the Sheet type, to look for the command
+        cmd = None
         for cls in self.cls.superclasses():
             cmd = self.helpsheet.cmddict.get((cls.__name__, longname), None)
             if cmd:
@@ -175,6 +176,7 @@ class GuideSheet(Sheet):
             for config in section.splitlines():
                 config = config.strip()
                 if config:
+                    key = val = None
                     try:
                         key, val = config.split(': ', maxsplit=1)
                     except ValueError:

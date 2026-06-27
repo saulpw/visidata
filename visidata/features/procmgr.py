@@ -1,3 +1,5 @@
+# pyright: reportUndefinedVariable=false
+# (uses `from visidata import *` (dynamic export))
 from visidata import *
 
 

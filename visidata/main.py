@@ -190,6 +190,7 @@ def sheet_from_description(vd, sources, sheet_desc):
         return sheet_desc
 
     # descend the tree of subsheets
+    vs = None
     for desc_lvl, subsheet in enumerate(sheet_desc):
         if desc_lvl == 0:
             vs = None

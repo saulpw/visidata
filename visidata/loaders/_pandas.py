@@ -146,6 +146,7 @@ class PandasSheet(Sheet):
     @asyncthread
     def reload(self):
         pd = vd.importExternal('pandas')
+        df = None
         if isinstance(self.source, pd.DataFrame):
             df = self.source
         elif isinstance(self.source, Path):

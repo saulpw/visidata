@@ -74,6 +74,7 @@ def order_from_string(sheet, s):
     ordering = []
     for instr in instructions:
         c = sheet.column(instr[1:])
+        reverse = False
         if instr[0] == '<':
             reverse = False
         elif instr[0] == '>':

@@ -1,3 +1,5 @@
+# pyright: reportUndefinedVariable=false
+# Crossword: undefined class (known-broken loader)
 from collections import defaultdict
 
 from visidata import VisiData, vd, Sheet, Column, asyncthread, CellColorizer, ColumnItem

@@ -66,6 +66,7 @@ class GrepSheet(JsonSheet):
                         with self.open_text_source() as fp:
                             try:
                                 extract_line_no = True
+                                line_no = None
                                 for L in fp:
                                     L = L.rstrip(linesep)
                                     sep1 = L.index(':')
@@ -97,6 +98,8 @@ class GrepSheet(JsonSheet):
 def sysopen_row(sheet, row):
     '''Open the file in an editor at the specific line.'''
     if sheet.nRows == 0: return
+    given = None
+    p = None
     try:
         given = row.file
         if vd.options.grep_base_dir and not os.path.isabs(given):

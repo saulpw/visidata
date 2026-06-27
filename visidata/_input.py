@@ -509,6 +509,7 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
 
         return updater(val)
 
+    input_kwargs = {}
     while True:
         try:
             input_kwargs = kwargs[cur_input_key]
@@ -701,6 +702,7 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
     editargs = dict(value=value, options=self.options)
 
     editargs.update(kwargs)  # update with user-specified args
+    r = None
     try:
         r = vd.editText(y, x, w, attr=colors.color_edit_cell, **editargs)
     except curses.error:

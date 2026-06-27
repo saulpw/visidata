@@ -1091,8 +1091,8 @@ class F5LogSheet(Sheet):
         else:
             object_regex = None
 
+        import zoneinfo
         try:
-            import zoneinfo
             self._log_tz = zoneinfo.ZoneInfo(
                 vd.options.get("f5log_log_timzeone", "UTC")
             )
@@ -1113,6 +1113,7 @@ class F5LogSheet(Sheet):
             kv = {
                 "message": m.get("message"),
             }
+            timestamp = None
             if m.get("date1"):
                 #
                 _t = m.get("date1")
@@ -1136,6 +1137,7 @@ class F5LogSheet(Sheet):
                             ),
                         ),
                     )
+                    continue  # unparseable date1: emit only the error row
             elif m.get("date2"):
                 timestamp = datetime.strptime(m.get("date2"), "%Y-%m-%dT%H:%M:%S%z")
             elif m.get("date3"):

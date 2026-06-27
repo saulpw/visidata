@@ -157,6 +157,7 @@ def save_xlsx(vd, p, *sheets):
             row.append(v)
         return row
 
+    ws = None
     for vs in sheets:
         if vs.xls_name != vs.names[-1]:
             vd.warning(f'saving {vs.name} as {vs.xls_name}')

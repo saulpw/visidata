@@ -1,4 +1,36 @@
 {
+    "include": [
+        "visidata"
+    ],
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+        "visidata/vendor",
+        "visidata/loaders/unzip_http.py",
+        "visidata/apps/galcon",
+        "visidata/apps/vgit",
+        "visidata/experimental"
+    ],
+
+    "//": "Disabled rules are dominated by false positives from VisiData's dynamic patterns (vd.* injection, @VisiData.api, lazy mappings, deferred/optional imports, custom annotations). reportUndefinedVariable / reportPossiblyUnbound stay ON: they catch real NameError-class bugs.",
     "reportAttributeAccessIssue": "none",
-    "reportOptionalMemberAccess": "none"
+    "reportOptionalMemberAccess": "none",
+    "reportArgumentType": "none",
+    "reportFunctionMemberAccess": "none",
+    "reportCallIssue": "none",
+    "reportMissingImports": "none",
+    "reportIncompatibleMethodOverride": "none",
+    "reportOptionalSubscript": "none",
+    "reportOptionalCall": "none",
+    "reportOptionalOperand": "none",
+    "reportOptionalIterable": "none",
+    "reportOptionalContextManager": "none",
+    "reportGeneralTypeIssues": "none",
+    "reportReturnType": "none",
+    "reportRedeclaration": "none",
+    "reportOperatorIssue": "none",
+    "reportInvalidTypeForm": "none",
+    "reportIndexIssue": "none",
+    "reportAssignmentType": "none",
+    "reportPrivateImportUsage": "none"
 }

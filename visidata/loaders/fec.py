@@ -62,6 +62,7 @@ class DiveSheet(Sheet):
         if self.size == 0:
             return
 
+        colgetter = None
         if isinstance(mapping, list):
             first = mapping[0]
             if isinstance(first, dict):

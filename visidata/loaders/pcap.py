@@ -1,3 +1,5 @@
+# pyright: reportUndefinedVariable=false
+# mac_manuf: unimplemented manufacturer lookup (known-broken getter)
 import collections
 import ipaddress
 

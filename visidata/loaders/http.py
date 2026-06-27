@@ -49,6 +49,7 @@ def openurl_http(vd, path, filetype=None):
         ctx.verify_mode = ssl.CERT_NONE
 
     req = urllib.request.Request(path.given, **vd.options.getall('http_req_'))
+    response = None
     try:
         response = urllib.request.urlopen(req, context=ctx)
     except urllib.error.HTTPError as e:

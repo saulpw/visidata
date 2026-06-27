@@ -99,6 +99,7 @@ class PandasFreqTableSheet(PivotSheet):
         # for PandasSheet, although we could implement it with a pd.Grouper
         # that operates similarly to pd.cut.
         df = self.source.df.copy()
+        value_counts = None
 
         # Implementation (special case): for one row, this degenerates
         # to .value_counts(); however this does not order in a stable manner.

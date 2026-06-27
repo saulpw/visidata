@@ -1,4 +1,6 @@
 # SPDX-License-Identifier: MIT
+# pyright: reportUndefinedVariable=false
+# (__version__/__description__ come from exec(__about__.py))
 
 from setuptools import setup, find_packages
 from pathlib import Path

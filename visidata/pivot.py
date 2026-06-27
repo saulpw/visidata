@@ -200,6 +200,7 @@ class PivotSheet(Sheet):
 
         numericBins = []
         degenerateBinning = False
+        nbins = minval = width = 0
         if numericCols:
             nbins = self.source.options.histogram_bins or int(len(self.source.rows) ** (1./2))
             vals = tuple(numericCols[0].getValues(self.source.rows))
@@ -239,6 +240,7 @@ class PivotSheet(Sheet):
                     self.addRow(r)
 
             # find the grouprow this sourcerow belongs in, by numericbin
+            val = None
             if numericCols:
                 try:
                     val = numericCols[0].getValue(sourcerow)
