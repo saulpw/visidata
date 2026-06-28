@@ -41,6 +41,7 @@ Thanks to @midichef for many bugfixes and improvements.
 - [mouse] resize column by dragging its right edge
 - [movement] add go-screen-* commands (#2797)
 - [main] add `-O`/`--output-cell` option (#2425)
+- [open] explicit `-f` filetype now overrides url-scheme dispatch (#3126)
 - [disp] `disp_wrap_break_long_words` now defaults to True (#3082)
 - [menu] add show-cursor and show-expr (#2848)
 - [dedupe] enable custom sheet name suffixes
