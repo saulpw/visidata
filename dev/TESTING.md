@@ -34,6 +34,8 @@ Use `$VD` in test scripts instead of hardcoding `bin/vd` or `python -m visidata`
 | `test-smoke.sh` | Basic startup and directory opening |
 | `test-macros.sh` | Macro replay (#1652) |
 | `test-startpos.sh` | CLI `+N`/`+col:row` positioning (#2425) |
+| `test-options-config.sh` | `.visidatarc` numeric/boolean/string + sheet-specific options (manual-tests.md #8) |
+| `test-options-precedence.sh` | Option precedence: native < visidatarc < CLI, `--config` selection, CLI globals (manual-tests.md #12) |
 | `test-startup-time.sh` | Startup under 400ms (#2216) |
 | `test-stdin.sh` | Stdin piping (#1978) |
 | `test-stdin-replay.sh` | Replaying with stdin input |
