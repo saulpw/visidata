@@ -12,27 +12,7 @@
 5. syscopy
 6. plots and image-loaders (like png)
     - relationship between plots and mice
-8. .visidatarc
-    - numerical, boolean and string option
-    - sheet-specific and global
-    - motd_url
 10. large dataset (311)
-12. Options
-    - local + global options should be set appropriately
-        - bin/vd -f tsv sample_data/sample.tsv -f csv sample_data/benchmark.csv
-        - bin/vd sample_data/y77d-th95.json.gz -f txt
-    - the order in which options should be applied is
-        - native_options -> cli_options for config/visidata_dir/imports -> plugin_imports -> visidatarc -> rest_of_cli
-        - check that cli overwrites visidatarc
-        - check that --config selects which visidatarc to load
-        - check that visidatarc can set plugin options
-    - -w and others should be set "globally" (work without -g option)
-    - bin/vd -f xlsx sample_data/sample-sales-reps.xlsx -f json sample_data/y77d-th95.json.gz
-        - the xlsx sheet should have filetype 'xlsx'
-    - bin/vd sample_data/sample-sales-reps.xlsx -n -f xlsx
-        - `o` another file
-        - check that it loads
-        - check that it does not show 'xlsx' on its sheet-specific options
 13. Filetype
     - visidata should be able to detect filetype from extension
         - bin/vd sample_data/benchmark.csv
