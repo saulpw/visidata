@@ -9,7 +9,7 @@ Thanks to @midichef for many bugfixes and improvements.
 - [search] hlsearch: highlight all search matches for `/` and `g/`; add `highlight_search` option (#2861)
 - [keys] prettykeys overhaul: all bindings now use human-readable key names (#2594)
 - [cli] `-f` filetype now applies per-path; add `-of` for output filetype and compound filetypes (#1242 #573 #985)
-- [commands] add `define-command` and `document` for current row (#655)
+- [commands] add `define-command`; document `currow` accessor for cursor row (#655)
 - [options] `z Ctrl+S` saves edited options to the config file (#2206)
 - [dir] add split-pane file preview for DirSheet (#3024)
 - [edit] add `vd.editCellBindings` for user-customizable cell editing keybindings (#2986)
@@ -50,7 +50,7 @@ Thanks to @midichef for many bugfixes and improvements.
 - [freqtbl] only start new threads for large or complex bins (#3050)
 - [freqtbl] honor bulk_select_clear on bulk select
 - [aggregator] show summary labels in first non-aggregated column if right edge not on screen
-- [types] add numtype, use for avg/median aggregators @pequiste (#2868)
+- [types] add numtype, use for avg/median aggregators (#2868)
 - [aggregators] preserve type returned by mean/avg/median instead of coercing to int @pequiste
 - [aggregators] copy formatter/displayer col attrs to AggrColumn
 - [column] add `color_readonly` option; better status for non-writable columns (#2936)
@@ -66,7 +66,7 @@ Thanks to @midichef for many bugfixes and improvements.
 - [icons] show icons with sheets: Dir, FreqTable, Graph
 - [canvas] when labels overlap, show one instead of hiding all
 - [canvas_text] add maxXY from darkdraw, fix g sliders
-- [guides] add InputGuide and SortGuide (#3036)
+- [guides] add InputGuide (#3036) and SortGuide (#2313)
 - [guides] add MovementGuide @tabibeyal (#2313)
 - [cliptext] allow escaping VisiData markup in strings (#2959)
 - [statusbar] make lstatus_max truncation preserve vd markup (#2908)
@@ -85,7 +85,7 @@ Thanks to @midichef for many bugfixes and improvements.
 - [asynccache/shell] make asynccache/addcol-shell thread-safe and runnable in macros and replay (#2826)
 - [shell] add options.max_threads for asynccache used by addcol-shell
 - [batch] honor `--readonly` for `-o` output: refuse overwriting existing files
-- [xlsx] add hlink/folHLink to color list (#2948)
+- [xlsx] add hlink/folHlink to color list (#2948)
 - [linux] add .desktop entry and AppStream metainfo for software-center search @Jaredy899
 
 ## Loaders
