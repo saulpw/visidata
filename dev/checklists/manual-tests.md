@@ -7,20 +7,14 @@
     - test batch mode
         - bin/vd -b -p tests/append.vd
         - bin/vd -p tests/append.vd -b
-2. piping data into visidata
 4. longname-exec
 5. syscopy
 6. plots and image-loaders (like png)
     - relationship between plots and mice
 10. large dataset (311)
-13. Filetype
-    - visidata should be able to detect filetype from extension
-        - bin/vd sample_data/benchmark.csv
-    - -f should apply to inner file for zipped filetypes
-        - bin/vd -f txt sample_data/y77d-th95.json.gz
-14. Testing the starting position syntax
-    - `bin/vd +:sample-salesv4:2:3 sample_data/sample-sales-reps.xlsx`
 15. Test loading url
+    - http url load + open-row html-link (#22) automated against a loopback server in tests/test-url.sh
+    - manual residual: a real external https url (e.g. https://visidata.org/usage.tsv) — TLS + live network, not in CI
 16. Split window
     - make sure that if you exit split window, all the sheets from both panes can be accessible on the resulting stack
     - test 1
@@ -61,18 +55,13 @@
     - using cursor in active pane
         - test both panes
 17. Anything new in this release (should it have its own automated test?)
-18. `edit-cell` and then `Ctrl+O` to launch editor.
-19. Save to a non-existent format.
-    - Saves to save-filetype by default
-    - If save-filetype is a non-existent format, blocks
-    - test overwrite=y,n,c
-20. Save multiple sheets to a single non-embeddable format
-    - save name makes sense
-    - fails if not offered a directory
-    - succeeds if offered a directory
+18. `edit-cell` and then `Ctrl+O` while editing actually opens $EDITOR and the cell takes the editor result.
+    - the launch+readback mechanism is automated in visidata/tests/test_editor.py; only the in-editor Ctrl+O keystroke is manual
+19. Save with overwrite=c onto an existing file: at the `<file> exists. overwrite?` prompt, confirm y/n actually overwrites/aborts.
+    - the rest of save/overwrite (fallback, block, overwrite=y/n, multi-sheet) is automated in tests/test-save.sh + tests/test-filetype.sh
 21. Test macro-record.
-22. Test `open-row` on an html link: https://hls.gsfc.nasa.gov/data/
-23. That DirSheet requires a commit-sheet before changes on filesystem
+22. Test `open-row` on a real external html link (e.g. https://hls.gsfc.nasa.gov/data/ or a Wikipedia page).
+    - the open-row link-following mechanism is automated in tests/test-url.sh; this residual is real-world HTML over live https
 24. Test adding multiple aggregators via palette (+)
 25. time vd -p tests/quit-nosave.vdj  - note down the time. compare to PR #2369
 26. Use the z; command. Then type in a command line like echo "| Ceci n'est pas une pipe"
