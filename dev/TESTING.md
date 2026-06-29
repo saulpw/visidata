@@ -36,6 +36,10 @@ Use `$VD` in test scripts instead of hardcoding `bin/vd` or `python -m visidata`
 | `test-startpos.sh` | CLI `+N`/`+col:row` positioning (#2425) |
 | `test-options-config.sh` | `.visidatarc` numeric/boolean/string + sheet-specific options (manual-tests.md #8) |
 | `test-options-precedence.sh` | Option precedence: native < visidatarc < CLI, `--config` selection, CLI globals (manual-tests.md #12) |
+| `test-save.sh` | Save overwrite=c/n/y and multi-sheet save-all to dir/non-dir/embeddable (manual-tests.md #19 #20) |
+| `test-dirsheet.sh` | DirSheet defers rename/delete until commit-sheet (manual-tests.md #23) |
+| `test-url.sh` | Load tsv from an http URL + open-row to follow an html link, via a loopback http.server (manual-tests.md #15 #22) |
+| `test-newfeatures.sh` | v3.4 bash-shaped features: `z Ctrl+S` saves options to config (#2206), `--profile` dump |
 | `test-startup-time.sh` | Startup under 400ms (#2216) |
 | `test-stdin.sh` | Stdin piping (#1978) |
 | `test-stdin-replay.sh` | Replaying with stdin input |

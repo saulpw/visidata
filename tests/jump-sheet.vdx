@@ -1,0 +1,4 @@
+# jump-sheet selects a sheet by name; the named sheet becomes the active/top sheet (v3.4)
+open-file sample_data/a.tsv
+open-file sample_data/b.tsv
+jump-sheet a

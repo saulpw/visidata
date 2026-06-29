@@ -53,6 +53,13 @@ if [[ "$result" != "1" ]]; then
     FAIL=1
 fi
 
+# === -f applies to the inner file of a compressed path (manual-tests.md #13) ===
+# -f txt forces the inner (decompressed) file of .json.gz to the txt loader,
+# yielding a single 'text' column instead of json's tabular columns.
+$VDB -f txt sample_data/y77d-th95.json.gz -o $OUTDIR/ft-gz-txt.tsv
+firstline_check "-f txt: inner file of .json.gz forced to txt loader" \
+    "text" "$OUTDIR/ft-gz-txt.tsv"
+
 # === -f is input-only: output follows the -o extension regardless of -f position (#1242) ===
 $VDB -f csv $OUTDIR/ft-data.txt -o $OUTDIR/ft-out1.txt
 firstline_check "-f before -o: -f does not leak, output by extension" $'a\tb' $OUTDIR/ft-out1.txt
