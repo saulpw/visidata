@@ -21,8 +21,8 @@ class ParquetColumn(Column):
         if rownum is None:
             return None
         val = self.source[rownum]
-        if val.type == 'large_string':
-            return memoryview(val.as_buffer())[:2**20].tobytes().decode('utf-8')
+        if val.type == 'large_string' and (buffer := val.as_buffer()):
+            return memoryview(buffer)[:2**20].tobytes().decode('utf-8')
         else:
             return val.as_py()
 
