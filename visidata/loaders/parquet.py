@@ -22,7 +22,10 @@ class ParquetColumn(Column):
             return None
         val = self.source[rownum]
         if val.type == 'large_string':
-            return memoryview(val.as_buffer())[:2**20].tobytes().decode('utf-8')
+            buf = val.as_buffer()
+            if buf is None:
+                return None
+            return memoryview(buf)[:2**20].tobytes().decode('utf-8')
         else:
             return val.as_py()
 
