@@ -15,6 +15,8 @@ BaseSheet.init('drag1')
 
 @VisiData.after
 def initCurses(vd):
+    if not getattr(curses, 'mousemask', None):
+      return
     curses.MOUSE_ALL = 0xffffffff
     curses.mouseEvents = {}
 
