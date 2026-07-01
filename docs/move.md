@@ -9,7 +9,7 @@ eleventyNavigation:
 - 'g' prefix goes all the way
 .  'gh' (or g Left) already goes to the first column, but maybe '0' should also.
 - (call out no number prefix?)
-- '/' and '?' search for regex, 'n' and 'N' continue.  These should work just like in vim but only within a single column.
+- '/' and '?' search for regex, 'z/' and 'z?' search by Python expr. 'n' and 'N' continue the last search of either type.  These should work just like in vim but only within a single column.
   - 'g' searches across all columns
 - 'zr'/'zc' go to a specific row or column by number
 - 'r' and 'c' go by row key or column name

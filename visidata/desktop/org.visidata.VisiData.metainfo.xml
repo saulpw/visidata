@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.visidata.VisiData</id>
+  <name>VisiData</name>
+  <summary>Terminal interface for exploring and arranging tabular data</summary>
+
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+
+  <description>
+    <p>
+      VisiData is an interactive multitool for tabular data. It combines the
+      clarity of a spreadsheet, the efficiency of the terminal, and the power of
+      Python, into a lightweight utility which can handle millions of rows with
+      ease.
+    </p>
+    <p>
+      It supports many formats including CSV, TSV, JSON, Excel (.xlsx), SQLite,
+      and many others. Open data from the command line or pipe it in for quick
+      exploration and transformation.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">visidata.desktop</launchable>
+
+  <url type="homepage">https://visidata.org</url>
+  <url type="bugtracker">https://github.com/saulpw/visidata/issues</url>
+  <url type="help">https://visidata.org/docs</url>
+  <url type="faq">https://visidata.org/install</url>
+
+  <developer_name>Saul Pwanson</developer_name>
+
+  <screenshots>
+    <screenshot type="default">
+      <image xml:space="preserve">https://raw.githubusercontent.com/saulpw/visidata/develop/docs/assets/guide.png</image>
+      <caption>Interactive guide showing VisiData in use</caption>
+    </screenshot>
+    <screenshot>
+      <image xml:space="preserve">https://raw.githubusercontent.com/saulpw/visidata/develop/docs/assets/vd-screenshot-options-colors.png</image>
+      <caption>Options sheet with color configuration in VisiData</caption>
+    </screenshot>
+  </screenshots>
+
+  <keywords>
+    <keyword>terminal</keyword>
+    <keyword>spreadsheet</keyword>
+    <keyword>tabular data</keyword>
+    <keyword>csv</keyword>
+    <keyword>data</keyword>
+  </keywords>
+</component>

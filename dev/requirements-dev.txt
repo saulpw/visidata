@@ -1,4 +1,6 @@
 markdown
+pyright
 pytest
 pyyaml
+ruff
 tox

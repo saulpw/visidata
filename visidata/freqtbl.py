@@ -1,7 +1,7 @@
 from copy import copy
 import itertools
 
-from visidata import vd, vlen, VisiData, Column, AttrColumn, Sheet, ColumnsSheet, ENTER, Fanout
+from visidata import vd, vlen, VisiData, Column, AttrColumn, Sheet, ColumnsSheet, Fanout, Progress, asyncthread
 from visidata.pivot import PivotSheet, PivotGroupRow
 
 
@@ -31,7 +31,7 @@ class HistogramColumn(Column):
 
 def makeFreqTable(sheet, *groupByCols):
     if not any(groupByCols):
-        vd.fail('FreqTableSheet requires at least 1 column for grouping')
+        vd.fail('no columns for grouping')
     return FreqTableSheet(sheet.name,
                           '%s_freq' % '-'.join(col.name for col in groupByCols),
                           groupByCols=groupByCols,
@@ -47,6 +47,8 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
 
 - `Enter` to open a copy of the source sheet, with only the rows in the current bin.
 - `g Enter` to open a copy of the source sheet, with a combination of the rows from all selected bins.
+- `zEnter` to open a copy of the source sheet, with all rows *except* those in the current bin.
+- `gzEnter` to open a copy of the source sheet, with all rows *except* those in selected bins.
 
 ## Tips
 
@@ -61,11 +63,13 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
 
     def selectRow(self, row):
         # Does not create an undo-operation for the select on the source rows. The caller should create undo-information itself.
-        self.source.select(row.sourcerows, status=False, add_undo=False)     # select all entries in the bin on the source sheet
+        for r in Progress(row.sourcerows, 'selecting'):
+            self.source.selectRow(r)
         return super().selectRow(row)  # then select the bin itself on this sheet
 
     def unselectRow(self, row):
-        self.source.unselect(row.sourcerows, status=False, add_undo=False)
+        for r in Progress(row.sourcerows, 'unselecting'):
+            self.source.unselectRow(r)
         return super().unselectRow(row)
 
     def addUndoSelection(self):
@@ -80,6 +84,8 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
     def select(self, rows, status=True, progress=True, add_undo=True):
         if add_undo:
             self.addUndoSelection()
+        if self.options.bulk_select_clear:  # clear source once, not per-bin in selectRow
+            self.source._selectedRows.clear()
         super().select(rows, status, progress, add_undo=False)
 
     def unselect(self, rows, status=True, progress=True, add_undo=True):
@@ -93,18 +99,21 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
             self.addUndoSelection()
         super().toggle(rows, add_undo=False)
 
+    @asyncthread
     def select_row(self, row, add_undo=True):
         'Add single *row* to set of selected rows, and corresponding rows in source sheet.'
         if add_undo:
             self.addUndoSelection()
         super().select_row(row, add_undo=False)
 
+    @asyncthread
     def unselect_row(self, row, add_undo=True):
         'Remove single *row* from set of selected rows, and remove corresponding rows in source sheet.'
         if add_undo:
             self.addUndoSelection()
         super().unselect_row(row, add_undo=False)
 
+    @asyncthread
     def toggle_row(self, row, add_undo=True):
         'Toggle selection of given *row* and of corresponding rows in source sheet.'
         if add_undo:
@@ -115,7 +124,7 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
         super().resetCols()
 
         # add default bonus columns
-        countCol = AttrColumn('count', 'sourcerows', type=vlen)
+        countCol = AttrColumn('count', 'sourcerows', type=vlen, width=9) #width=9 to properly align counts < 10**7
         for c in [
             countCol,
             Column('percent', type=float, getter=lambda col,row: len(row.sourcerows)*100/col.sheet.source.nRows),
@@ -155,7 +164,6 @@ Each row on this sheet corresponds to a *bin* of rows on the source sheet that h
     def openRows(self, rows):
         vs = copy(self.source)
         vs.names = vs.names + ["several"]
-        vs.source = self
         vs.rows = list(itertools.chain.from_iterable(row.sourcerows for row in rows))
         return vs
 
@@ -184,18 +192,29 @@ class FreqTablePreviewSheet(Sheet):
         return self.source.cursorRow.sourcerows
 
 
+@Sheet.api
+def exceptRows(sheet, exceptrows):
+    'Return all rows except *exceptrows* (single row or list of rows).'
+    if not isinstance(exceptrows, list):
+        exceptrows = [exceptrows]
+    return [r for r in sheet.rows if r not in exceptrows]
+
 FreqTableSheet.addCommand('', 'open-preview', 'vd.push(FreqTablePreviewSheet(sheet.name, "preview", source=sheet, columns=source.columns), pane=2); vd.options.disp_splitwin_pct=50', 'open split preview of source rows at cursor')
 
 Sheet.addCommand('F', 'freq-col', 'vd.push(makeFreqTable(sheet, cursorCol))', 'open Frequency Table grouped on current column, with aggregations of other columns')
 Sheet.addCommand('gF', 'freq-keys', 'vd.push(makeFreqTable(sheet, *keyCols)) if keyCols else vd.fail("there are no key columns to group by")', 'open Frequency Table grouped by all key columns on source sheet, with aggregations of other columns')
 Sheet.addCommand('zF', 'freq-summary', 'vd.push(makeFreqTableSheetSummary(sheet, Column("Total", sheet=sheet, getter=lambda col, row: "Total")))', 'open one-line summary for all rows and selected rows')
 
-ColumnsSheet.addCommand(ENTER, 'freq-row', 'vd.push(makeFreqTable(source[0], cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row')
+ColumnsSheet.addCommand('Enter', 'freq-row', 'vd.push(makeFreqTable(source[0], cursorRow))', 'open a Frequency Table sheet grouped on column referenced in current row')
 vd.addMenuItem('Data', 'Frequency table', 'current row', 'freq-row')
 
 FreqTableSheet.addCommand('gu', 'unselect-rows', 'unselect(selectedRows)', 'unselect all source rows grouped in current row')
-FreqTableSheet.addCommand('g'+ENTER, 'dive-selected', 'vd.push(openRows(selectedRows))', 'open copy of source sheet with rows that are grouped in selected rows')
+FreqTableSheet.addCommand('gEnter', 'dive-selected', 'vd.push(openRows(selectedRows))', 'open copy of source sheet with rows that are grouped in selected rows')
 FreqTableSheet.addCommand('', 'select-first', 'for r in rows: source.select([r.sourcerows[0]])', 'select first source row in each bin')
+FreqTableSheet.addCommand('zEnter', 'dive-except', 'vd.push(openRows(exceptRows(cursorRow)))', 'open copy of source sheet excluding rows in current bin')
+FreqTableSheet.addCommand('gzEnter', 'dive-except-selected', 'vd.push(openRows(exceptRows(selectedRows)))', 'open copy of source sheet excluding rows in selected bins')
+FreqTableSheet.bindkey('p', 'no-op')  #freqtbl rows aren't designed to allow pasting, so the default paste commands cause errors
+FreqTableSheet.bindkey('P', 'no-op')
 
 HistogramColumn.init('largest', lambda: 1)
 

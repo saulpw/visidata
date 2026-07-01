@@ -13,15 +13,15 @@ def date_parse(vd):
 
 vd.help_date = '''
 - RFC3339: `%Y-%m-%d %H:%M:%S.%f %z`
-- `%A`  Weekday as locale’s full name.
+- `%A`  Weekday as locale's full name.
 - `%w`  Weekday as a decimal number, where 0 is Sunday and 6 is Saturday.
 - `%d`  Day of the month as a zero-padded decimal number.
-- `%b`  Month as locale’s abbreviated name.
-- `%B`  Month as locale’s full name.
-- `%p`  Locale’s equivalent of either AM or PM.
-- `%c`  Locale’s appropriate date and time representation.
-- `%x`  Locale’s appropriate date representation.
-- `%X`  Locale’s appropriate time representation.
+- `%b`  Month as locale's abbreviated name.
+- `%B`  Month as locale's full name.
+- `%p`  Locale's equivalent of either AM or PM.
+- `%c`  Locale's appropriate date and time representation.
+- `%x`  Locale's appropriate date representation.
+- `%X`  Locale's appropriate time representation.
 - `%Z`  Time zone name (empty string if the object is naive).
 
 See [:onclick https://strftime.org]Python strftime()[/] for a full list of format codes.

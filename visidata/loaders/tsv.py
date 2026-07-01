@@ -1,5 +1,3 @@
-import os
-import contextlib
 import itertools
 import collections
 import math
@@ -8,8 +6,8 @@ import time
 from visidata import vd, asyncthread, options, Progress, ColumnItem, SequenceSheet, Sheet, VisiData
 from visidata import namedlist, filesize
 
-vd.option('delimiter', '\t', 'field delimiter to use for tsv/usv filetype', replay=True)
-vd.option('row_delimiter', '\n', 'row delimiter to use for tsv/usv filetype', replay=True)
+vd.option('delimiter', '\t', 'field delimiter to use for tsv/csv filetype', replay=True)
+vd.option('row_delimiter', '\n', 'row delimiter to use for tsv/csv filetype', replay=True)
 vd.option('tsv_safe_newline', '\u001e', 'replacement for newline character when saving to tsv', replay=True)
 vd.option('tsv_safe_tab', '\u001f', 'replacement for tab character when saving to tsv', replay=True)
 
@@ -28,28 +26,27 @@ def adaptive_bufferer(fp, max_buffer_size=65536):
     small"""
     buffer_size = 8
     processed_buffer_size = 0
-    previous_start_time = time.time()
+    t_read = 0
+    t_fill_target = 1   #in seconds
     while True:
-        next_chunk = fp.read(max(buffer_size, 1))
+        t_preread = time.time()
+        next_chunk = fp.read(buffer_size)
+        t_postread = time.time()
         if not next_chunk:
             break
-
         yield next_chunk
-
+        t_read += t_postread - t_preread
         processed_buffer_size += len(next_chunk)
 
-        current_time = time.time()
-        current_delta = current_time - previous_start_time
-
-        if current_delta < 1:
-            # if it takes less than one second to fill the buffer, double the size of the buffer
+        speed_ratio = t_read / t_fill_target
+        if speed_ratio <= 0.5:
+            # if filling the buffer takes less than half the ideal time, double the size of the buffer.
             buffer_size = min(buffer_size * 2, max_buffer_size)
         else:
-            # if it takes longer than one second, decrease the buffer size so it takes about
-            # 1 second to fill it
-            previous_start_time = current_time
-            buffer_size = math.ceil(min(processed_buffer_size / current_delta, max_buffer_size))
+            # adjust the buffer size proportionately to how long it took to fill
+            buffer_size = math.ceil(min(processed_buffer_size / speed_ratio, max_buffer_size))
             processed_buffer_size = 0
+            t_read = 0
 
 def splitter(stream, delim='\n'):
     'Generates one line/row/record at a time from stream, separated by delim'
@@ -69,12 +66,9 @@ def splitter(stream, delim='\n'):
 
 # rowdef: list
 class TsvSheet(SequenceSheet):
-    delimiter = ''
-    row_delimiter = ''
-
     def iterload(self):
-        delim = self.delimiter or self.options.delimiter
-        rowdelim = self.row_delimiter or self.options.row_delimiter
+        delim = self.source.options.delimiter
+        rowdelim = self.source.options.row_delimiter
         if delim == '':
             vd.warning("using '\\x00' as field delimiter")
             delim = '\x00'  #2272
@@ -102,10 +96,10 @@ class TsvSheet(SequenceSheet):
 
 
 @VisiData.api
-def save_tsv(vd, p, vs, delimiter='', row_delimiter=''):
+def save_tsv(vd, p, vs):
     'Write sheet to file `fn` as TSV.'
-    unitsep = delimiter or vs.options.delimiter
-    rowsep = row_delimiter or vs.options.row_delimiter
+    unitsep = p.options.delimiter
+    rowsep = p.options.row_delimiter
     if unitsep == '':
         vd.warning("saving with '\\x00' as field delimiter")
         unitsep = '\x00'
@@ -114,45 +108,15 @@ def save_tsv(vd, p, vs, delimiter='', row_delimiter=''):
         rowsep = '\x00'
     if unitsep == rowsep:
         vd.fail('field delimiter and row delimiter cannot be the same')
-    trdict = vs.safe_trdict()
+    trdict = vs.safe_trdict(delimiter=unitsep)
 
     with p.open(mode='w', encoding=vs.options.save_encoding) as fp:
         colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + rowsep
         fp.write(colhdr)
 
-        for dispvals in vs.iterdispvals(format=True):
+        for dispvals in vs.iterdispvals(format=True, delimiter=unitsep):
             fp.write(unitsep.join(dispvals.values()))
             fp.write(rowsep)
-
-
-@Sheet.api
-def append_tsv_row(vs, row):
-    'Append `row` to vs.source, creating file with correct headers if necessary. For internal use only.'
-    if not vs.source.exists():
-        with contextlib.suppress(FileExistsError):
-            parentdir = vs.source.parent
-            if parentdir:
-                os.makedirs(parentdir)
-
-        # Write tsv header for Sheet `vs` to Path `p`
-        trdict = vs.safe_trdict()
-        unitsep = options.delimiter
-
-        with vs.source.open(mode='w') as fp:
-            colhdr = unitsep.join(col.name.translate(trdict) for col in vs.visibleCols) + vs.options.row_delimiter
-            if colhdr.strip():  # is anything but whitespace
-                fp.write(colhdr)
-
-    newrow = ''
-
-    contents = vs.source.open(mode='r').read()
-    if not contents.endswith('\n'):  #1569
-        newrow += '\n'
-
-    newrow += '\t'.join(col.getDisplayValue(row) for col in vs.visibleCols) + '\n'
-
-    with vs.source.open(mode='a') as fp:
-        fp.write(newrow)
 
 
 vd.addGlobals({

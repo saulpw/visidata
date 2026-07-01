@@ -24,10 +24,10 @@ def num(vd, *args):
         return float(*args)
 
 
-Sheet.addCommand('i', 'addcol-incr', 'c=SettableColumn(type=int); addColumnAtCursor(c); c.setValues(rows, *numrange(nRows))', 'add column with incremental values')
-Sheet.addCommand('gi', 'setcol-incr', 'cursorCol.setValues(selectedRows, *numrange(sheet.nSelectedRows))', 'set current column for selected rows to incremental values')
-Sheet.addCommand('zi', 'addcol-incr-step', 'n=num(input("interval step: ")); c=SettableColumn(type=type(n)); addColumnAtCursor(c); c.setValues(rows, *numrange(nRows, step=n))', 'add column with incremental values times given step')
-Sheet.addCommand('gzi', 'setcol-incr-step', 'n=num(input("interval step: ")); cursorCol.setValues(selectedRows, *numrange(nSelectedRows, n))', 'set current column for selected rows to incremental values times given step')
+Sheet.addCommand('i', 'addcol-incr', 'c=SettableColumn(type=int); addColumnAtCursor(c); c.setValuesTyped(rows, *numrange(nRows))', 'add column with incremental values')
+Sheet.addCommand('gi', 'setcol-incr', 'cursorCol.setValuesTyped(selectedRows, *numrange(sheet.nSelectedRows))', 'set current column for selected rows to incremental values')
+Sheet.addCommand('zi', 'addcol-incr-step', 'n=num(input("interval step: ")); c=SettableColumn(type=type(n)); addColumnAtCursor(c); c.setValuesTyped(rows, *numrange(nRows, step=n))', 'add column with incremental values times given step')
+Sheet.addCommand('gzi', 'setcol-incr-step', 'n=num(input("interval step: ")); cursorCol.setValuesTyped(selectedRows, *numrange(nSelectedRows, n))', 'set current column for selected rows to incremental values times given step')
 
 vd.addMenuItems('''
     Column > Add column > increment > addcol-incr

@@ -1,5 +1,6 @@
 from contextlib import suppress
 import curses
+import json
 
 import visidata
 
@@ -8,20 +9,20 @@ from visidata import vd, colors, dispwidth, ColorAttr, clipstr_start
 from visidata import AttrDict
 
 
+vd.option('confirm', 'a', 'confirm interactive prompts {a=ask|y=yes}')
+
 vd.theme_option('color_edit_unfocused', '238 on 110', 'display color for unfocused input in form')
 vd.theme_option('color_edit_cell', '233 on 110', 'cell color to use when editing cell')
 vd.theme_option('disp_edit_fill', '_', 'edit field fill character')
 vd.theme_option('disp_unprintable', '·', 'substitute character for unprintables')
 vd.theme_option('mouse_interval', 1, 'max time between press/release for click (ms)', sheettype=None)
 
-vd.disp_help = 0  # current page of help shown
-vd._help_sidebars = []  # list of (help:str|HelpPane, title:str)
-
 
 class AcceptInput(Exception):
     '*args[0]* is the input to be accepted'
 
 vd._injectedInput = None  # for vd.injectInput
+vd.editCellBindings = {}  # user-customizable bindings for cell editing; use acceptThenFunc() to define
 
 
 @VisiData.api
@@ -60,16 +61,13 @@ def acceptThenFunc(*longnames):
 class EnableCursor:
     def __enter__(self):
         with suppress(curses.error):
-            curses.mousemask(0)
+            vd.enableMouse(False)
             curses.curs_set(1)
 
     def __exit__(self, exc_type, exc_val, tb):
         with suppress(curses.error):
             curses.curs_set(0)
-            if vd.options.mouse_interval:
-                curses.mousemask(curses.MOUSE_ALL if hasattr(curses, "MOUSE_ALL") else 0xffffffff)
-            else:
-                curses.mousemask(0)
+            vd.enableMouse(bool(vd.options.mouse_interval))
 
 
 def until_get_wch(scr):
@@ -187,6 +185,7 @@ class InputWidget:
                 ch = vd.getkeystroke(scr)
                 if ch in bindings:
                     self.value, self.current_i = bindings[ch](self.value, self.current_i)
+                    self.first_action = False
                 else:
                     if self.handle_key(ch, scr):
                         return self.value
@@ -196,38 +195,37 @@ class InputWidget:
         i = self.current_i  # the onscreen offset within the field where v[i] is displayed
         trunch = self.truncchar
         tr_w = dispwidth(trunch)
-        fill_w = dispwidth(self.fillchar)
 
         def _calc_display(dispval, i):
             '''Return a formatted substring of *dispval* that fills the on-screen width *w*.'''
             if i == len(dispval): # add a fillchar so the user perceives room to type
                 dispval += self.fillchar
-            dw = dispwidth(dispval)
+            dw = dispwidth(dispval, literal=True)
             if dw <= w:  # entire value fits
                 dispval += self.fillchar*(w-dw)
                 return dispval, i
             if w <= tr_w: # column is too narrow to hold a left and right truncation
                 return trunch, 0
 
-            dw = dispwidth(dispval[i:])
+            dw = dispwidth(dispval[i:], literal=True)
             if dw + tr_w <= w and dw <= w//2: #cursor is within half-colwidth of end
                 #truncate the left and show the end
-                frag, n = clipstr_start(dispval, w-tr_w)
+                frag, n = clipstr_start(dispval, w-tr_w, literal=True)
                 offset = len(dispval) - i
                 dispval = ' '*(w-tr_w - n) + trunch + frag
                 i = len(dispval) - offset
                 return dispval, i
 
             # the remaining cases need the right side truncated, after the new dispval is returned
-            dw = dispwidth(dispval[:i+1])
-            if dw + tr_w <= w and dispwidth(dispval[:i]) <= w//2: #cursor is within half-colwidth of start
+            dw = dispwidth(dispval[:i+1], literal=True)
+            if dw + tr_w <= w and dispwidth(dispval[:i], literal=True) <= w//2: #cursor is within half-colwidth of start
                 #truncate the right, and show the string start
                 pass
             else: # truncate left and right sides
                 # Place the cursor at the midpoint of the available colwidth
                 left_w = (w - 2*tr_w)//2
                 # calculate the fragment to the left of the cursor
-                l_frag, n = clipstr_start(dispval[:i], left_w)
+                l_frag, n = clipstr_start(dispval[:i], left_w, literal=True)
                 dispval = ' '*(left_w-n) + trunch + l_frag + dispval[i:]
                 i = left_w-n + len(trunch) + len(l_frag)
             return dispval, i
@@ -244,7 +242,7 @@ class InputWidget:
             #draw a space to indicate that the user can scroll right of the cell's final char
             clipdraw(scr, y, x+w, ' ', attr, 1, clear=False, literal=True)
         if scr:
-            prew = dispwidth(dispval[:i])
+            prew = dispwidth(dispval[:i], literal=True)
             if x+prew < scr.getmaxyx()[1]: #move cursor back to where the user is editing
                 scr.move(y, x+prew)
 
@@ -254,29 +252,28 @@ class InputWidget:
         v = self.value
 
         if ch == '':                               return False
-        elif ch == 'KEY_IC':                       self.insert_mode = not self.insert_mode
-        elif ch == '^A' or ch == 'KEY_HOME':       i = 0
-        elif ch == '^B' or ch == 'KEY_LEFT':       i -= 1
-        elif ch in ('^C', '^Q', '^['):             raise EscapeException(ch)
-        elif ch == '^D' or ch == 'KEY_DC':         v = delchar(v, i)
-        elif ch == '^E' or ch == 'KEY_END':        i = len(v)
-        elif ch == '^F' or ch == 'KEY_RIGHT':      i += 1
-        elif ch == '^G':
+        elif ch == 'Ins':                          self.insert_mode = not self.insert_mode
+        elif ch == 'Ctrl+A' or ch == 'Home':       i = 0
+        elif ch == 'Ctrl+B' or ch == 'Left':       i -= 1
+        elif ch in ('Ctrl+C', 'Ctrl+Q', 'Esc'): raise EscapeException(ch)
+        elif ch == 'Ctrl+D' or ch == 'Del':        v = delchar(v, i)
+        elif ch == 'Ctrl+E' or ch == 'End':        i = len(v)
+        elif ch == 'Ctrl+F' or ch == 'Right':      i += 1
+        elif ch == 'Ctrl+G':
             vd.cycleSidebar()
             return False # not considered a first keypress
-        elif ch in ('^H', 'KEY_BACKSPACE', '^?'):  i -= 1; v = delchar(v, i)
-        elif ch == '^I':                           v, i = self.completion(v, i, +1)
-        elif ch == 'KEY_BTAB':                     v, i = self.completion(v, i, -1)
-        elif ch in ['^J', '^M']:                   return True # ENTER to accept value
-        elif ch == '^K':                           v = v[:i]  # ^Kill to end-of-line
-        elif ch == '^N':
+        elif ch in ('Ctrl+H', 'Bksp', 'Ctrl+?'):   i -= 1; v = delchar(v, i)
+        elif ch == 'Tab':                          v, i = self.completion(v, i, +1)
+        elif ch == 'Shift+Tab':                    v, i = self.completion(v, i, -1)
+        elif ch == 'Enter':                        return True # ENTER to accept value
+        elif ch == 'Ctrl+K':                       v = v[:i]  # Ctrl+Kill to end-of-line
+        elif ch == 'Ctrl+N':
             c = ''
             while not c:
                 c = vd.getkeystroke(scr)
-            c = vd.prettykeys(c)
             i += len(c)
             v += c
-        elif ch == '^O':
+        elif ch == 'Ctrl+O':
             edit_v = vd.launchExternalEditor(v)
             if self.value == edit_v:
                 # leave cell unmodified when the editor exits with no change
@@ -284,22 +281,24 @@ class InputWidget:
             else:
                 self.value = edit_v
                 return True
-        elif ch == '^R':                           v = self.orig_value  # ^Reload initial value
-        elif ch == '^T':                           v = delchar(splice(v, i-2, v[i-1:i]), i)  # swap chars
-        elif ch == '^U':                           v = v[i:]; i = 0  # clear to beginning
-        elif ch == '^V':                           v = splice(v, i, until_get_wch(scr)); i += 1  # literal character
-        elif ch == '^W':                           j = find_word(v, 0, i-1, -1); v = v[:j+1] + v[i:]; i = j+1  # erase word
-        elif ch in ('KEY_DC5','kDC5','kDC3'):      j = find_word(v, i, len(v), +1); v = v[:i] + v[j+1:]  # erase word forward
-        elif ch == '^Y':                           v = splice(v, i, str(vd.memory.clipval))
-        elif ch == '^Z':                           vd.suspend()
-        # CTRL+arrow
-        elif ch == 'kLFT5':                        i = find_word(v, 0, i-1, -1)+1;  # word left
-        elif ch == 'kRIT5':                        i = find_word(v, i, len(v)-1, +1);  # word right
-        elif ch == 'kUP5':                         pass
-        elif ch == 'kDN5':                         pass
-        elif self.history and ch == 'KEY_UP':    v, i = self.prev_history(v, i)
-        elif self.history and ch == 'KEY_DOWN':  v, i = self.next_history(v, i)
-        elif len(ch) > 1:                          pass
+        elif ch == 'Ctrl+R':                           v = self.orig_value  # Ctrl+Reload initial value
+        elif ch == 'Ctrl+T':                           v = delchar(splice(v, i-2, v[i-1:i]), i)  # swap chars
+        elif ch == 'Ctrl+U':                           v = v[i:]; i = 0  # clear to beginning
+        elif ch == 'Ctrl+V':                           v = splice(v, i, until_get_wch(scr)); i += 1  # literal character
+        elif ch in ('Ctrl+W','Alt+Bksp','Ctrl+Bksp'):  j = find_word(v, 0, i-1, -1); v = v[:j+1] + v[i:]; i = j+1  # erase word
+        elif ch in ('Ctrl+Del','Alt+Del','Alt+d'):     j = find_word(v, i, len(v)-1, +1); v = v[:i] + v[j:]  # erase word forward
+        elif ch == 'Ctrl+Y':                           v = splice(v, i, str(vd.memory.clipval))
+        elif ch == 'Ctrl+Z':                           vd.suspend()
+        elif ch == 'Ctrl+Left':                        i = find_word(v, 0, i-1, -1)+1  # word left
+        elif ch == 'Ctrl+Right':                       i = find_word(v, i, len(v)-1, +1)  # word right
+        elif ch == 'Ctrl+Up':                          pass
+        elif ch == 'Ctrl+Down':                        pass
+        elif ch == 'Up':
+            if self.history: v, i = self.prev_history(v, i)
+        elif ch == 'Down':
+            if self.history: v, i = self.next_history(v, i)
+        elif ch == 'KEY_RESIZE':                       pass
+        elif len(ch) > 1:                              vd.warning(f'unknown key {ch}')
         else:
             if self.first_action:
                 v = ''
@@ -328,7 +327,7 @@ class InputWidget:
             self.former_i = i
         try:
             r = self.completer_func(v[:self.former_i], self.comps_idx)
-        except Exception as e:
+        except Exception:
             # raise  # beep/flash; how to report exception?
             return v, i
 
@@ -407,12 +406,19 @@ def editText(vd, y, x, w, attr=ColorAttr(), value='',
             vd.setLastArgs(v)
 
     if value:
+        t = type(value)
         if isinstance(value, (int, float)) and v[-1] == '%':  #2082
             pct = float(v[:-1])
             v = pct*value/100
-
-        # convert back to type of original value
-        v = type(value)(v)
+            # convert back to type of original value
+            v = t(v)
+        elif isinstance(v, str) and isinstance(value, (list, tuple, dict)):
+            import ast
+            v = ast.literal_eval(v)
+            if not isinstance(v, t):
+                vd.fail(f'error parsing string `{v}` into {t}')
+        else:
+            v = t(v)
 
     return v
 
@@ -431,7 +437,7 @@ def inputsingle(vd, prompt, record=True):
     y = sheet.windowHeight-1
     w = sheet.windowWidth
     rstatuslen = vd.drawRightStatus(sheet._scr, sheet)
-    promptlen = clipdraw(sheet._scr, y, 0, prompt, 0, w=w-rstatuslen-1)
+    promptlen = clipdraw(sheet._scr, y, 0, prompt, 0, w=w-rstatuslen-1, literal=True)
     sheet._scr.move(y, w-promptlen-rstatuslen-2)
 
     while not v:
@@ -445,9 +451,6 @@ def inputsingle(vd, prompt, record=True):
 @VisiData.api
 def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
     'A simple form, where each input is an entry in `kwargs`, with the key being the key in the returned dict, and the value being a dictionary of kwargs to the singular input().'
-    sheet = vd.activeSheet
-    scr = sheet._scr
-
     previnput = vd.getCommandInput()
     if previnput is not None:
         ret = None
@@ -468,6 +471,9 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
             return ret
 
         assert False, type(previnput)
+
+    sheet = vd.activeSheet  # after replay shortcut: no active sheet during bulk replay-reset
+    scr = sheet._scr
 
     maxw = sheet.windowWidth//2
     attr = colors.color_edit_unfocused
@@ -496,12 +502,14 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
         for k, v in kwargs.items():
             #recalculate y to adjust for screen resizes during input()
             y = sheet.windowHeight-v.get('dy')-1
-            maxw = min(sheet.windowWidth-1, max(dispwidth(v.get('prompt')), dispwidth(str(v.get('value', '')))))
-            promptlen = clipdraw(scr, y, 0, v.get('prompt'), attr, w=maxw)  #1947
-            promptlen = clipdraw(scr, y, promptlen, v.get('value', ''),  attr, w=maxw)
+            maxw = min(sheet.windowWidth-1, max(dispwidth(v.get('prompt'), literal=True),
+                                                dispwidth(str(v.get('value', '')), literal=True)))
+            promptlen = clipdraw(scr, y, 0, v.get('prompt'), attr, w=maxw, literal=True)  #1947
+            promptlen = clipdraw(scr, y, promptlen, v.get('value', ''),  attr, w=maxw, literal=True)
 
         return updater(val)
 
+    input_kwargs = {}
     while True:
         try:
             input_kwargs = kwargs[cur_input_key]
@@ -509,13 +517,12 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
                                              attr=colors.color_edit_cell,
                                              updater=_drawPrompt,
                                              record=False,
+                                             _input_rows=len(keys),
                                              bindings={
-                'KEY_BTAB': change_input(-1),
-                '^I':       change_input(+1),
-                'KEY_SR':   change_input(-1),
-                'KEY_SF':   change_input(+1),
-                'kUP':      change_input(-1),
-                'kDN':      change_input(+1),
+                'Shift+Tab':   change_input(-1),
+                'Tab':     change_input(+1),
+                'Shift+Up':   change_input(-1),
+                'Shift+Down': change_input(+1),
             })
             break
         except ChangeInput as e:
@@ -562,7 +569,8 @@ def input(vd, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None,
         attr = ColorAttr()
     sheet = vd.activeSheet
     if not vd.cursesEnabled:
-        if kwargs.get('record', True) and vd.cmdlog:
+        if vd.cmdlog:
+            # batch/replay mode: use replay input regardless of record flag; never read stdin
             return vd.getCommandInput()
 
         if kwargs.get('display', True):
@@ -614,6 +622,8 @@ def input(vd, prompt, type=None, defaultLast=False, history=[], dy=0, attr=None,
 @VisiData.api
 def confirm(vd, prompt, exc=EscapeException):
     'Display *prompt* on status line and demand input that starts with "Y" or "y" to proceed.  Raise *exc* otherwise.  Return True.'
+    if vd.options.confirm.startswith('y'):
+        return True
     if vd.options.batch:
         return vd.fail('cannot confirm in batch mode: ' + prompt)
 
@@ -650,6 +660,7 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
     x, w = self._visibleColLayout.get(vcolidx, (0, 0))
 
     col = self.availCols[vcolidx]
+
     if rowidx is None:
         rowidx = self.cursorRowIndex
 
@@ -657,26 +668,33 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
         y = 0
         value = value or col.name
     else:
+        if col.readonly:
+            vd.fail('cannot edit readonly column')
         y, h = self._rowLayout.get(rowidx, (0, 0))
-        value = value or col.getDisplayValue(self.rows[self.cursorRowIndex])
+        value = value or col.getFullDisplayValue(self.rows[self.cursorRowIndex])
 
     bindings={
-        'kUP':        acceptThenFunc('go-up', 'rename-col' if rowidx < 0 else 'edit-cell'),
-        'KEY_SR':     acceptThenFunc('go-up', 'rename-col' if rowidx < 0 else 'edit-cell'),
-        'kDN':        acceptThenFunc('go-down', 'rename-col' if rowidx < 0 else 'edit-cell'),
-        'KEY_SF':     acceptThenFunc('go-down', 'rename-col' if rowidx < 0 else 'edit-cell'),
-        'KEY_SRIGHT': acceptThenFunc('go-right', 'rename-col' if rowidx < 0 else 'edit-cell'),
-        'KEY_SLEFT':  acceptThenFunc('go-left', 'rename-col' if rowidx < 0 else 'edit-cell'),
-        '^I':         acceptThenFunc('go-right', 'rename-col' if rowidx < 0 else 'edit-cell'),
-        'KEY_BTAB':   acceptThenFunc('go-left', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'Shift+Up':     acceptThenFunc('go-up', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'Shift+Down':     acceptThenFunc('go-down', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'Shift+Right': acceptThenFunc('go-right', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'Shift+Left':  acceptThenFunc('go-left', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'Tab':         acceptThenFunc('go-right', 'rename-col' if rowidx < 0 else 'edit-cell'),
+        'Shift+Tab':   acceptThenFunc('go-left', 'rename-col' if rowidx < 0 else 'edit-cell'),
     }
 
     if vcolidx == self.nVisibleCols-1 or vcolidx >= self.nCols-1:
-        bindings['^I'] = acceptThenFunc('go-down', 'go-leftmost', 'edit-cell')
+        if rowidx < 0:
+            bindings['Tab'] = acceptThenFunc('go-leftmost', 'rename-col')
+        else:
+            bindings['Tab'] = acceptThenFunc('go-down', 'go-leftmost', 'edit-cell')
 
     if vcolidx <= 0:
-        bindings['KEY_BTAB'] = acceptThenFunc('go-up', 'go-rightmost', 'edit-cell')
+        if rowidx < 0:
+            bindings['Shift+Tab'] = acceptThenFunc('go-rightmost', 'rename-col')
+        else:
+            bindings['Shift+Tab'] = acceptThenFunc('go-up', 'go-rightmost', 'edit-cell')
 
+    bindings.update(vd.editCellBindings)
     # update local bindings with kwargs.bindings instead of the inverse, to preserve kwargs.bindings for caller
     bindings.update(kwargs.get('bindings', {}))
     kwargs['bindings'] = bindings
@@ -684,10 +702,11 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
     editargs = dict(value=value, options=self.options)
 
     editargs.update(kwargs)  # update with user-specified args
+    r = None
     try:
         r = vd.editText(y, x, w, attr=colors.color_edit_cell, **editargs)
     except curses.error:
-        vd.fail(f'aborting edit due to resize')
+        vd.fail('aborting edit due to resize')
 
     if rowidx >= 0:  # if not header
         r = col.type(r)  # convert input to column type, let exceptions be raised
@@ -695,4 +714,4 @@ def editCell(self, vcolidx=None, rowidx=None, value=None, **kwargs):
     return r
 
 
-vd.addGlobals(CompleteKey=CompleteKey, AcceptInput=AcceptInput, InputWidget=InputWidget)
+vd.addGlobals(CompleteKey=CompleteKey, AcceptInput=AcceptInput, InputWidget=InputWidget, acceptThenFunc=acceptThenFunc)

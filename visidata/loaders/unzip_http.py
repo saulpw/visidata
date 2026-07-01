@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Copyright (c) 2022 Saul Pwanson
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -52,7 +54,6 @@ import fnmatch
 import argparse
 import pathlib
 import urllib.parse
-from visidata import vd
 
 
 __version__ = '0.6'
@@ -125,7 +126,7 @@ class RemoteZipFile:
     magic_eocd = b'\x50\x4b\x05\x06'
 
     def __init__(self, url):
-        urllib3 = vd.importExternal('urllib3')
+        import urllib3
         self.url = url
         self.http = urllib3.PoolManager()
         self.zip_size = 0
@@ -150,10 +151,16 @@ class RemoteZipFile:
 
     def infoiter(self):
         resp = self.http.request('HEAD', self.url)
+        if not (200 <= resp.status <= 299):
+            error(f'cannot open URL: HTTP status {resp.status}')
+
         r = resp.headers.get('Accept-Ranges', '')
         if r != 'bytes':
             hostname = urllib.parse.urlparse(self.url).netloc
             warning(f"{hostname} Accept-Ranges header ('{r}') is not 'bytes'--trying anyway")
+
+        if 'Content-Length' not in resp.headers:
+            error('cannot open URL: missing Content-Length header')
 
         self.zip_size = int(resp.headers['Content-Length'])
         resp = self.get_range(
@@ -218,7 +225,7 @@ class RemoteZipFile:
 
             outpath = path/member
             os.makedirs(outpath.parent, exist_ok=True)
-            with self._open(member) as fpin:
+            with self.open(member) as fpin:
                 with open(path/member, mode='wb') as fpout:
                     while True:
                         r = fpin.read(65536)
@@ -238,7 +245,7 @@ class RemoteZipFile:
             if any(fnmatch.fnmatch(f.filename, g) for g in globs):
                 yield f
 
-    def _open(self, fn):
+    def open(self, fn):
         if isinstance(fn, str):
             f = list(self.matching_files(fn))
             if not f:
@@ -259,8 +266,8 @@ class RemoteZipFile:
         else:
             error(f'unknown compression method {method}')
 
-    def open(self, fn):
-        return io.TextIOWrapper(self._open(fn))
+    def open_text(self, fn):
+        return io.TextIOWrapper(self.open(fn))
 
 
 class RemoteZipStream(io.RawIOBase):

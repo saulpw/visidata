@@ -60,6 +60,14 @@ Some examples of great bug reports:
   - [#340 by @Mikee-3000](https://github.com/saulpw/visidata/issues/340)
 
 
+## Setting Up Git Hooks
+
+VisiData includes git hooks in `dev/hooks/` that run unit tests and cmdlog tests before pushing. To enable them:
+
+```
+git config core.hooksPath dev/hooks
+```
+
 ## Submitting Source Code
 
 Check out the [Plugin Authors Guide](https://visidata.org/docs/api) for an overview of the API.

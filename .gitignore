@@ -10,9 +10,18 @@ visidata.egg-info/
 *.swo
 *dist
 *_build
+build/
 tags
 /tests/log/
 # Mac files
 .DS_Store
 .direnv
 .envrc
+.meta
+.claude
+
+# Generated man pages (run `make man` to build)
+visidata/man/vd.1
+visidata/man/visidata.1
+visidata/man/vd.txt
+docs/man.md

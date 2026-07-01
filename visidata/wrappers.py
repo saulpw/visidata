@@ -53,6 +53,7 @@ class TypedWrapper:
     def __eq__(self, x):
         if isinstance(x, TypedWrapper):
             return self.type == x.type and self.val == x.val
+        return self.val == x  # a wrapped None compares equal to None  #3112
 
     def __iter__(self):
         return self
@@ -90,7 +91,7 @@ def wrmap(func, iterable, *args):
     for it in iterable:
         try:
             yield func(it, *args)
-        except Exception as e:
+        except Exception:
             pass
 
 

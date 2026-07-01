@@ -17,7 +17,7 @@ def abortWhatever(sheet):
         vd.status('nothing to abort')
 
 
-GitSheet.addCommand('^A', 'git-abort', 'abortWhatever()', 'abort the current in-progress action')
+GitSheet.addCommand('Ctrl+A', 'git-abort', 'abortWhatever()', 'abort the current in-progress action')
 
 
 vd.addMenuItems('Git > Abort > git-abort')

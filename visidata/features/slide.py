@@ -1,11 +1,12 @@
 '''slide rows/columns around'''
 
 import visidata
-from visidata import Sheet, moveListItem, vd
+from visidata import Sheet, ColumnsSheet, moveListItem, vd
 
 @Sheet.api
 def slide_col(sheet, colidx, newcolidx):
     vd.addUndo(moveVisibleCol, sheet, newcolidx, colidx)
+    sheet.setModified()
     return moveVisibleCol(sheet, colidx, newcolidx)
 
 @Sheet.api
@@ -17,7 +18,12 @@ def slide_keycol(sheet, fromKeyColIdx, toKeyColIdx):
 @Sheet.api
 def slide_row(sheet, rowidx, newcolidx):
     vd.addUndo(moveListItem, sheet.rows, newcolidx, rowidx)
+    sheet.setModified()
     return moveListItem(sheet.rows, rowidx, newcolidx)
+
+@ColumnsSheet.before
+def slide_row(sheet, rowidx, newcolidx):
+    sheet.rows[rowidx].sheet.setModified()  # reordering source columns modifies the source
 
 
 def moveKeyCol(sheet, fromKeyColIdx, toKeyColIdx):
@@ -116,20 +122,20 @@ def make_tester(setup_vdx):
 def test_slide_keycol_1(vd):
     t = make_tester(f'''
             open-file {sample_path}
-            +::OrderDate key-col
-            +::Region key-col
-            +::Rep key-col
+            +:OrderDate: key-col
+            +:Region: key-col
+            +:Rep: key-col
         ''')
 
     t('',                             'OrderDate Region Rep Item Units Unit_Cost Total')
-    t('+::Rep slide-leftmost',        'Rep OrderDate Region Item Units Unit_Cost Total')
-    t('+::OrderDate slide-rightmost', 'Region Rep OrderDate Item Units Unit_Cost Total')
-    t('+::Rep slide-left',            'OrderDate Rep Region Item Units Unit_Cost Total')
-    t('+::OrderDate slide-right',     'Region OrderDate Rep Item Units Unit_Cost Total')
+    t('+:Rep: slide-leftmost',        'Rep OrderDate Region Item Units Unit_Cost Total')
+    t('+:OrderDate: slide-rightmost', 'Region Rep OrderDate Item Units Unit_Cost Total')
+    t('+:Rep: slide-left',            'OrderDate Rep Region Item Units Unit_Cost Total')
+    t('+:OrderDate: slide-right',     'Region OrderDate Rep Item Units Unit_Cost Total')
 
     t('''
-        +::Item key-col
-        +::Item slide-left
+        +:Item: key-col
+        +:Item: slide-left
         slide-left
         slide-right
         slide-right
@@ -141,17 +147,17 @@ def test_slide_keycol_1(vd):
 def test_slide_leftmost(vd):
     t = make_tester(f'''open-file {benchmark_path}''')
 
-    t('+::Paid slide-leftmost', 'Paid Date Customer SKU Item Quantity Unit')
+    t('+:Paid: slide-leftmost', 'Paid Date Customer SKU Item Quantity Unit')
 
     t = make_tester(f'''
          open-file {benchmark_path}
-         +::Date key-col
+         +:Date: key-col
     ''')
 
     t('', 'Date Customer SKU Item Quantity Unit Paid')
-    t('''+::Item slide-leftmost''', 'Date Item Customer SKU Quantity Unit Paid')
-    t('''+::SKU key-col
-         +::Quantity slide-leftmost''', 'Date SKU Quantity Customer Item Unit Paid')
-    t('''+::Date slide-leftmost''', 'Date Customer SKU Item Quantity Unit Paid')
-    t('''+::Item slide-leftmost
-         +::SKU slide-leftmost''', 'Date SKU Item Customer Quantity Unit Paid')
+    t('''+:Item: slide-leftmost''', 'Date Item Customer SKU Quantity Unit Paid')
+    t('''+:SKU: key-col
+         +:Quantity: slide-leftmost''', 'Date SKU Quantity Customer Item Unit Paid')
+    t('''+:Date: slide-leftmost''', 'Date Customer SKU Item Quantity Unit Paid')
+    t('''+:Item: slide-leftmost
+         +:SKU: slide-leftmost''', 'Date SKU Item Customer Quantity Unit Paid')

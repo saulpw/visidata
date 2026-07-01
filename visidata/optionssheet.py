@@ -1,3 +1,6 @@
+import re
+
+import visidata
 from visidata import vd, VisiData, BaseSheet, Sheet, Column, AttrColumn, CellColorizer, Option
 
 
@@ -38,8 +41,9 @@ class OptionsSheet(Sheet):
         else:
             r = '# Sheet Options\nThis is a list of option settings specifically for the current sheet.'
 
-        r += f'\n\n- `e` to edit/toggle the current option value'
+        r += '\n\n- `e` to edit/toggle the current option value'
         r += '\n- `d` to restore option to builtin default'
+        r += '\n- `z Ctrl+S` to save option overrides to config file'
         return r
 
     def diffOption(self, optname):
@@ -73,19 +77,48 @@ class OptionsSheet(Sheet):
     def iterload(self):
         for k in vd.options.keys():
             v = vd.options._get(k)
+            if v.cli_only:
+                continue
             if v.sheettype in [None, BaseSheet]:
                 yield v
             elif self.source != 'global' and v.sheettype in self.source.superclasses():
                 yield v
 
     def newRow(self):
-        vd.fail('adding rows to the options sheet is not supported.')
+        vd.fail('adding rows to the options sheet is not supported')
 
 
 BaseSheet.addCommand('O', 'options-global', 'vd.push(vd.globalOptionsSheet)', 'open Options Sheet: edit global options (apply to all sheets)')
 
 BaseSheet.addCommand('zO', 'options-sheet', 'vd.push(sheet.optionsSheet)', 'open Options Sheet: edit sheet options (apply to current sheet only)')
 
+@OptionsSheet.api
+def commit(sheet, *rows):
+    'Save option overrides to config file.'
+    p = visidata.Path(vd.options.config)
+    configlines = [re.sub(r'\s*=\s*', '=', L, count=1) for L in p] if p.exists() else []
+
+    newlines = []
+    for row in sheet.rows:
+        val = sheet.diffOption(row.name)
+        if val != '' and val != vd.options.getdefault(row.name):
+            line = f'options.{row.name}={repr(val)}'
+            if line not in configlines:
+                newlines.append(line)
+
+    if not newlines:
+        vd.fail('no new options to save')
+
+    vd.confirm(f'save {len(newlines)} options to {p}? ')
+
+    with open(str(p), mode='a') as fp:
+        for line in newlines:
+            print(line, file=fp)
+
+    vd.status(f'saved {len(newlines)} options to {p}')
+
+
+OptionsSheet.addCommand('zCtrl+S', 'commit-sheet', 'commit()', 'save option overrides to config file')
 OptionsSheet.addCommand('d', 'unset-option', 'options.unset(cursorRow.name, str(source))', 'remove option override for this context')
 OptionsSheet.addCommand(None, 'edit-option', 'editOption(cursorRow)', 'edit option at current row')
 OptionsSheet.bindkey('e', 'edit-option')

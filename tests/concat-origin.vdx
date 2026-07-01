@@ -1,0 +1,6 @@
+# concat join should have origin_sheet column like append  #2929
+open-file tests/data1.tsv
+open-file tests/data2.tsv
+join-sheets-top2 concat
+col origin_sheet
+resize-col-max

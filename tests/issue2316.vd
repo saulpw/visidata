@@ -1,0 +1,4 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	sample_data/issue2316.zip	o
+			allow-error	unknown `log` filetype
+issue2316		キ.,sample.log	open-row		Enter	open .log inside zip as text not tar

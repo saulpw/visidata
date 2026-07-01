@@ -62,6 +62,8 @@ def makeAggrColumn(aggcol, aggregator):
     return AggrColumn(aggname,
                   type=aggregator.type or aggcol.type,
                   fmtstr=aggcol.fmtstr,
+                  formatter=aggcol.formatter,
+                  displayer=aggcol.displayer,
                   origCol=aggcol,
                   aggregator=aggregator)
 
@@ -198,6 +200,7 @@ class PivotSheet(Sheet):
 
         numericBins = []
         degenerateBinning = False
+        nbins = minval = width = 0
         if numericCols:
             nbins = self.source.options.histogram_bins or int(len(self.source.rows) ** (1./2))
             vals = tuple(numericCols[0].getValues(self.source.rows))
@@ -222,7 +225,7 @@ class PivotSheet(Sheet):
         # group rows by their keys (groupByCols), and separate by their pivot values (pivotCols)
         groups = {}  # [formattedDiscreteKeys] -> (numericGroupRows:dict(formattedNumericKeyRange -> PivotGroupRow), groupRow:PivotGroupRow)  # groupRow is main/error row
 
-        for sourcerow in Progress(self.source.iterrows(), 'grouping', total=self.source.nRows):
+        for sourcerow in self.source.iterrows('grouping'):
             discreteKeys = list(forward(origcol.getTypedValue(sourcerow)) for origcol in discreteCols)
 
             # wrapply will pass-through a key-able TypedWrapper
@@ -237,6 +240,7 @@ class PivotSheet(Sheet):
                     self.addRow(r)
 
             # find the grouprow this sourcerow belongs in, by numericbin
+            val = None
             if numericCols:
                 try:
                     val = numericCols[0].getValue(sourcerow)

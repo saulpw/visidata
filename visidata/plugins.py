@@ -59,7 +59,7 @@ def removePlugin(vd, plugin:str):
 
         sys.modules.pop(plugin)
         importlib.invalidate_caches()
-        vd.warning(f'"{plugin}" plugin removed')
+        vd.warning(f'`{plugin}` plugin removed')
     except FileNotFoundError:
         vd.debug("no {vd.pluginConfig} found")
 
@@ -79,6 +79,7 @@ class PluginsSheet(Sheet):
         ItemColumn('installed', width=8),
         ItemColumn('description', width=60),
     ]
+    _ordering = [('name', True)]  # sort by name initially
     nKeys = 1
     def iterload(self):
         import pkgutil

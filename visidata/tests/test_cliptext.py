@@ -189,15 +189,114 @@ class TestClipText:
         assert clips == clippeds
         assert clipw == clippedw
 
-    def test_clipdraw_chunks(self):
-        prechunks = [
-            ('', 'x'),
-            ('', 'jsonl'),
-        ]
-        scr = Mock()
-        scr.getmaxyx.return_value = (80,25)
-        visidata.clipdraw_chunks(scr, 0, 0, prechunks, visidata.ColorAttr(), w=5)
-        scr.addstr.assert_has_calls([
-                call(0, 0, 'x', 0),
-                call(0, 1, 'jso…', 0),
-        ], any_order=True)
+    @pytest.mark.parametrize('s, dispw, clipped', [
+        #clip front half
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]',
+        50,
+        '[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]…[:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]'),
+        #clip front half, dropping escaped markup
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]\uFFF9[:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:]\uFFFB[:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]',
+        50,
+        '[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]…[:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]'),
+
+        #clip back half, when front half is an exact fit at 24 wide
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234[:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]',
+        50,
+        '[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234…[:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]'),
+
+        #clip front half, when front half reaches 25 wide
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]12345[:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]',
+        50,
+        '[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]…[:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]'),
+
+        #clip back half, when front half is 24 wide and back half is 27 wide
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234[:menu-active]1234567[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:]',
+        50,
+        '[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234…[:menu-active]ten_chars3[:][:menu-active]ten_chars4[:]'),
+
+        #no clipping for a string exactly 50 wide, when front is 24 wide and back is 26
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234[:menu-active]123456[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:]',
+        50,
+        '[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234[:menu-active]123456[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:]'),
+
+        #trimming to very short widths
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234[:menu-active]123456[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:]',
+        5,
+        '…'),
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234[:menu-active]123456[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:]',
+        1,
+        '…'),
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234[:menu-active]123456[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:]',
+        0,
+        ''),
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:]1234[:menu-active]123456[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:]',
+        -1,
+        ''),
+        ('[:onclick jump-sheet-1]a[:][:onclick jump-sheet-2]ten_chars1[:][:menu-active]ten_chars3[:][:onclick jump-sheet-4]b[:]',
+        4,
+        '[:onclick jump-sheet-1]a[:]…[:onclick jump-sheet-4]b[:]'),
+        ('[:onclick jump-sheet-1]a[:][:onclick jump-sheet-2]ten_chars1[:][:menu-active]ten_chars3[:][:onclick jump-sheet-4]b[:]',
+        2,
+        '…[:onclick jump-sheet-4]b[:]'),
+
+        #no clipping, contents have plenty of room
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]',
+        100,
+        '[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]'),
+
+        #no clipping, contents fit exactly
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]',
+        70,
+        '[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]'),
+
+        #contents are too wide by 1
+        ('[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:][:menu-active]ten_chars3[:][:menu-active]ten_chars4[:][:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]',
+        69,
+         '[:onclick jump-sheet-1]ten_chars0[:][:onclick jump-sheet-2]ten_chars1[:][:menu-active]ten_chars3[:]…[:menu-active]ten_chars5[:][:menu-active]ten_chars6[:][:menu-active]ten_chars7[:]'),
+    ])
+    def test_truncate_markup_middle(self, s, dispw, clipped):
+        output = visidata.clip_markup_middle(s, dispw)
+        assert output == clipped
+
+    @pytest.mark.parametrize('text, width, expected', [
+        # color tag spanning two lines should carry over
+        ('[:error]line one\nline two[/]', 80,
+         [('[:error]line one[/]', 'line one'),
+          ('[:error]line two[/]', 'line two')]),
+        # nested tags spanning lines
+        ('[:bold]a\n[:error]b[/]\nc[/]', 80,
+         [('[:bold]a[/]', 'a'),
+          ('[:bold][:error]b[/][/]', 'b'),
+          ('[:bold]c[/]', 'c')]),
+        # no markup, multiline (should work as before)
+        ('hello\nworld', 80,
+         [('hello', 'hello'),
+          ('world', 'world')]),
+        # single line with markup (should work as before)
+        ('[:error]oops[/]', 80,
+         [('[:error]oops[/]', 'oops')]),
+        # nested tags spanning lines, closed with [:]
+        ('[:bold]a\n[:error]b\nc[:]\nd [:bold]e[/]', 80,
+         [('[:bold]a[/]', 'a'),
+          ('[:bold][:error]b[/][/]', 'b'),
+          ('[:bold][:error]c[:]', 'c'),
+          ('d [:bold]e[/]', 'd e'),
+         ]),
+    ])
+    def test_wraptext_color_spans_lines(self, text, width, expected):
+        result = list(visidata.wraptext(text, width=width))
+        assert result == expected
+
+    @pytest.mark.parametrize('text, width, expected', [
+        # escaped plain text lacking markup, to demonstrate
+        ('\uFFF9.:bold.a.:.123\uFFFb', 10,
+         [('\uFFF9.:bold.a.:.123\uFFFb', '.:bold.a.:'),
+          ('', '.123')]),
+        # escaped markup wraps just like the example above
+        ('\uFFF9[:bold]a[:]123\uFFFb', 10,
+         [('\uFFF9[:bold]a[:]123\uFFFb', '[:bold]a[:'),
+          ('', ']123')]),
+    ])
+    def test_wraptext_escaped_literals(self, text, width, expected):
+        result = list(visidata.wraptext(text, width=width))
+        assert result == expected

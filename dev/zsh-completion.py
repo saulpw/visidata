@@ -9,10 +9,10 @@ import re
 sys.path.insert(0, dirn(dirn((os.path.abspath(__file__)))))
 from visidata import vd
 
-ZSH_COMPLETION_FILE = "_visidata"
+ZSH_COMPLETION_FILE = sys.argv[1] if len(sys.argv) > 1 else "_visidata"
 ZSH_COMPLETION_TEMPLATE = "dev/zsh-completion.in"
 pat_class = re.compile("'(.*)'")
-pat_select = re.compile("^\([^)]*\)")
+pat_select = re.compile(r"^\([^)]*\)")
 
 
 def generate_completion(opt):

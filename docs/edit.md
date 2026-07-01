@@ -19,6 +19,18 @@ Command                    Operation
 `g*` *regex*/*subst*       replace matching *regex* in **current column for selected rows** with *subst*
 `g=` *expr*                evaluate Python *expr* over each selected row and set **current column** to the result
 
+## Bulk corrections
+
+`ge` unifies inconsistent values for the same logical item (e.g. "visidata", "Visidata", "VisiData", "vd") across selected rows. The initial input seeds from the current cell.
+
+1. Select the rows with inconsistent values.
+2. Move the cursor to a row with the correct value; it need not be selected.
+3. Type `ge`, edit the value if needed, and press `Enter`.
+
+All selected cells in the current column take the corrected value.
+
+A Frequency Table (`Shift+F`) makes the distinct values easy to see. Editing a key cell there propagates the correction back to the source sheet (see [note](#note) below).
+
 ## note!
 
 Modifications made to rows on derived sheets will be reflected on the source sheets.  This includes the Frequency Table: editing the key column there will change all instances on the source sheet, and if that sheet is derived from another source sheet, it will be reflected there, and so on.
@@ -39,6 +51,20 @@ Command             Operation
 `Backspace`         deletes previous character
 `Up`/`Down`         sets contents to previous/next in history
 `Tab`/`Shift-Tab`   autocompletes input (when available)
+
+### Cell navigation while editing
+
+When editing a cell (with `e`), these additional commands move to an adjacent cell and continue editing:
+
+Command             Operation
+--------            ----------
+`Shift+Down`/`Shift+Up`       saves and moves to cell below/above
+`Shift+Right`/`Shift+Left`    saves and moves to cell right/left
+`Tab`/`Shift-Tab`             saves and moves to cell right/left
+
+`Tab` wraps to the next row when at the last column; `Shift-Tab` wraps to the previous row when at the first column.
+
+These bindings can be customized; see [Customize](/docs/customize#customizing-cell-editing-keybindings).
 
 ---
 

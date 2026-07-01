@@ -1,8 +1,8 @@
 import functools
 import collections
 
-from visidata import VisiData, MetaSheet, ColumnAttr, Column, BaseSheet, VisiDataMetaSheet, SuspendCurses
-from visidata import vd, asyncthread, ENTER, drawcache, AttrDict, TextSheet
+from visidata import VisiData, MetaSheet, ColumnAttr, Column, BaseSheet, VisiDataMetaSheet, SuspendCurses, ColorAttr
+from visidata import vd, asyncthread, drawcache, AttrDict, TextSheet, Path
 
 
 vd.option('disp_help_flags', 'cmdpalette guides help hints inputfield inputkeys nometacols sidebar',
@@ -151,7 +151,9 @@ class HelpPane:
             self.parentscr = scr
 
         self.scr.erase()
-        self.scr.box()
+        cattr = kwargs.get('attr', ColorAttr())
+        h_box, w_box = self.scr.getmaxyx()
+        vd.drawBox(self.scr, 0, 0, w_box, h_box, cattr)
         self.amgr.draw(self.scr, y=1, x=2, **kwargs)
         self.scr.noutrefresh()
 
@@ -161,7 +163,8 @@ class HelpPane:
 def getHelpPane(vd, name, module='visidata') -> HelpPane:
     ret = HelpPane(name)
     try:
-        ret.amgr.load(name, (vd.pkg_resources_files(module)/f'ddw/{name}.ddw').open(encoding='utf-8'))
+        with (vd.pkg_resources_files(module)/f'ddw/{name}.ddw').open(encoding='utf-8') as fp:
+            ret.amgr.load(name, fp)
         ret.amgr.trigger(name, loop=True)
     except FileNotFoundError as e:
         vd.debug(str(e))
@@ -178,18 +181,18 @@ def openManPage(vd):
     with SuspendCurses():
         module_path = vd.pkg_resources_files(__name__.split('.')[0])
         if os.system(' '.join(['man', str(module_path/'man/vd.1')])) != 0:
-            vd.push(TextSheet('man_vd', source=module_path/'man/vd.txt'))
+            vd.push(TextSheet('man_vd', source=Path(str(module_path/'man/vd.txt'))))
 
 
-# in VisiData, g^H refers to the man page
-BaseSheet.addCommand('g^H', 'sysopen-help', 'openManPage()', 'Show the UNIX man page for VisiData')
-BaseSheet.addCommand('z^H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))', 'list commands and keybindings available on current sheet')
-BaseSheet.addCommand('gz^H', 'help-commands-all', 'vd.push(HelpSheet("all_commands", source=None, revbinds={}))', 'list commands and keybindings for all sheet types')
+# in VisiData, gCtrl+H refers to the man page
+BaseSheet.addCommand('gCtrl+H', 'sysopen-help', 'openManPage()', 'Show the UNIX man page for VisiData')
+BaseSheet.addCommand('zCtrl+H', 'help-commands', 'vd.push(HelpSheet(name + "_commands", source=sheet, revbinds={}))', 'list commands and keybindings available on current sheet')
+BaseSheet.addCommand('gzCtrl+H', 'help-commands-all', 'vd.push(HelpSheet("all_commands", source=None, revbinds={}))', 'list commands and keybindings for all sheet types')
 
-BaseSheet.bindkey('KEY_F(1)', 'sysopen-help')
-BaseSheet.bindkey('zKEY_F(1)', 'help-commands')
-BaseSheet.bindkey('zKEY_BACKSPACE', 'help-commands')
-BaseSheet.bindkey('gKEY_BACKSPACE', 'sysopen-help')
+BaseSheet.bindkey('F1', 'sysopen-help')
+BaseSheet.bindkey('zF1', 'help-commands')
+BaseSheet.bindkey('zBksp', 'help-commands')
+BaseSheet.bindkey('gBksp', 'sysopen-help')
 
 HelpSheet.addCommand(None, 'exec-command', 'quit(sheet); draw_all(); activeStack[0].execCommand(cursorRow.longname)', 'execute command on undersheet')
 BaseSheet.addCommand(None, 'open-tutorial-visidata', 'launchBrowser("https://jsvine.github.io/intro-to-visidata/")', 'open https://jsvine.github.io/intro-to-visidata/')

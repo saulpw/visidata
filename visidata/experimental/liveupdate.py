@@ -17,7 +17,7 @@ def expr(self, expr):
     try:
         self.compiledExpr = compile(expr, '<expr>', 'eval') if expr else None
         self._expr = expr
-    except SyntaxError as e:
+    except SyntaxError:
         self._expr = None
 
 

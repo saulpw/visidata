@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from visidata import vd, options, Extensible, drawcache, drawcache_property, VisiData
 import visidata
 
-__all__ = ['ColorAttr', 'colors', 'update_attr', 'ColorMaker', 'rgb_to_attr']
+__all__ = ['ColorAttr', 'colors', 'update_attr', 'ColorMaker', 'rgb_to_attr', 'css_to_xterm256', 'xterm256_to_rgb', 'rgb_to_xterm256', 'xterm256_to_css']
 
 vd.help_color = '''Color syntax: `<attribute> <fg-color> on <bg-color>`
 
@@ -78,16 +78,17 @@ def update_attr(oldattr:ColorAttr, updattr:ColorAttr, updprec:int=None) -> Color
 class ColorMaker:
     def __init__(self):
         self.color_pairs = {}  # (fg,bg) -> (pairnum, colornamestr) (pairnum can be or'ed with other attrs)
-        self.color_cache = {}  # colorname -> colorpair
+        self.colorpair_cache = {}  # colorname -> pairnum
 
     @drawcache_property
-    def colorcache(self):
+    def colorattr_cache(self):
+        'mapping of colorname or optname to ColorAttr'
         return {}
 
     def setup(self):
         try:
             curses.use_default_colors()
-        except Exception as e:
+        except Exception:
             pass
 
     @drawcache_property
@@ -115,11 +116,11 @@ class ColorMaker:
     def get_color(self, optname:str, precedence:int=0) -> ColorAttr:
         '''Return ColorAttr for options.color_foo if *optname* of either "foo" or "color_foo",
            Otherwise parse *optname* for colorstring like "bold 34 red on 135 blue".'''
-        r = self.colorcache.get(optname, None)
+        r = self.colorattr_cache.get(optname, None)
         if r is None:
             coloropt = vd.options._get(optname) or vd.options._get(f'color_{optname}')
             colornamestr = coloropt.value if coloropt else optname
-            r = self.colorcache[optname] = self._colornames_to_cattr(colornamestr, precedence)
+            r = self.colorattr_cache[optname] = self._colornames_to_cattr(colornamestr, precedence)
         return r
 
     def _split_colorstr(self, colorstr):
@@ -157,7 +158,7 @@ class ColorMaker:
         if not colorname:
             return default
 
-        r = self.color_cache.get(colorname, None)
+        r = self.colorpair_cache.get(colorname, None)
         if r is not None:
             return r
 
@@ -171,9 +172,9 @@ class ColorMaker:
 
         try: # test to see if color is available
             curses.init_pair(255, r, 0)
-            self.color_cache[colorname] = r
+            self.colorpair_cache[colorname] = r
             return r
-        except curses.error as e:
+        except curses.error:
             return None  # not available
         except ValueError:  # Python 3.10+  issue #1227
             return None
@@ -203,13 +204,13 @@ class ColorMaker:
             if pairnum is None:
                 if len(self.color_pairs) > 254:
                     self.color_pairs.clear()  # start over
-                    self.color_cache.clear()
+                    self.colorpair_cache.clear()
                 pairnum = len(self.color_pairs)+1
                 if fg is None: fg = -1
                 if bg is None: bg = -1
                 try:
                     curses.init_pair(pairnum, fg, bg)
-                except curses.error as e:
+                except curses.error:
                     return 0  # do not cache
                 self.color_pairs[(fg, bg)] = (pairnum, colorname)
 
@@ -218,6 +219,8 @@ class ColorMaker:
 
 colors = ColorMaker()
 
+
+@functools.lru_cache(256)
 def rgb_to_xterm256(r:int,g:int,b:int,a:int=255) -> int:
     if a == 0:
         return -1
@@ -236,10 +239,61 @@ def rgb_to_xterm256(r:int,g:int,b:int,a:int=255) -> int:
         return int(16 + r*36 + g*6 + b)
 
 
+def xterm256_to_css(n:'str|int') -> str:
+    r,g,b = xterm256_to_rgb(n)
+    return f'#{r:02x}{g:02x}{b:02x}'
+
+
+@functools.lru_cache(256)
+def xterm256_to_rgb(n:'str|int') -> tuple:
+    if not n:
+        return (255,255,255)
+    colordict = dict(
+            black=(0,0,0),
+            blue=(114,159,207),
+            green=(78,154,6),
+            red=(204,0,0),
+            cyan=(6,152,154),
+            magenta=(255,0,255),
+            brown=(196,160, 0),
+            white=(211,215,207),
+            gray=(85,87,83),
+            lightblue=(50,175,255),
+            lightgreen=(138,226,52),
+            lightaqua=(52,226,226),
+            lightred=(239,41,41),
+            lightpurple=(173,127,168),
+            lightyellow=(252,233,79),
+            brightwhite=(255,255,255),
+    )
+    if n in colordict:
+        return colordict.get(n)
+    n = int(n)
+    if 0 <= n < 16:
+        return list(colordict.values())[n]
+    if 16 <= n < 232:
+        n -= 16
+        r,g,b = n//36,(n%36)//6,n%6
+        ints = [0x00, 0x66, 0x88,0xbb,0xdd,0xff]
+        return ints[r],ints[g],ints[b]
+    else:
+        n=list(range(8,255,10))[n-232]
+        return n,n,n
+
+
 @functools.lru_cache(256)
 def rgb_to_attr(r:int,g:int,b:int,a:int=255) -> str:
     return str(rgb_to_xterm256(r,g,b,a))
 
+@functools.lru_cache(256)
+def css_to_xterm256(csscolor:str) -> str:
+    if csscolor[0] == '#':
+        csscolor = csscolor[1:]
+    r,g,b,_ = csscolor[:2], csscolor[2:4], csscolor[4:6], csscolor[6:]
+    r = int(r, base=16)
+    g = int(g, base=16)
+    b = int(b, base=16)
+    return rgb_to_xterm256(r,g,b)
 
 import sys
 vd.addGlobals({k:getattr(sys.modules[__name__], k) for k in __all__})

@@ -10,75 +10,60 @@ on:
     - develop
 
 jobs:
-  run-tests:
+  full-tests:
 
     strategy:
       matrix:
-        python-version: [3.8, 3.9, "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.9", "3.14"]
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     timeout-minutes: 20
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
-    - name: Set up Python ${{ matrix.pythonversion }}
-      uses: actions/setup-python@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
+        cache: 'pip'
 
-    - name: Set up Environment
+    - name: Install en_US.UTF-8 locale
       run: |
-        export PYTHONPATH=~/visidata:~/visidata/visidata
-        locale
+        sudo apt-get update -qq
+        sudo apt-get install -y locales
+        sudo locale-gen en_US.UTF-8
 
-    - name: Install Base VisiData
-      run: pip3 install .
+    - name: Install VisiData with test dependencies
+      run: make install-test
 
-    - name: Ensure VisiData works with Base Dependencies
-      run: vd --version
+    - name: Run tests
+      run: make test
 
-    - name: Ensure VisiData can load a dir
-      run: vd . --batch
+  unit-tests:
 
-# Apt packages are slow to install, often taking up to a minute.
-# lxml dependencies are unneeded when installing lxml via pip
-#    - name: Install lxml dependencies
-#      run: sudo apt install -y libxml2-dev libxslt-dev
-# only needed for testing open-ping, which isn't tested currently anyway
-#    - name: Install ping dependencies
-#      run: sudo apt install -y traceroute
-#
-    - name: Install optional dependencies
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+
+    runs-on: ubuntu-slim
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+
+    - name: Install en_US.UTF-8 locale
       run: |
-        pip3 install ".[test]"
-        pip3 install pytest
+        sudo apt-get update -qq
+        sudo apt-get install -y locales
+        sudo locale-gen en_US.UTF-8
+
+    - name: Install VisiData with test dependencies
+      run: make install-test
 
     - name: Run unit tests
-      run: |
-        pytest -sv visidata/tests/
-
-    - name: Run Cmdlog Tests in parallel
-      run: dev/test.sh -j 4
-      shell: bash
-
-    - name: Test macros
-      run: |
-        mkdir -p ~/.visidata
-        cp tests/macros/macros.jsonl tests/macros/1.vdj ~/.visidata/
-        vd --batch --visidata-dir ~/.visidata -p tests/macros/test_macro.vd --output tests/macros/golden/test_macro.tsv
-        git --no-pager diff --numstat tests/
-        git --no-pager diff --exit-code tests/
-
-    - name: Test replaying input from stdin
-      run: |
-          echo -e '{"a":1}\n{"a":2}' | vd -f jsonl -p dev/stdin.vdj --batch --debug -N
-
-    - name: Ensure VisiData can create completions
-      run: python -v dev/zsh-completion.py
-
-    - name: Ensure VisiData does not drop lines from RepeatFiles
-      run: |
-        NUMLINES=$(seq 10000 | vd -b | wc -l)
-        if ! [[ $NUMLINES -eq 10000 ]]; then
-            exit 1
-        fi
+      run: make test

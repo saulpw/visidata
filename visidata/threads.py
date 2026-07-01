@@ -8,30 +8,68 @@ import collections
 import subprocess
 import curses
 
-from visidata import VisiData, vd, options, globalCommand, Sheet, EscapeException
+from visidata import VisiData, vd, options, globalCommand, Sheet, EscapeException, asyncthread
 from visidata import ColumnAttr, Column, BaseSheet, ItemColumn
 
 
 vd.option('profile', False, 'enable profiling on threads')
 vd.option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
+vd.option('max_threads', 10, 'maximum number of concurrent processes on DirSheet')
 
 vd.theme_option('color_working', '118 5', 'color of system running smoothly')
 
 BaseSheet.init('currentThreads', list)
 
-def asynccache(key=lambda *args, **kwargs: str(args)+str(kwargs)):
+
+vd._queuedFuncs = []
+
+
+class QueuedFunc:
+    def __init__(self, func, args, kwargs, readonly=False):
+        self._func = func
+        self._args = args
+        self._kwargs = kwargs
+        self._result = None
+        self._proc = None
+        self._readonly = readonly
+
+    def _run_sync(self):
+        self._result = self._func(*self._args, **self._kwargs)
+
+    def _run(self):
+        self._proc = vd.execAsync(self._run_sync, _readonly=self._readonly)
+
+
+@VisiData.api
+def _queueFunc(vd, func, *args, _readonly=False, **kwargs):
+    qf = QueuedFunc(func, args, kwargs, readonly=_readonly)
+    vd._queuedFuncs.append(qf)
+    vd._runToCapacity()
+    return qf
+
+
+@VisiData.api
+def _runToCapacity(vd):
+    for i in range(len(vd.unfinishedThreads), vd.options.max_threads+1):
+        if not vd._queuedFuncs:
+            break
+
+        qf = vd._queuedFuncs.pop(0)
+        qf._run()
+
+
+def asynccache(keyfunc=lambda *args, **kwargs: str(args)+str(kwargs)):
     def _decorator(func):
         'Function decorator, so first call to `func()` spawns a separate thread. Calls return the Thread until the wrapped function returns; subsequent calls return the cached return value.'
         d = {}  # per decoration cache
-        def _func(k, *args, **kwargs):
-            d[k] = func(*args, **kwargs)
-
         @functools.wraps(func)
         def _execAsync(*args, **kwargs):
-            k = key(*args, **kwargs)
+            k = keyfunc(*args, **kwargs)
             if k not in d:
-                d[k] = vd.execAsync(_func, k, *args, **kwargs)
-            return d.get(k)
+                t = vd._queueFunc(func, *args, **kwargs, _readonly=True)
+                #atomic read/write to d[k]
+                d.setdefault(k, t)  #2826
+            return d.get(k)._result
         return _execAsync
     return _decorator
 
@@ -65,7 +103,7 @@ class _Progress:
             self.sheet.progresses.remove(self)
 
     def __iter__(self):
-        with self as prog:
+        with self:
             for item in self.iterable:
                 yield item
                 self.made += 1
@@ -131,7 +169,7 @@ def checkMemoryUsage(vd):
         if vd.options.debug:
             vd.exceptionCaught(e)
         vd.options.min_memory_mb = 0
-        vd.warning('disabling min_memory_mb: "free" not installed')
+        vd.warning('disabling `min_memory_mb`; `free` not installed')
         return ''
     tot_m, used_m, free_m = map(int, freestats[-1].split()[1:])
     ret = f'  [{free_m}MB] '
@@ -198,8 +236,12 @@ def execAsync(vd, func, *args, **kwargs):
     else:
         sheet = kwargs.pop('sheet')
 
-    if sheet is not None and (sheet.lastCommandThreads and threading.current_thread() not in sheet.lastCommandThreads):
-        vd.fail(f'still running **{sheet.lastCommandThreads[-1].name}** from previous command')
+    # threads from the last command can launch new non-readonly threads, but no
+    # one else can, if any threads from previous commands on this sheet are
+    # still running
+    if not kwargs.pop('_readonly', False):
+        if sheet is not None and (sheet.lastCommandThreads and threading.current_thread() not in sheet.lastCommandThreads):  #1148
+            vd.fail(f'still running **{sheet.lastCommandThreads[-1].name}** from previous command')
 
     # the current thread's activeCommand
     cmd = vd.activeCommand
@@ -220,21 +262,30 @@ def execAsync(vd, func, *args, **kwargs):
     return thread
 
 def _toplevelTryFunc(func, *args, **kwargs):
-  with ThreadProfiler(threading.current_thread()) as prof:
+  with ThreadProfiler(threading.current_thread()):
     t = threading.current_thread()
     t.name = func.__name__
     try:
         t.status = func(*args, **kwargs)
-    except EscapeException as e:  # user aborted
+        if t.status is None:
+            t.status = 'ended'
+    except EscapeException:  # user aborted
         t.status = 'aborted by user'
         vd.warning(f'{t.name} aborted')
     except Exception as e:
         t.exception = e
         t.status = 'exception'
         vd.exceptionCaught(e)
+    finally:
+        t.endTime = time.process_time()
 
     if t.sheet:
         t.sheet.currentThreads.remove(t)
+
+    try:
+        vd._runToCapacity()
+    except Exception as e:
+        vd.exceptionCaught(e)
 
 def asyncignore(func):
     'Decorator like `@asyncthread` but without attaching to a sheet, so no sheet.threadStatus will show it.'
@@ -296,14 +347,6 @@ def unfinishedThreads(self):
     'A list of unfinished threads (those without a recorded `endTime`).'
     return [t for t in self.threads if getattr(t, 'endTime', None) is None and getattr(t, 'sheet', None) is not None]
 
-@VisiData.api
-def checkForFinishedThreads(self):
-    'Mark terminated threads with endTime.'
-    for t in self.unfinishedThreads:
-        if not t.is_alive():
-            t.endTime = time.process_time()
-            if getattr(t, 'status', None) is None:
-                t.status = 'ended'
 
 @VisiData.api
 def sync(self, *joiningThreads):
@@ -313,7 +356,6 @@ def sync(self, *joiningThreads):
         deads = set()  # dead threads
         threads = joiningThreads or set(self.unfinishedThreads)
         threads -= set([threading.current_thread(), getattr(vd, 'drawThread', None), getattr(vd, 'outputProgressThread', None)])
-        threads -= deads
         threads -= set([None])
         for t in threads:
             try:
@@ -464,22 +506,29 @@ def codestr(code):
 def allThreadsSheet(self):
     return ThreadsSheet("threads", source=vd.threads)
 
-ThreadsSheet.addCommand('^C', 'cancel-thread', 'cancelThread(cursorRow)', 'abort thread at current row')
-ThreadsSheet.addCommand('g^C', 'cancel-all', 'cancelThread(*sheet.rows)', 'abort all threads on this threads sheet')
+@BaseSheet.api
+def cancel_sheet(sheet):
+    vd.replay_cancel()
+    vd._queuedFuncs.clear()
+    vd.cancelThread(*sheet.currentThreads or vd.fail("no active threads on this sheet"))
+
+
+ThreadsSheet.addCommand('Ctrl+C', 'cancel-thread', 'cancelThread(cursorRow)', 'abort thread at current row')
+ThreadsSheet.addCommand('gCtrl+C', 'cancel-all', 'cancelThread(*sheet.rows)', 'abort all threads on this threads sheet')
 ThreadsSheet.addCommand(None, 'add-row', 'fail("cannot add new rows on Threads Sheet")', 'invalid command')
 
-ProfileSheet.addCommand('z^S', 'save-profile', 'source.dump_stats(input("save profile to: ", value=name+".prof"))', 'save profile')
-ProfileSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow.code.co_filename, "+%s" % cursorRow.code.co_firstlineno)', 'open current file at referenced row in external $EDITOR')
-ProfileStatsSheet.addCommand('^O', 'sysopen-row', 'launchEditor(cursorRow[0], "+%s" % cursorRow[1])', 'open current file at referenced row in external $EDITOR')
+ProfileSheet.addCommand('zCtrl+S', 'save-profile', 'source.dump_stats(input("save profile to: ", value=name+".prof"))', 'save profile')
+ProfileSheet.addCommand('Ctrl+O', 'sysopen-row', 'launchEditor(cursorRow.code.co_filename, "+%s" % cursorRow.code.co_firstlineno)', 'open current file at referenced row in external $EDITOR')
+ProfileStatsSheet.addCommand('Ctrl+O', 'sysopen-row', 'launchEditor(cursorRow[0], "+%s" % cursorRow[1])', 'open current file at referenced row in external $EDITOR')
 
-BaseSheet.addCommand('^_', 'toggle-profile', 'toggleProfiling()', 'Enable or disable profiling on main VisiData process')
+BaseSheet.addCommand('Ctrl+_', 'toggle-profile', 'toggleProfiling()', 'Enable or disable profiling on main VisiData process')
 
-BaseSheet.addCommand('^C', 'cancel-sheet', 'cancelThread(*sheet.currentThreads or fail("no active threads on this sheet"))', 'abort all threads on current sheet')
-BaseSheet.addCommand('g^C', 'cancel-all', 'liveThreads=list(t for vs in vd.sheets for t in vs.currentThreads); cancelThread(*liveThreads); status("canceled %s threads" % len(liveThreads))', 'abort all spawned threads')
+BaseSheet.addCommand('Ctrl+C', 'cancel-sheet', 'cancel_sheet()', 'abort all threads on current sheet')
+BaseSheet.addCommand('gCtrl+C', 'cancel-all', 'liveThreads=list(t for vs in vd.sheets for t in vs.currentThreads); cancelThread(*liveThreads); status("canceled %s threads" % len(liveThreads))', 'abort all spawned threads')
 
 
-BaseSheet.addCommand('^T', 'threads-all', 'vd.push(vd.allThreadsSheet)', 'open Threads for all sheets')
-BaseSheet.addCommand('z^T', 'threads-sheet', 'vd.push(ThreadsSheet("threads", source=sheet.currentThreads))', 'open Threads for this sheet')
+BaseSheet.addCommand('Ctrl+T', 'threads-all', 'vd.push(vd.allThreadsSheet)', 'open Threads for all sheets')
+BaseSheet.addCommand('zCtrl+T', 'threads-sheet', 'vd.push(ThreadsSheet("threads", source=sheet.currentThreads))', 'open Threads for this sheet')
 
 vd.addGlobals({
     'ThreadsSheet': ThreadsSheet,

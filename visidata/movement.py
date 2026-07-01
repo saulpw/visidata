@@ -36,6 +36,13 @@ def pageLeft(self):
     So really both the `leftIndex` and the `cursorIndex` should move in
     tandem until things are correct.'''
 
+    # a hidden column shows alone when the cursor is on it (index past the
+    # visible cols); step back into the visible columns instead of stalling  #3134
+    if self.cursorVisibleColIndex >= self.nVisibleCols:
+        self.cursorVisibleColIndex = self.nVisibleCols-1
+        self.leftVisibleColIndex = self.cursorVisibleColIndex
+        return
+
     targetIdx = self.leftVisibleColIndex  # for rightmost column
     firstNonKeyVisibleColIndex = self.visibleCols.index(self.nonKeyVisibleCols[0])
     while self.rightVisibleColIndex != targetIdx and self.leftVisibleColIndex > firstNonKeyVisibleColIndex:
@@ -62,7 +69,7 @@ def pageLeft(self):
 @Sheet.api
 @asyncthread
 def moveToNextRow(vs, func, reverse=False, msg='no different value up this column'):
-    'Move cursor to next (prev if reverse) row for which func returns True.  Returns False if no row meets the criteria.'
+    'Move cursor to next (prev if reverse) row for which func returns True.'
     rng = range(vs.cursorRowIndex-1, -1, -1) if reverse else range(vs.cursorRowIndex+1, vs.nRows)
     found = False
     with Progress(total=len(vs.rows)) as prog:
@@ -92,17 +99,31 @@ def visibleWidth(self):
     return w
 
 
+@BaseSheet.api
+def jump_sheet(sheet, name):
+    matches = [s for s in vd.allSheets if s.name == name]
+    if not matches:
+        vd.fail(f'no sheet named `{name}`')
+    vd.push(matches[0])
+
+
 Sheet.addCommand(None, 'go-left',  'cursorRight(-1)', 'go left', replay=False)
 Sheet.addCommand(None, 'go-down',  'cursorDown(+1)', 'go down', replay=False)
 Sheet.addCommand(None, 'go-up',    'cursorDown(-1)', 'go up', replay=False)
 Sheet.addCommand(None, 'go-right', 'cursorRight(+1)', 'go right', replay=False)
 Sheet.addCommand(None, 'go-pagedown', 'cursorDown(nScreenRows-1); sheet.topRowIndex = bottomRowIndex', 'scroll one page forward', replay=False)
 Sheet.addCommand(None, 'go-pageup', 'cursorDown(-nScreenRows+1); sheet.bottomRowIndex = topRowIndex', 'scroll one page backward', replay=False)
+Sheet.addCommand(None, 'go-pagedown-half', 'n=nScreenRows//2; cursorDown(n); sheet.topRowIndex += n', 'scroll half page forward', replay=False)
+Sheet.addCommand(None, 'go-pageup-half', 'n=-nScreenRows//2; cursorDown(n); sheet.topRowIndex += n', 'scroll half page backward', replay=False)
 
 Sheet.addCommand(None, 'go-leftmost', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = 0', 'go all the way to the left of sheet')
 Sheet.addCommand(None, 'go-top', 'sheet.cursorRowIndex = sheet.topRowIndex = 0', 'go all the way to the top of sheet')
 Sheet.addCommand(None, 'go-bottom', 'sheet.cursorRowIndex = sheet.bottomRowIndex = len(rows)-1', 'go all the way to the bottom of sheet')
 Sheet.addCommand(None, 'go-rightmost', 'sheet.leftVisibleColIndex = len(visibleCols)-1; pageLeft(); sheet.cursorVisibleColIndex = len(visibleCols)-1', 'go all the way to the right of sheet')
+
+Sheet.addCommand(None, 'go-screen-top', 'sheet.cursorRowIndex = sheet.topRowIndex', 'go to the first row visible on screen')
+Sheet.addCommand(None, 'go-screen-middle', 'sheet.cursorRowIndex = (sheet.topRowIndex+sheet.bottomRowIndex)//2', 'go to the middle row visible on screen')
+Sheet.addCommand(None, 'go-screen-bottom', 'sheet.cursorRowIndex = sheet.bottomRowIndex', 'go to the last row visible on screen')
 
 Sheet.addCommand('zr', 'go-row-number', 'sheet.cursorRowIndex = int(input("move to row number: "))', 'go to the given row number (0-based)')
 
@@ -116,35 +137,34 @@ Sheet.addCommand('z<', 'go-prev-null', 'moveToNextRow(lambda row,col=cursorCol,i
 Sheet.addCommand('z>', 'go-next-null', 'moveToNextRow(lambda row,col=cursorCol,isnull=isNullFunc(): isnull(col.getValue(row)), msg="no null down this column")', 'go down current column to next null value')
 
 for i in range(1, 11):
-    BaseSheet.addCommand(ALT+str(i)[-1], 'jump-sheet-'+str(i), f'vd.push(*(list(s for s in allSheets if s.shortcut==str({i})) or fail("no sheet")))', f'jump to sheet {i}')
+    BaseSheet.addCommand(f'Alt+{str(i)[-1]}', f'jump-sheet-{i}', f'vd.push(*(list(s for s in allSheets if s.shortcut==str({i})) or fail("no sheet")))', f'jump to sheet {i}')
 
 for i in range(11, 21):
-    BaseSheet.addCommand('', 'jump-sheet-'+str(i), f'vd.push(*(list(s for s in allSheets if s.shortcut==str({i})) or fail("no sheet")))', f'jump to sheet {i}')
+    BaseSheet.addCommand('', f'jump-sheet-{i}', f'vd.push(*(list(s for s in allSheets if s.shortcut==str({i})) or fail("no sheet")))', f'jump to sheet {i}')
 
-BaseSheet.bindkey('KEY_LEFT', 'go-left')
-BaseSheet.bindkey('KEY_DOWN', 'go-down')
-BaseSheet.bindkey('KEY_UP', 'go-up')
-BaseSheet.bindkey('KEY_RIGHT', 'go-right')
-BaseSheet.bindkey('KEY_NPAGE', 'go-pagedown')
-BaseSheet.bindkey('KEY_PPAGE', 'go-pageup')
+BaseSheet.addCommand('', 'jump-sheet', 'jump_sheet(input("jump to sheet: ", completer=CompleteKey(s.name for s in allSheets)))', 'jump to sheet by name')
 
-BaseSheet.bindkey('gKEY_LEFT', 'go-leftmost'),
-BaseSheet.bindkey('gKEY_RIGHT', 'go-rightmost'),
-BaseSheet.bindkey('gKEY_UP', 'go-top'),
-BaseSheet.bindkey('gKEY_DOWN', 'go-bottom'),
+BaseSheet.bindkey('Left', 'go-left')
+BaseSheet.bindkey('Down', 'go-down')
+BaseSheet.bindkey('Up', 'go-up')
+BaseSheet.bindkey('Right', 'go-right')
+BaseSheet.bindkey('PgDn', 'go-pagedown')
+BaseSheet.bindkey('PgUp', 'go-pageup')
+
+BaseSheet.bindkey('gLeft', 'go-leftmost')
+BaseSheet.bindkey('gRight', 'go-rightmost')
+BaseSheet.bindkey('gUp', 'go-top')
+BaseSheet.bindkey('gDown', 'go-bottom')
 BaseSheet.bindkey('Home', 'go-top')
 BaseSheet.bindkey('End', 'go-bottom')
-
-Sheet.bindkey('BUTTON1_CLICKED', 'go-mouse')
-Sheet.bindkey('BUTTON3_PRESSED', 'go-mouse')
 
 # vim-style scrolling with the 'z' prefix
 Sheet.addCommand('zz', 'scroll-middle', 'sheet.topRowIndex = cursorRowIndex-int(nScreenRows/2)', 'scroll current row to center of screen')
 
-Sheet.addCommand('kRIT5', 'go-right-page', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex', 'scroll cursor one page right', replay=False)
-Sheet.addCommand('kLFT5', 'go-left-page', 'pageLeft()', 'scroll cursor one page left', replay=False)
-Sheet.addCommand(None, 'scroll-left', 'sheet.cursorVisibleColIndex -= options.scroll_incr', 'scroll one column left')
-Sheet.addCommand(None, 'scroll-right', 'sheet.cursorVisibleColIndex += options.scroll_incr', 'scroll one column right')
+Sheet.addCommand('Ctrl+Right', 'go-right-page', 'sheet.cursorVisibleColIndex = sheet.leftVisibleColIndex = rightVisibleColIndex', 'scroll cursor one page right', replay=False)
+Sheet.addCommand('Ctrl+Left', 'go-left-page', 'pageLeft()', 'scroll cursor one page left', replay=False)
+Sheet.addCommand(None, 'scroll-left', 'sheet.cursorVisibleColIndex -= options.scroll_incr', 'scroll left by one column increment')
+Sheet.addCommand(None, 'scroll-right', 'sheet.cursorVisibleColIndex += options.scroll_incr', 'scroll right by one column increment')
 Sheet.addCommand(None, 'scroll-leftmost', 'sheet.leftVisibleColIndex = cursorVisibleColIndex', 'scroll sheet to leftmost column')
 Sheet.addCommand(None, 'scroll-rightmost', 'tmp = cursorVisibleColIndex; pageLeft(); sheet.cursorVisibleColIndex = tmp', 'scroll sheet to rightmost column')
 
@@ -164,33 +184,33 @@ Sheet.addCommand(None, 'go-home', 'sheet.topRowIndex = sheet.cursorRowIndex = 0;
 BaseSheet.bindkey('Ctrl+ScrollUp', 'scroll-left')
 BaseSheet.bindkey('Ctrl+ScrollDown', 'scroll-right')
 
-BaseSheet.bindkey('zKEY_UP', 'scroll-up')
-BaseSheet.bindkey('zKEY_DOWN', 'scroll-down')
-BaseSheet.bindkey('zKEY_LEFT', 'scroll-left')
-BaseSheet.bindkey('zKEY_RIGHT', 'scroll-right')
+BaseSheet.bindkey('zUp', 'scroll-up')
+BaseSheet.bindkey('zDown', 'scroll-down')
+BaseSheet.bindkey('zLeft', 'scroll-left')
+BaseSheet.bindkey('zRight', 'scroll-right')
 
 # vim-like keybindings
 
-BaseSheet.bindkey('h', 'go-left'),
-BaseSheet.bindkey('j', 'go-down'),
-BaseSheet.bindkey('k', 'go-up'),
-BaseSheet.bindkey('l', 'go-right'),
-BaseSheet.bindkey('^F', 'go-pagedown'),
-BaseSheet.bindkey('^B', 'go-pageup'),
-BaseSheet.bindkey('gg', 'go-top'),
-BaseSheet.bindkey('G',  'go-bottom'),
-BaseSheet.bindkey('gj', 'go-bottom'),
-BaseSheet.bindkey('gk', 'go-top'),
-BaseSheet.bindkey('gh', 'go-leftmost'),
+BaseSheet.bindkey('h', 'go-left')
+BaseSheet.bindkey('j', 'go-down')
+BaseSheet.bindkey('k', 'go-up')
+BaseSheet.bindkey('l', 'go-right')
+BaseSheet.bindkey('Ctrl+F', 'go-pagedown')
+BaseSheet.bindkey('Ctrl+B', 'go-pageup')
+BaseSheet.bindkey('gg', 'go-top')
+BaseSheet.bindkey('G',  'go-bottom')
+BaseSheet.bindkey('gj', 'go-bottom')
+BaseSheet.bindkey('gk', 'go-top')
+BaseSheet.bindkey('gh', 'go-leftmost')
 BaseSheet.bindkey('gl', 'go-rightmost')
 
-BaseSheet.addCommand('^^', 'jump-prev', 'vd.activeStack[1:] or fail("no previous sheet"); vd.push(vd.activeStack[1])', 'jump to previous sheet in this pane')
-BaseSheet.addCommand('g^^', 'jump-first', 'vd.push(vd.activeStack[-1])', 'jump to first sheet')
+BaseSheet.addCommand('Ctrl+^', 'jump-prev', 'vd.activeStack[1:] or fail("no previous sheet"); vd.push(vd.activeStack[1])', 'jump to previous sheet in this pane')
+BaseSheet.addCommand('gCtrl+^', 'jump-first', 'vd.push(vd.activeStack[-1])', 'jump to first sheet')
 
 BaseSheet.addCommand('BUTTON1_RELEASED', 'no-op', 'pass', 'do nothing')
 
-BaseSheet.addCommand(None, 'mouse-enable', 'mm, _ = curses.mousemask(-1); status("mouse "+("ON" if mm else "OFF"))', 'enable mouse events')
-BaseSheet.addCommand(None, 'mouse-disable', 'mm, _ = curses.mousemask(0); status("mouse "+("ON" if mm else "OFF"))', 'disable mouse events')
+BaseSheet.addCommand(None, 'mouse-enable', 'b = vd.enableMouse(True); status("mouse "+("ON" if b else "OFF"))', 'enable mouse events')
+BaseSheet.addCommand(None, 'mouse-disable', 'b = vd.enableMouse(False); status("mouse "+("ON" if b else "OFF"))', 'disable mouse events')
 
 
 vd.addGlobals({'rotateRange': rotateRange})
@@ -200,15 +220,18 @@ vd.addMenuItems('''
     View > Other sheet > first sheet > jump-first
     Row > Goto > top > go-top
     Row > Goto > bottom > go-bottom
+    Row > Goto > screen top > go-screen-top
+    Row > Goto > screen bottom > go-screen-bottom
+    Row > Goto > screen middle > go-screen-middle
     Row > Goto > previous > page > go-pageup
+    Row > Goto > previous > half page > go-pageup-half
     Row > Goto > previous > null > go-prev-null
     Row > Goto > previous > value > go-prev-value
     Row > Goto > previous > selected > go-prev-selected
     Row > Goto > next > page > go-pagedown
+    Row > Goto > next > half page > go-pagedown-half
     Row > Goto > next > null > go-next-null
     Row > Goto > next > value > go-next-value
     Row > Goto > next > selected > go-next-selected
     Row > Goto > by number > go-row-number
-    View > Other sheet > previous sheet > jump-prev
-    View > Other sheet > first sheet > jump-first
 ''')

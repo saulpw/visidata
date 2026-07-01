@@ -137,8 +137,8 @@ class PandasSheet(Sheet):
         '''
         try:
             col.sheet.df.loc[row.name, col.expr] = val
-        except ValueError as err:
-            vd.warning(f'Type of {val} does not match column {col.name}. Changing type.')
+        except ValueError:
+            vd.warning(f'type of {val} does not match column `{col.name}`; changing type')
             col.type = anytype
             col.sheet.df.loc[row.name, col.expr] = val
         self.setModified()
@@ -146,6 +146,7 @@ class PandasSheet(Sheet):
     @asyncthread
     def reload(self):
         pd = vd.importExternal('pandas')
+        df = None
         if isinstance(self.source, pd.DataFrame):
             df = self.source
         elif isinstance(self.source, Path):
@@ -186,7 +187,7 @@ class PandasSheet(Sheet):
         for col in (c for c in df.columns if not c.startswith("__vd_")):
             self.addColumn(Column(
                 col,
-                type=self.dtype_to_type(df[col]),
+                type=self.dtype_to_type(df[col].dtype),
                 getter=self.getValue,
                 setter=self.setValue,
                 expr=col
@@ -198,7 +199,7 @@ class PandasSheet(Sheet):
         self.rows = DataFrameAdapter(df)
         self._selectedMask = pd.Series(False, index=df.index)
         if df.index.nunique() != df.shape[0]:
-            vd.warning("Non-unique index, row selection API may not work or may be incorrect")
+            vd.warning("non-unique index; row selection may not work correctly")
 
     @asyncthread
     def sort(self):
@@ -212,7 +213,7 @@ class PandasSheet(Sheet):
 
     def _checkSelectedIndex(self):
         pd = vd.importExternal('pandas')
-        if self._selectedMask.index is not self.df.index:
+        if not self._selectedMask.index.equals(self.df.index):
             # DataFrame was modified inplace, so the selection is no longer valid
             vd.status('pd.DataFrame.index updated, clearing {} selected rows'
                       .format(self._selectedMask.sum()))
@@ -348,7 +349,7 @@ class PandasSheet(Sheet):
         vd.addUndo(self._deleteRows, index or self.nRows - 1)
 
     def delete_row(self, rowidx):
-        pd = vd.importExternal('pandas')
+        vd.importExternal('pandas')
         oldrow = self.df.iloc[rowidx:rowidx+1]
 
         # Use to_dict() here to work around an edge case when applying undos.
@@ -358,7 +359,7 @@ class PandasSheet(Sheet):
         # There may be a better way to handle that case.
         vd.addUndo(self.addRows, oldrow.to_dict(), rowidx, undo=False)
         self._deleteRows(rowidx)
-        vd.memory.cliprows = [oldrow]
+        vd.setClipboardRows([oldrow])
         self.setModified()
 
     def deleteBy(self, by):
@@ -406,6 +407,9 @@ PandasSheet.addCommand('g\\', 'unselect-cols-regex', 'selectByRegex(regex=inputR
 
 # Override with a pandas/dataframe-aware implementation
 PandasSheet.addCommand('"', 'dup-selected', 'vs=PandasSheet(sheet.name, "selectedref", source=selectedRows.df); vd.push(vs)', 'open duplicate sheet with only selected rows')
+PandasSheet.addCommand('g"', 'dup-rows', 'vs=PandasSheet(sheet.name, "copy", source=sheet.df); vd.push(vs)', 'open duplicate sheet with all rows')
+PandasSheet.addCommand('z"', 'dup-selected-deep', 'vs=PandasSheet(sheet.name, "selecteddeepcopy", source=selectedRows.df.copy(deep=True)); vd.push(vs)', 'open duplicate sheet with deepcopy of selected rows')
+PandasSheet.addCommand('gz"', 'dup-rows-deep', 'vs=PandasSheet(sheet.name, "deepcopy", source=sheet.df.copy(deep=True)); vd.push(vs)', 'open duplicate sheet with deepcopy of all rows')
 
 vd.addGlobals({
     'PandasSheet': PandasSheet,

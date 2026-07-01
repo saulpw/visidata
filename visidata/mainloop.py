@@ -6,13 +6,14 @@ import signal
 import threading
 import time
 
-from visidata import vd, VisiData, colors, ESC, options, BaseSheet, AttrDict
+from visidata import vd, VisiData, colors, ESC, options, BaseSheet, AttrDict, stacktrace
 
 __all__ = ['ReturnValue', 'run']
 
 vd.curses_timeout = 100 # curses timeout in ms
 vd.timeouts_before_idle = 10
 vd.min_draw_ms = 100  # draw_all at least this often, even if keystrokes are pending
+vd.numTimeouts = 0
 vd._lastDrawTime = 0  # last time drawn (from time.time())
 
 
@@ -31,8 +32,22 @@ def callNoExceptions(vd, func, *args, **kwargs):
 
 
 @VisiData.api
+def callIgnoreExceptions(vd, func, *args, **kwargs):
+    'Catch and ignore any raised exceptions.  Log as errors when options.debug.'
+    try:
+        return func(*args, **kwargs)
+    except Exception as e:
+        if vd.options.debug:
+            vd.lastErrors.append(stacktrace(exclude_caller=True))
+            vd.status(f'{type(e).__name__}: {e}', priority=2)
+
+
+@VisiData.api
 def drawSheet(vd, scr, sheet):
     'Erase *scr* and draw *sheet* on it, including status bars and sidebar.'
+
+    if not sheet:
+        return
 
     sheet.ensureLoaded()
 
@@ -158,13 +173,12 @@ def runresult(vd):
 @VisiData.api
 def mainloop(vd, scr):
     'Manage execution of keystrokes and subsequent redrawing of screen.'
-    nonidle_timeout = vd.curses_timeout
 
     scr.timeout(vd.curses_timeout)
     with contextlib.suppress(curses.error):
         curses.curs_set(0)
 
-    numTimeouts = 0
+    vd.numTimeouts = 0
     prefixWaiting = False
     vd.scrFull = scr
     if not vd.wantsHelp('help'):
@@ -198,7 +212,7 @@ def mainloop(vd, scr):
             vd.keystrokes = ''
 
         if keystroke:  # wait until next keystroke to clear statuses and previous keystrokes
-            numTimeouts = 0
+            vd.numTimeouts = 0
             if not prefixWaiting:
                 vd.keystrokes = ''
 
@@ -210,67 +224,86 @@ def mainloop(vd, scr):
                 except Exception as e:
                     vd.exceptionCaught(e)
 
-            if keystroke and keystroke in vd.allPrefixes and keystroke in vd.keystrokes[:-1]:
+            keystroke = vd.prettykeys(keystroke)
+            potential = vd.keystrokes + keystroke
+            if keystroke and keystroke in vd.allPrefixes and keystroke in vd.keystrokes and potential not in vd.allPrefixes and vd.bindkeys._get(potential) is None:  #3012
                 vd.warning('duplicate prefix: ' + keystroke)
                 vd.keystrokes = ''
+                keystroke = ''
             else:
-                keystroke = vd.prettykeys(keystroke)
-                vd.keystrokes += keystroke
+                vd.keystrokes = potential
 
-        vd.drawRightStatus(sheet._scr, sheet)  # visible for commands that wait for input
+        vd.callNoExceptions(vd.drawRightStatus, sheet._scr, sheet)  # visible for commands that wait for input
 
         if not keystroke:  # timeout instead of keypress
             pass
         elif keystroke == 'Ctrl+Q':
             return vd.lastErrors and '\n'.join(vd.lastErrors[-1])
         elif vd.bindkeys._get(vd.keystrokes) is not None:
-            sheet.execCommand(vd.keystrokes, keystrokes=vd.keystrokes)
+            try:
+                sheet.execCommand(vd.bindkeys._get(vd.keystrokes), keystrokes=vd.keystrokes)
+            except Exception as e:  #2859
+                vd.exceptionCaught(e)
             prefixWaiting = False
         elif vd.keystrokes in vd.allPrefixes:
             prefixWaiting = True
         else:
             vd.status('no command for "%s"' % (vd.keystrokes))
+            sheet.longname = ''
             prefixWaiting = False
 
-        # play next queued command
-        if vd._nextCommands and not vd.unfinishedThreads:
-            cmd = vd._nextCommands.pop(0)
-            if isinstance(cmd, (dict, list)):  # .vd cmdlog rows are NamedListTemplate
-                try:
-                    if vd.replayOne(cmd):
-                        vd.replay_cancel()
-                except Exception as e:
-                    vd.exceptionCaught(e)
-                    vd.replay_cancel()
-            else:
-                sheet.execCommand(cmd, keystrokes=vd.keystrokes)
+        vd._playNextQueuedCommand(sheet)
 
-        if not vd._nextCommands:
-            if vd.currentReplay:
-                vd.currentReplayRow = None
-                vd.currentReplay = None
-
-        vd.checkForFinishedThreads()
         vd.callNoExceptions(sheet.checkCursor)
 
         time.sleep(0)  # yield to other threads which may not have started yet
-        if vd._nextCommands:
-            if vd.unfinishedThreads:  #2369 #2635
-                # while running a bg thread for a command, schedule infrequent redraws
-                vd.curses_timeout = nonidle_timeout
-            else:
-                # otherwise, schedule the next redraw and command (immediately, for default replay_wait)
-                vd.curses_timeout = int(vd.options.replay_wait*1000)
-        elif vd.unfinishedThreads:
-            vd.curses_timeout = nonidle_timeout
-        else:
-            numTimeouts += 1
-            if vd.timeouts_before_idle >= 0 and numTimeouts >= vd.timeouts_before_idle:
-                vd.curses_timeout = -1
-            else:
-                vd.curses_timeout = nonidle_timeout
+        scr.timeout(vd.get_curses_timeout())
 
-        scr.timeout(vd.curses_timeout)
+
+@VisiData.api
+def _playNextQueuedCommand(vd, sheet):
+        try:
+            if vd._nextCommands and not vd.unfinishedThreads:
+                cmd = vd._nextCommands.pop(0)
+                if isinstance(cmd, (dict, list)):  # .vd cmdlog rows are NamedListTemplate
+                    if vd.replayOne(cmd):
+                        vd.replay_cancel()
+                else:
+                    sheet.execCommand(cmd, keystrokes=vd.keystrokes)
+        except Exception as e:
+            vd.exceptionCaught(e)
+            vd.replay_cancel()
+
+        if not vd._nextCommands:
+            vd.replay_cancel()
+
+
+@VisiData.api
+def get_curses_timeout(vd) -> int:
+        nonidle_timeout = vd.curses_timeout
+
+        if vd._nextCommands:
+            if vd.currentReplay:
+                curses_timeout = int(vd.options.replay_wait*1000)
+            elif vd.unfinishedThreads:  #2369 #2635
+                # while running a bg thread for a command, schedule infrequent redraws
+                curses_timeout = nonidle_timeout
+            else:
+                # otherwise, schedule the next redraw and command immediately
+                curses_timeout = 0
+            vd.numTimeouts = 0
+
+        elif vd.unfinishedThreads:
+            curses_timeout = nonidle_timeout
+            vd.numTimeouts = 0
+        else:
+            vd.numTimeouts += 1
+            if vd.timeouts_before_idle >= 0 and vd.numTimeouts >= vd.timeouts_before_idle:
+                curses_timeout = -1  # nothing has been happening for a bit, wait indefinitely
+            else:
+                curses_timeout = nonidle_timeout
+
+        return curses_timeout
 
 
 @VisiData.api
@@ -288,7 +321,6 @@ def initCurses(vd):
     curses.noecho()
 
     curses.raw()    # get control keys instead of signals
-    curses.meta(1)  # allow "8-bit chars"
 
     scr.keypad(1)
 
@@ -316,6 +348,7 @@ def run(vd, *sheetlist):
     'Main entry point; launches vdtui with the given sheets already pushed (last one is visible)'
 
     scr = None
+    ret = None
     try:
         # Populate VisiData object with sheets from a given list.
         for vs in sheetlist:

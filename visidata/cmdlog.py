@@ -1,10 +1,11 @@
 import threading
 
 from visidata import vd, UNLOADED, namedlist, vlen, asyncthread, globalCommand, date
-from visidata import VisiData, BaseSheet, Sheet, ColumnAttr, VisiDataMetaSheet, JsonLinesSheet, TypedWrapper, AttrDict, Progress, ErrorSheet, CompleteKey, Path
+from visidata import VisiData, BaseSheet, Sheet, ColumnAttr, VisiDataMetaSheet, JsonLinesSheet, TypedWrapper, AttrDict, Progress, ErrorSheet, CompleteKey, Path, ColumnsSheet
 import visidata
 
 vd.option('replay_wait', 0.0, 'time to wait between replayed commands, in seconds', sheettype=None)
+vd.option('replay_ignore_errors', False, 'continue replay on error instead of aborting', sheettype=None)
 vd.theme_option('disp_replay_play', '▶', 'status indicator for active replay')
 vd.theme_option('disp_replay_record', '⏺', 'status indicator for macro record')
 vd.theme_option('color_status_replay', 'green', 'color of replay status indicator')
@@ -42,7 +43,8 @@ VisiData.save_vd = VisiData.save_tsv
 @VisiData.api
 def save_vdj(vd, p, *vsheets):
     with p.open(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
-        fp.write("#!vd -p\n")
+        fp.write("#!/usr/bin/env -S vd -p\n")
+        fp.write(f"# {visidata.__version_info__}\n")
         for vs in vsheets:
             vs.write_jsonl(fp)
 
@@ -87,7 +89,7 @@ def isLoggableSheet(sheet):
 def moveToRow(vs, rowstr):
     'Move cursor to row given by *rowstr*, which can be either the row number or keystr.'
     rowidx = vs.getRowIndexFromStr(rowstr)
-    if rowidx is None:
+    if rowidx is None or rowidx >= vs.nRows:
         return False
 
     vs.cursorRowIndex = rowidx
@@ -115,12 +117,13 @@ def getRowIndexFromStr(vs, row):
 @Sheet.api
 def moveToCol(vs, col):
     'Move cursor to column given by *col*, which can be either the column number or column name.'
+    vcolidx = None
     if isinstance(col, str):
-        vcolidx = indexMatch(vs.visibleCols, lambda c,name=col: name == c.name)
+        vcolidx = indexMatch(vs.availCols, lambda c,name=col: name == c.name)
     elif isinstance(col, int):
         vcolidx = col
 
-    if vcolidx is None or vcolidx >= vs.nVisibleCols:
+    if vcolidx is None or vcolidx >= len(vs.availCols):
         return False
 
     vs.cursorVisibleColIndex = vcolidx
@@ -171,7 +174,7 @@ class CommandLogBase:
             self.afterExecSheet(sheet, False, '')
 
         colname, rowname, sheetname = '', '', None
-        if sheet and not (cmd.longname.startswith('open-') and not cmd.longname in ('open-row', 'open-cell')):
+        if sheet and not (cmd.longname.startswith('open-') and cmd.longname not in ('open-row', 'open-cell')):
             sheetname = sheet.name
 
             colname, rowname = sheet.commandCursor(cmd.execstr)
@@ -256,10 +259,10 @@ def moveToReplayContext(vd, r, vs):
         vd.clearCaches()
 
         if r.row not in [None, '']:
-            vs.moveToRow(r.row) or vd.error(f'no "{r.row}" row on {vs}')
+            vs.moveToRow(r.row) or vd.error(f'no `{r.row}` row on {vs}')
 
         if r.col not in [None, '']:
-            vs.moveToCol(r.col) or vd.error(f'no "{r.col}" column on {vs}')
+            vs.moveToCol(r.col) or vd.error(f'no `{r.col}` column on {vs}')
 
 
 @VisiData.api
@@ -271,7 +274,7 @@ def replayOne(vd, r):
             vd.fail('failed to find command to replay')
 
         if r.sheet and longname not in ['set-option', 'unset-option']:
-            vs = vd.getSheet(r.sheet) or vd.error('no sheet named %s' % r.sheet)
+            vs = vd.getSheet(r.sheet) or vd.error(f'no sheet named `{r.sheet}`')
         else:
             vs = None
 
@@ -344,13 +347,15 @@ def replay_sync(vd, cmdlog):
                 vd.statuses.clear()
                 try:
                     if vd.replayOne(cmdlog.cursorRow):
-                        vd.replay_cancel()
-                        return True
+                        if not vd.options.replay_ignore_errors:
+                            vd.replay_cancel()
+                            return True
                 except Exception as e:
-                    vd.replay_cancel()
                     vd.exceptionCaught(e)
-                    vd.status('replay canceled')
-                    return True
+                    if not vd.options.replay_ignore_errors:
+                        vd.replay_cancel()
+                        vd.status('replay canceled')
+                        return True
 
                 cmdlog.cursorRowIndex += 1
                 prog.addProgress(1)
@@ -366,8 +371,8 @@ def replay_sync(vd, cmdlog):
 @VisiData.api
 def replay(vd, cmdlog):
     'Inject commands into live execution with interface.'
-    vd.push(cmdlog)
     vd._nextCommands.extend(cmdlog.rows)
+    vd.currentReplay = cmdlog
 
 
 @VisiData.api
@@ -418,6 +423,14 @@ def cmdlog_sheet(sheet):
     return c
 
 
+@ColumnsSheet.property
+def cmdlog_sheet(sheet):
+    'Edits to a single source sheet log (and undo) against that source. #3133'
+    if len(sheet.source) == 1 and isinstance(sheet.source[0], BaseSheet):
+        return sheet.source[0].cmdlog_sheet
+    return super(ColumnsSheet, sheet).cmdlog_sheet
+
+
 @BaseSheet.property
 def shortcut(self):
     if self._shortcut:
@@ -439,7 +452,8 @@ def shortcut(self):
 def cmdlog(vd):
     if not vd._cmdlog:
         vd._cmdlog = CommandLogJsonl('cmdlog', rows=[])  # no reload
-        vd._cmdlog.resetCols()
+        with vd.suppressUndo():  # building a sheet's layout is not an undoable user action
+            vd._cmdlog.resetCols()
         vd.beforeExecHooks.append(vd._cmdlog.beforeExecHook)
     return vd._cmdlog
 
@@ -452,37 +466,19 @@ def modifyCommand(vd):
     return vd.cmdlog.rows[-1]
 
 
-@CommandLogJsonl.api
-@asyncthread
-def repeat_for_n(cmdlog, r, n=1):
-    r.sheet = r.row = r.col = ""
-    for i in range(n):
-        vd.replayOne(r)
-
-@CommandLogJsonl.api
-@asyncthread
-def repeat_for_selected(cmdlog, r):
-    r.sheet = r.row = r.col = ""
-
-    for idx, r in enumerate(vd.sheet.rows):
-        if vd.sheet.isSelected(r):
-            vd.sheet.cursorRowIndex = idx
-            vd.replayOne(r)
-
-
 BaseSheet.init('_shortcut')
 
 
 globalCommand('gD', 'cmdlog-all', 'vd.push(vd.cmdlog)', 'open global CommandLog for all commands executed in current session')
 globalCommand('D', 'cmdlog-sheet', 'vd.push(sheet.cmdlog)', "open current sheet's CommandLog with all other loose ends removed; includes commands from parent sheets")
 globalCommand('zD', 'cmdlog-sheet-only', 'vd.push(sheet.cmdlog_sheet)', 'open CommandLog for current sheet with commands from parent sheets removed')
-BaseSheet.addCommand('^D', 'save-cmdlog', 'saveSheets(inputPath("save cmdlog to: ", value=fnSuffix(name)), vd.cmdlog)', 'save CommandLog to filename.vdj file')
-BaseSheet.bindkey('^N', 'no-op')
-BaseSheet.addCommand('^K', 'replay-stop', 'vd.replay_cancel(); vd.warning("replay canceled")', 'cancel current replay')
+BaseSheet.addCommand('Ctrl+D', 'save-cmdlog', 'saveSheets(inputPath("save cmdlog to: ", value=fnSuffix(name)), vd.cmdlog)', 'save CommandLog to filename.vdj file')
+BaseSheet.bindkey('Ctrl+N', 'no-op')
+BaseSheet.addCommand('Ctrl+K', 'replay-stop', 'vd.replay_cancel(); vd.warning("replay canceled")', 'cancel current replay')
 
 globalCommand(None, 'show-status', 'status(input("status: "))', 'show given message on status line')
-globalCommand('^V', 'show-version', 'status(__version_info__);', 'Show version and copyright information on status line')
-globalCommand('z^V', 'check-version', 'checkVersion(input("require version: ", value=__version_info__))', 'check VisiData version against given version')
+globalCommand('Ctrl+V', 'show-version', 'status(__version_info__);', 'Show version and copyright information on status line')
+globalCommand('zCtrl+V', 'check-version', 'checkVersion(input("require version: ", value=__version_info__))', 'check VisiData version against given version')
 
 CommandLog.addCommand('x', 'replay-row', 'vd.replayOne(cursorRow); status("replayed one row")', 'replay command in current row')
 CommandLog.addCommand('gx', 'replay-all', 'vd.replay(sheet)', 'replay contents of entire CommandLog')
@@ -495,10 +491,13 @@ CommandLog.options.encoding = 'utf-8'
 CommandLogJsonl.options.json_sort_keys = False
 CommandLogJsonl.options.regex_skip = r'^(//|#).*'
 
-vd.addGlobals(CommandLogBase=CommandLogBase, CommandLogRow=CommandLogRow)
+vd.addGlobals(CommandLogBase=CommandLogBase,
+              CommandLogJsonl=CommandLogJsonl,
+              CommandLogRow=CommandLogRow,
+              )
 
 vd.addMenuItems('''
-            View > Command log > this sheet > cmdlog-sheet
+    View > Command log > this sheet > cmdlog-sheet
     View > Command log > this sheet only > cmdlog-sheet-only
     View > Command log > all commands > cmdlog-all
     System > Execute longname > exec-longname

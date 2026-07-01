@@ -5,7 +5,7 @@ import datetime
 import os.path
 from visidata.loaders import unzip_http
 
-from visidata import vd, VisiData, asyncthread, Sheet, Progress, Menu, options
+from visidata import vd, VisiData, asyncthread, Sheet, Progress, Menu
 from visidata import ColumnAttr, Column, Path, filesize
 from visidata.type_date import date
 
@@ -42,7 +42,7 @@ class ZipSheet(Sheet):
     columns = [
         Column('directory',
             getter=lambda col,row: str(row[1].parent) if str(row[1].parent) == '.' else str(row[1].parent) + '/'),
-        Column('filename', getter=lambda col,row: row[1].name + row[1].suffix),
+        Column('filename', getter=lambda col,row: row[1].name),
         Column('abspath', type=str, width=0, getter=lambda col,row: row[1]),
         Column('ext', getter=lambda col,row: row[0].filename.endswith('/') and '/' or row[1].ext),
         Column('size', getter=lambda col,row: row[0].file_size, type=int),
@@ -67,27 +67,22 @@ Commands:
 
     def openZipFile(self, fp, *args, **kwargs):
         '''Use VisiData input to handle password-protected zip files.'''
-        if isinstance(fp, zipfile.ZipFile):
-            zip_open =  fp.open
-        elif isinstance(fp, unzip_http.RemoteZipFile):
-            zip_open = fp._open
         try:
-            return zip_open(*args, **kwargs)
+            return fp.open(*args, **kwargs)
         except RuntimeError as err:
             if 'password required' in err.args[0]:
                 pwd = vd.input(f'{args[0].filename} is encrypted, enter password: ', display=False)
-                return zip_open(*args, **kwargs, pwd=pwd.encode('utf-8'))
+                return fp.open(*args, **kwargs, pwd=pwd.encode('utf-8'))
             vd.exceptionCaught(err)
 
     def openRow(self, row):
             fi, zpath = row
             fp = self.openZipFile(self.zfp, fi)
-            return vd.openSource(Path(fi.filename, fp=fp, filesize=fi.file_size), filetype=options.filetype)
+            return vd.openSource(Path(fi.filename, fp=fp, filesize=fi.file_size))
 
     def extract(self, *rows, path=None):
         path = path or Path('.')
 
-        files = []
         for row in rows:
             r, _ = row
             vd.confirmOverwrite(path/r.filename)  #1452
@@ -95,8 +90,7 @@ Commands:
 
     def sysopen_row(self, row):
         'Extract file in row to tempdir and launch $EDITOR.  Modifications will be discarded.'
-        import tempfile
-        with tempfile.TemporaryDirectory() as tempdir:
+        with vd.TempDir() as tempdir:
             self.zfp.extract(member=row[0], path=tempdir)
             vd.launchExternalEditorPath(Path(tempdir)/row[0].filename)
 
@@ -111,6 +105,7 @@ Commands:
     def zfp(self):
         if not self._zfp:
             if '://' in str(self.source):
+                vd.importExternal('urllib3')
                 unzip_http.warning = vd.warning
                 self._zfp = unzip_http.RemoteZipFile(str(self.source))
             elif isinstance(self.source, Path):
@@ -125,8 +120,11 @@ Commands:
         return self._zfp
 
     def iterload(self):
-        for zi in Progress(self.zfp.infolist()):
-            yield [zi, Path(zi.filename)]
+        try:
+            for zi in Progress(self.zfp.infolist()):
+                yield [zi, Path(zi.filename)]
+        except Exception as e:
+            vd.fail(f'{e}')
 
 
 #from https://docs.python.org/3/library/tarfile.html#tarfile.REGTYPE

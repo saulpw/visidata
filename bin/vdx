@@ -1,0 +1,178 @@
+#!/usr/bin/env python3
+# vdx - VisiData command server client
+#
+# Usage:
+#   vdx [<options>] [<commands...>]
+#
+# Without arguments: shows current screen state.
+#
+# Options:
+#   -q          quiet (omit state; no output if no error)
+#   -n          no sync (do not wait for all commands to finish before returning state)
+#   -s PATH     connect via Unix domain socket at PATH (overrides VD_SOCKET, ignores VD_PORT)
+#
+# Each command is a longname optionally followed by :input
+#   vdx open-file:foo.csv go-col-regex:dob type-date sort-desc
+#
+# Environment:
+#   VD_SOCKET      - Unix domain socket path (preferred over VD_PORT if set)
+#   VD_PORT        - server port (default: 8123)
+#   VD_LAUNCH_CMD  - command to open a new terminal (default: tmux split-window -h)
+
+# ailevel 6
+
+import argparse
+import os
+import socket
+import subprocess
+import sys
+import time
+
+
+def _connect(endpoint):
+    'endpoint: str path => AF_UNIX; (host, port) tuple => AF_INET.'
+    if isinstance(endpoint, str):
+        s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        s.connect(endpoint)
+    else:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect(endpoint)
+    return s
+
+
+def send_recv(endpoint, payload):
+    'Send payload to server, read full response.'
+    s = _connect(endpoint)
+    s.sendall(payload.encode('utf-8'))
+    s.shutdown(socket.SHUT_WR)
+
+    response = b''
+    while True:
+        chunk = s.recv(4096)
+        if not chunk:
+            break
+        response += chunk
+    s.close()
+    return response.decode('utf-8')
+
+
+def start_server(endpoint, vd_bin, vd_args=''):
+    'Launch VisiData in a new terminal with command server.'
+    if isinstance(endpoint, str):
+        listen_arg = f'--server-socket {endpoint}'
+    else:
+        listen_arg = f'--server-port {endpoint[1]}'
+    launch_cmd = os.environ.get('VD_LAUNCH_CMD', 'tmux split-window -h')
+    config_arg = '--config visidatarc' if os.path.isfile('visidatarc') else ''
+    proc = subprocess.Popen(f'{launch_cmd} {vd_bin} --quitguard=False {listen_arg} --disp_scroll_context=3 {config_arg} {vd_args}', shell=True)
+
+    for _ in range(30):
+        ret = proc.poll()
+        if ret is not None and ret != 0:
+            print(f'Launch command failed (exit {ret}): {launch_cmd}', file=sys.stderr)
+            sys.exit(1)
+        try:
+            if send_recv(endpoint, 'screen\n'):
+                return
+        # FileNotFoundError: AF_UNIX path not yet created by the server
+        except (ConnectionRefusedError, FileNotFoundError, OSError):
+            pass
+        time.sleep(0.5)
+
+    print('Timeout waiting for VisiData server', file=sys.stderr)
+    sys.exit(1)
+
+
+def find_vd_bin():
+    'Find VisiData binary, preferring local repo.'
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    local_vd = os.path.join(script_dir, 'vd')
+    if os.path.isfile(local_vd) and os.access(local_vd, os.X_OK):
+        return local_vd
+    return 'vd'
+
+
+def main():
+    parser = argparse.ArgumentParser(prog='vdx', description='VisiData command server client')
+    parser.add_argument('-q', dest='quiet', action='store_true', help='quiet (omit state)')
+    parser.add_argument('-n', dest='nosync', action='store_true', help='do not sync (return state without waiting)')
+    parser.add_argument('-s', '--socket', dest='socket', default=os.environ.get('VD_SOCKET'), help='Unix socket path (overrides VD_SOCKET)')
+    parser.add_argument('-a', '--args', dest='vd_args', default='', help='extra args to pass to vd on launch (e.g. "-p file.vdx")')
+    parser.add_argument('-w', '--wait', dest='wait', action='store_true', help='wait for command queue to drain (useful after -p replay)')
+    parser.add_argument('commands', nargs='*', metavar='CMD')
+    args = parser.parse_args()
+
+    if args.socket:
+        endpoint = args.socket
+    else:
+        host = '127.0.0.1'
+        port = int(os.environ.get('VD_PORT', 8123))
+        endpoint = (host, port)
+
+    # Build payload lines
+    lines = []
+    for cmd in args.commands:
+        longname, _, input_str = cmd.partition(':')
+        if input_str:
+            lines.append(f'{longname} {input_str}')
+        else:
+            lines.append(longname)
+
+    if not args.nosync and lines:
+        lines.append('sync')
+
+    if not args.quiet:
+        lines.append('screen')
+
+    # Ensure server is running
+    vd_args = args.vd_args
+
+    def ensure_server():
+        vd_bin = find_vd_bin()
+        try:
+            s = _connect(endpoint)
+            s.close()
+        except (ConnectionRefusedError, FileNotFoundError, OSError):
+            start_server(endpoint, vd_bin, vd_args)
+
+    if not lines and not args.wait:
+        ensure_server()
+        return
+
+    if args.wait:
+        ensure_server()
+        import json as json_mod
+        while True:
+            try:
+                resp = send_recv(endpoint, 'get-progress\n')
+                progress = json_mod.loads(resp)
+                if progress.get('queued_commands', 0) == 0 and progress.get('threads', 0) == 0:
+                    break
+            except (ConnectionRefusedError, ConnectionResetError, FileNotFoundError, OSError):
+                print('vd server exited', file=sys.stderr)
+                sys.exit(0)
+            time.sleep(0.5)
+
+    payload = '\n'.join(lines) + '\n'
+
+    try:
+        response = send_recv(endpoint, payload)
+    except ConnectionResetError:
+        print('vd server exited', file=sys.stderr)
+        sys.exit(0)
+    except (ConnectionRefusedError, FileNotFoundError, OSError):
+        try:
+            start_server(endpoint, find_vd_bin(), vd_args)
+            response = send_recv(endpoint, payload)
+        except (ConnectionRefusedError, ConnectionResetError, FileNotFoundError, OSError):
+            print('vd server not available', file=sys.stderr)
+            sys.exit(1)
+
+    if response:
+        sys.stdout.write(response)
+        if not response.endswith('\n'):
+            sys.stdout.write('\n')
+
+
+if __name__ == '__main__':
+    main()

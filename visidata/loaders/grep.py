@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from visidata import vd, VisiData, JsonSheet, ColumnAttr, Path, ENTER, AttrDict, ExpectedException, stacktrace, TypedExceptionWrapper
+from visidata import vd, VisiData, JsonSheet, ColumnAttr, Path, AttrDict, ExpectedException, stacktrace, TypedExceptionWrapper
 import json
 import os
 from os import linesep
@@ -66,6 +66,7 @@ class GrepSheet(JsonSheet):
                         with self.open_text_source() as fp:
                             try:
                                 extract_line_no = True
+                                line_no = None
                                 for L in fp:
                                     L = L.rstrip(linesep)
                                     sep1 = L.index(':')
@@ -97,6 +98,8 @@ class GrepSheet(JsonSheet):
 def sysopen_row(sheet, row):
     '''Open the file in an editor at the specific line.'''
     if sheet.nRows == 0: return
+    given = None
+    p = None
     try:
         given = row.file
         if vd.options.grep_base_dir and not os.path.isabs(given):
@@ -113,7 +116,7 @@ def sysopen_row(sheet, row):
     else:
         vd.fail(f'cannot find file: {p.given}')
 
-GrepSheet.addCommand(ENTER, 'sysopen-row', 'sysopen_row(cursorRow)', 'open current file in external $EDITOR, at the line')
+GrepSheet.addCommand('Enter', 'sysopen-row', 'sysopen_row(cursorRow)', 'open current file in external $EDITOR, at the line')
 
 vd.addGlobals({
     'GrepSheet': GrepSheet,

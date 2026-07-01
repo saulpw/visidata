@@ -1,6 +1,6 @@
 import curses
 
-from visidata import vd, VisiData, BaseSheet, Sheet, AttrDict
+from visidata import vd, VisiData, BaseSheet, Sheet, AttrDict, dispwidth
 
 
 # registry of mouse events.  cleared before every draw cycle.
@@ -9,6 +9,8 @@ vd.mousereg = []  # list of AttrDict(y=, x=, h=, w=, buttonfuncs=dict)
 # sheet mouse position for current mouse event
 BaseSheet.init('mouseX', int)
 BaseSheet.init('mouseY', int)
+# sheet info for a click that may become a drag
+BaseSheet.init('drag1')
 
 
 @VisiData.after
@@ -16,14 +18,26 @@ def initCurses(vd):
     if not getattr(curses, 'mousemask', None):
       return
     curses.MOUSE_ALL = 0xffffffff
-    curses.mousemask(curses.MOUSE_ALL if vd.options.mouse_interval else 0)
+    curses.mouseEvents = {}
+
+    if not vd.enableMouse(bool(vd.options.mouse_interval)):
+        return
+
     curses.def_prog_mode()
     curses.mouseinterval(vd.options.mouse_interval)
-    curses.mouseEvents = {}
 
     for k in dir(curses):
         if k.startswith('BUTTON') or k in ('REPORT_MOUSE_POSITION', '2097152'):
             curses.mouseEvents[getattr(curses, k)] = k
+
+
+@VisiData.api
+def enableMouse(vd, b:bool) -> bool:  #2913 #2851
+    'Call curses.mousemask(all if b else 0) only if available.  Return True if mouse enabled.'
+    if not hasattr(curses, 'mousemask'):
+        return False
+    mm, _ = curses.mousemask(getattr(curses, 'MOUSE_ALL', 0xffffffff) if b else 0)
+    return bool(mm)
 
 
 @VisiData.after
@@ -78,12 +92,12 @@ def parseMouse(vd, **kwargs):
 
 @VisiData.api
 def handleMouse(vd, sheet):
+    r = None
     try:
         vd.keystrokes = ''
         pct = vd.windowConfig['pct']
         topPaneActive = ((vd.activePane == 2 and pct < 0)  or (vd.activePane == 1 and pct > 0))
         bottomPaneActive = ((vd.activePane == 1 and pct < 0)  or (vd.activePane == 2 and pct > 0))
-        r = None
         r = vd.parseMouse(top=vd.winTop, bot=vd.winBottom, menu=vd.scrMenu)
         if (bottomPaneActive and 'top' in r.found) or (topPaneActive and 'bot' in r.found):
             vd.activePane = 1 if vd.activePane == 2 else 2
@@ -114,10 +128,22 @@ def handleMouse(vd, sheet):
 
 
 @Sheet.api
-def visibleColAtX(sheet, x):
+def visibleColInfoAtX(sheet, x):
+    '''return (vcolidx, is_separator) for the x-coordinate'''
     for vcolidx, (colx, w) in sheet._visibleColLayout.items():
-        if colx <= x <= colx+w:
-            return vcolidx
+        if vcolidx == sheet.nVisibleCols-1:
+            sep = vd.options.disp_rowend_sep
+        elif (sheet.keyCols and sheet.availCols[vcolidx] is sheet.keyCols[-1]):
+            sep = vd.options.disp_keycol_sep
+        else:
+            sep = vd.options.disp_column_sep
+        sepw = dispwidth(sep, literal=True)
+        if colx <= x <= colx+w+sepw-1:
+            if colx <= x <= colx+w-1:  #in the cell
+                return (vcolidx, False)
+            else:   #in the end-of-column separator
+                return (vcolidx, True)
+    return (None, False)
 
 
 @Sheet.api
@@ -127,16 +153,39 @@ def visibleRowAtY(sheet, y):
             return rowidx
 
 
-@Sheet.command('BUTTON1_PRESSED', 'go-mouse', 'set cursor to row and column where mouse was clicked')
-def go_mouse(sheet):
+Sheet.addCommand('BUTTON1_PRESSED', 'go-mouse-1', 'go_mouse(drag_button=1)', 'set cursor to row and column where mouse was clicked, or start a drag event')
+Sheet.bindkey('BUTTON1_CLICKED', 'go-mouse-1')
+Sheet.addCommand('BUTTON1_RELEASED', 'check-drag', 'drag_button1()', 'resize column if col separator has been dragged')
+Sheet.addCommand('BUTTON3_PRESSED', 'go-mouse', 'go_mouse()', 'set cursor to row and column where mouse was clicked')
+@Sheet.api
+def go_mouse(sheet, drag_button=None):
+    if sheet.mouseY == sheet.windowHeight-1:
+        return
     ridx = sheet.visibleRowAtY(sheet.mouseY)
     if ridx is not None:
         sheet.cursorRowIndex = ridx
-    cidx = sheet.visibleColAtX(sheet.mouseX)
+    cidx, is_column = sheet.visibleColInfoAtX(sheet.mouseX)
     if cidx is not None:
         sheet.cursorVisibleColIndex = cidx
+        if drag_button == 1 and is_column:
+            # save info for a possible drag event
+            sheet.drag1 = (sheet.availCols[cidx], sheet.mouseX)
+        else:
+            sheet.drag1 = None
+
+@Sheet.api
+def drag_button1(sheet):
+    if not sheet.drag1:
+        return
+    delta_w = sheet.mouseX - sheet.drag1[1]
+    col = sheet.drag1[0]
+    sheet.drag1 = None
+    if col.width and col.width > 0:
+        new_w = col.width + delta_w
+        if new_w > 0:
+            col.setWidth(new_w)
 
 Sheet.addCommand(None, 'scroll-mouse', 'sheet.topRowIndex=cursorRowIndex-mouseY+1', 'scroll to mouse cursor location')
 
-Sheet.addCommand('ScrollUp', 'scroll-up', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr', 'scroll one row up')
-Sheet.addCommand('ScrollDown', 'scroll-down', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr', 'scroll one row down')
+Sheet.addCommand('ScrollUp', 'scroll-up', 'cursorDown(options.scroll_incr); sheet.topRowIndex += options.scroll_incr', 'scroll up by one row increment')
+Sheet.addCommand('ScrollDown', 'scroll-down', 'cursorDown(-options.scroll_incr); sheet.topRowIndex -= options.scroll_incr', 'scroll down by one row increment')

@@ -129,3 +129,37 @@ If more than one person uses it, [submit a PR](https://github.com/saulpw/visidat
 `TableSheet` sheets (which is any sheet with a row/column grid, i.e. most sheets) have *colorizers*, functions that can provide display attributes on individual rows, columns, or cells.
 
 See [docs/api/interface](/docs/api/interface#colors) for how to use colorizers.
+
+## Conditional Formatting
+
+For ad-hoc conditional formatting from inside a session, three commands attach a colorizer to the current sheet that paints cells, rows, or columns wherever a Python expression is truthy:
+
+- `color-cell` -- color individual cells (a CellColorizer)
+- `color-row` -- color whole rows (a RowColorizer)
+- `color-col` -- color whole columns (a ColumnColorizer)
+
+Each command pops up a two-field form prompting for an `expr:` (the Python expression) and a `color:`.  The `color:` field is pre-filled with the first color from `red green yellow cyan magenta blue` (and their `on <color>` background variants) that isn't already in use on this sheet.
+
+The `color:` field accepts any color string (`red`, `bold green`, `on red`, `215 yellow on 17`) or any `color_*` option name -- with or without the `color_` prefix.  So `error` resolves to `color_error`, `current_row` to `color_current_row`, etc., picking up whatever your theme defines for that role.
+
+Like `addcol-expr` and `select-expr`, bare column names in the expression resolve to that column's typed value for the current row, so `temperature > 100` Just Works on a sheet with a `temperature` column.  In addition, four bindings are always available, each under a short and long name:
+
+- `s` / `sheet` -- the sheet
+- `c` / `col` -- the Column object the colorizer is being asked about
+- `r` / `row` -- the row object
+- `v` / `value` -- the typed value of the current cell
+
+Examples (assuming a sheet with columns `name`, `score`, `status`):
+
+    color-cell  red          value < 0
+    color-cell  bold green   score >= 90
+    color-row   on red       status == 'failed'
+    color-col   underline    c.name.startswith('total_')
+
+### Notes
+
+- **Row colorizers evaluate per cell, not per row.**  The colorizer dispatcher walks each cell as it draws and asks every colorizer whether to apply.  Inside a `color-row` expression, `v` and `value` therefore refer to *the current cell being drawn*, not "the row's value" -- so a row-level rule like `value > 100` will only light up cells that match, not entire rows.  For real per-row rules, reference the row by bare column name (`status == 'failed'`).
+- **Empty `color:` is meaningful.**  If you blank out the color field, the colorizer falls back to using whatever the expression itself returned as the color string.  That lets an expression compute the color dynamically -- e.g. `'red' if value < 0 else 'green' if value > 0 else ''` -- though in practice you'll want a literal color most of the time.
+- **Performance.**  These commands use the existing colorizer infrastructure that already drives selected-row highlighting, key-column coloring, etc.  The expression is compiled once at command time and re-evaluated only on cells that get drawn, so the cost is bounded by the visible viewport, not the size of the sheet.
+- **Type errors are silent.**  Cells where the expression raises an exception (e.g. `value > 50` on a column that has not been typed as a number, so `value` is still a string) are simply not colored.  If a `color-cell` rule isn't lighting anything up, set the column type first (`#` for int, `%` for float) or wrap the comparison (`int(value) > 50`).  Run vd with `--debug` to see the raised exception in the status log.
+- **No persistence yet.**  Conditional-format colorizers live on the sheet instance for the session and are lost when the sheet is closed.  To re-apply them in a future session, save the commands as a macro or add them to your `.visidatarc`.

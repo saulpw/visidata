@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+# Pre-push hook: run all tests before pushing
+
+set -e
+make test-all

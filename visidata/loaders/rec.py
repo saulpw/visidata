@@ -93,7 +93,7 @@ class RecIndexSheet(IndexSheet):
                 elif desc in ['confidential']:  # encrypted
                     pass
                 else:
-                    vd.warning('Unhandled descriptor: ' +line)
+                    vd.warning(f'unhandled descriptor: {line}')
             else:
                 if newRecord:
                     row = None
@@ -132,7 +132,7 @@ def save_rec(vd, p, *vsheets):
             for col in vs.visibleCols:
                 if col.keycol:
                     fp.write(f'%key: {col.name}\n')
-            for row in Progress(vs.rows):
+            for row in vs.iterrows('saving'):
                 for col in vs.visibleCols:
                     cell = col.getCell(row)
                     if cell.value is not None:

@@ -41,4 +41,4 @@ class TabulaSheet(IndexSheet):
     def iterload(self):
         tabula = vd.importExternal('tabula')
         for i, t in enumerate(tabula.read_pdf(self.source, pages='all', multiple_tables=True)):
-            yield PandasSheet(self.source.name, i, source=t)
+            yield PandasSheet(self.source.base_stem, i, source=t)

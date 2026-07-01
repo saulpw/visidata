@@ -1,0 +1,19 @@
+# edits to a newly-added row on a deferred sheet should be
+# merged into the deferred add, not tracked as separate mods  #2901
+
+open-file sample_data/employees.sqlite
+open-row
+
+# add a row and edit the dname text column
+add-row
+col dname
+edit-cell hello
+
+# getDeferredChanges should have 1 add with the edited value, 0 separate mods
+assert-expr len(sheet.getDeferredChanges()[0]) == 1
+assert-expr len(sheet.getDeferredChanges()[1]) == 0
+assert-expr sheet.column('dname').calcValue(list(sheet.getDeferredChanges()[0].values())[0]) is not None
+
+# undo the edit; added row value should revert to None
+undo-last
+assert-expr sheet.column('dname').calcValue(list(sheet.getDeferredChanges()[0].values())[0]) is None

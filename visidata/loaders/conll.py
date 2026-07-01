@@ -36,14 +36,27 @@ class ConllSheet(TableSheet):
         ItemColumn('misc', 10, type=dict),
     ]
     def iterload(self):
+        # relied on official pyconll guidance for migrating v3 to v4
+        # https://pyconll.readthedocs.io/en/stable/migration.html
         pyconll = vd.importExternal('pyconll')
+        try: #succeeds for pyconll version >= 4
+            import pyconll.conllu
+            v4 = True
+        except ModuleNotFoundError:
+            v4 = False
 
         # sent_id + token_id will be unique
         self.setKeys([self.columns[0], self.columns[1]])
-
-        with self.source.open(encoding='utf-8') as fp:
-            for sent in pyconll.load.iter_sentences(fp):
-                sent_id = sent.id
-                for token in sent:
-                    yield [sent_id, token.id, token._form, token.lemma, token.upos,
+        if v4:
+            conllu = pyconll.conllu.conllu
+            for sent in conllu.iter_from_file(self.source.given):
+                for token in sent.tokens:
+                    yield [sent.meta['sent_id'], token.id, token.form, token.lemma, token.upos,
                             token.xpos, token.feats, token.head, token.deprel, token.deps, token.misc]
+        else:
+            with self.source.open(encoding='utf-8') as fp:
+                for sent in pyconll.load.iter_sentences(fp):
+                    sent_id = sent.id
+                    for token in sent:
+                        yield [sent_id, token.id, token._form, token.lemma, token.upos,
+                                token.xpos, token.feats, token.head, token.deprel, token.deps, token.misc]

@@ -1,0 +1,16 @@
+# addcol-expr should allow name=expr to specify column name  #3022
+
+open-file sample_data/sample.tsv
+
+# named expr: result = Units should create column named "result"
+addcol-expr result = Units
+assert-expr cursorCol.name == "result"
+assert-cell 95
+
+# plain expr without name should use the expression as column name
+addcol-expr Units
+assert-expr cursorCol.name == "Units"
+
+# double-equals should not be parsed as name=expr
+addcol-expr Units == Units
+assert-expr cursorCol.name == "Units == Units"

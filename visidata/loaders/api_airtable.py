@@ -17,7 +17,7 @@ def guessurl_airtable(vd, p, response):
 
 @VisiData.api
 def open_airtable(vd, p):
-    pyairtable = vd.importExternal('pyairtable')
+    vd.importExternal('pyairtable')
 
     token = os.environ.get('AIRTABLE_AUTH_TOKEN') or vd.options.airtable_auth_token
     if not token:
@@ -50,7 +50,9 @@ class AirtableSheet(Sheet):
     def iterload(self):
         self.fields = set()
 
-        for page in self.api.iterate(self.airtable_base, self.airtable_table, view=self.airtable_view):
+        table = self.api.table(self.airtable_base, self.airtable_table)
+        
+        for page in table.iterate(view=self.airtable_view):
             for row in page:
                 yield row
 

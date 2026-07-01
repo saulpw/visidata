@@ -16,7 +16,7 @@ def isError(col, row):
         if v is not None:
             col.type(v)
         return False
-    except Exception as e:
+    except Exception:
         return True
 
 
@@ -85,7 +85,7 @@ class DescribeSheet(ColumnsSheet):
                         v = srccol.type(v)
                         vals.append(v)
                     d['distinct'].add(v)
-                except Exception as e:
+                except Exception:
                     d['errors'].append(sr)
 
             d['mode'] = self.calcStatistic(d, mode, vals)

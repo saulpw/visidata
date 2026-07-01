@@ -58,6 +58,7 @@ vd.themes['asciimono'] = dict(
 
     color_graph_axis='bold',
     color_sidebar='reverse',
+    disp_boxchars='||--++++',
     color_change_pending='reverse',
     color_delete_pending='underline',
 

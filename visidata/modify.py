@@ -1,36 +1,37 @@
 from copy import copy
 
-from visidata import vd, VisiData, asyncthread
-from visidata import Sheet, RowColorizer, CellColorizer, Column, BaseSheet, Progress
+from visidata import vd, VisiData, asyncthread, ColumnColorizer
+from visidata import Sheet, RowColorizer, CellColorizer, Column, BaseSheet, Progress, ColumnsSheet
 
+vd.theme_option('color_readonly', 'on 52', 'color for readonly columns')
 vd.theme_option('color_add_pending', 'green', 'color for rows pending add')
 vd.theme_option('color_change_pending', 'reverse yellow', 'color for cells pending modification')
 vd.theme_option('color_delete_pending', 'red', 'color for rows pending delete')
-vd.option('overwrite', 'c', 'overwrite existing files {y=yes|c=confirm|n=no}')
+vd.option('overwrite', 'c', 'allow overwriting existing files {c=check|n=no/readonly}')
 
 vd.optalias('readonly', 'overwrite', 'n')
 vd.optalias('ro', 'overwrite', 'n')
-vd.optalias('y', 'overwrite', 'y')
+vd.optalias('y', 'confirm', 'y')
 
 
 @VisiData.api
 def couldOverwrite(vd) -> bool:
     'Return True if overwrite might be allowed.'
-    return vd.options.overwrite.startswith(('y','c'))
+    return vd.options.overwrite.startswith(('c', 'y'))
 
 
 @VisiData.api
 def confirmOverwrite(vd, path, msg:str=''):
-    'Fail if file exists and overwrite not allowed.'
-    if path is None or path.exists():
-        msg = msg or f'{path.given} exists. overwrite? '
-        ow = vd.options.overwrite
-        if ow.startswith('c'):  # confirm
-            vd.confirm(msg)
-        elif ow.startswith('y'):  # yes/always
-            pass
-        else: #1805  empty/no/never/readonly
-            vd.fail('overwrite disabled')
+    'Fail if file exists and overwrite not allowed.  *path* of None always checks.'
+    if path is not None and not path.exists():
+        return True
+    ow = vd.options.overwrite
+    if not ow.startswith(('c', 'y')):  #1805 empty/no/never: readonly
+        vd.fail('overwrite disabled')
+    if ow.startswith('c'):  # 'y' (legacy) excluded on purpose: it overwrites without confirming
+        if not msg and path is not None:
+            msg = f'{path.given} exists. overwrite? '
+        vd.confirm(msg or 'overwrite? ')
     return True
 
 # deferred cached
@@ -50,7 +51,8 @@ Sheet.colorizers += [
         RowColorizer(9, 'color_add_pending', lambda s,c,r,v: s.rowid(r) in s._deferredAdds),
         CellColorizer(8, 'color_change_pending', lambda s,c,r,v: c and (r is not None) and s.isChanged(c, r)),
         RowColorizer(9, 'color_delete_pending', lambda s,c,r,v: s.isDeleted(r)),
-        ]
+        ColumnColorizer(9, 'color_readonly', lambda s,c,r,v: c and (r is None) and c.readonly),
+]
 
 @Sheet.api
 def preloadHook(sheet):
@@ -58,6 +60,10 @@ def preloadHook(sheet):
     sheet._deferredAdds.clear()
     sheet._deferredMods.clear()
     sheet._deferredDels.clear()
+
+@Sheet.after
+def afterLoad(sheet):
+    sheet.hasBeenModified = False
 
 @Sheet.api
 def rowAdded(self, row):
@@ -76,6 +82,15 @@ def cellChanged(col, row, val):
     oldval = col.getValue(row)
     if oldval != val:
         rowid = col.sheet.rowid(row)
+
+        if rowid in col.sheet._deferredAdds:
+            col.putValue(row, val)
+            def _undoNewCellChanged(col, row, oldval):
+                col.putValue(row, oldval)
+            vd.addUndo(_undoNewCellChanged, col, row, oldval)
+            return
+
+
         if rowid not in col.sheet._deferredMods:
             rowmods = {}
             col.sheet._deferredMods[rowid] = (row, rowmods)
@@ -114,7 +129,7 @@ def rowDeleted(self, row):
 @Sheet.api
 @asyncthread
 def addRows(sheet, rows, index=None, undo=True):
-    'Add *rows* after row at *index*.'
+    'Add *rows* after row at *index*, possibly deferred, setting the modified status, and making it undoable if *undo* is True.'
     addedRows = {}
     if index is None: index=len(sheet.rows)
     for i, row in enumerate(Progress(rows, gerund='adding')):
@@ -262,8 +277,18 @@ def commitDeleteRow(self, row):
     'To commit a deleted row.  Override per sheet type.'
 
 
-@asyncthread
+# on the ColumnsSheet a row is a source column; adding/deleting marks the source modified
+@ColumnsSheet.before
+def addRow(sheet, row, index=None):
+    row.sheet.setModified()
+
+@ColumnsSheet.api
+def commitDeleteRow(sheet, row):
+    row.sheet.setModified()
+
+
 @Sheet.api
+@asyncthread
 def putChanges(sheet):
     'Commit changes to ``sheet.source``. May overwrite source completely without confirmation.  Overridable.'
     sheet.commitAdds()
@@ -332,9 +357,9 @@ def new_rows(sheet, n):
 Sheet.addCommand('a', 'add-row', 'addRows([newRow()], index=cursorRowIndex); cursorDown(1)', 'append a blank row')
 Sheet.addCommand('ga', 'add-rows', 'n=int(input("add # rows: ", value=1)); addRows(new_rows(n), index=cursorRowIndex); cursorDown(1)', 'append N blank rows')
 Sheet.addCommand('za', 'addcol-new', 'addColumnAtCursor(SettableColumn(input("column name: ")))', 'append an empty column')
-Sheet.addCommand('gza', 'addcol-bulk', 'addColumnAtCursor(*(SettableColumn() for c in range(int(input("add columns: ")))))', 'append N empty columns')
+Sheet.addCommand('gza', 'addcol-bulk', 'addColumnAtCursor(*(SettableColumn() for c in range(int(input("add # columns: ", value=1)))))', 'append N empty columns')
 
-Sheet.addCommand('z^S', 'commit-sheet', 'commit()', 'commit changes back to source.  not undoable!')
+Sheet.addCommand('zCtrl+S', 'commit-sheet', 'commit()', 'commit changes back to source.  not undoable!')
 
 vd.addMenuItems('''
     File > Save > changes to source > commit-sheet

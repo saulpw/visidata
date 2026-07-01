@@ -1,7 +1,7 @@
 from copy import copy
 import re
 
-from visidata import VisiData, vd, Sheet, options, Column, Progress, anytype, ColumnItem, asyncthread, TypedExceptionWrapper, TypedWrapper, IndexSheet, vlen
+from visidata import VisiData, vd, Sheet, options, Column, AttrColumn, Progress, anytype, ColumnItem, asyncthread, TypedExceptionWrapper, TypedWrapper, IndexSheet, UNLOADED, vlen
 from visidata.type_date import date
 
 vd.option('sqlite_onconnect', '', 'sqlite statement to execute after opening a connection')
@@ -41,8 +41,20 @@ class SqliteSheet(Sheet):
     'Provide functionality for importing SQLite databases.'
     savesToSource = True
     defer = True
-    query = ''
+    _query = ''
     tableName = ''
+
+    @property
+    def query(self) -> str:
+        return self._query
+
+    @query.setter
+    def query(self, v:str):
+        if self.tableName:
+            vd.fail('use exec-sql to create a query sheet from a table')
+        self._query = v
+        self.name = ' '.join(v.strip().split())
+        self.rows = UNLOADED  #3020: auto-reload on next draw, no stale state
 
     def conn(self):
         import sqlite3
@@ -58,7 +70,9 @@ class SqliteSheet(Sheet):
         return con
 
     def rawSql(self, q:str) -> 'SqliteSheet':
-        return SqliteSheet('query', source=self.source, query=q)
+        vs = SqliteSheet('', source=self.source)
+        vs.query = q  #2136: via setter; constructor kwargs bypass the property
+        return vs
 
     @property
     def sidebar(self):
@@ -123,10 +137,17 @@ class SqliteSheet(Sheet):
 
             self.result = self.execute(conn, query, parms=getattr(self, 'parms', []))
 
+            resultcols = []
             for i, desc in enumerate(self.result.description):
-                self.addColumn(ColumnItem(desc[0], i))
+                col = ColumnItem(desc[0], i)
+                self.addColumn(col)
+                resultcols.append(col)
 
-            for row in self.result:
+            typemap = {int: int, float: float}  #2136
+            for i, row in enumerate(self.result):
+                if i == 0:
+                    for col, val in zip(resultcols, row):
+                        col.type = typemap.get(type(val), anytype)
                 yield row
 
     def iterload(self):
@@ -149,7 +170,7 @@ class SqliteSheet(Sheet):
                 else:
                     return None
             elif not isinstance(v, (int, float, str)):
-                v = col.getDisplayValue(r)
+                v = col.getFullDisplayValue(row)
             return v
 
         def values(row, cols):
@@ -203,6 +224,7 @@ class SqliteSheet(Sheet):
 
 
 class SqliteIndexSheet(SqliteSheet, IndexSheet):
+    columns = IndexSheet.columns + [AttrColumn('query', width=0)]  #2136
     rowtype = 'tables'
     tableName = 'sqlite_master'
     savesToSource = True
@@ -285,7 +307,7 @@ def save_sqlite(vd, p, *vsheets):
                 elif isinstance(v, (list, tuple, dict)):
                     v = jsonenc.encode(v)
                 elif not isinstance(v, (int, float, str)):
-                    v = col.getDisplayValue(r)
+                    v = col.getFullDisplayValue(r)
                 sqlvals.append(v)
             sql = 'INSERT INTO "%s" (%s) VALUES (%s)' % (tblname, ','.join(f'"{c.name}"' for c in vs.visibleCols), ','.join('?' for v in sqlvals))
             c.execute(sql, sqlvals)
@@ -294,6 +316,7 @@ def save_sqlite(vd, p, *vsheets):
 
 
 SqliteSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("execute SQL: ", type="sql")))', 'execute raw SQL statement')
+SqliteSheet.addCommand('', 'edit-sql', 'sheet.query = input("edit SQL: ", value=query, type="sql")', 'edit and re-execute SQL query')  #2136
 
 SqliteIndexSheet.addCommand('a', 'add-table', 'fail("create a new table by saving a sheet to this database file")', 'stub; add table by saving a sheet to the db file instead')
 SqliteIndexSheet.bindkey('ga', 'add-table')
@@ -302,6 +325,7 @@ VisiData.save_db = VisiData.save_sqlite
 
 vd.addMenuItems('''
     Data > execute SQL query > exec-sql
+    Data > edit SQL query > edit-sql
 ''')
 
 vd.addGlobals({

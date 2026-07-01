@@ -3,7 +3,7 @@
 import re
 
 
-from visidata import VisiData, TableSheet, ItemColumn, AttrDict
+from visidata import vd, VisiData, TableSheet, ItemColumn, AttrDict
 
 
 @VisiData.api
@@ -23,6 +23,7 @@ class JrnlSheet(TableSheet):
     def iterload(self):
         re_title = re.compile(r'\[(.*?)\s(.*?)\] (.*)')
         prevline = ''
+        row = None
         for line in self.source:
             tags = re.findall(r'(?<!\S)(@[-+*#/\w]+)', line)
             if not prevline:
@@ -35,8 +36,10 @@ class JrnlSheet(TableSheet):
                     yield row
                     continue
 
-            row.body += line + '\n'
-            row.tags = ' '.join([row.tags]+tags)
+            if row is None:
+                vd.fail('jrnl file must start with a "[date time] title" line')
+            row.body += line + '\n'  # pyright: ignore[reportPossiblyUnboundVariable]
+            row.tags = ' '.join([row.tags]+tags)  # pyright: ignore[reportPossiblyUnboundVariable]
             prevline = line.strip()
 
 

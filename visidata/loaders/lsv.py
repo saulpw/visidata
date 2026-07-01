@@ -14,9 +14,9 @@ def open_lsv(vd, p):
 def save_lsv(vd, p, *vsheets):
     vs = vsheets[0]
     with p.open(mode='w', encoding=vs.options.save_encoding) as fp:
-        for row in vs.iterrows():
+        for row in vs.iterrows('saving'):
             for col in vs.visibleCols:
-                fp.write('%s: %s\n' % (col.name, col.getDisplayValue(row)))
+                fp.write('%s: %s\n' % (col.name, col.getFullDisplayValue(row)))
             fp.write('\n')
 
 

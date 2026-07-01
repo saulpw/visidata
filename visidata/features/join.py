@@ -3,7 +3,8 @@ import itertools
 import functools
 from copy import copy
 
-from visidata import vd, VisiData, asyncthread, Sheet, Progress, IndexSheet, Column, CellColorizer, ColumnItem, SubColumnItem, TypedWrapper, ColumnsSheet, AttrDict, dispwidth
+from visidata import vd, VisiData, asyncthread, Sheet, Progress, IndexSheet, Column, CellColorizer, ItemColumn, SubColumnItem, TypedWrapper, ColumnsSheet, AttrDict, dispwidth
+from visidata import WritableColumn
 
 vd.help_join = '# Join Help\nHELPTODO'
 
@@ -18,18 +19,30 @@ def ensureLoaded(vd, sheets):
 
 @asyncthread
 def _appendRowsAfterLoading(joinsheet, origsheets):
+    '''Will fail() if any sheets have different numbers of visible columns.'''
     with Progress(gerund='loading'):
         vd.ensureLoaded(origsheets)
         vd.sync()
 
-    colnames = {c.name:c for c in joinsheet.visibleCols}
+    colcounts = { len(vs.visibleCols) for vs in origsheets }
+    if len(colcounts) != 1:
+        vd.fail('sheets must have same number of columns for `concat`; use `append` instead')
+
+    # rowdef: (srcSheet, srcRow), same as ConcatSheet  #2929
+    srcKeyColNames = {c.name for c in origsheets[0].keyCols}
+    joinsheet.columns = []
+    joinsheet.addColumn(ItemColumn('origin_sheet', 0, width=0))
+    keyedcols = collections.defaultdict(dict)  # name -> { sheet -> col }
+
     for vs in origsheets:
-        joinsheet.rows.extend(vs.rows)
+        joinsheet.rows.extend((vs, r) for r in vs.rows)
         for c in vs.visibleCols:
-            if c.name not in colnames:
-                newcol = copy(c)
-                colnames[c.name] = newcol
+            if not keyedcols[c.name]:
+                newcol = ConcatColumn(c.name, cols=keyedcols[c.name], type=c.type)
+                if c.name in srcKeyColNames:
+                    newcol.keycol = c.keycol
                 joinsheet.addColumn(newcol)
+            keyedcols[c.name][vs] = c
 
 
 @VisiData.api
@@ -48,7 +61,10 @@ def join_sheets_cols(vd, cols, jointype:str=''):
 
 @Sheet.api
 def openJoin(sheet, others, jointype=''):
-    sheets = [sheet] + others
+    if sheet is vd.sheetsSheet:
+        sheets = others
+    else:
+        sheets = [sheet] + others
 
     sheets[1:] or vd.fail("join requires more than 1 sheet")
 
@@ -56,7 +72,7 @@ def openJoin(sheet, others, jointype=''):
         name = '&'.join(vs.name for vs in sheets)
         sheettypes = set(type(vs) for vs in sheets)
         if len(sheettypes) != 1:  # only one type of sheet #1598
-            vd.fail(f'only same sheet types can be concat-joined; use "append"')
+            vd.fail('only same sheet types can be concat-joined; use `append`')
 
         joinsheet = copy(sheet)
         joinsheet.name = name
@@ -73,7 +89,7 @@ def openJoin(sheet, others, jointype=''):
 
     nkeys = set(len(s.keyCols) for s in sheets)
     if 0 in nkeys or len(nkeys) != 1:
-        vd.fail(f'all sheets must have the same number of key columns')
+        vd.fail('all sheets must have the same number of key columns')
 
     if jointype == 'extend':
         vs = copy(sheets[0])
@@ -100,7 +116,7 @@ vd.jointypes = [AttrDict(key=k, desc=v) for k, v in {
 }.items()]
 
 def joinkey(sheetKeyCols, row):
-    return tuple(c.getDisplayValue(row) for c in sheetKeyCols)
+    return tuple(c.getFullDisplayValue(row) for c in sheetKeyCols)
 
 
 def groupRowsByKey(sheets:dict, rowsBySheetKey, rowsByKey):
@@ -128,20 +144,22 @@ def groupRowsByKey(sheets:dict, rowsBySheetKey, rowsByKey):
                     ]
 
 
-class JoinKeyColumn(Column):
+class JoinKeyColumn(WritableColumn):
     def __init__(self, name='', keycols=None, **kwargs):
         super().__init__(name, type=keycols[0].type, width=keycols[0].width, **kwargs)
         self.keycols = keycols
 
     def calcValue(self, row):
-        vals = set()
-        for i, c in enumerate(self.keycols):
+        vals = []
+        for c in self.keycols:
             if row[c.sheet] is not None:
-                vals.add(c.getTypedValue(row[c.sheet]))
-        if len(vals) != 1:
+                v = c.getTypedValue(row[c.sheet])
+                if not any(v == existing for existing in vals):  #3099
+                    vals.append(v)
+        if len(vals) > 1:
             keycolnames = ', '.join([f'{col.sheet.name}:{col.name}' for col in self.keycols])
-            vd.warning(f"source key columns ({keycolnames}) have different types")
-        return vals.pop()
+            vd.warning(f"key cols ({keycolnames}) matched by display value but have differing typed values")
+        return vals[0]
 
     def putValue(self, row, value):
         for i, c in enumerate(self.keycols):
@@ -154,7 +172,7 @@ class JoinKeyColumn(Column):
             c.recalc()
 
 
-class MergeColumn(Column):
+class MergeColumn(WritableColumn):
     # .cols is { sheet: col, ... } in sheet-join order
     def calcValue(self, row):
         'Return value from last joined sheet with truth-y value in this column for the given row.'
@@ -255,7 +273,7 @@ class JoinSheet(Sheet):
 
 
 ## for ExtendedSheet_reload below
-class ExtendedColumn(Column):
+class ExtendedColumn(WritableColumn):
     def calcValue(self, row):
         key = joinkey(self.firstJoinSource.keyCols, row)
         srcrow = self.rowsBySheetKey[self.srcsheet][key]
@@ -314,7 +332,7 @@ def ExtendedSheet_reload(self, sheets):
 
 
 ## for ConcatSheet
-class ConcatColumn(Column):
+class ConcatColumn(WritableColumn):
     '''ConcatColumn(name, cols={srcsheet:srccol}, ...)'''
     def getColBySheet(self, s):
         return self.cols.get(s, None)
@@ -337,7 +355,7 @@ class ConcatColumn(Column):
 # rowdef: (srcSheet, srcRow)
 class ConcatSheet(Sheet):
     'combination of multiple sheets by row concatenation. source=list of sheets. '
-    columns = [ColumnItem('origin_sheet', 0, width=0)]
+    columns = [ItemColumn('origin_sheet', 0, width=0)]
     def iterload(self):
         # only one column with each name allowed per sheet
         keyedcols = collections.defaultdict(dict)  # name -> { sheet -> col }
@@ -368,8 +386,8 @@ def inputJointype(vd):
     def _fmt_aggr_summary(match, row, trigger_key):
         formatted_jointype = match.formatted.get('key', row.key) if match else row.key
         r = ' '*(dispwidth(prompt)-3)
-        r += f'[:keystrokes]{trigger_key}[/]  '
-        r += formatted_jointype
+        r += f' [:keystrokes]{trigger_key}[/] ' if trigger_key else '   '
+        r += f'[:bold]{formatted_jointype}[/]'
         if row.desc:
             r += ' - '
             r += match.formatted.get('desc', row.desc) if match else row.desc
@@ -397,10 +415,10 @@ vd.addMenuItems('''
 
 for d in vd.jointypes:
     jointype, joinhelp = d.key, d.desc
-    IndexSheet.addCommand('', f'join-selected-{jointype}', 'left, rights = someSelectedRows[0], someSelectedRows[1:]; vd.push(left.openJoin(rights, jointype="{jointype}))', f'join selected sheets, keeping {joinhelp}')
+    IndexSheet.addCommand('', f'join-selected-{jointype}', f'left, rights = someSelectedRows[0], someSelectedRows[1:]; vd.push(left.openJoin(rights, jointype="{jointype}"))', f'join selected sheets, keeping {joinhelp}')
     Sheet.addCommand('', f'join-sheets-top2-{jointype}', f'vd.push(openJoin(vd.sheets[1:2], jointype="{jointype}"))', f'join top two sheets on Sheets Stack, keeping {joinhelp}')
     Sheet.addCommand('', f'join-sheets-all-{jointype}', f'vd.push(openJoin(vd.sheets[1:], jointype="{jointype}"))', f'join all sheets on Sheets Stack, keeping {joinhelp}')
-    ColumnsSheet.addCommand('', 'join-cols-{jointype}', 'vd.push(join_sheets_cols(selectedRows, jointype=inputJointype()))', f'join sheets for selected columns, keeping {joinhelp}')
+    ColumnsSheet.addCommand('', f'join-cols-{jointype}', f'vd.push(join_sheets_cols(selectedRows, jointype="{jointype}"))', f'join sheets for selected columns, keeping {joinhelp}')
 
     vd.addMenuItems(f'''Data > Join > Selected Sheets > {jointype} > join-selected-{jointype}''')
     vd.addMenuItems(f'''Data > Join > Top Two Sheets > {jointype} > join-sheets-top2-{jointype}''')
@@ -409,3 +427,12 @@ for d in vd.jointypes:
 IndexSheet.guide += '''
     - `&` to join the selected sheets together
 '''
+
+
+def test_join_unhashable(vd):
+    'JoinKeyColumn.calcValue must not crash on unhashable typed values  #3099'
+    cols = lambda: [ItemColumn('key', 'key'), ItemColumn('val', 'val')]
+    s1 = Sheet('a', columns=cols(), rows=[{'key': [1, 2], 'val': 'from-a'}])
+    s2 = Sheet('b', columns=cols(), rows=[{'key': [1, 2], 'val': 'from-b'}])
+    kc = JoinKeyColumn('key', keycols=[s1.column('key'), s2.column('key')])
+    assert kc.calcValue({s1: s1.rows[0], s2: s2.rows[0]}) == [1, 2]

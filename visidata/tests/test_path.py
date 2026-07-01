@@ -2,6 +2,7 @@ import io
 import pytest
 
 from visidata import Path
+from visidata.path import RepeatFile, BytesIOWrapper
 
 class TestVisidataPath:
 
@@ -22,7 +23,9 @@ class TestVisidataPath:
         assert Path('foo').ext == ''
         assert Path('foo').base_stem == 'foo'
         assert Path('foo.').ext == ''
-        assert Path('foo.').base_stem == 'foo.'
+        # assert Path('foo.').base_stem == 'foo.' # only 'foo' since python 3.14
+        assert Path('foo..').ext == ''
+        assert Path('foo..').base_stem == 'foo..'
         assert Path('.foo').ext == ''
         assert Path('.foo').base_stem == '.foo'
 
@@ -33,3 +36,36 @@ class TestVisidataPath:
         a = next(p.open())
         b = next(p.open())
         assert a == b
+
+    def test_iterdir_yields_visidata_paths(self):  # #2188
+        for p in Path('/tmp').iterdir():
+            assert isinstance(p, Path), f'{p} is {type(p)}, expected visidata.Path'
+            break  # just check the first one
+
+    def test_name_returns_full_filename(self):  # #2188
+        assert Path('foo.csv').name == 'foo.csv'
+        assert Path('/tmp/bar.tsv').name == 'bar.tsv'
+        assert Path('foo').name == 'foo'
+        assert Path('foo.csv.gz').name == 'foo.csv.gz'
+        assert Path('foo.csv.gz').ext == 'csv'
+        assert Path('foo.csv.gz').compression == 'gz'
+        assert Path('foo.vds.zst').ext == 'vds'
+        assert Path('foo.vds.zst').compression == 'zst'
+        assert Path('foo.vds.zstd').ext == 'vds'  #2286
+        assert Path('foo.vds.zstd').compression == 'zstd'  #2286
+
+    def test_repeatfile_bytesiowrapper(self):  # #2829
+        rf = RepeatFile(iter(['hello\n', 'world\n']))
+        bio = BytesIOWrapper(rf)
+        data = bio.read()
+        assert isinstance(data, bytes)
+        assert b'hello' in data
+
+    def test_repeatfile_io_interface(self):  # #3097
+        rf = RepeatFile(iter(['hello', 'world']))
+        assert rf.closed is False
+        rf.flush()  # no-op, must not raise
+        # read(-1) means read everything, per file protocol
+        assert rf.read(-1) == 'hello\nworld\n'
+        rf.close()
+        assert rf.closed is True

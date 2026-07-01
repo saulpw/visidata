@@ -12,7 +12,7 @@ the introductory comment/documentation:
 import collections
 from dataclasses import dataclass
 from enum import Enum
-from visidata import VisiData, vd
+from visidata import VisiData, vd, escape_vdcode
 
 # Overwrite to true to get some diagnostic visualization
 DEBUG = False
@@ -139,7 +139,7 @@ def debugV2(T, pattern, F, lastIdx, H, C):
     width = lastIdx - F[0] + 1
 
     for i, f in enumerate(F):
-        I = i * width
+        I = i * width  # noqa: E741
         if i == 0:
             print('  ', end='')
             for j in range(f, lastIdx + 1):
@@ -330,7 +330,7 @@ def _fuzzymatch(target: str, pattern: str) -> MatchResult:
     j = maxScorePos
     preferMatch = True
     while True:
-        I = i * width
+        I = i * width  # noqa: E741
         j0 = j - f0
         s = H[I + j0]
 
@@ -357,16 +357,24 @@ def _fuzzymatch(target: str, pattern: str) -> MatchResult:
 
 
 def _format_match(s, positions):
+    '''*positions* is a list of indices into string *s*.
+    Returns a string containing visidata markup, where every character that matches is surrounded by [:match] [/].
+    Any bracket character that is to be displayed literally, is escaped.'''
     out = list(s)
+    literals = dict.fromkeys([i for i, c in enumerate(s) if c == '['], True)
     for p in positions:
         out[p] = f'[:match]{out[p]}[/]'
+        literals[p] = False
+    for j in literals:
+        if literals[j]:
+            out[j] = escape_vdcode('[')
     return "".join(out)
 
 CombinedMatch = collections.namedtuple('CombinedMatch', 'score formatted match')
 
 
 @VisiData.api
-def fuzzymatch(vd, haystack:"list[dict[str, str]]", needles:"list[str]) -> list[CombinedMatch]", case_sensitive=False):
+def fuzzymatch(vd, haystack:"list[dict[str, str]]", needles:"list[str]", case_sensitive=False) -> "list[CombinedMatch]":
     '''Perform matching that is case-insensitive by default. Return sorted list of matching dict values in haystack, augmenting the input dicts with _score:int and _positions:dict[k,set[int]] where k is each non-_ key in the haystack dict. Set *case_sensitive* to match case.'''
     if not case_sensitive:
         needles = [ p.lower() for p in needles]
@@ -377,6 +385,7 @@ def fuzzymatch(vd, haystack:"list[dict[str, str]]", needles:"list[str]) -> list[
         for k, v in h.items():
             if k[0] == '_': continue
             positions = set()
+            v = str(v) if v is not None else ''
             v_match = v if case_sensitive else v.lower()
             for p in needles:
                 mr = _fuzzymatch(v_match, p)
@@ -417,3 +426,13 @@ def test_fuzzymatch(vd):
     assert _fuzzymatch('hello world', 'elo wo') == MatchResult(
         1, 8, 127, [7, 6, 5, 4, 2, 1]
     )
+
+    # #2XXX None values in haystack should not crash fuzzymatch
+    haystack = [
+        dict(longname='open-file', description='open the given file'),
+        dict(longname='save-sheet', description=None),
+        dict(longname='quit-all', description='quit all sheets'),
+    ]
+    results = vd.fuzzymatch(haystack, ['save'])
+    assert len(results) > 0
+    assert results[0].match['longname'] == 'save-sheet'

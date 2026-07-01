@@ -2,7 +2,7 @@ import math
 import random
 
 from collections import defaultdict, Counter, OrderedDict
-from visidata import vd, asyncthread, ENTER, colors, update_attr, clipdraw, dispwidth
+from visidata import vd, asyncthread, colors, update_attr, clipdraw, dispwidth
 from visidata import BaseSheet, Column, Progress, ColorAttr
 from visidata.bezier import bezier
 
@@ -159,17 +159,17 @@ class Plotter(BaseSheet):
         # pixels[y][x] = { attr: list(rows), ... }
         self.pixels = [[defaultdict(list) for x in range(self.plotwidth)] for y in range(self.plotheight)]
 
-    def plotpixel(self, x, y, attr:"str|ColorAttr=''", row=None):
+    def plotpixel(self, x, y, attr:"str|ColorAttr"='', row=None):
         self.pixels[y][x][attr].append(row)
 
-    def plotline(self, x1, y1, x2, y2, attr:"str|ColorAttr=''", row=None):
+    def plotline(self, x1, y1, x2, y2, attr:"str|ColorAttr"='', row=None):
         for x, y in iterline(x1, y1, x2, y2):
             self.plotpixel(math.ceil(x), math.ceil(y), attr, row)
 
-    def plotlabel(self, x, y, text, attr:"str|ColorAttr=''", row=None):
+    def plotlabel(self, x, y, text, attr:"str|ColorAttr"='', row=None):
         self.labels.append((x, y, text, attr, row))
 
-    def plotlegend(self, i, txt, attr:"str|ColorAttr=''", width=15):
+    def plotlegend(self, i, txt, attr:"str|ColorAttr"='', width=15):
         # move it 1 character to the left b/c the rightmost column can't be drawn to
         self.plotlabel(self.plotwidth-(width+1)*2, i*4, txt, attr)
 
@@ -304,8 +304,8 @@ class Plotter(BaseSheet):
             def _overlaps(a, b):
                 a_x1, _, a_txt, _, _ = a
                 b_x1, _, b_txt, _, _ = b
-                a_x2 = a_x1 + dispwidth(a_txt)
-                b_x2 = b_x1 + dispwidth(b_txt)
+                a_x2 = a_x1 + dispwidth(a_txt, literal=True)
+                b_x2 = b_x1 + dispwidth(b_txt, literal=True)
                 if a_x1 < b_x1 < a_x2 or a_x1 < b_x2 < a_x2 or \
                    b_x1 < a_x1 < b_x2 or b_x1 < a_x2 < b_x2:
                    return True
@@ -317,7 +317,7 @@ class Plotter(BaseSheet):
             for o in labels:
                 if _overlaps(o[0], textobj):
                     o[1] = False
-                    label_fldraw[1] = False
+                    label_fldraw[1] = True
 
         if self.options.disp_graph_labels:
             labels_by_line = defaultdict(list) # y -> text labels
@@ -328,7 +328,7 @@ class Plotter(BaseSheet):
                 char_y = int(pix_y/4)
                 char_x = int(pix_x/2)
                 if row is not None:
-                    char_x -= math.ceil(dispwidth(txt)/2)*2
+                    char_x -= math.ceil(dispwidth(txt, literal=True)/2)*2
                 o = (char_x, char_y, txt, attr, row)
                 _mark_overlap_text(labels_by_line[char_y], o)
 
@@ -337,14 +337,14 @@ class Plotter(BaseSheet):
                     if fldraw:
                         char_x, char_y, txt, attr, row = o
                         cattr = colors.get_color(attr)
-                        clipdraw(scr, char_y, char_x, txt, cattr, dispwidth(txt))
+                        clipdraw(scr, char_y, char_x, txt, cattr, dispwidth(txt, literal=True), literal=True)
                         cursorBBox = self.plotterCursorBox
                         for c in txt:
-                            w = dispwidth(c)
+                            w = dispwidth(c, literal=True)
                             # draw cursor if the cursor contains the midpoint of the character cell
                             if cursorBBox.contains(char_x*2+1, char_y*4+2):
                                 char_attr = update_attr(cattr, colors.color_current_row)
-                                clipdraw(scr, char_y, char_x, c, char_attr, w)
+                                clipdraw(scr, char_y, char_x, c, char_attr, w, literal=True)
                             char_x += w
 
 
@@ -405,7 +405,7 @@ class Canvas(Plotter):
                 del self.legends[lastlegend]
                 legend = '[other]'
 
-            self.legendwidth = max(self.legendwidth, dispwidth(legend))
+            self.legendwidth = max(self.legendwidth, dispwidth(legend, literal=True))
             self.legends[legend] = attr
             self.plotAttrs[k] = attr
         return attr
@@ -523,21 +523,21 @@ class Canvas(Plotter):
         else:
             return None
 
-    def point(self, x, y, attr:"str|ColorAttr=''", row=None):
+    def point(self, x, y, attr:"str|ColorAttr"='', row=None):
         self.polylines.append(([(x, y)], attr, row))
 
-    def line(self, x1, y1, x2, y2, attr:"str|ColorAttr=''", row=None):
+    def line(self, x1, y1, x2, y2, attr:"str|ColorAttr"='', row=None):
         self.polylines.append(([(x1, y1), (x2, y2)], attr, row))
 
-    def polyline(self, vertexes, attr:"str|ColorAttr=''", row=None):
+    def polyline(self, vertexes, attr:"str|ColorAttr"='', row=None):
         'adds lines for (x,y) vertexes of a polygon'
         self.polylines.append((vertexes, attr, row))
 
-    def polygon(self, vertexes, attr:"str|ColorAttr=''", row=None):
+    def polygon(self, vertexes, attr:"str|ColorAttr"='', row=None):
         'adds lines for (x,y) vertexes of a polygon'
         self.polylines.append((vertexes + [vertexes[0]], attr, row))
 
-    def qcurve(self, vertexes, attr:"str|ColorAttr=''", row=None):
+    def qcurve(self, vertexes, attr:"str|ColorAttr"='', row=None):
         'Draw quadratic curve from vertexes[0] to vertexes[2] with control point at vertexes[1]'
         if len(vertexes) != 3:
             vd.fail('need exactly 3 points for qcurve (got %d)' % len(vertexes))
@@ -549,7 +549,7 @@ class Canvas(Plotter):
         for x, y in bezier(x1, y1, x2, y2, x3, y3):
             self.point(x, y, attr, row)
 
-    def label(self, x, y, text, attr:"str|ColorAttr=''", row=None):
+    def label(self, x, y, text, attr:"str|ColorAttr"='', row=None):
         self.gridlabels.append((x, y, text, attr, row))
 
     def fixPoint(self, plotterPoint, canvasPoint):
@@ -587,8 +587,12 @@ class Canvas(Plotter):
             ymax = ymax or 0
             if xmin == xmax:
                 xmax += 1
+                if xmin == xmax:  #handle large floats that were unchanged by += 1
+                    xmin = xmin * 0.99  #the alternative of increasing xmax could hit infinity
             if ymin == ymax:
                 ymax += 1
+                if ymin == ymax:
+                    ymin = ymin * 0.99
             self.canvasBox = BoundingBox(float(xmin), float(ymin), float(xmax), float(ymax))
 
         w = self.calcVisibleBoxWidth()
@@ -718,7 +722,7 @@ class Canvas(Plotter):
     def render(self, h, w):
         'resets plotter, cancels previous render threads, spawns a new render'
         self.needsRefresh = False
-        vd.cancelThread(*(t for t in self.currentThreads if t.name == 'plotAll_async'))
+        vd.cancelThread(*(t for t in self.currentThreads if t.name == 'render_async'))
         self.labels.clear()
         self.resetCanvasDimensions(h, w)
         self.resetBounds(refresh=False)
@@ -737,6 +741,7 @@ class Canvas(Plotter):
         xmin, ymin, xmax, ymax = bb.xmin, bb.ymin, bb.xmax, bb.ymax
         xfactor, yfactor = self.xScaler, self.yScaler
         plotxmin = self.plotviewBox.xmin
+        plotymax = plotymin = 0
         if invert_y:
             plotymax = self.plotviewBox.ymax
         else:
@@ -779,7 +784,8 @@ class Canvas(Plotter):
     def deleteSourceRows(self, rows):
         rows = list(rows)
         self.source.copyRows(rows)
-        self.source.deleteBy(lambda r,rows=rows: r in rows)
+        rowids = {self.source.rowid(r):True for r in rows}
+        self.source.deleteBy(lambda r,rowids=rowids: self.source.rowid(r) in rowids)
         self.reload()
 
 Plotter.addCommand('v', 'visibility', 'options.disp_graph_labels = not options.disp_graph_labels', 'toggle disp_graph_labels option')
@@ -837,13 +843,13 @@ Canvas.addCommand('ScrollDown', 'zoomout-mouse', 'cm=canvasMouse; incrZoom(optio
 Canvas.addCommand('s', 'select-cursor', 'source.select(list(rowsWithin(plotterCursorBox)))', 'select rows on source sheet contained within canvas cursor')
 Canvas.addCommand('t', 'stoggle-cursor', 'source.toggle(list(rowsWithin(plotterCursorBox)))', 'toggle selection of rows on source sheet contained within canvas cursor')
 Canvas.addCommand('u', 'unselect-cursor', 'source.unselect(list(rowsWithin(plotterCursorBox)))', 'unselect rows on source sheet contained within canvas cursor')
-Canvas.addCommand(ENTER, 'dive-cursor', 'vs=copy(source); vs.rows=list(rowsWithin(plotterCursorBox)); vd.push(vs)', 'open sheet of source rows contained within canvas cursor')
+Canvas.addCommand('Enter', 'dive-cursor', 'vs=copy(source); vs.rows=list(rowsWithin(plotterCursorBox)); vd.push(vs)', 'open sheet of source rows contained within canvas cursor')
 Canvas.addCommand('d', 'delete-cursor', 'deleteSourceRows(rowsWithin(plotterCursorBox))', 'delete rows on source sheet contained within canvas cursor')
 
 Canvas.addCommand('gs', 'select-visible', 'source.select(list(rowsWithin(plotterVisibleBox)))', 'select rows on source sheet visible on screen')
 Canvas.addCommand('gt', 'stoggle-visible', 'source.toggle(list(rowsWithin(plotterVisibleBox)))', 'toggle selection of rows on source sheet visible on screen')
 Canvas.addCommand('gu', 'unselect-visible', 'source.unselect(list(rowsWithin(plotterVisibleBox)))', 'unselect rows on source sheet visible on screen')
-Canvas.addCommand('g'+ENTER, 'dive-visible', 'vs=copy(source); vs.rows=list(rowsWithin(plotterVisibleBox)); vd.push(vs)', 'open sheet of source rows visible on screen')
+Canvas.addCommand('gEnter', 'dive-visible', 'vs=copy(source); vs.rows=list(rowsWithin(plotterVisibleBox)); vd.push(vs)', 'open sheet of source rows visible on screen')
 Canvas.addCommand('gd', 'delete-visible', 'deleteSourceRows(rowsWithin(plotterVisibleBox))', 'delete rows on source sheet visible on screen')
 
 vd.addGlobals({
@@ -869,6 +875,6 @@ vd.addMenuItems('''
     Plot > Zoom > out > zoomout-cursor
     Plot > Zoom > in > zoomin-cursor
     Plot > Zoom > cursor > zoom-all
-    Plot > Dive into cursor > dive-cursor
-    Plot > Delete > under cursor > delete-cursor
+    View > Open subsheet > from cursor > dive-cursor
+    Edit > Delete > under cursor > delete-cursor
 ''')

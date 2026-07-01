@@ -1,0 +1,4 @@
+# test fixed-width loader preserves leading spaces with header=0  #2265
+option global header 0
+option override filetype fixed
+open-file sample_data/test-fixed-leadingspaces.txt

@@ -1,4 +1,3 @@
-import sys
 import math
 import functools
 import collections
@@ -7,7 +6,7 @@ from copy import copy
 import itertools
 
 from visidata import Progress, Sheet, Column, ColumnsSheet, VisiData, SettableColumn
-from visidata import vd, anytype, vlen, asyncthread, wrapply, AttrDict, date, INPROGRESS, dispwidth, stacktrace, TypedExceptionWrapper
+from visidata import vd, anytype, numtype, vlen, asyncthread, wrapply, AttrDict, date, INPROGRESS, dispwidth, stacktrace, TypedExceptionWrapper
 
 vd.help_aggregators = '''# Choose Aggregators
 Start typing an aggregator name or description.
@@ -40,6 +39,7 @@ def getValueRows(self, rows):
         except Exception:
             pass
 
+
 @Column.api
 def getValues(self, rows):
     'Generate value for each row in *rows* at this column, excluding null and error values.'
@@ -52,6 +52,7 @@ vd.aggregators = collections.OrderedDict()  # [aggname] -> annotated func, or li
 Column.init('aggstr', str, copy=True)
 Column.init('_aggregatedTotals', dict)  # [aggname] -> agg total over all rows
 
+
 def aggregators_get(col):
     'A space-separated names of aggregators on this column.'
     aggs = []
@@ -59,6 +60,7 @@ def aggregators_get(col):
         agg = vd.aggregators[k]
         aggs += agg if isinstance(agg, list) else [agg]
     return aggs
+
 
 def aggregators_set(col, aggs):
     if isinstance(aggs, str):
@@ -94,6 +96,7 @@ class Aggregator:
                 return None
             raise e
 
+
 class ListAggregator(Aggregator):
     '''A list aggregator is an aggregator that returns a list of values, generally
     one value per input row, unlike ordinary aggregators that operate on rows
@@ -122,11 +125,13 @@ class ListAggregator(Aggregator):
         vals = [ col.getTypedValue(r) for r in row_group ]
         return vals
 
+
 @VisiData.api
 def aggregator(vd, name, funcValues, helpstr='', *, type=None):
     '''Define simple aggregator *name* that calls ``funcValues(values)`` to aggregate *values*.
        Use *type* to force type of aggregated column (default to use type of source column).'''
     vd.aggregators[name] = Aggregator(name, type, funcValues=funcValues, helpstr=helpstr)
+
 
 @VisiData.api
 def aggregator_list(vd, name, helpstr='', type=anytype, listtype=anytype):
@@ -138,13 +143,16 @@ def aggregator_list(vd, name, helpstr='', type=anytype, listtype=anytype):
 
 ## specific aggregator implementations
 
+
 def mean(vals):
     vals = list(vals)
     if vals:
-        return float(sum(vals))/len(vals)
+        return sum(vals)/len(vals)
+
 
 def vsum(vals):
     return sum(vals, start=type(vals[0] if len(vals) else 0)())  #1996
+
 
 def stdev(vals):
     # because statistics.stdev can raise an exception, we put it in a wrapper.
@@ -155,6 +163,7 @@ def stdev(vals):
     except statistics.StatisticsError as e:  #when vals holds only 1 element
         e.stacktrace = stacktrace()
         return TypedExceptionWrapper(None, exception=e)
+
 
 # http://code.activestate.com/recipes/511478-finding-the-percentile-of-the-values/
 def _percentile(N, percent, key=lambda x:x):
@@ -178,6 +187,7 @@ def _percentile(N, percent, key=lambda x:x):
     d1 = key(N[int(c)]) * (k-f)
     return d0+d1
 
+
 @functools.lru_cache(100)
 class PercentileAggregator(Aggregator):
     def __init__(self, pct, helpstr=''):
@@ -187,8 +197,10 @@ class PercentileAggregator(Aggregator):
     def aggregate(self, col, rows):
         return _percentile(sorted(col.getValues(rows)), self.pct/100, key=float)
 
+
 def quantiles(q, helpstr):
     return [PercentileAggregator(round(100*i/q), helpstr) for i in range(1, q)]
+
 
 def aggregate_groups(sheet, col, rows, aggr) -> list:
     '''Returns a list, containing the result of the aggregator applied to each row.
@@ -233,9 +245,9 @@ def aggregate_groups(sheet, col, rows, aggr) -> list:
 
 vd.aggregator('min', min, 'minimum value')
 vd.aggregator('max', max, 'maximum value')
-vd.aggregator('avg', mean, 'arithmetic mean of values', type=float)
-vd.aggregator('mean', mean, 'arithmetic mean of values', type=float)
-vd.aggregator('median', statistics.median, 'median of values')
+vd.aggregator('avg', mean, 'arithmetic mean of values', type=numtype)
+vd.aggregator('mean', mean, 'arithmetic mean of values', type=numtype)
+vd.aggregator('median', statistics.median, 'median of values', type=numtype)
 vd.aggregator('mode', statistics.mode, 'mode of values')
 vd.aggregator('sum', vsum, 'sum of values')
 vd.aggregator('distinct', set, 'distinct values', type=vlen)
@@ -252,6 +264,7 @@ vd.aggregators['q10'] = quantiles(10, 'deciles (10/20/30/40/50/60/70/80/90th pct
 # is needed in vd.aggregators
 for pct in (10, 20, 25, 30, 33, 40, 50, 60, 67, 70, 75, 80, 90, 95, 99):
     vd.aggregators[f'p{pct}'] = PercentileAggregator(pct, f'{pct}th percentile')
+
 
 class KeyFindingAggregator(Aggregator):
     '''Return the key of the row that results from applying *aggr_func* to *rows*.
@@ -285,6 +298,7 @@ ColumnsSheet.columns += [
            help='change the metrics calculated in every Frequency or Pivot derived from the source sheet')
 ]
 
+
 @Sheet.api
 def addAggregators(sheet, cols, aggrnames):
     'Add each aggregator in list of *aggrnames* to each of *cols*. Ignores names that are not valid.'
@@ -303,6 +317,7 @@ def aggname(col, agg):
     'Consistent formatting of the name of given aggregator for this column.  e.g. "col1_sum"'
     return '%s_%s' % (col.name, agg.name)
 
+
 @Column.api
 def aggregateTotal(col, agg):
     if agg not in col._aggregatedTotals:
@@ -314,7 +329,7 @@ def aggregateTotal(col, agg):
 @Column.api
 @asyncthread
 def _aggregateTotalAsync(col, agg):
-    col._aggregatedTotals[agg] = agg.aggregate(col, col.sheet.rows)
+    col._aggregatedTotals[agg] = wrapply(agg.aggregate, col, col.sheet.rows)
 
 
 @Column.api
@@ -350,8 +365,8 @@ def chooseAggregators(vd, prompt = 'choose aggregators: '):
     def _fmt_aggr_summary(match, row, trigger_key):
         formatted_aggrname = match.formatted.get('key', row.key) if match else row.key
         r = ' '*(dispwidth(prompt)-3)
-        r += f'[:keystrokes]{trigger_key}[/]  '
-        r += formatted_aggrname
+        r += f' [:keystrokes]{trigger_key}[/] ' if trigger_key else '   '
+        r += f'[:bold]{formatted_aggrname}[/]'
         if row.desc:
             r += ' - '
             r += match.formatted.get('desc', row.desc) if match else row.desc
@@ -373,13 +388,14 @@ def chooseAggregators(vd, prompt = 'choose aggregators: '):
             vd.warning(f'aggregator does not exist: {aggr}')
     return aggrs
 
+
 @Sheet.api
 @asyncthread
 def addcol_aggregate(sheet, col, aggrnames):
     for aggrname in aggrnames:
         aggrs = vd.aggregators.get(aggrname)
+        if aggrs is None: continue
         aggrs = aggrs if isinstance(aggrs, list) else [aggrs]
-        if not aggrs: continue
         for aggr in aggrs:
             rows = aggregate_groups(sheet, col, sheet.rows, aggr)
             if isinstance(aggr, ListAggregator):
@@ -396,6 +412,7 @@ ColumnsSheet.addCommand('g+', 'aggregate-cols', 'addAggregators(selectedRows or 
 Sheet.addCommand('', 'addcol-aggregate', 'addcol_aggregate(cursorCol, chooseAggregators(prompt="aggregator for groups: "))', 'add column(s) with aggregator of rows grouped by key columns')
 
 vd.addGlobals(
+    Aggregator=Aggregator,
     ListAggregator=ListAggregator
 )
 

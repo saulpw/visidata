@@ -2,7 +2,6 @@ import os
 import sys
 import signal
 import subprocess
-import tempfile
 import curses
 
 import visidata
@@ -45,8 +44,7 @@ def launchBrowser(vd, *args):
 @visidata.VisiData.api
 def launchExternalEditor(vd, v, linenum=0):
     'Launch $EDITOR to edit string *v* starting on line *linenum*.'
-    import tempfile
-    with tempfile.NamedTemporaryFile() as temp:
+    with vd.TempFile() as temp:
         temp.close()  #2118 must close before re-opening on windows
         with open(temp.name, 'w') as fp:
             fp.write(v)
@@ -97,7 +95,7 @@ def _breakpoint(*args, **kwargs):
 sys.breakpointhook = _breakpoint
 
 
-visidata.BaseSheet.addCommand('^Z', 'suspend', 'suspend()', 'suspend VisiData process')
+visidata.BaseSheet.addCommand('Ctrl+Z', 'suspend', 'suspend()', 'suspend VisiData process')
 visidata.BaseSheet.addCommand('', 'breakpoint', 'breakpoint()', 'drop into pdb REPL')
 
 visidata.vd.addGlobals(SuspendCurses=SuspendCurses)

@@ -1,4 +1,4 @@
-from visidata import vd, BaseSheet, ENTER, colors, dispwidth
+from visidata import vd, BaseSheet, colors, dispwidth
 import curses
 
 
@@ -75,6 +75,16 @@ class TextCanvas(BaseSheet):
     def rows(self, v):
         pass
 
+    @property
+    def minXY(self) -> int:
+        minX, minY, maxX, maxY = boundingBox(self.rows)
+        return minX, minY
+
+    @property
+    def maxXY(self) -> int:
+        minX, minY, maxX, maxY = boundingBox(self.rows)
+        return maxX, maxY
+
     def reload(self):
         pass
 
@@ -110,10 +120,12 @@ class TextCanvas(BaseSheet):
         return list(self.iterbox(self.cursorBox))
 
     def slide(self, rows, dx, dy):
-        maxX, maxY = self.windowWidth, self.windowHeight
         x1, y1, x2, y2 = boundingBox(rows)
-        dx = -x1 if x1+dx < 0 else (maxX-x2-1 if x2+dx > maxX-1 else dx)
-        dy = -y1 if y1+dy < 0 else (maxY-y2-1 if y2+dy > maxY-1 else dy)
+
+        # limit dx to not slide beyond top-left
+        if x1+dx < 0: dx = -x1
+        if y1+dy < 0: dy = -y1
+
         xcol = self.source.column('x')
         ycol = self.source.column('y')
         for r in rows:
@@ -129,18 +141,18 @@ TextCanvas.addCommand('', 'go-down', 'cursorBox.y1 += 1')
 TextCanvas.addCommand('', 'go-up', 'cursorBox.y1 -= 1')
 TextCanvas.addCommand('', 'go-left', 'cursorBox.x1 -= 1')
 TextCanvas.addCommand('', 'go-right', 'cursorBox.x1 += 1')
-TextCanvas.addCommand('kRIT5', 'resize-cursor-wider', 'cursorBox.w += 1', 'increase cursor width by one character')
-TextCanvas.addCommand('kLFT5', 'resize-cursor-thinner', 'cursorBox.w -= 1', 'decrease cursor width by one character')
-TextCanvas.addCommand('kUP5', 'resize-cursor-shorter', 'cursorBox.h -= 1', 'decrease cursor height by one character')
-TextCanvas.addCommand('kDN5', 'resize-cursor-taller', 'cursorBox.h += 1', 'increase cursor height by one character')
-TextCanvas.addCommand('gzKEY_LEFT', 'resize-cursor-min-width', 'cursorBox.w = 1')
-TextCanvas.addCommand('gzKEY_UP', 'resize-cursor-min-height', 'cursorBox.h = 1')
+TextCanvas.addCommand('Ctrl+Right', 'resize-cursor-wider', 'cursorBox.w += 1', 'increase cursor width by one character')
+TextCanvas.addCommand('Ctrl+Left', 'resize-cursor-thinner', 'cursorBox.w -= 1', 'decrease cursor width by one character')
+TextCanvas.addCommand('Ctrl+Up', 'resize-cursor-shorter', 'cursorBox.h -= 1', 'decrease cursor height by one character')
+TextCanvas.addCommand('Ctrl+Down', 'resize-cursor-taller', 'cursorBox.h += 1', 'increase cursor height by one character')
+TextCanvas.addCommand('gzLeft', 'resize-cursor-min-width', 'cursorBox.w = 1')
+TextCanvas.addCommand('gzUp', 'resize-cursor-min-height', 'cursorBox.h = 1')
 TextCanvas.addCommand('z_', 'resize-cursor-min', 'cursorBox.h = cursorBox.w = 1')
-TextCanvas.addCommand('g_', 'resize-cursor-max', 'cursorBox.x1=cursorBox.y1=0; cursorBox.h=maxY+1; cursorBox.w=maxX+1')
-TextCanvas.bindkey('zKEY_RIGHT', 'resize-cursor-wider')
-TextCanvas.bindkey('zKEY_LEFT', 'resize-cursor-thinner')
-TextCanvas.bindkey('zKEY_UP', 'resize-cursor-shorter')
-TextCanvas.bindkey('zKEY_DOWN', 'resize-cursor-taller')
+TextCanvas.addCommand('g_', 'resize-cursor-max', 'maxX, maxY = maxXY; cursorBox.x1=cursorBox.y1=0; cursorBox.h=maxY+1; cursorBox.w=maxX+1')
+TextCanvas.bindkey('zRight', 'resize-cursor-wider')
+TextCanvas.bindkey('zLeft', 'resize-cursor-thinner')
+TextCanvas.bindkey('zUp', 'resize-cursor-shorter')
+TextCanvas.bindkey('zDown', 'resize-cursor-taller')
 TextCanvas.addCommand('BUTTON1_PRESSED', 'move-cursor', 'sheet.cursorBox = CharBox(None, mouseX, mouseY, 1, 1)', 'start cursor box with left mouse button press')
 TextCanvas.addCommand('BUTTON1_RELEASED', 'end-cursor', 'cursorBox.x2=mouseX+2; cursorBox.y2=mouseY+2; cursorBox.normalize()', 'end cursor box with left mouse button release')
 
@@ -155,17 +167,17 @@ TextCanvas.addCommand('zt', 'toggle-top-cursor', 'source.toggle(list(itercursor(
 TextCanvas.addCommand('zu', 'unselect-top-cursor', 'source.unselect(list(itercursor(n=1)))')
 TextCanvas.addCommand('d', 'delete-cursor', 'source.deleteBy(lambda r,rows=cursorRows: r in rows)', 'delete first item under cursor')
 TextCanvas.addCommand('gd', 'delete-selected', 'source.deleteSelected()', 'delete selected rows on source sheet')
-TextCanvas.addCommand(ENTER, 'dive-cursor', 'vs=copy(source); vs.rows=cursorRows; vs.source=sheet; vd.push(vs)', 'dive into source rows under cursor')
-TextCanvas.addCommand('g'+ENTER, 'dive-selected', 'vd.push(type(source)(source=sheet, rows=source.selectedRows))', 'dive into selected source rows')
+TextCanvas.addCommand('Enter', 'dive-cursor', 'vs=copy(source); vs.rows=cursorRows; vs.source=sheet; vd.push(vs)', 'dive into source rows under cursor')
+TextCanvas.addCommand('gEnter', 'dive-selected', 'vd.push(type(source)(source=sheet, rows=source.selectedRows))', 'dive into selected source rows')
 
 TextCanvas.addCommand('H', 'slide-left-obj',       'slide(source.selectedRows, -1, 0)', 'slide selected objects left one character')
 TextCanvas.addCommand('J', 'slide-down-obj',       'slide(source.selectedRows, 0, +1)', 'slide selected objects down one character')
 TextCanvas.addCommand('K', 'slide-up-obj',         'slide(source.selectedRows, 0, -1)', 'slide selected objects up one character')
 TextCanvas.addCommand('L', 'slide-right-obj',      'slide(source.selectedRows, +1, 0)', 'slide selected objects right one character')
-TextCanvas.addCommand('gH', 'slide-leftmost-obj',  'slide(source.selectedRows, -maxX, 0)', 'slide selected objects all the way left')
-TextCanvas.addCommand('gJ', 'slide-bottom-obj',    'slide(source.selectedRows, 0, +maxY)', 'slide all selected objects all the way bottom')
-TextCanvas.addCommand('gK', 'slide-top-obj',       'slide(source.selectedRows, 0, -maxY)', 'slide all selected objects all the way top')
-TextCanvas.addCommand('gL', 'slide-rightmost-obj', 'slide(source.selectedRows, +maxX, 0)', 'slide all selected objects all the way right')
+TextCanvas.addCommand('gH', 'slide-leftmost-obj',  'slide(source.selectedRows, -maxXY[0], 0)', 'slide selected objects all the way left')
+TextCanvas.addCommand('gJ', 'slide-bottom-obj',    'slide(source.selectedRows, 0, +maxXY[1])', 'slide all selected objects all the way bottom')
+TextCanvas.addCommand('gK', 'slide-top-obj',       'slide(source.selectedRows, 0, -maxXY[1])', 'slide all selected objects all the way top')
+TextCanvas.addCommand('gL', 'slide-rightmost-obj', 'slide(source.selectedRows, +maxXY[0], 0)', 'slide all selected objects all the way right')
 
 
 TextCanvas.init('cursorBox', lambda: CharBox(None, 0,0,1,1))

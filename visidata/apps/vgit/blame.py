@@ -44,7 +44,7 @@ class GitBlame(GitSheet):
             parts = lines[i].split()
             sha, orig, final = parts[:3]
             if len(parts) > 3:
-                nlines_this_group = parts[3]
+                pass
 
             if sha not in headers:
                 hdr = AttrDict(sha=sha, orig_linenum=orig, final_linenum=final)
@@ -71,6 +71,6 @@ class GitBlame(GitSheet):
             i += 1
 
 
-#GitBlame.addCommand(ENTER, 'diff-line', 'openDiff(str(gitfile), cursorRow[0]["sha"]+"^", cursorRow[0]["sha"])', 'open diff of the commit when this line changed')
+#GitBlame.addCommand('Enter', 'diff-line', 'openDiff(str(gitfile), cursorRow[0]["sha"]+"^", cursorRow[0]["sha"])', 'open diff of the commit when this line changed')
 
 #GitStatus.addCommand(None, 'git-blame', 'vd.push(GitBlame(cursorRow, source=sheet))', 'push blame for this file')

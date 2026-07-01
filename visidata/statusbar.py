@@ -8,7 +8,7 @@ import curses
 import sys
 
 import visidata
-from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, dispwidth, ColorAttr, clipstr_middle
+from visidata import vd, VisiData, BaseSheet, Sheet, ColumnItem, Column, RowColorizer, options, colors, wrmap, clipdraw, ExpectedException, update_attr, dispwidth, ColorAttr, clipstr_middle, clip_markup_middle
 
 
 
@@ -25,7 +25,7 @@ vd.theme_option('color_status', 'bold on 238', 'status line color')
 vd.theme_option('color_error', '202 1', 'error message color')
 vd.theme_option('color_warning', '166 15', 'warning message color')
 vd.theme_option('color_top_status', 'underline', 'top window status bar color')
-vd.theme_option('color_active_status', 'black on 68 blue', ' active window status bar color')
+vd.theme_option('color_active_status', 'black on 68 blue', 'active window status bar color')
 vd.theme_option('color_inactive_status', '8 on black', 'inactive window status bar color')
 vd.theme_option('color_highlight_status', 'black on green', 'color of highlighted elements in statusbar')
 
@@ -40,9 +40,6 @@ def ancestors(sheet):
 
 @BaseSheet.property
 def sheetlist(sheet):
-    leafsheets = []
-    parents = set()
-
     sheetstack = vd.sheetstack(sheet.pane)
     sheets = [x for x in vd.allSheets if x in sheetstack]+ [x for x in sheetstack if x not in vd.allSheets]
 
@@ -84,8 +81,18 @@ def statusHistory(vd):
     return list()  # list of [priority, statusmsg, repeats] for all status messages ever
 
 @VisiData.api
-def getStatusSource(vd):
-    return None
+def getStatusSource(vd) -> str:
+    return ''
+
+
+@VisiData.api
+def printStatus(vd, *args, priority=0, source=None):
+    'Print status to stderr in batch mode. Overridable by plugins.'
+    if priority > 0:
+        msg = '\r' + composeStatus(args)
+        if vd.options.debug:
+            msg += f' [{source}]'
+        builtins.print(msg, file=sys.stderr)
 
 
 @VisiData.api
@@ -100,15 +107,20 @@ def status(vd, *args, priority=0):
     source = vd.getStatusSource()
 
     if not vd.cursesEnabled:
-        msg = '\r' + composeStatus(args)
-        if vd.options.debug:
-            msg += f' [{source}]'
-        builtins.print(msg, file=sys.stderr)
+        vd.printStatus(*args, priority=priority, source=source)
 
     return vd.addToStatusHistory(*args, priority=priority, source=source)
 
 @VisiData.api
 def addToStatusHistory(vd, *args, priority=0, source=None):
+    safe = []  #3111 snapshot now; args may be mutated later
+    for a in args:
+        try:
+            safe.append(str(a))
+        except Exception as e:
+            safe.append(f'{type(e).__name__}: {e}')
+    args = tuple(safe)
+
     if vd.statusHistory:
         prevpri, prevargs, _, _ = vd.statusHistory[-1]
         if prevpri == priority and prevargs == args:
@@ -117,6 +129,7 @@ def addToStatusHistory(vd, *args, priority=0, source=None):
 
     vd.statusHistory.append([priority, args, 1, source])
     return True
+
 
 @VisiData.api
 def error(vd, *args):
@@ -145,11 +158,6 @@ def debug(vd, *args, **kwargs):
     'Display *args* on status if options.debug is set.'
     if options.debug:
         return vd.status(*args, **kwargs)
-
-def middleTruncate(s, w):
-    if len(s) <= w:
-        return s
-    return s[:w] + options.disp_truncator + s[-w:]
 
 
 def composeStatus(msgparts, n=1):
@@ -183,7 +191,7 @@ def drawLeftStatus(vd, scr, vs):
     lstatus = vs.leftStatus()
     maxwidth = options.disp_lstatus_max
     if maxwidth > 0:
-        lstatus = middleTruncate(lstatus, maxwidth//2)
+        lstatus = clip_markup_middle(lstatus, maxwidth)
 
     x = clipdraw(scr, y, 0, lstatus, cattr, w=vs.windowWidth-1)
 
@@ -211,6 +219,12 @@ def threadStatus(vs) -> str:
     if vs.currentThreads:
         ret = str(vd.checkMemoryUsage())
         gerunds = [p.gerund for p in vs.progresses if p.gerund] or ['processing']
+        if vd._queuedFuncs:
+            ret += f' [:working]{len(vd._queuedFuncs)} queued functions[/] '
+
+        if vd._nextCommands:
+            ret += f' [:working]{len(vd._nextCommands)} queued commands[/] '
+
         ret += f' [:working]{vs.progressPct} {gerunds[0]}…[/]'
         return ret
     return ''
@@ -277,8 +291,26 @@ def statusHistorySheet(vd):
     return StatusSheet("status_history", source=vd.statusHistory[::-1])  # in reverse order
 
 
-BaseSheet.addCommand('^P', 'open-statuses', 'vd.push(vd.statusHistorySheet)', 'open Status History')
+BaseSheet.addCommand('Ctrl+P', 'open-statuses', 'vd.push(vd.statusHistorySheet)', 'open Status History')
 
 vd.addMenuItems('''
     View > Statuses > open-statuses
 ''')
+
+
+## tests
+
+def test_addToStatusHistory_snapshot_mutable(vd):  #3111
+    vd.statusHistory.clear()
+    d = {}
+    vd.addToStatusHistory(d)
+    d['newval'] = 'cellval'
+    assert vd.statusHistory[-1][1] == ('{}',)
+
+
+def test_addToStatusHistory_str_failure_shown(vd):  #3111
+    class Bad:
+        def __str__(self): raise ValueError('nope')
+    vd.statusHistory.clear()
+    vd.addToStatusHistory('before', Bad(), 'after')
+    assert vd.statusHistory[-1][1] == ('before', 'ValueError: nope', 'after')

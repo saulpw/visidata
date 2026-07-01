@@ -4,14 +4,14 @@ from copy import deepcopy
 import json
 
 from visidata import VisiData, vd, Column, asyncthread, Progress, PythonSheet, InvertedCanvas, date, wrapply, TypedExceptionWrapper, TypedWrapper
-
+from visidata import WritableColumn
 
 
 @VisiData.api
 def open_geojson(vd, p):
     return GeoJSONSheet(p.base_stem, source=p)
 
-class GeoJSONColumn(Column):
+class GeoJSONColumn(WritableColumn):
     def calcValue(self, row):
         return row.get('properties', {}).get(self.expr)
 
@@ -108,7 +108,7 @@ class GeoJSONMap(InvertedCanvas):
                 for hole in polygon[1:]:
                     self.polygon(hole, 0, row)
         else:
-            vd.warning('notimpl shapeType %s' % typ)
+            vd.warning(f'not implemented: shapeType `{typ}`')
 
         return bbox
 
@@ -134,7 +134,7 @@ def _rowdict(cols, row):
 @VisiData.api
 def save_geojson(vd, p, vs):
     features = []
-    for row in Progress(vs.rows, 'saving'):
+    for row in vs.iterrows('saving'):
         copyrow = deepcopy(row)
         copyrow['properties'] = _rowdict(vs.visibleCols, row)
         features.append(copyrow)
@@ -156,7 +156,7 @@ def save_geojson(vd, p, vs):
 
 GeoJSONSheet.addCommand('.', 'plot-row', 'vd.push(GeoJSONMap(name+"_map", sourceRows=[cursorRow], textCol=cursorCol, source=sheet))', 'plot geospatial vector in current row')
 GeoJSONSheet.addCommand('g.', 'plot-rows', 'vd.push(GeoJSONMap(name+"_map", sourceRows=rows, textCol=cursorCol, source=sheet))', 'plot all geospatial vectors in current sheet')
-GeoJSONMap.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet)', 'save current sheet to filename in format determined by extension (default .geojson)')
+GeoJSONMap.addCommand('Ctrl+S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName(sheet)), sheet)', 'save current sheet to given filename and filetype')
 
 vd.addGlobals({
     'GeoJSONMap': GeoJSONMap,

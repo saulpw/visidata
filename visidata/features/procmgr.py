@@ -1,3 +1,5 @@
+# pyright: reportUndefinedVariable=false
+# (uses `from visidata import *` (dynamic export))
 from visidata import *
 
 
@@ -192,8 +194,8 @@ ProcessesSheet.addCommand('gd', 'term-selected', 'for r in someSelectedRows: os.
 ProcessesSheet.addCommand('zd', 'kill-process', 'os.kill(cursorRow.pid, signal.SIGKILL)', 'send SIGKILL to process')
 ProcessesSheet.addCommand('gzd', 'kill-selected', 'for r in someSelectedRows: os.kill(r.pid, signal.SIGKILL)', 'send SIGKILL to selected processes')
 
-ProcessesSheet.addCommand('^K', 'signal-process', 'os.kill(cursorRow.pid, chooseSignal())', 'send chosen signal to process')
-UsefulProcessesSheet.addCommand('^K', 'signal-selected', 'os.kill(cursorRow.pid, chooseSignal())', 'kill(2) send chosen signal to process')
+ProcessesSheet.addCommand('Ctrl+K', 'signal-process', 'os.kill(cursorRow.pid, chooseSignal())', 'send chosen signal to process')
+UsefulProcessesSheet.addCommand('Ctrl+K', 'signal-selected', 'os.kill(cursorRow.pid, chooseSignal())', 'kill(2) send chosen signal to process')
 UsefulProcessesSheet.addCommand('', 'open-rlimits', 'vd.push(RlimitsSheet(cursorRow.name() + "_rlimits", cursorRow))', 'push rlimits for this process')
 
 vd.addMenuItem('System', 'Signal', 'current process', 'TERMinate', 'term-process')

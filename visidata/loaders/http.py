@@ -1,10 +1,10 @@
 import re
 
-from visidata import Path, RepeatFile, vd, VisiData
+from visidata import Path, RepeatFile, vd, VisiData, __version_info__
 from visidata.loaders.tsv import splitter
 
 vd.option('http_max_next', 0, 'max next.url pages to follow in http response') #848
-vd.option('http_req_headers', {}, 'http headers to send to requests')
+vd.option('http_req_headers', {'User-Agent': __version_info__}, 'http headers to send to requests')
 vd.option('http_ssl_verify', True, 'verify host and certificates for https')
 
 
@@ -33,7 +33,7 @@ def openurl_http(vd, path, filetype=None):
         sch = schemes[0]
         openfunc = getattr(vd, f'openhttp_{sch}', vd.getGlobals().get(f'openhttp_{sch}'))
         if not openfunc:
-            vd.fail(f'no vd.openhttp_{sch}')
+            vd.fail(f'no handler for `{sch}` url scheme')
         return openfunc(Path(schemes[-1]+'://'+path.given.split('://')[1]))
 
     import urllib.request
@@ -49,6 +49,7 @@ def openurl_http(vd, path, filetype=None):
         ctx.verify_mode = ssl.CERT_NONE
 
     req = urllib.request.Request(path.given, **vd.options.getall('http_req_'))
+    response = None
     try:
         response = urllib.request.urlopen(req, context=ctx)
     except urllib.error.HTTPError as e:
@@ -65,7 +66,7 @@ def openurl_http(vd, path, filetype=None):
         n = 0
         while response:
             path.responses.append(response)
-            with response as fp:
+            with response:
                 for line in splitter(response, delim=b'\n'):
                     yield line.decode(vd.options.encoding)
 

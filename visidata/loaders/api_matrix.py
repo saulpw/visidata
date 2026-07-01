@@ -34,7 +34,7 @@ def openhttp_matrix(vd, p):
     vd.timeouts_before_idle = -1
     return MatrixSheet(p.base_stem, source=p)
 
-vd.open_matrix = vd.openhttp_matrix
+VisiData.open_matrix = VisiData.openhttp_matrix
 
 
 class MatrixRoomsSheet(Sheet):
@@ -118,7 +118,6 @@ class MatrixSheet(Sheet):
         self.addRow(chunk)
 
     def room_event(self, room, chunk):
-        ev = AttrDict(chunk)
         t = chunk['type']
         if t == 'm.receipt':
             for msgid, content in chunk['content'].items():

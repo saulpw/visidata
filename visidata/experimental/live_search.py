@@ -33,5 +33,5 @@ def dup_search(sheet, cols='cursorCol'):
     vs.name = vs.source.name+'_'+vs.search
 
 
-Sheet.addCommand('^[s', 'dup-search', 'dup_search("cursorCol")', 'search for regex forwards in current column, creating duplicate sheet with matching rows live')
-Sheet.addCommand('g^[s', 'dup-search-cols', 'dup_search("visibleCols")', 'search for regex forwards in all columns, creating duplicate sheet with matching rows live')
+Sheet.addCommand('Alt+s', 'dup-search', 'dup_search("cursorCol")', 'search for regex forwards in current column, creating duplicate sheet with matching rows live')
+Sheet.addCommand('gAlt+s', 'dup-search-cols', 'dup_search("visibleCols")', 'search for regex forwards in all columns, creating duplicate sheet with matching rows live')

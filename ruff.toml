@@ -1,0 +1,34 @@
+# Ruff config for VisiData
+# Suppresses intentional style choices; flags real issues only.
+
+exclude = [
+    "deps/",
+    "visidata/apps/galcon/",  # WIP demo app — known-broken, not linted
+    "visidata/apps/vgit/",    # WIP app — known-broken (DifferSheet etc. unimplemented)
+]
+
+[lint]
+preview = true
+explicit-preview-rules = true
+select = ["E", "F"]
+
+ignore = [
+    "E3",     # blank lines — visidata controls vertical whitespace deliberately
+    "E501",   # line too long — no line length limit in visidata
+    "E701",   # multiple statements on one line (colon) — deliberate visidata style
+    "E702",   # multiple statements on one line (semicolon) — deliberate visidata style
+    "E731",   # lambda assignment — idiomatic in visidata
+    "E402",   # module import not at top — some loaders need deferred imports
+    "F401",   # unused import — many are intentional re-exports
+    "F403",   # import star — core visidata pattern
+    "F405",   # undefined from import star — consequence of F403
+    "F811",   # redefined while unused — often intentional overrides
+    "F722",   # forward annotation syntax error — visidata uses custom annotations
+    "E712",   # true-false comparison — `== True` used intentionally in some places
+    "E721",   # type comparison — `type(x) != type(y)` used intentionally
+]
+
+[lint.per-file-ignores]
+"visidata/loaders/pcap.py" = ["F821"]        # mac_manuf: known-broken getter, file otherwise live
+"visidata/loaders/xword.py" = ["F821"]       # Crossword: undefined symbol, file otherwise live
+"visidata/loaders/unzip_http.py" = ["F841"]  # vendored from saulpw/unzip-http — keep pristine

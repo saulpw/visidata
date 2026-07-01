@@ -3,7 +3,7 @@ import random
 import os.path
 from functools import singledispatch
 
-from visidata import vd, Sheet, asyncthread, Progress, Column, VisiData, deduceType, anytype, getitemdef, ColumnsSheet
+from visidata import vd, Sheet, asyncthread, Progress, Column, VisiData, deduceType, anytype, getitemdef, ColumnsSheet, WritableColumn
 
 
 @Sheet.api
@@ -77,7 +77,7 @@ def _(sampleValue, col, vals):
             if isinstance(v, str):
                 return 0
             return len(v)
-        except Exception as e:
+        except Exception:
             return 0
 
     if hasattr(sampleValue, '_fields'):  # looks like a namedtuple
@@ -117,7 +117,7 @@ def expand(col, rows):
 
 
 @VisiData.api
-class ExpandedColumn(Column):
+class ExpandedColumn(WritableColumn):
     def calcValue(self, row):
         return getitemdef(self.origCol.getValue(row), self.expr)
 
@@ -125,6 +125,9 @@ class ExpandedColumn(Column):
         self.origCol.getValue(row)[self.expr] = value
         if setModified:
             self.origCol.sheet.setModified()
+
+    def readonly(self):
+        return True
 
 
 @Sheet.api
@@ -143,6 +146,7 @@ def contract_cols(sheet, cols, depth=1):  # depth == 0 means contract all the wa
             col.width = sheet.options.default_width
 
         sheet.columns = [col for col in sheet.columns if getattr(col, 'origCol', None) not in origCols]
+    sheet.validate_sortcols()
 
 
 @Sheet.api
@@ -160,6 +164,7 @@ def contract_source_cols(sheet, cols):
     for vs in sheet.source:
         vd.addUndo(setattr, vs, 'columns', vs.columns)
         vs.columns[:] = [c for c in vs.columns if c not in cols]
+        vs.validate_sortcols()
     return ret
 
 
@@ -188,7 +193,7 @@ Sheet.addCommand('g)', 'contract-cols', 'contract_cols(visibleCols)', 'remove al
 Sheet.addCommand('z)', 'contract-col-depth', 'contract_cols([cursorCol], depth=int(input("contract depth=", value=0)))', 'remove current column and siblings from sheet columns and unhide parent, prompting for depth')
 Sheet.addCommand('gz)', 'contract-cols-depth', 'contract_cols(visibleCols, depth=int(input("contract depth=", value=0)))', 'remove all child columns and unhide toplevel parents, prompting for depth')
 
-ColumnsSheet.addCommand(')', 'contract-source-cols', 'source[0].addColumn(contract_source_cols(someSelectedRows), index=cursorRowIndex)', 'contract selected columns into column group')  #1702
+ColumnsSheet.addCommand(')', 'contract-source-cols', 'source[0].addColumn(contract_source_cols(someSelectedRows), index=cursorRowIndex); clearSelected()', 'contract selected columns into column group')  #1702
 
 
 vd.addMenuItems('''

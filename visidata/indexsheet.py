@@ -91,17 +91,17 @@ def nextRow(sheet, n=1):
 
 
 vd.addCommand('S', 'sheets-stack', 'vd.push(vd.sheetsSheet)', 'open Sheets Stack: join or jump between the active sheets on the current stack')
-vd.addCommand('gS', 'sheets-all', 'vd.push(vd.allSheetsSheet)', 'open Sheets Sheet: join or jump between all sheets from current session')
+vd.addCommand('gS', 'sheets-all', 'vd.allSheetsSheet.reload(); vd.push(vd.allSheetsSheet)', 'open Sheets Sheet: join or jump between all sheets from current session')
 
 BaseSheet.addCommand('g>', 'open-source-next', 'vd.replace(openSource(source.nextRow())) if isinstance(source, IndexSheet) else fail("parent sheet must be Index Sheet")', 'open next sheet on parent index sheet')
 BaseSheet.addCommand('g<', 'open-source-prev', 'vd.replace(openSource(source.nextRow(-1))) if isinstance(source, IndexSheet) else fail("parent sheet must be Index Sheet")', 'open prev sheet on parent index sheet')
 
-IndexSheet.addCommand('g^R', 'reload-selected', 'reloadSheets(selectedRows or rows)', 'reload all selected sheets')
+IndexSheet.addCommand('gCtrl+R', 'reload-selected', 'reloadSheets(selectedRows or rows)', 'reload all selected sheets')
 
 # when diving into a sheet, remove the index unless it is precious
 IndexSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_columns", source=selectedRows))', 'open Columns Sheet with all visible columns from selected sheets')
-IndexSheet.addCommand('^C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)', 'abort async thread for current sheet')
-IndexSheet.addCommand('gz^C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)', 'abort async threads for selected sheets')
+IndexSheet.addCommand('zCtrl+C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)', 'abort async thread for current sheet')
+IndexSheet.addCommand('gzCtrl+C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)', 'abort async threads for selected sheets')
 SheetsSheet.addCommand('Enter', 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(openRow(dest))', 'open sheet referenced in current row')
 
 vd.addGlobals(IndexSheet=IndexSheet,

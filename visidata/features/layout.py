@@ -3,8 +3,9 @@ from visidata import VisiData, vd, Column, Sheet, Fanout, asyncthread
 @Column.api
 def setWidth(self, w):
     if self.width != w:
-        if self.width == 0 or w == 0:  # hide/unhide
-            vd.addUndo(setattr, self, '_width', self.width)
+        vd.addUndo(setattr, self, '_width', self.width)
+        if self.sheet:
+            self.sheet.setModified()
     self._width = w
 
 
@@ -15,6 +16,20 @@ def toggleWidth(self, width):
         self.width = width
     else:
         self.width = int(self.sheet.options.default_width)
+
+
+@Sheet.api
+def resize_cols_max(sheet, cols):
+    'Resize all *cols* to max width as a group; if all already at max, reset all to default.'
+    rows = sheet.visibleRows
+    maxwidths = {c: c.getMaxWidth(rows) for c in cols}
+    if all(c.width == maxwidths[c] for c in cols):
+        default = int(sheet.options.default_width)
+        for c in cols:
+            c.setWidth(default)
+    else:
+        for c in cols:
+            c.setWidth(maxwidths[c])
 
 
 @Column.api
@@ -33,7 +48,13 @@ def unhide_cols(vd, cols, rows):
 @VisiData.api
 def hide_col(vd, col):
     if not col: vd.fail("no columns to hide")
+    sheet = col.sheet
+    # hiding rightmost visible col: keep cursor on new rightmost instead of stranding on first hidden
+    keepcursor = sheet and not col.hidden and col in sheet.visibleCols \
+                 and sheet.cursorVisibleColIndex >= len(sheet.visibleCols)-1
     col.hide()
+    if keepcursor:
+        sheet.cursorRight(-1)
 
 @Sheet.api
 @asyncthread
@@ -52,7 +73,7 @@ def hide_uniform_cols(sheet):
 
 Sheet.addCommand('_', 'resize-col-max', 'if cursorCol: cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'toggle width of current column between full and default width')
 Sheet.addCommand('z_', 'resize-col-input', 'width = int(input("set width= ", value=cursorCol.width)); cursorCol.setWidth(width)', 'adjust width of current column to N')
-Sheet.addCommand('g_', 'resize-cols-max', 'for c in visibleCols: c.toggleWidth(c.getMaxWidth(visibleRows))', 'toggle widths of all visible columns between full and default width')
+Sheet.addCommand('g_', 'resize-cols-max', 'sheet.resize_cols_max(visibleCols)', 'set widths of all visible columns to full width; if all already full, reset to default')
 Sheet.addCommand('gz_', 'resize-cols-input', 'width = int(input("set width= ", value=cursorCol.width)); Fanout(visibleCols).setWidth(width)', 'adjust widths of all visible columns to N')
 
 Sheet.addCommand('-', 'hide-col', 'hide_col(cursorCol)', 'hide the current column')

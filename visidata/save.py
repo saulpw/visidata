@@ -8,11 +8,22 @@ from visidata import Sheet, BaseSheet, VisiData, IndexSheet, Path, Progress, Typ
 vd.option('safe_error', '#ERR', 'error string to use while saving', replay=True)
 vd.option('save_encoding', 'utf-8', 'encoding passed to codecs.open when saving a file', replay=True, help=vd.help_encoding)
 
+_compression_formats = {'gz', 'bz2', 'xz', 'lzma', 'zst', 'zstd'}
+
+def parse_filetype(ft):
+    'Parse filetype string like "json.gz" into (format, compression). Returns (ft, None) for plain types.'
+    for sep in ('.', '+'):
+        if sep in ft:
+            fmt, comp = ft.rsplit(sep, 1)
+            if comp in _compression_formats:
+                return fmt, comp
+    return ft, None
+
 @Sheet.api
-def safe_trdict(vs):
+def safe_trdict(vs, delimiter=None):
     'returns string.translate dictionary for replacing tabs and newlines'
     if vs.options.safety_first:
-        delim = vs.options.delimiter
+        delim = delimiter or vs.options.delimiter
         trdict = {
              0: '', #  strip NUL completely
             10: vs.options.tsv_safe_newline,  # \n
@@ -26,13 +37,13 @@ def safe_trdict(vs):
 
 
 @Sheet.api
-def iterdispvals(sheet, *cols, format=False):
+def iterdispvals(sheet, *cols, format=False, delimiter=None):
     'For each row in sheet, yield OrderedDict of values for given cols.  Values are typed if format=False, or a formatted display string if format=True.'
     if not cols:
         cols = sheet.visibleCols
 
     transformers = collections.OrderedDict()  # list of transformers for each column in order
-    trdict = sheet.safe_trdict()
+    trdict = sheet.safe_trdict(delimiter=delimiter)
     for col in cols:
         transformers[col] = [ col.type ]
         if format:
@@ -42,7 +53,7 @@ def iterdispvals(sheet, *cols, format=False):
             transformers[col].append(lambda v,trdict=trdict: v.translate(trdict))
 
     options_safe_error = sheet.options.safe_error
-    for r in Progress(sheet.rows):
+    for r in sheet.iterrows('saving'):
         dispvals = collections.OrderedDict()  # [col] -> value
         for col, transforms in transformers.items():
             try:
@@ -53,7 +64,7 @@ def iterdispvals(sheet, *cols, format=False):
 
             try:
                 for t in transforms:
-                    if dispval is None:
+                    if dispval is None or isinstance(dispval, float) and dispval != dispval:
                         break
                     elif isinstance(dispval, TypedExceptionWrapper):
                         dispval = options_safe_error or str(dispval)
@@ -64,9 +75,9 @@ def iterdispvals(sheet, *cols, format=False):
                     else:
                         dispval = t(dispval)
 
-                if dispval is None and format:
+                if (dispval is None or isinstance(dispval, float) and dispval != dispval) and format:
                     dispval = ''
-            except Exception as e:
+            except Exception:
                 dispval = str(dispval)
 
             dispvals[col] = dispval
@@ -83,7 +94,7 @@ def itervals(sheet, *cols, format=False):
 def getDefaultSaveName(sheet):
     src = getattr(sheet, 'source', None)
     if hasattr(src, 'scheme') and src.scheme:
-        return src.name + src.suffix
+        return src.name
     if isinstance(src, Path):
         if src.given == '-':
             return f'stdin.{sheet.options.save_filetype}'
@@ -100,7 +111,7 @@ def saveCols(vd, cols):
     sheet = cols[0].sheet
     vs = copy(sheet)
     vs.columns = list(cols)
-    vs.rows = sheet.rows
+    vs.rows = list(sheet.rows)  # copy list to avoid conflict with rows modifications
     if len(cols) == 1:
         savedcoltxt = cols[0].name + ' column'
     else:
@@ -125,23 +136,44 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=True):
     unloaded = [ vs for vs in vsheets if vs.rows is UNLOADED ]
     vd.sync(*vd.ensureLoaded(unloaded))
 
-    filetypes = [givenpath.ext.lower(), vd.options.save_filetype.lower()]
+    # resolve filetype: path option (from inputPath or -f) > extension > save_filetype
+    path_filetype = givenpath.options.is_set('filetype', givenpath)
+    if path_filetype:
+        fmt, compression = parse_filetype(path_filetype.value)
+        if compression and givenpath.compression is None:
+            givenpath.compression = compression
+    else:
+        fmt = None
+
+    givenext = givenpath.ext.lower()
+    default_ft = vd.options.save_filetype.lower()
 
     vd.clearCaches()
 
-    for ft in filetypes:
-        savefunc = getattr(vsheets[0], 'save_' + ft, None) or getattr(vd, 'save_' + ft, None)
+    def _find_saver(ft):
+        return getattr(vsheets[0], 'save_' + ft, None) or getattr(vd, 'save_' + ft, None)
+
+    savefunc = filetype = None
+    requested = [ft for ft in (fmt, givenext) if ft]
+    for ft in requested:
+        savefunc = _find_saver(ft)
         if savefunc:
             filetype = ft
             break
 
-    if savefunc is None:
-        vd.fail(f'no function to save as {", ".join(filetypes)}')
+    if not savefunc:
+        savefunc = _find_saver(default_ft)
+        if not savefunc:
+            vd.fail(f'no saver for {" or ".join(requested + [default_ft])}')
+        if requested:
+            vd.confirm(f'no `{requested[0]}` saver, save as {default_ft}? ')  #2286
+        filetype = default_ft
 
     if confirm_overwrite:
         vd.confirmOverwrite(givenpath)
 
-    vd.status('saving %s sheets to %s as %s' % (len(vsheets), givenpath.given, filetype))
+    disptype = f'{filetype}.{givenpath.compression}' if givenpath.compression else filetype
+    vd.status('saving %s sheets to %s as %s' % (len(vsheets), givenpath.given, disptype))
 
     if not givenpath.given.endswith('/'):  # forcibly specify save individual files into directory by ending path with /
         for vs in vsheets:
@@ -178,13 +210,12 @@ def saveSheets(vd, givenpath, *vsheets, confirm_overwrite=True):
 def save_zip(vd, p, *vsheets):
     vd.clearCaches()
 
-    import tempfile
     import zipfile
-    with tempfile.TemporaryDirectory() as tmpdir:
+    with vd.TempDir() as tmpdir:
         with zipfile.ZipFile(str(p), 'w', zipfile.ZIP_DEFLATED, allowZip64=True, compresslevel=9) as zfp:
             for vs in Progress(vsheets):
                 filetype = vs.options.save_filetype
-                tmpp = Path(f'{tmpdir}{vs.name}.{filetype}')
+                tmpp = Path(tmpdir)/f'{vs.name}.{filetype}'
                 savefunc = getattr(vs, 'save_' + filetype, None) or getattr(vd, 'save_' + filetype, None)
                 savefunc(tmpp, vs)
                 zfp.write(tmpp, f'{vs.name}.{vs.options.save_filetype}')
@@ -197,8 +228,8 @@ def save_txt(vd, p, *vsheets):
 
     with p.open(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
         for vs in vsheets:
-            unitsep = vs.options.delimiter
-            rowsep = vs.options.row_delimiter
+            unitsep = p.options.delimiter
+            rowsep = p.options.row_delimiter
             for dispvals in vs.iterdispvals(*vs.visibleCols, format=True):
                 fp.write(unitsep.join(dispvals.values()))
                 fp.write(rowsep)
@@ -213,13 +244,13 @@ def rootSheet(sheet):
     return r
 
 
-BaseSheet.addCommand('^S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName()), sheet)', 'save current sheet to filename in format determined by extension (default .tsv)')
+BaseSheet.addCommand('Ctrl+S', 'save-sheet', 'vd.saveSheets(inputPath("save to: ", value=getDefaultSaveName()), sheet)', 'save current sheet to given filename and filetype')
 BaseSheet.addCommand('', 'save-sheet-really', 'vd.saveSheets(Path(getDefaultSaveName()), sheet, confirm_overwrite=False)', 'save current sheet without asking for filename or confirmation')
 BaseSheet.addCommand('', 'save-source', 'vd.saveSheets(rootSheet().source, rootSheet())', 'save root sheet to its source')
-BaseSheet.addCommand('g^S', 'save-all', 'vd.saveSheets(inputPath("save all sheets to: "), *vd.stackedSheets)', 'save all sheets to given file or directory)')
-IndexSheet.addCommand('g^S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelectedRows, value="_".join(getattr(vs, "name", None) or "blank" for vs in selectedRows)), *selectedRows)', 'save all selected sheets to given file or directory')
-Sheet.addCommand('', 'save-col', 'saveCols([cursorCol])', 'save current column only to filename in format determined by extension (default .tsv)')
-Sheet.addCommand('', 'save-col-keys', 'saveCols(keyCols + [cursorCol])', 'save key columns and current column to filename in format determined by extension (default .tsv)')
+BaseSheet.addCommand('gCtrl+S', 'save-all', 'vd.saveSheets(inputPath("save all sheets to: "), *vd.stackedSheets)', 'save all sheets to given file or directory)')
+IndexSheet.addCommand('gCtrl+S', 'save-selected', 'vd.saveSheets(inputPath("save %d sheets to: " % nSelectedRows, value="_".join(getattr(vs, "name", None) or "blank" for vs in selectedRows)), *selectedRows)', 'save all selected sheets to given file or directory')
+Sheet.addCommand('', 'save-col', 'saveCols([cursorCol])', 'save current column only to given filename and filetype')
+Sheet.addCommand('', 'save-col-keys', 'saveCols(keyCols + [cursorCol])', 'save key columns and current column to given filename and filetype')
 
 vd.addMenuItems('''
     File > Save > current sheet > save-sheet

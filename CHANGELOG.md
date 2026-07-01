@@ -1,5 +1,204 @@
 # VisiData version history
 
+# v3.4 (2026-06-30)
+
+Thanks to @midichef for many bugfixes and improvements.
+
+## New Features
+
+- [search] hlsearch: highlight all search matches for `/` and `g/`; add `highlight_search` option (#2861)
+- [keys] prettykeys overhaul: all bindings now use human-readable key names (#2594)
+- [cli] `-f` filetype now applies per-path; add `-of` for output filetype and compound filetypes (#1242 #573 #985)
+- [commands] add `define-command`; document `currow` accessor for cursor row (#655)
+- [options] `z Ctrl+S` saves edited options to the config file (#2206)
+- [dir] add split-pane file preview for DirSheet (#3024)
+- [edit] add `vd.editCellBindings` for user-customizable cell editing keybindings (#2986)
+- [selection] add `select-to-prev-selected` and `select-to-next-selected` commands
+- [movement] add `jump-sheet` command (select sheet by name with tab-completion)
+- [columns] change displayed float precision with `Alt+-`/`Alt++`/`g%` (setcol-precision-less/-more/-input)
+- [exec-shell] add command to drop into an interactive `$SHELL`
+- [repl] add embedded ptipython REPL (#2736)
+- [server] add command-server (AF_UNIX socket: screen/sync/progress protocol) and vdx client
+- [packages] add Python packages sheet
+- [profile] add `--profile` flag for main thread profiling
+- [colors] add conversion functions to/from xterm256
+- [vimcompat] add vimcompat experiment with go-page-half bindings @daviewales (#2927)
+- [daw] add vdaw: experimental transcript-based audio editor
+- [experimental] add llm plugin: analyze columns with Anthropic Claude (#2947)
+- [experimental] add search_geo plugin: bbox-overlap helpers for STAC catalogs
+
+## Improvements
+
+- [save] add `confirm` option; `-y` skips all confirms; confirm before default-format fallback (#2286)
+- [cmdpalette] show fuzzy input-history palette (#2684)
+- [aggregators] add aggregation bar; use wrapply for aggregateTotal errors (#2209 #2995)
+- [search] `n`/`N` repeat expr search (`z/`), not just regex (#3015)
+- [macros] add keystroke binding and input parameters (#2784 #2785)
+- [macros] add editable helpstr for macros (#2770)
+- [expr] allow `name=expr` in addcol-expr (#3022)
+- [sheets] confirm before exiting when quitguard is True (#2891)
+- [sheets] show sheet name in cursor status line
+- [mouse] resize column by dragging its right edge
+- [movement] add go-screen-* commands (#2797)
+- [main] add `-O`/`--output-cell` option (#2425)
+- [open] explicit `-f` filetype now overrides url-scheme dispatch (#3126)
+- [disp] `disp_wrap_break_long_words` now defaults to True (#3082)
+- [menu] add show-cursor and show-expr (#2848)
+- [dedupe] enable custom sheet name suffixes
+- [join] add origin_sheet to concat join; use ItemColumn (#2929)
+- [freqtbl] `zEnter`/`gzEnter` dive into source excluding current/selected bins (#2950)
+- [freqtbl] only start new threads for large or complex bins (#3050)
+- [freqtbl] honor bulk_select_clear on bulk select
+- [aggregator] show summary labels in first non-aggregated column if right edge not on screen
+- [types] add numtype, use for avg/median aggregators (#2868)
+- [aggregators] preserve type returned by mean/avg/median instead of coercing to int @pequiste
+- [aggregators] copy formatter/displayer col attrs to AggrColumn
+- [column] add `color_readonly` option; better status for non-writable columns (#2936)
+- [column] mark expanded columns and custom columns as writable (#2936)
+- [edit-cell] fail early on readonly column (#2936)
+- [keys] add Ctrl+Shift+Up/Down and Alt+NumPad prettykeys
+- [input] add Ctrl+Bksp, Alt+Bksp, Alt+d bindings (#2500)
+- [indexsheet] bind cancel row to zCtrl+C (#2938)
+- [graph] accept refline input for multiple xcols; better error checking
+- [graph][seaborn] add title and axis labels @meestahp
+- [themes] add adwaita light and dark variants @Tjorbenn (#3006)
+- [sidebar] use half/quarter block chars for sidebar border
+- [icons] show icons with sheets: Dir, FreqTable, Graph
+- [canvas] when labels overlap, show one instead of hiding all
+- [canvas_text] add maxXY from darkdraw, fix g sliders
+- [guides] add InputGuide (#3036) and SortGuide (#2313)
+- [guides] add MovementGuide @tabibeyal (#2313)
+- [cliptext] allow escaping VisiData markup in strings (#2959)
+- [statusbar] make lstatus_max truncation preserve vd markup (#2908)
+- [help] refer to visidata clipboard as "internal clipboard" (#2864 #2865)
+- [clipboard api] add get/setClipboardRows and get/setClipboardCols
+- [syscopy] add cursorFullDisplay for complex objects (#2806)
+- [settings] set list/tuple/dict options from strings; preserve type when editing
+- [config] respect XDG_CONFIG_HOME and XDG_CACHE_HOME on macOS @maxim-uvarov-ai-assistant
+- [xdg] use user_data_dir for StoredLists like input_history (#2889)
+- [messages] standardize error/warning/fail message style across the codebase
+- [cmdlog] expose CommandLogJsonl (#2940)
+- [mouse api] add vd.enableMouse; ignore if no curses.mousemask (#2913 #2851)
+- [memory] move open-memos to BaseSheet
+- [incr] use setValuesTyped to allow setting of non-numeric columns
+- [modify] add Progress to setValuesTyped
+- [asynccache/shell] make asynccache/addcol-shell thread-safe and runnable in macros and replay (#2826)
+- [shell] add options.max_threads for asynccache used by addcol-shell
+- [batch] honor `--readonly` for `-o` output: refuse overwriting existing files
+- [xlsx] add hlink/folHlink to color list (#2948)
+- [linux] add .desktop entry and AppStream metainfo for software-center search @Jaredy899
+
+## Loaders
+
+- [sqlite] improve exec-sql (query names, types, edit-sql); guard table sheets (#2136 #3020)
+- [parquet] decode WKB geometry; add plot commands for GeoParquet
+- [parquet] make ParquetColumn editable (#2890)
+- [vdsql] show SQL in sidebar (#2200)
+- [vdsql] add postgres_schema option to show tables from multiple schemas (#2027)
+- [vdsql] aliases for .ddb, .sqlite, .db (#2259)
+- [vdsql] bump ibis version (#2410 #2682)
+- [vdsql] fix join compatibility with Ibis >= 9.0 @terencelaurent (#2899)
+- [csv] skip blank lines @Jonathan-Haddock (#3085)
+- [html] handle interspersed th/td in table rows (#1346)
+- [html] handle rowspan in data cells (#1308)
+- [html] for # of header rows, use options.header
+- [fixed_width] split columns from header positions; warn when putValue truncates (#2265)
+- [fixed_width] adjust colstarts for right-justified headers (#3029)
+- [s3] recursive dir listing with dir_depth; detail=True avoids N+1 stat calls
+- [s3] add anonymous-mode access @leimgruberf
+- [save] treat NaN as null when saving
+- [path] recognize .zstd as a compression extension (#2286)
+- [loader] handle HTTP errors from remote zip files (#2655)
+- [http] add default user agent (#2880)
+- [loader] add claude filetype for browsing ~/.claude sessions
+- [airtable] update loader to work with latest pyairtable library @mplattner
+- [mysql] fix connecting with no password @pequiste
+- [conll] update loader to work with pyconll v4.0
+- [eml/pcap] enable loaders for mhtml, cap, pcapng, ntar file types
+
+## Bugfixes
+
+- [pandas] fix loader bugs @weichm (#2968)
+- [join] don't crash on unhashable keycol values (#3099)
+- [fuzzymatch] fix crash on None values in haystack dict
+- [canvas] fix division by zero when col's only value is a large float (#2884)
+- [help] fix sysopen-help crash on PosixPath (#3154)
+- [curses] fix crash on startup on NetBSD wscons tty consoles @rsmirnov90 (#2851)
+- [path] handle filenames ending in . in Python 3.14 (#2887)
+- [mainloop] do not exit if rightstatus throws an exception
+- [mainloop] reset numTimeouts when there are unfinishedThreads @iamleot (#2931)
+- [undo] fix columns-sheet resize undo and undo-sync (#3102 #3133 #3137)
+- [column] evict cached cell on setValue so undo works on cached cols (#3155)
+- [modify] add undo for deferred edits on added rows @justin2004 (#2901)
+- [modify] mark sheet modified on more column changes (#3122)
+- [modify] clear modified status after load to prevent overvigilant quitguard
+- [mainloop] fix undo of first user alteration to a replayed cmdlog
+- [wrappers] compare wrapped None equal to None (#3112)
+- [cmdlog] replay commands on hidden columns (#2849)
+- [repeat] use queueCommand instead of replayOne (#2932)
+- [macro] fix vd attempts to use deleted macros @haoyeau (#2893)
+- [cmdlog] make vdj shebang work on macOS @ilyagr (#2870)
+- [column] fix col width calc for data with markup
+- [column] fix width that formatValue used for list/dict/tuple
+- [column] stop truncating col names holding markup
+- [loaders] stop truncating markup in fixed-width data
+- [input] fix cursor x when editing data with markup
+- [canvas] properly handle labels containing markup
+- [cliptext] color tags span across lines in wraptext (#2212)
+- [input] fix perf pegging cpu (#2911)
+- [canvas] delete in linear time instead of quadratic
+- [hide-col] keep cursor on last unhidden col when hiding rightmost (#3148)
+- [movement] escape lone hidden column on go-left-page (#3134)
+- [resize-cols] resize-cols-max sets all visible columns as a group (#3132)
+- [sort] prevent sortcol from having multiple priorities (#3142)
+- [splitwin] close (gZ) now returns all sheets to a single pane (#3138)
+- [freqtbl] fix nested dive-selected corrupting source chain (#3001)
+- [freqtbl] disable paste-before and paste-after
+- [input] swallow Up/Down silently when no history (#3025)
+- [input] allow editing header of readonly column
+- [input] fix use of rowidx before it is set
+- [palette] when no choices match, show warning on Enter
+- [palette] align choices with prompt before Tab is pressed
+- [palette] clarify that TAB precedes ENTER
+- [status] do not show previous longname after unbound key (#2779)
+- [status] snapshot args as strings when adding to history (#3111)
+- [settings] prevent lockup when keystroke is same as longname
+- [mainloop] allow prefix keys to reappear in multi-prefix sequences (#3012)
+- [mainloop] for bindkey cmd, show longname in fail msg; catch fail() from execCommand
+- [mouse] prevent errors clicking past last column, in hidden cols, with keycols
+- [colors] fix error drawing off right side of narrow window
+- [theme] remove nonexistent color from light theme
+- [open-row] allow pandas to open row as sheet (#2925)
+- [open] fail instead of opening DirSheet on an empty cell
+- [shell] fix DirSheet hiding files when source dir starts with '.'
+- [shell] move open-row from incorrect Open toplevel menu
+- [postgres] unquote url.password in postgres loader @egwynn
+- [http] fix default user agent (#2880)
+- [join] fail on concat of sheets with unequal # of cols
+- [graph] improve error message when plot has no numeric x-axis (#3041)
+- [aggr] catch nonexistent aggr in addcol-aggregate
+- [popen] kill leftover processes that have NOT finished
+- [exit] kill subprocesses before os._exit
+- [sync] mark finished thread reliably with endTime
+- [path] remove progress in iter (#2323)
+- [movement] fix desc of scroll-up/down/left/right amount
+- [fuzzymatch] stringify non-str values
+- [debug] do not avoid cleanup if options.debug
+- [reload] reload_or_replace function should be on BaseSheet
+- [clipboard] fix wrong api usage
+- [regex] clarify error for regex needing a capture group
+
+## API
+
+- [api] add `@Extensible.around` decorator; document before/after
+- [path] add iterdir() yielding visidata.Path; Path.name returns full filename (#2188)
+- [path] add vd.TempFile/vd.TempDir with tmp_prefix option (#3127)
+- [path] add RepeatFile IO interface and closed/close/flush (#2829 #3097)
+- [path] add options property to Path (#2425)
+- [column] add getFullDisplayValue for untruncated display values (#2806)
+- [threads] add asyncsingle_queue decorator
+- [shell] add global bytes_rstrip for use as a type (#3081)
+
 # v3.3 (2025-09-07)
 
 - added options.disp_help_flags; deprecated options.disp_expert

@@ -1,8 +1,8 @@
 from copy import copy
-from visidata import vd, options, VisiData, ListOfDictSheet, ENTER, CompleteKey, ReturnValue
+from visidata import vd, options, VisiData, ListOfDictSheet, CompleteKey, ReturnValue
 
 
-vd.option('fancy_chooser', False, 'a nicer selection interface for aggregators and jointype')
+vd.option('fancy_chooser', False, 'use nicer selection interface for aggregators and jointype')
 
 @VisiData.api
 def chooseOne(vd, choices, type=''):
@@ -70,7 +70,7 @@ def chooseMany(vd, choices, type=''):
                 if c in choice_keys:
                     chosen.append(c)
                 else:
-                    vd.warning('invalid choice "%s"' % c)
+                    vd.warning(f'invalid choice `{c}`')
         except ReturnValue as e:
             chosen = e.args[0]
 
@@ -80,5 +80,5 @@ def chooseMany(vd, choices, type=''):
     return chosen
 
 
-ChoiceSheet.addCommand(ENTER, 'choose-rows', 'makeChoice([cursorRow])')
-ChoiceSheet.addCommand('g'+ENTER, 'choose-rows-selected', 'makeChoice(onlySelectedRows)')
+ChoiceSheet.addCommand('Enter', 'choose-rows', 'makeChoice([cursorRow])')
+ChoiceSheet.addCommand('gEnter', 'choose-rows-selected', 'makeChoice(onlySelectedRows)')

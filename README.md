@@ -1,15 +1,14 @@
-# VisiData v3.3
+# VisiData v3.4
 
 [![Tests](https://github.com/saulpw/visidata/workflows/visidata-ci-build/badge.svg)](https://github.com/saulpw/visidata/actions/workflows/main.yml)
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/saulpw/visidata)
 
 [![discord](https://img.shields.io/discord/880915750007750737?label=discord)](https://visidata.org/chat)
-[![mastodon @visidata@fosstodon.org][2.1]][2]
-[![twitter @VisiData][1.1]][1]
+[![Mastodon](https://img.shields.io/mastodon/follow/110136431814047095?domain=https%3A%2F%2Ffosstodon.org)](https://fosstodon.org/@saulpw)
 
 A terminal interface for exploring and arranging tabular data.
 
-![Frequency table](http://visidata.org/freq-move-row.gif)
+![Frequency table](http://visidata.org/videos/freq-move-row.gif)
 
 VisiData supports tsv, csv, sqlite, json, xlsx (Excel), hdf5, and [many other formats](https://visidata.org/formats).
 
@@ -25,9 +24,32 @@ To install the latest release from PyPi:
 
     pip3 install visidata
 
+To try VisiData without installing, use [pipx](https://pipx.pypa.io/) or [uv](https://docs.astral.sh/uv/):
+
+    pipx run visidata          # or: uvx visidata
+
+To install permanently (adds `vd` to your PATH):
+
+    pipx install visidata      # or: uv tool install visidata
+
+Additional Python packages are needed for some formats:
+
+    pipx install visidata --preinstall openpyxl --preinstall lxml
+    # or: uv tool install visidata --with openpyxl --with lxml
+
+To add format packages to an existing pipx install:
+
+    pipx inject visidata openpyxl lxml
+
 To install the cutting edge `develop` branch (no warranty expressed or implied):
 
     pip3 install git+https://github.com/saulpw/visidata.git@develop
+
+If VisiData reports `package X not installed` even after you installed it, `vd`
+is almost certainly running from a different environment than the one you
+installed the package into. Check `which vd`, then install the package into
+*that* environment — e.g. `pipx inject visidata X` for a pipx install, or the
+Homebrew Python for `brew install visidata`.
 
 See [visidata.org/install](https://visidata.org/install) for detailed instructions for all available platforms and package managers.
 
@@ -64,10 +86,3 @@ VisiData is conceived and developed by Saul Pwanson `<vd@saul.pw>`.
 Anja Kefala `<anja.kefala@gmail.com>` maintains the documentation and packages for all platforms.
 
 Many thanks to numerous other [contributors](https://visidata.org/credits/), and to those wonderful users who provide feedback, for helping to make VisiData the awesome tool that it is.
-
-[1.1]: http://i.imgur.com/tXSoThF.png
-[1]: http://www.twitter.com/VisiData
-[2.1]: https://raw.githubusercontent.com/mastodon/mastodon/main/app/javascript/images/logo.svg
-[2]: https://fosstodon.org/@visidata
-
-<!-- Please don't remove this: Grab your social icons from https://github.com/carlsednaoui/gitsocial -->

@@ -35,6 +35,22 @@ See [:onclick https://docs.python.org/3/library/codecs.html#error-handlers]https
 
 vd.option('encoding', 'utf-8-sig', 'encoding passed to codecs.open when reading a file', replay=True, help=vd.help_encoding)
 vd.option('encoding_errors', 'surrogateescape', 'encoding_errors passed to codecs.open', replay=True, help=vd.help_encoding_errors)
+vd.option('tmp_prefix', 'visidata-', 'prefix for temporary files and directories', sheettype=None)  #3127
+
+
+@VisiData.api
+def TempFile(vd, **kwargs):
+    'Return a tempfile.NamedTemporaryFile with the `tmp_prefix` option as prefix.'
+    import tempfile
+    return tempfile.NamedTemporaryFile(prefix=vd.options.tmp_prefix, **kwargs)
+
+
+@VisiData.api
+def TempDir(vd, **kwargs):
+    'Return a tempfile.TemporaryDirectory with the `tmp_prefix` option as prefix.'
+    import tempfile
+    return tempfile.TemporaryDirectory(prefix=vd.options.tmp_prefix, **kwargs)
+
 
 @VisiData.api
 def pkg_resources_files(vd, package):
@@ -52,7 +68,7 @@ def pkg_resources_files(vd, package):
 def vstat(path, force=False):
     try:
         return os.stat(path)
-    except Exception as e:
+    except Exception:
         return None
 
 def filesize(path):
@@ -176,8 +192,10 @@ class Path(os.PathLike):
 
     @property
     def name(self):
-        'Filename without any extensions.  Not the same as pathlib.Path.'
-        return self.base_stem
+        'Full filename including extensions. Same as pathlib.Path.name.'
+        if self._given == '.':
+            return self._path.absolute().name
+        return self._path.name
 
     @property
     def given(self):
@@ -193,7 +211,7 @@ class Path(os.PathLike):
             self._path = pathlib.Path(given)
 
         self.ext = self.suffix[1:]
-        if self.suffix:  #1450  don't make this a oneliner; [:-0] doesn't work
+        if self.suffix and self.suffix != '.':  #1450  don't make this a oneliner; [:-0] doesn't work  #2887
             self.base_stem = self._path.name[:-len(self.suffix)]
         elif self._given == '.':  #1768
             self.base_stem = self._path.absolute().name
@@ -201,13 +219,17 @@ class Path(os.PathLike):
             self.base_stem = self._path.name
 
         # check if file is compressed
-        if self.suffix in ['.gz', '.bz2', '.xz', '.lzma', '.zst']:
+        if self.suffix in ['.gz', '.bz2', '.xz', '.lzma', '.zst', '.zstd']:
             self.compression = self.ext
             uncompressedpath = Path(self.given[:-len(self.suffix)])  # strip suffix
             self.base_stem = uncompressedpath.base_stem
             self.ext = uncompressedpath.ext
         else:
             self.compression = None
+
+    @property
+    def options(self):
+        return vd.OptionsObject(vd._options, obj=self)
 
     def __getattr__(self, k):
         if hasattr(self.__dict__, k):
@@ -257,7 +279,7 @@ class Path(os.PathLike):
                 # convert 'a' to 'w' for stdout: https://bugs.python.org/issue27805
                 return os.dup(vd._stdout.fileno())
             else:
-                vd.error('invalid mode "%s" for Path.open()' % mode)
+                vd.error(f'invalid mode `{mode}` for Path.open()')
                 return sys.stderr
 
         return self._open(mode=mode)
@@ -288,7 +310,7 @@ class Path(os.PathLike):
                 # convert 'a' to 'w' for stdout: https://bugs.python.org/issue27805
                 return open(os.dup(vd._stdout.fileno()), 'wt')
             else:
-                vd.error('invalid mode "%s" for Path.open()' % mode)
+                vd.error(f'invalid mode `{mode}` for Path.open()')
                 return sys.stderr
 
         return self._open(mode=mode, encoding=encoding or vd.options.encoding, errors=vd.options.encoding_errors, newline=newline)
@@ -329,7 +351,7 @@ class Path(os.PathLike):
         elif self.compression in ['xz', 'lzma']:
             import lzma
             zopen = lzma.open
-        elif self.compression == 'zst':
+        elif self.compression in ('zst', 'zstd'):
             zstandard = vd.importExternal('zstandard')
             zopen = zstandard.open
         else:
@@ -343,11 +365,9 @@ class Path(os.PathLike):
         return zopen(FileProgress(path, fp=open(path, mode='rb'), **kwargs), **kwargs)
 
     def __iter__(self):
-        with Progress(total=filesize(self)) as prog:
-            with self.open(encoding=vd.options.encoding) as fd:
-                for i, line in enumerate(fd):
-                    prog.addProgress(len(line))
-                    yield line.rstrip('\n')
+        with self.open(encoding=vd.options.encoding) as fd:
+            for line in fd:
+                yield line.rstrip('\n')
 
     def read_bytes(self):
         'Return the entire binary contents of the pointed-to file as a bytes object.'
@@ -379,7 +399,7 @@ class Path(os.PathLike):
         try:
             if not self.is_url():
                 return self._path.stat()
-        except Exception as e:
+        except Exception:
             return None
 
     @wraps(pathlib.Path.exists)
@@ -394,6 +414,10 @@ class Path(os.PathLike):
         'The URL scheme component, if path is a URL.'
         if self.is_url():
             return urlparse(self.given).scheme
+
+    def iterdir(self):  #2188
+        'Yield Path objects of the directory contents.'
+        return (Path(p) for p in self._path.iterdir())
 
     def with_name(self, name):
         'Return a sibling Path with *name* as a filename in the same directory.'
@@ -412,6 +436,9 @@ class RepeatFile:
         self.iter_lines = iter_lines
         self.lines = lines if lines is not None else []
         self.iter = RepeatFileIter(self)
+        self.encoding = None  #2829
+        self.errors = None
+        self.closed = False  #3097
 
     def __enter__(self):
         '''Returns a new independent file-like object, sharing the same line cache.'''
@@ -426,7 +453,7 @@ class RepeatFile:
 
     def read(self, n=None):
         '''Returns a string or bytes object. Unlike the standard read() function, when *n* is given, more than *n* characters/bytes can be returned, and often will.'''
-        if n is None:
+        if n is None or n < 0:  #3097: -1 means read all
             n = 10**12  # some too huge number
         r = []
         size = 0
@@ -461,6 +488,7 @@ class RepeatFile:
             else:
                 raise ValueError('invalid whence (%s, should be %s, %s or %s)' % (whence, io.SEEK_SET, io.SEEK_CUR, io.SEEK_END))
         self.iter.nextIndex = offset
+        return offset  #3097: io protocol — seek returns new position
 
     def readline(self, size=-1):
         if size != -1:
@@ -475,6 +503,30 @@ class RepeatFile:
 
     def __next__(self):
         return next(self.iter)
+
+    def readable(self):
+        return True
+
+    def writable(self):
+        return False
+
+    def seekable(self):
+        return True
+
+    def read1(self, n=-1):
+        return self.read(n)
+
+    def peek(self, n=-1):
+        pos = self.tell()
+        data = self.read(n)
+        self.seek(pos)
+        return data
+
+    def close(self):  #3097
+        self.closed = True
+
+    def flush(self):  #3097
+        pass
 
     def exists(self):
         return True

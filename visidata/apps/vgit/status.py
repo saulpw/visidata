@@ -112,10 +112,6 @@ class GitStatus(GitSheet):
         return self.gitBranchStatuses.get(self.branch, 'no branch')
 
     def iterload(self):
-        files = [GitFile(p, self.source) for p in self.source.iterdir() if p.stem not in ('.git')]  # files in working dir
-
-        filenames = dict((gf.filename, gf) for gf in files)
-
         self._cachedStatus.clear()
         for fn in self.git_iter('ls-files', '-z'):
             self._cachedStatus[fn] = AttrDict(status='  ')
@@ -182,9 +178,9 @@ GitStatus.addCommand(None, 'git-ignore-file', 'open(rootPath/".gitignore", "a").
 GitStatus.addCommand(None, 'git-ignore-wildcard', 'open(rootPath/.gitignore, "a").write(input("add wildcard to .gitignore: "))', 'add input line to toplevel .gitignore')
 
 
-#GitStatus.addCommand('z^J', 'diff-file-staged', 'vd.push(getStagedHunksSheet(sheet, cursorRow))', 'push staged diffs for this file')
-#GitStatus.addCommand('gz^J', 'diff-selected-staged', 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files')
-#GitStatus.addCommand('^O', 'sysopen-row', 'launchExternalEditorPath(Path(cursorRow.path))', 'open this file in $EDITOR')
+#GitStatus.addCommand('zEnter', 'diff-file-staged', 'vd.push(getStagedHunksSheet(sheet, cursorRow))', 'push staged diffs for this file')
+#GitStatus.addCommand('gzEnter', 'diff-selected-staged', 'vd.push(getStagedHunksSheet(sheet, *(selectedRows or rows)))', 'push staged diffs for selected files or all files')
+#GitStatus.addCommand('Ctrl+O', 'sysopen-row', 'launchExternalEditorPath(Path(cursorRow.path))', 'open this file in $EDITOR')
 
 
 vd.addMenuItems('''

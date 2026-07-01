@@ -14,9 +14,9 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.8, 3.9, "3.10", "3.11"]
+        python-version: ["3.9", "3.10", "3.11"]
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
     - uses: actions/checkout@v2
 
@@ -26,7 +26,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install VisiData
-      run: pip3 install .
+      run: make install
 
     - name: Install vgit
       run: pip3 install visidata/apps/vgit/
@@ -41,4 +41,4 @@ jobs:
       run: echo "import visidata.apps.vgit" >> ~/.visidatarc
 
     - name: Run tests
-      run: vd -p visidata/apps/vgit/tests/*.vdx --batch
+      run: make test-vgit

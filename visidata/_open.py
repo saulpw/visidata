@@ -5,7 +5,9 @@ import sys
 from visidata import VisiData, vd, Path, BaseSheet, TableSheet, TextSheet, SettableColumn
 
 
-vd.option('filetype', '', 'specify file type', replay=True)
+vd.option('filetype', '', 'input filetype; overrides file extension', replay=True)
+
+vd.stdinSource = None  # Path('-') with piped fp, set in main()
 
 
 @VisiData.api
@@ -20,8 +22,23 @@ def inputFilename(vd, prompt, *args, **kwargs):
 
 
 @VisiData.api
-def inputPath(vd, *args, **kwargs):
-    return Path(vd.inputFilename(*args, **kwargs))
+def inputPath(vd, *args, filetype='', **kwargs):
+    'Input a path with filetype field. Sets filetype on the returned Path if given.'
+    prompt = args[0] if args else kwargs.pop('prompt', 'path: ')
+    completer = _completeFilename
+    if not vd.couldOverwrite():  #1805
+        completer = None
+        v = kwargs.get('value', '')
+        if v and Path(v).exists():
+            kwargs['value'] = ''
+    r = vd.inputMultiple(
+        path=dict(prompt=prompt, type='filename', completer=completer, **kwargs),
+        filetype=dict(prompt='as filetype: ', type='filetype', value=filetype),
+    )
+    p = Path(r['path'].strip())
+    if r['filetype']:
+        p.options.filetype = r['filetype']
+    return p
 
 
 def _completeFilename(val, state):
@@ -81,11 +98,16 @@ def guess_extension(vd, path):
 def openPath(vd, p, filetype=None, create=False):
     '''Call ``open_<filetype>(p)`` or ``openurl_<p.scheme>(p, filetype)``.  Return constructed but unloaded sheet of appropriate type.
     If True, *create* will return a new, blank **Sheet** if file does not exist.'''
-    # allow user to assign a filetype to a pathname:  options.set('filetype', 'csv', '-')
-    filetype = filetype or vd.options.getonly('filetype', str(p), None)  #1710
-    filetype = filetype or vd.options.getonly('filetype', 'global', None)
+    filetype = filetype or p.options.filetype  # resolve from path instance, Path class, global  #1710
 
     if p.scheme and not p.has_fp():
+        # an explicit filetype with a dedicated open_<filetype> overrides url-scheme dispatch  #3126
+        if filetype:
+            ft = filetype.lower()
+            openfunc = getattr(vd, 'open_'+ft, None) or vd.getGlobals().get('open_'+ft, None)
+            if openfunc:
+                return openfunc(p)
+
         schemes = p.scheme.split('+')
         openfuncname = 'openurl_' + schemes[-1]
 
@@ -101,9 +123,11 @@ def openPath(vd, p, filetype=None, create=False):
     # assign filetype from extension, but only for files, not directories
     if not p.is_dir():  #2547
         filetype = filetype or p.ext
-    filetype = filetype or vd.options.filetype
 
     filetype = filetype.lower()
+
+    # store resolved filetype on path for downstream access (e.g. self.source.options.filetype)
+    p.options.set('filetype', filetype, p, cmdlog=False)
 
     if not p.exists():
         newfunc = getattr(vd, 'new_' + filetype, vd.getGlobals().get('new_' + filetype))
@@ -114,7 +138,7 @@ def openPath(vd, p, filetype=None, create=False):
         vd.status('creating blank %s' % (p.given))
         return newfunc(p)
 
-    if p.is_fifo():
+    if p.is_fifo() and not p.has_fp():
         # read the file as text, into a RepeatFile that can be opened multiple times
         p = Path(p.given, fp=p.open(mode='rb'))
 
@@ -133,10 +157,10 @@ def openPath(vd, p, filetype=None, create=False):
             for k, v in opts.items():
                 if k != 'filetype' and not k.startswith('_'):
                     setattr(vs.options, k, v)
-            vd.warning('guessed "%s" filetype based on contents' % opts['filetype'])
+            vd.status(f'guessed `{opts["filetype"]}` filetype based on contents')
             return vs
 
-        vd.warning('unknown "%s" filetype' % filetype)
+        vd.warning(f'unknown `{filetype}` filetype')
 
         filetype = 'txt'
         openfunc = vd.open_txt
@@ -155,19 +179,23 @@ def openSource(vd, p, filetype=None, create=False, **kwargs):
 
     vs = None
     if isinstance(p, str):
-        if '://' in p:
-            vs = vd.openPath(Path(p), filetype=filetype)  # convert to Path and recurse
-        elif p == '-':
-            if vd.stdinSource.fptext.isatty():
-                vd.fail('cannot open stdin when it is a tty')
-            vs = vd.openPath(vd.stdinSource, filetype=filetype)
-        else:
-            vs = vd.openPath(Path(p), filetype=filetype, create=create)  # convert to Path and recurse
+        p = Path(p)
+
+    if p.given == '-' and p.fp is None and p.fptext is None and vd.stdinSource is not None:
+        p = vd.stdinSource  # bare Path('-') means piped stdin
+
+    if p is vd.stdinSource:
+        if p.fptext is None or p.fptext.isatty():
+            vd.fail('cannot open stdin when it is a tty')
+        vs = vd.openPath(p, filetype=filetype)
     else:
         vs = vd.openPath(p, filetype=filetype, create=create)
 
     for optname, optval in kwargs.items():
         vs.options[optname] = optval
+        # Path is authoritative for format options  #2727
+        if isinstance(vs.source, Path):
+            vs.source.options.set(optname, optval, vs.source, cmdlog=False)
 
     return vs
 
@@ -187,8 +215,8 @@ def open_txt(vd, p):
     return TextSheet(p.base_stem, source=p)
 
 
-BaseSheet.addCommand('o', 'open-file', 'vd.push(openSource(inputFilename("open: "), create=True))', 'Open file or URL')
-TableSheet.addCommand('zo', 'open-cell-file', 'vd.push(openSource(cursorDisplay) or fail(f"file {cursorDisplay} does not exist"))', 'Open file or URL from path in current cell')
+BaseSheet.addCommand('o', 'open-file', 'vd.push(openSource(inputPath("open: "), create=True))', 'Open file or URL')
+TableSheet.addCommand('zo', 'open-cell-file', 'cd=cursorDisplay; (vd.push(openSource(cd) if cd else fail("no path given")) or fail(f"file {cd} does not exist"))', 'Open file or URL from path in current cell')
 BaseSheet.addCommand('gU', 'undo-last-quit', 'push(allSheets[-1])', 'reopen most recently closed sheet')
 
 vd.addMenuItems('''

@@ -39,6 +39,8 @@ The *execstr* is a string of Python code passed to ``exec()`` when the command i
 
 The ``vd`` and ``sheet`` symbols are available to specify explicitly.
 
+``currow`` is available on TableSheets; it provides access to column values for the current cursor row by name (e.g. ``currow.Price`` returns the typed value of the ``Price`` column for the cursor row).
+
 .. note::
 
     Unqualified ``options`` in a command execstr will use the sheet-specific options context for the current sheet.
@@ -55,8 +57,8 @@ Commands API
 Keybindings
 ~~~~~~~~~~~~
 
-   - Use "``^X``" for :kbd:`Ctrl+X`.
-   - Primarily, plugin authors and users should use ``0-9``, "``KEY_F(1)``", ``ALT+`` for custom keybindings; these are purposefully left available for user keybindings.
+   - Use "``Ctrl+X``" for :kbd:`Ctrl+X`.
+   - Primarily, plugin authors and users should use ``0-9``, function keys (``F2``), ``Alt+`` for custom keybindings; these are purposefully left available for user keybindings.
    - Consider not providing a default at all, for infrequently used commands.
    - Instead give it an easy and memorable longname, and/or a unique *helpstr* which can be searched for in the **Command Help** (:kbd:`g Ctrl+H`) with :kbd:`g/`.
    - Many other keycodes can be returned from the curses library as strings.
@@ -69,12 +71,7 @@ New prefixes can be added to this list, and then they can also be used as prefix
 
 .. note::
 
-    Combinations of prefixes are allowed, but only in the specified order: ``g`` must come before ``z``, which must come before ``ALT``.
-
-.. note::
-
-    ``ALT`` is a just a handy constant for "``^[``", which represents :kbd:`Ctrl+[`, which maps to :kbd:`Esc` in the terminal.
-    Curses represents :kbd:`Alt+X` (:kbd:`Meta+X` on some keyboards) as :kbd:`Esc x`. So to bind a command to :kbd:`Alt+X`, use ``ALT+'x'`` or ``'^[x'``.
+    Combinations of prefixes are allowed, but only in the specified order: ``g`` must come before ``z``, which must come before ``Alt+``.
 
 .. _other-commands:
 
@@ -145,5 +142,5 @@ Examples
 
     # bind Shift+H, Ctrl+H, and Alt+H to this command
     BaseSheet.bindkey('H', 'show-hello')
-    BaseSheet.bindkey('^H', 'show-hello')
-    BaseSheet.bindkey(ALT+'h', 'show-hello')
+    BaseSheet.bindkey('Ctrl+H', 'show-hello')
+    BaseSheet.bindkey('Alt+h', 'show-hello')

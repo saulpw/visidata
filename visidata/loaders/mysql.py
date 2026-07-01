@@ -36,23 +36,29 @@ class SQL:
         import MySQLdb as mysql
         import MySQLdb.cursors as cursors
 
-        dbname = self.url.path[1:]
-        connection = mysql.connect(
-                    user=self.url.username,
-                    database=self.url.path[1:],
-                    host=self.url.hostname,
-                    port=self.url.port or 3306,
-                    password=unquote(self.url.password),
-                    use_unicode=True,
-                    charset='utf8',
-                    cursorclass=cursors.SSCursor) ## if SSCursor is not used mysql will first fetch ALL data, and only then visualize it
+        connection_parameters = dict(
+            user=self.url.username,
+            database=self.url.path[1:],
+            host=self.url.hostname,
+            port=self.url.port or 3306,
+            use_unicode=True,
+            charset='utf8',
+            cursorclass=cursors.SSCursor) ## if SSCursor is not used mysql will first fetch ALL data, and only then visualize it
+
+        if self.url.password is not None:
+            connection_parameters['password'] = unquote(self.url.password) 
+
+        connection = mysql.connect(**connection_parameters)
+
+        cursor = None
         try:
             cursor = connection.cursor() # one connection per request as SSCursor only allows to fetch data asynchronously from one query at a time
             cursor.execute(qstr)
             with cursor as c:
                 yield c
         finally:
-            cursor.close()
+            if cursor is not None:
+                cursor.close()
             connection.close()
 
     @asyncthread

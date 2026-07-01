@@ -14,14 +14,14 @@ vd.option('regex_maxsplit', 0, 'maxsplit to pass to regex.split', replay=True)
 
 @VisiData.api
 def makeRegexSplitter(vd, regex, origcol):
-    return lambda row, regex=regex, origcol=origcol, maxsplit=options.regex_maxsplit: regex.split(origcol.getDisplayValue(row), maxsplit=maxsplit)
+    return lambda row, regex=regex, origcol=origcol, maxsplit=options.regex_maxsplit: regex.split(origcol.getFullDisplayValue(row), maxsplit=maxsplit)
 
 @VisiData.api
 def makeRegexMatcher(vd, regex, origcol):
     if not regex.groups:
-        vd.fail('specify a capture group')  #1778
+        vd.fail('specify a capture group using parentheses')  #1778
     def _regexMatcher(row):
-        m = regex.search(origcol.getDisplayValue(row))
+        m = regex.search(origcol.getFullDisplayValue(row))
         if m:
             return m.groupdict() if m.groupdict() else m.groups()
     return _regexMatcher
@@ -33,6 +33,7 @@ def RegexColumn(vs, regexMaker, origcol, regexstr):
     func = regexMaker(regex, origcol)
     return Column(origcol.name+'_re',
                   getter=lambda col,row,func=func: func(row),
+                  setter=None,
                   origCol=origcol)
 
 
@@ -46,7 +47,6 @@ def addRegexColumns(vs, regexMaker, origcol, regexstr):
     func = regexMaker(regex, origcol)
 
     cols = {}
-    ncols = 0  # number of new columns added already
     for r in Progress(vs.getSampleRows()):
         m = vd.callNoExceptions(func, r)
         if not m:
@@ -68,7 +68,7 @@ def addRegexColumns(vs, regexMaker, origcol, regexstr):
             raise TypeError("addRegexColumns() expects a dict, list, or tuple from regexMaker, but got a "+type(m).__name__)
 
     if not cols:
-        vd.warning("no regex matches found, didn't add column")
+        vd.warning("no regex matches found; did not add column")
         return
 
     vs.addColumnAtCursor(*cols.values())
@@ -76,7 +76,7 @@ def addRegexColumns(vs, regexMaker, origcol, regexstr):
 
 @VisiData.api
 def regexTransform(vd, origcol, before='', after=''):
-    return lambda col,row,origcol=origcol,before=before,after=after,flags=origcol.sheet.regex_flags(): re.sub(before, after, origcol.getDisplayValue(row), flags=flags)
+    return lambda col,row,origcol=origcol,before=before,after=after,flags=origcol.sheet.regex_flags(): re.sub(before, after, origcol.getFullDisplayValue(row), flags=flags)
 
 
 @VisiData.api
@@ -125,13 +125,22 @@ def inputRegexSubst(vd, prompt):
     return vd.inputMultiple(before=dict(type='regex', prompt='search: ', help=prompt),
                             after=dict(type='regex-replace', prompt='replace: ', help=prompt))
 
+@Sheet.api
+def setcol_regex_subst(sheet, cols):
+    if all([c.readonly for c in cols]):
+        vd.fail("cannot set values on readonly columns")
+    if len(cols) > 1:
+        prompt = f'regex transform {len(cols)} columns'
+    else:
+        prompt = 'regex transform column'
+    sheet.setValuesFromRegex(cols, sheet.someSelectedRows, **vd.inputRegexSubst(prompt))
 
 Sheet.addCommand(':', 'addcol-split', 'addColumnAtCursor(RegexColumn(makeRegexSplitter, cursorCol, inputRegex("split regex: ", type="regex-split")))', 'add column split by regex')
 Sheet.addCommand(';', 'addcol-capture', 'addColumnAtCursor(RegexColumn(makeRegexMatcher, cursorCol, inputRegex("capture regex: ", type="regex-capture")))', 'add column captured by regex')
 
 Sheet.addCommand('*', 'addcol-regex-subst', 'addColumnAtCursor(Column(cursorCol.name + "_re", getter=regexTransform(cursorCol, **inputRegexSubst("regex transform column"))))', 'add column derived from current column, replacing `search` regex with `replace` (may include \\1 backrefs)')
-Sheet.addCommand('g*', 'setcol-regex-subst', 'setValuesFromRegex([cursorCol], someSelectedRows, **inputRegexSubst("regex transform column"))', 'modify selected rows in current column, replacing `search` regex with `replace`, (may include backreferences \\1 etc)')
-Sheet.addCommand('gz*', 'setcol-regex-subst-all', 'setValuesFromRegex(visibleCols, someSelectedRows, **inputRegexSubst(f"regex transform {nVisibleCols} columns"))', 'modify selected rows in all visible columns, replacing `search` regex with `replace` (may include \\1 backrefs)')
+Sheet.addCommand('g*', 'setcol-regex-subst', 'setcol_regex_subst([cursorCol])', 'modify selected rows in current column, replacing `search` regex with `replace`, (may include \\1 backrefs)')
+Sheet.addCommand('gz*', 'setcol-regex-subst-all', 'setcol_regex_subst(visibleCols)', 'modify selected rows in all visible columns, replacing `search` regex with `replace` (may include \\1 backrefs)')
 
 
 vd.addMenuItems('''

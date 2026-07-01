@@ -96,7 +96,7 @@ class XlsxSheet(SequenceSheet):
                            getter=lambda c,r: c.sheet.colorize_xlsx_cell(c,r)))
 
     def paste_after(self, rowidx):
-        to_paste = list(copy.copy(r) for r in reversed(vd.memory.cliprows))
+        to_paste = list(copy.copy(r) for r in reversed(vd.getClipboardRows()))
         self.addRows(to_paste, index=rowidx)
 
 
@@ -157,6 +157,7 @@ def save_xlsx(vd, p, *sheets):
             row.append(v)
         return row
 
+    ws = None
     for vs in sheets:
         if vs.xls_name != vs.names[-1]:
             vd.warning(f'saving {vs.name} as {vs.xls_name}')
@@ -169,7 +170,7 @@ def save_xlsx(vd, p, *sheets):
             row = _convert_save_row(dispvals)
             try:
                 ws.append(row)
-            except openpyxl.utils.exceptions.IllegalCharacterError as e:
+            except openpyxl.utils.exceptions.IllegalCharacterError:
                 row = _convert_save_row(dispvals, replace_illegal=True)  #1402
                 ws.append(row)
 
@@ -240,7 +241,7 @@ def xlsx_color_to_xterm256(sheet, color) -> str:
 def theme_and_tint_to_rgb(sheet, theme, tint) -> str:
     """Given a workbook, a theme number and a tint return a xterm256 color number"""
     rgb = sheet.theme_colors[theme]
-    h, l, s = rgb_to_ms_hls(rgb)
+    h, l, s = rgb_to_ms_hls(rgb)  # noqa: E741
     r, g, b = ms_hls_to_rgb(h, tint_luminance(tint, l), s)
 
     return rgb_to_attr(r*256, g*256, b*256)
@@ -258,7 +259,7 @@ def theme_colors(sheet):
 
     theme_colors = []
 
-    for c in ['lt1', 'dk1', 'lt2', 'dk2', 'accent1', 'accent2', 'accent3', 'accent4', 'accent5', 'accent6']:
+    for c in ['lt1', 'dk1', 'lt2', 'dk2', 'accent1', 'accent2', 'accent3', 'accent4', 'accent5', 'accent6', 'hlink', 'folHlink']:
         accent = firstColorScheme.find(QName(xlmns, c).text)
         for i in list(accent): # walk all child nodes, rather than assuming [0]
             if 'window' in i.attrib['val']:
@@ -279,7 +280,7 @@ def rgb_to_ms_hls(red, green=None, blue=None):
             red = int(red[0:2], 16) / RGBMAX
         else:
             red, green, blue = red
-    h, l, s = rgb_to_hls(red, green, blue)
+    h, l, s = rgb_to_hls(red, green, blue)  # noqa: E741
     return (int(round(h * HLSMAX)), int(round(l * HLSMAX)), int(round(s * HLSMAX)))
 
 def ms_hls_to_rgb(hue, lightness=None, saturation=None):

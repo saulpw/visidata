@@ -1,4 +1,4 @@
-.Dd June 13, 2025
+.Dd June 30, 2026
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -31,13 +31,14 @@
 .Op Cm -w Ar waitsecs
 .Op Cm --batch
 .Op Cm -i
+.Op Cm -of Ar filetype
 .Op Cm -o Ar output
 .Op Ar field Ns Cm = Ns Ar value
 .
 .Nm vd
 .Op Ar options
 .Op Ar input No ...
-.Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar row Ns : Ns Ar col
+.Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar col Ns : Ns Ar row
 .
 .Sh DESCRIPTION
 .Nm VisiData No is an easy-to-use multipurpose tool to explore, clean, edit, and restructure data.
@@ -147,7 +148,17 @@ jump to previous sheet (swaps with current sheet)
 .It Ic  "z/  z?" Ar expr
 .No search by Python Ar expr No forward/backward in current column (with column names as variables)
 .It Ic  " n   N"
-go to next/previous match from last regex search
+go to next/previous match from last search
+.Pp
+.No Search matches are highlighted when Sy options.highlight_search No is set (default: on).
+.It ( Ns Ar highlight-col Ns )
+highlight a regex in current column (without moving)
+.It ( Ns Ar highlight-sheet Ns )
+highlight a regex in all columns (without moving)
+.It ( Ns Ar highlight-clear Ns )
+clear all highlight patterns
+.Pp
+.No Undoing a search does not clear the highlighting; use Ar highlight-clear No instead.
 .Pp
 .It Ic  " <   >"
 go up/down current column to next value
@@ -215,8 +226,8 @@ rename current column to combined contents of current cell in selected rows (or 
 .It Ic "gz^"
 rename all visible columns to combined contents of current column for selected rows (or current row)
 .Pp
-.It Ic "  =" Ar expr
-.No create new column from Python Ar expr Ns , with column names, and attributes, as variables
+.It Ic "  =" Ar [name=]expr
+.No create new column from Python Ar expr Ns , with column names, and attributes, as variables. Optionally specify column Ar name Ns .
 .It Ic " g=" Ar expr
 .No set current column for selected rows to result of Python Ar expr
 .It Ic "gz=" Ar expr
@@ -406,11 +417,11 @@ open
 .It Ic "zo"
 open file or url from path in current cell
 .It Ic "^S g^S" Ar filename
-.No save current/all sheet(s) to Ar filename No in format determined by extension (default .tsv)
+.No save current/all sheet(s) to Ar filename No with given filetype
 .It ""
 .No Note: if the format does not support multisave, or the Ar filename No ends in a Sy / Ns , a directory will be created.
 .It Ic "z^S" Ar filename
-.No save current column only to Ar filename No in format determined by extension (default .tsv)
+.No save current column only to Ar filename No with given filetype
 .It Ic "^D" Ar filename.vdj
 .No save Sy CommandLog No to Ar filename.vdj No file
 .It Ic "A"
@@ -756,6 +767,8 @@ edit option at current row
 remove option override for this context
 .It Ic "^S"
 .No save option configuration to Sy foo.visidatarc
+.It Ic "z^S"
+.No save option overrides to config file
 .El
 .
 .Ss CommandLog (Shift+D)
@@ -888,8 +901,8 @@ show/hide methods and hidden properties
 .Bl -tag -width XXXXXXXXXXXXXXXXXXXXXXXXXXX -compact
 .It Cm -P Ns = Ns Ar longname
 .No preplay Ar longname No before replay or regular launch; limited to Sy Base Sheet No bound commands
-.It Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar row Ns : Ns Ar col
-.No launch vd with Ar subsheet No of Ar toplevel No at top-of-stack, and cursor at Ar row No and Ar col Ns ; all arguments are optional
+.It Cm + Ns Ar toplevel Ns : Ns Ar subsheet Ns : Ns Ar col Ns : Ns Ar row
+.No launch vd with Ar subsheet No of Ar toplevel No at top-of-stack, and cursor at Ar col No and Ar row Ns ; all arguments are optional
 .It Cm --overwrite Ns = Ns Ar c
 .No Overwrite with confirmation
 .It Cm --guides
@@ -898,17 +911,29 @@ show/hide methods and hidden properties
 .Pp
 .Lo f filetype filetype
 .No "tsv               "
-set loader to use for
+set input loader to use for
 .Ar filetype
-instead of file extension
+instead of file extension (aliases
+.Sy -if Ns , Cm --input-filetype Ns ); applies to subsequent input paths on the
+CLI, not to the
+.Sy -o
+output or files opened later in the session
+.
+.Lo of output-filetype filetype
+.No "                  "
+set the saver for the
+.Sy -o
+output to
+.Ar filetype
+instead of its extension
 .
 .Lo d delimiter delimiter
 .No "\(rst                "
 field delimiter to use for tsv/usv filetype
 .
-.Lo y overwrite y
+.Lo y confirm y
 .No "y                 "
-overwrite existing files without confirmation
+auto-accept all confirmation prompts (including file overwrite)
 .
 .Lo ro overwrite n
 .No "n                 "
@@ -967,11 +992,36 @@ disable loading .visidatarc and plugin addons
 .Dl Ic vd newfile.tsv
 .No open a blank sheet named Ar newfile No if file does not exist
 .Pp
-.Dl Ic vd sample.xlsx +:sheet1:2:3
-.No launch with Sy sheet1 No at top-of-stack, and cursor at column Sy 2 No and row Sy 3
-.Pp
 .Dl Ic vd -P open-plugins
 .No preplay longname Sy open-plugins No before starting the session
+.Pp
+.Dl Ic vd a.xlsx b.tsv c.tsv +0:3:1:2
+.No launch with cursor for sheet Sy 0 No (a.xlsx) at subsheet Sy 3 No in sheet Sy 0 Ns , col Sy 1 Ns , row Sy 2
+.Dl Ic vd a.xlsx b.tsv c.tsv +0:1:2
+.No launch with cursor for sheet Sy 0 No (a.xlsx) at col Sy 1 Ns , row Sy 2
+.Dl Ic vd a.tsv b.tsv c.tsv +1:2
+.No launch with cursor for last sheet (c.tsv) at col Sy 1 Ns , row Sy 2
+.Dl Ic vd a.tsv b.tsv c.tsv +1:
+.No launch with cursor for last sheet (c.tsv) at col Sy 1
+.Dl Ic vd a.tsv b.tsv c.tsv +:2
+.No launch with cursor for last sheet (c.tsv) at row Sy 2
+.Pp
+.Dl Ic vd a.xlsx b.xlsx c.xlsx +0:annual:1:2 +1:sales:monthly:3:4
+.No launch with cursor for sheet Sy 0 No (a.xlsx) in subsheet Sy annual No at col Sy 1 Ns , row Sy 2 Ns , and cursor for sheet Sy 1 No (b.xlsx), subsheet Sy sales No in subsheet monthly; col Sy 3 Ns , row Sy 4
+.Pp
+.Dl Ic vd a.tsv b.tsv c.tsv +1::
+.No launch in sheet Sy 1 No (b.tsv), with cursor at col 0, row 0
+.Dl Ic vd a.tsv b.tsv c.tsv +-2::
+.No launch in Sy 2nd No from last sheet (b.tsv), with cursor at col 0, row 0
+.Pp
+.Dl Ic vd a.tsv b.tsv c.tsv +:1:
+.No launch with cursors for all sheets at col Sy 1
+.Dl Ic vd a.tsv b.tsv c.tsv +::2
+.No launch with cursors for all sheets at row Sy 2
+.Dl Ic vd a.tsv b.tsv c.tsv +:1:2
+.No launch with cursors for all sheets at col Sy 1 Ns , row Sy 2
+.Dl Ic vd a.xlsx b.xslx c.xlsx +:a:1:2
+.No launch with cursors for all sheets at subsheet Sy a Ns , col Sy 1 Ns , row Sy 2
 .Sh FILES
 At the start of every session,
 .Sy VisiData No looks for Pa $HOME/.visidatarc Ns , and calls Python exec() on its contents if it exists.

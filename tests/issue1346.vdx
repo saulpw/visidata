@@ -1,0 +1,2 @@
+open-file tests/issue1346.html
+open-row

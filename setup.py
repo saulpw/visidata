@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from setuptools import setup
-import platform
+import os.path
 import sysconfig
 
 
@@ -11,7 +11,7 @@ def all_requirements():
         requirements = []
         for line in f:
             line = line.strip()
-            if (line and not line.startswith('#') and not line.startswith('-e git+https')):
+            if (line and not line.startswith('#') and not line.startswith('-e git+https') and not line.startswith('git+https')):
 
                 # inline comments
                 if '#' in line:
@@ -25,7 +25,7 @@ def all_requirements():
 
 # tox can't actually run python3 setup.py: https://github.com/tox-dev/tox/issues/96
 # from visidata import __version__
-__version__ = "3.3"
+__version__ = "3.4"
 install_requires = [
     "python-dateutil",
     'importlib_resources; python_version<"3.9"',
@@ -71,8 +71,11 @@ setup(
         "visidata.desktop",
     ],
     data_files=[
-        ("share/man/man1", ["visidata/man/vd.1", "visidata/man/visidata.1"]),
+        ("share/man/man1", [f for f in ["visidata/man/vd.1", "visidata/man/visidata.1"] if os.path.exists(f)]),
         ("share/applications", ["visidata/desktop/visidata.desktop"]),
+        ("share/metainfo", ["visidata/desktop/org.visidata.VisiData.metainfo.xml"]),
+        ("share/icons/hicolor/48x48/apps", ["visidata/desktop/icons/48x48/visidata.png"]),
+        ("share/icons/hicolor/32x32/apps", ["visidata/desktop/icons/32x32/visidata.png"]),
     ],
     extras_require={
         "test": [
@@ -92,28 +95,34 @@ setup(
             "pypng",
             "pytest",
             "PyYAML>=5.1",
+            "shapely",
             "tabulate",
             "tomli",
             "wcwidth",
-            "xport>=3.0",
+            "xport>=3.0,<3.3",
         ],"windows-curses": ['windows-curses >= 2.4.1; platform_system == "Windows"',  # 2119
         ],
         "all": all_requirements(),
     },
     package_data={
-        "visidata.man": ["vd.1", "vd.txt"],
+        "visidata.man": [f for f in ["vd.1", "vd.txt"] if os.path.exists(os.path.join("visidata", "man", f))],
         "visidata.ddw": ["input.ddw", "regex.ddw"],
         "visidata": ["guides/*.md"],
         "visidata.tests": ["sample.tsv", "benchmark.csv"],
-        "visidata.desktop": ["visidata.desktop"],
-        "visidata.experimenta.noahs_tapestry": [
+        "visidata.desktop": [
+            "visidata.desktop",
+            "org.visidata.VisiData.metainfo.xml",
+            "icons/48x48/visidata.png",
+            "icons/32x32/visidata.png",
+        ],
+        "visidata.experimental.noahs_tapestry": [
             "*.ddw",
             "*.md",
             "*.json",
             "noahs.sqlite",
         ],
     },
-    license="GPLv3",
+    license="GPL-3.0-only",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
@@ -121,7 +130,6 @@ setup(
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
         "Intended Audience :: System Administrators",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
         "Topic :: Database :: Front-Ends",

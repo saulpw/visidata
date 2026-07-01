@@ -1,4 +1,4 @@
-from visidata import vd, Sheet, options, Column, asyncthread, Progress, PivotGroupRow, ENTER, HistogramColumn
+from visidata import vd, Sheet, options, Column, asyncthread, Progress, PivotGroupRow, HistogramColumn
 
 from visidata.loaders._pandas import PandasSheet
 from visidata.pivot import PivotSheet
@@ -99,6 +99,7 @@ class PandasFreqTableSheet(PivotSheet):
         # for PandasSheet, although we could implement it with a pd.Grouper
         # that operates similarly to pd.cut.
         df = self.source.df.copy()
+        value_counts = None
 
         # Implementation (special case): for one row, this degenerates
         # to .value_counts(); however this does not order in a stable manner.
@@ -134,7 +135,7 @@ class PandasFreqTableSheet(PivotSheet):
             # value_counts = value_counts.stack(list(range(len(self.groupByCols) - 1)))
             # value_counts = value_counts.loc[value_counts > 0].sort_values(ascending=False)
         else:
-            vd.fail("Unable to do FrequencyTable, no columns to group on provided")
+            vd.fail("no columns to group on")
 
         # add default bonus columns
         for c in [

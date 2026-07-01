@@ -13,7 +13,7 @@ vd.help_int_fmt = '''
 - other fmt (like `{:4d}` is passed to Python [:onclick https://docs.python.org/3/library/string.html#custom-string-formatting)]string.format[/]
 '''
 
-vd.option('disp_float_fmt', '{:.02f}', 'default fmtstr to format float values', replay=True, help=vd.help_float_fmt)
+vd.option('disp_float_fmt', '{:.2f}', 'default fmtstr to format float values', replay=True, help=vd.help_float_fmt)
 vd.option('disp_int_fmt', '{:d}', 'default fmtstr to format int values', replay=True, help=vd.help_int_fmt)
 
 
@@ -95,8 +95,17 @@ vd.typemap = {}
 def getType(vd, typetype):
     return vd.typemap.get(typetype) or VisiDataType()
 
+
+@vd.numericType('')
+def numtype(r=None):
+    'A passthrough numeric type that uses default precision and formatting'
+    return r
+numtype.__name__ = 'num'
+
+
 vdtype(None, '∅', name='none')
 vdtype(anytype, '', formatter=lambda _,v: str(v))
+vdtype(numtype, '')
 vdtype(str, '~', formatter=lambda _,v: v)
 vdtype(int, '#')
 vdtype(float, '%')
@@ -135,5 +144,6 @@ class vlen(int):
         return self
 
 vd.addGlobals(anytype=anytype,
+              numtype=numtype,
               vdtype=vdtype,
               deduceType=deduceType)

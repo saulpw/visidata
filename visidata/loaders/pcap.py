@@ -1,7 +1,9 @@
+# pyright: reportUndefinedVariable=false
+# mac_manuf: unimplemented manufacturer lookup (known-broken getter)
 import collections
 import ipaddress
 
-from visidata import VisiData, vd, Sheet, options, Column, asyncthread, Progress, TsvSheet, getattrdeep, ColumnAttr, date, vlen, filesize
+from visidata import VisiData, vd, Sheet, options, Column, asyncignore, Progress, TsvSheet, getattrdeep, ColumnAttr, date, vlen, filesize
 
 vd.option('pcap_internet', 'n', '(y/s/n) if save_dot includes all internet hosts separately (y), combined (s), or does not include the internet (n)')
 
@@ -19,9 +21,9 @@ services = {}  # [('tcp', 25)] -> 'smtp'
 def open_pcap(vd, p):
     return PcapSheet(p.base_stem, source=p)
 
-open_cap = open_pcap
-open_pcapng = open_pcap
-open_ntar = open_pcap
+VisiData.open_cap = VisiData.open_pcap
+VisiData.open_pcapng = VisiData.open_pcap
+VisiData.open_ntar = VisiData.open_pcap
 
 def manuf(mac):
     return oui.get(mac[:13]) or oui.get(mac[:10]) or oui.get(mac[:8])
@@ -104,7 +106,7 @@ def read_pcap(f):
         return dpkt.pcap.Reader(f.open_bytes())
 
 
-@asyncthread
+@asyncignore
 def load_oui(url):
     vsoui = TsvSheet('vsoui', source=vd.urlcache(url, days=30))
     vsoui.reload.__wrapped__(vsoui)
@@ -118,7 +120,7 @@ def load_oui(url):
             vd.exceptionCaught(e)
 
 
-@asyncthread
+@asyncignore
 def load_iana(url):
     ports_tsv = TsvSheet('ports_tsv', source=vd.urlcache(url, days=30))
     ports_tsv.reload.__wrapped__(ports_tsv)
@@ -400,7 +402,7 @@ def flowname(flow):
 def try_apply(func, *args, **kwargs):
     try:
         return func(*args, **kwargs)
-    except Exception as e:
+    except Exception:
         pass
 
 

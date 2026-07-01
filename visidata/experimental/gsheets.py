@@ -10,11 +10,11 @@ def open_gsheets(vd, p):
     if m:
         return GSheetsIndex(p.base_stem, source=m.groups()[0])
 
-vd.open_g = vd.open_gsheets
+VisiData.open_g = VisiData.open_gsheets
 
 @VisiData.lazy_property
 def google_discovery(self):
-    googleapiclient = vd.importExternal('googleapiclient', 'google-api-python-client')
+    vd.importExternal('googleapiclient', 'google-api-python-client')
     from googleapiclient import discovery
     return discovery
 

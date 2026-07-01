@@ -105,11 +105,14 @@ class VisiData(visidata.Extensible):
         visidata.Extensible.clear_all_caches()
 
     def resetVisiData(self):
-        self.clearCaches()  # we want vd to return a new VisiData object for each command
-        vd = visidata.vd  # get the new vd
+        vd = visidata.vd  # get the actual vd
         vd.cmdlog.rows = []
-        vd.sheets = []
-        vd.allSheets = []
+        vd.sheets.clear()
+        vd.allSheets.clear()
+        vd.lastErrors.clear()
+        vd.options.resetToDefaults()
+
+        vd.clearCaches()
         return vd
 
     def get_wch(self, scr):
@@ -134,7 +137,7 @@ class VisiData(visidata.Extensible):
         except curses.error:
             pass
         finally:
-            scr.timeout(self.curses_timeout)
+            scr.timeout(self.get_curses_timeout())
 
         return bool(self.pendingKeys)
 
@@ -149,6 +152,7 @@ class VisiData(visidata.Extensible):
             try:
                 scr.refresh()
                 k = self.get_wch(scr)
+                self.drainPendingKeys(scr)
                 vs = vs or self.activeSheet
                 if vs:
                     self.drawRightStatus(vs._scr, vs) # continue to display progress %
@@ -159,7 +163,14 @@ class VisiData(visidata.Extensible):
             if ord(k) >= 32 and ord(k) != 127:  # 127 == DEL or ^?
                 return k
             k = ord(k)
-        return curses.keyname(k).decode('utf-8')
+        keyname = curses.keyname(k).decode('utf-8')
+        if keyname == '^[':  # Esc/Alt+
+            if self.pendingKeys:  # more to come
+                k = self.pendingKeys.pop(0)
+                return 'Alt+'+self.prettykeys(str(k))
+            else:
+                return 'Esc'
+        return self.prettykeys(keyname)
 
     @property
     def screenHeight(self):

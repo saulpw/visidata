@@ -8,7 +8,7 @@ import os
 
 import visidata
 from visidata import VisiData, BaseSheet, vd, AttrDict
-from visidata.vendor.appdirs import user_config_dir, user_cache_dir
+from visidata.vendor.appdirs import user_config_dir, user_cache_dir, user_data_dir
 
 
 # [settingname] -> { objname(Sheet-instance/Sheet-type/'global'/'default'): Option/Command/longname }
@@ -32,10 +32,15 @@ class SettingsMgr(collections.OrderedDict):
             v = obj.name
         elif inspect.isclass(obj) and issubclass(obj, BaseSheet):
             v = obj.__name__
+        elif isinstance(obj, os.PathLike):
+            v = str(obj)
+        elif inspect.isclass(obj) and issubclass(obj, os.PathLike):
+            v = obj.__name__
         else:
             return None
 
-        self.allobjs[v] = obj
+        if not isinstance(obj, str) or v not in self.allobjs:
+            self.allobjs[v] = obj
         return v
 
     def getobj(self, objname):
@@ -104,27 +109,38 @@ class SettingsMgr(collections.OrderedDict):
             for o in self[k]:
                 yield (k, o), self[k][o]
 
+    def resetToDefaults(self):
+        'Remove global and instance-level settings, keeping defaults and class-level overrides.'
+        for k in self:
+            to_remove = [objname for objname in self[k]
+                         if objname != 'default'
+                         and not (inspect.isclass(self.allobjs.get(objname)))]
+            for objname in to_remove:
+                del self[k][objname]
+
 
 
 class Command:
-    def __init__(self, longname, execstr, helpstr='', module='', replay=True, deprecated=False):
+    def __init__(self, longname, execstr, helpstr='', module='', replay=True, deprecated=False, testable=True):
         self.longname = longname
         self.execstr = execstr
         self.helpstr = helpstr
         self.module = module
         self.deprecated = deprecated
         self.replayable = replay
+        self.testable = testable
 
 
 class Option:
     def __init__(self, name, value, description='', module='', help=''):
-        # description gets shows on the manpage and the optionssheet; help is shown on the sidebar while editing
+        # description gets shown on the manpage and the optionssheet; help is shown on the sidebar while editing
         self.name = name
         self.value = value
         self.helpstr = description
         self.extrahelp = help
         self.replayable = False
         self.sheettype = BaseSheet
+        self.cli_only = False
         self.module = module
 
     def __str__(self):
@@ -190,7 +206,7 @@ class OptionsObject:
                 return opt.value
         return default
 
-    def set(self, optname, value, obj='global'):
+    def set(self, optname, value, obj='global', cmdlog=True):
         "Override *value* for *optname* in the options context, or in the *obj* context if given."
         opt = self._get(optname)
         module = None  # keep default
@@ -201,6 +217,11 @@ class OptionsObject:
                 return self.unset(optname, obj=obj)
             elif isinstance(value, str) and t is bool: # special case for bool options
                 value = value and (value[0] not in "0fFnN")  # ''/0/false/no are false, everything else is true
+            elif isinstance(value, str) and t in (list, tuple, dict):
+                import ast
+                value = ast.literal_eval(value)
+                if not isinstance(value, t):
+                    vd.fail(f'error parsing string for `{optname}` into {t}')
             elif type(value) is t:    # if right type, no conversion
                 pass
             elif curval is None:  # if None, do not apply type conversion
@@ -208,13 +229,13 @@ class OptionsObject:
             else:
                 value = t(value)
 
-            if curval != value and self._get(optname, 'default').replayable:
+            if cmdlog and curval != value and self._get(optname, 'default').replayable:
                 if obj != 'default' and type(obj) is not type:  # default and class options set on init aren't recorded
                     if vd.cmdlog:
                         self.add_option_to_cmdlogs(obj, optname, value, 'set-option')
         else:
             curval = None
-            vd.warning('setting unknown option %s' % optname)
+            vd.warning(f'setting unknown option `{optname}`')
             module = 'unknown'
 
         return self._set(optname, value, obj, module=module)
@@ -247,18 +268,26 @@ class OptionsObject:
                         keystrokes='', input=str(value),
                         longname=longname, undofuncs=[]))
 
+    def resetToDefaults(self):
+        'Remove all non-default option settings.'
+        self._opts.resetToDefaults()
+        self._cache.clear()
+
     def setdefault(self, optname, value, helpstr, module):
         return self._set(optname, value, 'default', helpstr=helpstr, module=module)
 
     def getall(self, prefix=''):
         'Return dictionary of all options beginning with `prefix` (with `prefix` removed from the name).'
-        return { optname[len(prefix):] : vd.options[optname]
-                    for optname in vd.options.keys()
+        return { optname[len(prefix):] : self[optname]
+                    for optname in self.keys()
                         if optname.startswith(prefix) }
 
     def __getattr__(self, optname):      # options.foo
         'Return value of option `optname` for stored options context.'
-        return self.__getitem__(optname)
+        opt = self._get(optname, obj=self._obj)
+        if not opt:
+            raise AttributeError(optname)
+        return opt.value
 
     def __setattr__(self, optname, value):   # options.foo = value
         'Set *value* of option *optname* for stored options context.'
@@ -299,19 +328,22 @@ def _resolve_optalias(vd, optname, optval):
 
 
 @VisiData.api
-def option(vd, name, default, description, replay=False, sheettype=BaseSheet, help:str=''):
+def option(vd, name, default, description, replay=False, sheettype=BaseSheet, help:str='', cli_only=False):
     '''Declare a new option.
 
    - `name`: name of option
    - `default`: default value when no other override exists
-   - `helpstr`: short description of option (as shown in the **Options Sheet**)
+   - `description`: short description of option (as shown in the **Options Sheet**)
    - `replay`: ``True`` if changes to the option should be stored in the **Command Log**
    - `sheettype`: ``None`` if the option is not sheet-specific, to make it global on CLI
+   - `help`: extra help for the option (shown in the sidebar while editing)
+   - `cli_only`: ``True`` if the option is only meaningful as a CLI argument (hidden from Options Sheet)
     '''
     opt = vd.options.setdefault(name, default, description, vd.importingModule)
     opt.replayable = replay
     opt.sheettype=sheettype
     opt.extrahelp = help
+    opt.cli_only = cli_only
     return opt
 
 
@@ -337,6 +369,18 @@ def addCommand(cls, keystrokes, longname, execstr, helpstr='', replay=True, **kw
     if keystrokes:
         vd.bindkey(keystrokes, longname, cls)
     return longname
+
+@BaseSheet.class_api
+@classmethod
+def removeCommand(cls, keystrokes, longname):
+    '''Remove a command from *cls* sheet type.
+
+    - *keystrokes*: if provided, unbind this specific keystroke.
+    - *longname*: name of the command to remove.
+    '''
+    vd.commands.unset(longname, cls)
+    if keystrokes:
+        vd.unbindkey(keystrokes, cls)
 
 def _command(cls, binding, longname, helpstr, **kwargs):
     def decorator(func):
@@ -365,8 +409,8 @@ def unbindkey(vd, keystrokes, obj='BaseSheet'):
 def bindkey(cls, keystrokes, longname):
     'Bind *keystrokes* to *longname* on the *cls* sheet type.'
     oldlongname = vd.bindkeys._get(keystrokes, cls)
-    if oldlongname:
-        vd.warning('%s was already bound to %s' % (keystrokes, oldlongname))
+    if oldlongname and oldlongname != longname:
+        vd.warning(f'`{keystrokes}` was already bound to `{oldlongname}`')
     vd.bindkey(keystrokes, longname, cls)
 
 @BaseSheet.class_api
@@ -383,8 +427,12 @@ def getCommand(sheet, cmd):
         return cmd
 
     longname = cmd
+    seen = []
     while vd.bindkeys._get(longname, obj=sheet) is not None:
         longname = vd.bindkeys._get(longname, obj=sheet)
+        if longname in seen:
+            vd.fail(f'keystroke/command definitions form a cycle: {longname}')
+        seen.append(longname)
 
     return vd.commands._get(longname, obj=sheet)
 
@@ -411,18 +459,8 @@ def loadConfigFile(vd, fn=''):
             vd.addGlobals(newdefs)
 
 
-def addOptions(parser):
-    for optname in vd.options.keys('default'):
-        if optname.startswith('color_') or optname.startswith('disp_'):
-            continue
-        action = 'store_true' if options[optname] is False else 'store'
-        try:
-            parser.add_argument('--' + optname.replace('_', '-'), action=action, dest=optname, default=None, help=options._opts._get(optname).helpstr)
-        except argparse.ArgumentError:
-            pass
-
-
-def _get_config_file():
+@VisiData.cached_property
+def config_file(vd):
     xdg_config_file = visidata.Path(user_config_dir('visidata')) / 'config.py'
     if xdg_config_file.exists():
         return xdg_config_file
@@ -430,8 +468,14 @@ def _get_config_file():
         return visidata.Path('~/.visidatarc')
 
 
-def _get_cache_dir():
+@VisiData.cached_property
+def cache_dir(vd):
     return visidata.Path(user_cache_dir('visidata'))
+
+
+@VisiData.cached_property
+def data_dir(vd):
+    return visidata.Path(user_data_dir('visidata'))
 
 
 @VisiData.api
@@ -465,7 +509,7 @@ def loadConfigAndPlugins(vd, args=AttrDict()):
                 sys.modules[f'visidata.plugins.{ep.name}'] = plug
                 vd.debug(f'Plugin {ep.name} loaded')
             except Exception as e:
-                vd.warning(f'Plugin {ep.name} failed to load')
+                vd.warning(f'plugin `{ep.name}` failed to load')
                 vd.exceptionCaught(e)
             finally:
                 vd.importingModule = None
@@ -519,8 +563,8 @@ def importExternal(vd, modname, pipmodname=''):
         m = importlib.import_module(modname)
         vd.addGlobals({modname:m})
         return m
-    except ModuleNotFoundError as e:
-        vd.fail(f'External package "{modname}" not installed; run: pip install {pipmodname}')
+    except ModuleNotFoundError:
+        vd.fail(f'package `{modname}` not installed; run: `pip install {pipmodname}`')
 
 
 @VisiData.api

@@ -70,7 +70,7 @@ def save_png(vd, p, vs):
 
     vd.status('saving %sx%s' % (vs.width, vs.height))
 
-    vd.importExternal('png', 'pypng')
+    png = vd.importExternal('png', 'pypng')
     img = png.from_array(pixels, mode='RGBA')
     with open(p, 'wb') as fp:
         img.write(fp)

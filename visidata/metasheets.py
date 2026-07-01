@@ -1,8 +1,8 @@
 import collections
 
-from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, ENTER, asyncthread, Sheet, IndexSheet
+from visidata import globalCommand, BaseSheet, Column, options, vd, anytype, asyncthread, Sheet, IndexSheet
 from visidata import CellColorizer, RowColorizer, JsonLinesSheet, AttrDict
-from visidata import ColumnAttr, ItemColumn
+from visidata import ColumnAttr, ItemColumn, WritableColumn
 from visidata import TsvSheet, Path, Option
 from visidata import undoAttrFunc, VisiData, vlen
 
@@ -34,7 +34,7 @@ Other commands (not specific to Columns Sheet):
 - {help.commands.setcol_input}
 '''
 
-    class ValueColumn(Column):
+    class ValueColumn(WritableColumn):
         'passthrough to the value on the source cursorRow'
         def calcValue(self, srcCol):
             return srcCol.getDisplayValue(srcCol.sheet.cursorRow)
@@ -63,6 +63,7 @@ Other commands (not specific to Columns Sheet):
     colorizers = [
         RowColorizer(7, 'color_key_col', lambda s,c,r,v: r and r.keycol),
         RowColorizer(8, 'color_hidden_col', lambda s,c,r,v: r and r.hidden),
+        RowColorizer(8, 'color_readonly', lambda s,c,r,v: r and r.readonly),
     ]
 
     @property
@@ -96,7 +97,7 @@ VisiDataMetaSheet.options.row_delimiter = '\n'
 VisiDataMetaSheet.options.encoding = 'utf-8'
 
 
-@VisiData.property
+@VisiData.lazy_property
 def allColumnsSheet(vd):
     return ColumnsSheet("all_columns", source=vd.stackedSheets)
 
@@ -129,7 +130,7 @@ def join_cols(sheet):
 
 
 # copy vd.sheets so that ColumnsSheet itself isn't included (for recalc in addRow)
-globalCommand('gC', 'columns-all', 'vd.push(vd.allColumnsSheet)', 'open Columns Sheet: edit column properties for all visible columns from all sheets on the sheets stack')
+globalCommand('gC', 'columns-all', 'vs=vd.allColumnsSheet; vs.reload(); vd.push(vs)', 'open Columns Sheet: edit column properties for all visible columns from all sheets on the sheets stack')
 
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))', 'open Columns Sheet: edit column properties for current sheet')
 

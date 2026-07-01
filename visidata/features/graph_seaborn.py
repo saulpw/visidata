@@ -4,25 +4,31 @@ Add plot-column-ext and plot-numerics-ext to Sheet, and plot-ext to GraphSheet, 
 
 from visidata import vd, VisiData, Sheet, GraphSheet, Progress, asyncthread
 
+
 @VisiData.api
 @asyncthread
 def plot_seaborn(vd, rows, xcols, ycols):
     vd.status(f'plotting {len(rows)} rows using matplotlib')
+    # import all libraries used by ext_plot_seaborn() inside the originating visidata process,
+    # not the spawned process, so they stay imported for speed on subsequent calls
+    global pyplot, seaborn
+    pyplot = vd.importExternal('matplotlib.pyplot', 'matplotlib')
+    seaborn = vd.importExternal('seaborn')
     import multiprocessing
-    mp = multiprocessing.Process(target=ext_plot_seaborn, args=(rows, xcols, ycols))
+    mp = multiprocessing.Process(target=ext_plot_seaborn, args=(vd, rows, xcols, ycols))
     mp.start()
 
 
-def ext_plot_seaborn(rows, xcols, ycols):
-    pd = vd.importExternal('pandas')
-    plt = vd.importExternal('matplotlib.pyplot', 'matplotlib')
-    sns = vd.importExternal('seaborn')
+def ext_plot_seaborn(vd, rows, xcols, ycols):
+    plt = pyplot
+    sns = seaborn
 
     # Set the default theme
     sns.set()
 
     plt.figure(figsize=(10, 6))
-    plt.title('')
+    title = f'{", ".join(c.name for c in xcols)} vs {", ".join(c.name for c in ycols)}'
+    plt.title(title)
     plt.xticks(rotation=15)
 
     nerrors = 0
@@ -57,15 +63,19 @@ def ext_plot_seaborn(rows, xcols, ycols):
                 if vd.options.debug:
                     raise
 
-    sns.scatterplot(
+    ax = sns.scatterplot(
         x=x_array,
         y=y_array,
         hue=cat_array,
-#        hue_order=df.tag.value_counts().iloc[:top].index,
-#        data=tmpdf,
+        #        hue_order=df.tag.value_counts().iloc[:top].index,
+        #        data=tmpdf,
         s=5,
         linewidth=0,
-        ).legend().set_title = (None)
+    )
+
+    ax.set(xlabel=", ".join(c.name for c in xcols),
+           ylabel=", ".join(c.name for c in ycols))
+    ax.xaxis.labelpad = 1
 
     plt.show()
 

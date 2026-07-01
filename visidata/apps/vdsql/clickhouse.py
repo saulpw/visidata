@@ -41,7 +41,7 @@ class ClickhouseSheet(IbisTableSheet):
                             yield row
                         self.total_rows = prog.total
 
-            except Exception as e:
+            except Exception:
                 raise
             except BaseException:
                 if qid:

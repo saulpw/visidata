@@ -1,0 +1,30 @@
+# .mailmap - Consolidate git author identities
+# See: https://git-scm.com/docs/gitmailmap
+#
+# Format: Canonical Name <canonical@email.com> Old Name <old@email.com>
+# Lines map alternative identities to canonical form for git shortlog, blame, etc.
+
+# AJ Kerrigan
+AJ Kerrigan <kerrigan.aj@gmail.com> <aj@speckledmonkey.com>
+AJ Kerrigan <kerrigan.aj@gmail.com> <akerrigan@mdsol.com>
+
+# Anja Kefala
+Anja Kefala <anja.kefala@gmail.com> anjakefala <anja.kefala@gmail.com>
+Anja Kefala <anja.kefala@gmail.com> anjakefala <anja@voltrondata.com>
+Anja Kefala <anja.kefala@gmail.com> Kefala <anja.kefala@gmail.com>
+Anja Kefala <anja.kefala@gmail.com> <anja@voltrondata.com>
+
+# David Branner (was misconfigured as "Your Name")
+David Branner <brannerchinese@users.noreply.github.com> Your Name <brannerchinese@users.noreply.github.com>
+
+# geekscrapy (also committed as molley)
+geekscrapy <github.7rhdeqzfu7@pkt5.com> molley <github.7rhdeqzfu7@pkt5.com>
+geekscrapy <github.7rhdeqzfu7@pkt5.com> <github.7rhdeqzfu.7@pkt5.com>
+
+# pacien
+pacien <pacien.trangirard@pacien.net> <pacien@users.noreply.github.com>
+
+# Saul Pwanson
+Saul Pwanson <code@saul.pw> saulpw <code@saul.pw>
+Saul Pwanson <code@saul.pw> <saulpwanson@gmail.com>
+Saul Pwanson <code@saul.pw> <saul@voltrondata.com>

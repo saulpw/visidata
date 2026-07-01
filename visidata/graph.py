@@ -83,7 +83,12 @@ class GraphSheet(InvertedCanvas):
         self.reflines_char_x = {}    # { x value in character coordinates -> character to use to draw that vertical line }
         self.reflines_char_y = {}    # { y value in character coordinates -> character to use to draw that horizontal line }
 
-        vd.numericCols(self.xcols) or vd.fail('at least one numeric key col necessary for x-axis')
+        if not vd.numericCols(self.xcols):
+            if self.xcols:
+                vd.fail('no numeric key column; set type with `#` `%` or `@`')
+            else:
+                vd.fail('no key columns; press `!` on a numeric column to set x-axis')
+
         self.ycols or vd.fail('%s is non-numeric' % '/'.join(yc.name for yc in kwargs.get('ycols')))
 
     def resetCanvasDimensions(self, windowHeight, windowWidth):
@@ -148,6 +153,7 @@ class GraphSheet(InvertedCanvas):
                 has_x_line = char_x in self.reflines_char_x.keys()
                 if has_x_line or has_y_line:
                     cattr = colors.color_graph_refline
+                    ch = ''
                     if has_x_line:
                         ch = self.reflines_char_x[char_x]
                         # where two lines cross, draw the vertical line, not the horizontal one
@@ -319,10 +325,9 @@ class GraphSheet(InvertedCanvas):
         xstrs = vd.input("add line(s) at x = ", type="reflinex", value=suggested, defaultLast=True).split()
 
         for xstr in xstrs:
-            vals = [ v.strip() for v in xstr.split(',') ]
-            if len(vals) != len(self.xcols):
-                vd.fail(f'must have {len(self.xcols)} x values, had {len(vals)} values: {xstr}')
-            self.reflines_x += [xtype(val) for xcol, val in zip(self.xcols, vals) if xtype(val) not in self.reflines_x ]
+            refval = xtype(xstr.strip())
+            if refval not in self.reflines_x:
+                self.reflines_x.append(refval)
         self.refresh()
 
     def draw_refline_y(self):
@@ -336,16 +341,21 @@ class GraphSheet(InvertedCanvas):
 
     def erase_refline_x(self):
         if len(self.reflines_x) == 0:
-            vd.fail(f'no x refline to erase')
+            vd.fail('no x refline to erase')
         xtype = vd.numericCols(self.xcols)[0].type
         suggested = format_input_value(self.reflines_x[0], xtype)
 
         xstrs = vd.input('remove line(s) at x = ', value=suggested, type='reflinex', defaultLast=True).split()
-        for input_x in xstrs:
-            self.reflines_x.remove(xtype(input_x))
+        for x in xstrs:
+            try:
+                self.reflines_x.remove(xtype(x))
+            except ValueError:
+                vd.warning(f'value {x} not in reflines_x')
         self.refresh()
 
     def erase_refline_y(self):
+        if len(self.reflines_y) == 0:
+            vd.fail('no y refline to erase')
         ytype = self.ycols[0].type
         suggested = format_input_value(self.reflines_y[0], ytype) if self.reflines_y else ''
         ystrs = vd.input('remove line(s) at y = ', value=suggested, type='refliney', defaultLast=True).split()
@@ -353,7 +363,7 @@ class GraphSheet(InvertedCanvas):
             try:
                 self.reflines_y.remove(ytype(y))
             except ValueError:
-                vd.fail(f'value {y} not in reflines_y')
+                vd.warning(f'value {y} not in reflines_y')
         self.refresh()
 
 def format_input_value(val, type):
@@ -404,6 +414,13 @@ GraphSheet.addCommand('zx', 'erase-refline-x', 'sheet.erase_refline_x()', 'remov
 GraphSheet.addCommand('zy', 'erase-refline-y', 'sheet.erase_refline_y()', 'remove a vertical line at y-values (space-separated)')
 GraphSheet.addCommand('gzx', 'erase-reflines-x', 'sheet.reflines_x = []; sheet.refresh()', 'erase all vertical x-value lines')
 GraphSheet.addCommand('gzy', 'erase-reflines-y', 'sheet.reflines_y = []; sheet.refresh()', 'erase any horizontal y-value lines')
+
+@GraphSheet.after
+def reload(sheet):
+    if not vd.cursesEnabled:
+        sheet.resetCanvasDimensions(25, 80)
+        sheet.resetBounds(refresh=False)
+        sheet.plot_elements(invert_y=True)
 
 vd.addGlobals({
     'GraphSheet': GraphSheet,

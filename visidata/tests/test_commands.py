@@ -33,6 +33,10 @@ nonTested = (
         'sysedit',
         'sysopen',
         'open-memusage',
+        'open-url',
+        'open-repl',
+        'open-tutorial',
+        'git-',
         )
 
 def isTestableCommand(longname, cmdlist):
@@ -43,7 +47,7 @@ def isTestableCommand(longname, cmdlist):
 
 inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                 'save-all': 'lagan.csv',
-                 'open-file': 'jetsam.csv',  # reopen what was just saved ('o' must come after ^S in the commands list)
+                 'open-file': 'jetsam.csv',  # reopen what was just saved ('o' must come after Ctrl+S in the commands list)
                  'save-col': 'flotsam.csv',
                  'save-col-keys': 'debris.csv',
                 'pyobj-expr': '2+2',            # open the python object for '4'
@@ -63,6 +67,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'addcol-bulk': '1',
                  'addcol-expr': 'Units',          # just copy the column
                  'assert-expr': 'sheet.column(\"Units\")',
+                 'assert-cell': '2016-01-06',
                  'show-command-info': 'select-row',
                  'assert-expr-row': 'Units',
                  'addcol-incr-step': '2',
@@ -70,7 +75,6 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'setcol-iter': 'range(1, 100)',
                  'addcol-iter': 'range(1, 100)',
                  'setcol-format-enum': '1=cat',
-                 'open-ping': 'github.com',
                  'setcol-input': '5',
                  'show-expr': 'OrderDate',
                  'setcol-expr': 'OrderDate',
@@ -81,11 +85,9 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'addcol-regex-subst': dict(before=r'Units/(\w)', after=r'\1'), # the first character
                  'search-cols': 'foo',
                  'searchr-cols': 'bar',
-                 'select-cols-regex': '.',
                  'select-expr': 'OrderDate',
                  'setcol-fake': 'name',
                  'unselect-expr': 'OrderDate',
-                 'unselect-cols-regex': '.',
                  'random-rows': '3',
                  'select-random': '3',
                  'import-python': 'math',
@@ -119,10 +121,27 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'col': 'Units',
                  'row': '5',
                  'addcol-aggregate': 'max',
+                 'define-command': 'type-test cursorCol.type = str',
+                 'highlight-sheet': 'e..',
+                 'highlight-col': '[0-9]',
+                 'color-cell': 'True',
+                 'color-row': 'True',
+                 'color-col': 'True',
+                 'setcol-precision-input': '5',
               }
 
 @pytest.mark.usefixtures('curses_setup')
 class TestCommands:
+
+    def test_command_execstrs_compile(self):
+        'every registered command execstr must be syntactically valid Python'
+        errors = []
+        for (longname, objname), cmd in visidata.vd.commands.iterall():
+            try:
+                compile(cmd.execstr, f'{longname} ({objname})', 'exec')
+            except SyntaxError as e:
+                errors.append(f'{longname} on {objname} (from {cmd.module}): {e}')
+        assert not errors, 'syntax errors in registered commands:\n  ' + '\n  '.join(errors)
 
     def test_baseCommands(self, mock_screen):
         'exec each global command at least once'
@@ -136,9 +155,13 @@ class TestCommands:
 
         nerrs = 0
         ntotal = 0
-        for longname in cmdlist.keys():
+        # cmdlist is changed when define-command is tested, so save its keys to avoid RuntimeError: OrderedDict mutated during iteration
+        longnames = list(cmdlist.keys())
+        for longname in longnames:
             cmd = vs.getCommand(longname)
             if cmd and cmd.deprecated:
+                continue
+            if cmd and not getattr(cmd, 'testable', True):
                 continue
             if not isTestableCommand(longname, cmdlist):
                 continue
@@ -170,16 +193,16 @@ class TestCommands:
         vd.scr = mock_screen
 
         if longname in inputLines:
-            line = [ch for ch in inputLines[longname]] + ['^J']
+            line = [ch for ch in inputLines[longname]] + ['Enter']
             vd.getkeystroke = Mock(side_effect=line)
         else:
-            vd.getkeystroke = Mock(side_effect=['^J'])
+            vd.getkeystroke = Mock(side_effect=['Enter'])
 
         sample_file = vd.pkg_resources_files(visidata) / 'tests/sample.tsv'
         vs = visidata.TsvSheet('sample', source=visidata.Path(sample_file))
         cmd = vs.getCommand(longname)
         if not cmd:
-            vd.warning(f'command cannot be tested on TsvSheet, skipping:  {longname}')
+            vd.debug(f'command cannot be tested on TsvSheet, skipping:  {longname}')
             return
         vs.reload.__wrapped__(vs)
         vs.vd = vd

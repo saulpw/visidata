@@ -41,7 +41,11 @@ def orderBy(sheet, *cols, reverse=False, change_column=False, save_cmd_input=Tru
         sheet._ordering = new_ordering
         do_sort = True
     else:
+        sortcols = [sortcol for (sortcol,rev) in sheet._ordering]
         for c in cols:
+            # for sort-*-add commands: if the column is already a sortcol, change it to have the lowest priority
+            if c in sortcols:
+                sheet._ordering = [(keepcol,rev) for (keepcol,rev) in sheet._ordering if keepcol != c]
             sheet._ordering.append((c, reverse))
             do_sort = True
 
@@ -70,6 +74,7 @@ def order_from_string(sheet, s):
     ordering = []
     for instr in instructions:
         c = sheet.column(instr[1:])
+        reverse = False
         if instr[0] == '<':
             reverse = False
         elif instr[0] == '>':
@@ -152,6 +157,16 @@ def _sort_order(col, srccol):
     n, reverse = sort_cols[0]
     return -n if reverse else n
 
+@Sheet.api
+def validate_sortcols(sheet):
+    '''Make sure all sort columns in the sheet ordering still exist.
+    Intended to be called after operations that destroy columns.'''
+    sheet._ordering = [(col,rev) for (col, rev) in sheet._ordering if col in sheet.columns]
+
+@ColumnsSheet.after
+def delete_row(self, rowidx):
+    for vs in self.source:
+        vs.validate_sortcols()
 
 # replace existing sort criteria
 Sheet.addCommand('[', 'sort-asc', 'orderBy(None, cursorCol)', 'sort ascending by current column; replace any existing sort criteria')

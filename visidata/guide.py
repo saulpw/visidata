@@ -7,7 +7,7 @@ Each guide shows you how to use a particular feature in VisiData. Gray guides ha
 '''
 import re
 
-from visidata import vd, BaseSheet, Sheet, ItemColumn, Column, VisiData, ENTER, RowColorizer, AttrDict, MissingAttrFormatter
+from visidata import vd, BaseSheet, Sheet, ItemColumn, Column, VisiData, RowColorizer, AttrDict, MissingAttrFormatter
 from visidata import wraptext, Path, CellColorizer
 import visidata
 
@@ -135,6 +135,7 @@ class CommandHelpGetter:
         binding = self.helpsheet.revbinds.get(longname, [None])[0] or '<unbound>'
         # cmddict has a SheetClass associated with each command
         # go through all the parents of the Sheet type, to look for the command
+        cmd = None
         for cls in self.cls.superclasses():
             cmd = self.helpsheet.cmddict.get((cls.__name__, longname), None)
             if cmd:
@@ -175,6 +176,7 @@ class GuideSheet(Sheet):
             for config in section.splitlines():
                 config = config.strip()
                 if config:
+                    key = val = None
                     try:
                         key, val = config.split(': ', maxsplit=1)
                     except ValueError:
@@ -206,7 +208,7 @@ BaseSheet.addCommand('', 'open-guide-index', 'vd.push(GuideIndex("VisiData_Guide
 
 @VisiData.api
 def inputKeys(vd, prompt):
-    return vd.input(prompt, help=f'''
+    return vd.input(prompt, help='''
                 # Input Keystrokes
                 - Press `Ctrl+N` and then press another keystroke to spell out that keystroke.
                 - Press `Ctrl+C` to cancel the input.

@@ -1,0 +1,6 @@
+# setcol-precision-more raises a float column's displayed precision (v3.4 Alt++/Alt+-/g%)
+open-file tests/newcmds-nums.csv
+col x
+type-float
+setcol-precision-more
+setcol-precision-more

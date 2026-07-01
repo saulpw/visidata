@@ -1,0 +1,7 @@
+# select-to-next-selected fills the run from the cursor to the next selected row (v3.4)
+open-file tests/newcmds-rows.tsv
+row 5
+select-row
+row 1
+select-to-next-selected
+dup-selected

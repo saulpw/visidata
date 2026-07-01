@@ -1,13 +1,13 @@
 import time
 
 from visidata import vd, VisiData, BaseSheet, Sheet, TextSheet, PyobjSheet
-from visidata import ItemColumn, Column, vlen, date, asyncsingle, ENTER, AttrDict
+from visidata import ItemColumn, Column, vlen, date, asyncsingle, AttrDict
 
 vd.option('zulip_batch_size', -100, 'number of messages to fetch per call (<0 to fetch before anchor)')
 vd.option('zulip_anchor', 1000000000, 'message id to start fetching from')
 vd.option('zulip_delay_s', 0.00001, 'seconds to wait between calls (0 to stop after first)')
-vd.option('zulip_api_key', '', 'Zulip API key')
-vd.option('zulip_email', '', 'Email for use with Zulip API key')
+vd.option('zulip_api_key', '', 'API key for Zulip')
+vd.option('zulip_email', '', 'email address for use with Zulip API key')
 
 
 @VisiData.api
@@ -19,7 +19,7 @@ def open_zulip(vd, p):
         vd.warning('zulip_api_key must be set first')
         vd.status('Enter your login email and Zulip API key (see _https://zulip.com/api/api-keys_).')
         email = vd.input(f'Login email for {p.given}: ', record=False)
-        api_key = vd.input(f'Zulip API key: ', record=False)
+        api_key = vd.input('Zulip API key: ', record=False)
 
         vd.setPersistentOptions(zulip_email=email, zulip_api_key=api_key)
 
@@ -207,7 +207,7 @@ Loads continuously starting with most recent, until all messages have been read.
             for dest in recp:
                 self.send_message(msg, row['subject'], dest['email'], 'private')
         else:
-            self.send_message(msg, row['subject'], dest, 'stream')
+            self.send_message(msg, row['subject'], recp, 'stream')
 
     def send_message(self, msg, subject, dest, msgtype='stream'):
         req = {

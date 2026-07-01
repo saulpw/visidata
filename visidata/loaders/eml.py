@@ -6,7 +6,7 @@ from visidata import VisiData, vd, Column, TableSheet, vlen
 def open_eml(vd, p):
     return EmailSheet(p.base_stem, source=p)
 
-open_mhtml = open_eml
+VisiData.open_mhtml = VisiData.open_eml
 
 class EmailSheet(TableSheet):
     rowtype = 'parts'  # rowdef: sub-Messages

@@ -8,8 +8,9 @@ Functionality is more limited than local paths, but supports:
 """
 
 import textwrap
+from functools import cached_property
+
 from visidata import (
-    ENTER,
     Column,
     ItemColumn,
     Path,
@@ -53,6 +54,7 @@ class S3Path(Path):
             self._fs = s3fs_core.S3FileSystem(
                 client_kwargs={"endpoint_url": vd.options.s3_endpoint or None},
                 version_aware=self.version_aware,
+                anon=vd.options.s3_anon,
             )
 
         return self._fs
@@ -120,6 +122,14 @@ class S3DirSheet(Sheet):
         )
         self.fs = source.fs
 
+    @cached_property
+    def _display_prefix(self):
+        """The source prefix to strip from row names for display."""
+        prefix = self.source.given
+        if prefix.startswith("s3://"):
+            prefix = prefix[5:]
+        return prefix.rstrip("/") + "/"
+
     def object_display_name(self, row):
         """Provide a friendly display name for an S3 path.
 
@@ -127,16 +137,34 @@ class S3DirSheet(Sheet):
         prefix bits to imitate a directory browser. When glob matching,
         include the full key name for each entry.
         """
-        return (
-            row.get("name")
-            if self.use_glob_matching
-            else row.get("name").rpartition("/")[2]
-        )
+        if self.use_glob_matching:
+            return row.get("name")
+        name = row.get("name", "")
+        if name.startswith(self._display_prefix):
+            return name[len(self._display_prefix):]
+        return name.rpartition("/")[2]
+
+    def _yield_entry(self, key, info):
+        """Yield row(s) for an S3 key, expanding versions if version-aware."""
+        if self.version_aware and info.get("type") == "file":
+            yield from (
+                {**obj_version, "name": key, "type": "file"}
+                for obj_version in self.fs.object_version_info(key)
+                if key.partition("/")[2] == obj_version["Key"]
+            )
+        else:
+            yield info
+
+    def _iterdir(self, path, dir_depth, depth=0):
+        """Walk S3 path, recursing into directories up to dir_depth levels."""
+        for info in self.fs.ls(path, detail=True):
+            key = info["name"]
+            yield from self._yield_entry(key, info)
+            if info.get("type") == "directory" and depth < dir_depth:
+                yield from self._iterdir(key, dir_depth, depth + 1)
 
     def iterload(self):
         """Delegate to the underlying filesystem to fetch S3 entries."""
-        list_func = self.fs.glob if self.use_glob_matching else self.fs.ls
-
         if not (
             self.use_glob_matching
             or self.fs.exists(self.source.given)
@@ -149,15 +177,11 @@ class S3DirSheet(Sheet):
         else:
             self.column("latest").hide(True)
 
-        for key in list_func(str(self.source)):
-            if self.version_aware and self.fs.isfile(key):
-                yield from (
-                    {**obj_version, "name": key, "type": "file"}
-                    for obj_version in self.fs.object_version_info(key)
-                    if key.partition("/")[2] == obj_version["Key"]
-                )
-            else:
-                yield self.fs.stat(key)
+        if self.use_glob_matching:
+            for info in self.fs.glob(str(self.source), detail=True).values():
+                yield from self._yield_entry(info["name"], info)
+        else:
+            yield from self._iterdir(str(self.source), self.options.dir_depth)
 
     @asyncthread
     def download(self, rows, savepath):
@@ -259,31 +283,31 @@ def openurl_s3(vd, p, filetype):
 
 
 S3DirSheet.addCommand(
-    ENTER,
+    'Enter',
     "s3-open-row",
     "vd.push(next(sheet.open_rows([cursorRow])))",
     "open the current S3 entry",
 )
 S3DirSheet.addCommand(
-    "g" + ENTER,
+    "gEnter",
     "s3-open-rows",
     "for vs in sheet.open_rows(selectedRows): vd.push(vs)",
     "open all selected S3 entries",
 )
 S3DirSheet.addCommand(
-    "z^R",
+    "zCtrl+R",
     "s3-refresh-sheet",
     "sheet.refresh_path(str(sheet.source))",
     "clear the s3fs cache for this path, then reload",
 )
 S3DirSheet.addCommand(
-    "gz^R",
+    "gzCtrl+R",
     "s3-refresh-sheet-all",
     "sheet.refresh_path()",
     "clear the entire s3fs cache, then reload",
 )
 S3DirSheet.addCommand(
-    "^V",
+    "Ctrl+V",
     "s3-toggle-versioning",
     "sheet.toggle_versioning()",
     "enable/disable support for S3 versioning",
@@ -309,19 +333,9 @@ S3DirSheet.addCommand(
 S3DirSheet.addCommand(
     "x",
     "s3-download-row",
-    # Note about the use of `_path.name` here. Given a `visidata.Path`
-    # object `path`, `path._path` is a `pathlib.Path` object.
-    #
-    # `visidata.Path` objects do some fun parsing to pick out
-    # file types and extensions, handle compression transparently,
-    # etc. That parsing leaves the `name` attribute without a file
-    # extension, and makes it a little tricky to tack back on.
-    #
-    # `pathlib.Path` objects have a `name` with the extension intact.
-    # That makes `path._path.name` a convenient default output path.
     textwrap.dedent(
         """
-        savepath = inputPath("download to: ", value=Path(cursorRow["name"])._path.name)
+        savepath = inputPath("download to: ", value=Path(cursorRow["name"]).name)
         sheet.download([cursorRow], savepath)
     """
     ),

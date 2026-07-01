@@ -4,10 +4,11 @@ import visidata
 from visidata import VisiData
 
 @VisiData.api
-def getStatusSource(vd):
+def getStatusSource(vd) -> str:
     if not vd.options.debug:
         return ''
     stack = inspect.stack(context=0)  #2370
+    sf = stack[0]
     for i, sf in enumerate(stack):
         if sf.function in 'status aside'.split():
             if stack[i+1].function in 'error fail warning debug'.split():

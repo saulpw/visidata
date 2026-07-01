@@ -1,12 +1,10 @@
-import os
-
-import visidata
-from visidata import Extensible, VisiData, vd, EscapeException, MissingAttrFormatter, AttrDict
+from visidata import vd, Extensible, VisiData, EscapeException, MissingAttrFormatter
 
 
-UNLOADED = tuple()  # sentinel for a sheet not yet loaded for the first time
+UNLOADED = tuple()  # sentinel for a sheet not yet loaded for the first time; should be iterable
 
 vd.beforeExecHooks = [] # func(sheet, cmd, args, keystrokes) called before the exec()
+
 
 class LazyChainMap:
     'provides a lazy mapping to obj attributes.  useful when some attributes are expensive properties.'
@@ -302,6 +300,7 @@ class BaseSheet(DrawablePane):
         'Return formatted string with *sheet* and *vd* accessible to expressions.  Missing expressions return empty strings instead of error.'
         return MissingAttrFormatter().format(fmt, sheet=self, vd=vd, **kwargs)
 
+
 @VisiData.api
 def redraw(vd):
     'Clear the terminal screen and let the next draw cycle recreate the windows and redraw everything.'
@@ -318,6 +317,7 @@ def redraw(vd):
 def sheet(self):
     return self.activeSheet
 
+
 @VisiData.api
 def isLongname(self, ks:str):
     'Return True if *ks* is a longname.'
@@ -329,16 +329,17 @@ def getSheet(vd, sheetname):
     'Return Sheet from the sheet stack.  *sheetname* can be a sheet name or a sheet number indexing directly into ``vd.sheets``.'
     if isinstance(sheetname, BaseSheet):
         return sheetname
+
     matchingSheets = [x for x in vd.sheets if x.name == sheetname]
     if matchingSheets:
         if len(matchingSheets) > 1:
-            vd.warning('more than one sheet named "%s"' % sheetname)
+            vd.warning(f'more than one sheet named `{sheetname}`')
         return matchingSheets[0]
 
     try:
         sheetidx = int(sheetname)
         return vd.sheets[sheetidx]
-    except ValueError:
+    except (ValueError, IndexError):
         pass
 
     if sheetname == 'options':

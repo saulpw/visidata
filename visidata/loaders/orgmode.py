@@ -25,8 +25,10 @@ import collections
 import datetime
 import os
 import re
+import sys
 
 from visidata import vd, VisiData, Column, Sheet, ItemColumn, vlen, asyncthread, Path, AttrDict, date
+from visidata import WritableColumn
 
 
 @VisiData.api
@@ -54,7 +56,7 @@ def encode_date(dt=None):
     return '%02d%s%s' % (dt.year % 100, s[dt.month-1], s[dt.day-1])
 
 
-class OrgContentsColumn(Column):
+class OrgContentsColumn(WritableColumn):
     def setValue(self, row, v, setModified=True):
         super().setValue(row, v, setModified=setModified)
         orgmode_parse_into(row, v)
@@ -245,7 +247,6 @@ A list of orgmode sections from _{sheet.source}_.
                     yield fpath/fn
 
         if self.filetype == 'orgdir':
-            basepath = str(self.source)
             for p in _walkfiles(self.source):
                 if p.base_stem.startswith('.'): continue
                 if p.ext in ['org', 'md']:
@@ -263,6 +264,7 @@ A list of orgmode sections from _{sheet.source}_.
 #        row.file_string = open(path).read()
         row = orgmode_parse(open(path).readlines())
         st = path.stat()
+        mtime = None
         if st:
             mtime = st.st_mtime
 
@@ -321,7 +323,6 @@ def paste_into(sheet, row, sourcerows, cols):
 
 @OrgSheet.api
 def paste_data_into(sheet, row, sourcerows, cols):
-    body = row.body or ''
     for r in sourcerows:
         data = vd.encode_json(r, cols)
         row.contents += f':{cols[0].sheet.name}:{data}\n'
@@ -404,23 +405,23 @@ def sysopen_rows(sheet, rows):
                 lastrow = lastrow.parent
 
             if lastrow:
-                sourceRows.append(section)
+                sheet.sourceRows.append(section)
             else:
                 sheet.addRow(section)
 
     sheet.refreshRows()
 
-OrgSheet.addCommand('^O', 'sysopen-row', 'sysopen_row(cursorRow)', 'open current file in external $EDITOR')
-OrgSheet.addCommand('g^O', 'sysopen-rows', 'sysopen_rows(selectedRows)', 'open selected files in external $EDITOR')
-OrgSheet.addCommand('^J', 'expand-row', 'openRows([cursorRow]); sheet.cursorRowIndex += 1')
-OrgSheet.addCommand('z^J', 'close-row', 'closeRows([cursorRow]); sheet.cursorRowIndex += 1')
-OrgSheet.addCommand('g^J', 'expand-selected', 'openRows(selectedRows)')
-OrgSheet.addCommand('gz^J', 'close-selected', 'closeRows(selectedRows)')
+OrgSheet.addCommand('Ctrl+O', 'sysopen-row', 'sysopen_row(cursorRow)', 'open current file in external $EDITOR')
+OrgSheet.addCommand('gCtrl+O', 'sysopen-rows', 'sysopen_rows(selectedRows)', 'open selected files in external $EDITOR')
+OrgSheet.addCommand('Enter', 'expand-row', 'openRows([cursorRow]); sheet.cursorRowIndex += 1')
+OrgSheet.addCommand('zEnter', 'close-row', 'closeRows([cursorRow]); sheet.cursorRowIndex += 1')
+OrgSheet.addCommand('gEnter', 'expand-selected', 'openRows(selectedRows)')
+OrgSheet.addCommand('gzEnter', 'close-selected', 'closeRows(selectedRows)')
 OrgSheet.addCommand('ga', 'combine-selected', 'addRows([combine_rows(selectedRows)], index=cursorRowIndex); cursorDown(1)', 'combine selected rows into new org entry')
 
-OrgSheet.addCommand('zp', 'paste-data', 'paste_data_into(cursorRow, vd.memory.cliprows, vd.memory.clipcols)', 'move clipboard rows to children of current row')
-OrgSheet.addCommand('p', 'paste-sections', 'paste_data_into(cursorRow, vd.memory.cliprows, vd.memory.clipcols)', 'move clipboard rows to children of current row')
-OrgSheet.addCommand('g^S', 'save-all', 'save_all()', 'save all org files')
+OrgSheet.addCommand('zp', 'paste-data', 'paste_data_into(cursorRow, vd.getClipboardRows(), vd.getClipboardCols())', 'move clipboard rows to children of current row')
+OrgSheet.addCommand('p', 'paste-sections', 'paste_data_into(cursorRow, vd.getClipboardRows(), vd.getClipboardCols())', 'move clipboard rows to children of current row')
+OrgSheet.addCommand('gCtrl+S', 'save-all', 'save_all()', 'save all org files')
 
 
 if __name__ == '__main__':

@@ -16,7 +16,7 @@ mapbox-vector-tile  # mbtiles
 pypng               # png
 fonttools           # ttf/otf
 sas7bdat            # sas7bdat (SAS)
-xport>=3            # xpt (SAS)
+xport>=3,<3.3       # xpt (SAS)
 PyYAML>=5.1         # yaml/yml
 dpkt                # pcap
 dnslib              # pcap
@@ -33,6 +33,7 @@ urllib3             # .zip over http
 pyarrow>=14.0.1; python_version >= '3.8' # arrow arrows parquet (Apache Arrow)
 pyarrow_hotfix; python_version <= '3.7' # pyarrow security patch
 pyarrow; python_version <= '3.7'
+shapely             # GeoParquet WKB geometry
 seaborn             # plot via seaborn
 matplotlib          # svg saver
 sh                  # ping
@@ -55,5 +56,5 @@ matrix_client       # matrix API
 zulip               # zulip API
 pyairtable          # airtable API
 
--e git+https://github.com/saulpw/pyxlsb.git@visidata#egg=pyxlsb                 # xlsb
--e git+https://github.com/anjakefala/savReaderWriter#egg=savReaderWriter        # sav (SPSS)
+git+https://github.com/saulpw/pyxlsb.git@visidata#egg=pyxlsb                 # xlsb
+git+https://github.com/anjakefala/savReaderWriter#egg=savReaderWriter        # sav (SPSS)

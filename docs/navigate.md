@@ -25,8 +25,25 @@ Command(s)              Operation
 --------------          ---------------
 ` /`  ` ?` *regex*      search for *regex* matches up/down the **current** column
 `g/`  `g?` *regex*      search for *regex* matches up/down over **all visible** columns
-` n`  `Shift+N`              move to next/previous *regex* match from last search
+` n`  `Shift+N`              move to next/previous match from last search
 `z/`  `z?` *expr*       search by Python *expr* up/down (with column names as variables)
+
+By default, search matches are highlighted in the sheet (like vim's `hlsearch`).
+
+Command(s)              Operation
+--------------          ---------------
+`highlight-col`         highlight a regex in the current column (without moving)
+`highlight-sheet`       highlight a regex in all columns (without moving)
+`highlight-clear`       clear all highlight patterns
+
+Undo of a search command does not undo the highlighting; use `highlight-clear` to remove all highlights.
+
+**Options**
+
+Option                         Default                 Description
+-----                          -----                   -----
+`highlight_search`             `True`                  whether to highlight search matches
+`color_highlight_search`       `21 blue on 15 white`   color for highlighted search matches
 
 The following example uses [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
 
@@ -40,6 +57,19 @@ The following example uses [sample.tsv](https://raw.githubusercontent.com/saulpw
 1. Press `z Ctrl+H` to open the **Commands sheet**.
 2. Move to the `keystrokes` column and press `/`, followed by `gk`.
 3. Press `c` followed by `longname` to move the cursor to the **longname** column.
+
+---
+
+## Input history
+
+When entering a search regex or other input that has been used before, a history palette appears showing previous inputs.
+
+- `Up`/`Down` cycle through previous inputs (like shell history).
+- `Down` past the newest entry restores the original typed text.
+- Type to fuzzy search through history.
+- `PgUp`/`PgDn` to scroll through the history palette.
+
+The history palette uses the same visual style as the command palette, and is enabled when `cmdpalette` is included in `options.disp_help_flags`.
 
 ---
 

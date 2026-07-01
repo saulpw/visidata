@@ -63,7 +63,7 @@ class ArrowSheet(Sheet):
         try:
             with pa.OSFile(str(self.source), 'rb') as fp:
                 self.coldata = pa.ipc.open_file(fp).read_all()
-        except pa.lib.ArrowInvalid as e:
+        except pa.lib.ArrowInvalid:
             with pa.OSFile(str(self.source), 'rb') as fp:
                 self.coldata = pa.ipc.open_stream(fp).read_all()
 
@@ -82,7 +82,7 @@ class ArrowSheet(Sheet):
 @VisiData.api
 def save_arrow(vd, p, sheet, streaming=False):
     pa = vd.importExternal('pyarrow')
-    np = vd.importExternal('numpy')
+    vd.importExternal('numpy')
 
     typemap = {
         anytype: pa.string(),

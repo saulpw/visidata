@@ -22,5 +22,6 @@ def getrootxy(vd, scr):  # like scr.getparyx() but for all ancestor scrs
     return px, py
 
 
+vd.bindkey('', 'no-op')              # needed to hide the next 2 long key combinations from showing up on palette chooser
 vd.bindkey('Alt+[Shift+I', 'no-op')  #2247 focus-in
 vd.bindkey('Alt+[Shift+O', 'no-op')  # focus-out

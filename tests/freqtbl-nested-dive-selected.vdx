@@ -1,0 +1,11 @@
+# nested freq table with dive-selected should preserve source chain  #3001
+open-file sample_data/sample.tsv
+col OrderDate
+freq-col
+freq-col
+select-row
+row 1
+select-row
+dive-selected
+row 0
+open-row

@@ -1,0 +1,6 @@
+name	geometry
+p1	Point[1]
+line	LineString[3]
+box	Polygon[5]
+donut	Polygon[10]
+mpts	MultiPoint[3]

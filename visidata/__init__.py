@@ -1,6 +1,6 @@
 'VisiData: a curses interface for exploring and arranging tabular data'
 
-__version__ = '3.3'
+__version__ = '3.4'
 __version_info__ = 'VisiData v' + __version__
 __author__ = 'Saul Pwanson <vd@saul.pw>'
 __status__ = 'Production/Stable'
@@ -59,6 +59,7 @@ import visidata.column
 
 import visidata.interface
 import visidata.sheets
+import visidata.splitwin
 import visidata.rename_col
 import visidata.indexsheet
 

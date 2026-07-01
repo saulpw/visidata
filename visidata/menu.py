@@ -68,6 +68,7 @@ def getMenuItem(sheet, menupath:List[str]=None):
     if not menupath:
         menupath = sheet.activeMenuItems
 
+    currentItem = None
     try:
         currentItem = sheet
         for i in menupath:
@@ -297,7 +298,6 @@ def drawMenu(vd, scr, sheet):
     scr.addstr(0, 0, ' '*(w-1), colors.color_menu.attr)
     disp_menu_boxchars = sheet.options.disp_menu_boxchars
     x = 1
-    ymax = 4
     toplevel = sheet.menus
     for i, item in enumerate(toplevel):
         if sheet.activeMenuItems and i == sheet.activeMenuItems[0]:
@@ -442,15 +442,17 @@ def runMenu(vd):
 
         currentItem = sheet.getMenuItem()
 
-        if k == '^[':  # ESC
+        if k == 'Esc':  # ESC
             nEscapes += 1  #1470
             if nEscapes > 1:
                 return
+            else:
+                vd.status('press Esc again to exit the menu')
             continue
         else:
             nEscapes = 0
 
-        if k in ['^C', '^Q', 'q', '^H', 'KEY_BACKSPACE']:
+        if k in ['Ctrl+C', 'Ctrl+Q', 'q', 'Ctrl+H', 'Bksp']:
             return
 
         elif k in ['KEY_MOUSE']:
@@ -460,25 +462,25 @@ def runMenu(vd):
             elif r == 'doit':
                 break
 
-        elif k in ['KEY_RIGHT', 'l']:
+        elif k in ['Right', 'l']:
             if currentItem.menus and sheet.activeMenuItems[1] != 0:  # not first item
                 sheet.activeMenuItems.append(0)
             else:
                 sheet.activeMenuItems = [sheet.activeMenuItems[0]+1, 0]
 
-        elif k in ['KEY_LEFT', 'h']:
+        elif k in ['Left', 'h']:
             if len(sheet.activeMenuItems) > 2:
                 sheet.activeMenuItems.pop(-1)
             else:
                 sheet.activeMenuItems = [sheet.activeMenuItems[0]-1, 0]
 
-        elif k in ['KEY_DOWN', 'j']:
+        elif k in ['Down', 'j']:
             sheet.activeMenuItems[-1] += 1
 
-        elif k in ['KEY_UP', 'k']:
+        elif k in ['Up', 'k']:
             sheet.activeMenuItems[-1] -= 1
 
-        elif k in [ENTER, ' ', '^J', '^M']:
+        elif k in ['Space', 'Enter']:
             if currentItem.menus:
                 sheet.activeMenuItems.append(0)
             else:
@@ -512,6 +514,6 @@ BaseSheet.addCommand('Alt+p', 'menu-plot', 'pressMenu("Plot")', '')
 BaseSheet.addCommand('Alt+s', 'menu-system', 'pressMenu("System")', '')
 BaseSheet.addCommand('Alt+h', 'menu-help', 'pressMenu("Help")', 'open the Help menu')
 BaseSheet.bindkey('Ctrl+H', 'menu-help')
-BaseSheet.bindkey('KEY_BACKSPACE', 'menu-help')
+BaseSheet.bindkey('Bksp', 'menu-help')
 
 vd.addGlobals({'Menu': Menu})

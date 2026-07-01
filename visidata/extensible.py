@@ -9,7 +9,6 @@ class Extensible:
     @classmethod
     def init(cls, membername, initfunc=lambda: None, copy=False):
         'Prepend equivalent of ``self.<membername> = initfunc()`` to ``<cls>.__init__``.  If *copy* is True, <membername> will be copied when object is copied.'
-
         def thisclass_hasattr(cls, k):
             return getattr(cls, k, None) is not getattr(cls.__bases__[0], k, None)
 
@@ -55,6 +54,7 @@ class Extensible:
 
     @classmethod
     def before(cls, beforefunc):
+        'Decorator to run a function before an existing method. Return value is ignored.'
         funcname = beforefunc.__name__
         oldfunc = getattr(cls, funcname, None)
         if not oldfunc:
@@ -70,6 +70,7 @@ class Extensible:
 
     @classmethod
     def after(cls, afterfunc):
+        'Decorator to run a function after an existing method. Return value is ignored.'
         funcname = afterfunc.__name__
         oldfunc = getattr(cls, funcname, None)
         if not oldfunc:
@@ -82,6 +83,21 @@ class Extensible:
             return r
 
         setattr(cls,  funcname, wrappedfunc)
+        return wrappedfunc
+
+    @classmethod
+    def around(cls, aroundfunc):
+        'Decorator to wrap an existing method, passing the original as the second argument (after self/obj) to *aroundfunc*.'
+        funcname = aroundfunc.__name__
+        oldfunc = getattr(cls, funcname, None)
+        if not oldfunc:
+            oldfunc = lambda *args, **kwargs: None
+
+        @wraps(oldfunc)
+        def wrappedfunc(obj, *args, **kwargs):
+            return aroundfunc(obj, oldfunc, *args, **kwargs)
+
+        setattr(cls, funcname, wrappedfunc)
         return wrappedfunc
 
     @classmethod

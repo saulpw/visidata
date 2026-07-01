@@ -20,7 +20,7 @@ def updateColNames(sheet, rows, cols, overwrite=False):
     vd.addUndoColNames(cols)
     for c in cols:
         if not c._name or overwrite:
-            c.name = "\n".join(c.getDisplayValue(r) for r in rows)
+            c.name = "\n".join(c.getFullDisplayValue(r) for r in rows)
 
 
 Sheet.addCommand('^', 'rename-col', 'vd.addUndoColNames([cursorCol]); cursorCol.name = editCell(cursorVisibleColIndex, -1, value=cleanName(cursorCol.name))', 'rename current column')

@@ -32,3 +32,7 @@
 
 - [ ] extra data for special features (e.g. .zip encryption)
 
+# Loader registration
+
+- [ ] add format entry to `dev/formats.jsonl`
+

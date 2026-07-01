@@ -40,7 +40,7 @@ def gen_identify_duplicates(sheet):
 
     cols_to_check = None
     if len(keyCols) == 0:
-        vd.warning("No key cols specified. Using all columns.")
+        vd.warning("no key columns specified; using all columns")
         cols_to_check = sheet.visibleCols
     else:
         cols_to_check = sheet.keyCols
@@ -81,13 +81,13 @@ def select_duplicate_rows(sheet, duplicates=True):
 
 
 @Sheet.api
-def dedupe_rows(sheet):
+def dedupe_rows(sheet, suffix='_deduped'):
     """
     Given a sheet, pushes a new sheet in which only non-duplicate rows are
     included.
     """
     vs = copy(sheet)
-    vs.name += "_deduped"
+    vs.name += suffix
 
     @asyncthread
     def _reload(self=vs):

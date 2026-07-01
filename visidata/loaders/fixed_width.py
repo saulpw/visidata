@@ -1,5 +1,6 @@
 
 from visidata import VisiData, vd, Sheet, Column, Progress, SequenceSheet, dispwidth
+from visidata import WritableColumn
 
 
 vd.option('fixed_rows', 1000, 'number of rows to check for fixed width columns')
@@ -15,17 +16,17 @@ def getMaxDataWidth(col, rows):  #2255 need real max width for fixed width saver
     even if wider than window. (Slow for large cells!)'''
 
     w = 0
-    nlen = dispwidth(col.name)
+    nlen = dispwidth(col.name, literal=True)
     if len(rows) > 0:
         w_max = 0
         for r in rows:
-            row_w = dispwidth(col.getDisplayValue(r))
+            row_w = dispwidth(col.getFullDisplayValue(r), literal=True)
             if w_max < row_w:
                 w_max = row_w
         w = w_max
     return max(w, nlen)
 
-class FixedWidthColumn(Column):
+class FixedWidthColumn(WritableColumn):
     def __init__(self, name, i, j, **kwargs):
         super().__init__(name, **kwargs)
         self.i, self.j = i, j
@@ -34,31 +35,80 @@ class FixedWidthColumn(Column):
         return row[0][self.i:self.j]
 
     def putValue(self, row, value):
-        value = str(value)[:self.j-self.i]
-        j = self.j or len(row)
-        row[0] = row[0][:self.i] + '%-*s' % (j-self.i, value) + row[0][self.j:]
+        j = self.j or len(row[0])
+        colwidth = j - self.i
+        value = str(value)
+        if len(value) > colwidth:
+            vd.warning(f'{self.name}: value truncated to {colwidth} chars')
+            value = value[:colwidth]
+        row[0] = row[0][:self.i] + '%-*s' % (colwidth, value) + row[0][j:]
 
-def columnize(rows):
+def columnize(rows, has_header=True):
     'Generate (i,j) indexes for fixed-width columns found in rows'
 
-    ## find all character columns that are not spaces ever
+    if not rows:
+        return
+
+    # Use first row (header) to determine column positions  #2265
+    # This prevents data with internal spaces from creating false column splits
+    # With no header (header=0), find columns where ALL rows have spaces  #2265
+    if has_header:
+        detect_rows = [rows[0]]
+    else:
+        detect_rows = rows
+
+    colstarts = []
+    maxlen = max(len(r) for r in detect_rows)
+    for i in range(maxlen):
+        all_space = all(i >= len(r) or r[i].isspace() for r in detect_rows)
+        if not all_space:
+            if i == 0 or all(i-1 >= len(r) or r[i-1].isspace() for r in detect_rows):
+                colstarts.append(i)
+
+    if not colstarts:
+        return
+
+    # find actual end of each column using all rows  #2255
     allNonspaces = set()
     for r in rows:
         for i, ch in enumerate(r):
             if not ch.isspace():
                 allNonspaces.add(i)
 
-    colstart = 0
-    prev = 0
+    if has_header and len(colstarts) > 1:  #3029
+        # Adjust for right-justified headers where data extends beyond header text
+        if any(pos in allNonspaces for pos in range(colstarts[0])):
+            colstarts[0] = 0
+        for idx in range(1, len(colstarts)):
+            run_end = None
+            in_run = False
+            for pos in range(colstarts[idx-1], colstarts[idx]):
+                if pos not in allNonspaces:
+                    in_run = True
+                elif in_run:
+                    run_end = pos
+                    in_run = False
+            if in_run:
+                run_end = colstarts[idx]
+            if run_end is not None:
+                colstarts[idx] = run_end
 
-    # collapse fields
-    for i in allNonspaces:
-        if i > prev+1:
-            yield colstart, prev+1 #2255
-            colstart = i
-        prev = i
-
-    yield colstart, prev+1   # final column gets rest of line
+    for idx, start in enumerate(colstarts):
+        if idx + 1 < len(colstarts):
+            # column ends at last non-space position before next column start
+            nextstart = colstarts[idx + 1]
+            end = start
+            for pos in range(start, nextstart):
+                if pos in allNonspaces:
+                    end = pos + 1
+            yield start, end  #2255
+        else:
+            # final column: find last non-space position
+            end = start
+            for pos in allNonspaces:
+                if pos >= start and pos + 1 > end:
+                    end = pos + 1
+            yield start, end
 
 
 class FixedWidthColumnsSheet(SequenceSheet):
@@ -73,7 +123,7 @@ class FixedWidthColumnsSheet(SequenceSheet):
         maxcols = self.options.fixed_maxcols
         self.columns = []
         fixedRows = list([x] for x in self.optlines(itsource, 'fixed_rows'))
-        for i, j in columnize(list(r[0] for r in fixedRows)):
+        for i, j in columnize(list(r[0] for r in fixedRows), has_header=bool(self.options.header)):
             if maxcols and self.nCols >= maxcols-1:
                 self.addColumn(FixedWidthColumn('', i, None))
                 break

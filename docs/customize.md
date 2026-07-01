@@ -50,6 +50,22 @@ To unbind `i` before binding it:
 3. Launch VisiData.
 
 
+### Customizing cell editing keybindings
+
+`bindkey` changes keybindings in normal (non-editing) mode.  To change keybindings during cell editing, use `vd.editCellBindings` with `acceptThenFunc()`:
+
+~~~
+vd.editCellBindings['Enter'] = acceptThenFunc('go-down', 'edit-cell')
+~~~
+
+`acceptThenFunc()` takes one or more command longnames.  It saves the current edit, then executes each command in sequence.  For example, to make `Enter` save and move down to edit the next cell (spreadsheet-style):
+
+~~~
+vd.editCellBindings['Enter'] = acceptThenFunc('go-down', 'edit-cell')
+~~~
+
+See [Editing Contents](/docs/edit) for the full list of default cell editing keybindings.
+
 ### Creating new commands
 
 At minimum, `<Sheet>.addCommand` requires a longname and execstr.
@@ -57,8 +73,10 @@ At minimum, `<Sheet>.addCommand` requires a longname and execstr.
 For example, to define a new command:
 
 ~~~
-Sheet.addCommand('^D', 'scroll-halfpage-down', 'cursorDown(nScreenRows//2); sheet.topRowIndex += nScreenRows//2')
+Sheet.addCommand('Ctrl+D', 'scroll-halfpage-down', 'cursorDown(nScreenRows//2); sheet.topRowIndex += nScreenRows//2')
 ~~~
+
+To define a command interactively (without editing `.visidatarc`), use the `define-command` command.  The input is `longname execstr` (separated by the first space).  For example: `define-command show-item status(currow.Item)`.
 
 Commands and keybindings are set on a particular Sheet Type in the class hierarchy. Use `BaseSheet` for commands which don't need a sheet at all--these will apply to all sheets.  Commands and bindings on more specific sheets will override more generic ones.  `Sheet` is a generic table, `ColumnsSheet` would be for the columns sheet, `FreqTableSheet` for frequency tables, and so on.
 
@@ -95,6 +113,11 @@ Supply a space-separated list of aggregator names to `options.describe_aggrs` in
 ```
 options.describe_aggrs = 'mean stdev irr'
 ```
+
+### Saving options from the Options Sheet {#save-options}
+
+Options edited on the Options Sheet (`Shift+O`) can be saved to the config file with `z Ctrl+S`.
+Only options that differ from the default and aren't already in the config file will be appended.
 
 ### Turning off motd {#motd}
 

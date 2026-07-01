@@ -1,0 +1,8 @@
+# zEnter on freq table opens source sheet excluding current bin  #2950
+open-file sample_data/benchmark.csv
+col Customer
+freq-col
+row 0
+dive-except
+col SKU
+sort-asc

@@ -142,7 +142,7 @@ HunkViewer.addCommand('1', 'git-remove-hunk', 'source.git_apply(cursorRow.hunk, 
 HunkViewer.addCommand('Enter', 'git-skip-hunk', 'hunks.pop(0); reload()', 'move to the next hunk without applying this hunk')
 HunkViewer.addCommand('d', 'delete-line', 'source[7].pop(cursorRow[3]); reload()', 'delete a line from the patch')
 
-#HunksSheet.addCommand('g^J', 'git-diff-selected', 'vd.push(HunkViewer(selectedRows or rows, source=sheet))', 'view the diffs for the selected hunks (or all hunks)')
+#HunksSheet.addCommand('gEnter', 'git-diff-selected', 'vd.push(HunkViewer(selectedRows or rows, source=sheet))', 'view the diffs for the selected hunks (or all hunks)')
 
 @GitDiffSheet.api
 def git_apply(sheet, row, *args):

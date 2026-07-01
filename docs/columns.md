@@ -252,6 +252,8 @@ Note that by default the expansion logic will look for nested columns in **up to
 
 The `=` command takes a Python expression as input and creates a new column, where each cell evaluates the expression in the context of its row.
 
+To specify the column name, use `name=expr` (e.g. `total = Units * Unit_Cost`).  If no name is given, the expression itself is used as the column name.
+
 These variables and functions are available in the scope of an expression:
 
 - **Column names** evaluate to the typed value of the cell in the named column for the same row.
@@ -266,6 +268,7 @@ These variables and functions are available in the scope of an expression:
 - **`row`**: the current row (a Python object of the internal rowtype)
 - **`curcol`**: evaluate to the typed value of this row in the column that the cursor was on at the time that the expression column was added.
 - **`cursorCol`**: evaluate to the typed value of this row for the column the cursor is on. Changes as the cursor moves for `=`. Uses the column from the time the calculation was made for `g=`, `gz=`, and `z=`.
+- **`currow`**: a convenience object for accessing column values of the current cursor row by name. e.g. `currow.Price` returns the typed value of the `Price` column for the cursor row.
 
 Additional attributes can be added to sheets and columns.
 

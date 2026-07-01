@@ -35,10 +35,8 @@ class MeltedSheet(Sheet):
                 if cats not in valcols:
                     valcols[cats] = []
                 valcols[cats].append((valcolname, c))
-                ncats = len(varvals)
             else:
                 vd.status(f'"{c.name}" column does not match regex, skipping')
-                ncats = 0
 
         return valcols
 
@@ -80,7 +78,7 @@ class MeltedSheet(Sheet):
                     try:
                         if melt_null or not isNull(c.getValue(r)):
                             meltedrow[varval] = c
-                    except Exception as e:
+                    except Exception:
                         pass
 
                 if meltedrow:  # remove rows with no content (all nulls)

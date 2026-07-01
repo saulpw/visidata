@@ -1,11 +1,11 @@
 import random
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 
 from visidata import VisiData, vd, Sheet, options, anytype, asyncthread, ColumnItem
 
 __all__ = ['openurl_postgres', 'openurl_postgresql', 'openurl_rds', 'PgTable', 'PgTablesSheet']
 
-vd.option('postgres_schema', 'public', 'The desired schema for the Postgres database')
+vd.option('postgres_schema', 'public', 'desired schema for the Postgres database')
 
 def codeToType(type_code, colname):
     psycopg2 = vd.importExternal('psycopg2', 'psycopg2-binary')
@@ -52,11 +52,12 @@ def openurl_postgres(vd, url, filetype=None):
                 dbname=dbname,
                 host=url.hostname,
                 port=url.port,
-                password=url.password)
+                password=unquote(url.password))
 
     return PgTablesSheet(dbname+"_tables", sql=SQL(conn))
 
 
+openurl_postgresql = openurl_postgres
 VisiData.openurl_postgresql=VisiData.openurl_postgres
 
 
