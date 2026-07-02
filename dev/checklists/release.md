@@ -33,8 +33,9 @@
 
    d. bump version in `__version__` in source code (visidata/main.py, visidata/__init__.py) and setup.py;
 
-6. Run dev/mkman.sh to build the manpage and updated website
-    - Run ./mkmanhtml.sh, and move that to visidata.org:site/docs/man, and to visidata:docs/man.md
+6. Run `make man` to build the man pages and docs/man.md
+    - the sdist build also generates man pages automatically, and fails if it can't
+    - move docs/man.md to visidata.org:site/docs/man
 
 7. Merge `develop` to stable
 
