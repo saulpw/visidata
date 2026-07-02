@@ -1,10 +1,15 @@
 import itertools
 import contextlib
+import threading
 from copy import copy
 
-from visidata import vd, options, VisiData, BaseSheet, UNLOADED
+from visidata import vd, VisiData, BaseSheet
 
-vd._undo_suppressed = False  # set while building a sheet's layout; GIL makes the flip atomic
+class _UndoSuppressed(threading.local):
+    'per-thread: overlapping async reloads must not clobber each other #3165'
+    value = False
+
+vd._undo_suppressed = _UndoSuppressed()
 
 BaseSheet.init('undone', list)  # list of CommandLogRow for redo after undo
 
@@ -21,18 +26,18 @@ def isUndoableCommand(longname):
 @VisiData.api
 @contextlib.contextmanager
 def suppressUndo(vd):
-    'Do not record undos within this block (e.g. while constructing a sheet).'
-    old = vd._undo_suppressed
-    vd._undo_suppressed = True
+    'Do not record undos in this thread within this block (e.g. while constructing a sheet).'
+    old = vd._undo_suppressed.value
+    vd._undo_suppressed.value = True
     try:
         yield
     finally:
-        vd._undo_suppressed = old
+        vd._undo_suppressed.value = old
 
 @VisiData.api
 def addUndo(vd, undofunc, *args, **kwargs):
     'On undo of latest command, call ``undofunc(*args, **kwargs)``.'
-    if vd.options.undo and not vd._undo_suppressed:
+    if vd.options.undo and not vd._undo_suppressed.value:
         # occurs when VisiData is just starting up.
         # very early in startup, modifyCommand does not yet exist
         if not vd.activeCommand:
