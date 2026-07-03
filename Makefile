@@ -16,7 +16,7 @@ help:
 	@echo "  make test              run all tests (same as test-all)"
 	@echo ""
 	@echo "Build:"
-	@echo "  make man               generate man pages (requires soelim, preconv, aha)"
+	@echo "  make man               generate man pages and docs/man.md (requires soelim, preconv, aha)"
 	@echo "  make zsh-completion    generate zsh completion script"
 	@echo "  make docker            build docker images"
 	@echo ""
@@ -57,6 +57,7 @@ build: man zsh-completion
 
 man:
 	dev/mkman.sh
+	dev/mkmanhtml.sh
 
 zsh-completion:
 	python3 dev/zsh-completion.py _visidata

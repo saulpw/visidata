@@ -1,8 +1,35 @@
 #!/usr/bin/env python3
 
 from setuptools import setup
+from setuptools.command.sdist import sdist as _sdist
 import os.path
+import subprocess
 import sysconfig
+
+
+manfiles = ['visidata/man/vd.1', 'visidata/man/visidata.1', 'visidata/man/vd.txt']
+
+
+def ensure_man_pages():
+    if all(os.path.exists(f) for f in manfiles):
+        return True
+    try:
+        subprocess.run([os.path.join('dev', 'mkman.sh')], check=True)
+    except (OSError, subprocess.CalledProcessError) as e:
+        print(f'warning: man page generation failed ({e}); packaging without man pages')
+    return all(os.path.exists(f) for f in manfiles)
+
+
+# eval before setup(): package_data/data_files snapshot at load time
+has_man = ensure_man_pages()
+
+
+class sdist(_sdist):
+    # hard-fail: v3.4 sdist silently shipped without man pages (#3019)
+    def run(self):
+        if not has_man:
+            raise SystemExit('man pages required for sdist; install groff and man-db and rerun')
+        super().run()
 
 
 def all_requirements():
@@ -36,6 +63,7 @@ if not sysconfig.get_platform().startswith("mingw"):  # 2757
     install_requires += ['windows-curses >= 2.4.1; platform_system == "Windows"']   # 2119
 
 setup(
+    cmdclass={"sdist": sdist},
     name="visidata",
     version=__version__,
     description="terminal interface for exploring and arranging tabular data",
@@ -71,7 +99,7 @@ setup(
         "visidata.desktop",
     ],
     data_files=[
-        ("share/man/man1", [f for f in ["visidata/man/vd.1", "visidata/man/visidata.1"] if os.path.exists(f)]),
+        ("share/man/man1", ["visidata/man/vd.1", "visidata/man/visidata.1"] if has_man else []),
         ("share/applications", ["visidata/desktop/visidata.desktop"]),
         ("share/metainfo", ["visidata/desktop/org.visidata.VisiData.metainfo.xml"]),
         ("share/icons/hicolor/48x48/apps", ["visidata/desktop/icons/48x48/visidata.png"]),
@@ -105,7 +133,7 @@ setup(
         "all": all_requirements(),
     },
     package_data={
-        "visidata.man": [f for f in ["vd.1", "vd.txt"] if os.path.exists(os.path.join("visidata", "man", f))],
+        "visidata.man": ["vd.1", "vd.txt"] if has_man else [],
         "visidata.ddw": ["input.ddw", "regex.ddw"],
         "visidata": ["guides/*.md"],
         "visidata.tests": ["sample.tsv", "benchmark.csv"],
