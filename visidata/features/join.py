@@ -348,6 +348,8 @@ class ConcatColumn(WritableColumn):
         srcCol = self.getColBySheet(srcSheet)
         if srcCol:
             srcCol.setValue(srcRow, v, setModified=setModified)
+            if setModified:
+                self.sheet.setModified()
         else:
             vd.fail('column not on source sheet')
 
