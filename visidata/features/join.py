@@ -343,11 +343,11 @@ class ConcatColumn(WritableColumn):
         if srcCol:
             return srcCol.calcValue(srcRow)
 
-    def setValue(self, row, v):
+    def setValue(self, row, v, setModified=True):
         srcSheet, srcRow = row
         srcCol = self.getColBySheet(srcSheet)
         if srcCol:
-            srcCol.setValue(srcRow, v)
+            srcCol.setValue(srcRow, v, setModified=setModified)
         else:
             vd.fail('column not on source sheet')
 
