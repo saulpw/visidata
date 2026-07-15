@@ -14,6 +14,8 @@ from visidata import Sheet, Path, Column
 if (
     # Windows
     sys.platform == 'win32'
+    # Cygwin and MSYS2
+    or sys.platform == 'cygwin'
     # WSL 2
     or "microsoft-standard-WSL2" in platform.uname().release
     # WSL 1
