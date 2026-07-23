@@ -28,17 +28,20 @@ def _appendRowsAfterLoading(joinsheet, origsheets):
     if len(colcounts) != 1:
         vd.fail('sheets must have same number of columns for `concat`; use `append` instead')
 
-    # rowdef: (srcSheet, srcRow), same as ConcatSheet  #2929
+    # rowdef: srcRow, unwrapped so sheet-type commands still work  #3187
+    joinsheet.rowOrigins = {}  # id(srcRow) -> srcSheet  #2929
     srcKeyColNames = {c.name for c in origsheets[0].keyCols}
     joinsheet.columns = []
-    joinsheet.addColumn(ItemColumn('origin_sheet', 0, width=0))
+    joinsheet.addColumn(Column('origin_sheet', width=0, getter=lambda c,r: c.sheet.rowOrigins.get(id(r))))
     keyedcols = collections.defaultdict(dict)  # name -> { sheet -> col }
 
     for vs in origsheets:
-        joinsheet.rows.extend((vs, r) for r in vs.rows)
+        joinsheet.rows.extend(vs.rows)
+        for r in vs.rows:
+            joinsheet.rowOrigins[id(r)] = vs
         for c in vs.visibleCols:
             if not keyedcols[c.name]:
-                newcol = ConcatColumn(c.name, cols=keyedcols[c.name], type=c.type)
+                newcol = OriginColumn(c.name, cols=keyedcols[c.name], type=c.type)
                 if c.name in srcKeyColNames:
                     newcol.keycol = c.keycol
                 joinsheet.addColumn(newcol)
@@ -348,6 +351,21 @@ class ConcatColumn(WritableColumn):
         srcCol = self.getColBySheet(srcSheet)
         if srcCol:
             srcCol.setValue(srcRow, v)
+        else:
+            vd.fail('column not on source sheet')
+
+
+class OriginColumn(ConcatColumn):
+    '''Like ConcatColumn, but rowdef is the unwrapped srcRow; srcSheet comes from sheet.rowOrigins.'''
+    def calcValue(self, row):
+        srcCol = self.getColBySheet(self.sheet.rowOrigins.get(id(row)))
+        if srcCol:
+            return srcCol.calcValue(row)
+
+    def setValue(self, row, v):
+        srcCol = self.getColBySheet(self.sheet.rowOrigins.get(id(row)))
+        if srcCol:
+            srcCol.setValue(row, v)
         else:
             vd.fail('column not on source sheet')
 
