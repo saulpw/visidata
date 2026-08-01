@@ -15,7 +15,11 @@ def plot_seaborn(vd, rows, xcols, ycols):
     pyplot = vd.importExternal('matplotlib.pyplot', 'matplotlib')
     seaborn = vd.importExternal('seaborn')
     import multiprocessing
-    mp = multiprocessing.Process(target=ext_plot_seaborn, args=(vd, rows, xcols, ycols))
+    if multiprocessing.get_start_method() == 'forkserver':  #3192  Python >= 3.14
+        pfunc = multiprocessing.get_context('fork').Process
+    else:
+        pfunc = multiprocessing.Process
+    mp = pfunc(target=ext_plot_seaborn, args=(vd, rows, xcols, ycols))
     mp.start()
 
 
