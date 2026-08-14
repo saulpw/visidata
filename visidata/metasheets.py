@@ -77,6 +77,9 @@ Other commands (not specific to Columns Sheet):
             self.columns[0].hide()  # hide 'sheet' column if only one sheet
         else:
             self.rows = [col for vs in self.source for col in vs.visibleCols if isinstance(vs, Sheet) and vs is not self]
+            # reused all_columns sheet may have hidden this on a prior single-sheet load
+            if self.columns[0].hidden:
+                self.columns[0]._width = None
 
     def newRow(self):
         c = type(self.source[0])._coltype()
@@ -129,8 +132,8 @@ def join_cols(sheet):
     destSheet.addColumn(c, index=sheet.cursorRowIndex)
 
 
-# copy vd.sheets so that ColumnsSheet itself isn't included (for recalc in addRow)
-globalCommand('gC', 'columns-all', 'vs=vd.allColumnsSheet; vs.reload(); vd.push(vs)', 'open Columns Sheet: edit column properties for all visible columns from all sheets on the sheets stack')
+# copy current stackedSheets so the cached allColumnsSheet sees newly opened sheets (#3191)
+globalCommand('gC', 'columns-all', 'vs=vd.allColumnsSheet; vs.source=vd.stackedSheets; vs.reload(); vd.push(vs)', 'open Columns Sheet: edit column properties for all visible columns from all sheets on the sheets stack')
 
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))', 'open Columns Sheet: edit column properties for current sheet')
 
