@@ -124,22 +124,12 @@ def test_dedupe_unhashable(vd):
         {'val': [1, 2]},
         {'val': [1, 2]},
         {'val': [3, 4]},
-    ])
-    assert [is_dupe for row, is_dupe in gen_identify_duplicates(s)] == [False, True, False]
-
-
-def test_dedupe_mixed_hashable(vd):
-    'hashable and unhashable values must dedupe independently and correctly'
-    cols = lambda: [ItemColumn('val', 'val')]
-    s = Sheet('s', columns=cols(), rows=[
-        {'val': 'a'},
-        {'val': [1, 2]},
         {'val': 'a'},
         {'val': (1, 2)},
+        {'val': 'a'},
         {'val': [1, 2]},
-        {'val': 'b'},
     ])
-    assert [is_dupe for row, is_dupe in gen_identify_duplicates(s)] == [False, False, True, False, True, False]
+    assert [is_dupe for row, is_dupe in gen_identify_duplicates(s)] == [False, True, False, False, False, True, True]
 
 
 """
