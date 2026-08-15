@@ -24,7 +24,7 @@ __author__ = "Jeremy Singer-Vine <jsvine@gmail.com>"
 
 from copy import copy
 
-from visidata import Sheet, TableSheet, asyncthread, Progress, vd
+from visidata import Sheet, TableSheet, asyncthread, Progress, vd, ItemColumn
 
 
 def gen_identify_duplicates(sheet):
@@ -45,12 +45,14 @@ def gen_identify_duplicates(sheet):
     else:
         cols_to_check = sheet.keyCols
 
-    seen = set()
+    seen = []
     for r in sheet.rows:
         vals = tuple(col.getValue(r) for col in cols_to_check)
-        is_dupe = vals in seen
+        # use a list with == comparison instead of a set, since vals may
+        # contain unhashable types like list or dict (e.g. from JSON) #3196
+        is_dupe = any(vals == existing for existing in seen)
         if not is_dupe:
-            seen.add(vals)
+            seen.append(vals)
         yield (r, is_dupe)
 
 
@@ -110,6 +112,17 @@ vd.addMenuItems('''
     Row > Select > duplicate rows > select-duplicate-rows
     Data > Deduplicate rows > dedupe-rows
 ''')
+
+def test_dedupe_unhashable(vd):
+    'gen_identify_duplicates must not crash on unhashable typed values  #3196'
+    cols = lambda: [ItemColumn('val', 'val')]
+    s = Sheet('s', columns=cols(), rows=[
+        {'val': [1, 2]},
+        {'val': [1, 2]},
+        {'val': [3, 4]},
+    ])
+    assert [is_dupe for row, is_dupe in gen_identify_duplicates(s)] == [False, True, False]
+
 
 """
 # Changelog
