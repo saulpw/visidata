@@ -1260,10 +1260,26 @@ def quitAndReleaseMemory(vs):
 
 @Sheet.api
 def async_deepcopy(sheet, rowlist):
+    'Return list to be filled asynchronously with deepcopies of the rows in *rowlist*.'
+    # Values set on a SettableColumn live in the column's _store, keyed by rowid.
+    # A deepcopied row is a new object with a new rowid, so those values must be
+    # remapped onto it, in a store no longer shared with the source column.  #3174
+    stores = []
+    for c in sheet.columns:
+        if isinstance(c, SettableColumn):
+            stores.append((c, c._store))
+            c._store = {}
+
     @asyncthread
     def _async_deepcopy(newlist, oldlist):
         for r in vd.Progress(oldlist, 'copying'):
-            newlist.append(deepcopy(r))
+            newrow = deepcopy(r)
+            newlist.append(newrow)
+            oldid = sheet.rowid(r)
+            newid = sheet.rowid(newrow)
+            for c, oldstore in stores:
+                if oldid in oldstore:
+                    c._store[newid] = oldstore[oldid]
 
     ret = []
     _async_deepcopy(ret, rowlist)
