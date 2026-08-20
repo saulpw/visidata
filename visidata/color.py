@@ -176,7 +176,7 @@ class ColorMaker:
             return r
         except curses.error:
             return None  # not available
-        except ValueError:  # Python 3.10+  issue #1227
+        except ValueError:  # Python 3.10+  issue #1227; also for terminals with no colors  #3206
             return None
 
     def _attrnames_to_num(self, attrnames:'list[str]') -> int:
@@ -212,6 +212,10 @@ class ColorMaker:
                     curses.init_pair(pairnum, fg, bg)
                 except curses.error:
                     return 0  # do not cache
+                except ValueError:
+                    if not curses.has_color(): #for terminals that do not support color, like vt100
+                        return 0
+                    raise
                 self.color_pairs[(fg, bg)] = (pairnum, colorname)
 
             return curses.color_pair(pairnum)
