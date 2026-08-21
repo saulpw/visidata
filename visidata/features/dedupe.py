@@ -27,7 +27,7 @@ from copy import copy
 from visidata import Sheet, TableSheet, asyncthread, Progress, vd, ItemColumn
 
 
-def gen_identify_duplicates(sheet):
+def gen_identify_duplicates(sheet, cols=None):
     """
     Takes a sheet, and returns a generator yielding a tuple for each row
     encountered. The tuple's structure is `(row_object, is_dupe)`, where
@@ -36,19 +36,19 @@ def gen_identify_duplicates(sheet):
     See note in Usage section above regarding how duplicates are determined.
     """
 
-    keyCols = sheet.keyCols
-
-    cols_to_check = None
-    if len(keyCols) == 0:
-        vd.warning("no key columns specified; using all columns")
-        cols_to_check = sheet.visibleCols
-    else:
-        cols_to_check = sheet.keyCols
+    if not cols:
+        keyCols = sheet.keyCols
+        cols = None
+        if len(keyCols) == 0:
+            vd.warning("no key columns specified; using all columns")
+            cols = sheet.visibleCols
+        else:
+            cols = sheet.keyCols
 
     seen = set()
     seen_unhashable = []  # linear-scan fallback: list/dict values from JSON  #3196
     for r in sheet.rows:
-        vals = tuple(col.getValue(r) for col in cols_to_check)
+        vals = tuple(col.getValue(r) for col in cols)
         try:
             is_dupe = vals in seen
             if not is_dupe:
@@ -73,9 +73,7 @@ def select_duplicate_rows(sheet, duplicates=True):
     before = len(sheet.selectedRows)
 
     gen = gen_identify_duplicates(sheet)
-    prog = Progress(gen, gerund="selecting", total=sheet.nRows)
-
-    for row, is_dupe in prog:
+    for row, is_dupe in Progress(gen, gerund="selecting", total=sheet.nRows):
         if is_dupe == duplicates:
             sheet.selectRow(row)
 
@@ -85,6 +83,13 @@ def select_duplicate_rows(sheet, duplicates=True):
 
     vd.status(f"selected {sel_count}{more_str} {sheet.rowtype}")
 
+@Sheet.api
+@asyncthread
+def select_col_duplicates(sheet, col, duplicates=True):
+    gen = gen_identify_duplicates(sheet, [col])
+    for row, is_dupe in Progress(gen, gerund="selecting", total=sheet.nRows):
+        if is_dupe == duplicates:
+            sheet.selectRow(row)
 
 @Sheet.api
 def dedupe_rows(sheet, suffix='_deduped'):
@@ -109,6 +114,7 @@ def dedupe_rows(sheet, suffix='_deduped'):
 
 
 # Add longname-commands to VisiData to execute these methods
+TableSheet.addCommand(None, "select-col-duplicates", "sheet.select_col_duplicates(cursorCol)", "select each row where the cell in the current column is a duplicate of a prior cell in the current column")
 TableSheet.addCommand(None, "select-duplicate-rows", "sheet.select_duplicate_rows()", "select each row that is a duplicate of a prior row")
 TableSheet.addCommand(None, "dedupe-rows", "vd.push(sheet.dedupe_rows())", "open new sheet in which only non-duplicate rows in the active sheet are included")
 
