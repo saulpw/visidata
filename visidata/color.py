@@ -213,7 +213,7 @@ class ColorMaker:
                 except curses.error:
                     return 0  # do not cache
                 except ValueError:
-                    if not curses.has_color(): #for terminals that do not support color, like vt100
+                    if not curses.has_colors(): #for terminals that do not support color, like vt100
                         return 0
                     raise
                 self.color_pairs[(fg, bg)] = (pairnum, colorname)
