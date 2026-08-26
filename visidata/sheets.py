@@ -105,6 +105,8 @@ class LazyComputeRow:
         return str(self.as_dict())
 
     def as_dict(self):
+        if self.col in self.sheet.visibleCols:
+            raise RecursiveExprException()
         return {c.name:self[c.name] for c in self.sheet.visibleCols}
 
     def __getattr__(self, k):
