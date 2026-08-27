@@ -54,7 +54,9 @@ class ZipSheet(Sheet):
     guide = '''# Zip Sheet
 This is a list of files contained in the zipfile {sheet.displaySource}.
 
-Once extracted, files can be loaded with `ENTER`.
+Once extracted, files can be loaded with `ENTER`.  A member with a
+compression suffix (like `data.csv.gz`) is decompressed on the way in,
+and loaded as the filetype named by the remaining extension.
 
 Commands:
 
@@ -62,6 +64,7 @@ Commands:
 - `gx` to extract selected files to current directory
 - `zx` to extract current file to a given pathname
 - `gzx`  to extract selected files to given directory
+- `open-row-filetype` to load the current file as a named filetype
 
 '''
 
@@ -75,10 +78,10 @@ Commands:
                 return fp.open(*args, **kwargs, pwd=pwd.encode('utf-8'))
             vd.exceptionCaught(err)
 
-    def openRow(self, row):
+    def openRow(self, row, filetype=None):
             fi, zpath = row
             fp = self.openZipFile(self.zfp, fi)
-            return vd.openSource(Path(fi.filename, fp=fp, filesize=fi.file_size))
+            return vd.openSource(Path(fi.filename, fp=fp, filesize=fi.file_size), filetype=filetype)
 
     def extract(self, *rows, path=None):
         path = path or Path('.')
@@ -145,6 +148,18 @@ tarfile_type_names = {
 class TarSheet(Sheet):
     'Wrapper for `tarfile` library.'
     rowtype = 'files' # rowdef TarInfo
+    guide = '''# Tar Sheet
+This is a list of files contained in the tarfile {sheet.displaySource}.
+
+Files can be loaded with `ENTER`.  A member with a compression suffix
+(like `data.csv.gz`) is decompressed on the way in, and loaded as the
+filetype named by the remaining extension.
+
+Commands:
+
+- `open-row-filetype` to load the current file as a named filetype
+
+'''
     columns = [
         ColumnAttr('name'),
         Column('ext', getter=lambda col,row: row.isdir() and '/' or os.path.splitext(row.name)[1][1:]),
@@ -157,9 +172,9 @@ class TarSheet(Sheet):
     ]
     nKeys=1
 
-    def openRow(self, fi):
+    def openRow(self, fi, filetype=None):
             tfp = tarfile.open(name=str(self.source))
-            return vd.openSource(Path(fi.name, fp=tfp.extractfile(fi), filesize=fi.size))
+            return vd.openSource(Path(fi.name, fp=tfp.extractfile(fi), filesize=fi.size), filetype=filetype)
 
     def iterload(self):
         with tarfile.open(name=str(self.source)) as tf:
@@ -174,6 +189,13 @@ ZipSheet.addCommand('gx', 'extract-selected', 'extract(*onlySelectedRows)', 'ext
 ZipSheet.addCommand('zx', 'extract-file-to', 'extract(cursorRow, path=inputPath("extract to: "))', 'extract current file to given pathname')
 ZipSheet.addCommand('gzx', 'extract-selected-to', 'extract(*onlySelectedRows, path=inputPath("extract %d files to: " % nSelectedRows))', 'extract selected files to given directory')
 ZipSheet.addCommand('Ctrl+O', 'sysopen-row', 'sysopen_row(cursorRow)', 'open $EDITOR with current file (modifications will be discarded)')
+
+ZipSheet.addCommand('', 'open-row-filetype', 'vd.push(openRow(cursorRow, filetype=vd.input("open as filetype: ", type="filetype")))', 'open current file as a given filetype')
+TarSheet.addCommand('', 'open-row-filetype', 'vd.push(openRow(cursorRow, filetype=vd.input("open as filetype: ", type="filetype")))', 'open current file as a given filetype')
+
+vd.addMenuItems('''
+    Row > Dive into > as filetype > open-row-filetype
+''')
 
 vd.addMenu(Menu('File', Menu('Extract',
         Menu('current file', 'extract-file'),
