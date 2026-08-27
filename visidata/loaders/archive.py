@@ -1,3 +1,4 @@
+import io
 import pathlib
 import tarfile
 import zipfile
@@ -173,16 +174,32 @@ Commands:
     nKeys=1
 
     def openRow(self, fi, filetype=None):
-            tfp = tarfile.open(name=str(self.source))
-            return vd.openSource(Path(fi.name, fp=tfp.extractfile(fi), filesize=fi.size), filetype=filetype)
+            return vd.openSource(Path(fi.name, fp=self.tfp.extractfile(fi), filesize=fi.size), filetype=filetype)
+
+    @property
+    def tfp(self):
+        '''Open tarfile for source.  A tar nested in another archive has no
+        pathname to reopen, so it is read in place when its stream allows random
+        access, and held in memory only when it cannot seek (like an archive
+        piped in on stdin).'''
+        if not self._tfp:
+            if self.source.has_fp():
+                fp = self.source.open_bytes()
+                if not fp.seekable():
+                    fp = io.BytesIO(fp.read())
+                self._tfp = tarfile.open(fileobj=fp)
+            else:
+                self._tfp = tarfile.open(name=str(self.source))
+
+        return self._tfp
 
     def iterload(self):
-        with tarfile.open(name=str(self.source)) as tf:
-            for ti in Progress(tf.getmembers()):
-                yield ti
+        for ti in Progress(self.tfp.getmembers()):
+            yield ti
 
 
 ZipSheet.init('_zfp', lambda: None, copy=True)
+TarSheet.init('_tfp', lambda: None, copy=True)
 
 ZipSheet.addCommand('x', 'extract-file', 'extract(cursorRow)', 'extract current file to current directory')
 ZipSheet.addCommand('gx', 'extract-selected', 'extract(*onlySelectedRows)', 'extract selected files to current directory')
