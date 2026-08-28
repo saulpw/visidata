@@ -1,0 +1,17 @@
+# concat of IndexSheets keeps Sheet rows: open-row and join-selected work  #3187
+
+open-file sample_data/employees.sqlite
+open-file tests/issue3187.sqlite
+sheets-stack
+select-rows
+join-selected concat
+
+# rows are still Sheets: dive into one and come back
+col name
+row キdept
+open-row
+quit-sheet
+
+# select both dept tables (one per file) and concat their rows
+select-equal-cell
+join-selected concat
