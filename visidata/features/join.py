@@ -4,7 +4,7 @@ import functools
 from copy import copy
 
 from visidata import vd, VisiData, asyncthread, Sheet, Progress, IndexSheet, Column, CellColorizer, ItemColumn, SubColumnItem, TypedWrapper, ColumnsSheet, AttrDict, dispwidth
-from visidata import WritableColumn
+from visidata import WritableColumn, SettableColumn
 
 vd.help_join = '# Join Help\nHELPTODO'
 
@@ -28,17 +28,19 @@ def _appendRowsAfterLoading(joinsheet, origsheets):
     if len(colcounts) != 1:
         vd.fail('sheets must have same number of columns for `concat`; use `append` instead')
 
-    # rowdef: (srcSheet, srcRow), same as ConcatSheet  #2929
+    # rowdef: srcRow, native, so sheet-typed commands still work  #3187
     srcKeyColNames = {c.name for c in origsheets[0].keyCols}
     joinsheet.columns = []
-    joinsheet.addColumn(ItemColumn('origin_sheet', 0, width=0))
+    origincol = joinsheet.addColumn(SettableColumn('origin_sheet', width=0))  #2929
     keyedcols = collections.defaultdict(dict)  # name -> { sheet -> col }
 
     for vs in origsheets:
-        joinsheet.rows.extend((vs, r) for r in vs.rows)
+        joinsheet.rows.extend(vs.rows)
+        for r in vs.rows:
+            origincol.putValue(r, vs)
         for c in vs.visibleCols:
             if not keyedcols[c.name]:
-                newcol = ConcatColumn(c.name, cols=keyedcols[c.name], type=c.type)
+                newcol = JoinConcatColumn(c.name, keyedcols[c.name], origincol, type=c.type)
                 if c.name in srcKeyColNames:
                     newcol.keycol = c.keycol
                 joinsheet.addColumn(newcol)
@@ -74,7 +76,7 @@ def openJoin(sheet, others, jointype=''):
         if len(sheettypes) != 1:  # only one type of sheet #1598
             vd.fail('only same sheet types can be concat-joined; use `append`')
 
-        joinsheet = copy(sheet)
+        joinsheet = copy(sheets[0])  # not `sheet`, which may be the SheetsSheet itself (g& on sheets stack)
         joinsheet.name = name
         joinsheet.rows = []
         joinsheet.source = sheets
@@ -348,6 +350,27 @@ class ConcatColumn(WritableColumn):
         srcCol = self.getColBySheet(srcSheet)
         if srcCol:
             srcCol.setValue(srcRow, v, setModified=setModified)
+            if setModified:
+                self.sheet.setModified()
+        else:
+            vd.fail('column not on source sheet')
+
+
+class JoinConcatColumn(ConcatColumn):
+    'ConcatColumn over native rows; the row\'s source sheet comes from *origincol*.'
+    def __init__(self, name, cols, origincol, **kwargs):
+        super().__init__(name, cols=cols, **kwargs)
+        self.origincol = origincol
+
+    def calcValue(self, row):
+        srcCol = self.getColBySheet(self.origincol.getValue(row))
+        if srcCol:
+            return srcCol.calcValue(row)
+
+    def setValue(self, row, v, setModified=True):
+        srcCol = self.getColBySheet(self.origincol.getValue(row))
+        if srcCol:
+            srcCol.setValue(row, v, setModified=setModified)
             if setModified:
                 self.sheet.setModified()
         else:
