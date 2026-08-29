@@ -1,0 +1,3 @@
+sheet	col	row	longname	input	keystrokes	comment
+			open-file	tests/.visidata/benchmark.duckdb	o	open file
+benchmark		0	dive-row		^J	load the benchmark table

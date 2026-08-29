@@ -1,0 +1,4 @@
+open-file tests/.visidata/duckdb_test.duckdb
+exec-python from visidata import UNLOADED; assert all(r.rows is UNLOADED for r in vd.sheet.rows)
+exec-python r = next(r for r in vd.sheet.rows if r.table_name == 'edit_pk'); assert r.nRows == 2 and r.nCols == 3
+exec-python r = next(r for r in vd.sheet.rows if r.table_name == 'dept_view'); assert r.nCols == 3

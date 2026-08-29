@@ -1,0 +1,9 @@
+exec-python import os, shutil, tempfile, uuid; p=os.path.join(tempfile.gettempdir(), f'duckdb-no-pk-{uuid.uuid4().hex}.duckdb'); shutil.copyfile('tests/.visidata/duckdb_test.duckdb', p); vd.push(vd.openSource(p))
+exec-python vd.options.overwrite='y'
+row キedit_no_pk
+open-row
+row 1
+col note
+edit-cell bravo+
+commit-sheet
+reload-sheet
