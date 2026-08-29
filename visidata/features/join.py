@@ -371,15 +371,18 @@ class ConcatSheet(Sheet):
                     yield (sheet, r)
                     prog.addProgress(1)
 
-                for idx, col in enumerate(sheet.visibleCols):
-                    if not keyedcols[col.name]:  # first column with this name/number
-                        self.addColumn(ConcatColumn(col.name, cols=keyedcols[col.name], type=col.type))
+                # columns with duplicate names on the same sheet are keyed by
+                # (name, nth occurrence), so they stay distinct columns  #3178
+                nameoccurrences = collections.Counter()
+                for col in sheet.visibleCols:
+                    n = nameoccurrences[col.name]
+                    nameoccurrences[col.name] += 1
+                    key = col.name if n == 0 else (col.name, n)
 
-                    if sheet in keyedcols[col.name]:  # two columns with same name on sheet
-                        keyedcols[idx][sheet] = col  # key by column num instead
-                        self.addColumn(ConcatColumn(col.name, cols=keyedcols[idx], type=col.type))
-                    else:
-                        keyedcols[col.name][sheet] = col
+                    if not keyedcols[key]:  # first column with this name/occurrence
+                        self.addColumn(ConcatColumn(col.name, cols=keyedcols[key], type=col.type))
+
+                    keyedcols[key][sheet] = col
 
 
 @VisiData.api
@@ -438,3 +441,32 @@ def test_join_unhashable(vd):
     s2 = Sheet('b', columns=cols(), rows=[{'key': [1, 2], 'val': 'from-b'}])
     kc = JoinKeyColumn('key', keycols=[s1.column('key'), s2.column('key')])
     assert kc.calcValue({s1: s1.rows[0], s2: s2.rows[0]}) == [1, 2]
+
+
+def test_concatsheet_duplicate_colnames(vd):
+    'ConcatSheet must not merge same-named columns from the same sheet  #3178'
+    def mksheet(name, colnames, row):
+        return Sheet(name, columns=[ItemColumn(n, i) for i, n in enumerate(colnames)], rows=[row])
+
+    a = mksheet('a', ['a', 'a'], ['1', '2'])
+    b = mksheet('b', ['b', 'b'], ['3', '4'])
+
+    cs = ConcatSheet('a&b', source=[a, b])
+    cs.rows = list(cs.iterload())
+
+    assert [c.name for c in cs.visibleCols] == ['a', 'a', 'b', 'b']
+    assert [[c.getDisplayValue(r) for c in cs.visibleCols] for r in cs.rows] == [
+        ['1', '2', '', ''],
+        ['', '', '3', '4'],
+    ]
+
+    # columns with the same name on *different* sheets still line up
+    x = mksheet('x', ['k', 'v'], ['1', '2'])
+    y = mksheet('y', ['v', 'k'], ['3', '4'])
+    cs2 = ConcatSheet('x&y', source=[x, y])
+    cs2.rows = list(cs2.iterload())
+    assert [c.name for c in cs2.visibleCols] == ['k', 'v']
+    assert [[c.getDisplayValue(r) for c in cs2.visibleCols] for r in cs2.rows] == [
+        ['1', '2'],
+        ['4', '3'],
+    ]
