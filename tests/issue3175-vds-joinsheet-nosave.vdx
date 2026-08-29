@@ -1,0 +1,19 @@
+# a JoinSheet should save as .vds; column types that cannot be reconstructed
+# on load fall back to plain Column instead of crashing the save  #3175
+
+option global overwrite y
+
+open-file tests/data1.tsv
+key-col
+open-file tests/data2.tsv
+key-col
+join-sheets-top2 inner
+
+save-sheet /tmp/vd-issue3175.vds
+open-file /tmp/vd-issue3175.vds
+open-row
+
+# the joined values survived the round trip
+assert-expr sheet.nRows == 2
+assert-expr list(map(lambda c: c.name, sheet.visibleCols)) == ['Key', 'C', 'D', 'A', 'B']
+assert-expr sorted(map(lambda cr: cr[0].getDisplayValue(cr[1]), __import__('itertools').product(sheet.visibleCols, sheet.rows))) == ['2', '2', 'a2', 'a2', 'b2', 'b2', 'c1', 'd1', 'e1', 'f1']
