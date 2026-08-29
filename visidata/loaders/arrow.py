@@ -7,13 +7,13 @@ from visidata import Sheet, VisiData, TypedWrapper, anytype, date, vlen, Column,
 @VisiData.api
 def open_arrow(vd, p):
     'Apache Arrow IPC file format'
-    return ArrowSheet(p.base_stem, source=p)
+    return ArrowSheet(p.base_stem, source=p, ipc_format='file')
 
 
 @VisiData.api
 def open_arrows(vd, p):
     'Apache Arrow IPC streaming format'
-    return ArrowSheet(p.base_stem, source=p)
+    return ArrowSheet(p.base_stem, source=p, ipc_format='stream')
 
 
 def arrow_to_vdtype(t):
@@ -57,15 +57,22 @@ def arrow_to_vdtype(t):
     return arrow_to_vd_typemap.get(t.id, anytype)
 
 class ArrowSheet(Sheet):
+    ipc_format = 'file'  # 'file' (random-access) or 'stream'
+
     def iterload(self):
         pa = vd.importExternal('pyarrow')
 
-        try:
-            with pa.OSFile(str(self.source), 'rb') as fp:
-                self.coldata = pa.ipc.open_file(fp).read_all()
-        except pa.lib.ArrowInvalid:
-            with pa.OSFile(str(self.source), 'rb') as fp:
+        if self.ipc_format == 'stream':
+            # non-seeking, so this works on unseekable sources like stdin
+            with self.source.open_bytes() as fp:
                 self.coldata = pa.ipc.open_stream(fp).read_all()
+        else:
+            try:
+                with self.source.open_bytes() as fp:
+                    self.coldata = pa.ipc.open_file(fp).read_all()
+            except pa.lib.ArrowInvalid:
+                with self.source.open_bytes() as fp:
+                    self.coldata = pa.ipc.open_stream(fp).read_all()
 
         self.columns = []
         for colnum, col in enumerate(self.coldata):
