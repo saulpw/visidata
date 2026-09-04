@@ -84,7 +84,7 @@ def user_data_dir(appname=None, appauthor=None, version=None, roaming=False):
             else:
                 path = os.path.join(path, appname)
     elif system == 'darwin':
-        path = os.path.expanduser('~/Library/Application Support/')
+        path = os.getenv('XDG_DATA_HOME', os.path.expanduser('~/Library/Application Support'))
         if appname:
             path = os.path.join(path, appname)
     else:
@@ -349,8 +349,14 @@ def user_state_dir(appname=None, appauthor=None, version=None, roaming=False):
 
     That means, by default "~/.local/state/<AppName>".
     """
-    if system in ["win32", "darwin"]:
+    if system == "win32":
         path = user_data_dir(appname, appauthor, None, roaming)
+    elif system == "darwin":
+        path = os.getenv('XDG_STATE_HOME')
+        if not path:
+            path = user_data_dir(appname, appauthor, None, roaming)
+        elif appname:
+            path = os.path.join(path, appname)
     else:
         path = os.getenv('XDG_STATE_HOME', os.path.expanduser("~/.local/state"))
         if appname:
