@@ -63,7 +63,7 @@ def user_data_dir(appname=None, appauthor=None, version=None, roaming=False):
             for a discussion of issues.
 
     Typical user data directories are:
-        Mac OS X:               ~/Library/Application Support/<AppName>
+        Mac OS X:               ~/Library/Application Support/<AppName>  # or in $XDG_DATA_HOME, if defined
         Unix:                   ~/.local/share/<AppName>    # or in $XDG_DATA_HOME, if defined
         Win XP (not roaming):   C:\Documents and Settings\<username>\Application Data\<AppAuthor>\<AppName>
         Win XP (roaming):       C:\Documents and Settings\<username>\Local Settings\Application Data\<AppAuthor>\<AppName>
@@ -184,7 +184,7 @@ def user_config_dir(appname=None, appauthor=None, version=None, roaming=False):
             for a discussion of issues.
 
     Typical user config directories are:
-        Mac OS X:               ~/Library/Preferences/<AppName>
+        Mac OS X:               ~/Library/Preferences/<AppName>  # or in $XDG_CONFIG_HOME, if defined
         Unix:                   ~/.config/<AppName>     # or in $XDG_CONFIG_HOME, if defined
         Win *:                  same as user_data_dir
 
@@ -280,8 +280,8 @@ def user_cache_dir(appname=None, appauthor=None, version=None, opinion=True):
             discussion below.
 
     Typical user cache directories are:
-        Mac OS X:   ~/Library/Caches/<AppName>
-        Unix:       ~/.cache/<AppName> (XDG default)
+        Mac OS X:   ~/Library/Caches/<AppName>  # or in $XDG_CACHE_HOME, if defined
+        Unix:       ~/.cache/<AppName>     # or in $XDG_CACHE_HOME, if defined
         Win XP:     C:\Documents and Settings\<username>\Local Settings\Application Data\<AppAuthor>\<AppName>\Cache
         Vista:      C:\Users\<username>\AppData\Local\<AppAuthor>\<AppName>\Cache
 
@@ -340,7 +340,7 @@ def user_state_dir(appname=None, appauthor=None, version=None, roaming=False):
             for a discussion of issues.
 
     Typical user state directories are:
-        Mac OS X:  same as user_data_dir
+        Mac OS X:  same as user_data_dir      # or in $XDG_STATE_HOME, if defined
         Unix:      ~/.local/state/<AppName>   # or in $XDG_STATE_HOME, if defined
         Win *:     same as user_data_dir
 
