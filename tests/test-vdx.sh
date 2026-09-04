@@ -147,7 +147,7 @@ if [ -n "$NOSAVE_PID" ]; then
     if [ $nosave_exit -ne 0 ]; then
         cat /tmp/vd-nosave-output.txt >&2
         # extract failing test name from error output
-        failing_test=$(grep -oP '^\S+-nosave' /tmp/vd-nosave-output.txt | head -1)
+        failing_test=$(grep -oE '^\S+-nosave' /tmp/vd-nosave-output.txt | head -1)
         if [ -n "$failing_test" ]; then
             FAILED_TESTS[$failing_test]=1
         else
