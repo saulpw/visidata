@@ -12,6 +12,8 @@ def open_dta(vd, p):
 
 VisiData.open_stata = VisiData.open_pandas
 
+vd.option('pandas_allow_pickle', False, 'pandas allow unpickling objects (unsafe)')
+
 for ft in 'feather gbq orc pickle sas stata'.split():
     funcname ='open_'+ft
     if not getattr(VisiData, funcname, None):
@@ -157,6 +159,10 @@ class PandasSheet(Sheet):
                 readfunc = partial(pd.read_json, lines=True)
             elif filetype == 'hdf5':
                 readfunc = partial(pd.read_hdf, lines=True)
+            elif filetype == 'pickle':
+                if not self.options.pandas_allow_pickle:
+                    vd.fail('unpickling runs arbitrary code; set pandas_allow_pickle to load')
+                readfunc = pd.read_pickle
             else:
                 readfunc = getattr(pd, 'read_'+filetype) or vd.error('no pandas.read_'+filetype)
             # readfunc() handles binary and text open()
