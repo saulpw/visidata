@@ -1,4 +1,5 @@
 import re
+import sys
 import time
 
 from visidata import vd, BaseSheet, Path, VisiData
@@ -31,7 +32,7 @@ def replay_reset(vs):  # noqa: ARG001
 def replay_end(vs):  # noqa: ARG001
     'Reset state for next test (no output).'
     if vd.options.debug:
-        print(f'{time.time() - vd.replay_start_time:.1f}s  {vd.replay_output_path}')
+        print(f'{time.time() - vd.replay_start_time:.1f}s  {vd.replay_output_path}', file=sys.stderr)
 
 _default_printStatus = VisiData.printStatus
 
@@ -42,9 +43,9 @@ def printStatus(vd, *args, priority=0, source=None):
         msg = str(args[0])
         allowed = any(re.search(p, msg) for p in vd.replay_allowed_errors)
         if not allowed:
-            print(f'{vd.replay_output_path}:{vd.replay_line}: {msg}')
+            print(f'{vd.replay_output_path}:{vd.replay_line}: {msg}', file=sys.stderr)
         elif vd.options.debug:
-            print(f'{vd.replay_output_path}:{vd.replay_line}: {msg} (expected)')
+            print(f'{vd.replay_output_path}:{vd.replay_line}: {msg} (expected)', file=sys.stderr)
     else:
         _default_printStatus(vd, *args, priority=priority, source=source)
 
@@ -55,7 +56,7 @@ def replay_output(vs):
     vd.saveSheets(outpath, vs, confirm_overwrite=False)
     vd.sync()
     if vd.options.debug:
-        print(f'{time.time() - vd.replay_start_time:.1f}s  {vd.replay_output_path}')
+        print(f'{time.time() - vd.replay_start_time:.1f}s  {vd.replay_output_path}', file=sys.stderr)
 
 
 @BaseSheet.api
