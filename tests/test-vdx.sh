@@ -121,7 +121,7 @@ done
 NOSAVE_PID=""
 if [ -n "$NOSAVE_BATCH" ]; then
     NOSAVE_BATCH+="replay-exit"$'\n'
-    env PYTHONPATH=. bin/vd --play - $VD_OPTS <<< "$NOSAVE_BATCH" > /tmp/vd-nosave-output.txt &
+    env PYTHONPATH=. bin/vd --play - $VD_OPTS <<< "$NOSAVE_BATCH" > /tmp/vd-nosave-output.txt 2>&1 &
     NOSAVE_PID=$!
 fi
 
