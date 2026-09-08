@@ -123,7 +123,7 @@ NOSAVE_PID=""
 NOSAVE_OUTPUT="$VD_TESTTMP/test-vdx-nosave-output.txt"
 if [ -n "$NOSAVE_BATCH" ]; then
     NOSAVE_BATCH+="replay-exit"$'\n'
-    env PYTHONPATH=. bin/vd --play - $VD_OPTS <<< "$NOSAVE_BATCH" > "$NOSAVE_OUTPUT" &
+    env PYTHONPATH=. bin/vd --play - $VD_OPTS <<< "$NOSAVE_BATCH" > "$NOSAVE_OUTPUT" 2>&1 &
     NOSAVE_PID=$!
 fi
 
