@@ -117,6 +117,14 @@ class RemoteZipInfo:
             i += fieldsz
 
 
+def safe_extract_path(base, member):
+    base = pathlib.Path(base).resolve()
+    target = (base / member).resolve()
+    if base != target and base not in target.parents:
+        raise Exception(f'refusing unsafe path in zip member: {member!r}')
+    return target
+
+
 class RemoteZipFile:
     fmt_eocd = '<IHHHHIIH'  # end of central directory
     fmt_eocd64 = '<IQHHIIQQQQ'  # end of central directory ZIP64
@@ -223,10 +231,10 @@ class RemoteZipFile:
 
             path = path or pathlib.Path('.')
 
-            outpath = path/member
+            outpath = safe_extract_path(path, member)
             os.makedirs(outpath.parent, exist_ok=True)
             with self.open(member) as fpin:
-                with open(path/member, mode='wb') as fpout:
+                with open(outpath, mode='wb') as fpout:
                     while True:
                         r = fpin.read(65536)
                         if not r:
@@ -354,6 +362,7 @@ def download_file(f, rzf, args):
     else:
         path = pathlib.Path(f.filename)
         if args.full_filepaths:
+            path = safe_extract_path('.', path)
             path.parent.mkdir(parents=True, exist_ok=True)
         else:
             path = path.name
