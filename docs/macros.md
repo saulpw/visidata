@@ -14,11 +14,14 @@ The basic usage is:
 
 1. Press `m` (macro-record) to begin recording the macro.
 2. Go through the commands you wish to record.
-3. Then type `m` again to complete the recording, and prompt for the keystroke or longname to bind it to.
+3. Then type `m` again to complete the recording.
+4. When prompted, assign the keystroke or longname to bind the macro to.
 
-The macro will then be executed every time the provided keystroke is used. Note: the Alt+keys and the function keys are left unbound; overriding other keys may conflict with existing bindings, now or in the future.
+The macro will then be executed every time the provided keystroke is used.
 
-Executing a macro will the series of commands starting on the current row and column on the current sheet.
+Note: the Alt+keys and the function keys are left unbound; overriding other keys may conflict with existing bindings, now or in the future.
+
+Macro execution is performed starting on the current row and column on the current sheet.
 
 ## Keystroke Binding
 
