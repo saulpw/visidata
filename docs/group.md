@@ -15,7 +15,7 @@ Aggregators provide summary statistics for grouped rows.
 Command             Operation
 --------            ----------
  `+` *aggregator*   adds *aggregator* to current column
-`z+` *aggregator*   displays result of *aggregator* over values in selected rows for current column
+`z+` *aggregator*   display aggregate for current column values in selected rows
 
 The following statistical aggregators are available:
 
