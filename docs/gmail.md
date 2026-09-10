@@ -3,7 +3,7 @@
 ## Why
 
 As of May 30 2022, Google [doesn't allow](https://support.google.com/accounts/answer/6010255?hl=en) you to log into your IMAP gmail account using only a username/password combination.
-So to open your Gmail in Visidata you need to create a Google API App, attach some scopes to it, generate a client ID and secret, then let Visidata use that client ID and secret (in a json file).
+So to open your Gmail in VisiData you need to create a Google API App, attach some scopes to it, generate a client ID and secret, then let VisiData use that client ID and secret (in a json file).
 
 ## How
 
@@ -133,7 +133,7 @@ Select the application type `Desktop App` and give your OAuth 2.0 client a name 
 
 ![](assets/gmail_oauth/15.png)
 
-Click `DOWNLOAD JSON` and move the downloaded file into the visidata project directory at the path `vdplus/api/google/` and call the file `google-creds.json`
+Click `DOWNLOAD JSON` and move the downloaded file into the VisiData project directory at the path `vdplus/api/google/` and call the file `google-creds.json`
 
 ---
 
@@ -157,7 +157,7 @@ Click `Select all`
 
 ![](assets/gmail_oauth/18.png)
 
-See your gmail in Visidata.
+See your gmail in VisiData.
 
 <Chef's Kiss>
 
