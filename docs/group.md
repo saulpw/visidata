@@ -47,9 +47,18 @@ The follow howtos will have examples of workflows involving grouping of data and
 ---
 The following examples use the file [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
 
-## How to group data (frequency table, pivot table, describe table,)
+## How to group data (describe table, pivot table, frequency table)
 
-## How to make a pivot table frequency table, pivot table, describe table,)
+---
+
+### How to create a describe table (descriptive statistics)
+
+1. Assign proper types to all numerical columns, by moving to each column in turn and pressing the appropriate key for the type : int (`#`),  float (`%`),  currency (`$`), or date (`@`).
+2. Press `Shift+I` to open the **Describe sheet**.
+
+---
+
+### How to create a pivot table
 
 <div class="asciicast">
     <asciinema-player id="player" poster="npt:0:10" rows=27 src="../casts/pivot.cast"></asciinema-player>
@@ -63,17 +72,14 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 
 ---
 
-## [How to create a frequency chart](#frequency) {#frequency}
-
-
-### How to make a histogram
+### [How to create a frequency table / histogram](#frequency) {#frequency}
 
 **Question** How many of each **Item** were sold?
 
 1. Move the cursor to the **Item** column.
-2. Press `Shift+F` to open the **Frequency table**.
+2. Press `Shift+F` to open the **Frequency Table**.
 
-### How to use the Frequency table to view the results of statistical aggregation
+#### How to use the Frequency table to view the results of statistical aggregation
 
 **Question** What was the monthly revenue?
 
@@ -85,12 +91,6 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 6. On the **OrderDate** column type `Shift+F` to open the **Frequency table**.
 7. On the **OrderDate** column, press `[` to sort the table in chrononological order.
 8. On the **sum_Total** column, type `^` followed by `Revenue` to rename the column.
-
----
-
-### How to calculate some descriptive statistics
-
-1. Press `Shift+I` to open the **Describe sheet**.
 
 ---
 
