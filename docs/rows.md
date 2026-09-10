@@ -39,19 +39,19 @@ In visidata, you filter rows by selecting rows of interest and then creating a n
 
     **or**
 
-    b. `"` to open a duplicate sheet which has references to the selected rows.  Edits performed within the duplicate sheet will also propagate to the source sheet.
+    b. `"` to open a duplicate sheet which has references to the selected rows.  Value edits to either sheet will apply in both sheets.
 
     **or**
 
-    c. `g"` to open a duplicate sheet which has references to all rows, and keeping the selected rows selected.  The selection can be modified on the parent sheet and the new sheet independently, but any changes will not be reflected on both sheets.
+    c. `g"` to open a duplicate sheet which has references to all rows, keeping the selected rows selected.  Value edits to either sheet will apply in both sheets. The active selection in each sheet is independent.
 
     **or**
 
-    d. `z"` to open a copy of the sheet which has copies of the selected rows.  Any changes will not affect the source sheet.
+    d. `z"` to open a copy of the sheet which has copies of the selected rows.  Value edits willin either sheet will not propgate to the other.
 
     **or**
 
-    d. `gz"` to open a copy of the sheet which has copies of all rows.  Any changes will be reflected on the source sheet
+    d. `gz"` to open a copy of the sheet which has copies of all rows.  Value edits willin either sheet will not propgate to the other.
 
 
 The following example uses the file [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
