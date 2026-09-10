@@ -41,6 +41,14 @@ Version: VisiData 2.7.1
 2. Move the cursor to the column to be filled.
 3. Press `gi`.
 
+**or**
+
+for more control, use a python expression to generate the values:
+1. Press `gs` to select all rows (or use other commands to select a subset of rows to fill).
+2. Move the cursor to the column to be filled.
+3. Press `gz=`, and enter `range(10,1000,7)` when prompted for a python expression.
+
+
 ## How to edit a cell
 
 1. Press `e` to edit an individual cell.
