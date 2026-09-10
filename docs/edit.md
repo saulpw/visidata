@@ -48,6 +48,9 @@ Command             Operation
 `Ctrl+O`            opens external $EDITOR to edit contents
 `Ctrl+R`            reloads initial value
 `Ctrl+A`/`Ctrl+E`   moves to beginning/end of line
+`Ctrl+K`            deletes to end of line
+`Ctrl+T`            swap previous two letters
+`Ctrl+Right/Left`   Skip word forward/backward
 `Backspace`         deletes previous character
 `Up`/`Down`         sets contents to previous/next in history
 `Tab`/`Shift-Tab`   autocompletes input (when available)
