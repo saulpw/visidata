@@ -8,7 +8,7 @@ Version: VisiData 1.1
 
 
 
-Graphs in VisiData can be used to visualise the relationship between numeric dependent variables vs a numeric independent variable. Optionally, a second independent variable, which is categorical,  adds an additional colored scatter plot for each category.
+Graphs in VisiData can be used to visualise the relationship between numeric dependent variables and a numeric independent variable. Optionally, a second independent variable, which is categorical, adds an additional colored scatter plot for each category.
 
 This example uses the file [StatusPR.csv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/StatusPR.csv).
 
