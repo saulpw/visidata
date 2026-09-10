@@ -11,6 +11,7 @@ version: VisiData 3.0
 Macros allow you to bind a series of commands to a key and then replay those commands within a session by using that keystroke.
 
 The basic usage is:
+
 1. Press `m` (macro-record) to begin recording the macro.
 2. Go through the commands you wish to record.
 3. Then type `m` again to complete the recording, and prompt for the keystroke or longname to bind it to.
