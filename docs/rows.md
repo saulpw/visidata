@@ -29,6 +29,8 @@ An example usage follows.
 
 ## How to filter rows
 
+In visidata, you filter rows by selecting rows of interest and then creating a new sheet from the selection.
+
 1. Press `s` or `t` on the rows to be filtered.
 
 2. Press
