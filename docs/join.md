@@ -6,22 +6,21 @@ Update: 2020-10-27
 Version: VisiData 2.0.1
 ---
 
-
+The following example uses the files [join_people.csv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/join_people.csv) and  [join_salary.csv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/join_salary.csv).
 
 ## How to join two datasets
 
 1.  Open the datasets in VisiData.
 
-    a. `vd d1.tsv d2.tsv`
+    a. `vd join_people.csv join_salary.csv`
 
     **or**
 
     b. Press `o` and enter a filepath for each file.
-2. Press `S` to open up the **Sheets Sheet**. Through here, you can navigate to every sheet by pressing `Enter` on the row it is referenced in.
-3. Navigate to the sheets you want the join, and set their shared columns as key columns with `!`.
-4. Press `S` to return to the **Sheets sheet**. Select the sheets you want to merge with `s`.
-5. Optional: If performing a left outer join, use `Shift+J` or `Shift+K` to reorder the sheets. The first sheet will be the one for whom all rows will be retained.
-6. Type `&` to open the join-chooser, and select your desired jointype with `Enter`.
+2. Navigate to each of the sheets and set the `ssn` column to be a key column with `!`.  The key columns will act as join columns. You can have multiple key columns per sheet.
+3. Press `S` to open up the **Sheets Sheet** and select the sheets you want to merge with `s` or 't'.
+4. Optional: If performing a left outer join, use `Shift+J` or `Shift+K` to reorder the sheets. The first sheet will be the one for whom all rows will be retained.
+5. Type `&` to open the join-chooser, and select your desired jointype with `Enter`.
 
 jointype            description
 ---------           -------------
@@ -34,12 +33,21 @@ jointype            description
 `append`            keeps all rows from all sheets; columns from all sheets
 `concat`            keeps all rows from all sheets; columns and type from first sheet
 
-## How to append two datasets
+## How to combine rows/columns from two datasets
+
+For this we use either the `append` or `concat` join types.
+
+The `append` type forms the union of all rows from all sheets. For columns which exist in multiple sheets,
+all data from these columns is combined into a single column.
+
+The `concat` type forms the intersection of all columns from all sheets, and projects the data from those columns in the the original sheets into rows in the resulting sheet.
+
+Steps:
 
 1. Open the datasets with VisiData.
 2. Press `Shift+S` to open the **Sheets sheet**.
 3. Use `s` or `t` to select the sheets to merge.
-4. Type `&` and press `Enter` on `append` to concatenate the selected datasets.
+4. Type `&` and press `Enter` on `append` or `concat` to combine the selected datasets.
 
 ## Identifying source rows
 
