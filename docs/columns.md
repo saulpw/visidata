@@ -201,7 +201,7 @@ uses the commands for column splitting and transformation with [xd/puzzles.tsv](
 
 The `*` command can be used to do content transformations of cells. The `g*` variant transforms in-place, instead of creating a new column.
 
-The following example uses [benchmarks.csv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/benchmarks.csv).
+The following example uses [benchmark.csv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/benchmark.csv).
 
 **Question** Transform the **SKU** values of *food* to *nutri*.
 
