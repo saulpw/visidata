@@ -125,7 +125,21 @@ Sheet.addCommand(None, 'go-screen-top', 'sheet.cursorRowIndex = sheet.topRowInde
 Sheet.addCommand(None, 'go-screen-middle', 'sheet.cursorRowIndex = (sheet.topRowIndex+sheet.bottomRowIndex)//2', 'go to the middle row visible on screen')
 Sheet.addCommand(None, 'go-screen-bottom', 'sheet.cursorRowIndex = sheet.bottomRowIndex', 'go to the last row visible on screen')
 
-Sheet.addCommand('zr', 'go-row-number', 'sheet.cursorRowIndex = int(input("move to row number: "))', 'go to the given row number (0-based)')
+@Sheet.api
+def goRowNumber(sheet, n):
+    'Move cursor to 0-based row *n*. Warn and clamp if out of bounds.'
+    n = int(n)
+    nrows = sheet.nRows
+    if nrows <= 0:
+        vd.warning('no rows')
+        sheet.cursorRowIndex = 0
+        return
+    if n < 0 or n >= nrows:
+        vd.warning(f'row {n} out of bounds (0-{nrows-1})')
+    sheet.cursorRowIndex = n
+
+
+Sheet.addCommand('zr', 'go-row-number', 'goRowNumber(input("move to row number: "))', 'go to the given row number (0-based)')
 
 
 Sheet.addCommand('<', 'go-prev-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorTypedValue: col.getTypedValue(row) != val, reverse=True, msg="no different value up this column")', 'go up current column to next value')
