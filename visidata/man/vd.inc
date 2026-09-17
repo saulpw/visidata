@@ -237,6 +237,8 @@ rename all visible columns to combined contents of current column for selected r
 .Pp
 .It "  i"
 .No add column with incremental values
+.It Ic "addcol-incr-key"
+.No add column with incremental values, restarting at each change in key columns
 .It " gi"
 .No set current column for selected rows to incremental values
 .It " zi" Ar step

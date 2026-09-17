@@ -16,6 +16,12 @@ Commands(s)     Operation
 
 ---
 
+## Increment by key
+
+{help.commands.addcol-incr-key}
+
+Mark grouping columns as keys with `!`.  Numbering restarts at `options.incr_base` whenever any key column changes in the current row order.  A returning key starts a new count.  With no key columns, numbering continues across all rows, like `i`.
+
 ## How to hide (remove) and unhide (return) columns
 
 ###### How to hide columns

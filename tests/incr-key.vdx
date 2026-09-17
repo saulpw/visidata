@@ -1,0 +1,14 @@
+open-file sample_data/incr-key.tsv
+addcol-incr-key
+rename-col ungrouped
+col group
+key-col
+addcol-incr-key
+rename-col by_group
+col subgroup
+key-col
+addcol-incr-key
+rename-col by_both
+option global incr_base 5
+addcol-incr-key
+rename-col from_five
