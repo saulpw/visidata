@@ -125,6 +125,7 @@ All `csv_*` options are passed unchanged into csv.reader() and csv.writer().
 ## xml {#xml}
 - `v` show only columns in current row attributes
 - `za` add column for xml attributes
+- `dive-xml-table` open current element's children as a table, with attributes and child values as columns
 
 ## pcap {#pcap}
 - loader-specific options

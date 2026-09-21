@@ -42,6 +42,7 @@ The keystroke immediately follows the bullet.  Do not say "Press" or "Use" withi
  - Write modifier keys as `Ctrl+X`, `Alt+X`, `Shift+X` — never caret notation (`^X`).
  - Separate prefix modifiers from the base key with a space: `g Enter`, `z Shift+F`, `gz Enter`.
  - Prefix option names with `options.` in prose (e.g. `options.numeric_binning`). Not needed in option tables where the column header already says "option".
+ - Match the surrounding entries' level of detail; loader reference additions usually need only a command summary.
  - Describe user-facing behavior, not implementation details. e.g. "Undoing on the frequency table also undoes on the source sheet" not "Both sheets share a single undo point".
  - Prefer lists to tables when each row works as a self-contained list item (not too many columns).
  - Use ASCII punctuation only. No em-dashes, en-dashes, smart quotes, or Unicode ellipses. Plain `-` or `:` instead.

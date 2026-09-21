@@ -1,0 +1,18 @@
+open-file tests/xml-table.xml
+row 0
+dive-xml-table
+col Details
+expand-col
+col Details.Late
+expand-col
+col Notes
+expand-col
+col Empty
+expand-col
+row 4
+col Details.Late.value
+open-cell
+assert-cell c
+row 1
+assert-cell d
+quit-sheet

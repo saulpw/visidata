@@ -1,0 +1,6 @@
+Title	Details.name	Details.age	Details._text	Details.Late.value	Details.Late.new	Genre	Notes._text	Notes.level	_text	OriginAppId	Empty.Deep
+First	Anne					Golf	plain				
+Second	[2] Bob; None	[2] 30; 40	[2] None; None	[2] None; None	[2] None; None	[2] Sports; Golf	rich	important			
+Third	Cara		direct text	yes					meaningful text	0	false
+Fourth	[2] None; None	[2] None; 50	[2] None; None	[2] [2] a; b; None	[2] [2] None; None; None						
+Fifth	[2] None; None	[2] None; 60	[2] None; None	[2] [2] c; d; None	[2] [2] field; None; None						
