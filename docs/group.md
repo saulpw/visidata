@@ -52,8 +52,11 @@ The following examples use the file [sample.tsv](https://raw.githubusercontent.c
 ## How to make a pivot table frequency table, pivot table, describe table,)
 
 <div class="asciicast">
-    <asciinema-player id="player" poster="npt:0:10" rows=27 src="../casts/pivot.cast"></asciinema-player>
+    <div id="player"></div>
     <script type="text/javascript" src="/asciinema-player.js"></script>
+    <script type="text/javascript">
+        AsciinemaPlayer.create('../casts/pivot.cast', document.getElementById('player'), { poster: 'npt:0:10', rows: 27 });
+    </script>
 </div>
 
 1. Move to the column A with the independent variable, and press `!` to mark it as a key column to group by.

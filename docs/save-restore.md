@@ -12,8 +12,11 @@ Version: VisiData 0.99
 This example creates and then uses the file [pivot.vdj](https://raw.githubusercontent.com/saulpw/visidata/stable/tests/pivot.vdj).
 
 <section id="hero">
-    <asciinema-player id="player" poster="npt:0:41" rows=27 src="../casts/save-restore.cast"></asciinema-player>
+    <div id="player"></div>
     <script type="text/javascript" src="/asciinema-player.js"></script>
+    <script type="text/javascript">
+        AsciinemaPlayer.create('../casts/save-restore.cast', document.getElementById('player'), { poster: 'npt:0:41', rows: 27 });
+    </script>
 </section>
 
 To save and restore a session in VisiData:
