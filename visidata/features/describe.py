@@ -111,13 +111,32 @@ class DescribeSheet(ColumnsSheet):
             return vs
         vd.warning(val)
 
+@DescribeSheet.api
+def select_describe_cell(sheet, row, col, select):
+    src = row.sheet
+    if col.name in ('errors', 'nulls'):
+        if select:
+            src.select(sheet.cursorValue)
+        else:
+            src.unselect(sheet.cursorValue)
+    else:
+        if col.name == 'distinct':
+            vals = sheet.cursorValue
+            containing = src.gatherBy(lambda r,c=row,vals=vals: c.getValue(r) in vals)
+        else:
+            val = sheet.cursorValue
+            containing = src.gatherBy(lambda r,c=row,v=val: c.getValue(r) == v)
+        if select:
+            src.select(containing, progress=False)
+        else:
+            src.unselect(containing, progress=False)
 
 TableSheet.addCommand('I', 'describe-sheet', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet]))', 'open Describe Sheet with descriptive statistics for all visible columns')
 BaseSheet.addCommand('gI', 'describe-all', 'vd.push(DescribeSheet("describe_all", source=vd.stackedSheets))', 'open Describe Sheet with description statistics for all visible columns from all sheets')
 IndexSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visible columns from selected sheets')
 
-DescribeSheet.addCommand('zs', 'select-cell', 'cursorRow.sheet.select(cursorValue)', 'select rows on source sheet which are being described in current cell')
-DescribeSheet.addCommand('zu', 'unselect-cell', 'cursorRow.sheet.unselect(cursorValue)', 'unselect rows on source sheet which are being described in current cell')
+DescribeSheet.addCommand('zs', 'select-cell', 'select_describe_cell(cursorRow, cursorCol, select=True)', 'select rows on source sheet matching current cell typed value')
+DescribeSheet.addCommand('zu', 'unselect-cell', 'select_describe_cell(cursorRow, cursorCol, select=False)', 'unselect rows on source sheet matching current cell typed value')
 
 vd.addMenuItems('Data > Statistics > describe-sheet')
 
