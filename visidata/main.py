@@ -461,8 +461,9 @@ def main_vd():
         vd.cmdlog.openHook(vs, vs.source)
         sources.append(vs)
 
-    for vs in reversed(sources):
+    for vs in sources:
         vd.push(vs, load=False) #1471, 1555
+    vd.sheets.reverse()  # put sheets in same order as command line args  #3225
 
     if not vd.sheets and not args.play and not options.batch:
         if cli_filetype:
@@ -516,9 +517,10 @@ def main_vd():
                 vd.execAsync = lambda *args, vd=vd, **kwargs: visidata.VisiData.execAsync(vd, *args, **kwargs)
                 run()
         else:
-            vd.push(vs)
-            for src in reversed(sources):
+            for src in sources:
                 vd.push(src, load=False)
+            vd.push(vs)
+            vd.sheets.reverse()
             vd.replay(vs)
             run()
 
