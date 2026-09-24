@@ -60,8 +60,22 @@ def nextColName(sheet, show_cells=True):
     vd.warning(f'found no column with name: {name}')
 
 
+@Sheet.api
+def goColNumber(sheet, n):
+    'Move cursor to 0-based visible column *n*. Warn and clamp if out of bounds.'
+    n = int(n)
+    ncols = sheet.nVisibleCols
+    if ncols <= 0:
+        vd.warning('no columns')
+        sheet.cursorVisibleColIndex = 0
+        return
+    if n < 0 or n >= ncols:
+        vd.warning(f'column {n} out of bounds (0-{ncols-1})')
+    sheet.cursorVisibleColIndex = n
+
+
 Sheet.addCommand('c', 'go-col-regex', 'sheet.cursorVisibleColIndex=nextColRegex(inputRegex("column name regex: ", type="regex-col", defaultLast=True))', 'go to next column with name matching regex')
-Sheet.addCommand('zc', 'go-col-number', 'sheet.cursorVisibleColIndex = int(input("move to column number: "))', 'go to given column number (0-based)')
+Sheet.addCommand('zc', 'go-col-number', 'goColNumber(input("move to column number: "))', 'go to given column number (0-based)')
 Sheet.addCommand('', 'go-col-name', 'sheet.cursorVisibleColIndex=nextColName()', 'go to next column with name matching string, case-insensitive')
 
 vd.addMenuItems('''
