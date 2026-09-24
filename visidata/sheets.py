@@ -745,19 +745,23 @@ class TableSheet(BaseSheet):
             # and larger. The goal is to avoid using nFooterRows. Because nFooterRows
             # cannot in general be calculated properly until after calcColLayout() has
             # determined which columns are visible.
-            vrows = self.rows[self.topRowIndex:self.topRowIndex+self.windowHeight]
-            if col.width is None and len(vrows) > 0:
-                measure_rows = vrows if self.nRows > 1000 else self.rows[:1000]  #1964
-                # delayed auto-width: assign _width to skip setModified
-                col._width = max(col.getMaxWidth(measure_rows), minColWidth)
-                if vcolidx < self.nVisibleCols-1:  # let last column fill up the max width
-                    col._width = min(col._width, self.options.default_width)
-
-            width = col.width if col.width is not None else self.options.default_width
+            if col.width is None:
+                vrows = self.rows[self.topRowIndex:self.topRowIndex+self.windowHeight]
+                if len(vrows) > 0:
+                    measure_rows = vrows if self.nRows > 1000 else self.rows[:1000]  #1964
+                    # delayed auto-width: assign _width to skip setModified
+                    col._width = max(col.getMaxWidth(measure_rows), minColWidth)
+                    if vcolidx < self.nVisibleCols-1:  # let last column fill up the max width
+                        col._width = min(col._width, self.options.default_width)
+                width = self.options.default_width
+            else:
+                width = col.width
 
             # when cursor showing a hidden column
             if vcolidx >= self.nVisibleCols and vcolidx == self.cursorVisibleColIndex:
                 width = self.options.default_width
+            elif col.hidden:  #non-cursor hidden cols have room for 1 letter + truncator  #3150
+                return 2
 
             #subtract 1 character of empty space from windowWidth, for the margin to the right of the sheet
             width = min(width, self.windowWidth-x-1)
@@ -804,7 +808,12 @@ class TableSheet(BaseSheet):
                 hdrcattr = update_attr(hdrcattr, colors.color_bottom_hdr, 5)
 
             if y+i < self.windowHeight:
-                clipdraw(scr, y+i, x, name, hdrcattr, w=colwidth, literal=True)
+                if col.width or colwidth != 2:
+                    #columns that are not hidden, or a hidden column where the cursor is:  draw the full name
+                    clipdraw(scr, y+i, x, name, hdrcattr, w=colwidth, literal=True)
+                else:  #any hidden column which does not contain the cursor
+                    #show just the first 1-2 characters (or clip it with ellipsis if it's wider than 2)
+                    clipdraw(scr, y+i, x, col.name, hdrcattr, w=2, literal=True)
             vd.onMouse(scr, x, y+i, colwidth, 1, BUTTON3_RELEASED='rename-col')
 
             if C and x+colwidth+dispwidth(C) < self.windowWidth-1 and y+i < self.windowHeight:
