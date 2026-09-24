@@ -1,0 +1,18 @@
+exec-python import os, shutil, tempfile, uuid; p=os.path.join(tempfile.gettempdir(), f'duckdb-composite-{uuid.uuid4().hex}.duckdb'); shutil.copyfile('tests/.visidata/duckdb_test.duckdb', p); vd.push(vd.openSource(p))
+exec-python vd.options.overwrite='y'
+exec-python vd.sheet.cursorRowIndex = next(i for i, r in enumerate(vd.sheet.rows) if r.schema_name == 'other' and r.table_name == 'edit composite')
+open-row
+row 1
+col note
+edit-cell bravo+
+row 2
+delete-row
+add-row
+col key one
+edit-cell 3
+col key"two
+edit-cell c
+col note
+edit-cell delta
+commit-sheet
+reload-sheet
