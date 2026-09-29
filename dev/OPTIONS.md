@@ -36,6 +36,8 @@ When you access `obj.options.foo`, the system resolves through contexts from hig
 3. **Global**
 4. **Default**
 
+Reading an undefined option with `vd.options.name`, `vd.options['name']`, or `vd.options.getonly()` returns `None` and warns once per option name per process, across all contexts; `vd.options.get(name, default)` returns the default silently. For a defined option, `getonly(name, obj, default)` still returns the default when no value is set directly on `obj`.
+
 ## Setting Options
 
 ```python
