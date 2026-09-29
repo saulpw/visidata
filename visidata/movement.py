@@ -99,6 +99,16 @@ def visibleWidth(self):
     return w
 
 
+@Sheet.api
+def go_row_number(sheet, number):
+    index = number if number >= 0 else sheet.nRows + number
+    sheet.cursorRowIndex = max(0, min(index, sheet.nRows-1))
+    if not sheet.nRows:
+        vd.warning('no rows')
+    elif index != sheet.cursorRowIndex:
+        vd.warning(f'row number `{number}` out of bounds; moved to row {sheet.cursorRowIndex}')
+
+
 @BaseSheet.api
 def jump_sheet(sheet, name):
     matches = [s for s in vd.allSheets if s.name == name]
@@ -125,7 +135,7 @@ Sheet.addCommand(None, 'go-screen-top', 'sheet.cursorRowIndex = sheet.topRowInde
 Sheet.addCommand(None, 'go-screen-middle', 'sheet.cursorRowIndex = (sheet.topRowIndex+sheet.bottomRowIndex)//2', 'go to the middle row visible on screen')
 Sheet.addCommand(None, 'go-screen-bottom', 'sheet.cursorRowIndex = sheet.bottomRowIndex', 'go to the last row visible on screen')
 
-Sheet.addCommand('zr', 'go-row-number', 'sheet.cursorRowIndex = int(input("move to row number: "))', 'go to the given row number (0-based)')
+Sheet.addCommand('zr', 'go-row-number', 'go_row_number(int(input("move to row number: ")))', 'go to the given row number (0-based, negative from end); warn if clamped')
 
 
 Sheet.addCommand('<', 'go-prev-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorTypedValue: col.getTypedValue(row) != val, reverse=True, msg="no different value up this column")', 'go up current column to next value')

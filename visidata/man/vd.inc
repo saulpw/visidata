@@ -176,7 +176,7 @@ go up/down current column to next selected row
 .It Ic " r" Ar regex
 .No go to next row with key matching Ar regex
 .It Ic "zc  zr" Ar number
-.No go to column/row Ar number No (0-based)
+.No go to column/row Ar number No (0-based, negative from end); warn if clamped
 .Pp
 .It Ic " H   J   K   L"
 slide current row/column left/down/up/right

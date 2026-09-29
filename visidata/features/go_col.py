@@ -4,6 +4,17 @@ from visidata import vd, Sheet, AttrDict, dispwidth, escape_vdcode
 
 
 @Sheet.api
+def go_col_number(sheet, number):
+    ncols = len(sheet.availCols)
+    index = number if number >= 0 else ncols + number
+    sheet.cursorVisibleColIndex = max(0, min(index, ncols-1))
+    if not ncols:
+        vd.warning('no columns')
+    elif index != sheet.cursorVisibleColIndex:
+        vd.warning(f'column number `{number}` out of bounds; moved to column {sheet.cursorVisibleColIndex}')
+
+
+@Sheet.api
 def nextColRegex(sheet, colregex):
     'Go to first visible column after the cursor matching `colregex`.'
     pivot = sheet.cursorVisibleColIndex
@@ -61,7 +72,7 @@ def nextColName(sheet, show_cells=True):
 
 
 Sheet.addCommand('c', 'go-col-regex', 'sheet.cursorVisibleColIndex=nextColRegex(inputRegex("column name regex: ", type="regex-col", defaultLast=True))', 'go to next column with name matching regex')
-Sheet.addCommand('zc', 'go-col-number', 'sheet.cursorVisibleColIndex = int(input("move to column number: "))', 'go to given column number (0-based)')
+Sheet.addCommand('zc', 'go-col-number', 'go_col_number(int(input("move to column number: ")))', 'go to given column number (0-based, negative from end); warn if clamped')
 Sheet.addCommand('', 'go-col-name', 'sheet.cursorVisibleColIndex=nextColName()', 'go to next column with name matching string, case-insensitive')
 
 vd.addMenuItems('''
