@@ -76,7 +76,7 @@ Other commands (not specific to Columns Sheet):
             self.cursorRowIndex = self.source[0].cursorColIndex
             self.columns[0].hide()  # hide 'sheet' column if only one sheet
         else:
-            self.rows = [col for vs in self.source for col in vs.visibleCols if isinstance(vs, Sheet) and vs is not self]
+            self.rows = [col for vs in self.source for col in vs.columns if isinstance(vs, Sheet) and vs is not self]
 
     def newRow(self):
         c = type(self.source[0])._coltype()
@@ -130,7 +130,7 @@ def join_cols(sheet):
 
 
 # copy vd.sheets so that ColumnsSheet itself isn't included (for recalc in addRow)
-globalCommand('gC', 'columns-all', 'vs=vd.allColumnsSheet; vs.reload(); vd.push(vs)', 'open Columns Sheet: edit column properties for all visible columns from all sheets on the sheets stack')
+globalCommand('gC', 'columns-all', 'vs=vd.allColumnsSheet; vs.reload(); vd.push(vs)', 'open Columns Sheet: edit column properties for all columns from all sheets on the sheets stack')
 
 Sheet.addCommand('C', 'columns-sheet', 'vd.push(ColumnsSheet(name+"_columns", source=[sheet]))', 'open Columns Sheet: edit column properties for current sheet')
 

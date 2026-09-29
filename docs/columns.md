@@ -334,6 +334,10 @@ When using `=`, and wanting to reference the current column, we recommend using 
 
 ## How to configure multiple columns
 
+{help.commands.columns_all}
+
+Hidden columns are included. Edit a hidden column's `width` to a positive number to unhide it on its source sheet.
+
 Properties of columns on the source sheet can be changed by using [standard editing commands](/man#edit) on its **Columns sheet** (accessed with `Shift+C`). In particular, it facilitates the selection of multiple columns, followed by utilising one of the `g`-prefixed commands to modify all of them.
 
 For a full list of available commands, see the [man page](/man#columns). Some example workflows follow.

@@ -676,7 +676,7 @@ edit either value or name, to edit reference
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic gC
-.No open Sy Columns Sheet No with all visible columns from all sheets
+.No open Sy Columns Sheet No with all columns from all sheets
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -717,8 +717,10 @@ jump to sheet referenced in current row
 push selected sheets to top of sheet stack
 .It Ic " a"
 add row to reference a new blank sheet
-.It Ic "gC  gI"
-.No open Sy Columns Sheet Ns / Ns Sy Describe Sheet No with all visible columns from selected sheets
+.It Ic "gC"
+.No open Sy Columns Sheet No with all columns from selected sheets
+.It Ic "gI"
+.No open Sy Describe Sheet No with all visible columns from selected sheets
 .It Ic "g^R"
 .No reload all selected sheets
 .It Ic "z^C  gz^C"
