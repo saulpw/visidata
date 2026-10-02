@@ -47,6 +47,12 @@ class SettingsMgr(collections.OrderedDict):
         'Inverse of objname(obj); returns obj if available'
         return self.allobjs.get(objname)
 
+    def forget(self, obj):
+        'Drop references to *obj* (a released sheet), and to sheets sourced from it (like its cmdlog), from allobjs and the _mappings cache.'
+        for k in [k for k, v in self.allobjs.items() if v is obj or (isinstance(v, BaseSheet) and v.source is obj)]:
+            del self.allobjs[k]
+        type(self)._mappings.cache_clear()  # lru_cache cannot evict a single key
+
     def unset(self, k, obj='default'):
         'Remove setting for given key in the given context.'
         objstr = self.objname(obj)
@@ -170,6 +176,11 @@ class OptionsObject:
             opt = self._opts._get(k, obj)
             self._cache[(k, obj or vd.activeSheet)] = opt
         return opt
+
+    def _uncache(self, obj):
+        'Drop cached lookups made in the context of *obj*.'
+        for k in [k for k in self._cache if k[1] is obj]:
+            del self._cache[k]
 
     def _set(self, k, v, obj=None, helpstr='', module=None):
         k, v = vd._resolve_optalias(k, v)  # to set deprecated and abbreviated options

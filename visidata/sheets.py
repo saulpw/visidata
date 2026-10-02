@@ -1258,6 +1258,32 @@ def quitAndReleaseMemory(vs):
         vs.rows = UNLOADED
         vd.remove(vs)
         vd.allSheets.remove(vs)
+        vd.releaseSheet(vs)
+
+
+@VisiData.api
+def releaseSheet(vd, vs):
+    'Drop internal references (caches, threads, undos) to *vs*, once it is gone from both vd.sheets and vd.allSheets, so it can be freed.'
+    if vs in vd.sheets or vs in vd.allSheets:
+        return
+
+    vd.options._uncache(vs)
+    for mgr in (vd.commands, vd.bindkeys, vd._options):
+        mgr.forget(vs)
+
+    vd.releaseThreads(vs)
+    vd.releaseUndos(vs)
+
+    if isinstance(vs, Sheet):
+        vs._selectedRows.clear()
+    for idx in (vd._sheetsSheet, vd._allSheetsSheet):  # lazy properties, maybe not created yet
+        if idx is not None:
+            idx.unselectRow(vs)
+
+    from visidata import cliptext
+    cliptext.dispwidth.cache_clear()
+    cliptext._clipstr.cache_clear()
+    vd.clearCaches()
 
 
 @Sheet.api

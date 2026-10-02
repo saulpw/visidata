@@ -71,6 +71,32 @@ class GlobalSheetsSheet(SheetsSheet):  #1620
     def sort(self):
         IndexSheet.sort(self)
 
+    def commitDeleteRow(self, row):
+        'A sheet deleted from sheets_all is gone for good: release it before the next command, once the delete (maybe async) has recorded its undos.'
+        vd._sheetsToRelease.append(row)
+
+
+vd._sheetsToRelease = []  # sheets deleted from sheets_all, to be released before the next command
+
+
+def releaseDeletedSheets(sheet, cmd, args, keystrokes):
+    'beforeExecHook: release sheets deleted from sheets_all, unless the delete is still running or about to be undone.'
+    if not vd._sheetsToRelease or vd.allSheetsSheet.currentThreads:
+        return
+    if cmd.longname in ('undo-last', 'redo-last'):  # releasing now would drop the undo of the delete itself
+        return
+    sheets, vd._sheetsToRelease = vd._sheetsToRelease, []
+    for vs in sheets:
+        if vs in vd.allSheets:  # delete was undone
+            continue
+        if vs in vd.sheets:  # still open: release once it is quit
+            if vs not in vd._sheetsToRelease:
+                vd._sheetsToRelease.append(vs)
+            continue
+        vd.releaseSheet(vs)
+
+vd.beforeExecHooks.append(releaseDeletedSheets)
+
 
 @VisiData.lazy_property
 def sheetsSheet(vd):

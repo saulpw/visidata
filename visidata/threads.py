@@ -216,6 +216,21 @@ def _annotate_thread(t, endTime=None):
 vd.threads = [_annotate_thread(threading.current_thread(), 0)]
 
 @VisiData.api
+def releaseThreads(vd, vs):
+    'Drop finished threads of released sheet *vs*; unlink it from the others.'
+    main = threading.main_thread()
+    for t in list(vd.threads):  # remove in place: other threads may be appending concurrently
+        if getattr(t, 'sheet', None) is not vs:
+            continue
+        if t.endTime is not None and t is not main:
+            vd.threads.remove(t)
+        else:
+            t.sheet = None
+    if getattr(threading.current_thread(), 'sheet', None) is vs:
+        threading.current_thread().sheet = None
+
+
+@VisiData.api
 def execSync(vd, func, *args, sheet=None, **kwargs):
     'Execute ``func(*args, **kwargs)`` in this thread (synchronously). A drop-in substitute for vd.execAsync.'
     vd.callNoExceptions(func, *args, **kwargs)
@@ -279,8 +294,9 @@ def _toplevelTryFunc(func, *args, **kwargs):
     finally:
         t.endTime = time.process_time()
 
-    if t.sheet:
-        t.sheet.currentThreads.remove(t)
+    sheet = t.sheet  # read once: vd.releaseThreads may clear it concurrently
+    if sheet:
+        sheet.currentThreads.remove(t)
 
     try:
         vd._runToCapacity()

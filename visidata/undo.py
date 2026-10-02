@@ -80,6 +80,54 @@ def undo(vd, sheet):
     vd.fail("nothing to undo on current sheet")
 
 
+def _refersTo(x, target, depth=4):
+    'Return True if *x* is *target*, or contains it within *depth* levels of containers or closures.'
+    if x is target:
+        return True
+    if depth <= 0:
+        return False
+    if isinstance(x, dict):
+        x = list(x.values())
+    if isinstance(x, (list, tuple, set)):
+        if len(x) > 1000:  # e.g. a copy of some sheet's rows: only look at the top level
+            return any(v is target for v in x)
+        return any(_refersTo(v, target, depth-1) for v in x)
+    if callable(x):
+        if getattr(x, '__self__', None) is target:
+            return True
+        for cell in getattr(x, '__closure__', None) or ():
+            try:
+                if _refersTo(cell.cell_contents, target, depth-1):
+                    return True
+            except ValueError:  # empty cell
+                pass
+    return False
+
+
+def _undoRefersTo(undo, vs):
+    undofunc, args, kwargs = undo
+    return _refersTo(undofunc, vs) or _refersTo(args, vs) or _refersTo(kwargs, vs)
+
+
+@VisiData.api
+def releaseUndos(vd, vs):
+    'Drop undos that keep released sheet *vs* (or its rows) alive.'
+    vs.undone.clear()
+    if getattr(vs, '_cmdlog_sheet', None) is not None:  # lazy_property, maybe not created yet
+        for r in vs._cmdlog_sheet.rows:  # same row objects as in vd.cmdlog
+            if r.undofuncs:
+                r.undofuncs = []
+
+    cmdlogrows = list(vd.cmdlog.rows)
+    if vd.activeCommand:
+        cmdlogrows.append(vd.activeCommand)
+    for r in cmdlogrows:
+        if r.undofuncs and any(_undoRefersTo(u, vs) for u in r.undofuncs):
+            # a partial undo would be wrong, and an empty one would make undo silently skip to an older command
+            msg = f'cannot undo {r.longname}: sheet "{vs.name}" was released'
+            r.undofuncs = [(vd.warning, (msg,), {})]
+
+
 @VisiData.api
 def redo(vd, sheet):
     sheet.undone or vd.fail("nothing to redo")
