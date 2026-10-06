@@ -114,6 +114,8 @@ class Column(Extensible):
         'Reset column cache, attach column to *sheet*, and reify column name.'
         if self._cachedValues:
             self._cachedValues.clear()
+        if hasattr(self, '_aggregatedTotals') and self._aggregatedTotals:
+            self._aggregatedTotals.clear()
         if sheet:
             self.sheet = sheet
         self.name = self._name
@@ -158,7 +160,8 @@ class Column(Extensible):
 
     @type.setter
     def type(self, t):
-        if self._type != t:
+        changed = (self._type != t)
+        if changed:
             vd.addUndo(setattr, self, '_type', self.type)
             if self.sheet:
                 self.sheet.setModified()
@@ -168,6 +171,8 @@ class Column(Extensible):
             self.typestr = t
         else:
             self._type = t
+        if changed:
+            self.recalc()
 
     @property
     def width(self):
