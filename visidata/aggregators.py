@@ -53,6 +53,11 @@ Column.init('aggstr', str, copy=True)
 Column.init('_aggregatedTotals', dict)  # [aggname] -> agg total over all rows
 
 
+@Column.after
+def recalc(col, sheet=None):
+    col._aggregatedTotals.clear()  #3234
+
+
 def aggregators_get(col):
     'A space-separated names of aggregators on this column.'
     aggs = []

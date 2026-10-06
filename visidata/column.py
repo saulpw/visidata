@@ -158,8 +158,9 @@ class Column(Extensible):
 
     @type.setter
     def type(self, t):
-        if self._type != t:
-            vd.addUndo(setattr, self, '_type', self.type)
+        changed = (self._type != t)
+        if changed:
+            vd.addUndo(self._undoType, self.type)
             if self.sheet:
                 self.sheet.setModified()
         if not t:
@@ -168,6 +169,12 @@ class Column(Extensible):
             self.typestr = t
         else:
             self._type = t
+        if changed:
+            self.recalc()  #3234 type-dependent caches (like aggregate totals)
+
+    def _undoType(self, t):
+        self._type = t
+        self.recalc()
 
     @property
     def width(self):

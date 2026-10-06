@@ -31,3 +31,24 @@ class TestColumnCache:
         assert c.getValue(s.rows[0]) == 99           # redraw repopulates cache
         c.setValue(s.rows[0], 1, setModified=False)  # undo's setValue
         assert c.getValue(s.rows[0]) == 1            # revert visible without another recalc
+
+    def test_type_change_clears_aggregated_totals(self):
+        'Changing column type, and undoing that, recomputes aggregate totals.  #3234'
+        from visidata import vd, TableSheet, ColumnItem, anytype
+
+        s = TableSheet('t_agg', rows=[['1'], ['2']], columns=[ColumnItem('A', 0, type=anytype)])
+        c = s.columns[0]
+        agg = vd.aggregators['sum']
+
+        def total():
+            c.aggregateTotal(agg)
+            vd.sync()
+            return c.aggregateTotal(agg)
+
+        assert total() != 3   # sum of strings is an error
+
+        c.type = int
+        assert total() == 3
+
+        c._undoType(anytype)  # what undo of type-int calls
+        assert total() != 3
