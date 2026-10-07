@@ -30,7 +30,7 @@ class VcfSheet(PythonSheet):
             for line in fp:
                 lines.append(line)
                 if line.startswith('END:'):
-                    row = vobject.readOne('\n'.join(lines))
+                    row = vobject.readOne(''.join(lines))
                     for k, v in row.contents.items():
                         if v and str(v[0].value).startswith('(None)'):
                             continue
