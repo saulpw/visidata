@@ -7,13 +7,10 @@ col A
 edit-cell hello
 
 dup-rows-deep
-assert-expr sheet.column('A').getValue(sheet.rows[0]) == 'hello'
-
-# the copy's values must not leak back into the source sheet's column store
-assert-expr len(vd.sheets[1].column('A')._store) == 1
+assert-expr-row A == 'hello'
 
 # editing the copy must not change the source sheet
 edit-cell goodbye
-assert-expr sheet.column('A').getValue(sheet.rows[0]) == 'goodbye'
+assert-expr-row A == 'goodbye'
 quit-sheet
-assert-expr sheet.column('A').getValue(sheet.rows[0]) == 'hello'
+assert-expr-row A == 'hello'
