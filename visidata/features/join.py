@@ -359,8 +359,7 @@ class ConcatSheet(Sheet):
     'combination of multiple sheets by row concatenation. source=list of sheets. '
     columns = [ItemColumn('origin_sheet', 0, width=0)]
     def iterload(self):
-        # only one column with each name allowed per sheet
-        keyedcols = collections.defaultdict(dict)  # name -> { sheet -> col }
+        keyedcols = collections.defaultdict(dict)  # name or (name, nth) -> { sheet -> col }
 
         with Progress(gerund='loading'):
             vd.ensureLoaded(self.source)
