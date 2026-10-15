@@ -12,6 +12,30 @@ def open_vds(vd, p):
     return VdsIndexSheet(p.base_stem, source=p)
 
 
+def _colstate(col):
+    '''Return the .vds metadata dict for *col*.
+
+    A column type is only preserved if it can actually be reconstructed on load:
+    its class must be in the global namespace, and its saved state must be
+    JSON-serializable.  Anything else (JoinKeyColumn, SubColumnFunc, ...) is
+    saved as a plain Column holding the values by name  #3175.'''
+    d = col.__getstate__()
+    if not isinstance(col, (SettableColumn, ItemColumn)):
+        clsname = type(col).__name__
+        if clsname in vd.getGlobals():
+            try:
+                json.dumps(d)
+            except TypeError:
+                pass
+            else:
+                d['col'] = clsname
+                return d
+
+    d['col'] = 'Column'
+    d['expr'] = col.name  #2037  override expr
+    return d
+
+
 @VisiData.api
 def save_vds(vd, p, *sheets):
     'Save in custom VisiData format, preserving columns and their attributes.'
@@ -24,15 +48,7 @@ def save_vds(vd, p, *sheets):
 
             # class and attrs for each column in vs
             for col in vs.columns:
-                d = col.__getstate__()
-                if isinstance(col, SettableColumn):
-                    d['col'] = 'Column'
-                elif isinstance(col, ItemColumn):
-                    d['col'] = 'Column'
-                    d['expr'] = col.name  #2037  override expr
-                else:
-                    d['col'] = type(col).__name__
-                fp.write('#'+json.dumps(d)+NL)
+                fp.write('#'+json.dumps(_colstate(col))+NL)
 
             if not vs.rows:
                 fp.write(NL)  #2342  blank line to separate sheets without rows

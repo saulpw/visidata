@@ -1,0 +1,10 @@
+# a full JoinSheet should round-trip through .vds  #3175
+
+open-file tests/data1.tsv
+key-col
+open-file tests/data2.tsv
+key-col
+join-sheets-top2 full
+save-sheet $VD_TESTTMP/issue3175-vds-full.vds
+open-file $VD_TESTTMP/issue3175-vds-full.vds
+open-row
