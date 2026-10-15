@@ -101,42 +101,54 @@ class DescribeSheet(ColumnsSheet):
         d[func.__name__] = r
         return r
 
+    def describedRows(self, col, srccol):
+        'Return rows from the source sheet of *srccol* which are described by the statistic in *col*.'
+        if not isinstance(col, DescribeColumn):
+            vd.fail('no rows described in this column')
+
+        d = self.describeData[srccol]
+        statname = col.expr
+        if statname in ('errors', 'nulls'):
+            return d[statname]
+        if statname not in d:
+            return []
+
+        stat = d[statname]
+        isNull = srccol.sheet.isNullFunc()
+        ret = []
+        for sr in Progress(srccol.sheet.rows, 'gathering'):
+            try:
+                v = srccol.getValue(sr)
+                if isNull(v):
+                    if statname == 'distinct':
+                        ret.append(sr)
+                    continue
+                v = srccol.type(v)
+            except Exception:
+                continue
+
+            # match typed value, as computed in reloadColumn  #3223
+            if statname in ('mode', 'min', 'max', 'median'):
+                if v == stat:
+                    ret.append(sr)
+            else:  # distinct and aggregators: all rows with a value
+                ret.append(sr)
+        return ret
+
     def openCell(self, col, row):
         'open copy of source sheet with rows described in current cell'
-        val = col.getValue(row)
-        if isinstance(val, list):
-            vs=copy(row.sheet)
-            vs.rows=val
-            vs.name+="_%s_%s"%(row.name,col.name)
-            return vs
-        vd.warning(val)
+        vs=copy(row.sheet)
+        vs.rows=self.describedRows(col, row)
+        vs.name+="_%s_%s"%(row.name,col.name)
+        return vs
 
-@DescribeSheet.api
-def select_describe_cell(sheet, row, col, select):
-    src = row.sheet
-    if col.name in ('errors', 'nulls'):
-        if select:
-            src.select(sheet.cursorValue)
-        else:
-            src.unselect(sheet.cursorValue)
-    else:
-        if col.name == 'distinct':
-            vals = sheet.cursorValue
-            containing = src.gatherBy(lambda r,c=row,vals=vals: c.getValue(r) in vals)
-        else:
-            val = sheet.cursorValue
-            containing = src.gatherBy(lambda r,c=row,v=val: c.getValue(r) == v)
-        if select:
-            src.select(containing, progress=False)
-        else:
-            src.unselect(containing, progress=False)
 
 TableSheet.addCommand('I', 'describe-sheet', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet]))', 'open Describe Sheet with descriptive statistics for all visible columns')
 BaseSheet.addCommand('gI', 'describe-all', 'vd.push(DescribeSheet("describe_all", source=vd.stackedSheets))', 'open Describe Sheet with description statistics for all visible columns from all sheets')
 IndexSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visible columns from selected sheets')
 
-DescribeSheet.addCommand('zs', 'select-cell', 'select_describe_cell(cursorRow, cursorCol, select=True)', 'select rows on source sheet matching current cell typed value')
-DescribeSheet.addCommand('zu', 'unselect-cell', 'select_describe_cell(cursorRow, cursorCol, select=False)', 'unselect rows on source sheet matching current cell typed value')
+DescribeSheet.addCommand('zs', 'select-cell', 'cursorRow.sheet.select(describedRows(cursorCol, cursorRow))', 'select rows on source sheet which are being described in current cell')
+DescribeSheet.addCommand('zu', 'unselect-cell', 'cursorRow.sheet.unselect(describedRows(cursorCol, cursorRow))', 'unselect rows on source sheet which are being described in current cell')
 
 vd.addMenuItems('Data > Statistics > describe-sheet')
 
