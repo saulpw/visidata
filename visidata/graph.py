@@ -92,8 +92,8 @@ class GraphSheet(InvertedCanvas):
         self.ycols or vd.fail('%s is non-numeric' % '/'.join(yc.name for yc in kwargs.get('ycols')))
 
     def resetCanvasDimensions(self, windowHeight, windowWidth):
-        if self.left_margin < self.ylabel_maxw:
-            self.left_margin = self.ylabel_maxw
+        # 1 char for y-name, 1 char for blank, 10 chars for y-tick-labels
+        self.left_margin = 4 + 20
         super().resetCanvasDimensions(windowHeight, windowWidth)
 
     @asyncthread
@@ -256,13 +256,9 @@ class GraphSheet(InvertedCanvas):
     def add_y_axis_label(self, frac):
         label_data_y = self.visibleBox.ymin + frac*self.visibleBox.h
         txt = self.formatYLabel(label_data_y)
-        w = (dispwidth(txt)+1)*2
-        if self.ylabel_maxw < w:
-            self.ylabel_maxw = w
         y = self.scaleY(label_data_y)
-
-        # plot y-axis labels on the far left of the canvas, but within the plotview height-wise
-        self.plotlabel(0, y, txt, 'graph_axis')
+        x = 4 # start after y-name and blank space
+        self.plotlabel(x, y, txt, 'graph_axis')
 
     def add_x_axis_label(self, frac):
         label_data_x = self.visibleBox.xmin + frac*self.visibleBox.w
@@ -289,16 +285,24 @@ class GraphSheet(InvertedCanvas):
 
     def createLabels(self):
         self.gridlabels = []
-        self.ylabel_maxw = self.leftMarginPixels
 
-        # y-axis
+        # Title
+        xname = ','.join(xcol.name for xcol in self.xcols if vd.isNumeric(xcol)) or 'row#'
+        yname = ','.join(ycol.name for ycol in self.ycols)
+        title = f'{xname} vs {yname}'
+        title_width_pixels = dispwidth(title) * 2
+        title_x = self.plotviewBox.xmin + (self.plotviewBox.w / 2) - (title_width_pixels / 2)
+        title_y = self.plotviewBox.ymin - 8
+        self.plotlabel(title_x, title_y, title, 'graph_axis')
+
+        # y-axis ticks
         self.add_y_axis_label(1.00)
         self.add_y_axis_label(0.75)
         self.add_y_axis_label(0.50)
         self.add_y_axis_label(0.25)
         self.add_y_axis_label(0.00)
 
-        # x-axis
+        # x-axis ticks
         self.add_x_axis_label(1.00)
         self.add_x_axis_label(0.75)
         self.add_x_axis_label(0.50)
@@ -307,10 +311,6 @@ class GraphSheet(InvertedCanvas):
 
         # TODO: if 0 line is within visible bounds, explicitly draw the axis
         # TODO: grid lines corresponding to axis labels
-
-        xname = ','.join(xcol.name for xcol in self.xcols if vd.isNumeric(xcol)) or 'row#'
-        xname, _ = clipstr(xname, self.left_margin//2-2)
-        self.plotlabel(0, self.plotviewBox.ymax+4, xname+'»', 'graph_axis')
 
     def rowsWithin(self, plotter_bbox):
         'return list of deduped rows within plotter_bbox'
