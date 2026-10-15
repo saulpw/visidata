@@ -119,6 +119,12 @@ All PRs must include an [AI Level](ai-levels.md) (0-10) in the PR body. At level
 
 Run `dev/test-all.sh` locally before pushing. After creating a PR, check CI status with `gh pr checks` and fix any failures before moving on.
 
+### External PRs
+
+Merge a human contributor's PR on GitHub with "Rebase and merge", so it shows as merged; merge locally only when the commits need changes that can't go on the PR branch.
+
+For PRs at AI level 5+, push small cleanups (test style, nits) to the PR branch ourselves instead of asking the author for another round.
+
 ### Documentation
 
 Update docs in the same commit as the code change, not as a separate follow-up commit. Check `docs/README.md` for which files to update.
