@@ -359,8 +359,7 @@ class ConcatSheet(Sheet):
     'combination of multiple sheets by row concatenation. source=list of sheets. '
     columns = [ItemColumn('origin_sheet', 0, width=0)]
     def iterload(self):
-        # only one column with each name allowed per sheet
-        keyedcols = collections.defaultdict(dict)  # name -> { sheet -> col }
+        keyedcols = collections.defaultdict(dict)  # name or (name, nth) -> { sheet -> col }
 
         with Progress(gerund='loading'):
             vd.ensureLoaded(self.source)
@@ -371,15 +370,18 @@ class ConcatSheet(Sheet):
                     yield (sheet, r)
                     prog.addProgress(1)
 
-                for idx, col in enumerate(sheet.visibleCols):
-                    if not keyedcols[col.name]:  # first column with this name/number
-                        self.addColumn(ConcatColumn(col.name, cols=keyedcols[col.name], type=col.type))
+                # columns with duplicate names on the same sheet are keyed by
+                # (name, nth occurrence), so they stay distinct columns  #3178
+                nameoccurrences = collections.Counter()
+                for col in sheet.visibleCols:
+                    n = nameoccurrences[col.name]
+                    nameoccurrences[col.name] += 1
+                    key = col.name if n == 0 else (col.name, n)
 
-                    if sheet in keyedcols[col.name]:  # two columns with same name on sheet
-                        keyedcols[idx][sheet] = col  # key by column num instead
-                        self.addColumn(ConcatColumn(col.name, cols=keyedcols[idx], type=col.type))
-                    else:
-                        keyedcols[col.name][sheet] = col
+                    if not keyedcols[key]:  # first column with this name/occurrence
+                        self.addColumn(ConcatColumn(col.name, cols=keyedcols[key], type=col.type))
+
+                    keyedcols[key][sheet] = col
 
 
 @VisiData.api
