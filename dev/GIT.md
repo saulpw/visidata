@@ -84,6 +84,8 @@ We've started doing this for PRs also. It's a bit of clutter but it helps:
 
 Commit before posting GitHub comments/replies. Let Saul push first, then post the comment. Don't post replies to issues before the relevant code is committed and pushed.
 
+Before drafting any public reply, consider who is on the other end.  If the contributor is clearly human (especially one waiting on us), Saul replies himself; flag it to him instead of drafting an AI comment.
+
 AI-generated comments should have the full attribution at the bottom: `[this message written by Claude Opus 4.6 and approved by @saulpw]`.
 
 ### Closing Issues for Implemented Features
