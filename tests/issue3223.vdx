@@ -1,0 +1,20 @@
+# select-cell on Describe sheet selects source rows matching typed stats  #3223
+open-file sample_data/benchmark.csv
+col Date
+type-date
+col Quantity
+type-int
+describe-sheet
+
+# mode of typed Date column
+row 0
+col mode
+select-cell
+
+# max of typed int column
+row 4
+col max
+select-cell
+
+quit-sheet
+dup-selected
