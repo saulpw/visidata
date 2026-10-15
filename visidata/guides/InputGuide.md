@@ -34,6 +34,11 @@ Keystrokes available at any input prompt.
 - `Up`/`Down` to cycle previous inputs for this input type
 - `Tab`/`Shift+Tab` to cycle completions
 
+## Multiple fields
+
+- `Shift+Down`/`Shift+Up` to move to the next/previous field
+- `Tab`/`Shift+Tab` also move between fields, except in a field with completion (like a filename), where they complete
+
 ## Other
 
 - `Ctrl+G` to cycle sidebar help panes

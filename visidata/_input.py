@@ -513,17 +513,19 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
     while True:
         try:
             input_kwargs = kwargs[cur_input_key]
+            bindings = {
+                'Shift+Up':   change_input(-1),
+                'Shift+Down': change_input(+1),
+            }
+            if not input_kwargs.get('completer'):  #3169
+                bindings['Shift+Tab'] = change_input(-1)
+                bindings['Tab'] = change_input(+1)
             input_kwargs['value'] = vd.input(**input_kwargs,
                                              attr=colors.color_edit_cell,
                                              updater=_drawPrompt,
                                              record=False,
                                              _input_rows=len(keys),
-                                             bindings={
-                'Shift+Tab':   change_input(-1),
-                'Tab':     change_input(+1),
-                'Shift+Up':   change_input(-1),
-                'Shift+Down': change_input(+1),
-            })
+                                             bindings=bindings)
             break
         except ChangeInput as e:
             input_kwargs['value'] = e.args[0]
