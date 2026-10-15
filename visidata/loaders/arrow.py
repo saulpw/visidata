@@ -60,12 +60,13 @@ class ArrowSheet(Sheet):
     def iterload(self):
         pa = vd.importExternal('pyarrow')
 
+        with self.source.open_bytes() as fp:  # read once, so stdin works for either format  #3184
+            buf = pa.py_buffer(fp.read())
+
         try:
-            with pa.OSFile(str(self.source), 'rb') as fp:
-                self.coldata = pa.ipc.open_file(fp).read_all()
+            self.coldata = pa.ipc.open_file(buf).read_all()
         except pa.lib.ArrowInvalid:
-            with pa.OSFile(str(self.source), 'rb') as fp:
-                self.coldata = pa.ipc.open_stream(fp).read_all()
+            self.coldata = pa.ipc.open_stream(buf).read_all()
 
         self.columns = []
         for colnum, col in enumerate(self.coldata):
