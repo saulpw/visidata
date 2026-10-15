@@ -1,0 +1,16 @@
+# deepcopied rows should keep the values set on SettableColumns; the values are
+# stored by rowid, and the copies have new rowids  #3174
+
+open-new
+add-row
+col A
+edit-cell hello
+
+dup-rows-deep
+assert-expr-row A == 'hello'
+
+# editing the copy must not change the source sheet
+edit-cell goodbye
+assert-expr-row A == 'goodbye'
+quit-sheet
+assert-expr-row A == 'hello'
