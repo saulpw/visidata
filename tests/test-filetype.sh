@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Test -f/filetype per-path semantics  #1242 #573 #2286
 source tests/testenv.sh
+vd_testtmp
+OUTDIR="$VD_TESTTMP/test-filetype"
 
 VDB="$VD --batch"
 FAIL=0
@@ -34,7 +36,6 @@ firstline_check() {
 }
 
 mkdir -p $OUTDIR
-rm -f $OUTDIR/ft-*
 
 # CSV content with an uninformative extension
 printf 'a,b\n1,2\n3,4\n' > $OUTDIR/ft-data.txt

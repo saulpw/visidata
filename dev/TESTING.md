@@ -22,7 +22,7 @@ Defined in `tests/testenv.sh`, which all test scripts source. `test-all.sh` re-e
 | `VD` | `$PYTHON -m visidata --config tests/.visidatarc --visidata-dir tests/.visidata` | VisiData command with stock test config |
 | `NPROCS` | `$(nproc)` | Parallel test processes |
 | `OUTDIR` | `tests/output` | Directory for test output files |
-| `VD_TESTTMP` | `/tmp/vd-tests-<datetime>-XXXXXX` | Scratch dir for the whole run, created by `vd_testtmp` in `test-all.sh`/`test-vdx.sh` and removed when that script exits |
+| `VD_TESTTMP` | `/tmp/vd-tests-<datetime>-XXXXXX` | Scratch dir shared by the suite; `test-all.sh` and scripts needing scratch files call `vd_testtmp`. Only the creating script removes it on exit; each script uses its own named paths inside |
 
 Use `$VD` in test scripts instead of hardcoding `bin/vd` or `python -m visidata`. Both paths call the same `vd_cli()` entry point; `$PYTHON -m visidata` is preferred because it's explicit about which Python interpreter is used. `$VD` includes `--config` and `--visidata-dir` so tests are isolated from the user's personal config.
 

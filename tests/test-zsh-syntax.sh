@@ -3,9 +3,9 @@
 # apostrophe-bearing defaults (e.g. http_req_headers) stay a single shell word.
 source tests/testenv.sh
 set -e
+vd_testtmp
 
-COMPFILE=$(mktemp)
-trap 'rm -f "$COMPFILE"' EXIT
+COMPFILE="$VD_TESTTMP/test-zsh-syntax.zsh"
 
 $PYTHON dev/zsh-completion.py "$COMPFILE"
 
