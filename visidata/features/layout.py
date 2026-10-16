@@ -2,11 +2,7 @@ from visidata import VisiData, vd, Column, Sheet, Fanout, asyncthread
 
 @Column.api
 def setWidth(self, w):
-    if self.width != w:
-        vd.addUndo(setattr, self, '_width', self.width)
-        if self.sheet and (self.width == 0 or w == 0):  # hide/unhide
-            self.sheet.setModified()
-    self._width = w
+    self.width = w
 
 
 @Column.api
@@ -41,9 +37,8 @@ def toggleMultiline(self):
 
 @VisiData.api
 def unhide_cols(vd, cols, rows):
-    'sets appropriate width if column was either hidden (0) or unseen (None)'
     for c in cols:
-        c.setWidth(abs(c.width or 0) or c.getMaxWidth(rows))
+        c.setWidth(c.width or c.getMaxWidth(rows))
 
 @VisiData.api
 def hide_col(vd, col):

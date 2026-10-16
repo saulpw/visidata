@@ -747,7 +747,7 @@ class TableSheet(BaseSheet):
             # cannot in general be calculated properly until after calcColLayout() has
             # determined which columns are visible.
             vrows = self.rows[self.topRowIndex:self.topRowIndex+self.windowHeight]
-            if col.width is None and len(vrows) > 0:
+            if col.width is None and not col.hidden and len(vrows) > 0:
                 measure_rows = vrows if self.nRows > 1000 else self.rows[:1000]  #1964
                 # delayed auto-width: assign _width to skip setModified
                 col._width = max(col.getMaxWidth(measure_rows), minColWidth)
@@ -756,9 +756,8 @@ class TableSheet(BaseSheet):
 
             width = col.width if col.width is not None else self.options.default_width
 
-            # when cursor showing a hidden column
-            if vcolidx >= self.nVisibleCols and vcolidx == self.cursorVisibleColIndex:
-                width = self.options.default_width
+            if col.hidden and vcolidx != self.cursorVisibleColIndex:
+                width = 0
 
             #subtract 1 character of empty space from windowWidth, for the margin to the right of the sheet
             width = min(width, self.windowWidth-x-1)

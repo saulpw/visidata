@@ -51,7 +51,7 @@ class Column(Extensible):
            - ``False`` (default): getValue never caches; calcValue is always called.
            - ``True``: getValue maintains a cache of ``options.col_cache_size``.
            - ``"async"``: ``getValue`` launches thread for every uncached result, returns invalid value until cache entry available.
-        - *width*: == 0 if hidden, None if auto-compute next time.
+        - *width*: None if auto-compute next time; <= 0 hides the column.
         - *height*: max height, None/0 to auto-compute for each row.
         - *fmtstr*: format string as applied by column type.
         - *getter*: default calcValue calls ``getter(col, row)``.
@@ -70,7 +70,8 @@ class Column(Extensible):
         self._type = type     # anytype/str/int/float/date/func
         self.getter = lambda col, row: row
         self.setter = None
-        self._width = None    # == 0 if hidden, None if auto-compute next time
+        self._width = None    # None if auto-compute next time
+        self._hidden = False
         self.hoffset = 0      # starting horizontal (char) offset of displayed column value
         self.voffset = 0      # starting vertical (line) offset of displayed column value
         self.height = 1       # max height, None/0 to auto-compute for each row
@@ -104,7 +105,7 @@ class Column(Extensible):
         return self.__copy__()  # no separate deepcopy
 
     def __getstate__(self):
-        return {k:getattr(self, k) for k in 'name typestr width height expr keycol formatter displayer fmtstr voffset hoffset aggstr'.split() if hasattr(self, k)}
+        return {k:getattr(self, k) for k in 'name typestr width hidden height expr keycol formatter displayer fmtstr voffset hoffset aggstr'.split() if hasattr(self, k)}
 
     def __setstate__(self, d):
         for attr, v in d.items():
@@ -183,11 +184,25 @@ class Column(Extensible):
 
     @width.setter
     def width(self, w):
+        if w is not None:
+            self.hidden = w <= 0
+            if self.hidden:
+                return
         if self.width != w:
             vd.addUndo(setattr, self, '_width', self.width)
-            if self.sheet and (self.width == 0 or w == 0):  # hide/unhide
-                self.sheet.setModified()
             self._width = w
+
+    @property
+    def hidden(self):
+        return self._hidden
+
+    @hidden.setter
+    def hidden(self, v):
+        if self._hidden != v:
+            vd.addUndo(setattr, self, '_hidden', self._hidden)
+            if self.sheet:
+                self.sheet.setModified()
+            self._hidden = v
 
     @property
     def formatted_help(self):
@@ -298,21 +313,11 @@ class Column(Extensible):
         return f(*args, **kwargs)
 
     def hide(self, hide=True):
-        if hide:
-            self.setWidth(0)
-        else:
-            self.setWidth(abs(self.width or self.getMaxWidth(self.sheet.visibleRows)))
+        self.hidden = hide
 
     @property
     def readonly(self):
         return self.setter is None
-
-    @property
-    def hidden(self):
-        'Return True if width of this column is 0 or negative.'
-        if self.width is None:
-            return False
-        return self.width <= 0
 
     def calcValue(self, row):
         'Calculate and return value for *row* in this column.'
@@ -574,7 +579,7 @@ class ItemColumn(WritableColumn):
 class SubColumnFunc(Column):
     'Column compositor; preprocess row with *subfunc*(row, *expr*) before passing to *origcol*.getValue and *origcol*.setValue.'
     def __init__(self, name='', origcol=None, expr=None, subfunc=getitemdef, **kwargs):
-        super().__init__(name, type=origcol.type, width=origcol.width, expr=expr, **kwargs)
+        super().__init__(name, type=origcol.type, width=origcol.width, hidden=origcol.hidden, expr=expr, **kwargs)
         self.origcol = origcol
         self.subfunc = subfunc
 
