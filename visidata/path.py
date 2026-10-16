@@ -6,6 +6,7 @@ import codecs
 import pathlib
 from urllib.parse import urlparse, urlunparse
 from functools import wraps, lru_cache
+from typing import Callable, Optional
 
 from visidata import vd
 from visidata import VisiData, Progress
@@ -332,7 +333,7 @@ class Path(os.PathLike):
         else:
             return self._path.read_text(*args, **kwargs)
 
-    def _zopen(self):
+    def _zopenfunc(self) -> Optional[Callable]:
         'Return the open() of the module for this path\'s compression suffix, or None if uncompressed.'
         if self.compression == 'gz':
             import gzip
@@ -350,7 +351,7 @@ class Path(os.PathLike):
 
     def decompress(self, fp):
         'Return already-open binary *fp* wrapped in a decompressor, per this path\'s compression suffix.'
-        zopen = self._zopen()
+        zopen = self._zopenfunc()
         return zopen(fp, mode='rb') if zopen else fp
 
     @wraps(pathlib.Path.open)
@@ -364,7 +365,7 @@ class Path(os.PathLike):
 
         path = self
 
-        zopen = self._zopen()
+        zopen = self._zopenfunc()
         if not zopen:
             return FileProgress(path, fp=self._path.open(*args, **kwargs), **kwargs)
 
