@@ -15,31 +15,35 @@ def _quote_literal(value):
     return "'" + str(value).replace("'", "''") + "'"
 
 
+def _relation_parts(sheet):
+    return [part for part in (sheet.database_name, sheet.schema_name, sheet.table_name) if part]
+
+
 def _relation_arg(sheet):
-    parts = [sheet.schema_name, sheet.table_name]
-    return '.'.join(part for part in parts if part)
+    return '.'.join(_relation_parts(sheet))
 
 
 def _relation_ref(sheet):
-    parts = [sheet.schema_name, sheet.table_name]
-    return '.'.join(_quote_ident(part) for part in parts if part)
+    return '.'.join(_quote_ident(part) for part in _relation_parts(sheet))
+
+
+_duckdb_types = dict(
+    BOOLEAN=bool,
+    TINYINT=int, SMALLINT=int, INTEGER=int, BIGINT=int, HUGEINT=int,
+    UTINYINT=int, USMALLINT=int, UINTEGER=int, UBIGINT=int, UHUGEINT=int,
+    FLOAT=float, DOUBLE=float, DECIMAL=float,
+    DATE=date,
+    VARCHAR=str, UUID=str,
+)
 
 
 def _parse_duckdb_type(dtype):
     typename = str(dtype).upper()
-
-    if typename == 'BOOLEAN':
-        return bool
-    if any(tok in typename for tok in ('HUGEINT', 'BIGINT', 'INTEGER', 'SMALLINT', 'TINYINT', 'UBIGINT', 'UINTEGER', 'USMALLINT', 'UTINYINT', 'INT2', 'INT4', 'INT8')):
-        return int
-    if any(tok in typename for tok in ('DOUBLE', 'FLOAT', 'REAL', 'DECIMAL', 'NUMERIC')):
-        return float
-    if any(tok in typename for tok in ('TIMESTAMP', 'DATE', 'TIME')):
+    if typename.endswith(']'):  # LIST or ARRAY of any element type
+        return anytype
+    if typename.startswith('TIMESTAMP'):
         return date
-    if any(tok in typename for tok in ('VARCHAR', 'TEXT', 'CHAR', 'STRING', 'UUID')):
-        return str
-
-    return anytype
+    return _duckdb_types.get(typename.split('(')[0], anytype)
 
 
 def _iterfetch(result, batch_size=1000):
@@ -140,10 +144,12 @@ class DuckdbSheet(Sheet):
             conn.close()
 
     def iterload_query(self, query):
-        conn = self.conn()
+        conn = self.conn(read_only=False)
         try:
             self.columns = []
             result = self.execute(conn, query, parms=getattr(self, 'parms', None))
+            if not result.description:  # statement without a result set, like CREATE or INSERT
+                return
             for i, desc in enumerate(result.description):
                 self.addColumn(ItemColumn(desc[0], i, type=_parse_duckdb_type(desc[1])))
 
