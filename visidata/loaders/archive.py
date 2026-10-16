@@ -55,9 +55,7 @@ class ZipSheet(Sheet):
     guide = '''# Zip Sheet
 This is a list of files contained in the zipfile {sheet.displaySource}.
 
-Once extracted, files can be loaded with `ENTER`.  A member with a
-compression suffix (like `data.csv.gz`) is decompressed on the way in,
-and loaded as the filetype named by the remaining extension.
+Once extracted, files can be loaded with `ENTER`.
 
 Commands:
 
@@ -65,7 +63,7 @@ Commands:
 - `gx` to extract selected files to current directory
 - `zx` to extract current file to a given pathname
 - `gzx`  to extract selected files to given directory
-- `open-row-filetype` to load the current file as a named filetype
+- `zEnter` to load the current file as a given filetype
 
 '''
 
@@ -152,13 +150,11 @@ class TarSheet(Sheet):
     guide = '''# Tar Sheet
 This is a list of files contained in the tarfile {sheet.displaySource}.
 
-Files can be loaded with `ENTER`.  A member with a compression suffix
-(like `data.csv.gz`) is decompressed on the way in, and loaded as the
-filetype named by the remaining extension.
+Files can be loaded with `ENTER`.
 
 Commands:
 
-- `open-row-filetype` to load the current file as a named filetype
+- `zEnter` to load the current file as a given filetype
 
 '''
     columns = [
@@ -207,8 +203,8 @@ ZipSheet.addCommand('zx', 'extract-file-to', 'extract(cursorRow, path=inputPath(
 ZipSheet.addCommand('gzx', 'extract-selected-to', 'extract(*onlySelectedRows, path=inputPath("extract %d files to: " % nSelectedRows))', 'extract selected files to given directory')
 ZipSheet.addCommand('Ctrl+O', 'sysopen-row', 'sysopen_row(cursorRow)', 'open $EDITOR with current file (modifications will be discarded)')
 
-ZipSheet.addCommand('', 'open-row-filetype', 'vd.push(openRow(cursorRow, filetype=vd.input("open as filetype: ", type="filetype")))', 'open current file as a given filetype')
-TarSheet.addCommand('', 'open-row-filetype', 'vd.push(openRow(cursorRow, filetype=vd.input("open as filetype: ", type="filetype")))', 'open current file as a given filetype')
+ZipSheet.addCommand('zEnter', 'open-row-filetype', 'vd.push(openRow(cursorRow, filetype=vd.input("open as filetype: ", type="filetype")))', 'open current file as a given filetype')
+TarSheet.addCommand('zEnter', 'open-row-filetype', 'vd.push(openRow(cursorRow, filetype=vd.input("open as filetype: ", type="filetype")))', 'open current file as a given filetype')
 
 vd.addMenuItems('''
     Row > Dive into > as filetype > open-row-filetype
