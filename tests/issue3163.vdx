@@ -1,0 +1,8 @@
+open-file tests/data1.tsv
+col A
+hide-col
+hide-col
+hide-col
+row 0
+edit-cell edited
+unhide-cols

@@ -36,6 +36,9 @@ Mark grouping columns as keys with `!`.  Numbering restarts at `options.incr_bas
 4. Press `e` followed by `0` to set the width for that column to **0**.
 5. Press `q` to return to the source sheet.
 
+After hiding the last visible column with `-`, the cursor rests on the leftmost hidden column.
+The column under the cursor expands for viewing and editing; its width remains **0**.
+
 ###### How to unhide columns
 
 1. Press `gv` to unhide all columns on current sheet.
