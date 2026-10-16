@@ -1256,6 +1256,10 @@ def quitAndReleaseMemory(vs):
         vs.confirmQuit('quit')
         vs.rows.clear()
         vs.rows = UNLOADED
+        if isinstance(vs, Sheet):
+            vs._selectedRows.clear()
+        for r in vs.cmdlog_sheet.rows:  # undos hold copies of rows  #3231
+            r.undofuncs = []
         vd.remove(vs)
         vd.allSheets.remove(vs)
 
