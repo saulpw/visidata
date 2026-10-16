@@ -178,7 +178,8 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
         s = ''.join(s)
         return s, dispwidth(s, literal=True)
     if trunchlen > dispw: #if the truncator cannot fit, use a truncator of ''
-        return _clipstr(s, dispw, trunch='', oddspacech=oddspacech, combch=combch, modch=modch)
+        _clipfunc = _clipstr if isinstance(s, str) else _clipstr.__wrapped__
+        return _clipfunc(s, dispw, trunch='', oddspacech=oddspacech, combch=combch, modch=modch)
     for c in s:
         newc, chlen = _dispch(c, oddspacech=oddspacech, combch=combch, modch=modch)
         if not newc:
@@ -204,14 +205,16 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
 def clipstr(s, dispw, truncator=None, oddspace=None):
     ''' *s* is a string or an iterator that contains characters.
     *dispw* is the integer screen width that the clipped string will fit inside, or None.'''
+    # _clipfunc: an iterator hashes by identity, so caching it only pins the drawn value
+    _clipfunc = _clipstr if isinstance(s, str) else _clipstr.__wrapped__  #3231
     if vd.options.visibility:
-        return _clipstr(s, dispw,
+        return _clipfunc(s, dispw,
                         trunch=vd.options.disp_truncator if truncator is None else truncator,
                         oddspacech=vd.options.disp_oddspace if oddspace is None else oddspace,
                         modch='\u25e6',
                         combch='\u25cc')
     else:
-        return _clipstr(s, dispw,
+        return _clipfunc(s, dispw,
                 trunch=vd.options.disp_truncator if truncator is None else truncator,
                 oddspacech=vd.options.disp_oddspace if oddspace is None else oddspace,
                 modch='',
