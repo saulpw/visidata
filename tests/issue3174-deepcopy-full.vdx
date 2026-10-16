@@ -1,0 +1,8 @@
+# dup-rows-deep on a full join keeps the source sheets as references  #3174
+
+open-file tests/data1.tsv
+key-col
+open-file tests/data2.tsv
+key-col
+join-sheets-top2 full
+dup-rows-deep

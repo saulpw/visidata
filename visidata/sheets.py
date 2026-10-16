@@ -404,10 +404,8 @@ class TableSheet(BaseSheet):
         return max(c.height for c in cols) if cols else 1
 
     def __deepcopy__(self, memo):
-        'same as __copy__'
-        ret = self.__copy__()
-        memo[id(self)] = ret
-        return ret
+        'Sheets referenced from rows are references, never copied.'
+        return self
 
     def __str__(self):
         return self.name
@@ -1320,8 +1318,8 @@ Sheet.addCommand('ge', 'setcol-input', 'cursorCol.setValuesTyped(selectedRows, i
 
 Sheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.reload=lambda vs=vs,rows=selectedRows: setattr(vs, "rows", list(rows)); vd.push(vs)', 'open a duplicate sheet with only the selected rows')
 Sheet.addCommand('g"', 'dup-rows', 'vs=copy(sheet); vs.name+="_copy"; vs.rows=list(rows); status("copied "+vs.name); vs.select(selectedRows); vd.push(vs)', 'open a duplicate sheet with all rows')
-Sheet.addCommand('z"', 'dup-selected-deep', 'vs = deepcopy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = vs.async_deepcopy(selectedRows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")', 'open duplicate sheet with deepcopy of selected rows')
-Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = deepcopy(sheet); vs.name += "_deepcopy"; vs.rows = vs.async_deepcopy(rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")', 'open duplicate sheet with deepcopy of all rows')
+Sheet.addCommand('z"', 'dup-selected-deep', 'vs = copy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = vs.async_deepcopy(selectedRows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")', 'open duplicate sheet with deepcopy of selected rows')
+Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = copy(sheet); vs.name += "_deepcopy"; vs.rows = vs.async_deepcopy(rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")', 'open duplicate sheet with deepcopy of all rows')
 
 Sheet.addCommand('z~', 'type-any', 'cursorCol.type = anytype', 'set type of current column to anytype')
 Sheet.addCommand('~', 'type-string', 'cursorCol.type = str', 'set type of current column to str')

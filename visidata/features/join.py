@@ -40,7 +40,7 @@ def _appendRowsAfterLoading(joinsheet, origsheets):
             origincol.putValue(r, vs)
         for c in vs.visibleCols:
             if not keyedcols[c.name]:
-                newcol = JoinConcatColumn(c.name, keyedcols[c.name], origincol, type=c.type)
+                newcol = JoinConcatColumn(c.name, cols=keyedcols[c.name], type=c.type)
                 if c.name in srcKeyColNames:
                     newcol.keycol = c.keycol
                 joinsheet.addColumn(newcol)
@@ -358,9 +358,9 @@ class ConcatColumn(WritableColumn):
 
 class JoinConcatColumn(ConcatColumn):
     'ConcatColumn over native rows; the row\'s source sheet comes from *origincol*.'
-    def __init__(self, name, cols, origincol, **kwargs):
-        super().__init__(name, cols=cols, **kwargs)
-        self.origincol = origincol
+    @property
+    def origincol(self):
+        return self.sheet.column('origin_sheet')  # lookup, not a stored ref: copied sheets get copies of this column
 
     def calcValue(self, row):
         srcCol = self.getColBySheet(self.origincol.getValue(row))

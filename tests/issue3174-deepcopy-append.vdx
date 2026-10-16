@@ -1,0 +1,6 @@
+# dup-rows-deep on an append join keeps the source sheets as references  #3174
+
+open-file tests/data1.tsv
+open-file tests/data2.tsv
+join-sheets-top2 append
+dup-rows-deep
