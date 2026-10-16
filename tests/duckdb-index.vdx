@@ -1,0 +1,8 @@
+# the index shows tables and views with row and column counts from duckdb metadata, before loading them
+
+open-file tests/data3.tsv
+save-sheet $VD_TESTTMP/duckdb-index.duckdb
+open-file $VD_TESTTMP/duckdb-index.duckdb
+exec-sql DROP TABLE data3; CREATE SCHEMA other; CREATE TABLE t1 (id INTEGER PRIMARY KEY, note VARCHAR); INSERT INTO t1 VALUES (1, 'a'), (2, 'b'); CREATE VIEW v1 AS SELECT note FROM t1; CREATE TABLE other.t2 (x INTEGER[], s STRUCT(a INTEGER), tm TIME)
+quit-sheet
+reload-sheet

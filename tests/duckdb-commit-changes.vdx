@@ -1,5 +1,12 @@
-exec-python import os, shutil, tempfile, uuid; p=os.path.join(tempfile.gettempdir(), f'duckdb-commit-{uuid.uuid4().hex}.duckdb'); shutil.copyfile('tests/.visidata/duckdb_test.duckdb', p); vd.push(vd.openSource(p))
-exec-python vd.options.overwrite='y'
+# edits, adds, and deletes commit to a table with a primary key
+
+option global confirm y
+open-file tests/data3.tsv
+save-sheet $VD_TESTTMP/duckdb-commit-changes.duckdb
+open-file $VD_TESTTMP/duckdb-commit-changes.duckdb
+exec-sql DROP TABLE data3; CREATE TABLE edit_pk (id INTEGER PRIMARY KEY, note VARCHAR, amount DECIMAL(10,2)); INSERT INTO edit_pk VALUES (1, 'naïve café', 1.25), (2, '東京', 2.50)
+quit-sheet
+reload-sheet
 row キedit_pk
 open-row
 row 0

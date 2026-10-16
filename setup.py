@@ -109,7 +109,7 @@ setup(
         "test": [
             "brotli",
             "dnslib",
-            "duckdb; python_version >= '3.10'",
+            "duckdb",
             "dpkt",
             "fecfile",
             "Faker",

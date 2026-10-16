@@ -1,6 +1,13 @@
-exec-python import os, shutil, tempfile, uuid; p=os.path.join(tempfile.gettempdir(), f'duckdb-composite-{uuid.uuid4().hex}.duckdb'); shutil.copyfile('tests/.visidata/duckdb_test.duckdb', p); vd.push(vd.openSource(p))
-exec-python vd.options.overwrite='y'
-exec-python vd.sheet.cursorRowIndex = next(i for i, r in enumerate(vd.sheet.rows) if r.schema_name == 'other' and r.table_name == 'edit composite')
+# commits to a table in another schema with a composite primary key and quoted names
+
+option global confirm y
+open-file tests/data3.tsv
+save-sheet $VD_TESTTMP/duckdb-commit-composite-pk.duckdb
+open-file $VD_TESTTMP/duckdb-commit-composite-pk.duckdb
+exec-sql DROP TABLE data3; CREATE SCHEMA other; CREATE TABLE other."edit composite" ("key one" INTEGER, "key""two" VARCHAR, note VARCHAR, PRIMARY KEY ("key one", "key""two")); INSERT INTO other."edit composite" VALUES (1, 'a', 'alpha'), (1, 'b', 'bravo'), (2, 'c', 'charlie')
+quit-sheet
+reload-sheet
+row キedit composite
 open-row
 row 1
 col note

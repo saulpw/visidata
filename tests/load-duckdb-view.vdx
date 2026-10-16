@@ -1,0 +1,10 @@
+# views open like tables
+
+open-file tests/data3.tsv
+save-sheet $VD_TESTTMP/load-duckdb-view.duckdb
+open-file $VD_TESTTMP/load-duckdb-view.duckdb
+exec-sql DROP TABLE data3; CREATE TABLE departments (deptno INTEGER PRIMARY KEY, dname VARCHAR, loc VARCHAR); INSERT INTO departments VALUES (10, 'ACCOUNTING', 'NEW YORK'), (20, '研发', '東京'); CREATE VIEW dept_view AS SELECT * FROM departments ORDER BY deptno
+quit-sheet
+reload-sheet
+row キdept_view
+open-row

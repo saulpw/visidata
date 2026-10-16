@@ -1,3 +1,10 @@
-open-file tests/.visidata/duckdb_test.duckdb
-exec-python vd.sheet.cursorRowIndex = next(i for i, r in enumerate(vd.sheet.rows) if r.schema_name == 'other' and r.table_name == 'shared_rows')
+# a table with the same name in another schema opens from that schema
+
+open-file tests/data3.tsv
+save-sheet $VD_TESTTMP/duckdb-open-alt-schema.duckdb
+open-file $VD_TESTTMP/duckdb-open-alt-schema.duckdb
+exec-sql DROP TABLE data3; CREATE SCHEMA other; CREATE TABLE shared_rows (id INTEGER PRIMARY KEY, note VARCHAR); INSERT INTO shared_rows VALUES (1, 'main one'), (2, 'main two'); CREATE TABLE other.shared_rows (id INTEGER PRIMARY KEY, note VARCHAR); INSERT INTO other.shared_rows VALUES (1, 'other one'), (2, 'other two')
+quit-sheet
+reload-sheet
+row 1
 open-row
