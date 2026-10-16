@@ -117,10 +117,23 @@ def jump_sheet(sheet, name):
     vd.push(matches[0])
 
 
+Sheet.init('stoppedAtHiddenEdge', bool)
+
+@Sheet.api
+def go_right(sheet):
+    atHiddenEdge = sheet.cursorVisibleColIndex == sheet.nVisibleCols-1 and sheet.nVisibleCols < len(sheet.availCols)
+    if atHiddenEdge and not sheet.stoppedAtHiddenEdge:
+        sheet.stoppedAtHiddenEdge = True
+        vd.status('press again to enter hidden columns')
+        return
+    sheet.stoppedAtHiddenEdge = False
+    sheet.cursorRight(+1)
+
+
 Sheet.addCommand(None, 'go-left',  'cursorRight(-1)', 'go left', replay=False)
 Sheet.addCommand(None, 'go-down',  'cursorDown(+1)', 'go down', replay=False)
 Sheet.addCommand(None, 'go-up',    'cursorDown(-1)', 'go up', replay=False)
-Sheet.addCommand(None, 'go-right', 'cursorRight(+1)', 'go right', replay=False)
+Sheet.addCommand(None, 'go-right', 'go_right()', 'go right; press twice to cross into hidden columns', replay=False)
 Sheet.addCommand(None, 'go-pagedown', 'cursorDown(nScreenRows-1); sheet.topRowIndex = bottomRowIndex', 'scroll one page forward', replay=False)
 Sheet.addCommand(None, 'go-pageup', 'cursorDown(-nScreenRows+1); sheet.bottomRowIndex = topRowIndex', 'scroll one page backward', replay=False)
 Sheet.addCommand(None, 'go-pagedown-half', 'n=nScreenRows//2; cursorDown(n); sheet.topRowIndex += n', 'scroll half page forward', replay=False)

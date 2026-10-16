@@ -33,11 +33,10 @@ Mark grouping columns as keys with `!`.  Numbering restarts at `options.incr_bas
 1. Press `Shift+C` on the source sheet to open its **Columns sheet**.
 2. Move the cursor right to the **width** column.
 3. Move the cursor down to the row which represents the column you wish to hide.
-4. Press `e` followed by `0` to set the width for that column to **0**.
+4. Press `e` followed by `0`.
 5. Press `q` to return to the source sheet.
 
-After hiding the last visible column with `-`, the cursor rests on the leftmost hidden column.
-The column under the cursor expands for viewing and editing; its width remains **0**.
+Hidden columns are drawn as 1-cell columns to the right of the visible ones.  Hidden columns can be viewed without unhiding by moving the cursor onto them.  At the last visible column, press `go-right` (Right arrow or `l`) twice to move past the visible columns into the hidden columns.
 
 ###### How to unhide columns
 
@@ -47,7 +46,7 @@ The column under the cursor expands for viewing and editing; its width remains *
 
 1. Press `Shift+C` on the source sheet to open its **Columns sheet**.
 2. Move the cursor right to the **width** column.
-3. Move the cursor down to the row which represents the column you wish to unhide. Currently, that cell should contain the value **0**.
+3. Move the cursor down to the row which represents the column you wish to unhide.
 4. Press `e` followed by a *positive number* to set the width.
 5. Press `q` to return to the source sheet.
 
