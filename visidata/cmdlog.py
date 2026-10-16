@@ -206,9 +206,10 @@ class CommandLogBase:
 
         # remove user-aborted commands and simple movements (unless first command on the sheet, which created the sheet)
         if not sheet.cmdlog_sheet.rows or vd.isLoggableCommand(vd.activeCommand):
-            if isLoggableSheet(sheet):      # don't record actions from cmdlog or other internal sheets on global cmdlog
-                self.addRow(vd.activeCommand)  # add to global cmdlog
-            sheet.cmdlog_sheet.addRow(vd.activeCommand)  # add to sheet-specific cmdlog
+            with vd.suppressUndo():  # new-key columns added to a cmdlog are not part of the command  #3231
+                if isLoggableSheet(sheet):      # don't record actions from cmdlog or other internal sheets on global cmdlog
+                    self.addRow(vd.activeCommand)  # add to global cmdlog
+                sheet.cmdlog_sheet.addRow(vd.activeCommand)  # add to sheet-specific cmdlog
 
         vd.activeCommand = None
 
@@ -216,8 +217,9 @@ class CommandLogBase:
         while isinstance(src, BaseSheet):
             src = src.source
         r = self.newRow(keystrokes='o', input=str(src), longname='open-file', replayable=True)
-        vs.cmdlog_sheet.addRow(r)
-        self.addRow(r)
+        with vd.suppressUndo():
+            vs.cmdlog_sheet.addRow(r)
+            self.addRow(r)
 
 class CommandLog(CommandLogBase, VisiDataMetaSheet):
     pass
