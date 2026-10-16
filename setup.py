@@ -109,6 +109,7 @@ setup(
         "test": [
             "brotli",
             "dnslib",
+            "duckdb",
             "dpkt",
             "fecfile",
             "Faker",

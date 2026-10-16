@@ -1,0 +1,8 @@
+# exec-sql runs statements without results, then queries
+
+open-file tests/data3.tsv
+save-sheet $VD_TESTTMP/duckdb-exec-sql.duckdb
+open-file $VD_TESTTMP/duckdb-exec-sql.duckdb
+exec-sql CREATE TABLE departments (deptno INTEGER PRIMARY KEY, dname VARCHAR, loc VARCHAR); INSERT INTO departments VALUES (20, '研发', '東京'), (10, 'ACCOUNTING', 'NEW YORK')
+quit-sheet
+exec-sql select dname, loc from "main"."departments" order by deptno
