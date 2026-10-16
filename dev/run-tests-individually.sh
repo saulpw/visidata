@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# usage: ./dev/run-tests-individually.sh [<tests/name.vd> […]]
+# usage: ./dev/run-tests-individually.sh [<tests/name.vd*> […]]
 #
 # Runs each test in its own vd process, for full isolation.
 # Slower than `dev/test.sh` (which batches all tests into one process),
@@ -19,7 +19,7 @@ main() {
     failures=()
 
     if [[ ${#test_files[@]} -eq 0 ]]; then
-        test_files=(tests/*.vd)
+        test_files=(tests/*.vd*)
     fi
 
     # Clean logs
@@ -30,9 +30,9 @@ main() {
     trap 'exit 130' SIGINT
 
     for test_file in "${test_files[@]}"; do
-        test_name="$(basename "$test_file" .vd)"
+        test_name="$(basename "${test_file%.vd*}")"
 
-        if ./dev/test.sh "$test_name" >tests/log/"$test_name".log 2>&1; then
+        if ./dev/test.sh "$test_file" >tests/log/"$test_name".log 2>&1; then
             pass "$test_name"
         else
             fail "$test_name"

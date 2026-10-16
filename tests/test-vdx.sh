@@ -95,6 +95,11 @@ for i in $TESTS ; do
     fi
 done
 
+if [ $((N_TESTS + N_SKIPPED)) -eq 0 ]; then
+    echo "FAIL: no tests matched: ${*:-tests/*.vd*}"
+    exit 1
+fi
+
 # Chunk golden tests into NPROCS sequential batches (keeps similar imports together)
 N_GOLDEN=${#GOLDEN_TESTS[@]}
 CHUNK=$(( (N_GOLDEN + NPROCS - 1) / NPROCS ))
