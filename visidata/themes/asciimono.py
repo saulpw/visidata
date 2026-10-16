@@ -82,11 +82,12 @@ vd.themes['asciimono'] = dict(
     color_code='',
 
     color_menu='reverse',
+    color_submenu='reverse',
     color_menu_active='',
     color_menu_spec='reverse',
     color_menu_help='reverse',
+    color_menu_help_key='bold reverse',
     color_add_pending='',
-    disp_menu_boxchars='||--    ||',
     disp_menu_more='>',
     disp_menu_push='+',
     disp_menu_input='_',

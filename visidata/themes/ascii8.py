@@ -73,10 +73,10 @@ vd.themes['ascii8'] = dict(
     color_longname_status='black on cyan',
 
     color_menu='black on cyan',
+    color_submenu='black on blue',
     color_menu_active='yellow on black',
     color_menu_spec='black on green',
     color_menu_help='black on cyan',
-    disp_menu_boxchars='||--    ||',
     disp_menu_more='>',
     disp_menu_push='+',
     disp_menu_input='_',
