@@ -471,6 +471,8 @@ class TableSheet(BaseSheet):
     @drawcache_property
     def visibleCols(self):  # non-hidden cols
         'List of non-hidden columns in display order.'
+        if not self.columns:
+            return [Column('', sheet=self)]  # cursorCol placeholder: many commands assume one
         return self.keyCols + [c for c in self.columns if not c.hidden and not c.keycol]
 
     @drawcache_property
@@ -612,7 +614,7 @@ class TableSheet(BaseSheet):
         'Insert all *cols* into columns after cursor.  Return first column.'
         index = 0
         ccol = self.cursorCol
-        if ccol and not ccol.keycol:
+        if ccol in self.columns and not ccol.keycol:
             index = self.columns.index(ccol)+1
 
         self.addColumn(*cols, index=index)

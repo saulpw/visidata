@@ -90,7 +90,7 @@ def moveToNextRow(vs, func, reverse=False, msg='no different value up this colum
 @Column.property
 def visibleWidth(self):
     'Width of column as is displayed in terminal'
-    vcolidx = self.sheet.visibleCols.index(self)
+    vcolidx = self.sheet.availCols.index(self)
     if vcolidx in self.sheet._visibleColLayout:
         w = self.sheet._visibleColLayout[vcolidx][1]
     else:  #this case should never happen in normal use

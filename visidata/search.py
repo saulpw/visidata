@@ -66,7 +66,7 @@ def searchRegex(vd, sheet, moveCursor=False, reverse=False, regex_flags=None, **
             if c:
                 if moveCursor:
                     sheet.cursorRowIndex = rowidx
-                    sheet.cursorVisibleColIndex = sheet.visibleCols.index(c)
+                    sheet.cursorVisibleColIndex = sheet.availCols.index(c)
                     return
                 else:
                     matchingRowIndexes += 1
@@ -141,7 +141,7 @@ def clear_search(sheet):
        highlight_search is active.'''
     pass
 
-Sheet.addCommand('r', 'search-keys', 'tmp=cursorVisibleColIndex; moveInputRegex("row key", type="regex-row", columns=keyCols or [visibleCols[0]]); sheet.cursorVisibleColIndex=tmp', 'go to next row with key matching regex')
+Sheet.addCommand('r', 'search-keys', 'tmp=cursorVisibleColIndex; moveInputRegex("row key", type="regex-row", columns=keyCols or availCols[:1]); sheet.cursorVisibleColIndex=tmp', 'go to next row with key matching regex')
 Sheet.addCommand('/', 'search-col', 'moveInputRegex("search", columns="cursorCol", backward=False)', 'search for regex forwards in current column')
 Sheet.addCommand('?', 'searchr-col', 'moveInputRegex("reverse search", columns="cursorCol", backward=True)', 'search for regex backwards in current column')
 Sheet.addCommand('n', 'search-next', 'vd.searchNext(sheet, reverse=False)', 'go to next match from last search')
