@@ -182,6 +182,8 @@ def paste_after(sheet, rowidx):
     for extrow in vd.getClipboardRows():
         if isinstance(extrow, Column):
             newrow = copy(extrow)
+            if isinstance(newrow, SettableColumn):
+                newrow._store = dict(extrow._store)  #3146
         else:
             newrow = sheet.newRow()
             for col, extcol in zip(sheet.visibleCols, vd.getClipboardCols()):
