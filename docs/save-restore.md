@@ -36,21 +36,16 @@ To save and restore a session in VisiData:
 
 ## Environment and locale
 
-`set-envvar` sets an environment variable for the running process and records it in the global and per-sheet command logs.
-Enter `NAME=value`; `NAME=` sets an empty value, and further `=` characters belong to the value.
-Values are saved as plain text in command logs.
+`set-envvar` sets an environment variable (`NAME=value`) and records it in the command logs, like a global option.
+Setting `LANG` or any `LC_*` variable also reapplies the locale, which affects `type-floatlocale`, number formatting, and date formatting.
 
-To pin numeric parsing for replays, add this to `.visidatarc`:
+To record a locale in every saved cmdlog, add this to `.visidatarc`:
 
 ```python
-vd.setEnvvar('LC_NUMERIC', 'en_US.UTF-8')
+vd.setEnvvar('LC_NUMERIC=en_US.UTF-8')
 ```
 
-The resulting `set-envvar` row precedes the sheet's commands in saved logs and replays even before a sheet is open.
-`LANG` and `LC_*` changes refresh the active locale, including `type-floatlocale`, number formatting, and locale-dependent date formatting.
-The locale must be installed on the replay machine (`locale -a` lists installed locales).
-An unsupported locale fails without changing the previous environment or locale.
-A nonempty `LC_ALL` overrides `LANG` and category-specific variables such as `LC_NUMERIC`; `set-envvar LC_ALL=` clears that override.
+The locale must be installed on the replaying machine (`locale -a` lists them), and a nonempty `LC_ALL` overrides the other `LC_*` variables.
 
 ## How to replay a cmdlog on a different file
 

@@ -82,8 +82,8 @@ Commands and keybindings are set on a particular Sheet Type in the class hierarc
 
 ### Environment variables
 
-`vd.setEnvvar('LC_NUMERIC', 'en_US.UTF-8')` in `.visidatarc` pins numeric parsing and records the locale in saved command logs.
-See [Environment and locale](save-restore.md#environment-and-locale) for replay behavior and locale precedence.
+`vd.setEnvvar('LC_NUMERIC=en_US.UTF-8')` in `.visidatarc` sets the numeric locale and records it in saved command logs.
+See [Environment and locale](save-restore.md#environment-and-locale).
 
 ### Adding custom aggregators {#aggregators}
 

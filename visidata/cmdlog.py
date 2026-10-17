@@ -204,23 +204,14 @@ class CommandLogBase:
             vd.activeCommand = None
             return
 
-        if vd.activeCommand.longname == 'set-envvar':
-            self.add_global(vd.activeCommand)
-        elif not sheet.cmdlog_sheet.rows or vd.isLoggableCommand(vd.activeCommand):
+        # remove user-aborted commands and simple movements (unless first command on the sheet, which created the sheet)
+        if not sheet.cmdlog_sheet.rows or vd.isLoggableCommand(vd.activeCommand):
             with vd.suppressUndo():  # new-key columns added to a cmdlog are not part of the command  #3231
                 if isLoggableSheet(sheet):      # don't record actions from cmdlog or other internal sheets on global cmdlog
                     self.addRow(vd.activeCommand)  # add to global cmdlog
                 sheet.cmdlog_sheet.addRow(vd.activeCommand)  # add to sheet-specific cmdlog
 
         vd.activeCommand = None
-
-    def add_global(self, row):
-        row.sheet = None
-        row.col = row.row = ''
-        with vd.suppressUndo():
-            logs = [vs.cmdlog_sheet for vs in [*vd.sheets, *vd.allSheets]]
-            for log in dict.fromkeys([self, *logs]):
-                log.addRow(row)
 
     def openHook(self, vs, src):
         while isinstance(src, BaseSheet):
@@ -284,7 +275,7 @@ def replayOne(vd, r):
         if longname is None and getattr(r, 'keystrokes', None) is None:
             vd.fail('failed to find command to replay')
 
-        if r.sheet and longname not in ['set-option', 'unset-option']:
+        if r.sheet and longname not in ['set-option', 'unset-option', 'set-envvar']:
             vs = vd.getSheet(r.sheet) or vd.error(f'no sheet named `{r.sheet}`')
         else:
             vs = None
@@ -425,9 +416,11 @@ def cmdlog(sheet):
 @BaseSheet.lazy_property
 def cmdlog_sheet(sheet):
     c = CommandLogJsonl(sheet.name+'_cmdlog', source=sheet, rows=[])
+    # copy over all existing globally set options
+    # you only need to do this for the first BaseSheet in a tree
     if not isinstance(sheet.source, BaseSheet):
         for r in vd.cmdlog.rows:
-            if r.longname in ('set-envvar', 'unset-option') or (r.sheet == 'global' and r.longname == 'set-option'):
+            if r.sheet == 'global' and (r.longname in ('set-option', 'set-envvar')) or (r.longname == 'unset-option'):
                 c.addRow(r)
     return c
 

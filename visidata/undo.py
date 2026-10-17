@@ -59,7 +59,7 @@ def undo(vd, sheet):
     if not vd.options.undo:
         vd.fail("options.undo not enabled")
 
-    cmdlogrows = itertools.dropwhile(lambda r: r.longname == 'set-option', sheet.cmdlog_sheet.rows)
+    cmdlogrows = itertools.dropwhile(lambda r: r.longname in ('set-option', 'set-envvar'), sheet.cmdlog_sheet.rows)
     # skip the first remaining command, to exclude it from undo,
     # because it is always the command that created the sheet, or for
     # replayed cmdlogs, a no-op placeholder row
