@@ -52,3 +52,29 @@ class TestColumnCache:
 
         c._undoType(anytype)  # what undo of type-int calls
         assert total() != 3
+
+    def test_row_changes_refresh_aggregated_totals(self):
+        'Adding, editing, deleting, and undoing rows recompute aggregate totals.  #3003'
+        from visidata import vd
+        s, c = self._sheet()
+        vd.push(s)
+        vd.cmdlog.openHook(s, s.source)
+        agg = vd.aggregators['sum']
+
+        def total():
+            c.aggregateTotal(agg)
+            vd.sync()
+            return c.aggregateTotal(agg)
+
+        assert total() == 3
+        s.addRows([{'a': 10}])
+        vd.sync()
+        assert total() == 13
+        c.setValue(s.rows[0], 5)
+        assert total() == 17
+        s.execCommand('delete-row')
+        vd.sync()
+        assert total() == 12
+        s.execCommand('undo-last')
+        vd.sync()
+        assert total() == 17
