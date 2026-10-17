@@ -44,6 +44,7 @@ def sheetlist(sheet):
     sheets = [x for x in vd.allSheets if x in sheetstack]+ [x for x in sheetstack if x not in vd.allSheets]
 
     sheetnames = []
+    active = 0
     for vs in sheets:
         if not vs.precious:  #2573
             continue
@@ -51,14 +52,20 @@ def sheetlist(sheet):
             shortcut = ' '
             if vs.shortcut in '1 2 3 4 5 6 7 8 9 10'.split():
                 shortcut = vs.shortcut[-1] + vs.icon
-            if vs is vd.sheet:
+            if vs is sheetstack[0]:
+                active = len(sheetnames)
                 sheetnames.append(f'[:menu_active]{shortcut}{vs.name}[:]')
             else:
                 sheetnames.append(f'[:onclick jump-sheet-{vs.shortcut}]' + clipstr_middle(f'{shortcut}{vs.name}', 20)[0] + '[:]')
         else:
             sheetnames.append(vs)
 
-    return ' | '.join(sheetnames)
+    prefix = ''
+    while active > 0 and dispwidth(' | '.join(sheetnames[:active+1])) > sheet.windowWidth//2:  #2928
+        del sheetnames[0]
+        active -= 1
+        prefix = '… '
+    return prefix + ' | '.join(sheetnames)
 
 @BaseSheet.api
 def _updateStatusBeforeExec(sheet, cmd, args, ks):
