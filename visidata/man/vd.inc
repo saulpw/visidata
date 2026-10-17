@@ -1043,6 +1043,29 @@ For example:
 .Ed
 .Pp
 Functions defined in .visidatarc are available in python expressions (e.g. in derived columns).
+.Pp
+.Sy options.visidata_dir
+is the directory for additional files, including local plugins in its
+.Pa plugins/
+subdirectory.
+It defaults to
+.Pa ~/.config/visidata
+on Linux and
+.Pa ~/Library/Preferences/visidata
+on macOS, or
+.Pa $XDG_CONFIG_HOME/visidata
+when
+.Ev XDG_CONFIG_HOME
+is set on either platform.
+Set
+.Ev VD_DIR
+before starting
+.Nm vd
+or use
+.Cm --visidata-dir Ns = Ns Ar directory
+to choose another directory.
+The command-line option takes precedence over
+.Ev VD_DIR Ns .
 .
 .Sh SUPPORTED SOURCES
 Core VisiData includes these sources:

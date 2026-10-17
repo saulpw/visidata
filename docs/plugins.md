@@ -14,7 +14,7 @@ Plugins can be installed in 3 places:
 
 1. They can come packaged with the VisiData install.
 2. They can be installed via pip.
-3. They can be copied into the `.visidata/plugins/` directory.
+3. They can be copied into the `plugins/` subdirectory of `options.visidata_dir`.
 
 ## builtin plugins
 
@@ -36,15 +36,21 @@ It also adds other commands and options.
 
 ## copied manually into local plugins directory
 
-Finally, `.visidatarc` can import any Python code.
-Since any Python modules in the `options.visidata_dir` directory (default `~/.visidata/`) are available for import,
-you can copy a plugin into a module in that directory and import it that way.
+Python modules in `options.visidata_dir` are available for import from `.visidatarc`.
+The default directory is `~/.config/visidata` on Linux and `~/Library/Preferences/visidata` on macOS.
+On either platform, setting `XDG_CONFIG_HOME` changes the default to `$XDG_CONFIG_HOME/visidata`.
 
-To install a plugin manually:
+To choose another directory, set the `VD_DIR` environment variable before starting `vd`, or use `vd --visidata-dir=/path/to/visidata`.
+The command-line option takes precedence over `VD_DIR`.
+For example, to store plugins under `~/.visidata`, run this in the shell and add it to the shell startup file to keep the setting:
 
-1. Make a `plugins` directory: `mkdir -p ~/.visidata/plugins`
-2. Copy the plugin Python file there: `cp myplugin.py ~/.visidata/plugins`
-3. Add a line to your ~/.visidatarc to import the plugin: `import plugins.myplugin`
+    export VD_DIR="$HOME/.visidata"
+
+To install a plugin manually with this setting:
+
+1. Make a `plugins` directory: `mkdir -p "$VD_DIR/plugins"`
+2. Copy the plugin Python file there: `cp myplugin.py "$VD_DIR/plugins"`
+3. Add a line to `~/.visidatarc` to import the plugin: `import plugins.myplugin`
 4. Install the dependencies for the plugin (if any).
 
 # How to Disable Plugins
