@@ -415,7 +415,7 @@ class TableSheet(BaseSheet):
 
     @drawcache_property
     def currow(self):
-        return LazyComputeRow(self, self.cursorRow, self.cursorCol)
+        return LazyComputeRow(self, self.cursorRow, curcol=self.cursorCol)
 
     def evalExpr(self, expr:str, row=None, col=None, **kwargs):
         'eval() expr in the context of (row, col), with extra bindings in kwargs'
