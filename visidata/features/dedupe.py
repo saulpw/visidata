@@ -4,8 +4,13 @@
 Duplicates are determined by the sheet's key columns.
 
 If no key columns are specified, then a duplicate row is one where the values
-of *all non-hidden* columns are exactly the same as a row that occurs earlier
+of *all non-hidden* columns are the same as a row that occurs earlier
 in the sheet.
+
+Values are compared as displayed, after conversion to the column's type, the
+same way freq-col groups them.  So `1` and `1.0` are distinct in an untyped
+column, but duplicates in an int column.  Cells that fail type conversion are
+compared by their underlying value.
 
 If key columns *are* specified, then duplicates are detected based on the
 values in just those columns.
@@ -24,7 +29,15 @@ __author__ = "Jeremy Singer-Vine <jsvine@gmail.com>"
 
 from copy import copy
 
-from visidata import Sheet, TableSheet, asyncthread, Progress, vd, ItemColumn
+from visidata import Sheet, TableSheet, asyncthread, Progress, vd, ItemColumn, wrapply, TypedExceptionWrapper
+
+
+def dedupeKey(col, row):
+    'Return the formatted typed value, the key FreqTableSheet groups by; for errors, the raw value.  #3219'
+    v = wrapply(col.format, col.getTypedValue(row))
+    if isinstance(v, TypedExceptionWrapper):
+        return (TypedExceptionWrapper, col.getValue(row))
+    return v
 
 
 def gen_identify_duplicates(sheet, cols=None):
@@ -46,9 +59,9 @@ def gen_identify_duplicates(sheet, cols=None):
             cols = sheet.keyCols
 
     seen = set()
-    seen_unhashable = []  # linear-scan fallback: list/dict values from JSON  #3196
+    seen_unhashable = []  # linear-scan fallback: error cells with list/dict raw values  #3196
     for r in sheet.rows:
-        vals = tuple(col.getValue(r) for col in cols)
+        vals = tuple(dedupeKey(col, r) for col in cols)
         try:
             is_dupe = vals in seen
             if not is_dupe:
@@ -139,11 +152,11 @@ def test_dedupe_unhashable(vd):
         {'val': [1, 2]},
         {'val': [3, 4]},
         {'val': 'a'},
-        {'val': (1, 2)},
+        {'val': (1, 2)},  # displays the same as [1, 2]  #3219
         {'val': 'a'},
         {'val': [1, 2]},
     ])
-    assert [is_dupe for row, is_dupe in gen_identify_duplicates(s)] == [False, True, False, False, False, True, True]
+    assert [is_dupe for row, is_dupe in gen_identify_duplicates(s)] == [False, True, False, False, True, True, True]
 
 
 """
