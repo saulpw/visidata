@@ -605,7 +605,7 @@ def setPersistentOptions(vd, **kwargs):
                 fp.write(f'options.{optname}={repr(optval)}\n')
 
 
-vd.option('visidata_dir', user_config_dir('visidata'), 'directory to load and store additional files', sheettype=None)
+vd.option('visidata_dir', user_config_dir('visidata'), 'VisiData directory for plugins and other files; set with $VD_DIR or --visidata-dir', sheettype=None)
 
 BaseSheet.bindkey('^M', '^J')  # for windows ENTER
 
