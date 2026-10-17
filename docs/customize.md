@@ -80,6 +80,11 @@ To define a command interactively (without editing `.visidatarc`), use the `defi
 
 Commands and keybindings are set on a particular Sheet Type in the class hierarchy. Use `BaseSheet` for commands which don't need a sheet at all--these will apply to all sheets.  Commands and bindings on more specific sheets will override more generic ones.  `Sheet` is a generic table, `ColumnsSheet` would be for the columns sheet, `FreqTableSheet` for frequency tables, and so on.
 
+### Environment variables
+
+`vd.setEnvvar('LC_NUMERIC', 'en_US.UTF-8')` in `.visidatarc` pins numeric parsing and records the locale in saved command logs.
+See [Environment and locale](save-restore.md#environment-and-locale) for replay behavior and locale precedence.
+
 ### Adding custom aggregators {#aggregators}
 
 Aggregators allow you to gather the rows within a single column, and interpret them using descriptive statistics. VisiData comes pre-loaded with a default set like mean, stdev, and sum.

@@ -1,0 +1,7 @@
+set-envvar LC_ALL=
+set-envvar LC_NUMERIC=en_US.UTF-8
+open-new
+add-row
+rename-col result
+edit-cell 1,234.5
+type-floatlocale
