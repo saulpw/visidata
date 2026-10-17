@@ -206,7 +206,7 @@ Always write tests FIRST, verify they FAIL on the current code, then fix the cod
 - **Unit tests** (pytest) for pure functions like `wraptext()`, `clipstr()`, `iterchunks()` — add to existing test files in `visidata/tests/`
 - **Golden tests** for behavior that requires the full VisiData UI/session — create a `.vdx` test in `tests/`
 
-Default to a `.vdx` test.  Use pytest instead only when an existing test file in `visidata/tests/` already covers the area and the change there is smaller than the equivalent `.vdx` test.
+Default to a `.vdx` test.  Use pytest instead only when an existing test file in `visidata/tests/` already covers the area and the change there is smaller than the equivalent `.vdx` test.  A test that checks only Python-level assertions, with no output to compare, goes in pytest.
 
 For golden tests: create a `.vdx` file, generate golden output, and verify with `dev/test.sh`.
 

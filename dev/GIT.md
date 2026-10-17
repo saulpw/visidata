@@ -110,6 +110,7 @@ In general:
 By default, commit to **develop** unless explicitly working in another branch on a PR. If on a different branch, cherry-pick or switch to develop first.
 
 When working interactively with Saul, commit directly to develop even if the fix has a GitHub issue; side branches and PRs are for unattended/background work or when asked.
+Unattended work for a GitHub issue goes on a side branch as a PR; unattended work with no issue commits to develop.
 
 ### Pull Requests
 
