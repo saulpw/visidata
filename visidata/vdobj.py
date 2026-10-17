@@ -159,22 +159,25 @@ class VisiData(visidata.Extensible):
             except curses.error:
                 return ''  # curses timeout
 
+        keyname = self.keyname(k)
+        if len(keyname) == 1:  # printable
+            return keyname
+        if keyname == '^[':  # Esc/Alt+
+            if self.pendingKeys:  # more to come
+                return 'Alt+'+self.prettykeys(self.keyname(self.pendingKeys.pop(0)))
+            else:
+                return 'Esc'
+        return self.prettykeys(keyname)
+
+    def keyname(self, k) -> str:
+        'Return printable character for keypress *k* from get_wch() or getch(), or its curses keyname.'
         if isinstance(k, str):
             if ord(k) >= 32 and ord(k) != 127:  # 127 == DEL or ^?
                 return k
             k = ord(k)
-        elif 32 <= k < 127:
+        elif 32 <= k < 127:  #3230
             return chr(k)
-        keyname = curses.keyname(k).decode('utf-8')
-        if keyname == '^[':  # Esc/Alt+
-            if self.pendingKeys:  # more to come
-                k = self.pendingKeys.pop(0)
-                if isinstance(k, int):
-                    k = chr(k) if 32 <= k < 127 else curses.keyname(k).decode('utf-8')
-                return 'Alt+'+self.prettykeys(k)
-            else:
-                return 'Esc'
-        return self.prettykeys(keyname)
+        return curses.keyname(k).decode('utf-8')
 
     @property
     def screenHeight(self):

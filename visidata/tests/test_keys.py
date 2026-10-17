@@ -52,14 +52,16 @@ class GetWchScreen(GetchScreen):
     ([27, ord('L')], 'Alt+Shift+L'),
     ([27, ord(' ')], 'Alt+Space'),
     ([27, curses.KEY_UP], 'Alt+Up'),
+    ([27, 9], 'Alt+Tab'),
+    ([27, 10], 'Alt+Enter'),
+    ([27, 127], 'Alt+Ctrl+?'),
 ])
 def test_getkeystroke(screen_class, keys, expected, monkeypatch):
     keynames = {k: bytes([k]) for k in range(32, 127)}
-    keynames.update({9: b'^I', 27: b'^[', 127: b'^?', curses.KEY_UP: b'KEY_UP'})
+    keynames.update({9: b'^I', 10: b'^J', 27: b'^[', 127: b'^?', curses.KEY_UP: b'KEY_UP'})
     monkeypatch.setattr(curses, 'keyname', keynames.__getitem__)
-    instance = VisiData()
-    instance.prettykeys_trdict = vd.prettykeys_trdict
-    monkeypatch.setattr(instance, 'get_curses_timeout', lambda: 0)
+    monkeypatch.setattr(vd, 'pendingKeys', [])
+    monkeypatch.setattr(vd, 'get_curses_timeout', lambda: 0)
 
-    assert instance.getkeystroke(screen_class(keys)) == expected
-    assert instance.pendingKeys == []
+    assert VisiData.getkeystroke(vd, screen_class(keys)) == expected  # class method: test_commands leaves a Mock on vd
+    assert vd.pendingKeys == []
