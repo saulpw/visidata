@@ -1,0 +1,3 @@
+open-file sample_data/issue3208-b.csv
+open-file sample_data/issue3208-a.csv
+join-sheets-top2 append
