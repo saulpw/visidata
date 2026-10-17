@@ -3,7 +3,7 @@ import os
 
 import pytest
 
-from visidata import vd, Sheet, ExpectedException, CommandLogJsonl
+from visidata import vd, Sheet, ColumnsSheet, ExpectedException, CommandLogJsonl
 
 
 @pytest.fixture
@@ -45,6 +45,30 @@ def test_setenv_records_global_and_sheet_logs(env_session):
         assert len(rows) == 1
         assert not rows[0].sheet
         assert rows[0].input == 'VD_TEST_ENV=a=b'
+
+
+@pytest.mark.parametrize('initialized', [False, True])
+def test_setenv_records_retained_and_shared_logs(env_session, initialized):
+    retained = Sheet('retained', rows=[])
+    vd.push(retained)
+    if initialized:
+        retained.cmdlog_sheet
+    vd.remove(retained)
+    active = Sheet('active', rows=[])
+    vd.push(active)
+    columns = ColumnsSheet('columns', source=[active])
+    vd.push(columns, load=False)
+
+    vd.setEnvvar('VD_TEST_ENV', 'retained')
+
+    assert retained not in vd.sheets
+    assert retained in vd.allSheets
+    assert columns.cmdlog_sheet is active.cmdlog_sheet
+    for log in (vd.cmdlog, retained.cmdlog_sheet, active.cmdlog_sheet):
+        rows = envrows(log)
+        assert len(rows) == 1
+        assert rows[0].input == 'VD_TEST_ENV=retained'
+        assert not rows[0].sheet
 
 
 @pytest.mark.parametrize('value', ['', 'a=b'])

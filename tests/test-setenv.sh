@@ -30,4 +30,32 @@ PY
 
 env LC_ALL= LC_NUMERIC=C $VD --batch --play "$CMDLOG" --output "$RESULT"
 diff -u tests/golden/issue3195.tsv "$RESULT"
-echo "rc locale saved and replayed from a sheetless cmdlog in $(elapsed)s"
+SESSION="$VD_TESTTMP/test-setenv-reopened.vdx"
+printf '%s\n' "vd.setEnvvar('LC_NUMERIC', 'C')" > "$RC"
+printf '%s\n' \
+    'open-new' \
+    "open-file $DATA" \
+    'quit-sheet' \
+    'set-envvar LC_NUMERIC=en_US.UTF-8' \
+    'jump-sheet test-setenv' \
+    'type-floatlocale' > "$SESSION"
+
+env LC_ALL= LC_NUMERIC=C $VD --config "$RC" --batch --play "$SESSION" --output "$RESULT"
+diff -u tests/golden/issue3195.tsv "$RESULT"
+printf '%s\n' 'cmdlog-sheet' >> "$SESSION"
+env LC_ALL= LC_NUMERIC=C $VD --config "$RC" --batch --play "$SESSION" --output "$CMDLOG"
+env LC_ALL= LC_NUMERIC=C $VD --batch --play "$CMDLOG" --output "$RESULT"
+diff -u tests/golden/issue3195.tsv "$RESULT"
+
+$PYTHON - "$CMDLOG" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1]) as fp:
+    rows = [json.loads(line) for line in fp if not line.startswith('#')]
+envrows = [r for r in rows if r['longname'] == 'set-envvar']
+assert [r['input'] for r in envrows] == ['LC_NUMERIC=C', 'LC_NUMERIC=en_US.UTF-8'], envrows
+assert all(not r.get('sheet') for r in envrows), envrows
+PY
+
+echo "rc and reopened-sheet locales saved and replayed in $(elapsed)s"

@@ -218,7 +218,7 @@ class CommandLogBase:
         row.sheet = None
         row.col = row.row = ''
         with vd.suppressUndo():
-            logs = [vs.cmdlog_sheet for vs in vd.sheets]
+            logs = [vs.cmdlog_sheet for vs in [*vd.sheets, *vd.allSheets]]
             for log in dict.fromkeys([self, *logs]):
                 log.addRow(row)
 
