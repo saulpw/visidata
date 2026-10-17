@@ -113,6 +113,7 @@ All three formats allow `#` line comments.
 - `-flaky` suffix runs the test but treats failures as non-fatal
 - `-311` suffix runs only on Python 3.11+; `-n311` runs only below 3.11
 - Tests should modify data and provide golden output file, rather than using `assert-expr` commands
+- Don't test status or warning messages; check the resulting data
 - Set explicit cursor positions (e.g., `row 6`) rather than relying on defaults, for test hygiene
 - Explicit saving is not necessary, as the test harness will save the top sheet to the proper output file
 - Write scratch files to `$VD_TESTTMP/<testname>.<ext>`, not `tests/output/` (every file there needs a golden).  Tests never delete files themselves.  See `sqlite-commit.vdx`.
