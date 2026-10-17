@@ -106,7 +106,7 @@ class LazyComputeRow:
 
     def as_dict(self):
         if self.col in self.sheet.visibleCols:
-            raise RecursiveExprException()
+            raise RecursiveExprException(f'as_dict() includes its own column {self.col.name}')  #3210
         return {c.name:self[c.name] for c in self.sheet.visibleCols}
 
     def __getattr__(self, k):
