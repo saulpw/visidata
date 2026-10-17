@@ -5,9 +5,10 @@ from visidata import vd, VisiData, clipdraw, colors
 
 class HistoryPalette:
     'Manages state, navigation, and drawing for the history input palette.'
-    def __init__(self, sheet, items, input_height, updater):
+    def __init__(self, sheet, items, input_height, updater, default=''):
         'Initialize palette state from history items.'
         self.sheet = sheet
+        self.default = default # prompt's initial value; newest entry once the line is changed
         self.items = items                                    # raw history list
         self.haystack = [dict(input=item) for item in items]  # precomputed for fuzzymatch
         self.display = [(item, item) for item in items]       # (formatted_text, raw_value)
@@ -42,7 +43,12 @@ class HistoryPalette:
     def enter_nav(self, v):
         'Save orig and place cursor at end of display list.'
         self.orig = v
-        self._recompute(v)
+        if v == self.default:
+            self._recompute('')
+        else:
+            self._recompute(v)
+            if self.default:
+                self.display = [d for d in self.display if d[1] != self.default] + [(self.default, self.default)]
         self.cursor = len(self.display) - 1
         self.top = max(0, self.cursor - self.nvis() + 1)
 
@@ -164,7 +170,7 @@ def input(vd, orig_input, *args, **kwargs):
 
     sheet = vd.activeSheet
     items = list(history)   # 0=oldest .. N-1=newest
-    pal = HistoryPalette(sheet, items, max(_input_rows, 1), updater)
+    pal = HistoryPalette(sheet, items, max(_input_rows, 1), updater, default=str(kwargs.get('value') or ''))
 
     pal_bindings = dict(bindings)
     pal_bindings['Up'] = pal.nav_up
