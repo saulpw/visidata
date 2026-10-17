@@ -76,7 +76,7 @@ inputLines = { 'save-sheet': 'jetsam.csv',  # save to some tmp file
                  'addcol-iter': 'range(1, 100)',
                  'setcol-format-enum': '1=cat',
                  'setcol-input': '5',
-                 'set-envvar': 'VD_TEST_ENV=',
+                 'set-envvar': '{"name": "VD_TEST_ENV", "value": ""}',
                  'show-expr': 'OrderDate',
                  'setcol-expr': 'OrderDate',
                  'open-ping': 'localhost',

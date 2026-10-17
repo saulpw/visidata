@@ -36,13 +36,13 @@ To save and restore a session in VisiData:
 
 ## Environment and locale
 
-`set-envvar` sets an environment variable (`NAME=value`) and records it in the command logs, like a global option.
+`set-envvar` sets an environment variable and records it in the command logs, like a global option.
 Setting `LANG` or any `LC_*` variable also reapplies the locale, which affects `type-floatlocale`, number formatting, and date formatting.
 
 To record a locale in every saved cmdlog, add this to `.visidatarc`:
 
 ```python
-vd.setEnvvar('LC_NUMERIC=en_US.UTF-8')
+vd.setenv('LC_NUMERIC', 'en_US.UTF-8')
 ```
 
 The locale must be installed on the replaying machine (`locale -a` lists them), and a nonempty `LC_ALL` overrides the other `LC_*` variables.

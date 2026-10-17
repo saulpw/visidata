@@ -1,5 +1,5 @@
-set-envvar LC_ALL=
-set-envvar LC_NUMERIC=en_US.UTF-8
+set-envvar {"name": "LC_ALL", "value": ""}
+set-envvar {"name": "LC_NUMERIC", "value": "en_US.UTF-8"}
 open-new
 add-row
 rename-col result

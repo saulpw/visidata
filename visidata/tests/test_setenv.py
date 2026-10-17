@@ -1,3 +1,4 @@
+import json
 import locale
 import os
 
@@ -5,7 +6,7 @@ from visidata import vd, Sheet
 
 
 def envrows(log):
-    return [r.input for r in log.rows if r.longname == 'set-envvar']
+    return [json.loads(r.input) for r in log.rows if r.longname == 'set-envvar']
 
 
 def test_setenv_replays_from_sheet_cmdlog(monkeypatch):
@@ -15,13 +16,13 @@ def test_setenv_replays_from_sheet_cmdlog(monkeypatch):
     monkeypatch.setenv('LC_NUMERIC', '')
     origlocale = locale.setlocale(locale.LC_ALL)
     try:
-        vd.setEnvvar('VD_TEST_ENV=a=b')
-        vd.setEnvvar('LC_NUMERIC=C')
+        vd.setenv('VD_TEST_ENV', 'a=b')
+        vd.setenv('LC_NUMERIC', 'C')
         assert locale.setlocale(locale.LC_NUMERIC) == 'C'
 
         vs = Sheet('later', rows=[])
         saved = list(vs.cmdlog.rows)
-        assert envrows(vs.cmdlog) == ['VD_TEST_ENV=a=b', 'LC_NUMERIC=C']
+        assert envrows(vs.cmdlog) == [dict(name='VD_TEST_ENV', value='a=b'), dict(name='LC_NUMERIC', value='C')]
 
         vd.resetVisiData()
         monkeypatch.setenv('VD_TEST_ENV', '')

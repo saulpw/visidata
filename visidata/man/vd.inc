@@ -786,7 +786,7 @@ remove option override for this context
 .No open global Sy CommandLog No for all commands executed in the current session
 .It Ic zD
 .No open current sheet's Sy CommandLog No with the parent sheets commands' removed
-.It Ic "set-envvar" Ar NAME=value
+.It Ic "set-envvar" Ar name value
 .No set an environment variable and record it for replay; refresh locale for LANG and LC_* variables
 .El
 .Bl -inset -compact
