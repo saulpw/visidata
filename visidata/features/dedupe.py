@@ -86,10 +86,18 @@ def select_duplicate_rows(sheet, duplicates=True):
 @Sheet.api
 @asyncthread
 def select_col_duplicates(sheet, col, duplicates=True):
+    before = len(sheet.selectedRows)
+
     gen = gen_identify_duplicates(sheet, [col])
     for row, is_dupe in Progress(gen, gerund="selecting", total=sheet.nRows):
         if is_dupe == duplicates:
             sheet.selectRow(row)
+
+    sel_count = len(sheet.selectedRows) - before
+
+    more_str = " more" if before > 0 else ""
+
+    vd.status(f"selected {sel_count}{more_str} {sheet.rowtype}")
 
 @Sheet.api
 def dedupe_rows(sheet, suffix='_deduped'):
@@ -114,7 +122,7 @@ def dedupe_rows(sheet, suffix='_deduped'):
 
 
 # Add longname-commands to VisiData to execute these methods
-TableSheet.addCommand(None, "select-col-duplicates", "sheet.select_col_duplicates(cursorCol)", "select each row where the cell in the current column is a duplicate of a prior cell in the current column")
+TableSheet.addCommand(None, "select-col-duplicates", "sheet.select_col_duplicates(cursorCol)", "select each row where the cell in the current column is a duplicate of a prior cell in the current column; invert selection for distinct values")
 TableSheet.addCommand(None, "select-duplicate-rows", "sheet.select_duplicate_rows()", "select each row that is a duplicate of a prior row")
 TableSheet.addCommand(None, "dedupe-rows", "vd.push(sheet.dedupe_rows())", "open new sheet in which only non-duplicate rows in the active sheet are included")
 

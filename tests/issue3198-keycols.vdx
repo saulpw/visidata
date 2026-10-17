@@ -1,0 +1,7 @@
+# select-col-duplicates ignores key columns
+open-file sample_data/issue3198.tsv
+col k
+key-col-on
+col v
+select-col-duplicates
+dup-selected
