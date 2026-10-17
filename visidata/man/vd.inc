@@ -1044,10 +1044,11 @@ For example:
 .Pp
 Functions defined in .visidatarc are available in python expressions (e.g. in derived columns).
 .Pp
-.Sy options.visidata_dir
-is the directory for additional files, including local plugins in its
+The
+.Em VisiData directory
+holds local plugins (in its
 .Pa plugins/
-subdirectory.
+subdirectory), saved macros, and other files.
 It defaults to
 .Pa ~/.config/visidata
 on Linux and
@@ -1056,7 +1057,7 @@ on macOS, or
 .Pa $XDG_CONFIG_HOME/visidata
 when
 .Ev XDG_CONFIG_HOME
-is set on either platform.
+is set.
 Set
 .Ev VD_DIR
 before starting
@@ -1066,6 +1067,11 @@ or use
 to choose another directory.
 The command-line option takes precedence over
 .Ev VD_DIR Ns .
+Input history and the list of saved macros are in the data directory
+.Pf ( Pa ~/.local/share/visidata
+on Linux), and cached downloads are in the cache directory
+.Pf ( Pa ~/.cache/visidata
+on Linux); neither moves with the VisiData directory.
 .
 .Sh SUPPORTED SOURCES
 Core VisiData includes these sources:
