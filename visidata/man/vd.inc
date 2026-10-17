@@ -742,7 +742,7 @@ save selected or all sheets
 .It Sy "\&."
 .Sy append No "combine all rows from all sheets"
 .It Sy "\&."
-.Sy concat No "similar to 'append' but keep first sheet type and columns"
+.Sy concat No "match columns by position, keeping first sheet type, column names and types"
 .It Sy "\&."
 .Sy extend No "copy first selected sheet, keeping all rows and sheet type, and extend with columns from other sheets"
 .It Sy "\&."
