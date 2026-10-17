@@ -2,8 +2,8 @@
 eleventyNavigation:
   key: Plugins
   order: 13
-Updated: 2023-11-22
-Version: VisiData 3.0
+Updated: 2026-10-16
+Version: VisiData 3.5
 ---
 
 A *plugin* is an optional Python module to modify or extend VisiData functionality. Once installed, all plugins are automatically imported when `vd` is started.
@@ -14,7 +14,7 @@ Plugins can be installed in 3 places:
 
 1. They can come packaged with the VisiData install.
 2. They can be installed via pip.
-3. They can be copied into the `.visidata/plugins/` directory.
+3. They can be copied into the `plugins/` subdirectory of the [VisiData directory](#the-visidata-directory).
 
 ## builtin plugins
 
@@ -36,15 +36,13 @@ It also adds other commands and options.
 
 ## copied manually into local plugins directory
 
-Finally, `.visidatarc` can import any Python code.
-Since any Python modules in the `options.visidata_dir` directory (default `~/.visidata/`) are available for import,
-you can copy a plugin into a module in that directory and import it that way.
+Python modules in the [VisiData directory](#the-visidata-directory) (`<vd_dir>` below) are available for import from `.visidatarc`.
 
 To install a plugin manually:
 
-1. Make a `plugins` directory: `mkdir -p ~/.visidata/plugins`
-2. Copy the plugin Python file there: `cp myplugin.py ~/.visidata/plugins`
-3. Add a line to your ~/.visidatarc to import the plugin: `import plugins.myplugin`
+1. Make a `plugins` directory: `mkdir -p <vd_dir>/plugins`
+2. Copy the plugin Python file there: `cp myplugin.py <vd_dir>/plugins`
+3. Add a line to `~/.visidatarc` to import the plugin: `import plugins.myplugin`
 4. Install the dependencies for the plugin (if any).
 
 # How to Disable Plugins
@@ -57,6 +55,39 @@ To load `.visidatarc` but not autoload plugins installed with pip, set `options.
     `vd --plugins-autoload=False`
 
 Plugins explicitly imported in .visidatarc will still be installed.
+
+# The VisiData directory
+
+The VisiData directory holds local plugins (`plugins/`) and their dependencies (`plugins-deps/`), saved macros, Google API tokens, the HTTP cache for the scrape and reddit loaders, and REPL history.
+VisiData adds it to the Python import path at startup.
+
+The default VisiData directory is:
+
+- Linux: `~/.config/visidata`
+- macOS: `~/Library/Preferences/visidata`
+- Windows: `%LOCALAPPDATA%\visidata\visidata`
+
+On Linux and macOS, `XDG_CONFIG_HOME` changes the default to `$XDG_CONFIG_HOME/visidata`.
+
+To use another directory, set the `VD_DIR` environment variable before starting `vd`, or pass `--visidata-dir=<vd_dir>` on the command line.
+The command-line option takes precedence over `VD_DIR`.
+Setting `options.visidata_dir` in `.visidatarc` does not work, because the VisiData directory is set up before `.visidatarc` is loaded.
+Before VisiData 3.2, the default was `~/.visidata`.
+To keep using it, add this to the shell startup file:
+
+    export VD_DIR="$HOME/.visidata"
+
+## Other storage locations
+
+VisiData stores some files outside the VisiData directory.
+`VD_DIR` and `--visidata-dir` do not move these.
+
+- The data directory holds input history (`input_history.jsonl`) and the list of saved macros (`macros.jsonl`).
+  Default: `~/.local/share/visidata` (Linux), `~/Library/Application Support/visidata` (macOS), `%LOCALAPPDATA%\visidata\visidata` (Windows), or `$XDG_DATA_HOME/visidata`.
+- The cache directory holds cached downloads, like the message of the day and currency rates.
+  Default: `~/.cache/visidata` (Linux), `~/Library/Caches/visidata` (macOS), `%LOCALAPPDATA%\visidata\visidata\Cache` (Windows), or `$XDG_CACHE_HOME/visidata`.
+- The config file is `config.py` in the default VisiData directory if it exists, otherwise `~/.visidatarc`.
+  Set `VD_CONFIG` or pass `--config=<file>` to use another file.
 
 # VisiData API reference
 
