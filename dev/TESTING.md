@@ -106,7 +106,7 @@ All three formats allow `#` line comments.
 **Test output:** `tests/output/testname.ext` — actual output from the latest test run (gitignored, never committed). Compare against golden with `diff tests/golden/name.ext tests/output/name.ext`.
 
 **Conventions:**
-- `-nosave` suffix (e.g., `issue2225-nosave.vdx`) skips golden comparison; runs in a separate batch without `replay_ignore_errors`, so `assert-expr` failures are caught. Use for tests that verify internal state via assertions rather than output comparison. Also required for graph/canvas tests, since the pixel buffer is not populated in batch mode (cursor-based commands are no-ops).
+- `-nosave` suffix (e.g., `issue2225-nosave.vdx`) skips golden comparison and runs in a separate batch without `replay_ignore_errors`.  Use it only for graph/canvas tests, since the pixel buffer is not populated in batch mode (cursor-based commands are no-ops).
 - `-broken` suffix skips the test entirely
 - `-manual` suffix skips the test entirely (for tests not suitable for automation but worth keeping)
 - `-perf` suffix runs via `test-perf.sh` (separate from `test.sh`); reports wall time per test
