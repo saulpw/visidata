@@ -29,22 +29,19 @@ def _appendRowsAfterLoading(joinsheet, origsheets):
         vd.fail('sheets must have same number of columns for `concat`; use `append` instead')
 
     # rowdef: srcRow, native, so sheet-typed commands still work  #3187
-    srcKeyColNames = {c.name for c in origsheets[0].keyCols}
     joinsheet.columns = []
     origincol = joinsheet.addColumn(SettableColumn('origin_sheet', width=0))  #2929
-    keyedcols = collections.defaultdict(dict)  # name -> { sheet -> col }
+    keyedcols = collections.defaultdict(dict)  # positions: names may repeat within a sheet (#3208)
 
     for vs in origsheets:
         joinsheet.rows.extend(vs.rows)
         for r in vs.rows:
             origincol.putValue(r, vs)
-        for c in vs.visibleCols:
-            if not keyedcols[c.name]:
-                newcol = JoinConcatColumn(c.name, keyedcols[c.name], origincol, type=c.type)
-                if c.name in srcKeyColNames:
-                    newcol.keycol = c.keycol
+        for i, c in enumerate(vs.visibleCols):
+            if not keyedcols[i]:
+                newcol = JoinConcatColumn(c.name, keyedcols[i], origincol, type=c.type, keycol=c.keycol)
                 joinsheet.addColumn(newcol)
-            keyedcols[c.name][vs] = c
+            keyedcols[i][vs] = c
 
 
 @VisiData.api
@@ -112,7 +109,7 @@ vd.jointypes = [AttrDict(key=k, desc=v) for k, v in {
     'full': 'all rows from all sheets (union)',
     'diff': 'only rows NOT in all sheets',
     'append': 'all rows from all sheets; columns from all sheets',
-    'concat': 'all rows from all sheets; columns and type from first sheet',
+    'concat': 'all rows from all sheets; columns by position, names and types from first sheet',
     'extend': 'only rows from first sheet; type from first sheet; columns from all sheets',
     'merge': 'all rows from all sheets; where keys match, use latest truthy value',
 }.items()]

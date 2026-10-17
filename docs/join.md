@@ -32,7 +32,9 @@ jointype            description
 `extend`            keeps all rows and retain **SheetType** from first selected sheet
 `merge`             Merges differences from other sheets into first sheet
 `append`            keeps all rows from all sheets; columns from all sheets
-`concat`            keeps all rows from all sheets; columns and type from first sheet
+`concat`            keeps all rows from all sheets; matches columns by position, with names and types from first sheet
+
+`concat` requires the same sheet type and number of visible columns in each sheet. `append` matches columns by name.
 
 ## How to append two datasets
 
