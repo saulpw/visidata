@@ -71,7 +71,9 @@ On Linux and macOS, `XDG_CONFIG_HOME` changes the default to `$XDG_CONFIG_HOME/v
 
 To use another directory, set the `VD_DIR` environment variable before starting `vd`, or pass `--visidata-dir=<vd_dir>` on the command line.
 The command-line option takes precedence over `VD_DIR`.
-For example, to use `~/.visidata`, add this to the shell startup file:
+Setting `options.visidata_dir` in `.visidatarc` does not work, because the VisiData directory is set up before `.visidatarc` is loaded.
+Before VisiData 3.2, the default was `~/.visidata`.
+To keep using it, add this to the shell startup file:
 
     export VD_DIR="$HOME/.visidata"
 
