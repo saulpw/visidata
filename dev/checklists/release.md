@@ -35,7 +35,7 @@
 
 6. Run `make man` to build the man pages and docs/man.md
     - the sdist build also generates man pages automatically, and fails if it can't
-    - move docs/man.md to visidata.org:site/docs/man
+    - keep docs/man.md for the GitHub release (step 15)
 
 7. Merge `develop` to stable
 
@@ -100,7 +100,7 @@ git push --tags
 13. Write up the release notes and add it to `www/releases.md`. Add it to index.md.
 
 
-15. Update the website by pushing to master. Update with new manpage. Update redirect to point to new manpage.
+15. Upload docs/man.md to the GitHub release (`gh release upload v#.#.# docs/man.md`); the website build fetches /man from the latest release.  Then update the website by pushing to master.
     - release notes
 
 16. Comb through issues and close the ones that have been solved, referencing the version number
