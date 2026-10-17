@@ -38,7 +38,7 @@ Aggregator      Description
 
 When one or more columns have aggregators, the **aggregation bar** appears at the bottom of the sheet.
 Each aggregator has its own row, showing the aggregator name and the computed value for each column with that aggregator.
-Values are computed over all rows asynchronously.
+Values are computed over all rows asynchronously, and recomputed after rows are added, deleted, or edited.
 
 - {help.options.color_aggregator}
 
