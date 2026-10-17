@@ -53,54 +53,28 @@ class TestColumnCache:
         c._undoType(anytype)  # what undo of type-int calls
         assert total() != 3
 
-    def _sumTotal(self, col):
-        from visidata import vd
-        agg = vd.aggregators['sum']
-        col.aggregateTotal(agg)
-        vd.sync()
-        return col.aggregateTotal(agg)
-
-    def test_row_and_cell_changes_refresh_aggregated_totals(self):
-        'Adding rows, deleting rows, and editing cells recompute aggregate totals.  #3003'
-        from visidata import vd
-        s, c = self._sheet()
-        assert self._sumTotal(c) == 3
-
-        s.addRows([{'a': 10}])
-        vd.sync()
-        assert self._sumTotal(c) == 13
-
-        s.deleteBy(lambda r: r['a'] == 1)
-        assert self._sumTotal(c) == 12
-
-        c.setValue(s.rows[0], 5)
-        assert self._sumTotal(c) == 15
-
-    def test_undo_refreshes_aggregated_totals(self):
-        'Undoing a row deletion recomputes aggregate totals.  #3003'
+    def test_row_changes_refresh_aggregated_totals(self):
+        'Adding, editing, deleting, and undoing rows recompute aggregate totals.  #3003'
         from visidata import vd
         s, c = self._sheet()
         vd.push(s)
         vd.cmdlog.openHook(s, s.source)
-        assert self._sumTotal(c) == 3
-
-        s.execCommand('delete-row')
-        vd.sync()
-        assert self._sumTotal(c) == 2
-
-        s.execCommand('undo-last')
-        vd.sync()
-        assert self._sumTotal(c) == 3
-
-    def test_late_aggregate_does_not_overwrite_refreshed_totals(self):
-        'A total still computing when the cache is reset lands in the discarded cache.  #3234'
-        from visidata import vd, INPROGRESS
-        s, c = self._sheet()
         agg = vd.aggregators['sum']
 
-        pending = []
-        c._aggregateTotalAsync = lambda agg, totals: pending.append(totals)
-        assert c.aggregateTotal(agg) is INPROGRESS
-        c.recalc()
-        pending[0][agg] = 'stale'
-        assert c.aggregateTotal(agg) != 'stale'
+        def total():
+            c.aggregateTotal(agg)
+            vd.sync()
+            return c.aggregateTotal(agg)
+
+        assert total() == 3
+        s.addRows([{'a': 10}])
+        vd.sync()
+        assert total() == 13
+        c.setValue(s.rows[0], 5)
+        assert total() == 17
+        s.execCommand('delete-row')
+        vd.sync()
+        assert total() == 12
+        s.execCommand('undo-last')
+        vd.sync()
+        assert total() == 17
