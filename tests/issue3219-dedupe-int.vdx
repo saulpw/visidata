@@ -1,0 +1,6 @@
+# int type merges 1/1.0/"1"; conversion errors stay distinct by raw value
+open-file sample_data/issue3219.jsonl
+col val
+key-col
+type-int
+dedupe-rows
