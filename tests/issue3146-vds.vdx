@@ -1,0 +1,5 @@
+# vds round-trips columns with duplicate names
+open-file tests/issue3146.csv
+save-sheet $VD_TESTTMP/issue3146.vds
+open-file $VD_TESTTMP/issue3146.vds
+open-row

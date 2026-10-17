@@ -47,8 +47,17 @@ def save_vds(vd, p, *sheets):
             fp.write('#'+json.dumps(d)+NL)
 
             # class and attrs for each column in vs
+            rowkeys = {}  # col -> unique key in each row dict
             for col in vs.columns:
-                fp.write('#'+json.dumps(_colstate(col))+NL)
+                key, n = col.name, 1
+                while key in rowkeys.values():
+                    n += 1
+                    key = f'{col.name}_{n}'
+                rowkeys[col] = key
+                d = _colstate(col)
+                if key != col.name:
+                    d['key'] = key  #3146
+                fp.write('#'+json.dumps(d)+NL)
 
             if not vs.rows:
                 fp.write(NL)  #2342  blank line to separate sheets without rows
@@ -56,7 +65,7 @@ def save_vds(vd, p, *sheets):
 
             with Progress(gerund='saving'):
                 for row in vs.iterdispvals(*vs.columns, format=False):
-                    d = {col.name:val for col, val in row.items()}
+                    d = {rowkeys[col]:val for col, val in row.items()}
                     fp.write(json.dumps(d, default=str)+NL)
 
 
@@ -94,11 +103,13 @@ class VdsSheet(JsonSheet):
                 classname = d.pop('col')
                 if classname == 'Column':
                     classname = 'ItemColumn'
-                    d['expr'] = d['name']
+                    d['expr'] = d.get('key', d['name'])
+                key = d.pop('key', d['name'])
 
                 c = vd.getGlobals()[classname](d.pop('name'), sheet=self)
                 self.addColumn(c)
-                self.colnames[c.name] = c
+                self.colnames[key] = c
+                self._knownKeys.add(key)
                 c.__setstate__(d)  # must happen after addColumn sets .sheet
 
                 line = fp.readline()
