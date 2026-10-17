@@ -28,16 +28,19 @@ def _appendRowsAfterLoading(joinsheet, origsheets):
     if len(colcounts) != 1:
         vd.fail('sheets must have same number of columns for `concat`; use `append` instead')
 
+    if len({tuple(c.name for c in vs.visibleCols) for vs in origsheets}) > 1:
+        vd.warning('column names differ; `concat` matches columns by position')
+
     # rowdef: srcRow, native, so sheet-typed commands still work  #3187
     joinsheet.columns = []
     origincol = joinsheet.addColumn(SettableColumn('origin_sheet', width=0))  #2929
-    keyedcols = collections.defaultdict(dict)  # positions: names may repeat within a sheet (#3208)
+    keyedcols = collections.defaultdict(dict)  # position -> { sheet -> col }
 
     for vs in origsheets:
         joinsheet.rows.extend(vs.rows)
         for r in vs.rows:
             origincol.putValue(r, vs)
-        for i, c in enumerate(vs.visibleCols):
+        for i, c in enumerate(vs.visibleCols):  #3208
             if not keyedcols[i]:
                 newcol = JoinConcatColumn(c.name, cols=keyedcols[i], type=c.type, keycol=c.keycol)
                 joinsheet.addColumn(newcol)

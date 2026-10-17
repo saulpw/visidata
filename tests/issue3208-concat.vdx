@@ -1,3 +1,4 @@
 open-file sample_data/issue3208-b.csv
 open-file sample_data/issue3208-a.csv
 join-sheets-top2 concat
+assert-expr any('by position' in r[1][0] for r in vd.statusHistory)
