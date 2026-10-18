@@ -8,6 +8,7 @@ from visidata import IndexSheet, VisiData, Sheet, Path, VisiDataMetaSheet, Colum
 
 vd.macroMode = None  # CommandLog
 vd.macrobindings = {}
+vd.macrokeys = {}  # binding -> keystroke bound by setMacro
 
 MACRO_PARAM_RE = re.compile(r'\{(\w+)(?:=([^}]*))?\}')
 
@@ -41,7 +42,7 @@ class MacroSheet(IndexSheet):
 
     def commitDeleteRow(self, row):
         binding = row.binding
-        keystroke = getattr(row, 'keystroke', '')
+        keystroke = vd.macrokeys.pop(binding, '')
 
         # Remove from macrobindings
         del vd.macrobindings[binding]
@@ -139,6 +140,9 @@ def setMacro(vd, ks:str, vs, helpstr='', keystroke=''):
     vs.helpstr = helpstr
     vs.keystroke = keystroke
     vd.macrobindings[ks] = vs
+    oldkeystroke = vd.macrokeys.pop(ks, '')
+    if oldkeystroke and oldkeystroke != keystroke and vd.bindkeys._get(oldkeystroke, BaseSheet) == ks:
+        BaseSheet.unbindkey(oldkeystroke)  #2784
     old_module = vd.importingModule
     vd.importingModule = 'macros'
     try:
@@ -146,6 +150,7 @@ def setMacro(vd, ks:str, vs, helpstr='', keystroke=''):
             BaseSheet.addCommand('', ks, f'runMacro("{ks}")', helpstr)
             if keystroke:  #2784
                 BaseSheet.bindkey(keystroke, ks)
+                vd.macrokeys[ks] = keystroke
         else:
             BaseSheet.addCommand(ks, f'exec-{vs.name}', f'runMacro("{ks}")', helpstr)
     finally:
