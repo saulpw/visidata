@@ -1,34 +1,26 @@
 import json
+import shutil
+from pathlib import Path
 
 import pytest
 
 from visidata import vd, BaseSheet
 
 
-MACRO_VDJ = '{"sheet": "", "col": "", "row": "", "longname": "go-down", "input": "", "keystrokes": "j", "comment": ""}\n'
+TEST_DATA_HOME = Path(__file__).parents[2]/'tests/xdg/data'
 
 
 @pytest.fixture
 def macrodir(tmp_path, monkeypatch):
-    datadir = tmp_path/'visidata'
-    datadir.mkdir()
+    shutil.copytree(TEST_DATA_HOME, tmp_path, dirs_exist_ok=True)
     monkeypatch.setenv('XDG_DATA_HOME', str(tmp_path))
     vd.clearCaches()
-    vd.options.visidata_dir = str(datadir)
-    (datadir/'happy-time.vdj').write_text(MACRO_VDJ)
-    (datadir/'macros.jsonl').write_text(json.dumps(dict(binding='happy-time', source='happy-time.vdj', keystroke='Alt+q')) + '\n')
-    vd.macrobindings.clear()
-    vd.macros.clear()
-    vd._macrosheet = None
     vd.reloadMacros()
-    yield datadir
-    for ks in ('Alt+q', 'Alt+j'):
-        if vd.bindkeys._get(ks, BaseSheet):
-            BaseSheet.unbindkey(ks)
-    if vd.isLongname('happy-time') and 'happy-time' in vd.macrobindings:
-        BaseSheet.removeCommand('', 'happy-time')
-    vd.macrobindings.clear()
+    yield tmp_path/'visidata'
+    for ks in vd.macrokeys.values():
+        BaseSheet.unbindkey(ks)
     vd.macrokeys.clear()
+    vd.macrobindings.clear()
     vd._macrosheet = None
     vd.clearCaches()
 
@@ -41,23 +33,23 @@ def macrorow():
     vs = vd.macrosheet
     vs.reload()
     vd.sync()
-    return vs, next(r for r in vs.rows if r.binding == 'happy-time')
+    return vs, next(r for r in vs.rows if r.binding == 'sort-by-col')
 
 
 @pytest.mark.usefixtures('curses_setup')
 class TestMacroKeystroke:
     def test_keystroke_from_macros_jsonl(self, macrodir):
-        assert boundto('Alt+q') == 'happy-time'
+        assert boundto('Alt+q') == 'sort-by-col'
 
     def test_edit_keystroke_rebinds(self, macrodir):
         vs, row = macrorow()
         vs.column('keystroke').setValue(row, 'Alt+j')
         vs.putChanges()
         vd.sync()
-        assert boundto('Alt+j') == 'happy-time'
+        assert boundto('Alt+j') == 'sort-by-col'
         assert not boundto('Alt+q')
         saved = [json.loads(L) for L in (macrodir/'macros.jsonl').read_text().splitlines()]
-        assert [r['keystroke'] for r in saved if r['binding'] == 'happy-time'] == ['Alt+j']
+        assert [r['keystroke'] for r in saved if r['binding'] == 'sort-by-col'] == ['Alt+j']
 
     def test_clear_keystroke_unbinds(self, macrodir):
         vs, row = macrorow()
@@ -65,7 +57,7 @@ class TestMacroKeystroke:
         vs.putChanges()
         vd.sync()
         assert not boundto('Alt+q')
-        assert 'happy-time' in vd.macrobindings
+        assert 'sort-by-col' in vd.macrobindings
 
     def test_delete_unbinds(self, macrodir):
         vs, row = macrorow()
@@ -73,5 +65,5 @@ class TestMacroKeystroke:
         vs.putChanges()
         vd.sync()
         assert not boundto('Alt+q')
-        assert 'happy-time' not in vd.macrobindings
-        assert 'happy-time' not in (macrodir/'macros.jsonl').read_text()
+        assert 'sort-by-col' not in vd.macrobindings
+        assert 'sort-by-col' not in (macrodir/'macros.jsonl').read_text()
