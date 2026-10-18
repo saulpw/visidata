@@ -5,6 +5,8 @@ import shutil
 import stat
 import subprocess
 import contextlib
+import threading
+import time
 try:
     import pwd
     import grp
@@ -23,6 +25,7 @@ vd.option('dir_hidden', False, 'load hidden files on DirSheet')
 vd.option('active_procs', 10, 'number of concurrent processes on DirSheet')
 
 vd.spawnedProcesses = []
+_shellThrottleLock = threading.Lock()
 
 def bytes_rstrip(*args, **kwargs): #3081
     return bytes.rstrip(*args, **kwargs)
@@ -77,8 +80,8 @@ def open_fdir(vd, p):
     return FileListSheet(p.base_stem, source=p)
 
 @VisiData.api
-def addShellColumns(vd, cmd, sheet, curcol=None):
-    shellcol = ColumnShell(cmd, source=sheet, width=0, curcol=curcol)
+def addShellColumns(vd, cmd, sheet, curcol=None, delay=0):
+    shellcol = ColumnShell(cmd, source=sheet, width=0, curcol=curcol, delay=delay)
     sheet.addColumnAtCursor(
             Column(cmd+'_stdout', type=bytes_rstrip, srccol=shellcol, getter=lambda col,row: col.srccol.getValue(row)[0]),
             Column(cmd+'_stderr', type=bytes_rstrip, srccol=shellcol, getter=lambda col,row: col.srccol.getValue(row)[1]),
@@ -89,10 +92,23 @@ SHELL_COLREF_RE = r'\$\{([^}]+)\}|\$(\w+)'
 
 
 class ColumnShell(Column):
-    def __init__(self, name, cmd=None, curcol=None, **kwargs):
+    def __init__(self, name, cmd=None, curcol=None, delay=0, **kwargs):
         super().__init__(name, **kwargs)
         self.expr = cmd or name
         self.curcol = curcol
+        self.delay = delay
+        self._nextLaunch = 0
+
+    def throttle(self):
+        'Wait until *delay* seconds have passed since this column last started a command.'
+        while self.delay:
+            with _shellThrottleLock:
+                now = time.monotonic()
+                if now >= self._nextLaunch:
+                    self._nextLaunch = now + self.delay
+                    return
+                wait = self._nextLaunch - now
+            time.sleep(min(wait, 0.1))
 
     @asynccache(lambda col,row: (col, col.sheet.rowid(row)))
     def calcValue(self, row):
@@ -101,9 +117,19 @@ class ColumnShell(Column):
             cmd = re.sub(SHELL_COLREF_RE,
                          lambda m: shlex.quote(str(context[m.group(1) or m.group(2)])),
                          self.expr)
+            self.throttle()  #3103
             p = vd.popen([os.getenv('SHELL', 'bash'), '-c', cmd],
                     stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            return p.communicate()
+            try:
+                while True:
+                    try:
+                        return p.communicate(timeout=0.1)  # timeout: Ctrl+C lands only between bytecodes
+                    except subprocess.TimeoutExpired:
+                        pass
+            except BaseException:
+                p.kill()
+                p.wait()
+                raise
         except Exception as e:
             vd.exceptionCaught(e)
 
@@ -265,7 +291,9 @@ class FileListSheet(DirSheet):
 
 @VisiData.api
 def inputShell(vd):
-    cmd = vd.input("sh$ ", type="sh")
+    r = vd.inputMultiple(command=dict(prompt="sh$ ", type="sh"),
+                         delay=dict(prompt="seconds between starts: ", type="shell_delay", value='0'))
+    cmd = r['command']
     refs = [m.group(1) or m.group(2) for m in re.finditer(SHELL_COLREF_RE, cmd)]
     if not refs:
         vd.warning('no $column in command')
@@ -274,12 +302,12 @@ def inputShell(vd):
         badnames = [name for name in refs if name not in colnames]
         if badnames:
             vd.fail(f'no such columns: {", ".join(badnames)}')
-    return cmd
+    return cmd, float(r['delay'] or 0)
 
 DirSheet.addCommand('`', 'open-dir-parent', 'vd.push(openSource(source.parent if source.resolve()!=Path(".").resolve() else os.path.dirname(source.resolve())))', 'open parent directory')  #1801
 BaseSheet.addCommand('', 'open-dir-current', 'vd.push(vd.currentDirSheet)', 'open Directory Sheet: browse properties of files in current directory')
 
-Sheet.addCommand('z;', 'addcol-shell', 'cmd=inputShell(); addShellColumns(cmd, sheet, curcol=cursorCol)', 'create new column from bash expression, with $columnNames as variables')
+Sheet.addCommand('z;', 'addcol-shell', 'cmd, delay=inputShell(); addShellColumns(cmd, sheet, curcol=cursorCol, delay=delay)', 'create new column from bash expression, with $columnNames as variables')
 
 DirSheet.addCommand('Enter', 'open-row-file', 'vd.push(openSource(cursorRow or fail("no row"), filetype="dir" if cursorRow.is_dir() else LazyComputeRow(sheet, cursorRow).ext))', 'open current file as a new sheet')
 DirSheet.addCommand('gEnter', 'open-rows', 'for r in selectedRows: vd.push(openSource(r))', 'open selected files as new sheets')

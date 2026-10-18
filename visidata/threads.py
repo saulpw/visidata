@@ -14,7 +14,7 @@ from visidata import ColumnAttr, Column, BaseSheet, ItemColumn
 
 vd.option('profile', False, 'enable profiling on threads')
 vd.option('min_memory_mb', 0, 'minimum memory to continue loading and async processing')
-vd.option('max_threads', 10, 'maximum number of concurrent processes on DirSheet')
+vd.option('max_threads', 10, 'maximum number of concurrent processes for addcol-shell')
 
 vd.theme_option('color_working', '118 5', 'color of system running smoothly')
 
