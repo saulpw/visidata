@@ -537,6 +537,8 @@ vd.addGlobals({
     'asyncsingle': asyncsingle,
     'asyncsingle_queue': asyncsingle_queue,
     'asyncignore': asyncignore,
+    'ProfileSheet': ProfileSheet,
+    'ProfileStatsSheet': ProfileStatsSheet,
 })
 
 vd.addMenuItems('''

@@ -78,3 +78,5 @@ def save_jsonla(vd, p, *vsheets):
 
 
 JsonlArraySheet.options.regex_skip = r'^(//|#).*'
+
+vd.addGlobals(JsonlArraySheet=JsonlArraySheet)

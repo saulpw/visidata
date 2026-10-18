@@ -1,4 +1,4 @@
-from visidata import VisiData, Sheet, ItemColumn, date, Column
+from visidata import vd, VisiData, Sheet, ItemColumn, date, Column
 
 
 @VisiData.api
@@ -39,3 +39,5 @@ class MboxSheet(Sheet):
         self.mailbox = cls(str(self.source), create=False)
         for r in self.mailbox.itervalues():
             yield r
+
+vd.addGlobals(MboxSheet=MboxSheet)

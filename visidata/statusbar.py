@@ -321,3 +321,5 @@ def test_addToStatusHistory_str_failure_shown(vd):  #3111
     vd.statusHistory.clear()
     vd.addToStatusHistory('before', Bad(), 'after')
     assert vd.statusHistory[-1][1] == ('before', 'ValueError: nope', 'after')
+
+vd.addGlobals(StatusSheet=StatusSheet)

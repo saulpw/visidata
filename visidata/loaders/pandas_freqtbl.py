@@ -180,4 +180,4 @@ PandasSheet.addCommand('gF', 'freq-keys', 'vd.push(makePandasFreqTable(sheet, *k
 PandasFreqTableSheet.init('largest', lambda: 1)
 PandasFreqTableSheet.options.numeric_binning = False
 
-vd.addGlobals(makePandasFreqTable=makePandasFreqTable)
+vd.addGlobals(makePandasFreqTable=makePandasFreqTable, PandasFreqTableSheet=PandasFreqTableSheet)

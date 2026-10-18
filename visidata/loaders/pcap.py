@@ -413,3 +413,5 @@ PcapSheet.addCommand('3', 'l3-packet', 'vd.push(TCPSheet("L3packets", source=she
 vd.addMenuItem('View', 'Packet capture', 'flows', 'flows')
 vd.addMenuItem('View', 'Packet capture', 'IP (L2)', 'l2-packet')
 vd.addMenuItem('View', 'Packet capture', 'TCP (L3)', 'l3-packet')
+
+vd.addGlobals(EtherSheet=EtherSheet, IPSheet=IPSheet, TCPSheet=TCPSheet, UDPSheet=UDPSheet, PcapSheet=PcapSheet, PcapFlowsSheet=PcapFlowsSheet)

@@ -55,3 +55,5 @@ def extract_parts(sheet, givenpath, *parts):
 
 EmailSheet.addCommand('x', 'extract-part', 'extract_part(inputPath("save part as: ", value=cursorRow.get_filename()), cursorRow)')
 EmailSheet.addCommand('gx', 'extract-part-selected', 'extract_parts(inputPath("save %d parts in: " % nSelectedRows), *selectedRows)')
+
+vd.addGlobals(EmailSheet=EmailSheet)

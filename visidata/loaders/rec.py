@@ -141,3 +141,5 @@ def save_rec(vd, p, *vsheets):
 
                 fp.write('\n')
             fp.write('\n')
+
+vd.addGlobals(RecSheet=RecSheet, RecIndexSheet=RecIndexSheet)

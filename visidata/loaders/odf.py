@@ -85,3 +85,5 @@ class OdsSheet(SequenceSheet):
                 empty_rows = 0
                 for i in range(row_repeat):
                     yield list(row)
+
+vd.addGlobals(OdsIndexSheet=OdsIndexSheet, OdsSheet=OdsSheet)

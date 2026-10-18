@@ -463,3 +463,5 @@ def test_join_unhashable(vd):
     s2 = Sheet('b', columns=cols(), rows=[{'key': [1, 2], 'val': 'from-b'}])
     kc = JoinKeyColumn('key', keycols=[s1.column('key'), s2.column('key')])
     assert kc.calcValue({s1: s1.rows[0], s2: s2.rows[0]}) == [1, 2]
+
+vd.addGlobals(JoinSheet=JoinSheet, ConcatSheet=ConcatSheet)

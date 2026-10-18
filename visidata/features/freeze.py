@@ -79,3 +79,5 @@ Sheet.addCommand("gz'", 'cache-cols', 'for c in visibleCols: c.resetCache()', 'a
 
 vd.addMenuItem('Column', 'Freeze', 'setcol-freeze')
 vd.addMenuItem('File', 'Freeze', 'freeze-sheet')
+
+vd.addGlobals(StaticSheet=StaticSheet)

@@ -85,3 +85,5 @@ def _guess_type(fmt):
     return anytype
 
 Hdf5ObjSheet.addCommand('A', 'dive-metadata', 'vd.push(SheetDict(cursorRow.name + "_attrs", source=cursorRow.attrs))', 'open metadata sheet for object referenced in current row')
+
+vd.addGlobals(Hdf5ObjSheet=Hdf5ObjSheet)

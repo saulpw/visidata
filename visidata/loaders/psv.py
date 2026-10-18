@@ -15,3 +15,5 @@ class PsvSheet(TsvSheet):
 def save_psv(vd, p, vs):
     p.options.set('delimiter', '|', p, cmdlog=False)
     vd.save_tsv(p, vs)
+
+vd.addGlobals(PsvSheet=PsvSheet)

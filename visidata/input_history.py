@@ -53,3 +53,5 @@ def inputHistorySheet(vd):
 
 
 vd.addCommand(None, 'open-input-history', 'vd.push(inputHistorySheet)', 'open sheet with previous inputs')
+
+vd.addGlobals(InputHistorySheet=InputHistorySheet)
