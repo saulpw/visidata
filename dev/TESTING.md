@@ -201,12 +201,18 @@ Developer-only validation belongs in pytest, not in runtime mechanisms. Don't ad
 
 ## Bug Fix Testing
 
-Always write tests FIRST, verify they FAIL on the current code, then fix the code and verify the tests pass. Use the appropriate test type:
+When a test is warranted, write it FIRST, verify it FAILS on the current code, then fix the code and verify it passes.  Verify with a tracked test (or interactively), not throwaway `python -c` scripts.  Use the appropriate test type:
 
 - **Unit tests** (pytest) for pure functions like `wraptext()`, `clipstr()`, `iterchunks()` — add to existing test files in `visidata/tests/`
 - **Golden tests** for behavior that requires the full VisiData UI/session — create a `.vdx` test in `tests/`
 
-Default to a `.vdx` test.  Use pytest instead only when an existing test file in `visidata/tests/` already covers the area and the change there is smaller than the equivalent `.vdx` test.  A test that checks only Python-level assertions, with no output to compare, goes in pytest.
+Default to one golden `.vdx` per feature or fix; often it is the only test.  Add a pytest only when all of these hold:
+
+- It checks a pure function against a table of inputs and outputs (like `test_substitute` in `test_shell.py`).
+- It runs in milliseconds: no sleeps, subprocesses, threads, or wall-clock asserts.
+- It pins down a case a reader wouldn't catch from the code (an edge case, or a past bug).
+
+If the `.vdx` already covers it, skip the pytest.  Writing no test for a few lines of plain mechanics is fine.
 
 For golden tests: create a `.vdx` file, generate golden output, and verify with `dev/test.sh`.
 
