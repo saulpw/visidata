@@ -98,3 +98,20 @@ class TestLLM:
         vd.options.llm_rate_delay = 0
         analyze(textsheet(*['a']*101))
         assert confirmed == [threading.current_thread()]
+
+    def test_query_rows(self, fake, monkeypatch):
+        pushed = []
+        monkeypatch.setattr(vd, 'push', lambda vs, *a, **kw: pushed.append(vs), raising=False)
+        fake.texts = ['line one\nline two']
+        sheet = textsheet('alpha', 'beta')
+        sheet.llmQueryRows(sheet.rows, 'what is common?')
+        vd.sync()
+        assert len(fake.calls) == 1
+        kw = fake.calls[0]
+        assert 'output_config' not in kw
+        prompt = kw['messages'][0]['content']
+        assert 'what is common?' in prompt
+        assert json.dumps([{'text': 'alpha'}, {'text': 'beta'}]) in prompt
+        vs = pushed[0]
+        vs.ensureLoaded()
+        assert [r[1] for r in vs.rows] == ['line one', 'line two']

@@ -44,7 +44,7 @@ import time
 import json
 import re
 
-from visidata import vd, VisiData, Sheet, SettableColumn, asyncthread, Progress
+from visidata import vd, VisiData, Sheet, TextSheet, SettableColumn, asyncthread, Progress
 
 # Configuration options
 vd.option('llm_model', 'claude-opus-5-5', 'Anthropic model name')
@@ -102,22 +102,28 @@ def loadLLMTemplate(vd):
 
 
 @VisiData.api
-def queryLLM(vd, prompt):
-    'Query Anthropic LLM with prompt and return parsed response.'
+def llmCreate(vd, prompt, **kwargs):
+    'Send *prompt* to the LLM and return (response text, total tokens).'
     response = vd.anthropic_client.beta.messages.create(
         model=vd.options.llm_model,
         max_tokens=vd.options.llm_max_tokens,
-        output_config={'format': RESPONSE_FORMAT},
         betas=['server-side-fallback-2026-07-01'],
         fallbacks='default',
-        messages=[{'role': 'user', 'content': prompt}]
+        messages=[{'role': 'user', 'content': prompt}],
+        **kwargs
     )
 
     if response.stop_reason == 'refusal':
         vd.fail('LLM declined the request')
 
-    raw_text = ''.join(b.text for b in response.content if b.type == 'text')
-    tokens = response.usage.input_tokens + response.usage.output_tokens
+    text = ''.join(b.text for b in response.content if b.type == 'text')
+    return text, response.usage.input_tokens + response.usage.output_tokens
+
+
+@VisiData.api
+def queryLLM(vd, prompt):
+    'Query Anthropic LLM with prompt and return parsed response.'
+    raw_text, tokens = vd.llmCreate(prompt, output_config={'format': RESPONSE_FORMAT})
 
     # Try to parse JSON response
     try:
@@ -216,6 +222,28 @@ def llmAnalyzeRows(sheet, col, rows, query, template):
     vd.status(msg)
 
 
+@Sheet.api
+def llmQueryRows(sheet, rows, query=None):
+    'Send *rows* (visible columns, as JSON) to the LLM in one request with *query*; show the reply in a new sheet.'
+    vd.anthropic_client
+    if query is None:
+        query = vd.input('LLM query over rows: ', type='llm-query')
+
+    cols = sheet.visibleCols
+    data = [{c.name: c.getDisplayValue(r) for c in cols} for r in rows]
+    prompt = f'{query}\n\nData from the sheet "{sheet.name}", one JSON object per row:\n{json.dumps(data, ensure_ascii=False)}'
+    sheet.llmQueryPrompt(prompt, len(rows))
+
+
+@Sheet.api
+@asyncthread
+def llmQueryPrompt(sheet, prompt, nrows):
+    vd.status(f'sending {nrows} rows to LLM')
+    text, tokens = vd.llmCreate(prompt)
+    vd.push(TextSheet(sheet.name, 'llm', source=text.splitlines()))
+    vd.status(f'LLM query complete ({tokens} tokens)')
+
+
 # Command bindings - no default keybindings, users can add their own
 Sheet.addCommand('', 'llm-analyze-column',
     'llmAnalyzeColumn(cursorCol, rows)',
@@ -225,8 +253,18 @@ Sheet.addCommand('', 'llm-analyze-selected',
     'llmAnalyzeColumn(cursorCol, someSelectedRows)',
     'analyze selected rows only with LLM')
 
+Sheet.addCommand('', 'llm-query-sheet',
+    'llmQueryRows(rows)',
+    'send all rows to LLM in one query and show the reply')
+
+Sheet.addCommand('', 'llm-query-selected',
+    'llmQueryRows(someSelectedRows)',
+    'send selected rows to LLM in one query and show the reply')
+
 # Menu integration
 vd.addMenuItems('''
     Column > Analyze with LLM > all rows > llm-analyze-column
     Column > Analyze with LLM > selected rows > llm-analyze-selected
+    Data > Query LLM > all rows > llm-query-sheet
+    Data > Query LLM > selected rows > llm-query-selected
 ''')
