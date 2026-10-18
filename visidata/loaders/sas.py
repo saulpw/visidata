@@ -45,3 +45,5 @@ class SasSheet(Sheet):
 
         with self.dat as fp:
             yield from Progress(fp, total=self.dat.properties.row_count)
+
+vd.addGlobals(XptSheet=XptSheet, SasSheet=SasSheet)

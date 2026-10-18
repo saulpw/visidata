@@ -302,3 +302,5 @@ def tint_luminance(tint, lum):
         return int(round(lum * (1.0 + tint)))
     else:
         return int(round(lum * (1.0 - tint) + (HLSMAX - HLSMAX * (1.0 - tint))))
+
+vd.addGlobals(XlsxIndexSheet=XlsxIndexSheet, XlsxSheet=XlsxSheet, XlsIndexSheet=XlsIndexSheet, XlsSheet=XlsSheet)

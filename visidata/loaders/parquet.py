@@ -192,4 +192,4 @@ def save_parquet(vd, p, sheet):
 ParquetSheet.addCommand('.', 'plot-row', 'vd.push(ParquetGeoCanvas(name+"_map", source=sheet, sourceRows=[cursorRow], textCol=cursorCol))', 'plot geometry in current row')
 ParquetSheet.addCommand('g.', 'plot-rows', 'vd.push(ParquetGeoCanvas(name+"_map", source=sheet, sourceRows=rows, textCol=cursorCol))', 'plot geometries in all rows')
 
-vd.addGlobals(ParquetGeoCanvas=ParquetGeoCanvas)
+vd.addGlobals(ParquetGeoCanvas=ParquetGeoCanvas, ParquetSheet=ParquetSheet)

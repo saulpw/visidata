@@ -10,3 +10,5 @@ class FrictionlessIndexSheet(IndexSheet):
         self.dp = datapackage.Package(self.source.open(encoding='utf-8'))
         for r in Progress(self.dp.resources):
             yield vd.openSource(self.source.with_name(r.descriptor['path']), filetype=r.descriptor.get('format', 'json'))
+
+vd.addGlobals(FrictionlessIndexSheet=FrictionlessIndexSheet)

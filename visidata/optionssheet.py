@@ -128,3 +128,5 @@ vd.addMenuItems('''
     File > Options > all sheets > options-global
     File > Options > this sheet > options-sheet
 ''')
+
+vd.addGlobals(OptionsSheet=OptionsSheet)

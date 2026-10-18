@@ -126,3 +126,5 @@ def save_npy(vd, p, sheet):
     arr = np.array(data, dtype=dtype)
     with p.open_bytes(mode='w') as outf:
         np.save(outf, arr, allow_pickle=bool(sheet.options.npy_allow_pickle))
+
+vd.addGlobals(NpySheet=NpySheet, NpzSheet=NpzSheet)

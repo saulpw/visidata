@@ -295,5 +295,7 @@ def open_fec(vd, p):
     return FECFiling(p.base_stem, source=p)
 
 vd.addGlobals({
-    "DiveSheet": DiveSheet
+    "DiveSheet": DiveSheet,
+    "FECItemizationSheet": FECItemizationSheet,
+    "FECScheduleSheet": FECScheduleSheet,
 })

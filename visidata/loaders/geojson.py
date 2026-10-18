@@ -160,4 +160,5 @@ GeoJSONMap.addCommand('Ctrl+S', 'save-sheet', 'vd.saveSheets(inputPath("save to:
 
 vd.addGlobals({
     'GeoJSONMap': GeoJSONMap,
+    'GeoJSONSheet': GeoJSONSheet,
 })

@@ -177,7 +177,7 @@ HtmlDocsSheet.addCommand(';', 'addcol-selector', 'sel=input("css selector: ", ty
 HtmlElementsSheet.addCommand(';', 'addcol-selector', 'sel=input("css selector: ", type="selector"); addColumn(SelectorColumn(sel, expr=sel, cache="async"))',  'add column derived from css selector of current column')
 
 vd.addGlobals({
-    'HtmlDocsSheet':SelectorColumn,
+    'HtmlDocsSheet':HtmlDocsSheet,
     'SelectorColumn':SelectorColumn,
     'DocsSelectorColumn':DocsSelectorColumn,
 })

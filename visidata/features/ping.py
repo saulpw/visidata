@@ -154,6 +154,8 @@ BaseSheet.addCommand('', 'open-ping', 'vd.push(makePingStats(vd.input("ping: ", 
 
 vd.addGlobals(
     makePingStats=makePingStats,
+    PingStatsSheet=PingStatsSheet,
+    PingSheet=PingSheet,
 )
 
 vd.addMenuItems('''

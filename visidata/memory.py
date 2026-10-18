@@ -44,3 +44,5 @@ def inputMemoName(vd, value):
 
 BaseSheet.addCommand('Alt+Shift+M', 'open-memos', 'vd.push(vd.memosSheet)', 'open the Memory Sheet')
 Sheet.addCommand('Alt+m', 'memo-cell', 'vd.memoValue(inputMemoName(cursorDisplay), cursorTypedValue, cursorDisplay)', 'store value in current cell to Memory Sheet')
+
+vd.addGlobals(MemorySheet=MemorySheet)

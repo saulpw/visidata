@@ -245,3 +245,5 @@ vd.addMenuItems('''
     System > Record macro > macro-record
     System > Macros sheet > macro-sheet
 ''')
+
+vd.addGlobals(MacroSheet=MacroSheet)

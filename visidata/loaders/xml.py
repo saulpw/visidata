@@ -259,7 +259,7 @@ XmlSheet.addCommand('za', 'addcol-xmlattr', 'attr=input("add attribute: "); addC
 XmlSheet.addCommand('v', 'visibility', 'showColumnsBasedOnRow(cursorRow)', 'show only columns in current row attributes')
 XmlSheet.addCommand('', 'dive-xml-table', 'vd.push(XmlTableSheet(name, unns(cursorRow.tag), source=cursorRow))', 'open immediate children of current XML element as a table')
 
-vd.addGlobals(XmlTableSheet=XmlTableSheet, unns=unns)
+vd.addGlobals(XmlTableSheet=XmlTableSheet, unns=unns, XmlSheet=XmlSheet)
 
 vd.addMenuItems('''
     Data > Dive > XML table > dive-xml-table

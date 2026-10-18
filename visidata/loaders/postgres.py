@@ -137,3 +137,5 @@ class PgTable(Sheet):
                 self.addColumn(c)
             for r in cur:
                 self.addRow(r)
+
+vd.addGlobals(PgTablesSheet=PgTablesSheet)

@@ -108,3 +108,5 @@ def save_xd(vd, p, vs):
 
 
 GridSheet.options.disp_column_sep = ''
+
+vd.addGlobals(CrosswordsSheet=CrosswordsSheet, GridSheet=GridSheet, CrosswordSheet=CrosswordSheet, PuzSheet=PuzSheet)

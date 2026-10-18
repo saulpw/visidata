@@ -2,7 +2,7 @@ import collections
 
 #1179  Line Separated Values for e.g. awk
 
-from visidata import VisiData, Sheet, ItemColumn
+from visidata import vd, VisiData, Sheet, ItemColumn
 
 
 @VisiData.api
@@ -51,3 +51,5 @@ class LsvSheet(Sheet):
 
         if row:
             yield row
+
+vd.addGlobals(LsvSheet=LsvSheet)

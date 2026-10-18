@@ -17,3 +17,5 @@ class MsgpackSheet(JsonSheet):
             brotli = vd.importModule('brotli')
             data = brotli.decompress(data)
         yield from msgpack.unpackb(data, raw=False)
+
+vd.addGlobals(MsgpackSheet=MsgpackSheet)

@@ -304,3 +304,5 @@ vd.addMenuItems('''
     File > Reddit > open in browser > subreddit in current row > sysopen-subreddit
     File > Reddit > open in browser > selected subreddits > sysopen-subreddits
 ''')
+
+vd.addGlobals(SubredditSheet=SubredditSheet, RedditorsSheet=RedditorsSheet)

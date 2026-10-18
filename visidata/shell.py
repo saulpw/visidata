@@ -354,6 +354,7 @@ def copy_files(sheet, paths, dest):
 vd.addGlobals(
     DirSheet=DirSheet,
     bytes_rstrip=bytes.rstrip,
+    FileListSheet=FileListSheet,
 )
 
 vd.addMenuItems('''

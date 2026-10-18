@@ -125,3 +125,5 @@ def save_arrow(vd, p, sheet, streaming=False):
 @VisiData.api
 def save_arrows(vd, p, sheet):
     return vd.save_arrow(p, sheet, streaming=True)
+
+vd.addGlobals(ArrowSheet=ArrowSheet)

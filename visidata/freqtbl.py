@@ -224,6 +224,7 @@ vd.addGlobals(
     FreqTableSheet=FreqTableSheet,
     FreqTableSheetSummary=FreqTableSheetSummary,
     HistogramColumn=HistogramColumn,
+    FreqTablePreviewSheet=FreqTablePreviewSheet,
 )
 
 vd.addMenuItems('''

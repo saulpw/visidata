@@ -241,3 +241,5 @@ vd.addMenuItems('''
     View > Sidebar > cycle > sidebar-cycle
     View > Sidebar > open in new sheet > open-sidebar
 ''')
+
+vd.addGlobals(SidebarSheet=SidebarSheet)

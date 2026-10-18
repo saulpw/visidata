@@ -130,7 +130,7 @@ ErrorSheet.addCommand('Enter', 'sysopen-error', 'sysopen_error(cursorCol, cursor
 
 TextSheet.options.save_filetype = 'txt'
 
-vd.addGlobals({'TextSheet': TextSheet, 'ErrorSheet': ErrorSheet, 'ErrorCellSheet': ErrorCellSheet})
+vd.addGlobals({'TextSheet': TextSheet, 'ErrorSheet': ErrorSheet, 'ErrorCellSheet': ErrorCellSheet, 'ErrorsSheet': ErrorsSheet})
 
 vd.addMenuItems('''
     View > Errors > recent > error-recent

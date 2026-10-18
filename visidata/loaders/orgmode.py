@@ -428,3 +428,5 @@ if __name__ == '__main__':
     for fn in sys.argv[1:]:
         sect = orgmode_parse(Path(fn))
         print(orgmode_to_string(sect).strip())
+
+vd.addGlobals(OrgSheet=OrgSheet)

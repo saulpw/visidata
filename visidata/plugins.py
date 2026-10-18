@@ -101,3 +101,5 @@ PluginsSheet.addCommand('d', 'delete-plugin', 'removePlugin(cursorRow.name); rel
 vd.addMenuItems('''
     System > Plugins Sheet > open-plugins
 ''')
+
+vd.addGlobals(PluginsSheet=PluginsSheet)

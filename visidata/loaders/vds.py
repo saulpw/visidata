@@ -118,3 +118,5 @@ class VdsSheet(JsonSheet):
                 d = json.loads(line)
                 yield d
                 line = fp.readline()
+
+vd.addGlobals(VdsIndexSheet=VdsIndexSheet, VdsSheet=VdsSheet)

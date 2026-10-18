@@ -235,4 +235,4 @@ vd.addMenuItems('''
 
 vd.optalias('guides', 'preplay', 'open-guide-index')
 
-vd.addGlobals({"CommandHelpGetter": CommandHelpGetter, "OptionHelpGetter": OptionHelpGetter})
+vd.addGlobals({"CommandHelpGetter": CommandHelpGetter, "OptionHelpGetter": OptionHelpGetter, "GuideSheet": GuideSheet})

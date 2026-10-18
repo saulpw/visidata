@@ -51,3 +51,5 @@ class YamlSheet(JsonSheet):
             else:
                 # A file containing multiple YAML documents: yield one row per document.
                 yield from Progress(chain([first, second], documents), total=0)
+
+vd.addGlobals(YamlSheet=YamlSheet)

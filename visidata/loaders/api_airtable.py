@@ -70,3 +70,5 @@ class AirtableSheet(Sheet):
 def api(self):
     import pyairtable
     return pyairtable.Api(self.airtable_auth_token)
+
+vd.addGlobals(AirtableSheet=AirtableSheet)
