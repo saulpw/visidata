@@ -216,7 +216,7 @@ def _annotate_thread(t, endTime=None):
 vd.threads = [_annotate_thread(threading.current_thread(), 0)]
 
 @VisiData.api
-def execSync(vd, func, *args, sheet=None, **kwargs):
+def execSync(vd, func, *args, sheet=None, _readonly=False, **kwargs):  #3103
     'Execute ``func(*args, **kwargs)`` in this thread (synchronously). A drop-in substitute for vd.execAsync.'
     vd.callNoExceptions(func, *args, **kwargs)
     t = threading.current_thread()
