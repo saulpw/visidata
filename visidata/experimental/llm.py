@@ -5,10 +5,12 @@ Analyze column data using Anthropic Claude LLM with natural language queries.
 
 ## Usage
 
-1. Position cursor on a column containing text data
-2. Run `llm-analyze-column` command (or `llm-analyze-selected` for selected rows only)
-3. Enter your analysis query (e.g. "Did the model exhibit reasoning?")
-4. Four new columns will be added with results:
+1. `pip install anthropic`, set `ANTHROPIC_API_KEY`, and add
+   `import visidata.experimental.llm` to ~/.visidatarc
+2. Position cursor on a column containing text data
+3. Run `llm-analyze-column` command (or `llm-analyze-selected` for selected rows only)
+4. Enter your analysis query (e.g. "Did the model exhibit reasoning?")
+5. Four new columns will be added with results:
    - `{colname}_llm_score` (0-1 float score)
    - `{colname}_llm_analysis` (text explanation)
    - `{colname}_llm_raw` (hidden raw JSON response)
@@ -18,20 +20,21 @@ Analyze column data using Anthropic Claude LLM with natural language queries.
 
 Set in ~/.visidatarc or via environment variables:
 
-    options.llm_model = "claude-haiku-4-5"
-    options.llm_max_tokens = 1024
-    options.llm_temperature = 1.0
-    options.llm_rate_delay = 0.5  # seconds between requests
+    options.llm_model = "claude-opus-5-5"
+    options.llm_max_tokens = 16000
+    options.llm_rate_delay = 0.1  # seconds between requests
     options.llm_template_path = ""  # path to custom template file
 
     export ANTHROPIC_API_KEY="..."
+
 ## Custom Templates
 
-Create a text file with {query} and {text} placeholders:
+Create a text file with {query} and {text} placeholders.  The response is
+constrained to JSON with `score` and `analysis` fields, so the template
+only needs to say what to judge:
 
     Analyze this text: {text}
     Question: {query}
-    Return JSON: {{"score": 0-1, "analysis": "explanation"}}
 
 Then set: `options.llm_template_path = "/path/to/template.txt"`
 '''
@@ -44,9 +47,8 @@ import re
 from visidata import vd, VisiData, Sheet, SettableColumn, asyncthread, Progress
 
 # Configuration options
-vd.option('llm_model', 'claude-haiku-4-5', 'Anthropic model name')
-vd.option('llm_max_tokens', 1024, 'max tokens for LLM response')
-vd.option('llm_temperature', 1.0, 'temperature for LLM sampling (0-1)')
+vd.option('llm_model', 'claude-opus-5-5', 'Anthropic model name')
+vd.option('llm_max_tokens', 16000, 'max tokens for LLM response, including thinking')
 vd.option('llm_rate_delay', 0.1, 'delay in seconds between API requests')
 vd.option('llm_template_path', '', 'path to custom template file (empty = use default)')
 
@@ -62,12 +64,25 @@ Provide:
 
 Response format: {{"score": <float 0-1>, "analysis": "<text>"}}'''
 
+RESPONSE_FORMAT = {
+    'type': 'json_schema',
+    'schema': {
+        'type': 'object',
+        'properties': {
+            'score': {'type': 'number'},
+            'analysis': {'type': 'string'},
+        },
+        'required': ['score', 'analysis'],
+        'additionalProperties': False,
+    },
+}
+
 
 @VisiData.lazy_property
 def anthropic_client(vd):
     'Initialize and return Anthropic API client.'
-    anthropic = vd.importExternal('anthropic')
     api_key = os.environ.get('ANTHROPIC_API_KEY') or vd.fail('set $ANTHROPIC_API_KEY (Get API key from https://console.anthropic.com/')
+    anthropic = vd.importExternal('anthropic')
     return anthropic.Anthropic(api_key=api_key)
 
 
@@ -89,19 +104,24 @@ def loadLLMTemplate(vd):
 @VisiData.api
 def queryLLM(vd, prompt):
     'Query Anthropic LLM with prompt and return parsed response.'
-    response = vd.anthropic_client.messages.create(
+    response = vd.anthropic_client.beta.messages.create(
         model=vd.options.llm_model,
         max_tokens=vd.options.llm_max_tokens,
-        temperature=vd.options.llm_temperature,
+        output_config={'format': RESPONSE_FORMAT},
+        betas=['server-side-fallback-2026-07-01'],
+        fallbacks='default',
         messages=[{'role': 'user', 'content': prompt}]
     )
 
-    raw_text = response.content[0].text
+    if response.stop_reason == 'refusal':
+        vd.fail('LLM declined the request')
+
+    raw_text = ''.join(b.text for b in response.content if b.type == 'text')
     tokens = response.usage.input_tokens + response.usage.output_tokens
 
     # Try to parse JSON response
     try:
-        data = json.loads(raw_text)
+        data = json.loads(re.sub(r'^\s*```(?:json)?\s*|\s*```\s*$', '', raw_text))
         score = float(data.get('score', 0))
         analysis = str(data.get('analysis', ''))
     except (json.JSONDecodeError, ValueError, KeyError):
@@ -119,18 +139,25 @@ def queryLLM(vd, prompt):
 
 
 @Sheet.api
-@asyncthread
-def llmAnalyzeColumn(sheet, col, rows, query):
+def llmAnalyzeColumn(sheet, col, rows, query=None):
     'Analyze column data with LLM using given query.'
-    # Load template
+    vd.anthropic_client
     template = vd.loadLLMTemplate()
+
+    if query is None:
+        query = vd.input('LLM query: ', type='llm-query')
 
     # Warn about large datasets
     n_rows = len(rows)
     if n_rows > 100:
-        if not vd.confirm(f'Analyze {n_rows} rows? This may take some time and money.'):
-            return
+        vd.confirm(f'Analyze {n_rows} rows? This may take some time and money.')
 
+    sheet.llmAnalyzeRows(col, rows, query, template)
+
+
+@Sheet.api
+@asyncthread
+def llmAnalyzeRows(sheet, col, rows, query, template):
     # Create result columns
     score_col = SettableColumn(f'{col.name}_llm_score', type=float)
     analysis_col = SettableColumn(f'{col.name}_llm_analysis', type=str, width=40)
@@ -153,12 +180,6 @@ def llmAnalyzeColumn(sheet, col, rows, query):
         if not cell_text or str(cell_text).strip() == '':
             skipped += 1
             continue
-
-        # Truncate if too long (rough estimate: 4 chars ~= 1 token)
-        max_chars = vd.options.llm_max_tokens * 3
-        if len(cell_text) > max_chars:
-            cell_text = cell_text[:max_chars] + '...'
-            vd.warning(f'Cell content truncated (exceeded {max_chars} chars)')
 
         # Build prompt
         prompt = template.format(query=query, text=cell_text)
@@ -197,11 +218,11 @@ def llmAnalyzeColumn(sheet, col, rows, query):
 
 # Command bindings - no default keybindings, users can add their own
 Sheet.addCommand('', 'llm-analyze-column',
-    'llmAnalyzeColumn(cursorCol, rows, vd.input("LLM query: ", type="llm-query"))',
+    'llmAnalyzeColumn(cursorCol, rows)',
     'analyze all rows in current column with LLM')
 
 Sheet.addCommand('', 'llm-analyze-selected',
-    'llmAnalyzeColumn(cursorCol, someSelectedRows, vd.input("LLM query: ", type="llm-query"))',
+    'llmAnalyzeColumn(cursorCol, someSelectedRows)',
     'analyze selected rows only with LLM')
 
 # Menu integration
