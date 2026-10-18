@@ -27,6 +27,30 @@ class FakeMessages:
             usage=SimpleNamespace(input_tokens=10, output_tokens=5))
 
 
+    def stream(self, **kwargs):
+        self.calls.append(kwargs)
+        chunks = self.texts.pop(0)
+        return FakeStream(chunks)
+
+
+class FakeStream:
+    def __init__(self, chunks):
+        self.text_stream = iter(chunks)
+        self.text = ''.join(chunks)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        pass
+
+    def get_final_message(self):
+        return SimpleNamespace(
+            stop_reason='end_turn',
+            content=[SimpleNamespace(type='text', text=self.text)],
+            usage=SimpleNamespace(input_tokens=10, output_tokens=5))
+
+
 @pytest.fixture
 def fake(monkeypatch):
     msgs = FakeMessages([])
@@ -102,7 +126,7 @@ class TestLLM:
     def test_query_rows(self, fake, monkeypatch):
         pushed = []
         monkeypatch.setattr(vd, 'push', lambda vs, *a, **kw: pushed.append(vs), raising=False)
-        fake.texts = ['line one\nline two']
+        fake.texts = [['line ', 'one\nline', ' two']]
         sheet = textsheet('alpha', 'beta')
         sheet.llmQueryRows(sheet.rows, 'what is common?')
         vd.sync()
@@ -115,3 +139,13 @@ class TestLLM:
         vs = pushed[0]
         vs.ensureLoaded()
         assert [r[1] for r in vs.rows] == ['line one', 'line two']
+
+    def test_query_confirm_in_main_thread(self, fake, monkeypatch):
+        confirmed = []
+        monkeypatch.setattr(vd, 'confirm', lambda prompt, *a, **kw: confirmed.append(threading.current_thread()), raising=False)
+        monkeypatch.setattr(vd, 'push', lambda vs, *a, **kw: None, raising=False)
+        fake.texts = [['ok']]
+        sheet = textsheet(*['a']*101)
+        sheet.llmQueryRows(sheet.rows, 'q?')
+        vd.sync()
+        assert confirmed == [threading.current_thread()]

@@ -102,9 +102,9 @@ def loadLLMTemplate(vd):
 
 
 @VisiData.api
-def llmCreate(vd, prompt, **kwargs):
-    'Send *prompt* to the LLM and return (response text, total tokens).'
-    response = vd.anthropic_client.beta.messages.create(
+def llmRequest(vd, prompt, **kwargs):
+    'Return the API request arguments for *prompt*.'
+    return dict(
         model=vd.options.llm_model,
         max_tokens=vd.options.llm_max_tokens,
         betas=['server-side-fallback-2026-07-01'],
@@ -113,11 +113,21 @@ def llmCreate(vd, prompt, **kwargs):
         **kwargs
     )
 
+
+@VisiData.api
+def llmResult(vd, response):
+    'Return (response text, total tokens) from a finished API *response*.'
     if response.stop_reason == 'refusal':
         vd.fail('LLM declined the request')
 
     text = ''.join(b.text for b in response.content if b.type == 'text')
     return text, response.usage.input_tokens + response.usage.output_tokens
+
+
+@VisiData.api
+def llmCreate(vd, prompt, **kwargs):
+    'Send *prompt* to the LLM and return (response text, total tokens).'
+    return vd.llmResult(vd.anthropic_client.beta.messages.create(**vd.llmRequest(prompt, **kwargs)))
 
 
 @VisiData.api
@@ -229,6 +239,9 @@ def llmQueryRows(sheet, rows, query=None):
     if query is None:
         query = vd.input('LLM query over rows: ', type='llm-query')
 
+    if len(rows) > 100:
+        vd.confirm(f'Send {len(rows)} rows to LLM in one query? This may take some time and money.')
+
     cols = sheet.visibleCols
     data = [{c.name: c.getDisplayValue(r) for c in cols} for r in rows]
     prompt = f'{query}\n\nData from the sheet "{sheet.name}", one JSON object per row:\n{json.dumps(data, ensure_ascii=False)}'
@@ -239,8 +252,18 @@ def llmQueryRows(sheet, rows, query=None):
 @asyncthread
 def llmQueryPrompt(sheet, prompt, nrows):
     vd.status(f'sending {nrows} rows to LLM')
-    text, tokens = vd.llmCreate(prompt)
-    vd.push(TextSheet(sheet.name, 'llm', source=text.splitlines()))
+    vs = TextSheet(sheet.name, 'llm', source=[])
+    vs.rows = [[1, '']]
+    vd.push(vs)
+
+    with vd.anthropic_client.beta.messages.stream(**vd.llmRequest(prompt)) as stream:
+        for chunk in stream.text_stream:
+            first, *rest = chunk.split('\n')
+            vs.rows[-1][1] += first
+            for line in rest:
+                vs.addRow([len(vs.rows)+1, line])
+        _, tokens = vd.llmResult(stream.get_final_message())
+
     vd.status(f'LLM query complete ({tokens} tokens)')
 
 
