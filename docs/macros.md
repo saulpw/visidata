@@ -40,6 +40,12 @@ To add parameters to an existing macro:
 
 For example, recording a macro that adds a column with `=name + " suffix"`, then editing the input to `{col} + " {text=suffix}"`, will prompt for `col` and `text` values each time the macro runs.
 
+Parameter names must be valid Python identifiers, so `{3}` in a regex is left alone.
+To keep literal braces in a parameterized macro, double them: `f"{{name}}-{suffix}"` runs as `f"{name}-..."` and prompts only for `suffix`.
+
+If a recorded command's input or column already contains `{name}` (for example an f-string expression like `=f"{first} {last}"`), the macro is recorded with `braces` set to `literal`, and its braces run as typed with no parameter prompts.
+The `braces` column on the Macros Sheet shows this; set it to `param` to use parameters in such a macro, after doubling any braces that should stay literal.
+
 # The Macros Sheet
 
 Use `gm` (`macro-sheet`) to open an index of existing macros.

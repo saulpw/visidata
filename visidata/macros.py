@@ -10,7 +10,8 @@ vd.macroMode = None  # CommandLog
 vd.macrobindings = {}
 vd.macrokeys = {}  # binding -> keystroke bound by setMacro
 
-MACRO_PARAM_RE = re.compile(r'\{(\w+)(?:=([^}]*))?\}')
+# {{text}} is an escaped literal {text}; {name} or {name=default} is a parameter
+MACRO_PARAM_RE = re.compile(r'\{\{([^{}]*)\}\}|\{([^\W\d]\w*)(?:=([^{}]*))?\}')
 
 
 vd.macros = vd.StoredList(name='macros')
@@ -25,10 +26,12 @@ class MacroSheet(IndexSheet):
         - `d` to mark macro for delete; `z Ctrl+S` to commit.
         - Edit `keystroke` to bind/change a keystroke for a macro.
         - Edit `input` or `col` to use `{param}` or `{param=default}` for parameters.
+        - Set `braces` to `literal` to run `{text}` as typed, without parameters.
     '''
     columns = [
         AttrColumn('binding'),
         AttrColumn('keystroke'),
+        AttrColumn('braces'),
         AttrColumn('helpstr'),
         Column('num_commands', type=vlen, width=0),
         AttrColumn('source'),
@@ -100,20 +103,30 @@ def runMacro(vd, binding:str):
 
     # #2785: check for parameterized inputs
     params = {}  # name -> default
-    for row in cmdlog.rows:
-        for field in ('input', 'col'):
-            val = getattr(row, field, '')
-            if val:
-                for m in MACRO_PARAM_RE.finditer(str(val)):
-                    name, default = m.group(1), m.group(2)
-                    if name not in params:
-                        params[name] = default or ''
+    templated = False
+    if getattr(cmdlog, 'braces', '') != 'literal':
+        for row in cmdlog.rows:
+            for field in ('input', 'col'):
+                val = getattr(row, field, '')
+                if val:
+                    for m in MACRO_PARAM_RE.finditer(str(val)):
+                        templated = True
+                        name, default = m.group(2), m.group(3)
+                        if name and name not in params:
+                            params[name] = default or ''
 
-    if params:
-        param_values = vd.inputMultiple(**{
-            name: dict(prompt=f'{name}: ', value=default)
-            for name, default in params.items()
-        })
+    if templated:
+        param_values = {}
+        if params:
+            param_values = vd.inputMultiple(**{
+                name: dict(prompt=f'{name}: ', value=default)
+                for name, default in params.items()
+            })
+
+        def substitute(m):
+            if m.group(2) is None:
+                return '{' + m.group(1) + '}'
+            return param_values.get(m.group(2), m.group(0))
 
         cmdlog = copy(cmdlog)
         cmdlog.rows = []
@@ -122,9 +135,7 @@ def runMacro(vd, binding:str):
             for field in ('input', 'col'):
                 val = getattr(row, field, '')
                 if val:
-                    setattr(row, field, MACRO_PARAM_RE.sub(
-                        lambda m: param_values.get(m.group(1), m.group(0)),
-                        str(val)))
+                    setattr(row, field, MACRO_PARAM_RE.sub(substitute, str(val)))
             cmdlog.rows.append(row)
 
     vd.replay_sync(cmdlog)
@@ -132,13 +143,14 @@ def runMacro(vd, binding:str):
 
 
 @VisiData.api
-def setMacro(vd, ks:str, vs, helpstr='', keystroke=''):
-    'Set *ks* which is either a keystroke or a longname to run the cmdlog in *vs*.'
+def setMacro(vd, ks:str, vs, helpstr='', keystroke='', braces=''):
+    'Set *ks* which is either a keystroke or a longname to run the cmdlog in *vs*.  *braces* is "literal" to run `{text}` in inputs as typed, otherwise braces mark parameters.'
     ks = vd.prettykeys(ks)
     keystroke = vd.prettykeys(keystroke) if keystroke else ''
     vs.binding = ks
     vs.helpstr = helpstr
     vs.keystroke = keystroke
+    vs.braces = braces
     vd.macrobindings[ks] = vs
     oldkeystroke = vd.macrokeys.pop(ks, '')
     if oldkeystroke and oldkeystroke != keystroke and vd.bindkeys._get(oldkeystroke, BaseSheet) == ks:
@@ -158,14 +170,14 @@ def setMacro(vd, ks:str, vs, helpstr='', keystroke=''):
 
 
 @CommandLogJsonl.api
-def saveMacro(self, rows, ks, keystroke=''):
+def saveMacro(self, rows, ks, keystroke='', braces=''):
         vs = copy(self)
         vs.rows = rows
         macropath = Path(vd.fnSuffix(str(Path(vd.options.visidata_dir)/ks)))
         vd.save_vdj(macropath, vs)
         vd.status(f'{ks} saved to {macropath}')
-        vd.setMacro(ks, vs, keystroke=keystroke)
-        vd.macros.append(dict(binding=ks, source=str(macropath), helpstr='', keystroke=keystroke))
+        vd.setMacro(ks, vs, keystroke=keystroke, braces=braces)
+        vd.macros.append(dict(binding=ks, source=str(macropath), helpstr='', keystroke=keystroke, braces=braces))
         vd.reloadMacros()
         vd.macrosheet.reload()
 
@@ -216,13 +228,23 @@ def startMacro(cmdlog):
                         break
                     keystroke = vd.input(f'{keystroke} already bound to {existing}; enter keystroke (Enter to skip): ')
 
-            vd.cmdlog.saveMacro(vd.macroMode.rows, ks, keystroke=keystroke)
+            vd.cmdlog.saveMacro(vd.macroMode.rows, ks, keystroke=keystroke, braces=vd.recordedBraces(vd.macroMode.rows))
         finally:
             vd.macroMode = None
     else:
         ks = vd.sheet.revbinds.get('macro-record', ['m'])[0]  #2776
         vd.status(f"recording macro; stop recording with `{ks}`")
         vd.macroMode = CommandLogJsonl('current_macro', rows=[])
+
+
+@VisiData.api
+def recordedBraces(vd, rows):
+    'Return "literal" if any recorded input or col has text that playback would treat as a parameter.'
+    for row in rows:
+        for field in ('input', 'col'):
+            if MACRO_PARAM_RE.search(str(getattr(row, field, '') or '')):
+                return 'literal'  #2785
+    return ''
 
 
 @VisiData.before
@@ -240,7 +262,7 @@ def reloadMacros(vd):
             p = vd.macros.path.parent / r.source
         vs = vd.loadMacro(p)
         if vs:
-            vd.setMacro(r.binding, vs, getattr(r, 'helpstr', ''), keystroke=getattr(r, 'keystroke', ''))
+            vd.setMacro(r.binding, vs, getattr(r, 'helpstr', ''), keystroke=getattr(r, 'keystroke', ''), braces=getattr(r, 'braces', ''))
 
 
 Sheet.addCommand('m', 'macro-record', 'vd.cmdlog.startMacro()', 'start/stop macro recording', replay=False)
