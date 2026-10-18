@@ -16,18 +16,18 @@ def test_setenv_replays_from_sheet_cmdlog(monkeypatch):
     monkeypatch.setenv('LC_NUMERIC', '')
     origlocale = locale.setlocale(locale.LC_ALL)
     try:
-        vd.setenv('VD_TEST_ENV', 'a=b')
+        vd.setenv('VD_TEST_ENV', 'foobar')
         vd.setenv('LC_NUMERIC', 'C')
         assert locale.setlocale(locale.LC_NUMERIC) == 'C'
 
         vs = Sheet('later', rows=[])
         saved = list(vs.cmdlog.rows)
-        assert envrows(vs.cmdlog) == [dict(name='VD_TEST_ENV', value='a=b'), dict(name='LC_NUMERIC', value='C')]
+        assert envrows(vs.cmdlog) == [dict(name='VD_TEST_ENV', value='foobar'), dict(name='LC_NUMERIC', value='C')]
 
         vd.resetVisiData()
         monkeypatch.setenv('VD_TEST_ENV', '')
         for r in saved:
             assert not vd.replayOne(r)
-        assert os.environ['VD_TEST_ENV'] == 'a=b'
+        assert os.environ['VD_TEST_ENV'] == 'foobar'
     finally:
         locale.setlocale(locale.LC_ALL, origlocale)
