@@ -275,7 +275,7 @@ def replayOne(vd, r):
         if longname is None and getattr(r, 'keystrokes', None) is None:
             vd.fail('failed to find command to replay')
 
-        if r.sheet and longname not in ['set-option', 'unset-option']:
+        if r.sheet and longname not in ['set-option', 'unset-option', 'set-envvar']:
             vs = vd.getSheet(r.sheet) or vd.error(f'no sheet named `{r.sheet}`')
         else:
             vs = None
@@ -420,7 +420,7 @@ def cmdlog_sheet(sheet):
     # you only need to do this for the first BaseSheet in a tree
     if not isinstance(sheet.source, BaseSheet):
         for r in vd.cmdlog.rows:
-            if r.sheet == 'global' and (r.longname == 'set-option') or (r.longname == 'unset-option'):
+            if r.sheet == 'global' and (r.longname in ('set-option', 'set-envvar')) or (r.longname == 'unset-option'):
                 c.addRow(r)
     return c
 
