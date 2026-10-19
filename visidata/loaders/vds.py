@@ -64,8 +64,10 @@ def save_vds(vd, p, *sheets):
                 continue
 
             with Progress(gerund='saving'):
-                for row in vs.iterdispvals(*vs.columns, format=False):
-                    d = {rowkeys[col]:val for col, val in row.items()}
+                # zip: iterdispvals must yield rows in vs.rows order
+                for r, row in zip(vs.rows, vs.iterdispvals(*vs.columns, format=False)):
+                    d = {rowkeys[col]:val for col, val in row.items()
+                            if val is not None or not isinstance(r, dict) or col.expr in r}  #3255
                     fp.write(json.dumps(d, default=str)+NL)
 
 
