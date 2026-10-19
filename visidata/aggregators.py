@@ -6,7 +6,7 @@ from copy import copy
 import itertools
 
 from visidata import Progress, BaseSheet, Sheet, Column, ColumnsSheet, VisiData, SettableColumn
-from visidata import vd, anytype, numtype, vlen, asyncthread, wrapply, AttrDict, date, INPROGRESS, dispwidth, stacktrace, TypedExceptionWrapper
+from visidata import vd, EscapeException, anytype, numtype, vlen, asyncthread, wrapply, AttrDict, date, INPROGRESS, dispwidth, stacktrace, TypedExceptionWrapper
 
 vd.help_aggregators = '''# Choose Aggregators
 Start typing an aggregator name or description.
@@ -343,14 +343,18 @@ def aggname(col, agg):
 def aggregateTotal(col, agg):
     if agg not in col._aggregatedTotals:
         col._aggregatedTotals[agg] = INPROGRESS
-        col._aggregateTotalAsync(agg, col._aggregatedTotals)
+        col._aggregateTotalAsync(agg, col._aggregatedTotals, sheet=col.sheet)
     return col._aggregatedTotals[agg]
 
 
 @Column.api
 @asyncthread
 def _aggregateTotalAsync(col, agg, totals):
-    totals[agg] = wrapply(agg.aggregate, col, col.sheet.rows)
+    try:
+        totals[agg] = wrapply(agg.aggregate, col, col.sheet.rows)
+    except EscapeException as e:
+        totals[agg] = TypedExceptionWrapper(None, exception=e)  #2207
+        raise
 
 
 @Column.api
