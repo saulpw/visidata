@@ -40,3 +40,4 @@ There is no current intent to replace the .vdj format with .vdx.
 If you care only about the data and columns on the sheets, and not any provenance or exactitude or any of that stuff you get from going directly to the source, then you can save to .vds.
 It should load generally to an index of the sheets, with each retaining the data and layout it was saved with, but without any history.
 Each row is a JSON object keyed by column name; a column whose name repeats an earlier one is keyed `name_2`, `name_3`, etc., with that key saved as `key` in its column metadata.
+A key missing from a row stays missing, so sparse JSON rows keep their shape; an explicit null is saved as null.
