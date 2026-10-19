@@ -270,19 +270,19 @@ def llmQueryPrompt(sheet, prompt, nrows):
 # Command bindings - no default keybindings, users can add their own
 Sheet.addCommand('', 'llm-analyze-column',
     'llmAnalyzeColumn(cursorCol, rows)',
-    'analyze all rows in current column with LLM')
+    'analyze all rows in current column with LLM', testable=False)
 
 Sheet.addCommand('', 'llm-analyze-selected',
     'llmAnalyzeColumn(cursorCol, someSelectedRows)',
-    'analyze selected rows only with LLM')
+    'analyze selected rows only with LLM', testable=False)
 
 Sheet.addCommand('', 'llm-query-sheet',
     'llmQueryRows(rows)',
-    'send all rows to LLM in one query and show the reply')
+    'send all rows to LLM in one query and show the reply', testable=False)
 
 Sheet.addCommand('', 'llm-query-selected',
     'llmQueryRows(someSelectedRows)',
-    'send selected rows to LLM in one query and show the reply')
+    'send selected rows to LLM in one query and show the reply', testable=False)
 
 # Menu integration
 vd.addMenuItems('''
