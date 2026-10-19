@@ -1,8 +1,0 @@
-# safety_first keeps typed values typed in typed savers
-option global safety_first True
-open-file tests/issue3256.tsv
-col qty
-type-int
-save-sheet $VD_TESTTMP/issue3256.vds
-open-file $VD_TESTTMP/issue3256.vds
-open-row

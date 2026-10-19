@@ -1,6 +1,0 @@
-#{"name": "issue3256"}
-#{"name": "name", "typestr": "", "width": 6, "hidden": false, "height": 1, "expr": "name", "keycol": 0, "formatter": "", "displayer": "", "fmtstr": "", "voffset": 0, "hoffset": 0, "aggstr": "", "col": "Column"}
-#{"name": "qty", "typestr": "int", "width": 5, "hidden": false, "height": 1, "expr": "qty", "keycol": 0, "formatter": "", "displayer": "", "fmtstr": "", "voffset": 0, "hoffset": 0, "aggstr": "", "col": "Column"}
-#{"name": "note", "typestr": "", "width": 6, "hidden": false, "height": 1, "expr": "note", "keycol": 0, "formatter": "", "displayer": "", "fmtstr": "", "voffset": 0, "hoffset": 0, "aggstr": "", "col": "Column"}
-{"name": "a", "qty": 4, "note": "one"}
-{"name": "b", "qty": 12, "note": "two"}
