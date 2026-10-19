@@ -659,7 +659,7 @@ class TableSheet(BaseSheet):
 
         if self.cursorVisibleColIndex <= 0:
             self.cursorVisibleColIndex = 0
-        elif self.cursorVisibleColIndex >= len(self.availCols):
+        elif self.cursorVisibleColIndex >= len(self.availCols) and not self.loading:  #3124 columns may not be added yet
             self.cursorVisibleColIndex = len(self.availCols)-1
 
         if self.topRowIndex < 0:
@@ -704,7 +704,8 @@ class TableSheet(BaseSheet):
                 elif self.cursorVisibleColIndex > maxcolidx:
                     # some cases:  1) jumping rightward, so cursor has just moved to a column that is offscreen to the right
                     #              2) when keycols fill entire screen
-                    #              3) during reload, when we have no rows loaded yet
+                    if self.loading and not self.rows:  # no widths measured yet
+                        break
                     self.leftVisibleColIndex += 1
                     continue
 
@@ -745,14 +746,18 @@ class TableSheet(BaseSheet):
             # cannot in general be calculated properly until after calcColLayout() has
             # determined which columns are visible.
             vrows = self.rows[self.topRowIndex:self.topRowIndex+self.windowHeight]
-            if col.width is None and not col.hidden and len(vrows) > 0:
+            width = col.width
+            if width is None and not col.hidden and len(vrows) > 0:
                 measure_rows = vrows if self.nRows > 1000 else self.rows[:1000]  #1964
-                # delayed auto-width: assign _width to skip setModified
-                col._width = max(col.getMaxWidth(measure_rows), minColWidth)
+                width = max(col.getMaxWidth(measure_rows), minColWidth)
                 if vcolidx < self.nVisibleCols-1:  # let last column fill up the max width
-                    col._width = min(col._width, self.options.default_width)
+                    width = min(width, self.options.default_width)
+                if not self.loading or self.nRows > 1000:  #3124 remeasure while rows load
+                    # delayed auto-width: assign _width to skip setModified
+                    col._width = col._autowidth = width
 
-            width = col.width if col.width is not None else self.options.default_width
+            if width is None:
+                width = self.options.default_width
 
             if col.hidden and vcolidx != self.cursorVisibleColIndex:
                 width = 0

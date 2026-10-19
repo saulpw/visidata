@@ -71,6 +71,7 @@ class Column(Extensible):
         self.getter = lambda col, row: row
         self.setter = None
         self._width = None    # None if auto-compute next time
+        self._autowidth = None
         self._hidden = False
         self.hoffset = 0      # starting horizontal (char) offset of displayed column value
         self.voffset = 0      # starting vertical (line) offset of displayed column value
@@ -171,6 +172,8 @@ class Column(Extensible):
         else:
             self._type = t
         if changed:
+            if self._width == self._autowidth:
+                self._width = None  #3124 refit width measured under the old type
             self.recalc()  #3234 type-dependent caches (like aggregate totals)
 
     def _undoType(self, t):
