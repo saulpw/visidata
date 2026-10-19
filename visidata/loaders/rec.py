@@ -65,6 +65,7 @@ class RecIndexSheet(IndexSheet):
                 sheet = RecSheet('', columns=[], rows=[], source=self, comments=comments)
                 sheet.columns = []
                 comments = []
+                row = None  #3257
                 yield sheet
                 newRecord = False
 
