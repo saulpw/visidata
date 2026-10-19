@@ -1,0 +1,4 @@
+Key	A	echo $A_stdout	echo x$B_stdout	echo x$B_stderr	echo $A_stderr	B
+1	a1	a1	xb1			b1
+2	c1	c1	xd1			d1
+2	e1	e1	xf1			f1
