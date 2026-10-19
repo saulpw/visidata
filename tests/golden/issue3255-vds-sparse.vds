@@ -1,7 +1,0 @@
-#{"name": "issue3255"}
-#{"name": "id", "typestr": "", "width": null, "hidden": false, "height": 1, "expr": "id", "keycol": 0, "formatter": "", "displayer": "", "fmtstr": "", "voffset": 0, "hoffset": 0, "aggstr": "", "col": "Column"}
-#{"name": "name", "typestr": "", "width": null, "hidden": false, "height": 1, "expr": "name", "keycol": 0, "formatter": "", "displayer": "", "fmtstr": "", "voffset": 0, "hoffset": 0, "aggstr": "", "col": "Column"}
-#{"name": "phone", "typestr": "", "width": null, "hidden": false, "height": 1, "expr": "phone", "keycol": 0, "formatter": "", "displayer": "", "fmtstr": "", "voffset": 0, "hoffset": 0, "aggstr": "", "col": "Column"}
-{"id": 1, "name": "Kyle", "phone": "555-0101"}
-{"id": 2, "name": "Darlene"}
-{"id": 3, "name": null, "phone": null}

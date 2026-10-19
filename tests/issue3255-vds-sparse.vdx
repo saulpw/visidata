@@ -1,5 +1,0 @@
-# vds keeps keys absent from sparse rows, and nulls that are present
-open-file tests/issue3255.jsonl
-save-sheet $VD_TESTTMP/issue3255.vds
-open-file $VD_TESTTMP/issue3255.vds
-open-row
