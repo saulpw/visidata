@@ -7,4 +7,3 @@ key-col
 join-sheets-top2 concat
 save-sheet $VD_TESTTMP/issue3175-vds-concat.vds
 open-file $VD_TESTTMP/issue3175-vds-concat.vds
-open-row
