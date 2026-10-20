@@ -1,6 +1,0 @@
-sheet	col	row	longname	input	keystrokes	comment
-			open-file	sample_data/petshop/tinyshop.jsonl	o
-tinyshop	qty		type-int		#	set type of current column to int
-tinyshop	qty		aggregate-col	sum	+	Add aggregator to current column
-tinyshop	qty		freq-col		Shift+F	open Frequency Table grouped on current column, with aggregations of other columns
-tinyshop_qty_freq	qty		sort-asc		[	sort ascending by current column; replace any existing sort criteria

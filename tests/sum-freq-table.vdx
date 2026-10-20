@@ -1,0 +1,8 @@
+open-file sample_data/petshop/tinyshop.jsonl
+sheet tinyshop
+col qty
+type-int
+aggregate-col sum
+freq-col
+sheet tinyshop_qty_freq
+sort-asc

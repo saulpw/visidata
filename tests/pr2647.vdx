@@ -1,0 +1,31 @@
+open-file sample_data/petshop/petshop.sqlite
+sheet petshop
+row キcustomers
+open-row
+sheet customers
+select-expr customerid <= 1004
+dup-selected-deep
+rename-sheet a
+sheet a
+col customerid
+key-col
+jump-prev
+sheet customers
+unselect-rows
+select-expr customerid >= 1003 and customerid <= 1006
+dup-selected-deep
+rename-sheet b
+sheet b
+col customerid
+key-col
+sheets-stack
+sheet sheets
+row キb
+stoggle-row
+row キa
+stoggle-row
+join-selected merge
+sheet b+a
+col name
+row キ1005
+edit-cell Susan Ashworth-Smith

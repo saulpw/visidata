@@ -1,0 +1,26 @@
+open-file sample_data/petshop/petshop.sqlite
+sheet petshop
+row キproducts
+open-row
+sheet petshop
+row キorders_items
+open-row
+sheet products
+col sku
+key-col
+sheet orders_items
+col sku
+key-col
+sheets-stack
+sheet sheets
+row キorders_items
+select-row
+row キproducts
+select-row
+join-sheets full
+sheet orders_items+products
+col orderid
+key-col
+sort-keys-asc
+col orderid
+key-col

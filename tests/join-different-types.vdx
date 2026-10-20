@@ -1,0 +1,25 @@
+open-file sample_data/petshop/petshop.sqlite
+sheet petshop
+row キcustomers
+open-row
+sheet petshop
+row キorders
+open-row
+sheet orders
+col customerid
+key-col
+sheets-stack
+sheet sheets
+row キcustomers
+open-row
+sheet customers
+col customerid
+key-col
+sheets-stack
+sheet sheets
+row キorders
+select-row
+row キcustomers
+select-row
+join-sheets inner
+allow-error have differing typed values
