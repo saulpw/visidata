@@ -72,6 +72,8 @@ def save_vds(vd, p, *sheets):
 
 
 class VdsIndexSheet(IndexSheet):
+    stackRestored = False
+
     def iterload(self):
         vs = None
         with self.source.open(encoding='utf-8') as fp:
@@ -80,9 +82,25 @@ class VdsIndexSheet(IndexSheet):
                 if line.startswith('#{'):
                     d = json.loads(line[1:])
                     if 'col' not in d:
-                        vs = VdsSheet(d.pop('name'), columns=[], source=self.source, source_fpos=fp.tell())
+                        vs = VdsSheet(d.pop('name'), columns=[], source=self, source_fpos=fp.tell())
                         yield vs
                 line = fp.readline()
+
+    def afterLoad(self):
+        super().afterLoad()
+        if not self.stackRestored and self.rows and self in vd.sheets:
+            self.stackRestored = True
+            self.restoreStack()
+
+    def restoreStack(self):
+        'Replace this sheet on the sheets stack with its sheets, first sheet on top, as save-all wrote them.'
+        for vs in self.rows:
+            vs.vd = vd
+            vs.pane = self.pane
+            if vs.precious and vs not in vd.allSheets:
+                vd.allSheets.append(vs)
+        i = vd.sheets.index(self)
+        vd.sheets[i:i+1] = self.rows  #2309
 
 
 class VdsSheet(JsonSheet):
@@ -93,7 +111,7 @@ class VdsSheet(JsonSheet):
         self.colnames = {}
         self.columns = []
 
-        with self.source.open(encoding='utf-8') as fp:
+        with self.source.source.open(encoding='utf-8') as fp:
             fp.seek(self.source_fpos)
 
             # consume all metadata, create columns

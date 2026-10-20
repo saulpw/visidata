@@ -1,0 +1,6 @@
+name	type	pane	nRows	nCols	nVisibleCols	keyColNames	source
+sheets	SheetsSheet	1	5	11	8	name	[5] sheets; data2; data1; data2; data1
+data2	VdsSheet	1	2	3	3		issue2309
+data1	VdsSheet	1	3	3	3		issue2309
+data2	TsvSheet	1	2	3	3		tests/data2.tsv
+data1	TsvSheet	1	3	3	3		tests/data1.tsv
