@@ -48,12 +48,12 @@ class SQL:
         return psycopg2.connect(**kwargs)
 
     @contextmanager
-    def cur(self, qstr):
+    def cur(self, qstr, params=None):
         conn = self._connect()
         randomname = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
         try:
             cur = conn.cursor(randomname)
-            cur.execute(qstr)
+            cur.execute(qstr, params)
             yield cur
             cur.close()
         finally:
@@ -108,16 +108,15 @@ class PgTablesSheet(IndexSheet):
     rowtype = 'tables'
 
     def iterload(self):
-        schema = options.postgres_schema
-        qstr = f'''
+        qstr = '''
             SELECT relname table_name, column_count.ncols, reltuples::bigint est_nrows
                 FROM pg_class, pg_namespace, (
-                    SELECT table_name, COUNT(column_name) AS ncols FROM information_schema.COLUMNS WHERE table_schema = '{schema}' GROUP BY table_name
+                    SELECT table_name, COUNT(column_name) AS ncols FROM information_schema.COLUMNS WHERE table_schema = %(schema)s GROUP BY table_name
                     ) AS column_count
-                WHERE  pg_class.relnamespace = pg_namespace.oid AND pg_namespace.nspname = '{schema}' AND column_count.table_name = relname;
+                WHERE  pg_class.relnamespace = pg_namespace.oid AND pg_namespace.nspname = %(schema)s AND column_count.table_name = relname;
         '''
 
-        with self.sql.cur(qstr) as cur:
+        with self.sql.cur(qstr, dict(schema=self.options.postgres_schema)) as cur:
             for tblname, ncols, est_nrows in cur:
                 yield PgTable(tblname, source=tblname, sql=self.sql,
                               column_count=ncols,
@@ -159,13 +158,15 @@ class PgTable(Sheet):
             yield from self.iterload_table(self.source)
 
     def iterload_table(self, tblname):
+        vd.importExternal('psycopg2', 'psycopg2-binary')
+        from psycopg2 import sql
         if self.options.postgres_schema:
-            source = f'"{self.options.postgres_schema}"."{tblname}"'
+            source = sql.Identifier(self.options.postgres_schema, tblname)
         else:
-            source = f'"{tblname}"'
+            source = sql.Identifier(tblname)
 
         self.tableName = tblname
-        with self.sql.cur(f"SELECT * FROM {source}") as cur:
+        with self.sql.cur(sql.SQL("SELECT * FROM {}").format(source)) as cur:
             self.columns = []
             r = cur.fetchone()
             if r:

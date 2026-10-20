@@ -51,6 +51,30 @@ if ! grep -q benchmark $OUTDIR/pg-tables.tsv; then
     FAIL=1
 fi
 
+# #2989: exec-sql opens a sheet of query results
+rm -f $OUTDIR/pg-exec-sql.tsv
+cat > $OUTDIR/pg-exec-sql.vdx <<EOF2
+open-file postgres:///vdtest
+exec-sql SELECT customer, count(*) AS n FROM benchmark GROUP BY customer ORDER BY customer LIMIT 2
+save-sheet $OUTDIR/pg-exec-sql.tsv
+EOF2
+$VDB -p $OUTDIR/pg-exec-sql.vdx
+expected=$'customer\tn\nDavid Attenborough\t4\nDouglas "Dougie" Powers\t3'
+if [[ "$(cat $OUTDIR/pg-exec-sql.tsv)" != "$expected" ]]; then
+    echo "FAIL: exec-sql results"
+    cat $OUTDIR/pg-exec-sql.tsv
+    FAIL=1
+fi
+
+# quotes in schema, table, and column names
+$VDB --postgres-schema="it's" 'postgres:///vdtest/we"ird' -o $OUTDIR/pg-quoted.tsv
+expected=$'a"b\tc\'d\n1\tx\n2\ty'
+if [[ "$(cat $OUTDIR/pg-quoted.tsv)" != "$expected" ]]; then
+    echo "FAIL: quoted identifiers"
+    cat $OUTDIR/pg-quoted.tsv
+    FAIL=1
+fi
+
 if [[ $FAIL -eq 1 ]]; then
     echo "FAILED"
     exit 1

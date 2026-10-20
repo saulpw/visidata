@@ -28,6 +28,8 @@ psql -d $DB -c "CREATE TABLE benchmark (
 )"
 psql -d $DB -c "\copy benchmark FROM 'sample_data/benchmark.csv' CSV HEADER"
 
+psql -d $DB -c "CREATE SCHEMA \"it's\"" -c "CREATE TABLE \"it's\".\"we\"\"ird\" (\"a\"\"b\" INT, \"c'd\" TEXT)" -c "INSERT INTO \"it's\".\"we\"\"ird\" VALUES (1, 'x'), (2, 'y')"
+
 echo "verifying"
 n=$(psql -d $DB -tAc "SELECT count(*) FROM benchmark")
 echo "$n rows in benchmark table"
