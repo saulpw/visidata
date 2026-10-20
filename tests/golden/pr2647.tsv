@@ -1,7 +1,4 @@
-customerid	name	address	citystatezip	birthdate	phone	location
-1003	Douglas "Dougie" Powers	33 Bay St	Staten Island, NY 10301	1985-11-02	718-555-0193	{"lat": 40.64171, "lng": -74.07581}
-1004	David Attenborough	41 Kew Rd	Richmond, London TW9 2NQ	1926-05-08	+44 20 7946 0110	{"lat": 51.46983, "lng": -0.29561}
-1005	Susan Ashworth-Smith	61 W 87th St	Manhattan, NY 10024	1979-09-21	917-555-0166	{"lat": 40.78719, "lng": -73.97031}
-1006	Wil Wheaton	1200 E Colorado Blvd	Pasadena, CA 91106	1972-07-29	626-555-0124	{"lat": 34.14615, "lng": -118.12764}
-1001	Robert Armstrong	1179 Fulton St	Brooklyn, NY 11216	1981-04-17	718-555-0142	{"lat": 40.68062, "lng": -73.95323}
-1002	桜 高橋 (Sakura Takahashi)	3-12-5 Roppongi Apt 1201	Minato-ku, Tokyo 106-0032	1990-03-27	+81 3-5555-0177	{"lat": 35.66272, "lng": 139.73135}
+key	source_sheet
+b_only	c
+both	a
+a_only	a

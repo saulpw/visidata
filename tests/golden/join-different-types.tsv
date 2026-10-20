@@ -1,43 +1,4 @@
-customerid	name	address	citystatezip	birthdate	phone	location	orderid	ordered	source	shipped	total	total_usd
-1001	Robert Armstrong	1179 Fulton St	Brooklyn, NY 11216	1981-04-17	718-555-0142	{"lat": 40.68062, "lng": -73.95323}	5001	7/2/2018 1:47p	web	2018-07-03 10:15:00	$51.80	51.80
-1001	Robert Armstrong	1179 Fulton St	Brooklyn, NY 11216	1981-04-17	718-555-0142	{"lat": 40.68062, "lng": -73.95323}	5014	7/30/2018 9:15a	web	2018-07-31 10:15:00	$103.60	103.60
-1001	Robert Armstrong	1179 Fulton St	Brooklyn, NY 11216	1981-04-17	718-555-0142	{"lat": 40.68062, "lng": -73.95323}	5038	8/27/2018 10:07a	web	2018-08-28 10:15:01	$51.80	51.80
-1001	Robert Armstrong	1179 Fulton St	Brooklyn, NY 11216	1981-04-17	718-555-0142	{"lat": 40.68062, "lng": -73.95323}	5051	2018-09-28 10:07	web	2018-09-29 10:15:00	$51.80	51.80
-1001	Robert Armstrong	1179 Fulton St	Brooklyn, NY 11216	1981-04-17	718-555-0142	{"lat": 40.68062, "lng": -73.95323}	5052	2018-09-30 00:00	web		$1,864.80	1864.80
-1002	桜 高橋 (Sakura Takahashi)	3-12-5 Roppongi Apt 1201	Minato-ku, Tokyo 106-0032	1990-03-27	+81 3-5555-0177	{"lat": 35.66272, "lng": 139.73135}	5028	8/16/2018 5:15p	web	2018-08-17 10:15:22	832¥	7.50
-1003	Douglas "Dougie" Powers	33 Bay St	Staten Island, NY 10301	1985-11-02	718-555-0193	{"lat": 40.64171, "lng": -74.07581}	5002	7/2/2018 3:32p	register	2018-07-02 15:32:08	$4.22	4.22
-1003	Douglas "Dougie" Powers	33 Bay St	Staten Island, NY 10301	1985-11-02	718-555-0193	{"lat": 40.64171, "lng": -74.07581}	5011	7/23/2018 4:23p	web	2018-07-24 10:15:09	$18.62	18.62
-1004	David Attenborough	41 Kew Rd	Richmond, London TW9 2NQ	1926-05-08	+44 20 7946 0110	{"lat": 51.46983, "lng": -0.29561}	5008	7/16/2018 8:40a	web	2018-07-17 10:15:26	£3.40	4.50
-1004	David Attenborough	41 Kew Rd	Richmond, London TW9 2NQ	1926-05-08	+44 20 7946 0110	{"lat": 51.46983, "lng": -0.29561}	5016	8/1/2018 2:44p	web	2018-08-02 10:15:12	£7.20	9.45
-1004	David Attenborough	41 Kew Rd	Richmond, London TW9 2NQ	1926-05-08	+44 20 7946 0110	{"lat": 51.46983, "lng": -0.29561}	5031	8/20/2018 5:12p	web	2018-08-21 10:15:19	£5.94	7.60
-1005	Susan Ashworth	61 W 87th St	Manhattan, NY 10024	1979-09-21	917-555-0166	{"lat": 40.78719, "lng": -73.97031}	5040	2018-09-04 17:12	register	2018-09-04 17:12:03	$1,339.56	1339.56
-1005	Susan Ashworth	61 W 87th St	Manhattan, NY 10024	1979-09-21	917-555-0166	{"lat": 40.78719, "lng": -73.97031}	5046	2018-09-18 16:40	register	2018-09-18 16:40:19	$964.94	964.94
-1005	Susan Ashworth	61 W 87th St	Manhattan, NY 10024	1979-09-21	917-555-0166	{"lat": 40.78719, "lng": -73.97031}	5049	2018-09-25 17:32	register	2018-09-25 17:32:18	$735.36	735.36
-1006	Wil Wheaton	1200 E Colorado Blvd	Pasadena, CA 91106	1972-07-29	626-555-0124	{"lat": 34.14615, "lng": -118.12764}	5007	7/15/2018 5:26p	web	2018-07-16 10:15:21	$39.95	39.95
-1007	Helen Halestorm	512 Bergen St	Brooklyn, NY 11217	1987-01-09	347-555-0105	{"lat": 40.68093, "lng": -73.97518}	5005	7/15/2018 11:30a	register	2018-07-15 11:30:00	$65.88	65.88
-1007	Helen Halestorm	512 Bergen St	Brooklyn, NY 11217	1987-01-09	347-555-0105	{"lat": 40.68093, "lng": -73.97518}	5026	8/16/2018 11:50a	register		$0	0.00
-1008	Rubeus Hagrid	Hagrid's Hut
-Hogwarts Castle	Hogsmeade, Scotland		+44 1632 960187		5050	2018-09-26 20:05	phone	2018-09-27 10:15:05	$3,602.10	3602.10
-1009	Jon Arbuckle	711 Maple St	Muncie, IN 47302	1977-02-29	765-555-0119	{"lat": 40.18122, "lng": -85.38955}	5010	7/20/2018 2:13p	web	2018-07-21 10:15:12	$197.50	197.50
-1009	Jon Arbuckle	711 Maple St	Muncie, IN 47302	1977-02-29	765-555-0119	{"lat": 40.18122, "lng": -85.38955}	5034	8/22/2018 2:13p	web	2018-08-23 10:15:09	$44.95	44.95
-1010	Juan Johnson	2475 Grand Concourse	Bronx, NY 10468	1992-12-12	718-555-0131	{"lat": 40.86214, "lng": -73.89781}	5041	2018-09-06 15:10	register	2018-09-06 15:10:08	$239.98	239.98
-1010	Juan Johnson	2475 Grand Concourse	Bronx, NY 10468	1992-12-12	718-555-0131	{"lat": 40.86214, "lng": -73.89781}	5047	2018-09-20 16:45	register	2018-09-20 16:45:00	$5.96	5.96
-1011	Monica Johnson	2475 Grand Concourse	Bronx, NY 10468	1988-02-29	718-555-0132	{"lat": 40.86214, "lng": -73.89781}	5015	7/32/2018 10:02a	register	2018-08-01 10:02:01	$4.47	4.47
-1011	Monica Johnson	2475 Grand Concourse	Bronx, NY 10468	1988-02-29	718-555-0132	{"lat": 40.86214, "lng": -73.89781}	5022	8/13/2018 11:02a	register	2018-08-13 11:02:19	$19.87	19.87
-1011	Monica Johnson	2475 Grand Concourse	Bronx, NY 10468	1988-02-29	718-555-0132	{"lat": 40.86214, "lng": -73.89781}	5039	8/28/2018 11:15a	register	2018-08-28 11:15:00	$9.98	9.98
-1013	Mr. Praline	12 Chorley New Rd	Flat 2	Bolton BL1 4AP	1949-12-01	None	{"lat": 53.57915, "lng": -2.44602}	5024	8/15/2018 11:50a	register		$0	0.00
-1013	Mr. Praline	12 Chorley New Rd	Flat 2	Bolton BL1 4AP	1949-12-01	None	{"lat": 53.57915, "lng": -2.44602}	5025	8/15/2018 11:57a	register		-$2,300.00	-2300.00
-1014	Kyle Kennedy	220 Washington St	Hoboken, NJ 07030	1983-06-14		{"lat": 40.73853, "lng": -74.03097}	5027	8/16/2018 4:00p	register	2018-08-16 16:00:00	$2,495.99	2495.99
-1014	Kyle Kennedy	220 Washington St	Hoboken, NJ 07030	1983-06-14		{"lat": 40.73853, "lng": -74.03097}	5029	8/20/2018 9:36a	register		-$1,247.99	-1247.99
-1015	 Michael Smith 	84 Havemeyer St	Brooklyn, NY 11211	1980-02-15	347-555-0150	{"lat": 40.71308, "lng": -73.95632}	5003	7/2/2018 4:20p	register	2018-07-02 16:20:15	$45.43	45.43
-1015	 Michael Smith 	84 Havemeyer St	Brooklyn, NY 11211	1980-02-15	347-555-0150	{"lat": 40.71308, "lng": -73.95632}	5006	7/15/2018 4:05p	register	2018-07-15 16:05:16	$7.74	7.74
-1015	 Michael Smith 	84 Havemeyer St	Brooklyn, NY 11211	1980-02-15	347-555-0150	{"lat": 40.71308, "lng": -73.95632}	5012	7/26/2018 12:16p	register	2018-07-26 12:16:14	$3.87	3.87
-1015	 Michael Smith 	84 Havemeyer St	Brooklyn, NY 11211	1980-02-15	347-555-0150	{"lat": 40.71308, "lng": -73.95632}	5017	8/4/2018 12:20p	register	2018-08-04 12:20:12	$2.58	2.58
-1015	 Michael Smith 	84 Havemeyer St	Brooklyn, NY 11211	1980-02-15	347-555-0150	{"lat": 40.71308, "lng": -73.95632}	5020	8/9/2018 12:11p	register	2018-08-09 12:11:08	$1.29	1.29
-1015	 Michael Smith 	84 Havemeyer St	Brooklyn, NY 11211	1980-02-15	347-555-0150	{"lat": 40.71308, "lng": -73.95632}	5023	8/13/2018 12:14p	register	2018-08-13 12:14:05	$1.29	1.29
-1015	 Michael Smith 	84 Havemeyer St	Brooklyn, NY 11211	1980-02-15	347-555-0150	{"lat": 40.71308, "lng": -73.95632}	5032	8/21/2018 12:15p	register		-$1.29	-1.29
-1016	מרוסיה ניסנהולץ אבולעפיה	1504 Avenue J	Brooklyn, NY 11230	1962-04-30	718-555-0158	{"lat": 40.62513, "lng": -73.96263}	5030	8/20/2018 1:47p	register	2018-08-20 13:47:09		137.85
-1017	מרוסיה ניסנהולץ	1504 Avenue J	Brooklyn, NY 11230	1962-04-30	718-555-0158	{"lat": 40.62513, "lng": -73.96263}	5035	8/22/2018 5:49p	register	2018-08-22 17:49:04	₪245	67.68
-1018	María Fernández	1052 Calle Loíza	San Juan, PR 00911	1975-08-30	787-555-0148	{"lat": 18.45166, "lng": -66.05931}	5044	2018-09-14 15:25	phone	2018-09-15 10:15:07	$24.00	24.00
-1019	Darlene Null	9 Spring St	Manhatten, NY 1OO12		212-555-0101	{"lat": 38.0, "lng": -97.0}	5043	2018-09-11 10:05	register	2018-09-11 10:05:14	$12.00	12.00
-1021	John Dolittle	   	Staten Island, NY 10314	1991-10-24	718-555-0199	{"lat": 40.60512, "lng": -74.14853}	5045	2018-09-17 11:20	register	2018-09-17 11:20:05	$1,440.56	1440.56
+Row	other	a	b	c
+2	some	this	is	data
+4	other	look	at	that
+5	stuff	here	is	more
