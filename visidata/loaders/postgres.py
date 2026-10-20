@@ -3,7 +3,7 @@ import string
 from contextlib import contextmanager
 from urllib.parse import urlparse, unquote
 
-from visidata import VisiData, vd, Sheet, IndexSheet, options, anytype, ColumnItem, UNLOADED
+from visidata import VisiData, vd, Sheet, IndexSheet, anytype, ColumnItem, UNLOADED
 
 __all__ = ['openurl_postgres', 'openurl_postgresql', 'openurl_rds', 'PgTable', 'PgTablesSheet']
 
@@ -129,7 +129,6 @@ class PgTablesSheet(IndexSheet):
 # rowdef: list of values
 class PgTable(Sheet):
     query = ''
-    tableName = ''
     estimated_rows = None
     column_count = None
 
@@ -165,7 +164,6 @@ class PgTable(Sheet):
         else:
             source = sql.Identifier(tblname)
 
-        self.tableName = tblname
         with self.sql.cur(sql.SQL("SELECT * FROM {}").format(source)) as cur:
             self.columns = []
             r = cur.fetchone()
