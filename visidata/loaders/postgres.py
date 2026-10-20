@@ -3,7 +3,7 @@ import string
 from contextlib import contextmanager
 from urllib.parse import urlparse, unquote
 
-from visidata import VisiData, vd, Sheet, IndexSheet, options, anytype, ColumnItem
+from visidata import VisiData, vd, Sheet, IndexSheet, options, anytype, ColumnItem, UNLOADED
 
 __all__ = ['openurl_postgres', 'openurl_postgresql', 'openurl_rds', 'PgTable', 'PgTablesSheet']
 
@@ -51,13 +51,12 @@ class SQL:
     def cur(self, qstr):
         conn = self._connect()
         randomname = ''.join(random.choice(string.ascii_uppercase) for _ in range(6))
-        cur = conn.cursor(randomname, withhold=True)
         try:
+            cur = conn.cursor(randomname)
             cur.execute(qstr)
-            conn.commit()
             yield cur
-        finally:
             cur.close()
+        finally:
             conn.close()
 
 
@@ -119,11 +118,10 @@ class PgTablesSheet(IndexSheet):
         '''
 
         with self.sql.cur(qstr) as cur:
-            r = cur.fetchone()
-            if r:
-                yield PgTable(r[0], source=r[0], sql=self.sql)
-            for r in cur:
-                yield PgTable(r[0], source=r[0], sql=self.sql)
+            for tblname, ncols, est_nrows in cur:
+                yield PgTable(tblname, source=tblname, sql=self.sql,
+                              column_count=ncols,
+                              estimated_rows=est_nrows if est_nrows >= 0 else None)
 
     def rawSql(self, q):
         return PgQuerySheet(q[:40], sql=self.sql, query=q)
@@ -133,6 +131,20 @@ class PgTablesSheet(IndexSheet):
 class PgTable(Sheet):
     query = ''
     tableName = ''
+    estimated_rows = None
+    column_count = None
+
+    @property
+    def nRows(self):
+        if self.rows is UNLOADED and self.estimated_rows is not None:
+            return self.estimated_rows
+        return super().nRows
+
+    @property
+    def nCols(self):
+        if self.rows is UNLOADED and self.column_count is not None:
+            return self.column_count
+        return super().nCols
 
     @property
     def sidebar(self):
@@ -194,5 +206,7 @@ class PgQuerySheet(PgTable):
 PgTable.addCommand('', 'exec-sql', 'vd.push(rawSql(input("execute SQL: ", type="sql")))', 'execute raw SQL statement')
 PgTable.addCommand('', 'edit-sql', 'vd.push(rawSql(input("edit SQL: ", value=query, type="sql")))', 'edit and re-execute SQL query')
 PgTablesSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("execute SQL: ", type="sql")))', 'execute raw SQL statement')
+
+PgTablesSheet.class_options.load_lazy = True  #282
 
 vd.addGlobals(PgTablesSheet=PgTablesSheet, PgTable=PgTable)
