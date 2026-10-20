@@ -287,6 +287,7 @@ def save_sqlite(vd, p, *vsheets):
         vlen: 'INTEGER',
         float: 'REAL',
         date: 'DATE',
+        str: 'TEXT',
     }
 
     for t in vd.numericTypes:
@@ -301,7 +302,7 @@ def save_sqlite(vd, p, *vsheets):
         tblname = vd.cleanName(vs.name)
         sqlcols = []
         for col in vs.visibleCols:
-            sqlcols.append('"%s" %s' % (col.name, sqltypes.get(col.type, 'TEXT')))
+            sqlcols.append(('"%s" %s' % (col.name, sqltypes.get(col.type, ''))).rstrip())
         sql = 'CREATE TABLE IF NOT EXISTS "%s" (%s)' % (tblname, ', '.join(sqlcols))
         c.execute(sql)
 
