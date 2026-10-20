@@ -3,15 +3,11 @@ import string
 from contextlib import contextmanager
 from urllib.parse import urlparse, unquote
 
-from visidata import VisiData, vd, Sheet, IndexSheet, Column, options, anytype, asyncthread, ColumnItem, TypedExceptionWrapper, TypedWrapper
+from visidata import VisiData, vd, Sheet, IndexSheet, options, anytype, ColumnItem
 
 __all__ = ['openurl_postgres', 'openurl_postgresql', 'openurl_rds', 'PgTable', 'PgTablesSheet']
 
 vd.option('postgres_schema', 'public', 'desired schema for the Postgres database')
-vd.option('postgres_user', '', 'postgres username (overrides URL)')
-vd.option('postgres_password', '', 'postgres password (overrides URL)')
-vd.option('postgres_host', '', 'postgres hostname (overrides URL)')
-vd.option('postgres_port', 0, 'postgres port (overrides URL)')
 
 
 def codeToType(type_code, colname):
@@ -41,15 +37,12 @@ class SQL:
             rds = boto3.client('rds')
             password = rds.generate_db_auth_token(url.hostname, url.port, url.username, self._rds_region)
         else:
-            password = vd.options.postgres_password or (unquote(url.password) if url.password else None)
+            password = unquote(url.password) if url.password else None
 
         kwargs = dict(dbname=self.dbname)
-        u = vd.options.postgres_user or url.username
-        h = vd.options.postgres_host or url.hostname
-        p = vd.options.postgres_port or url.port
-        if u: kwargs['user'] = u
-        if h: kwargs['host'] = h
-        if p: kwargs['port'] = p
+        if url.username: kwargs['user'] = url.username
+        if url.hostname: kwargs['host'] = url.hostname
+        if url.port: kwargs['port'] = url.port
         if password: kwargs['password'] = password
 
         return psycopg2.connect(**kwargs)
@@ -67,13 +60,6 @@ class SQL:
             cur.close()
             conn.close()
 
-    @contextmanager
-    def conn(self):
-        conn = self._connect()
-        try:
-            yield conn
-        finally:
-            conn.close()
 
 
 @VisiData.api
@@ -145,8 +131,6 @@ class PgTablesSheet(IndexSheet):
 
 # rowdef: list of values
 class PgTable(Sheet):
-    savesToSource = True
-    defer = True
     query = ''
     tableName = ''
 
@@ -168,24 +152,6 @@ class PgTable(Sheet):
         else:
             source = f'"{tblname}"'
 
-        # get primary keys for this table  #579
-        self._pkeyNames = []
-        try:
-            schema = self.options.postgres_schema or 'public'
-            pkqstr = f'''SELECT kcu.column_name
-                FROM information_schema.table_constraints tc
-                JOIN information_schema.key_column_usage kcu
-                    ON tc.constraint_name = kcu.constraint_name
-                    AND tc.table_schema = kcu.table_schema
-                WHERE tc.table_schema = '{schema}'
-                    AND tc.table_name = '{tblname}'
-                    AND tc.constraint_type = 'PRIMARY KEY'
-                ORDER BY kcu.ordinal_position'''
-            with self.sql.cur(pkqstr) as pkcur:
-                self._pkeyNames = [r[0] for r in pkcur]
-        except Exception:
-            pass
-
         self.tableName = tblname
         with self.sql.cur(f"SELECT * FROM {source}") as cur:
             self.columns = []
@@ -197,14 +163,6 @@ class PgTable(Sheet):
             else:
                 for c in vd.postgresGetColumns(cur):
                     self.addColumn(c)
-
-            # set key columns based on primary keys
-            self._pkeyColumns = []
-            for pkname in self._pkeyNames:
-                for c in self.columns:
-                    if c.name == pkname:
-                        self._pkeyColumns.append(c)
-                        self.setKeys([c])
 
             for r in cur:
                 yield list(r)
@@ -226,71 +184,9 @@ class PgTable(Sheet):
     def rawSql(self, q):
         return PgQuerySheet(q[:40], sql=self.sql, query=q)
 
-    def rowid(self, row):
-        if getattr(self, '_pkeyColumns', None):
-            return tuple(c.calcValue(row) for c in self._pkeyColumns)
-        return id(row)
-
-    @asyncthread
-    def putChanges(self):
-        adds, mods, dels = self.getDeferredChanges()
-
-        def value(row, col):
-            v = col.getTypedValue(row)
-            if isinstance(v, TypedWrapper):
-                if isinstance(v, TypedExceptionWrapper):
-                    return options.safe_error
-                else:
-                    return None
-            elif not isinstance(v, (int, float, str)):
-                v = col.getDisplayValue(row)
-            return v
-
-        def values(row, cols):
-            return [value(row, c) for c in cols]
-
-        with self.sql.conn() as conn:
-            cur = conn.cursor()
-
-            for r in adds.values():
-                cols = self.visibleCols
-                sql = 'INSERT INTO "%s" ' % self.tableName
-                sql += '(%s)' % ','.join('"%s"' % c.name for c in cols)
-                sql += ' VALUES (%s)' % ','.join('%s' for c in cols)
-                cur.execute(sql, values(r, cols))
-
-            for row, rowmods in mods.values():
-                if not getattr(self, '_pkeyColumns', None):
-                    vd.warning('cannot modify rows in tables without primary key')
-                    break
-                sql = 'UPDATE "%s" SET ' % self.tableName
-                sql += ', '.join('"%s"=%%s' % c.name for c, _ in rowmods.items())
-                sql += ' WHERE %s' % ' AND '.join('"%s"=%%s' % c.name for c in self._pkeyColumns)
-                newvals = values(row, [c for c, _ in rowmods.items()])
-                wherevals = [Column.calcValue(c, row) for c in self._pkeyColumns]
-                cur.execute(sql, newvals + wherevals)
-
-            for row in dels.values():
-                if not getattr(self, '_pkeyColumns', None):
-                    vd.warning('cannot delete rows in tables without primary key')
-                    break
-                sql = 'DELETE FROM "%s" ' % self.tableName
-                sql += ' WHERE %s' % ' AND '.join('"%s"=%%s' % c.name for c in self._pkeyColumns)
-                wherevals = [Column.calcValue(c, row) for c in self._pkeyColumns]
-                cur.execute(sql, wherevals)
-
-            conn.commit()
-            cur.close()
-
-        self.preloadHook()
-        self.reload()
-
 
 class PgQuerySheet(PgTable):
     'Sheet for results of a raw SQL query.'
-    savesToSource = False
-    defer = False
-
     def iterload(self):
         yield from self.iterload_query(self.query)
 
