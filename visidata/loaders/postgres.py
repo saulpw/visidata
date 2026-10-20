@@ -52,7 +52,7 @@ def openurl_postgres(vd, url, filetype=None):
                 dbname=dbname,
                 host=url.hostname,
                 port=url.port,
-                password=unquote(url.password))
+                password=unquote(url.password) if url.password else None)
 
     return PgTablesSheet(dbname+"_tables", sql=SQL(conn))
 
