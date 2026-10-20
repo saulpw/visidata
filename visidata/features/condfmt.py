@@ -160,7 +160,7 @@ def color_row_from_col(sheet, colorcol):
 
 
 @Sheet.api
-def color_cell_from_cell(sheet, targetcol, colorcol):
+def color_cell_from_col(sheet, targetcol, colorcol):
     'Add a CellColorizer that paints *targetcol* cells with the color string in the same row of *colorcol*.'
     sheet.addColorizer(CellColorizer(condfmt_precedence, None, lambda s,c,r,v: c is targetcol and colorcol.getDisplayValue(r)))  #2764
     vd.status(f'`{targetcol.name}` colored from `{colorcol.name}`')
@@ -179,14 +179,14 @@ Sheet.addCommand('', 'color-cell', 'color_cell(**inputCondFmt())', 'apply color 
 Sheet.addCommand('', 'color-row',  'color_row(**inputCondFmt())',  'apply color to rows where Python expr is truthy')
 Sheet.addCommand('', 'color-col',  'color_col(**inputCondFmt())',  'apply color to columns where Python expr is truthy')
 Sheet.addCommand('', 'color-row-from-col',  'color_row_from_col(inputColorCol(cursorCol.name))',  'color each row with the color string in given column')
-Sheet.addCommand('', 'color-cell-from-cell', 'color_cell_from_cell(cursorCol, inputColorCol(cursorCol.name+"_color"))', 'color each cell in current column with the color string in the same row of given column')
+Sheet.addCommand('', 'color-cell-from-col', 'color_cell_from_col(cursorCol, inputColorCol(cursorCol.name+"_color"))', 'color each cell in current column with the color string in the same row of given column')
 
 vd.addMenuItems('''
     View > Color > cells where > color-cell
     View > Color > rows where > color-row
     View > Color > columns where > color-col
     View > Color > rows from column > color-row-from-col
-    View > Color > cells from cells > color-cell-from-cell
+    View > Color > cells from column > color-cell-from-col
 ''')
 
 
@@ -330,12 +330,12 @@ def test_color_row_from_col(vd):  #2764
     assert not cz.func(s, temp, None, None)      # header
 
 
-def test_color_cell_from_cell(vd):  #2764
+def test_color_cell_from_col(vd):  #2764
     'Only the target column gets the color string from the color column.'
     s = _colorspec_test_sheet()
     temp, temp_color = s.columns
     before = list(s._colorizers)
-    s.color_cell_from_cell(temp, temp_color)
+    s.color_cell_from_col(temp, temp_color)
     cz, = [cz for cz in s._colorizers if cz not in before]
     assert cz.func(s, temp, s.rows[1], 120) == 'bold red'
     assert not cz.func(s, temp_color, s.rows[1], 'bold red')
