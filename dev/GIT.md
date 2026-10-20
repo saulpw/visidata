@@ -42,7 +42,7 @@ When we put together a patch release, we scan commit messages for this marker to
 Do not assume a commit is patch-safe — always ask before adding the `-` marker.
 
 #### Issue Numbers
-Any issue numbers fixed in a commit should be appended to the git commit summary line, including the leading `#`.
+Any issue numbers fixed in a commit should be appended to the git commit summary line, including the leading `#`, on follow-up commits too.  Use only GitHub issue numbers, never a PR's number; with no issue, the commit carries no number.
 
 Examples:
 - `#1234` - Single issue
