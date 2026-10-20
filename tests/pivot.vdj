@@ -1,7 +1,9 @@
 #!vd -p
-{"sheet": "", "col": "", "row": "", "longname": "open-file", "input": "sample_data/sample.tsv", "keystrokes": "o", "comment": ""}
-{"sheet": "sample", "col": "Rep", "row": "", "longname": "key-col", "input": "", "keystrokes": "!", "comment": ""}
-{"sheet": "sample", "col": "Units", "row": "", "longname": "type-int", "input": "", "keystrokes": "#", "comment": ""}
-{"sheet": "sample", "col": "Units", "row": "", "longname": "aggregate-col", "input": "sum", "keystrokes": "+", "comment": ""}
-{"sheet": "sample", "col": "Units", "row": "", "longname": "aggregate-col", "input": "mean", "keystrokes": "+", "comment": ""}
-{"sheet": "sample", "col": "Item", "row": "", "longname": "pivot", "input": "", "keystrokes": "W", "comment": ""}
+{"sheet": "", "col": "", "row": "", "longname": "open-file", "input": "sample_data/petshop/tinyshop.jsonl", "keystrokes": "o", "comment": ""}
+{"sheet": "tinyshop", "col": "sku", "row": "", "longname": "addcol-expr", "input": "sku[:3]", "keystrokes": "=", "comment": ""}
+{"sheet": "tinyshop", "col": "sku[:3]", "row": "", "longname": "rename-col", "input": "prefix", "keystrokes": "^", "comment": ""}
+{"sheet": "tinyshop", "col": "name", "row": "", "longname": "key-col", "input": "", "keystrokes": "!", "comment": ""}
+{"sheet": "tinyshop", "col": "qty", "row": "", "longname": "type-int", "input": "", "keystrokes": "#", "comment": ""}
+{"sheet": "tinyshop", "col": "qty", "row": "", "longname": "aggregate-col", "input": "sum", "keystrokes": "+", "comment": ""}
+{"sheet": "tinyshop", "col": "qty", "row": "", "longname": "aggregate-col", "input": "mean", "keystrokes": "+", "comment": ""}
+{"sheet": "tinyshop", "col": "prefix", "row": "", "longname": "pivot", "input": "", "keystrokes": "W", "comment": ""}

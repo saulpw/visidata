@@ -1,4 +1,6 @@
 # freq-col groups match dedupe-rows
-open-file sample_data/issue3219.jsonl
-col val
+open-file sample_data/petshop/petshop.sqlite
+row キorders
+open-row
+col customerid
 freq-col

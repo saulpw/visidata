@@ -1,19 +1,21 @@
 sheet	col	row	longname	input	keystrokes	comment
-			open-file	sample_data/test.jsonl	o	
-		numeric_binning	set-option	True		
-test	key1		type-date		@	
-test	qty		type-int		#	
-test	amt		type-float		%	
-test	qty		aggregate-col	sum	+	
-test	key1		key-col		!	
-test			columns-sheet		C	
-test_columns		キqty	select-row		s	
-test_columns		キamt	select-row		s	
-test_columns			aggregate-cols	min	g+	
-test_columns			aggregate-cols	max	g+	
-test_columns			quit-sheet		q	
-test	key2		pivot		W	
-test_pivot_key2			columns-sheet		C	
-test_pivot_key2_columns	name		sort-asc		[	
-test_pivot_key2_columns			quit-sheet		q	
-test_pivot_key2	key1		sort-asc		[	
+			open-file	sample_data/petshop/orders-flat.jsonl	o
+		numeric_binning	set-option	True
+orders-flat	ordered		type-date		@
+orders-flat	qty		type-int		#
+orders-flat	unit_price		type-float		%
+orders-flat	qty		aggregate-col	sum	+
+orders-flat	ordered		key-col		!
+orders-flat			columns-sheet		C
+orders-flat_columns		キqty	select-row		s
+orders-flat_columns		キunit_price	select-row		s
+orders-flat_columns			aggregate-cols	min	g+
+orders-flat_columns			aggregate-cols	max	g+
+orders-flat_columns			quit-sheet		q
+orders-flat	sku		addcol-expr	sku[:3]	=
+orders-flat	sku[:3]		rename-col	prefix	^
+orders-flat	prefix		pivot		W
+orders-flat_pivot_prefix			columns-sheet		C
+orders-flat_pivot_prefix_columns	name		sort-asc		[
+orders-flat_pivot_prefix_columns			quit-sheet		q
+orders-flat_pivot_prefix	ordered		sort-asc		[

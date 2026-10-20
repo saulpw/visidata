@@ -1,6 +1,11 @@
-key1	amt_max_bar	amt_max_baz	amt_max_foo	amt_min_bar	amt_min_baz	amt_min_foo	qty_max_bar	qty_max_baz	qty_max_foo	qty_min_bar	qty_min_baz	qty_min_foo	qty_sum_bar	qty_sum_baz	qty_sum_foo
-#ERR													0	0	0
-		43.20			3.30			32			4		0	36	0
-2016-01-01 - 2016-12-07									1			1	0	0	1
-2016-12-07 - 2017-11-13													0	0	0
-2017-11-13 - 2018-10-20	0.30	0.01	0.01	0.30	0.01	0.01	16	256		16	256		16	256	0
+ordered	qty_max_	qty_max_COL	qty_max_FUD	qty_max_HOM	qty_max_PET	qty_max_RET	qty_max_TOY	qty_max_fud	qty_min_	qty_min_COL	qty_min_FUD	qty_min_HOM	qty_min_PET	qty_min_RET	qty_min_TOY	qty_min_fud	qty_sum_	qty_sum_COL	qty_sum_FUD	qty_sum_HOM	qty_sum_PET	qty_sum_RET	qty_sum_TOY	qty_sum_fud	unit_price_max_	unit_price_max_COL	unit_price_max_FUD	unit_price_max_HOM	unit_price_max_PET	unit_price_max_RET	unit_price_max_TOY	unit_price_max_fud	unit_price_min_	unit_price_min_COL	unit_price_min_FUD	unit_price_min_HOM	unit_price_min_PET	unit_price_min_RET	unit_price_min_TOY	unit_price_min_fud
+#ERR					3								3				0	0	0	0	3	0	0	0																
+			2								2						0	0	2	0	0	0	0	0																
+2018-07-02 - 2018-07-13			12		1						1		1				0	0	19	0	1	0	0	0					29.95								29.95			
+2018-07-13 - 2018-07-24	1	1	50		2		1		1	1	5		2		1		2	1	101	0	2	0	1	0																
+2018-07-24 - 2018-08-05	1		4					3	1		1					3	1	0	15	0	0	0	0	3																
+2018-08-05 - 2018-08-16			3		12	1					1		0	1			0	0	5	0	13	1	0	0																
+2018-08-16 - 2018-08-27	1		30	1	1	6	1		1		1	1	1	1	1		2	0	35	1	2	8	3	0																
+2018-08-27 - 2018-09-07			2	1	2						2	1	1				0	0	2	1	4	0	0	0																
+2018-09-07 - 2018-09-18			2	1	6		1				1	1	1		1		0	0	3	2	7	0	1	0																
+2018-09-18 - 2018-09-30			144		5						1		1				0	0	153	0	16	0	0	0																

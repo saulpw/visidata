@@ -1,10 +1,18 @@
 #!vd -p
-{"sheet": null, "col": "", "row": "", "longname": "open-file", "input": "sample_data/a.tsv", "keystrokes": "o", "comment": null, "replayable": true}
-{"col": "", "row": "", "longname": "open-file", "input": "sample_data/b.tsv", "keystrokes": "o", "replayable": true}
-{"sheet": "a", "col": "key", "row": "", "longname": "key-col", "input": "", "keystrokes": "!", "comment": "toggle current column as a key column", "replayable": true}
-{"sheet": "b", "col": "key", "row": "", "longname": "key-col", "input": "", "keystrokes": "!", "comment": "toggle current column as a key column", "replayable": true}
+{"sheet": null, "col": "", "row": "", "longname": "open-file", "input": "sample_data/petshop/petshop.sqlite", "keystrokes": "o", "comment": null, "replayable": true}
+{"sheet": "petshop", "col": "", "row": "キcustomers", "longname": "open-row", "input": "", "keystrokes": "Enter", "comment": "open sheet referenced in current row", "replayable": true}
+{"sheet": "customers", "col": "", "row": "", "longname": "select-expr", "input": "customerid <= 1004", "keystrokes": "z|", "comment": "select rows matching Python expression in any visible column", "replayable": true}
+{"sheet": "customers", "col": "", "row": "", "longname": "dup-selected-deep", "input": "", "keystrokes": "g\"", "comment": "open duplicate sheet with deepcopy of selected rows", "replayable": true}
+{"col": "", "row": "", "longname": "rename-sheet", "input": "a", "keystrokes": "", "comment": "rename current sheet", "replayable": true}
+{"sheet": "a", "col": "customerid", "row": "", "longname": "key-col", "input": "", "keystrokes": "!", "comment": "toggle current column as a key column", "replayable": true}
+{"sheet": "a", "col": "", "row": "", "longname": "jump-prev", "input": "", "keystrokes": "Ctrl+^", "comment": "jump to previous sheet in this pane (swap with current sheet)", "replayable": true}
+{"sheet": "customers", "col": "", "row": "", "longname": "unselect-rows", "input": "", "keystrokes": "gu", "comment": "unselect all rows", "replayable": true}
+{"sheet": "customers", "col": "", "row": "", "longname": "select-expr", "input": "customerid >= 1003 and customerid <= 1006", "keystrokes": "z|", "comment": "select rows matching Python expression in any visible column", "replayable": true}
+{"sheet": "customers", "col": "", "row": "", "longname": "dup-selected-deep", "input": "", "keystrokes": "g\"", "comment": "open duplicate sheet with deepcopy of selected rows", "replayable": true}
+{"col": "", "row": "", "longname": "rename-sheet", "input": "b", "keystrokes": "", "comment": "rename current sheet", "replayable": true}
+{"sheet": "b", "col": "customerid", "row": "", "longname": "key-col", "input": "", "keystrokes": "!", "comment": "toggle current column as a key column", "replayable": true}
 {"sheet": "b", "col": "", "row": "", "longname": "sheets-stack", "input": "", "keystrokes": "Shift+S", "comment": "open Sheets Stack: join or jump between the active sheets on the current stack", "replayable": true}
-{"sheet": "sheets", "col": "", "row": 1, "longname": "stoggle-row", "input": "", "keystrokes": "t", "comment": "toggle selection of current row", "replayable": true}
-{"sheet": "sheets", "col": "", "row": 2, "longname": "stoggle-row", "input": "", "keystrokes": "t", "comment": "toggle selection of current row", "replayable": true}
+{"sheet": "sheets", "col": "", "row": "キb", "longname": "stoggle-row", "input": "", "keystrokes": "t", "comment": "toggle selection of current row", "replayable": true}
+{"sheet": "sheets", "col": "", "row": "キa", "longname": "stoggle-row", "input": "", "keystrokes": "t", "comment": "toggle selection of current row", "replayable": true}
 {"sheet": "sheets", "col": "", "row": "", "longname": "join-selected", "input": "merge", "keystrokes": "&", "comment": "merge selected sheets with visible columns from all, keeping rows according to jointype", "replayable": true}
-{"sheet": "b+a", "col": "source_sheet", "row": 0, "longname": "edit-cell", "input": "c", "keystrokes": "e", "comment": "edit contents of current cell", "replayable": true}
+{"sheet": "b+a", "col": "name", "row": "キ1005", "longname": "edit-cell", "input": "Susan Ashworth-Smith", "keystrokes": "e", "comment": "edit contents of current cell", "replayable": true}

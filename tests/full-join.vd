@@ -1,12 +1,13 @@
 sheet	col	row	longname	input	keystrokes	comment
-			open-file	tests/data1.tsv	o	
-			open-file	tests/data2.tsv	o	
-data1	Key		key-col		!	
-data2	Key		key-col		!	
-data2			sheets-stack		S	
-sheets		キdata2	select-row		s	
-sheets		キdata1	select-row		s	
-sheets			join-sheets	full	&	
-data2+data1	A		key-col		!	
-data2+data1			sort-keys-asc		g[	
-data2+data1	A		key-col		!	
+			open-file	sample_data/petshop/petshop.sqlite	o
+petshop		キproducts	open-row		^J
+petshop		キorders_items	open-row		^J
+products	sku		key-col		!
+orders_items	sku		key-col		!
+orders_items			sheets-stack		S
+sheets		キorders_items	select-row		s
+sheets		キproducts	select-row		s
+sheets			join-sheets	full	&
+orders_items+products	orderid		key-col		!
+orders_items+products			sort-keys-asc		g[
+orders_items+products	orderid		key-col		!
