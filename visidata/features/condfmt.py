@@ -1,6 +1,6 @@
 '''Conditional formatting commands.  #3061'''
 
-from visidata import vd, Sheet, CellColorizer, RowColorizer, ColumnColorizer
+from visidata import vd, Sheet, CellColorizer, RowColorizer, ColumnColorizer, CompleteKey
 
 
 # default colors offered when adding a conditional format
@@ -152,14 +152,41 @@ def inputCondFmt(sheet):
     )
 
 
+@Sheet.api
+def color_row_from_col(sheet, colorcol):
+    'Add a RowColorizer that paints each row with the color string in its *colorcol* cell.'
+    sheet.addColorizer(RowColorizer(condfmt_precedence, None, lambda s,c,r,v: colorcol.getDisplayValue(r)))  #2764
+    vd.status(f'rows colored from `{colorcol.name}`')
+
+
+@Sheet.api
+def color_cell_from_cell(sheet, targetcol, colorcol):
+    'Add a CellColorizer that paints *targetcol* cells with the color string in the same row of *colorcol*.'
+    sheet.addColorizer(CellColorizer(condfmt_precedence, None, lambda s,c,r,v: c is targetcol and colorcol.getDisplayValue(r)))  #2764
+    vd.status(f'`{targetcol.name}` colored from `{colorcol.name}`')
+
+
+@Sheet.api
+def inputColorCol(sheet, default=''):
+    'Prompt for the column holding color strings.'
+    if default not in sheet.colsByName:
+        default = ''
+    colname = vd.input('color strings from column: ', value=default, completer=CompleteKey(sorted(sheet.colsByName)))
+    return sheet.column(colname)
+
+
 Sheet.addCommand('', 'color-cell', 'color_cell(**inputCondFmt())', 'apply color to cells where Python expr is truthy')
 Sheet.addCommand('', 'color-row',  'color_row(**inputCondFmt())',  'apply color to rows where Python expr is truthy')
 Sheet.addCommand('', 'color-col',  'color_col(**inputCondFmt())',  'apply color to columns where Python expr is truthy')
+Sheet.addCommand('', 'color-row-from-col',  'color_row_from_col(inputColorCol(cursorCol.name))',  'color each row with the color string in given column')
+Sheet.addCommand('', 'color-cell-from-cell', 'color_cell_from_cell(cursorCol, inputColorCol(cursorCol.name+"_color"))', 'color each cell in current column with the color string in the same row of given column')
 
 vd.addMenuItems('''
     View > Color > cells where > color-cell
     View > Color > rows where > color-row
     View > Color > columns where > color-col
+    View > Color > rows from column > color-row-from-col
+    View > Color > cells from cells > color-cell-from-cell
 ''')
 
 
@@ -273,3 +300,42 @@ def test_condfmt_value_is_typed_not_wrapper(vd):  #3061
     assert cz.func(s, s.columns[1], s.rows[1], cellval) is True
     cellval = s.columns[1].getCell(s.rows[0])  # status='ok' -> no 'a'
     assert cz.func(s, s.columns[1], s.rows[0], cellval) is False
+
+
+def _colorspec_test_sheet():
+    'Build a tiny TableSheet whose `temp_color` column holds color strings for `temp`.'
+    from visidata import Sheet, ItemColumn
+    return Sheet('toy', columns=[
+        ItemColumn('temp', 0, type=int),
+        ItemColumn('temp_color', 1),
+    ], rows=[
+        [50, 'green'],
+        [120, 'bold red'],
+        [-5, ''],
+    ])
+
+
+def test_color_row_from_col(vd):  #2764
+    'Each row gets the color string from its cell in the color column, even if hidden.'
+    s = _colorspec_test_sheet()
+    temp, temp_color = s.columns
+    temp_color.hide()
+    before = list(s._colorizers)
+    s.color_row_from_col(temp_color)
+    cz, = [cz for cz in s._colorizers if cz not in before]
+    assert cz.coloropt is None
+    assert cz.func(s, temp, s.rows[0], 50) == 'green'
+    assert cz.func(s, temp, s.rows[1], 120) == 'bold red'
+    assert not cz.func(s, temp, s.rows[2], -5)   # empty color string colors nothing
+    assert not cz.func(s, temp, None, None)      # header
+
+
+def test_color_cell_from_cell(vd):  #2764
+    'Only the target column gets the color string from the color column.'
+    s = _colorspec_test_sheet()
+    temp, temp_color = s.columns
+    before = list(s._colorizers)
+    s.color_cell_from_cell(temp, temp_color)
+    cz, = [cz for cz in s._colorizers if cz not in before]
+    assert cz.func(s, temp, s.rows[1], 120) == 'bold red'
+    assert not cz.func(s, temp_color, s.rows[1], 'bold red')
