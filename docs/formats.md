@@ -136,6 +136,9 @@ All `csv_*` options are passed unchanged into csv.reader() and csv.writer().
 - loader-specific options
     - `postgres_schema` (default: 'public') the desired schema for the Postgres database
 - `vd postgres://`*username*`:`*password*`@`*hostname*`:`*port*`/`*database* opens a connection to the given postgres database.
+    - any part may be omitted; libpq fills it from `PGUSER`, `PGPASSWORD`, `PGHOST`, `PGPORT`, or `~/.pgpass`, and `postgres:///`*database* connects over the local Unix socket.
+- `vd postgres:///`*database*`/`*table* opens a single table directly.
+- `exec-sql` on the tables sheet or a table opens a sheet with the results of a SELECT query; `edit-sql` edits that query.
 
 ## imap {#imap}
 - `vd "imap://user@domain.com:passwordhere@imap-mailserver.com"` opens a connection to the IMAP server
