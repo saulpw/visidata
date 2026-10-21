@@ -1,0 +1,4 @@
+# quotes in schema, table, and column names
+
+option global postgres_schema it's
+open-file postgres:///vdtest/we"ird

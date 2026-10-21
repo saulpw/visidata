@@ -1,0 +1,11 @@
+# tables are readonly until writes are supported  #579
+
+allow-error cannot edit readonly column
+allow-error saving changes to postgres is not supported yet
+allow-error replay aborted during (edit-cell|commit-sheet)
+open-file postgres:///vdtest/benchmark
+row 0
+col customer
+edit-cell Nobody
+add-row
+commit-sheet

@@ -31,12 +31,15 @@ shift $((OPTIND - 1))
 
 VD_OPTS="--batch --config tests/.visidatarc --visidata-dir tests/.visidata"
 
+HAVE_PG=$(psql -d vdtest -c 'SELECT 1' >/dev/null 2>&1 && echo yes)
+
 should_skip() {
     local i="$1"
     case "${i%.vd*}" in
         *-broken) echo "broken" ;;
         *-manual) echo "manual" ;;
         *-perf)   echo "perf" ;;
+        *-pg)     [ -z "$HAVE_PG" ] && echo "no postgres (dev/setup-postgres.sh)" ;;
         *-nosave) return 1 ;;  # not skipped, just no golden comparison
         *-flaky)  return 1 ;;  # not skipped; failures reported but non-fatal
         *-n311)  [ "$PY311" == "True" ] && echo "n311" ;;

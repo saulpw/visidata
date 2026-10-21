@@ -112,6 +112,7 @@ All three formats allow `#` line comments.
 - `-perf` suffix runs via `test-perf.sh` (separate from `test.sh`); reports wall time per test
 - `-flaky` suffix runs the test but treats failures as non-fatal
 - `-311` suffix runs only on Python 3.11+; `-n311` runs only below 3.11
+- `-pg` suffix runs only when the `vdtest` postgres database is reachable; create it with `dev/setup-postgres.sh`
 - Tests should modify data and provide golden output file, rather than using `assert-expr` commands
 - Don't test status or warning messages; check the resulting data
 - Set explicit cursor positions (e.g., `row 6`) rather than relying on defaults, for test hygiene

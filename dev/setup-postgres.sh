@@ -34,4 +34,4 @@ echo "verifying"
 n=$(psql -d $DB -tAc "SELECT count(*) FROM benchmark")
 echo "$n rows in benchmark table"
 
-echo "setup complete: run tests with dev/test-all.sh tests/test-postgres.sh"
+echo "setup complete: tests/*-pg.vdx now run in dev/test-all.sh"
