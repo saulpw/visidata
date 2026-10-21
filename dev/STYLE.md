@@ -91,6 +91,10 @@ def my_method(sheet, arg): ...
 def my_vd_method(vd): ...
 ```
 
+## Progress
+
+`Progress(iterable)` takes its total from `len(iterable)` and counts each item it yields, for a single pass.  For several passes (e.g. once per column), use one `with Progress(total=...) as prog` for the whole operation and bump it with `prog.addProgress(n)`.
+
 ## Options
 
 - Prefix options with module name/abbreviation when exclusive to that module.

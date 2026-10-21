@@ -1,4 +1,4 @@
-from visidata import VisiData, vd, Column, Sheet, Fanout, asyncthread
+from visidata import VisiData, vd, Column, Sheet, Fanout, asyncthread, Progress
 
 @Column.api
 def setWidth(self, w):
@@ -15,10 +15,10 @@ def toggleWidth(self, width):
 
 
 @Sheet.api
-def resize_cols_max(sheet, cols):
-    'Resize all *cols* to max width as a group; if all already at max, reset all to default.'
-    rows = sheet.visibleRows
-    maxwidths = {c: c.getMaxWidth(rows) for c in cols}
+def resize_cols_max(sheet, cols, maxwidths=None):
+    'Resize all *cols* to *maxwidths* (default: max width of visible rows) as a group; if all already at max, reset all to default.'
+    if maxwidths is None:
+        maxwidths = {c: c.getMaxWidth(sheet.visibleRows) for c in cols}
     if all(c.width == maxwidths[c] for c in cols):
         default = int(sheet.options.default_width)
         for c in cols:
@@ -26,6 +26,19 @@ def resize_cols_max(sheet, cols):
     else:
         for c in cols:
             c.setWidth(maxwidths[c])
+
+
+@Sheet.api
+@asyncthread
+def resize_cols_max_all(sheet, cols):
+    'Resize all *cols* as a group to max width of all rows, not only the visible ones.'
+    maxwidths = {}
+    with Progress(gerund='measuring', total=len(sheet.rows)*len(cols)) as prog:
+        for c in cols:
+            rows = iter(sheet.rows)
+            maxwidths[c] = c.getMaxWidth(r for r in rows if prog.addProgress(1))
+            prog.addProgress(sum(1 for r in rows))  # getMaxWidth stops early on wide columns
+    sheet.resize_cols_max(cols, maxwidths)
 
 
 @Column.api
@@ -69,6 +82,8 @@ def hide_uniform_cols(sheet):
 Sheet.addCommand('_', 'resize-col-max', 'if cursorCol: cursorCol.toggleWidth(cursorCol.getMaxWidth(visibleRows))', 'toggle width of current column between full and default width')
 Sheet.addCommand('z_', 'resize-col-input', 'width = int(input("set width= ", value=cursorCol.width)); cursorCol.setWidth(width)', 'adjust width of current column to N')
 Sheet.addCommand('g_', 'resize-cols-max', 'sheet.resize_cols_max(visibleCols)', 'set widths of all visible columns to full width; if all already full, reset to default')
+Sheet.addCommand('', 'resize-col-max-all', 'if cursorCol: sheet.resize_cols_max_all([cursorCol])', 'toggle width of current column between default and max width of all rows')
+Sheet.addCommand('', 'resize-cols-max-all', 'sheet.resize_cols_max_all(visibleCols)', 'set widths of all visible columns to max width of all rows; if all already full, reset to default')
 Sheet.addCommand('gz_', 'resize-cols-input', 'width = int(input("set width= ", value=cursorCol.width)); Fanout(visibleCols).setWidth(width)', 'adjust widths of all visible columns to N')
 
 Sheet.addCommand('-', 'hide-col', 'hide_col(cursorCol)', 'hide the current column')
@@ -88,6 +103,8 @@ vd.addMenuItems('''
     Column > Resize > current column width to max > resize-col-max
     Column > Resize > current column width to N > resize-col-input
     Column > Resize > all columns width to max > resize-cols-max
+    Column > Resize > current column width to max of all rows > resize-col-max-all
+    Column > Resize > all columns width to max of all rows > resize-cols-max-all
     Column > Resize > all columns width to N > resize-cols-input
     Row > Resize > height to N > resize-height-input
     Row > Resize > height to max > resize-height-max
