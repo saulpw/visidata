@@ -339,7 +339,11 @@ def asyncsingle_queue(func):
 
         _func.__name__ = func.__name__ # otherwise, the the thread's name is '_func'
 
+        if args and isinstance(args[0], BaseSheet) and 'sheet' not in kwargs:  #2624
+            kwargs['sheet'] = args[0]
+
         _execAsync.searchThread = vd.execAsync(_func, *args, **kwargs)
+        return _execAsync.searchThread
     _execAsync.searchThread = None
     return _execAsync
 
