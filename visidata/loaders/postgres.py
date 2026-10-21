@@ -3,7 +3,7 @@ import string
 from contextlib import contextmanager
 from urllib.parse import urlparse, unquote
 
-from visidata import VisiData, vd, Sheet, IndexSheet, anytype, ColumnItem, UNLOADED
+from visidata import VisiData, vd, Sheet, IndexSheet, anytype, ItemColumn, UNLOADED
 
 __all__ = ['openurl_postgres', 'openurl_postgresql', 'openurl_rds', 'PgTable', 'PgTablesSheet']
 
@@ -97,10 +97,16 @@ openurl_postgresql = openurl_postgres
 VisiData.openurl_postgresql = VisiData.openurl_postgres
 
 
+class PgColumn(ItemColumn):
+    @property
+    def readonly(self):
+        return True  #579
+
+
 @VisiData.api
 def postgresGetColumns(vd, cur):
     for i, coldesc in enumerate(cur.description):
-        yield ColumnItem(coldesc.name, i, type=codeToType(coldesc.type_code, coldesc.name))
+        yield PgColumn(coldesc.name, i, type=codeToType(coldesc.type_code, coldesc.name))
 
 
 # rowdef: PgTable sheet
@@ -128,6 +134,7 @@ class PgTablesSheet(IndexSheet):
 
 # rowdef: list of values
 class PgTable(Sheet):
+    defer = True
     query = ''
     estimated_rows = None
     column_count = None
@@ -194,6 +201,9 @@ class PgTable(Sheet):
 
     def rawSql(self, q):
         return PgQuerySheet(q[:40], sql=self.sql, query=q)
+
+    def commit(self, *rows):
+        vd.fail('saving changes to postgres is not supported yet')  #579
 
 
 class PgQuerySheet(PgTable):

@@ -75,6 +75,15 @@ if [[ "$(cat $OUTDIR/pg-quoted.tsv)" != "$expected" ]]; then
     FAIL=1
 fi
 
+# #579: tables are readonly until writes are supported
+for cmds in "edit-cell x" $'add-row\ncommit-sheet' $'delete-row\ncommit-sheet'; do
+    printf 'open-file postgres:///vdtest/benchmark\n%s\n' "$cmds" > $OUTDIR/pg-readonly.vdx
+    if $VDB -p $OUTDIR/pg-readonly.vdx > $OUTDIR/pg-readonly.out 2>&1; then
+        echo "FAIL: '${cmds//$'\n'/; }' succeeded on a readonly table"
+        FAIL=1
+    fi
+done
+
 if [[ $FAIL -eq 1 ]]; then
     echo "FAILED"
     exit 1
