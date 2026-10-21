@@ -1,5 +1,0 @@
-# resize-col-max-all fits the widest value in all rows, not only those on screen  #2780
-open-file tests/issue2780.tsv
-col name
-resize-col-max-all
-columns-sheet

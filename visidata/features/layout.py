@@ -15,11 +15,10 @@ def toggleWidth(self, width):
 
 
 @Sheet.api
-def resize_cols_max(sheet, cols, rows=None):
-    'Resize all *cols* to max width of *rows* (default visible rows) as a group; if all already at max, reset all to default.'
-    if rows is None:
-        rows = sheet.visibleRows
-    maxwidths = {c: c.getMaxWidth(rows) for c in cols}
+def resize_cols_max(sheet, cols, maxwidths=None):
+    'Resize all *cols* to *maxwidths* (default: max width of visible rows) as a group; if all already at max, reset all to default.'
+    if maxwidths is None:
+        maxwidths = {c: c.getMaxWidth(sheet.visibleRows) for c in cols}
     if all(c.width == maxwidths[c] for c in cols):
         default = int(sheet.options.default_width)
         for c in cols:
@@ -33,7 +32,7 @@ def resize_cols_max(sheet, cols, rows=None):
 @asyncthread
 def resize_cols_max_all(sheet, cols):
     'Resize all *cols* as a group to max width of all rows, not only the visible ones.'
-    sheet.resize_cols_max(cols, rows=Progress(sheet.rows, gerund='measuring', total=len(sheet.rows)*len(cols)))
+    sheet.resize_cols_max(cols, {c: c.getMaxWidth(Progress(sheet.rows, gerund='measuring')) for c in cols})
 
 
 @Column.api
