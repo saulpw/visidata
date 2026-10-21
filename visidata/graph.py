@@ -73,6 +73,7 @@ class InvertedCanvas(Canvas):
 # provides axis labels, legend
 class GraphSheet(InvertedCanvas):
     rowtype = 'points'
+    reloadWithSource = True
 
     def __init__(self, *names, sourceRows=None, **kwargs):
         self.ylabel_maxw = 0

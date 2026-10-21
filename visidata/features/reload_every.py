@@ -4,6 +4,16 @@ import time
 from visidata import vd, BaseSheet, Sheet, asyncignore, asyncthread, asyncsingle_queue, Path, ScopedSetattr
 
 
+BaseSheet.reloadWithSource = False  # reload this sheet whenever its source sheet finishes reloading
+
+
+@Sheet.after
+def afterLoad(sheet):
+    for vs in list(vd.sheets):
+        if vs.source is sheet and vs.reloadWithSource:
+            vs.reload()  #2570
+
+
 @BaseSheet.api
 @asyncignore
 def reload_every(sheet, seconds:int):
