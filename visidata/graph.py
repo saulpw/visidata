@@ -74,8 +74,9 @@ class InvertedCanvas(Canvas):
 class GraphSheet(InvertedCanvas):
     rowtype = 'points'
 
-    def __init__(self, *names, **kwargs):
+    def __init__(self, *names, sourceRows=None, **kwargs):
         self.ylabel_maxw = 0
+        self._sourceRows = sourceRows
         super().__init__(*names, **kwargs)
 
         self.reflines_x = []
@@ -90,6 +91,17 @@ class GraphSheet(InvertedCanvas):
                 vd.fail('no key columns; press `!` on a numeric column to set x-axis')
 
         self.ycols or vd.fail('%s is non-numeric' % '/'.join(yc.name for yc in kwargs.get('ycols')))
+
+    @property
+    def sourceRows(self):
+        'Rows to plot: all of the source sheet (even after it reloads), unless given explicitly.'
+        if self._sourceRows is None:
+            return self.source.rows  #2570
+        return self._sourceRows
+
+    @sourceRows.setter
+    def sourceRows(self, rows):
+        self._sourceRows = rows
 
     def resetCanvasDimensions(self, windowHeight, windowWidth):
         if self.left_margin < self.ylabel_maxw:
@@ -378,9 +390,9 @@ def format_input_value(val, type):
         return str(val)
 
 
-Sheet.addCommand('.', 'plot-column', 'vd.push(GraphSheet(sheet.name, "graph", source=sheet, sourceRows=rows, xcols=keyCols, ycols=numericCols([cursorCol])))', 'plot current numeric column vs key columns; numeric key column is used for x-axis, while categorical key columns determine color')
-Sheet.addCommand('g.', 'plot-numerics', 'vd.push(GraphSheet(sheet.name, "graph", source=sheet, sourceRows=rows, xcols=keyCols, ycols=numericCols(nonKeyVisibleCols)))', 'plot a graph of all visible numeric columns vs key columns')
-ColumnsSheet.addCommand('g.', 'plot-source-selected', 'vd.push(GraphSheet(sheet.source[0].name, "graph", source=source[0], sourceRows=source[0].rows, xcols=source[0].keyCols, ycols=numericCols(selectedRows)))', 'plot a graph of all selected columns vs key columns on source sheet')
+Sheet.addCommand('.', 'plot-column', 'vd.push(GraphSheet(sheet.name, "graph", source=sheet, xcols=keyCols, ycols=numericCols([cursorCol])))', 'plot current numeric column vs key columns; numeric key column is used for x-axis, while categorical key columns determine color')
+Sheet.addCommand('g.', 'plot-numerics', 'vd.push(GraphSheet(sheet.name, "graph", source=sheet, xcols=keyCols, ycols=numericCols(nonKeyVisibleCols)))', 'plot a graph of all visible numeric columns vs key columns')
+ColumnsSheet.addCommand('g.', 'plot-source-selected', 'vd.push(GraphSheet(sheet.source[0].name, "graph", source=source[0], xcols=source[0].keyCols, ycols=numericCols(selectedRows)))', 'plot a graph of all selected columns vs key columns on source sheet')
 
 # swap directions of up/down
 InvertedCanvas.addCommand(None, 'go-up', 'if cursorBox: sheet.cursorBox.ymin += cursorBox.h', 'move cursor up by its height')
