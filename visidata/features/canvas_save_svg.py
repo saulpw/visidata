@@ -10,6 +10,7 @@ import collections
 from visidata import VisiData, Canvas, vd, Progress
 
 vd.option('plt_marker', '.', 'matplotlib.markers')
+vd.option('plt_linestyle', '', 'matplotlib linestyle for save-svg; "-" to connect points as a line chart')
 
 
 @Canvas.api
@@ -44,7 +45,8 @@ def plot_sheet(self, ax):
                     raise
         lines = []
         for k in xpts:
-            line = ax.scatter(xpts[k], ypts[k], label=' '.join(str(x) for x in k), **vd.options.getall('plt_'))
+            pts = sorted(zip(xpts[k], ypts[k]))
+            line, = ax.plot([x for x, y in pts], [y for x, y in pts], label=' '.join(str(x) for x in k), **vd.options.getall('plt_'))  #3002
             lines.append(line)
 
         ax.legend(handles=lines)
