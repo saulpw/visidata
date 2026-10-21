@@ -35,18 +35,18 @@ def injectInput(vd, x, prefill=False):
 
 
 @VisiData.api
-def getCommandInput(vd, prefill=False):
-    if vd._injectedInput is not None and vd._injectedPrefill == prefill:
+def getCommandInput(vd):
+    if vd._injectedInput is not None:
         r = vd._injectedInput
         vd._injectedInput = None
         return r
 
-    if not prefill:
-        return vd.getLastArgs()
+    return vd.getLastArgs()
 
 
 @BaseSheet.after
 def execCommand(sheet, longname, *args, **kwargs):
+    vd._injectedPrefill = False
     if vd._injectedInput is not None:
         vd.debug(f'{longname} did not consume input "{vd._injectedInput}"')
         vd._injectedInput = None
@@ -381,7 +381,8 @@ def editText(vd, y, x, w, attr=ColorAttr(), value='',
     prefill = None
     if record and vd.cmdlog:
         v = vd.getCommandInput()
-        prefill = vd.getCommandInput(prefill=True)
+        if vd._injectedPrefill:
+            prefill, v = v, None
 
     if v is None:
         if vd.options.batch:
@@ -459,7 +460,8 @@ def inputsingle(vd, prompt, record=True):
 def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
     'A simple form, where each input is an entry in `kwargs`, with the key being the key in the returned dict, and the value being a dictionary of kwargs to the singular input().'
     previnput = vd.getCommandInput()
-    if previnput is not None:
+    prefill = previnput if vd._injectedPrefill else None
+    if previnput is not None and prefill is None:
         ret = None
         if isinstance(previnput, str):
             if previnput.startswith('{'):
@@ -479,7 +481,6 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
 
         assert False, type(previnput)
 
-    prefill = vd.getCommandInput(prefill=True)
     if isinstance(prefill, dict):
         for k, v in prefill.items():
             kwargs[k]['value'] = v

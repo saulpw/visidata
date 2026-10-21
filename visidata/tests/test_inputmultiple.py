@@ -7,7 +7,7 @@ def _bindingsByPrompt(monkeypatch, **fields):
     'Run inputMultiple with *fields*; return the bindings vd.input got for each prompt.'
     sheet = Mock(_scr=None, windowWidth=80, windowHeight=25)
     monkeypatch.setattr(type(visidata.vd), 'activeSheet', property(lambda vd: sheet))
-    monkeypatch.setattr(visidata.vd, 'getCommandInput', lambda prefill=False: None)
+    monkeypatch.setattr(visidata.vd, 'getCommandInput', lambda: None)
 
     got = {}
     def _input(prompt='', bindings={}, **kwargs):
