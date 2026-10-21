@@ -18,6 +18,7 @@ def startReload(sheet, reloadfunc):
 @BaseSheet.api
 @asyncignore
 def reload_every(sheet, seconds:int):
+    vd.timeouts_before_idle = -1  # no-idle: getch must keep timing out for reloads to be drawn
     while True:
         # continue reloading till vd.remove() runs, like when the sheet is quit
         if sheet not in vd.sheets:
@@ -36,6 +37,7 @@ def reload_modified(sheet):
     assert isinstance(p, Path)
     assert not p.is_url()
 
+    vd.timeouts_before_idle = -1  # no-idle: getch must keep timing out for reloads to be drawn
     mtime = 0
     while True:
         if sheet not in vd.sheets:
