@@ -41,20 +41,28 @@ ZERO_WIDTH_CF = set(map(chr, [
 ]))
 
 
+# SPACING_CF: format chars that libc wcwidth (and so ncurses) gives a cell
+SPACING_CF = set(map(chr, [
+    0x00AD, 0x0600, 0x0601, 0x0602, 0x0603, 0x0604, 0x0605, 0x06DD, 0x070F,
+    0x0890, 0x0891, 0x08E2, 0xFFF9, 0xFFFA, 0xFFFB, 0x110BD, 0x110CD,
+    *range(0x13430, 0x13440),
+]))
+
+
 def wcwidth(cc, ambig=1):
+        ccat = unicodedata.category(cc)
+        if ccat in ('Mn', 'Me') or (ccat == 'Cf' and cc not in SPACING_CF):  #2685
+            return 0
+        if '\u1160' <= cc <= '\u11ff' or '\ud7b0' <= cc <= '\ud7ff':  # hangul medial/final jamo
+            return 0
         if cc in ZERO_WIDTH_CF:
             return 1
         eaw = unicodedata.east_asian_width(cc)
         if eaw in 'AN':  # ambiguous or neutral
-            if unicodedata.category(cc) == 'Mn':
-                return 1
-            else:
-                return ambig
+            return ambig
         elif eaw in 'WF': # wide/full
             return 2
-        elif not unicodedata.combining(cc):
-            return 1
-        return 0
+        return 1
 
 
 def is_vdcode(s:str) -> bool:
