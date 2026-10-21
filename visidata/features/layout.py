@@ -32,7 +32,13 @@ def resize_cols_max(sheet, cols, maxwidths=None):
 @asyncthread
 def resize_cols_max_all(sheet, cols):
     'Resize all *cols* as a group to max width of all rows, not only the visible ones.'
-    sheet.resize_cols_max(cols, {c: c.getMaxWidth(Progress(sheet.rows, gerund='measuring')) for c in cols})
+    nrows = len(sheet.rows)
+    maxwidths = {}
+    with Progress(gerund='measuring', total=nrows*len(cols)) as prog:
+        for i, c in enumerate(cols):
+            maxwidths[c] = c.getMaxWidth(r for r in sheet.rows if prog.addProgress(1))
+            prog.made = (i+1)*nrows  # getMaxWidth stops early on wide columns
+    sheet.resize_cols_max(cols, maxwidths)
 
 
 @Column.api
