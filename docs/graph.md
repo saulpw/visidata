@@ -78,7 +78,7 @@ Scroll-wheel            zooms in/out
 A graph replots its source's current rows whenever the source sheet reloads, so a graph of a file that is still being written can follow along:
 
 1. Open the file and plot the columns as above.
-2. Press `Ctrl+^` to return to the source sheet, and use `reload-modified` to reload it whenever the file changes.
+2. Press `Ctrl+^` to return to the source sheet, and use `reload-modified` to start reloading it whenever the file changes.
 3. Press `Ctrl+^` to go back to the graph.
 
 `Ctrl+R` on the graph also replots the source's current rows.
