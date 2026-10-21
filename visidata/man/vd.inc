@@ -104,6 +104,8 @@ toggle sidebar
 .No undo the most recent modification ( requires enabled Sy options.undo Ns )
 .It Ic "  R"
 .No redo the most recent undo ( requires enabled Sy options.undo Ns )
+.It Ic " zR"
+.No undo the most recent modification and rerun it, editing its previous input ( requires enabled Sy options.undo Ns )
 .Pp
 .It Ic "Space" Ar longname
 .No open command palette; execute top command by its Ar longname

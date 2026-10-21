@@ -22,24 +22,27 @@ class AcceptInput(Exception):
     '*args[0]* is the input to be accepted'
 
 vd._injectedInput = None  # for vd.injectInput
+vd._injectedPrefill = False
 vd.editCellBindings = {}  # user-customizable bindings for cell editing; use acceptThenFunc() to define
 
 
 @VisiData.api
-def injectInput(vd, x):
-    'Use *x* as input to next command.'
+def injectInput(vd, x, prefill=False):
+    'Use *x* as input to next command, or with *prefill* as the initial value to edit.'
     assert vd._injectedInput is None, vd._injectedInput
     vd._injectedInput = x
+    vd._injectedPrefill = prefill
 
 
 @VisiData.api
-def getCommandInput(vd):
-    if vd._injectedInput is not None:
+def getCommandInput(vd, prefill=False):
+    if vd._injectedInput is not None and vd._injectedPrefill == prefill:
         r = vd._injectedInput
         vd._injectedInput = None
         return r
 
-    return vd.getLastArgs()
+    if not prefill:
+        return vd.getLastArgs()
 
 
 @BaseSheet.after
@@ -375,8 +378,10 @@ def editText(vd, y, x, w, attr=ColorAttr(), value='',
              display=True, record=True, clear=True, **kwargs):
     '''Invoke modal single-line editor at (*y*, *x*) for *w* terminal chars. Use *display* is False for sensitive input like passphrases.  If *record* is True, get input from the cmdlog in batch mode, and save input to the cmdlog if *display* is also True. Return new value as string. Callers should handle curses.error, which will be raised if the terminal is resized during the edit, in a way that moves the editor coordinates offscreen.'''
     v = None
+    prefill = None
     if record and vd.cmdlog:
         v = vd.getCommandInput()
+        prefill = vd.getCommandInput(prefill=True)
 
     if v is None:
         if vd.options.batch:
@@ -389,7 +394,7 @@ def editText(vd, y, x, w, attr=ColorAttr(), value='',
             value = ''
 
         try:
-            widget = InputWidget(value=str(value), display=display, **kwargs)
+            widget = InputWidget(value=str(value if prefill is None else prefill), display=display, **kwargs)
 
             with vd.AddedHelp(vd.getHelpPane('input', module='visidata'), 'Input Keystrokes Help', 'inputkeys'), \
                  vd.AddedHelp(help, 'Input Field Help', 'inputfield'):
@@ -471,6 +476,11 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
             return ret
 
         assert False, type(previnput)
+
+    prefill = vd.getCommandInput(prefill=True)
+    if isinstance(prefill, dict):
+        for k, v in prefill.items():
+            kwargs[k]['value'] = v
 
     sheet = vd.activeSheet  # after replay shortcut: no active sheet during bulk replay-reset
     scr = sheet._scr

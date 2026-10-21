@@ -87,6 +87,14 @@ def redo(vd, sheet):
     vd.replayOne(cmdlogrow)
     vd.status("%s redone" % cmdlogrow.longname)
 
+@VisiData.api
+def revise(vd, sheet):
+    vd.undo(sheet)
+    cmdlogrow = sheet.undone[-1]
+    vd.injectInput(cmdlogrow.input, prefill=True)
+    if not sheet.execCommand(cmdlogrow.longname):
+        sheet.undone.pop()
+
 # undoers
 def undoAttrFunc(objs, attrname):
     'Return closure that sets attrname on each obj to its former value.'
@@ -132,6 +140,7 @@ def addUndoSetValues(vd, cols, rows):
 
 BaseSheet.addCommand('U', 'undo-last', 'vd.undo(sheet)', 'Undo the most recent change (options.undo must be enabled)')
 BaseSheet.addCommand('R', 'redo-last', 'vd.redo(sheet)', 'Redo the most recent undo (options.undo must be enabled)')
+BaseSheet.addCommand('zR', 'revise-last-input', 'vd.revise(sheet)', 'Undo the most recent change and rerun it, editing its previous input (options.undo must be enabled)')
 
 vd.addGlobals(
     undoAttrFunc=undoAttrFunc,
@@ -141,4 +150,5 @@ vd.addGlobals(
 vd.addMenuItems('''
     Edit > Undo > undo-last
     Edit > Redo > redo-last
+    Edit > Revise last input > revise-last-input
 ''')
