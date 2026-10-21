@@ -1,0 +1,3 @@
+# postgres:///db/table opens the table directly  #282
+
+open-file postgres:///vdtest/benchmark

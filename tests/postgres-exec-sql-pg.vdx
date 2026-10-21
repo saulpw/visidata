@@ -1,0 +1,4 @@
+# exec-sql opens a sheet of query results  #2989
+
+open-file postgres:///vdtest
+exec-sql SELECT customer, count(*) AS n FROM benchmark GROUP BY customer ORDER BY customer
