@@ -91,6 +91,10 @@ def my_method(sheet, arg): ...
 def my_vd_method(vd): ...
 ```
 
+## Progress
+
+`Progress(iterable)` takes its total from `len(iterable)` and counts each item it yields, so wrap one iteration per Progress.  Iterating the same Progress again keeps counting past its total; make a fresh one for each pass.
+
 ## Options
 
 - Prefix options with module name/abbreviation when exclusive to that module.
