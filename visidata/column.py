@@ -277,7 +277,10 @@ class Column(Extensible):
         if self.type is anytype:
             if isinstance(typedval, (dict, list, tuple)):
                 if width is None:
-                    return ''.join(iterchars(typedval))
+                    try:
+                        return json.dumps(typedval, default=str, ensure_ascii=False)  #2944
+                    except Exception:
+                        return ''.join(iterchars(typedval))
                 dispval, dispw = clipstr(iterchars(typedval), width-1) #subtract 1 for left-side margin
                 return dispval
 

@@ -7,6 +7,8 @@ VisiData uses these conventions to display nested data:
 - {{2}} indicates a nested object with 2 keys
 - [3] indicates a nested array with 3 elements
 
+Text formats like CSV and TSV save nested values as JSON.
+
 [:note_type]Expanding[/] unpacks nested data column-wise, often useful for nested objects:
 
 - {help.commands.expand-col}
