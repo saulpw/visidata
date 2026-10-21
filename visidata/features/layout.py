@@ -37,7 +37,7 @@ def resize_cols_max_all(sheet, cols):
     with Progress(gerund='measuring', total=nrows*len(cols)) as prog:
         for i, c in enumerate(cols):
             maxwidths[c] = c.getMaxWidth(r for r in sheet.rows if prog.addProgress(1))
-            prog.made = (i+1)*nrows  # getMaxWidth stops early on wide columns
+            prog.addProgress((i+1)*nrows - prog.made)  # getMaxWidth stops early on wide columns
     sheet.resize_cols_max(cols, maxwidths)
 
 

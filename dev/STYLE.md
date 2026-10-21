@@ -93,7 +93,7 @@ def my_vd_method(vd): ...
 
 ## Progress
 
-`Progress(iterable)` takes its total from `len(iterable)` and counts each item it yields, so it fits a single pass.  For several passes (e.g. once per column), use one `with Progress(total=...) as prog` for the whole operation and bump it with `prog.addProgress(n)`; a fresh Progress per pass makes the bar restart at 0% each time.
+`Progress(iterable)` takes its total from `len(iterable)` and counts each item it yields, so it fits a single pass.  For several passes (e.g. once per column), use one `with Progress(total=...) as prog` for the whole operation and bump it with `prog.addProgress(n)`, never by assigning `prog.made`; a fresh Progress per pass makes the bar restart at 0% each time.
 
 ## Options
 
