@@ -201,6 +201,10 @@ toggle widths of all visible columns between full and default width
 .No adjust width of current column to Ar number
 .It Ic "gz_" Ar number
 adjust widths of all visible columns to Ar number
+.It Ic "resize-col-max-all"
+toggle width of current column between default width and the widest value in all rows, not only those on screen
+.It Ic "resize-cols-max-all"
+toggle widths of all visible columns between default width and the widest value in all rows
 .Pp
 .It Ic " -" Ns " (hyphen)"
 hide current column
