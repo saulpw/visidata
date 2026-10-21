@@ -76,6 +76,11 @@ def BoundingBox(x1, y1, x2, y2):
     return Box(min(x1, x2), min(y1, y2), abs(x2-x1), abs(y2-y1))
 
 
+def _rangeChanged(lo, hi, oldlo, oldhi):
+    tol = (oldhi - oldlo) * 1e-9  # float noise from Box w/h round-trips
+    return abs(lo - oldlo) > tol or abs(hi - oldhi) > tol
+
+
 def clipline(x1, y1, x2, y2, xmin, ymin, xmax, ymax):
     'Liang-Barsky algorithm, returns [xn1,yn1,xn2,yn2] of clipped line within given area, or None'
     dx = x2-x1
@@ -369,6 +374,8 @@ class Canvas(Plotter):
         self.aspectRatio = 0.0
         self.xzoomlevel = 1.0
         self.yzoomlevel = 1.0
+        self.pinned_x = False  # user set the visible x range; keep it across reloads
+        self.pinned_y = False
         self.needsRefresh = False
 
         self.polylines = []   # list of ([(canvas_x, canvas_y), ...], fgcolornum, row)
@@ -560,6 +567,9 @@ class Canvas(Plotter):
 
     def zoomTo(self, bbox):
         'set visible area to bbox, maintaining aspectRatio if applicable'
+        vb = self.visibleBox
+        self.pinned_x |= _rangeChanged(bbox.xmin, bbox.xmax, vb.xmin, vb.xmax)
+        self.pinned_y |= _rangeChanged(bbox.ymin, bbox.ymax, vb.ymin, vb.ymax)
         self.fixPoint(self.plotviewBox.xymin, bbox.xymin)
         self.xzoomlevel=bbox.w/self.canvasBox.w
         self.yzoomlevel=bbox.h/self.canvasBox.h
@@ -568,6 +578,24 @@ class Canvas(Plotter):
     def incrZoom(self, incr):
         self.xzoomlevel *= incr
         self.yzoomlevel *= incr
+        self.pinned_x = self.pinned_y = True
+
+        self.resetBounds()
+
+    def refitBounds(self, oldCanvasBox, oldVisibleBox, oldZoom):
+        'Fit bounds to the plotted data, keeping the visible range of each pinned axis from before the reload.'
+        self.canvasBox = self.visibleBox = None
+        self.xzoomlevel = self.yzoomlevel = 1.0
+        self.resetBounds(refresh=False)
+
+        if oldVisibleBox:
+            if self.pinned_x:
+                self.xzoomlevel = oldZoom[0] * oldCanvasBox.w / self.canvasBox.w
+                self.visibleBox.xmin = oldVisibleBox.xmin
+            if self.pinned_y:
+                self.yzoomlevel = oldZoom[1] * oldCanvasBox.h / self.canvasBox.h
+                self.visibleBox.ymin = oldVisibleBox.ymin
+            self.cursorBox = None
 
         self.resetBounds()
 
@@ -799,8 +827,8 @@ Canvas.addCommand(None, 'go-rightmost', 'if cursorBox: sheet.cursorBox.xmin = vi
 Canvas.addCommand(None, 'go-top',    'if cursorBox: sheet.cursorBox.ymin = sheet.calcTopCursorY()', 'move cursor to top edge of visible canvas')
 Canvas.addCommand(None, 'go-bottom', 'if cursorBox: sheet.cursorBox.ymin = sheet.calcBottomCursorY()', 'move cursor to bottom edge of visible canvas')
 
-Canvas.addCommand(None, 'go-pagedown', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin += t; sheet.visibleBox.ymin += t; refresh()', 'move cursor down to next visible page')
-Canvas.addCommand(None, 'go-pageup', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin -= t; sheet.visibleBox.ymin -= t; refresh()', 'move cursor up to previous visible page')
+Canvas.addCommand(None, 'go-pagedown', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin += t; sheet.visibleBox.ymin += t; sheet.pinned_y = True; refresh()', 'move cursor down to next visible page')
+Canvas.addCommand(None, 'go-pageup', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin -= t; sheet.visibleBox.ymin -= t; sheet.pinned_y = True; refresh()', 'move cursor up to previous visible page')
 
 Canvas.addCommand('zh', 'go-left-small', 'sheet.cursorBox.xmin -= canvasCharWidth', 'move cursor left one character')
 Canvas.addCommand('zl', 'go-right-small', 'sheet.cursorBox.xmin += canvasCharWidth', 'move cursor right one character')
@@ -820,7 +848,7 @@ Canvas.addCommand('zz', 'zoom-cursor', 'zoomTo(cursorBox)', 'set visible bounds 
 
 Canvas.addCommand('-', 'zoomout-cursor', 'tmp=cursorBox.center; incrZoom(options.disp_zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom out from cursor center')
 Canvas.addCommand('+', 'zoomin-cursor', 'tmp=cursorBox.center; incrZoom(1.0/options.disp_zoom_incr); fixPoint(plotviewBox.center, tmp)', 'zoom into cursor center')
-Canvas.addCommand('_', 'zoom-all', 'sheet.canvasBox = None; sheet.visibleBox = None; sheet.xzoomlevel=sheet.yzoomlevel=1.0; resetBounds()', 'zoom to fit full extent')
+Canvas.addCommand('_', 'zoom-all', 'sheet.canvasBox = None; sheet.visibleBox = None; sheet.xzoomlevel=sheet.yzoomlevel=1.0; sheet.pinned_x = sheet.pinned_y = False; resetBounds()', 'zoom to fit full extent')
 Canvas.addCommand('z_', 'set-aspect', 'sheet.aspectRatio = float(input("aspect ratio=", value=aspectRatio)); refresh()', 'set aspect ratio')
 
 # set cursor box with left click
@@ -831,7 +859,7 @@ Canvas.bindkey('BUTTON1_DOUBLE_CLICKED', 'remake-cursor')
 Canvas.bindkey('BUTTON1_TRIPLE_CLICKED', 'remake-cursor')
 
 Canvas.addCommand('BUTTON3_PRESSED', 'start-move', 'cm=canvasMouse; sheet.anchorPoint = cm if cm else None', 'mark grid point to move')
-Canvas.addCommand('BUTTON3_RELEASED', 'end-move', 'fixPoint(plotterMouse, anchorPoint) if anchorPoint else None', 'mark canvas anchor point')
+Canvas.addCommand('BUTTON3_RELEASED', 'end-move', 'if anchorPoint: fixPoint(plotterMouse, anchorPoint); sheet.pinned_x = sheet.pinned_y = True', 'mark canvas anchor point')
 # A click does not actually move the canvas, but gives useful UI feedback. It helps users understand that they can do press-drag-release.
 Canvas.addCommand('BUTTON3_CLICKED', 'move-canvas',  '', 'move canvas (in place)')
 Canvas.bindkey('BUTTON3_DOUBLE_CLICKED', 'move-canvas')

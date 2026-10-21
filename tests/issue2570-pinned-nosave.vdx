@@ -1,0 +1,22 @@
+# #2570  graph reload keeps a user-set x range, and refits the unset y range to new rows
+exec-python open(Path('$VD_TESTTMP/issue2570-pinned.tsv').given, 'w').write('x\ty\n1\t2\n2\t3\n')
+open-file $VD_TESTTMP/issue2570-pinned.tsv
+col x
+type-int
+key-col
+col y
+type-int
+plot-column
+resize-x-input 0 10
+
+exec-python open(Path('$VD_TESTTMP/issue2570-pinned.tsv').given, 'a').write('20\t50\n')
+jump-prev
+reload-rows
+jump-prev
+assert-expr len(sheet.polylines) == 3
+assert-expr round(visibleBox.xmin, 6) == 0 and round(visibleBox.xmax, 6) == 10
+assert-expr canvasBox.ymax == 50 and visibleBox.ymax == 50
+
+zoom-all
+reload-sheet
+assert-expr visibleBox.xmax == 20

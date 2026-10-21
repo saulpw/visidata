@@ -114,6 +114,8 @@ class GraphSheet(InvertedCanvas):
         nerrors = 0
         nplotted = 0
 
+        oldCanvasBox, oldVisibleBox = self.canvasBox, self.visibleBox
+        oldZoom = (self.xzoomlevel, self.yzoomlevel)
         self.reset()
         self.row_order = {}
 
@@ -141,8 +143,7 @@ class GraphSheet(InvertedCanvas):
 
         vd.status('loaded %d points (%d errors)' % (nplotted, nerrors))
 
-        self.xzoomlevel=self.yzoomlevel=1.0
-        self.resetBounds()
+        self.refitBounds(oldCanvasBox, oldVisibleBox, oldZoom)  #2570
 
     def draw(self, scr):
         windowHeight, windowWidth = scr.getmaxyx()
@@ -400,8 +401,8 @@ InvertedCanvas.addCommand(None, 'go-up', 'if cursorBox: sheet.cursorBox.ymin += 
 InvertedCanvas.addCommand(None, 'go-down', 'if cursorBox: sheet.cursorBox.ymin -= cursorBox.h', 'move cursor down by its height')
 InvertedCanvas.addCommand(None, 'go-top',  'if cursorBox: sheet.cursorBox.ymin = sheet.calcTopCursorY()', 'move cursor to top edge of visible canvas')
 InvertedCanvas.addCommand(None, 'go-bottom', 'if cursorBox: sheet.cursorBox.ymin = sheet.calcBottomCursorY()', 'move cursor to bottom edge of visible canvas')
-InvertedCanvas.addCommand(None, 'go-pagedown', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin -= t; sheet.visibleBox.ymin -= t; sheet.refresh()', 'move cursor down to next visible page')
-InvertedCanvas.addCommand(None, 'go-pageup', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin += t; sheet.visibleBox.ymin += t; sheet.refresh()', 'move cursor up to previous visible page')
+InvertedCanvas.addCommand(None, 'go-pagedown', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin -= t; sheet.visibleBox.ymin -= t; sheet.pinned_y = True; sheet.refresh()', 'move cursor down to next visible page')
+InvertedCanvas.addCommand(None, 'go-pageup', 't=(visibleBox.ymax-visibleBox.ymin); sheet.cursorBox.ymin += t; sheet.visibleBox.ymin += t; sheet.pinned_y = True; sheet.refresh()', 'move cursor up to previous visible page')
 
 InvertedCanvas.addCommand(None, 'go-down-small', 'sheet.cursorBox.ymin -= canvasCharHeight', 'move cursor down one character')
 InvertedCanvas.addCommand(None, 'go-up-small', 'sheet.cursorBox.ymin += canvasCharHeight', 'move cursor up one character')
