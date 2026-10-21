@@ -394,6 +394,8 @@ def editText(vd, y, x, w, attr=ColorAttr(), value='',
             value = ''
 
         try:
+            if prefill is not None:
+                kwargs['i'] = len(str(prefill))
             widget = InputWidget(value=str(value if prefill is None else prefill), display=display, **kwargs)
 
             with vd.AddedHelp(vd.getHelpPane('input', module='visidata'), 'Input Keystrokes Help', 'inputkeys'), \
@@ -481,6 +483,7 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
     if isinstance(prefill, dict):
         for k, v in prefill.items():
             kwargs[k]['value'] = v
+            kwargs[k]['i'] = len(str(v))
 
     sheet = vd.activeSheet  # after replay shortcut: no active sheet during bulk replay-reset
     scr = sheet._scr
@@ -539,6 +542,7 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
             break
         except ChangeInput as e:
             input_kwargs['value'] = e.args[0]
+            input_kwargs.pop('i', None)
             offset = e.args[1]
             i = keys.index(cur_input_key)
             cur_input_key = keys[(i+offset)%len(keys)]
