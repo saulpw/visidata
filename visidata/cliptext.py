@@ -66,6 +66,36 @@ def wcwidth(cc, ambig=1):
         return 1
 
 
+# emoji sequences: libc wcwidth (and so curses) and terminals lay these out differently
+emoji_seq_chars = '\uFE0F\u200D\U0001F3FB-\U0001F3FF'
+emoji_seq_re = re.compile(f'[{emoji_seq_chars}]')
+emoji_cluster_re = re.compile('[^\u200D](?:[\uFE0E\uFE0F\u20E3\U0001F3FB-\U0001F3FF\U000E0020-\U000E007F]|\u200D[^\u200D])+')
+emoji_strip_re = re.compile(f'[{emoji_seq_chars}]+')
+
+
+def iterclusters(s):
+    'Yield each char of *s*, except emoji sequences, which are yielded whole.'
+    i = 0
+    for m in emoji_cluster_re.finditer(s):
+        if not emoji_seq_re.search(m.group()) or unicodedata.category(m.group()[0])[0] in 'LM':  # ZWJ in Indic/Arabic text
+            continue
+        yield from s[i:m.start()]
+        yield m.group()
+        i = m.end()
+    yield from s[i:]
+
+
+def stripemoji(s):
+    'Return *s* with emoji sequences reduced to their base characters.'
+    return ''.join(emoji_strip_re.sub('', c) if len(c) > 1 else c for c in iterclusters(s))
+
+
+def clusterwidth(cluster, ambig=1):
+    if len(cluster) == 1:
+        return wcwidth(cluster, ambig)
+    return max(2, sum(wcwidth(cc, ambig) for cc in cluster))  # terminals draw emoji sequences 2 wide
+
+
 def is_vdcode(s:str) -> bool:
     return (s.startswith('[:') and s.endswith(']')) or \
            (s.startswith('[/') and s.endswith(']'))
@@ -120,12 +150,15 @@ def iterchunks(s, literal=False):
 def dispwidth(ss, maxwidth=None, literal=False):
     'Return display width of string, according to unicodedata width and vd.options.disp_ambig_width.'
     disp_ambig_width = vd.options.disp_ambig_width
+    emojiseq = vd.options.disp_emoji_sequences
     w = 0
 
     for _, s in iterchunks(ss, literal=literal):
+        if emoji_seq_re.search(s):
+            s = iterclusters(s) if emojiseq else stripemoji(s)
         for cc in s:
             if cc:
-                w += wcwidth(cc, disp_ambig_width)
+                w += clusterwidth(cc, disp_ambig_width)
                 if maxwidth and w > maxwidth:
                     return maxwidth
     return w
@@ -166,7 +199,7 @@ def iterchars(x):
 
 
 @functools.lru_cache(maxsize=100000)
-def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
+def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch='', emojiseq=True):
     ''' *s* is a string or an iterator that contains characters.
     *dispw* is the integer screen width that the clipped string will fit inside, or None.
     Return clipped string and width in terminal display characters.
@@ -182,15 +215,21 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
     trunc_i = 0
     w_truncated = 0
 
+    if isinstance(s, str) and emoji_seq_re.search(s):
+        s = iterclusters(s) if emojiseq else stripemoji(s)
+
     trunchlen = dispwidth(trunch, literal=True)
     if dispw is None:
         s = ''.join(s)
         return s, dispwidth(s, literal=True)
     if trunchlen > dispw: #if the truncator cannot fit, use a truncator of ''
         _clipfunc = _clipstr if isinstance(s, str) else _clipstr.__wrapped__
-        return _clipfunc(s, dispw, trunch='', oddspacech=oddspacech, combch=combch, modch=modch)
+        return _clipfunc(s, dispw, trunch='', oddspacech=oddspacech, combch=combch, modch=modch, emojiseq=emojiseq)
     for c in s:
-        newc, chlen = _dispch(c, oddspacech=oddspacech, combch=combch, modch=modch)
+        if len(c) > 1:
+            newc, chlen = c, dispwidth(c, literal=True)
+        else:
+            newc, chlen = _dispch(c, oddspacech=oddspacech, combch=combch, modch=modch)
         if not newc:
             newc = c
             chlen = dispwidth(c, literal=True)
@@ -201,7 +240,7 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
             w += chlen
             #move the truncation spot forward only when the truncation character can fit
             if w+trunchlen <= dispw:
-                trunc_i += 1
+                trunc_i += len(newc)
                 w_truncated += chlen
             continue
         # if we reach this line, a character did not fit, and the result needs truncation
@@ -221,13 +260,15 @@ def clipstr(s, dispw, truncator=None, oddspace=None):
                         trunch=vd.options.disp_truncator if truncator is None else truncator,
                         oddspacech=vd.options.disp_oddspace if oddspace is None else oddspace,
                         modch='\u25e6',
-                        combch='\u25cc')
+                        combch='\u25cc',
+                        emojiseq=vd.options.disp_emoji_sequences)
     else:
         return _clipfunc(s, dispw,
                 trunch=vd.options.disp_truncator if truncator is None else truncator,
                 oddspacech=vd.options.disp_oddspace if oddspace is None else oddspace,
                 modch='',
-                combch='')
+                combch='',
+                emojiseq=vd.options.disp_emoji_sequences)
 
 
 def clipdraw(scr, y, x, s, attr, w=None, clear=True, literal=False, **kwargs):
