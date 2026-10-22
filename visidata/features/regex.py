@@ -7,7 +7,7 @@ from visidata import VisiData, BaseSheet, Sheet, Column, Progress
 
 @VisiData.lazy_property
 def help_regex(vd):
-    return vd.getHelpPane('regex', module='visidata')
+    return vd.getHelpPane('regex', module='visidata', title='Regex Help')
 
 
 vd.option('regex_maxsplit', 0, 'maxsplit to pass to regex.split', replay=True)

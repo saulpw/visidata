@@ -26,7 +26,7 @@ class AddedHelp:
         if text:
             if not vd.wantsHelp(help_flag):
                 return
-            self.helpfunc = lambda: (text, title)
+            self.helpfunc = lambda: (text, getattr(text, 'title', '') or title)
 
     def __enter__(self):
         if self.helpfunc:
