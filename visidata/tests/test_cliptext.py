@@ -312,3 +312,7 @@ class TestClipText:
     def test_wraptext_escaped_literals(self, text, width, expected):
         result = list(visidata.wraptext(text, width=width))
         assert result == expected
+
+    def test_wraptext_wide(self):
+        pytest.importorskip('wcwidth', minversion='0.5')
+        assert list(visidata.wraptext('\u9999\u6E2F'*3 + ' abc', width=4)) == [('\u9999\u6E2F', '\u9999\u6E2F')]*3 + [('abc', ' abc')]  #2416
