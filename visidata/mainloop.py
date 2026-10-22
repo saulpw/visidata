@@ -55,6 +55,7 @@ def drawSheet(vd, scr, sheet):
         return
 
     scr.erase()  # clear screen before every re-draw
+    vd._deferredDraws = [e for e in vd._deferredDraws if e[0] is not scr]
     scr.bkgd(' ', colors.color_default.attr)
 
     sheet._scr = scr
@@ -161,6 +162,8 @@ def draw_all(vd):
         vd.win2.refresh()
     if vd.scrMenu:
         vd.scrMenu.refresh()
+
+    vd.drawDeferred(vd.scrFull)
 
 
 @VisiData.api

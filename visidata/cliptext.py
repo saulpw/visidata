@@ -1,3 +1,4 @@
+import os
 import curses
 import unicodedata
 import sys
@@ -5,7 +6,7 @@ import re
 import functools
 import textwrap
 
-from visidata import vd, drawcache, update_attr, colors, ColorAttr
+from visidata import vd, VisiData, drawcache, update_attr, colors, ColorAttr
 
 disp_column_fill = ' '
 bracket_markup_re = r'\[[:/][^\]]*?\]'  # [:whatever until the closing bracket] or [/whatever] or [:whatever] or [/] or [:]
@@ -254,6 +255,57 @@ def _addstr(scr, y, x, s, attr):
         pass
 
 
+# variable_width_re: chars that terminals may draw wider or narrower than libc wcwidth
+variable_width_re = re.compile('[\u0300-\u036F\u0483-\u0489\u0591-\u05C7\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED'
+                               '\u0900-\u0FFF\u1000-\u109F\u1100-\u11FF\u1780-\u17FF\u1AB0-\u1AFF\u1DC0-\u1DFF'
+                               '\u200B-\u200F\u202A-\u202E\u2060-\u206F\u20D0-\u20FF\u2600-\u27BF\uA960-\uA97F\uD7B0-\uD7FF'
+                               '\uFE00-\uFE0F\uFE20-\uFE2F\U0001F000-\U0001FAFF\U000E0000-\U000E01EF]')
+
+vd._deferredDraws = []  # (scr, y, x, s, attr)
+
+
+def _undefer(scr, y, x, w):
+    'Drop deferred draws that a new draw at (y,x)-(y,x+w) covers.'
+    if vd._deferredDraws:
+        vd._deferredDraws = [e for e in vd._deferredDraws if not (e[0] is scr and e[1] == y and x <= e[2] < x+w)]
+
+
+def _addstr_deferred(scr, y, x, s, w, attr):
+    'addstr, except leave text with variable-width chars blank and queue it for drawDeferred.'
+    _undefer(scr, y, x, w)
+    if not variable_width_re.search(s):
+        _addstr(scr, y, x, s, attr)
+        return
+
+    _addstr(scr, y, x, disp_column_fill*w, attr)
+    vd._deferredDraws.append((scr, y, x, s, attr))
+
+
+@VisiData.api
+def drawDeferred(vd, scr):
+    '''Draw queued text, each in its own screen update, then restore the cursor of *scr*.
+    Terminals and curses can disagree on the width of this text; drawn alone, the disagreement cannot shift the rest of the line.'''
+    if not vd._deferredDraws:
+        return
+
+    queue, vd._deferredDraws = vd._deferredDraws, []
+    cup = curses.tigetstr('cup')
+    cury, curx = scr.getyx()
+    for win, y, x, s, attr in queue:
+        try:
+            win.addstr(y, x, s, attr)
+        except curses.error:
+            pass
+        win.refresh()
+        if cup:
+            wy, wx = win.getyx()
+            by, bx = win.getbegyx()
+            os.write(1, curses.tparm(cup, by+wy, bx+wx))  # cup: put terminal cursor where curses thinks it is
+
+    scr.move(cury, curx)
+    scr.refresh()
+
+
 def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clear=True, **kwargs):
     '''Draw `chunks` (sequence of (color:str, text:str) as from iterchunks) at (y,x)-(y,x+w) with curses `attr`, clipping with ellipsis char.
        If `clear`, clear whole editing area before displaying.
@@ -276,6 +328,7 @@ def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clea
         actualw = min(w, windowWidth-x)
         if scr:
             _addstr(scr, y, x, disp_column_fill*actualw, cattr.attr)  # clear whole area before displaying
+            _undefer(scr, y, x, actualw)
 
     try:
         for colorstate, chunk in chunks:
@@ -308,7 +361,7 @@ def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clea
             clipped, dispw = clipstr(chunk, chunkw, **kwargs)
 
             if y >= 0 and y < windowHeight:
-                _addstr(scr, y, x, clipped, cattr.attr)
+                _addstr_deferred(scr, y, x, clipped, dispw, cattr.attr)
             else:
                 if vd.options.debug:
                     raise Exception(f'addstr(y={y} x={x}) out of bounds')

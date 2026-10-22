@@ -151,6 +151,7 @@ class VisiData(visidata.Extensible):
             curses.reset_prog_mode()  #1347
             try:
                 scr.refresh()
+                self.drawDeferred(scr)  #2685
                 k = self.get_wch(scr)
                 self.drainPendingKeys(scr)
                 vs = vs or self.activeSheet
