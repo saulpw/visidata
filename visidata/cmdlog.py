@@ -11,7 +11,7 @@ vd.theme_option('disp_replay_record', '⏺', 'status indicator for macro record'
 vd.theme_option('color_status_replay', 'green', 'color of replay status indicator')
 
 # prefixes which should not be logged
-nonLogged = '''forget exec-longname undo redo quit
+nonLogged = '''forget exec-longname undo redo revise quit
 show error errors statuses options threads jump go-
 replay cancel save-cmdlog macro cmdlog-sheet menu repeat reload-every
 search scroll prev next page start end zoom visibility sidebar
