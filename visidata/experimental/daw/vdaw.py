@@ -4,11 +4,10 @@ from copy import copy
 
 import json
 import os
-import textwrap
 
 from functools import cached_property
 from visidata import vd, VisiData, Sheet, ItemColumn, AttrColumn, AttrDict, vlen, RowColorizer, Column
-from visidata import drawcache_property, setitem, asyncthread
+from visidata import drawcache_property, setitem, asyncthread, wraplines
 
 from . import MpvProcess
 
@@ -550,7 +549,7 @@ class PodcastEditingSheet(Sheet):
         row = self.rows[rowidx]
 
         formatted_rows = []
-        for line in textwrap.wrap(row.text,
+        for line in wraplines(row.text,
                         width=self.column('text').width-2,
                         break_long_words=False,
                         break_on_hyphens=False):

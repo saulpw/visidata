@@ -1,13 +1,12 @@
 import collections
 import itertools
 from copy import copy, deepcopy
-import textwrap
 import re
 
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException, Fanout
 from visidata import (options, Column, namedlist, SettableColumn, AttrDict, DisplayWrapper,
 TypedExceptionWrapper, BaseSheet, UNLOADED, wrapply,
-clipdraw, clipdraw_chunks, ColorAttr, update_attr, colors, undoAttrFunc, vlen, dispwidth)
+clipdraw, clipdraw_chunks, ColorAttr, update_attr, colors, undoAttrFunc, vlen, dispwidth, wraplines)
 import visidata
 from visidata.utils import colname_letters
 
@@ -36,7 +35,7 @@ def _splitcell(sheet, s, width=0, maxheight=1):
 
     ret = []
     for attr, text in s:
-        for line in textwrap.wrap(text, width=width, **wrap_kwargs):
+        for line in wraplines(text, width=width, **wrap_kwargs):
             if len(ret) >= maxheight:
                 ret[-1][0][1] += ' ' + line
                 break

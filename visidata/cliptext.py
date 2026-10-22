@@ -10,9 +10,9 @@ from visidata import vd, VisiData, drawcache, update_attr, colors, ColorAttr
 
 try:  # optional jquast/wcwidth wraps by display width, not len()  #2416 #2685
     from wcwidth import wrap as _wcwrap, propagate_sgr  # propagate_sgr: wcwidth>=0.5, else wrap() rejects propagate_sgr=False
-    _wrap = functools.partial(_wcwrap, propagate_sgr=False)
+    wraplines = functools.partial(_wcwrap, propagate_sgr=False)
 except ImportError:
-    _wrap = textwrap.wrap
+    wraplines = textwrap.wrap
 
 disp_column_fill = ' '
 bracket_markup_re = r'\[[:/][^\]]*?\]'  # [:whatever until the closing bracket] or [/whatever] or [:whatever] or [/] or [:]
@@ -445,7 +445,7 @@ def wraptext(text, width=80, indent=''):
         if linetext == '':  #for markup with no contents, like '[:tag][/]' or '[:]' or '[/]'
             yield '', ''
             continue
-        for linenum, wrapped_textline in enumerate(_wrap(linetext, width=width, drop_whitespace=False)):
+        for linenum, wrapped_textline in enumerate(wraplines(linetext, width=width, drop_whitespace=False)):
             wrapped_remainder = wrapped_textline
             marked_up = ''
             while chunks:
@@ -599,6 +599,7 @@ vd.addGlobals(clipstr=clipstr,
               iterchars=iterchars,
               iterchunks=iterchunks,
               wraptext=wraptext,
+              wraplines=wraplines,
               clipstr_start=clipstr_start,
               clipstr_middle=clipstr_middle,
               clip_markup_middle=clip_markup_middle,

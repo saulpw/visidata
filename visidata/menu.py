@@ -1,10 +1,9 @@
 import string
-import textwrap
 import time
 import curses
 
 from typing import List, Union
-from visidata import vd, drawcache, colors, clipdraw, dispwidth
+from visidata import vd, drawcache, colors, clipdraw, dispwidth, wraplines
 from visidata import BaseSheet, VisiData, AttrDict, ENTER
 
 vd.option('disp_menu', True, 'show menu on top line when not active', sheettype=None)
@@ -342,7 +341,7 @@ def drawMenu(vd, scr, sheet):
     helpx = 30
     helpw = min(w-helpx-4, 76)
     ls,rs,ts,bs,tl,tr,bl,br,lsr,rsl = disp_menu_boxchars
-    helplines = textwrap.wrap(cmd.helpstr or '(no help available)', width=helpw-4)
+    helplines = wraplines(cmd.helpstr or '(no help available)', width=helpw-4)
 
     # place helpbox just below deepest menu
     menuh = 2+sum(sheet.activeMenuItems[1:-1])
