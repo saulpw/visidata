@@ -42,7 +42,7 @@ def _appendRowsAfterLoading(joinsheet, origsheets):
             origincol.putValue(r, vs)
         for i, c in enumerate(vs.visibleCols):  #3208
             if not keyedcols[i]:
-                newcol = JoinConcatColumn(c.name, cols=keyedcols[i], type=c.type, keycol=c.keycol)
+                newcol = ConcatColumn(c.name, cols=keyedcols[i], type=c.type, keycol=c.keycol)
                 joinsheet.addColumn(newcol)
             keyedcols[i][vs] = c
 
@@ -87,7 +87,7 @@ def openJoin(sheet, others, jointype=''):
 
     elif jointype == 'append':
         name = '&'.join(vs.name for vs in sheets)
-        return ConcatSheet(name, source=sheets)
+        return AppendSheet(name, source=sheets)
 
     nkeys = set(len(s.keyCols) for s in sheets)
     if 0 in nkeys or len(nkeys) != 1:
@@ -111,8 +111,8 @@ vd.jointypes = [AttrDict(key=k, desc=v) for k, v in {
     'outer': 'only rows with matching keys on first selected sheet',
     'full': 'all rows from all sheets (union)',
     'diff': 'only rows NOT in all sheets',
-    'append': 'all rows from all sheets; columns from all sheets',
-    'concat': 'all rows from all sheets; columns by position, names and types from first sheet',
+    'append': 'all rows from all sheets; columns matched by name; generic sheet',
+    'concat': 'all rows from same-type sheets; columns by position; keeps first sheet\'s type',
     'extend': 'only rows from first sheet; type from first sheet; columns from all sheets',
     'merge': 'all rows from all sheets; where keys match, use latest truthy value',
 }.items()]
@@ -333,9 +333,9 @@ def ExtendedSheet_reload(self, sheets):
                     self.addRow(combinedRow[sheets[0]])
 
 
-## for ConcatSheet
-class ConcatColumn(WritableColumn):
-    '''ConcatColumn(name, cols={srcsheet:srccol}, ...)'''
+## for AppendSheet
+class AppendColumn(WritableColumn):
+    '''AppendColumn(name, cols={srcsheet:srccol}, ...)'''
     def getColBySheet(self, s):
         return self.cols.get(s, None)
 
@@ -356,8 +356,8 @@ class ConcatColumn(WritableColumn):
             vd.fail('column not on source sheet')
 
 
-class JoinConcatColumn(ConcatColumn):
-    'ConcatColumn over native rows; the row\'s source sheet comes from *origincol*.'
+class ConcatColumn(AppendColumn):
+    'AppendColumn over native rows; the row\'s source sheet comes from *origincol*.'
     @property
     def origincol(self):
         return self.sheet.column('origin_sheet')  # lookup, not a stored ref: copied sheets get copies of this column
@@ -378,7 +378,7 @@ class JoinConcatColumn(ConcatColumn):
 
 
 # rowdef: (srcSheet, srcRow)
-class ConcatSheet(Sheet):
+class AppendSheet(Sheet):
     'combination of multiple sheets by row concatenation. source=list of sheets. '
     columns = [ItemColumn('origin_sheet', 0, width=0)]
     def iterload(self):
@@ -402,7 +402,7 @@ class ConcatSheet(Sheet):
                     key = col.name if n == 0 else (col.name, n)
 
                     if not keyedcols[key]:  # first column with this name/occurrence
-                        self.addColumn(ConcatColumn(col.name, cols=keyedcols[key], type=col.type))
+                        self.addColumn(AppendColumn(col.name, cols=keyedcols[key], type=col.type))
 
                     keyedcols[key][sheet] = col
 
@@ -464,4 +464,4 @@ def test_join_unhashable(vd):
     kc = JoinKeyColumn('key', keycols=[s1.column('key'), s2.column('key')])
     assert kc.calcValue({s1: s1.rows[0], s2: s2.rows[0]}) == [1, 2]
 
-vd.addGlobals(JoinSheet=JoinSheet, ConcatSheet=ConcatSheet)
+vd.addGlobals(JoinSheet=JoinSheet, AppendSheet=AppendSheet)
