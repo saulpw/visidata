@@ -29,7 +29,7 @@ def repeat_for_selected(sheet, cmdrow):
             vd.queueCommand(cmdrow.longname, cmdrow.input, row=idx, sheet=sheet)
 
 
-BaseSheet.addCommand('', 'repeat-last', 'repeat_last(vd.prevCmdlogRow)', 'run most recent command with an empty, queried input')
+BaseSheet.addCommand('', 'repeat-last', 'repeat_last(vd.prevCmdlogRow)', 'run most recent command again (incl its input)')
 BaseSheet.addCommand('', 'repeat-input', 'repeat_for_n(vd.prevCmdlogRow, 1)', 'run previous modifying command (incl input)')
 BaseSheet.addCommand('', 'repeat-input-n', 'repeat_for_n(vd.prevCmdlogRow, input("# times to repeat prev command:", value=1))', 'run previous command (incl its input) N times')
 BaseSheet.addCommand('', 'repeat-input-selected', 'repeat_for_selected(vd.prevCmdlogRow)', 'run previous command (incl its input) for each selected row')
