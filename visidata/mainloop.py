@@ -154,7 +154,7 @@ def draw_all(vd):
     if vd.scrMenu:
         vd.callNoExceptions(vd.drawMenu, vd.scrMenu, vd.activeSheet)
 
-    vd.callNoExceptions(vd.drawSidebar, vd.scrFull, vd.activeSheet)
+    vd.callNoExceptions(vd.drawSidebar, vd.activeSheet._scr or vd.scrFull, vd.activeSheet)  #2202
 
     if vd.win1:
         vd.win1.refresh()
