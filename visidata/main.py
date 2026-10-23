@@ -170,9 +170,9 @@ def moveToPos(vd, sources, sheet_desc, startcol, startrow):
         sheet_descs = [sheet_desc]
     if startcol is not None or startrow is not None:
         moves = []
-        if startcol:
+        if startcol is not None:
             moves += [(d, startcol, None) for d in sheet_descs]
-        if startrow:
+        if startrow is not None:
             moves += [(d, None, startrow) for d in sheet_descs]
     else:
         moves = [(d, None, None) for d in sheet_descs]
