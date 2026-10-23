@@ -3,6 +3,7 @@
 No keys are bound; bind one in .visidatarc, for example:
 
     Sheet.bindkey('z$', 'type-decimal')
+    ColumnsSheet.bindkey('gz$', 'type-decimal-selected')
 '''
 
 from decimal import Decimal
@@ -25,6 +26,8 @@ def decimal(*args):
         return Decimal()
     v = args[0]
     if isinstance(v, str):
+        if v.strip().startswith('(') and v.strip().endswith(')'):
+            return -decimal(v.strip()[1:-1])
         v = ''.join(ch for ch in v if ch in decimalchars)
     elif isinstance(v, float):
         v = repr(v)

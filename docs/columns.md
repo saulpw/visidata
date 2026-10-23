@@ -79,9 +79,14 @@ There is also the `floatlocale` type, which uses Python's `locale.atof` to parse
 
 If you need locale-specific float parsing regularly, you may want to [rebind](/docs/customize) `%` or `z%` (or maybe some other keystroke) to `type-floatlocale` instead.
 
-The `decimal` type filters out non-numeric characters like `currency`, but parses the remainder as a Python [Decimal](https://docs.python.org/3/library/decimal.html), so sums and other arithmetic are exact: `0.10 + 0.20` is `0.30`, not `0.30000000000000004`.  It keeps the number of decimal places from the source (`0.10` stays `0.10`).  The `type-decimal` command is unbound by default; to use it for money, [rebind](/docs/customize) `$` (or `z$`) in `~/.visidatarc`:
+The `decimal` type filters out non-numeric characters like `currency`, but parses the remainder as a Python [Decimal](https://docs.python.org/3/library/decimal.html), so sums and other arithmetic are exact: `0.10 + 0.20` is `0.30`, not `0.30000000000000004`.  It keeps the number of decimal places from the source (`0.10` stays `0.10`).  The `type-decimal` command is unbound by default; to try it, [bind](/docs/customize) `z$` and `gz$` in `~/.visidatarc`:
 
-    Sheet.bindkey('$', 'type-decimal')
+~~~
+Sheet.bindkey('z$', 'type-decimal')
+ColumnsSheet.bindkey('gz$', 'type-decimal-selected')
+~~~
+
+Accounting-style negatives in parentheses, like `(12.34)`, parse as negative.
 
 In expressions, a `decimal` can be added to or multiplied by an `int` or another `decimal`, but not a `float`: `amt * 1.1` is an error.  Use `amt * Decimal("1.1")` instead.
 

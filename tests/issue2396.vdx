@@ -5,6 +5,9 @@ type-decimal
 addcol-expr amt*3
 aggregate-col sum
 col amt
+addcol-expr amt*Decimal("1.1")
+aggregate-col sum
+col amt
 aggregate-col sum
 col cat
 freq-col
