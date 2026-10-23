@@ -768,6 +768,7 @@ IbisTableSheet.addCommand("'", 'addcol-cast', 'addcol_cast(cursorCol)')
 
 IbisTableSheet.addCommand('zb', 'sidebar-choose', 'choose_sidebar()', 'choose vdsql sidebar to show')
 IbisTableSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("SQL query: ")))', 'open sheet with results of raw SQL query')
+IbisTableSheet.addCommand('', 'syscopy-sql', 'syscopyValue(pending_sql)', 'copy SQL for current query to system clipboard (using options.clipboard_copy_cmd)')
 IbisTableSheet.addCommand('', 'addcol-subst', 'addColumnAtCursor(addcol_subst(cursorCol, **inputRegexSubstOld("transform column by regex: ")))') # deprecated
 IbisTableSheet.addCommand('', 'addcol-regex-subst', 'addColumnAtCursor(addcol_subst(cursorCol, **inputRegexSubst("transform column by regex: ")))')
 IbisTableSheet.addCommand('', 'addcol-split', 'addColumnAtCursor(addcol_split(cursorCol, input("split by delimiter: ", type="delim-split")))')
@@ -795,3 +796,4 @@ IbisTableSheet.class_options.clean_names = True
 IbisTableSheet.class_options.regex_flags = ''
 
 vd.addMenuItem('View', 'Sidebar', 'choose', 'sidebar-choose')
+vd.addMenuItem('Edit', 'Copy', 'to system clipboard', 'query SQL', 'syscopy-sql')
