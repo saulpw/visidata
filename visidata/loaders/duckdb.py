@@ -351,9 +351,14 @@ def save_duckdb(vd, p, *vsheets):
             sqlcols = [f'{_quote_ident(col.name)} {sqltypes.get(col.type, "VARCHAR")}' for col in vs.visibleCols]
             conn.execute(f'CREATE TABLE IF NOT EXISTS {_quote_ident(tblname)} ({", ".join(sqlcols)})')
 
-            for row in Progress(vs.rows, 'saving'):
-                sqlvals = []
-                for col in vs.visibleCols:
+            # one list per column, inserted in bulk via unnest; per-row INSERT is ~40x slower
+            columns = ','.join(_quote_ident(c.name) for c in vs.visibleCols)
+            unnests = ','.join('unnest(?)' for _ in vs.visibleCols)
+            insertsql = f'INSERT INTO {_quote_ident(tblname)} ({columns}) SELECT {unnests}'
+            collists = [[] for _ in vs.visibleCols]
+
+            for rownum, row in enumerate(Progress(vs.rows, 'saving')):
+                for i, col in enumerate(vs.visibleCols):
                     value = col.getTypedValue(row)
                     if isinstance(value, TypedWrapper):
                         if isinstance(value, TypedExceptionWrapper):
@@ -364,11 +369,14 @@ def save_duckdb(vd, p, *vsheets):
                         value = jsonenc.encode(value)
                     elif not isinstance(value, (int, float, str, bool)):
                         value = col.getFullDisplayValue(row)
-                    sqlvals.append(value)
+                    collists[i].append(value)
 
-                placeholders = ','.join('?' for _ in sqlvals)
-                columns = ','.join(_quote_ident(c.name) for c in vs.visibleCols)
-                conn.execute(f'INSERT INTO {_quote_ident(tblname)} ({columns}) VALUES ({placeholders})', sqlvals)
+                if (rownum+1) % 10000 == 0:
+                    conn.execute(insertsql, collists)
+                    collists = [[] for _ in vs.visibleCols]
+
+            if collists[0]:
+                conn.execute(insertsql, collists)
 
         conn.commit()
     except Exception:
