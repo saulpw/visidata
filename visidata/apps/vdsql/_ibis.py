@@ -99,6 +99,10 @@ class IbisConnectionPool:
         yield self._local.connection
 
 
+def isSystemSchema(name:str) -> bool:
+    return name == 'information_schema' or name.startswith('pg_')
+
+
 class IbisTableIndexSheet(IndexSheet):
     # sheet_type = IbisTableSheet  # set below
 
@@ -128,7 +132,7 @@ class IbisTableIndexSheet(IndexSheet):
 
             dbnames = [dbname
                        for dbname in con.list_databases()
-                       if '*' in schemas or dbname in schemas]
+                       if dbname in schemas or ('*' in schemas and not isSystemSchema(dbname))]
 
             for dbname in dbnames or [None]:
                 for tblname in con.list_tables(database=dbname):
