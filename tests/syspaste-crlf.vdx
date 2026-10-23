@@ -1,0 +1,3 @@
+# open-syspaste of CRLF tsv strips CR like a file on disk  #2571
+option global clipboard_paste_cmd cat tests/issue2571.tsv
+open-syspaste tsv

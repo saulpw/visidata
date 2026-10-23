@@ -2,7 +2,6 @@ import os
 import os.path
 import sys
 import io
-import codecs
 import pathlib
 from urllib.parse import urlparse, urlunparse
 from functools import wraps, lru_cache
@@ -296,9 +295,10 @@ class Path(os.PathLike):
             return self.rfile.reopen()
 
         if self.fp and not self.fptext:
-            self.fptext = codecs.iterdecode(self.decompress(self.fp),
-                                            encoding=encoding or vd.options.encoding,
-                                            errors=encoding_errors or vd.options.encoding_errors)
+            self.fptext = io.TextIOWrapper(self.decompress(self.fp),
+                                           encoding=encoding or vd.options.encoding,
+                                           errors=encoding_errors or vd.options.encoding_errors,
+                                           newline=newline)
 
         if self.fptext:
             self.rfile = RepeatFile(self.fptext)
