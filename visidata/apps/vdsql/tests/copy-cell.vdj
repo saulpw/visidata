@@ -1,0 +1,7 @@
+#!/usr/bin/env vd -p
+{"longname": "open-file", "input": "tests/business.sqlite", "keystrokes": "o"}
+{"sheet": "business", "col": "", "row": "キcustomers", "longname": "open-row", "input": "", "keystrokes": "Enter"}
+{"sheet": "customers", "col": "name", "row": 1, "longname": "copy-cell", "input": "", "keystrokes": "zy", "comment": "copy current cell to internal clipboard"}
+{"sheet": "customers", "col": "", "row": "", "longname": "dup-limit", "input": 3}
+{"sheet": "customers_top3", "col": "", "row": "", "longname": "freeze-sheet", "input": "", "keystrokes": "g'"}
+{"sheet": "customers_top3'", "col": "name", "row": 0, "longname": "paste-cell", "input": "", "keystrokes": "zp", "comment": "set contents of current cell to last internal clipboard value"}

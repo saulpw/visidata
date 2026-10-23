@@ -670,7 +670,7 @@ def notimpl(sheet):
 
 
 dml_cmds = '''addcol-bulk addcol-new add-row add-rows
-copy-cell copy-cells copy-row copy-selected commit-sheet cut-cell cut-cells cut-row cut-selected delete-cell delete-cells delete-row delete-selected
+copy-row copy-selected commit-sheet cut-cell cut-cells cut-row cut-selected delete-cell delete-cells delete-row delete-selected
 edit-cell paste-after paste-before paste-cell setcell-expr
 setcol-clipboard setcol-expr setcol-fake setcol-fill setcol-format-enum setcol-formatter setcol-incr setcol-incr-step setcol-input setcol-iter setcol-subst setcol-subst-all
 '''.split()

@@ -69,6 +69,7 @@ There are a few differences, however:
 - `z"` creates a new sheet with a different row limit.
 - `gz"` removes the row limit entirely (fetch all rows).
 - `'` casts the current column to its given type, persisting into future queries (with `"`).
+- `Y`/`gY` copy rows to the system clipboard (as csv, tsv, txt, etc.), and `zy`/`gzy` copy cells to the internal clipboard, but only from the loaded rows.
 - `g'` freezes the current set of loaded rows into a plain VisiData sheet, where all VisiData commands are available.
 
 Some VisiData commands aren't implemented using the database engine.
