@@ -1,0 +1,10 @@
+# decimal type sums and multiplies exactly  #2396
+open-file tests/issue2396.csv
+col amt
+type-decimal
+addcol-expr amt*3
+aggregate-col sum
+col amt
+aggregate-col sum
+col cat
+freq-col

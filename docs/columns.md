@@ -79,6 +79,12 @@ There is also the `floatlocale` type, which uses Python's `locale.atof` to parse
 
 If you need locale-specific float parsing regularly, you may want to [rebind](/docs/customize) `%` or `z%` (or maybe some other keystroke) to `type-floatlocale` instead.
 
+The `decimal` type filters out non-numeric characters like `currency`, but parses the remainder as a Python [Decimal](https://docs.python.org/3/library/decimal.html), so sums and other arithmetic are exact: `0.10 + 0.20` is `0.30`, not `0.30000000000000004`.  It keeps the number of decimal places from the source (`0.10` stays `0.10`).  The `type-decimal` command is unbound by default; to use it for money, [rebind](/docs/customize) `$` (or `z$`) in `~/.visidatarc`:
+
+    Sheet.bindkey('$', 'type-decimal')
+
+In expressions, a `decimal` can be added to or multiplied by an `int` or another `decimal`, but not a `float`: `amt * 1.1` is an error.  Use `amt * Decimal("1.1")` instead.
+
 The following example uses the file [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
 
 <div class="asciicast">
@@ -108,6 +114,7 @@ Type      Option            Default
 int       `disp_int_fmt`      `{:.0f}`
 float     `disp_float_fmt`    `{:.02f}`
 currency  `disp_currency_fmt` `%0.2f`
+decimal   `disp_decimal_fmt`  `{}`
 date      `disp_date_fmt`     `%Y-%m-%d`
 
 Ways to adjust the display formatting:
@@ -122,6 +129,8 @@ There are several formatting styles offered:
 * Formatting that starts with `'%'` (e.g. `%0.2f`) will use [locale.format_string()](https://docs.python.org/3.6/library/locale.html#locale.format_string).
 * Otherwise (e.g. `{:.02f}`), formatting will be passed to Python's [string.format()](https://docs.python.org/3/library/string.html#custom-string-formatting).
 * Date fmtstr are passed to [strftime](https://strftime.org/).
+
+For `decimal` columns, use `string.format()` style (e.g. `{:.2f}`); `%` formatting converts the value to a float first.
 
 The default for currency uses `locale.format_string()`. The default for int/float/date use `string.format()`.
 
