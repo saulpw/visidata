@@ -61,6 +61,38 @@ class TestClipText:
         assert clips == clippeds
         assert clipw == clippedw
 
+    @pytest.mark.parametrize('emojiseq, s, w, clippeds, clippedw', [
+        (True, '\u2764\uFE0F', None, '\u2764\uFE0F', 2),  # heart + VS16
+        (True, '\U0001F9D2\U0001F3FD', None, '\U0001F9D2\U0001F3FD', 4),  # child + skin tone
+        (True, '\U0001F3F3\uFE0F\u200D\U0001F308', None, '\U0001F3F3\uFE0F\u200D\U0001F308', 3),  # rainbow flag
+        (True, '1\uFE0F\u20E3', None, '1\uFE0F\u20E3', 2),  # keycap
+        (True, '\u2764\uFE0F\u2764\uFE0F', 3, '\u2764\uFE0F\u2026', 3),
+        (True, 'a\U0001F3F3\uFE0F\u200D\U0001F308', 3, 'a\u2026', 2),
+        (False, '\u2764\uFE0F', None, '\u2764', 1),
+        (False, '\U0001F9D2\U0001F3FD', None, '\U0001F9D2', 2),
+        (False, '\U0001F3F3\uFE0F\u200D\U0001F308', None, '\U0001F3F3\U0001F308', 3),
+        (False, '1\uFE0F\u20E3', None, '1\u20E3', 1),
+        (False, 'Tie\u0302\u0301ng', None, 'Tie\u0302\u0301ng', 5),
+        (False, '\u0915\u094D\u200D\u0937', None, '\u0915\u094D\u200D\u0937', 2),  # devanagari half-form ZWJ
+    ])
+    def test_clipstr_emoji_sequences(self, emojiseq, s, w, clippeds, clippedw):
+        visidata.vd.options.disp_emoji_sequences = emojiseq
+        visidata.vd.clearCaches()
+        visidata.dispwidth.cache_clear()
+        try:
+            assert visidata.clipstr(s, w) == (clippeds, clippedw)
+            if w is None:
+                assert visidata.dispwidth(s) == clippedw
+        finally:
+            visidata.vd.options.unset('disp_emoji_sequences')
+            visidata.vd.clearCaches()
+            visidata.dispwidth.cache_clear()
+
+    def test_iterclusters(self):
+        from visidata.cliptext import iterclusters
+        s = 'a\u2764\uFE0Fb\U0001F3F3\uFE0F\u200D\U0001F308\U0001F9D2\U0001F3FDe\u0301'
+        assert list(iterclusters(s)) == ['a', '\u2764\uFE0F', 'b', '\U0001F3F3\uFE0F\u200D\U0001F308', '\U0001F9D2\U0001F3FD', 'e', '\u0301']
+
     @pytest.mark.parametrize('s, w, clippeds, clippedw', [
         ('b to', 4, 'b to', 4),
         ('abcde', 8, 'abcde', 5),

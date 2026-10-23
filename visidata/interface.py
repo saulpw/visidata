@@ -7,6 +7,7 @@ vd.theme_option('disp_more_left', '<', 'header note indicating more columns to t
 vd.theme_option('disp_more_right', '>', 'header note indicating more columns to the right')
 vd.theme_option('disp_error_val', '', 'displayed contents for computation exception')
 vd.theme_option('disp_ambig_width', 1, 'width to use for unicode chars marked ambiguous')
+vd.theme_option('disp_emoji_sequences', True, 'draw emoji sequences (variation selector, ZWJ, skin tone) whole; if False, draw their base characters')
 
 vd.theme_option('disp_pending', '', 'string to display in pending cells')
 vd.theme_option('disp_note_pending', ':', 'note to display for pending cells')
