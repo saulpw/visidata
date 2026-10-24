@@ -7,3 +7,13 @@
 - api fix: vd.push no longer returns the sheet
 - if you want it reloaded every push, call .reload() before the push
 
+
+```python
+# wrong: push starts an async reload, which may replace .rows after this line
+vs = TsvSheet('foo', source=p)
+vd.push(vs)
+vs.rows = myrows
+
+# right: give the sheet a source that its reload() turns into rows
+vd.push(PyobjSheet('foo', source=myrows))
+```

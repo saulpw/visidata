@@ -9,7 +9,7 @@
 - e. User input (OptionsSheet) overrides currently at the 'override' layer.
 - f. These layers may apply to any of these settings.  This is the resolution order (the first applicable layer is used):
 
-   0. user sheet-specific override (with `Shift+O` in 1.3)
+   0. user sheet-specific override (with `Shift+O`)
    1. current sheet instance
    2. current sheet type
    3. current sheet parent types
@@ -18,6 +18,8 @@
    6. .visidatarc  (associated object is string 'override')
    7. global defaults  (associated object is string 'default')
 
+   Current resolution chain: [dev/OPTIONS.md](../OPTIONS.md).
+
 
 ## II. Commands/Keybindings
 
@@ -25,15 +27,14 @@
 - b. `bindkey(keystrokes, longname)` creates global default keybinding (used when nothing else overrides it)
 - c. `<Sheet>.addCommand()` (which has identical interface to a) sets the command on the sheet type (Id5) if <Sheet> is a SheetType, or on the sheet instance (Id4) if <Sheet> is an instance.
 - d. `<Sheet>.bindkey()` does the same as (c) but for keybindings.
-- e. `g Shift+D` to get to macros sheet to edit macro keybindings.
-- f. `g Ctrl+H` can add/edit keybindings for all commands on all sheets (Id1, not impl yet)
-- g. `z Ctrl+H` for list of sheet-specific commands (not global or on Sheet)
+- e. `gm` (macro-sheet) to get to macros sheet to edit macro keybindings.
+- f. a sheet to add/edit keybindings for all commands on all sheets (Id1, not impl yet; `g Ctrl+H` now opens the man page)
+- g. `z Ctrl+H` lists commands and keybindings available on the current sheet; `gz Ctrl+H` for all sheet types
 - h. Commands are identified by longname, and have a default keybinding.  Use None for no default.
 - i. Command lists can be gotten by:
-    - `commands`: dict of [Sheet] -> dict of [longname] -> Command for all commands for all sheets
-    - `SheetType.commands` or `vs.commands`: dict of [longname] -> Command for all accessible commands on this sheet
-    - `bindings` or `SheetType.bindings`, similarly
-- j. `commands.show_version` or `commands[`show_version`] returns the Command in resolution order.  `bindings['^V']` returns the bound longname.
+    - `vd.commands`: dict of [longname] -> dict of [Sheet] -> Command for all commands for all sheets
+    - `vd.bindkeys`, similarly for keybindings
+- j. `vs.getCommand('show-version')` returns the Command in resolution order.  `vd.bindkeys._get('Ctrl+V', vs)` returns the bound longname.
 
 ## III. Options
 

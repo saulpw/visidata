@@ -1,17 +1,21 @@
 # getting input from the user
 
-    VisiData.input(prompt, type='', defaultLast=False, **editargs) -> str:
+    VisiData.input(prompt, type=None, defaultLast=False, history=[], dy=0, attr=None, updater=lambda v: None, **editargs) -> str:
       - get a line of input from the user on the status line
       - history stored and managed by 'type' if given
       - defaults to last history item if no input and defaultLast is True
+      - updater(val) is called on every keypress or timeout
+      - dy: number of lines from bottom of pane; attr: curses attribute for prompt
+      - see the docstring in _input.py for the rest (display, record, bindings, help)
 
 
-    VisiData.confirm(prompt, exc=ExpectedException) -> bool or raise:
-      - if input is not 'y', raise esc (or returns False if exc=None)
+    VisiData.confirm(prompt, exc=EscapeException) -> bool or raise:
+      - if input is not 'y', raise exc (or returns False if exc=None)
       - input not recorded on cmdlog
 
-    VisiData.choose(L:Sequence, n=None) -> element or list:
-      - input choices separated by spaces.  may have a better interface eventually.
+    VisiData.choose(choices, n=None, type='') -> key or list of keys:
+      - choices is a list of dicts, each with a unique "key"
+      - keys typed separated by spaces, or picked from a ChoiceSheet in fancy mode (see chooseMany)
 
     Sheet.editCell(vcolidx, rowidx, **editargs) -> str:
       - edit a cell value in-place on the screen
