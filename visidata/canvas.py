@@ -76,6 +76,10 @@ def BoundingBox(x1, y1, x2, y2):
     return Box(min(x1, x2), min(y1, y2), abs(x2-x1), abs(y2-y1))
 
 
+def _isDefaultRange(zoomlevel, vmin, cmin, cspan):
+    return math.isclose(zoomlevel, 1.0) and abs(vmin - cmin) <= cspan * 1e-6  # tolerance: float noise from zoomTo/fixPoint
+
+
 def clipline(x1, y1, x2, y2, xmin, ymin, xmax, ymax):
     'Liang-Barsky algorithm, returns [xn1,yn1,xn2,yn2] of clipped line within given area, or None'
     dx = x2-x1
@@ -568,6 +572,40 @@ class Canvas(Plotter):
     def incrZoom(self, incr):
         self.xzoomlevel *= incr
         self.yzoomlevel *= incr
+
+        self.resetBounds()
+
+    @property
+    def pinned_x(self):
+        'True if the user has zoomed or scrolled the x axis away from the full extent.'
+        return bool(self.visibleBox and self.canvasBox) and \
+            not _isDefaultRange(self.xzoomlevel, self.visibleBox.xmin, self.canvasBox.xmin, self.canvasBox.w)
+
+    @property
+    def pinned_y(self):
+        'True if the user has zoomed or scrolled the y axis away from the full extent.'
+        return bool(self.visibleBox and self.canvasBox) and \
+            not _isDefaultRange(self.yzoomlevel, self.visibleBox.ymin, self.canvasBox.ymin, self.canvasBox.h)
+
+    def pinnedView(self):
+        'Return (xmin, xspan) and (ymin, yspan) of the visible range, or None for an axis at its full extent.'
+        x = (self.visibleBox.xmin, self.canvasBox.w*self.xzoomlevel) if self.pinned_x else None
+        y = (self.visibleBox.ymin, self.canvasBox.h*self.yzoomlevel) if self.pinned_y else None
+        return x, y
+
+    def refitBounds(self, pinnedView=(None, None)):
+        'Fit bounds to the plotted data, keeping the visible range of each axis in *pinnedView* (from pinnedView()).'
+        self.canvasBox = self.visibleBox = None
+        self.xzoomlevel = self.yzoomlevel = 1.0
+        self.resetBounds(refresh=False)
+
+        x, y = pinnedView
+        if x:
+            self.visibleBox.xmin, self.xzoomlevel = x[0], x[1]/self.canvasBox.w
+        if y:
+            self.visibleBox.ymin, self.yzoomlevel = y[0], y[1]/self.canvasBox.h
+        if x or y:
+            self.cursorBox = None
 
         self.resetBounds()
 

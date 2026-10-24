@@ -72,3 +72,15 @@ Right-click and drag    scrolls
 Scroll-wheel            zooms in/out
 
 ---
+
+## How to watch a graph update live
+
+A graph replots its source's current rows whenever the source sheet reloads, so a graph of a file that is still being written can follow along:
+
+1. Open the file and plot the columns as above.
+2. Press `Ctrl+^` to return to the source sheet, and use `reload-modified` to start reloading it whenever the file changes.
+3. Press `Ctrl+^` to go back to the graph.
+
+`Ctrl+R` on the graph also replots the source's current rows.
+
+On reload, the graph refits each axis to the new data, unless that axis has been zoomed, scrolled, or set with `x` or `y`; then it keeps that range.  `_` fits the full extent again, and the graph refits on later reloads.
