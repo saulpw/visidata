@@ -81,8 +81,12 @@
     python3 setup.py sdist bdist_wheel
     chmod -R a+rX dist
     ls dist/
+    unzip -l dist/*.whl | grep man/
+    tar tzf dist/*.tar.gz | grep man/
     twine upload dist/*
     ```
+
+  Before uploading, check that both the wheel and the sdist list `visidata/man/vd.1` and `vd.txt` (the 3.4 wheel shipped without them, #3189).
 
 11. Test install/upgrade from pypi
 
