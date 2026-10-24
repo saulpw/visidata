@@ -110,7 +110,7 @@ class DescribeSheet(ColumnsSheet):
         d = self.describeData[srccol]
         statname = col.expr
         if statname in ('errors', 'nulls'):
-            return d[statname]
+            return list(d[statname])
         stat = d.get(statname)
         if stat is None or isinstance(stat, TypedExceptionWrapper):
             vd.fail(f'no {statname} for this column')
