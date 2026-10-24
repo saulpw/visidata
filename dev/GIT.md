@@ -90,6 +90,8 @@ AI-generated comments should have the full attribution at the bottom: `[this mes
 
 ### Closing Issues for Implemented Features
 
+Close a bug when its fix is pushed to develop, not at release.
+
 When closing an issue for a feature that's already been implemented, the comment should include:
 - A link to the implementing commit(s)
 - Links to relevant documentation pages
