@@ -128,6 +128,8 @@ Merge a human contributor's PR on GitHub with "Rebase and merge", so it shows as
 
 For PRs at AI level 5+, push small cleanups (test style, nits) to the PR branch ourselves instead of asking the author for another round.
 
+After pushing changes to a PR, never merge it without Saul's explicit approval of the edited version; he reviews it first.
+
 ### Documentation
 
 Update docs in the same commit as the code change, not as a separate follow-up commit. Check `docs/README.md` for which files to update.
