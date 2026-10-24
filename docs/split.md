@@ -55,3 +55,5 @@ Now, the visible sheet of the second window has changed, while the visible sheet
 We can use `^^`, so that sample **Sheet** is once again visible, and full-screen it with `g Shift+Z`, effectively leaving split screen mode.
 
 ![]
+
+Quitting the last sheet in one window gives the other window the full screen.  Split screen stays on, though: the next sheet opened goes into the empty window.
