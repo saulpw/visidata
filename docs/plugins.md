@@ -2,7 +2,7 @@
 eleventyNavigation:
   key: Plugins
   order: 13
-Updated: 2026-10-16
+Updated: 2026-10-24
 Version: VisiData 3.5
 ---
 
@@ -23,6 +23,26 @@ For example, there are some features available in `visidata.experimental`, like 
 VisiData intentionally does not work this way, but people who prefer their terminal applications to act more like Excel can add this to their .visidatarc:
 
     import visidata.experimental.digit_autoedit
+
+### Copy and paste by shape
+
+`clipboard_shapes` is a proposed set of copy and paste bindings.
+`y` (yank) and `p` (paste) become prefixes, followed by the shape of the target: `.` for a cell, `-` for a row, `|` for a column.
+An `s` before the shape means the selected rows.
+To enable, add this to .visidatarc:
+
+    import visidata.experimental.clipboard_shapes
+
+- `y .` (`copy-cell`) to copy current cell to internal clipboard (default `zy`).
+- `y -` (`copy-row`) to copy current row to internal clipboard (default `y`).
+- `ys -` (`copy-selected`) to copy selected rows to internal clipboard (default `gy`).
+- `ys |` (`copy-cells`) to copy contents of current column for selected rows to internal clipboard (default `gzy`).
+- `p .` (`paste-cell`) to set contents of current cell to last internal clipboard value (default `zp`).
+- `p -` (`paste-after`) to paste internal clipboard rows after current row (default `p`).
+- `ps |` (`setcol-clipboard`) to set cells of current column for selected rows to last internal clipboard value (default `gzp`).
+
+The default bindings other than `y` and `p` still work.
+These bindings may change; leave feedback on [#3008](https://github.com/saulpw/visidata/issues/3008).
 
 ## via pip
 
