@@ -4,6 +4,14 @@
 
 Thanks to @midichef for bugfixes and reviews, and to @VXNCXNX, @danielwe, @chutzimir, @mpr1255, @horizonbymuneeb, @chiliec, @dacodas, @maxfain, and @khughitt for their contributions.
 
+## Breaking Changes
+
+- [join] `concat` matches columns by position and keeps the first sheet's column names; sheets with the same names in a different order now line up by position.  Use `append` to match by name. (#3208)
+- [save] dict/list cells save as JSON in text formats, instead of the previous text rendering (#2944)
+- [cmdlog] `go-` movement commands are no longer logged, so `repeat-last` repeats the last real command and saved `.vdj` files leave out cursor moves (#3129)
+- [describe] all null forms count as one distinct value, which lowers distinct counts by one (#3223)
+- [options] reading an undefined option warns and returns None, instead of raising
+
 ## New Features
 
 - [postgres] overhaul postgres loader: fresh connection per query, `/dbname/tablename` URLs, `exec-sql` and `edit-sql`, lazy table loading with streamed rows (#282 #586 #727 #2989)
@@ -30,16 +38,14 @@ Thanks to @midichef for bugfixes and reviews, and to @VXNCXNX, @danielwe, @chutz
 - [column] hidden is its own flag; width survives hide/unhide; `.vds` saves it (#3214)
 - [movement] press `go-right` twice to enter hidden columns (#3215)
 - [movement] warn on clamped numbered jumps (#3166)
-- [cmdlog] leave `go-` movement commands out of the cmdlog (#3129)
 - [macros] recorded `{braces}` play back literally (`braces=literal`); `{{ }}` escapes braces in parameterized macros (#2785)
 - [macros] unbind the old keystroke when a macro's keystroke changes (#2784)
-- [save] dict/list cells save as JSON in text formats (#2944)
 - [aggregators] footer totals refresh after row and cell changes (#3003)
 - [sheets] `Q` frees rows held by undos and selection
 - [sheets] exit prompt only for modified or guarded sheets (#3173)
 - [sheets] column layout no longer depends on load timing (#3124)
 - [reload] keep the screen live while a reload watcher runs (#2624)
-- [join] `concat` keeps the first sheet's rowdef and matches columns by position; `origin_sheet` is settable (#3187 #3208)
+- [join] `concat` keeps the first sheet's rowdef; `origin_sheet` is settable (#3187)
 - [join] clarify `append` vs `concat` in help and docs (#3187)
 - [input] Tab completes in multi-field prompts with a completer (open-file, save-sheet); Shift+Up/Down switch fields (#3169)
 - [shell] `addcol-shell` delays between process starts; Ctrl+C kills running commands (#3103)
@@ -53,7 +59,6 @@ Thanks to @midichef for bugfixes and reviews, and to @VXNCXNX, @danielwe, @chutz
 ## Loaders
 
 - [postgres] quote identifiers and pass schema as a parameter; connect without a password in the URL (#2989)
-- [postgres] tables are readonly until write support lands; `postgres_user`/`_password`/`_host`/`_port` options removed in favor of libpq's `PG*` env vars and `~/.pgpass` (#579 #522)
 - [vdsql] open tables outside the default postgres schema; `postgres_schema='*'` skips system schemas (#2027 #2203)
 - [duckdb] save rows in bulk via unnest (#3237)
 - [archive] decompress members by suffix; open a tar nested in another archive; `zEnter` opens a member with a chosen filetype @chutzimir (#3212)
@@ -76,7 +81,7 @@ Thanks to @midichef for bugfixes and reviews, and to @VXNCXNX, @danielwe, @chutz
 - [dedupe] don't crash on unhashable typed values @VXNCXNX (#3196)
 - [dedupe] compare values the way `freq-col` groups them (#3219)
 - [describe] `select-cell` and `dive-cell` choose the right cells @midichef (#3223)
-- [describe] even-count median selects rows with either middle value; blank and #ERR stat cells fail with a reason; all null forms count as one distinct value (#3223)
+- [describe] even-count median selects rows with either middle value; blank and #ERR stat cells fail with a reason (#3223)
 - [describe] dive on errors/nulls copies the row list
 - [seaborn] prevent PicklingError on Python 3.14 @midichef
 - [color] prevent early crash on colorless terminals like vt100 @midichef (#3206)
@@ -89,7 +94,6 @@ Thanks to @midichef for bugfixes and reviews, and to @VXNCXNX, @danielwe, @chutz
 - [clipboard] pasted columns get their own values (#3146)
 - [cmdlog] log commands run with undo suppressed
 - [aggregators] canceled footer totals no longer stay in progress (#2207)
-- [options] reading an undefined option warns and returns None
 - [input] preserve getch printable keys (#3230)
 - [history_palette] keep the prompt default reachable
 - [save] `safety_first` translates only str values
