@@ -1,0 +1,7 @@
+# dive-cell on a blank stat fails instead of opening an empty sheet  #3223
+allow-error no min for this column
+open-file tests/issue3223.json
+describe-sheet
+row 1
+col min
+dive-cell

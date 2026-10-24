@@ -1,7 +1,7 @@
 from copy import copy
-from statistics import mode, median, mean, stdev
+from statistics import mode, median, median_low, median_high, mean, stdev
 
-from visidata import vd, Column, ColumnAttr, vlen, RowColorizer, asyncthread, Progress, wrapply
+from visidata import vd, Column, ColumnAttr, vlen, RowColorizer, asyncthread, Progress, wrapply, TypedExceptionWrapper
 from visidata import BaseSheet, TableSheet, ColumnsSheet, IndexSheet
 
 
@@ -81,6 +81,7 @@ class DescribeSheet(ColumnsSheet):
                     v = srccol.getValue(sr)
                     if isNull(v):
                         d['nulls'].append(sr)
+                        v = None  # all nulls count as one distinct value
                     else:
                         v = srccol.type(v)
                         vals.append(v)
@@ -110,12 +111,13 @@ class DescribeSheet(ColumnsSheet):
         statname = col.expr
         if statname in ('errors', 'nulls'):
             return d[statname]
-        if statname not in d:
-            return []
+        stat = d.get(statname)
+        if stat is None or isinstance(stat, TypedExceptionWrapper):
+            vd.fail(f'no {statname} for this column')
 
-        stat = d[statname]
         isNull = srccol.sheet.isNullFunc()
         ret = []
+        medianRows = []
         for sr in Progress(srccol.sheet.rows, 'gathering'):
             try:
                 v = srccol.getValue(sr)
@@ -128,11 +130,20 @@ class DescribeSheet(ColumnsSheet):
                 continue
 
             # match typed value, as computed in reloadColumn  #3223
-            if statname in ('mode', 'min', 'max', 'median'):
+            if statname == 'median':
+                medianRows.append((v, sr))
+            elif statname in ('mode', 'min', 'max'):
                 if v == stat:
                     ret.append(sr)
-            else:  # distinct and aggregators: all rows with a value
+            else:  # distinct and aggregators: all typed rows
                 ret.append(sr)
+
+        if medianRows:
+            vals = [v for v, sr in medianRows]
+            middle = (median_low(vals), median_high(vals))
+            if middle[0] != middle[1]:
+                vd.status(f'median {stat} is between two values; using rows with {middle[0]} or {middle[1]}')
+            ret = [sr for v, sr in medianRows if v in middle]
         return ret
 
     def openCell(self, col, row):
