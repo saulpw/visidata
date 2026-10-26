@@ -33,6 +33,7 @@ Use `$VD` in test scripts instead of hardcoding `bin/vd` or `python -m visidata`
 | `test-vdx.sh` | Golden tests: replays all `tests/*.vd*` files via `dev/test.sh` |
 | `test-pytest.sh` | Python unit tests via pytest |
 | `test-smoke.sh` | Basic startup and directory opening |
+| `test-tui.sh` | Interactive smoke: common prompts open, with their help sidebar, in a real terminal via tmux (#3269) |
 | `test-macros.sh` | Macro replay (#1652) |
 | `test-startpos.sh` | CLI `+N`/`+col:row` positioning (#2425) |
 | `test-options-config.sh` | `.visidatarc` numeric/boolean/string + sheet-specific options (manual-tests.md #8) |
@@ -206,6 +207,7 @@ When a test is warranted, write it FIRST, verify it FAILS on the current code, t
 
 - **Unit tests** (pytest) for pure functions like `wraptext()`, `clipstr()`, `iterchunks()` — add to existing test files in `visidata/tests/`
 - **Golden tests** for behavior that requires the full VisiData UI/session — create a `.vdx` test in `tests/`
+- **TUI smoke** (`tests/test-tui.sh`) for anything drawn only interactively: prompts, sidebars, input help.  Batch replay never draws, so a `.vdx` can't catch these.  Add a `smoke` line only for a new input code path (10 cases max).
 
 Default to one golden `.vdx` per feature or fix; often it is the only test.  Add a pytest only when all of these hold:
 
