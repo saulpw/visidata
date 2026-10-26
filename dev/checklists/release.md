@@ -101,7 +101,7 @@ git tag v#.#.#
 git push --tags
 ```
 
-13. Write up the release notes and add it to `www/releases.md`. Add it to index.md.
+13. Write the release notes as the GitHub release body (draft in `.meta/promo/v#.#-github-release.md`).  In `~/git/visidata.org`, `make release VER=#.#` creates `site/blog/<year>/v#.#.md` from `blog-release-tmpl.md`; fill it from the release body and commit.  The `releases` tag lists it on the home and releases pages.
 
 
 15. Upload docs/man.md to the GitHub release (`gh release upload v#.#.# docs/man.md`); the website build fetches /man from the latest release.  Then update the website by pushing to master.
