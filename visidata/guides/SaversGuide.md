@@ -6,8 +6,8 @@
 - {help.commands.save_col}
 - {help.commands.save_col_keys}
 
-- Saving writes all rows, and only the visible columns.
-- Text formats like tsv and csv write each value as its column type formats it, so a float column saves `1.23456` as `1.23`.  The json format writes the typed value.
+- Saving writes all rows, and only the visible columns.  To save only the selected rows, first open them with `"` (`dup-selected`).
+- Text formats like tsv and csv write each value as its column type formats it, so a float column saves `1.23456` as `1.23`.  The json format writes the typed value.  Set the column's **fmtstr** on the **Columns Sheet** (`Shift+C`) to keep more digits.
 
 ## Save several sheets
 
@@ -23,14 +23,14 @@ On the **Sheets Sheet**, opened with `Shift+S` (`sheets-stack`):
 ## Choose the format
 
 - The save prompt has a second field, **as filetype**.  `Shift+Up` moves to it.
-- A filetype given there overrides the file extension.  With neither, the format is `save_filetype`.
-- An extension with no saver asks to save as `save_filetype` instead.
+- A filetype given there overrides the file extension.  With neither, the format is `options.save_filetype`.
+- When neither the filetype nor the extension has a saver, a prompt asks to save as `options.save_filetype` instead.
 - Add `.gz`, `.bz2`, `.xz`, or `.zst` to the path to compress the file: `out.csv.gz`.
 
 ## Overwrite and read-only
 
-- Saving over an existing file asks for confirmation first.
-- `--readonly` to refuse to overwrite existing files, and to refuse `z Ctrl+S` (`commit-sheet`).  `[RO]` shows in the status bar, and the save prompt does not suggest an existing file.
+- Saving over an existing file asks for confirmation first, except for `--output`.
+- `--readonly` to refuse to overwrite existing files, and to refuse `z Ctrl+S` (`commit-sheet`).  **[RO]** shows in the status bar, and the save prompt does not suggest an existing file.
 - `--confirm=y` to accept every confirmation, including overwrite.  `--readonly` overrides it.
 
 ## Save from the command line
