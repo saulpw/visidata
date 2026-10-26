@@ -1,6 +1,3 @@
----
-sheet: Sheet
----
 # Matching and Transforming Strings with Regex
 
 Some commands for selecting, searching, and transforming data, accept a regular expression as input.

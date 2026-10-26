@@ -1,6 +1,3 @@
----
-sheet: PivotSheet
----
 # Pivot Tables are just Frequency Tables with more columns
 
 Pivot Tables group rows by key columns, summarizing aggregated columns for each distinct value in the current column.

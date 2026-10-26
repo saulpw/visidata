@@ -120,19 +120,39 @@ class OptionHelpGetter:
         return f'[:onclick options-sheet {optname}][:longname_guide]{optname}[/][/]: {opt.helpstr} (default: {opt.value})'
 
 
+def guideKeys(keys:str) -> str:
+    'Return *keys* with a space between a g/z prefix and a named key: "gCtrl+S" -> "g Ctrl+S"; "g_" is unchanged.'
+    for prefix in ('gz', 'g', 'z'):
+        rest = keys[len(prefix):]
+        if keys.startswith(prefix) and len(rest) > 1:
+            return f'{prefix} {rest}'
+    return keys
+
+
 class CommandHelpGetter:
-    'For easy and consistent formatting in sidebars and helpstrings, use {help.commands.long_name}.'
-    def __init__(self, cls):
+    'For easy and consistent formatting in sidebars and helpstrings, use {help.commands.long_name}, or {help.commands.SheetType.long_name} for a command on another sheet type.'
+    def __init__(self, cls, helpsheet=None):
         self.cls = cls
-        self.helpsheet = vd.HelpSheet()
-        vd.sync(self.helpsheet.ensureLoaded())
+        self.helpsheet = helpsheet
+        if not helpsheet:
+            self.helpsheet = vd.HelpSheet()
+            vd.sync(self.helpsheet.ensureLoaded())
 
     def __getattr__(self, k):
+        cls = vd.getGlobals().get(k)
+        if isinstance(cls, type) and issubclass(cls, BaseSheet):
+            return CommandHelpGetter(cls, helpsheet=self.helpsheet)
         return self.__getitem__(k)
 
     def __getitem__(self, k):
         longname = k.replace('_', '-')
-        binding = self.helpsheet.revbinds.get(longname, [None])[0] or '<unbound>'
+        binding = self.helpsheet.revbinds.get(longname, [None])[0]
+        byname = not binding
+        if binding:
+            binding = guideKeys(binding)
+        else:
+            execkey = self.helpsheet.revbinds.get('exec-longname', [None])[0]
+            binding = f'{execkey} {longname}' if execkey else longname
         # cmddict has a SheetClass associated with each command
         # go through all the parents of the Sheet type, to look for the command
         cmd = None
@@ -152,7 +172,30 @@ class CommandHelpGetter:
                 binding += f' <{inputtype}>'
 
         helpstr = cmd.helpstr
+        if byname:
+            return f'[:code]{binding}[/] to {helpstr}'
         return f'[:code]{binding}[/] ([:longname_guide]{longname}[/]) to {helpstr}'
+
+
+def parseGuide(text:str) -> 'tuple[AttrDict, str]':
+    'Return (metadata, body) of guide *text*, with metadata from the YAML-ish front matter at the top, if any.'
+    metadata = AttrDict(sheettype='Sheet')
+    m = re.match(r'---\n(.*?)^---\n', text, re.MULTILINE | re.DOTALL)
+    if not m:
+        return metadata, text
+
+    frontmatter, body = m.group(1), text[m.end():]
+
+    for config in frontmatter.splitlines():
+        config = config.strip()
+        if config:
+            key = val = None
+            try:
+                key, val = config.split(': ', maxsplit=1)
+            except ValueError:
+                vd.fail('incorrect front matter syntax')
+            metadata[key] = val
+    return metadata, body
 
 
 class GuideSheet(Sheet):
@@ -166,27 +209,15 @@ class GuideSheet(Sheet):
     colorizers = [CellColorizer(4, 'color_sidebar', lambda s,c,r,v: True)]
 
     def iterload(self):
-        self.metadata = AttrDict(sheettype='Sheet')
         text = self.source.open(mode='r').read()
         winWidth = 78
 
-        # parsing front matter
-        sections = text.split('---\n', maxsplit=2)
-        for section in sections[:-1]:
-            for config in section.splitlines():
-                config = config.strip()
-                if config:
-                    key = val = None
-                    try:
-                        key, val = config.split(': ', maxsplit=1)
-                    except ValueError:
-                        vd.fail('incorrect front matter syntax')
-                    self.metadata[key] = val
+        self.metadata, body = parseGuide(text)
 
         # formatting text
         helper = AttrDict(commands=CommandHelpGetter(vd.getGlobals()[self.metadata.sheettype]),
                           options=OptionHelpGetter())
-        guidetext = MissingAttrFormatter().format(sections[-1], help=helper, vd=vd)
+        guidetext = MissingAttrFormatter().format(body, help=helper, vd=vd)
 
         # parsing guide
         for startingLine, text in enumerate(guidetext.splitlines()):
