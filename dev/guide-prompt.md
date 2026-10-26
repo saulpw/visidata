@@ -9,7 +9,7 @@ The operator (a top-level session or a human) runs:
 1. A writer agent: "Follow dev/guide-prompt.md to write the guide SaversGuide."  It stops at a committed local branch and a PR body file.
 2. A fresh reviewer agent: "Follow dev/guide-review.md to review visidata/guides/SaversGuide.md in wip/guide-SaversGuide."  Name any topic pending a maintainer decision, so the reviewer skips it.
 3. If any note is a blocker or an edit, send the notes to the writer, who applies each one or rebuts it in its report, commits, and updates the PR body.  Then go back to step 2 with a new reviewer, and give it every earlier round's notes with how each was resolved.  After three rounds that still have blockers or edits, stop and show the notes to Saul.
-4. When a round has only nits, the writer lists them in the PR body under "Nits", and the operator pushes the branch and opens the PR from the PR body file.
+4. When a round has only nits, the writer lists them in the PR body under "Nits", and the operator pushes the branch and opens the PR from the PR body file.  (`gh pr edit` fails on a Projects-classic deprecation error; update a PR body with `gh api -X PATCH repos/saulpw/visidata/pulls/<n> -F body=@<file>`.)
 
 Do not change `dev/DOCS.md`, this file, or `guide-review.md` during a run.  Process fixes go in between guides.
 
@@ -54,7 +54,7 @@ Do not describe behavior that has not been confirmed.  For anything the guide sa
 
 Use `sample_data/` and `tests/` for input files.  Make a fresh scratch directory (`mktemp -d`, or one inside a harness-provided scratchpad) and give every output path in it absolutely, so nothing lands in the worktree.  Generate every example table from a batch run; never write one by hand.  A `.vdx` script is one command per line, `longname input` separated by a space (see `dev/TESTING.md`).  A prompt with several fields (like save's path and filetype) needs a `.vdj` line with `"input": {...}`.  Always pass `-o`; without it batch mode dumps the sheet to stdout.  An overwrite confirmation aborts batch replay, so save to fresh paths.  For behavior only reachable interactively (prompt keys, sidebar), drive vd in tmux, as `tests/test-tui.sh` does.  In a prompt with a prefilled value, the first typed character replaces the whole value.
 
-Report bugs found while verifying in the PR body, and do not fix them in this PR.  Describe the actual behavior in the guide, or leave the feature out.
+Fix errors found while verifying in docs (`docs/`), the manpage source (`visidata/man/vd.inc`), and helpstrings in this PR, each in its own commit tagged with its module (`[man]`, `[save]`), and list them in the PR body under "Fixed in this PR".  Do not fix code.  Report surprising code behavior in the PR body under "Possible bugs", as questions: some of it is intentional (`save-sheet-really` overwrites even under `--readonly`, like vim's `:w!`).  Describe the actual behavior in the guide, or leave the feature out.
 
 ## 4. Write
 
@@ -89,7 +89,9 @@ Write the PR body to `wip/guide-<Name>.pr.md`, with:
 - One line on what the guide covers.
 - The commands and options included.
 - The candidates left out, each with its reason.
-- Anything unconfirmed or questionable, and bugs found while verifying.
+- Anything unconfirmed or questionable.
+- Fixed in this PR: doc, manpage, and helpstring errors.
+- Possible bugs: surprising code behavior, as questions.
 - Nits from the last review round, if any.
 - Helpstring wording notes from every round, under "Helpstring wording", for a separate pass.
 - `Part of #2313`.
