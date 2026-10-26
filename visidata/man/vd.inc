@@ -427,9 +427,9 @@ open file or url from path in current cell
 .It Ic "^S g^S" Ar filename
 .No save current/all sheet(s) to Ar filename No with given filetype
 .It ""
-.No Note: if the format does not support multisave, or the Ar filename No ends in a Sy / Ns , a directory will be created.
-.It Ic "z^S" Ar filename
-.No save current column only to Ar filename No with given filetype
+.No Note: if the Ar filename No ends in a Sy / Ns , each sheet is saved to its own file in that directory.  A format that does not support multisave requires it.
+.It Ic "z^S"
+.No commit pending changes on current sheet to its source
 .It Ic "^D" Ar filename.vdj
 .No save Sy CommandLog No to Ar filename.vdj No file
 .It Ic "A"
