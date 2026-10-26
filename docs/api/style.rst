@@ -40,7 +40,7 @@ Color/Markup Standards
     - e.g. Use ``[:keys]`` for keystrokes and longnames, and ``[:code]`` for Python and other actual code.
 
 - List relevant commands with the general pattern: ``- [:keys]<keystroke>[/] ([:code]<longname>[/]) to <command helpstring>``.
-    - Use ``{help.commands.<longname>}`` to get the **GuideSheet** to replace it with the properly formatted string above. You can write it out manually if that would result in more detail or clarity, but it's much more preferred to adjust the docstring so that this pattern would work. 
+    - Use ``{help.commands.<longname>}`` to get the **GuideSheet** to replace it with the properly formatted string above. For a command on another sheet type, name the class: ``{help.commands.IndexSheet.save_selected}``. You can write it out manually if that would result in more detail or clarity, but it's much more preferred to adjust the docstring so that this pattern would work. 
 
 - List relevant options with ``[:onclick options-sheet <option name>][:code]option name>[/] to <option helpstring> (default: <option default value>)``.
   - Similarly, use ``{help.options.<option-name>}`` to expand into the above, and prefer to modify the helpstring instead of writing it out manually.
