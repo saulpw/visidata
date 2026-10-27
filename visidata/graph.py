@@ -309,6 +309,10 @@ class GraphSheet(InvertedCanvas):
         # TODO: grid lines corresponding to axis labels
 
         xname = ','.join(xcol.name for xcol in self.xcols if vd.isNumeric(xcol)) or 'row#'
+        yname = ','.join(ycol.name for ycol in self.ycols)
+        title = f'{yname} vs {xname}'
+        self.plotlabel(self.plotviewBox.xcenter - dispwidth(title), 0, title, 'graph_axis')
+
         xname, _ = clipstr(xname, self.left_margin//2-2)
         self.plotlabel(0, self.plotviewBox.ymax+4, xname+'»', 'graph_axis')
 

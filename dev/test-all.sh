@@ -3,6 +3,7 @@
 # Usage: test-all.sh [test scripts...]
 
 source tests/testenv.sh
+vd_testtmp
 # PYTHONFAULTHANDLER: SIGABRT → all-thread traceback dump
 export PYTHON VD NPROCS OUTDIR PYTHONFAULTHANDLER=1
 

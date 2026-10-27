@@ -62,6 +62,8 @@ vd.addGlobals(MySheet=MySheet)  # keyword args, not dict
 ### Caching Per-Row Data
 When you need one cached value per row, use a `Column` with `cache=True` (or `cache='async'` for expensive I/O).  Don't build a separate dict — Column's cache is already keyed by `rowid` and integrates with the sheet lifecycle.  Example: `DirSheet` uses a hidden `Column('preview', width=0, cache=True, ...)` to cache preview sheet objects per file.
 
+Don't put an @asynccache on calcValue, unless you know the rowdef to be simple.  asynccache will expand the entire row every time it is called, which can be more expensive than the actual calcValue.
+
 ### Loaders vs Features
 - **Loaders** (`visidata/loaders/`): defines `vd.open_<ext>()`
 - **Features** (`visidata/features/`): everything else
@@ -79,6 +81,7 @@ Sheet.addCommand('gEnter', 'dive-selected', 'openRows(selectedRows)', 'help')
 - In general, keep `input*()` calls in the execstr, not inside helpers — the menu system inspects the execstr for the string 'input' to determine which commands take input.  To keep execstrs from getting too long, create another inputSomething(). Pass the input result into the helper as an argument.  Exception: when input should not be requested if some other condition fails, and that condition is too complicated for the execstr.
 - A command can only call `input()` once, even with `replay=False`.
 - `replay=False` — not added to cmdlog. `deprecated=True` — hidden from help. `testable=False` — excluded from test sweep.
+- Every registered command runs in the `test_baseCommands` sweep, in everyone's `dev/test-all.sh`, on every machine, with whatever credentials and network that machine has.  When adding, changing, or reviewing a command, consider what it does there: network or paid API calls (maybe only when a key happens to be set), slow or unbounded runtime, writes outside the test dir, external processes.  If any apply, mark it `testable=False` and test it with a mock.
 
 ## API Decorators
 
@@ -89,6 +92,10 @@ def my_method(sheet, arg): ...
 @VisiData.api
 def my_vd_method(vd): ...
 ```
+
+## Progress
+
+`Progress(iterable)` takes its total from `len(iterable)` and counts each item it yields, for a single pass.  For several passes (e.g. once per column), use one `with Progress(total=...) as prog` for the whole operation and bump it with `prog.addProgress(n)`.
 
 ## Options
 

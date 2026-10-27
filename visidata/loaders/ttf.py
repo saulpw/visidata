@@ -102,3 +102,5 @@ def makePen(*args, **kwargs):
 
 
 #TTFGlyphsSheet.bindkey('.', 'open-row')
+
+vd.addGlobals(TTFTablesSheet=TTFTablesSheet, TTFGlyphsSheet=TTFGlyphsSheet)

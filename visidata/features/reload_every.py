@@ -1,34 +1,50 @@
 import os
 import time
 
-from visidata import vd, BaseSheet, Sheet, asyncignore, asyncthread, asyncsingle_queue, Path, ScopedSetattr
+from visidata import vd, BaseSheet, Sheet, asyncignore, asyncsingle_queue, Path, ScopedSetattr, ExpectedException
+
+
+@BaseSheet.api
+def startReload(sheet, reloadfunc):
+    'Return thread from reloadfunc(), or None if a command is still running on *sheet*.'
+    if sheet.lastCommandThreads:
+        return None
+    try:
+        return reloadfunc()
+    except ExpectedException:  # race: a command can start after the check
+        return None
 
 
 @BaseSheet.api
 @asyncignore
 def reload_every(sheet, seconds:int):
+    vd.timeouts_before_idle = -1  # no-idle: getch must keep timing out for reloads to be drawn
     while True:
         # continue reloading till vd.remove() runs, like when the sheet is quit
         if sheet not in vd.sheets:
             break
-        vd.sync(sheet.reload())
+        t = sheet.startReload(sheet.reload)
+        if t:
+            vd.sync(t)
         time.sleep(seconds)
 
 
 @BaseSheet.api
-@asyncthread
+@asyncignore
 def reload_modified(sheet):
     'Spawn thread to call sheet.reload_rows when sheet.source mtime has changed.'
     p = sheet.source
     assert isinstance(p, Path)
     assert not p.is_url()
 
+    vd.timeouts_before_idle = -1  # no-idle: getch must keep timing out for reloads to be drawn
     mtime = 0
     while True:
+        if sheet not in vd.sheets:
+            break
         t = os.stat(p).st_mtime
-        if t != mtime:
+        if t != mtime and sheet.startReload(sheet.reload_rows):
             mtime = t
-            sheet.reload_rows()
         time.sleep(1)
 
 

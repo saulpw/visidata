@@ -1,0 +1,7 @@
+sheet	name	width	type	fmtstr	value	aggregators	sortorder
+data2	Key	5			2		
+data2	C				a2		
+data2	D	4			b2		
+data1	Key	5			1		
+data1	A				a1		
+data1	B	4			b1		

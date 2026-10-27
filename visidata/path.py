@@ -2,10 +2,10 @@ import os
 import os.path
 import sys
 import io
-import codecs
 import pathlib
 from urllib.parse import urlparse, urlunparse
 from functools import wraps, lru_cache
+from typing import Callable, Optional
 
 from visidata import vd
 from visidata import VisiData, Progress
@@ -295,9 +295,10 @@ class Path(os.PathLike):
             return self.rfile.reopen()
 
         if self.fp and not self.fptext:
-            self.fptext = codecs.iterdecode(self.fp,
-                                            encoding=encoding or vd.options.encoding,
-                                            errors=encoding_errors or vd.options.encoding_errors)
+            self.fptext = io.TextIOWrapper(self.decompress(self.fp),
+                                           encoding=encoding or vd.options.encoding,
+                                           errors=encoding_errors or vd.options.encoding_errors,
+                                           newline=newline)
 
         if self.fptext:
             self.rfile = RepeatFile(self.fptext)
@@ -326,35 +327,46 @@ class Path(os.PathLike):
         if self.lines:
             return RepeatFile(self.lines).read()
         elif self.fp:
-            return self.fp.read()
+            return self.decompress(self.fp).read()
         elif self.fptext:
             return self.fptext.read()
         else:
             return self._path.read_text(*args, **kwargs)
 
+    def _zopenfunc(self) -> Optional[Callable]:
+        'Return the open() of the module for this path\'s compression suffix, or None if uncompressed.'
+        if self.compression == 'gz':
+            import gzip
+            return gzip.open
+        elif self.compression == 'bz2':
+            import bz2
+            return bz2.open
+        elif self.compression in ['xz', 'lzma']:
+            import lzma
+            return lzma.open
+        elif self.compression in ('zst', 'zstd'):
+            zstandard = vd.importExternal('zstandard')
+            return zstandard.open
+        return None
+
+    def decompress(self, fp):
+        'Return already-open binary *fp* wrapped in a decompressor, per this path\'s compression suffix.'
+        zopen = self._zopenfunc()
+        return zopen(fp, mode='rb') if zopen else fp
+
     @wraps(pathlib.Path.open)
     def _open(self, *args, **kwargs):
         if self.fp:
-            return FileProgress(self, fp=self.fp, **kwargs)
+            # an archive member is a stream whose name still carries its compression
+            return self.decompress(FileProgress(self, fp=self.fp, **kwargs))
 
         if self.fptext:
             return FileProgress(self, fp=BytesIOWrapper(self.fptext), **kwargs)
 
         path = self
 
-        if self.compression == 'gz':
-            import gzip
-            zopen = gzip.open
-        elif self.compression == 'bz2':
-            import bz2
-            zopen = bz2.open
-        elif self.compression in ['xz', 'lzma']:
-            import lzma
-            zopen = lzma.open
-        elif self.compression in ('zst', 'zstd'):
-            zstandard = vd.importExternal('zstandard')
-            zopen = zstandard.open
-        else:
+        zopen = self._zopenfunc()
+        if not zopen:
             return FileProgress(path, fp=self._path.open(*args, **kwargs), **kwargs)
 
         if 'w' in kwargs.get('mode', ''):

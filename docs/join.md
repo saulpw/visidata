@@ -31,8 +31,10 @@ jointype            description
 `diff`              keeps only rows NOT in all sheets
 `extend`            keeps all rows and retain **SheetType** from first selected sheet
 `merge`             Merges differences from other sheets into first sheet
-`append`            keeps all rows from all sheets; columns from all sheets
-`concat`            keeps all rows from all sheets; columns and type from first sheet
+`append`            keeps all rows from all sheets; matches columns by name, into a generic sheet
+`concat`            keeps all rows from same-type sheets; matches columns by position, keeping the first sheet's type, column names and types
+
+`concat` requires the same sheet type and number of visible columns in each sheet. `append` matches columns by name and accepts any sheets, but the result is a generic sheet, so commands specific to the source sheet type (like opening a sheet from an index row) are not available on it.
 
 ## How to append two datasets
 

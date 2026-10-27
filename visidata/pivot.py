@@ -5,7 +5,7 @@ from visidata import vlen, vd, date, setitem, anytype
 import visidata
 
 
-# discrete_keys = tuple of formatted discrete keys that group the row
+# discrete_keys = list of formatted discrete keys that group the row
 # numeric_key is a range
 # sourcerows is list(all source.rows in group)
 # pivotrows is { pivot_values: list(source.rows in group with pivot_values) }
@@ -226,6 +226,7 @@ class PivotSheet(Sheet):
         groups = {}  # [formattedDiscreteKeys] -> (numericGroupRows:dict(formattedNumericKeyRange -> PivotGroupRow), groupRow:PivotGroupRow)  # groupRow is main/error row
 
         for sourcerow in self.source.iterrows('grouping'):
+            # store keys in a list instead of a tuple, so values on source sheet change when users edit them in PivotSheet
             discreteKeys = list(forward(origcol.getTypedValue(sourcerow)) for origcol in discreteCols)
 
             # wrapply will pass-through a key-able TypedWrapper

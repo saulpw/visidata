@@ -56,7 +56,7 @@ import pathlib
 import urllib.parse
 
 
-__version__ = '0.6'
+__version__ = '0.8'
 
 
 def error(s):
@@ -115,6 +115,14 @@ class RemoteZipInfo:
                     self.header_offset = vals.pop(0)
 
             i += fieldsz
+
+
+def safe_extract_path(base, member):
+    base = pathlib.Path(base).resolve()
+    target = (base / member).resolve()
+    if base != target and base not in target.parents:
+        raise Exception(f'refusing unsafe path in zip member: {member!r}')
+    return target
 
 
 class RemoteZipFile:
@@ -223,10 +231,10 @@ class RemoteZipFile:
 
             path = path or pathlib.Path('.')
 
-            outpath = path/member
+            outpath = safe_extract_path(path, member)
             os.makedirs(outpath.parent, exist_ok=True)
             with self.open(member) as fpin:
-                with open(path/member, mode='wb') as fpout:
+                with open(outpath, mode='wb') as fpout:
                     while True:
                         r = fpin.read(65536)
                         if not r:
@@ -354,6 +362,7 @@ def download_file(f, rzf, args):
     else:
         path = pathlib.Path(f.filename)
         if args.full_filepaths:
+            path = safe_extract_path('.', path)
             path.parent.mkdir(parents=True, exist_ok=True)
         else:
             path = path.name

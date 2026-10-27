@@ -32,3 +32,11 @@ If you wish to be a bit gentler, 'gq' will quit all sheets ('global quit').
 
 
 [1] Control-Q is the only builtin command (necessary sometimes during development).  All other [commands can be overridden](/howto/commands).
+
+# How do I confirm before quitting?
+
+- `options.quitguard = True` in `.visidatarc`: confirm before quitting a sheet with unsaved changes.
+- `vd --quitguard foo.csv`: guard the sheets opened from the command line.  Quitting a guarded sheet always asks, even with no changes.
+- `guard-sheet` (File > Guard > on): guard the current sheet.  `guard-sheet-off` removes the guard.
+
+When exiting VisiData, one confirmation covers all sheets.

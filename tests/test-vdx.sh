@@ -12,6 +12,7 @@ trap "echo SIGTERM; exit;" SIGTERM
 trap "echo SIGINT; exit;" SIGINT
 
 source tests/testenv.sh
+vd_testtmp
 
 export LC_NUMERIC="en_US.UTF-8" #2867
 export LC_TIME="en_US.UTF-8"
@@ -30,12 +31,15 @@ shift $((OPTIND - 1))
 
 VD_OPTS="--batch --config tests/.visidatarc --visidata-dir tests/.visidata"
 
+HAVE_PG=$(psql -d vdtest -c 'SELECT 1' >/dev/null 2>&1 && echo yes)
+
 should_skip() {
     local i="$1"
     case "${i%.vd*}" in
         *-broken) echo "broken" ;;
         *-manual) echo "manual" ;;
         *-perf)   echo "perf" ;;
+        *-pg)     [ -z "$HAVE_PG" ] && echo "no postgres (dev/setup-postgres.sh)" ;;
         *-nosave) return 1 ;;  # not skipped, just no golden comparison
         *-flaky)  return 1 ;;  # not skipped; failures reported but non-fatal
         *-n311)  [ "$PY311" == "True" ] && echo "n311" ;;
@@ -94,6 +98,11 @@ for i in $TESTS ; do
     fi
 done
 
+if [ $((N_TESTS + N_SKIPPED)) -eq 0 ]; then
+    echo "FAIL: no tests matched: ${*:-tests/*.vd*}"
+    exit 1
+fi
+
 # Chunk golden tests into NPROCS sequential batches (keeps similar imports together)
 N_GOLDEN=${#GOLDEN_TESTS[@]}
 CHUNK=$(( (N_GOLDEN + NPROCS - 1) / NPROCS ))
@@ -119,9 +128,10 @@ done
 
 # nosave tests run without replay_ignore_errors so assert-expr failures are caught
 NOSAVE_PID=""
+NOSAVE_OUTPUT="$VD_TESTTMP/test-vdx-nosave-output.txt"
 if [ -n "$NOSAVE_BATCH" ]; then
     NOSAVE_BATCH+="replay-exit"$'\n'
-    env PYTHONPATH=. bin/vd --play - $VD_OPTS <<< "$NOSAVE_BATCH" > /tmp/vd-nosave-output.txt &
+    env PYTHONPATH=. bin/vd --play - $VD_OPTS <<< "$NOSAVE_BATCH" > "$NOSAVE_OUTPUT" 2>&1 &
     NOSAVE_PID=$!
 fi
 
@@ -145,9 +155,9 @@ if [ -n "$NOSAVE_PID" ]; then
     wait $NOSAVE_PID
     nosave_exit=$?
     if [ $nosave_exit -ne 0 ]; then
-        cat /tmp/vd-nosave-output.txt >&2
+        cat "$NOSAVE_OUTPUT" >&2
         # extract failing test name from error output
-        failing_test=$(grep -oP '^\S+-nosave' /tmp/vd-nosave-output.txt | head -1)
+        failing_test=$(grep -oE '^\S+-nosave' "$NOSAVE_OUTPUT" | head -1)
         if [ -n "$failing_test" ]; then
             FAILED_TESTS[$failing_test]=1
         else

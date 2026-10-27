@@ -208,3 +208,5 @@ vd.addMenuItem('System', 'Stats', 'CPU', 'open-cpustats')
 vd.addMenuItem('System', 'Stats', 'memory', 'open-memstats')
 vd.addMenuItem('System', 'Stats', 'processes', 'open-processes')
 vd.addMenuItem('System', 'Stats', 'resource limits', 'open-rlimits')
+
+vd.addGlobals(CPUStatsSheet=CPUStatsSheet, MemStatsSheet=MemStatsSheet, UsefulProcessesSheet=UsefulProcessesSheet, ProcessesSheet=ProcessesSheet, RlimitsSheet=RlimitsSheet)

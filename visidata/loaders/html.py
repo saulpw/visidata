@@ -256,3 +256,5 @@ def HTML(vd, s):
 
 
 VisiData.save_htm = VisiData.save_html
+
+vd.addGlobals(HtmlTablesSheet=HtmlTablesSheet, HtmlLinksSheet=HtmlLinksSheet, HtmlTableSheet=HtmlTableSheet)

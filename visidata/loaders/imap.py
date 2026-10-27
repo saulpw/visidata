@@ -71,3 +71,5 @@ class ImapSheet(TableSheet):
                 self.addRow(p, **kwargs)
         else:
             super().addRow(row, **kwargs)
+
+vd.addGlobals(ImapSheet=ImapSheet)

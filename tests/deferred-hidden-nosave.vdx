@@ -1,0 +1,13 @@
+# changes in hidden columns are not counted or committed
+
+open-file sample_data/employees.sqlite
+open-row
+
+row 0
+col dname
+edit-cell x
+col loc
+edit-cell y
+hide-col
+
+assert-expr sheet.changestr(*sheet.getDeferredChanges()) == 'change 1 values'

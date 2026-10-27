@@ -5,6 +5,8 @@
 #   With no args, tests all formats with roundtrip set in dev/formats.jsonl
 
 source tests/testenv.sh
+vd_testtmp
+OUTDIR="$VD_TESTTMP/test-roundtrip"
 mkdir -p $OUTDIR
 
 FAILED=0
@@ -21,8 +23,6 @@ test_roundtrip() {
         SKIPPED=$((SKIPPED + 1))
         return
     fi
-
-    rm -f "$out1" "$out2"
 
     # First pass: load source, save as format
     $VD "$src" --batch -o "$out1"

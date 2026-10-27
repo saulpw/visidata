@@ -19,6 +19,15 @@ Command(s)                    Operation
 
 ---
 
+## Go to a numbered row or column
+
+`z r` (`go-row-number`) and `z c` (`go-col-number`) go to a 0-based row or column number.
+Negative numbers count from the end: `-1` is the last row or column.
+Column numbers include visible columns first, followed by hidden columns.
+Out-of-bounds numbers move to the nearest end and warn with the resulting position.
+
+---
+
 ## How to search within a sheet
 
 Command(s)              Operation

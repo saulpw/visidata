@@ -1,0 +1,6 @@
+# "Automatic" xlsx text color contrasts with the cell fill
+
+option global xlsx_meta_columns True
+open-file sample_data/issue2988.xlsx
+open-row
+unhide-cols

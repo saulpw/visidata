@@ -37,6 +37,12 @@ vd -f sqlite bar.db
 ls -l | vd -f fixed
 ~~~
 
+To read an Arrow IPC stream from stdin (requires `pyarrow`):
+
+~~~
+vd -f arrows - < data.arrows
+~~~
+
 ### How CLI options apply to files
 
 `-f`/`-if`/`--input-filetype` applies to all subsequent input paths on the command line, not just the one immediately following.  The output file given with `-o` has its own flag, `-of`/`--output-filetype`; without it the output is saved by its extension.

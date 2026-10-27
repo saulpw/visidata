@@ -1,0 +1,7 @@
+# a table saved from a csv loads back with its rows and columns
+
+open-file sample_data/benchmark.csv
+save-sheet $VD_TESTTMP/load-duckdb.duckdb
+open-file $VD_TESTTMP/load-duckdb.duckdb
+row キbenchmark
+open-row

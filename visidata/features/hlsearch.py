@@ -107,7 +107,7 @@ Sheet.addCommand('', 'highlight-sheet', 'highlight_input(None)', 'highlight a re
 Sheet.addCommand('', 'highlight-col', 'highlight_input([cursorCol])', 'highlight a regex in current column')
 Sheet.addCommand('', 'highlight-clear', 'clear_search()', 'clear the current highlight pattern')
 # redefine existing commands
-Sheet.addCommand('r', 'search-keys', 'tmp=cursorVisibleColIndex; cols=keyCols or [visibleCols[0]]; r=moveInputRegex("row key", type="regex-row", columns=cols); setHighlightRegex(r, cols); sheet.cursorVisibleColIndex=tmp', 'go to next row with key matching regex')
+Sheet.addCommand('r', 'search-keys', 'tmp=cursorVisibleColIndex; cols=keyCols or availCols[:1]; r=moveInputRegex("row key", type="regex-row", columns=cols); setHighlightRegex(r, cols); sheet.cursorVisibleColIndex=tmp', 'go to next row with key matching regex')
 Sheet.addCommand('/', 'search-col', 'r=moveInputRegex("search", columns="cursorCol", backward=False); setHighlightRegex(r, [cursorCol])', 'search for regex forwards in current column')
 Sheet.addCommand('?', 'searchr-col', 'r=moveInputRegex("reverse search", columns="cursorCol", backward=True); setHighlightRegex(r, [cursorCol])', 'search for regex backwards in current column')
 Sheet.addCommand('g/', 'search-cols', 'r=moveInputRegex("g/", backward=False, columns="visibleCols"); setHighlightRegex(r, sheet.visibleCols)', 'search for regex forwards over all visible columns')

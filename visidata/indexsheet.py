@@ -99,7 +99,7 @@ BaseSheet.addCommand('g<', 'open-source-prev', 'vd.replace(openSource(source.nex
 IndexSheet.addCommand('gCtrl+R', 'reload-selected', 'reloadSheets(selectedRows or rows)', 'reload all selected sheets')
 
 # when diving into a sheet, remove the index unless it is precious
-IndexSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_columns", source=selectedRows))', 'open Columns Sheet with all visible columns from selected sheets')
+IndexSheet.addCommand('gC', 'columns-selected', 'vd.push(ColumnsSheet("all_columns", source=selectedRows))', 'open Columns Sheet with all columns from selected sheets')
 IndexSheet.addCommand('zCtrl+C', 'cancel-row', 'cancelThread(*cursorRow.currentThreads)', 'abort async thread for current sheet')
 IndexSheet.addCommand('gzCtrl+C', 'cancel-rows', 'for vs in selectedRows: cancelThread(*vs.currentThreads)', 'abort async threads for selected sheets')
 SheetsSheet.addCommand('Enter', 'open-row', 'dest=cursorRow; vd.sheets.remove(sheet) if not sheet.precious else None; vd.push(openRow(dest))', 'open sheet referenced in current row')

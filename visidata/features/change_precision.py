@@ -4,6 +4,7 @@ __author__ = 'Andy Craig, andycraig (https://github.com/andycraig)'
 import re
 
 from visidata import VisiData, vd, Sheet, Column, floatsi, currency, date
+from visidata.features.type_decimal import decimal
 
 FLOAT_FORMAT_RE = r'\{:\.([0-9]+)f\}|%\.([0-9]+)f'
 
@@ -26,9 +27,12 @@ def setcol_precision(col, amount:int):
         except ValueError:
             i = 2
         col.fmtstr = date_fmtstrs[(i+amount)%len(date_fmtstrs)]
-    elif col.type in (float, floatsi, currency):
+    elif col.type in (float, floatsi, currency, decimal):
         if col.fmtstr == '':
-            col.fmtstr = f'%.{2 + amount}f'
+            if col.type is decimal:
+                col.fmtstr = '{:.' + f'{max(0, 2 + amount)}f' + '}'
+            else:
+                col.fmtstr = f'%.{2 + amount}f'
         else:
             m = re.fullmatch(FLOAT_FORMAT_RE, col.fmtstr)
             if not m:

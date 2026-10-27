@@ -7,10 +7,10 @@ import visidata
 
 class TestEditText:
     @pytest.fixture(autouse=True, scope='function')
-    def setUp(self):
+    def setUp(self, monkeypatch):
         self.chars = []
-        visidata.vd.getkeystroke = Mock(side_effect=self.chars)
-        visidata.vd.warning = warnings.warn
+        monkeypatch.setattr(visidata.vd, 'getkeystroke', Mock(side_effect=self.chars))
+        monkeypatch.setattr(visidata.vd, 'warning', warnings.warn)
 
     @pytest.mark.parametrize('keys, result, kwargs', [
         ('Enter', '', {}),

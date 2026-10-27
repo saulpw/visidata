@@ -1,0 +1,35 @@
+# commit writes only visible table columns: undone, hidden, and added columns are skipped
+
+option global undo True
+option global confirm y
+open-file tests/data3.tsv
+save-sheet $VD_TESTTMP/sqlite-commit.sqlite
+open-file $VD_TESTTMP/sqlite-commit.sqlite
+open-row
+
+# undone addcol-incr leaves no pending changes for its column
+row 0
+add-row
+col E
+addcol-incr
+undo-last
+col Key
+row 1
+edit-cell 5
+col E
+edit-cell e5
+
+# added column not in the table is skipped with a warning
+allow-error not committing columns missing from table
+addcol-incr
+
+row 0
+col E
+edit-cell e1x
+
+# changes in hidden columns are not committed
+col F
+edit-cell f1x
+hide-col
+
+commit-sheet

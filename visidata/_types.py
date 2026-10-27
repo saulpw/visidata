@@ -40,7 +40,9 @@ anytype.__name__ = ''
 @VisiData.global_api
 def numericFormatter(vd, fmtstr, typedval):
     try:
-        fmtstr = fmtstr or vd.options['disp_'+type(typedval).__name__+'_fmt']
+        fmtstr = fmtstr or vd.options.get('disp_'+type(typedval).__name__+'_fmt')
+        if fmtstr is None:
+            return str(typedval)
         if fmtstr[0] == '%':
             return locale.format_string(fmtstr, typedval, grouping=False)
         else:

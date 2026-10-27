@@ -1,5 +1,135 @@
 # VisiData version history
 
+# v3.5 (2026-10-27)
+
+Thanks to @midichef for bugfixes and reviews, and to @VXNCXNX, @danielwe, @chutzimir, @mpr1255, @horizonbymuneeb, @chiliec, @dacodas, @maxfain, and @khughitt for their contributions.
+
+## Security
+
+- [pandas] `.pickle` files are no longer loaded unless the new `pandas_allow_pickle` option is set (default off).  Unpickling runs arbitrary code from the file, so opening an untrusted `.pickle` could execute it.  CVE pending, reported by @Santoshkumarpuppala.
+- [unzip_http] refuse zip members whose path resolves outside the extraction directory (Zip Slip).  CVE-2026-41958, reported by @MaxFreedomPollard, and independently by @robsherw of Cisco Talos and six others.  Also fixed in unzip-http 0.8.
+- [eml] refuse attachment filenames that resolve outside the extraction directory in `gx` (path traversal).  CVE-2026-42532, reported by @robsherw of Cisco Talos (TALOS-2026-2415).
+
+## Breaking Changes
+
+- [join] `concat` matches columns by position and keeps the first sheet's column names; sheets with the same names in a different order now line up by position.  Use `append` to match by name. (#3208)
+- [save] dict/list cells save as JSON in text formats, instead of the previous text rendering (#2944)
+- [cmdlog] `go-` movement commands are no longer logged, so `repeat-last` repeats the last real command and saved `.vdj` files leave out cursor moves (#3129)
+- [describe] all null forms count as one distinct value, which lowers distinct counts by one (#3223)
+- [options] reading an undefined option warns and returns None, instead of raising
+
+## New Features
+
+- [postgres] overhaul postgres loader: fresh connection per query, `/dbname/tablename` URLs, `exec-sql` and `edit-sql`, lazy table loading with streamed rows (#282 #586 #727 #2989)
+- [duckdb] add native duckdb loader @mpr1255 (#3035)
+- [decimal] add opt-in decimal type (`type-decimal`, unbound by default); parses currency and parenthesized accounting negatives (#2396)
+- [condfmt] add `color-cell-from-col` and `color-row-from-col` (#2764)
+- [cmdlog] add `set-envvar`; environment changes are recorded for replay (#3195)
+- [incr] add `addcol-incr-key`: increment restarts at each change in key columns
+- [xml] add `dive-xml-table` to open an element's children as a table
+- [dedupe] add `select-col-duplicates` to select duplicate cells in one column @midichef
+- [layout] add `resize-col-max-all` and `resize-cols-max-all`, sized by all rows (#2780)
+- [vdsql] add `syscopy-sql`; enable `copy-cell` and `copy-cells` (#2393)
+- [save-svg] add `plt_linestyle` option for line charts (#3002)
+- [graph] add centered "y vs x" title
+- [server] ship the `vdx` command-server client with `vd`
+- [undo] add `zU` undo-redo-input: undo the last change and rerun it with its input prefilled; `redo-input` (unbound) redoes with input prefilled (#3031)
+
+## Improvements
+
+- [cliptext] wrap text by display width with wcwidth>=0.5 when installed; zero width for combining marks and format chars (#2416 #2685)
+- [sidebar] draw sidebar in the active pane when split; rearrange input keystroke help into one column (#2202)
+- [statusbar] keep the active tab visible (#2928)
+- [menu] lighten default menu color, distinct from active status (#3161)
+- [column] hidden is its own flag; width survives hide/unhide; `.vds` saves it (#3214)
+- [movement] press `go-right` twice to enter hidden columns (#3215)
+- [movement] warn on clamped numbered jumps (#3166)
+- [macros] recorded `{braces}` play back literally (`braces=literal`); `{{ }}` escapes braces in parameterized macros (#2785)
+- [macros] unbind the old keystroke when a macro's keystroke changes (#2784)
+- [aggregators] footer totals refresh after row and cell changes (#3003)
+- [sheets] `Q` frees rows held by undos and selection
+- [sheets] exit prompt only for modified or guarded sheets (#3173)
+- [sheets] column layout no longer depends on load timing (#3124)
+- [reload] keep the screen live while a reload watcher runs (#2624)
+- [join] `concat` keeps the first sheet's rowdef; `origin_sheet` is settable (#3187)
+- [join] clarify `append` vs `concat` in help and docs (#3187)
+- [input] Tab completes in multi-field prompts with a completer (open-file, save-sheet); Shift+Up/Down switch fields (#3169)
+- [shell] `addcol-shell` delays between process starts; Ctrl+C kills running commands (#3103)
+- [color] derive color and pair limits from the terminal (#3206)
+- [main] match sheet order to command line args @midichef (#3225)
+- [apps] loader stubs auto-import their app (#3126)
+- [config] respect `XDG_DATA_HOME`/`XDG_STATE_HOME` on macOS @danielwe
+- [windows] treat Cygwin and MSYS2 environments as Windows @dacodas
+- [man] generate man pages during sdist build; ship man sources (#3019)
+
+## Loaders
+
+- [postgres] quote identifiers and pass schema as a parameter; connect without a password in the URL (#2989)
+- [vdsql] open tables outside the default postgres schema; `postgres_schema='*'` skips system schemas (#2027 #2203)
+- [duckdb] save rows in bulk via unnest (#3237)
+- [archive] decompress members by suffix; open a tar nested in another archive; `zEnter` opens a member with a chosen filetype @chutzimir (#3212)
+- [xlsx] contrast Automatic text color with the cell fill (#2988)
+- [vds] open the saved stack instead of the index (#2309)
+- [vds] keep columns with duplicate names distinct; keep keys absent from sparse rows (#3146)
+- [vds] save a column type only when it can be loaded back @VXNCXNX (#3175)
+- [sqlite] commit only visible table columns; save untyped columns with no declared type
+- [arrow] read source once, so stdin works (#3184)
+- [vcf] fix loader halting on folded lines @chiliec
+- [jsonla] save only the first sheet; load ragged rows
+- [rec] keep first record of each later sheet
+- [path] decode in-memory files with universal newlines, like disk files (#2571)
+
+## Bugfixes
+
+- [undo] make suppressUndo per-thread (#3165)
+- [join] prevent error on undo of edit to ConcatColumn; edits set the modified flag @midichef
+- [join] keep same-named columns distinct when appending sheets @VXNCXNX (#3178)
+- [dedupe] don't crash on unhashable typed values @VXNCXNX (#3196)
+- [dedupe] compare values the way `freq-col` groups them (#3219)
+- [describe] `select-cell` and `dive-cell` choose the right cells @midichef (#3223)
+- [describe] even-count median selects rows with either middle value; blank and #ERR stat cells fail with a reason (#3223)
+- [describe] dive on errors/nulls copies the row list
+- [seaborn] prevent PicklingError on Python 3.14 @midichef
+- [color] prevent early crash on colorless terminals like vt100 @midichef (#3206)
+- [modify] do not commit changes in hidden columns; resize marks modified only on hide/unhide (#3122)
+- [columns] drop all-hidden phantom column; keep a placeholder column for sheets with no columns (#3163)
+- [column] recalc on type change and its undo @horizonbymuneeb (#3234)
+- [metasheets] columns-all includes hidden columns and refreshes its source (#3190 #3191)
+- [sheets] SettableColumn values survive deepcopied rows @VXNCXNX; `dup-rows-deep` keeps sheets in rows as references (#3174)
+- [sheets] `currow` can read the cursor column; `as_dict` recursion error names the column @midichef (#3210)
+- [clipboard] pasted columns get their own values (#3146)
+- [cmdlog] log commands run with undo suppressed
+- [aggregators] canceled footer totals no longer stay in progress (#2207)
+- [input] preserve getch printable keys (#3230)
+- [history_palette] keep the prompt default reachable
+- [save] `safety_first` translates only str values
+- [main] `+sheet:subsheet:0:0` opens the subsheet
+- [mainloop] draw_all is a no-op without a screen (#3173)
+- [replay] batch status and debug go to stderr @danielwe
+- [repeat] help for `repeat-last` matches behavior
+
+## API
+
+- [api] export every core, loader, and feature sheet type to globals (#3086)
+- [api] add `vd.setEnvvar()` (#3195)
+- [column] `Column.hidden` is a settable attribute, separate from width (#3214)
+- [join] rename `ConcatSheet` to `AppendSheet`; `ConcatSheet` remains as a deprecated alias (#3187)
+
+## Experimental
+
+- [clipboard_shapes] add copy/paste bindings by shape: `y`/`p` then `.` cell, `-` row, `|` column, `s` for selected rows @midichef (#3008)
+- [llm] default to Opus 5.5; structured JSON replies; `llm-query-sheet` and `llm-query-selected` send rows as one query; stream replies into the sheet (#2947)
+
+## Docs
+
+- [docs] add SECURITY.md with the private reporting process
+- [docs] CONTRIBUTING: new contributors get in touch before opening a PR (#3205)
+- [docs] document plugin directory selection (#3067)
+- [docs] postgres URL forms, libpq defaults, and exec-sql (#282 #2989)
+- [docs] fix graph page asciinema player for v3 @maxfain
+- [docs] split: quitting the last sheet in a window
+- [dev] quote zsh completion suffix @khughitt (#3181)
+
 # v3.4 (2026-06-30)
 
 Thanks to @midichef for many bugfixes and improvements.

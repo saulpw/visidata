@@ -1,0 +1,4 @@
+name	schema_name	table_type	rows	cols	keys	source
+t1	main	BASE TABLE	2	2		duckdb-index
+v1	main	VIEW	0	1		duckdb-index
+t2	other	BASE TABLE	0	3		duckdb-index

@@ -170,14 +170,11 @@ class ColorMaker:
         if r is None:
             return None
 
-        try: # test to see if color is available
-            curses.init_pair(255, r, 0)
-            self.colorpair_cache[colorname] = r
-            return r
-        except curses.error:
-            return None  # not available
-        except ValueError:  # Python 3.10+  issue #1227
-            return None
+        if not 0 <= r < getattr(curses, 'COLORS', 0):
+            return None  # not available  #1227 #3206
+
+        self.colorpair_cache[colorname] = r
+        return r
 
     def _attrnames_to_num(self, attrnames:'list[str]') -> int:
         attrs = 0
@@ -202,7 +199,8 @@ class ColorMaker:
     def _get_colorpair(self, fg:'int|None', bg:'int|None', colorname:str) -> int:
             pairnum, _ = self.color_pairs.get((fg, bg), (None, ''))
             if pairnum is None:
-                if len(self.color_pairs) > 254:
+                maxpairs = min(256, getattr(curses, 'COLOR_PAIRS', 0))
+                if len(self.color_pairs) >= maxpairs-1:
                     self.color_pairs.clear()  # start over
                     self.colorpair_cache.clear()
                 pairnum = len(self.color_pairs)+1
@@ -210,7 +208,7 @@ class ColorMaker:
                 if bg is None: bg = -1
                 try:
                     curses.init_pair(pairnum, fg, bg)
-                except curses.error:
+                except (curses.error, ValueError):  #3206
                     return 0  # do not cache
                 self.color_pairs[(fg, bg)] = (pairnum, colorname)
 

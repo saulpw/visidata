@@ -153,6 +153,8 @@ class Option:
 @VisiData.api
 class OptionsObject:
     'minimalist options framework'
+    _warned_unknown_options = set()
+
     def __init__(self, mgr, obj=None):
         object.__setattr__(self, '_opts', mgr)
         object.__setattr__(self, '_cache', {})
@@ -197,13 +199,19 @@ class OptionsObject:
     def getdefault(self, optname):
         return self._get(optname, 'default').value
 
+    def _warn_unknown(self, optname):
+        if optname not in self._warned_unknown_options:
+            self._warned_unknown_options.add(optname)
+            vd.warning(f'reading unknown option `{optname}`')
+
     def getonly(self, optname, obj, default):
-        'Return value of option optname as set on obj, or default if not set specifically on obj'
+        'Return value set on obj, default if unset on obj, or None if undefined.'
         d = self._opts.get(optname, None)
-        if d:
-            opt = d.get(self._opts.objname(obj), None)
-            if opt:
-                return opt.value
+        if not d:
+            return self._warn_unknown(optname)
+        opt = d.get(self._opts.objname(obj), None)
+        if opt:
+            return opt.value
         return default
 
     def set(self, optname, value, obj='global', cmdlog=True):
@@ -284,10 +292,9 @@ class OptionsObject:
 
     def __getattr__(self, optname):      # options.foo
         'Return value of option `optname` for stored options context.'
-        opt = self._get(optname, obj=self._obj)
-        if not opt:
+        if optname.startswith('_'):  # dunder probes (copy, pickle, hasattr)
             raise AttributeError(optname)
-        return opt.value
+        return self[optname]
 
     def __setattr__(self, optname, value):   # options.foo = value
         'Set *value* of option *optname* for stored options context.'
@@ -296,7 +303,7 @@ class OptionsObject:
     def __getitem__(self, optname):      # options[optname]
         opt = self._get(optname, obj=self._obj)
         if not opt:
-            raise ValueError('no option "%s"' % optname)
+            return self._warn_unknown(optname)
         return opt.value
 
     def __setitem__(self, optname, value):   # options[optname] = value
@@ -598,7 +605,7 @@ def setPersistentOptions(vd, **kwargs):
                 fp.write(f'options.{optname}={repr(optval)}\n')
 
 
-vd.option('visidata_dir', user_config_dir('visidata'), 'directory to load and store additional files', sheettype=None)
+vd.option('visidata_dir', user_config_dir('visidata'), 'VisiData directory for plugins and other files; set with $VD_DIR or --visidata-dir', sheettype=None)
 
 BaseSheet.bindkey('^M', '^J')  # for windows ENTER
 

@@ -283,3 +283,7 @@ vd.addGlobals(deprecated_warn=deprecated_warn)
 
 #vd.option('disp_expert', 'max level of options and columns to include')
 #vd.option('disp_help', '')
+
+# v3.5
+
+vd.addGlobals(ConcatSheet=visidata.AppendSheet)  # deprecated in v3.5; use AppendSheet

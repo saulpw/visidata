@@ -1,0 +1,14 @@
+# editing a deepcopied join row must not change its source rows  #3174
+
+open-file tests/data1.tsv
+key-col
+open-file tests/data2.tsv
+key-col
+join-sheets-top2 full
+dup-rows-deep
+col A
+assert-expr-row A == 'c1'
+edit-cell XX
+assert-expr-row A == 'XX'
+quit-sheet
+assert-expr-row A == 'c1'

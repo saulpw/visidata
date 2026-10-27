@@ -4,7 +4,7 @@ import functools
 from copy import copy
 
 from visidata import vd, VisiData, asyncthread, Sheet, Progress, IndexSheet, Column, CellColorizer, ItemColumn, SubColumnItem, TypedWrapper, ColumnsSheet, AttrDict, dispwidth
-from visidata import WritableColumn
+from visidata import WritableColumn, SettableColumn
 
 vd.help_join = '# Join Help\nHELPTODO'
 
@@ -28,21 +28,23 @@ def _appendRowsAfterLoading(joinsheet, origsheets):
     if len(colcounts) != 1:
         vd.fail('sheets must have same number of columns for `concat`; use `append` instead')
 
-    # rowdef: (srcSheet, srcRow), same as ConcatSheet  #2929
-    srcKeyColNames = {c.name for c in origsheets[0].keyCols}
+    if len({tuple(c.name for c in vs.visibleCols) for vs in origsheets}) > 1:
+        vd.warning('column names differ; `concat` matches columns by position')
+
+    # rowdef: srcRow, native, so sheet-typed commands still work  #3187
     joinsheet.columns = []
-    joinsheet.addColumn(ItemColumn('origin_sheet', 0, width=0))
-    keyedcols = collections.defaultdict(dict)  # name -> { sheet -> col }
+    origincol = joinsheet.addColumn(SettableColumn('origin_sheet', width=0))  #2929
+    keyedcols = collections.defaultdict(dict)  # position -> { sheet -> col }
 
     for vs in origsheets:
-        joinsheet.rows.extend((vs, r) for r in vs.rows)
-        for c in vs.visibleCols:
-            if not keyedcols[c.name]:
-                newcol = ConcatColumn(c.name, cols=keyedcols[c.name], type=c.type)
-                if c.name in srcKeyColNames:
-                    newcol.keycol = c.keycol
+        joinsheet.rows.extend(vs.rows)
+        for r in vs.rows:
+            origincol.putValue(r, vs)
+        for i, c in enumerate(vs.visibleCols):  #3208
+            if not keyedcols[i]:
+                newcol = ConcatColumn(c.name, cols=keyedcols[i], type=c.type, keycol=c.keycol)
                 joinsheet.addColumn(newcol)
-            keyedcols[c.name][vs] = c
+            keyedcols[i][vs] = c
 
 
 @VisiData.api
@@ -74,7 +76,7 @@ def openJoin(sheet, others, jointype=''):
         if len(sheettypes) != 1:  # only one type of sheet #1598
             vd.fail('only same sheet types can be concat-joined; use `append`')
 
-        joinsheet = copy(sheet)
+        joinsheet = copy(sheets[0])  # not `sheet`, which may be the SheetsSheet itself (g& on sheets stack)
         joinsheet.name = name
         joinsheet.rows = []
         joinsheet.source = sheets
@@ -85,7 +87,7 @@ def openJoin(sheet, others, jointype=''):
 
     elif jointype == 'append':
         name = '&'.join(vs.name for vs in sheets)
-        return ConcatSheet(name, source=sheets)
+        return AppendSheet(name, source=sheets)
 
     nkeys = set(len(s.keyCols) for s in sheets)
     if 0 in nkeys or len(nkeys) != 1:
@@ -109,8 +111,8 @@ vd.jointypes = [AttrDict(key=k, desc=v) for k, v in {
     'outer': 'only rows with matching keys on first selected sheet',
     'full': 'all rows from all sheets (union)',
     'diff': 'only rows NOT in all sheets',
-    'append': 'all rows from all sheets; columns from all sheets',
-    'concat': 'all rows from all sheets; columns and type from first sheet',
+    'append': 'all rows from all sheets; columns matched by name; generic sheet',
+    'concat': 'all rows from same-type sheets; columns by position; keeps first sheet\'s type',
     'extend': 'only rows from first sheet; type from first sheet; columns from all sheets',
     'merge': 'all rows from all sheets; where keys match, use latest truthy value',
 }.items()]
@@ -331,9 +333,9 @@ def ExtendedSheet_reload(self, sheets):
                     self.addRow(combinedRow[sheets[0]])
 
 
-## for ConcatSheet
-class ConcatColumn(WritableColumn):
-    '''ConcatColumn(name, cols={srcsheet:srccol}, ...)'''
+## for AppendSheet
+class AppendColumn(WritableColumn):
+    '''AppendColumn(name, cols={srcsheet:srccol}, ...)'''
     def getColBySheet(self, s):
         return self.cols.get(s, None)
 
@@ -343,22 +345,44 @@ class ConcatColumn(WritableColumn):
         if srcCol:
             return srcCol.calcValue(srcRow)
 
-    def setValue(self, row, v):
+    def setValue(self, row, v, setModified=True):
         srcSheet, srcRow = row
         srcCol = self.getColBySheet(srcSheet)
         if srcCol:
-            srcCol.setValue(srcRow, v)
+            srcCol.setValue(srcRow, v, setModified=setModified)
+            if setModified:
+                self.sheet.setModified()
+        else:
+            vd.fail('column not on source sheet')
+
+
+class ConcatColumn(AppendColumn):
+    'AppendColumn over native rows; the row\'s source sheet comes from *origincol*.'
+    @property
+    def origincol(self):
+        return self.sheet.column('origin_sheet')  # lookup, not a stored ref: copied sheets get copies of this column
+
+    def calcValue(self, row):
+        srcCol = self.getColBySheet(self.origincol.getValue(row))
+        if srcCol:
+            return srcCol.calcValue(row)
+
+    def setValue(self, row, v, setModified=True):
+        srcCol = self.getColBySheet(self.origincol.getValue(row))
+        if srcCol:
+            srcCol.setValue(row, v, setModified=setModified)
+            if setModified:
+                self.sheet.setModified()
         else:
             vd.fail('column not on source sheet')
 
 
 # rowdef: (srcSheet, srcRow)
-class ConcatSheet(Sheet):
+class AppendSheet(Sheet):
     'combination of multiple sheets by row concatenation. source=list of sheets. '
     columns = [ItemColumn('origin_sheet', 0, width=0)]
     def iterload(self):
-        # only one column with each name allowed per sheet
-        keyedcols = collections.defaultdict(dict)  # name -> { sheet -> col }
+        keyedcols = collections.defaultdict(dict)  # name or (name, nth) -> { sheet -> col }
 
         with Progress(gerund='loading'):
             vd.ensureLoaded(self.source)
@@ -369,15 +393,18 @@ class ConcatSheet(Sheet):
                     yield (sheet, r)
                     prog.addProgress(1)
 
-                for idx, col in enumerate(sheet.visibleCols):
-                    if not keyedcols[col.name]:  # first column with this name/number
-                        self.addColumn(ConcatColumn(col.name, cols=keyedcols[col.name], type=col.type))
+                # columns with duplicate names on the same sheet are keyed by
+                # (name, nth occurrence), so they stay distinct columns  #3178
+                nameoccurrences = collections.Counter()
+                for col in sheet.visibleCols:
+                    n = nameoccurrences[col.name]
+                    nameoccurrences[col.name] += 1
+                    key = col.name if n == 0 else (col.name, n)
 
-                    if sheet in keyedcols[col.name]:  # two columns with same name on sheet
-                        keyedcols[idx][sheet] = col  # key by column num instead
-                        self.addColumn(ConcatColumn(col.name, cols=keyedcols[idx], type=col.type))
-                    else:
-                        keyedcols[col.name][sheet] = col
+                    if not keyedcols[key]:  # first column with this name/occurrence
+                        self.addColumn(AppendColumn(col.name, cols=keyedcols[key], type=col.type))
+
+                    keyedcols[key][sheet] = col
 
 
 @VisiData.api
@@ -436,3 +463,5 @@ def test_join_unhashable(vd):
     s2 = Sheet('b', columns=cols(), rows=[{'key': [1, 2], 'val': 'from-b'}])
     kc = JoinKeyColumn('key', keycols=[s1.column('key'), s2.column('key')])
     assert kc.calcValue({s1: s1.rows[0], s2: s2.rows[0]}) == [1, 2]
+
+vd.addGlobals(JoinSheet=JoinSheet, AppendSheet=AppendSheet)

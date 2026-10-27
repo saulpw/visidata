@@ -1,0 +1,10 @@
+# nested and TIME columns load as-is, not as errors
+
+open-file tests/data3.tsv
+save-sheet $VD_TESTTMP/duckdb-types.duckdb
+open-file $VD_TESTTMP/duckdb-types.duckdb
+exec-sql DROP TABLE data3; CREATE TABLE t (id INTEGER, xs INTEGER[], s STRUCT(a INTEGER, b VARCHAR), m MAP(VARCHAR, INTEGER), tm TIME, d DATE); INSERT INTO t VALUES (1, [1, 2], {'a': 1, 'b': 'x'}, MAP {'k': 5}, '12:34:56', '2026-10-29')
+quit-sheet
+reload-sheet
+row キt
+open-row

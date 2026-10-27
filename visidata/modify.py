@@ -300,7 +300,7 @@ def putChanges(sheet):
 
 @Sheet.api
 def getDeferredChanges(sheet):
-    '''Return changes made to deferred sheets that have not been committed, as a tuple (added_rows, modified_rows, deleted_rows).  *modified_rows* does not include any *added_rows* or *deleted_rows*.
+    '''Return changes made to deferred sheets that have not been committed, as a tuple (added_rows, modified_rows, deleted_rows).  *modified_rows* does not include any *added_rows* or *deleted_rows*, or changes in hidden columns.
 
         - *added_rows*: { rowid:row, ... }
         - *modified_rows*: { rowid: (row, { col:val, ... }), ... }
@@ -311,10 +311,13 @@ def getDeferredChanges(sheet):
 
     # only report mods if they aren't adds or deletes
     mods = {} # [rowid] -> (row, dict(col:val))
+    visibleCols = set(sheet.visibleCols)
     for row, rowmods in sheet._deferredMods.values():
         rowid = sheet.rowid(row)
         if rowid not in sheet._deferredAdds and rowid not in sheet._deferredDels:
-            mods[rowid] = (row, {col:val for col, val in rowmods.items() if sheet.isChanged(col, row)})
+            changed = {col:val for col, val in rowmods.items() if col in visibleCols and sheet.isChanged(col, row)}
+            if changed:
+                mods[rowid] = (row, changed)
 
     return sheet._deferredAdds, mods, sheet._deferredDels
 

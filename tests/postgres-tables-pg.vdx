@@ -1,0 +1,5 @@
+# tables sheet lists tables without loading them  #282
+
+open-file postgres:///vdtest
+col rows
+hide-col

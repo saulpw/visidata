@@ -16,6 +16,12 @@ Commands(s)     Operation
 
 ---
 
+## Increment by key
+
+{help.commands.addcol-incr-key}
+
+Mark grouping columns as keys with `!`.  Numbering restarts at `options.incr_base` whenever any key column changes in the current row order.  A returning key starts a new count.  With no key columns, numbering continues across all rows, like `i`.
+
 ## How to hide (remove) and unhide (return) columns
 
 ###### How to hide columns
@@ -27,8 +33,10 @@ Commands(s)     Operation
 1. Press `Shift+C` on the source sheet to open its **Columns sheet**.
 2. Move the cursor right to the **width** column.
 3. Move the cursor down to the row which represents the column you wish to hide.
-4. Press `e` followed by `0` to set the width for that column to **0**.
+4. Press `e` followed by `0`.
 5. Press `q` to return to the source sheet.
+
+Hidden columns are drawn as 1-cell columns to the right of the visible ones.  Hidden columns can be viewed without unhiding by moving the cursor onto them.  At the last visible column, press `go-right` (Right arrow or `l`) twice to move past the visible columns into the hidden columns.
 
 ###### How to unhide columns
 
@@ -38,7 +46,7 @@ Commands(s)     Operation
 
 1. Press `Shift+C` on the source sheet to open its **Columns sheet**.
 2. Move the cursor right to the **width** column.
-3. Move the cursor down to the row which represents the column you wish to unhide. Currently, that cell should contain the value **0**.
+3. Move the cursor down to the row which represents the column you wish to unhide.
 4. Press `e` followed by a *positive number* to set the width.
 5. Press `q` to return to the source sheet.
 
@@ -71,11 +79,25 @@ There is also the `floatlocale` type, which uses Python's `locale.atof` to parse
 
 If you need locale-specific float parsing regularly, you may want to [rebind](/docs/customize) `%` or `z%` (or maybe some other keystroke) to `type-floatlocale` instead.
 
+The `decimal` type filters out non-numeric characters like `currency`, but parses the remainder as a Python [Decimal](https://docs.python.org/3/library/decimal.html), so sums and other arithmetic are exact: `0.10 + 0.20` is `0.30`, not `0.30000000000000004`.  It keeps the number of decimal places from the source (`0.10` stays `0.10`).  The `type-decimal` command is unbound by default; to try it, [bind](/docs/customize) `z$` and `gz$` in `~/.visidatarc`:
+
+~~~
+Sheet.bindkey('z$', 'type-decimal')
+ColumnsSheet.bindkey('gz$', 'type-decimal-selected')
+~~~
+
+Accounting-style negatives in parentheses, like `(12.34)`, parse as negative.
+
+In expressions, a `decimal` can be added to or multiplied by an `int` or another `decimal`, but not a `float`: `amt * 1.1` is an error.  Use `amt * Decimal("1.1")` instead.
+
 The following example uses the file [sample.tsv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/sample.tsv).
 
 <div class="asciicast">
-    <asciinema-player id="player-types" poster="npt:0:20" rows=27 src="../casts/types.cast"></asciinema-player>
+    <div id="player-types"></div>
     <script type="text/javascript" src="/asciinema-player.js"></script>
+    <script type="text/javascript">
+        AsciinemaPlayer.create('../casts/types.cast', document.getElementById('player-types'), { poster: 'npt:0:20', rows: 27 });
+    </script>
 </div>
 
 ###### How to batch specify column types for more than one column
@@ -97,6 +119,7 @@ Type      Option            Default
 int       `disp_int_fmt`      `{:.0f}`
 float     `disp_float_fmt`    `{:.02f}`
 currency  `disp_currency_fmt` `%0.2f`
+decimal   `disp_decimal_fmt`  `{}`
 date      `disp_date_fmt`     `%Y-%m-%d`
 
 Ways to adjust the display formatting:
@@ -111,6 +134,8 @@ There are several formatting styles offered:
 * Formatting that starts with `'%'` (e.g. `%0.2f`) will use [locale.format_string()](https://docs.python.org/3.6/library/locale.html#locale.format_string).
 * Otherwise (e.g. `{:.02f}`), formatting will be passed to Python's [string.format()](https://docs.python.org/3/library/string.html#custom-string-formatting).
 * Date fmtstr are passed to [strftime](https://strftime.org/).
+
+For `decimal` columns, use `string.format()` style (e.g. `{:.2f}`); `%` formatting converts the value to a float first.
 
 The default for currency uses `locale.format_string()`. The default for int/float/date use `string.format()`.
 
@@ -188,7 +213,10 @@ Python regular expressions provide more finetuned column splitting. The followin
 uses the commands for column splitting and transformation with [xd/puzzles.tsv](http://xd.saul.pw/xd-metadata.zip).
 
 <div class="asciicast">
-    <asciinema-player id="player-split-regex" poster="npt:0:20" rows=27 src="../casts/split-regex.cast"></asciinema-player>
+    <div id="player-split-regex"></div>
+    <script type="text/javascript">
+        AsciinemaPlayer.create('../casts/split-regex.cast', document.getElementById('player-split-regex'), { poster: 'npt:0:20', rows: 27 });
+    </script>
 </div>
 
 ###
@@ -241,7 +269,10 @@ The following demo shows `(` commands applied to this data:
 ~~~
 
 <div class="asciicast">
-    <asciinema-player id="player-expand-cols" poster="npt:0:20" rows=13 src="../casts/expand-cols.cast"></asciinema-player>
+    <div id="player-expand-cols"></div>
+    <script type="text/javascript">
+        AsciinemaPlayer.create('../casts/expand-cols.cast', document.getElementById('player-expand-cols'), { poster: 'npt:0:20', rows: 13 });
+    </script>
 </div>
 
 Note that by default the expansion logic will look for nested columns in **up to** `options.default_sample_size` (Default: 100) **rows surrounding the cursor**. This behavior can be controlled by adjusting `default_sample_size` in the **Options Sheet**, or setting `options.default_sample_size` in the `~/.visidatarc` file.
@@ -318,6 +349,10 @@ When using `=`, and wanting to reference the current column, we recommend using 
 ---
 
 ## How to configure multiple columns
+
+{help.commands.columns_all}
+
+Hidden columns are included. Edit a hidden column's `width` to a positive number to unhide it on its source sheet.
 
 Properties of columns on the source sheet can be changed by using [standard editing commands](/man#edit) on its **Columns sheet** (accessed with `Shift+C`). In particular, it facilitates the selection of multiple columns, followed by utilising one of the `g`-prefixed commands to modify all of them.
 

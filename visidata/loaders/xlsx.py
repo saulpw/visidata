@@ -5,12 +5,14 @@ import re
 from colorsys import rgb_to_hls, hls_to_rgb
 
 from visidata import VisiData, vd, Sheet, Column, Progress, IndexSheet, ColumnAttr, SequenceSheet, AttrDict, AttrColumn
-from visidata import CellColorizer, getattrdeep, rgb_to_attr
+from visidata import CellColorizer, getattrdeep, rgb_to_attr, xterm256_to_rgb
 from visidata.type_date import date
 
 
 vd.option('xlsx_meta_columns', False, 'include columns for cell objects, font colors, and fill colors', replay=True)
 vd.option('xlsx_color_cells', True, 'color cells based on xlsx source')
+vd.option('color_xlsx_auto_dark', '16 black', 'color of Automatic xlsx text on light fills')
+vd.option('color_xlsx_auto_light', '231 white', 'color of Automatic xlsx text on dark fills')
 
 @VisiData.api
 def open_xls(vd, p):
@@ -216,12 +218,18 @@ def colorize_xlsx_cell(sheet, col, row):
 
     if bg == '-1' or fg == '-1':
         fg, bg = '-1', '-1'
+    elif not fg and bg.isdigit():  #2988
+        r, g, b = xterm256_to_rgb(bg)
+        if 0.299*r + 0.587*g + 0.114*b > 128:
+            fg = sheet.options.color_xlsx_auto_dark
+        else:
+            fg = sheet.options.color_xlsx_auto_light
 
     return f'{fg} on {bg}'
 
 @XlsxSheet.api
 def xlsx_color_to_xterm256(sheet, color) -> str:
-    if not color:
+    if not color or color.type == 'auto':
         return ''
 
     if color.type == 'rgb':
@@ -302,3 +310,5 @@ def tint_luminance(tint, lum):
         return int(round(lum * (1.0 + tint)))
     else:
         return int(round(lum * (1.0 - tint) + (HLSMAX - HLSMAX * (1.0 - tint))))
+
+vd.addGlobals(XlsxIndexSheet=XlsxIndexSheet, XlsxSheet=XlsxSheet, XlsIndexSheet=XlsIndexSheet, XlsSheet=XlsSheet)

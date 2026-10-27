@@ -1,10 +1,15 @@
 import itertools
 import contextlib
+import threading
 from copy import copy
 
-from visidata import vd, options, VisiData, BaseSheet, UNLOADED
+from visidata import vd, VisiData, BaseSheet
 
-vd._undo_suppressed = False  # set while building a sheet's layout; GIL makes the flip atomic
+class _UndoSuppressed(threading.local):
+    'per-thread: overlapping async reloads must not clobber each other #3165'
+    value = False
+
+vd._undo_suppressed = _UndoSuppressed()
 
 BaseSheet.init('undone', list)  # list of CommandLogRow for redo after undo
 
@@ -21,18 +26,18 @@ def isUndoableCommand(longname):
 @VisiData.api
 @contextlib.contextmanager
 def suppressUndo(vd):
-    'Do not record undos within this block (e.g. while constructing a sheet).'
-    old = vd._undo_suppressed
-    vd._undo_suppressed = True
+    'Do not record undos in this thread within this block (e.g. while constructing a sheet).'
+    old = vd._undo_suppressed.value
+    vd._undo_suppressed.value = True
     try:
         yield
     finally:
-        vd._undo_suppressed = old
+        vd._undo_suppressed.value = old
 
 @VisiData.api
 def addUndo(vd, undofunc, *args, **kwargs):
     'On undo of latest command, call ``undofunc(*args, **kwargs)``.'
-    if vd.options.undo and not vd._undo_suppressed:
+    if vd.options.undo and not vd._undo_suppressed.value:
         # occurs when VisiData is just starting up.
         # very early in startup, modifyCommand does not yet exist
         if not vd.activeCommand:
@@ -54,7 +59,7 @@ def undo(vd, sheet):
     if not vd.options.undo:
         vd.fail("options.undo not enabled")
 
-    cmdlogrows = itertools.dropwhile(lambda r: r.longname == 'set-option', sheet.cmdlog_sheet.rows)
+    cmdlogrows = itertools.dropwhile(lambda r: r.longname in ('set-option', 'set-envvar'), sheet.cmdlog_sheet.rows)
     # skip the first remaining command, to exclude it from undo,
     # because it is always the command that created the sheet, or for
     # replayed cmdlogs, a no-op placeholder row
@@ -81,6 +86,15 @@ def redo(vd, sheet):
     cmdlogrow = sheet.undone.pop()
     vd.replayOne(cmdlogrow)
     vd.status("%s redone" % cmdlogrow.longname)
+
+@VisiData.api
+def redoInput(vd, sheet):
+    sheet.undone or vd.fail("nothing to redo")
+    cmdlogrow = sheet.undone[-1]
+    vd.moveToReplayContext(cmdlogrow, sheet)
+    vd.injectInput(cmdlogrow.input, prefill=True)
+    if not sheet.execCommand(cmdlogrow.longname):
+        sheet.undone.pop()
 
 # undoers
 def undoAttrFunc(objs, attrname):
@@ -127,6 +141,8 @@ def addUndoSetValues(vd, cols, rows):
 
 BaseSheet.addCommand('U', 'undo-last', 'vd.undo(sheet)', 'Undo the most recent change (options.undo must be enabled)')
 BaseSheet.addCommand('R', 'redo-last', 'vd.redo(sheet)', 'Redo the most recent undo (options.undo must be enabled)')
+BaseSheet.addCommand('', 'redo-input', 'vd.redoInput(sheet)', 'Redo the most recent undo, editing its previous input (options.undo must be enabled)')
+BaseSheet.addCommand('zU', 'undo-redo-input', 'vd.undo(sheet); vd.redoInput(sheet)', 'Undo the most recent change and rerun it, editing its previous input (options.undo must be enabled)')
 
 vd.addGlobals(
     undoAttrFunc=undoAttrFunc,
@@ -136,4 +152,5 @@ vd.addGlobals(
 vd.addMenuItems('''
     Edit > Undo > undo-last
     Edit > Redo > redo-last
+    Edit > Revise last input > undo-redo-input
 ''')

@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from visidata import vd, Sheet, Column
 
 vd.option('disp_currency_fmt', '%.02f', 'default fmtstr to format for currency values', replay=True, help=vd.help_float_fmt)
@@ -18,7 +20,7 @@ def currency(*args):
 def displayer_currency(col, dw, width=None):
     text = dw.text
 
-    if isinstance(dw.typedval, (int, float)):
+    if isinstance(dw.typedval, (int, float, Decimal)):
         if dw.typedval < 0:
             text = f'({dw.text[1:]})'.rjust(width-1)
             yield ('currency_neg', '')

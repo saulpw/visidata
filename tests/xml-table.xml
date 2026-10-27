@@ -1,0 +1,7 @@
+<rows>
+  <Game blank=" "><Title>First</Title><Details><name>Anne</name></Details><Genre>Golf</Genre><Notes>plain</Notes><OriginAppId/><Empty><Deep/></Empty></Game>
+  <Game><Title>Second</Title><Details><name>Bob</name><age>30</age></Details><Details><age>40</age></Details><Genre>Sports</Genre><Genre>Golf</Genre><Notes level="important">rich</Notes></Game>
+  <Game>meaningful text<Title>Third</Title><Details>direct text<name>Cara</name><Late><value>yes</value></Late></Details><OriginAppId>0</OriginAppId><Empty><Deep>false</Deep></Empty></Game>
+  <Game><Title>Fourth</Title><Details><Late><value>a</value></Late><Late><value>b</value></Late></Details><Details><age>50</age></Details></Game>
+  <Game><Title>Fifth</Title><Details><Late><value>c</value><new>field</new></Late><Late><value>d</value></Late></Details><Details><age>60</age></Details></Game>
+</rows>

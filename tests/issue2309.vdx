@@ -1,0 +1,13 @@
+# opening a multi-sheet .vds restores the saved stack, first sheet on top  #2309
+
+open-file tests/data1.tsv
+open-file tests/data2.tsv
+save-all $VD_TESTTMP/issue2309.vds
+open-file $VD_TESTTMP/issue2309.vds
+sheets-stack
+col progressPct
+hide-col
+col shortcut
+hide-col
+col cursorDisplay
+hide-col

@@ -1,13 +1,12 @@
 import collections
 import itertools
 from copy import copy, deepcopy
-import textwrap
 import re
 
 from visidata import VisiData, Extensible, globalCommand, ColumnAttr, ColumnItem, vd, EscapeException, drawcache, drawcache_property, LazyChainMap, asyncthread, ExpectedException, Fanout
 from visidata import (options, Column, namedlist, SettableColumn, AttrDict, DisplayWrapper,
 TypedExceptionWrapper, BaseSheet, UNLOADED, wrapply,
-clipdraw, clipdraw_chunks, ColorAttr, update_attr, colors, undoAttrFunc, vlen, dispwidth)
+clipdraw, clipdraw_chunks, ColorAttr, update_attr, colors, undoAttrFunc, vlen, dispwidth, wraplines)
 import visidata
 from visidata.utils import colname_letters
 
@@ -36,7 +35,7 @@ def _splitcell(sheet, s, width=0, maxheight=1):
 
     ret = []
     for attr, text in s:
-        for line in textwrap.wrap(text, width=width, **wrap_kwargs):
+        for line in wraplines(text, width=width, **wrap_kwargs):
             if len(ret) >= maxheight:
                 ret[-1][0][1] += ' ' + line
                 break
@@ -105,6 +104,8 @@ class LazyComputeRow:
         return str(self.as_dict())
 
     def as_dict(self):
+        if self.col in self.sheet.visibleCols:
+            raise RecursiveExprException(f'as_dict() includes its own column {self.col.name}')  #3210
         return {c.name:self[c.name] for c in self.sheet.visibleCols}
 
     def __getattr__(self, k):
@@ -402,10 +403,8 @@ class TableSheet(BaseSheet):
         return max(c.height for c in cols) if cols else 1
 
     def __deepcopy__(self, memo):
-        'same as __copy__'
-        ret = self.__copy__()
-        memo[id(self)] = ret
-        return ret
+        'Sheets referenced from rows are references, never copied.'
+        return self
 
     def __str__(self):
         return self.name
@@ -415,7 +414,7 @@ class TableSheet(BaseSheet):
 
     @drawcache_property
     def currow(self):
-        return LazyComputeRow(self, self.cursorRow, self.cursorCol)
+        return LazyComputeRow(self, self.cursorRow, curcol=self.cursorCol)
 
     def evalExpr(self, expr:str, row=None, col=None, **kwargs):
         'eval() expr in the context of (row, col), with extra bindings in kwargs'
@@ -469,7 +468,9 @@ class TableSheet(BaseSheet):
     @drawcache_property
     def visibleCols(self):  # non-hidden cols
         'List of non-hidden columns in display order.'
-        return (self.keyCols + [c for c in self.columns if not c.hidden and not c.keycol]) or [Column('', sheet=self)]
+        if not self.columns:
+            return [Column('', sheet=self)]  # cursorCol placeholder: many commands assume one
+        return self.keyCols + [c for c in self.columns if not c.hidden and not c.keycol]
 
     @drawcache_property
     def keyCols(self):
@@ -610,11 +611,8 @@ class TableSheet(BaseSheet):
         'Insert all *cols* into columns after cursor.  Return first column.'
         index = 0
         ccol = self.cursorCol
-        if ccol and not ccol.keycol:
-            try:
-                index = self.columns.index(ccol)+1
-            except ValueError: # when all columns are hidden, the one column shown is not in self.columns
-                index = 0
+        if ccol in self.columns and not ccol.keycol:
+            index = self.columns.index(ccol)+1
 
         self.addColumn(*cols, index=index)
         firstnewcol = [c for c in cols if not c.hidden][0]
@@ -660,7 +658,7 @@ class TableSheet(BaseSheet):
 
         if self.cursorVisibleColIndex <= 0:
             self.cursorVisibleColIndex = 0
-        elif self.cursorVisibleColIndex >= len(self.availCols):
+        elif self.cursorVisibleColIndex >= len(self.availCols) and not self.loading:  #3124 columns may not be added yet
             self.cursorVisibleColIndex = len(self.availCols)-1
 
         if self.topRowIndex < 0:
@@ -705,7 +703,8 @@ class TableSheet(BaseSheet):
                 elif self.cursorVisibleColIndex > maxcolidx:
                     # some cases:  1) jumping rightward, so cursor has just moved to a column that is offscreen to the right
                     #              2) when keycols fill entire screen
-                    #              3) during reload, when we have no rows loaded yet
+                    if self.loading and not self.rows:  # no widths measured yet
+                        break
                     self.leftVisibleColIndex += 1
                     continue
 
@@ -746,18 +745,21 @@ class TableSheet(BaseSheet):
             # cannot in general be calculated properly until after calcColLayout() has
             # determined which columns are visible.
             vrows = self.rows[self.topRowIndex:self.topRowIndex+self.windowHeight]
-            if col.width is None and len(vrows) > 0:
+            width = col.width
+            if width is None and not col.hidden and len(vrows) > 0:
                 measure_rows = vrows if self.nRows > 1000 else self.rows[:1000]  #1964
-                # delayed auto-width: assign _width to skip setModified
-                col._width = max(col.getMaxWidth(measure_rows), minColWidth)
+                width = max(col.getMaxWidth(measure_rows), minColWidth)
                 if vcolidx < self.nVisibleCols-1:  # let last column fill up the max width
-                    col._width = min(col._width, self.options.default_width)
+                    width = min(width, self.options.default_width)
+                if not self.loading or self.nRows > 1000:  #3124 remeasure while rows load
+                    # delayed auto-width: assign _width to skip setModified
+                    col._width = col._autowidth = width
 
-            width = col.width if col.width is not None else self.options.default_width
-
-            # when cursor showing a hidden column
-            if vcolidx >= self.nVisibleCols and vcolidx == self.cursorVisibleColIndex:
+            if width is None:
                 width = self.options.default_width
+
+            if col.hidden and vcolidx != self.cursorVisibleColIndex:
+                width = 0
 
             #subtract 1 character of empty space from windowWidth, for the margin to the right of the sheet
             width = min(width, self.windowWidth-x-1)
@@ -1204,11 +1206,13 @@ def quit(vd, *sheets):
 
     remaining = set(vd.stackedSheets) - set(sheets)
     exiting = not remaining
-    if exiting and vd.options.quitguard and not vd._nextCommands:
-        nmodified = sum(1 for vs in sheets if vs.precious and vs.hasBeenModified)
-        modmsg = f' ({nmodified} sheet(s) modified)' if nmodified else ' (nothing modified)'
-        vd.draw_all()
-        vd.confirm(f'exit VisiData{modmsg}? ')
+    if exiting and not vd._nextCommands:
+        nmodified = sum(1 for vs in sheets if vs.options.quitguard and vs.precious and vs.hasBeenModified)
+        nguarded = sum(1 for vs in sheets if vs.options.getonly('quitguard', vs, False))
+        if nmodified or nguarded:  #3173  clean unguarded exit stays silent
+            modmsg = f'{nmodified} sheet(s) modified' if nmodified else f'{nguarded} sheet(s) guarded'
+            vd.draw_all()
+            vd.confirm(f'exit VisiData ({modmsg})? ')
 
     for vs in sheets:
         if not exiting:
@@ -1254,16 +1258,36 @@ def quitAndReleaseMemory(vs):
         vs.confirmQuit('quit')
         vs.rows.clear()
         vs.rows = UNLOADED
+        if isinstance(vs, Sheet):
+            vs._selectedRows.clear()
+        for r in vs.cmdlog_sheet.rows:  # undos hold copies of rows  #3231
+            r.undofuncs = []
         vd.remove(vs)
         vd.allSheets.remove(vs)
 
 
 @Sheet.api
 def async_deepcopy(sheet, rowlist):
+    'Return list to be filled asynchronously with deepcopies of the rows in *rowlist*.'
+    # Values set on a SettableColumn live in the column's _store, keyed by rowid.
+    # A deepcopied row is a new object with a new rowid, so those values must be
+    # remapped onto it, in a store no longer shared with the source column.  #3174
+    stores = []
+    for c in sheet.columns:
+        if isinstance(c, SettableColumn):
+            stores.append((c, c._store))
+            c._store = {}
+
     @asyncthread
     def _async_deepcopy(newlist, oldlist):
         for r in vd.Progress(oldlist, 'copying'):
-            newlist.append(deepcopy(r))
+            newrow = deepcopy(r)
+            newlist.append(newrow)
+            oldid = sheet.rowid(r)
+            newid = sheet.rowid(newrow)
+            for c, oldstore in stores:
+                if oldid in oldstore:
+                    c._store[newid] = oldstore[oldid]
 
     ret = []
     _async_deepcopy(ret, rowlist)
@@ -1298,8 +1322,8 @@ Sheet.addCommand('ge', 'setcol-input', 'cursorCol.setValuesTyped(selectedRows, i
 
 Sheet.addCommand('"', 'dup-selected', 'vs=copy(sheet); vs.name += "_selectedref"; vs.reload=lambda vs=vs,rows=selectedRows: setattr(vs, "rows", list(rows)); vd.push(vs)', 'open a duplicate sheet with only the selected rows')
 Sheet.addCommand('g"', 'dup-rows', 'vs=copy(sheet); vs.name+="_copy"; vs.rows=list(rows); status("copied "+vs.name); vs.select(selectedRows); vd.push(vs)', 'open a duplicate sheet with all rows')
-Sheet.addCommand('z"', 'dup-selected-deep', 'vs = deepcopy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = vs.async_deepcopy(selectedRows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")', 'open duplicate sheet with deepcopy of selected rows')
-Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = deepcopy(sheet); vs.name += "_deepcopy"; vs.rows = vs.async_deepcopy(rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")', 'open duplicate sheet with deepcopy of all rows')
+Sheet.addCommand('z"', 'dup-selected-deep', 'vs = copy(sheet); vs.name += "_selecteddeepcopy"; vs.rows = vs.async_deepcopy(selectedRows); vd.push(vs); status("pushed sheet with async deepcopy of selected rows")', 'open duplicate sheet with deepcopy of selected rows')
+Sheet.addCommand('gz"', 'dup-rows-deep', 'vs = copy(sheet); vs.name += "_deepcopy"; vs.rows = vs.async_deepcopy(rows); vd.push(vs); status("pushed sheet with async deepcopy of all rows")', 'open duplicate sheet with deepcopy of all rows')
 
 Sheet.addCommand('z~', 'type-any', 'cursorCol.type = anytype', 'set type of current column to anytype')
 Sheet.addCommand('~', 'type-string', 'cursorCol.type = str', 'set type of current column to str')

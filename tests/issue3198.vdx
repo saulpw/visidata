@@ -1,0 +1,5 @@
+# select-col-duplicates compares only the current column, not all columns
+open-file sample_data/issue3198.tsv
+col v
+select-col-duplicates
+dup-selected

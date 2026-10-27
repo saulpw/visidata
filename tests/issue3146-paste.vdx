@@ -1,0 +1,17 @@
+# pasted column copies keep their own values
+open-file tests/data1.tsv
+col B
+addcol-new X
+row 0
+edit-cell foo
+columns-sheet
+row 3
+copy-row
+paste-after
+row 4
+col name
+edit-cell Y
+quit-sheet
+col Y
+row 0
+edit-cell bar

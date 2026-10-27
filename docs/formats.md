@@ -13,6 +13,7 @@ eleventyNavigation:
 | zip                   | ZIP archive format                             | 0\.28           |                              | 0\.28         | 1989    | PKWARE                                                        |                      |
 | hdf5                  | Hierarchical Data Format                       | 0\.28           |                              | 0\.28         | 199x    | NCSA                                                          | h5py                 |
 | [sqlite](#sqlite)     | sqlite                                         | 0\.42           |                              | 0\.42         | 2000    | D\. Richard Hipp                                              |                      |
+| [duckdb](#duckdb)     | DuckDB                                         | 3\.5            |                              | 3\.5          | 2019    | DuckDB Foundation                                             | duckdb               |
 | xls                   | Excel spreadsheets                             | 0\.42           |                              | 0\.42         | 1987    | Microsoft                                                     | xlrd                 |
 | [fixed](#fixed)       | fixed width text                               | 0\.97           |                              | 0\.97         |         |                                                               |                      |
 | [postgres](#postgres) | PostgreSQL database                            | 0\.97           |                              | 0\.97         | 1996    |                                                               |                      |
@@ -125,6 +126,7 @@ All `csv_*` options are passed unchanged into csv.reader() and csv.writer().
 ## xml {#xml}
 - `v` show only columns in current row attributes
 - `za` add column for xml attributes
+- `dive-xml-table` open current element's children as a table, with attributes and child values as columns
 
 ## pcap {#pcap}
 - loader-specific options
@@ -134,6 +136,9 @@ All `csv_*` options are passed unchanged into csv.reader() and csv.writer().
 - loader-specific options
     - `postgres_schema` (default: 'public') the desired schema for the Postgres database
 - `vd postgres://`*username*`:`*password*`@`*hostname*`:`*port*`/`*database* opens a connection to the given postgres database.
+    - any part may be omitted; libpq fills it from `PGUSER`, `PGPASSWORD`, `PGHOST`, `PGPORT`, or `~/.pgpass`, and `postgres:///`*database* connects over the local Unix socket.
+- `vd postgres:///`*database*`/`*table* opens a single table directly.
+- `exec-sql` on the tables sheet or a table opens a sheet with the results of a SELECT query; `edit-sql` edits that query.
 
 ## imap {#imap}
 - `vd "imap://user@domain.com:passwordhere@imap-mailserver.com"` opens a connection to the IMAP server
@@ -155,6 +160,12 @@ In psql:
 ## sqlite {#sqlite}
 - supports saving for CREATE/INSERT (not wholesale updates)
 - `z Ctrl+S` to commit any `add-row`/`edit-cell`/`delete-row`
+
+## duckdb {#duckdb}
+- loader-specific requirements
+    - `duckdb` python module in path or virtual environment
+- supports saving for CREATE/INSERT
+- `z Ctrl+S` to commit deferred `add-row`/`edit-cell`/`delete-row` changes back to the source database
 
 ## mysql {#mysql}
 - loader-specific requirements

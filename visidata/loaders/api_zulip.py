@@ -227,6 +227,7 @@ vd.addGlobals({
     'ZulipStreamsSheet': ZulipStreamsSheet,
     'ZulipAPISheet': ZulipAPISheet,
     'ZulipMessagesSheet': ZulipMessagesSheet,
+    'ZulipTopicsSheet': ZulipTopicsSheet,
 })
 
 ZulipAPISheet.addCommand('', 'open-zulip-profile', 'vd.push(PyobjSheet("profile", source=z_client.get_profile()))', 'open connected user\'s profile')

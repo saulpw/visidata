@@ -2,7 +2,7 @@
 # Usage: $0 [<options>] [<input> ...]
 #        $0 [<options>] --play <cmdlog> [--batch] [-w <waitsecs>] [-o <output>] [field=value ...]
 
-__version__ = '3.4'
+__version__ = '3.5'
 __version_info__ = 'saul.pw/VisiData v' + __version__
 
 from copy import copy
@@ -170,9 +170,9 @@ def moveToPos(vd, sources, sheet_desc, startcol, startrow):
         sheet_descs = [sheet_desc]
     if startcol is not None or startrow is not None:
         moves = []
-        if startcol:
+        if startcol is not None:
             moves += [(d, startcol, None) for d in sheet_descs]
-        if startrow:
+        if startrow is not None:
             moves += [(d, None, startrow) for d in sheet_descs]
     else:
         moves = [(d, None, None) for d in sheet_descs]
@@ -461,8 +461,9 @@ def main_vd():
         vd.cmdlog.openHook(vs, vs.source)
         sources.append(vs)
 
-    for vs in reversed(sources):
+    for vs in sources:
         vd.push(vs, load=False) #1471, 1555
+    vd.sheets.reverse()  # put sheets in same order as command line args  #3225
 
     if not vd.sheets and not args.play and not options.batch:
         if cli_filetype:
@@ -516,9 +517,10 @@ def main_vd():
                 vd.execAsync = lambda *args, vd=vd, **kwargs: visidata.VisiData.execAsync(vd, *args, **kwargs)
                 run()
         else:
-            vd.push(vs)
-            for src in reversed(sources):
+            for src in sources:
                 vd.push(src, load=False)
+            vd.push(vs)
+            vd.sheets.reverse()
             vd.replay(vs)
             run()
 

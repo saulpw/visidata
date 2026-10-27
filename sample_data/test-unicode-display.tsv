@@ -9,3 +9,19 @@ emoji variant	❤️	heart + variant
 emoji modifier	🧒🏽	child + medium skin tone
 zero-width-joiner	🕵️‍♀️	detective + zwj + female
 variant+zwj	🏳️‍🌈	flag + variant + zwj + rainbow
+combining accent	Tiếng Việt	NFD vietnamese
+devanagari	नमस्ते	namaste
+kannada virama	ಕ್ಕ	ka + virama + ka
+lone regional	x🇭y	x + regional indicator H + y
+keycap	1️⃣	1 + VS16 + combining keycap
+text variant	❤︎	heart + VS15 (text style)
+family zwj	👨‍👩‍👧	man + zwj + woman + zwj + girl
+tag flag	🏴󠁧󠁢󠁳󠁣󠁴󠁿	black flag + tags gbsct (Scotland)
+devanagari matras	हिंदी	hindi: spacing vowel signs
+bengali conjunct	ক্ষমা	kshama: ka + virama + ssa
+thai	ภาษาไทย	phasa thai
+tibetan stack	བོད་སྐད	bod skad: subjoined ka
+arabic harakat	العَرَبِيَّة	al-arabiyya with vowel marks
+hebrew niqqud	שָׁלוֹם	shalom with vowel points
+hangul jamo	한글	hangul as NFD conjoining jamo
+stacked marks	Z̤͔ͧ̑a̼ͭ͒	letters with several combining marks

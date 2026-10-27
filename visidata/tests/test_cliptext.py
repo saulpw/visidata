@@ -10,6 +10,15 @@ class TestClipText:
         ('abcdef', 6),
         ('桜 高橋', 7),
         ('[:onclick sidebar-toggle][:reverse] b to toggle sidebar [:]', 21),
+        ('e\u0301te', 3),  # NFD é
+        ('Tie\u0302\u0301ng Vie\u0323\u0302t', 10),  # NFD Vietnamese
+        ('\u0c95\u0ccd\u0c95', 2),  # kannada virama #2685
+        ('\u0928\u092e\u0938\u094d\u0924\u0947', 4),  # devanagari नमस्ते
+        ('\u1100\u1161', 2),  # hangul conjoining jamo
+        ('a\u200db\u200bc', 3),  # ZWJ, ZWSP
+        ('\u20dd', 0),  # enclosing mark
+        ('a\u00adb', 3),  # soft hyphen takes a cell
+        ('\u0600', 1),  # arabic number sign takes a cell
     ])
     def test_dispwidth(self, s, dispw):
         assert visidata.dispwidth(s) == dispw
@@ -34,6 +43,9 @@ class TestClipText:
         ('abcdef', None, 'abcdef', 6),
         ('ででで', None, 'ででで', 6),
         ('で'*100, None, 'で'*100, 2*100),
+        ('Tie\u0302\u0301ng Vie\u0323\u0302t', 10, 'Tie\u0302\u0301ng Vie\u0323\u0302t', 10),
+        ('Tie\u0302\u0301ng Vie\u0323\u0302t', 7, 'Tie\u0302\u0301ng …', 7),
+        ('ae\u0301x', 2, 'a…', 2),
         (iterchars([1,2,3]), 4, '[3]…', 4),
         (iterchars([1,2,3]), 7, '[3] 1;…', 7),
         (iterchars([1,2,3]), 9, '[3] 1; 2…', 9),
@@ -300,3 +312,7 @@ class TestClipText:
     def test_wraptext_escaped_literals(self, text, width, expected):
         result = list(visidata.wraptext(text, width=width))
         assert result == expected
+
+    def test_wraptext_wide(self):
+        pytest.importorskip('wcwidth', minversion='0.5')
+        assert list(visidata.wraptext('\u9999\u6E2F'*3 + ' abc', width=4)) == [('\u9999\u6E2F', '\u9999\u6E2F')]*3 + [('abc', ' abc')]  #2416

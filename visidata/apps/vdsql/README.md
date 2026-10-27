@@ -69,6 +69,7 @@ There are a few differences, however:
 - `z"` creates a new sheet with a different row limit.
 - `gz"` removes the row limit entirely (fetch all rows).
 - `'` casts the current column to its given type, persisting into future queries (with `"`).
+- `Y`/`gY` copy rows to the system clipboard (as csv, tsv, txt, etc.), and `zy`/`gzy` copy cells to the internal clipboard, but only from the loaded rows.
 - `g'` freezes the current set of loaded rows into a plain VisiData sheet, where all VisiData commands are available.
 
 Some VisiData commands aren't implemented using the database engine.
@@ -83,7 +84,21 @@ If you want to use them anyway, knowing the dataset is incomplete, use `g'` to f
 - `zb` to choose a sidebar option (pending SQL, base SQL, etc.)
 - `gb` to open the sidebar as its own sheet
 
-In this way you can compose a SQL expression using VisiData commands, open the SQL sidebar, and save the resulting query to a file (or copy it into your system clipboard buffer).
+In this way you can compose a SQL expression using VisiData commands, open the SQL sidebar, and save the resulting query to a file.
+`syscopy-sql` (Edit > Copy > to system clipboard > query SQL) copies the pending query to the system clipboard.
+
+### Dumping tables
+
+Saving a table only saves its loaded rows (`ibis_limit`, 500 by default).
+To save a whole table, use `gz"` first, or start with `--ibis-limit=0`.
+
+To dump several tables at once, select them on the table index and use `g Ctrl+S` (save-selected) to a directory (one file per table) or to a `.sqlite` or `.duckdb` file:
+
+    vdsql --ibis-limit=0 postgres://...
+
+To dump one table straight from the command line:
+
+    vdsql --ibis-limit=0 postgres://.../db +:tablename:: -b -o tablename.csv
 
 ### Options
 
@@ -107,6 +122,14 @@ In this way you can compose a SQL expression using VisiData commands, open the S
 ### Backend-specific notes
 
 #### PostgreSQL
+
+Connection parameters left out of the URL come from the standard libpq environment variables (`PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`, etc.) and `~/.pgpass`, which keeps passwords out of the URL and the shell history:
+
+    PGPASSWORD=... vdsql postgres://user@host/db
+
+To open a table directly:
+
+    vdsql postgres://.../db +:tablename::
 
 By default, only tables from the `public` schema are shown.
 

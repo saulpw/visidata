@@ -60,3 +60,5 @@ class ConllSheet(TableSheet):
                     for token in sent:
                         yield [sent_id, token.id, token._form, token.lemma, token.upos,
                                 token.xpos, token.feats, token.head, token.deprel, token.deps, token.misc]
+
+vd.addGlobals(ConllSheet=ConllSheet)

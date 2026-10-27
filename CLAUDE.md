@@ -110,6 +110,12 @@ Use this when writing user-facing documentation, help text, or in-app guides.
 - Option and command reference format
 - Technical writing guidelines
 
+### [dev/SECURITY.md](dev/SECURITY.md) - Handling a Security Report
+Use this when a vulnerability is reported privately, or a fix must stay embargoed.
+- Intake and reporter communication
+- `sec/<slug>` branches, never pushed before release
+- Drafts under `.meta/security/`, advisory and CVE, release ordering
+
 ### [dev/PERFORMANCE.md](dev/PERFORMANCE.md) - Performance Analysis
 Use this when investigating or optimizing performance issues.
 - Finding reproducible performance issues

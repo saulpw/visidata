@@ -1,8 +1,7 @@
-import textwrap
 import re
 
 from visidata import vd, BaseSheet, options, Sheet, ColumnItem, asyncthread
-from visidata import Column, vlen
+from visidata import Column, vlen, wraplines
 from visidata import globalCommand, VisiData
 import visidata
 
@@ -30,7 +29,7 @@ class TextSheet(Sheet):
         wrap = self.options.wrap
         for startingLine, text in enumerate(source):
             if wrap and text:
-                for i, L in enumerate(textwrap.wrap(str(text), width=winWidth)):
+                for i, L in enumerate(wraplines(str(text), width=winWidth)):
                     yield [startingLine+i+1, L]
             else:
                 yield [startingLine+1, text]
@@ -130,7 +129,7 @@ ErrorSheet.addCommand('Enter', 'sysopen-error', 'sysopen_error(cursorCol, cursor
 
 TextSheet.options.save_filetype = 'txt'
 
-vd.addGlobals({'TextSheet': TextSheet, 'ErrorSheet': ErrorSheet, 'ErrorCellSheet': ErrorCellSheet})
+vd.addGlobals({'TextSheet': TextSheet, 'ErrorSheet': ErrorSheet, 'ErrorCellSheet': ErrorCellSheet, 'ErrorsSheet': ErrorsSheet})
 
 vd.addMenuItems('''
     View > Errors > recent > error-recent

@@ -108,6 +108,8 @@ Keystroke(s)        Command                 Action
 
 Shell columns run a command for each row, interpolating `$columnName` references with column values.  Both stdout and stderr are captured as separate columns.
 
+The prompt also asks for the minimum seconds between starting commands (0 for no delay), to e.g. stay under an API rate limit.  At most `options.max_threads` commands run at once.  `Ctrl+C` (`cancel-sheet`) kills the running commands.
+
 ## Options
 
 Option          Default     Description

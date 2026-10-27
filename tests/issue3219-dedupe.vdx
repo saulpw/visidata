@@ -1,0 +1,5 @@
+# dedupe-rows groups like freq-col: by the displayed typed value
+open-file sample_data/issue3219.jsonl
+col val
+key-col
+dedupe-rows

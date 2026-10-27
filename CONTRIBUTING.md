@@ -74,6 +74,8 @@ Check out the [Plugin Authors Guide](https://visidata.org/docs/api) for an overv
 Code in `visidata/features/` or `visidata/loaders/` is generally welcome, as long as it is useful to someone and safe for everyone.
 Updates or additions to the core code should be proposed via an [Github Issue](https://github.com/saulpw/visidata/issues/new/choose) before submitting a PR.
 
+Unfortunately, as of 2026 we no longer accept drive-by PRs from new contributors.  If you want to contribute, contact me first via [Discord](https://visidata.org/chat) or email (vd@saul.pw), and we'll have a chat about how you use VisiData and what you use it for, so I can verify you're a real person with a vested interest in the project.
+
 VisiData has two main branches:
 
   - [stable](https://github.com/saulpw/visidata/tree/stable) has the last known good version of VisiData (what is in pypi/brew/apt).

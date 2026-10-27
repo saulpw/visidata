@@ -90,13 +90,23 @@ def moveToNextRow(vs, func, reverse=False, msg='no different value up this colum
 @Column.property
 def visibleWidth(self):
     'Width of column as is displayed in terminal'
-    vcolidx = self.sheet.visibleCols.index(self)
+    vcolidx = self.sheet.availCols.index(self)
     if vcolidx in self.sheet._visibleColLayout:
         w = self.sheet._visibleColLayout[vcolidx][1]
     else:  #this case should never happen in normal use
         #the width can be inaccurate if the column is not at x=0
         w = self.sheet.calcSingleColLayout(vcolidx)
     return w
+
+
+@Sheet.api
+def go_row_number(sheet, number):
+    index = number if number >= 0 else sheet.nRows + number
+    sheet.cursorRowIndex = max(0, min(index, sheet.nRows-1))
+    if not sheet.nRows:
+        vd.warning('no rows')
+    elif index != sheet.cursorRowIndex:
+        vd.warning(f'row number `{number}` out of bounds; moved to row {sheet.cursorRowIndex}')
 
 
 @BaseSheet.api
@@ -107,10 +117,23 @@ def jump_sheet(sheet, name):
     vd.push(matches[0])
 
 
+Sheet.init('stoppedAtHiddenEdge', bool)
+
+@Sheet.api
+def go_right(sheet):
+    atHiddenEdge = sheet.cursorVisibleColIndex == sheet.nVisibleCols-1 and sheet.nVisibleCols < len(sheet.availCols)
+    if atHiddenEdge and not sheet.stoppedAtHiddenEdge:
+        sheet.stoppedAtHiddenEdge = True
+        vd.status('press again to enter hidden columns')
+        return
+    sheet.stoppedAtHiddenEdge = False
+    sheet.cursorRight(+1)
+
+
 Sheet.addCommand(None, 'go-left',  'cursorRight(-1)', 'go left', replay=False)
 Sheet.addCommand(None, 'go-down',  'cursorDown(+1)', 'go down', replay=False)
 Sheet.addCommand(None, 'go-up',    'cursorDown(-1)', 'go up', replay=False)
-Sheet.addCommand(None, 'go-right', 'cursorRight(+1)', 'go right', replay=False)
+Sheet.addCommand(None, 'go-right', 'go_right()', 'go right; press twice to cross into hidden columns', replay=False)
 Sheet.addCommand(None, 'go-pagedown', 'cursorDown(nScreenRows-1); sheet.topRowIndex = bottomRowIndex', 'scroll one page forward', replay=False)
 Sheet.addCommand(None, 'go-pageup', 'cursorDown(-nScreenRows+1); sheet.bottomRowIndex = topRowIndex', 'scroll one page backward', replay=False)
 Sheet.addCommand(None, 'go-pagedown-half', 'n=nScreenRows//2; cursorDown(n); sheet.topRowIndex += n', 'scroll half page forward', replay=False)
@@ -125,7 +148,7 @@ Sheet.addCommand(None, 'go-screen-top', 'sheet.cursorRowIndex = sheet.topRowInde
 Sheet.addCommand(None, 'go-screen-middle', 'sheet.cursorRowIndex = (sheet.topRowIndex+sheet.bottomRowIndex)//2', 'go to the middle row visible on screen')
 Sheet.addCommand(None, 'go-screen-bottom', 'sheet.cursorRowIndex = sheet.bottomRowIndex', 'go to the last row visible on screen')
 
-Sheet.addCommand('zr', 'go-row-number', 'sheet.cursorRowIndex = int(input("move to row number: "))', 'go to the given row number (0-based)')
+Sheet.addCommand('zr', 'go-row-number', 'go_row_number(int(input("move to row number: ")))', 'go to the given row number (0-based, negative from end); warn if clamped')
 
 
 Sheet.addCommand('<', 'go-prev-value', 'moveToNextRow(lambda row,sheet=sheet,col=cursorCol,val=cursorTypedValue: col.getTypedValue(row) != val, reverse=True, msg="no different value up this column")', 'go up current column to next value')

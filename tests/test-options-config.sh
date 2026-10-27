@@ -12,10 +12,10 @@
 # `-O -`. addcol-expr lands the cursor on the new column, so no movement needed.
 # stderr passes through (visible); $() captures only the stdout value.
 source tests/testenv.sh
+vd_testtmp
 FAIL=0
 
-RC=$(mktemp)
-trap 'rm -f "$RC"' EXIT
+RC="$VD_TESTTMP/test-options-config.py"
 cat > "$RC" <<'EOF'
 options.motd_url = ''
 options.default_width = 33

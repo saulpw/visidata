@@ -99,6 +99,10 @@ class IbisConnectionPool:
         yield self._local.connection
 
 
+def isSystemSchema(name:str) -> bool:
+    return name == 'information_schema' or name.startswith('pg_')
+
+
 class IbisTableIndexSheet(IndexSheet):
     # sheet_type = IbisTableSheet  # set below
 
@@ -128,7 +132,7 @@ class IbisTableIndexSheet(IndexSheet):
 
             dbnames = [dbname
                        for dbname in con.list_databases()
-                       if '*' in schemas or dbname in schemas]
+                       if dbname in schemas or ('*' in schemas and not isSystemSchema(dbname))]
 
             for dbname in dbnames or [None]:
                 for tblname in con.list_tables(database=dbname):
@@ -386,8 +390,9 @@ class IbisTableSheet(Sheet):
     def baseQuery(self, con):
         'Return base table for {database_name}.{table_name}'
         import ibis
-        tbl = con.table(self.table_name)
-        return ibis.table(tbl.schema(), name=self.fqtblname(con))
+        dbname = getattr(self, 'dbname', None)
+        tbl = con.table(self.table_name, database=dbname)
+        return ibis.table(tbl.schema(), name=self.fqtblname(con), database=dbname)  #2203
 
     def fqtblname(self, con) -> str:
         'Return fully-qualified table name including database/schema, or whatever connection needs to identify this table.'
@@ -669,7 +674,7 @@ def notimpl(sheet):
 
 
 dml_cmds = '''addcol-bulk addcol-new add-row add-rows
-copy-cell copy-cells copy-row copy-selected commit-sheet cut-cell cut-cells cut-row cut-selected delete-cell delete-cells delete-row delete-selected
+copy-row copy-selected commit-sheet cut-cell cut-cells cut-row cut-selected delete-cell delete-cells delete-row delete-selected
 edit-cell paste-after paste-before paste-cell setcell-expr
 setcol-clipboard setcol-expr setcol-fake setcol-fill setcol-format-enum setcol-formatter setcol-incr setcol-incr-step setcol-input setcol-iter setcol-subst setcol-subst-all
 '''.split()
@@ -767,6 +772,7 @@ IbisTableSheet.addCommand("'", 'addcol-cast', 'addcol_cast(cursorCol)')
 
 IbisTableSheet.addCommand('zb', 'sidebar-choose', 'choose_sidebar()', 'choose vdsql sidebar to show')
 IbisTableSheet.addCommand('', 'exec-sql', 'vd.push(rawSql(input("SQL query: ")))', 'open sheet with results of raw SQL query')
+IbisTableSheet.addCommand('', 'syscopy-sql', 'syscopyValue(pending_sql)', 'copy SQL for current query to system clipboard (using options.clipboard_copy_cmd)')
 IbisTableSheet.addCommand('', 'addcol-subst', 'addColumnAtCursor(addcol_subst(cursorCol, **inputRegexSubstOld("transform column by regex: ")))') # deprecated
 IbisTableSheet.addCommand('', 'addcol-regex-subst', 'addColumnAtCursor(addcol_subst(cursorCol, **inputRegexSubst("transform column by regex: ")))')
 IbisTableSheet.addCommand('', 'addcol-split', 'addColumnAtCursor(addcol_split(cursorCol, input("split by delimiter: ", type="delim-split")))')
@@ -794,3 +800,4 @@ IbisTableSheet.class_options.clean_names = True
 IbisTableSheet.class_options.regex_flags = ''
 
 vd.addMenuItem('View', 'Sidebar', 'choose', 'sidebar-choose')
+vd.addMenuItem('Edit', 'Copy', 'to system clipboard', 'query SQL', 'syscopy-sql')

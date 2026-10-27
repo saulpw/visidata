@@ -22,6 +22,7 @@ Defined in `tests/testenv.sh`, which all test scripts source. `test-all.sh` re-e
 | `VD` | `$PYTHON -m visidata --config tests/.visidatarc --visidata-dir tests/.visidata` | VisiData command with stock test config |
 | `NPROCS` | `$(nproc)` | Parallel test processes |
 | `OUTDIR` | `tests/output` | Directory for test output files |
+| `VD_TESTTMP` | `/tmp/vd-tests-<datetime>-XXXXXX` | Scratch dir shared by the suite; `test-all.sh` and scripts needing scratch files call `vd_testtmp`. Only the creating script removes it on exit; each script uses its own named paths inside |
 
 Use `$VD` in test scripts instead of hardcoding `bin/vd` or `python -m visidata`. Both paths call the same `vd_cli()` entry point; `$PYTHON -m visidata` is preferred because it's explicit about which Python interpreter is used. `$VD` includes `--config` and `--visidata-dir` so tests are isolated from the user's personal config.
 
@@ -32,6 +33,7 @@ Use `$VD` in test scripts instead of hardcoding `bin/vd` or `python -m visidata`
 | `test-vdx.sh` | Golden tests: replays all `tests/*.vd*` files via `dev/test.sh` |
 | `test-pytest.sh` | Python unit tests via pytest |
 | `test-smoke.sh` | Basic startup and directory opening |
+| `test-tui.sh` | Interactive smoke: common prompts open, with their help sidebar, in a real terminal via tmux (#3269) |
 | `test-macros.sh` | Macro replay (#1652) |
 | `test-startpos.sh` | CLI `+N`/`+col:row` positioning (#2425) |
 | `test-options-config.sh` | `.visidatarc` numeric/boolean/string + sheet-specific options (manual-tests.md #8) |
@@ -105,15 +107,18 @@ All three formats allow `#` line comments.
 **Test output:** `tests/output/testname.ext` — actual output from the latest test run (gitignored, never committed). Compare against golden with `diff tests/golden/name.ext tests/output/name.ext`.
 
 **Conventions:**
-- `-nosave` suffix (e.g., `issue2225-nosave.vdx`) skips golden comparison; runs in a separate batch without `replay_ignore_errors`, so `assert-expr` failures are caught. Use for tests that verify internal state via assertions rather than output comparison. Also required for graph/canvas tests, since the pixel buffer is not populated in batch mode (cursor-based commands are no-ops).
+- `-nosave` suffix (e.g., `issue2225-nosave.vdx`) skips golden comparison and runs in a separate batch without `replay_ignore_errors`.  Use it only for graph/canvas tests, since the pixel buffer is not populated in batch mode (cursor-based commands are no-ops).
 - `-broken` suffix skips the test entirely
 - `-manual` suffix skips the test entirely (for tests not suitable for automation but worth keeping)
 - `-perf` suffix runs via `test-perf.sh` (separate from `test.sh`); reports wall time per test
 - `-flaky` suffix runs the test but treats failures as non-fatal
 - `-311` suffix runs only on Python 3.11+; `-n311` runs only below 3.11
+- `-pg` suffix runs only when the `vdtest` postgres database is reachable; create it with `dev/setup-postgres.sh`
 - Tests should modify data and provide golden output file, rather than using `assert-expr` commands
+- Don't test status or warning messages; check the resulting data
 - Set explicit cursor positions (e.g., `row 6`) rather than relying on defaults, for test hygiene
 - Explicit saving is not necessary, as the test harness will save the top sheet to the proper output file
+- Write scratch files to `$VD_TESTTMP/<testname>.<ext>`, not `tests/output/` (every file there needs a golden).  Tests never delete files themselves.  See `sqlite-commit.vdx`.
 - Never fetch from the network in tests; use local fixture files instead (flaky connections cause spurious CI failures)
 
 **Creating a new golden test:**
@@ -198,10 +203,19 @@ Developer-only validation belongs in pytest, not in runtime mechanisms. Don't ad
 
 ## Bug Fix Testing
 
-Always write tests FIRST, verify they FAIL on the current code, then fix the code and verify the tests pass. Use the appropriate test type:
+When a test is warranted, write it FIRST, verify it FAILS on the current code, then fix the code and verify it passes.  Verify with a tracked test (or interactively), not throwaway `python -c` scripts.  Use the appropriate test type:
 
 - **Unit tests** (pytest) for pure functions like `wraptext()`, `clipstr()`, `iterchunks()` — add to existing test files in `visidata/tests/`
 - **Golden tests** for behavior that requires the full VisiData UI/session — create a `.vdx` test in `tests/`
+- **TUI smoke** (`tests/test-tui.sh`) for anything drawn only interactively: prompts, sidebars, input help.  Batch replay never draws, so a `.vdx` can't catch these.  Add a `smoke` line only for a new input code path (10 cases max).
+
+Default to one golden `.vdx` per feature or fix; often it is the only test.  Add a pytest only when all of these hold:
+
+- It checks a pure function against a table of inputs and outputs (like `test_substitute` in `test_shell.py`).
+- It runs in milliseconds: no sleeps, subprocesses, threads, or wall-clock asserts.
+- It pins down a case a reader wouldn't catch from the code (an edge case, or a past bug).
+
+If the `.vdx` already covers it, skip the pytest.  Writing no test for a few lines of plain mechanics is fine.
 
 For golden tests: create a `.vdx` file, generate golden output, and verify with `dev/test.sh`.
 

@@ -1,3 +1,4 @@
+import os
 import curses
 import unicodedata
 import sys
@@ -5,7 +6,13 @@ import re
 import functools
 import textwrap
 
-from visidata import vd, drawcache, update_attr, colors, ColorAttr
+from visidata import vd, VisiData, drawcache, update_attr, colors, ColorAttr
+
+try:  # optional jquast/wcwidth wraps by display width, not len()  #2416 #2685
+    from wcwidth import wrap as _wcwrap, propagate_sgr  # propagate_sgr: wcwidth>=0.5, else wrap() rejects propagate_sgr=False
+    wraplines = functools.partial(_wcwrap, propagate_sgr=False)
+except ImportError:
+    wraplines = textwrap.wrap
 
 disp_column_fill = ' '
 bracket_markup_re = r'\[[:/][^\]]*?\]'  # [:whatever until the closing bracket] or [/whatever] or [:whatever] or [/] or [:]
@@ -41,20 +48,28 @@ ZERO_WIDTH_CF = set(map(chr, [
 ]))
 
 
+# SPACING_CF: format chars that libc wcwidth (and so ncurses) gives a cell
+SPACING_CF = set(map(chr, [
+    0x00AD, 0x0600, 0x0601, 0x0602, 0x0603, 0x0604, 0x0605, 0x06DD, 0x070F,
+    0x0890, 0x0891, 0x08E2, 0xFFF9, 0xFFFA, 0xFFFB, 0x110BD, 0x110CD,
+    *range(0x13430, 0x13440),
+]))
+
+
 def wcwidth(cc, ambig=1):
+        ccat = unicodedata.category(cc)
+        if ccat in ('Mn', 'Me') or (ccat == 'Cf' and cc not in SPACING_CF):  #2685
+            return 0
+        if '\u1160' <= cc <= '\u11ff' or '\ud7b0' <= cc <= '\ud7ff':  # hangul medial/final jamo
+            return 0
         if cc in ZERO_WIDTH_CF:
             return 1
         eaw = unicodedata.east_asian_width(cc)
         if eaw in 'AN':  # ambiguous or neutral
-            if unicodedata.category(cc) == 'Mn':
-                return 1
-            else:
-                return ambig
+            return ambig
         elif eaw in 'WF': # wide/full
             return 2
-        elif not unicodedata.combining(cc):
-            return 1
-        return 0
+        return 1
 
 
 def is_vdcode(s:str) -> bool:
@@ -178,7 +193,8 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
         s = ''.join(s)
         return s, dispwidth(s, literal=True)
     if trunchlen > dispw: #if the truncator cannot fit, use a truncator of ''
-        return _clipstr(s, dispw, trunch='', oddspacech=oddspacech, combch=combch, modch=modch)
+        _clipfunc = _clipstr if isinstance(s, str) else _clipstr.__wrapped__
+        return _clipfunc(s, dispw, trunch='', oddspacech=oddspacech, combch=combch, modch=modch)
     for c in s:
         newc, chlen = _dispch(c, oddspacech=oddspacech, combch=combch, modch=modch)
         if not newc:
@@ -204,14 +220,16 @@ def _clipstr(s, dispw, trunch='', oddspacech='', combch='', modch=''):
 def clipstr(s, dispw, truncator=None, oddspace=None):
     ''' *s* is a string or an iterator that contains characters.
     *dispw* is the integer screen width that the clipped string will fit inside, or None.'''
+    # _clipfunc: an iterator hashes by identity, so caching it only pins the drawn value
+    _clipfunc = _clipstr if isinstance(s, str) else _clipstr.__wrapped__  #3231
     if vd.options.visibility:
-        return _clipstr(s, dispw,
+        return _clipfunc(s, dispw,
                         trunch=vd.options.disp_truncator if truncator is None else truncator,
                         oddspacech=vd.options.disp_oddspace if oddspace is None else oddspace,
                         modch='\u25e6',
                         combch='\u25cc')
     else:
-        return _clipstr(s, dispw,
+        return _clipfunc(s, dispw,
                 trunch=vd.options.disp_truncator if truncator is None else truncator,
                 oddspacech=vd.options.disp_oddspace if oddspace is None else oddspace,
                 modch='',
@@ -243,6 +261,57 @@ def _addstr(scr, y, x, s, attr):
         pass
 
 
+# variable_width_re: chars that terminals may draw wider or narrower than libc wcwidth
+variable_width_re = re.compile('[\u0300-\u036F\u0483-\u0489\u0591-\u05C7\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED'
+                               '\u0900-\u0FFF\u1000-\u109F\u1100-\u11FF\u1780-\u17FF\u1AB0-\u1AFF\u1DC0-\u1DFF'
+                               '\u200B-\u200F\u202A-\u202E\u2060-\u206F\u20D0-\u20FF\u2600-\u27BF\uA960-\uA97F\uD7B0-\uD7FF'
+                               '\uFE00-\uFE0F\uFE20-\uFE2F\U0001F000-\U0001FAFF\U000E0000-\U000E01EF]')
+
+vd._deferredDraws = []  # (scr, y, x, s, attr)
+
+
+def _undefer(scr, y, x, w):
+    'Drop deferred draws that a new draw at (y,x)-(y,x+w) covers.'
+    if vd._deferredDraws:
+        vd._deferredDraws = [e for e in vd._deferredDraws if not (e[0] is scr and e[1] == y and x <= e[2] < x+w)]
+
+
+def _addstr_deferred(scr, y, x, s, w, attr):
+    'addstr, except leave text with variable-width chars blank and queue it for drawDeferred.'
+    _undefer(scr, y, x, w)
+    if not variable_width_re.search(s):
+        _addstr(scr, y, x, s, attr)
+        return
+
+    _addstr(scr, y, x, disp_column_fill*w, attr)
+    vd._deferredDraws.append((scr, y, x, s, attr))
+
+
+@VisiData.api
+def drawDeferred(vd, scr):
+    '''Draw queued text, each in its own screen update, then restore the cursor of *scr*.
+    Terminals and curses can disagree on the width of this text; drawn alone, the disagreement cannot shift the rest of the line.'''
+    if not vd._deferredDraws:
+        return
+
+    queue, vd._deferredDraws = vd._deferredDraws, []
+    cup = curses.tigetstr('cup')
+    cury, curx = scr.getyx()
+    for win, y, x, s, attr in queue:
+        try:
+            win.addstr(y, x, s, attr)
+        except curses.error:
+            pass
+        win.refresh()
+        if cup:
+            wy, wx = win.getyx()
+            by, bx = win.getbegyx()
+            os.write(1, curses.tparm(cup, by+wy, bx+wx))  # cup: put terminal cursor where curses thinks it is
+
+    scr.move(cury, curx)
+    scr.refresh()
+
+
 def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clear=True, **kwargs):
     '''Draw `chunks` (sequence of (color:str, text:str) as from iterchunks) at (y,x)-(y,x+w) with curses `attr`, clipping with ellipsis char.
        If `clear`, clear whole editing area before displaying.
@@ -265,6 +334,7 @@ def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clea
         actualw = min(w, windowWidth-x)
         if scr:
             _addstr(scr, y, x, disp_column_fill*actualw, cattr.attr)  # clear whole area before displaying
+            _undefer(scr, y, x, actualw)
 
     try:
         for colorstate, chunk in chunks:
@@ -297,7 +367,7 @@ def clipdraw_chunks(scr, y, x, chunks, cattr:ColorAttr=ColorAttr(), w=None, clea
             clipped, dispw = clipstr(chunk, chunkw, **kwargs)
 
             if y >= 0 and y < windowHeight:
-                _addstr(scr, y, x, clipped, cattr.attr)
+                _addstr_deferred(scr, y, x, clipped, dispw, cattr.attr)
             else:
                 if vd.options.debug:
                     raise Exception(f'addstr(y={y} x={x}) out of bounds')
@@ -375,8 +445,7 @@ def wraptext(text, width=80, indent=''):
         if linetext == '':  #for markup with no contents, like '[:tag][/]' or '[:]' or '[/]'
             yield '', ''
             continue
-        # textwrap.wrap does not handle variable-width characters  #2416
-        for linenum, wrapped_textline in enumerate(textwrap.wrap(linetext, width=width, drop_whitespace=False)):
+        for linenum, wrapped_textline in enumerate(wraplines(linetext, width=width, drop_whitespace=False)):
             wrapped_remainder = wrapped_textline
             marked_up = ''
             while chunks:
@@ -530,6 +599,7 @@ vd.addGlobals(clipstr=clipstr,
               iterchars=iterchars,
               iterchunks=iterchunks,
               wraptext=wraptext,
+              wraplines=wraplines,
               clipstr_start=clipstr_start,
               clipstr_middle=clipstr_middle,
               clip_markup_middle=clip_markup_middle,

@@ -65,6 +65,7 @@ class RecIndexSheet(IndexSheet):
                 sheet = RecSheet('', columns=[], rows=[], source=self, comments=comments)
                 sheet.columns = []
                 comments = []
+                row = None  #3257
                 yield sheet
                 newRecord = False
 
@@ -141,3 +142,5 @@ def save_rec(vd, p, *vsheets):
 
                 fp.write('\n')
             fp.write('\n')
+
+vd.addGlobals(RecSheet=RecSheet, RecIndexSheet=RecIndexSheet)

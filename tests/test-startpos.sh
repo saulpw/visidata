@@ -42,6 +42,7 @@ check "+0:0:: -> dept subsheet" "10" sample_data/employees.sqlite +0:0::
 check "+0:dept:: -> dept by name" "10" sample_data/employees.sqlite +0:dept::
 check "+0:0:1:0 -> dname col" "ACCOUNTING" sample_data/employees.sqlite +0:0:1:0
 check "+0:0::1 -> row 1" "20" sample_data/employees.sqlite +0:0::1
+check "+0:dept:0:0 -> dept subsheet" "10" sample_data/employees.sqlite +0:dept:0:0
 
 if [[ $FAIL -eq 1 ]]; then
     echo "FAILED in $(elapsed)s"

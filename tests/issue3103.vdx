@@ -1,0 +1,5 @@
+# addcol-shell: plain command (older cmdlogs) and command+delay  #3103
+open-file tests/data1.tsv
+col A
+addcol-shell echo $A
+addcol-shell {"command": "echo x$B", "delay": "0.01"}

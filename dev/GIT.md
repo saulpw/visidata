@@ -42,7 +42,7 @@ When we put together a patch release, we scan commit messages for this marker to
 Do not assume a commit is patch-safe — always ask before adding the `-` marker.
 
 #### Issue Numbers
-Any issue numbers fixed in a commit should be appended to the git commit summary line, including the leading `#`.
+Any issue numbers fixed in a commit should be appended to the git commit summary line, including the leading `#`, on follow-up commits too.  Use only GitHub issue numbers, never a PR's number; with no issue, the commit carries no number.
 
 Examples:
 - `#1234` - Single issue
@@ -84,9 +84,13 @@ We've started doing this for PRs also. It's a bit of clutter but it helps:
 
 Commit before posting GitHub comments/replies. Let Saul push first, then post the comment. Don't post replies to issues before the relevant code is committed and pushed.
 
+Before drafting any public reply, consider who is on the other end.  If the contributor is clearly human (especially one waiting on us), Saul replies himself; flag it to him instead of drafting an AI comment.
+
 AI-generated comments should have the full attribution at the bottom: `[this message written by Claude Opus 4.6 and approved by @saulpw]`.
 
 ### Closing Issues for Implemented Features
+
+Close a bug when its fix is pushed to develop, not at release.
 
 When closing an issue for a feature that's already been implemented, the comment should include:
 - A link to the implementing commit(s)
@@ -107,6 +111,9 @@ In general:
 
 By default, commit to **develop** unless explicitly working in another branch on a PR. If on a different branch, cherry-pick or switch to develop first.
 
+When working interactively with Saul, commit directly to develop even if the fix has a GitHub issue; side branches and PRs are for unattended/background work or when asked.
+Unattended work for a GitHub issue goes on a side branch as a PR; unattended work with no issue commits to develop.
+
 ### Pull Requests
 
 `develop` is the trunk branch. PRs come from side branches, not from develop directly. Create a feature branch off develop for PRs.
@@ -114,6 +121,14 @@ By default, commit to **develop** unless explicitly working in another branch on
 All PRs must include an [AI Level](ai-levels.md) (0-10) in the PR body. At level 4+, specify the model/version used. Always read `dev/ai-levels.md` to determine the correct level — don't guess.
 
 Run `dev/test-all.sh` locally before pushing. After creating a PR, check CI status with `gh pr checks` and fix any failures before moving on.
+
+### External PRs
+
+Merge a human contributor's PR on GitHub with "Rebase and merge", so it shows as merged; merge locally only when the commits need changes that can't go on the PR branch.
+
+For PRs at AI level 5+, push small cleanups (test style, nits) to the PR branch ourselves instead of asking the author for another round.
+
+After pushing changes to a PR, never merge it without Saul's explicit approval of the edited version; he reviews it first.
 
 ### Documentation
 

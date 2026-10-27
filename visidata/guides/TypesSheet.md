@@ -5,6 +5,7 @@ Columns usually begin as untyped (`anytype`), but can be set to specific types.
 - {help.commands.type-any}
 - {help.commands.type-currency}
 - {help.commands.type-date}
+- {help.commands.type-decimal}
 - {help.commands.type-float}
 - {help.commands.type-int}
 - {help.commands.type-len}
@@ -15,6 +16,7 @@ Columns usually begin as untyped (`anytype`), but can be set to specific types.
 VisiData pre-set defaults for formatting types:
 
 - `currency` removes non-numeric characters and parses the remainder as `float`.
+- `decimal` removes non-numeric characters and parses the remainder as an exact `Decimal`.
 - `date` parses dates into date object (shown as ISO8601).
 - `vlen` formats the cell value to the length of the content
 - `float` uses the decimal separator, keeping two significant digits.
@@ -28,6 +30,7 @@ To change the default fmtstr for a type:
 - {help.options.disp_currency_fmt}
 - {help.options.color_currency_neg}
 - {help.options.disp_date_fmt}
+- {help.options.disp_decimal_fmt}
 - {help.options.disp_float_fmt}
 - {help.options.disp_int_fmt}
 

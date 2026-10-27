@@ -82,3 +82,5 @@ def chooseMany(vd, choices, type=''):
 
 ChoiceSheet.addCommand('Enter', 'choose-rows', 'makeChoice([cursorRow])')
 ChoiceSheet.addCommand('gEnter', 'choose-rows-selected', 'makeChoice(onlySelectedRows)')
+
+vd.addGlobals(ChoiceSheet=ChoiceSheet)

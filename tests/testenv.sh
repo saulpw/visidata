@@ -6,7 +6,16 @@ VD="${VD:-$PYTHON -m visidata --config tests/.visidatarc --visidata-dir tests/.v
 NPROCS=${NPROCS:-$(nproc)}
 OUTDIR=${OUTDIR:-tests/output}
 export NO_COLOR=1
+unset ANTHROPIC_API_KEY
 
 # elapsed: seconds (%.1f) since this file was sourced
 T_START=$(date +%s.%N)
 elapsed() { awk "BEGIN{printf \"%.1f\", $(date +%s.%N) - $T_START}"; }
+
+# vd_testtmp: export $VD_TESTTMP, a suite-wide scratch dir removed when the creating script exits
+vd_testtmp() {
+    [ -n "$VD_TESTTMP" ] && return
+    VD_TESTTMP=$(mktemp -d "/tmp/vd-tests-$(date +%Y%m%d-%H%M%S)-XXXXXX") || exit 1
+    export VD_TESTTMP
+    trap 'rm -rf "$VD_TESTTMP"' EXIT
+}

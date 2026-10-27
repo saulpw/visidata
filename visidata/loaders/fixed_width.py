@@ -162,3 +162,5 @@ def save_fixed(vd, p, *vsheets):
                     fp.write('\n')
 
 FixedWidthColumnsSheet.options.null_value = ''    # the file format cannot contain None, so use empty string instead
+
+vd.addGlobals(FixedWidthColumnsSheet=FixedWidthColumnsSheet)

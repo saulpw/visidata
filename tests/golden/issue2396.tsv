@@ -1,0 +1,3 @@
+cat	count	amt_sum	amt*Decimal("1.1")_sum	amt*3_sum
+b	4	1000.905	1100.9955	3002.715
+a	3	0.25	0.275	0.75

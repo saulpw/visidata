@@ -1,6 +1,3 @@
----
-sheet: AggregatorSheet
----
 # Aggregations like sum, mean, and distinct
 
 Aggregators provide summary statistics for grouped rows.

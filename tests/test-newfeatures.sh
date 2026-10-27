@@ -6,11 +6,12 @@
 # Both use an isolated --config/--visidata-dir under a temp dir so they never
 # touch the developer's real ~/.visidatarc, and clean up on exit.
 source tests/testenv.sh
+vd_testtmp
 FAIL=0
 
 ROOT=$PWD
-WORK=$(mktemp -d)
-trap 'rm -rf "$WORK"' EXIT
+WORK="$VD_TESTTMP/test-newfeatures"
+mkdir -p "$WORK"
 
 RC="$WORK/visidatarc"
 : > "$RC"   # empty config to append into

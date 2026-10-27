@@ -1,0 +1,8 @@
+# append keeps same-named columns from one sheet distinct  #3178
+open-file tests/data1.tsv
+col A
+rename-col B
+open-file tests/data2.tsv
+col C
+rename-col D
+join-sheets-top2 append

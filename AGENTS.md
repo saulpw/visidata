@@ -14,6 +14,7 @@
 - `tests/`: functional replay tests (`.vd/.vdj/.vdx`) and `tests/golden/` outputs.
 - `visidata/tests/`: Python unit tests.
 - `docs/` and `dev/`: user and developer documentation.
+- The visidata.org website is a separate repo (`../visidata.org`) but part of this project: edit it directly, not through an inbox.
 
 ## Build, Test, and Development Commands
 - `python3 -m pip install .`: install local package.

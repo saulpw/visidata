@@ -33,8 +33,9 @@
 
    d. bump version in `__version__` in source code (visidata/main.py, visidata/__init__.py) and setup.py;
 
-6. Run dev/mkman.sh to build the manpage and updated website
-    - Run ./mkmanhtml.sh, and move that to visidata.org:site/docs/man, and to visidata:docs/man.md
+6. Run `make man` to build the man pages and docs/man.md
+    - the sdist build also generates man pages automatically, and fails if it can't
+    - keep docs/man.md for the GitHub release (step 15)
 
 7. Merge `develop` to stable
 
@@ -80,8 +81,12 @@
     python3 setup.py sdist bdist_wheel
     chmod -R a+rX dist
     ls dist/
+    unzip -l dist/*.whl | grep man/
+    tar tzf dist/*.tar.gz | grep man/
     twine upload dist/*
     ```
+
+  Before uploading, check that both the wheel and the sdist list `visidata/man/vd.1` and `vd.txt` (the 3.4 wheel shipped without them, #3189).
 
 11. Test install/upgrade from pypi
 
@@ -96,10 +101,10 @@ git tag v#.#.#
 git push --tags
 ```
 
-13. Write up the release notes and add it to `www/releases.md`. Add it to index.md.
+13. Write the release notes as the GitHub release body (draft in `.meta/promo/v#.#-github-release.md`).  In `~/git/visidata.org`, `make release VER=#.#` creates `site/blog/<year>/v#.#.md` from `blog-release-tmpl.md`; fill it from the release body and commit.  The `releases` tag lists it on the home and releases pages.
 
 
-15. Update the website by pushing to master. Update with new manpage. Update redirect to point to new manpage.
+15. Upload docs/man.md to the GitHub release (`gh release upload v#.#.# docs/man.md`); the website build fetches /man from the latest release.  Then update the website by pushing to master.
     - release notes
 
 16. Comb through issues and close the ones that have been solved, referencing the version number

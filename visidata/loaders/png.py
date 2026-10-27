@@ -93,3 +93,5 @@ def blockchar(i:int):
 
 PNGDrawing.options.disp_canvas_charset = ''.join(blockchar(i) for i in range(256))
 PNGSheet.addCommand('.', 'plot-sheet', 'vd.push(PNGDrawing(name+"_plot", source=sheet, sourceRows=rows))', 'plot this png')
+
+vd.addGlobals(PNGSheet=PNGSheet)

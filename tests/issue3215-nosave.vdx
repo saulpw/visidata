@@ -1,0 +1,7 @@
+open-file tests/data1.tsv
+col A
+hide-col
+go-right
+assert-expr cursorCol.name == 'B'
+go-right
+assert-expr cursorCol.name == 'A'

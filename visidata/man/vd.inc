@@ -1,4 +1,4 @@
-.Dd June 30, 2026
+.Dd October 27, 2026
 .Dt vd \&1 "Quick Reference Guide"
 .Os Linux/MacOS
 .
@@ -104,6 +104,8 @@ toggle sidebar
 .No undo the most recent modification ( requires enabled Sy options.undo Ns )
 .It Ic "  R"
 .No redo the most recent undo ( requires enabled Sy options.undo Ns )
+.It Ic " zU"
+.No undo the most recent modification and rerun it, editing its previous input ( requires enabled Sy options.undo Ns )
 .Pp
 .It Ic "Space" Ar longname
 .No open command palette; execute top command by its Ar longname
@@ -176,7 +178,7 @@ go up/down current column to next selected row
 .It Ic " r" Ar regex
 .No go to next row with key matching Ar regex
 .It Ic "zc  zr" Ar number
-.No go to column/row Ar number No (0-based)
+.No go to column/row Ar number No (0-based, negative from end); warn if clamped
 .Pp
 .It Ic " H   J   K   L"
 slide current row/column left/down/up/right
@@ -201,6 +203,10 @@ toggle widths of all visible columns between full and default width
 .No adjust width of current column to Ar number
 .It Ic "gz_" Ar number
 adjust widths of all visible columns to Ar number
+.It Ic "resize-col-max-all"
+toggle width of current column between default width and the widest value in all rows, not only those on screen
+.It Ic "resize-cols-max-all"
+toggle widths of all visible columns between default width and the widest value in all rows
 .Pp
 .It Ic " -" Ns " (hyphen)"
 hide current column
@@ -237,6 +243,8 @@ rename all visible columns to combined contents of current column for selected r
 .Pp
 .It "  i"
 .No add column with incremental values
+.It Ic "addcol-incr-key"
+.No add column with incremental values, restarting at each change in key columns
 .It " gi"
 .No set current column for selected rows to incremental values
 .It " zi" Ar step
@@ -674,7 +682,7 @@ edit either value or name, to edit reference
 .El
 .Bl -tag -width XXXXXXXXXXXXXXX -compact -offset XXX
 .It Ic gC
-.No open Sy Columns Sheet No with all visible columns from all sheets
+.No open Sy Columns Sheet No with all columns from all sheets
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -715,8 +723,10 @@ jump to sheet referenced in current row
 push selected sheets to top of sheet stack
 .It Ic " a"
 add row to reference a new blank sheet
-.It Ic "gC  gI"
-.No open Sy Columns Sheet Ns / Ns Sy Describe Sheet No with all visible columns from selected sheets
+.It Ic "gC"
+.No open Sy Columns Sheet No with all columns from selected sheets
+.It Ic "gI"
+.No open Sy Describe Sheet No with all visible columns from selected sheets
 .It Ic "g^R"
 .No reload all selected sheets
 .It Ic "z^C  gz^C"
@@ -736,9 +746,9 @@ save selected or all sheets
 .It Sy "\&."
 .Sy diff No "  keep only rows NOT in all sheets"
 .It Sy "\&."
-.Sy append No "combine all rows from all sheets"
+.Sy append No "combine all rows from all sheets into a generic sheet, matching columns by name"
 .It Sy "\&."
-.Sy concat No "similar to 'append' but keep first sheet type and columns"
+.Sy concat No "combine all rows from same-type sheets, matching columns by position, keeping first sheet type, column names and types"
 .It Sy "\&."
 .Sy extend No "copy first selected sheet, keeping all rows and sheet type, and extend with columns from other sheets"
 .It Sy "\&."
@@ -782,6 +792,8 @@ remove option override for this context
 .No open global Sy CommandLog No for all commands executed in the current session
 .It Ic zD
 .No open current sheet's Sy CommandLog No with the parent sheets commands' removed
+.It Ic "set-envvar" Ar name value
+.No set an environment variable and record it for replay; refresh locale for LANG and LC_* variables
 .El
 .Bl -inset -compact
 .It (sheet-specific commands)
@@ -1039,6 +1051,35 @@ For example:
 .Ed
 .Pp
 Functions defined in .visidatarc are available in python expressions (e.g. in derived columns).
+.Pp
+The
+.Em VisiData directory
+holds local plugins (in its
+.Pa plugins/
+subdirectory), saved macros, and other files.
+It defaults to
+.Pa ~/.config/visidata
+on Linux and
+.Pa ~/Library/Preferences/visidata
+on macOS, or
+.Pa $XDG_CONFIG_HOME/visidata
+when
+.Ev XDG_CONFIG_HOME
+is set.
+Set
+.Ev VD_DIR
+before starting
+.Nm vd
+or use
+.Cm --visidata-dir Ns = Ns Ar directory
+to choose another directory.
+The command-line option takes precedence over
+.Ev VD_DIR Ns .
+Input history and the list of saved macros are in the data directory
+.Pf ( Pa ~/.local/share/visidata
+on Linux), and cached downloads are in the cache directory
+.Pf ( Pa ~/.cache/visidata
+on Linux); neither moves with the VisiData directory.
 .
 .Sh SUPPORTED SOURCES
 Core VisiData includes these sources:

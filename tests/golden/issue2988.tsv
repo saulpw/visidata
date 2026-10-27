@@ -1,0 +1,6 @@
+fill	fill_cellPyObj	fill_fontColor	fill_fillColor	fill_colorizer	text	text_cellPyObj	text_fontColor	text_fillColor	text_colorizer
+light gray, auto text	<ReadOnlyCell 'Sheet'.A2>	1	00000000	-1 on -1	text	<ReadOnlyCell 'Sheet'.B2>	True	FFD9D9D9	16 black on 252
+dark blue, auto text	<ReadOnlyCell 'Sheet'.A3>	1	00000000	-1 on -1	text	<ReadOnlyCell 'Sheet'.B3>	True	FF1F3864	231 white on 17
+yellow, no text color	<ReadOnlyCell 'Sheet'.A4>	1	00000000	-1 on -1	text	<ReadOnlyCell 'Sheet'.B4>		FFFFFF00	16 black on 226
+dark blue, red text	<ReadOnlyCell 'Sheet'.A5>	1	00000000	-1 on -1	text	<ReadOnlyCell 'Sheet'.B5>	FFFF0000	FF1F3864	196 on 17
+no fill, auto text	<ReadOnlyCell 'Sheet'.A6>	1	00000000	-1 on -1	text	<ReadOnlyCell 'Sheet'.B6>	True	00000000	-1 on -1

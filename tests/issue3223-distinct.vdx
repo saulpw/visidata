@@ -1,0 +1,4 @@
+# Describe distinct counts all nulls as one value  #3223
+option global null_value -
+open-file tests/issue3223.json
+describe-sheet

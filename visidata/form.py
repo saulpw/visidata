@@ -128,3 +128,5 @@ def confirm(vd, prompt, exc=EscapeException):
         vd.warning(msg)
         return False
     return True
+
+vd.addGlobals(FormSheet=FormSheet)

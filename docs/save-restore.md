@@ -12,8 +12,11 @@ Version: VisiData 0.99
 This example creates and then uses the file [pivot.vdj](https://raw.githubusercontent.com/saulpw/visidata/stable/tests/pivot.vdj).
 
 <section id="hero">
-    <asciinema-player id="player" poster="npt:0:41" rows=27 src="../casts/save-restore.cast"></asciinema-player>
+    <div id="player"></div>
     <script type="text/javascript" src="/asciinema-player.js"></script>
+    <script type="text/javascript">
+        AsciinemaPlayer.create('../casts/save-restore.cast', document.getElementById('player'), { poster: 'npt:0:41', rows: 27 });
+    </script>
 </section>
 
 To save and restore a session in VisiData:
@@ -30,6 +33,19 @@ To save and restore a session in VisiData:
 3. Replay the cmdlog, on the commandline: `vd -p fn.vdj`.
 
 ---
+
+## Environment and locale
+
+`set-envvar` sets an environment variable and records it in the command logs, like a global option.
+Setting `LANG` or any `LC_*` variable also reapplies the locale, which affects `type-floatlocale`, number formatting, and date formatting.
+
+To record a locale in every saved cmdlog, add this to `.visidatarc`:
+
+```python
+vd.setenv('LC_NUMERIC', 'en_US.UTF-8')
+```
+
+The locale must be installed on the replaying machine (`locale -a` lists them), and a nonempty `LC_ALL` overrides the other `LC_*` variables.
 
 ## How to replay a cmdlog on a different file
 

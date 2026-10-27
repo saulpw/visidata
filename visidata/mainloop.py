@@ -55,6 +55,7 @@ def drawSheet(vd, scr, sheet):
         return
 
     scr.erase()  # clear screen before every re-draw
+    vd._deferredDraws = [e for e in vd._deferredDraws if e[0] is not scr]
     scr.bkgd(' ', colors.color_default.attr)
 
     sheet._scr = scr
@@ -124,6 +125,9 @@ def setWindows(vd, scr, pct=None):
 @VisiData.api
 def draw_all(vd):
     'Draw all sheets in all windows.'
+    if not vd.scrFull:  #3173  no screen in batch mode
+        return
+
     vd.clearCaches()
 
     ss1 = vd.sheetstack(1)
@@ -150,7 +154,7 @@ def draw_all(vd):
     if vd.scrMenu:
         vd.callNoExceptions(vd.drawMenu, vd.scrMenu, vd.activeSheet)
 
-    vd.callNoExceptions(vd.drawSidebar, vd.scrFull, vd.activeSheet)
+    vd.callNoExceptions(vd.drawSidebar, vd.activeSheet._scr or vd.scrFull, vd.activeSheet)  #2202
 
     if vd.win1:
         vd.win1.refresh()
@@ -158,6 +162,8 @@ def draw_all(vd):
         vd.win2.refresh()
     if vd.scrMenu:
         vd.scrMenu.refresh()
+
+    vd.drawDeferred(vd.scrFull)
 
 
 @VisiData.api

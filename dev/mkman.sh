@@ -2,6 +2,7 @@
 
 # Usage: $0
 #    builds vd(1) man page in src repo (run via `make man`)
+#    requires: soelim, preconv (groff), man
 
 # TODO:
 #   - parse_options should be moved to bin/
@@ -30,18 +31,4 @@ preconv -r -e utf8 $BUILD/vd-pre.1 > $MAN/vd.1
 preconv -r -e utf8 $BUILD/vd-pre.1 > $MAN/visidata.1
 MANWIDTH=80 man $MAN/vd.1 > $MAN/vd.txt
 
-# build docs/man.md
-
-manhtml="$VD"/docs/man.md
-echo '---' > "$manhtml"
-echo 'eleventyNavigation:' >> "$manhtml"
-echo '  key: Quick Reference Guide' >> "$manhtml"
-echo '  order: 2' >> "$manhtml"
-echo 'permalink: /man/' >> "$manhtml"
-echo '---' >> "$manhtml"
-echo '<section><pre id="manpage" class="whitespace-pre-wrap text-xs">' >> "$manhtml"
-
-MAN_KEEP_FORMATTING=1 COLUMNS=1000 man "$MAN"/vd.1 | ul | aha --no-header >> "$manhtml"
-echo '</pre></section>' >> "$manhtml"
-
-echo "Files are written to $BUILD"
+echo "Man pages written to $MAN"

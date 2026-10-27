@@ -11,11 +11,16 @@
 # Fixtures live in tests/url/ (usage.tsv + page.html linking to it). The html
 # subtest needs lxml; it is skipped (not failed) when lxml is absent.
 source tests/testenv.sh
+vd_testtmp
+
+(
 FAIL=0
 
 DOCROOT=tests/url
-PORTFILE=$(mktemp)
-trap 'kill "$SRVPID" 2>/dev/null; rm -f "$PORTFILE"' EXIT
+OUTDIR="$VD_TESTTMP/test-url"
+mkdir -p "$OUTDIR"
+PORTFILE="$OUTDIR/port"
+trap 'kill "$SRVPID" 2>/dev/null; wait "$SRVPID" 2>/dev/null' EXIT
 
 # loopback static file server; first stdout line is the bound ephemeral port
 python3 - "$DOCROOT" <<'PY' >"$PORTFILE" 2>/dev/null &
@@ -34,8 +39,6 @@ PORT=""
 for _ in $(seq 1 50); do PORT=$(cat "$PORTFILE"); [[ -n "$PORT" ]] && break; sleep 0.1; done
 [[ -n "$PORT" ]] || { echo "FAIL: loopback server did not start"; exit 1; }
 BASE="http://127.0.0.1:$PORT"
-
-mkdir -p "$OUTDIR"
 
 diffcheck() {
     local desc="$1" expected="$2" got="$3"
@@ -66,3 +69,4 @@ if [[ $FAIL -ne 0 ]]; then
     exit 1
 fi
 echo "all url tests passed in $(elapsed)s"
+)

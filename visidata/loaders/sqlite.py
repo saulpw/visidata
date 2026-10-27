@@ -180,24 +180,34 @@ class SqliteSheet(Sheet):
             return vals
 
         with self.conn() as conn:
+            tablecols = [r[1] for r in self.execute(conn, 'PRAGMA TABLE_INFO("%s")' % self.tableName)]
+            cols = [c for c in self.visibleCols if c.name in tablecols or c is self.rowidColumn]
+            touched = set(self.visibleCols) if adds else set()
+            touched.update(c for _, rowmods in mods.values() for c in rowmods)
+            missing = [c.name for c in self.visibleCols if c in touched and c not in cols]
+            if missing:
+                vd.warning('not committing columns missing from table "%s": %s' % (self.tableName, ', '.join(missing)))
+
             for r in adds.values():
-                cols = self.visibleCols
                 sql = 'INSERT INTO "%s" ' % self.tableName
-                sql += '(%s)' % ','.join(c.name for c in cols)
+                sql += '(%s)' % ','.join('"%s"' % c.name for c in cols)
                 sql += ' VALUES (%s)' % ','.join('?' for c in cols)
                 res = self.execute(conn, sql, parms=values(r, cols))
                 if res.rowcount != res.arraysize:
                     vd.warning('not all rows inserted') # f'{res.rowcount}/{res.arraysize} rows inserted'
 
             for row, rowmods in mods.values():
+                modcols = [c for c in rowmods if c in cols]
+                if not modcols:
+                    continue
                 if not self.rowidColumn:
                     vd.warning('cannot modify rows in tables without rowid')
                     break
                 wherecols = [self.rowidColumn]
                 sql = 'UPDATE "%s" SET ' % self.tableName
-                sql += ', '.join('%s=?' % c.name for c, _ in rowmods.items())
+                sql += ', '.join('"%s"=?' % c.name for c in modcols)
                 sql += ' WHERE %s' % ' AND '.join('"%s"=?' % c.name for c in wherecols)
-                newvals=values(row, [c for c, _ in rowmods.items()])
+                newvals=values(row, modcols)
                 # calcValue gets the 'previous' value (before update)
                 wherevals=list(Column.calcValue(c, row) or '' for c in wherecols)
                 res = self.execute(conn, sql, parms=newvals+wherevals)
@@ -277,6 +287,7 @@ def save_sqlite(vd, p, *vsheets):
         vlen: 'INTEGER',
         float: 'REAL',
         date: 'DATE',
+        str: 'TEXT',
     }
 
     for t in vd.numericTypes:
@@ -291,7 +302,7 @@ def save_sqlite(vd, p, *vsheets):
         tblname = vd.cleanName(vs.name)
         sqlcols = []
         for col in vs.visibleCols:
-            sqlcols.append('"%s" %s' % (col.name, sqltypes.get(col.type, 'TEXT')))
+            sqlcols.append(('"%s" %s' % (col.name, sqltypes.get(col.type, ''))).rstrip())
         sql = 'CREATE TABLE IF NOT EXISTS "%s" (%s)' % (tblname, ', '.join(sqlcols))
         c.execute(sql)
 

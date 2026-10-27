@@ -136,3 +136,5 @@ class MyTable(Sheet):
                     yield r
                 except UnicodeDecodeError as e:
                     vd.exceptionCaught(e)
+
+vd.addGlobals(MyTablesSheet=MyTablesSheet)

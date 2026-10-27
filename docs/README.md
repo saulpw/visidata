@@ -35,7 +35,7 @@ Guide to what each file covers, so it's clear which files to update when user-fa
 - dirsheet.md: Directory Sheet (DirSheet): browsing, editing, previewing files
 - split.md: Split screen, viewing two sheets simultaneously
 - save-restore.md: Saving and replaying sessions
-- plugins.md: Installing plugins (builtin, pip, ~/.visidata/plugins/)
+- plugins.md: Installing plugins (builtin, pip, local plugins directory)
 - shell.md: ZSH completion
 - formats.md: Supported file formats, loaders/savers, dependencies
 - internal_formats.md: .vd, .vdj, .vdx (command logs) and .vds (sheet state) formats

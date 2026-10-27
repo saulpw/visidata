@@ -30,11 +30,21 @@ jobs:
     - name: Install en_US.UTF-8 locale
       run: |
         sudo apt-get update -qq
-        sudo apt-get install -y locales
+        sudo apt-get install -y locales tmux
         sudo locale-gen en_US.UTF-8
 
     - name: Install VisiData with test dependencies
       run: make install-test
+
+    - name: Set up postgres for -pg tests
+      run: |
+        sudo apt-get install -y postgresql
+        pg_lsclusters -h | awk '$4 != "online" {print $1, $2}' | while read -r ver cluster; do
+          sudo pg_ctlcluster "$ver" "$cluster" start
+        done
+        sudo -u postgres createuser -s "$(id -un)"
+        pip3 install psycopg2-binary
+        dev/setup-postgres.sh
 
     - name: Run tests
       run: make test
@@ -59,7 +69,7 @@ jobs:
     - name: Install en_US.UTF-8 locale
       run: |
         sudo apt-get update -qq
-        sudo apt-get install -y locales
+        sudo apt-get install -y locales tmux
         sudo locale-gen en_US.UTF-8
 
     - name: Install VisiData with test dependencies

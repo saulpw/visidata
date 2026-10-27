@@ -27,12 +27,12 @@
 # longer shows 'xlsx'. That per-path behavior is exercised by tests/test-filetype.sh
 # (manual-tests.md item 13 "Filetype"), not here.
 source tests/testenv.sh
+vd_testtmp
 FAIL=0
 
-RCE=$(mktemp)   # empty (isolation only)
-RCA=$(mktemp)   # default_width=33
-RCB=$(mktemp)   # default_width=77
-trap 'rm -f "$RCE" "$RCA" "$RCB"' EXIT
+RCE="$VD_TESTTMP/test-options-precedence-empty.py"
+RCA="$VD_TESTTMP/test-options-precedence-33.py"
+RCB="$VD_TESTTMP/test-options-precedence-77.py"
 printf "options.motd_url=''\n" > "$RCE"
 printf "options.motd_url=''\noptions.default_width=33\n" > "$RCA"
 printf "options.motd_url=''\noptions.default_width=77\n" > "$RCB"

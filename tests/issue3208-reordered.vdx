@@ -1,0 +1,9 @@
+open-file sample_data/issue3208-b.csv
+col x
+rename-col c
+col y
+rename-col b
+col z
+rename-col a
+open-file sample_data/issue3208-a.csv
+join-sheets-top2 concat

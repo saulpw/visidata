@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Test delimiter handling across formats and CLI args  #2727
 source tests/testenv.sh
+vd_testtmp
+OUTDIR="$VD_TESTTMP/test-delimiter"
 
 set -e
 

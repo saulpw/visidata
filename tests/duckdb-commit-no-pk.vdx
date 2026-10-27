@@ -1,0 +1,17 @@
+# edits to a table without a primary key are not committed
+
+option global confirm y
+open-file tests/data3.tsv
+save-sheet $VD_TESTTMP/duckdb-commit-no-pk.duckdb
+open-file $VD_TESTTMP/duckdb-commit-no-pk.duckdb
+exec-sql DROP TABLE data3; CREATE TABLE edit_no_pk (id INTEGER, note VARCHAR); INSERT INTO edit_no_pk VALUES (1, 'alpha'), (2, 'bravo')
+quit-sheet
+reload-sheet
+row キedit_no_pk
+open-row
+row 1
+col note
+edit-cell bravo+
+allow-error cannot modify rows in tables without primary key
+commit-sheet
+reload-sheet

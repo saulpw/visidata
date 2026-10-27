@@ -5,8 +5,8 @@ import statistics
 from copy import copy
 import itertools
 
-from visidata import Progress, Sheet, Column, ColumnsSheet, VisiData, SettableColumn
-from visidata import vd, anytype, numtype, vlen, asyncthread, wrapply, AttrDict, date, INPROGRESS, dispwidth, stacktrace, TypedExceptionWrapper
+from visidata import Progress, BaseSheet, Sheet, Column, ColumnsSheet, VisiData, SettableColumn
+from visidata import vd, EscapeException, anytype, numtype, vlen, asyncthread, wrapply, AttrDict, date, INPROGRESS, dispwidth, stacktrace, TypedExceptionWrapper
 
 vd.help_aggregators = '''# Choose Aggregators
 Start typing an aggregator name or description.
@@ -51,6 +51,27 @@ vd.aggregators = collections.OrderedDict()  # [aggname] -> annotated func, or li
 
 Column.init('aggstr', str, copy=True)
 Column.init('_aggregatedTotals', dict)  # [aggname] -> agg total over all rows
+
+
+@Column.after
+def recalc(col, sheet=None):
+    col._aggregatedTotals = {}  #3234 new dict: in-flight totals land in the old one
+
+
+@BaseSheet.api
+def clearAggregatedTotals(sheet):
+    for c in getattr(sheet, 'columns', ()):
+        c._aggregatedTotals = {}
+
+
+@BaseSheet.after
+def setModified(sheet):
+    sheet.clearAggregatedTotals()  #3003
+
+
+@VisiData.after
+def undo(vd, sheet):
+    sheet.clearAggregatedTotals()  # undo funcs restore rows without setModified
 
 
 def aggregators_get(col):
@@ -322,14 +343,18 @@ def aggname(col, agg):
 def aggregateTotal(col, agg):
     if agg not in col._aggregatedTotals:
         col._aggregatedTotals[agg] = INPROGRESS
-        col._aggregateTotalAsync(agg)
+        col._aggregateTotalAsync(agg, col._aggregatedTotals, sheet=col.sheet)
     return col._aggregatedTotals[agg]
 
 
 @Column.api
 @asyncthread
-def _aggregateTotalAsync(col, agg):
-    col._aggregatedTotals[agg] = wrapply(agg.aggregate, col, col.sheet.rows)
+def _aggregateTotalAsync(col, agg, totals):
+    try:
+        totals[agg] = wrapply(agg.aggregate, col, col.sheet.rows)
+    except EscapeException as e:
+        totals[agg] = TypedExceptionWrapper(None, exception=e)  #2207
+        raise
 
 
 @Column.api

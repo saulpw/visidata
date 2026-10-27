@@ -13,8 +13,11 @@ Graphs in VisiData can be used to visualise the relationship between numeric dep
 This example uses the file [StatusPR.csv](https://raw.githubusercontent.com/saulpw/visidata/stable/sample_data/StatusPR.csv).
 
 <section id="hero">
-    <asciinema-player id="player" poster="npt:0:30" rows=27 src="../casts/pivot-graphs.cast"></asciinema-player>
+    <div id="player"></div>
     <script type="text/javascript" src="/asciinema-player.js"></script>
+    <script type="text/javascript">
+        AsciinemaPlayer.create('../casts/pivot-graphs.cast', document.getElementById('player'), { poster: 'npt:0:30', rows: 27 });
+    </script>
 </section>
 
 ---

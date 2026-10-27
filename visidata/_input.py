@@ -22,14 +22,16 @@ class AcceptInput(Exception):
     '*args[0]* is the input to be accepted'
 
 vd._injectedInput = None  # for vd.injectInput
+vd._injectedPrefill = False
 vd.editCellBindings = {}  # user-customizable bindings for cell editing; use acceptThenFunc() to define
 
 
 @VisiData.api
-def injectInput(vd, x):
-    'Use *x* as input to next command.'
+def injectInput(vd, x, prefill=False):
+    'Use *x* as input to next command, or with *prefill* as the initial value to edit.'
     assert vd._injectedInput is None, vd._injectedInput
     vd._injectedInput = x
+    vd._injectedPrefill = prefill
 
 
 @VisiData.api
@@ -44,6 +46,7 @@ def getCommandInput(vd):
 
 @BaseSheet.after
 def execCommand(sheet, longname, *args, **kwargs):
+    vd._injectedPrefill = False
     if vd._injectedInput is not None:
         vd.debug(f'{longname} did not consume input "{vd._injectedInput}"')
         vd._injectedInput = None
@@ -375,8 +378,11 @@ def editText(vd, y, x, w, attr=ColorAttr(), value='',
              display=True, record=True, clear=True, **kwargs):
     '''Invoke modal single-line editor at (*y*, *x*) for *w* terminal chars. Use *display* is False for sensitive input like passphrases.  If *record* is True, get input from the cmdlog in batch mode, and save input to the cmdlog if *display* is also True. Return new value as string. Callers should handle curses.error, which will be raised if the terminal is resized during the edit, in a way that moves the editor coordinates offscreen.'''
     v = None
+    prefill = None
     if record and vd.cmdlog:
         v = vd.getCommandInput()
+        if vd._injectedPrefill:
+            prefill, v = v, None
 
     if v is None:
         if vd.options.batch:
@@ -389,7 +395,9 @@ def editText(vd, y, x, w, attr=ColorAttr(), value='',
             value = ''
 
         try:
-            widget = InputWidget(value=str(value), display=display, **kwargs)
+            if prefill is not None:
+                kwargs['i'] = len(str(prefill))
+            widget = InputWidget(value=str(value if prefill is None else prefill), display=display, **kwargs)
 
             with vd.AddedHelp(vd.getHelpPane('input', module='visidata'), 'Input Keystrokes Help', 'inputkeys'), \
                  vd.AddedHelp(help, 'Input Field Help', 'inputfield'):
@@ -452,7 +460,8 @@ def inputsingle(vd, prompt, record=True):
 def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
     'A simple form, where each input is an entry in `kwargs`, with the key being the key in the returned dict, and the value being a dictionary of kwargs to the singular input().'
     previnput = vd.getCommandInput()
-    if previnput is not None:
+    prefill = previnput if vd._injectedPrefill else None
+    if previnput is not None and prefill is None:
         ret = None
         if isinstance(previnput, str):
             if previnput.startswith('{'):
@@ -471,6 +480,11 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
             return ret
 
         assert False, type(previnput)
+
+    if isinstance(prefill, dict):
+        for k, v in prefill.items():
+            kwargs[k]['value'] = v
+            kwargs[k]['i'] = len(str(v))
 
     sheet = vd.activeSheet  # after replay shortcut: no active sheet during bulk replay-reset
     scr = sheet._scr
@@ -513,20 +527,23 @@ def inputMultiple(vd, updater=lambda val: None, record=True, **kwargs):
     while True:
         try:
             input_kwargs = kwargs[cur_input_key]
+            bindings = {
+                'Shift+Up':   change_input(-1),
+                'Shift+Down': change_input(+1),
+            }
+            if not input_kwargs.get('completer'):  #3169
+                bindings['Shift+Tab'] = change_input(-1)
+                bindings['Tab'] = change_input(+1)
             input_kwargs['value'] = vd.input(**input_kwargs,
                                              attr=colors.color_edit_cell,
                                              updater=_drawPrompt,
                                              record=False,
                                              _input_rows=len(keys),
-                                             bindings={
-                'Shift+Tab':   change_input(-1),
-                'Tab':     change_input(+1),
-                'Shift+Up':   change_input(-1),
-                'Shift+Down': change_input(+1),
-            })
+                                             bindings=bindings)
             break
         except ChangeInput as e:
             input_kwargs['value'] = e.args[0]
+            input_kwargs.pop('i', None)
             offset = e.args[1]
             i = keys.index(cur_input_key)
             cur_input_key = keys[(i+offset)%len(keys)]

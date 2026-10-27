@@ -327,6 +327,9 @@ vd.addGlobals({
     'SheetDict': SheetDict,
     'PyobjSheet': PyobjSheet,
     'view': view,
+    'PythonAtomSheet': PythonAtomSheet,
+    'ListOfPyobjSheet': ListOfPyobjSheet,
+    'ListOfNamedTupleSheet': ListOfNamedTupleSheet,
 })
 
 vd.addMenuItems('''

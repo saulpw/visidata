@@ -1,7 +1,7 @@
 from copy import copy
-from statistics import mode, median, mean, stdev
+from statistics import mode, median, median_low, median_high, mean, stdev
 
-from visidata import vd, Column, ColumnAttr, vlen, RowColorizer, asyncthread, Progress, wrapply
+from visidata import vd, Column, ColumnAttr, vlen, RowColorizer, asyncthread, Progress, wrapply, TypedExceptionWrapper
 from visidata import BaseSheet, TableSheet, ColumnsSheet, IndexSheet
 
 
@@ -81,6 +81,7 @@ class DescribeSheet(ColumnsSheet):
                     v = srccol.getValue(sr)
                     if isNull(v):
                         d['nulls'].append(sr)
+                        v = None  # all nulls count as one distinct value
                     else:
                         v = srccol.type(v)
                         vals.append(v)
@@ -101,23 +102,64 @@ class DescribeSheet(ColumnsSheet):
         d[func.__name__] = r
         return r
 
+    def describedRows(self, col, srccol):
+        'Return rows from the source sheet of *srccol* which are described by the statistic in *col*.'
+        if not isinstance(col, DescribeColumn):
+            vd.fail('no rows described in this column')
+
+        d = self.describeData[srccol]
+        statname = col.expr
+        if statname in ('errors', 'nulls'):
+            return list(d[statname])
+        stat = d.get(statname)
+        if stat is None or isinstance(stat, TypedExceptionWrapper):
+            vd.fail(f'no {statname} for this column')
+
+        isNull = srccol.sheet.isNullFunc()
+        ret = []
+        medianRows = []
+        for sr in Progress(srccol.sheet.rows, 'gathering'):
+            try:
+                v = srccol.getValue(sr)
+                if isNull(v):
+                    if statname == 'distinct':
+                        ret.append(sr)
+                    continue
+                v = srccol.type(v)
+            except Exception:
+                continue
+
+            # match typed value, as computed in reloadColumn  #3223
+            if statname == 'median':
+                medianRows.append((v, sr))
+            elif statname in ('mode', 'min', 'max'):
+                if v == stat:
+                    ret.append(sr)
+            else:  # distinct and aggregators: all typed rows
+                ret.append(sr)
+
+        if medianRows:
+            vals = [v for v, sr in medianRows]
+            middle = (median_low(vals), median_high(vals))
+            if middle[0] != middle[1]:
+                vd.status(f'median {stat} is between two values; using rows with {middle[0]} or {middle[1]}')
+            ret = [sr for v, sr in medianRows if v in middle]
+        return ret
+
     def openCell(self, col, row):
         'open copy of source sheet with rows described in current cell'
-        val = col.getValue(row)
-        if isinstance(val, list):
-            vs=copy(row.sheet)
-            vs.rows=val
-            vs.name+="_%s_%s"%(row.name,col.name)
-            return vs
-        vd.warning(val)
+        vs=copy(row.sheet)
+        vs.rows=self.describedRows(col, row)
+        vs.name+="_%s_%s"%(row.name,col.name)
+        return vs
 
 
 TableSheet.addCommand('I', 'describe-sheet', 'vd.push(DescribeSheet(sheet.name+"_describe", source=[sheet]))', 'open Describe Sheet with descriptive statistics for all visible columns')
 BaseSheet.addCommand('gI', 'describe-all', 'vd.push(DescribeSheet("describe_all", source=vd.stackedSheets))', 'open Describe Sheet with description statistics for all visible columns from all sheets')
 IndexSheet.addCommand('gI', 'describe-selected', 'vd.push(DescribeSheet("describe_all", source=selectedRows))', 'open Describe Sheet with all visible columns from selected sheets')
 
-DescribeSheet.addCommand('zs', 'select-cell', 'cursorRow.sheet.select(cursorValue)', 'select rows on source sheet which are being described in current cell')
-DescribeSheet.addCommand('zu', 'unselect-cell', 'cursorRow.sheet.unselect(cursorValue)', 'unselect rows on source sheet which are being described in current cell')
+DescribeSheet.addCommand('zs', 'select-cell', 'cursorRow.sheet.select(describedRows(cursorCol, cursorRow))', 'select rows on source sheet which are being described in current cell')
+DescribeSheet.addCommand('zu', 'unselect-cell', 'cursorRow.sheet.unselect(describedRows(cursorCol, cursorRow))', 'unselect rows on source sheet which are being described in current cell')
 
 vd.addMenuItems('Data > Statistics > describe-sheet')
 

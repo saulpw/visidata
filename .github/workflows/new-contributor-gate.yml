@@ -1,0 +1,23 @@
+# Close PRs from new contributors; see CONTRIBUTING.md#submitting-source-code.
+# A maintainer reopening the PR keeps it open; once merged, the author is a CONTRIBUTOR and skips this.
+# Never checks out or runs PR code, so pull_request_target is safe here.
+name: new-contributor gate
+on:
+  pull_request_target:
+    types: [opened, reopened]
+permissions:
+  pull-requests: write
+jobs:
+  gate:
+    if: >-
+      contains(fromJSON('["FIRST_TIMER","FIRST_TIME_CONTRIBUTOR","NONE"]'), github.event.pull_request.author_association)
+      && (github.event.action == 'opened' || github.event.sender.login == github.event.pull_request.user.login)
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.html_url }}
+        run: |
+          gh pr close "$PR" --comment "Unfortunately, as of 2026 VisiData no longer accepts drive-by PRs from new contributors.  If you want to contribute, contact @saulpw first via [Discord](https://visidata.org/chat) or email (vd@saul.pw), and we'll have a chat about how you use VisiData and what you use it for.  See [CONTRIBUTING](https://github.com/saulpw/visidata/blob/develop/CONTRIBUTING.md#submitting-source-code).
+
+          [This is an automated message.]"

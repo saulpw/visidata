@@ -53,7 +53,6 @@ definitions:
 - publish list of definitions
 - publish keyboard layouts with new longnames (make 3-word longnames fit)
    - clickable keys to go to specific doc section
-- change options.cmdlog_longname default to True
 - write up our rules and glossary and include them in our www
 
 

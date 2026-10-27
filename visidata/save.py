@@ -50,7 +50,7 @@ def iterdispvals(sheet, *cols, format=False, delimiter=None):
             formatMaker = getattr(col, 'formatter_'+(col.formatter or sheet.options.disp_formatter))
             transformers[col].append(formatMaker(col._formatdict))
         if trdict:
-            transformers[col].append(lambda v,trdict=trdict: v.translate(trdict))
+            transformers[col].append(lambda v,trdict=trdict: v.translate(trdict) if isinstance(v, str) else v)  #3256
 
     options_safe_error = sheet.options.safe_error
     for r in sheet.iterrows('saving'):

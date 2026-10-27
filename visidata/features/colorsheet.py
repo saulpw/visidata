@@ -1,5 +1,5 @@
 import curses
-from visidata import VisiData, colors, Sheet, Column, ItemColumn, RowColorizer, wrapply, BaseSheet
+from visidata import vd, VisiData, colors, Sheet, Column, ItemColumn, RowColorizer, wrapply, BaseSheet
 
 
 class ColorSheet(Sheet):
@@ -46,3 +46,5 @@ BaseSheet.addCommand(None, 'open-colors', 'vd.push(vd.colorsSheet)', 'open Color
 @VisiData.lazy_property
 def colorsSheet(vd):
     return ColorSheet('colors')
+
+vd.addGlobals(ColorSheet=ColorSheet)

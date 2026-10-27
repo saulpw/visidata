@@ -45,8 +45,9 @@ class JsonlArraySheet(SequenceSheet):
                 yield json.loads(L)
 
         # set column types from first row
-        for i, c in enumerate(self.columns):
-            c.type = deduceType(self.rows[0][i])
+        if self.rows:
+            for c, v in zip(self.columns, self.rows[0]):  #3258
+                c.type = deduceType(v)
 
 
 def get_jsonla_rows(sheet, cols):
@@ -72,9 +73,12 @@ def write_jsonla(vs, fp):
 
 @VisiData.api
 def save_jsonla(vd, p, *vsheets):
+    if len(vsheets) > 1:
+        vd.warning('jsonla cannot save multiple sheets; saving only the first')  #3258
     with p.open(mode='w', encoding=vsheets[0].options.save_encoding) as fp:
-        for vs in vsheets:
-            write_jsonla(vs, fp)
+        write_jsonla(vsheets[0], fp)
 
 
 JsonlArraySheet.options.regex_skip = r'^(//|#).*'
+
+vd.addGlobals(JsonlArraySheet=JsonlArraySheet)

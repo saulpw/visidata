@@ -1,0 +1,6 @@
+Title	Details.name	Details.age	Details._text	Details.Late.value	Details.Late.new	Genre	Notes._text	Notes.level	_text	OriginAppId	Empty.Deep
+First	Anne					Golf	plain				
+Second	["Bob", null]	["30", "40"]	[null, null]	[null, null]	[null, null]	["Sports", "Golf"]	rich	important			
+Third	Cara		direct text	yes					meaningful text	0	false
+Fourth	[null, null]	[null, "50"]	[null, null]	[["a", "b"], null]	[[null, null], null]						
+Fifth	[null, null]	[null, "60"]	[null, null]	[["c", "d"], null]	[["field", null], null]						

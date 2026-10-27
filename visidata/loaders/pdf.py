@@ -42,3 +42,5 @@ class TabulaSheet(IndexSheet):
         tabula = vd.importExternal('tabula')
         for i, t in enumerate(tabula.read_pdf(self.source, pages='all', multiple_tables=True)):
             yield PandasSheet(self.source.base_stem, i, source=t)
+
+vd.addGlobals(PdfMinerSheet=PdfMinerSheet, TabulaSheet=TabulaSheet)

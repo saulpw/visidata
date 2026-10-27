@@ -1,6 +1,3 @@
----
-sheet: Sheet
----
 # Create a window over consecutive rows
 
 Window functions enable computations that relate the current window to surrounding rows, like cumulative sum, rolling averages or lead/lag computations.
@@ -25,13 +22,15 @@ With large window sizes, [:code]g'[/] (`freeze-sheet`) to calculate all cells an
 3. To create a moving average of the values in the window, add a new column with a python expression: [:keys]=[/] (`addcol-expr`)
 followed by `sum(price_window)/len(price_window)`
 
-date            color   price   price_window            sum(price_window)/len(price_window)
-----------      -----   -----   -------------------     -----------------------------------
-2024-09-01      R       38      [4] ; 38; 28; 100       41.5
-2024-09-02      B       28      [4] 38; 28; 100; 33     49.75
-2024-09-03      R       100     [4] 28; 100; 33; 99     65.0
-2024-09-03      B       33      [4] 100; 33; 99;        58.0
-2024-09-03      B       99      [4] 33; 99; ;           33.0
+date        price  price_window          sum(price_window)/len(price_window)
+----------  -----  --------------------  -----------------------------------
+2024-09-01  30     [3] 30; 28; 100       52.666666666666664
+2024-09-02  28     [4] 30; 28; 100; 33   47.75
+2024-09-03  100    [4] 28; 100; 33; 99   65.0
+2024-09-03  33     [3] 100; 33; 99       77.33333333333333
+2024-09-03  99     [2] 33; 99            66.0
+
+Windows at the top and bottom of the sheet have fewer rows.
 
 
 ## Workflows

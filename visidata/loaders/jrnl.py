@@ -53,3 +53,5 @@ def save_jrnl(vd, p, *vsheets):
                 if body:
                     fp.write(body + '\n')
                 fp.write('\n')
+
+vd.addGlobals(JrnlSheet=JrnlSheet)

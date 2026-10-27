@@ -26,7 +26,7 @@ class AddedHelp:
         if text:
             if not vd.wantsHelp(help_flag):
                 return
-            self.helpfunc = lambda: (text, title)
+            self.helpfunc = lambda: (text, title if isinstance(text, str) else (text.title or title))  #3269
 
     def __enter__(self):
         if self.helpfunc:
@@ -67,13 +67,24 @@ def cycleSidebar(vd, n:int=1):
     vd.clearCaches()
 
 
+def splitSidebarTitle(text:str, title:str='') -> 'tuple[str,str]':
+    'Return (title, body) of sidebar *text*, taking the title from a leading "# " line if no *title* given.'
+    text = textwrap.dedent(text.strip('\n'))
+    lines = text.splitlines()
+    if not title and lines and lines[0].strip().startswith('# '):
+        title = lines[0].strip()[2:]
+        text = '\n'.join(lines[1:])
+    return title, text
+
+
 @BaseSheet.cached_property
 def help_sidebars(sheet) -> 'list[Callable[[], tuple[str,str]]]':
     r = []
-    if sheet.default_sidebar:
+    if splitSidebarTitle(sheet.default_sidebar)[1].strip():
         r.append(lambda: (sheet.default_sidebar, ''))
-    if sheet.guide:
-        r.append(lambda: (sheet.formatString(sheet.guide, help=sheet.formatter_helpstr), ''))
+    guide = sheet.formatString(sheet.guide, help=sheet.formatter_helpstr) if sheet.guide else ''
+    if splitSidebarTitle(guide)[1].strip():  #2202
+        r.append(lambda: (guide, ''))
     return r + vd._help_sidebars
 
 
@@ -162,15 +173,7 @@ def drawSidebarText(sheet, scr, text:Union[None,str,'HelpPane'], title:str='', o
         maxlinew = text.width
         winh = min(maxh, text.height+2)+1
     else:
-        text = textwrap.dedent(text.strip('\n'))
-
-        if not text:
-            return
-
-        lines = text.splitlines()
-        if not title and lines and lines[0].strip().startswith('# '):
-            title = lines[0].strip()[2:]
-            text = '\n'.join(lines[1:])
+        title, text = splitSidebarTitle(text, title)
 
         if not text:
             return
@@ -241,3 +244,5 @@ vd.addMenuItems('''
     View > Sidebar > cycle > sidebar-cycle
     View > Sidebar > open in new sheet > open-sidebar
 ''')
+
+vd.addGlobals(SidebarSheet=SidebarSheet)

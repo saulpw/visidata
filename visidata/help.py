@@ -99,9 +99,10 @@ class HelpSheet(MetaSheet):
 
 
 class HelpPane:
-    def __init__(self, name):
+    def __init__(self, name, title=''):
         import visidata
         self.name = name
+        self.title = title
         self.scr = None
         self.parentscr = None
         self.amgr = visidata.AnimationMgr()
@@ -160,8 +161,8 @@ class HelpPane:
 
 @VisiData.api
 @functools.lru_cache(maxsize=None)
-def getHelpPane(vd, name, module='visidata') -> HelpPane:
-    ret = HelpPane(name)
+def getHelpPane(vd, name, module='visidata', title='') -> HelpPane:
+    ret = HelpPane(name, title=title)
     try:
         with (vd.pkg_resources_files(module)/f'ddw/{name}.ddw').open(encoding='utf-8') as fp:
             ret.amgr.load(name, fp)

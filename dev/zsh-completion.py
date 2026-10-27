@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import os
 from os.path import dirname as dirn
+import shlex
 import sys
 import re
 
@@ -42,7 +43,11 @@ def generate_completion(opt):
     # to control the display of default value
     helpstr = helpstr + f" (default: {opt.value})"
     helpstr = helpstr.replace("[", "\\[").replace("]", "\\]")
-    return f"{prefix}'[{helpstr}]{completion}'"
+    # Quote only the description/completion suffix. The prefix is left bare so
+    # zsh brace expansion (e.g. `{-P,--play}`) still produces per-alias specs.
+    # shlex.quote escapes embedded apostrophes (e.g. in dict-valued defaults
+    # like http_req_headers) and other shell metacharacters.
+    return prefix + shlex.quote(f"[{helpstr}]{completion}")  #3181
 
 
 flags = [generate_completion(vd._options[opt]["default"]) for opt in vd._options]

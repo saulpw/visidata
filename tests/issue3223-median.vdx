@@ -1,0 +1,10 @@
+# select-cell on an even-count median selects both middle values  #3223
+open-file tests/issue3223.json
+col n
+type-int
+describe-sheet
+row 0
+col median
+select-cell
+quit-sheet
+dup-selected
