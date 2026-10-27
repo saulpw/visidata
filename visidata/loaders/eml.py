@@ -45,9 +45,14 @@ def extract_parts(sheet, givenpath, *parts):
         except FileExistsError:
             vd.debug(f'{givenpath} already exists')
 
+        base = os.path.realpath(givenpath)
         for i, part in enumerate(parts):
             fn = part.get_filename() or f'part{i}'
-            vd.execAsync(sheet.extract_part, givenpath / fn, part)
+            outpath = givenpath / fn
+            if os.path.dirname(os.path.realpath(outpath)) != base:
+                vd.warning(f'skipping part with unsafe filename: {fn!r}')
+                continue
+            vd.execAsync(sheet.extract_part, outpath, part)
     elif len(parts) == 1:
         vd.execAsync(sheet.extract_part, givenpath, parts[0])
     else:
