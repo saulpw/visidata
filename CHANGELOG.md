@@ -4,6 +4,12 @@
 
 Thanks to @midichef for bugfixes and reviews, and to @VXNCXNX, @danielwe, @chutzimir, @mpr1255, @horizonbymuneeb, @chiliec, @dacodas, @maxfain, and @khughitt for their contributions.
 
+## Security
+
+- [pandas] `.pickle` files are no longer loaded unless the new `pandas_allow_pickle` option is set (default off).  Unpickling runs arbitrary code from the file, so opening an untrusted `.pickle` could execute it.  CVE pending, reported by @Santoshkumarpuppala.
+- [unzip_http] refuse zip members whose path resolves outside the extraction directory (Zip Slip).  CVE-2026-41958, reported by @MaxFreedomPollard, and independently by @robsherw of Cisco Talos and six others.  Also fixed in unzip-http 0.8.
+- [eml] refuse attachment filenames that resolve outside the extraction directory in `gx` (path traversal).  CVE-2026-42532, reported by @robsherw of Cisco Talos (TALOS-2026-2415).
+
 ## Breaking Changes
 
 - [join] `concat` matches columns by position and keeps the first sheet's column names; sheets with the same names in a different order now line up by position.  Use `append` to match by name. (#3208)
