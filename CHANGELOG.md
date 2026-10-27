@@ -111,6 +111,7 @@ Thanks to @midichef for bugfixes and reviews, and to @VXNCXNX, @danielwe, @chutz
 
 ## Experimental
 
+- [clipboard_shapes] add copy/paste bindings by shape: `y`/`p` then `.` cell, `-` row, `|` column, `s` for selected rows @midichef (#3008)
 - [llm] default to Opus 5.5; structured JSON replies; `llm-query-sheet` and `llm-query-selected` send rows as one query; stream replies into the sheet (#2947)
 
 ## Docs
