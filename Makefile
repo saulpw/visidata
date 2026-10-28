@@ -1,7 +1,7 @@
 .PHONY: help \
        install install-dev install-test install-all \
        test test-all test-vgit test-vdsql \
-       build man zsh-completion docker \
+       build man zsh-completion docker dist upload \
        setup-hooks setup-vscode check \
        diff-test clean
 
@@ -19,6 +19,8 @@ help:
 	@echo "  make man               generate man pages and docs/man.md (requires soelim, preconv, aha)"
 	@echo "  make zsh-completion    generate zsh completion script"
 	@echo "  make docker            build docker images"
+	@echo "  make dist              build and check sdist and wheel in dist/"
+	@echo "  make upload            make dist, then upload this version to PyPI"
 	@echo ""
 	@echo "Setup:"
 	@echo "  make setup-hooks       configure git to use dev/hooks"
@@ -64,6 +66,14 @@ zsh-completion:
 
 docker:
 	dev/build-container
+
+version := $(shell sed -n 's/^__version__ = "\(.*\)"/\1/p' setup.py)
+
+dist:
+	dev/mkdist.sh
+
+upload: dist
+	twine upload dist/visidata-$(version).tar.gz dist/visidata-$(version)-*.whl
 
 # Setup
 

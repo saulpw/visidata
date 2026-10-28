@@ -1,0 +1,22 @@
+name: Publish to PyPI
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    environment: pypi
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y groff man-db
+      - run: pip install build twine
+      - run: make dist
+      - uses: pypa/gh-action-pypi-publish@release/v1

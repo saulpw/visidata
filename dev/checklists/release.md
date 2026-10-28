@@ -55,38 +55,9 @@
 
 10. Push `stable` to pypi
 
-    a. set up a ~/.pypirc
+    Pushing the `v#.#.#` tag (step 12) runs `.github/workflows/publish.yml`, which builds with `make dist` and publishes via PyPI trusted publishing.
 
-    ```
-    [distutils]
-    index-servers=
-        pypi
-        testpypi
-    [pypi]
-    repository:https://upload.pypi.org/legacy/
-    username:
-    password:
-
-    [testpypi]
-    repository: https://test.pypi.org/legacy
-    username:
-    password:
-    ```
-
-
-  Push to pypi
-    ```
-    rm -rf dist/
-    rm -rf build/
-    python3 setup.py sdist bdist_wheel
-    chmod -R a+rX dist
-    ls dist/
-    unzip -l dist/*.whl | grep man/
-    tar tzf dist/*.tar.gz | grep man/
-    twine upload dist/*
-    ```
-
-  Before uploading, check that both the wheel and the sdist list `visidata/man/vd.1` and `vd.txt` (the 3.4 wheel shipped without them, #3189).
+    Local fallback (needs `build`, `twine`, groff, man-db, and a `~/.pypirc`): `make upload`.  `make dist` alone builds and checks without uploading; it fails if the wheel or sdist lacks `visidata/man/vd.1` or `vd.txt` (#3189).
 
 11. Test install/upgrade from pypi
 
