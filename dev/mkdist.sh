@@ -14,8 +14,8 @@ python3 -m build
 chmod -R a+rX dist
 
 for f in visidata/man/vd.1 visidata/man/vd.txt; do
-    unzip -l dist/*.whl | grep -q "$f" || { echo "wheel is missing $f"; exit 1; }
-    tar tzf dist/*.tar.gz | grep -q "$f" || { echo "sdist is missing $f"; exit 1; }
+    unzip -l dist/*.whl | grep "$f" >/dev/null || { echo "wheel is missing $f"; exit 1; }
+    tar tzf dist/*.tar.gz | grep "$f" >/dev/null || { echo "sdist is missing $f"; exit 1; }
 done
 
 twine check dist/*
