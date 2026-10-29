@@ -85,7 +85,7 @@ By default, `test.sh` splits tests into `nproc` parallel batches for speed (~5s)
 
 The replay file is now always loaded as `vdx`, but tests may be in vd, vdj, or vdx format; the `.vdx` loader now interprets all three formats (even commingled).
 
-Prefer vdx format for new tests.
+Prefer vdx format for new tests.  When changing a `.vd` or `.vdj` test, convert it to `.vdx` in the same commit: `vd -b tests/foo.vd -o foo.vdx`, then replay it against the golden, since the saver can drop a `sheet` or `col` line the replay needs.
 
 **What the harness checks:**
 1. **Runtime errors** — any exception during replay (tracked via `vd.lastErrors`)
