@@ -1,7 +1,7 @@
 .PHONY: help \
        install install-dev install-test install-all \
        test test-all test-vgit test-vdsql \
-       build man zsh-completion docker dist upload \
+       build man zsh-completion docker dist dist-clean upload \
        setup-hooks setup-vscode check \
        diff-test clean
 
@@ -21,6 +21,7 @@ help:
 	@echo "  make docker            build docker images"
 	@echo "  make dist              build and check sdist and wheel in dist/"
 	@echo "  make upload            make dist, then upload this version to PyPI"
+	@echo "  make dist-clean        remove dist/, build/, and egg-info"
 	@echo ""
 	@echo "Setup:"
 	@echo "  make setup-hooks       configure git to use dev/hooks"
@@ -71,6 +72,9 @@ version := $(shell sed -n 's/^__version__ = "\(.*\)"/\1/p' setup.py)
 
 dist:
 	dev/mkdist.sh
+
+dist-clean:
+	rm -rf dist build *.egg-info
 
 upload: dist
 	twine upload dist/visidata-$(version).tar.gz dist/visidata-$(version)-*.whl
