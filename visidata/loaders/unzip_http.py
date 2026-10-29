@@ -56,7 +56,7 @@ import pathlib
 import urllib.parse
 
 
-__version__ = '0.8'
+__version__ = '0.9'
 
 
 def error(s):
@@ -137,6 +137,11 @@ class RemoteZipFile:
         import urllib3
         self.url = url
         self.http = urllib3.PoolManager()
+        self.default_headers = {
+            'User-Agent': f'unzip-http/{__version__}',
+            'Accept': '*/*',
+            'Connection': 'keep-alive',
+        }
         self.zip_size = 0
 
     def __enter__(self):
@@ -158,7 +163,7 @@ class RemoteZipFile:
         return list(r.filename for r in self.infoiter())
 
     def infoiter(self):
-        resp = self.http.request('HEAD', self.url)
+        resp = self._request('HEAD')
         if not (200 <= resp.status <= 299):
             error(f'cannot open URL: HTTP status {resp.status}')
 
@@ -245,8 +250,14 @@ class RemoteZipFile:
         for fn in members or self.namelist():
             self.extract(fn, path, pwd=pwd)
 
+    def _request(self, method, headers=None, preload_content=True):
+        h = dict(self.default_headers)
+        if headers:
+            h.update(headers)
+        return self.http.request(method, self.url, headers=h, preload_content=preload_content)
+
     def get_range(self, start, n):
-        return self.http.request('GET', self.url, headers={'Range': f'bytes={start}-{start+n-1}'}, preload_content=False)
+        return self._request('GET', headers={'Range': f'bytes={start}-{start+n-1}'}, preload_content=False)
 
     def matching_files(self, *globs):
         for f in self.files.values():
