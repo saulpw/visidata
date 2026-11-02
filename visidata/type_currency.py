@@ -6,13 +6,16 @@ vd.option('disp_currency_fmt', '%.02f', 'default fmtstr to format for currency v
 vd.theme_option('color_currency_neg', 'red', 'color for negative values in currency displayer', replay=True)
 
 
-floatchars='+-0123456789.'
+floatchars='+-0123456789.()'
 
 @vd.numericType('$')
 def currency(*args):
     'dirty float (strip non-numeric characters)'
     if args and isinstance(args[0], str):
-        args = [''.join(ch for ch in args[0] if ch in floatchars)]
+        v = ''.join(ch for ch in args[0] if ch in floatchars)
+        if v.startswith('(') and v.endswith(')'):
+            return -currency(v[1:-1])
+        args = [v]
     return float(*args)
 
 

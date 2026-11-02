@@ -1,0 +1,7 @@
+# currency parses accounting negatives like decimal  #2396
+open-file tests/issue2396.csv
+col amt
+type-currency
+aggregate-col sum
+col cat
+freq-col
