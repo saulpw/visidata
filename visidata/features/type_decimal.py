@@ -12,7 +12,7 @@ from visidata import vd, Sheet, ColumnsSheet
 
 vd.option('disp_decimal_fmt', '{}', 'default fmtstr to format decimal values', replay=True, help=vd.help_float_fmt)
 
-decimalchars = '+-0123456789.'
+decimalchars = '+-0123456789.()'
 
 
 def formatDecimal(fmtstr, val):
@@ -26,9 +26,9 @@ def decimal(*args):
         return Decimal()
     v = args[0]
     if isinstance(v, str):
-        if v.strip().startswith('(') and v.strip().endswith(')'):
-            return -decimal(v.strip()[1:-1])
         v = ''.join(ch for ch in v if ch in decimalchars)
+        if v.startswith('(') and v.endswith(')'):
+            return -decimal(v[1:-1])
     elif isinstance(v, float):
         v = repr(v)
     return Decimal(v)
