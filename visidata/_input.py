@@ -298,8 +298,21 @@ class InputWidget:
         elif ch == 'Down':
             if self.history: v, i = self.next_history(v, i)
         elif ch == 'KEY_RESIZE':                       pass
-        elif len(ch) > 1:                              vd.warning(f'unknown key {ch}')
-        else:
+        elif len(ch) > 1:
+            if ch in ('Space', 'Shift+Space', 'Alt+Space'):
+                ch = ' '
+            elif '+' in ch:
+                mod, key = ch.split('+', 1)
+                if mod in ('Alt', 'Shift') and len(key) == 1 and key.isprintable():
+                    ch = key
+                else:
+                    vd.warning(f'unknown key {ch}')
+                    return False
+            else:
+                vd.warning(f'unknown key {ch}')
+                return False
+
+        if len(ch) == 1 or ch == ' ':
             if self.first_action:
                 v = ''
             if self.insert_mode:
