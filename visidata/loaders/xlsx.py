@@ -1,3 +1,4 @@
+import io
 import itertools
 import copy
 import datetime
@@ -16,13 +17,20 @@ vd.option('color_xlsx_auto_light', '231 white', 'color of Automatic xlsx text on
 
 @VisiData.api
 def open_xls(vd, p):
-    p.is_local() or vd.fail('xls loader does not support remote files')
+    p.fptext and not p.fp and vd.fail('xls loader needs binary data; download the file and open it locally')
     return XlsIndexSheet(p.base_stem, source=p)
 
 @VisiData.api
 def open_xlsx(vd, p):
-    p.is_local() or vd.fail('xlsx loader does not support remote files')
+    p.fptext and not p.fp and vd.fail('xlsx loader needs binary data; download the file and open it locally')
     return XlsxIndexSheet(p.base_stem, source=p)
+
+
+def workbook_file(p):
+    'Return a filename or seekable binary file for *p*; workbooks need random access, so archive members and compressed files are read into memory.  #2557'
+    if p.is_local() and not p.compression:
+        return str(p)
+    return io.BytesIO(p.read_bytes())
 
 class XlsxIndexSheet(IndexSheet):
     'Load XLSX file (in Excel Open XML format).'
@@ -38,7 +46,7 @@ class XlsxIndexSheet(IndexSheet):
 
     def iterload(self):
         openpyxl = vd.importExternal('openpyxl')
-        self.workbook = openpyxl.load_workbook(str(self.source), data_only=True, read_only=True)
+        self.workbook = openpyxl.load_workbook(workbook_file(self.source), data_only=True, read_only=True)
         for sheetname in self.workbook.sheetnames:
             src = self.workbook[sheetname]
             yield XlsxSheet(self.name, sheetname, source=src, workbook=self.workbook)
@@ -114,7 +122,11 @@ class XlsIndexSheet(IndexSheet):
     nKeys = 1
     def iterload(self):
         xlrd = vd.importExternal('xlrd')
-        self.workbook = xlrd.open_workbook(str(self.source))
+        src = workbook_file(self.source)
+        if isinstance(src, str):
+            self.workbook = xlrd.open_workbook(src)
+        else:
+            self.workbook = xlrd.open_workbook(file_contents=src.getvalue())
         for sheetname in self.workbook.sheet_names():
             yield XlsSheet(self.name, sheetname, source=self.workbook.sheet_by_name(sheetname))
 
@@ -139,6 +151,7 @@ def xls_name(vs):
 
 @VisiData.api
 def save_xlsx(vd, p, *sheets):
+    check_binary_stdout(p, 'xlsx')
     openpyxl = vd.importExternal('openpyxl')
 
     wb = openpyxl.Workbook()
@@ -178,11 +191,12 @@ def save_xlsx(vd, p, *sheets):
 
     wb.active = ws
 
-    wb.save(filename=p)
+    save_workbook(wb, p)
 
 
 @VisiData.api
 def save_xls(vd, p, *sheets):
+    check_binary_stdout(p, 'xls')
     xlwt = vd.importExternal('xlwt')
 
     wb = xlwt.Workbook()
@@ -199,7 +213,25 @@ def save_xls(vd, p, *sheets):
             for c_i, v in enumerate(dispvals.values()):
                 ws1.write(r_i, c_i, v)
 
-    wb.save(p)
+    save_workbook(wb, p)
+
+
+def check_binary_stdout(p, filetype):
+    'Refuse to write binary *filetype* to stdout when it is a terminal.'
+    if p.given == '-' and vd._stdout.isatty():
+        vd.fail(f'{filetype} is binary; redirect stdout or give a filename')
+
+
+def save_workbook(wb, p):
+    'Save openpyxl or xlwt *wb* to *p*; "-" is stdout, which the libraries would take as a filename.'
+    if p.given == '-':
+        buf = io.BytesIO()
+        wb.save(buf)
+        vd._stdout.flush()
+        vd._stdout.buffer.write(buf.getvalue())
+        vd._stdout.flush()
+    else:
+        wb.save(p)
 
 
 # from https://stackoverflow.com/a/65426130
