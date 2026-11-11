@@ -68,6 +68,16 @@ check "overwrite=n refuses to overwrite existing -o" "PRE" "$(head -1 "$T/sv-n2.
 $VDB --readonly "$CSV1" -o "$T/sv-new.tsv" 2>/dev/null
 check "--readonly still creates a new -o file" $'a\tb' "$(head -1 "$T/sv-new.tsv" 2>/dev/null | tr -d '\r')"
 
+# === #3276 batch -o exit code reflects save success/failure ===
+
+# successful save exits 0
+$VDB "$CSV1" -o "$T/sv-rc-ok.tsv" 2>/dev/null
+check "batch -o exits 0 on success" "0" "$?"
+
+# save into a non-existent directory fails in the saver; exit must be nonzero
+$VDB "$CSV1" -o "$T/nosuchdir/out.csv" 2>/dev/null
+check "batch -o exits nonzero when the save fails" "1" "$?"
+
 # === #20 save multiple sheets (save-all, via --play) ===
 # These runs give no -o, so batch dumps the active sheet to the piped stdout;
 # that dump is unrelated to the save-all file side-effects, so discard it.

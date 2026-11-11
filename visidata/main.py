@@ -524,6 +524,7 @@ def main_vd():
             vd.replay(vs)
             run()
 
+    nerrors_before_save = sum(1 for s in vd.statusHistory if s[0] >= 2)
     if vd.stackedSheets and (flPipedOutput or args.output) and not args.output_cell:
         outpath = Path(args.output or '-')
         if output_filetype:
@@ -541,6 +542,10 @@ def main_vd():
         vd.sync(*saver_threads)
 
     vd._stdout.flush()
+
+    nerrors_after_save = sum(1 for s in vd.statusHistory if s[0] >= 2)
+    if (flPipedOutput or args.output) and nerrors_after_save > nerrors_before_save:
+        return 1
 
     return 0
 
