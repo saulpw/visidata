@@ -1,4 +1,5 @@
 from copy import copy
+from decimal import Decimal
 import collections
 import string
 import itertools
@@ -298,7 +299,7 @@ class Column(Extensible):
         '''
         if width is not None and width > 1 and \
                 vd.isNumeric(self) and \
-                isinstance(dw.typedval, (int, float)):
+                isinstance(dw.typedval, (int, float, Decimal)):
             yield ('', dw.text.rjust(width-2))
         else:
             yield ('', dw.text)
