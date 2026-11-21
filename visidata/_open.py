@@ -9,6 +9,11 @@ vd.option('filetype', '', 'input filetype; overrides file extension', replay=Tru
 
 vd.stdinSource = None  # Path('-') with piped fp, set in main()
 
+# url schemes whose openurl_* loader fetches the url and honours the filetype it is
+# given, so an explicit filetype must be passed through instead of dispatching to
+# open_<filetype> directly (which would try to open the url as a local file)  #3278
+download_schemes = ('http', 'https', 's3')
+
 
 @VisiData.api
 def inputFilename(vd, prompt, *args, **kwargs):
@@ -101,14 +106,18 @@ def openPath(vd, p, filetype=None, create=False):
     filetype = filetype or p.options.filetype  # resolve from path instance, Path class, global  #1710
 
     if p.scheme and not p.has_fp():
-        # an explicit filetype with a dedicated open_<filetype> overrides url-scheme dispatch  #3126
-        if filetype:
+        schemes = p.scheme.split('+')
+
+        # an explicit filetype with a dedicated open_<filetype> overrides url-scheme
+        # dispatch #3126, except for download schemes: those loaders fetch the url and
+        # then pick the loader from the filetype, so calling open_<filetype> here would
+        # try to open the url as a local file #3278
+        if filetype and schemes[0] not in download_schemes:
             ft = filetype.lower()
             openfunc = getattr(vd, 'open_'+ft, None) or vd.getGlobals().get('open_'+ft, None)
             if openfunc:
                 return openfunc(p)
 
-        schemes = p.scheme.split('+')
         openfuncname = 'openurl_' + schemes[-1]
 
         openfunc = getattr(vd, openfuncname, None) or vd.getGlobals().get(openfuncname, None)
