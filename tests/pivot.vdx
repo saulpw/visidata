@@ -1,0 +1,14 @@
+open-file sample_data/petshop/tinyshop.jsonl
+sheet tinyshop
+col sku
+addcol-expr sku[:3]
+col sku[:3]
+rename-col prefix
+col name
+key-col
+col qty
+type-int
+aggregate-col sum
+aggregate-col mean
+col prefix
+pivot

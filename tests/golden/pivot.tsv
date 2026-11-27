@@ -1,12 +1,8 @@
-Rep	sum_Pencil	mean_Pencil	sum_Binder	mean_Binder	sum_Pen	mean_Pen	sum_Desk	mean_Desk	sum_Pen Set	mean_Pen Set
-Jones	130	65.00	124	41.33	64	64.00	0		78	39.00
-Kivell	0		50	50.00	0		5	5.00	138	69.00
-Jardine	126	63.00	105	52.50	0		0		50	50.00
-Gill	60	30.00	126	63.00	27	27.00	0		0	
-Sorvino	56	56.00	7	7.00	76	76.00	3	3.00	0	
-Andrews	155	51.67	28	28.00	0		0		0	
-Thompson	32	32.00	57	57.00	0		0		0	
-Morgan	90	90.00	28	28.00	0		0		55	55.00
-Howard	0		29	29.00	96	96.00	0		0	
-Parent	0		81	81.00	15	15.00	0		74	74.00
-Smith	67	67.00	87	87.00	0		2	2.00	0	
+name	sum_FUD	mean_FUD	sum_PET	mean_PET	sum_COL	mean_COL	sum_TOY	mean_TOY	sum_HOM	mean_HOM
+Robert Armstrong	12	4.00	0		0		0		0	
+Helen Halestorm	0		2	2.00	0		0		0	
+Wil Wheaton	0		0		1	1.00	0		0	
+Jon Arbuckle	50	50.00	0		0		0		0	
+Douglas "Dougie" Powers	0		0		0		1	1.00	0	
+Susan Ashworth	2	2.00	2	1.00	0		0		0	
+Juan Johnson	0		1	1.00	0		0		1	1.00

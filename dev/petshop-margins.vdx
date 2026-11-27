@@ -1,0 +1,44 @@
+# petshop sample data: wholesale cost vs retail price, per product
+# usage: vd dev/petshop-margins.vdx   (from the repo root)
+
+open-file sample_data/petshop/petshop.vds
+row キorders_items
+open-row
+col sku
+key-col
+col unit_price
+type-currency
+quit-sheet
+
+row キproducts
+open-row
+col sku
+key-col
+col wholesale_cost
+type-float
+quit-sheet
+
+select-rows
+row キcustomers
+unselect-row
+row キorders
+unselect-row
+join-selected inner
+
+addcol-expr (unit_price - wholesale_cost) / unit_price
+rename-col margin
+type-float
+
+col desc
+key-col
+col wholesale_cost
+aggregate-col max
+col unit_price
+aggregate-col min
+aggregate-col max
+col margin
+aggregate-col avg
+freq-keys
+
+col margin_avg
+sort-asc
